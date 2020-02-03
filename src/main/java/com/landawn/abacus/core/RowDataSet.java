@@ -107,7 +107,6 @@ import com.landawn.abacus.util.stream.IntStream;
 import com.landawn.abacus.util.stream.ObjIteratorEx;
 import com.landawn.abacus.util.stream.Stream;
 
-// TODO: Auto-generated Javadoc
 /**
  * It's a row DataSet from logic aspect. But each column is stored in a list.
  *
@@ -2786,7 +2785,7 @@ public class RowDataSet implements DataSet, Cloneable {
             PropInfo propInfo = null;
 
             for (int columnIndex : columnIndexes) {
-                propName = _columnNameList.get(columnIndexes[columnIndex]);
+                propName = _columnNameList.get(columnIndex);
                 propInfo = entityInfo.getPropInfo(propName);
 
                 if (propInfo == null) {
@@ -2929,7 +2928,7 @@ public class RowDataSet implements DataSet, Cloneable {
             PropInfo propInfo = null;
 
             for (int columnIndex : columnIndexes) {
-                propName = _columnNameList.get(columnIndexes[columnIndex]);
+                propName = _columnNameList.get(columnIndex);
                 propInfo = entityInfo.getPropInfo(propName);
 
                 if (propInfo == null) {
@@ -4556,6 +4555,36 @@ public class RowDataSet implements DataSet, Cloneable {
         return groupBy(columnName, (Function<?, ?>) null, aggregateResultColumnName, aggregateOnColumnName, collector);
     }
 
+    @Override
+    public DataSet groupBy(String columnName, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowClass) {
+        final List<Object> keyColumn = getColumn(columnName);
+        final List<Object> valueColumn = toList(rowClass, aggregateOnColumnNames);
+
+        final Map<Object, List<Object>> map = new LinkedHashMap<>(N.min(9, size()));
+        final List<Object> keyList = new ArrayList<>(N.min(9, size()));
+        Object key = null;
+        List<Object> val = null;
+
+        for (int i = 0, size = keyColumn.size(); i < size; i++) {
+            key = getHashKey(keyColumn.get(i));
+            val = map.get(key);
+
+            if (val == null) {
+                val = new ArrayList<>();
+                map.put(key, val);
+
+                keyList.add(keyColumn.get(i));
+            }
+
+            val.add(valueColumn.get(i));
+        }
+
+        final List<String> newColumnNameList = N.asList(columnName, aggregateResultColumnName);
+        final List<List<Object>> newColumnList = N.asList(keyList, new ArrayList<>(map.values()));
+
+        return new RowDataSet(newColumnNameList, newColumnList);
+    }
+
     /**
      *
      * @param columnName
@@ -4755,6 +4784,39 @@ public class RowDataSet implements DataSet, Cloneable {
         return result;
     }
 
+    @Override
+    public <K, E extends Exception> DataSet groupBy(String columnName, com.landawn.abacus.util.Throwables.Function<K, ?, E> keyMapper,
+            String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowClass) throws E {
+        final Throwables.Function<Object, ?, E> keyMapper2 = (Throwables.Function<Object, ?, E>) (keyMapper == null ? Fn.identity() : keyMapper);
+
+        final List<Object> keyColumn = getColumn(columnName);
+        final List<Object> valueColumn = toList(rowClass, aggregateOnColumnNames);
+
+        final Map<Object, List<Object>> map = new LinkedHashMap<>(N.min(9, size()));
+        final List<Object> keyList = new ArrayList<>(N.min(9, size()));
+        Object key = null;
+        List<Object> val = null;
+
+        for (int i = 0, size = keyColumn.size(); i < size; i++) {
+            key = getHashKey(keyMapper2.apply(keyColumn.get(i)));
+            val = map.get(key);
+
+            if (val == null) {
+                val = new ArrayList<>();
+                map.put(key, val);
+
+                keyList.add(keyColumn.get(i));
+            }
+
+            val.add(valueColumn.get(i));
+        }
+
+        final List<String> newColumnNameList = N.asList(columnName, aggregateResultColumnName);
+        final List<List<Object>> newColumnList = N.asList(keyList, new ArrayList<>(map.values()));
+
+        return new RowDataSet(newColumnNameList, newColumnList);
+    }
+
     /** The Constant CLONE. */
     private static final Function<DisposableObjArray, Object[]> CLONE = new Function<DisposableObjArray, Object[]>() {
         @Override
@@ -4910,6 +4972,79 @@ public class RowDataSet implements DataSet, Cloneable {
     public <T, E extends Exception> DataSet groupBy(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName,
             final Throwables.Function<Stream<T>, ?, E> func) throws E {
         return groupBy(columnNames, (Function<? super DisposableObjArray, ?>) null, aggregateResultColumnName, aggregateOnColumnName, func);
+    }
+
+    @Override
+    public DataSet groupBy(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames, Class<?> rowClass) {
+        N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+        N.checkArgNotNullOrEmpty(aggregateOnColumnNames, "aggregateOnColumnNames");
+
+        if (columnNames.size() == 1) {
+            return groupBy(columnNames.iterator().next(), aggregateResultColumnName, aggregateOnColumnNames, rowClass);
+        }
+
+        final int size = size();
+        final int[] columnIndexes = checkColumnName(columnNames);
+        final int columnCount = columnIndexes.length;
+        final int newColumnCount = columnIndexes.length + 1;
+        final List<String> newColumnNameList = N.newArrayList(newColumnCount);
+        newColumnNameList.addAll(columnNames);
+        newColumnNameList.add(aggregateResultColumnName);
+
+        final List<List<Object>> newColumnList = new ArrayList<>(newColumnCount);
+
+        for (int i = 0; i < columnCount; i++) {
+            newColumnList.add(new ArrayList<>());
+        }
+
+        if (size == 0) {
+            newColumnList.add(new ArrayList<>());
+
+            return new RowDataSet(newColumnNameList, newColumnList);
+        }
+
+        final List<Object> valueColumnList = toList(rowClass, aggregateOnColumnNames);
+
+        final Map<Wrapper<Object[]>, List<Object>> keyRowMap = new LinkedHashMap<>(N.min(9, size()));
+
+        Object[] keyRow = Objectory.createObjectArray(columnCount);
+        Wrapper<Object[]> key = null;
+        List<Object> val = null;
+
+        for (int rowIndex = 0; rowIndex < size; rowIndex++) {
+            for (int i = 0; i < newColumnCount; i++) {
+                keyRow[i] = _columnList.get(columnIndexes[i]).get(rowIndex);
+            }
+
+            key = Wrapper.of(keyRow);
+            val = keyRowMap.get(key);
+
+            if (val == null) {
+                val = new ArrayList<>();
+                keyRowMap.put(key, val);
+
+                for (int i = 0; i < newColumnCount; i++) {
+                    newColumnList.get(i).add(keyRow[i]);
+                }
+
+                keyRow = Objectory.createObjectArray(columnCount);
+            }
+
+            val.add(valueColumnList.get(rowIndex));
+        }
+
+        if (keyRow != null) {
+            Objectory.recycle(keyRow);
+            keyRow = null;
+        }
+
+        for (Wrapper<Object[]> e : keyRowMap.keySet()) {
+            Objectory.recycle(e.value());
+        }
+
+        newColumnList.add(new ArrayList<>(keyRowMap.values()));
+
+        return new RowDataSet(newColumnNameList, newColumnList);
     }
 
     /**
@@ -5149,6 +5284,81 @@ public class RowDataSet implements DataSet, Cloneable {
         return result;
     }
 
+    @Override
+    public <E extends Exception> DataSet groupBy(Collection<String> columnNames,
+            com.landawn.abacus.util.Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, String aggregateResultColumnName,
+            Collection<String> aggregateOnColumnNames, Class<?> rowClass) throws E {
+        N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+        N.checkArgNotNullOrEmpty(aggregateOnColumnNames, "aggregateOnColumnNames");
+
+        final boolean isNullOrIdentityKeyMapper = keyMapper == null || keyMapper == Fn.identity();
+
+        if (isNullOrIdentityKeyMapper) {
+            if (columnNames.size() == 1) {
+                return groupBy(columnNames.iterator().next(), aggregateResultColumnName, aggregateOnColumnNames, rowClass);
+            } else {
+                return groupBy(columnNames, aggregateResultColumnName, aggregateOnColumnNames, rowClass);
+            }
+        }
+
+        final int size = size();
+        final int[] columnIndexes = checkColumnName(columnNames);
+        final int columnCount = columnIndexes.length;
+        final int newColumnCount = columnIndexes.length + 1;
+        final List<String> newColumnNameList = N.newArrayList(newColumnCount);
+        newColumnNameList.addAll(columnNames);
+        newColumnNameList.add(aggregateResultColumnName);
+
+        final List<List<Object>> newColumnList = new ArrayList<>(newColumnCount);
+
+        for (int i = 0; i < columnCount; i++) {
+            newColumnList.add(new ArrayList<>());
+        }
+
+        if (size == 0) {
+            newColumnList.add(new ArrayList<>());
+
+            return new RowDataSet(newColumnNameList, newColumnList);
+        }
+
+        final List<Object> valueColumnList = toList(rowClass, aggregateOnColumnNames);
+
+        final Map<Object, List<Object>> keyRowMap = N.newLinkedHashMap();
+        final Object[] keyRow = Objectory.createObjectArray(columnCount);
+        final DisposableObjArray keyDisposableArray = DisposableObjArray.wrap(keyRow);
+
+        Object key = null;
+        List<Object> val = null;
+
+        for (int rowIndex = 0; rowIndex < size; rowIndex++) {
+            for (int i = 0; i < newColumnCount; i++) {
+                keyRow[i] = _columnList.get(columnIndexes[i]).get(rowIndex);
+            }
+
+            key = getHashKey(keyMapper.apply(keyDisposableArray));
+            val = keyRowMap.get(key);
+
+            if (val == null) {
+                val = new ArrayList<>();
+                keyRowMap.put(key, val);
+
+                for (int i = 0; i < newColumnCount; i++) {
+                    newColumnList.get(i).add(keyRow[i]);
+                }
+            }
+
+            val.add(valueColumnList.get(rowIndex));
+        }
+
+        if (keyRow != null) {
+            Objectory.recycle(keyRow);
+        }
+
+        newColumnList.add(new ArrayList<>(keyRowMap.values()));
+
+        return new RowDataSet(newColumnNameList, newColumnList);
+    }
+
     /**
      *
      * @param <E>
@@ -5341,6 +5551,22 @@ public class RowDataSet implements DataSet, Cloneable {
         });
     }
 
+    @Override
+    public Stream<DataSet> rollup(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
+            Class<?> rowClass) {
+        return Stream.of(Iterables.rollup(columnNames)).reversed().map(new Function<Collection<String>, DataSet>() {
+            @Override
+            public DataSet apply(final Collection<String> columnNames) {
+                return Try.call(new Callable<DataSet>() {
+                    @Override
+                    public DataSet call() throws Exception {
+                        return groupBy(columnNames, aggregateResultColumnName, aggregateOnColumnNames, rowClass);
+                    }
+                });
+            }
+        });
+    }
+
     /**
      *
      * @param columnNames
@@ -5463,6 +5689,23 @@ public class RowDataSet implements DataSet, Cloneable {
         });
     }
 
+    @Override
+    public <E extends Exception> Stream<DataSet> rollup(Collection<String> columnNames,
+            com.landawn.abacus.util.Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, String aggregateResultColumnName,
+            Collection<String> aggregateOnColumnNames, Class<?> rowClass) {
+        return Stream.of(Iterables.rollup(columnNames)).reversed().map(new Function<Collection<String>, DataSet>() {
+            @Override
+            public DataSet apply(final Collection<String> columnNames) {
+                return Try.call(new Callable<DataSet>() {
+                    @Override
+                    public DataSet call() throws Exception {
+                        return groupBy(columnNames, keyMapper, aggregateResultColumnName, aggregateOnColumnNames, rowClass);
+                    }
+                });
+            }
+        });
+    }
+
     /**
      *
      * @param <E>
@@ -5566,6 +5809,22 @@ public class RowDataSet implements DataSet, Cloneable {
                     @Override
                     public DataSet call() throws Exception {
                         return groupBy(columnNames, aggregateResultColumnName, aggregateOnColumnName, func);
+                    }
+                });
+            }
+        });
+    }
+
+    @Override
+    public Stream<DataSet> cube(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
+            Class<?> rowClass) {
+        return cubeSet(columnNames).map(new Function<Collection<String>, DataSet>() {
+            @Override
+            public DataSet apply(final Collection<String> columnNames) {
+                return Try.call(new Callable<DataSet>() {
+                    @Override
+                    public DataSet call() throws Exception {
+                        return groupBy(columnNames, aggregateResultColumnName, aggregateOnColumnNames, rowClass);
                     }
                 });
             }
@@ -5688,6 +5947,23 @@ public class RowDataSet implements DataSet, Cloneable {
                     @Override
                     public DataSet call() throws Exception {
                         return groupBy(columnNames, keyMapper, aggregateResultColumnName, aggregateOnColumnName, func);
+                    }
+                });
+            }
+        });
+    }
+
+    @Override
+    public <E extends Exception> Stream<DataSet> cube(Collection<String> columnNames,
+            com.landawn.abacus.util.Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, String aggregateResultColumnName,
+            Collection<String> aggregateOnColumnNames, Class<?> rowClass) {
+        return cubeSet(columnNames).map(new Function<Collection<String>, DataSet>() {
+            @Override
+            public DataSet apply(final Collection<String> columnNames) {
+                return Try.call(new Callable<DataSet>() {
+                    @Override
+                    public DataSet call() throws Exception {
+                        return groupBy(columnNames, keyMapper, aggregateResultColumnName, aggregateOnColumnNames, rowClass);
                     }
                 });
             }

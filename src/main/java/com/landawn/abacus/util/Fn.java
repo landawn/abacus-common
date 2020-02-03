@@ -476,6 +476,20 @@ public final class Fn extends Comparators {
         }
     };
 
+    private static final Function<Pair<Object, Object>, Object> LEFT = new Function<Pair<Object, Object>, Object>() {
+        @Override
+        public Object apply(Pair<Object, Object> t) {
+            return t.getLeft();
+        }
+    };
+
+    private static final Function<Pair<Object, Object>, Object> RIGHT = new Function<Pair<Object, Object>, Object>() {
+        @Override
+        public Object apply(Pair<Object, Object> t) {
+            return t.getRight();
+        }
+    };
+
     /** The Constant INVERSE. */
     private static final Function<Map.Entry<Object, Object>, Map.Entry<Object, Object>> INVERSE = new Function<Map.Entry<Object, Object>, Map.Entry<Object, Object>>() {
         @Override
@@ -1240,6 +1254,16 @@ public final class Fn extends Comparators {
     @SuppressWarnings("rawtypes")
     public static <K, V> Function<Entry<K, V>, V> value() {
         return (Function) VALUE;
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static <L, R> Function<Pair<L, R>, L> left() {
+        return (Function) LEFT;
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static <L, R> Function<Pair<L, R>, R> right() {
+        return (Function) RIGHT;
     }
 
     /**
