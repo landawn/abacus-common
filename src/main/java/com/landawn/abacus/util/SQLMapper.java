@@ -78,7 +78,7 @@ public final class SQLMapper {
     public static final int MAX_ID_LENGTH = 64;
 
     /** The named SQL map. */
-    private final Map<String, NamedSQL> namedSQLMap = new LinkedHashMap<>();
+    private final Map<String, ParsedSql> sqlMapper = new LinkedHashMap<>();
 
     /** The attrs map. */
     private final Map<String, ImmutableMap<String, String>> attrsMap = new HashMap<>();
@@ -142,7 +142,7 @@ public final class SQLMapper {
      * @return
      */
     public Set<String> keySet() {
-        return namedSQLMap.keySet();
+        return sqlMapper.keySet();
     }
 
     /**
@@ -150,12 +150,12 @@ public final class SQLMapper {
      * @param id
      * @return
      */
-    public NamedSQL get(String id) {
+    public ParsedSql get(String id) {
         if (N.isNullOrEmpty(id) || id.length() > MAX_ID_LENGTH) {
             return null;
         }
 
-        return namedSQLMap.get(id);
+        return sqlMapper.get(id);
     }
 
     /**
@@ -164,7 +164,7 @@ public final class SQLMapper {
      * @param id
      * @return
      */
-    public Map<String, String> getAttrs(String id) {
+    public ImmutableMap<String, String> getAttrs(String id) {
         if (N.isNullOrEmpty(id) || id.length() > MAX_ID_LENGTH) {
             return null;
         }
@@ -175,13 +175,13 @@ public final class SQLMapper {
     /**
      *
      * @param id
-     * @param namedSQL
+     * @param sql
      * @return
      */
-    public NamedSQL add(String id, NamedSQL namedSQL) {
+    public ParsedSql add(String id, ParsedSql sql) {
         checkId(id);
 
-        return namedSQLMap.put(id, namedSQL);
+        return sqlMapper.put(id, sql);
     }
 
     /**
@@ -193,7 +193,7 @@ public final class SQLMapper {
     public void add(String id, String sql, Map<String, String> attrs) {
         checkId(id);
 
-        namedSQLMap.put(id, NamedSQL.parse(sql));
+        sqlMapper.put(id, ParsedSql.parse(sql));
         attrsMap.put(id, ImmutableMap.copyOf(attrs));
     }
 
@@ -208,8 +208,8 @@ public final class SQLMapper {
             throw new IllegalArgumentException("Id: " + id + " is too long. The maximum length for id is: " + MAX_ID_LENGTH);
         }
 
-        if (namedSQLMap.containsKey(id)) {
-            throw new IllegalArgumentException(id + " already exists with sql: " + namedSQLMap.get(id));
+        if (sqlMapper.containsKey(id)) {
+            throw new IllegalArgumentException(id + " already exists with sql: " + sqlMapper.get(id));
         }
     }
 
@@ -222,7 +222,7 @@ public final class SQLMapper {
             return;
         }
 
-        namedSQLMap.remove(id);
+        sqlMapper.remove(id);
     }
 
     /**
@@ -236,7 +236,7 @@ public final class SQLMapper {
             Document doc = XMLUtil.createDOMParser(true, true).newDocument();
             Element sqlMapperNode = doc.createElement(SQLMapper.SQL_MAPPER);
 
-            for (String id : namedSQLMap.keySet()) {
+            for (String id : sqlMapper.keySet()) {
                 Element sqlNode = doc.createElement(SQL);
                 sqlNode.setAttribute(ID, id);
 
@@ -248,7 +248,7 @@ public final class SQLMapper {
                     }
                 }
 
-                Text sqlText = doc.createTextNode(namedSQLMap.get(id).getNamedSQL());
+                Text sqlText = doc.createTextNode(sqlMapper.get(id).sql());
                 sqlNode.appendChild(sqlText);
                 sqlMapperNode.appendChild(sqlNode);
             }
@@ -277,7 +277,7 @@ public final class SQLMapper {
      */
     @Override
     public int hashCode() {
-        return namedSQLMap.hashCode();
+        return sqlMapper.hashCode();
     }
 
     /**
@@ -287,7 +287,7 @@ public final class SQLMapper {
      */
     @Override
     public boolean equals(Object obj) {
-        return this == obj || (obj instanceof SQLMapper && N.equals(((SQLMapper) obj).namedSQLMap, namedSQLMap));
+        return this == obj || (obj instanceof SQLMapper && N.equals(((SQLMapper) obj).sqlMapper, sqlMapper));
     }
 
     /**
@@ -296,6 +296,6 @@ public final class SQLMapper {
      */
     @Override
     public String toString() {
-        return namedSQLMap.toString();
+        return sqlMapper.toString();
     }
 }

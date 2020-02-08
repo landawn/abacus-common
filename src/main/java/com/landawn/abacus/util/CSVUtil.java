@@ -1016,11 +1016,11 @@ public final class CSVUtil {
      */
     public static long exportCSV(final File out, final Connection conn, final String querySQL, final Collection<String> selectColumnNames, final long offset,
             final long count, final boolean writeTitle, final boolean quoted) throws UncheckedSQLException, UncheckedIOException {
-        final NamedSQL namedSQL = NamedSQL.parse(querySQL);
+        final ParsedSql sql = ParsedSql.parse(querySQL);
         PreparedStatement stmt = null;
 
         try {
-            stmt = conn.prepareStatement(namedSQL.getParameterizedSQL(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            stmt = conn.prepareStatement(sql.getParameterizedSql(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
             stmt.setFetchSize(200);
 
