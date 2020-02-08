@@ -5492,6 +5492,24 @@ public final class Fn extends Comparators {
 
     /**
      *
+     * @param runnable
+     * @param result
+     * @return
+     */
+    public static <T> com.landawn.abacus.util.function.Callable<T> toCallable(final com.landawn.abacus.util.function.Runnable runnable, final T result) {
+        N.checkArgNotNull(runnable);
+
+        return new com.landawn.abacus.util.function.Callable<T>() {
+            @Override
+            public T call() {
+                runnable.run();
+                return result;
+            }
+        };
+    }
+
+    /**
+     *
      * @param <R>
      * @param callable
      * @return
@@ -12804,6 +12822,25 @@ public final class Fn extends Comparators {
                 public Void call() throws E {
                     runnable.run();
                     return null;
+                }
+            };
+        }
+
+        /**
+         *
+         * @param <E>
+         * @param runnable
+         * @param result
+         * @return
+         */
+        public static <T, E extends Exception> Throwables.Callable<T, E> toCallable(final Throwables.Runnable<E> runnable, final T result) {
+            N.checkArgNotNull(runnable);
+
+            return new Throwables.Callable<T, E>() {
+                @Override
+                public T call() throws E {
+                    runnable.run();
+                    return result;
                 }
             };
         }
