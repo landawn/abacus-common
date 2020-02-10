@@ -24,7 +24,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @author Haiyang Li
  * @since 1.2
  */
-public class BooleanTriple {
+public final class BooleanTriple extends PrimitiveTriple<BooleanTriple> {
 
     /** The  1. */
     public final boolean _1;
@@ -108,8 +108,8 @@ public class BooleanTriple {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(Throwables.Consumer<BooleanTriple, E> action) throws E {
-        action.accept(this);
+    public <E extends Exception> void accept(Throwables.BooleanTriConsumer<E> action) throws E {
+        action.accept(_1, _2, _3);
     }
 
     /**
@@ -120,8 +120,8 @@ public class BooleanTriple {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(Throwables.Function<BooleanTriple, U, E> mapper) throws E {
-        return mapper.apply(this);
+    public <U, E extends Exception> U map(Throwables.BooleanTriFunction<U, E> mapper) throws E {
+        return mapper.apply(_1, _2, _3);
     }
 
     /**
@@ -131,8 +131,8 @@ public class BooleanTriple {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Optional<BooleanTriple> filter(final Throwables.Predicate<BooleanTriple, E> predicate) throws E {
-        return predicate.test(this) ? Optional.of(this) : Optional.<BooleanTriple> empty();
+    public <E extends Exception> Optional<BooleanTriple> filter(final Throwables.BooleanTriPredicate<E> predicate) throws E {
+        return predicate.test(_1, _2, _3) ? Optional.of(this) : Optional.<BooleanTriple> empty();
     }
 
     /**

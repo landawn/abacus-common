@@ -24,7 +24,7 @@ import com.landawn.abacus.util.stream.ByteStream;
  * @author Haiyang Li
  * @since 1.2
  */
-public class BytePair {
+public final class BytePair extends PrimitivePair<BytePair> {
 
     /** The  1. */
     public final byte _1;
@@ -119,22 +119,11 @@ public class BytePair {
     /**
      *
      * @param <E>
-     * @param comsumer
-     * @throws E the e
-     */
-    public <E extends Exception> void forEach(Throwables.ByteConsumer<E> comsumer) throws E {
-        comsumer.accept(this._1);
-        comsumer.accept(this._2);
-    }
-
-    /**
-     *
-     * @param <E>
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(Throwables.Consumer<BytePair, E> action) throws E {
-        action.accept(this);
+    public <E extends Exception> void accept(Throwables.ByteBiConsumer<E> action) throws E {
+        action.accept(_1, _2);
     }
 
     /**
@@ -145,8 +134,8 @@ public class BytePair {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(Throwables.Function<BytePair, U, E> mapper) throws E {
-        return mapper.apply(this);
+    public <U, E extends Exception> U map(Throwables.ByteBiFunction<U, E> mapper) throws E {
+        return mapper.apply(_1, _2);
     }
 
     /**
@@ -156,8 +145,8 @@ public class BytePair {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Optional<BytePair> filter(final Throwables.Predicate<BytePair, E> predicate) throws E {
-        return predicate.test(this) ? Optional.of(this) : Optional.<BytePair> empty();
+    public <E extends Exception> Optional<BytePair> filter(final Throwables.ByteBiPredicate<E> predicate) throws E {
+        return predicate.test(_1, _2) ? Optional.of(this) : Optional.<BytePair> empty();
     }
 
     /**

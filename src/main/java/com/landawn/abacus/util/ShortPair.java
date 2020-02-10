@@ -24,7 +24,7 @@ import com.landawn.abacus.util.stream.ShortStream;
  * @author Haiyang Li
  * @since 1.2
  */
-public class ShortPair {
+public final class ShortPair extends PrimitivePair<ShortPair> {
 
     /** The  1. */
     public final short _1;
@@ -133,8 +133,8 @@ public class ShortPair {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(Throwables.Consumer<ShortPair, E> action) throws E {
-        action.accept(this);
+    public <E extends Exception> void accept(Throwables.ShortBiConsumer<E> action) throws E {
+        action.accept(_1, _2);
     }
 
     /**
@@ -145,8 +145,8 @@ public class ShortPair {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(Throwables.Function<ShortPair, U, E> mapper) throws E {
-        return mapper.apply(this);
+    public <U, E extends Exception> U map(Throwables.ShortBiFunction<U, E> mapper) throws E {
+        return mapper.apply(_1, _2);
     }
 
     /**
@@ -156,8 +156,8 @@ public class ShortPair {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Optional<ShortPair> filter(final Throwables.Predicate<ShortPair, E> predicate) throws E {
-        return predicate.test(this) ? Optional.of(this) : Optional.<ShortPair> empty();
+    public <E extends Exception> Optional<ShortPair> filter(final Throwables.ShortBiPredicate<E> predicate) throws E {
+        return predicate.test(_1, _2) ? Optional.of(this) : Optional.<ShortPair> empty();
     }
 
     /**

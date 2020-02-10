@@ -40,7 +40,7 @@ import com.landawn.abacus.util.function.Supplier;
  * 
  * public class Wombat {
  * 
- *   <span style="color:green">final static Logger logger = LoggerFactory.getLogger(Wombat.class);</span>
+ *   <span style="color:green">static final Logger logger = LoggerFactory.getLogger(Wombat.class);</span>
  *   Integer t;
  *   Integer oldT;
  * 

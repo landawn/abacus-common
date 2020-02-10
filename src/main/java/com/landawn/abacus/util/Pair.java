@@ -16,6 +16,7 @@
 
 package com.landawn.abacus.util;
 
+import java.util.AbstractMap;
 import java.util.Map;
 
 import com.landawn.abacus.annotation.Beta;
@@ -227,8 +228,8 @@ public final class Pair<L, R> {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean setIf(final L newLeft, final R newRight, Throwables.TriPredicate<? super Pair<L, R>, ? super L, ? super R, E> predicate)
-            throws E {
+    public <E extends Exception> boolean setIf(final L newLeft, final R newRight,
+            Throwables.TriPredicate<? super Pair<L, R>, ? super L, ? super R, E> predicate) throws E {
         if (predicate.test(this, newLeft, newRight)) {
             this.left = newLeft;
             this.right = newRight;
@@ -420,12 +421,28 @@ public final class Pair<L, R> {
         return Stream.of(this);
     }
 
+    public <T, E extends Exception> Stream<T> stream(final Throwables.Function<? super Pair<L, R>, Stream<T>, E> func) throws E {
+        return func.apply(this);
+    }
+
+    public Optional<Pair<L, R>> toOptional() {
+        return Optional.of(this);
+    }
+
     /**
      *
      * @return
      */
     public Tuple2<L, R> toTuple() {
         return Tuple.of(left, right);
+    }
+
+    /**
+     *
+     * @return
+     */
+    public Map.Entry<L, R> toEntry() {
+        return new AbstractMap.SimpleEntry<>(left, right);
     }
 
     /**

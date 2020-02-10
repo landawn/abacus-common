@@ -108,7 +108,7 @@ public enum SQLOperation {
     }
 
     /** The Constant operationMap. */
-    private final static Map<String, SQLOperation> operationMap = new HashMap<>();
+    private static final Map<String, SQLOperation> operationMap = new HashMap<>();
 
     static {
         SQLOperation[] values = SQLOperation.values();

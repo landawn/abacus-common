@@ -24,7 +24,7 @@ import com.landawn.abacus.util.stream.DoubleStream;
  * @author Haiyang Li
  * @since 1.2
  */
-public final class DoubleTriple {
+public final class DoubleTriple extends PrimitiveTriple<DoubleTriple> {
 
     /** The  1. */
     public final double _1;
@@ -148,8 +148,8 @@ public final class DoubleTriple {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(Throwables.Consumer<DoubleTriple, E> action) throws E {
-        action.accept(this);
+    public <E extends Exception> void accept(Throwables.DoubleTriConsumer<E> action) throws E {
+        action.accept(_1, _2, _3);
     }
 
     /**
@@ -160,8 +160,8 @@ public final class DoubleTriple {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(Throwables.Function<DoubleTriple, U, E> mapper) throws E {
-        return mapper.apply(this);
+    public <U, E extends Exception> U map(Throwables.DoubleTriFunction<U, E> mapper) throws E {
+        return mapper.apply(_1, _2, _3);
     }
 
     /**
@@ -171,8 +171,8 @@ public final class DoubleTriple {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Optional<DoubleTriple> filter(final Throwables.Predicate<DoubleTriple, E> predicate) throws E {
-        return predicate.test(this) ? Optional.of(this) : Optional.<DoubleTriple> empty();
+    public <E extends Exception> Optional<DoubleTriple> filter(final Throwables.DoubleTriPredicate<E> predicate) throws E {
+        return predicate.test(_1, _2, _3) ? Optional.of(this) : Optional.<DoubleTriple> empty();
     }
 
     /**

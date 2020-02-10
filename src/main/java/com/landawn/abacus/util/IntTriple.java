@@ -24,7 +24,7 @@ import com.landawn.abacus.util.stream.IntStream;
  * @author Haiyang Li
  * @since 1.2
  */
-public final class IntTriple {
+public final class IntTriple extends PrimitiveTriple<IntTriple> {
 
     /** The  1. */
     public final int _1;
@@ -148,8 +148,8 @@ public final class IntTriple {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(Throwables.Consumer<IntTriple, E> action) throws E {
-        action.accept(this);
+    public <E extends Exception> void accept(Throwables.IntTriConsumer<E> action) throws E {
+        action.accept(_1, _2, _3);
     }
 
     /**
@@ -160,8 +160,8 @@ public final class IntTriple {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(Throwables.Function<IntTriple, U, E> mapper) throws E {
-        return mapper.apply(this);
+    public <U, E extends Exception> U map(Throwables.IntTriFunction<U, E> mapper) throws E {
+        return mapper.apply(_1, _2, _3);
     }
 
     /**
@@ -171,8 +171,8 @@ public final class IntTriple {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Optional<IntTriple> filter(final Throwables.Predicate<IntTriple, E> predicate) throws E {
-        return predicate.test(this) ? Optional.of(this) : Optional.<IntTriple> empty();
+    public <E extends Exception> Optional<IntTriple> filter(final Throwables.IntTriPredicate<E> predicate) throws E {
+        return predicate.test(_1, _2, _3) ? Optional.of(this) : Optional.<IntTriple> empty();
     }
 
     /**

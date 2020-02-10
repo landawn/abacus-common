@@ -24,7 +24,7 @@ import com.landawn.abacus.util.stream.ShortStream;
  * @author Haiyang Li
  * @since 1.2
  */
-public class ShortTriple {
+public final class ShortTriple extends PrimitiveTriple<ShortTriple> {
 
     /** The  1. */
     public final short _1;
@@ -148,8 +148,8 @@ public class ShortTriple {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(Throwables.Consumer<ShortTriple, E> action) throws E {
-        action.accept(this);
+    public <E extends Exception> void accept(Throwables.ShortTriConsumer<E> action) throws E {
+        action.accept(_1, _2, _3);
     }
 
     /**
@@ -160,8 +160,8 @@ public class ShortTriple {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(Throwables.Function<ShortTriple, U, E> mapper) throws E {
-        return mapper.apply(this);
+    public <U, E extends Exception> U map(Throwables.ShortTriFunction<U, E> mapper) throws E {
+        return mapper.apply(_1, _2, _3);
     }
 
     /**
@@ -171,8 +171,8 @@ public class ShortTriple {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Optional<ShortTriple> filter(final Throwables.Predicate<ShortTriple, E> predicate) throws E {
-        return predicate.test(this) ? Optional.of(this) : Optional.<ShortTriple> empty();
+    public <E extends Exception> Optional<ShortTriple> filter(final Throwables.ShortTriPredicate<E> predicate) throws E {
+        return predicate.test(_1, _2, _3) ? Optional.of(this) : Optional.<ShortTriple> empty();
     }
 
     /**

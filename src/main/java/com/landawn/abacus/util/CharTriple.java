@@ -24,7 +24,7 @@ import com.landawn.abacus.util.stream.CharStream;
  * @author Haiyang Li
  * @since 1.2
  */
-public final class CharTriple {
+public final class CharTriple extends PrimitiveTriple<CharTriple> {
 
     /** The  1. */
     public final char _1;
@@ -148,8 +148,8 @@ public final class CharTriple {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(Throwables.Consumer<CharTriple, E> action) throws E {
-        action.accept(this);
+    public <E extends Exception> void accept(Throwables.CharTriConsumer<E> action) throws E {
+        action.accept(_1, _2, _3);
     }
 
     /**
@@ -160,8 +160,8 @@ public final class CharTriple {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(Throwables.Function<CharTriple, U, E> mapper) throws E {
-        return mapper.apply(this);
+    public <U, E extends Exception> U map(Throwables.CharTriFunction<U, E> mapper) throws E {
+        return mapper.apply(_1, _2, _3);
     }
 
     /**
@@ -171,8 +171,8 @@ public final class CharTriple {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Optional<CharTriple> filter(Throwables.Predicate<CharTriple, E> predicate) throws E {
-        return predicate.test(this) ? Optional.of(this) : Optional.<CharTriple> empty();
+    public <E extends Exception> Optional<CharTriple> filter(final Throwables.CharTriPredicate<E> predicate) throws E {
+        return predicate.test(_1, _2, _3) ? Optional.of(this) : Optional.<CharTriple> empty();
     }
 
     /**

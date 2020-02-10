@@ -37,7 +37,7 @@ import java.util.TimeZone;
 public final class ISO8601Util {
 
     /** The Constant DEF_8601_LEN. */
-    protected final static int DEF_8601_LEN = "yyyy-MM-ddThh:mm:ss.SSS+00:00".length();
+    protected static final int DEF_8601_LEN = "yyyy-MM-ddThh:mm:ss.SSS+00:00".length();
 
     /**
      * Timezone we use for 'Z' in ISO-8601 date/time values: since 2.7

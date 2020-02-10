@@ -24,7 +24,7 @@ import com.landawn.abacus.util.stream.ByteStream;
  * @author Haiyang Li
  * @since 1.2
  */
-public class ByteTriple {
+public final class ByteTriple extends PrimitiveTriple<ByteTriple> {
 
     /** The  1. */
     public final byte _1;
@@ -148,8 +148,8 @@ public class ByteTriple {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(Throwables.Consumer<ByteTriple, E> action) throws E {
-        action.accept(this);
+    public <E extends Exception> void accept(Throwables.ByteTriConsumer<E> action) throws E {
+        action.accept(_1, _2, _3);
     }
 
     /**
@@ -160,8 +160,8 @@ public class ByteTriple {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(Throwables.Function<ByteTriple, U, E> mapper) throws E {
-        return mapper.apply(this);
+    public <U, E extends Exception> U map(Throwables.ByteTriFunction<U, E> mapper) throws E {
+        return mapper.apply(_1, _2, _3);
     }
 
     /**
@@ -171,8 +171,8 @@ public class ByteTriple {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Optional<ByteTriple> filter(final Throwables.Predicate<ByteTriple, E> predicate) throws E {
-        return predicate.test(this) ? Optional.of(this) : Optional.<ByteTriple> empty();
+    public <E extends Exception> Optional<ByteTriple> filter(final Throwables.ByteTriPredicate<E> predicate) throws E {
+        return predicate.test(_1, _2, _3) ? Optional.of(this) : Optional.<ByteTriple> empty();
     }
 
     /**

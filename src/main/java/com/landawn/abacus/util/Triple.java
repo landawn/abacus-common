@@ -443,6 +443,14 @@ public final class Triple<L, M, R> {
         return Stream.of(this);
     }
 
+    public <T, E extends Exception> Stream<T> stream(final Throwables.Function<? super Triple<L, M, R>, Stream<T>, E> func) throws E {
+        return func.apply(this);
+    }
+
+    public Optional<Triple<L, M, R>> toOptional() {
+        return Optional.of(this);
+    }
+
     /**
      *
      * @return

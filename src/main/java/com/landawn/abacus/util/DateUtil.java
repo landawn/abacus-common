@@ -103,7 +103,7 @@ public abstract class DateUtil {
      * RFC 1123 / RFC 822. Used for parsing via `SimpleDateFormat` as well as
      * error messages.
      */
-    public final static String RFC1123_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
+    public static final String RFC1123_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
 
     /**
      * This is half a month, so this represents whether a date is in the top

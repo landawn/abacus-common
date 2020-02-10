@@ -24,7 +24,7 @@ import com.landawn.abacus.util.stream.LongStream;
  * @author Haiyang Li
  * @since 1.2
  */
-public final class LongPair {
+public final class LongPair extends PrimitivePair<LongPair> {
 
     /** The  1. */
     public final long _1;
@@ -128,36 +128,36 @@ public final class LongPair {
     }
 
     /**
-     *
-     * @param <E>
-     * @param action
-     * @throws E the e
-     */
-    public <E extends Exception> void accept(Throwables.Consumer<LongPair, E> action) throws E {
-        action.accept(this);
+    *
+    * @param <E>
+    * @param action
+    * @throws E the e
+    */
+    public <E extends Exception> void accept(Throwables.LongBiConsumer<E> action) throws E {
+        action.accept(_1, _2);
     }
 
     /**
-     *
-     * @param <U>
-     * @param <E>
-     * @param mapper
-     * @return
-     * @throws E the e
-     */
-    public <U, E extends Exception> U map(Throwables.Function<LongPair, U, E> mapper) throws E {
-        return mapper.apply(this);
+    *
+    * @param <U>
+    * @param <E>
+    * @param mapper
+    * @return
+    * @throws E the e
+    */
+    public <U, E extends Exception> U map(Throwables.LongBiFunction<U, E> mapper) throws E {
+        return mapper.apply(_1, _2);
     }
 
     /**
-     *
-     * @param <E>
-     * @param predicate
-     * @return
-     * @throws E the e
-     */
-    public <E extends Exception> Optional<LongPair> filter(final Throwables.Predicate<LongPair, E> predicate) throws E {
-        return predicate.test(this) ? Optional.of(this) : Optional.<LongPair> empty();
+    *
+    * @param <E>
+    * @param predicate
+    * @return
+    * @throws E the e
+    */
+    public <E extends Exception> Optional<LongPair> filter(final Throwables.LongBiPredicate<E> predicate) throws E {
+        return predicate.test(_1, _2) ? Optional.of(this) : Optional.<LongPair> empty();
     }
 
     /**

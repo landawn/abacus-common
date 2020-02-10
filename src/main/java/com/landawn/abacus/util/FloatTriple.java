@@ -24,7 +24,7 @@ import com.landawn.abacus.util.stream.FloatStream;
  * @author Haiyang Li
  * @since 1.2
  */
-public final class FloatTriple {
+public final class FloatTriple extends PrimitiveTriple<FloatTriple> {
 
     /** The  1. */
     public final float _1;
@@ -148,8 +148,8 @@ public final class FloatTriple {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(Throwables.Consumer<FloatTriple, E> action) throws E {
-        action.accept(this);
+    public <E extends Exception> void accept(Throwables.FloatTriConsumer<E> action) throws E {
+        action.accept(_1, _2, _3);
     }
 
     /**
@@ -160,8 +160,8 @@ public final class FloatTriple {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(Throwables.Function<FloatTriple, U, E> mapper) throws E {
-        return mapper.apply(this);
+    public <U, E extends Exception> U map(Throwables.FloatTriFunction<U, E> mapper) throws E {
+        return mapper.apply(_1, _2, _3);
     }
 
     /**
@@ -171,8 +171,8 @@ public final class FloatTriple {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Optional<FloatTriple> filter(final Throwables.Predicate<FloatTriple, E> predicate) throws E {
-        return predicate.test(this) ? Optional.of(this) : Optional.<FloatTriple> empty();
+    public <E extends Exception> Optional<FloatTriple> filter(final Throwables.FloatTriPredicate<E> predicate) throws E {
+        return predicate.test(_1, _2, _3) ? Optional.of(this) : Optional.<FloatTriple> empty();
     }
 
     /**

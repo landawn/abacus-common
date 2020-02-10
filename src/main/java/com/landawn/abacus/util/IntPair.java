@@ -24,7 +24,7 @@ import com.landawn.abacus.util.stream.IntStream;
  * @author Haiyang Li
  * @since 1.2
  */
-public final class IntPair {
+public final class IntPair extends PrimitivePair<IntPair> {
 
     /** The  1. */
     public final int _1;
@@ -133,8 +133,8 @@ public final class IntPair {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(Throwables.Consumer<IntPair, E> action) throws E {
-        action.accept(this);
+    public <E extends Exception> void accept(Throwables.IntBiConsumer<E> action) throws E {
+        action.accept(_1, _2);
     }
 
     /**
@@ -145,8 +145,8 @@ public final class IntPair {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(Throwables.Function<IntPair, U, E> mapper) throws E {
-        return mapper.apply(this);
+    public <U, E extends Exception> U map(Throwables.IntBiFunction<U, E> mapper) throws E {
+        return mapper.apply(_1, _2);
     }
 
     /**
@@ -156,8 +156,8 @@ public final class IntPair {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Optional<IntPair> filter(final Throwables.Predicate<IntPair, E> predicate) throws E {
-        return predicate.test(this) ? Optional.of(this) : Optional.<IntPair> empty();
+    public <E extends Exception> Optional<IntPair> filter(final Throwables.IntBiPredicate<E> predicate) throws E {
+        return predicate.test(_1, _2) ? Optional.of(this) : Optional.<IntPair> empty();
     }
 
     /**

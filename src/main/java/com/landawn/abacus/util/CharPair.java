@@ -24,7 +24,7 @@ import com.landawn.abacus.util.stream.CharStream;
  * @author Haiyang Li
  * @since 1.2
  */
-public final class CharPair {
+public final class CharPair extends PrimitivePair<CharPair> {
 
     /** The  1. */
     public final char _1;
@@ -133,8 +133,8 @@ public final class CharPair {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(Throwables.Consumer<CharPair, E> action) throws E {
-        action.accept(this);
+    public <E extends Exception> void accept(Throwables.CharBiConsumer<E> action) throws E {
+        action.accept(_1, _2);
     }
 
     /**
@@ -145,8 +145,8 @@ public final class CharPair {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(Throwables.Function<CharPair, U, E> mapper) throws E {
-        return mapper.apply(this);
+    public <U, E extends Exception> U map(Throwables.CharBiFunction<U, E> mapper) throws E {
+        return mapper.apply(_1, _2);
     }
 
     /**
@@ -156,8 +156,8 @@ public final class CharPair {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Optional<CharPair> filter(Throwables.Predicate<CharPair, E> predicate) throws E {
-        return predicate.test(this) ? Optional.of(this) : Optional.<CharPair> empty();
+    public <E extends Exception> Optional<CharPair> filter(final Throwables.CharBiPredicate<E> predicate) throws E {
+        return predicate.test(_1, _2) ? Optional.of(this) : Optional.<CharPair> empty();
     }
 
     /**

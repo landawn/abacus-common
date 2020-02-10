@@ -30,51 +30,10 @@ import com.landawn.abacus.util.stream.Stream;
  * @author Haiyang Li
  * @since 0.8
  */
-public abstract class Tuple {
+public abstract class Tuple<TP> {
 
     /** The Constant EMPTY. */
-    public static final Tuple EMPTY = new Tuple() {
-        @Override
-        public int arity() {
-            return 0;
-        }
-
-        @Override
-        public boolean anyNull() {
-            return false;
-        }
-
-        @Override
-        public boolean allNull() {
-            return true;
-        }
-
-        @Override
-        public Object[] toArray() {
-            return N.EMPTY_OBJECT_ARRAY;
-        }
-
-        @Override
-        public <A> A[] toArray(A[] a) {
-            return a;
-        }
-
-        @Override
-        public <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E {
-            N.checkArgNotNull(consumer);
-            // do nothing.
-        }
-
-        @Override
-        public Stream<? extends Tuple> stream() {
-            return Stream.empty();
-        }
-
-        @Override
-        public String toString() {
-            return "[]";
-        }
-    };
+    private static final Tuple0 EMPTY = new Tuple0();
 
     /**
      * Instantiates a new tuple.
@@ -101,6 +60,13 @@ public abstract class Tuple {
     public abstract boolean allNull();
 
     /**
+     * 
+     * @param objToFind
+     * @return
+     */
+    public abstract boolean contains(final Object objToFind);
+
+    /**
      *
      * @return
      */
@@ -124,9 +90,60 @@ public abstract class Tuple {
 
     /**
      *
+     * @param <E>
+     * @param action
+     * @throws E the e
+     */
+    public <E extends Exception> void accept(final Throwables.Consumer<? super TP, E> action) throws E {
+        action.accept((TP) this);
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param <E>
+     * @param mapper
+     * @return
+     * @throws E the e
+     */
+    public <U, E extends Exception> U map(final Throwables.Function<? super TP, U, E> mapper) throws E {
+        return mapper.apply((TP) this);
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param predicate
+     * @return
+     * @throws E the e
+     */
+    public <E extends Exception> Optional<TP> filter(final Throwables.Predicate<? super TP, E> predicate) throws E {
+        return predicate.test((TP) this) ? Optional.of((TP) this) : Optional.<TP> empty();
+    }
+
+    /**
+     *
      * @return
      */
-    protected abstract Stream<? extends Tuple> stream();
+    public Stream<TP> stream() {
+        return Stream.of((TP) this);
+    }
+
+    /**
+     *
+     * @return
+     */
+    public <T, E extends Exception> Stream<T> stream(final Throwables.Function<TP, Stream<T>, E> func) throws E {
+        return func.apply((TP) this);
+    }
+
+    /**
+     * 
+     * @return
+     */
+    public Optional<TP> toOptional() {
+        return Optional.of((TP) this);
+    }
 
     /**
      *
@@ -308,10 +325,10 @@ public abstract class Tuple {
      * @param a
      * @return
      */
-    public static <T extends Tuple> T from(final Object[] a) {
+    public static <TP extends Tuple<TP>> TP from(final Object[] a) {
         final int len = a == null ? 0 : a.length;
 
-        Tuple result = null;
+        Tuple<?> result = null;
 
         switch (len) {
             case 0:
@@ -358,7 +375,7 @@ public abstract class Tuple {
                 throw new RuntimeException("Too many elements(" + a.length + ") to fill in Tuple.");
         }
 
-        return (T) result;
+        return (TP) result;
     }
 
     /**
@@ -367,11 +384,11 @@ public abstract class Tuple {
      * @param c
      * @return
      */
-    public static <T extends Tuple> T from(final Collection<?> c) {
+    public static <TP extends Tuple<TP>> TP from(final Collection<?> c) {
         final int len = c == null ? 0 : c.size();
         final Iterator<?> iter = c == null ? null : c.iterator();
 
-        Tuple result = null;
+        Tuple<?> result = null;
 
         switch (len) {
             case 0:
@@ -418,23 +435,71 @@ public abstract class Tuple {
                 throw new RuntimeException("Too many elements(" + c.size() + ") to fill in Tuple.");
         }
 
-        return (T) result;
+        return (TP) result;
     }
 
     public static <T1, T2, T3> Tuple3<T1, T2, T3> flat(Tuple2<Tuple2<T1, T2>, T3> tp) {
         return new Tuple3<>(tp._1._1, tp._1._2, tp._2);
     }
 
-//    public static <T1, T2, T3, T4> Tuple4<T1, T2, T3, T4> flatt(Tuple2<Tuple2<Tuple2<T1, T2>, T3>, T4> tp) {
-//        return new Tuple4<>(tp._1._1._1, tp._1._1._2, tp._1._2, tp._2);
-//    }
+    //    public static <T1, T2, T3, T4> Tuple4<T1, T2, T3, T4> flatt(Tuple2<Tuple2<Tuple2<T1, T2>, T3>, T4> tp) {
+    //        return new Tuple4<>(tp._1._1._1, tp._1._1._2, tp._1._2, tp._2);
+    //    }
 
     /**
      * The Class Tuple1.
      *
      * @param <T1>
      */
-    public final static class Tuple1<T1> extends Tuple {
+    static final class Tuple0 extends Tuple<Tuple0> {
+        @Override
+        public int arity() {
+            return 0;
+        }
+
+        @Override
+        public boolean anyNull() {
+            return false;
+        }
+
+        @Override
+        public boolean allNull() {
+            return true;
+        }
+
+        @Override
+        public boolean contains(final Object objToFind) {
+            return false;
+        }
+
+        @Override
+        public Object[] toArray() {
+            return N.EMPTY_OBJECT_ARRAY;
+        }
+
+        @Override
+        public <A> A[] toArray(A[] a) {
+            return a;
+        }
+
+        @Override
+        public <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E {
+            N.checkArgNotNull(consumer);
+            // do nothing.
+        }
+
+        @Override
+        public String toString() {
+            return "[]";
+        }
+    }
+
+    /**
+     * The Class Tuple1.
+     *
+     * @param <T1>
+     */
+    public static final class Tuple1<T1> extends Tuple<Tuple1<T1>> {
 
         /** The  1. */
         public final T1 _1;
@@ -483,6 +548,11 @@ public abstract class Tuple {
             return _1 == null;
         }
 
+        @Override
+        public boolean contains(final Object objToFind) {
+            return N.equals(_1, objToFind);
+        }
+
         /**
          *
          * @return
@@ -520,62 +590,6 @@ public abstract class Tuple {
             final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
             objConsumer.accept(_1);
-        }
-
-        /**
-         *
-         * @param <E>
-         * @param action
-         * @throws E the e
-         */
-        public <E extends Exception> void accept(final Throwables.Consumer<? super Tuple1<T1>, E> action) throws E {
-            action.accept(this);
-        }
-
-        /**
-         *
-         * @param <U>
-         * @param <E>
-         * @param mapper
-         * @return
-         * @throws E the e
-         */
-        public <U, E extends Exception> U map(final Throwables.Function<? super Tuple1<T1>, U, E> mapper) throws E {
-            return mapper.apply(this);
-        }
-
-        /**
-         *
-         * @param <E>
-         * @param predicate
-         * @return
-         * @throws E the e
-         */
-        public <E extends Exception> Optional<Tuple1<T1>> filter(final Throwables.Predicate<? super Tuple1<T1>, E> predicate) throws E {
-            return predicate.test(this) ? Optional.of(this) : Optional.<Tuple1<T1>> empty();
-        }
-
-        /**
-         *
-         * @return
-         */
-        @Override
-        public Stream<Tuple1<T1>> stream() {
-            return Stream.of(this);
-        }
-
-        /**
-         * <pre>
-         * <code>
-         * Optional#ofNullable(_1)
-         * </code>
-         * </pre>.
-         *
-         * @return
-         * @see Optional#ofNullable(Object)
-         */
-        public Optional<T1> toOptional() {
-            return Optional.ofNullable(_1);
         }
 
         /**
@@ -626,7 +640,7 @@ public abstract class Tuple {
      * @param <T1>
      * @param <T2>
      */
-    public final static class Tuple2<T1, T2> extends Tuple {
+    public static final class Tuple2<T1, T2> extends Tuple<Tuple2<T1, T2>> {
 
         /** The  1. */
         public final T1 _1;
@@ -680,6 +694,11 @@ public abstract class Tuple {
             return _1 == null && _2 == null;
         }
 
+        @Override
+        public boolean contains(final Object objToFind) {
+            return N.equals(_1, objToFind) || N.equals(_2, objToFind);
+        }
+
         /**
          *
          * @return
@@ -716,6 +735,14 @@ public abstract class Tuple {
         }
 
         /**
+         * 
+         * @return
+         */
+        public ImmutableEntry<T1, T2> toEntry() {
+            return ImmutableEntry.of(_1, _2);
+        }
+
+        /**
          *
          * @return
          */
@@ -743,30 +770,8 @@ public abstract class Tuple {
          * @param action
          * @throws E the e
          */
-        public <E extends Exception> void accept(final Throwables.Consumer<? super Tuple2<T1, T2>, E> action) throws E {
-            action.accept(this);
-        }
-
-        /**
-         *
-         * @param <E>
-         * @param action
-         * @throws E the e
-         */
         public <E extends Exception> void accept(final Throwables.BiConsumer<? super T1, ? super T2, E> action) throws E {
             action.accept(_1, _2);
-        }
-
-        /**
-         *
-         * @param <U>
-         * @param <E>
-         * @param mapper
-         * @return
-         * @throws E the e
-         */
-        public <U, E extends Exception> U map(final Throwables.Function<? super Tuple2<T1, T2>, U, E> mapper) throws E {
-            return mapper.apply(this);
         }
 
         /**
@@ -788,28 +793,8 @@ public abstract class Tuple {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> Optional<Tuple2<T1, T2>> filter(final Throwables.Predicate<? super Tuple2<T1, T2>, E> predicate) throws E {
-            return predicate.test(this) ? Optional.of(this) : Optional.<Tuple2<T1, T2>> empty();
-        }
-
-        /**
-         *
-         * @param <E>
-         * @param predicate
-         * @return
-         * @throws E the e
-         */
         public <E extends Exception> Optional<Tuple2<T1, T2>> filter(final Throwables.BiPredicate<? super T1, ? super T2, E> predicate) throws E {
             return predicate.test(_1, _2) ? Optional.of(this) : Optional.<Tuple2<T1, T2>> empty();
-        }
-
-        /**
-         *
-         * @return
-         */
-        @Override
-        public Stream<Tuple2<T1, T2>> stream() {
-            return Stream.of(this);
         }
 
         /**
@@ -862,7 +847,7 @@ public abstract class Tuple {
      * @param <T2>
      * @param <T3>
      */
-    public final static class Tuple3<T1, T2, T3> extends Tuple {
+    public static final class Tuple3<T1, T2, T3> extends Tuple<Tuple3<T1, T2, T3>> {
 
         /** The  1. */
         public final T1 _1;
@@ -919,6 +904,11 @@ public abstract class Tuple {
         @Override
         public boolean allNull() {
             return _1 == null && _2 == null && _3 == null;
+        }
+
+        @Override
+        public boolean contains(final Object objToFind) {
+            return N.equals(_1, objToFind) || N.equals(_2, objToFind) || N.equals(_3, objToFind);
         }
 
         /**
@@ -986,30 +976,8 @@ public abstract class Tuple {
          * @param action
          * @throws E the e
          */
-        public <E extends Exception> void accept(final Throwables.Consumer<? super Tuple3<T1, T2, T3>, E> action) throws E {
-            action.accept(this);
-        }
-
-        /**
-         *
-         * @param <E>
-         * @param action
-         * @throws E the e
-         */
         public <E extends Exception> void accept(final Throwables.TriConsumer<? super T1, ? super T2, ? super T3, E> action) throws E {
             action.accept(_1, _2, _3);
-        }
-
-        /**
-         *
-         * @param <U>
-         * @param <E>
-         * @param mapper
-         * @return
-         * @throws E the e
-         */
-        public <U, E extends Exception> U map(final Throwables.Function<? super Tuple3<T1, T2, T3>, U, E> mapper) throws E {
-            return mapper.apply(this);
         }
 
         /**
@@ -1031,29 +999,9 @@ public abstract class Tuple {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> Optional<Tuple3<T1, T2, T3>> filter(final Throwables.Predicate<? super Tuple3<T1, T2, T3>, E> predicate) throws E {
-            return predicate.test(this) ? Optional.of(this) : Optional.<Tuple3<T1, T2, T3>> empty();
-        }
-
-        /**
-         *
-         * @param <E>
-         * @param predicate
-         * @return
-         * @throws E the e
-         */
         public <E extends Exception> Optional<Tuple3<T1, T2, T3>> filter(final Throwables.TriPredicate<? super T1, ? super T2, ? super T3, E> predicate)
                 throws E {
             return predicate.test(_1, _2, _3) ? Optional.of(this) : Optional.<Tuple3<T1, T2, T3>> empty();
-        }
-
-        /**
-         *
-         * @return
-         */
-        @Override
-        public Stream<Tuple3<T1, T2, T3>> stream() {
-            return Stream.of(this);
         }
 
         /**
@@ -1108,7 +1056,7 @@ public abstract class Tuple {
      * @param <T3>
      * @param <T4>
      */
-    public final static class Tuple4<T1, T2, T3, T4> extends Tuple {
+    public static final class Tuple4<T1, T2, T3, T4> extends Tuple<Tuple4<T1, T2, T3, T4>> {
 
         /** The  1. */
         public final T1 _1;
@@ -1172,6 +1120,11 @@ public abstract class Tuple {
             return _1 == null && _2 == null && _3 == null && _4 == null;
         }
 
+        @Override
+        public boolean contains(final Object objToFind) {
+            return N.equals(_1, objToFind) || N.equals(_2, objToFind) || N.equals(_3, objToFind) || N.equals(_4, objToFind);
+        }
+
         /**
          *
          * @return
@@ -1223,48 +1176,6 @@ public abstract class Tuple {
             objConsumer.accept(_2);
             objConsumer.accept(_3);
             objConsumer.accept(_4);
-        }
-
-        /**
-         *
-         * @param <E>
-         * @param action
-         * @throws E the e
-         */
-        public <E extends Exception> void accept(final Throwables.Consumer<? super Tuple4<T1, T2, T3, T4>, E> action) throws E {
-            action.accept(this);
-        }
-
-        /**
-         *
-         * @param <U>
-         * @param <E>
-         * @param mapper
-         * @return
-         * @throws E the e
-         */
-        public <U, E extends Exception> U map(final Throwables.Function<? super Tuple4<T1, T2, T3, T4>, U, E> mapper) throws E {
-            return mapper.apply(this);
-        }
-
-        /**
-         *
-         * @param <E>
-         * @param predicate
-         * @return
-         * @throws E the e
-         */
-        public <E extends Exception> Optional<Tuple4<T1, T2, T3, T4>> filter(final Throwables.Predicate<? super Tuple4<T1, T2, T3, T4>, E> predicate) throws E {
-            return predicate.test(this) ? Optional.of(this) : Optional.<Tuple4<T1, T2, T3, T4>> empty();
-        }
-
-        /**
-         *
-         * @return
-         */
-        @Override
-        public Stream<Tuple4<T1, T2, T3, T4>> stream() {
-            return Stream.of(this);
         }
 
         /**
@@ -1321,7 +1232,7 @@ public abstract class Tuple {
      * @param <T4>
      * @param <T5>
      */
-    public final static class Tuple5<T1, T2, T3, T4, T5> extends Tuple {
+    public static final class Tuple5<T1, T2, T3, T4, T5> extends Tuple<Tuple5<T1, T2, T3, T4, T5>> {
 
         /** The  1. */
         public final T1 _1;
@@ -1390,6 +1301,11 @@ public abstract class Tuple {
             return _1 == null && _2 == null && _3 == null && _4 == null && _5 == null;
         }
 
+        @Override
+        public boolean contains(final Object objToFind) {
+            return N.equals(_1, objToFind) || N.equals(_2, objToFind) || N.equals(_3, objToFind) || N.equals(_4, objToFind) || N.equals(_5, objToFind);
+        }
+
         /**
          *
          * @return
@@ -1443,49 +1359,6 @@ public abstract class Tuple {
             objConsumer.accept(_3);
             objConsumer.accept(_4);
             objConsumer.accept(_5);
-        }
-
-        /**
-         *
-         * @param <E>
-         * @param action
-         * @throws E the e
-         */
-        public <E extends Exception> void accept(final Throwables.Consumer<? super Tuple5<T1, T2, T3, T4, T5>, E> action) throws E {
-            action.accept(this);
-        }
-
-        /**
-         *
-         * @param <U>
-         * @param <E>
-         * @param mapper
-         * @return
-         * @throws E the e
-         */
-        public <U, E extends Exception> U map(final Throwables.Function<? super Tuple5<T1, T2, T3, T4, T5>, U, E> mapper) throws E {
-            return mapper.apply(this);
-        }
-
-        /**
-         *
-         * @param <E>
-         * @param predicate
-         * @return
-         * @throws E the e
-         */
-        public <E extends Exception> Optional<Tuple5<T1, T2, T3, T4, T5>> filter(final Throwables.Predicate<? super Tuple5<T1, T2, T3, T4, T5>, E> predicate)
-                throws E {
-            return predicate.test(this) ? Optional.of(this) : Optional.<Tuple5<T1, T2, T3, T4, T5>> empty();
-        }
-
-        /**
-         *
-         * @return
-         */
-        @Override
-        public Stream<Tuple5<T1, T2, T3, T4, T5>> stream() {
-            return Stream.of(this);
         }
 
         /**
@@ -1545,7 +1418,7 @@ public abstract class Tuple {
      * @param <T5>
      * @param <T6>
      */
-    public static final class Tuple6<T1, T2, T3, T4, T5, T6> extends Tuple {
+    public static final class Tuple6<T1, T2, T3, T4, T5, T6> extends Tuple<Tuple6<T1, T2, T3, T4, T5, T6>> {
 
         /** The  1. */
         public final T1 _1;
@@ -1619,6 +1492,12 @@ public abstract class Tuple {
             return _1 == null && _2 == null && _3 == null && _4 == null && _5 == null && _6 == null;
         }
 
+        @Override
+        public boolean contains(final Object objToFind) {
+            return N.equals(_1, objToFind) || N.equals(_2, objToFind) || N.equals(_3, objToFind) || N.equals(_4, objToFind) || N.equals(_5, objToFind)
+                    || N.equals(_6, objToFind);
+        }
+
         /**
          *
          * @return
@@ -1674,49 +1553,6 @@ public abstract class Tuple {
             objConsumer.accept(_4);
             objConsumer.accept(_5);
             objConsumer.accept(_6);
-        }
-
-        /**
-         *
-         * @param <E>
-         * @param action
-         * @throws E the e
-         */
-        public <E extends Exception> void accept(final Throwables.Consumer<? super Tuple6<T1, T2, T3, T4, T5, T6>, E> action) throws E {
-            action.accept(this);
-        }
-
-        /**
-         *
-         * @param <U>
-         * @param <E>
-         * @param mapper
-         * @return
-         * @throws E the e
-         */
-        public <U, E extends Exception> U map(final Throwables.Function<? super Tuple6<T1, T2, T3, T4, T5, T6>, U, E> mapper) throws E {
-            return mapper.apply(this);
-        }
-
-        /**
-         *
-         * @param <E>
-         * @param predicate
-         * @return
-         * @throws E the e
-         */
-        public <E extends Exception> Optional<Tuple6<T1, T2, T3, T4, T5, T6>> filter(
-                final Throwables.Predicate<? super Tuple6<T1, T2, T3, T4, T5, T6>, E> predicate) throws E {
-            return predicate.test(this) ? Optional.of(this) : Optional.<Tuple6<T1, T2, T3, T4, T5, T6>> empty();
-        }
-
-        /**
-         *
-         * @return
-         */
-        @Override
-        public Stream<Tuple6<T1, T2, T3, T4, T5, T6>> stream() {
-            return Stream.of(this);
         }
 
         /**
@@ -1779,7 +1615,7 @@ public abstract class Tuple {
      * @param <T6>
      * @param <T7>
      */
-    public static final class Tuple7<T1, T2, T3, T4, T5, T6, T7> extends Tuple {
+    public static final class Tuple7<T1, T2, T3, T4, T5, T6, T7> extends Tuple<Tuple7<T1, T2, T3, T4, T5, T6, T7>> {
 
         /** The  1. */
         public final T1 _1;
@@ -1858,6 +1694,12 @@ public abstract class Tuple {
             return _1 == null && _2 == null && _3 == null && _4 == null && _5 == null && _6 == null && _7 == null;
         }
 
+        @Override
+        public boolean contains(final Object objToFind) {
+            return N.equals(_1, objToFind) || N.equals(_2, objToFind) || N.equals(_3, objToFind) || N.equals(_4, objToFind) || N.equals(_5, objToFind)
+                    || N.equals(_6, objToFind) || N.equals(_7, objToFind);
+        }
+
         /**
          *
          * @return
@@ -1915,49 +1757,6 @@ public abstract class Tuple {
             objConsumer.accept(_5);
             objConsumer.accept(_6);
             objConsumer.accept(_7);
-        }
-
-        /**
-         *
-         * @param <E>
-         * @param action
-         * @throws E the e
-         */
-        public <E extends Exception> void accept(final Throwables.Consumer<? super Tuple7<T1, T2, T3, T4, T5, T6, T7>, E> action) throws E {
-            action.accept(this);
-        }
-
-        /**
-         *
-         * @param <U>
-         * @param <E>
-         * @param mapper
-         * @return
-         * @throws E the e
-         */
-        public <U, E extends Exception> U map(final Throwables.Function<? super Tuple7<T1, T2, T3, T4, T5, T6, T7>, U, E> mapper) throws E {
-            return mapper.apply(this);
-        }
-
-        /**
-         *
-         * @param <E>
-         * @param predicate
-         * @return
-         * @throws E the e
-         */
-        public <E extends Exception> Optional<Tuple7<T1, T2, T3, T4, T5, T6, T7>> filter(
-                final Throwables.Predicate<? super Tuple7<T1, T2, T3, T4, T5, T6, T7>, E> predicate) throws E {
-            return predicate.test(this) ? Optional.of(this) : Optional.<Tuple7<T1, T2, T3, T4, T5, T6, T7>> empty();
-        }
-
-        /**
-         *
-         * @return
-         */
-        @Override
-        public Stream<Tuple7<T1, T2, T3, T4, T5, T6, T7>> stream() {
-            return Stream.of(this);
         }
 
         /**
@@ -2022,7 +1821,7 @@ public abstract class Tuple {
      * @param <T7>
      * @param <T8>
      */
-    public static final class Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> extends Tuple {
+    public static final class Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> extends Tuple<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> {
 
         /** The  1. */
         public final T1 _1;
@@ -2110,6 +1909,12 @@ public abstract class Tuple {
             return _1 == null && _2 == null && _3 == null && _4 == null && _5 == null && _6 == null && _7 == null && _8 == null;
         }
 
+        @Override
+        public boolean contains(final Object objToFind) {
+            return N.equals(_1, objToFind) || N.equals(_2, objToFind) || N.equals(_3, objToFind) || N.equals(_4, objToFind) || N.equals(_5, objToFind)
+                    || N.equals(_6, objToFind) || N.equals(_7, objToFind) || N.equals(_8, objToFind);
+        }
+
         /**
          *
          * @return
@@ -2169,49 +1974,6 @@ public abstract class Tuple {
             objConsumer.accept(_6);
             objConsumer.accept(_7);
             objConsumer.accept(_8);
-        }
-
-        /**
-         *
-         * @param <E>
-         * @param action
-         * @throws E the e
-         */
-        public <E extends Exception> void accept(final Throwables.Consumer<? super Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>, E> action) throws E {
-            action.accept(this);
-        }
-
-        /**
-         *
-         * @param <U>
-         * @param <E>
-         * @param mapper
-         * @return
-         * @throws E the e
-         */
-        public <U, E extends Exception> U map(final Throwables.Function<? super Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>, U, E> mapper) throws E {
-            return mapper.apply(this);
-        }
-
-        /**
-         *
-         * @param <E>
-         * @param predicate
-         * @return
-         * @throws E the e
-         */
-        public <E extends Exception> Optional<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> filter(
-                final Throwables.Predicate<? super Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>, E> predicate) throws E {
-            return predicate.test(this) ? Optional.of(this) : Optional.<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> empty();
-        }
-
-        /**
-         *
-         * @return
-         */
-        @Override
-        public Stream<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> stream() {
-            return Stream.of(this);
         }
 
         /**
@@ -2278,7 +2040,7 @@ public abstract class Tuple {
      * @param <T8>
      * @param <T9>
      */
-    public static final class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends Tuple {
+    public static final class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends Tuple<Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> {
 
         /** The  1. */
         public final T1 _1;
@@ -2340,10 +2102,10 @@ public abstract class Tuple {
             this._9 = _9;
         }
 
-//    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9> Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> flat(
-//            Tuple2<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>, T9> tp) {
-//        return new Tuple9<>(tp._1._1, tp._1._2, tp._1._3, tp._1._4, tp._1._5, tp._1._6, tp._1._7, tp._1._8, tp._2);
-//    }
+        //    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9> Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> flat(
+        //            Tuple2<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>, T9> tp) {
+        //        return new Tuple9<>(tp._1._1, tp._1._2, tp._1._3, tp._1._4, tp._1._5, tp._1._6, tp._1._7, tp._1._8, tp._2);
+        //    }
 
         /**
          *
@@ -2370,6 +2132,12 @@ public abstract class Tuple {
         @Override
         public boolean allNull() {
             return _1 == null && _2 == null && _3 == null && _4 == null && _5 == null && _6 == null && _7 == null && _8 == null && _9 == null;
+        }
+
+        @Override
+        public boolean contains(final Object objToFind) {
+            return N.equals(_1, objToFind) || N.equals(_2, objToFind) || N.equals(_3, objToFind) || N.equals(_4, objToFind) || N.equals(_5, objToFind)
+                    || N.equals(_6, objToFind) || N.equals(_7, objToFind) || N.equals(_8, objToFind) || N.equals(_9, objToFind);
         }
 
         /**
@@ -2433,49 +2201,6 @@ public abstract class Tuple {
             objConsumer.accept(_7);
             objConsumer.accept(_8);
             objConsumer.accept(_9);
-        }
-
-        /**
-         *
-         * @param <E>
-         * @param action
-         * @throws E the e
-         */
-        public <E extends Exception> void accept(final Throwables.Consumer<? super Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>, E> action) throws E {
-            action.accept(this);
-        }
-
-        /**
-         *
-         * @param <U>
-         * @param <E>
-         * @param mapper
-         * @return
-         * @throws E the e
-         */
-        public <U, E extends Exception> U map(final Throwables.Function<? super Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>, U, E> mapper) throws E {
-            return mapper.apply(this);
-        }
-
-        /**
-         *
-         * @param <E>
-         * @param predicate
-         * @return
-         * @throws E the e
-         */
-        public <E extends Exception> Optional<Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> filter(
-                final Throwables.Predicate<? super Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>, E> predicate) throws E {
-            return predicate.test(this) ? Optional.of(this) : Optional.<Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> empty();
-        }
-
-        /**
-         *
-         * @return
-         */
-        @Override
-        public Stream<Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> stream() {
-            return Stream.of(this);
         }
 
         /**

@@ -24,7 +24,7 @@ import com.landawn.abacus.util.stream.FloatStream;
  * @author Haiyang Li
  * @since 1.2
  */
-public final class FloatPair {
+public final class FloatPair extends PrimitivePair<FloatPair> {
 
     /** The  1. */
     public final float _1;
@@ -133,8 +133,8 @@ public final class FloatPair {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(Throwables.Consumer<FloatPair, E> action) throws E {
-        action.accept(this);
+    public <E extends Exception> void accept(Throwables.FloatBiConsumer<E> action) throws E {
+        action.accept(_1, _2);
     }
 
     /**
@@ -145,8 +145,8 @@ public final class FloatPair {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(Throwables.Function<FloatPair, U, E> mapper) throws E {
-        return mapper.apply(this);
+    public <U, E extends Exception> U map(Throwables.FloatBiFunction<U, E> mapper) throws E {
+        return mapper.apply(_1, _2);
     }
 
     /**
@@ -156,8 +156,8 @@ public final class FloatPair {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Optional<FloatPair> filter(final Throwables.Predicate<FloatPair, E> predicate) throws E {
-        return predicate.test(this) ? Optional.of(this) : Optional.<FloatPair> empty();
+    public <E extends Exception> Optional<FloatPair> filter(final Throwables.FloatBiPredicate<E> predicate) throws E {
+        return predicate.test(_1, _2) ? Optional.of(this) : Optional.<FloatPair> empty();
     }
 
     /**

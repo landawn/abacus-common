@@ -24,7 +24,7 @@ import com.landawn.abacus.util.stream.DoubleStream;
  * @author Haiyang Li
  * @since 1.2
  */
-public final class DoublePair {
+public final class DoublePair extends PrimitivePair<DoublePair> {
 
     /** The  1. */
     public final double _1;
@@ -133,8 +133,8 @@ public final class DoublePair {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(Throwables.Consumer<DoublePair, E> action) throws E {
-        action.accept(this);
+    public <E extends Exception> void accept(Throwables.DoubleBiConsumer<E> action) throws E {
+        action.accept(_1, _2);
     }
 
     /**
@@ -145,8 +145,8 @@ public final class DoublePair {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(Throwables.Function<DoublePair, U, E> mapper) throws E {
-        return mapper.apply(this);
+    public <U, E extends Exception> U map(Throwables.DoubleBiFunction<U, E> mapper) throws E {
+        return mapper.apply(_1, _2);
     }
 
     /**
@@ -156,8 +156,8 @@ public final class DoublePair {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Optional<DoublePair> filter(final Throwables.Predicate<DoublePair, E> predicate) throws E {
-        return predicate.test(this) ? Optional.of(this) : Optional.<DoublePair> empty();
+    public <E extends Exception> Optional<DoublePair> filter(final Throwables.DoubleBiPredicate<E> predicate) throws E {
+        return predicate.test(_1, _2) ? Optional.of(this) : Optional.<DoublePair> empty();
     }
 
     /**
