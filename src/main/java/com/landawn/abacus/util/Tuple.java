@@ -133,7 +133,7 @@ public abstract class Tuple<TP> {
      *
      * @return
      */
-    public <T, E extends Exception> Stream<T> stream(final Throwables.Function<TP, Stream<T>, E> func) throws E {
+    public <T, E extends Exception> Stream<T> stream(final Throwables.Function<? super TP, Stream<T>, E> func) throws E {
         return func.apply((TP) this);
     }
 

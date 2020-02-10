@@ -4425,7 +4425,7 @@ public abstract class Collectors {
         final Function<List<?>, Tuple4<A1, A2, A3, A4>> func = new Function<List<?>, Tuple4<A1, A2, A3, A4>>() {
             @Override
             public Tuple4<A1, A2, A3, A4> apply(List<?> t) {
-                return Tuple4.from(t);
+                return Tuple.<Tuple4<A1, A2, A3, A4>> from(t);
             }
         };
 
@@ -4442,7 +4442,7 @@ public abstract class Collectors {
         final Function<List<?>, Tuple5<A1, A2, A3, A4, A5>> func = new Function<List<?>, Tuple5<A1, A2, A3, A4, A5>>() {
             @Override
             public Tuple5<A1, A2, A3, A4, A5> apply(List<?> t) {
-                return Tuple5.from(t);
+                return Tuple.<Tuple5<A1, A2, A3, A4, A5>> from(t);
             }
         };
 
@@ -4746,7 +4746,7 @@ public abstract class Collectors {
         final Function<List<?>, Tuple4<A1, A2, A3, A4>> func = new Function<List<?>, Tuple4<A1, A2, A3, A4>>() {
             @Override
             public Tuple4<A1, A2, A3, A4> apply(List<?> t) {
-                return Tuple4.from(t);
+                return Tuple.<Tuple4<A1, A2, A3, A4>> from(t);
             }
         };
 
@@ -4764,7 +4764,7 @@ public abstract class Collectors {
         final Function<List<?>, Tuple5<A1, A2, A3, A4, A5>> func = new Function<List<?>, Tuple5<A1, A2, A3, A4, A5>>() {
             @Override
             public Tuple5<A1, A2, A3, A4, A5> apply(List<?> t) {
-                return Tuple5.from(t);
+                return Tuple.<Tuple5<A1, A2, A3, A4, A5>> from(t);
             }
         };
 
