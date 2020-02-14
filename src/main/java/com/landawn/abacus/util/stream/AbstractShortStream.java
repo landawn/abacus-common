@@ -1046,7 +1046,7 @@ abstract class AbstractShortStream extends ShortStream {
     @Override 
     public <E extends Exception> void forEachIndexed(Throwables.IndexedShortConsumer<E> action) throws E {
         if (isParallel()) {
-            final AtomicInteger idx = new AtomicInteger();
+            final AtomicInteger idx = new AtomicInteger(0);
 
             forEach(new Throwables.ShortConsumer<E>() {
                 @Override

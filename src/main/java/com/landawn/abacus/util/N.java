@@ -2940,6 +2940,176 @@ public final class N extends CommonUtil {
         return result;
     }
 
+    public static <E extends Exception> int replaceIf(final boolean[] a, final Throwables.BooleanPredicate<E> predicate, final boolean newValue) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return 0;
+        }
+
+        int result = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            if (predicate.test(a[i])) {
+                a[i] = newValue;
+                result++;
+            }
+        }
+
+        return result;
+    }
+
+    public static <E extends Exception> int replaceIf(final char[] a, final Throwables.CharPredicate<E> predicate, final char newValue) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return 0;
+        }
+
+        int result = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            if (predicate.test(a[i])) {
+                a[i] = newValue;
+                result++;
+            }
+        }
+
+        return result;
+    }
+
+    public static <E extends Exception> int replaceIf(final byte[] a, final Throwables.BytePredicate<E> predicate, final byte newValue) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return 0;
+        }
+
+        int result = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            if (predicate.test(a[i])) {
+                a[i] = newValue;
+                result++;
+            }
+        }
+
+        return result;
+    }
+
+    public static <E extends Exception> int replaceIf(final short[] a, final Throwables.ShortPredicate<E> predicate, final short newValue) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return 0;
+        }
+
+        int result = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            if (predicate.test(a[i])) {
+                a[i] = newValue;
+                result++;
+            }
+        }
+
+        return result;
+    }
+
+    public static <E extends Exception> int replaceIf(final int[] a, final Throwables.IntPredicate<E> predicate, final int newValue) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return 0;
+        }
+
+        int result = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            if (predicate.test(a[i])) {
+                a[i] = newValue;
+                result++;
+            }
+        }
+
+        return result;
+    }
+
+    public static <E extends Exception> int replaceIf(final long[] a, final Throwables.LongPredicate<E> predicate, final long newValue) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return 0;
+        }
+
+        int result = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            if (predicate.test(a[i])) {
+                a[i] = newValue;
+                result++;
+            }
+        }
+
+        return result;
+    }
+
+    public static <E extends Exception> int replaceIf(final float[] a, final Throwables.FloatPredicate<E> predicate, final float newValue) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return 0;
+        }
+
+        int result = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            if (predicate.test(a[i])) {
+                a[i] = newValue;
+                result++;
+            }
+        }
+
+        return result;
+    }
+
+    public static <E extends Exception> int replaceIf(final double[] a, final Throwables.DoublePredicate<E> predicate, final double newValue) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return 0;
+        }
+
+        int result = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            if (predicate.test(a[i])) {
+                a[i] = newValue;
+                result++;
+            }
+        }
+
+        return result;
+    }
+
+    public static <T, E extends Exception> int replaceIf(final T[] a, final Throwables.Predicate<? super T, E> predicate, final T newValue) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return 0;
+        }
+
+        int result = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            if (predicate.test(a[i])) {
+                a[i] = newValue;
+                result++;
+            }
+        }
+
+        return result;
+    }
+
+    public static <T, E extends Exception> int replaceIf(final List<T> c, final Throwables.Predicate<? super T, E> predicate, final T newValue) throws E {
+        if (N.isNullOrEmpty(c)) {
+            return 0;
+        }
+
+        int result = 0;
+
+        for (int i = 0, n = c.size(); i < n; i++) {
+            if (predicate.test(c.get(i))) {
+                c.set(i, newValue);
+                result++;
+            }
+        }
+
+        return result;
+    }
+
     /**
      * <p>
      * Copies the given array and adds the given element at the end of the new
@@ -10919,8 +11089,7 @@ public final class N extends CommonUtil {
      * @param action
      * @throws E the e
      */
-    public static <E extends Exception> void forEach(final int startInclusive, final int endExclusive, final int step, Throwables.Runnable<E> action)
-            throws E {
+    public static <E extends Exception> void forEach(final int startInclusive, final int endExclusive, final int step, Throwables.Runnable<E> action) throws E {
         checkArgument(step != 0, "The input parameter 'step' can not be zero");
 
         if (endExclusive == startInclusive || endExclusive > startInclusive != step > 0) {

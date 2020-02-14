@@ -1049,7 +1049,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
     @Override 
     public <E extends Exception> void forEachIndexed(Throwables.IndexedDoubleConsumer<E> action) throws E {
         if (isParallel()) {
-            final AtomicInteger idx = new AtomicInteger();
+            final AtomicInteger idx = new AtomicInteger(0);
 
             forEach(new Throwables.DoubleConsumer<E>() {
                 @Override

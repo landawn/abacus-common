@@ -34,8 +34,10 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import com.landawn.abacus.annotation.AccessFieldByMethod;
+import com.landawn.abacus.annotation.Column;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.JsonXmlField;
+import com.landawn.abacus.annotation.Table;
 import com.landawn.abacus.annotation.Type.EnumBy;
 import com.landawn.abacus.annotation.Type.Scope;
 import com.landawn.abacus.core.DirtyMarkerUtil;
@@ -345,6 +347,8 @@ public final class ParserUtil {
         /** The hash prop info map. */
         private final Map<Integer, PropInfo> hashPropInfoMap;
 
+        public final String tableName;
+
         /**
          * Instantiates a new entity info.
          *
@@ -427,6 +431,22 @@ public final class ParserUtil {
             }
 
             this.propInfoList = ImmutableList.of(propInfos);
+
+            String tmpTableName = null;
+
+            if (this.annotations.containsKey(Table.class)) {
+                tmpTableName = ((Table) this.annotations.get(Table.class)).value();
+            } else {
+                try {
+                    if (this.annotations.containsKey(javax.persistence.Table.class)) {
+                        tmpTableName = ((javax.persistence.Table) this.annotations.get(javax.persistence.Table.class)).name();
+                    }
+                } catch (Throwable e) {
+                    // ignore
+                }
+            }
+
+            this.tableName = tmpTableName;
         }
 
         /**
@@ -906,6 +926,8 @@ public final class ParserUtil {
         /** The has format. */
         final boolean hasFormat;
 
+        public final String columnName;
+
         /**
          * Instantiates a new prop info.
          *
@@ -935,6 +957,8 @@ public final class ParserUtil {
             isLongDateFormat = false;
             numberFormat = null;
             hasFormat = false;
+
+            columnName = null;
         }
 
         /**
@@ -1001,6 +1025,22 @@ public final class ParserUtil {
             this.numberFormat = N.isNullOrEmpty(numberFormatStr) ? null : new DecimalFormat(numberFormatStr);
 
             this.hasFormat = N.notNullOrEmpty(dateFormat) || numberFormat != null;
+
+            String tmpColumnName = null;
+
+            if (this.annotations.containsKey(Column.class)) {
+                tmpColumnName = ((Column) this.annotations.get(Column.class)).value();
+            } else {
+                try {
+                    if (this.annotations.containsKey(javax.persistence.Column.class)) {
+                        tmpColumnName = ((javax.persistence.Column) this.annotations.get(javax.persistence.Column.class)).name();
+                    }
+                } catch (Throwable e) {
+                    // ignore
+                }
+            }
+
+            this.columnName = tmpColumnName;
         }
 
         /**

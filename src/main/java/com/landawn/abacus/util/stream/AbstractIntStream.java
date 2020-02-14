@@ -1045,7 +1045,7 @@ abstract class AbstractIntStream extends IntStream {
     @Override 
     public <E extends Exception> void forEachIndexed(Throwables.IndexedIntConsumer<E> action) throws E {
         if (isParallel()) {
-            final AtomicInteger idx = new AtomicInteger();
+            final AtomicInteger idx = new AtomicInteger(0);
 
             forEach(new Throwables.IntConsumer<E>() {
                 @Override

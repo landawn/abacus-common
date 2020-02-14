@@ -442,6 +442,26 @@ public final class Splitter {
 
     /**
      *
+     * @param source
+     * @param mapper
+     * @return
+     */
+    public <R, E extends Exception> List<R> split(final CharSequence source, final Throwables.Function<? super String, R, E> mapper) throws E {
+        final List<String> tmp = new ArrayList<>();
+        split(tmp, source);
+
+        @SuppressWarnings("rawtypes")
+        final List<R> result = (List) tmp;
+
+        for (int i = 0, size = tmp.size(); i < size; i++) {
+            result.set(i, mapper.apply(tmp.get(i)));
+        }
+
+        return result;
+    }
+
+    /**
+     *
      * @param <T>
      * @param targetType
      * @param source
@@ -596,6 +616,18 @@ public final class Splitter {
      */
     public String[] splitToArray(final CharSequence source) {
         final List<String> substrs = split(source);
+
+        return substrs.toArray(new String[substrs.size()]);
+    }
+
+    /**
+     * Split to array.
+     *
+     * @param source
+     * @return
+     */
+    public <E extends Exception> String[] splitToArray(final CharSequence source, final Throwables.Function<? super String, String, E> mapper) throws E {
+        final List<String> substrs = split(source, mapper);
 
         return substrs.toArray(new String[substrs.size()]);
     }

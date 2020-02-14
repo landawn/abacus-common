@@ -155,6 +155,13 @@ public abstract class Stream<T>
         super(sorted, cmp, closeHandlers);
     }
 
+    /**
+     * Select the elements belong to the specified {@code targetType}(including its subtype).
+     * 
+     * @param <U>
+     * @param targetType
+     * @return
+     */
     @SequentialOnly
     @IntermediateOp
     public <U> Stream<U> select(Class<U> targetType) {
@@ -4937,7 +4944,6 @@ public abstract class Stream<T>
             return Stream.empty();
         }
 
-        final AtomicInteger threadCounter = new AtomicInteger(c.size());
         final ArrayBlockingQueue<T> queue = new ArrayBlockingQueue<>(queueSize);
         final Holder<Throwable> eHolder = new Holder<>();
         final MutableBoolean onGoing = MutableBoolean.of(true);
@@ -4946,6 +4952,7 @@ public abstract class Stream<T>
         final Iterator<? extends Stream<? extends T>> iterators = c.iterator();
         final int threadNum = Math.min(c.size(), readThreadNum);
         final List<ContinuableFuture<Void>> futureList = new ArrayList<>(threadNum);
+        final AtomicInteger threadCounter = new AtomicInteger(threadNum);
 
         for (int i = 0; i < threadNum; i++) {
             futureList.add(DEFAULT_ASYNC_EXECUTOR.execute(new Throwables.Runnable<RuntimeException>() {
@@ -5113,7 +5120,6 @@ public abstract class Stream<T>
             return Stream.empty();
         }
 
-        final AtomicInteger threadCounter = new AtomicInteger(c.size());
         final ArrayBlockingQueue<T> queue = new ArrayBlockingQueue<>(queueSize);
         final Holder<Throwable> eHolder = new Holder<>();
         final MutableBoolean onGoing = MutableBoolean.of(true);
@@ -5122,6 +5128,7 @@ public abstract class Stream<T>
         final Iterator<? extends Iterator<? extends T>> iterators = c.iterator();
         final int threadNum = Math.min(c.size(), readThreadNum);
         final List<ContinuableFuture<Void>> futureList = new ArrayList<>(threadNum);
+        final AtomicInteger threadCounter = new AtomicInteger(threadNum);
 
         for (int i = 0; i < threadNum; i++) {
             futureList.add(DEFAULT_ASYNC_EXECUTOR.execute(new Throwables.Runnable<RuntimeException>() {

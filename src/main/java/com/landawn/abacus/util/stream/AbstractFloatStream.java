@@ -1048,7 +1048,7 @@ abstract class AbstractFloatStream extends FloatStream {
     @Override 
     public <E extends Exception> void forEachIndexed(Throwables.IndexedFloatConsumer<E> action) throws E {
         if (isParallel()) {
-            final AtomicInteger idx = new AtomicInteger();
+            final AtomicInteger idx = new AtomicInteger(0);
 
             forEach(new Throwables.FloatConsumer<E>() {
                 @Override

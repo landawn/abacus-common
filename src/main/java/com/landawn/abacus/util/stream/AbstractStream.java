@@ -1640,7 +1640,7 @@ abstract class AbstractStream<T> extends Stream<T> {
     @TerminalOp
     public <E extends Exception> void forEachIndexed(Throwables.IndexedConsumer<? super T, E> action) throws E {
         if (isParallel()) {
-            final AtomicInteger idx = new AtomicInteger();
+            final AtomicInteger idx = new AtomicInteger(0);
 
             forEach(new Throwables.Consumer<T, E>() {
                 @Override

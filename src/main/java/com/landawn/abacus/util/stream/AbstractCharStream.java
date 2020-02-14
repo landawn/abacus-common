@@ -1041,7 +1041,7 @@ abstract class AbstractCharStream extends CharStream {
     @Override 
     public <E extends Exception> void forEachIndexed(Throwables.IndexedCharConsumer<E> action) throws E {
         if (isParallel()) {
-            final AtomicInteger idx = new AtomicInteger();
+            final AtomicInteger idx = new AtomicInteger(0);
 
             forEach(new Throwables.CharConsumer<E>() {
                 @Override

@@ -1034,7 +1034,7 @@ abstract class AbstractByteStream extends ByteStream {
     @Override 
     public <E extends Exception> void forEachIndexed(Throwables.IndexedByteConsumer<E> action) throws E {
         if (isParallel()) {
-            final AtomicInteger idx = new AtomicInteger();
+            final AtomicInteger idx = new AtomicInteger(0);
 
             forEach(new Throwables.ByteConsumer<E>() {
                 @Override

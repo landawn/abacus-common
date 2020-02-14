@@ -1045,7 +1045,7 @@ abstract class AbstractLongStream extends LongStream {
     @Override 
     public <E extends Exception> void forEachIndexed(Throwables.IndexedLongConsumer<E> action) throws E {
         if (isParallel()) {
-            final AtomicInteger idx = new AtomicInteger();
+            final AtomicInteger idx = new AtomicInteger(0);
 
             forEach(new Throwables.LongConsumer<E>() {
                 @Override
