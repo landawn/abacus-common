@@ -27,7 +27,7 @@ import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.ShortIterator;
 import com.landawn.abacus.util.Throwables;
@@ -881,7 +881,7 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
     }
 
     @Override
-    public ShortStream merge(final ShortStream b, final ShortBiFunction<Nth> nextSelector) {
+    public ShortStream merge(final ShortStream b, final ShortBiFunction<MergeResult> nextSelector) {
         return new ParallelIteratorShortStream(ShortStream.merge(this, b, nextSelector), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 

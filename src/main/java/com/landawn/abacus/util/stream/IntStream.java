@@ -42,7 +42,7 @@ import com.landawn.abacus.util.IntList;
 import com.landawn.abacus.util.IntSummaryStatistics;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
@@ -442,7 +442,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public abstract IntStream merge(final IntStream b, final IntBiFunction<Nth> nextSelector);
+    public abstract IntStream merge(final IntStream b, final IntBiFunction<MergeResult> nextSelector);
 
     public abstract IntStream zipWith(IntStream b, IntBinaryOperator zipFunction);
 
@@ -654,15 +654,15 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     private static final Function<int[][], IntStream> flatMappper = new Function<int[][], IntStream>() {
         @Override
         public IntStream apply(int[][] t) {
-            return IntStream.flat(t);
+            return IntStream.flatten(t);
         }
     };
 
-    public static IntStream flat(final int[][] a) {
+    public static IntStream flatten(final int[][] a) {
         return N.isNullOrEmpty(a) ? empty() : Stream.of(a).flatMapToInt(flatMapper);
     }
 
-    public static IntStream flat(final int[][] a, final boolean vertically) {
+    public static IntStream flatten(final int[][] a, final boolean vertically) {
         if (N.isNullOrEmpty(a)) {
             return empty();
         } else if (a.length == 1) {
@@ -721,7 +721,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
         return of(iter);
     }
 
-    public static IntStream flat(final int[][] a, final int valueForNone, final boolean vertically) {
+    public static IntStream flatten(final int[][] a, final int valueForNone, final boolean vertically) {
         if (N.isNullOrEmpty(a)) {
             return empty();
         } else if (a.length == 1) {
@@ -813,7 +813,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
         return of(iter);
     }
 
-    public static IntStream flat(final int[][][] a) {
+    public static IntStream flatten(final int[][][] a) {
         return N.isNullOrEmpty(a) ? empty() : Stream.of(a).flatMapToInt(flatMappper);
     }
 
@@ -1966,7 +1966,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static IntStream merge(final int[] a, final int[] b, final IntBiFunction<Nth> nextSelector) {
+    public static IntStream merge(final int[] a, final int[] b, final IntBiFunction<MergeResult> nextSelector) {
         if (N.isNullOrEmpty(a)) {
             return of(b);
         } else if (N.isNullOrEmpty(b)) {
@@ -1988,7 +1988,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             public int nextInt() {
                 if (cursorA < lenA) {
                     if (cursorB < lenB) {
-                        if (nextSelector.apply(a[cursorA], b[cursorB]) == Nth.FIRST) {
+                        if (nextSelector.apply(a[cursorA], b[cursorB]) == MergeResult.TAKE_FIRST) {
                             return a[cursorA++];
                         } else {
                             return b[cursorB++];
@@ -2013,7 +2013,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static IntStream merge(final int[] a, final int[] b, final int[] c, final IntBiFunction<Nth> nextSelector) {
+    public static IntStream merge(final int[] a, final int[] b, final int[] c, final IntBiFunction<MergeResult> nextSelector) {
         return merge(merge(a, b, nextSelector).iteratorEx(), IntStream.of(c).iteratorEx(), nextSelector);
     }
 
@@ -2024,7 +2024,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static IntStream merge(final IntIterator a, final IntIterator b, final IntBiFunction<Nth> nextSelector) {
+    public static IntStream merge(final IntIterator a, final IntIterator b, final IntBiFunction<MergeResult> nextSelector) {
         return new IteratorIntStream(new IntIteratorEx() {
             private int nextA = 0;
             private int nextB = 0;
@@ -2040,7 +2040,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             public int nextInt() {
                 if (hasNextA) {
                     if (b.hasNext()) {
-                        if (nextSelector.apply(nextA, (nextB = b.nextInt())) == Nth.FIRST) {
+                        if (nextSelector.apply(nextA, (nextB = b.nextInt())) == MergeResult.TAKE_FIRST) {
                             hasNextA = false;
                             hasNextB = true;
                             return nextA;
@@ -2053,7 +2053,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
                     }
                 } else if (hasNextB) {
                     if (a.hasNext()) {
-                        if (nextSelector.apply((nextA = a.nextInt()), nextB) == Nth.FIRST) {
+                        if (nextSelector.apply((nextA = a.nextInt()), nextB) == MergeResult.TAKE_FIRST) {
                             return nextA;
                         } else {
                             hasNextA = true;
@@ -2066,7 +2066,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
                     }
                 } else if (a.hasNext()) {
                     if (b.hasNext()) {
-                        if (nextSelector.apply((nextA = a.nextInt()), (nextB = b.nextInt())) == Nth.FIRST) {
+                        if (nextSelector.apply((nextA = a.nextInt()), (nextB = b.nextInt())) == MergeResult.TAKE_FIRST) {
                             hasNextB = true;
                             return nextA;
                         } else {
@@ -2093,7 +2093,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static IntStream merge(final IntIterator a, final IntIterator b, final IntIterator c, final IntBiFunction<Nth> nextSelector) {
+    public static IntStream merge(final IntIterator a, final IntIterator b, final IntIterator c, final IntBiFunction<MergeResult> nextSelector) {
         return merge(merge(a, b, nextSelector).iteratorEx(), c, nextSelector);
     }
 
@@ -2104,7 +2104,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static IntStream merge(final IntStream a, final IntStream b, final IntBiFunction<Nth> nextSelector) {
+    public static IntStream merge(final IntStream a, final IntStream b, final IntBiFunction<MergeResult> nextSelector) {
         return merge(a.iteratorEx(), b.iteratorEx(), nextSelector).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
@@ -2116,7 +2116,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static IntStream merge(final IntStream a, final IntStream b, final IntStream c, final IntBiFunction<Nth> nextSelector) {
+    public static IntStream merge(final IntStream a, final IntStream b, final IntStream c, final IntBiFunction<MergeResult> nextSelector) {
         return merge(merge(a, b, nextSelector), c, nextSelector);
     }
 
@@ -2126,7 +2126,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static IntStream merge(final Collection<? extends IntStream> c, final IntBiFunction<Nth> nextSelector) {
+    public static IntStream merge(final Collection<? extends IntStream> c, final IntBiFunction<MergeResult> nextSelector) {
         if (N.isNullOrEmpty(c)) {
             return empty();
         } else if (c.size() == 1) {
@@ -2152,7 +2152,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static IntStream parallelMerge(final Collection<? extends IntStream> c, final IntBiFunction<Nth> nextSelector) {
+    public static IntStream parallelMerge(final Collection<? extends IntStream> c, final IntBiFunction<MergeResult> nextSelector) {
         return parallelMerge(c, nextSelector, DEFAULT_MAX_THREAD_NUM);
     }
 
@@ -2163,7 +2163,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param maxThreadNum
      * @return
      */
-    public static IntStream parallelMerge(final Collection<? extends IntStream> c, final IntBiFunction<Nth> nextSelector, final int maxThreadNum) {
+    public static IntStream parallelMerge(final Collection<? extends IntStream> c, final IntBiFunction<MergeResult> nextSelector, final int maxThreadNum) {
         N.checkArgument(maxThreadNum > 0, "'maxThreadNum' must not less than 1");
 
         if (maxThreadNum <= 1) {

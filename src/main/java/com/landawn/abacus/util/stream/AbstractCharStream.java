@@ -35,7 +35,7 @@ import com.landawn.abacus.util.MutableChar;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.StringUtil.Strings;
@@ -989,7 +989,7 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream merge(CharStream b, CharBiFunction<Nth> nextSelector) {
+    public CharStream merge(CharStream b, CharBiFunction<MergeResult> nextSelector) {
         return CharStream.merge(this, b, nextSelector);
     }
 

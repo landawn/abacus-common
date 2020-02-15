@@ -28,7 +28,7 @@ import com.landawn.abacus.util.FloatIterator;
 import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u.Holder;
@@ -957,7 +957,7 @@ final class ParallelIteratorFloatStream extends IteratorFloatStream {
     }
 
     @Override
-    public FloatStream merge(final FloatStream b, final FloatBiFunction<Nth> nextSelector) {
+    public FloatStream merge(final FloatStream b, final FloatBiFunction<MergeResult> nextSelector) {
         return new ParallelIteratorFloatStream(FloatStream.merge(this, b, nextSelector), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 

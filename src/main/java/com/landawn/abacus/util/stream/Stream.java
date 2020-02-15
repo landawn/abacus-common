@@ -75,13 +75,13 @@ import com.landawn.abacus.util.Keyed;
 import com.landawn.abacus.util.LineIterator;
 import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.LongIterator;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Multimap;
 import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NoCachingNoUpdating;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableEntry;
-import com.landawn.abacus.util.Nth;
 import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
@@ -2963,7 +2963,7 @@ public abstract class Stream<T>
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract Stream<T> merge(final Stream<? extends T> b, final BiFunction<? super T, ? super T, Nth> nextSelector);
+    public abstract Stream<T> merge(final Stream<? extends T> b, final BiFunction<? super T, ? super T, MergeResult> nextSelector);
 
     @ParallelSupported
     @IntermediateOp
@@ -2983,17 +2983,22 @@ public abstract class Stream<T>
     public abstract <T2, T3, R> Stream<R> zipWith(final Stream<T2> b, final Stream<T3> c, final T valueForNoneA, final T2 valueForNoneB, final T3 valueForNoneC,
             final TriFunction<? super T, ? super T2, ? super T3, R> zipFunction);
 
-    @SequentialOnly
-    @TerminalOp
-    public abstract long persist(File file, Throwables.Function<? super T, String, IOException> toLine) throws IOException;
 
     @SequentialOnly
     @TerminalOp
-    public abstract long persist(OutputStream os, Throwables.Function<? super T, String, IOException> toLine) throws IOException;
+    public abstract long persist(File file) throws IOException;
 
     @SequentialOnly
     @TerminalOp
-    public abstract long persist(Writer writer, Throwables.Function<? super T, String, IOException> toLine) throws IOException;
+    public abstract long persist(Throwables.Function<? super T, String, IOException> toLine, File file) throws IOException;
+
+    @SequentialOnly
+    @TerminalOp
+    public abstract long persist(Throwables.Function<? super T, String, IOException> toLine, OutputStream os) throws IOException;
+
+    @SequentialOnly
+    @TerminalOp
+    public abstract long persist(Throwables.Function<? super T, String, IOException> toLine, Writer writer) throws IOException;
 
     @SequentialOnly
     @TerminalOp
@@ -3846,15 +3851,31 @@ public abstract class Stream<T>
         return EntryStream.of(map).filterByKey(keyFilter).values();
     }
 
-    public static <T> Stream<T> flat(final Collection<? extends Collection<? extends T>> c) {
+    public static Stream<Integer> range(final int startInclusive, final int endExclusive) {
+        return IntStream.range(startInclusive, endExclusive).boxed();
+    }
+
+    public static Stream<Long> range(final long startInclusive, final long endExclusive) {
+        return LongStream.range(startInclusive, endExclusive).boxed();
+    }
+
+    public static Stream<Integer> rangeClosed(final int startInclusive, final int endInclusive) {
+        return IntStream.rangeClosed(startInclusive, endInclusive).boxed();
+    }
+
+    public static Stream<Long> rangeClosed(final long startInclusive, final long endInclusive) {
+        return LongStream.rangeClosed(startInclusive, endInclusive).boxed();
+    }
+
+    public static <T> Stream<T> flatten(final Collection<? extends Collection<? extends T>> c) {
         return of(c).flattMap(Fn.<Collection<? extends T>> identity());
     }
 
-    public static <T> Stream<T> flat(final T[][] a) {
+    public static <T> Stream<T> flatten(final T[][] a) {
         return of(a).flatMapp(Fn.<T[]> identity());
     }
 
-    public static <T> Stream<T> flat(final T[][] a, final boolean vertically) {
+    public static <T> Stream<T> flatten(final T[][] a, final boolean vertically) {
         if (N.isNullOrEmpty(a)) {
             return empty();
         } else if (a.length == 1) {
@@ -3913,7 +3934,7 @@ public abstract class Stream<T>
         return of(iter);
     }
 
-    public static <T> Stream<T> flat(final T[][] a, final T valueForNone, final boolean vertically) {
+    public static <T> Stream<T> flatten(final T[][] a, final T valueForNone, final boolean vertically) {
         if (N.isNullOrEmpty(a)) {
             return empty();
         } else if (a.length == 1) {
@@ -4002,7 +4023,7 @@ public abstract class Stream<T>
         return of(iter);
     }
 
-    public static <T> Stream<T> flat(final T[][][] a) {
+    public static <T> Stream<T> flatten(final T[][][] a) {
         return of(a).flatMapp(e -> e).flatMapp(Fn.<T[]> identity());
     }
 
@@ -9225,7 +9246,7 @@ public abstract class Stream<T>
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static <T> Stream<T> merge(final T[] a, final T[] b, final BiFunction<? super T, ? super T, Nth> nextSelector) {
+    public static <T> Stream<T> merge(final T[] a, final T[] b, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
         if (N.isNullOrEmpty(a)) {
             return of(b);
         } else if (N.isNullOrEmpty(b)) {
@@ -9247,7 +9268,7 @@ public abstract class Stream<T>
             public T next() {
                 if (cursorA < lenA) {
                     if (cursorB < lenB) {
-                        if (nextSelector.apply(a[cursorA], b[cursorB]) == Nth.FIRST) {
+                        if (nextSelector.apply(a[cursorA], b[cursorB]) == MergeResult.TAKE_FIRST) {
                             return a[cursorA++];
                         } else {
                             return b[cursorB++];
@@ -9272,7 +9293,7 @@ public abstract class Stream<T>
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static <T> Stream<T> merge(final T[] a, final T[] b, final T[] c, final BiFunction<? super T, ? super T, Nth> nextSelector) {
+    public static <T> Stream<T> merge(final T[] a, final T[] b, final T[] c, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
         return merge(merge(a, b, nextSelector).iteratorEx(), Stream.of(c).iteratorEx(), nextSelector);
     }
 
@@ -9284,7 +9305,7 @@ public abstract class Stream<T>
      * @return
      */
     public static <T> Stream<T> merge(final Collection<? extends T> a, final Collection<? extends T> b,
-            final BiFunction<? super T, ? super T, Nth> nextSelector) {
+            final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
         return merge(N.iterate(a), N.iterate(b), nextSelector);
     }
 
@@ -9297,7 +9318,7 @@ public abstract class Stream<T>
      * @return
      */
     public static <T> Stream<T> merge(final Collection<? extends T> a, final Collection<? extends T> b, final Collection<? extends T> c,
-            final BiFunction<? super T, ? super T, Nth> nextSelector) {
+            final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
         return merge(N.iterate(a), N.iterate(b), N.iterate(c), nextSelector);
     }
 
@@ -9308,7 +9329,7 @@ public abstract class Stream<T>
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static <T> Stream<T> merge(final Iterator<? extends T> a, final Iterator<? extends T> b, final BiFunction<? super T, ? super T, Nth> nextSelector) {
+    public static <T> Stream<T> merge(final Iterator<? extends T> a, final Iterator<? extends T> b, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
         return new IteratorStream<>(new ObjIteratorEx<T>() {
             private T nextA = null;
             private T nextB = null;
@@ -9324,7 +9345,7 @@ public abstract class Stream<T>
             public T next() {
                 if (hasNextA) {
                     if (b.hasNext()) {
-                        if (nextSelector.apply(nextA, (nextB = b.next())) == Nth.FIRST) {
+                        if (nextSelector.apply(nextA, (nextB = b.next())) == MergeResult.TAKE_FIRST) {
                             hasNextA = false;
                             hasNextB = true;
                             return nextA;
@@ -9337,7 +9358,7 @@ public abstract class Stream<T>
                     }
                 } else if (hasNextB) {
                     if (a.hasNext()) {
-                        if (nextSelector.apply((nextA = a.next()), nextB) == Nth.FIRST) {
+                        if (nextSelector.apply((nextA = a.next()), nextB) == MergeResult.TAKE_FIRST) {
                             return nextA;
                         } else {
                             hasNextA = true;
@@ -9350,7 +9371,7 @@ public abstract class Stream<T>
                     }
                 } else if (a.hasNext()) {
                     if (b.hasNext()) {
-                        if (nextSelector.apply((nextA = a.next()), (nextB = b.next())) == Nth.FIRST) {
+                        if (nextSelector.apply((nextA = a.next()), (nextB = b.next())) == MergeResult.TAKE_FIRST) {
                             hasNextB = true;
                             return nextA;
                         } else {
@@ -9378,7 +9399,7 @@ public abstract class Stream<T>
      * @return
      */
     public static <T> Stream<T> merge(final Iterator<? extends T> a, final Iterator<? extends T> b, final Iterator<? extends T> c,
-            final BiFunction<? super T, ? super T, Nth> nextSelector) {
+            final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
         return merge(merge(a, b, nextSelector).iteratorEx(), c, nextSelector);
     }
 
@@ -9389,17 +9410,17 @@ public abstract class Stream<T>
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static <T> Stream<T> merge(final Stream<? extends T> a, final Stream<? extends T> b, final BiFunction<? super T, ? super T, Nth> nextSelector) {
+    public static <T> Stream<T> merge(final Stream<? extends T> a, final Stream<? extends T> b, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
         return merge(a.iteratorEx(), b.iteratorEx(), nextSelector).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
     public static <T> Stream<T> merge(final Stream<? extends T> a, final Stream<? extends T> b, final Stream<? extends T> c,
-            final BiFunction<? super T, ? super T, Nth> nextSelector) {
+            final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
 
         return merge(merge(a, b, nextSelector), c, nextSelector);
     }
 
-    public static <T> Stream<T> merge(final List<? extends Collection<? extends T>> c, final BiFunction<? super T, ? super T, Nth> nextSelector) {
+    public static <T> Stream<T> merge(final List<? extends Collection<? extends T>> c, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
         N.checkArgNotNull(nextSelector);
 
         if (N.isNullOrEmpty(c)) {
@@ -9426,7 +9447,7 @@ public abstract class Stream<T>
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static <T> Stream<T> merge(final Collection<? extends Stream<? extends T>> c, final BiFunction<? super T, ? super T, Nth> nextSelector) {
+    public static <T> Stream<T> merge(final Collection<? extends Stream<? extends T>> c, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
         N.checkArgNotNull(nextSelector);
 
         if (N.isNullOrEmpty(c)) {
@@ -9454,7 +9475,7 @@ public abstract class Stream<T>
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static <T> Stream<T> mergge(final Collection<? extends Iterator<? extends T>> c, final BiFunction<? super T, ? super T, Nth> nextSelector) {
+    public static <T> Stream<T> mergge(final Collection<? extends Iterator<? extends T>> c, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
         N.checkArgNotNull(nextSelector);
 
         if (N.isNullOrEmpty(c)) {
@@ -9476,11 +9497,11 @@ public abstract class Stream<T>
         return result;
     }
 
-    public static <T> Stream<T> parallelMerge(final List<? extends Collection<? extends T>> c, final BiFunction<? super T, ? super T, Nth> nextSelector) {
+    public static <T> Stream<T> parallelMerge(final List<? extends Collection<? extends T>> c, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
         return parallelMerge(c, nextSelector, DEFAULT_MAX_THREAD_NUM);
     }
 
-    public static <T> Stream<T> parallelMerge(final List<? extends Collection<? extends T>> c, final BiFunction<? super T, ? super T, Nth> nextSelector,
+    public static <T> Stream<T> parallelMerge(final List<? extends Collection<? extends T>> c, final BiFunction<? super T, ? super T, MergeResult> nextSelector,
             final int maxThreadNum) {
         N.checkArgNotNull(nextSelector);
 
@@ -9513,7 +9534,7 @@ public abstract class Stream<T>
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static <T> Stream<T> parallelMerge(final Collection<? extends Stream<? extends T>> c, final BiFunction<? super T, ? super T, Nth> nextSelector) {
+    public static <T> Stream<T> parallelMerge(final Collection<? extends Stream<? extends T>> c, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
         return parallelMerge(c, nextSelector, DEFAULT_MAX_THREAD_NUM);
     }
 
@@ -9524,7 +9545,7 @@ public abstract class Stream<T>
      * @param maxThreadNum
      * @return
      */
-    public static <T> Stream<T> parallelMerge(final Collection<? extends Stream<? extends T>> c, final BiFunction<? super T, ? super T, Nth> nextSelector,
+    public static <T> Stream<T> parallelMerge(final Collection<? extends Stream<? extends T>> c, final BiFunction<? super T, ? super T, MergeResult> nextSelector,
             final int maxThreadNum) {
         N.checkArgument(maxThreadNum > 0, "'maxThreadNum' must not less than 1");
 
@@ -9603,7 +9624,7 @@ public abstract class Stream<T>
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static <T> Stream<T> parallelMergge(final Collection<? extends Iterator<? extends T>> c, final BiFunction<? super T, ? super T, Nth> nextSelector) {
+    public static <T> Stream<T> parallelMergge(final Collection<? extends Iterator<? extends T>> c, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
         return parallelMergge(c, nextSelector, DEFAULT_MAX_THREAD_NUM);
     }
 
@@ -9614,7 +9635,7 @@ public abstract class Stream<T>
      * @param maxThreadNum
      * @return
      */
-    public static <T> Stream<T> parallelMergge(final Collection<? extends Iterator<? extends T>> c, final BiFunction<? super T, ? super T, Nth> nextSelector,
+    public static <T> Stream<T> parallelMergge(final Collection<? extends Iterator<? extends T>> c, final BiFunction<? super T, ? super T, MergeResult> nextSelector,
             final int maxThreadNum) {
         N.checkArgument(maxThreadNum > 0, "'maxThreadNum' must not less than 1");
 

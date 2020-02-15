@@ -224,9 +224,9 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
                 if (n > len - position) {
                     position = len;
+                } else {
+                    position += n;
                 }
-
-                position += n;
             }
         });
     }
@@ -241,6 +241,56 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     public static <T, E extends Exception> ExceptionalStream<T, E> of(final Collection<? extends T> c) {
         if (N.isNullOrEmpty(c)) {
             return empty();
+        }
+
+        if (N.isListElementDataFieldGettable && N.listElementDataField != null && c instanceof ArrayList) {
+            T[] tmp = null;
+
+            try {
+                tmp = (T[]) N.listElementDataField.get(c);
+            } catch (Throwable e) {
+                // ignore;
+                N.isListElementDataFieldGettable = false;
+            }
+
+            if (tmp != null) {
+                final T[] a = tmp;
+                final int len = c.size();
+
+                return newStream(new ExceptionalIterator<T, E>() {
+                    private int position = 0;
+
+                    @Override
+                    public boolean hasNext() throws E {
+                        return position < len;
+                    }
+
+                    @Override
+                    public T next() throws E {
+                        if (position >= len) {
+                            throw new NoSuchElementException();
+                        }
+
+                        return a[position++];
+                    }
+
+                    @Override
+                    public long count() throws E {
+                        return len - position;
+                    }
+
+                    @Override
+                    public void skip(long n) throws E {
+                        N.checkArgNotNegative(n, "n");
+
+                        if (n > len - position) {
+                            position = len;
+                        } else {
+                            position += n;
+                        }
+                    }
+                });
+            }
         }
 
         return of(c.iterator());
@@ -440,18 +490,35 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
             return empty();
         }
 
+        final int len = N.len(a);
+
         return newStream(new ExceptionalIterator<Integer, E>() {
-            private final int len = a.length;
-            private int idx = 0;
+            private int position = 0;
 
             @Override
             public boolean hasNext() throws E {
-                return idx < len;
+                return position < len;
             }
 
             @Override
             public Integer next() throws E {
-                return a[idx++];
+                return a[position++];
+            }
+
+            @Override
+            public long count() throws E {
+                return len - position;
+            }
+
+            @Override
+            public void skip(long n) throws E {
+                N.checkArgNotNegative(n, "n");
+
+                if (n > len - position) {
+                    position = len;
+                } else {
+                    position += n;
+                }
             }
         });
     }
@@ -467,18 +534,35 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
             return empty();
         }
 
+        final int len = N.len(a);
+
         return newStream(new ExceptionalIterator<Long, E>() {
-            private final int len = a.length;
-            private int idx = 0;
+            private int position = 0;
 
             @Override
             public boolean hasNext() throws E {
-                return idx < len;
+                return position < len;
             }
 
             @Override
             public Long next() throws E {
-                return a[idx++];
+                return a[position++];
+            }
+
+            @Override
+            public long count() throws E {
+                return len - position;
+            }
+
+            @Override
+            public void skip(long n) throws E {
+                N.checkArgNotNegative(n, "n");
+
+                if (n > len - position) {
+                    position = len;
+                } else {
+                    position += n;
+                }
             }
         });
     }
@@ -494,18 +578,35 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
             return empty();
         }
 
+        final int len = N.len(a);
+
         return newStream(new ExceptionalIterator<Double, E>() {
-            private final int len = a.length;
-            private int idx = 0;
+            private int position = 0;
 
             @Override
             public boolean hasNext() throws E {
-                return idx < len;
+                return position < len;
             }
 
             @Override
             public Double next() throws E {
-                return a[idx++];
+                return a[position++];
+            }
+
+            @Override
+            public long count() throws E {
+                return len - position;
+            }
+
+            @Override
+            public void skip(long n) throws E {
+                N.checkArgNotNegative(n, "n");
+
+                if (n > len - position) {
+                    position = len;
+                } else {
+                    position += n;
+                }
             }
         });
     }
@@ -517,7 +618,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> of(final Supplier<Collection<? extends T>> supplier) {
         N.checkArgNotNull(supplier, "supplier");
-        
+
         return ExceptionalStream.<Supplier<Collection<? extends T>>, E> just(supplier)
                 .flattMap(new Throwables.Function<Supplier<Collection<? extends T>>, Collection<? extends T>, E>() {
                     @Override
@@ -7421,13 +7522,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                         init();
                     }
 
-                    if (n <= 0) {
-                        return;
-                    } else if (n > len - position) {
+                    if (n > len - position) {
                         position = len;
+                    } else {
+                        position += n;
                     }
 
-                    position += n;
                 }
 
                 private void init() throws E {

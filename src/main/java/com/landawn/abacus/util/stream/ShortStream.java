@@ -37,7 +37,7 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.IndexedShort;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
@@ -400,7 +400,7 @@ public abstract class ShortStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public abstract ShortStream merge(final ShortStream b, final ShortBiFunction<Nth> nextSelector);
+    public abstract ShortStream merge(final ShortStream b, final ShortBiFunction<MergeResult> nextSelector);
 
     public abstract ShortStream zipWith(ShortStream b, ShortBinaryOperator zipFunction);
 
@@ -522,15 +522,15 @@ public abstract class ShortStream
     private static final Function<short[][], ShortStream> flatMappper = new Function<short[][], ShortStream>() {
         @Override
         public ShortStream apply(short[][] t) {
-            return ShortStream.flat(t);
+            return ShortStream.flatten(t);
         }
     };
 
-    public static ShortStream flat(final short[][] a) {
+    public static ShortStream flatten(final short[][] a) {
         return N.isNullOrEmpty(a) ? empty() : Stream.of(a).flatMapToShort(flatMapper);
     }
 
-    public static ShortStream flat(final short[][] a, final boolean vertically) {
+    public static ShortStream flatten(final short[][] a, final boolean vertically) {
         if (N.isNullOrEmpty(a)) {
             return empty();
         } else if (a.length == 1) {
@@ -589,7 +589,7 @@ public abstract class ShortStream
         return of(iter);
     }
 
-    public static ShortStream flat(final short[][] a, final short valueForNone, final boolean vertically) {
+    public static ShortStream flatten(final short[][] a, final short valueForNone, final boolean vertically) {
         if (N.isNullOrEmpty(a)) {
             return empty();
         } else if (a.length == 1) {
@@ -679,7 +679,7 @@ public abstract class ShortStream
         return of(iter);
     }
 
-    public static ShortStream flat(final short[][][] a) {
+    public static ShortStream flatten(final short[][][] a) {
         return N.isNullOrEmpty(a) ? empty() : Stream.of(a).flatMapToShort(flatMappper);
     }
 
@@ -1561,7 +1561,7 @@ public abstract class ShortStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static ShortStream merge(final short[] a, final short[] b, final ShortBiFunction<Nth> nextSelector) {
+    public static ShortStream merge(final short[] a, final short[] b, final ShortBiFunction<MergeResult> nextSelector) {
         if (N.isNullOrEmpty(a)) {
             return of(b);
         } else if (N.isNullOrEmpty(b)) {
@@ -1583,7 +1583,7 @@ public abstract class ShortStream
             public short nextShort() {
                 if (cursorA < lenA) {
                     if (cursorB < lenB) {
-                        if (nextSelector.apply(a[cursorA], b[cursorB]) == Nth.FIRST) {
+                        if (nextSelector.apply(a[cursorA], b[cursorB]) == MergeResult.TAKE_FIRST) {
                             return a[cursorA++];
                         } else {
                             return b[cursorB++];
@@ -1608,7 +1608,7 @@ public abstract class ShortStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static ShortStream merge(final short[] a, final short[] b, final short[] c, final ShortBiFunction<Nth> nextSelector) {
+    public static ShortStream merge(final short[] a, final short[] b, final short[] c, final ShortBiFunction<MergeResult> nextSelector) {
         return merge(merge(a, b, nextSelector).iteratorEx(), ShortStream.of(c).iteratorEx(), nextSelector);
     }
 
@@ -1619,7 +1619,7 @@ public abstract class ShortStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static ShortStream merge(final ShortIterator a, final ShortIterator b, final ShortBiFunction<Nth> nextSelector) {
+    public static ShortStream merge(final ShortIterator a, final ShortIterator b, final ShortBiFunction<MergeResult> nextSelector) {
         return new IteratorShortStream(new ShortIteratorEx() {
             private short nextA = 0;
             private short nextB = 0;
@@ -1635,7 +1635,7 @@ public abstract class ShortStream
             public short nextShort() {
                 if (hasNextA) {
                     if (b.hasNext()) {
-                        if (nextSelector.apply(nextA, (nextB = b.nextShort())) == Nth.FIRST) {
+                        if (nextSelector.apply(nextA, (nextB = b.nextShort())) == MergeResult.TAKE_FIRST) {
                             hasNextA = false;
                             hasNextB = true;
                             return nextA;
@@ -1648,7 +1648,7 @@ public abstract class ShortStream
                     }
                 } else if (hasNextB) {
                     if (a.hasNext()) {
-                        if (nextSelector.apply((nextA = a.nextShort()), nextB) == Nth.FIRST) {
+                        if (nextSelector.apply((nextA = a.nextShort()), nextB) == MergeResult.TAKE_FIRST) {
                             return nextA;
                         } else {
                             hasNextA = true;
@@ -1661,7 +1661,7 @@ public abstract class ShortStream
                     }
                 } else if (a.hasNext()) {
                     if (b.hasNext()) {
-                        if (nextSelector.apply((nextA = a.nextShort()), (nextB = b.nextShort())) == Nth.FIRST) {
+                        if (nextSelector.apply((nextA = a.nextShort()), (nextB = b.nextShort())) == MergeResult.TAKE_FIRST) {
                             hasNextB = true;
                             return nextA;
                         } else {
@@ -1688,7 +1688,7 @@ public abstract class ShortStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static ShortStream merge(final ShortIterator a, final ShortIterator b, final ShortIterator c, final ShortBiFunction<Nth> nextSelector) {
+    public static ShortStream merge(final ShortIterator a, final ShortIterator b, final ShortIterator c, final ShortBiFunction<MergeResult> nextSelector) {
         return merge(merge(a, b, nextSelector).iteratorEx(), c, nextSelector);
     }
 
@@ -1699,7 +1699,7 @@ public abstract class ShortStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static ShortStream merge(final ShortStream a, final ShortStream b, final ShortBiFunction<Nth> nextSelector) {
+    public static ShortStream merge(final ShortStream a, final ShortStream b, final ShortBiFunction<MergeResult> nextSelector) {
         return merge(a.iteratorEx(), b.iteratorEx(), nextSelector).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
@@ -1711,7 +1711,7 @@ public abstract class ShortStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static ShortStream merge(final ShortStream a, final ShortStream b, final ShortStream c, final ShortBiFunction<Nth> nextSelector) {
+    public static ShortStream merge(final ShortStream a, final ShortStream b, final ShortStream c, final ShortBiFunction<MergeResult> nextSelector) {
         return merge(merge(a, b, nextSelector), c, nextSelector);
     }
 
@@ -1721,7 +1721,7 @@ public abstract class ShortStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static ShortStream merge(final Collection<? extends ShortStream> c, final ShortBiFunction<Nth> nextSelector) {
+    public static ShortStream merge(final Collection<? extends ShortStream> c, final ShortBiFunction<MergeResult> nextSelector) {
         if (N.isNullOrEmpty(c)) {
             return empty();
         } else if (c.size() == 1) {
@@ -1747,7 +1747,7 @@ public abstract class ShortStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static ShortStream parallelMerge(final Collection<? extends ShortStream> c, final ShortBiFunction<Nth> nextSelector) {
+    public static ShortStream parallelMerge(final Collection<? extends ShortStream> c, final ShortBiFunction<MergeResult> nextSelector) {
         return parallelMerge(c, nextSelector, DEFAULT_MAX_THREAD_NUM);
     }
 
@@ -1758,7 +1758,7 @@ public abstract class ShortStream
      * @param maxThreadNum
      * @return
      */
-    public static ShortStream parallelMerge(final Collection<? extends ShortStream> c, final ShortBiFunction<Nth> nextSelector, final int maxThreadNum) {
+    public static ShortStream parallelMerge(final Collection<? extends ShortStream> c, final ShortBiFunction<MergeResult> nextSelector, final int maxThreadNum) {
         N.checkArgument(maxThreadNum > 0, "'maxThreadNum' must not less than 1");
 
         if (maxThreadNum <= 1) {

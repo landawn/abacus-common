@@ -35,7 +35,7 @@ import com.landawn.abacus.util.MutableByte;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.StringUtil.Strings;
@@ -987,7 +987,7 @@ abstract class AbstractByteStream extends ByteStream {
     }
 
     @Override
-    public ByteStream merge(ByteStream b, ByteBiFunction<Nth> nextSelector) {
+    public ByteStream merge(ByteStream b, ByteBiFunction<MergeResult> nextSelector) {
         return ByteStream.merge(this, b, nextSelector);
     }
 

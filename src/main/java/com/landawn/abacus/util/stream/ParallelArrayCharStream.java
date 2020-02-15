@@ -28,7 +28,7 @@ import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u.Holder;
@@ -1449,7 +1449,7 @@ final class ParallelArrayCharStream extends ArrayCharStream {
     }
 
     @Override
-    public CharStream merge(final CharStream b, final CharBiFunction<Nth> nextSelector) {
+    public CharStream merge(final CharStream b, final CharBiFunction<MergeResult> nextSelector) {
         return new ParallelIteratorCharStream(CharStream.merge(this, b, nextSelector), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 

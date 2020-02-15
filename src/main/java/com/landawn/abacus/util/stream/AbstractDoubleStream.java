@@ -36,7 +36,7 @@ import com.landawn.abacus.util.MutableDouble;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.StringUtil.Strings;
@@ -990,7 +990,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
     }
 
     @Override
-    public DoubleStream merge(DoubleStream b, DoubleBiFunction<Nth> nextSelector) {
+    public DoubleStream merge(DoubleStream b, DoubleBiFunction<MergeResult> nextSelector) {
         return DoubleStream.merge(this, b, nextSelector);
     }
 

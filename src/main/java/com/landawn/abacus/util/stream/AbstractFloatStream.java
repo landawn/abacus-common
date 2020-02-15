@@ -36,7 +36,7 @@ import com.landawn.abacus.util.MutableFloat;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.StringUtil.Strings;
@@ -996,7 +996,7 @@ abstract class AbstractFloatStream extends FloatStream {
     }
 
     @Override
-    public FloatStream merge(FloatStream b, FloatBiFunction<Nth> nextSelector) {
+    public FloatStream merge(FloatStream b, FloatBiFunction<MergeResult> nextSelector) {
         return FloatStream.merge(this, b, nextSelector);
     }
 

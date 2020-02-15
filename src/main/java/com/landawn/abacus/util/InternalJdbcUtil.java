@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.landawn.abacus.DirtyMarker;
-import com.landawn.abacus.annotation.Column;
 import com.landawn.abacus.core.DirtyMarkerUtil;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.logging.Logger;
@@ -492,25 +491,12 @@ final class InternalJdbcUtil {
         if (result == null) {
             final Map<String, String> biMap = N.newBiMap(LinkedHashMap.class, LinkedHashMap.class);
             final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
-            String columnName = null;
 
             for (PropInfo propInfo : entityInfo.propInfoList) {
-                if (propInfo.isAnnotationPresent(Column.class)) {
-                    columnName = propInfo.getAnnotation(Column.class).value();
-                } else {
-                    try {
-                        if (propInfo.isAnnotationPresent(javax.persistence.Column.class)) {
-                            columnName = propInfo.getAnnotation(javax.persistence.Column.class).name();
-                        }
-                    } catch (Throwable e) {
-                        logger.warn("To support javax.persistence.Table/Column, please add dependence javax.persistence:persistence-api");
-                    }
-                }
-
-                if (N.notNullOrEmpty(columnName)) {
-                    biMap.put(columnName, propInfo.name);
-                    biMap.put(columnName.toLowerCase(), propInfo.name);
-                    biMap.put(columnName.toUpperCase(), propInfo.name);
+                if (N.notNullOrEmpty(propInfo.columnName)) {
+                    biMap.put(propInfo.columnName, propInfo.name);
+                    biMap.put(propInfo.columnName.toLowerCase(), propInfo.name);
+                    biMap.put(propInfo.columnName.toUpperCase(), propInfo.name);
                 }
             }
 

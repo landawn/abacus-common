@@ -34,7 +34,7 @@ import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.StringUtil.Strings;
@@ -993,7 +993,7 @@ abstract class AbstractLongStream extends LongStream {
     }
 
     @Override
-    public LongStream merge(LongStream b, LongBiFunction<Nth> nextSelector) {
+    public LongStream merge(LongStream b, LongBiFunction<MergeResult> nextSelector) {
         return LongStream.merge(this, b, nextSelector);
     }
 

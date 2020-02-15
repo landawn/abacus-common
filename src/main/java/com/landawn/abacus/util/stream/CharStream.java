@@ -40,7 +40,7 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.IndexedChar;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
@@ -599,7 +599,7 @@ public abstract class CharStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public abstract CharStream merge(final CharStream b, final CharBiFunction<Nth> nextSelector);
+    public abstract CharStream merge(final CharStream b, final CharBiFunction<MergeResult> nextSelector);
 
     public abstract CharStream zipWith(CharStream b, CharBinaryOperator zipFunction);
 
@@ -792,15 +792,15 @@ public abstract class CharStream
     private static final Function<char[][], CharStream> flatMappper = new Function<char[][], CharStream>() {
         @Override
         public CharStream apply(char[][] t) {
-            return CharStream.flat(t);
+            return CharStream.flatten(t);
         }
     };
 
-    public static CharStream flat(final char[][] a) {
+    public static CharStream flatten(final char[][] a) {
         return N.isNullOrEmpty(a) ? empty() : Stream.of(a).flatMapToChar(flatMapper);
     }
 
-    public static CharStream flat(final char[][] a, final boolean vertically) {
+    public static CharStream flatten(final char[][] a, final boolean vertically) {
         if (N.isNullOrEmpty(a)) {
             return empty();
         } else if (a.length == 1) {
@@ -859,7 +859,7 @@ public abstract class CharStream
         return of(iter);
     }
 
-    public static CharStream flat(final char[][] a, final char valueForNone, final boolean vertically) {
+    public static CharStream flatten(final char[][] a, final char valueForNone, final boolean vertically) {
         if (N.isNullOrEmpty(a)) {
             return empty();
         } else if (a.length == 1) {
@@ -949,7 +949,7 @@ public abstract class CharStream
         return of(iter);
     }
 
-    public static CharStream flat(final char[][][] a) {
+    public static CharStream flatten(final char[][][] a) {
         return N.isNullOrEmpty(a) ? empty() : Stream.of(a).flatMapToChar(flatMappper);
     }
 
@@ -1862,7 +1862,7 @@ public abstract class CharStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static CharStream merge(final char[] a, final char[] b, final CharBiFunction<Nth> nextSelector) {
+    public static CharStream merge(final char[] a, final char[] b, final CharBiFunction<MergeResult> nextSelector) {
         if (N.isNullOrEmpty(a)) {
             return of(b);
         } else if (N.isNullOrEmpty(b)) {
@@ -1884,7 +1884,7 @@ public abstract class CharStream
             public char nextChar() {
                 if (cursorA < lenA) {
                     if (cursorB < lenB) {
-                        if (nextSelector.apply(a[cursorA], b[cursorB]) == Nth.FIRST) {
+                        if (nextSelector.apply(a[cursorA], b[cursorB]) == MergeResult.TAKE_FIRST) {
                             return a[cursorA++];
                         } else {
                             return b[cursorB++];
@@ -1909,7 +1909,7 @@ public abstract class CharStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static CharStream merge(final char[] a, final char[] b, final char[] c, final CharBiFunction<Nth> nextSelector) {
+    public static CharStream merge(final char[] a, final char[] b, final char[] c, final CharBiFunction<MergeResult> nextSelector) {
         return merge(merge(a, b, nextSelector).iteratorEx(), CharStream.of(c).iteratorEx(), nextSelector);
     }
 
@@ -1920,7 +1920,7 @@ public abstract class CharStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static CharStream merge(final CharIterator a, final CharIterator b, final CharBiFunction<Nth> nextSelector) {
+    public static CharStream merge(final CharIterator a, final CharIterator b, final CharBiFunction<MergeResult> nextSelector) {
         return new IteratorCharStream(new CharIteratorEx() {
             private char nextA = 0;
             private char nextB = 0;
@@ -1936,7 +1936,7 @@ public abstract class CharStream
             public char nextChar() {
                 if (hasNextA) {
                     if (b.hasNext()) {
-                        if (nextSelector.apply(nextA, (nextB = b.nextChar())) == Nth.FIRST) {
+                        if (nextSelector.apply(nextA, (nextB = b.nextChar())) == MergeResult.TAKE_FIRST) {
                             hasNextA = false;
                             hasNextB = true;
                             return nextA;
@@ -1949,7 +1949,7 @@ public abstract class CharStream
                     }
                 } else if (hasNextB) {
                     if (a.hasNext()) {
-                        if (nextSelector.apply((nextA = a.nextChar()), nextB) == Nth.FIRST) {
+                        if (nextSelector.apply((nextA = a.nextChar()), nextB) == MergeResult.TAKE_FIRST) {
                             return nextA;
                         } else {
                             hasNextA = true;
@@ -1962,7 +1962,7 @@ public abstract class CharStream
                     }
                 } else if (a.hasNext()) {
                     if (b.hasNext()) {
-                        if (nextSelector.apply((nextA = a.nextChar()), (nextB = b.nextChar())) == Nth.FIRST) {
+                        if (nextSelector.apply((nextA = a.nextChar()), (nextB = b.nextChar())) == MergeResult.TAKE_FIRST) {
                             hasNextB = true;
                             return nextA;
                         } else {
@@ -1989,7 +1989,7 @@ public abstract class CharStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static CharStream merge(final CharIterator a, final CharIterator b, final CharIterator c, final CharBiFunction<Nth> nextSelector) {
+    public static CharStream merge(final CharIterator a, final CharIterator b, final CharIterator c, final CharBiFunction<MergeResult> nextSelector) {
         return merge(merge(a, b, nextSelector).iteratorEx(), c, nextSelector);
     }
 
@@ -2000,7 +2000,7 @@ public abstract class CharStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static CharStream merge(final CharStream a, final CharStream b, final CharBiFunction<Nth> nextSelector) {
+    public static CharStream merge(final CharStream a, final CharStream b, final CharBiFunction<MergeResult> nextSelector) {
         return merge(a.iteratorEx(), b.iteratorEx(), nextSelector).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
@@ -2012,7 +2012,7 @@ public abstract class CharStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static CharStream merge(final CharStream a, final CharStream b, final CharStream c, final CharBiFunction<Nth> nextSelector) {
+    public static CharStream merge(final CharStream a, final CharStream b, final CharStream c, final CharBiFunction<MergeResult> nextSelector) {
         return merge(merge(a, b, nextSelector), c, nextSelector);
     }
 
@@ -2022,7 +2022,7 @@ public abstract class CharStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static CharStream merge(final Collection<? extends CharStream> c, final CharBiFunction<Nth> nextSelector) {
+    public static CharStream merge(final Collection<? extends CharStream> c, final CharBiFunction<MergeResult> nextSelector) {
         if (N.isNullOrEmpty(c)) {
             return empty();
         } else if (c.size() == 1) {
@@ -2048,7 +2048,7 @@ public abstract class CharStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static CharStream parallelMerge(final Collection<? extends CharStream> c, final CharBiFunction<Nth> nextSelector) {
+    public static CharStream parallelMerge(final Collection<? extends CharStream> c, final CharBiFunction<MergeResult> nextSelector) {
         return parallelMerge(c, nextSelector, DEFAULT_MAX_THREAD_NUM);
     }
 
@@ -2059,7 +2059,7 @@ public abstract class CharStream
      * @param maxThreadNum
      * @return
      */
-    public static CharStream parallelMerge(final Collection<? extends CharStream> c, final CharBiFunction<Nth> nextSelector, final int maxThreadNum) {
+    public static CharStream parallelMerge(final Collection<? extends CharStream> c, final CharBiFunction<MergeResult> nextSelector, final int maxThreadNum) {
         N.checkArgument(maxThreadNum > 0, "'maxThreadNum' must not less than 1");
 
         if (maxThreadNum <= 1) {

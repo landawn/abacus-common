@@ -19446,7 +19446,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> merge(final T[] a, final T[] b, final Throwables.BiFunction<? super T, ? super T, Nth, E> nextSelector)
+    public static <T, E extends Exception> List<T> merge(final T[] a, final T[] b, final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector)
             throws E {
         if (isNullOrEmpty(a)) {
             return isNullOrEmpty(b) ? new ArrayList<>() : asList(b);
@@ -19463,7 +19463,7 @@ public final class N extends CommonUtil {
         while (cursorA < lenA || cursorB < lenB) {
             if (cursorA < lenA) {
                 if (cursorB < lenB) {
-                    if (nextSelector.apply(a[cursorA], b[cursorB]) == Nth.FIRST) {
+                    if (nextSelector.apply(a[cursorA], b[cursorB]) == MergeResult.TAKE_FIRST) {
                         result.add(a[cursorA++]);
                     } else {
                         result.add(b[cursorB++]);
@@ -19490,7 +19490,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> merge(final Collection<? extends T> a, final Collection<? extends T> b,
-            final Throwables.BiFunction<? super T, ? super T, Nth, E> nextSelector) throws E {
+            final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) throws E {
         if (isNullOrEmpty(a)) {
             return isNullOrEmpty(b) ? new ArrayList<>() : new ArrayList<>(b);
         } else if (isNullOrEmpty(b)) {
@@ -19509,7 +19509,7 @@ public final class N extends CommonUtil {
         while (hasNextA || hasNextB || iterA.hasNext() || iterB.hasNext()) {
             if (hasNextA) {
                 if (iterB.hasNext()) {
-                    if (nextSelector.apply(nextA, (nextB = iterB.next())) == Nth.FIRST) {
+                    if (nextSelector.apply(nextA, (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
                         hasNextA = false;
                         hasNextB = true;
                         result.add(nextA);
@@ -19522,7 +19522,7 @@ public final class N extends CommonUtil {
                 }
             } else if (hasNextB) {
                 if (iterA.hasNext()) {
-                    if (nextSelector.apply((nextA = iterA.next()), nextB) == Nth.FIRST) {
+                    if (nextSelector.apply((nextA = iterA.next()), nextB) == MergeResult.TAKE_FIRST) {
                         result.add(nextA);
                     } else {
                         hasNextA = true;
@@ -19535,7 +19535,7 @@ public final class N extends CommonUtil {
                 }
             } else if (iterA.hasNext()) {
                 if (iterB.hasNext()) {
-                    if (nextSelector.apply((nextA = iterA.next()), (nextB = iterB.next())) == Nth.FIRST) {
+                    if (nextSelector.apply((nextA = iterA.next()), (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
                         hasNextB = true;
                         result.add(nextA);
                     } else {

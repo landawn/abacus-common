@@ -29,7 +29,7 @@ import com.landawn.abacus.util.KahanSummation;
 import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u.Holder;
@@ -1561,7 +1561,7 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
     }
 
     @Override
-    public FloatStream merge(final FloatStream b, final FloatBiFunction<Nth> nextSelector) {
+    public FloatStream merge(final FloatStream b, final FloatBiFunction<MergeResult> nextSelector) {
         return new ParallelIteratorFloatStream(FloatStream.merge(this, b, nextSelector), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 

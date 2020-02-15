@@ -28,7 +28,7 @@ import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u.Holder;
@@ -1449,7 +1449,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
     }
 
     @Override
-    public ByteStream merge(final ByteStream b, final ByteBiFunction<Nth> nextSelector) {
+    public ByteStream merge(final ByteStream b, final ByteBiFunction<MergeResult> nextSelector) {
         return new ParallelIteratorByteStream(ByteStream.merge(this, b, nextSelector), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 

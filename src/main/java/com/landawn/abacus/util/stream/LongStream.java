@@ -44,7 +44,7 @@ import com.landawn.abacus.util.LongList;
 import com.landawn.abacus.util.LongSummaryStatistics;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
@@ -425,7 +425,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public abstract LongStream merge(final LongStream b, final LongBiFunction<Nth> nextSelector);
+    public abstract LongStream merge(final LongStream b, final LongBiFunction<MergeResult> nextSelector);
 
     public abstract LongStream zipWith(LongStream b, LongBinaryOperator zipFunction);
 
@@ -598,15 +598,15 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     private static final Function<long[][], LongStream> flatMappper = new Function<long[][], LongStream>() {
         @Override
         public LongStream apply(long[][] t) {
-            return LongStream.flat(t);
+            return LongStream.flatten(t);
         }
     };
 
-    public static LongStream flat(final long[][] a) {
+    public static LongStream flatten(final long[][] a) {
         return N.isNullOrEmpty(a) ? empty() : Stream.of(a).flatMapToLong(flatMapper);
     }
 
-    public static LongStream flat(final long[][] a, final boolean vertically) {
+    public static LongStream flatten(final long[][] a, final boolean vertically) {
         if (N.isNullOrEmpty(a)) {
             return empty();
         } else if (a.length == 1) {
@@ -665,7 +665,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
         return of(iter);
     }
 
-    public static LongStream flat(final long[][] a, final long valueForNone, final boolean vertically) {
+    public static LongStream flatten(final long[][] a, final long valueForNone, final boolean vertically) {
         if (N.isNullOrEmpty(a)) {
             return empty();
         } else if (a.length == 1) {
@@ -755,7 +755,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
         return of(iter);
     }
 
-    public static LongStream flat(final long[][][] a) {
+    public static LongStream flatten(final long[][][] a) {
         return N.isNullOrEmpty(a) ? empty() : Stream.of(a).flatMapToLong(flatMappper);
     }
 
@@ -1720,7 +1720,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static LongStream merge(final long[] a, final long[] b, final LongBiFunction<Nth> nextSelector) {
+    public static LongStream merge(final long[] a, final long[] b, final LongBiFunction<MergeResult> nextSelector) {
         if (N.isNullOrEmpty(a)) {
             return of(b);
         } else if (N.isNullOrEmpty(b)) {
@@ -1742,7 +1742,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             public long nextLong() {
                 if (cursorA < lenA) {
                     if (cursorB < lenB) {
-                        if (nextSelector.apply(a[cursorA], b[cursorB]) == Nth.FIRST) {
+                        if (nextSelector.apply(a[cursorA], b[cursorB]) == MergeResult.TAKE_FIRST) {
                             return a[cursorA++];
                         } else {
                             return b[cursorB++];
@@ -1767,7 +1767,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static LongStream merge(final long[] a, final long[] b, final long[] c, final LongBiFunction<Nth> nextSelector) {
+    public static LongStream merge(final long[] a, final long[] b, final long[] c, final LongBiFunction<MergeResult> nextSelector) {
         return merge(merge(a, b, nextSelector).iteratorEx(), LongStream.of(c).iteratorEx(), nextSelector);
     }
 
@@ -1778,7 +1778,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static LongStream merge(final LongIterator a, final LongIterator b, final LongBiFunction<Nth> nextSelector) {
+    public static LongStream merge(final LongIterator a, final LongIterator b, final LongBiFunction<MergeResult> nextSelector) {
         return new IteratorLongStream(new LongIteratorEx() {
             private long nextA = 0;
             private long nextB = 0;
@@ -1794,7 +1794,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             public long nextLong() {
                 if (hasNextA) {
                     if (b.hasNext()) {
-                        if (nextSelector.apply(nextA, (nextB = b.nextLong())) == Nth.FIRST) {
+                        if (nextSelector.apply(nextA, (nextB = b.nextLong())) == MergeResult.TAKE_FIRST) {
                             hasNextA = false;
                             hasNextB = true;
                             return nextA;
@@ -1807,7 +1807,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
                     }
                 } else if (hasNextB) {
                     if (a.hasNext()) {
-                        if (nextSelector.apply((nextA = a.nextLong()), nextB) == Nth.FIRST) {
+                        if (nextSelector.apply((nextA = a.nextLong()), nextB) == MergeResult.TAKE_FIRST) {
                             return nextA;
                         } else {
                             hasNextA = true;
@@ -1820,7 +1820,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
                     }
                 } else if (a.hasNext()) {
                     if (b.hasNext()) {
-                        if (nextSelector.apply((nextA = a.nextLong()), (nextB = b.nextLong())) == Nth.FIRST) {
+                        if (nextSelector.apply((nextA = a.nextLong()), (nextB = b.nextLong())) == MergeResult.TAKE_FIRST) {
                             hasNextB = true;
                             return nextA;
                         } else {
@@ -1847,7 +1847,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static LongStream merge(final LongIterator a, final LongIterator b, final LongIterator c, final LongBiFunction<Nth> nextSelector) {
+    public static LongStream merge(final LongIterator a, final LongIterator b, final LongIterator c, final LongBiFunction<MergeResult> nextSelector) {
         return merge(merge(a, b, nextSelector).iteratorEx(), c, nextSelector);
     }
 
@@ -1858,7 +1858,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static LongStream merge(final LongStream a, final LongStream b, final LongBiFunction<Nth> nextSelector) {
+    public static LongStream merge(final LongStream a, final LongStream b, final LongBiFunction<MergeResult> nextSelector) {
         return merge(a.iteratorEx(), b.iteratorEx(), nextSelector).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
@@ -1870,7 +1870,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static LongStream merge(final LongStream a, final LongStream b, final LongStream c, final LongBiFunction<Nth> nextSelector) {
+    public static LongStream merge(final LongStream a, final LongStream b, final LongStream c, final LongBiFunction<MergeResult> nextSelector) {
         return merge(merge(a, b, nextSelector), c, nextSelector);
     }
 
@@ -1880,7 +1880,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static LongStream merge(final Collection<? extends LongStream> c, final LongBiFunction<Nth> nextSelector) {
+    public static LongStream merge(final Collection<? extends LongStream> c, final LongBiFunction<MergeResult> nextSelector) {
         if (N.isNullOrEmpty(c)) {
             return empty();
         } else if (c.size() == 1) {
@@ -1906,7 +1906,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static LongStream parallelMerge(final Collection<? extends LongStream> c, final LongBiFunction<Nth> nextSelector) {
+    public static LongStream parallelMerge(final Collection<? extends LongStream> c, final LongBiFunction<MergeResult> nextSelector) {
         return parallelMerge(c, nextSelector, DEFAULT_MAX_THREAD_NUM);
     }
 
@@ -1917,7 +1917,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param maxThreadNum
      * @return
      */
-    public static LongStream parallelMerge(final Collection<? extends LongStream> c, final LongBiFunction<Nth> nextSelector, final int maxThreadNum) {
+    public static LongStream parallelMerge(final Collection<? extends LongStream> c, final LongBiFunction<MergeResult> nextSelector, final int maxThreadNum) {
         N.checkArgument(maxThreadNum > 0, "'maxThreadNum' must not less than 1");
 
         if (maxThreadNum <= 1) {

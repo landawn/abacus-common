@@ -34,7 +34,7 @@ import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.StringUtil.Strings;
@@ -993,7 +993,7 @@ abstract class AbstractIntStream extends IntStream {
     }
 
     @Override
-    public IntStream merge(IntStream b, IntBiFunction<Nth> nextSelector) {
+    public IntStream merge(IntStream b, IntBiFunction<MergeResult> nextSelector) {
         return IntStream.merge(this, b, nextSelector);
     }
 

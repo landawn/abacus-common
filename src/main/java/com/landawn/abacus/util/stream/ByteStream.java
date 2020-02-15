@@ -40,7 +40,7 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.IndexedByte;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
@@ -427,7 +427,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public abstract ByteStream merge(final ByteStream b, final ByteBiFunction<Nth> nextSelector);
+    public abstract ByteStream merge(final ByteStream b, final ByteBiFunction<MergeResult> nextSelector);
 
     public abstract ByteStream zipWith(ByteStream b, ByteBinaryOperator zipFunction);
 
@@ -548,15 +548,15 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     private static final Function<byte[][], ByteStream> flatMappper = new Function<byte[][], ByteStream>() {
         @Override
         public ByteStream apply(byte[][] t) {
-            return ByteStream.flat(t);
+            return ByteStream.flatten(t);
         }
     };
 
-    public static ByteStream flat(final byte[][] a) {
+    public static ByteStream flatten(final byte[][] a) {
         return N.isNullOrEmpty(a) ? empty() : Stream.of(a).flatMapToByte(flatMapper);
     }
 
-    public static ByteStream flat(final byte[][] a, final boolean vertically) {
+    public static ByteStream flatten(final byte[][] a, final boolean vertically) {
         if (N.isNullOrEmpty(a)) {
             return empty();
         } else if (a.length == 1) {
@@ -615,7 +615,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
         return of(iter);
     }
 
-    public static ByteStream flat(final byte[][] a, final byte valueForNone, final boolean vertically) {
+    public static ByteStream flatten(final byte[][] a, final byte valueForNone, final boolean vertically) {
         if (N.isNullOrEmpty(a)) {
             return empty();
         } else if (a.length == 1) {
@@ -705,7 +705,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
         return of(iter);
     }
 
-    public static ByteStream flat(final byte[][][] a) {
+    public static ByteStream flatten(final byte[][][] a) {
         return N.isNullOrEmpty(a) ? empty() : Stream.of(a).flatMapToByte(flatMappper);
     }
 
@@ -1586,7 +1586,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static ByteStream merge(final byte[] a, final byte[] b, final ByteBiFunction<Nth> nextSelector) {
+    public static ByteStream merge(final byte[] a, final byte[] b, final ByteBiFunction<MergeResult> nextSelector) {
         if (N.isNullOrEmpty(a)) {
             return of(b);
         } else if (N.isNullOrEmpty(b)) {
@@ -1608,7 +1608,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             public byte nextByte() {
                 if (cursorA < lenA) {
                     if (cursorB < lenB) {
-                        if (nextSelector.apply(a[cursorA], b[cursorB]) == Nth.FIRST) {
+                        if (nextSelector.apply(a[cursorA], b[cursorB]) == MergeResult.TAKE_FIRST) {
                             return a[cursorA++];
                         } else {
                             return b[cursorB++];
@@ -1633,7 +1633,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static ByteStream merge(final byte[] a, final byte[] b, final byte[] c, final ByteBiFunction<Nth> nextSelector) {
+    public static ByteStream merge(final byte[] a, final byte[] b, final byte[] c, final ByteBiFunction<MergeResult> nextSelector) {
         return merge(merge(a, b, nextSelector).iteratorEx(), ByteStream.of(c).iteratorEx(), nextSelector);
     }
 
@@ -1644,7 +1644,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static ByteStream merge(final ByteIterator a, final ByteIterator b, final ByteBiFunction<Nth> nextSelector) {
+    public static ByteStream merge(final ByteIterator a, final ByteIterator b, final ByteBiFunction<MergeResult> nextSelector) {
         return new IteratorByteStream(new ByteIteratorEx() {
             private byte nextA = 0;
             private byte nextB = 0;
@@ -1660,7 +1660,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             public byte nextByte() {
                 if (hasNextA) {
                     if (b.hasNext()) {
-                        if (nextSelector.apply(nextA, (nextB = b.nextByte())) == Nth.FIRST) {
+                        if (nextSelector.apply(nextA, (nextB = b.nextByte())) == MergeResult.TAKE_FIRST) {
                             hasNextA = false;
                             hasNextB = true;
                             return nextA;
@@ -1673,7 +1673,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
                     }
                 } else if (hasNextB) {
                     if (a.hasNext()) {
-                        if (nextSelector.apply((nextA = a.nextByte()), nextB) == Nth.FIRST) {
+                        if (nextSelector.apply((nextA = a.nextByte()), nextB) == MergeResult.TAKE_FIRST) {
                             return nextA;
                         } else {
                             hasNextA = true;
@@ -1686,7 +1686,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
                     }
                 } else if (a.hasNext()) {
                     if (b.hasNext()) {
-                        if (nextSelector.apply((nextA = a.nextByte()), (nextB = b.nextByte())) == Nth.FIRST) {
+                        if (nextSelector.apply((nextA = a.nextByte()), (nextB = b.nextByte())) == MergeResult.TAKE_FIRST) {
                             hasNextB = true;
                             return nextA;
                         } else {
@@ -1713,7 +1713,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static ByteStream merge(final ByteIterator a, final ByteIterator b, final ByteIterator c, final ByteBiFunction<Nth> nextSelector) {
+    public static ByteStream merge(final ByteIterator a, final ByteIterator b, final ByteIterator c, final ByteBiFunction<MergeResult> nextSelector) {
         return merge(merge(a, b, nextSelector).iteratorEx(), c, nextSelector);
     }
 
@@ -1724,7 +1724,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static ByteStream merge(final ByteStream a, final ByteStream b, final ByteBiFunction<Nth> nextSelector) {
+    public static ByteStream merge(final ByteStream a, final ByteStream b, final ByteBiFunction<MergeResult> nextSelector) {
         return merge(a.iteratorEx(), b.iteratorEx(), nextSelector).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
@@ -1736,7 +1736,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static ByteStream merge(final ByteStream a, final ByteStream b, final ByteStream c, final ByteBiFunction<Nth> nextSelector) {
+    public static ByteStream merge(final ByteStream a, final ByteStream b, final ByteStream c, final ByteBiFunction<MergeResult> nextSelector) {
         return merge(merge(a, b, nextSelector), c, nextSelector);
     }
 
@@ -1746,7 +1746,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static ByteStream merge(final Collection<? extends ByteStream> c, final ByteBiFunction<Nth> nextSelector) {
+    public static ByteStream merge(final Collection<? extends ByteStream> c, final ByteBiFunction<MergeResult> nextSelector) {
         if (N.isNullOrEmpty(c)) {
             return empty();
         } else if (c.size() == 1) {
@@ -1772,7 +1772,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static ByteStream parallelMerge(final Collection<? extends ByteStream> c, final ByteBiFunction<Nth> nextSelector) {
+    public static ByteStream parallelMerge(final Collection<? extends ByteStream> c, final ByteBiFunction<MergeResult> nextSelector) {
         return parallelMerge(c, nextSelector, DEFAULT_MAX_THREAD_NUM);
     }
 
@@ -1783,7 +1783,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param maxThreadNum
      * @return
      */
-    public static ByteStream parallelMerge(final Collection<? extends ByteStream> c, final ByteBiFunction<Nth> nextSelector, final int maxThreadNum) {
+    public static ByteStream parallelMerge(final Collection<? extends ByteStream> c, final ByteBiFunction<MergeResult> nextSelector, final int maxThreadNum) {
         N.checkArgument(maxThreadNum > 0, "'maxThreadNum' must not less than 1");
 
         if (maxThreadNum <= 1) {

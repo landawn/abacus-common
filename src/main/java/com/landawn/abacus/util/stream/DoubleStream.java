@@ -42,7 +42,7 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.IndexedDouble;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
@@ -418,7 +418,7 @@ public abstract class DoubleStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public abstract DoubleStream merge(final DoubleStream b, final DoubleBiFunction<Nth> nextSelector);
+    public abstract DoubleStream merge(final DoubleStream b, final DoubleBiFunction<MergeResult> nextSelector);
 
     public abstract DoubleStream zipWith(DoubleStream b, DoubleBinaryOperator zipFunction);
 
@@ -539,7 +539,7 @@ public abstract class DoubleStream
     private static final Function<double[][], DoubleStream> flatMappper = new Function<double[][], DoubleStream>() {
         @Override
         public DoubleStream apply(double[][] t) {
-            return DoubleStream.flat(t);
+            return DoubleStream.flatten(t);
         }
     };
 
@@ -591,11 +591,11 @@ public abstract class DoubleStream
         });
     }
 
-    public static DoubleStream flat(final double[][] a) {
+    public static DoubleStream flatten(final double[][] a) {
         return N.isNullOrEmpty(a) ? empty() : Stream.of(a).flatMapToDouble(flatMapper);
     }
 
-    public static DoubleStream flat(final double[][] a, final boolean vertically) {
+    public static DoubleStream flatten(final double[][] a, final boolean vertically) {
         if (N.isNullOrEmpty(a)) {
             return empty();
         } else if (a.length == 1) {
@@ -654,7 +654,7 @@ public abstract class DoubleStream
         return of(iter);
     }
 
-    public static DoubleStream flat(final double[][] a, final double valueForNone, final boolean vertically) {
+    public static DoubleStream flatten(final double[][] a, final double valueForNone, final boolean vertically) {
         if (N.isNullOrEmpty(a)) {
             return empty();
         } else if (a.length == 1) {
@@ -744,7 +744,7 @@ public abstract class DoubleStream
         return of(iter);
     }
 
-    public static DoubleStream flat(final double[][][] a) {
+    public static DoubleStream flatten(final double[][][] a) {
         return N.isNullOrEmpty(a) ? empty() : Stream.of(a).flatMapToDouble(flatMappper);
     }
 
@@ -1459,7 +1459,7 @@ public abstract class DoubleStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static DoubleStream merge(final double[] a, final double[] b, final DoubleBiFunction<Nth> nextSelector) {
+    public static DoubleStream merge(final double[] a, final double[] b, final DoubleBiFunction<MergeResult> nextSelector) {
         if (N.isNullOrEmpty(a)) {
             return of(b);
         } else if (N.isNullOrEmpty(b)) {
@@ -1481,7 +1481,7 @@ public abstract class DoubleStream
             public double nextDouble() {
                 if (cursorA < lenA) {
                     if (cursorB < lenB) {
-                        if (nextSelector.apply(a[cursorA], b[cursorB]) == Nth.FIRST) {
+                        if (nextSelector.apply(a[cursorA], b[cursorB]) == MergeResult.TAKE_FIRST) {
                             return a[cursorA++];
                         } else {
                             return b[cursorB++];
@@ -1506,7 +1506,7 @@ public abstract class DoubleStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static DoubleStream merge(final double[] a, final double[] b, final double[] c, final DoubleBiFunction<Nth> nextSelector) {
+    public static DoubleStream merge(final double[] a, final double[] b, final double[] c, final DoubleBiFunction<MergeResult> nextSelector) {
         return merge(merge(a, b, nextSelector).iteratorEx(), DoubleStream.of(c).iteratorEx(), nextSelector);
     }
 
@@ -1517,7 +1517,7 @@ public abstract class DoubleStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static DoubleStream merge(final DoubleIterator a, final DoubleIterator b, final DoubleBiFunction<Nth> nextSelector) {
+    public static DoubleStream merge(final DoubleIterator a, final DoubleIterator b, final DoubleBiFunction<MergeResult> nextSelector) {
         return new IteratorDoubleStream(new DoubleIteratorEx() {
             private double nextA = 0;
             private double nextB = 0;
@@ -1533,7 +1533,7 @@ public abstract class DoubleStream
             public double nextDouble() {
                 if (hasNextA) {
                     if (b.hasNext()) {
-                        if (nextSelector.apply(nextA, (nextB = b.nextDouble())) == Nth.FIRST) {
+                        if (nextSelector.apply(nextA, (nextB = b.nextDouble())) == MergeResult.TAKE_FIRST) {
                             hasNextA = false;
                             hasNextB = true;
                             return nextA;
@@ -1546,7 +1546,7 @@ public abstract class DoubleStream
                     }
                 } else if (hasNextB) {
                     if (a.hasNext()) {
-                        if (nextSelector.apply((nextA = a.nextDouble()), nextB) == Nth.FIRST) {
+                        if (nextSelector.apply((nextA = a.nextDouble()), nextB) == MergeResult.TAKE_FIRST) {
                             return nextA;
                         } else {
                             hasNextA = true;
@@ -1559,7 +1559,7 @@ public abstract class DoubleStream
                     }
                 } else if (a.hasNext()) {
                     if (b.hasNext()) {
-                        if (nextSelector.apply((nextA = a.nextDouble()), (nextB = b.nextDouble())) == Nth.FIRST) {
+                        if (nextSelector.apply((nextA = a.nextDouble()), (nextB = b.nextDouble())) == MergeResult.TAKE_FIRST) {
                             hasNextB = true;
                             return nextA;
                         } else {
@@ -1586,7 +1586,7 @@ public abstract class DoubleStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static DoubleStream merge(final DoubleIterator a, final DoubleIterator b, final DoubleIterator c, final DoubleBiFunction<Nth> nextSelector) {
+    public static DoubleStream merge(final DoubleIterator a, final DoubleIterator b, final DoubleIterator c, final DoubleBiFunction<MergeResult> nextSelector) {
         return merge(merge(a, b, nextSelector).iteratorEx(), c, nextSelector);
     }
 
@@ -1597,7 +1597,7 @@ public abstract class DoubleStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static DoubleStream merge(final DoubleStream a, final DoubleStream b, final DoubleBiFunction<Nth> nextSelector) {
+    public static DoubleStream merge(final DoubleStream a, final DoubleStream b, final DoubleBiFunction<MergeResult> nextSelector) {
         return merge(a.iteratorEx(), b.iteratorEx(), nextSelector).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
@@ -1609,7 +1609,7 @@ public abstract class DoubleStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static DoubleStream merge(final DoubleStream a, final DoubleStream b, final DoubleStream c, final DoubleBiFunction<Nth> nextSelector) {
+    public static DoubleStream merge(final DoubleStream a, final DoubleStream b, final DoubleStream c, final DoubleBiFunction<MergeResult> nextSelector) {
         return merge(merge(a, b, nextSelector), c, nextSelector);
     }
 
@@ -1619,7 +1619,7 @@ public abstract class DoubleStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static DoubleStream merge(final Collection<? extends DoubleStream> c, final DoubleBiFunction<Nth> nextSelector) {
+    public static DoubleStream merge(final Collection<? extends DoubleStream> c, final DoubleBiFunction<MergeResult> nextSelector) {
         if (N.isNullOrEmpty(c)) {
             return empty();
         } else if (c.size() == 1) {
@@ -1645,7 +1645,7 @@ public abstract class DoubleStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static DoubleStream parallelMerge(final Collection<? extends DoubleStream> c, final DoubleBiFunction<Nth> nextSelector) {
+    public static DoubleStream parallelMerge(final Collection<? extends DoubleStream> c, final DoubleBiFunction<MergeResult> nextSelector) {
         return parallelMerge(c, nextSelector, DEFAULT_MAX_THREAD_NUM);
     }
 
@@ -1656,7 +1656,7 @@ public abstract class DoubleStream
      * @param maxThreadNum
      * @return
      */
-    public static DoubleStream parallelMerge(final Collection<? extends DoubleStream> c, final DoubleBiFunction<Nth> nextSelector, final int maxThreadNum) {
+    public static DoubleStream parallelMerge(final Collection<? extends DoubleStream> c, final DoubleBiFunction<MergeResult> nextSelector, final int maxThreadNum) {
         N.checkArgument(maxThreadNum > 0, "'maxThreadNum' must not less than 1");
 
         if (maxThreadNum <= 1) {

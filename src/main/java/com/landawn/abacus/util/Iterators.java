@@ -1877,7 +1877,7 @@ public final class Iterators {
      * @return
      */
     public static <T> ObjIterator<T> merge(final Collection<? extends T> a, final Collection<? extends T> b,
-            final BiFunction<? super T, ? super T, Nth> nextSelector) {
+            final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
         final Iterator<T> iterA = N.isNullOrEmpty(a) ? ObjIterator.<T> empty() : (Iterator<T>) a.iterator();
         final Iterator<T> iterB = N.isNullOrEmpty(b) ? ObjIterator.<T> empty() : (Iterator<T>) b.iterator();
 
@@ -1894,7 +1894,7 @@ public final class Iterators {
      * @return
      */
     public static <T> ObjIterator<T> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
-            final BiFunction<? super T, ? super T, Nth> nextSelector) {
+            final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
         N.checkArgNotNull(nextSelector);
 
         return new ObjIterator<T>() {
@@ -1914,7 +1914,7 @@ public final class Iterators {
             public T next() {
                 if (hasNextA) {
                     if (iterB.hasNext()) {
-                        if (nextSelector.apply(nextA, (nextB = iterB.next())) == Nth.FIRST) {
+                        if (nextSelector.apply(nextA, (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
                             hasNextA = false;
                             hasNextB = true;
                             return nextA;
@@ -1927,7 +1927,7 @@ public final class Iterators {
                     }
                 } else if (hasNextB) {
                     if (iterA.hasNext()) {
-                        if (nextSelector.apply((nextA = iterA.next()), nextB) == Nth.FIRST) {
+                        if (nextSelector.apply((nextA = iterA.next()), nextB) == MergeResult.TAKE_FIRST) {
                             return nextA;
                         } else {
                             hasNextA = true;
@@ -1940,7 +1940,7 @@ public final class Iterators {
                     }
                 } else if (iterA.hasNext()) {
                     if (iterB.hasNext()) {
-                        if (nextSelector.apply((nextA = iterA.next()), (nextB = iterB.next())) == Nth.FIRST) {
+                        if (nextSelector.apply((nextA = iterA.next()), (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
                             hasNextB = true;
                             return nextA;
                         } else {

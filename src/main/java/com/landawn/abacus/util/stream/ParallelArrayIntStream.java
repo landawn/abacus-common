@@ -28,7 +28,7 @@ import com.landawn.abacus.util.IntSummaryStatistics;
 import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u.Holder;
@@ -1646,7 +1646,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
     }
 
     @Override
-    public IntStream merge(final IntStream b, final IntBiFunction<Nth> nextSelector) {
+    public IntStream merge(final IntStream b, final IntBiFunction<MergeResult> nextSelector) {
         return new ParallelIteratorIntStream(IntStream.merge(this, b, nextSelector), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 

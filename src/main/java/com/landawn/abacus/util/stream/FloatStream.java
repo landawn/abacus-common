@@ -41,7 +41,7 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.IndexedFloat;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
@@ -417,7 +417,7 @@ public abstract class FloatStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public abstract FloatStream merge(final FloatStream b, final FloatBiFunction<Nth> nextSelector);
+    public abstract FloatStream merge(final FloatStream b, final FloatBiFunction<MergeResult> nextSelector);
 
     public abstract FloatStream zipWith(FloatStream b, FloatBinaryOperator zipFunction);
 
@@ -539,15 +539,15 @@ public abstract class FloatStream
     private static final Function<float[][], FloatStream> flatMappper = new Function<float[][], FloatStream>() {
         @Override
         public FloatStream apply(float[][] t) {
-            return FloatStream.flat(t);
+            return FloatStream.flatten(t);
         }
     };
 
-    public static FloatStream flat(final float[][] a) {
+    public static FloatStream flatten(final float[][] a) {
         return N.isNullOrEmpty(a) ? empty() : Stream.of(a).flatMapToFloat(flatMapper);
     }
 
-    public static FloatStream flat(final float[][] a, final boolean vertically) {
+    public static FloatStream flatten(final float[][] a, final boolean vertically) {
         if (N.isNullOrEmpty(a)) {
             return empty();
         } else if (a.length == 1) {
@@ -606,7 +606,7 @@ public abstract class FloatStream
         return of(iter);
     }
 
-    public static FloatStream flat(final float[][] a, final float valueForNone, final boolean vertically) {
+    public static FloatStream flatten(final float[][] a, final float valueForNone, final boolean vertically) {
         if (N.isNullOrEmpty(a)) {
             return empty();
         } else if (a.length == 1) {
@@ -696,7 +696,7 @@ public abstract class FloatStream
         return of(iter);
     }
 
-    public static FloatStream flat(final float[][][] a) {
+    public static FloatStream flatten(final float[][][] a) {
         return N.isNullOrEmpty(a) ? empty() : Stream.of(a).flatMapToFloat(flatMappper);
     }
 
@@ -1356,7 +1356,7 @@ public abstract class FloatStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static FloatStream merge(final float[] a, final float[] b, final FloatBiFunction<Nth> nextSelector) {
+    public static FloatStream merge(final float[] a, final float[] b, final FloatBiFunction<MergeResult> nextSelector) {
         if (N.isNullOrEmpty(a)) {
             return of(b);
         } else if (N.isNullOrEmpty(b)) {
@@ -1378,7 +1378,7 @@ public abstract class FloatStream
             public float nextFloat() {
                 if (cursorA < lenA) {
                     if (cursorB < lenB) {
-                        if (nextSelector.apply(a[cursorA], b[cursorB]) == Nth.FIRST) {
+                        if (nextSelector.apply(a[cursorA], b[cursorB]) == MergeResult.TAKE_FIRST) {
                             return a[cursorA++];
                         } else {
                             return b[cursorB++];
@@ -1403,7 +1403,7 @@ public abstract class FloatStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static FloatStream merge(final float[] a, final float[] b, final float[] c, final FloatBiFunction<Nth> nextSelector) {
+    public static FloatStream merge(final float[] a, final float[] b, final float[] c, final FloatBiFunction<MergeResult> nextSelector) {
         return merge(merge(a, b, nextSelector).iteratorEx(), FloatStream.of(c).iteratorEx(), nextSelector);
     }
 
@@ -1414,7 +1414,7 @@ public abstract class FloatStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static FloatStream merge(final FloatIterator a, final FloatIterator b, final FloatBiFunction<Nth> nextSelector) {
+    public static FloatStream merge(final FloatIterator a, final FloatIterator b, final FloatBiFunction<MergeResult> nextSelector) {
         return new IteratorFloatStream(new FloatIteratorEx() {
             private float nextA = 0;
             private float nextB = 0;
@@ -1430,7 +1430,7 @@ public abstract class FloatStream
             public float nextFloat() {
                 if (hasNextA) {
                     if (b.hasNext()) {
-                        if (nextSelector.apply(nextA, (nextB = b.nextFloat())) == Nth.FIRST) {
+                        if (nextSelector.apply(nextA, (nextB = b.nextFloat())) == MergeResult.TAKE_FIRST) {
                             hasNextA = false;
                             hasNextB = true;
                             return nextA;
@@ -1443,7 +1443,7 @@ public abstract class FloatStream
                     }
                 } else if (hasNextB) {
                     if (a.hasNext()) {
-                        if (nextSelector.apply((nextA = a.nextFloat()), nextB) == Nth.FIRST) {
+                        if (nextSelector.apply((nextA = a.nextFloat()), nextB) == MergeResult.TAKE_FIRST) {
                             return nextA;
                         } else {
                             hasNextA = true;
@@ -1456,7 +1456,7 @@ public abstract class FloatStream
                     }
                 } else if (a.hasNext()) {
                     if (b.hasNext()) {
-                        if (nextSelector.apply((nextA = a.nextFloat()), (nextB = b.nextFloat())) == Nth.FIRST) {
+                        if (nextSelector.apply((nextA = a.nextFloat()), (nextB = b.nextFloat())) == MergeResult.TAKE_FIRST) {
                             hasNextB = true;
                             return nextA;
                         } else {
@@ -1483,7 +1483,7 @@ public abstract class FloatStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static FloatStream merge(final FloatIterator a, final FloatIterator b, final FloatIterator c, final FloatBiFunction<Nth> nextSelector) {
+    public static FloatStream merge(final FloatIterator a, final FloatIterator b, final FloatIterator c, final FloatBiFunction<MergeResult> nextSelector) {
         return merge(merge(a, b, nextSelector).iteratorEx(), c, nextSelector);
     }
 
@@ -1494,7 +1494,7 @@ public abstract class FloatStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static FloatStream merge(final FloatStream a, final FloatStream b, final FloatBiFunction<Nth> nextSelector) {
+    public static FloatStream merge(final FloatStream a, final FloatStream b, final FloatBiFunction<MergeResult> nextSelector) {
         return merge(a.iteratorEx(), b.iteratorEx(), nextSelector).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
@@ -1506,7 +1506,7 @@ public abstract class FloatStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static FloatStream merge(final FloatStream a, final FloatStream b, final FloatStream c, final FloatBiFunction<Nth> nextSelector) {
+    public static FloatStream merge(final FloatStream a, final FloatStream b, final FloatStream c, final FloatBiFunction<MergeResult> nextSelector) {
         return merge(merge(a, b, nextSelector), c, nextSelector);
     }
 
@@ -1516,7 +1516,7 @@ public abstract class FloatStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static FloatStream merge(final Collection<? extends FloatStream> c, final FloatBiFunction<Nth> nextSelector) {
+    public static FloatStream merge(final Collection<? extends FloatStream> c, final FloatBiFunction<MergeResult> nextSelector) {
         if (N.isNullOrEmpty(c)) {
             return empty();
         } else if (c.size() == 1) {
@@ -1542,7 +1542,7 @@ public abstract class FloatStream
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    public static FloatStream parallelMerge(final Collection<? extends FloatStream> c, final FloatBiFunction<Nth> nextSelector) {
+    public static FloatStream parallelMerge(final Collection<? extends FloatStream> c, final FloatBiFunction<MergeResult> nextSelector) {
         return parallelMerge(c, nextSelector, DEFAULT_MAX_THREAD_NUM);
     }
 
@@ -1553,7 +1553,7 @@ public abstract class FloatStream
      * @param maxThreadNum
      * @return
      */
-    public static FloatStream parallelMerge(final Collection<? extends FloatStream> c, final FloatBiFunction<Nth> nextSelector, final int maxThreadNum) {
+    public static FloatStream parallelMerge(final Collection<? extends FloatStream> c, final FloatBiFunction<MergeResult> nextSelector, final int maxThreadNum) {
         N.checkArgument(maxThreadNum > 0, "'maxThreadNum' must not less than 1");
 
         if (maxThreadNum <= 1) {

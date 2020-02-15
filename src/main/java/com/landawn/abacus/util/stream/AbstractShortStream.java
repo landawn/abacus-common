@@ -32,7 +32,7 @@ import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.MutableShort;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.ShortIterator;
@@ -994,7 +994,7 @@ abstract class AbstractShortStream extends ShortStream {
     }
 
     @Override
-    public ShortStream merge(ShortStream b, ShortBiFunction<Nth> nextSelector) {
+    public ShortStream merge(ShortStream b, ShortBiFunction<MergeResult> nextSelector) {
         return ShortStream.merge(this, b, nextSelector);
     }
 

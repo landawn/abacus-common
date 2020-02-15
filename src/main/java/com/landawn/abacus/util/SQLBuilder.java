@@ -34,12 +34,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.landawn.abacus.DirtyMarker;
 import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.annotation.Column;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.NonUpdatable;
 import com.landawn.abacus.annotation.ReadOnly;
 import com.landawn.abacus.annotation.ReadOnlyId;
-import com.landawn.abacus.annotation.Table;
 import com.landawn.abacus.annotation.Transient;
 import com.landawn.abacus.condition.Between;
 import com.landawn.abacus.condition.Binary;
@@ -430,19 +428,11 @@ public abstract class SQLBuilder {
         String[] entityTableNames = classTableNameMap.get(entityClass);
 
         if (entityTableNames == null) {
-            if (entityClass.isAnnotationPresent(Table.class)) {
-                entityTableNames = Array.repeat(entityClass.getAnnotation(Table.class).value(), 3);
-            } else {
-                try {
-                    if (entityClass.isAnnotationPresent(javax.persistence.Table.class)) {
-                        entityTableNames = Array.repeat(entityClass.getAnnotation(javax.persistence.Table.class).name(), 3);
-                    }
-                } catch (Throwable e) {
-                    logger.warn("To support javax.persistence.Table/Column, please add dependence javax.persistence:persistence-api");
-                }
-            }
+            final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
 
-            if (entityTableNames == null) {
+            if (N.notNullOrEmpty(entityInfo.tableName)) {
+                entityTableNames = Array.repeat(entityInfo.tableName, 3);
+            } else {
                 final String simpleClassName = ClassUtil.getSimpleClassName(entityClass);
                 entityTableNames = new String[] { ClassUtil.toLowerCaseWithUnderscore(simpleClassName), ClassUtil.toUpperCaseWithUnderscore(simpleClassName),
                         ClassUtil.toCamelCase(simpleClassName) };
@@ -690,7 +680,7 @@ public abstract class SQLBuilder {
                 final Set<String> subEntityPropNameSet = N.newLinkedHashSet();
 
                 for (PropInfo propInfo : entityInfo.propInfoList) {
-                    if (!propInfo.isAnnotationPresent(Column.class)
+                    if (N.isNullOrEmpty(propInfo.columnName)
                             && (propInfo.type.isEntity() || (propInfo.type.isCollection() && propInfo.type.getElementType().isEntity()))
                             && (nonSubEntityPropNames == null || !nonSubEntityPropNames.contains(propInfo.name))) {
                         subEntityPropNameSet.add(propInfo.name);
@@ -3160,23 +3150,10 @@ public abstract class SQLBuilder {
 
         Map<String, String> propColumnNameMap = new HashMap<>();
         final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
-        String columnName = null;
 
         for (PropInfo propInfo : entityInfo.propInfoList) {
-            if (propInfo.isAnnotationPresent(Column.class)) {
-                columnName = propInfo.getAnnotation(Column.class).value();
-            } else {
-                try {
-                    if (propInfo.isAnnotationPresent(javax.persistence.Column.class)) {
-                        columnName = propInfo.getAnnotation(javax.persistence.Column.class).name();
-                    }
-                } catch (Throwable e) {
-                    logger.warn("To support javax.persistence.Table/Column, please add dependence javax.persistence:persistence-api");
-                }
-            }
-
-            if (N.notNullOrEmpty(columnName)) {
-                propColumnNameMap.put(propInfo.name, columnName);
+            if (N.notNullOrEmpty(propInfo.columnName)) {
+                propColumnNameMap.put(propInfo.name, propInfo.columnName);
             } else {
                 propColumnNameMap.put(propInfo.name, formalizeColumnName(propInfo.name, namingPolicy));
 

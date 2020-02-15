@@ -9787,13 +9787,13 @@ public final class Fn extends Comparators {
         @Deprecated
         @Beta
         @SequentialOnly
-        public static CharBiFunction<Nth> alternate() {
-            return new CharBiFunction<Nth>() {
+        public static CharBiFunction<MergeResult> alternate() {
+            return new CharBiFunction<MergeResult>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 
                 @Override
-                public Nth apply(char t, char u) {
-                    return flag.getAndInvert() ? Nth.FIRST : Nth.SECOND;
+                public MergeResult apply(char t, char u) {
+                    return flag.getAndInvert() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
                 }
             };
         }
@@ -10061,13 +10061,13 @@ public final class Fn extends Comparators {
         @Deprecated
         @Beta
         @SequentialOnly
-        public static ByteBiFunction<Nth> alternate() {
-            return new ByteBiFunction<Nth>() {
+        public static ByteBiFunction<MergeResult> alternate() {
+            return new ByteBiFunction<MergeResult>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 
                 @Override
-                public Nth apply(byte t, byte u) {
-                    return flag.getAndInvert() ? Nth.FIRST : Nth.SECOND;
+                public MergeResult apply(byte t, byte u) {
+                    return flag.getAndInvert() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
                 }
             };
         }
@@ -10335,13 +10335,13 @@ public final class Fn extends Comparators {
         @Deprecated
         @Beta
         @SequentialOnly
-        public static ShortBiFunction<Nth> alternate() {
-            return new ShortBiFunction<Nth>() {
+        public static ShortBiFunction<MergeResult> alternate() {
+            return new ShortBiFunction<MergeResult>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 
                 @Override
-                public Nth apply(short t, short u) {
-                    return flag.getAndInvert() ? Nth.FIRST : Nth.SECOND;
+                public MergeResult apply(short t, short u) {
+                    return flag.getAndInvert() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
                 }
             };
         }
@@ -10609,13 +10609,13 @@ public final class Fn extends Comparators {
         @Deprecated
         @Beta
         @SequentialOnly
-        public static IntBiFunction<Nth> alternate() {
-            return new IntBiFunction<Nth>() {
+        public static IntBiFunction<MergeResult> alternate() {
+            return new IntBiFunction<MergeResult>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 
                 @Override
-                public Nth apply(int t, int u) {
-                    return flag.getAndInvert() ? Nth.FIRST : Nth.SECOND;
+                public MergeResult apply(int t, int u) {
+                    return flag.getAndInvert() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
                 }
             };
         }
@@ -10883,13 +10883,13 @@ public final class Fn extends Comparators {
         @Deprecated
         @Beta
         @SequentialOnly
-        public static LongBiFunction<Nth> alternate() {
-            return new LongBiFunction<Nth>() {
+        public static LongBiFunction<MergeResult> alternate() {
+            return new LongBiFunction<MergeResult>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 
                 @Override
-                public Nth apply(long t, long u) {
-                    return flag.getAndInvert() ? Nth.FIRST : Nth.SECOND;
+                public MergeResult apply(long t, long u) {
+                    return flag.getAndInvert() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
                 }
             };
         }
@@ -11157,13 +11157,13 @@ public final class Fn extends Comparators {
         @Deprecated
         @Beta
         @SequentialOnly
-        public static FloatBiFunction<Nth> alternate() {
-            return new FloatBiFunction<Nth>() {
+        public static FloatBiFunction<MergeResult> alternate() {
+            return new FloatBiFunction<MergeResult>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 
                 @Override
-                public Nth apply(float t, float u) {
-                    return flag.getAndInvert() ? Nth.FIRST : Nth.SECOND;
+                public MergeResult apply(float t, float u) {
+                    return flag.getAndInvert() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
                 }
             };
         }
@@ -11431,13 +11431,13 @@ public final class Fn extends Comparators {
         @Deprecated
         @Beta
         @SequentialOnly
-        public static DoubleBiFunction<Nth> alternate() {
-            return new DoubleBiFunction<Nth>() {
+        public static DoubleBiFunction<MergeResult> alternate() {
+            return new DoubleBiFunction<MergeResult>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 
                 @Override
-                public Nth apply(double t, double u) {
-                    return flag.getAndInvert() ? Nth.FIRST : Nth.SECOND;
+                public MergeResult apply(double t, double u) {
+                    return flag.getAndInvert() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
                 }
             };
         }

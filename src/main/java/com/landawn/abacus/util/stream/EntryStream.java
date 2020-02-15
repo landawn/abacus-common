@@ -45,7 +45,7 @@ import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NoCachingNoUpdating;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableEntry;
-import com.landawn.abacus.util.Nth;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Throwables;
@@ -1972,7 +1972,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     public static <K, V> EntryStream<K, V> merge(final Map<K, V> a, final Map<K, V> b,
-            final BiFunction<? super Map.Entry<K, V>, ? super Map.Entry<K, V>, Nth> nextSelector) {
+            final BiFunction<? super Map.Entry<K, V>, ? super Map.Entry<K, V>, MergeResult> nextSelector) {
         N.checkArgNotNull(nextSelector);
 
         if (N.isNullOrEmpty(a)) {
@@ -1985,7 +1985,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     public static <K, V> EntryStream<K, V> merge(final Map<K, V> a, final Map<K, V> b, final Map<K, V> c,
-            final BiFunction<? super Map.Entry<K, V>, ? super Map.Entry<K, V>, Nth> nextSelector) {
+            final BiFunction<? super Map.Entry<K, V>, ? super Map.Entry<K, V>, MergeResult> nextSelector) {
         N.checkArgNotNull(nextSelector);
 
         if (N.isNullOrEmpty(a)) {
@@ -2000,7 +2000,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     public static <K, V> EntryStream<K, V> merge(final Collection<? extends Map<K, V>> maps,
-            final BiFunction<? super Map.Entry<K, V>, ? super Map.Entry<K, V>, Nth> nextSelector) {
+            final BiFunction<? super Map.Entry<K, V>, ? super Map.Entry<K, V>, MergeResult> nextSelector) {
         N.checkArgNotNull(nextSelector);
 
         if (N.isNullOrEmpty(maps)) {

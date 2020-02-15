@@ -57,13 +57,13 @@ import com.landawn.abacus.util.Indexed;
 import com.landawn.abacus.util.Iterables;
 import com.landawn.abacus.util.Joiner;
 import com.landawn.abacus.util.ListMultimap;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Multimap;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableEntry;
-import com.landawn.abacus.util.Nth;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
@@ -4476,7 +4476,7 @@ abstract class AbstractStream<T> extends Stream<T> {
     //    }
 
     @Override
-    public Stream<T> merge(final Stream<? extends T> b, final BiFunction<? super T, ? super T, Nth> nextSelector) {
+    public Stream<T> merge(final Stream<? extends T> b, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
         return Stream.merge(this, b, nextSelector);
     }
 
@@ -4501,30 +4501,42 @@ abstract class AbstractStream<T> extends Stream<T> {
         return Stream.zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     }
 
+    private static final Throwables.Function<Object, String, IOException> TO_LINE_OF_STRING = new Throwables.Function<Object, String, IOException>() {
+        @Override
+        public String apply(Object t) throws IOException {
+            return N.stringOf(t);
+        }
+    };
+
     @Override
-    public long persist(File file, Throwables.Function<? super T, String, IOException> toLine) throws IOException {
+    public long persist(final File file) throws IOException {
+        return persist(TO_LINE_OF_STRING, file);
+    }
+
+    @Override
+    public long persist(final Throwables.Function<? super T, String, IOException> toLine, final File file) throws IOException {
         final Writer writer = new FileWriter(file);
 
         try {
-            return persist(writer, toLine);
+            return persist(toLine, writer);
         } finally {
             IOUtil.close(writer);
         }
     }
 
     @Override
-    public long persist(OutputStream os, Throwables.Function<? super T, String, IOException> toLine) throws IOException {
+    public long persist(final Throwables.Function<? super T, String, IOException> toLine, final OutputStream os) throws IOException {
         final BufferedWriter bw = Objectory.createBufferedWriter(os);
 
         try {
-            return persist(bw, toLine);
+            return persist(toLine, bw);
         } finally {
             Objectory.recycle(bw);
         }
     }
 
     @Override
-    public long persist(Writer writer, Throwables.Function<? super T, String, IOException> toLine) throws IOException {
+    public long persist(final Throwables.Function<? super T, String, IOException> toLine, final Writer writer) throws IOException {
         assertNotClosed();
 
         try {

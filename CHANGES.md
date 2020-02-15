@@ -1,3 +1,10 @@
+### 1.20.4
+
+* Rename `Stream.flat` to `Stream.flattern`.
+* Rename `Nth` to `MergeResult`.
+* Improvements and bug fix.
+
+
 ### 1.20.3
 
 * Improvements and bug fix.
