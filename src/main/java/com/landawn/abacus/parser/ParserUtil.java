@@ -398,6 +398,10 @@ public final class ParserUtil {
                 propInfoMap.put(xmlPropName, propInfo);
                 propInfoMap.put(jsonPropName, propInfo);
 
+                if (N.notNullOrEmpty(propInfo.columnName) && !propInfoMap.containsKey(propInfo.columnName)) {
+                    propInfoMap.put(propInfo.columnName, propInfo);
+                }
+
                 if (isSerializable(propInfo.field) == false) {
                     // skip
                 } else {
