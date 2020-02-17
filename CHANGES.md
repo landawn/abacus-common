@@ -1,3 +1,9 @@
+### 1.20.7
+
+* Add `@Stateful`.
+* Improvements and bug fix.
+
+
 ### 1.20.6
 
 * Improvements and bug fix.

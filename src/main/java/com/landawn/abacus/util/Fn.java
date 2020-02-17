@@ -53,6 +53,7 @@ import java.util.regex.Pattern;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SequentialOnly;
+import com.landawn.abacus.annotation.Stateful;
 import com.landawn.abacus.exception.DuplicatedResultException;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableArray;
 import com.landawn.abacus.util.Tuple.Tuple1;
@@ -663,6 +664,8 @@ public final class Fn extends Comparators {
      * @param supplier
      * @return
      */
+    @Beta
+    @Stateful
     public static <T> Supplier<T> memoize(final Supplier<T> supplier) {
         return LazyInitializer.of(supplier);
     }
@@ -674,6 +677,8 @@ public final class Fn extends Comparators {
      * @param func
      * @return
      */
+    @Beta
+    @Stateful
     public static <T, R> Function<T, R> memoize(final Function<? super T, ? extends R> func) {
         return new Function<T, R>() {
             private volatile R resultForNull = (R) NONE;
@@ -727,6 +732,7 @@ public final class Fn extends Comparators {
      * @see {@code Stream.split/sliding};
      * @deprecated
      */
+    @Stateful
     @Deprecated
     @Beta
     @SequentialOnly
@@ -759,6 +765,7 @@ public final class Fn extends Comparators {
      * @see {@code Stream.split/sliding};
      * @deprecated
      */
+    @Stateful
     @Deprecated
     @Beta
     @SequentialOnly
@@ -3213,6 +3220,7 @@ public final class Fn extends Comparators {
      * @return
      */
     @Beta
+    @Stateful
     public static <T> Predicate<T> limitThenFilter(final int limit, final Predicate<T> predicate) {
         N.checkArgNotNull(predicate);
 
@@ -3236,6 +3244,7 @@ public final class Fn extends Comparators {
      * @return
      */
     @Beta
+    @Stateful
     public static <T, U> BiPredicate<T, U> limitThenFilter(final int limit, final BiPredicate<T, U> predicate) {
         N.checkArgNotNull(predicate);
 
@@ -3258,6 +3267,7 @@ public final class Fn extends Comparators {
      * @return
      */
     @Beta
+    @Stateful
     public static <T> Predicate<T> filterThenLimit(final Predicate<T> predicate, final int limit) {
         N.checkArgNotNull(predicate);
 
@@ -3281,6 +3291,7 @@ public final class Fn extends Comparators {
      * @return
      */
     @Beta
+    @Stateful
     public static <T, U> BiPredicate<T, U> filterThenLimit(final BiPredicate<T, U> predicate, final int limit) {
         N.checkArgNotNull(predicate);
 
@@ -3302,6 +3313,7 @@ public final class Fn extends Comparators {
      * @return
      */
     @Beta
+    @Stateful
     public static <T> Predicate<T> timeLimit(final long timeInMillis) {
         N.checkArgNotNegative(timeInMillis, "timeInMillis");
 
@@ -3336,6 +3348,7 @@ public final class Fn extends Comparators {
      * @return
      */
     @Beta
+    @Stateful
     public static <T> Predicate<T> timeLimit(final Duration duration) {
         N.checkArgNotNull(duration, "duration");
 
@@ -3350,6 +3363,7 @@ public final class Fn extends Comparators {
      */
     @Beta
     @SequentialOnly
+    @Stateful
     public static <T> Function<T, Indexed<T>> indexed() {
         return new Function<T, Indexed<T>>() {
             private final MutableLong idx = new MutableLong(0);
@@ -3370,6 +3384,7 @@ public final class Fn extends Comparators {
      */
     @Beta
     @SequentialOnly
+    @Stateful
     public static <T> Predicate<T> indexed(final IndexedPredicate<T> predicate) {
         return Predicates.indexed(predicate);
     }
@@ -5553,6 +5568,26 @@ public final class Fn extends Comparators {
     }
 
     /**
+     * Returns a stateful {@code BiFunction}. Don't cache or reuse it.
+     *
+     * @param <T>
+     * @return
+     */
+    @Beta
+    @SequentialOnly
+    @Stateful
+    public static <T> BiFunction<T, T, MergeResult> alternated() {
+        return new BiFunction<T, T, MergeResult>() {
+            private final MutableBoolean flag = MutableBoolean.of(true);
+
+            @Override
+            public MergeResult apply(T t, T u) {
+                return flag.getAndInvert() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
+            }
+        };
+    }
+
+    /**
      * Adds the all.
      *
      * @param <T>
@@ -7385,6 +7420,7 @@ public final class Fn extends Comparators {
          */
         @Beta
         @SequentialOnly
+        @Stateful
         public static <T> Predicate<T> indexed(final IndexedPredicate<T> predicate) {
             N.checkArgNotNull(predicate);
 
@@ -7406,6 +7442,7 @@ public final class Fn extends Comparators {
          */
         @Beta
         @SequentialOnly
+        @Stateful
         public static <T> Predicate<T> distinct() {
             return new Predicate<T>() {
                 private final Set<Object> set = N.newHashSet();
@@ -7426,6 +7463,7 @@ public final class Fn extends Comparators {
          */
         @Beta
         @SequentialOnly
+        @Stateful
         public static <T> Predicate<T> distinctBy(final Function<? super T, ?> mapper) {
             return new Predicate<T>() {
                 private final Set<Object> set = N.newHashSet();
@@ -7444,6 +7482,7 @@ public final class Fn extends Comparators {
          * @return
          */
         @Beta
+        @Stateful
         public static <T> Predicate<T> concurrentDistinct() {
             return new Predicate<T>() {
                 private final Map<Object, Object> map = new ConcurrentHashMap<>();
@@ -7463,6 +7502,7 @@ public final class Fn extends Comparators {
          * @return
          */
         @Beta
+        @Stateful
         public static <T> Predicate<T> concurrentDistinctBy(final Function<? super T, ?> mapper) {
             return new Predicate<T>() {
                 private final Map<Object, Object> map = new ConcurrentHashMap<>();
@@ -7483,6 +7523,7 @@ public final class Fn extends Comparators {
          */
         @Beta
         @SequentialOnly
+        @Stateful
         public static <T> Predicate<T> skipRepeats() {
             return new Predicate<T>() {
                 private T pre = (T) NONE;
@@ -7759,6 +7800,7 @@ public final class Fn extends Comparators {
          */
         @Beta
         @SequentialOnly
+        @Stateful
         public static <T, U> BiPredicate<T, U> indexed(final IndexedBiPredicate<T, U> predicate) {
             N.checkArgNotNull(predicate);
 
@@ -7866,6 +7908,7 @@ public final class Fn extends Comparators {
          */
         @Beta
         @SequentialOnly
+        @Stateful
         public static <T> Consumer<T> indexed(final IndexedConsumer<T> action) {
             N.checkArgNotNull(action);
 
@@ -8148,6 +8191,7 @@ public final class Fn extends Comparators {
          */
         @Beta
         @SequentialOnly
+        @Stateful
         public static <U, T> BiConsumer<U, T> indexed(final IndexedBiConsumer<U, T> action) {
             N.checkArgNotNull(action);
 
@@ -8236,6 +8280,7 @@ public final class Fn extends Comparators {
          */
         @Beta
         @SequentialOnly
+        @Stateful
         public static <T, R> Function<T, R> indexed(final IndexedFunction<T, R> func) {
             N.checkArgNotNull(func);
 
@@ -8545,6 +8590,7 @@ public final class Fn extends Comparators {
          */
         @Beta
         @SequentialOnly
+        @Stateful
         public static <U, T, R> BiFunction<U, T, R> indexed(final IndexedBiFunction<U, T, R> func) {
             N.checkArgNotNull(func);
 
@@ -9787,7 +9833,8 @@ public final class Fn extends Comparators {
         @Deprecated
         @Beta
         @SequentialOnly
-        public static CharBiFunction<MergeResult> alternate() {
+        @Stateful
+        public static CharBiFunction<MergeResult> alternated() {
             return new CharBiFunction<MergeResult>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 
@@ -10061,7 +10108,8 @@ public final class Fn extends Comparators {
         @Deprecated
         @Beta
         @SequentialOnly
-        public static ByteBiFunction<MergeResult> alternate() {
+        @Stateful
+        public static ByteBiFunction<MergeResult> alternated() {
             return new ByteBiFunction<MergeResult>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 
@@ -10335,7 +10383,8 @@ public final class Fn extends Comparators {
         @Deprecated
         @Beta
         @SequentialOnly
-        public static ShortBiFunction<MergeResult> alternate() {
+        @Stateful
+        public static ShortBiFunction<MergeResult> alternated() {
             return new ShortBiFunction<MergeResult>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 
@@ -10609,7 +10658,8 @@ public final class Fn extends Comparators {
         @Deprecated
         @Beta
         @SequentialOnly
-        public static IntBiFunction<MergeResult> alternate() {
+        @Stateful
+        public static IntBiFunction<MergeResult> alternated() {
             return new IntBiFunction<MergeResult>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 
@@ -10883,7 +10933,8 @@ public final class Fn extends Comparators {
         @Deprecated
         @Beta
         @SequentialOnly
-        public static LongBiFunction<MergeResult> alternate() {
+        @Stateful
+        public static LongBiFunction<MergeResult> alternated() {
             return new LongBiFunction<MergeResult>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 
@@ -11157,7 +11208,8 @@ public final class Fn extends Comparators {
         @Deprecated
         @Beta
         @SequentialOnly
-        public static FloatBiFunction<MergeResult> alternate() {
+        @Stateful
+        public static FloatBiFunction<MergeResult> alternated() {
             return new FloatBiFunction<MergeResult>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 
@@ -11431,7 +11483,8 @@ public final class Fn extends Comparators {
         @Deprecated
         @Beta
         @SequentialOnly
-        public static DoubleBiFunction<MergeResult> alternate() {
+        @Stateful
+        public static DoubleBiFunction<MergeResult> alternated() {
             return new DoubleBiFunction<MergeResult>() {
                 private final MutableBoolean flag = MutableBoolean.of(true);
 

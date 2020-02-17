@@ -34,6 +34,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.landawn.abacus.DirtyMarker;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
+import com.landawn.abacus.annotation.SequentialOnly;
+import com.landawn.abacus.annotation.Stateful;
 import com.landawn.abacus.core.DirtyMarkerUtil;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.logging.Logger;
@@ -316,23 +318,30 @@ public final class InternalUtil {
     }
 
     /**
+     * Don't cache or reuse the returned {@code BiRowMapper} instance. It's stateful.
      *
      * @param <T>
      * @param targetClass
      * @return
      */
+    @Beta
+    @SequentialOnly
+    @Stateful
     public static <T> Throwables.BiFunction<ResultSet, List<String>, T, SQLException> to(Class<? extends T> targetClass) {
         return to(targetClass, false);
     }
 
     /**
-     * Don't cache or reuse the returned {@code BiRowMapper} instance.
+     * Don't cache or reuse the returned {@code BiRowMapper} instance. It's stateful.
      *
      * @param <T>
      * @param targetClass
      * @param ignoreNonMatchedColumns
      * @return
      */
+    @Beta
+    @SequentialOnly
+    @Stateful
     public static <T> Throwables.BiFunction<ResultSet, List<String>, T, SQLException> to(Class<? extends T> targetClass,
             final boolean ignoreNonMatchedColumns) {
         if (Object[].class.isAssignableFrom(targetClass)) {
