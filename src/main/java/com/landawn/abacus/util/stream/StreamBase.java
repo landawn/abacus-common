@@ -1616,7 +1616,7 @@ abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, 
     }
 
     static <T> T[] toArray(Collection<T> c) {
-        if (isListElementDataFieldGettable && listElementDataField != null && c instanceof ArrayList) {
+        if (isListElementDataFieldGettable && listElementDataField != null && c.getClass().equals(ArrayList.class)) {
             try {
                 return (T[]) listElementDataField.get(c);
             } catch (Throwable e) {

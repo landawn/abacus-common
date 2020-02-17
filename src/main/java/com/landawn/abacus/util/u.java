@@ -182,8 +182,8 @@ public class u {
          * @throws E the e
          * @throws E2 the e2
          */
-        public <E extends Exception, E2 extends Exception> Optional<T> ifPresentOrElse(Throwables.Consumer<? super T, E> action, Throwables.Runnable<E2> emptyAction)
-                throws E, E2 {
+        public <E extends Exception, E2 extends Exception> Optional<T> ifPresentOrElse(Throwables.Consumer<? super T, E> action,
+                Throwables.Runnable<E2> emptyAction) throws E, E2 {
             N.checkArgNotNull(action, "action");
             N.checkArgNotNull(emptyAction, "emptyAction");
 
@@ -391,6 +391,10 @@ public class u {
             } else {
                 return empty();
             }
+        }
+
+        public boolean contains(final T element) {
+            return isPresent() && N.equals(this.value, element);
         }
 
         /**
@@ -708,8 +712,8 @@ public class u {
          * @throws E the e
          * @throws E2 the e2
          */
-        public <E extends Exception, E2 extends Exception> OptionalBoolean ifPresentOrElse(Throwables.BooleanConsumer<E> action, Throwables.Runnable<E2> emptyAction)
-                throws E, E2 {
+        public <E extends Exception, E2 extends Exception> OptionalBoolean ifPresentOrElse(Throwables.BooleanConsumer<E> action,
+                Throwables.Runnable<E2> emptyAction) throws E, E2 {
             N.checkArgNotNull(action, "action");
             N.checkArgNotNull(emptyAction, "emptyAction");
 
@@ -1136,7 +1140,8 @@ public class u {
          * @throws E the e
          * @throws E2 the e2
          */
-        public <E extends Exception, E2 extends Exception> OptionalChar ifPresentOrElse(Throwables.CharConsumer<E> action, Throwables.Runnable<E2> emptyAction) throws E, E2 {
+        public <E extends Exception, E2 extends Exception> OptionalChar ifPresentOrElse(Throwables.CharConsumer<E> action, Throwables.Runnable<E2> emptyAction)
+                throws E, E2 {
             N.checkArgNotNull(action, "action");
             N.checkArgNotNull(emptyAction, "emptyAction");
 
@@ -1575,7 +1580,8 @@ public class u {
          * @throws E the e
          * @throws E2 the e2
          */
-        public <E extends Exception, E2 extends Exception> OptionalByte ifPresentOrElse(Throwables.ByteConsumer<E> action, Throwables.Runnable<E2> emptyAction) throws E, E2 {
+        public <E extends Exception, E2 extends Exception> OptionalByte ifPresentOrElse(Throwables.ByteConsumer<E> action, Throwables.Runnable<E2> emptyAction)
+                throws E, E2 {
             N.checkArgNotNull(action, "action");
             N.checkArgNotNull(emptyAction, "emptyAction");
 
@@ -2005,8 +2011,8 @@ public class u {
          * @throws E the e
          * @throws E2 the e2
          */
-        public <E extends Exception, E2 extends Exception> OptionalShort ifPresentOrElse(Throwables.ShortConsumer<E> action, Throwables.Runnable<E2> emptyAction)
-                throws E, E2 {
+        public <E extends Exception, E2 extends Exception> OptionalShort ifPresentOrElse(Throwables.ShortConsumer<E> action,
+                Throwables.Runnable<E2> emptyAction) throws E, E2 {
             N.checkArgNotNull(action, "action");
             N.checkArgNotNull(emptyAction, "emptyAction");
 
@@ -2464,7 +2470,8 @@ public class u {
          * @throws E the e
          * @throws E2 the e2
          */
-        public <E extends Exception, E2 extends Exception> OptionalInt ifPresentOrElse(Throwables.IntConsumer<E> action, Throwables.Runnable<E2> emptyAction) throws E, E2 {
+        public <E extends Exception, E2 extends Exception> OptionalInt ifPresentOrElse(Throwables.IntConsumer<E> action, Throwables.Runnable<E2> emptyAction)
+                throws E, E2 {
             N.checkArgNotNull(action, "action");
             N.checkArgNotNull(emptyAction, "emptyAction");
 
@@ -2937,7 +2944,8 @@ public class u {
          * @throws E the e
          * @throws E2 the e2
          */
-        public <E extends Exception, E2 extends Exception> OptionalLong ifPresentOrElse(Throwables.LongConsumer<E> action, Throwables.Runnable<E2> emptyAction) throws E, E2 {
+        public <E extends Exception, E2 extends Exception> OptionalLong ifPresentOrElse(Throwables.LongConsumer<E> action, Throwables.Runnable<E2> emptyAction)
+                throws E, E2 {
             N.checkArgNotNull(action, "action");
             N.checkArgNotNull(emptyAction, "emptyAction");
 
@@ -3397,8 +3405,8 @@ public class u {
          * @throws E the e
          * @throws E2 the e2
          */
-        public <E extends Exception, E2 extends Exception> OptionalFloat ifPresentOrElse(Throwables.FloatConsumer<E> action, Throwables.Runnable<E2> emptyAction)
-                throws E, E2 {
+        public <E extends Exception, E2 extends Exception> OptionalFloat ifPresentOrElse(Throwables.FloatConsumer<E> action,
+                Throwables.Runnable<E2> emptyAction) throws E, E2 {
             N.checkArgNotNull(action, "action");
             N.checkArgNotNull(emptyAction, "emptyAction");
 
@@ -3841,8 +3849,8 @@ public class u {
          * @throws E the e
          * @throws E2 the e2
          */
-        public <E extends Exception, E2 extends Exception> OptionalDouble ifPresentOrElse(Throwables.DoubleConsumer<E> action, Throwables.Runnable<E2> emptyAction)
-                throws E, E2 {
+        public <E extends Exception, E2 extends Exception> OptionalDouble ifPresentOrElse(Throwables.DoubleConsumer<E> action,
+                Throwables.Runnable<E2> emptyAction) throws E, E2 {
             N.checkArgNotNull(action, "action");
             N.checkArgNotNull(emptyAction, "emptyAction");
 
@@ -4365,8 +4373,8 @@ public class u {
          * @throws E the e
          * @throws E2 the e2
          */
-        public <E extends Exception, E2 extends Exception> Nullable<T> ifPresentOrElse(Throwables.Consumer<? super T, E> action, Throwables.Runnable<E2> emptyAction)
-                throws E, E2 {
+        public <E extends Exception, E2 extends Exception> Nullable<T> ifPresentOrElse(Throwables.Consumer<? super T, E> action,
+                Throwables.Runnable<E2> emptyAction) throws E, E2 {
             N.checkArgNotNull(action, "action");
             N.checkArgNotNull(emptyAction, "emptyAction");
 
@@ -4408,8 +4416,8 @@ public class u {
          * @throws E the e
          * @throws E2 the e2
          */
-        public <E extends Exception, E2 extends Exception> Nullable<T> ifNotNullOrElse(Throwables.Consumer<? super T, E> action, Throwables.Runnable<E2> emptyAction)
-                throws E, E2 {
+        public <E extends Exception, E2 extends Exception> Nullable<T> ifNotNullOrElse(Throwables.Consumer<? super T, E> action,
+                Throwables.Runnable<E2> emptyAction) throws E, E2 {
             N.checkArgNotNull(action, "action");
             N.checkArgNotNull(emptyAction, "emptyAction");
 
@@ -4817,6 +4825,10 @@ public class u {
             } else {
                 return empty();
             }
+        }
+
+        public boolean contains(final T element) {
+            return isPresent() && N.equals(this.value, element);
         }
 
         /**
@@ -5434,7 +5446,8 @@ public class u {
          * @throws E the e
          * @throws E2 the e2
          */
-        public <E extends Exception, E2 extends Exception> void ifNotNullOrElse(Throwables.Consumer<? super T, E> action, Throwables.Runnable<E2> emptyAction) throws E, E2 {
+        public <E extends Exception, E2 extends Exception> void ifNotNullOrElse(Throwables.Consumer<? super T, E> action, Throwables.Runnable<E2> emptyAction)
+                throws E, E2 {
             N.checkArgNotNull(action, "action");
             N.checkArgNotNull(emptyAction, "emptyAction");
 

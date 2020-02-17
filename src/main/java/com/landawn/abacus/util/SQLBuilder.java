@@ -430,8 +430,8 @@ public abstract class SQLBuilder {
         if (entityTableNames == null) {
             final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
 
-            if (N.notNullOrEmpty(entityInfo.tableName)) {
-                entityTableNames = Array.repeat(entityInfo.tableName, 3);
+            if (entityInfo.tableName.isPresent()) {
+                entityTableNames = Array.repeat(entityInfo.tableName.get(), 3);
             } else {
                 final String simpleClassName = ClassUtil.getSimpleClassName(entityClass);
                 entityTableNames = new String[] { ClassUtil.toLowerCaseWithUnderscore(simpleClassName), ClassUtil.toUpperCaseWithUnderscore(simpleClassName),
@@ -680,7 +680,7 @@ public abstract class SQLBuilder {
                 final Set<String> subEntityPropNameSet = N.newLinkedHashSet();
 
                 for (PropInfo propInfo : entityInfo.propInfoList) {
-                    if (N.isNullOrEmpty(propInfo.columnName)
+                    if (!propInfo.columnName.isPresent()
                             && (propInfo.type.isEntity() || (propInfo.type.isCollection() && propInfo.type.getElementType().isEntity()))
                             && (nonSubEntityPropNames == null || !nonSubEntityPropNames.contains(propInfo.name))) {
                         subEntityPropNameSet.add(propInfo.name);
@@ -3152,8 +3152,8 @@ public abstract class SQLBuilder {
         final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
 
         for (PropInfo propInfo : entityInfo.propInfoList) {
-            if (N.notNullOrEmpty(propInfo.columnName)) {
-                propColumnNameMap.put(propInfo.name, propInfo.columnName);
+            if (propInfo.columnName.isPresent()) {
+                propColumnNameMap.put(propInfo.name, propInfo.columnName.get());
             } else {
                 propColumnNameMap.put(propInfo.name, formalizeColumnName(propInfo.name, namingPolicy));
 

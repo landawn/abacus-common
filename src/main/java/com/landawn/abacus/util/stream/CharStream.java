@@ -38,13 +38,12 @@ import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.Fn.FnC;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.IndexedChar;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
-import com.landawn.abacus.util.StringUtil;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Optional;
@@ -521,7 +520,7 @@ public abstract class CharStream
     @ParallelSupported
     @TerminalOp
     public abstract <E extends Exception> void forEachIndexed(Throwables.IndexedCharConsumer<E> action) throws E;
-    
+
     public abstract <E extends Exception> boolean anyMatch(final Throwables.CharPredicate<E> predicate) throws E;
 
     public abstract <E extends Exception> boolean allMatch(final Throwables.CharPredicate<E> predicate) throws E;
@@ -700,7 +699,7 @@ public abstract class CharStream
         }
 
         if (str instanceof String) {
-            return of(StringUtil.getCharsForReadOnly((String) str), startIndex, endIndex);
+            return of(com.landawn.abacus.util.InternalUtil.getCharsForReadOnly((String) str), startIndex, endIndex);
         }
 
         final CharIteratorEx iter = new CharIteratorEx() {

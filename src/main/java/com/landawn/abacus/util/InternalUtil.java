@@ -16,12 +16,15 @@
 
 package com.landawn.abacus.util;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -29,6 +32,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.landawn.abacus.DirtyMarker;
+import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.core.DirtyMarkerUtil;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.logging.Logger;
@@ -38,17 +43,19 @@ import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 
-/**
- * TODO: copied from {@code com.landawn.abacus.util.JdbcUtil}.
- *
- * @see {@code com.landawn.abacus.util.JdbcUtil}
+/**  
+ * 
+ * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
  */
-final class InternalJdbcUtil {
+@Deprecated
+@Internal
+@Beta
+public final class InternalUtil {
 
     /** The Constant logger. */
-    private static final Logger logger = LoggerFactory.getLogger(InternalJdbcUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(InternalUtil.class);
 
-    private InternalJdbcUtil() {
+    private InternalUtil() {
         // singleton for utility class
     }
 
@@ -60,7 +67,7 @@ final class InternalJdbcUtil {
      *
      * @param rs
      */
-    static void closeQuietly(final ResultSet rs) {
+    public static void closeQuietly(final ResultSet rs) {
         if (rs != null) {
             try {
                 rs.close();
@@ -78,7 +85,7 @@ final class InternalJdbcUtil {
      *
      * @param stmt
      */
-    static void closeQuietly(final Statement stmt) {
+    public static void closeQuietly(final Statement stmt) {
         if (stmt != null) {
             try {
                 stmt.close();
@@ -96,7 +103,7 @@ final class InternalJdbcUtil {
      *
      * @param conn
      */
-    static void closeQuietly(final Connection conn) {
+    public static void closeQuietly(final Connection conn) {
         if (conn != null) {
             try {
                 conn.close();
@@ -113,7 +120,7 @@ final class InternalJdbcUtil {
      * @return
      * @throws SQLException the SQL exception
      */
-    static int skip(final ResultSet rs, int n) throws SQLException {
+    public static int skip(final ResultSet rs, int n) throws SQLException {
         return skip(rs, (long) n);
     }
 
@@ -125,7 +132,7 @@ final class InternalJdbcUtil {
      * @throws SQLException the SQL exception
      * @see {@link ResultSet#absolute(int)}
      */
-    static int skip(final ResultSet rs, long n) throws SQLException {
+    public static int skip(final ResultSet rs, long n) throws SQLException {
         if (n <= 0) {
             return 0;
         } else if (n == 1) {
@@ -154,7 +161,7 @@ final class InternalJdbcUtil {
         }
     }
 
-    static List<String> getColumnLabelList(ResultSet rs) throws SQLException {
+    public static List<String> getColumnLabelList(ResultSet rs) throws SQLException {
         final ResultSetMetaData metaData = rs.getMetaData();
         final int columnCount = metaData.getColumnCount();
         final List<String> labelList = new ArrayList<>(columnCount);
@@ -174,7 +181,7 @@ final class InternalJdbcUtil {
      * @return
      * @throws SQLException the SQL exception
      */
-    static String getColumnLabel(final ResultSetMetaData rsmd, final int columnIndex) throws SQLException {
+    public static String getColumnLabel(final ResultSetMetaData rsmd, final int columnIndex) throws SQLException {
         final String result = rsmd.getColumnLabel(columnIndex);
 
         return N.isNullOrEmpty(result) ? rsmd.getColumnName(columnIndex) : result;
@@ -188,7 +195,7 @@ final class InternalJdbcUtil {
      * @return
      * @throws UncheckedSQLException the unchecked SQL exception
      */
-    static int getColumnIndex(final ResultSet resultSet, final String columnName) throws UncheckedSQLException {
+    public static int getColumnIndex(final ResultSet resultSet, final String columnName) throws UncheckedSQLException {
         int columnIndex = -1;
 
         try {
@@ -218,7 +225,7 @@ final class InternalJdbcUtil {
      * @return
      * @throws SQLException the SQL exception
      */
-    static Object getColumnValue(final ResultSet rs, final int columnIndex) throws SQLException {
+    public static Object getColumnValue(final ResultSet rs, final int columnIndex) throws SQLException {
         // Copied from JdbcUtils#getResultSetValue(ResultSet, int) in SpringJdbc under Apache License, Version 2.0.
         //    final Object obj = rs.getObject(columnIndex);
         //
@@ -263,7 +270,7 @@ final class InternalJdbcUtil {
      * @return
      * @throws SQLException the SQL exception
      */
-    static Object getColumnValue(final ResultSet rs, final String columnLabel) throws SQLException {
+    public static Object getColumnValue(final ResultSet rs, final String columnLabel) throws SQLException {
         // Copied from JdbcUtils#getResultSetValue(ResultSet, int) in SpringJdbc under Apache License, Version 2.0.
         //    final Object obj = rs.getObject(columnLabel);
         //
@@ -314,7 +321,7 @@ final class InternalJdbcUtil {
      * @param targetClass
      * @return
      */
-    static <T> Throwables.BiFunction<ResultSet, List<String>, T, SQLException> to(Class<? extends T> targetClass) {
+    public static <T> Throwables.BiFunction<ResultSet, List<String>, T, SQLException> to(Class<? extends T> targetClass) {
         return to(targetClass, false);
     }
 
@@ -326,7 +333,8 @@ final class InternalJdbcUtil {
      * @param ignoreNonMatchedColumns
      * @return
      */
-    static <T> Throwables.BiFunction<ResultSet, List<String>, T, SQLException> to(Class<? extends T> targetClass, final boolean ignoreNonMatchedColumns) {
+    public static <T> Throwables.BiFunction<ResultSet, List<String>, T, SQLException> to(Class<? extends T> targetClass,
+            final boolean ignoreNonMatchedColumns) {
         if (Object[].class.isAssignableFrom(targetClass)) {
             return new Throwables.BiFunction<ResultSet, List<String>, T, SQLException>() {
                 @Override
@@ -335,7 +343,7 @@ final class InternalJdbcUtil {
                     final Object[] a = Array.newInstance(targetClass.getComponentType(), columnCount);
 
                     for (int i = 0; i < columnCount; i++) {
-                        a[i] = InternalJdbcUtil.getColumnValue(rs, i + 1);
+                        a[i] = InternalUtil.getColumnValue(rs, i + 1);
                     }
 
                     return (T) a;
@@ -351,7 +359,7 @@ final class InternalJdbcUtil {
                     final List<Object> c = isListOrArrayList ? new ArrayList<>(columnCount) : (List<Object>) N.newInstance(targetClass);
 
                     for (int i = 0; i < columnCount; i++) {
-                        c.add(InternalJdbcUtil.getColumnValue(rs, i + 1));
+                        c.add(InternalUtil.getColumnValue(rs, i + 1));
                     }
 
                     return (T) c;
@@ -377,7 +385,7 @@ final class InternalJdbcUtil {
                             : (isLinkedHashMap ? new LinkedHashMap<>(columnCount) : (Map<String, Object>) N.newInstance(targetClass));
 
                     for (int i = 0; i < columnCount; i++) {
-                        m.put(columnLabels[i], InternalJdbcUtil.getColumnValue(rs, i + 1));
+                        m.put(columnLabels[i], InternalUtil.getColumnValue(rs, i + 1));
                     }
 
                     return (T) m;
@@ -485,7 +493,7 @@ final class InternalJdbcUtil {
      * @param entityClass
      * @return
      */
-    static ImmutableMap<String, String> getColumn2FieldNameMap(Class<?> entityClass) {
+    public static ImmutableMap<String, String> getColumn2FieldNameMap(Class<?> entityClass) {
         ImmutableMap<String, String> result = column2FieldNameMapPool.get(entityClass);
 
         if (result == null) {
@@ -493,10 +501,10 @@ final class InternalJdbcUtil {
             final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
 
             for (PropInfo propInfo : entityInfo.propInfoList) {
-                if (N.notNullOrEmpty(propInfo.columnName)) {
-                    biMap.put(propInfo.columnName, propInfo.name);
-                    biMap.put(propInfo.columnName.toLowerCase(), propInfo.name);
-                    biMap.put(propInfo.columnName.toUpperCase(), propInfo.name);
+                if (propInfo.columnName.isPresent()) {
+                    biMap.put(propInfo.columnName.get(), propInfo.name);
+                    biMap.put(propInfo.columnName.get().toLowerCase(), propInfo.name);
+                    biMap.put(propInfo.columnName.get().toUpperCase(), propInfo.name);
                 }
             }
 
@@ -506,5 +514,181 @@ final class InternalJdbcUtil {
         }
 
         return result;
+    }
+
+    /** The Constant listElementDataField. */
+    // ...
+    static final Field listElementDataField;
+
+    /** The Constant listSizeField. */
+    static final Field listSizeField;
+
+    /** The is list element data field gettable. */
+    static volatile boolean isListElementDataFieldGettable = true;
+
+    /** The is list element data field settable. */
+    static volatile boolean isListElementDataFieldSettable = true;
+
+    static {
+        Field tmp = null;
+
+        try {
+            tmp = ArrayList.class.getDeclaredField("elementData");
+        } catch (Throwable e) {
+            // ignore.
+        }
+
+        listElementDataField = tmp != null && tmp.getType().equals(Object[].class) ? tmp : null;
+
+        if (listElementDataField != null) {
+            ClassUtil.setAccessibleQuietly(listElementDataField, true);
+        }
+
+        tmp = null;
+
+        try {
+            tmp = ArrayList.class.getDeclaredField("size");
+        } catch (Throwable e) {
+            // ignore.
+        }
+
+        listSizeField = tmp != null && tmp.getType().equals(int.class) ? tmp : null;
+
+        if (listSizeField != null) {
+            ClassUtil.setAccessibleQuietly(listSizeField, true);
+        }
+    }
+
+    /**
+     * 
+     * @param c
+     * @return
+     * @deprecated internal use only
+     */
+    @Deprecated
+    static Object[] getInternalArray(final Collection<?> c) {
+        if (c == null) {
+            return null;
+        }
+
+        if (isListElementDataFieldGettable && listElementDataField != null && c.getClass().equals(ArrayList.class)) {
+            try {
+                return (Object[]) listElementDataField.get(c);
+            } catch (Throwable e) {
+                // ignore;
+                isListElementDataFieldGettable = false;
+            }
+
+        }
+
+        return null;
+    }
+
+    /**
+     * Create an array list by initializing its elements data with the specified array <code>a</code>.
+     * The returned list may share the same elements with the specified array <code>a</code>.
+     * That's to say any change on the List/Array will affect the Array/List.
+     *
+     * @param <T>
+     * @param a
+     * @return
+     */
+    @SafeVarargs
+    static <T> List<T> createList(final T... a) {
+        if (CommonUtil.isNullOrEmpty(a)) {
+            return new ArrayList<>();
+        }
+
+        if (isListElementDataFieldSettable && listElementDataField != null && listSizeField != null) {
+            final List<T> list = new ArrayList<>();
+
+            try {
+                listElementDataField.set(list, a);
+                listSizeField.set(list, a.length);
+
+                return list;
+            } catch (Throwable e) {
+                // ignore;
+                isListElementDataFieldSettable = false;
+            }
+        }
+
+        return CommonUtil.asList(a);
+    }
+
+    /** The Constant strValueField. */
+    static final Field strValueField;
+
+    /** The is string chars gettable. */
+    static volatile boolean isStringCharsGettable = true;
+
+    /** The Constant sharedStringConstructor. */
+    static final Constructor<String> sharedStringConstructor;
+
+    static {
+        Field tmp = null;
+
+        strValueField = ((tmp != null) && tmp.getName().equals("value") && tmp.getType().equals(char[].class)) ? tmp : null;
+
+        if (strValueField != null) {
+            ClassUtil.setAccessibleQuietly(strValueField, true);
+        }
+
+        Constructor<String> tmpConstructor = null;
+
+        try {
+            tmpConstructor = String.class.getDeclaredConstructor(char[].class, boolean.class);
+            ClassUtil.setAccessibleQuietly(tmpConstructor, true);
+        } catch (Exception e) {
+            // ignore.
+        }
+
+        sharedStringConstructor = tmpConstructor;
+    }
+
+    /**
+     * Gets the chars for read only.
+     *
+     * @param str
+     * @return
+     */
+    public static char[] getCharsForReadOnly(final String str) {
+        if (isStringCharsGettable && strValueField != null && str.length() > 3) {
+            try {
+                final char[] chars = (char[]) strValueField.get(str);
+
+                if (chars.length == str.length()) {
+                    return chars;
+                } else {
+                    isStringCharsGettable = false;
+                }
+
+            } catch (Exception e) {
+                // ignore.
+                isStringCharsGettable = false;
+            }
+        }
+
+        return str.toCharArray();
+    }
+
+    /**
+     *
+     * @param a the specified array should not be modified after it's used to
+     *            create the new String.
+     * @param share the same array will be shared with the new created ArrayList
+     *            if it's true.
+     * @return
+     */ 
+    static String newString(final char[] a, final boolean share) {
+        if (share && sharedStringConstructor != null) {
+            try {
+                return sharedStringConstructor.newInstance(a, true);
+            } catch (Exception e) {
+                throw N.toRuntimeException(e);
+            }
+        } else {
+            return String.valueOf(a);
+        }
     }
 }

@@ -243,54 +243,45 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
             return empty();
         }
 
-        if (N.isListElementDataFieldGettable && N.listElementDataField != null && c instanceof ArrayList) {
-            T[] tmp = null;
+        @SuppressWarnings("deprecation")
+        final T[] a = (T[]) InternalUtil.getInternalArray(c);
 
-            try {
-                tmp = (T[]) N.listElementDataField.get(c);
-            } catch (Throwable e) {
-                // ignore;
-                N.isListElementDataFieldGettable = false;
-            }
+        if (a != null) {
+            final int len = c.size();
 
-            if (tmp != null) {
-                final T[] a = tmp;
-                final int len = c.size();
+            return newStream(new ExceptionalIterator<T, E>() {
+                private int position = 0;
 
-                return newStream(new ExceptionalIterator<T, E>() {
-                    private int position = 0;
+                @Override
+                public boolean hasNext() throws E {
+                    return position < len;
+                }
 
-                    @Override
-                    public boolean hasNext() throws E {
-                        return position < len;
+                @Override
+                public T next() throws E {
+                    if (position >= len) {
+                        throw new NoSuchElementException();
                     }
 
-                    @Override
-                    public T next() throws E {
-                        if (position >= len) {
-                            throw new NoSuchElementException();
-                        }
+                    return a[position++];
+                }
 
-                        return a[position++];
+                @Override
+                public long count() throws E {
+                    return len - position;
+                }
+
+                @Override
+                public void skip(long n) throws E {
+                    N.checkArgNotNegative(n, "n");
+
+                    if (n > len - position) {
+                        position = len;
+                    } else {
+                        position += n;
                     }
-
-                    @Override
-                    public long count() throws E {
-                        return len - position;
-                    }
-
-                    @Override
-                    public void skip(long n) throws E {
-                        N.checkArgNotNegative(n, "n");
-
-                        if (n > len - position) {
-                            position = len;
-                        } else {
-                            position += n;
-                        }
-                    }
-                });
-            }
+                }
+            });
         }
 
         return of(c.iterator());
@@ -1066,11 +1057,12 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @param resultSet
      * @return
      */
+    @SuppressWarnings("deprecation")
     public static <T> ExceptionalStream<T, SQLException> rows(final Class<T> targetClass, final ResultSet resultSet) {
         N.checkArgNotNull(targetClass, "targetClass");
         N.checkArgNotNull(resultSet, "resultSet");
 
-        return rows(resultSet, InternalJdbcUtil.to(targetClass));
+        return rows(resultSet, InternalUtil.to(targetClass));
     }
 
     /**
@@ -1091,7 +1083,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
             return rows(targetClass, resultSet).onClose(new Throwables.Runnable<SQLException>() {
                 @Override
                 public void run() throws SQLException {
-                    InternalJdbcUtil.closeQuietly(resultSet);
+                    InternalUtil.closeQuietly(resultSet);
                 }
             });
         } else {
@@ -1134,13 +1126,14 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                 return rowMapper.apply(resultSet);
             }
 
+            @SuppressWarnings("deprecation")
             @Override
             public void skip(long n) throws SQLException {
                 N.checkArgNotNegative(n, "n");
 
                 final long m = hasNext ? n - 1 : n;
 
-                InternalJdbcUtil.skip(resultSet, m);
+                InternalUtil.skip(resultSet, m);
 
                 hasNext = false;
             }
@@ -1175,6 +1168,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                 return hasNext;
             }
 
+            @SuppressWarnings("deprecation")
             @Override
             public T next() throws SQLException {
                 if (hasNext() == false) {
@@ -1184,19 +1178,20 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                 hasNext = false;
 
                 if (columnLabels == null) {
-                    columnLabels = InternalJdbcUtil.getColumnLabelList(resultSet);
+                    columnLabels = InternalUtil.getColumnLabelList(resultSet);
                 }
 
                 return rowMapper.apply(resultSet, columnLabels);
             }
 
+            @SuppressWarnings("deprecation")
             @Override
             public void skip(long n) throws SQLException {
                 N.checkArgNotNegative(n, "n");
 
                 final long m = hasNext ? n - 1 : n;
 
-                InternalJdbcUtil.skip(resultSet, m);
+                InternalUtil.skip(resultSet, m);
 
                 hasNext = false;
             }
@@ -1247,18 +1242,20 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                     throw new NoSuchElementException("No more rows");
                 }
 
-                final T next = (T) InternalJdbcUtil.getColumnValue(resultSet, newColumnIndex);
+                @SuppressWarnings("deprecation")
+                final T next = (T) InternalUtil.getColumnValue(resultSet, newColumnIndex);
                 hasNext = false;
                 return next;
             }
 
+            @SuppressWarnings("deprecation")
             @Override
             public void skip(long n) throws SQLException {
                 N.checkArgNotNegative(n, "n");
 
                 final long m = hasNext ? n - 1 : n;
 
-                InternalJdbcUtil.skip(resultSet, m);
+                InternalUtil.skip(resultSet, m);
 
                 hasNext = false;
             }
@@ -1285,7 +1282,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
             return (ExceptionalStream<T, SQLException>) rows(resultSet, columnIndex).onClose(new Throwables.Runnable<SQLException>() {
                 @Override
                 public void run() throws SQLException {
-                    InternalJdbcUtil.closeQuietly(resultSet);
+                    InternalUtil.closeQuietly(resultSet);
                 }
             });
         } else {
@@ -1318,26 +1315,28 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                 return hasNext;
             }
 
+            @SuppressWarnings("deprecation")
             @Override
             public T next() throws SQLException {
                 if (!hasNext()) {
                     throw new NoSuchElementException("No more rows");
                 }
 
-                columnIndex = columnIndex == -1 ? InternalJdbcUtil.getColumnIndex(resultSet, columnName) : columnIndex;
-
-                final T next = (T) InternalJdbcUtil.getColumnValue(resultSet, columnIndex);
+                columnIndex = columnIndex == -1 ? InternalUtil.getColumnIndex(resultSet, columnName) : columnIndex;
+ 
+                final T next = (T) InternalUtil.getColumnValue(resultSet, columnIndex);
                 hasNext = false;
                 return next;
             }
 
+            @SuppressWarnings("deprecation")
             @Override
             public void skip(long n) throws SQLException {
                 N.checkArgNotNegative(n, "n");
 
                 final long m = hasNext ? n - 1 : n;
 
-                InternalJdbcUtil.skip(resultSet, m);
+                InternalUtil.skip(resultSet, m);
 
                 hasNext = false;
             }
@@ -1364,7 +1363,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
             return (ExceptionalStream<T, SQLException>) rows(resultSet, columnName).onClose(new Throwables.Runnable<SQLException>() {
                 @Override
                 public void run() throws SQLException {
-                    InternalJdbcUtil.closeQuietly(resultSet);
+                    InternalUtil.closeQuietly(resultSet);
                 }
             });
         } else {

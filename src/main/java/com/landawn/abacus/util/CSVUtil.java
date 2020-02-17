@@ -1014,6 +1014,7 @@ public final class CSVUtil {
      * @throws UncheckedSQLException the unchecked SQL exception
      * @throws UncheckedIOException the unchecked IO exception
      */
+    @SuppressWarnings("deprecation")
     public static long exportCSV(final File out, final Connection conn, final String querySQL, final Collection<String> selectColumnNames, final long offset,
             final long count, final boolean writeTitle, final boolean quoted) throws UncheckedSQLException, UncheckedIOException {
         final ParsedSql sql = ParsedSql.parse(querySQL);
@@ -1028,7 +1029,7 @@ public final class CSVUtil {
         } catch (SQLException e) {
             throw new UncheckedSQLException(e);
         } finally {
-            InternalJdbcUtil.closeQuietly(stmt);
+            InternalUtil.closeQuietly(stmt);
         }
     }
 
@@ -1078,6 +1079,7 @@ public final class CSVUtil {
      * @throws UncheckedSQLException the unchecked SQL exception
      * @throws UncheckedIOException the unchecked IO exception
      */
+    @SuppressWarnings("deprecation")
     public static long exportCSV(final File out, final PreparedStatement stmt, final Collection<String> selectColumnNames, final long offset, final long count,
             final boolean writeTitle, final boolean quoted) throws UncheckedSQLException, UncheckedIOException {
         ResultSet rs = null;
@@ -1090,7 +1092,7 @@ public final class CSVUtil {
         } catch (SQLException e) {
             throw new UncheckedSQLException(e);
         } finally {
-            InternalJdbcUtil.closeQuietly(rs);
+            InternalUtil.closeQuietly(rs);
         }
     }
 
@@ -1268,6 +1270,7 @@ public final class CSVUtil {
      * @throws UncheckedSQLException the unchecked SQL exception
      * @throws UncheckedIOException the unchecked IO exception
      */
+    @SuppressWarnings("deprecation")
     public static long exportCSV(final Writer out, final ResultSet rs, final Collection<String> selectColumnNames, long offset, final long count,
             final boolean writeTitle, final boolean quoted) throws UncheckedSQLException, UncheckedIOException {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
@@ -1295,7 +1298,7 @@ public final class CSVUtil {
             String label = null;
 
             for (int i = 0; i < columnCount; i++) {
-                label = InternalJdbcUtil.getColumnLabel(rsmd, i + 1);
+                label = InternalUtil.getColumnLabel(rsmd, i + 1);
 
                 if (columnNameSet == null || columnNameSet.remove(label)) {
                     columnNames[i] = label;
@@ -1346,7 +1349,7 @@ public final class CSVUtil {
                     type = typeArray[i];
 
                     if (type == null) {
-                        value = InternalJdbcUtil.getColumnValue(rs, i + 1);
+                        value = InternalUtil.getColumnValue(rs, i + 1);
 
                         if (value == null) {
                             bw.write(N.NULL_CHAR_ARRAY);
@@ -1440,7 +1443,7 @@ public final class CSVUtil {
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "deprecation" })
     public static <E extends Exception> long importCSV(final File file, final long offset, final long count, final boolean skipTitle,
             final Throwables.Predicate<String[], E> filter, final Connection conn, final String insertSQL, final int batchSize, final int batchInterval,
             final List<? extends Type> columnTypeList) throws UncheckedSQLException, UncheckedIOException, E {
@@ -1453,7 +1456,7 @@ public final class CSVUtil {
         } catch (SQLException e) {
             throw new UncheckedSQLException(e);
         } finally {
-            InternalJdbcUtil.closeQuietly(stmt);
+            InternalUtil.closeQuietly(stmt);
         }
     }
 
@@ -1778,7 +1781,7 @@ public final class CSVUtil {
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "deprecation" })
     public static <E extends Exception> long importCSV(final File file, final long offset, final long count, final Throwables.Predicate<String[], E> filter,
             final Connection conn, final String insertSQL, final int batchSize, final int batchInterval, final Map<String, ? extends Type> columnTypeMap)
             throws UncheckedSQLException, UncheckedIOException, E {
@@ -1791,7 +1794,7 @@ public final class CSVUtil {
         } catch (SQLException e) {
             throw new UncheckedSQLException(e);
         } finally {
-            InternalJdbcUtil.closeQuietly(stmt);
+            InternalUtil.closeQuietly(stmt);
         }
     }
 
@@ -2077,7 +2080,8 @@ public final class CSVUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static long importCSV(final File file, final Connection conn, final String insertSQL,
-            final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter) throws UncheckedSQLException, UncheckedIOException {
+            final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter)
+            throws UncheckedSQLException, UncheckedIOException {
         return importCSV(file, 0, Long.MAX_VALUE, conn, insertSQL, 200, 0, stmtSetter);
     }
 
@@ -2118,9 +2122,11 @@ public final class CSVUtil {
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      */
+    @SuppressWarnings("deprecation")
     public static <E extends Exception> long importCSV(final File file, final long offset, final long count, final Throwables.Predicate<String[], E> filter,
             final Connection conn, final String insertSQL, final int batchSize, final int batchInterval,
-            final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter) throws UncheckedSQLException, UncheckedIOException, E {
+            final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter)
+            throws UncheckedSQLException, UncheckedIOException, E {
         PreparedStatement stmt = null;
 
         try {
@@ -2130,7 +2136,7 @@ public final class CSVUtil {
         } catch (SQLException e) {
             throw new UncheckedSQLException(e);
         } finally {
-            InternalJdbcUtil.closeQuietly(stmt);
+            InternalUtil.closeQuietly(stmt);
         }
     }
 
@@ -2144,7 +2150,8 @@ public final class CSVUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static long importCSV(final File file, final PreparedStatement stmt,
-            final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter) throws UncheckedSQLException, UncheckedIOException {
+            final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter)
+            throws UncheckedSQLException, UncheckedIOException {
         return importCSV(file, 0, Long.MAX_VALUE, stmt, 200, 0, stmtSetter);
     }
 
@@ -2186,7 +2193,8 @@ public final class CSVUtil {
      */
     public static <E extends Exception> long importCSV(final File file, final long offset, final long count, final Throwables.Predicate<String[], E> filter,
             final PreparedStatement stmt, final int batchSize, final int batchInterval,
-            final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter) throws UncheckedSQLException, UncheckedIOException, E {
+            final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter)
+            throws UncheckedSQLException, UncheckedIOException, E {
         Reader reader = null;
 
         try {
@@ -2210,7 +2218,8 @@ public final class CSVUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static long importCSV(final InputStream is, final PreparedStatement stmt,
-            final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter) throws UncheckedSQLException, UncheckedIOException {
+            final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter)
+            throws UncheckedSQLException, UncheckedIOException {
         return importCSV(is, 0, Long.MAX_VALUE, stmt, 200, 0, stmtSetter);
     }
 
@@ -2252,7 +2261,8 @@ public final class CSVUtil {
      */
     public static <E extends Exception> long importCSV(final InputStream is, long offset, final long count, final Throwables.Predicate<String[], E> filter,
             final PreparedStatement stmt, final int batchSize, final int batchInterval,
-            final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter) throws UncheckedSQLException, UncheckedIOException, E {
+            final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter)
+            throws UncheckedSQLException, UncheckedIOException, E {
         final Reader reader = new InputStreamReader(is);
         return importCSV(reader, offset, count, filter, stmt, batchSize, batchInterval, stmtSetter);
     }
@@ -2267,7 +2277,8 @@ public final class CSVUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static long importCSV(final Reader reader, final PreparedStatement stmt,
-            final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter) throws UncheckedSQLException, UncheckedIOException {
+            final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter)
+            throws UncheckedSQLException, UncheckedIOException {
         return importCSV(reader, 0, Long.MAX_VALUE, stmt, 200, 0, stmtSetter);
     }
 
@@ -2286,7 +2297,8 @@ public final class CSVUtil {
      */
     @SuppressWarnings({ "unchecked" })
     public static long importCSV(final Reader reader, long offset, final long count, final PreparedStatement stmt, final int batchSize, final int batchInterval,
-            final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter) throws UncheckedSQLException, UncheckedIOException {
+            final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter)
+            throws UncheckedSQLException, UncheckedIOException {
         return importCSV(reader, offset, count, Fn.<String[]> alwaysTrue(), stmt, batchSize, batchInterval, stmtSetter);
     }
 
@@ -2310,7 +2322,8 @@ public final class CSVUtil {
     @SuppressWarnings({ "unchecked" })
     public static <E extends Exception> long importCSV(final Reader reader, long offset, final long count, final Throwables.Predicate<String[], E> filter,
             final PreparedStatement stmt, final int batchSize, final int batchInterval,
-            final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter) throws UncheckedSQLException, UncheckedIOException, E {
+            final Throwables.BiConsumer<? super PreparedStatement, ? super String[], SQLException> stmtSetter)
+            throws UncheckedSQLException, UncheckedIOException, E {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
         N.checkArgument(batchSize > 0 && batchInterval >= 0, "'batchSize'=%s must be greater than 0 and 'batchInterval'=%s can't be negative", batchSize,
                 batchInterval);

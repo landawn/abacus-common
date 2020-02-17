@@ -19,7 +19,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -449,73 +448,6 @@ class CommonUtil {
 
     /** The Constant clsTypePool. */
     private static final Map<Class<?>, Type<?>> clsTypePool = new ObjectPool<>(POOL_SIZE);
-
-    /** The Constant listElementDataField. */
-    // ...
-    static final Field listElementDataField;
-
-    /** The Constant listSizeField. */
-    static final Field listSizeField;
-
-    /** The is list element data field gettable. */
-    static volatile boolean isListElementDataFieldGettable = true;
-
-    /** The is list element data field settable. */
-    static volatile boolean isListElementDataFieldSettable = true;
-
-    static {
-        Field tmp = null;
-
-        try {
-            tmp = String.class.getDeclaredField("offset");
-        } catch (Throwable e) {
-            // ignore.
-        }
-
-        if (tmp == null) {
-            try {
-                tmp = String.class.getDeclaredField("count");
-            } catch (Throwable e) {
-                // ignore.
-            }
-        }
-
-        if (tmp == null) {
-            try {
-                tmp = String.class.getDeclaredField("value");
-            } catch (Throwable e) {
-                // ignore.
-            }
-        }
-
-        tmp = null;
-
-        try {
-            tmp = ArrayList.class.getDeclaredField("elementData");
-        } catch (Throwable e) {
-            // ignore.
-        }
-
-        listElementDataField = tmp != null && tmp.getType().equals(Object[].class) ? tmp : null;
-
-        if (listElementDataField != null) {
-            ClassUtil.setAccessibleQuietly(listElementDataField, true);
-        }
-
-        tmp = null;
-
-        try {
-            tmp = ArrayList.class.getDeclaredField("size");
-        } catch (Throwable e) {
-            // ignore.
-        }
-
-        listSizeField = tmp != null && tmp.getType().equals(int.class) ? tmp : null;
-
-        if (listSizeField != null) {
-            ClassUtil.setAccessibleQuietly(listSizeField, true);
-        }
-    }
 
     /** The Constant charStringCache. */
     static final String[] charStringCache = new String[128];
@@ -15337,6 +15269,7 @@ class CommonUtil {
      * @param step
      * @return
      */
+    @SuppressWarnings("deprecation")
     public static <T> List<T> copyOfRange(final List<T> c, int from, final int to, final int step) {
         CommonUtil.checkFromToIndex(from < to ? from : (to == -1 ? 0 : to), from < to ? to : from, c.size());
 
@@ -15364,42 +15297,10 @@ class CommonUtil {
             }
         } else {
             final T[] a = (T[]) c.subList(from, to).toArray();
-            result = createList(CommonUtil.copyOfRange(a, 0, a.length, step));
+            result = InternalUtil.createList(CommonUtil.copyOfRange(a, 0, a.length, step));
         }
 
         return result;
-    }
-
-    /**
-     * Create an array list by initializing its elements data with the specified array <code>a</code>.
-     * The returned list may share the same elements with the specified array <code>a</code>.
-     * That's to say any change on the List/Array will affect the Array/List.
-     *
-     * @param <T>
-     * @param a
-     * @return
-     */
-    @SafeVarargs
-    static <T> List<T> createList(final T... a) {
-        if (CommonUtil.isNullOrEmpty(a)) {
-            return new ArrayList<>();
-        }
-
-        if (CommonUtil.isListElementDataFieldSettable && CommonUtil.listElementDataField != null && CommonUtil.listSizeField != null) {
-            final List<T> list = new ArrayList<>();
-
-            try {
-                CommonUtil.listElementDataField.set(list, a);
-                CommonUtil.listSizeField.set(list, a.length);
-
-                return list;
-            } catch (Throwable e) {
-                // ignore;
-                CommonUtil.isListElementDataFieldSettable = false;
-            }
-        }
-
-        return CommonUtil.asList(a);
     }
 
     /**
@@ -15440,7 +15341,7 @@ class CommonUtil {
             return copyOfRange(str, from, to);
         }
 
-        return StringUtil.newString(copyOfRange(StringUtil.getCharsForReadOnly(str), from, to, step), true);
+        return InternalUtil.newString(copyOfRange(InternalUtil.getCharsForReadOnly(str), from, to, step), true);
     }
 
     /**

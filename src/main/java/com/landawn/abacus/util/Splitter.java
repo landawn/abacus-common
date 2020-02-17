@@ -210,9 +210,9 @@ public final class Splitter {
                     return new ObjIterator<String>() {
                         private final SubStringFunc subStringFunc = strip ? stripSubStringFunc : (trim ? trimSubStringFunc : defaultSubStringFunc);
                         @SuppressWarnings("deprecation")
-                        private final char[] sourceChars = StringUtil.getCharsForReadOnly(source.toString());
+                        private final char[] sourceChars = InternalUtil.getCharsForReadOnly(source.toString());
                         @SuppressWarnings("deprecation")
-                        private final char[] delimiterChars = StringUtil.getCharsForReadOnly(delimiter.toString());
+                        private final char[] delimiterChars = InternalUtil.getCharsForReadOnly(delimiter.toString());
                         private final int sourceLen = sourceChars.length;
                         private final int delimiterLen = delimiterChars.length;
                         private String next = null;

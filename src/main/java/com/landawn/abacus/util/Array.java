@@ -16,7 +16,6 @@
 package com.landawn.abacus.util;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -2326,21 +2325,13 @@ public final class Array {
             return;
         }
 
-        if (N.isListElementDataFieldGettable && N.listElementDataField != null && c instanceof ArrayList) {
-            T[] array = null;
+        @SuppressWarnings("deprecation")
+        final T[] a = (T[]) InternalUtil.getInternalArray(c);
 
-            try {
-                array = (T[]) N.listElementDataField.get(c);
-            } catch (Throwable e) {
-                // ignore;
-                N.isListElementDataFieldGettable = false;
-            }
+        if (a != null) {
+            sort(a, fromIndex, toIndex, cmp);
 
-            if (array != null) {
-                sort(array, fromIndex, toIndex, cmp);
-
-                return;
-            }
+            return;
         }
 
         final T[] array = (T[]) c.toArray();
@@ -3747,21 +3738,13 @@ public final class Array {
             return;
         }
 
-        if (N.isListElementDataFieldGettable && N.listElementDataField != null && c instanceof ArrayList) {
-            T[] array = null;
+        @SuppressWarnings("deprecation")
+        final T[] a = (T[]) InternalUtil.getInternalArray(c);
 
-            try {
-                array = (T[]) N.listElementDataField.get(c);
-            } catch (Throwable e) {
-                // ignore;
-                N.isListElementDataFieldGettable = false;
-            }
+        if (a != null) {
+            parallelSort(a, fromIndex, toIndex, cmp);
 
-            if (array != null) {
-                parallelSort(array, fromIndex, toIndex, cmp);
-
-                return;
-            }
+            return;
         }
 
         final T[] array = (T[]) c.toArray();
@@ -4527,7 +4510,7 @@ public final class Array {
     /**
      *
      * @param <T>
-     * @param list
+     * @param c
      * @param fromIndex
      * @param toIndex
      * @param key
@@ -4535,30 +4518,22 @@ public final class Array {
      * @return
      * @see Collections#binarySearch(List, Object, Comparator)
      */
-    static <T> int binarySearch(final List<? extends T> list, final int fromIndex, final int toIndex, final T key, final Comparator<? super T> cmp) {
-        if (N.isNullOrEmpty(list)) {
+    static <T> int binarySearch(final List<? extends T> c, final int fromIndex, final int toIndex, final T key, final Comparator<? super T> cmp) {
+        if (N.isNullOrEmpty(c)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        if (N.isListElementDataFieldGettable && N.listElementDataField != null && list instanceof ArrayList) {
-            T[] array = null;
+        @SuppressWarnings("deprecation")
+        final T[] a = (T[]) InternalUtil.getInternalArray(c);
 
-            try {
-                array = (T[]) N.listElementDataField.get(list);
-            } catch (Throwable e) {
-                // ignore;
-                N.isListElementDataFieldGettable = false;
-            }
-
-            if (array != null) {
-                return binarySearch(array, fromIndex, toIndex, key, cmp == null ? Comparators.NATURAL_ORDER : cmp);
-            }
+        if (a != null) {
+            return binarySearch(a, fromIndex, toIndex, key, cmp == null ? Comparators.NATURAL_ORDER : cmp);
         }
 
-        if (list instanceof RandomAccess || list.size() < BINARYSEARCH_THRESHOLD) {
-            return indexedBinarySearch(list, fromIndex, toIndex, key, cmp == null ? Comparators.NATURAL_ORDER : cmp);
+        if (c instanceof RandomAccess || c.size() < BINARYSEARCH_THRESHOLD) {
+            return indexedBinarySearch(c, fromIndex, toIndex, key, cmp == null ? Comparators.NATURAL_ORDER : cmp);
         } else {
-            return iteratorBinarySearch(list, fromIndex, toIndex, key, cmp == null ? Comparators.NATURAL_ORDER : cmp);
+            return iteratorBinarySearch(c, fromIndex, toIndex, key, cmp == null ? Comparators.NATURAL_ORDER : cmp);
         }
     }
 

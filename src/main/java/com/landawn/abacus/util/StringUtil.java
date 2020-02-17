@@ -20,8 +20,6 @@ import static com.landawn.abacus.util.WD._QUOTATION_D;
 import static com.landawn.abacus.util.WD._QUOTATION_S;
 import static java.util.logging.Level.WARNING;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.Normalizer;
@@ -38,8 +36,6 @@ import java.util.RandomAccess;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
-import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalChar;
 import com.landawn.abacus.util.u.OptionalDouble;
@@ -101,36 +97,6 @@ public abstract class StringUtil {
                 trimPreserveSplitterPool.put(delimiterChar, Splitter.with(delimiterChar).trim(true));
             }
         }
-    }
-
-    /** The Constant strValueField. */
-    static final Field strValueField;
-
-    /** The is string chars gettable. */
-    static volatile boolean isStringCharsGettable = true;
-
-    /** The Constant sharedStringConstructor. */
-    static final Constructor<String> sharedStringConstructor;
-
-    static {
-        Field tmp = null;
-
-        strValueField = ((tmp != null) && tmp.getName().equals("value") && tmp.getType().equals(char[].class)) ? tmp : null;
-
-        if (strValueField != null) {
-            ClassUtil.setAccessibleQuietly(strValueField, true);
-        }
-
-        Constructor<String> tmpConstructor = null;
-
-        try {
-            tmpConstructor = String.class.getDeclaredConstructor(char[].class, boolean.class);
-            ClassUtil.setAccessibleQuietly(tmpConstructor, true);
-        } catch (Exception e) {
-            // ignore.
-        }
-
-        sharedStringConstructor = tmpConstructor;
     }
 
     /**
@@ -289,6 +255,7 @@ public abstract class StringUtil {
      * @param padChar
      * @return
      */
+    @SuppressWarnings("deprecation")
     public static String padStart(String str, final int minLength, final char padChar) {
         if (str == null) {
             str = N.EMPTY_STRING;
@@ -303,7 +270,7 @@ public abstract class StringUtil {
 
         str.getChars(0, str.length(), chars, delta);
 
-        return newString(chars, true);
+        return InternalUtil.newString(chars, true);
     }
 
     /**
@@ -367,6 +334,7 @@ public abstract class StringUtil {
      * @param padChar
      * @return
      */
+    @SuppressWarnings("deprecation")
     public static String padEnd(String str, final int minLength, final char padChar) {
         if (str == null) {
             str = N.EMPTY_STRING;
@@ -379,7 +347,7 @@ public abstract class StringUtil {
 
         N.fill(chars, str.length(), minLength, padChar);
 
-        return newString(chars, true);
+        return InternalUtil.newString(chars, true);
     }
 
     /**
@@ -433,6 +401,7 @@ public abstract class StringUtil {
      * @param n
      * @return
      */
+    @SuppressWarnings("deprecation")
     public static String repeat(final char ch, final int n) {
         N.checkArgNotNegative(n, "n");
 
@@ -446,7 +415,7 @@ public abstract class StringUtil {
             final char[] array = new char[n];
             Arrays.fill(array, ch);
 
-            return newString(array, true);
+            return InternalUtil.newString(array, true);
         } else {
             final char[] array = new char[n];
             array[0] = ch;
@@ -461,7 +430,7 @@ public abstract class StringUtil {
                 N.copy(array, 0, array, cnt, n - cnt);
             }
 
-            return newString(array, true);
+            return InternalUtil.newString(array, true);
         }
     }
 
@@ -493,6 +462,7 @@ public abstract class StringUtil {
      * @param delimiter
      * @return
      */
+    @SuppressWarnings("deprecation")
     public static String repeat(String str, final int n, String delimiter) {
         N.checkArgNotNegative(n, "n");
 
@@ -528,7 +498,7 @@ public abstract class StringUtil {
             N.copy(cbuf, 0, cbuf, cnt, size - cnt);
         }
 
-        return newString(cbuf, true);
+        return InternalUtil.newString(cbuf, true);
     }
 
     /**
@@ -864,6 +834,7 @@ public abstract class StringUtil {
      *            the String to swap case, may be null
      * @return
      */
+    @SuppressWarnings("deprecation")
     public static String swapCase(final String str) {
         if (N.isNullOrEmpty(str)) {
             return str;
@@ -881,7 +852,7 @@ public abstract class StringUtil {
             }
         }
 
-        return newString(cbuf, true);
+        return InternalUtil.newString(cbuf, true);
     }
 
     /**
@@ -944,7 +915,8 @@ public abstract class StringUtil {
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
-        final char[] chars = getCharsForReadOnly(str);
+        @SuppressWarnings("deprecation")
+        final char[] chars = InternalUtil.getCharsForReadOnly(str);
 
         try {
             char ch = 0;
@@ -1474,7 +1446,8 @@ public abstract class StringUtil {
         if (index == N.INDEX_NOT_FOUND) {
             return str;
         } else {
-            final char[] chars = getCharsForReadOnly(str);
+            @SuppressWarnings("deprecation")
+            final char[] chars = InternalUtil.getCharsForReadOnly(str);
             final char[] cbuf = new char[str.length()];
 
             if (index > 0) {
@@ -2477,7 +2450,8 @@ public abstract class StringUtil {
             return str;
         }
 
-        final char[] chars = getCharsForReadOnly(str);
+        @SuppressWarnings("deprecation")
+        final char[] chars = InternalUtil.getCharsForReadOnly(str);
         final char[] cbuf = new char[chars.length];
         int count = 0;
         for (int i = 0, len = chars.length; i < len; i++) {
@@ -2734,7 +2708,8 @@ public abstract class StringUtil {
         final int len = cs.length();
 
         if (cs.getClass().equals(String.class)) {
-            final char[] chars = getCharsForReadOnly((String) cs);
+            @SuppressWarnings("deprecation")
+            final char[] chars = InternalUtil.getCharsForReadOnly((String) cs);
 
             for (int i = 0; i < len; i++) {
                 if (Character.isUpperCase(chars[i])) {
@@ -2766,7 +2741,8 @@ public abstract class StringUtil {
         final int len = cs.length();
 
         if (cs.getClass().equals(String.class)) {
-            final char[] chars = getCharsForReadOnly((String) cs);
+            @SuppressWarnings("deprecation")
+            final char[] chars = InternalUtil.getCharsForReadOnly((String) cs);
 
             for (int i = 0; i < len; i++) {
                 if (Character.isLowerCase(chars[i])) {
@@ -2800,7 +2776,8 @@ public abstract class StringUtil {
         final int len = cs.length();
 
         if (cs.getClass().equals(String.class)) {
-            final char[] chars = getCharsForReadOnly((String) cs);
+            @SuppressWarnings("deprecation")
+            final char[] chars = InternalUtil.getCharsForReadOnly((String) cs);
 
             for (int i = 0; i < len; i++) {
                 if (containsUppercase && containsLowercase) {
@@ -3050,7 +3027,8 @@ public abstract class StringUtil {
         final int len = cs.length();
 
         if (cs.getClass().equals(String.class)) {
-            final char[] chars = getCharsForReadOnly((String) cs);
+            @SuppressWarnings("deprecation")
+            final char[] chars = InternalUtil.getCharsForReadOnly((String) cs);
 
             for (int i = 0; i < len; i++) {
                 if (isAsciiPrintable(chars[i]) == false) {
@@ -3082,7 +3060,8 @@ public abstract class StringUtil {
         final int len = cs.length();
 
         if (cs.getClass().equals(String.class)) {
-            final char[] chars = getCharsForReadOnly((String) cs);
+            @SuppressWarnings("deprecation")
+            final char[] chars = InternalUtil.getCharsForReadOnly((String) cs);
 
             for (int i = 0; i < len; i++) {
                 if (isAsciiAlpha(chars[i]) == false) {
@@ -3114,7 +3093,8 @@ public abstract class StringUtil {
         final int len = cs.length();
 
         if (cs.getClass().equals(String.class)) {
-            final char[] chars = getCharsForReadOnly((String) cs);
+            @SuppressWarnings("deprecation")
+            final char[] chars = InternalUtil.getCharsForReadOnly((String) cs);
 
             for (int i = 0; i < len; i++) {
                 if (isAsciiAlpha(chars[i]) == false && chars[i] != ' ') {
@@ -3146,7 +3126,8 @@ public abstract class StringUtil {
         final int len = cs.length();
 
         if (cs.getClass().equals(String.class)) {
-            final char[] chars = getCharsForReadOnly((String) cs);
+            @SuppressWarnings("deprecation")
+            final char[] chars = InternalUtil.getCharsForReadOnly((String) cs);
 
             for (int i = 0; i < len; i++) {
                 if (isAsciiAlphanumeric(chars[i]) == false) {
@@ -3178,7 +3159,8 @@ public abstract class StringUtil {
         final int len = cs.length();
 
         if (cs.getClass().equals(String.class)) {
-            final char[] chars = getCharsForReadOnly((String) cs);
+            @SuppressWarnings("deprecation")
+            final char[] chars = InternalUtil.getCharsForReadOnly((String) cs);
 
             for (int i = 0; i < len; i++) {
                 if (isAsciiAlphanumeric(chars[i]) == false && chars[i] != ' ') {
@@ -3210,7 +3192,8 @@ public abstract class StringUtil {
         final int len = cs.length();
 
         if (cs.getClass().equals(String.class)) {
-            final char[] chars = getCharsForReadOnly((String) cs);
+            @SuppressWarnings("deprecation")
+            final char[] chars = InternalUtil.getCharsForReadOnly((String) cs);
 
             for (int i = 0; i < len; i++) {
                 if (isAsciiNumeric(chars[i]) == false) {
@@ -3264,7 +3247,8 @@ public abstract class StringUtil {
         final int len = cs.length();
 
         if (cs.getClass().equals(String.class)) {
-            final char[] chars = getCharsForReadOnly((String) cs);
+            @SuppressWarnings("deprecation")
+            final char[] chars = InternalUtil.getCharsForReadOnly((String) cs);
 
             for (int i = 0; i < len; i++) {
                 if (Character.isLetter(chars[i]) == false) {
@@ -3316,7 +3300,8 @@ public abstract class StringUtil {
         final int len = cs.length();
 
         if (cs.getClass().equals(String.class)) {
-            final char[] chars = getCharsForReadOnly((String) cs);
+            @SuppressWarnings("deprecation")
+            final char[] chars = InternalUtil.getCharsForReadOnly((String) cs);
 
             for (int i = 0; i < len; i++) {
                 if (Character.isLetter(chars[i]) == false && chars[i] != ' ') {
@@ -3369,7 +3354,8 @@ public abstract class StringUtil {
         final int len = cs.length();
 
         if (cs.getClass().equals(String.class)) {
-            final char[] chars = getCharsForReadOnly((String) cs);
+            @SuppressWarnings("deprecation")
+            final char[] chars = InternalUtil.getCharsForReadOnly((String) cs);
 
             for (int i = 0; i < len; i++) {
                 if (Character.isLetterOrDigit(chars[i]) == false) {
@@ -3423,7 +3409,8 @@ public abstract class StringUtil {
         final int len = cs.length();
 
         if (cs.getClass().equals(String.class)) {
-            final char[] chars = getCharsForReadOnly((String) cs);
+            @SuppressWarnings("deprecation")
+            final char[] chars = InternalUtil.getCharsForReadOnly((String) cs);
 
             for (int i = 0; i < len; i++) {
                 if (Character.isLetterOrDigit(chars[i]) == false && chars[i] != ' ') {
@@ -3488,7 +3475,8 @@ public abstract class StringUtil {
         final int len = cs.length();
 
         if (cs.getClass().equals(String.class)) {
-            final char[] chars = getCharsForReadOnly((String) cs);
+            @SuppressWarnings("deprecation")
+            final char[] chars = InternalUtil.getCharsForReadOnly((String) cs);
 
             for (int i = 0; i < len; i++) {
                 if (Character.isDigit(chars[i]) == false) {
@@ -3542,7 +3530,8 @@ public abstract class StringUtil {
         final int len = cs.length();
 
         if (cs.getClass().equals(String.class)) {
-            final char[] chars = getCharsForReadOnly((String) cs);
+            @SuppressWarnings("deprecation")
+            final char[] chars = InternalUtil.getCharsForReadOnly((String) cs);
 
             for (int i = 0; i < len; i++) {
                 if (Character.isDigit(chars[i]) == false && chars[i] != ' ') {
@@ -3594,7 +3583,8 @@ public abstract class StringUtil {
         final int len = cs.length();
 
         if (cs.getClass().equals(String.class)) {
-            final char[] chars = getCharsForReadOnly((String) cs);
+            @SuppressWarnings("deprecation")
+            final char[] chars = InternalUtil.getCharsForReadOnly((String) cs);
 
             for (int i = 0; i < len; i++) {
                 if (Character.isWhitespace(chars[i]) == false) {
@@ -3656,7 +3646,8 @@ public abstract class StringUtil {
             return false;
         }
 
-        final char[] chs = getCharsForReadOnly(str);
+        @SuppressWarnings("deprecation")
+        final char[] chs = InternalUtil.getCharsForReadOnly(str);
 
         int i = 0, num = 0;
         if (chs[i] == '+' || chs[i] == '-') {
@@ -3735,7 +3726,8 @@ public abstract class StringUtil {
             return false;
         }
 
-        final char[] chs = getCharsForReadOnly(str);
+        @SuppressWarnings("deprecation")
+        final char[] chs = InternalUtil.getCharsForReadOnly(str);
 
         int i = 0, num = 0;
         if (chs[i] == '+' || chs[i] == '-') {
@@ -4461,7 +4453,8 @@ public abstract class StringUtil {
             return false;
         }
 
-        final char[] chars = getCharsForReadOnly(str);
+        @SuppressWarnings("deprecation")
+        final char[] chars = InternalUtil.getCharsForReadOnly(str);
         for (int i = 0, len = str.length(); i < len; i++) {
             if (Character.isWhitespace(chars[i])) {
                 return true;
@@ -4925,7 +4918,8 @@ public abstract class StringUtil {
         }
 
         int count = 0;
-        final char[] chs = getCharsForReadOnly(str);
+        @SuppressWarnings("deprecation")
+        final char[] chs = InternalUtil.getCharsForReadOnly(str);
 
         for (int i = 0, len = chs.length; i < len; i++) {
             if (chs[i] == ch) {
@@ -5275,7 +5269,8 @@ public abstract class StringUtil {
             return res;
         }
 
-        final char[] chs = getCharsForReadOnly(str);
+        @SuppressWarnings("deprecation")
+        final char[] chs = InternalUtil.getCharsForReadOnly(str);
         final Deque<Integer> queue = new LinkedList<>();
 
         for (int i = idx; i < toIndex; i++) {
@@ -7879,6 +7874,7 @@ public abstract class StringUtil {
      * @param str
      * @return
      */
+    @SuppressWarnings("deprecation")
     public static String sort(String str) {
         if (N.isNullOrEmpty(str)) {
             return str;
@@ -7886,57 +7882,7 @@ public abstract class StringUtil {
 
         final char[] chs = str.toCharArray();
         Array.sort(chs);
-        return StringUtil.newString(chs, true);
-    }
-
-    /**
-     * Gets the chars for read only.
-     *
-     * @param str
-     * @return
-     */
-    @Beta
-    @Internal
-    @Deprecated
-    public static char[] getCharsForReadOnly(final String str) {
-        if (isStringCharsGettable && strValueField != null && str.length() > 3) {
-            try {
-                final char[] chars = (char[]) strValueField.get(str);
-
-                if (chars.length == str.length()) {
-                    return chars;
-                } else {
-                    isStringCharsGettable = false;
-                }
-
-            } catch (Exception e) {
-                // ignore.
-                isStringCharsGettable = false;
-            }
-        }
-
-        return str.toCharArray();
-    }
-
-    /**
-     *
-     * @param a the specified array should not be modified after it's used to
-     *            create the new String.
-     * @param share the same array will be shared with the new created ArrayList
-     *            if it's true.
-     * @return
-     */
-    @Internal
-    static String newString(final char[] a, final boolean share) {
-        if (share && sharedStringConstructor != null) {
-            try {
-                return sharedStringConstructor.newInstance(a, true);
-            } catch (Exception e) {
-                throw N.toRuntimeException(e);
-            }
-        } else {
-            return String.valueOf(a);
-        }
+        return InternalUtil.newString(chs, true);
     }
 
     /**

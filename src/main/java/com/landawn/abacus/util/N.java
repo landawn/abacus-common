@@ -5566,7 +5566,7 @@ public final class N extends CommonUtil {
      * @param toIndex
      * @return true, if successful
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "deprecation" })
     public static <T> boolean deleteRange(final List<T> c, final int fromIndex, final int toIndex) {
         checkFromToIndex(fromIndex, toIndex, c.size());
 
@@ -5577,20 +5577,22 @@ public final class N extends CommonUtil {
         if (c instanceof LinkedList || toIndex - fromIndex <= 3) {
             c.subList(fromIndex, toIndex).clear();
         } else {
-            if (isListElementDataFieldGettable && isListElementDataFieldSettable && listElementDataField != null && c instanceof ArrayList) {
-                T[] array = null;
+            final int size = c.size();
+            final T[] a = (T[]) InternalUtil.getInternalArray(c);
 
+            if (a != null) {
                 try {
-                    array = (T[]) listElementDataField.get(c);
-                    copy(array, toIndex, array, fromIndex, c.size() - toIndex);
-                    listSizeField.set(c, c.size() - (toIndex - fromIndex));
+                    copy(a, toIndex, a, fromIndex, size - toIndex);
+                    N.fill(a, size - (toIndex - fromIndex), size, null);
+                    InternalUtil.listSizeField.set(c, size - (toIndex - fromIndex));
+
                     // update modCount
                     c.add(null);
                     c.remove(c.size() - 1);
                     return true;
                 } catch (Throwable e) {
                     // ignore;
-                    isListElementDataFieldSettable = false;
+                    InternalUtil.isListElementDataFieldSettable = false;
                 }
             }
 
@@ -16996,6 +16998,7 @@ public final class N extends CommonUtil {
      * @param cmp
      * @return
      */
+    @SuppressWarnings("deprecation")
     public static <T> List<T> top(final T[] a, final int fromIndex, final int toIndex, final int n, final Comparator<? super T> cmp) {
         checkArgNotNegative(n, "n");
 
@@ -17019,7 +17022,7 @@ public final class N extends CommonUtil {
             }
         }
 
-        return createList((T[]) heap.toArray(EMPTY_OBJECT_ARRAY));
+        return InternalUtil.createList((T[]) heap.toArray(EMPTY_OBJECT_ARRAY));
     }
 
     /**
@@ -17068,6 +17071,7 @@ public final class N extends CommonUtil {
      * @param cmp
      * @return
      */
+    @SuppressWarnings("deprecation")
     public static <T> List<T> top(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int n, final Comparator<? super T> cmp) {
         checkArgNotNegative(n, "n");
 
@@ -17136,7 +17140,7 @@ public final class N extends CommonUtil {
             }
         }
 
-        return createList((T[]) heap.toArray(EMPTY_OBJECT_ARRAY));
+        return InternalUtil.createList((T[]) heap.toArray(EMPTY_OBJECT_ARRAY));
     }
 
     /**
@@ -19446,8 +19450,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> List<T> merge(final T[] a, final T[] b, final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector)
-            throws E {
+    public static <T, E extends Exception> List<T> merge(final T[] a, final T[] b,
+            final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) throws E {
         if (isNullOrEmpty(a)) {
             return isNullOrEmpty(b) ? new ArrayList<>() : asList(b);
         } else if (isNullOrEmpty(b)) {

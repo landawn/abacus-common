@@ -56,6 +56,7 @@ import com.landawn.abacus.util.ObjectPool;
 import com.landawn.abacus.util.Splitter;
 import com.landawn.abacus.util.StringUtil;
 import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.u.Optional;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -347,7 +348,7 @@ public final class ParserUtil {
         /** The hash prop info map. */
         private final Map<Integer, PropInfo> hashPropInfoMap;
 
-        public final String tableName;
+        public final Optional<String> tableName;
 
         /**
          * Instantiates a new entity info.
@@ -398,8 +399,8 @@ public final class ParserUtil {
                 propInfoMap.put(xmlPropName, propInfo);
                 propInfoMap.put(jsonPropName, propInfo);
 
-                if (N.notNullOrEmpty(propInfo.columnName) && !propInfoMap.containsKey(propInfo.columnName)) {
-                    propInfoMap.put(propInfo.columnName, propInfo);
+                if (propInfo.columnName.isPresent() && !propInfoMap.containsKey(propInfo.columnName.get())) {
+                    propInfoMap.put(propInfo.columnName.get(), propInfo);
                 }
 
                 if (isSerializable(propInfo.field) == false) {
@@ -450,7 +451,7 @@ public final class ParserUtil {
                 }
             }
 
-            this.tableName = tmpTableName;
+            this.tableName = Optional.ofNullable(tmpTableName);
         }
 
         /**
@@ -930,7 +931,7 @@ public final class ParserUtil {
         /** The has format. */
         final boolean hasFormat;
 
-        public final String columnName;
+        public final Optional<String> columnName;
 
         /**
          * Instantiates a new prop info.
@@ -962,7 +963,7 @@ public final class ParserUtil {
             numberFormat = null;
             hasFormat = false;
 
-            columnName = null;
+            columnName = Optional.<String> empty();
         }
 
         /**
@@ -1044,7 +1045,7 @@ public final class ParserUtil {
                 }
             }
 
-            this.columnName = tmpColumnName;
+            this.columnName = Optional.ofNullable(tmpColumnName);
         }
 
         /**

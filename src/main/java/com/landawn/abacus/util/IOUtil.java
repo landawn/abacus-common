@@ -1046,10 +1046,11 @@ public final class IOUtil {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
+    @SuppressWarnings("deprecation")
     public static String readString(final File file, final long offset, final int maxLen, final Charset encoding) throws UncheckedIOException {
         final char[] chs = readChars(file, offset, maxLen, encoding);
 
-        return N.isNullOrEmpty(chs) ? N.EMPTY_STRING : StringUtil.newString(chs, true);
+        return N.isNullOrEmpty(chs) ? N.EMPTY_STRING : InternalUtil.newString(chs, true);
     }
 
     /**
@@ -1096,10 +1097,11 @@ public final class IOUtil {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
+    @SuppressWarnings("deprecation")
     public static String readString(final InputStream is, final long offset, final int maxLen, final Charset encoding) throws UncheckedIOException {
         final char[] chs = readChars(is, offset, maxLen, encoding);
 
-        return N.isNullOrEmpty(chs) ? N.EMPTY_STRING : StringUtil.newString(chs, true);
+        return N.isNullOrEmpty(chs) ? N.EMPTY_STRING : InternalUtil.newString(chs, true);
     }
 
     /**
@@ -1121,10 +1123,11 @@ public final class IOUtil {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
+    @SuppressWarnings("deprecation")
     public static String readString(final Reader reader, final long offset, final int maxLen) throws UncheckedIOException {
         final char[] chs = readChars(reader, offset, maxLen);
 
-        return N.isNullOrEmpty(chs) ? N.EMPTY_STRING : StringUtil.newString(chs, true);
+        return N.isNullOrEmpty(chs) ? N.EMPTY_STRING : InternalUtil.newString(chs, true);
     }
 
     /**
@@ -6303,6 +6306,6 @@ public final class IOUtil {
      */
     @SuppressWarnings("deprecation")
     private static char[] toCharArray(CharSequence str) {
-        return str == null ? N.NULL_CHAR_ARRAY : StringUtil.getCharsForReadOnly(str instanceof String ? (String) str : str.toString());
+        return str == null ? N.NULL_CHAR_ARRAY : InternalUtil.getCharsForReadOnly(str instanceof String ? (String) str : str.toString());
     }
 }
