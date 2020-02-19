@@ -16,6 +16,7 @@ package com.landawn.abacus.parser;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -44,6 +45,7 @@ import com.landawn.abacus.core.DirtyMarkerUtil;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.type.Type;
+import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.DateUtil;
@@ -1465,17 +1467,14 @@ public final class ParserUtil {
          * @param propClass
          * @return
          */
-        @SuppressWarnings("deprecation")
         private String getAnnoType(final Field field, final Method getMethod, final Method setMethod, final Class<?> propClass) {
             final com.landawn.abacus.annotation.Type typeAnno = getAnnotation(com.landawn.abacus.annotation.Type.class);
 
             if (typeAnno != null && (typeAnno.scope() == Scope.ALL || typeAnno.scope() == Scope.PARSER)) {
-                if (N.notNullOrEmpty(typeAnno.value())) {
-                    return typeAnno.value();
-                } else if (N.notNullOrEmpty(typeAnno.name())) {
-                    return typeAnno.name();
-                } else if (propClass.isEnum()) {
-                    return ClassUtil.getCanonicalClassName(propClass) + "(" + String.valueOf(typeAnno.enumerated() == EnumBy.ORDINAL) + ")";
+                final String typeName = getTypeName(typeAnno, propClass);
+
+                if (N.notNullOrEmpty(typeName)) {
+                    return typeName;
                 }
             }
 
@@ -1501,7 +1500,6 @@ public final class ParserUtil {
          * @param propClass
          * @return
          */
-        @SuppressWarnings("deprecation")
         private String getJsonXmlAnnoType(final Field field, final Method getMethod, final Method setMethod, final Class<?> propClass) {
             final JsonXmlField jsonXmlFieldAnno = getAnnotation(JsonXmlField.class);
 
@@ -1516,12 +1514,10 @@ public final class ParserUtil {
             final com.landawn.abacus.annotation.Type typeAnno = getAnnotation(com.landawn.abacus.annotation.Type.class);
 
             if (typeAnno != null && (typeAnno.scope() == Scope.ALL || typeAnno.scope() == Scope.PARSER)) {
-                if (N.notNullOrEmpty(typeAnno.value())) {
-                    return typeAnno.value();
-                } else if (N.notNullOrEmpty(typeAnno.name())) {
-                    return typeAnno.name();
-                } else if (propClass.isEnum()) {
-                    return ClassUtil.getCanonicalClassName(propClass) + "(" + String.valueOf(typeAnno.enumerated() == EnumBy.ORDINAL) + ")";
+                final String typeName = getTypeName(typeAnno, propClass);
+
+                if (N.notNullOrEmpty(typeName)) {
+                    return typeName;
                 }
             }
 
@@ -1537,18 +1533,72 @@ public final class ParserUtil {
          * @param propClass
          * @return
          */
-        @SuppressWarnings("deprecation")
         private String getDBAnnoType(final Field field, final Method getMethod, final Method setMethod, final Class<?> propClass) {
             final com.landawn.abacus.annotation.Type typeAnno = getAnnotation(com.landawn.abacus.annotation.Type.class);
 
             if (typeAnno != null && (typeAnno.scope() == Scope.ALL || typeAnno.scope() == Scope.DB)) {
-                if (N.notNullOrEmpty(typeAnno.value())) {
-                    return typeAnno.value();
-                } else if (N.notNullOrEmpty(typeAnno.name())) {
-                    return typeAnno.name();
-                } else if (propClass.isEnum()) {
-                    return ClassUtil.getCanonicalClassName(propClass) + "(" + String.valueOf(typeAnno.enumerated() == EnumBy.ORDINAL) + ")";
+                final String typeName = getTypeName(typeAnno, propClass);
+
+                if (N.notNullOrEmpty(typeName)) {
+                    return typeName;
                 }
+            }
+
+            return null;
+        }
+
+        private String getTypeName(final com.landawn.abacus.annotation.Type typeAnno, final Class<?> propClass) {
+            @SuppressWarnings("deprecation")
+            final Optional<String> typeName = N.isNullOrEmpty(typeAnno.value())
+                    ? (N.isNullOrEmpty(typeAnno.name()) ? Optional.<String> empty() : Optional.of(typeAnno.name()))
+                    : Optional.of(typeAnno.value());
+
+            @SuppressWarnings("rawtypes")
+            final Class<? extends Type> typeClass = typeAnno.type();
+
+            if (typeClass != null && !typeClass.equals(Type.class)) {
+                Type<?> type = null;
+                @SuppressWarnings("rawtypes")
+                Constructor<? extends Type> constructor = null;
+
+                if (typeName.isPresent()) {
+                    constructor = ClassUtil.getDeclaredConstructor(typeClass, String.class);
+
+                    if (constructor != null) {
+                        ClassUtil.setAccessible(constructor, true);
+                        type = ClassUtil.invokeConstructor(constructor, typeName.get());
+                    } else {
+                        constructor = ClassUtil.getDeclaredConstructor(typeClass);
+
+                        if (constructor == null) {
+                            throw new IllegalArgumentException("No default constructor found in type class: " + typeClass);
+                        }
+
+                        ClassUtil.setAccessible(constructor, true);
+                        type = ClassUtil.invokeConstructor(constructor);
+                    }
+                } else {
+                    constructor = ClassUtil.getDeclaredConstructor(typeClass);
+
+                    if (constructor == null) {
+                        throw new IllegalArgumentException("No default constructor found in type class: " + typeClass);
+                    }
+
+                    ClassUtil.setAccessible(constructor, true);
+                    type = ClassUtil.invokeConstructor(constructor);
+                }
+
+                try {
+                    TypeFactory.registerType(type);
+                } catch (Exception e) {
+                    // ignore.
+                }
+
+                return type.name();
+            } else if (typeName.isPresent()) {
+                return typeName.get();
+            } else if (propClass.isEnum()) {
+                return ClassUtil.getCanonicalClassName(propClass) + "(" + String.valueOf(typeAnno.enumerated() == EnumBy.ORDINAL) + ")";
             }
 
             return null;
@@ -1594,41 +1644,45 @@ public final class ParserUtil {
                             : ClassUtil.getParameterizedTypeNameByMethod((setMethod == null) ? getMethod : setMethod);
                     return N.typeOf(parameterizedTypeName);
                 }
-            } else if (N.isNullOrEmpty(ClassUtil.getPackageName(entityClass))) {
-                return N.typeOf(annoType);
             } else {
-                final String pkgName = ClassUtil.getPackageName(entityClass);
-                final StringBuilder sb = new StringBuilder();
-                int start = 0;
+                Type<T> type = N.typeOf(annoType);
 
-                for (int i = 0, len = annoType.length(); i < len; i++) {
-                    char ch = annoType.charAt(i);
+                if (type == null && N.notNullOrEmpty(ClassUtil.getPackageName(entityClass))) {
+                    final String pkgName = ClassUtil.getPackageName(entityClass);
+                    final StringBuilder sb = new StringBuilder();
+                    int start = 0;
 
-                    if (ch == '<' || ch == '>' || ch == ' ' || ch == ',') {
-                        String str = annoType.substring(start, i);
+                    for (int i = 0, len = annoType.length(); i < len; i++) {
+                        char ch = annoType.charAt(i);
 
-                        if (str.length() > 0 && N.typeOf(str).clazz().equals(Object.class) && !N.typeOf(pkgName + "." + str).clazz().equals(Object.class)) {
+                        if (ch == '<' || ch == '>' || ch == ' ' || ch == ',') {
+                            String str = annoType.substring(start, i);
+
+                            if (str.length() > 0 && N.typeOf(str).clazz().equals(Object.class) && !N.typeOf(pkgName + "." + str).clazz().equals(Object.class)) {
+                                sb.append(pkgName + "." + str);
+                            } else {
+                                sb.append(str);
+                            }
+
+                            sb.append(ch);
+                            start = i + 1;
+                        }
+                    }
+
+                    if (start < annoType.length()) {
+                        String str = annoType.substring(start);
+
+                        if (N.typeOf(str).clazz().equals(Object.class) && !N.typeOf(pkgName + "." + str).clazz().equals(Object.class)) {
                             sb.append(pkgName + "." + str);
                         } else {
                             sb.append(str);
                         }
-
-                        sb.append(ch);
-                        start = i + 1;
                     }
+
+                    type = N.typeOf(sb.toString());
                 }
 
-                if (start < annoType.length()) {
-                    String str = annoType.substring(start);
-
-                    if (N.typeOf(str).clazz().equals(Object.class) && !N.typeOf(pkgName + "." + str).clazz().equals(Object.class)) {
-                        sb.append(pkgName + "." + str);
-                    } else {
-                        sb.append(str);
-                    }
-                }
-
-                return N.typeOf(sb.toString());
+                return type;
             }
         }
 

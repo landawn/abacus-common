@@ -53,6 +53,13 @@ public @interface Type {
     String name() default "";
 
     /**
+     * 
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    Class<? extends com.landawn.abacus.type.Type> type() default com.landawn.abacus.type.Type.class;
+
+    /**
      *
      * @return
      */
