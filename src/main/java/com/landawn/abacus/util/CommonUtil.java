@@ -84,6 +84,7 @@ import com.landawn.abacus.util.Iterables.Slice;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalInt;
+import com.landawn.abacus.util.function.BiPredicate;
 import com.landawn.abacus.util.function.BinaryOperator;
 import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.IntFunction;
@@ -6315,21 +6316,79 @@ class CommonUtil {
                 final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) sourceEntity);
 
                 if (signedPropNames.size() == 0) {
-                    // logger.warn("no property is signed in the specified source entity: "
-                    // + toString(entity));
+                    // logger.warn("no property is signed in the specified source entity: " + toString(entity));
                 } else {
+                    Object propValue = null;
+
                     for (String propName : signedPropNames) {
-                        targetEntityInfo.setPropValue(targetEntity, propName, srcEntityInfo.getPropValue(sourceEntity, propName), ignoreUnknownProperty);
+                        propValue = srcEntityInfo.getPropValue(sourceEntity, propName);
+
+                        if (N.notNullOrDefault(propValue)) {
+                            targetEntityInfo.setPropValue(targetEntity, propName, propValue, ignoreUnknownProperty);
+                        }
                     }
                 }
             } else {
+                Object propValue = null;
+
                 for (PropInfo propInfo : srcEntityInfo.propInfoList) {
-                    targetEntityInfo.setPropValue(targetEntity, propInfo.name, propInfo.getPropValue(sourceEntity), ignoreUnknownProperty);
+                    propValue = srcEntityInfo.getPropValue(sourceEntity, propInfo.name);
+
+                    if (N.notNullOrDefault(propValue)) {
+                        targetEntityInfo.setPropValue(targetEntity, propInfo.name, propValue, ignoreUnknownProperty);
+                    }
                 }
             }
         } else {
             for (String propName : selectPropNames) {
                 targetEntityInfo.setPropValue(targetEntity, propName, srcEntityInfo.getPropValue(sourceEntity, propName), ignoreUnknownProperty);
+            }
+        }
+
+        return targetEntity;
+    }
+
+    /**
+     * Set all the signed properties(including all primitive type properties) in
+     * the specified {@code sourceEntity} to the specified {@code targetEntity}.
+     *
+     * @param sourceEntity a Java Object what allows access to properties using getter
+     *            and setter methods.
+     * @param targetEntity a Java Object what allows access to properties using getter
+     *            and setter methods.
+     * @param filter
+     * @return {@code targetEntity}
+     */
+    public static <T> T merge(final Object sourceEntity, final T targetEntity, final BiPredicate<String, ?> filter) {
+        final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
+        final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
+        final BiPredicate<String, Object> objFilter = (BiPredicate<String, Object>) filter;
+
+        if (sourceEntity instanceof DirtyMarker) {
+            final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) sourceEntity);
+
+            if (signedPropNames.size() == 0) {
+                // logger.warn("no property is signed in the specified source entity: " + toString(entity));
+            } else {
+                Object propValue = null;
+
+                for (String propName : signedPropNames) {
+                    propValue = srcEntityInfo.getPropValue(sourceEntity, propName);
+
+                    if (objFilter.test(propName, propValue)) {
+                        targetEntityInfo.setPropValue(targetEntity, propName, propValue, false);
+                    }
+                }
+            }
+        } else {
+            Object propValue = null;
+
+            for (PropInfo propInfo : srcEntityInfo.propInfoList) {
+                propValue = propInfo.getPropValue(sourceEntity);
+
+                if (objFilter.test(propInfo.name, propValue)) {
+                    targetEntityInfo.setPropValue(targetEntity, propInfo.name, propValue, false);
+                }
             }
         }
 
@@ -6352,19 +6411,30 @@ class CommonUtil {
             final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) sourceEntity);
 
             if (signedPropNames.size() == 0) {
-                // logger.warn("no property is signed in the specified source entity: "
-                // + toString(entity));
+                // logger.warn("no property is signed in the specified source entity: " + toString(entity));
             } else {
+                Object propValue = null;
+
                 for (String propName : signedPropNames) {
                     if (ignorePropNames == null || ignorePropNames.contains(propName) == false) {
-                        targetEntityInfo.setPropValue(targetEntity, propName, srcEntityInfo.getPropValue(sourceEntity, propName), ignoreUnknownProperty);
+                        propValue = srcEntityInfo.getPropValue(sourceEntity, propName);
+
+                        if (N.notNullOrDefault(propValue)) {
+                            targetEntityInfo.setPropValue(targetEntity, propName, propValue, ignoreUnknownProperty);
+                        }
                     }
                 }
             }
         } else {
+            Object propValue = null;
+
             for (PropInfo propInfo : srcEntityInfo.propInfoList) {
                 if (ignorePropNames == null || ignorePropNames.contains(propInfo.name) == false) {
-                    targetEntityInfo.setPropValue(targetEntity, propInfo.name, propInfo.getPropValue(sourceEntity), ignoreUnknownProperty);
+                    propValue = propInfo.getPropValue(sourceEntity);
+
+                    if (N.notNullOrDefault(propValue)) {
+                        targetEntityInfo.setPropValue(targetEntity, propInfo.name, propValue, ignoreUnknownProperty);
+                    }
                 }
             }
         }
@@ -6379,8 +6449,8 @@ class CommonUtil {
      * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
      * @return {@code targetEntity}
      */
-    public static <T> T merge(final Object sourceEntity, final T targetEntity, final BinaryOperator<Object> mergeFunc) {
-        return merge(sourceEntity, targetEntity, null, mergeFunc);
+    public static <T> T merge(final Object sourceEntity, final T targetEntity, final BinaryOperator<?> mergeFunc) {
+        return merge(sourceEntity, targetEntity, (Collection<String>) null, mergeFunc);
     }
 
     /**
@@ -6395,10 +6465,10 @@ class CommonUtil {
      * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
      * @return {@code targetEntity}
      */
-    public static <T> T merge(final Object sourceEntity, final T targetEntity, final Collection<String> selectPropNames,
-            final BinaryOperator<Object> mergeFunc) {
+    public static <T> T merge(final Object sourceEntity, final T targetEntity, final Collection<String> selectPropNames, final BinaryOperator<?> mergeFunc) {
         final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
         final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
+        final BinaryOperator<Object> objMergeFunc = (BinaryOperator<Object>) mergeFunc;
         final boolean ignoreUnknownProperty = selectPropNames == null;
 
         if (selectPropNames == null) {
@@ -6406,8 +6476,7 @@ class CommonUtil {
                 final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) sourceEntity);
 
                 if (signedPropNames.size() == 0) {
-                    // logger.warn("no property is signed in the specified source entity: "
-                    // + toString(entity));
+                    // logger.warn("no property is signed in the specified source entity: " + toString(entity));
                 } else {
                     Object propValue = null;
                     PropInfo targetPropInfo = null;
@@ -6422,7 +6491,7 @@ class CommonUtil {
                             }
                         } else {
                             propValue = srcEntityInfo.getPropValue(sourceEntity, propName);
-                            targetPropInfo.setPropValue(targetEntity, mergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
+                            targetPropInfo.setPropValue(targetEntity, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
                         }
                     }
                 }
@@ -6440,7 +6509,7 @@ class CommonUtil {
                         }
                     } else {
                         propValue = propInfo.getPropValue(sourceEntity);
-                        targetPropInfo.setPropValue(targetEntity, mergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
+                        targetPropInfo.setPropValue(targetEntity, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
                     }
                 }
             }
@@ -6457,7 +6526,72 @@ class CommonUtil {
                     }
                 } else {
                     propValue = srcEntityInfo.getPropValue(sourceEntity, propName);
-                    targetPropInfo.setPropValue(targetEntity, mergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
+                    targetPropInfo.setPropValue(targetEntity, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
+                }
+            }
+        }
+
+        return targetEntity;
+    }
+
+    /**
+     * Set all the signed properties(including all primitive type properties) in
+     * the specified {@code sourceEntity} to the specified {@code targetEntity}.
+     *
+     * @param sourceEntity a Java Object what allows access to properties using getter
+     *            and setter methods.
+     * @param targetEntity a Java Object what allows access to properties using getter
+     *            and setter methods.
+     * @param filter
+     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
+     * @return {@code targetEntity}
+     */
+    public static <T> T merge(final Object sourceEntity, final T targetEntity, final BiPredicate<String, ?> filter, final BinaryOperator<?> mergeFunc) {
+        final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
+        final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
+        final BiPredicate<String, Object> objFilter = (BiPredicate<String, Object>) filter;
+        final BinaryOperator<Object> objMergeFunc = (BinaryOperator<Object>) mergeFunc;
+
+        if (sourceEntity instanceof DirtyMarker) {
+            final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) sourceEntity);
+
+            if (signedPropNames.size() == 0) {
+                // logger.warn("no property is signed in the specified source entity: " + toString(entity));
+            } else {
+                Object propValue = null;
+                PropInfo targetPropInfo = null;
+
+                for (String propName : signedPropNames) {
+                    propValue = srcEntityInfo.getPropValue(sourceEntity, propName);
+
+                    if (objFilter.test(propName, propValue)) {
+                        targetPropInfo = targetEntityInfo.getPropInfo(propName);
+
+                        if (targetPropInfo == null) {
+                            throw new IllegalArgumentException(
+                                    "No property found by name: " + propName + " in target entity class: " + targetEntity.getClass());
+                        }
+
+                        targetPropInfo.setPropValue(targetEntity, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
+                    }
+                }
+            }
+        } else {
+            Object propValue = null;
+            PropInfo targetPropInfo = null;
+
+            for (PropInfo propInfo : srcEntityInfo.propInfoList) {
+                propValue = propInfo.getPropValue(sourceEntity);
+
+                if (objFilter.test(propInfo.name, propValue)) {
+                    targetPropInfo = targetEntityInfo.getPropInfo(propInfo.name);
+
+                    if (targetPropInfo == null) {
+                        throw new IllegalArgumentException(
+                                "No property found by name: " + propInfo.name + " in target entity class: " + targetEntity.getClass());
+                    }
+
+                    targetPropInfo.setPropValue(targetEntity, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
                 }
             }
         }
@@ -6475,9 +6609,10 @@ class CommonUtil {
      * @return {@code targetEntity}
      */
     public static <T> T merge(final Object sourceEntity, final T targetEntity, final boolean ignoreUnknownProperty, final Set<String> ignorePropNames,
-            final BinaryOperator<Object> mergeFunc) {
+            final BinaryOperator<?> mergeFunc) {
         final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
         final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
+        final BinaryOperator<Object> objMergeFunc = (BinaryOperator<Object>) mergeFunc;
 
         if (sourceEntity instanceof DirtyMarker) {
             final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) sourceEntity);
@@ -6500,7 +6635,7 @@ class CommonUtil {
                             }
                         } else {
                             propValue = srcEntityInfo.getPropValue(sourceEntity, propName);
-                            targetPropInfo.setPropValue(targetEntity, mergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
+                            targetPropInfo.setPropValue(targetEntity, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
                         }
                     }
                 }
@@ -6520,213 +6655,7 @@ class CommonUtil {
                         }
                     } else {
                         propValue = propInfo.getPropValue(sourceEntity);
-                        targetPropInfo.setPropValue(targetEntity, mergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
-                    }
-                }
-            }
-        }
-
-        return targetEntity;
-    }
-
-    /**
-     * 
-     * @param <T>
-     * @param sourceEntity
-     * @param targetEntity
-     * @return {@code targetEntity}
-     */
-    public static <T> T mergeNonDefaultOnly(final Object sourceEntity, final T targetEntity) {
-        final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
-        final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
-
-        if (sourceEntity instanceof DirtyMarker) {
-            final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) sourceEntity);
-
-            if (signedPropNames.size() == 0) {
-                // logger.warn("no property is signed in the specified source entity: "
-                // + toString(entity));
-            } else {
-                Object propValue = null;
-
-                for (String propName : signedPropNames) {
-                    propValue = srcEntityInfo.getPropValue(sourceEntity, propName);
-
-                    if (propValue != null && !N.equals(propValue, N.defaultValueOf(propValue.getClass()))) {
-                        targetEntityInfo.setPropValue(targetEntity, propName, propValue, true);
-                    }
-                }
-            }
-        } else {
-            Object propValue = null;
-
-            for (PropInfo propInfo : srcEntityInfo.propInfoList) {
-                propValue = propInfo.getPropValue(sourceEntity);
-
-                if (propValue != null && !N.equals(propValue, N.defaultValueOf(propValue.getClass()))) {
-                    targetEntityInfo.setPropValue(targetEntity, propInfo.name, propValue, true);
-                }
-            }
-        }
-
-        return targetEntity;
-    }
-
-    /**
-     *
-     * @param sourceEntity
-     * @param targetEntity
-     * @param ignoreUnknownProperty
-     * @param ignorePropNames
-     * @return {@code targetEntity}
-     */
-    public static <T> T mergeNonDefaultOnly(final Object sourceEntity, final T targetEntity, final boolean ignoreUnknownProperty,
-            final Set<String> ignorePropNames) {
-        final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
-        final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
-
-        if (sourceEntity instanceof DirtyMarker) {
-            final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) sourceEntity);
-
-            if (signedPropNames.size() == 0) {
-                // logger.warn("no property is signed in the specified source entity: "
-                // + toString(entity));
-            } else {
-                Object propValue = null;
-
-                for (String propName : signedPropNames) {
-                    if (ignorePropNames == null || ignorePropNames.contains(propName) == false) {
-                        propValue = srcEntityInfo.getPropValue(sourceEntity, propName);
-
-                        if (propValue != null && !N.equals(propValue, N.defaultValueOf(propValue.getClass()))) {
-                            targetEntityInfo.setPropValue(targetEntity, propName, propValue, true);
-                        }
-                    }
-                }
-            }
-        } else {
-            Object propValue = null;
-
-            for (PropInfo propInfo : srcEntityInfo.propInfoList) {
-                if (ignorePropNames == null || ignorePropNames.contains(propInfo.name) == false) {
-                    propValue = propInfo.getPropValue(sourceEntity);
-
-                    if (propValue != null && !N.equals(propValue, N.defaultValueOf(propValue.getClass()))) {
-                        targetEntityInfo.setPropValue(targetEntity, propInfo.name, propValue, true);
-                    }
-                }
-            }
-        }
-
-        return targetEntity;
-    }
-
-    /**
-     * 
-     * @param <T>
-     * @param sourceEntity
-     * @param targetEntity
-     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
-     * @return {@code targetEntity}
-     */
-    public static <T> T mergeNonDefaultOnly(final Object sourceEntity, final T targetEntity, final BinaryOperator<Object> mergeFunc) {
-        final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
-        final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
-
-        if (sourceEntity instanceof DirtyMarker) {
-            final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) sourceEntity);
-
-            if (signedPropNames.size() == 0) {
-                // logger.warn("no property is signed in the specified source entity: "
-                // + toString(entity));
-            } else {
-                Object propValue = null;
-                PropInfo targetPropInfo = null;
-
-                for (String propName : signedPropNames) {
-                    propValue = srcEntityInfo.getPropValue(sourceEntity, propName);
-
-                    if (propValue != null && !N.equals(propValue, N.defaultValueOf(propValue.getClass()))) {
-                        targetPropInfo = targetEntityInfo.getPropInfo(propName);
-
-                        if (targetPropInfo != null) {
-                            targetPropInfo.setPropValue(targetEntity, mergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
-                        }
-                    }
-                }
-            }
-        } else {
-            Object propValue = null;
-            PropInfo targetPropInfo = null;
-
-            for (PropInfo propInfo : srcEntityInfo.propInfoList) {
-                propValue = propInfo.getPropValue(sourceEntity);
-
-                if (propValue != null && !N.equals(propValue, N.defaultValueOf(propValue.getClass()))) {
-                    targetPropInfo = targetEntityInfo.getPropInfo(propInfo.name);
-
-                    if (targetPropInfo != null) {
-                        targetPropInfo.setPropValue(targetEntity, mergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
-                    }
-                }
-            }
-        }
-
-        return targetEntity;
-    }
-
-    /**
-     *
-     * @param sourceEntity
-     * @param targetEntity
-     * @param ignoreUnknownProperty
-     * @param ignorePropNames
-     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
-     * @return {@code targetEntity}
-     */
-    public static <T> T mergeNonDefaultOnly(final Object sourceEntity, final T targetEntity, final boolean ignoreUnknownProperty,
-            final Set<String> ignorePropNames, final BinaryOperator<Object> mergeFunc) {
-        final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
-        final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
-
-        if (sourceEntity instanceof DirtyMarker) {
-            final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) sourceEntity);
-
-            if (signedPropNames.size() == 0) {
-                // logger.warn("no property is signed in the specified source entity: "
-                // + toString(entity));
-            } else {
-                Object propValue = null;
-                PropInfo targetPropInfo = null;
-
-                for (String propName : signedPropNames) {
-                    if (ignorePropNames == null || ignorePropNames.contains(propName) == false) {
-                        propValue = srcEntityInfo.getPropValue(sourceEntity, propName);
-
-                        if (propValue != null && !N.equals(propValue, N.defaultValueOf(propValue.getClass()))) {
-                            targetPropInfo = targetEntityInfo.getPropInfo(propName);
-
-                            if (targetPropInfo != null) {
-                                targetPropInfo.setPropValue(targetEntity, mergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            Object propValue = null;
-            PropInfo targetPropInfo = null;
-
-            for (PropInfo propInfo : srcEntityInfo.propInfoList) {
-                if (ignorePropNames == null || ignorePropNames.contains(propInfo.name) == false) {
-                    propValue = propInfo.getPropValue(sourceEntity);
-
-                    if (propValue != null && !N.equals(propValue, N.defaultValueOf(propValue.getClass()))) {
-                        targetPropInfo = targetEntityInfo.getPropInfo(propInfo.name);
-
-                        if (targetPropInfo != null) {
-                            targetPropInfo.setPropValue(targetEntity, mergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
-                        }
+                        targetPropInfo.setPropValue(targetEntity, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
                     }
                 }
             }
@@ -8220,6 +8149,16 @@ class CommonUtil {
     }
 
     /**
+     * Checks if is null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
+     *
+     * @param s
+     * @return true, if is null or default
+     */
+    public static boolean isNullOrDefault(final Object value) {
+        return (value == null) || equals(value, defaultValueOf(value.getClass()));
+    }
+
+    /**
      * Checks if is null or empty.
      *
      * @param s
@@ -8409,6 +8348,17 @@ class CommonUtil {
         }
 
         return true;
+    }
+
+    /**
+     * Checks if it's not null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
+     *
+     *
+     * @param s
+     * @return true, if it's not null or default
+     */
+    public static boolean notNullOrDefault(final Object value) {
+        return (value != null) && !equals(value, defaultValueOf(value.getClass()));
     }
 
     /**
