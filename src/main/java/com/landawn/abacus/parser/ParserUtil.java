@@ -44,6 +44,7 @@ import com.landawn.abacus.annotation.Type.Scope;
 import com.landawn.abacus.core.DirtyMarkerUtil;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
+import com.landawn.abacus.type.ObjectType;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.CharacterWriter;
@@ -357,6 +358,7 @@ public final class ParserUtil {
          *
          * @param cls
          */
+        @SuppressWarnings("deprecation")
         public EntityInfo(Class<?> cls) {
             name = ClassUtil.formalizePropName(cls.getSimpleName());
             this.cls = (Class<Object>) cls;
@@ -443,6 +445,10 @@ public final class ParserUtil {
 
             if (this.annotations.containsKey(Table.class)) {
                 tmpTableName = ((Table) this.annotations.get(Table.class)).value();
+
+                if (N.isNullOrEmpty(tmpTableName)) {
+                    tmpTableName = ((Table) this.annotations.get(Table.class)).name();
+                }
             } else {
                 try {
                     if (this.annotations.containsKey(javax.persistence.Table.class)) {
@@ -453,7 +459,7 @@ public final class ParserUtil {
                 }
             }
 
-            this.tableName = Optional.ofNullable(tmpTableName);
+            this.tableName = N.isNullOrEmpty(tmpTableName) ? Optional.<String> empty() : Optional.ofNullable(tmpTableName);
         }
 
         /**
@@ -977,6 +983,7 @@ public final class ParserUtil {
          * @param getMethod
          * @param classAnnotations
          */
+        @SuppressWarnings("deprecation")
         public PropInfo(final String propName, final String xmlPropName, final String jsonPropName, final Field field, final Method getMethod,
                 final ImmutableMap<Class<? extends Annotation>, Annotation> classAnnotations) {
             this.declaringClass = (Class<Object>) (field != null ? field.getDeclaringClass() : getMethod.getDeclaringClass());
@@ -1037,6 +1044,10 @@ public final class ParserUtil {
 
             if (this.annotations.containsKey(Column.class)) {
                 tmpColumnName = ((Column) this.annotations.get(Column.class)).value();
+
+                if (N.isNullOrEmpty(tmpColumnName)) {
+                    tmpColumnName = ((Column) this.annotations.get(Column.class)).name();
+                }
             } else {
                 try {
                     if (this.annotations.containsKey(javax.persistence.Column.class)) {
@@ -1047,7 +1058,7 @@ public final class ParserUtil {
                 }
             }
 
-            this.columnName = Optional.ofNullable(tmpColumnName);
+            this.columnName = N.isNullOrEmpty(tmpColumnName) ? Optional.<String> empty() : Optional.ofNullable(tmpColumnName);
         }
 
         /**
@@ -1549,12 +1560,10 @@ public final class ParserUtil {
 
         private String getTypeName(final com.landawn.abacus.annotation.Type typeAnno, final Class<?> propClass) {
             @SuppressWarnings("deprecation")
-            final Optional<String> typeName = N.isNullOrEmpty(typeAnno.value())
-                    ? (N.isNullOrEmpty(typeAnno.name()) ? Optional.<String> empty() : Optional.of(typeAnno.name()))
-                    : Optional.of(typeAnno.value());
+            final Optional<String> typeName = N.firstNonEmpty(typeAnno.value(), typeAnno.name());
 
             @SuppressWarnings("rawtypes")
-            final Class<? extends Type> typeClass = typeAnno.type();
+            final Class<? extends Type> typeClass = typeAnno.clazz();
 
             if (typeClass != null && !typeClass.equals(Type.class)) {
                 Type<?> type = null;
@@ -1645,9 +1654,15 @@ public final class ParserUtil {
                     return N.typeOf(parameterizedTypeName);
                 }
             } else {
-                Type<T> type = N.typeOf(annoType);
+                Type<T> type = null;
 
-                if (type == null && N.notNullOrEmpty(ClassUtil.getPackageName(entityClass))) {
+                try {
+                    type = N.typeOf(annoType);
+                } catch (Exception e) {
+                    // ignore
+                }
+
+                if ((type == null || type.getClass().equals(ObjectType.class)) && N.notNullOrEmpty(ClassUtil.getPackageName(entityClass))) {
                     final String pkgName = ClassUtil.getPackageName(entityClass);
                     final StringBuilder sb = new StringBuilder();
                     int start = 0;

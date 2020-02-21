@@ -57,7 +57,7 @@ public @interface Type {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    Class<? extends com.landawn.abacus.type.Type> type() default com.landawn.abacus.type.Type.class;
+    Class<? extends com.landawn.abacus.type.Type> clazz() default com.landawn.abacus.type.Type.class;
 
     /**
      *

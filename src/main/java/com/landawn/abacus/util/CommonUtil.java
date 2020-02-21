@@ -84,6 +84,7 @@ import com.landawn.abacus.util.Iterables.Slice;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalInt;
+import com.landawn.abacus.util.function.BinaryOperator;
 import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.IntFunction;
 import com.landawn.abacus.util.function.Supplier;
@@ -6287,9 +6288,10 @@ class CommonUtil {
      *
      * @param sourceEntity
      * @param targetEntity
+     * @return {@code targetEntity}
      */
-    public static void merge(final Object sourceEntity, final Object targetEntity) {
-        merge(sourceEntity, targetEntity, null);
+    public static <T> T merge(final Object sourceEntity, final T targetEntity) {
+        return merge(sourceEntity, targetEntity, (Collection<String>) null);
     }
 
     /**
@@ -6301,8 +6303,9 @@ class CommonUtil {
      * @param targetEntity a Java Object what allows access to properties using getter
      *            and setter methods.
      * @param selectPropNames
+     * @return {@code targetEntity}
      */
-    public static void merge(final Object sourceEntity, final Object targetEntity, final Collection<String> selectPropNames) {
+    public static <T> T merge(final Object sourceEntity, final T targetEntity, final Collection<String> selectPropNames) {
         final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
         final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
         final boolean ignoreUnknownProperty = selectPropNames == null;
@@ -6329,6 +6332,8 @@ class CommonUtil {
                 targetEntityInfo.setPropValue(targetEntity, propName, srcEntityInfo.getPropValue(sourceEntity, propName), ignoreUnknownProperty);
             }
         }
+
+        return targetEntity;
     }
 
     /**
@@ -6337,8 +6342,9 @@ class CommonUtil {
      * @param targetEntity
      * @param ignoreUnknownProperty
      * @param ignorePropNames
+     * @return {@code targetEntity}
      */
-    public static void merge(final Object sourceEntity, final Object targetEntity, final boolean ignoreUnknownProperty, final Set<String> ignorePropNames) {
+    public static <T> T merge(final Object sourceEntity, final T targetEntity, final boolean ignoreUnknownProperty, final Set<String> ignorePropNames) {
         final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
         final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
 
@@ -6362,6 +6368,371 @@ class CommonUtil {
                 }
             }
         }
+
+        return targetEntity;
+    }
+
+    /**
+     *
+     * @param sourceEntity
+     * @param targetEntity
+     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
+     * @return {@code targetEntity}
+     */
+    public static <T> T merge(final Object sourceEntity, final T targetEntity, final BinaryOperator<Object> mergeFunc) {
+        return merge(sourceEntity, targetEntity, null, mergeFunc);
+    }
+
+    /**
+     * Set all the signed properties(including all primitive type properties) in
+     * the specified {@code sourceEntity} to the specified {@code targetEntity}.
+     *
+     * @param sourceEntity a Java Object what allows access to properties using getter
+     *            and setter methods.
+     * @param targetEntity a Java Object what allows access to properties using getter
+     *            and setter methods.
+     * @param selectPropNames
+     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
+     * @return {@code targetEntity}
+     */
+    public static <T> T merge(final Object sourceEntity, final T targetEntity, final Collection<String> selectPropNames,
+            final BinaryOperator<Object> mergeFunc) {
+        final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
+        final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
+        final boolean ignoreUnknownProperty = selectPropNames == null;
+
+        if (selectPropNames == null) {
+            if (sourceEntity instanceof DirtyMarker) {
+                final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) sourceEntity);
+
+                if (signedPropNames.size() == 0) {
+                    // logger.warn("no property is signed in the specified source entity: "
+                    // + toString(entity));
+                } else {
+                    Object propValue = null;
+                    PropInfo targetPropInfo = null;
+
+                    for (String propName : signedPropNames) {
+                        targetPropInfo = targetEntityInfo.getPropInfo(propName);
+
+                        if (targetPropInfo == null) {
+                            if (ignoreUnknownProperty == false) {
+                                throw new IllegalArgumentException(
+                                        "No property found by name: " + propName + " in target entity class: " + targetEntity.getClass());
+                            }
+                        } else {
+                            propValue = srcEntityInfo.getPropValue(sourceEntity, propName);
+                            targetPropInfo.setPropValue(targetEntity, mergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
+                        }
+                    }
+                }
+            } else {
+                Object propValue = null;
+                PropInfo targetPropInfo = null;
+
+                for (PropInfo propInfo : srcEntityInfo.propInfoList) {
+                    targetPropInfo = targetEntityInfo.getPropInfo(propInfo.name);
+
+                    if (targetPropInfo == null) {
+                        if (ignoreUnknownProperty == false) {
+                            throw new IllegalArgumentException(
+                                    "No property found by name: " + propInfo.name + " in target entity class: " + targetEntity.getClass());
+                        }
+                    } else {
+                        propValue = propInfo.getPropValue(sourceEntity);
+                        targetPropInfo.setPropValue(targetEntity, mergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
+                    }
+                }
+            }
+        } else {
+            Object propValue = null;
+            PropInfo targetPropInfo = null;
+
+            for (String propName : selectPropNames) {
+                targetPropInfo = targetEntityInfo.getPropInfo(propName);
+
+                if (targetPropInfo == null) {
+                    if (ignoreUnknownProperty == false) {
+                        throw new IllegalArgumentException("No property found by name: " + propName + " in target entity class: " + targetEntity.getClass());
+                    }
+                } else {
+                    propValue = srcEntityInfo.getPropValue(sourceEntity, propName);
+                    targetPropInfo.setPropValue(targetEntity, mergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
+                }
+            }
+        }
+
+        return targetEntity;
+    }
+
+    /**
+     *
+     * @param sourceEntity
+     * @param targetEntity
+     * @param ignoreUnknownProperty
+     * @param ignorePropNames
+     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
+     * @return {@code targetEntity}
+     */
+    public static <T> T merge(final Object sourceEntity, final T targetEntity, final boolean ignoreUnknownProperty, final Set<String> ignorePropNames,
+            final BinaryOperator<Object> mergeFunc) {
+        final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
+        final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
+
+        if (sourceEntity instanceof DirtyMarker) {
+            final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) sourceEntity);
+
+            if (signedPropNames.size() == 0) {
+                // logger.warn("no property is signed in the specified source entity: "
+                // + toString(entity));
+            } else {
+                Object propValue = null;
+                PropInfo targetPropInfo = null;
+
+                for (String propName : signedPropNames) {
+                    if (ignorePropNames == null || ignorePropNames.contains(propName) == false) {
+                        targetPropInfo = targetEntityInfo.getPropInfo(propName);
+
+                        if (targetPropInfo == null) {
+                            if (ignoreUnknownProperty == false) {
+                                throw new IllegalArgumentException(
+                                        "No property found by name: " + propName + " in target entity class: " + targetEntity.getClass());
+                            }
+                        } else {
+                            propValue = srcEntityInfo.getPropValue(sourceEntity, propName);
+                            targetPropInfo.setPropValue(targetEntity, mergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
+                        }
+                    }
+                }
+            }
+        } else {
+            Object propValue = null;
+            PropInfo targetPropInfo = null;
+
+            for (PropInfo propInfo : srcEntityInfo.propInfoList) {
+                if (ignorePropNames == null || ignorePropNames.contains(propInfo.name) == false) {
+                    targetPropInfo = targetEntityInfo.getPropInfo(propInfo.name);
+
+                    if (targetPropInfo == null) {
+                        if (ignoreUnknownProperty == false) {
+                            throw new IllegalArgumentException(
+                                    "No property found by name: " + propInfo.name + " in target entity class: " + targetEntity.getClass());
+                        }
+                    } else {
+                        propValue = propInfo.getPropValue(sourceEntity);
+                        targetPropInfo.setPropValue(targetEntity, mergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
+                    }
+                }
+            }
+        }
+
+        return targetEntity;
+    }
+
+    /**
+     * 
+     * @param <T>
+     * @param sourceEntity
+     * @param targetEntity
+     * @return {@code targetEntity}
+     */
+    public static <T> T mergeNonDefaultOnly(final Object sourceEntity, final T targetEntity) {
+        final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
+        final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
+
+        if (sourceEntity instanceof DirtyMarker) {
+            final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) sourceEntity);
+
+            if (signedPropNames.size() == 0) {
+                // logger.warn("no property is signed in the specified source entity: "
+                // + toString(entity));
+            } else {
+                Object propValue = null;
+
+                for (String propName : signedPropNames) {
+                    propValue = srcEntityInfo.getPropValue(sourceEntity, propName);
+
+                    if (propValue != null && !N.equals(propValue, N.defaultValueOf(propValue.getClass()))) {
+                        targetEntityInfo.setPropValue(targetEntity, propName, propValue, true);
+                    }
+                }
+            }
+        } else {
+            Object propValue = null;
+
+            for (PropInfo propInfo : srcEntityInfo.propInfoList) {
+                propValue = propInfo.getPropValue(sourceEntity);
+
+                if (propValue != null && !N.equals(propValue, N.defaultValueOf(propValue.getClass()))) {
+                    targetEntityInfo.setPropValue(targetEntity, propInfo.name, propValue, true);
+                }
+            }
+        }
+
+        return targetEntity;
+    }
+
+    /**
+     *
+     * @param sourceEntity
+     * @param targetEntity
+     * @param ignoreUnknownProperty
+     * @param ignorePropNames
+     * @return {@code targetEntity}
+     */
+    public static <T> T mergeNonDefaultOnly(final Object sourceEntity, final T targetEntity, final boolean ignoreUnknownProperty,
+            final Set<String> ignorePropNames) {
+        final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
+        final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
+
+        if (sourceEntity instanceof DirtyMarker) {
+            final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) sourceEntity);
+
+            if (signedPropNames.size() == 0) {
+                // logger.warn("no property is signed in the specified source entity: "
+                // + toString(entity));
+            } else {
+                Object propValue = null;
+
+                for (String propName : signedPropNames) {
+                    if (ignorePropNames == null || ignorePropNames.contains(propName) == false) {
+                        propValue = srcEntityInfo.getPropValue(sourceEntity, propName);
+
+                        if (propValue != null && !N.equals(propValue, N.defaultValueOf(propValue.getClass()))) {
+                            targetEntityInfo.setPropValue(targetEntity, propName, propValue, true);
+                        }
+                    }
+                }
+            }
+        } else {
+            Object propValue = null;
+
+            for (PropInfo propInfo : srcEntityInfo.propInfoList) {
+                if (ignorePropNames == null || ignorePropNames.contains(propInfo.name) == false) {
+                    propValue = propInfo.getPropValue(sourceEntity);
+
+                    if (propValue != null && !N.equals(propValue, N.defaultValueOf(propValue.getClass()))) {
+                        targetEntityInfo.setPropValue(targetEntity, propInfo.name, propValue, true);
+                    }
+                }
+            }
+        }
+
+        return targetEntity;
+    }
+
+    /**
+     * 
+     * @param <T>
+     * @param sourceEntity
+     * @param targetEntity
+     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
+     * @return {@code targetEntity}
+     */
+    public static <T> T mergeNonDefaultOnly(final Object sourceEntity, final T targetEntity, final BinaryOperator<Object> mergeFunc) {
+        final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
+        final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
+
+        if (sourceEntity instanceof DirtyMarker) {
+            final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) sourceEntity);
+
+            if (signedPropNames.size() == 0) {
+                // logger.warn("no property is signed in the specified source entity: "
+                // + toString(entity));
+            } else {
+                Object propValue = null;
+                PropInfo targetPropInfo = null;
+
+                for (String propName : signedPropNames) {
+                    propValue = srcEntityInfo.getPropValue(sourceEntity, propName);
+
+                    if (propValue != null && !N.equals(propValue, N.defaultValueOf(propValue.getClass()))) {
+                        targetPropInfo = targetEntityInfo.getPropInfo(propName);
+
+                        if (targetPropInfo != null) {
+                            targetPropInfo.setPropValue(targetEntity, mergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
+                        }
+                    }
+                }
+            }
+        } else {
+            Object propValue = null;
+            PropInfo targetPropInfo = null;
+
+            for (PropInfo propInfo : srcEntityInfo.propInfoList) {
+                propValue = propInfo.getPropValue(sourceEntity);
+
+                if (propValue != null && !N.equals(propValue, N.defaultValueOf(propValue.getClass()))) {
+                    targetPropInfo = targetEntityInfo.getPropInfo(propInfo.name);
+
+                    if (targetPropInfo != null) {
+                        targetPropInfo.setPropValue(targetEntity, mergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
+                    }
+                }
+            }
+        }
+
+        return targetEntity;
+    }
+
+    /**
+     *
+     * @param sourceEntity
+     * @param targetEntity
+     * @param ignoreUnknownProperty
+     * @param ignorePropNames
+     * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
+     * @return {@code targetEntity}
+     */
+    public static <T> T mergeNonDefaultOnly(final Object sourceEntity, final T targetEntity, final boolean ignoreUnknownProperty,
+            final Set<String> ignorePropNames, final BinaryOperator<Object> mergeFunc) {
+        final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
+        final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
+
+        if (sourceEntity instanceof DirtyMarker) {
+            final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) sourceEntity);
+
+            if (signedPropNames.size() == 0) {
+                // logger.warn("no property is signed in the specified source entity: "
+                // + toString(entity));
+            } else {
+                Object propValue = null;
+                PropInfo targetPropInfo = null;
+
+                for (String propName : signedPropNames) {
+                    if (ignorePropNames == null || ignorePropNames.contains(propName) == false) {
+                        propValue = srcEntityInfo.getPropValue(sourceEntity, propName);
+
+                        if (propValue != null && !N.equals(propValue, N.defaultValueOf(propValue.getClass()))) {
+                            targetPropInfo = targetEntityInfo.getPropInfo(propName);
+
+                            if (targetPropInfo != null) {
+                                targetPropInfo.setPropValue(targetEntity, mergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            Object propValue = null;
+            PropInfo targetPropInfo = null;
+
+            for (PropInfo propInfo : srcEntityInfo.propInfoList) {
+                if (ignorePropNames == null || ignorePropNames.contains(propInfo.name) == false) {
+                    propValue = propInfo.getPropValue(sourceEntity);
+
+                    if (propValue != null && !N.equals(propValue, N.defaultValueOf(propValue.getClass()))) {
+                        targetPropInfo = targetEntityInfo.getPropInfo(propInfo.name);
+
+                        if (targetPropInfo != null) {
+                            targetPropInfo.setPropValue(targetEntity, mergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
+                        }
+                    }
+                }
+            }
+        }
+
+        return targetEntity;
     }
 
     /**
@@ -6841,6 +7212,30 @@ class CommonUtil {
         } else {
             return Iterators.last(c.iterator());
         }
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
+     */
+    public static <T extends CharSequence> Optional<T> firstNonEmpty(final T a, final T b) {
+        return a != null && a.length() > 0 ? Optional.of(a) : (b != null && b.length() > 0 ? Optional.of(b) : Optional.<T> empty());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
+    public static <T extends CharSequence> Optional<T> firstNonEmpty(final T a, final T b, final T c) {
+        return a != null && a.length() > 0 ? Optional.of(a)
+                : (b != null && b.length() > 0 ? Optional.of(b) : (c != null && c.length() > 0 ? Optional.of(c) : Optional.<T> empty()));
     }
 
     /**

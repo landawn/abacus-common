@@ -21,7 +21,6 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Interface Table.
  */
@@ -29,10 +28,17 @@ import java.lang.annotation.Target;
 @Target(value = { TYPE })
 @Retention(RUNTIME)
 public @interface Table {
+    /**
+     *
+     * @return
+     * @deprecated use {@code name} to specify attribute explicitly.
+     */
+    @Deprecated
+    String value() default "";
 
     /**
      *
      * @return
      */
-    String value() default "";
+    String name() default "";
 }

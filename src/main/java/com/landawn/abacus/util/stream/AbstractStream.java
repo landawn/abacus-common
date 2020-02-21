@@ -2390,6 +2390,11 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
+    public <K, R> Stream<R> innerJoin(Collection<? extends T> b, Function<? super T, ? extends K> keyMapper, BiFunction<? super T, ? super T, R> func) {
+        return innerJoin(b, keyMapper, keyMapper, func);
+    }
+
+    @Override
     public <U, K, R> Stream<R> innerJoin(final Stream<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func) {
         checkArgNotNull(b, "stream");
@@ -2501,6 +2506,11 @@ abstract class AbstractStream<T> extends Stream<T> {
                 return func.apply((T) null, u);
             }
         }));
+    }
+
+    @Override
+    public <K, R> Stream<R> fullJoin(Collection<? extends T> b, Function<? super T, ? extends K> keyMapper, BiFunction<? super T, ? super T, R> func) {
+        return fullJoin(b, keyMapper, keyMapper, func);
     }
 
     @Override
@@ -2644,6 +2654,11 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
+    public <K, R> Stream<R> leftJoin(Collection<? extends T> b, Function<? super T, ? extends K> keyMapper, BiFunction<? super T, ? super T, R> func) {
+        return leftJoin(b, keyMapper, keyMapper, func);
+    }
+
+    @Override
     public <U, K, R> Stream<R> leftJoin(final Stream<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func) {
         checkArgNotNull(b, "stream");
@@ -2755,6 +2770,11 @@ abstract class AbstractStream<T> extends Stream<T> {
                 return func.apply((T) null, u);
             }
         }));
+    }
+
+    @Override
+    public <K, R> Stream<R> rightJoin(Collection<? extends T> b, Function<? super T, ? extends K> keyMapper, BiFunction<? super T, ? super T, R> func) {
+        return rightJoin(b, keyMapper, keyMapper, func);
     }
 
     @Override
@@ -2912,6 +2932,11 @@ abstract class AbstractStream<T> extends Stream<T> {
         };
 
         return map(mapper);
+    }
+
+    @Override
+    public <K, R> Stream<R> groupJoin(Collection<? extends T> b, Function<? super T, ? extends K> keyMapper, BiFunction<? super T, ? super List<T>, R> func) {
+        return groupJoin(b, keyMapper, keyMapper, func);
     }
 
     @Override

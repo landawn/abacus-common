@@ -21,7 +21,6 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Interface Column.
  */
@@ -33,6 +32,14 @@ public @interface Column {
     /**
      *
      * @return
+     * @deprecated use {@code name} to specify attribute explicitly.
      */
+    @Deprecated
     String value() default "";
+
+    /**
+     *
+     * @return
+     */
+    String name() default "";
 }
