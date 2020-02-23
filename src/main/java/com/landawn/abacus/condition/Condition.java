@@ -18,7 +18,6 @@ import java.util.List;
 
 import com.landawn.abacus.util.NamingPolicy;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Interface Condition.
  *

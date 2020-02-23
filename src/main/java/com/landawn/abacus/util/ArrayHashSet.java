@@ -22,7 +22,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-// TODO: Auto-generated Javadoc
 /**
  * It's designed to supported primitive/object array.
  * The elements in the array must not be modified after the array is added into the set.

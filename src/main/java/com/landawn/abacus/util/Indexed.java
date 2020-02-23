@@ -16,7 +16,6 @@ package com.landawn.abacus.util;
 
 import java.util.Iterator;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class Indexed.
  *

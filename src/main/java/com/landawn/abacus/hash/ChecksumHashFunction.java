@@ -20,7 +20,6 @@ import java.util.zip.Checksum;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.function.Supplier;
 
-// TODO: Auto-generated Javadoc
 /**
  * Note: It's copied from Google Guava under Apache License 2.0
  * 

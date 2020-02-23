@@ -17,7 +17,6 @@ package com.landawn.abacus.logging;
 import java.util.HashMap;
 import java.util.Map;
 
-// TODO: Auto-generated Javadoc
 /**
  * A factory for creating Logger objects.
  *

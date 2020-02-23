@@ -26,7 +26,6 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.Objectory;
 
-// TODO: Auto-generated Javadoc
 /**
  * This class is used to join multiple conditions. like {@code And}, {@code Or}. But must not put clause(where, order by
  * ...) into it. Those clauses are joined by {@code Criteria}.

@@ -18,7 +18,6 @@ import static com.landawn.abacus.hash.LittleEndianByteArray.load32;
 import static com.landawn.abacus.hash.LittleEndianByteArray.load64;
 import static java.lang.Long.rotateRight;
 
-// TODO: Auto-generated Javadoc
 /**
  * Note: It's copied from Google Guava under Apache License 2.0
  * 

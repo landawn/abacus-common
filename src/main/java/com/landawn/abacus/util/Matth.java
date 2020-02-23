@@ -34,7 +34,6 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: Auto-generated Javadoc
 /**
  *  Note: A lot of codes in this classed are copied from Google Guava and Apache Commons Math under under the Apache License, Version 2.0.
  *  The purpose of copying the code is to re-organize the APIs.

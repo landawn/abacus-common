@@ -21,7 +21,6 @@ import com.landawn.abacus.util.ClassUtil;
 
 import sun.misc.Unsafe;
 
-// TODO: Auto-generated Javadoc
 /**
  * Note: It's copied from Google Guava under Apache License 2.0
  *

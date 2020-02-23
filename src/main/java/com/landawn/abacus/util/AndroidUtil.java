@@ -19,7 +19,6 @@ import java.util.concurrent.Executors;
 
 import com.landawn.abacus.annotation.Internal;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class AndroidUtil.
  *

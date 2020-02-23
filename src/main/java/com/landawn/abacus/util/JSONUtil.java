@@ -30,7 +30,6 @@ import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class JSONUtil.
  *

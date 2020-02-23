@@ -19,7 +19,6 @@ package com.landawn.abacus.util;
 
 import java.io.Serializable;
 
-// TODO: Auto-generated Javadoc
 /**
  * <p>
  * Note: it's copied from Apache Commons Lang developed at The Apache Software Foundation (http://www.apache.org/), or

@@ -19,7 +19,6 @@ import org.apache.logging.log4j.spi.ExtendedLogger;
 
 import com.landawn.abacus.util.function.Supplier;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class Log4Jv2Logger.
  *

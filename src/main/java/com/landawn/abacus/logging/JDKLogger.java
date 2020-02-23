@@ -17,7 +17,6 @@ package com.landawn.abacus.logging;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class JDKLogger.
  *

@@ -16,7 +16,6 @@ package com.landawn.abacus.exception;
 
 import java.sql.SQLException;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class UncheckedSQLException.
  *

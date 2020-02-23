@@ -19,7 +19,6 @@ import java.util.Collection;
 import com.landawn.abacus.condition.ConditionFactory.CF;
 import com.landawn.abacus.util.N;
 
-// TODO: Auto-generated Javadoc
 /**
  * It's recommended to use {@code On}, instead of {@code Using}. Because {@code Using} is associated with the table
  * column, not the object property.

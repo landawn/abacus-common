@@ -21,7 +21,6 @@ import com.esotericsoftware.reflectasm.ConstructorAccess;
 import com.esotericsoftware.reflectasm.FieldAccess;
 import com.esotericsoftware.reflectasm.MethodAccess;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class ReflectASM.
  *

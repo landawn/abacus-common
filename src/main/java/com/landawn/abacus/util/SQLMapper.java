@@ -36,7 +36,6 @@ import org.xml.sax.SAXException;
 import com.landawn.abacus.exception.ParseException;
 import com.landawn.abacus.exception.UncheckedIOException;
 
-// TODO: Auto-generated Javadoc
 /**
  * the sql scripts are configured in xml file and mapped to short ids referenced in program. for example: <br>
  * {@code <sqlMapper>} <br>

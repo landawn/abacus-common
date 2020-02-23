@@ -16,7 +16,6 @@ package com.landawn.abacus.pool;
 
 import java.io.Serializable;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class ActivityPrint.
  *

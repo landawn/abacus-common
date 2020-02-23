@@ -24,7 +24,6 @@ import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class Join.
  *

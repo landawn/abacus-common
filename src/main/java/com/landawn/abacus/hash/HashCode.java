@@ -19,7 +19,6 @@ import java.io.Serializable;
 import com.landawn.abacus.hash.Util.UnsignedInts;
 import com.landawn.abacus.util.N;
 
-// TODO: Auto-generated Javadoc
 /**
  * Note: It's copied from Google Guava under Apache License 2.0
  * 

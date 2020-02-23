@@ -16,7 +16,6 @@ package com.landawn.abacus.condition;
 
 import com.landawn.abacus.condition.ConditionFactory.CF;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class IsNaN.
  *

@@ -53,7 +53,6 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 
-// TODO: Auto-generated Javadoc
 /**
  * Any header can be set into the parameter <code>settings</code>
  *

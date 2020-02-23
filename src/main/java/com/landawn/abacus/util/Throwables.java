@@ -13,7 +13,6 @@
  */
 package com.landawn.abacus.util;
 
-// TODO: Auto-generated Javadoc
 /**
  * Catch checked exception and convert it to <code>RuntimeException</code>.
  *

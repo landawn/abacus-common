@@ -20,7 +20,6 @@ import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.Supplier;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class Result.
  *

@@ -26,7 +26,6 @@ import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.MoreExecutors;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class AbstractPool.
  *

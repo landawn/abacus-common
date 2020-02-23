@@ -20,7 +20,6 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.WD;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class Binary.
  *

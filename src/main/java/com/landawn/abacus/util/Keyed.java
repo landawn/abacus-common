@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util;
 
-// TODO: Auto-generated Javadoc
 /**
  * It's designed for performance improvement by only hash/compare {@code key} in {@code hashCode/equals} method.
  *

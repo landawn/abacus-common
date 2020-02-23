@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.pool;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Interface Poolable.
  *

@@ -21,7 +21,6 @@ import com.landawn.abacus.util.function.CharSupplier;
 import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.CharStream;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class CharIterator.
  *

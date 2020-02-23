@@ -20,7 +20,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.SortedSet;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class ImmutableSet.
  *

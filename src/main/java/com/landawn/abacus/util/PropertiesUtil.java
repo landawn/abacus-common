@@ -54,7 +54,6 @@ import com.landawn.abacus.parser.XMLSerializationConfig;
 import com.landawn.abacus.parser.XMLSerializationConfig.XSC;
 import com.landawn.abacus.type.Type;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class PropertiesUtil.
  *

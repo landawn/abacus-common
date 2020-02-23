@@ -39,7 +39,6 @@ import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 
-// TODO: Auto-generated Javadoc
 /**
  * <p>
  * Note: it's copied from Apache HttpComponents developed at The Apache Software Foundation (http://www.apache.org/), or

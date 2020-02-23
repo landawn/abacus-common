@@ -58,7 +58,6 @@ import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.StringUtil;
 import com.landawn.abacus.util.function.Function;
 
-// TODO: Auto-generated Javadoc
 /**
  * The client and server communicate by xml/json(may compressed by lz4/snappy/gzip)
  * through http. There are two ways to send the request: <li>1, Send the request

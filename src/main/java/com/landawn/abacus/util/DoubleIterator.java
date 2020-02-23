@@ -21,7 +21,6 @@ import com.landawn.abacus.util.function.DoubleSupplier;
 import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.DoubleStream;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class DoubleIterator.
  *

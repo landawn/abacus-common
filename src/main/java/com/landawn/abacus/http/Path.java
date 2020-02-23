@@ -22,7 +22,6 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-// TODO: Auto-generated Javadoc
 /**
  * Named replacement in the URL path. Values are converted to string using
  * {@link String#valueOf(Object)} and URL encoded.

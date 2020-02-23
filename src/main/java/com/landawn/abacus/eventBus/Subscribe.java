@@ -21,7 +21,6 @@ import java.lang.annotation.Target;
 
 import com.landawn.abacus.util.ThreadMode;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Interface Subscribe.
  *

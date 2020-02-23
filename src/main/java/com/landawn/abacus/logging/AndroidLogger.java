@@ -18,7 +18,6 @@ import com.landawn.abacus.util.N;
 
 import android.util.Log;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class AndroidLogger.
  *

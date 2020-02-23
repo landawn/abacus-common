@@ -50,7 +50,6 @@ import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.DateUtil;
-import com.landawn.abacus.util.HBaseColumn;
 import com.landawn.abacus.util.ImmutableList;
 import com.landawn.abacus.util.ImmutableMap;
 import com.landawn.abacus.util.Multiset;
@@ -61,7 +60,6 @@ import com.landawn.abacus.util.StringUtil;
 import com.landawn.abacus.util.WD;
 import com.landawn.abacus.util.u.Optional;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class ParserUtil.
  *
@@ -1628,31 +1626,10 @@ public final class ParserUtil {
         private <T> Type<T> getType(final String annoType, final Field field, final Method getMethod, final Method setMethod, final Class<?> propClass,
                 final Class<?> entityClass) {
             if (N.isNullOrEmpty(annoType)) {
-                final Class<?>[] typeArgs = field == null ? ClassUtil.getTypeArgumentsByMethod((setMethod == null) ? getMethod : setMethod)
-                        : ClassUtil.getTypeArgumentsByField(field);
+                final String parameterizedTypeName = field != null ? ClassUtil.getParameterizedTypeNameByField(field)
+                        : ClassUtil.getParameterizedTypeNameByMethod((setMethod == null) ? getMethod : setMethod);
 
-                if (typeArgs.length == 0) {
-                    return N.typeOf(propClass);
-                } else if (typeArgs.length == 1 && typeArgs[0].equals(HBaseColumn.class)) {
-                    Method addMethod = ClassUtil.getDeclaredMethod(entityClass, "add" + setMethod.getName().substring(3), HBaseColumn.class);
-
-                    String typeName = ClassUtil.getCanonicalClassName(propClass) + WD.LESS_THAN + ClassUtil.getSimpleClassName(HBaseColumn.class) + WD.LESS_THAN
-                            + ClassUtil.getCanonicalClassName(ClassUtil.getTypeArgumentsByMethod(addMethod)[0]) + WD.GREATER_THAN + WD.GREATER_THAN;
-
-                    return N.typeOf(typeName);
-                } else if (typeArgs.length == 2 && typeArgs[1].equals(HBaseColumn.class)) {
-                    Method addMethod = ClassUtil.getDeclaredMethod(entityClass, "add" + setMethod.getName().substring(3), HBaseColumn.class);
-
-                    String typeName = ClassUtil.getCanonicalClassName(propClass) + WD.LESS_THAN + ClassUtil.getCanonicalClassName(typeArgs[0]) + WD.COMMA_SPACE
-                            + ClassUtil.getSimpleClassName(HBaseColumn.class) + WD.LESS_THAN
-                            + ClassUtil.getCanonicalClassName(ClassUtil.getTypeArgumentsByMethod(addMethod)[0]) + WD.GREATER_THAN + WD.GREATER_THAN;
-
-                    return N.typeOf(typeName);
-                } else {
-                    final String parameterizedTypeName = field != null ? ClassUtil.getParameterizedTypeNameByField(field)
-                            : ClassUtil.getParameterizedTypeNameByMethod((setMethod == null) ? getMethod : setMethod);
-                    return N.typeOf(parameterizedTypeName);
-                }
+                return N.typeOf(parameterizedTypeName);
             } else {
                 Type<T> type = null;
 

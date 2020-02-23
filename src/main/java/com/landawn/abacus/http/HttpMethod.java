@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.http;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Enum HttpMethod.
  *

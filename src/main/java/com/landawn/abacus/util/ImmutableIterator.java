@@ -22,7 +22,6 @@ import java.util.Set;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.function.Supplier;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class ImmutableIterator.
  *

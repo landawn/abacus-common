@@ -28,7 +28,6 @@ import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.WD;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class SubQuery.
  *

@@ -28,7 +28,6 @@ import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.function.IntFunction;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class PrimitiveList.
  *

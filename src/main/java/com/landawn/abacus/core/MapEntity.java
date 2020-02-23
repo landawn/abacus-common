@@ -25,7 +25,6 @@ import java.util.Set;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.util.N;
 
-// TODO: Auto-generated Javadoc
 /**
  * This object is used to store the properties' values of an object. So it should not set or get value for other
  * object's property.

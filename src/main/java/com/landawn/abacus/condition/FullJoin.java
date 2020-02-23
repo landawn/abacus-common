@@ -16,7 +16,6 @@ package com.landawn.abacus.condition;
 
 import java.util.Collection;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class FullJoin.
  *

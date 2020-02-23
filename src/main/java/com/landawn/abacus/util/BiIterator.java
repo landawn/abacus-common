@@ -27,7 +27,6 @@ import com.landawn.abacus.util.function.Consumer;
 import com.landawn.abacus.util.function.IndexedConsumer;
 import com.landawn.abacus.util.stream.Stream;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class BiIterator.
  *

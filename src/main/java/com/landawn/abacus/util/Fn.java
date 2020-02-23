@@ -134,7 +134,6 @@ import com.landawn.abacus.util.stream.Collector;
 import com.landawn.abacus.util.stream.ObjIteratorEx;
 import com.landawn.abacus.util.stream.Stream;
 
-// TODO: Auto-generated Javadoc
 /**
  * Factory utility class for functional interfaces.
  *

@@ -18,7 +18,6 @@ package com.landawn.abacus.util;
 
 import java.util.regex.Pattern;
 
-// TODO: Auto-generated Javadoc
 /**
  * Note: Copied from Apache Commons Lang under Apache License V2.
  * 

@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.exception;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class DuplicatedRecordException.
  *

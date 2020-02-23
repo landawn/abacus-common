@@ -21,7 +21,6 @@ import com.landawn.abacus.util.function.ShortSupplier;
 import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.ShortStream;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class ShortIterator.
  *

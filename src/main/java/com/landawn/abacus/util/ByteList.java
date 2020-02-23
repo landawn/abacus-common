@@ -39,7 +39,6 @@ import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.ByteStream;
 import com.landawn.abacus.util.stream.Collector;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class ByteList.
  *

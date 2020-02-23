@@ -18,7 +18,6 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.function.Supplier;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class AbstractLogger.
  *

@@ -21,7 +21,6 @@ import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.util.ImmutableSet;
 import com.landawn.abacus.util.N;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class CriteriaUtil.
  *

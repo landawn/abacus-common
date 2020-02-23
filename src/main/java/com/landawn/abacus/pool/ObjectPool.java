@@ -16,7 +16,6 @@ package com.landawn.abacus.pool;
 
 import java.util.concurrent.TimeUnit;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Interface ObjectPool.
  *

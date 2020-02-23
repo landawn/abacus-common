@@ -21,7 +21,6 @@ import com.landawn.abacus.util.function.FloatSupplier;
 import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.FloatStream;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class FloatIterator.
  *

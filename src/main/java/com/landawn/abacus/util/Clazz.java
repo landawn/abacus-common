@@ -37,7 +37,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
-// TODO: Auto-generated Javadoc
 /**
  * It's designed to provide a convenient way to parameterized the generic type (e.g. {@code List.<String>class}).
  * <br /> 

@@ -16,7 +16,6 @@ package com.landawn.abacus.pool;
 
 import com.landawn.abacus.util.N;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class PoolableWrapper.
  *

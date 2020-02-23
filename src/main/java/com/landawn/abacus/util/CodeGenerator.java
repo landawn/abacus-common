@@ -33,7 +33,6 @@ import com.landawn.abacus.type.ObjectType;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeType;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class CodeGenerator.
  *

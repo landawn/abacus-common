@@ -69,7 +69,6 @@ import com.landawn.abacus.util.stream.Collectors;
 import com.landawn.abacus.util.stream.ObjIteratorEx;
 import com.landawn.abacus.util.stream.Stream;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Stream will be automatically closed after execution(A terminal method is executed/triggered).
  *
@@ -1323,7 +1322,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                 }
 
                 columnIndex = columnIndex == -1 ? InternalUtil.getColumnIndex(resultSet, columnName) : columnIndex;
- 
+
                 final T next = (T) InternalUtil.getColumnValue(resultSet, columnIndex);
                 hasNext = false;
                 return next;
@@ -4269,6 +4268,21 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
     /**
      * 
+     * @param <K>
+     * @param <R>
+     * @param b
+     * @param keyMapper
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <K, R> ExceptionalStream<R, E> innerJoin(final Collection<? extends T> b, final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+            final Throwables.BiFunction<? super T, ? super T, R, ? extends E> func) {
+        return innerJoin(b, keyMapper, keyMapper, func);
+    }
+
+    /**
+     * 
      * @param <U>
      * @param <K>
      * @param <R>
@@ -4407,6 +4421,21 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
             return t.value();
         }
     };
+
+    /**
+     * 
+     * @param <K>
+     * @param <R>
+     * @param b
+     * @param keyMapper
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <K, R> ExceptionalStream<R, E> fullJoin(final Collection<? extends T> b, final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+            final Throwables.BiFunction<? super T, ? super T, R, ? extends E> func) {
+        return fullJoin(b, keyMapper, keyMapper, func);
+    }
 
     /**
      *
@@ -4566,6 +4595,21 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
+     * 
+     * @param <K>
+     * @param <R>
+     * @param b
+     * @param keyMapper
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <K, R> ExceptionalStream<R, E> leftJoin(final Collection<? extends T> b, final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+            final Throwables.BiFunction<? super T, ? super T, R, ? extends E> func) {
+        return leftJoin(b, keyMapper, keyMapper, func);
+    }
+
+    /**
      *
      * @param <K>
      * @param <U>
@@ -4696,6 +4740,21 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                 return func.apply((T) null, u);
             }
         }));
+    }
+
+    /**
+     * 
+     * @param <K>
+     * @param <R>
+     * @param b
+     * @param keyMapper
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <K, R> ExceptionalStream<R, E> rightJoin(final Collection<? extends T> b, final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+            final Throwables.BiFunction<? super T, ? super T, R, ? extends E> func) {
+        return rightJoin(b, keyMapper, keyMapper, func);
     }
 
     /**
@@ -4861,6 +4920,21 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         };
 
         return map(mapper);
+    }
+
+    /**
+     * 
+     * @param <K>
+     * @param <R>
+     * @param b
+     * @param keyMapper
+     * @param func
+     * @return
+     */
+    @IntermediateOp
+    public <K, R> ExceptionalStream<R, E> groupJoin(final Collection<? extends T> b, final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
+            final Throwables.BiFunction<? super T, ? super List<T>, R, ? extends E> func) {
+        return groupJoin(b, keyMapper, keyMapper, func);
     }
 
     /**

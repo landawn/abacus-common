@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.condition;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class IsNot.
  *

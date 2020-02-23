@@ -21,7 +21,6 @@ import java.util.Map;
 
 import com.landawn.abacus.annotation.Internal;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Enum SQLOperation.
  *

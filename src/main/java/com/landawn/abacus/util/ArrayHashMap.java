@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-// TODO: Auto-generated Javadoc
 /**
  * It's designed to supported primitive/object array key.
  * The elements in the array must not be modified after the array is put into the map as key.

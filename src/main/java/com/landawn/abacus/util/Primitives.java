@@ -15,7 +15,6 @@
  */
 package com.landawn.abacus.util;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class Primitives.
  */

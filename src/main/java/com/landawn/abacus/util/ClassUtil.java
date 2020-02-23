@@ -34,7 +34,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;
@@ -124,7 +123,6 @@ import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class ClassUtil.
  *
@@ -445,12 +443,6 @@ public final class ClassUtil {
 
     /** The Constant methodPropNamePool. */
     private static final Map<Method, String> methodPropNamePool = new ObjectPool<>(POOL_SIZE * 2);
-
-    /** The Constant fieldTypeArgumentsPool. */
-    private static final Map<Field, Class<?>[]> fieldTypeArgumentsPool = new ObjectPool<>(POOL_SIZE * 2);
-
-    /** The Constant methodTypeArgumentsPool. */
-    private static final Map<Method, Class<?>[]> methodTypeArgumentsPool = new ObjectPool<>(POOL_SIZE * 2);
 
     /** The Constant fieldParameterizedTypeNamePool. */
     private static final Map<Field, String> fieldParameterizedTypeNamePool = new ObjectPool<>(POOL_SIZE * 2);
@@ -940,7 +932,7 @@ public final class ClassUtil {
         String parameterizedTypeName = fieldParameterizedTypeNamePool.get(field);
 
         if (parameterizedTypeName == null) {
-            parameterizedTypeName = formatParameterizedTypeName((field.getGenericType()).toString());
+            parameterizedTypeName = formatParameterizedTypeName(field.getGenericType().toString());
 
             fieldParameterizedTypeNamePool.put(field, parameterizedTypeName);
         }
@@ -967,6 +959,51 @@ public final class ClassUtil {
         return parameterizedTypeName;
     }
 
+    private static final Map<String, String> builtinTypeNameMap = new HashMap<>(100);
+
+    static {
+        builtinTypeNameMap.put(boolean[].class.getName(), "boolean[]");
+        builtinTypeNameMap.put(char[].class.getName(), "char[]");
+        builtinTypeNameMap.put(byte[].class.getName(), "byte[]");
+        builtinTypeNameMap.put(short[].class.getName(), "short[]");
+        builtinTypeNameMap.put(int[].class.getName(), "int[]");
+        builtinTypeNameMap.put(long[].class.getName(), "long[]");
+        builtinTypeNameMap.put(float[].class.getName(), "float[]");
+        builtinTypeNameMap.put(double[].class.getName(), "double[]");
+
+        builtinTypeNameMap.put(Boolean[].class.getName(), "Boolean[]");
+        builtinTypeNameMap.put(Character[].class.getName(), "Character[]");
+        builtinTypeNameMap.put(Byte[].class.getName(), "Byte[]");
+        builtinTypeNameMap.put(Short[].class.getName(), "Short[]");
+        builtinTypeNameMap.put(Integer[].class.getName(), "Integer[]");
+        builtinTypeNameMap.put(Long[].class.getName(), "Long[]");
+        builtinTypeNameMap.put(Float[].class.getName(), "Float[]");
+        builtinTypeNameMap.put(Double[].class.getName(), "Double[]");
+
+        builtinTypeNameMap.put(String[].class.getName(), "String[]");
+        builtinTypeNameMap.put(CharSequence[].class.getName(), "CharSequence[]");
+        builtinTypeNameMap.put(Number[].class.getName(), "Number[]");
+        builtinTypeNameMap.put(Object[].class.getName(), "Object[]");
+
+        for (String key : new ArrayList<>(builtinTypeNameMap.keySet())) {
+            builtinTypeNameMap.put("class " + key, builtinTypeNameMap.get(key));
+        }
+
+        builtinTypeNameMap.put(Boolean.class.getName(), "Boolean");
+        builtinTypeNameMap.put(Character.class.getName(), "Character");
+        builtinTypeNameMap.put(Byte.class.getName(), "Byte");
+        builtinTypeNameMap.put(Short.class.getName(), "Short");
+        builtinTypeNameMap.put(Integer.class.getName(), "Integer");
+        builtinTypeNameMap.put(Long.class.getName(), "Long");
+        builtinTypeNameMap.put(Float.class.getName(), "Float");
+        builtinTypeNameMap.put(Double.class.getName(), "Double");
+
+        builtinTypeNameMap.put(String.class.getName(), "String");
+        builtinTypeNameMap.put(CharSequence.class.getName(), "CharSequence");
+        builtinTypeNameMap.put(Number.class.getName(), "Number");
+        builtinTypeNameMap.put(Object.class.getName(), "Object");
+    }
+
     /**
      * Format parameterized type name.
      *
@@ -974,7 +1011,24 @@ public final class ClassUtil {
      * @return
      */
     static String formatParameterizedTypeName(final String parameterizedTypeName) {
-        String res = parameterizedTypeName.replaceAll("java.lang.", "").replaceAll("class ", "");
+        String res = builtinTypeNameMap.get(parameterizedTypeName);
+
+        if (res != null) {
+            return res;
+        }
+
+        res = parameterizedTypeName;
+
+        if (res.startsWith("class [L") && res.endsWith(";")) {
+            res = res.substring("class [L".length(), res.length() - 1) + "[]";
+        }
+
+        if (res.startsWith("interface [L") && res.endsWith(";")) {
+            res = res.substring("interface [L".length(), res.length() - 1) + "[]";
+        }
+
+        res = res.replaceAll("java.lang.", "").replaceAll("class ", "").replaceAll("interface ", "");
+
         final int idx = res.lastIndexOf('$');
 
         if (idx > 0) {
@@ -1006,68 +1060,6 @@ public final class ClassUtil {
         }
 
         return res;
-    }
-
-    /**
-     * Gets the type arguments by method.
-     *
-     * @param method
-     * @return
-     */
-    public static Class<?>[] getTypeArgumentsByField(final Field field) {
-        Class<?>[] typeParameterClasses = fieldTypeArgumentsPool.get(field);
-
-        if (typeParameterClasses == null) {
-            final java.lang.reflect.Type genericParameterType = field.getGenericType();
-            typeParameterClasses = getTypeArguments(genericParameterType);
-
-            fieldTypeArgumentsPool.put(field, typeParameterClasses);
-        }
-
-        return typeParameterClasses.length == 0 ? typeParameterClasses : typeParameterClasses.clone();
-    }
-
-    /**
-     * Gets the type arguments by method.
-     *
-     * @param method
-     * @return
-     */
-    public static Class<?>[] getTypeArgumentsByMethod(final Method method) {
-        Class<?>[] typeParameterClasses = methodTypeArgumentsPool.get(method);
-
-        if (typeParameterClasses == null) {
-            final java.lang.reflect.Type genericParameterType = N.isNullOrEmpty(method.getGenericParameterTypes()) ? method.getGenericReturnType()
-                    : method.getGenericParameterTypes()[0];
-
-            typeParameterClasses = getTypeArguments(genericParameterType);
-
-            methodTypeArgumentsPool.put(method, typeParameterClasses);
-        }
-
-        return typeParameterClasses.length == 0 ? typeParameterClasses : typeParameterClasses.clone();
-    }
-
-    public static Class<?>[] getTypeArguments(java.lang.reflect.Type genericParameterType) {
-        if (genericParameterType instanceof ParameterizedType) {
-            final ParameterizedType aType = (ParameterizedType) genericParameterType;
-            final java.lang.reflect.Type[] parameterArgTypes = aType.getActualTypeArguments();
-            final Class<?>[] typeParameterClasses = new Class[parameterArgTypes.length];
-
-            for (int i = 0; i < parameterArgTypes.length; i++) {
-                if (parameterArgTypes[i] instanceof Class) {
-                    typeParameterClasses[i] = (Class<?>) parameterArgTypes[i];
-                } else if (parameterArgTypes[i] instanceof ParameterizedType && ((ParameterizedType) parameterArgTypes[i]).getRawType() instanceof Class) {
-                    typeParameterClasses[i] = (Class<?>) ((ParameterizedType) parameterArgTypes[i]).getRawType();
-                } else {
-                    return new Class<?>[0];
-                }
-            }
-
-            return typeParameterClasses;
-        } else {
-            return new Class<?>[0];
-        }
     }
 
     /**

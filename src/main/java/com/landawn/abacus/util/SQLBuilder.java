@@ -60,7 +60,6 @@ import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.u.Optional;
 
-// TODO: Auto-generated Javadoc
 /**
  * It's easier to write/maintain the sql by <code>SQLBuilder</code> and more efficient, comparing to write sql in plain text.
  * <br>The <code>sql()</code> or <code>pair()</code> method must be called to release resources.

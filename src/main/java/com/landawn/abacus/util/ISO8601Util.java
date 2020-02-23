@@ -22,7 +22,6 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
-// TODO: Auto-generated Javadoc
 /**
  * 
  * Copyright (c) 2017,  Jackson Authors/Contributers.

@@ -40,7 +40,6 @@ import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.Collector;
 import com.landawn.abacus.util.stream.FloatStream;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class FloatList.
  *

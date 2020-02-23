@@ -21,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.landawn.abacus.condition.ConditionFactory.CF;
 import com.landawn.abacus.util.N;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class NamedProperty.
  *

@@ -22,7 +22,6 @@ import org.slf4j.spi.LocationAwareLogger;
 
 import com.landawn.abacus.util.function.Supplier;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class SLF4JLogger.
  *

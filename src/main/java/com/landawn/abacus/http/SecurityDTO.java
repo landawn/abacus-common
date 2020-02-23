@@ -24,7 +24,6 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.WSSecurityUtil;
 
-// TODO: Auto-generated Javadoc
 /**
  * This class provides a solution for safety data transfer between server/client.
  * First, let other DTOs extends this class and call encrypt method before sending message to server.

@@ -23,7 +23,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.landawn.abacus.annotation.AccessFieldByMethod;
 import com.landawn.abacus.annotation.Internal;
 
-// TODO: Auto-generated Javadoc
 /**
  * Memo of the signed and modified properties in this entity instance.
  *

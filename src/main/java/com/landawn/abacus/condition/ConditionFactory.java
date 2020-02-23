@@ -30,7 +30,6 @@ import com.landawn.abacus.util.SQLBuilder;
 import com.landawn.abacus.util.SortDirection;
 import com.landawn.abacus.util.WD;
 
-// TODO: Auto-generated Javadoc
 /**
  * A factory for creating Condition objects.
  *

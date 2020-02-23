@@ -61,7 +61,6 @@ import com.landawn.abacus.util.function.IntFunction;
 import com.landawn.abacus.util.function.Predicate;
 import com.landawn.abacus.util.function.Supplier;
 
-// TODO: Auto-generated Javadoc
 /**
  * <p>
  * Note: This class includes codes copied from Apache Commons Lang, Google Guava and other open source projects under the Apache License 2.0.
@@ -17851,6 +17850,38 @@ public final class N extends CommonUtil {
     }
 
     /**
+     * Distinct by the value mapped from <code>keyMapper</code>.
+     *
+     * Mostly it's designed for one-step operation to complete the operation in one step.
+     * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param keyMapper don't change value of the input parameter.
+     * @param supplier
+     * @return
+     * @throws E the e
+     */
+    public static <T, C extends Collection<T>, E extends Exception> C distinctBy(final Collection<? extends T> c,
+            final Throwables.Function<? super T, ?, E> keyMapper, final Supplier<C> supplier) throws E {
+        if (isNullOrEmpty(c)) {
+            return supplier.get();
+        }
+
+        final C result = supplier.get();
+        final Set<Object> set = newHashSet();
+
+        for (T e : c) {
+            if (set.add(hashKey(keyMapper.apply(e)))) {
+                result.add(e);
+            }
+        }
+
+        return result;
+    }
+
+    /**
      *
      * @param <T> the generic type
      * @param <E> the element type
@@ -18060,6 +18091,8 @@ public final class N extends CommonUtil {
      * @param targetClass
      * @param json
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromJSON(final Class<? extends T> targetClass, final String json) {
         return Utils.jsonParser.deserialize(targetClass, json);
@@ -18072,6 +18105,8 @@ public final class N extends CommonUtil {
      * @param json
      * @param config
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromJSON(final Class<? extends T> targetClass, final String json, final JSONDeserializationConfig config) {
         return Utils.jsonParser.deserialize(targetClass, json, config);
@@ -18083,6 +18118,8 @@ public final class N extends CommonUtil {
      * @param targetClass
      * @param json
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromJSON(final Class<? extends T> targetClass, final File json) {
         return Utils.jsonParser.deserialize(targetClass, json);
@@ -18095,6 +18132,8 @@ public final class N extends CommonUtil {
      * @param json
      * @param config
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromJSON(final Class<? extends T> targetClass, final File json, final JSONDeserializationConfig config) {
         return Utils.jsonParser.deserialize(targetClass, json, config);
@@ -18106,6 +18145,8 @@ public final class N extends CommonUtil {
      * @param targetClass
      * @param json
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromJSON(final Class<? extends T> targetClass, final InputStream json) {
         return Utils.jsonParser.deserialize(targetClass, json);
@@ -18118,6 +18159,8 @@ public final class N extends CommonUtil {
      * @param json
      * @param config
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromJSON(final Class<? extends T> targetClass, final InputStream json, final JSONDeserializationConfig config) {
         return Utils.jsonParser.deserialize(targetClass, json, config);
@@ -18129,6 +18172,8 @@ public final class N extends CommonUtil {
      * @param targetClass
      * @param json
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromJSON(final Class<? extends T> targetClass, final Reader json) {
         return Utils.jsonParser.deserialize(targetClass, json);
@@ -18141,6 +18186,8 @@ public final class N extends CommonUtil {
      * @param json
      * @param config
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromJSON(final Class<? extends T> targetClass, final Reader json, final JSONDeserializationConfig config) {
         return Utils.jsonParser.deserialize(targetClass, json, config);
@@ -18154,6 +18201,8 @@ public final class N extends CommonUtil {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromJSON(final Class<? extends T> targetClass, final String json, final int fromIndex, final int toIndex) {
         return Utils.jsonParser.deserialize(targetClass, json, fromIndex, toIndex);
@@ -18168,6 +18217,8 @@ public final class N extends CommonUtil {
      * @param toIndex
      * @param config
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromJSON(final Class<? extends T> targetClass, final String json, final int fromIndex, final int toIndex,
             final JSONDeserializationConfig config) {
@@ -18180,6 +18231,8 @@ public final class N extends CommonUtil {
      * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
      * @param json
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromJSON(final Type<? extends T> targetType, final String json) {
         return fromJSON(targetType, json, null);
@@ -18192,6 +18245,8 @@ public final class N extends CommonUtil {
      * @param json
      * @param config
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromJSON(final Type<? extends T> targetType, final String json, final JSONDeserializationConfig config) {
         return Utils.jsonParser.deserialize(targetType.clazz(), json, setConfig(targetType, config, true));
@@ -18203,6 +18258,8 @@ public final class N extends CommonUtil {
      * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
      * @param json
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromJSON(final Type<? extends T> targetType, final File json) {
         return fromJSON(targetType, json, null);
@@ -18215,6 +18272,8 @@ public final class N extends CommonUtil {
      * @param json
      * @param config
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromJSON(final Type<? extends T> targetType, final File json, final JSONDeserializationConfig config) {
         return Utils.jsonParser.deserialize(targetType.clazz(), json, setConfig(targetType, config, true));
@@ -18226,6 +18285,8 @@ public final class N extends CommonUtil {
      * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
      * @param json
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromJSON(final Type<? extends T> targetType, final InputStream json) {
         return fromJSON(targetType, json, null);
@@ -18238,6 +18299,8 @@ public final class N extends CommonUtil {
      * @param json
      * @param config
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromJSON(final Type<? extends T> targetType, final InputStream json, final JSONDeserializationConfig config) {
         return Utils.jsonParser.deserialize(targetType.clazz(), json, setConfig(targetType, config, true));
@@ -18249,6 +18312,8 @@ public final class N extends CommonUtil {
      * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
      * @param json
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromJSON(final Type<? extends T> targetType, final Reader json) {
         return fromJSON(targetType, json, null);
@@ -18261,6 +18326,8 @@ public final class N extends CommonUtil {
      * @param json
      * @param config
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromJSON(final Type<? extends T> targetType, final Reader json, final JSONDeserializationConfig config) {
         return Utils.jsonParser.deserialize(targetType.clazz(), json, setConfig(targetType, config, true));
@@ -18274,6 +18341,8 @@ public final class N extends CommonUtil {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromJSON(final Type<? extends T> targetType, final String json, final int fromIndex, final int toIndex) {
         return fromJSON(targetType, json, fromIndex, toIndex, null);
@@ -18288,6 +18357,8 @@ public final class N extends CommonUtil {
      * @param toIndex
      * @param config
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromJSON(final Type<? extends T> targetType, final String json, final int fromIndex, final int toIndex,
             final JSONDeserializationConfig config) {
@@ -18298,6 +18369,8 @@ public final class N extends CommonUtil {
      *
      * @param json
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static String formatJSON(final String json) {
         return formatJSON(Object.class, json);
@@ -18308,6 +18381,8 @@ public final class N extends CommonUtil {
      * @param type
      * @param json
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static String formatJSON(final Class<?> type, final String json) {
         return toJSON(fromJSON(type, json), Utils.jscPrettyFormat);
@@ -18318,6 +18393,8 @@ public final class N extends CommonUtil {
      * @param type
      * @param json
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static String formatJSON(final Type<?> type, final String json) {
         return toJSON(fromJSON(type, json), Utils.jscPrettyFormat);
@@ -18415,6 +18492,8 @@ public final class N extends CommonUtil {
      * @param targetClass
      * @param xml
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromXML(final Class<? extends T> targetClass, final String xml) {
         return Utils.xmlParser.deserialize(targetClass, xml);
@@ -18427,6 +18506,8 @@ public final class N extends CommonUtil {
      * @param xml
      * @param config
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromXML(final Class<? extends T> targetClass, final String xml, final XMLDeserializationConfig config) {
         return Utils.xmlParser.deserialize(targetClass, xml, config);
@@ -18438,6 +18519,8 @@ public final class N extends CommonUtil {
      * @param targetClass
      * @param xml
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromXML(final Class<? extends T> targetClass, final File xml) {
         return Utils.xmlParser.deserialize(targetClass, xml);
@@ -18450,6 +18533,8 @@ public final class N extends CommonUtil {
      * @param xml
      * @param config
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromXML(final Class<? extends T> targetClass, final File xml, final XMLDeserializationConfig config) {
         return Utils.xmlParser.deserialize(targetClass, xml, config);
@@ -18461,6 +18546,8 @@ public final class N extends CommonUtil {
      * @param targetClass
      * @param xml
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromXML(final Class<? extends T> targetClass, final InputStream xml) {
         return Utils.xmlParser.deserialize(targetClass, xml);
@@ -18473,6 +18560,8 @@ public final class N extends CommonUtil {
      * @param xml
      * @param config
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromXML(final Class<? extends T> targetClass, final InputStream xml, final XMLDeserializationConfig config) {
         return Utils.xmlParser.deserialize(targetClass, xml, config);
@@ -18484,6 +18573,8 @@ public final class N extends CommonUtil {
      * @param targetClass
      * @param xml
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromXML(final Class<? extends T> targetClass, final Reader xml) {
         return Utils.xmlParser.deserialize(targetClass, xml);
@@ -18496,6 +18587,8 @@ public final class N extends CommonUtil {
      * @param xml
      * @param config
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromXML(final Class<? extends T> targetClass, final Reader xml, final XMLDeserializationConfig config) {
         return Utils.xmlParser.deserialize(targetClass, xml, config);
@@ -18507,6 +18600,8 @@ public final class N extends CommonUtil {
      * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
      * @param xml
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromXML(final Type<? extends T> targetType, final String xml) {
         return fromJSON(targetType, xml, null);
@@ -18519,6 +18614,8 @@ public final class N extends CommonUtil {
      * @param xml
      * @param config
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromXML(final Type<? extends T> targetType, final String xml, final XMLDeserializationConfig config) {
         return Utils.xmlParser.deserialize(targetType.clazz(), xml, setConfig(targetType, config, false));
@@ -18530,6 +18627,8 @@ public final class N extends CommonUtil {
      * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
      * @param xml
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromXML(final Type<? extends T> targetType, final File xml) {
         return fromJSON(targetType, xml, null);
@@ -18542,6 +18641,8 @@ public final class N extends CommonUtil {
      * @param xml
      * @param config
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromXML(final Type<? extends T> targetType, final File xml, final XMLDeserializationConfig config) {
         return Utils.xmlParser.deserialize(targetType.clazz(), xml, setConfig(targetType, config, false));
@@ -18553,6 +18654,8 @@ public final class N extends CommonUtil {
      * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
      * @param xml
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromXML(final Type<? extends T> targetType, final InputStream xml) {
         return fromJSON(targetType, xml, null);
@@ -18565,6 +18668,8 @@ public final class N extends CommonUtil {
      * @param xml
      * @param config
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromXML(final Type<? extends T> targetType, final InputStream xml, final XMLDeserializationConfig config) {
         return Utils.xmlParser.deserialize(targetType.clazz(), xml, setConfig(targetType, config, false));
@@ -18576,6 +18681,8 @@ public final class N extends CommonUtil {
      * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
      * @param xml
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromXML(final Type<? extends T> targetType, final Reader xml) {
         return fromJSON(targetType, xml, null);
@@ -18588,6 +18695,8 @@ public final class N extends CommonUtil {
      * @param xml
      * @param config
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static <T> T fromXML(final Type<? extends T> targetType, final Reader xml, final XMLDeserializationConfig config) {
         return Utils.xmlParser.deserialize(targetType.clazz(), xml, setConfig(targetType, config, false));
@@ -18632,6 +18741,8 @@ public final class N extends CommonUtil {
      *
      * @param xml
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static String xml2JSON(final String xml) {
         return xml2JSON(Map.class, xml);
@@ -18643,6 +18754,8 @@ public final class N extends CommonUtil {
      * @param cls
      * @param xml
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static String xml2JSON(final Class<?> cls, final String xml) {
         return Utils.jsonParser.serialize(Utils.xmlParser.deserialize(cls, xml), Utils.jsc);
@@ -18653,6 +18766,8 @@ public final class N extends CommonUtil {
      *
      * @param json
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static String json2XML(final String json) {
         return json2XML(Map.class, json);
@@ -18664,6 +18779,8 @@ public final class N extends CommonUtil {
      * @param cls
      * @param json
      * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
     public static String json2XML(final Class<?> cls, final String json) {
         return Utils.xmlParser.serialize(Utils.jsonParser.deserialize(cls, json));

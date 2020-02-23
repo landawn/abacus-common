@@ -17,7 +17,6 @@ package com.landawn.abacus.util;
 import java.nio.charset.Charset;
 import java.util.Map;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class Charsets.
  *

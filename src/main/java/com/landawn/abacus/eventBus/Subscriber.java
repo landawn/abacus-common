@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.eventBus;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Interface Subscriber.
  *

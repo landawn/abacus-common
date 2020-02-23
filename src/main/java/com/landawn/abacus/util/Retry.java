@@ -22,7 +22,6 @@ import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.function.BiPredicate;
 import com.landawn.abacus.util.function.Predicate;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class Retry.
  *

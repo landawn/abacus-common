@@ -21,7 +21,6 @@ import com.landawn.abacus.util.function.ByteSupplier;
 import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.ByteStream;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class ByteIterator.
  *

@@ -36,7 +36,6 @@ import com.landawn.abacus.util.function.Consumer;
 import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.Predicate;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class Observer.
  *

@@ -20,7 +20,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class Properties.
  *

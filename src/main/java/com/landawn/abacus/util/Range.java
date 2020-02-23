@@ -21,7 +21,6 @@ import java.util.Collection;
 
 import com.landawn.abacus.util.u.Optional;
 
-// TODO: Auto-generated Javadoc
 /**
  * <p>
  * Note: it's copied from Apache Commons Lang developed at The Apache Software Foundation (http://www.apache.org/), or

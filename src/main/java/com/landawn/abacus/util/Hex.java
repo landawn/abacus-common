@@ -17,7 +17,6 @@
 
 package com.landawn.abacus.util;
 
-// TODO: Auto-generated Javadoc
 /**
  * Note: copied from Apache commons-codec: https://commons.apache.org/proper/commons-codec.
  * 

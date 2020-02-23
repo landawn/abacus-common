@@ -24,7 +24,6 @@ import com.landawn.abacus.condition.ConditionFactory.CF;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.SortDirection;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class OrderBy.
  *

@@ -23,7 +23,6 @@ import java.io.Writer;
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.exception.UncheckedIOException;
 
-// TODO: Auto-generated Javadoc
 /**
  * Design principles: <li>1, Simple (is beautiful)</li> <li>2, Fast (is powerful)</li> <li>3, Concepts (must be integral
  * and consistent)</li> <br/>

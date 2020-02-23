@@ -21,7 +21,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class ImmutableSortedSet.
  *

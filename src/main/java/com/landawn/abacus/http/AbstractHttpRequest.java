@@ -19,7 +19,6 @@ import java.util.Map;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.util.ContinuableFuture;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class AbstractHttpRequest.
  *

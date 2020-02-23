@@ -30,7 +30,6 @@ import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class GenericObjectPool.
  *

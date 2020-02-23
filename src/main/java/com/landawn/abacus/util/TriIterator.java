@@ -26,7 +26,6 @@ import com.landawn.abacus.util.function.IndexedConsumer;
 import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.stream.Stream;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class TriIterator.
  *
