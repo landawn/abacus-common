@@ -26,7 +26,7 @@ import com.landawn.abacus.util.N;
  * @author Haiyang Li
  * @since 1.3
  */
-public final class HttpSettings {
+public final class HttpSettings implements Cloneable {
 
     /** The connection timeout. */
     private int connectionTimeout;

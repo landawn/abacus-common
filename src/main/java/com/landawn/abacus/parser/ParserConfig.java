@@ -28,7 +28,7 @@ import com.landawn.abacus.annotation.JsonXmlField;
  * @see JsonXmlField
  * @since 0.8
  */
-public abstract class ParserConfig<C extends ParserConfig<C>> {
+public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneable {
 
     /** The ignored prop names. */
     Map<Class<?>, Collection<String>> ignoredPropNames = null;
@@ -105,5 +105,11 @@ public abstract class ParserConfig<C extends ParserConfig<C>> {
      *
      * @return
      */
-    public abstract C copy();
+    public C copy() {
+        try {
+            return (C) super.clone();
+        } catch (CloneNotSupportedException e) { 
+            throw new RuntimeException(e); // should never happen.
+        }
+    }
 }

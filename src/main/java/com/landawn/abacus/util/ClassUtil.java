@@ -444,12 +444,6 @@ public final class ClassUtil {
     /** The Constant methodPropNamePool. */
     private static final Map<Method, String> methodPropNamePool = new ObjectPool<>(POOL_SIZE * 2);
 
-    /** The Constant fieldParameterizedTypeNamePool. */
-    private static final Map<Field, String> fieldParameterizedTypeNamePool = new ObjectPool<>(POOL_SIZE * 2);
-
-    /** The Constant methodParameterizedTypeNamePool. */
-    private static final Map<Method, String> methodParameterizedTypeNamePool = new ObjectPool<>(POOL_SIZE * 2);
-
     /** The Constant keyWordMapper. */
     // reserved words.
     private static final Map<String, String> keyWordMapper = new HashMap<>(16);
@@ -929,15 +923,7 @@ public final class ClassUtil {
      * @return
      */
     public static String getParameterizedTypeNameByField(final Field field) {
-        String parameterizedTypeName = fieldParameterizedTypeNamePool.get(field);
-
-        if (parameterizedTypeName == null) {
-            parameterizedTypeName = formatParameterizedTypeName(field.getGenericType().toString());
-
-            fieldParameterizedTypeNamePool.put(field, parameterizedTypeName);
-        }
-
-        return parameterizedTypeName;
+        return formatParameterizedTypeName(field.getGenericType().toString());
     }
 
     /**
@@ -947,16 +933,13 @@ public final class ClassUtil {
      * @return
      */
     public static String getParameterizedTypeNameByMethod(final Method method) {
-        String parameterizedTypeName = methodParameterizedTypeNamePool.get(method);
+        final java.lang.reflect.Type[] genericParameterTypes = method.getGenericParameterTypes();
 
-        if (parameterizedTypeName == null) {
-            parameterizedTypeName = formatParameterizedTypeName(
-                    (N.isNullOrEmpty(method.getGenericParameterTypes()) ? method.getGenericReturnType() : method.getGenericParameterTypes()[0]).toString());
-
-            methodParameterizedTypeNamePool.put(method, parameterizedTypeName);
+        if (N.notNullOrDefault(genericParameterTypes)) {
+            return formatParameterizedTypeName(genericParameterTypes[0].toString());
+        } else {
+            return formatParameterizedTypeName(method.getGenericReturnType().toString());
         }
-
-        return parameterizedTypeName;
     }
 
     private static final Map<String, String> builtinTypeNameMap = new HashMap<>(100);
