@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 HaiYang Li
+ * Copyright (C) 2020 HaiYang Li
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -21,31 +21,28 @@ import java.lang.annotation.Target;
 import java.text.DecimalFormat;
 
 import com.landawn.abacus.annotation.Type.EnumBy;
+import com.landawn.abacus.util.NamingPolicy;
 
 /**
- * The Interface JsonXmlField.
+ * The Interface JsonXmlConfig.
  */
-@Target({ ElementType.FIELD })
+@Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface JsonXmlField {
+public @interface JsonXmlConfig {
 
     /**
      *
      * @return
      */
-    String name() default "";
+    NamingPolicy namingPolicy() default NamingPolicy.LOWER_CAMEL_CASE;
 
     /**
+     * values can be regular expressions 
      *
      * @return
+     * @see String#matches(String)
      */
-    String type() default "";
-
-    /**
-     *
-     * @return
-     */
-    EnumBy enumerated() default EnumBy.NAME;
+    String[] ignoredFields() default {};
 
     /**
      *
@@ -68,13 +65,7 @@ public @interface JsonXmlField {
 
     /**
      *
-     * @return true, if successful
+     * @return
      */
-    boolean ignore() default false;
-
-    /**
-     * 
-     * @return true if target field type is a JSON String.
-     */
-    boolean isJsonRawValue() default false;
+    EnumBy enumerated() default EnumBy.NAME;
 }

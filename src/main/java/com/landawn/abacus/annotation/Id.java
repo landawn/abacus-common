@@ -34,5 +34,5 @@ public @interface Id {
      *
      * @return
      */
-    String[] value() default "";
+    String[] value() default {};
 }

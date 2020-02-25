@@ -37,6 +37,7 @@ import java.util.TimeZone;
 import com.landawn.abacus.annotation.AccessFieldByMethod;
 import com.landawn.abacus.annotation.Column;
 import com.landawn.abacus.annotation.Internal;
+import com.landawn.abacus.annotation.JsonXmlConfig;
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.annotation.Table;
 import com.landawn.abacus.annotation.Type.EnumBy;
@@ -54,6 +55,7 @@ import com.landawn.abacus.util.ImmutableList;
 import com.landawn.abacus.util.ImmutableMap;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.ObjectPool;
 import com.landawn.abacus.util.Splitter;
 import com.landawn.abacus.util.StringUtil;
@@ -94,17 +96,13 @@ public final class ParserUtil {
     /** The Constant POOL_SIZE. */
     private static final int POOL_SIZE = 1024;
 
+    private static final int defaultNameIndex = NamingPolicy.LOWER_CAMEL_CASE.ordinal();
+
     /** The Constant entityInfoPool. */
     // ...
     private static final Map<Class<?>, EntityInfo> entityInfoPool = new ObjectPool<>(POOL_SIZE);
 
-    /**
-     * Checks if is serializable.
-     *
-     * @param field
-     * @return true, if is serializable
-     */
-    static boolean isSerializable(final Field field) {
+    static boolean isJsonXmlSerializable(final Field field, final JsonXmlConfig jsonXmlConfig) {
         if (field == null || Modifier.isStatic(field.getModifiers())) {
             return false;
         }
@@ -131,125 +129,214 @@ public final class ParserUtil {
             // ignore
         }
 
+        if (jsonXmlConfig != null && N.notNullOrDefault(jsonXmlConfig.ignoredFields())) {
+            String fieldName = field.getName();
+
+            for (String ignoreFieldName : jsonXmlConfig.ignoredFields()) {
+                if (fieldName.equals(ignoreFieldName) || fieldName.matches(ignoreFieldName)) {
+                    return false;
+                }
+            }
+        }
+
         return true;
     }
 
-    /**
-     * Gets the date format.
-     *
-     * @param field
-     * @return
-     */
-    static String getDateFormat(final Field field) {
-        if (field == null) {
-            return null;
-        }
-
-        if (field.isAnnotationPresent(JsonXmlField.class) && N.notNullOrEmpty(field.getAnnotation(JsonXmlField.class).dateFormat())) {
-            return field.getAnnotation(JsonXmlField.class).dateFormat();
-        }
-
-        try {
-            if (field.isAnnotationPresent(com.alibaba.fastjson.annotation.JSONField.class)
-                    && N.notNullOrEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).format())) {
-                return field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).format();
+    static String getDateFormat(final Field field, final JsonXmlConfig jsonXmlConfig) {
+        if (field != null) {
+            if (field.isAnnotationPresent(JsonXmlField.class) && N.notNullOrEmpty(field.getAnnotation(JsonXmlField.class).dateFormat())) {
+                return field.getAnnotation(JsonXmlField.class).dateFormat();
             }
-        } catch (Throwable e) {
-            // ignore
+
+            try {
+                if (field.isAnnotationPresent(com.alibaba.fastjson.annotation.JSONField.class)
+                        && N.notNullOrEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).format())) {
+                    return field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).format();
+                }
+            } catch (Throwable e) {
+                // ignore
+            }
+
+            try {
+                if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonFormat.class)
+                        && N.notNullOrEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonFormat.class).pattern())) {
+                    return field.getAnnotation(com.fasterxml.jackson.annotation.JsonFormat.class).pattern();
+                }
+            } catch (Throwable e) {
+                // ignore
+            }
         }
 
-        try {
-            if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonFormat.class)
-                    && N.notNullOrEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonFormat.class).pattern())) {
-                return field.getAnnotation(com.fasterxml.jackson.annotation.JsonFormat.class).pattern();
-            }
-        } catch (Throwable e) {
-            // ignore
+        if (jsonXmlConfig != null && N.notNullOrEmpty(jsonXmlConfig.dateFormat())) {
+            return jsonXmlConfig.dateFormat();
         }
 
         return null;
     }
 
-    /**
-     * Gets the time zone.
-     *
-     * @param field
-     * @return
-     */
-    static String getTimeZone(final Field field) {
-        if (field == null) {
-            return null;
-        }
-
-        if (field.isAnnotationPresent(JsonXmlField.class) && N.notNullOrEmpty(field.getAnnotation(JsonXmlField.class).timeZone())) {
-            return field.getAnnotation(JsonXmlField.class).timeZone();
-        }
-
-        try {
-            if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonFormat.class)
-                    && N.notNullOrEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonFormat.class).timezone())) {
-                return field.getAnnotation(com.fasterxml.jackson.annotation.JsonFormat.class).timezone();
+    static String getTimeZone(final Field field, final JsonXmlConfig jsonXmlConfig) {
+        if (field != null) {
+            if (field.isAnnotationPresent(JsonXmlField.class) && N.notNullOrEmpty(field.getAnnotation(JsonXmlField.class).timeZone())) {
+                return field.getAnnotation(JsonXmlField.class).timeZone();
             }
-        } catch (Throwable e) {
-            // ignore
+
+            try {
+                if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonFormat.class)
+                        && N.notNullOrEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonFormat.class).timezone())) {
+                    return field.getAnnotation(com.fasterxml.jackson.annotation.JsonFormat.class).timezone();
+                }
+            } catch (Throwable e) {
+                // ignore
+            }
+        }
+
+        if (jsonXmlConfig != null && N.notNullOrEmpty(jsonXmlConfig.timeZone())) {
+            return jsonXmlConfig.timeZone();
         }
 
         return null;
     }
 
-    /**
-     * Gets the number format.
-     *
-     * @param field
-     * @return
-     */
-    static String getNumberFormat(final Field field) {
-        if (field == null) {
-            return null;
+    static String getNumberFormat(final Field field, final JsonXmlConfig jsonXmlConfig) {
+        if (field != null) {
+            if (field.isAnnotationPresent(JsonXmlField.class) && N.notNullOrEmpty(field.getAnnotation(JsonXmlField.class).numberFormat())) {
+                return field.getAnnotation(JsonXmlField.class).numberFormat();
+            }
         }
 
-        if (field.isAnnotationPresent(JsonXmlField.class) && N.notNullOrEmpty(field.getAnnotation(JsonXmlField.class).numberFormat())) {
-            return field.getAnnotation(JsonXmlField.class).numberFormat();
+        if (jsonXmlConfig != null && N.notNullOrEmpty(jsonXmlConfig.numberFormat())) {
+            return jsonXmlConfig.numberFormat();
         }
 
         return null;
     }
 
-    /**
-     * Gets the JSON name.
-     *
-     * @param propName
-     * @param field
-     * @return
-     */
-    static String getJsonXmlName(final String propName, final Field field) {
-        if (field == null) {
-            return propName;
-        }
-
-        if (field.isAnnotationPresent(JsonXmlField.class) && N.notNullOrEmpty(field.getAnnotation(JsonXmlField.class).name())) {
-            return field.getAnnotation(JsonXmlField.class).name();
-        }
-
-        try {
-            if (field.isAnnotationPresent(com.alibaba.fastjson.annotation.JSONField.class)
-                    && N.notNullOrEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name())) {
-                return field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name();
+    static EnumBy getEnumerated(final Field field, final JsonXmlConfig jsonXmlConfig) {
+        if (field != null) {
+            if (field.isAnnotationPresent(JsonXmlField.class) && field.getAnnotation(JsonXmlField.class).enumerated() != null) {
+                return field.getAnnotation(JsonXmlField.class).enumerated();
             }
-        } catch (Throwable e) {
-            // ignore
         }
 
-        try {
-            if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonProperty.class)
-                    && N.notNullOrEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value())) {
-                return field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value();
+        if (jsonXmlConfig != null && jsonXmlConfig.enumerated() != null) {
+            return jsonXmlConfig.enumerated();
+        }
+
+        return EnumBy.NAME;
+    }
+
+    static boolean isJsonRawValue(final Field field, final JsonXmlConfig jsonXmlConfig) {
+        boolean isJsonRawValue = false;
+
+        if (field != null && field.isAnnotationPresent(JsonXmlField.class)) {
+            isJsonRawValue = field.getAnnotation(JsonXmlField.class).isJsonRawValue();
+
+            if (isJsonRawValue && !CharSequence.class.isAssignableFrom(field.getType())) {
+                throw new IllegalArgumentException("'isJsonRawValue' can only be applied to CharSequence type field");
             }
-        } catch (Throwable e) {
-            // ignore
         }
 
-        return propName;
+        return isJsonRawValue;
+    }
+
+    static JsonNameTag[] getJsonNameTags(final String name) {
+        final JsonNameTag[] result = new JsonNameTag[NamingPolicy.values().length];
+
+        for (NamingPolicy np : NamingPolicy.values()) {
+            result[np.ordinal()] = new JsonNameTag(convertName(name, np));
+        }
+
+        return result;
+    }
+
+    static XmlNameTag[] getXmlNameTags(final String name, final String typeName, final boolean isEntity) {
+        final XmlNameTag[] result = new XmlNameTag[NamingPolicy.values().length];
+
+        for (NamingPolicy np : NamingPolicy.values()) {
+            result[np.ordinal()] = new XmlNameTag(convertName(name, np), typeName, isEntity);
+        }
+
+        return result;
+    }
+
+    static JsonNameTag[] getJsonNameTags(final String propName, final Field field) {
+        String jsonXmlFieldName = null;
+
+        if (field != null) {
+            if (field.isAnnotationPresent(JsonXmlField.class) && N.notNullOrEmpty(field.getAnnotation(JsonXmlField.class).name())) {
+                jsonXmlFieldName = field.getAnnotation(JsonXmlField.class).name();
+            } else {
+                try {
+                    if (field.isAnnotationPresent(com.alibaba.fastjson.annotation.JSONField.class)
+                            && N.notNullOrEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name())) {
+                        jsonXmlFieldName = field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name();
+                    }
+                } catch (Throwable e) {
+                    // ignore
+                }
+
+                if (N.isNullOrDefault(jsonXmlFieldName)) {
+                    try {
+                        if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonProperty.class)
+                                && N.notNullOrEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value())) {
+                            jsonXmlFieldName = field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value();
+                        }
+                    } catch (Throwable e) {
+                        // ignore
+                    }
+                }
+            }
+        }
+
+        final JsonNameTag[] result = new JsonNameTag[NamingPolicy.values().length];
+
+        for (NamingPolicy np : NamingPolicy.values()) {
+            result[np.ordinal()] = new JsonNameTag(N.isNullOrDefault(jsonXmlFieldName) ? convertName(propName, np) : jsonXmlFieldName);
+        }
+
+        return result;
+    }
+
+    static XmlNameTag[] getXmlNameTags(final String propName, final Field field, final String typeName, final boolean isEntity) {
+        String jsonXmlFieldName = null;
+
+        if (field != null) {
+            if (field.isAnnotationPresent(JsonXmlField.class) && N.notNullOrEmpty(field.getAnnotation(JsonXmlField.class).name())) {
+                jsonXmlFieldName = field.getAnnotation(JsonXmlField.class).name();
+            } else {
+                try {
+                    if (field.isAnnotationPresent(com.alibaba.fastjson.annotation.JSONField.class)
+                            && N.notNullOrEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name())) {
+                        jsonXmlFieldName = field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name();
+                    }
+                } catch (Throwable e) {
+                    // ignore
+                }
+
+                if (N.isNullOrDefault(jsonXmlFieldName)) {
+                    try {
+                        if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonProperty.class)
+                                && N.notNullOrEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value())) {
+                            jsonXmlFieldName = field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value();
+                        }
+                    } catch (Throwable e) {
+                        // ignore
+                    }
+                }
+            }
+        }
+
+        final XmlNameTag[] result = new XmlNameTag[NamingPolicy.values().length];
+
+        for (NamingPolicy np : NamingPolicy.values()) {
+            result[np.ordinal()] = new XmlNameTag(N.isNullOrDefault(jsonXmlFieldName) ? convertName(propName, np) : jsonXmlFieldName, typeName, isEntity);
+        }
+
+        return result;
+    }
+
+    private static String convertName(final String name, final NamingPolicy namingPolicy) {
+        return namingPolicy == null || namingPolicy == NamingPolicy.LOWER_CAMEL_CASE ? name : namingPolicy.convert(name);
     }
 
     /**
@@ -279,6 +366,30 @@ public final class ParserUtil {
 
         return entityInfo;
     }
+
+    static int hashCode(char[] a) {
+        int result = 1;
+
+        for (char e : a) {
+            result = 31 * result + e;
+        }
+
+        return result;
+    }
+
+    static int hashCode(char[] a, int from, int to) {
+        return N.hashCode(a, from, to);
+    }
+
+    // private int hashCode(String str, int from, int to) {
+    // int result = 1;
+    //
+    // for (int i = from; i < to; i++) {
+    // result = 31 * result + str.charAt(i);
+    // }
+    //
+    // return result;
+    // }
 
     /**
      * Refresh entity prop info.
@@ -313,20 +424,22 @@ public final class ParserUtil {
 
         public final ImmutableMap<Class<? extends Annotation>, Annotation> annotations;
 
+        final NamingPolicy jsonXmlNamingPolicy;
+
         /** The type name. */
         final String typeName;
 
         /** The json info. */
-        final JSONInfo jsonInfo;
+        final JsonNameTag[] jsonNameTags;
 
         /** The xml info. */
-        final XMLInfo xmlInfo;
+        final XmlNameTag[] xmlNameTags;
 
         /** The prop infos. */
         final PropInfo[] propInfos;
 
-        /** The seri prop infos. */
-        final PropInfo[] seriPropInfos;
+        /** The jsonXmlSerializablePropInfos. */
+        final PropInfo[] jsonXmlSerializablePropInfos;
 
         /** The non transient seri prop infos. */
         final PropInfo[] nonTransientSeriPropInfos;
@@ -362,10 +475,15 @@ public final class ParserUtil {
             this.cls = (Class<Object>) cls;
             type = N.typeOf(cls);
             typeName = type.name();
-            jsonInfo = new JSONInfo(name);
-            xmlInfo = new XMLInfo(name, typeName, true);
 
             this.annotations = ImmutableMap.of(getAnnotations(cls));
+
+            final JsonXmlConfig jsonXmlConfig = (JsonXmlConfig) annotations.get(JsonXmlConfig.class);
+            this.jsonXmlNamingPolicy = jsonXmlConfig == null || jsonXmlConfig.namingPolicy() == null ? NamingPolicy.LOWER_CAMEL_CASE
+                    : jsonXmlConfig.namingPolicy();
+
+            jsonNameTags = getJsonNameTags(name);
+            xmlNameTags = getXmlNameTags(name, typeName, true);
 
             final List<String> propNameList = ClassUtil.getPropNameList(cls);
             final List<PropInfo> seriPropInfoList = new ArrayList<>();
@@ -378,8 +496,6 @@ public final class ParserUtil {
             hashPropInfoMap = new ObjectPool<>((propNameList.size() + 1) * 2);
 
             PropInfo propInfo = null;
-            String xmlPropName = null;
-            String jsonPropName = null;
             int i = 0;
 
             final Multiset<Integer> multiSet = new Multiset<>(propNameList.size() + 16);
@@ -390,22 +506,24 @@ public final class ParserUtil {
             for (String propName : propNameList) {
                 field = ClassUtil.getPropField(cls, propName);
                 getMethod = ClassUtil.getPropGetMethod(cls, propName);
-                xmlPropName = getJsonXmlName(propName, field);
-                jsonPropName = getJsonXmlName(propName, field);
 
-                propInfo = ASMUtil.isASMAvailable() ? new ASMPropInfo(propName, xmlPropName, jsonPropName, field, getMethod, annotations)
-                        : new PropInfo(propName, xmlPropName, jsonPropName, field, getMethod, annotations);
+                propInfo = ASMUtil.isASMAvailable() ? new ASMPropInfo(propName, field, getMethod, jsonXmlConfig, annotations)
+                        : new PropInfo(propName, field, getMethod, jsonXmlConfig, annotations);
 
                 propInfos[i++] = propInfo;
                 propInfoMap.put(propName, propInfo);
-                propInfoMap.put(xmlPropName, propInfo);
-                propInfoMap.put(jsonPropName, propInfo);
+
+                for (JsonNameTag nameTag : propInfo.jsonNameTags) {
+                    if (!propInfoMap.containsKey(new String(nameTag.name))) {
+                        propInfoMap.put(new String(nameTag.name), propInfo);
+                    }
+                }
 
                 if (propInfo.columnName.isPresent() && !propInfoMap.containsKey(propInfo.columnName.get())) {
                     propInfoMap.put(propInfo.columnName.get(), propInfo);
                 }
 
-                if (isSerializable(propInfo.field) == false) {
+                if (isJsonXmlSerializable(propInfo.field, jsonXmlConfig) == false) {
                     // skip
                 } else {
                     seriPropInfoList.add(propInfo);
@@ -419,21 +537,21 @@ public final class ParserUtil {
                     }
                 }
 
-                multiSet.add(propInfo.jsonInfo.name.length);
-                maxLength = Math.max(propInfo.jsonInfo.name.length, maxLength);
+                multiSet.add(propInfo.jsonNameTags[defaultNameIndex].name.length);
+                maxLength = Math.max(propInfo.jsonNameTags[defaultNameIndex].name.length, maxLength);
             }
 
-            seriPropInfos = seriPropInfoList.toArray(new PropInfo[seriPropInfoList.size()]);
+            jsonXmlSerializablePropInfos = seriPropInfoList.toArray(new PropInfo[seriPropInfoList.size()]);
             nonTransientSeriPropInfos = nonTransientSeriPropInfoList.toArray(new PropInfo[nonTransientSeriPropInfoList.size()]);
             transientSeriPropInfos = transientSeriPropInfoList.toArray(new PropInfo[transientSeriPropInfoList.size()]);
 
             propInfoArray = new PropInfo[maxLength + 1];
 
             for (PropInfo e : propInfos) {
-                hashPropInfoMap.put(hashCode(e.jsonInfo.name), e);
+                hashPropInfoMap.put(ParserUtil.hashCode(e.jsonNameTags[defaultNameIndex].name), e);
 
-                if (multiSet.get(e.jsonInfo.name.length) == 1) {
-                    propInfoArray[e.jsonInfo.name.length] = e;
+                if (multiSet.get(e.jsonNameTags[defaultNameIndex].name.length) == 1) {
+                    propInfoArray[e.jsonNameTags[defaultNameIndex].name.length] = e;
                 }
             }
 
@@ -507,7 +625,7 @@ public final class ParserUtil {
                     if (propInfo == PROP_INFO_MASK) {
                         // ignore.
                     } else {
-                        hashPropInfoMap.put(hashCode(propInfo.jsonInfo.name), propInfo);
+                        hashPropInfoMap.put(ParserUtil.hashCode(propInfo.jsonNameTags[defaultNameIndex].name), propInfo);
                     }
                 }
 
@@ -697,7 +815,7 @@ public final class ParserUtil {
             }
 
             if (propInfo == null) {
-                propInfo = hashPropInfoMap.get(hashCode(cbuf, from, to));
+                propInfo = hashPropInfoMap.get(ParserUtil.hashCode(cbuf, from, to));
             }
 
             if (propInfo != null) {
@@ -714,7 +832,7 @@ public final class ParserUtil {
                 // }
                 //
 
-                final char[] tmp = propInfo.jsonInfo.name;
+                final char[] tmp = propInfo.jsonNameTags[defaultNameIndex].name;
 
                 if (tmp.length == len) {
                     for (int i = 0; i < len; i++) {
@@ -831,42 +949,6 @@ public final class ParserUtil {
         public String toString() {
             return ClassUtil.getCanonicalClassName(cls);
         }
-
-        /**
-         *
-         * @param a
-         * @return
-         */
-        private int hashCode(char[] a) {
-            int result = 1;
-
-            for (char e : a) {
-                result = 31 * result + e;
-            }
-
-            return result;
-        }
-
-        /**
-         *
-         * @param a
-         * @param from
-         * @param to
-         * @return
-         */
-        private int hashCode(char[] a, int from, int to) {
-            return N.hashCode(a, from, to);
-        }
-
-        // private int hashCode(String str, int from, int to) {
-        // int result = 1;
-        //
-        // for (int i = from; i < to; i++) {
-        // result = 31 * result + str.charAt(i);
-        // }
-        //
-        // return result;
-        // }
     }
 
     /**
@@ -905,11 +987,9 @@ public final class ParserUtil {
         /** The db type. */
         public final Type<Object> dbType;
 
-        /** The json info. */
-        final JSONInfo jsonInfo;
+        final JsonNameTag[] jsonNameTags;
 
-        /** The xml info. */
-        final XMLInfo xmlInfo;
+        final XmlNameTag[] xmlNameTags;
 
         final boolean isFieldAccessible;
 
@@ -925,6 +1005,8 @@ public final class ParserUtil {
         final ZoneId zoneId;
 
         final DateTimeFormatter dateTimeFormatter;
+
+        final boolean isJsonRawValue;
 
         final JodaDateTimeFormatterHolder jodaDTFH;
 
@@ -956,14 +1038,15 @@ public final class ParserUtil {
 
             jsonXmlType = null;
             dbType = null;
-            xmlInfo = null;
-            jsonInfo = null;
+            xmlNameTags = null;
+            jsonNameTags = null;
             isDirtyMark = false;
             isFieldAccessible = false;
             dateFormat = null;
             timeZone = null;
             zoneId = null;
             dateTimeFormatter = null;
+            isJsonRawValue = false;
             jodaDTFH = null;
             isLongDateFormat = false;
             numberFormat = null;
@@ -972,17 +1055,8 @@ public final class ParserUtil {
             columnName = Optional.<String> empty();
         }
 
-        /**
-         * Instantiates a new prop info.
-         *
-         * @param propName
-         * @param xmlPropName
-         * @param jsonPropName
-         * @param getMethod
-         * @param classAnnotations
-         */
         @SuppressWarnings("deprecation")
-        public PropInfo(final String propName, final String xmlPropName, final String jsonPropName, final Field field, final Method getMethod,
+        public PropInfo(final String propName, final Field field, final Method getMethod, final JsonXmlConfig jsonXmlConfig,
                 final ImmutableMap<Class<? extends Annotation>, Annotation> classAnnotations) {
             this.declaringClass = (Class<Object>) (field != null ? field.getDeclaringClass() : getMethod.getDeclaringClass());
             this.isDirtyMark = DirtyMarkerUtil.isDirtyMarker(declaringClass);
@@ -992,15 +1066,15 @@ public final class ParserUtil {
             this.setMethod = ClassUtil.getPropSetMethod(declaringClass, propName);
             this.annotations = ImmutableMap.of(getAnnotations());
             this.clazz = (Class<Object>) (field == null ? (setMethod == null ? getMethod.getReturnType() : setMethod.getParameterTypes()[0]) : field.getType());
-            this.type = getType(getAnnoType(this.field, this.getMethod, this.setMethod, clazz), this.field, this.getMethod, this.setMethod, clazz,
-                    declaringClass);
-            this.jsonXmlType = getType(getJsonXmlAnnoType(this.field, this.getMethod, this.setMethod, clazz), this.field, this.getMethod, this.setMethod, clazz,
-                    declaringClass);
+            this.type = getType(getAnnoType(this.field, this.getMethod, this.setMethod, clazz, jsonXmlConfig), this.field, this.getMethod, this.setMethod,
+                    clazz, declaringClass);
+            this.jsonXmlType = getType(getJsonXmlAnnoType(this.field, this.getMethod, this.setMethod, clazz, jsonXmlConfig), this.field, this.getMethod,
+                    this.setMethod, clazz, declaringClass);
             this.dbType = getType(getDBAnnoType(this.field, this.getMethod, this.setMethod, clazz), this.field, this.getMethod, this.setMethod, clazz,
                     declaringClass);
 
-            this.jsonInfo = new JSONInfo(jsonPropName);
-            this.xmlInfo = new XMLInfo(xmlPropName, jsonXmlType.name(), false);
+            this.jsonNameTags = getJsonNameTags(propName, field);
+            this.xmlNameTags = getXmlNameTags(propName, field, jsonXmlType.name(), false);
 
             if (field != null && !this.annotations.containsKey(AccessFieldByMethod.class) && !classAnnotations.containsKey(AccessFieldByMethod.class)) {
                 ClassUtil.setAccessibleQuietly(field, true);
@@ -1008,12 +1082,13 @@ public final class ParserUtil {
 
             isFieldAccessible = isDirtyMark == false && field != null && field.isAccessible();
 
-            String timeZoneStr = StringUtil.trim(getTimeZone(field));
-            String dateFormatStr = StringUtil.trim(getDateFormat(field));
+            String timeZoneStr = StringUtil.trim(getTimeZone(field, jsonXmlConfig));
+            String dateFormatStr = StringUtil.trim(getDateFormat(field, jsonXmlConfig));
             this.dateFormat = N.isNullOrEmpty(dateFormatStr) ? null : dateFormatStr;
             this.timeZone = N.isNullOrEmpty(timeZoneStr) ? TimeZone.getDefault() : TimeZone.getTimeZone(timeZoneStr);
             this.zoneId = timeZone.toZoneId();
             this.dateTimeFormatter = N.isNullOrEmpty(dateFormat) ? null : DateTimeFormatter.ofPattern(dateFormat).withZone(zoneId);
+            this.isJsonRawValue = isJsonRawValue(field, jsonXmlConfig);
 
             JodaDateTimeFormatterHolder tmpJodaDTFH = null;
 
@@ -1033,7 +1108,7 @@ public final class ParserUtil {
                 throw new UnsupportedOperationException("Date format can't be 'long' for type java.time.LocalTime/LocalDate");
             }
 
-            String numberFormatStr = StringUtil.trim(getNumberFormat(field));
+            String numberFormatStr = StringUtil.trim(getNumberFormat(field, jsonXmlConfig));
             this.numberFormat = N.isNullOrEmpty(numberFormatStr) ? null : new DecimalFormat(numberFormatStr);
 
             this.hasFormat = N.notNullOrEmpty(dateFormat) || numberFormat != null;
@@ -1430,6 +1505,12 @@ public final class ParserUtil {
                 } else {
                     writer.write(numberFormat.format(x));
                 }
+            } else if (isJsonRawValue) {
+                if (x == null) {
+                    writer.write(NULL_CHAR_ARRAY);
+                } else {
+                    writer.write(((CharSequence) x).toString());
+                }
             } else {
                 jsonXmlType.writeCharacter(writer, x, config);
             }
@@ -1467,16 +1548,8 @@ public final class ParserUtil {
             return annotations;
         }
 
-        /**
-         * Gets the json xml anno type.
-         *
-         * @param field
-         * @param getMethod
-         * @param setMethod
-         * @param propClass
-         * @return
-         */
-        private String getAnnoType(final Field field, final Method getMethod, final Method setMethod, final Class<?> propClass) {
+        private String getAnnoType(final Field field, final Method getMethod, final Method setMethod, final Class<?> propClass,
+                final JsonXmlConfig jsonXmlConfig) {
             final com.landawn.abacus.annotation.Type typeAnno = getAnnotation(com.landawn.abacus.annotation.Type.class);
 
             if (typeAnno != null && (typeAnno.scope() == Scope.ALL || typeAnno.scope() == Scope.PARSER)) {
@@ -1493,31 +1566,31 @@ public final class ParserUtil {
                 if (N.notNullOrEmpty(jsonXmlFieldAnno.type())) {
                     return jsonXmlFieldAnno.type();
                 } else if (propClass.isEnum()) {
-                    return ClassUtil.getCanonicalClassName(propClass) + "(" + String.valueOf(jsonXmlFieldAnno.enumerated() == EnumBy.ORDINAL) + ")";
+                    return ClassUtil.getCanonicalClassName(propClass) + "(" + String.valueOf(getEnumerated(field, jsonXmlConfig) == EnumBy.ORDINAL) + ")";
                 }
+            }
+
+            if (jsonXmlConfig != null && propClass.isEnum()) {
+                return ClassUtil.getCanonicalClassName(propClass) + "(" + String.valueOf(getEnumerated(field, jsonXmlConfig) == EnumBy.ORDINAL) + ")";
             }
 
             return null;
         }
 
-        /**
-         * Gets the json xml anno type.
-         *
-         * @param field
-         * @param getMethod
-         * @param setMethod
-         * @param propClass
-         * @return
-         */
-        private String getJsonXmlAnnoType(final Field field, final Method getMethod, final Method setMethod, final Class<?> propClass) {
+        private String getJsonXmlAnnoType(final Field field, final Method getMethod, final Method setMethod, final Class<?> propClass,
+                final JsonXmlConfig jsonXmlConfig) {
             final JsonXmlField jsonXmlFieldAnno = getAnnotation(JsonXmlField.class);
 
             if (jsonXmlFieldAnno != null) {
                 if (N.notNullOrEmpty(jsonXmlFieldAnno.type())) {
                     return jsonXmlFieldAnno.type();
                 } else if (propClass.isEnum()) {
-                    return ClassUtil.getCanonicalClassName(propClass) + "(" + String.valueOf(jsonXmlFieldAnno.enumerated() == EnumBy.ORDINAL) + ")";
+                    return ClassUtil.getCanonicalClassName(propClass) + "(" + String.valueOf(getEnumerated(field, jsonXmlConfig) == EnumBy.ORDINAL) + ")";
                 }
+            }
+
+            if (jsonXmlConfig != null && propClass.isEnum()) {
+                return ClassUtil.getCanonicalClassName(propClass) + "(" + String.valueOf(getEnumerated(field, jsonXmlConfig) == EnumBy.ORDINAL) + ")";
             }
 
             final com.landawn.abacus.annotation.Type typeAnno = getAnnotation(com.landawn.abacus.annotation.Type.class);
@@ -1727,19 +1800,9 @@ public final class ParserUtil {
         /** The field access index. */
         final int fieldAccessIndex;
 
-        /**
-         * Instantiates a new ASM prop info.
-         *
-         * @param name
-         * @param xmlPropName
-         * @param jsonPropName
-         * @param field
-         * @param getMethod
-         * @param classAnnotations
-         */
-        public ASMPropInfo(final String name, final String xmlPropName, final String jsonPropName, final Field field, final Method getMethod,
+        public ASMPropInfo(final String name, final Field field, final Method getMethod, final JsonXmlConfig jsonXmlConfig,
                 final ImmutableMap<Class<? extends Annotation>, Annotation> classAnnotations) {
-            super(name, xmlPropName, jsonPropName, field, getMethod, classAnnotations);
+            super(name, field, getMethod, jsonXmlConfig, classAnnotations);
 
             methodAccess = com.esotericsoftware.reflectasm.MethodAccess.get(declaringClass);
             getMethodAccessIndex = getMethod == null ? -1 : methodAccess.getIndex(getMethod.getName(), 0);
@@ -1804,237 +1867,88 @@ public final class ParserUtil {
         }
     }
 
-    /**
-     * The Class JSONInfo.
-     */
-    static class JSONInfo {
-
-        /** The name. */
+    static class JsonNameTag {
         final char[] name;
-
-        /** The name. */
-        final char[] _name;
-
-        /** The name with colon. */
         final char[] nameWithColon;
-
-        /** The name with colon. */
-        final char[] _nameWithColon;
-
-        /** The name null. */
         final char[] nameNull;
-
-        /** The name null. */
-        final char[] _nameNull;
-
-        /** The quoted name. */
         final char[] quotedName;
-
-        /** The quoted name. */
-        final char[] _quotedName;
-
-        /** The quoted name with colon. */
         final char[] quotedNameWithColon;
-
-        /** The quoted name with colon. */
-        final char[] _quotedNameWithColon;
-
-        /** The quoted name null. */
         final char[] quotedNameNull;
 
-        /** The quoted name null. */
-        final char[] _quotedNameNull;
-
-        /**
-         * Instantiates a new JSON info.
-         *
-         * @param name
-         */
-        public JSONInfo(String name) {
-            final String lowerCaseName = ClassUtil.toLowerCaseWithUnderscore(name);
+        public JsonNameTag(String name) {
             this.name = name.toCharArray();
-            this._name = lowerCaseName.toCharArray();
             this.nameWithColon = (name + ":").toCharArray();
-            this._nameWithColon = (lowerCaseName + ":").toCharArray();
             this.nameNull = (name + ":null").toCharArray();
-            this._nameNull = (lowerCaseName + ":null").toCharArray();
             this.quotedName = ("\"" + name + "\"").toCharArray();
-            this._quotedName = ("\"" + lowerCaseName + "\"").toCharArray();
             this.quotedNameWithColon = ("\"" + name + "\":").toCharArray();
-            this._quotedNameWithColon = ("\"" + lowerCaseName + "\":").toCharArray();
             this.quotedNameNull = ("\"" + name + "\":null").toCharArray();
-            this._quotedNameNull = ("\"" + lowerCaseName + "\":null").toCharArray();
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             return (name == null) ? 0 : N.hashCode(name);
         }
 
-        /**
-         *
-         * @param obj
-         * @return true, if successful
-         */
         @Override
         public boolean equals(Object obj) {
-            return obj == this || (obj instanceof JSONInfo && N.equals(((JSONInfo) obj).name, name));
+            return obj == this || (obj instanceof JsonNameTag && N.equals(((JsonNameTag) obj).name, name));
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return N.toString(name);
         }
     }
 
-    /**
-     * The Class XMLInfo.
-     */
-    static class XMLInfo {
-
-        /** The name. */
+    static class XmlNameTag {
         final char[] name;
-
-        /** The name. */
-        final char[] _name;
-
-        /** The ep start. */
         final char[] epStart;
-
-        /** The ep start. */
-        final char[] _epStart;
-
-        /** The ep start with type. */
         final char[] epStartWithType;
-
-        /** The ep start with type. */
-        final char[] _epStartWithType;
-
-        /** The ep end. */
         final char[] epEnd;
-
-        /** The ep null. */
         final char[] epNull;
-
-        /** The ep null. */
-        final char[] _epNull;
-
-        /** The ep null with type. */
         final char[] epNullWithType;
-
-        /** The ep null with type. */
-        final char[] _epNullWithType;
-
-        /** The named start. */
         final char[] namedStart;
-
-        /** The named start. */
-        final char[] _namedStart;
-
-        /** The named start with type. */
         final char[] namedStartWithType;
-
-        /** The named start with type. */
-        final char[] _namedStartWithType;
-
-        /** The named end. */
         final char[] namedEnd;
-
-        /** The named end. */
-        final char[] _namedEnd;
-
-        /** The named null. */
         final char[] namedNull;
-
-        /** The named null. */
-        final char[] _namedNull;
-
-        /** The named null with type. */
         final char[] namedNullWithType;
 
-        /** The named null with type. */
-        final char[] _namedNullWithType;
-
-        /**
-         * Instantiates a new XML info.
-         *
-         * @param name
-         * @param typeName
-         * @param isEntity
-         */
-        public XMLInfo(String name, String typeName, boolean isEntity) {
-            final String lowerCaseName = ClassUtil.toLowerCaseWithUnderscore(name);
-
+        public XmlNameTag(String name, String typeName, boolean isEntity) {
             this.name = name.toCharArray();
-            this._name = lowerCaseName.toCharArray();
 
             final String typeAttr = typeName.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 
             if (isEntity) {
                 this.epStart = ("<entity name=\"" + name + "\">").toCharArray();
-                this._epStart = ("<entity name=\"" + lowerCaseName + "\">").toCharArray();
                 this.epStartWithType = ("<entity name=\"" + name + "\" type=\"" + typeAttr + "\">").toCharArray();
-                this._epStartWithType = ("<entity name=\"" + lowerCaseName + "\" type=\"" + typeAttr + "\">").toCharArray();
                 this.epEnd = ("</entity>").toCharArray();
                 this.epNull = ("<entity name=\"" + name + "\" isNull=\"true\" />").toCharArray();
-                this._epNull = ("<entity name=\"" + lowerCaseName + "\" isNull=\"true\" />").toCharArray();
                 this.epNullWithType = ("<entity name=\"" + name + "\" type=\"" + typeAttr + "\" isNull=\"true\" />").toCharArray();
-                this._epNullWithType = ("<entity name=\"" + lowerCaseName + "\" type=\"" + typeAttr + "\" isNull=\"true\" />").toCharArray();
             } else {
                 this.epStart = ("<property name=\"" + name + "\">").toCharArray();
-                this._epStart = ("<property name=\"" + lowerCaseName + "\">").toCharArray();
                 this.epStartWithType = ("<property name=\"" + name + "\" type=\"" + typeAttr + "\">").toCharArray();
-                this._epStartWithType = ("<property name=\"" + lowerCaseName + "\" type=\"" + typeAttr + "\">").toCharArray();
                 this.epEnd = ("</property>").toCharArray();
                 this.epNull = ("<property name=\"" + name + "\" isNull=\"true\" />").toCharArray();
-                this._epNull = ("<property name=\"" + lowerCaseName + "\" isNull=\"true\" />").toCharArray();
                 this.epNullWithType = ("<property name=\"" + name + "\" type=\"" + typeAttr + "\" isNull=\"true\" />").toCharArray();
-                this._epNullWithType = ("<property name=\"" + lowerCaseName + "\" type=\"" + typeAttr + "\" isNull=\"true\" />").toCharArray();
             }
 
             this.namedStart = ("<" + name + ">").toCharArray();
-            this._namedStart = ("<" + lowerCaseName + ">").toCharArray();
             this.namedStartWithType = ("<" + name + " type=\"" + typeAttr + "\">").toCharArray();
-            this._namedStartWithType = ("<" + lowerCaseName + " type=\"" + typeAttr + "\">").toCharArray();
             this.namedEnd = ("</" + name + ">").toCharArray();
-            this._namedEnd = ("</" + lowerCaseName + ">").toCharArray();
             this.namedNull = ("<" + name + " isNull=\"true\" />").toCharArray();
-            this._namedNull = ("<" + lowerCaseName + " isNull=\"true\" />").toCharArray();
             this.namedNullWithType = ("<" + name + " type=\"" + typeAttr + "\" isNull=\"true\" />").toCharArray();
-            this._namedNullWithType = ("<" + lowerCaseName + " type=\"" + typeAttr + "\" isNull=\"true\" />").toCharArray();
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public int hashCode() {
             return (name == null) ? 0 : N.hashCode(name);
         }
 
-        /**
-         *
-         * @param obj
-         * @return true, if successful
-         */
         @Override
         public boolean equals(Object obj) {
-            return obj == this || (obj instanceof XMLInfo && N.equals(((XMLInfo) obj).name, name));
+            return obj == this || (obj instanceof XmlNameTag && N.equals(((XmlNameTag) obj).name, name));
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return N.toString(name);
