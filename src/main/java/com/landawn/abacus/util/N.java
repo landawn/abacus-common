@@ -2496,10 +2496,10 @@ public final class N extends CommonUtil {
      * @param <T>
      * @param aa
      * @return
-     * @throws NullPointerException if the specified <code>aa</code> is <code>null</code>.
+     * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
      */
     @SafeVarargs
-    public static <T> T[] concat(final T[]... aa) {
+    public static <T> T[] concat(final T[]... aa) throws IllegalArgumentException {
         checkArgNotNull(aa, "aa");
 
         if (aa.length == 1) {
@@ -3316,19 +3316,19 @@ public final class N extends CommonUtil {
      * @param a
      * @param element
      * @return A new array containing the existing elements plus the new element
-     * @throws NullPointerException if the specified <code>a</code> is <code>null</code>.
+     * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
      */
-    public static <T> T[] add(final T[] a, final T element) {
+    public static <T> T[] add(final T[] a, final T element) throws IllegalArgumentException {
         checkArgNotNull(a, "a");
 
-        if (isNullOrEmpty(a)) {
-            return asArray(element);
+        final int len = a.length;
+        final T[] newArray = (T[]) Array.newInstance(a.getClass().getComponentType(), len + 1);
+
+        if (len > 0) {
+            copy(a, 0, newArray, 0, len);
         }
 
-        final T[] newArray = (T[]) Array.newInstance(a.getClass().getComponentType(), a.length + 1);
-
-        copy(a, 0, newArray, 0, a.length);
-        newArray[a.length] = element;
+        newArray[len] = element;
 
         return newArray;
     }
@@ -3567,14 +3567,14 @@ public final class N extends CommonUtil {
      * @param a the first array whose elements are added to the new array.
      * @param b the second array whose elements are added to the new array.
      * @return A new array containing the elements from a and b
-     * @throws NullPointerException if the specified <code>a</code> is <code>null</code>.
+     * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
      */
     @SafeVarargs
-    public static <T> T[] addAll(final T[] a, final T... b) {
+    public static <T> T[] addAll(final T[] a, final T... b) throws IllegalArgumentException {
         checkArgNotNull(a, "a");
 
         if (isNullOrEmpty(a)) {
-            return isNullOrEmpty(b) ? b : b.clone();
+            return isNullOrEmpty(b) ? a.clone() : b.clone();
         }
 
         final T[] newArray = (T[]) Array.newInstance(a.getClass().getComponentType(), a.length + b.length);
@@ -3934,9 +3934,9 @@ public final class N extends CommonUtil {
      * @param index the position of the new object
      * @param element the object to add
      * @return A new array containing the existing elements and the new element
-     * @throws NullPointerException if the specified <code>a</code> is <code>null</code>.
+     * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
      */
-    public static <T> T[] insert(final T[] a, final int index, final T element) {
+    public static <T> T[] insert(final T[] a, final int index, final T element) throws IllegalArgumentException {
         checkArgNotNull(a, "a");
 
         final T[] newArray = newArray(a.getClass().getComponentType(), a.length + 1);
@@ -3952,6 +3952,28 @@ public final class N extends CommonUtil {
         }
 
         return newArray;
+    }
+
+    /**
+     * Returns a new String
+     * 
+     * @param str
+     * @param index
+     * @param strToInsert
+     * @return a new String
+     */
+    public static String insert(final String str, final int index, final String strToInsert) {
+        N.checkIndex(index, len(str));
+
+        if (isNullOrEmpty(strToInsert)) {
+            return nullToEmpty(str);
+        } else if (isNullOrEmpty(str)) {
+            return nullToEmpty(strToInsert);
+        } else if (index == str.length()) {
+            return StringUtil.concat(str + strToInsert);
+        }
+
+        return str;
     }
 
     /**
@@ -4282,10 +4304,10 @@ public final class N extends CommonUtil {
      * @param index the position of the new elements start from
      * @param b the second array whose elements are added to the new array.
      * @return A new array containing the elements from a and b
-     * @throws NullPointerException if the specified <code>a</code> is <code>null</code>.
+     * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
      */
     @SafeVarargs
-    public static <T> T[] insertAll(final T[] a, final int index, final T... b) {
+    public static <T> T[] insertAll(final T[] a, final int index, final T... b) throws IllegalArgumentException {
         checkArgNotNull(a, "a");
 
         final T[] newArray = (T[]) Array.newInstance(a.getClass().getComponentType(), a.length + b.length);
@@ -4577,8 +4599,11 @@ public final class N extends CommonUtil {
      * @param index the position of the element to be removed
      * @return A new array containing the existing elements except the element
      *         at the specified position.
+     * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
      */
-    public static <T> T[] delete(final T[] a, final int index) {
+    public static <T> T[] delete(final T[] a, final int index) throws IllegalArgumentException {
+        checkArgNotNull(a, "a");
+
         final T[] result = newArray(a.getClass().getComponentType(), a.length - 1);
 
         if (index > 0) {
@@ -4624,7 +4649,7 @@ public final class N extends CommonUtil {
     @SafeVarargs
     public static boolean[] deleteAll(final boolean[] a, int... indices) {
         if (isNullOrEmpty(indices)) {
-            return a.clone();
+            return a == null ? N.EMPTY_BOOLEAN_ARRAY : a.clone();
         } else if (indices.length == 1) {
             return delete(a, indices[0]);
         }
@@ -4695,7 +4720,7 @@ public final class N extends CommonUtil {
     @SafeVarargs
     public static char[] deleteAll(final char[] a, int... indices) {
         if (isNullOrEmpty(indices)) {
-            return a.clone();
+            return a == null ? N.EMPTY_CHAR_ARRAY : a.clone();
         } else if (indices.length == 1) {
             return delete(a, indices[0]);
         }
@@ -4766,7 +4791,7 @@ public final class N extends CommonUtil {
     @SafeVarargs
     public static byte[] deleteAll(final byte[] a, int... indices) {
         if (isNullOrEmpty(indices)) {
-            return a.clone();
+            return a == null ? N.EMPTY_BYTE_ARRAY : a.clone();
         } else if (indices.length == 1) {
             return delete(a, indices[0]);
         }
@@ -4837,7 +4862,7 @@ public final class N extends CommonUtil {
     @SafeVarargs
     public static short[] deleteAll(final short[] a, int... indices) {
         if (isNullOrEmpty(indices)) {
-            return a.clone();
+            return a == null ? N.EMPTY_SHORT_ARRAY : a.clone();
         } else if (indices.length == 1) {
             return delete(a, indices[0]);
         }
@@ -4910,7 +4935,7 @@ public final class N extends CommonUtil {
     @SafeVarargs
     public static int[] deleteAll(final int[] a, int... indices) {
         if (isNullOrEmpty(indices)) {
-            return a.clone();
+            return a == null ? N.EMPTY_INT_ARRAY : a.clone();
         } else if (indices.length == 1) {
             return delete(a, indices[0]);
         }
@@ -4983,7 +5008,7 @@ public final class N extends CommonUtil {
     @SafeVarargs
     public static long[] deleteAll(final long[] a, int... indices) {
         if (isNullOrEmpty(indices)) {
-            return a.clone();
+            return a == null ? N.EMPTY_LONG_ARRAY : a.clone();
         } else if (indices.length == 1) {
             return delete(a, indices[0]);
         }
@@ -5054,7 +5079,7 @@ public final class N extends CommonUtil {
     @SafeVarargs
     public static float[] deleteAll(final float[] a, int... indices) {
         if (isNullOrEmpty(indices)) {
-            return a.clone();
+            return a == null ? N.EMPTY_FLOAT_ARRAY : a.clone();
         } else if (indices.length == 1) {
             return delete(a, indices[0]);
         }
@@ -5125,7 +5150,7 @@ public final class N extends CommonUtil {
     @SafeVarargs
     public static double[] deleteAll(final double[] a, int... indices) {
         if (isNullOrEmpty(indices)) {
-            return a.clone();
+            return a == null ? N.EMPTY_DOUBLE_ARRAY : a.clone();
         } else if (indices.length == 1) {
             return delete(a, indices[0]);
         }
@@ -5190,10 +5215,10 @@ public final class N extends CommonUtil {
      * @param indices the positions of the elements to be removed
      * @return A new array containing the existing elements except those at the
      *         specified positions.
-     * @throws NullPointerException if the specified <code>a</code> is <code>null</code>.
+     * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
      */
     @SafeVarargs
-    public static <T> T[] deleteAll(final T[] a, int... indices) {
+    public static <T> T[] deleteAll(final T[] a, int... indices) throws IllegalArgumentException {
         checkArgNotNull(a, "a");
 
         if (isNullOrEmpty(indices)) {
@@ -5298,315 +5323,6 @@ public final class N extends CommonUtil {
             final Object[] res = deleteAllBySortedIndices(a, indices);
             list.clear();
             list.addAll((List) Arrays.asList(res));
-        }
-
-        return true;
-    }
-
-    /**
-     * Deletes the values from {@code fromIndex} to {@code toIndex}.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return a new array
-     */
-    public static boolean[] deleteRange(final boolean[] a, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, a.length);
-
-        if (fromIndex == toIndex) {
-            return a.clone();
-        }
-
-        final boolean[] b = new boolean[a.length - (toIndex - fromIndex)];
-
-        if (fromIndex > 0) {
-            copy(a, 0, b, 0, fromIndex);
-        }
-
-        if (toIndex < a.length) {
-            copy(a, toIndex, b, fromIndex, a.length - toIndex);
-        }
-
-        return b;
-    }
-
-    /**
-     * Deletes the values from {@code fromIndex} to {@code toIndex}.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return a new array
-     */
-    public static char[] deleteRange(final char[] a, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, a.length);
-
-        if (fromIndex == toIndex) {
-            return a.clone();
-        }
-
-        final char[] b = new char[a.length - (toIndex - fromIndex)];
-
-        if (fromIndex > 0) {
-            copy(a, 0, b, 0, fromIndex);
-        }
-
-        if (toIndex < a.length) {
-            copy(a, toIndex, b, fromIndex, a.length - toIndex);
-        }
-
-        return b;
-    }
-
-    /**
-     * Deletes the values from {@code fromIndex} to {@code toIndex}.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return a new array
-     */
-    public static byte[] deleteRange(final byte[] a, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, a.length);
-
-        if (fromIndex == toIndex) {
-            return a.clone();
-        }
-
-        final byte[] b = new byte[a.length - (toIndex - fromIndex)];
-
-        if (fromIndex > 0) {
-            copy(a, 0, b, 0, fromIndex);
-        }
-
-        if (toIndex < a.length) {
-            copy(a, toIndex, b, fromIndex, a.length - toIndex);
-        }
-
-        return b;
-    }
-
-    /**
-     * Deletes the values from {@code fromIndex} to {@code toIndex}.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return a new array
-     */
-    public static short[] deleteRange(final short[] a, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, a.length);
-
-        if (fromIndex == toIndex) {
-            return a.clone();
-        }
-
-        final short[] b = new short[a.length - (toIndex - fromIndex)];
-
-        if (fromIndex > 0) {
-            copy(a, 0, b, 0, fromIndex);
-        }
-
-        if (toIndex < a.length) {
-            copy(a, toIndex, b, fromIndex, a.length - toIndex);
-        }
-
-        return b;
-    }
-
-    /**
-     * Deletes the values from {@code fromIndex} to {@code toIndex}.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return a new array
-     */
-    public static int[] deleteRange(final int[] a, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, a.length);
-
-        if (fromIndex == toIndex) {
-            return a.clone();
-        }
-
-        final int[] b = new int[a.length - (toIndex - fromIndex)];
-
-        if (fromIndex > 0) {
-            copy(a, 0, b, 0, fromIndex);
-        }
-
-        if (toIndex < a.length) {
-            copy(a, toIndex, b, fromIndex, a.length - toIndex);
-        }
-
-        return b;
-    }
-
-    /**
-     * Deletes the values from {@code fromIndex} to {@code toIndex}.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return a new array
-     */
-    public static long[] deleteRange(final long[] a, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, a.length);
-
-        if (fromIndex == toIndex) {
-            return a.clone();
-        }
-
-        final long[] b = new long[a.length - (toIndex - fromIndex)];
-
-        if (fromIndex > 0) {
-            copy(a, 0, b, 0, fromIndex);
-        }
-
-        if (toIndex < a.length) {
-            copy(a, toIndex, b, fromIndex, a.length - toIndex);
-        }
-
-        return b;
-    }
-
-    /**
-     * Deletes the values from {@code fromIndex} to {@code toIndex}.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return a new array
-     */
-    public static float[] deleteRange(final float[] a, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, a.length);
-
-        if (fromIndex == toIndex) {
-            return a.clone();
-        }
-
-        final float[] b = new float[a.length - (toIndex - fromIndex)];
-
-        if (fromIndex > 0) {
-            copy(a, 0, b, 0, fromIndex);
-        }
-
-        if (toIndex < a.length) {
-            copy(a, toIndex, b, fromIndex, a.length - toIndex);
-        }
-
-        return b;
-    }
-
-    /**
-     * Deletes the values from {@code fromIndex} to {@code toIndex}.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return a new array
-     */
-    public static double[] deleteRange(final double[] a, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, a.length);
-
-        if (fromIndex == toIndex) {
-            return a.clone();
-        }
-
-        final double[] b = new double[a.length - (toIndex - fromIndex)];
-
-        if (fromIndex > 0) {
-            copy(a, 0, b, 0, fromIndex);
-        }
-
-        if (toIndex < a.length) {
-            copy(a, toIndex, b, fromIndex, a.length - toIndex);
-        }
-
-        return b;
-    }
-
-    /**
-     * Deletes the values from {@code fromIndex} to {@code toIndex}.
-     *
-     * @param <T>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return a new array
-     */
-    public static <T> T[] deleteRange(final T[] a, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, a.length);
-
-        if (fromIndex == toIndex) {
-            return a.clone();
-        }
-
-        final T[] b = Array.newInstance(a.getClass().getComponentType(), a.length - (toIndex - fromIndex));
-
-        if (fromIndex > 0) {
-            copy(a, 0, b, 0, fromIndex);
-        }
-
-        if (toIndex < a.length) {
-            copy(a, toIndex, b, fromIndex, a.length - toIndex);
-        }
-
-        return b;
-    }
-
-    /**
-     * Returns {@code true} if the {@code List} is updated when {@code fromIndex < toIndex}, otherwise {@code false} is returned when {@code fromIndex == toIndex}.
-     *
-     * @param <T>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @return true, if successful
-     */
-    @SuppressWarnings({ "unchecked", "deprecation" })
-    public static <T> boolean deleteRange(final List<T> c, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, c.size());
-
-        if (fromIndex == toIndex) {
-            return false;
-        }
-
-        if (c instanceof LinkedList || toIndex - fromIndex <= 3) {
-            c.subList(fromIndex, toIndex).clear();
-        } else {
-            final int size = c.size();
-            final T[] a = (T[]) InternalUtil.getInternalArray(c);
-
-            if (a != null) {
-                try {
-                    copy(a, toIndex, a, fromIndex, size - toIndex);
-                    N.fill(a, size - (toIndex - fromIndex), size, null);
-                    InternalUtil.listSizeField.set(c, size - (toIndex - fromIndex));
-
-                    // update modCount
-                    c.add(null);
-                    c.remove(c.size() - 1);
-                    return true;
-                } catch (Throwable e) {
-                    // ignore;
-                    InternalUtil.isListElementDataFieldSettable = false;
-                }
-            }
-
-            final List<T> tmp = new ArrayList<>(c.size() - (toIndex - fromIndex));
-
-            if (fromIndex > 0) {
-                tmp.addAll(c.subList(0, fromIndex));
-            }
-
-            if (toIndex < c.size()) {
-                tmp.addAll(c.subList(toIndex, c.size()));
-            }
-
-            c.clear();
-            c.addAll(tmp);
         }
 
         return true;
@@ -5863,8 +5579,11 @@ public final class N extends CommonUtil {
      * @param element the element to be removed
      * @return A new array containing the existing elements except the first
      *         occurrence of the specified element.
+     * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
      */
-    public static <T> T[] remove(final T[] a, final T element) {
+    public static <T> T[] remove(final T[] a, final T element) throws IllegalArgumentException {
+        checkArgNotNull(a, "a");
+
         if (isNullOrEmpty(a)) {
             return a;
         }
@@ -7207,6 +6926,1169 @@ public final class N extends CommonUtil {
 
             return hasDuplicates;
         }
+    }
+
+    /**
+     * Deletes the values from {@code fromIndex} to {@code toIndex}.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return a new array
+     */
+    public static boolean[] deleteRange(final boolean[] a, final int fromIndex, final int toIndex) {
+        checkFromToIndex(fromIndex, toIndex, a.length);
+
+        if (fromIndex == toIndex) {
+            return a == null ? N.EMPTY_BOOLEAN_ARRAY : a.clone();
+        }
+
+        final int len = len(a);
+        final boolean[] b = new boolean[len - (toIndex - fromIndex)];
+
+        if (fromIndex > 0) {
+            copy(a, 0, b, 0, fromIndex);
+        }
+
+        if (toIndex < len) {
+            copy(a, toIndex, b, fromIndex, len - toIndex);
+        }
+
+        return b;
+    }
+
+    /**
+     * Deletes the values from {@code fromIndex} to {@code toIndex}.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return a new array
+     */
+    public static char[] deleteRange(final char[] a, final int fromIndex, final int toIndex) {
+        checkFromToIndex(fromIndex, toIndex, a.length);
+
+        if (fromIndex == toIndex) {
+            return a == null ? N.EMPTY_CHAR_ARRAY : a.clone();
+        }
+
+        final int len = len(a);
+        final char[] b = new char[len - (toIndex - fromIndex)];
+
+        if (fromIndex > 0) {
+            copy(a, 0, b, 0, fromIndex);
+        }
+
+        if (toIndex < len) {
+            copy(a, toIndex, b, fromIndex, len - toIndex);
+        }
+
+        return b;
+    }
+
+    /**
+     * Deletes the values from {@code fromIndex} to {@code toIndex}.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return a new array
+     */
+    public static byte[] deleteRange(final byte[] a, final int fromIndex, final int toIndex) {
+        checkFromToIndex(fromIndex, toIndex, a.length);
+
+        if (fromIndex == toIndex) {
+            return a == null ? N.EMPTY_BYTE_ARRAY : a.clone();
+        }
+
+        final int len = len(a);
+        final byte[] b = new byte[len - (toIndex - fromIndex)];
+
+        if (fromIndex > 0) {
+            copy(a, 0, b, 0, fromIndex);
+        }
+
+        if (toIndex < len) {
+            copy(a, toIndex, b, fromIndex, len - toIndex);
+        }
+
+        return b;
+    }
+
+    /**
+     * Deletes the values from {@code fromIndex} to {@code toIndex}.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return a new array
+     */
+    public static short[] deleteRange(final short[] a, final int fromIndex, final int toIndex) {
+        checkFromToIndex(fromIndex, toIndex, a.length);
+
+        if (fromIndex == toIndex) {
+            return a == null ? N.EMPTY_SHORT_ARRAY : a.clone();
+        }
+
+        final int len = len(a);
+        final short[] b = new short[len - (toIndex - fromIndex)];
+
+        if (fromIndex > 0) {
+            copy(a, 0, b, 0, fromIndex);
+        }
+
+        if (toIndex < len) {
+            copy(a, toIndex, b, fromIndex, len - toIndex);
+        }
+
+        return b;
+    }
+
+    /**
+     * Deletes the values from {@code fromIndex} to {@code toIndex}.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return a new array
+     */
+    public static int[] deleteRange(final int[] a, final int fromIndex, final int toIndex) {
+        checkFromToIndex(fromIndex, toIndex, a.length);
+
+        if (fromIndex == toIndex) {
+            return a == null ? N.EMPTY_INT_ARRAY : a.clone();
+        }
+
+        final int len = len(a);
+        final int[] b = new int[len - (toIndex - fromIndex)];
+
+        if (fromIndex > 0) {
+            copy(a, 0, b, 0, fromIndex);
+        }
+
+        if (toIndex < len) {
+            copy(a, toIndex, b, fromIndex, len - toIndex);
+        }
+
+        return b;
+    }
+
+    /**
+     * Deletes the values from {@code fromIndex} to {@code toIndex}.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return a new array
+     */
+    public static long[] deleteRange(final long[] a, final int fromIndex, final int toIndex) {
+        checkFromToIndex(fromIndex, toIndex, a.length);
+
+        if (fromIndex == toIndex) {
+            return a == null ? N.EMPTY_LONG_ARRAY : a.clone();
+        }
+
+        final int len = len(a);
+        final long[] b = new long[len - (toIndex - fromIndex)];
+
+        if (fromIndex > 0) {
+            copy(a, 0, b, 0, fromIndex);
+        }
+
+        if (toIndex < len) {
+            copy(a, toIndex, b, fromIndex, len - toIndex);
+        }
+
+        return b;
+    }
+
+    /**
+     * Deletes the values from {@code fromIndex} to {@code toIndex}.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return a new array
+     */
+    public static float[] deleteRange(final float[] a, final int fromIndex, final int toIndex) {
+        checkFromToIndex(fromIndex, toIndex, a.length);
+
+        if (fromIndex == toIndex) {
+            return a == null ? N.EMPTY_FLOAT_ARRAY : a.clone();
+        }
+
+        final int len = len(a);
+        final float[] b = new float[len - (toIndex - fromIndex)];
+
+        if (fromIndex > 0) {
+            copy(a, 0, b, 0, fromIndex);
+        }
+
+        if (toIndex < len) {
+            copy(a, toIndex, b, fromIndex, len - toIndex);
+        }
+
+        return b;
+    }
+
+    /**
+     * Deletes the values from {@code fromIndex} to {@code toIndex}.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return a new array
+     */
+    public static double[] deleteRange(final double[] a, final int fromIndex, final int toIndex) {
+        checkFromToIndex(fromIndex, toIndex, a.length);
+
+        if (fromIndex == toIndex) {
+            return a == null ? N.EMPTY_DOUBLE_ARRAY : a.clone();
+        }
+
+        final int len = len(a);
+        final double[] b = new double[len - (toIndex - fromIndex)];
+
+        if (fromIndex > 0) {
+            copy(a, 0, b, 0, fromIndex);
+        }
+
+        if (toIndex < len) {
+            copy(a, toIndex, b, fromIndex, len - toIndex);
+        }
+
+        return b;
+    }
+
+    /**
+     * Deletes the values from {@code fromIndex} to {@code toIndex}.
+     *
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return a new array
+     * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
+     */
+    public static <T> T[] deleteRange(final T[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
+        checkArgNotNull(a, "a");
+
+        checkFromToIndex(fromIndex, toIndex, a.length);
+
+        if (fromIndex == toIndex) {
+            return a.clone();
+        }
+
+        final int len = len(a);
+        final T[] b = Array.newInstance(a.getClass().getComponentType(), len - (toIndex - fromIndex));
+
+        if (fromIndex > 0) {
+            copy(a, 0, b, 0, fromIndex);
+        }
+
+        if (toIndex < len) {
+            copy(a, toIndex, b, fromIndex, len - toIndex);
+        }
+
+        return b;
+    }
+
+    /**
+     * Returns {@code true} if the {@code List} is updated when {@code fromIndex < toIndex}, otherwise {@code false} is returned when {@code fromIndex == toIndex}.
+     *
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return true, if successful
+     */
+    @SuppressWarnings({ "unchecked", "deprecation" })
+    public static <T> boolean deleteRange(final List<T> c, final int fromIndex, final int toIndex) {
+        checkFromToIndex(fromIndex, toIndex, c.size());
+
+        if (fromIndex == toIndex) {
+            return false;
+        }
+
+        final int size = c.size();
+
+        if (c instanceof LinkedList || toIndex - fromIndex <= 3) {
+            c.subList(fromIndex, toIndex).clear();
+        } else {
+            final T[] a = (T[]) InternalUtil.getInternalArray(c);
+
+            if (a != null) {
+                try {
+                    copy(a, toIndex, a, fromIndex, size - toIndex);
+                    N.fill(a, size - (toIndex - fromIndex), size, null);
+                    InternalUtil.listSizeField.set(c, size - (toIndex - fromIndex));
+
+                    // update modCount
+                    c.add(a[0]);
+                    c.remove(c.size() - 1);
+                    return true;
+                } catch (Throwable e) {
+                    // ignore;
+                    InternalUtil.isListElementDataFieldSettable = false;
+                }
+            }
+
+            final List<T> tmp = new ArrayList<>(size - (toIndex - fromIndex));
+
+            if (fromIndex > 0) {
+                tmp.addAll(c.subList(0, fromIndex));
+            }
+
+            if (toIndex < size) {
+                tmp.addAll(c.subList(toIndex, size));
+            }
+
+            c.clear();
+            c.addAll(tmp);
+        }
+
+        return true;
+    }
+
+    public static String deleteRange(String str, final int fromIndex, final int toIndex) {
+        final int len = len(str);
+
+        checkFromToIndex(fromIndex, toIndex, len);
+
+        if (fromIndex == toIndex || fromIndex >= len) {
+            return str == null ? N.EMPTY_STRING : str;
+        } else if (toIndex - fromIndex >= len) {
+            return N.EMPTY_STRING;
+        }
+
+        return StringUtil.concat(str.substring(0, fromIndex) + str.subSequence(toIndex, len));
+    }
+
+    /**
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+     */
+    public static void moveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        final int len = len(a);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+            return;
+        }
+
+        final boolean[] rangeTmp = N.copyOfRange(a, fromIndex, toIndex);
+
+        // move ahead
+        if (newPositionStartIndex < fromIndex) {
+            N.copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
+        } else {
+            N.copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
+        }
+
+        N.copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
+    }
+
+    /**
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+     */
+    public static void moveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        final int len = len(a);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+            return;
+        }
+
+        final char[] rangeTmp = N.copyOfRange(a, fromIndex, toIndex);
+
+        // move ahead
+        if (newPositionStartIndex < fromIndex) {
+            N.copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
+        } else {
+            N.copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
+        }
+
+        N.copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
+    }
+
+    /**
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+     */
+    public static void moveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        final int len = len(a);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+            return;
+        }
+
+        final byte[] rangeTmp = N.copyOfRange(a, fromIndex, toIndex);
+
+        // move ahead
+        if (newPositionStartIndex < fromIndex) {
+            N.copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
+        } else {
+            N.copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
+        }
+
+        N.copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
+    }
+
+    /**
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+     */
+    public static void moveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        final int len = len(a);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+            return;
+        }
+
+        final short[] rangeTmp = N.copyOfRange(a, fromIndex, toIndex);
+
+        // move ahead
+        if (newPositionStartIndex < fromIndex) {
+            N.copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
+        } else {
+            N.copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
+        }
+
+        N.copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
+    }
+
+    /**
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+     */
+    public static void moveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        final int len = len(a);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+            return;
+        }
+
+        final int[] rangeTmp = N.copyOfRange(a, fromIndex, toIndex);
+
+        // move ahead
+        if (newPositionStartIndex < fromIndex) {
+            N.copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
+        } else {
+            N.copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
+        }
+
+        N.copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
+    }
+
+    /**
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+     */
+    public static void moveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        final int len = len(a);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+            return;
+        }
+
+        final long[] rangeTmp = N.copyOfRange(a, fromIndex, toIndex);
+
+        // move ahead
+        if (newPositionStartIndex < fromIndex) {
+            N.copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
+        } else {
+            N.copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
+        }
+
+        N.copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
+    }
+
+    /**
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+     */
+    public static void moveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        final int len = len(a);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+            return;
+        }
+
+        final double[] rangeTmp = N.copyOfRange(a, fromIndex, toIndex);
+
+        // move ahead
+        if (newPositionStartIndex < fromIndex) {
+            N.copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
+        } else {
+            N.copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
+        }
+
+        N.copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
+    }
+
+    /**
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+     */
+    public static <T> void moveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        final int len = len(a);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+            return;
+        }
+
+        final T[] rangeTmp = N.copyOfRange(a, fromIndex, toIndex);
+
+        // move ahead
+        if (newPositionStartIndex < fromIndex) {
+            N.copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
+        } else {
+            N.copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
+        }
+
+        N.copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
+    }
+
+    /**
+     *
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, list.size() - (toIndex - fromIndex)]
+     * @return {@code true} if the specified {@code List} is updated.
+     */
+    @SuppressWarnings("deprecation")
+    public static <T> boolean moveRange(final List<T> c, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        final int size = size(c);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, size);
+
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+            return false;
+        }
+
+        final T[] a = (T[]) InternalUtil.getInternalArray(c);
+
+        if (a != null) {
+            try {
+                moveRange(a, fromIndex, toIndex, newPositionStartIndex);
+                // update modCount
+                c.add(a[0]);
+                c.remove(c.size() - 1);
+                return true;
+            } catch (Throwable e) {
+                // ignore;
+                InternalUtil.isListElementDataFieldSettable = false;
+            }
+        }
+
+        final T[] tmp = (T[]) c.toArray();
+
+        moveRange(tmp, fromIndex, toIndex, newPositionStartIndex);
+        c.clear();
+        c.addAll(Arrays.asList(tmp));
+
+        return true;
+    }
+
+    /**
+     *
+     * @param str
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, String.length - (toIndex - fromIndex)]
+     */
+    @SuppressWarnings("deprecation")
+    public static String moveRange(final String str, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        final int len = len(str);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+            return str;
+        }
+
+        final char[] a = str.toCharArray();
+
+        moveRange(a, fromIndex, toIndex, newPositionStartIndex);
+
+        return InternalUtil.newString(a, true);
+    }
+
+    /**
+     * Return a new array copy.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+     * @return a new array.
+     */
+    public static boolean[] copyThenMoveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+
+        final boolean[] copy = N.isNullOrEmpty(a) ? a : a.clone();
+
+        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+
+        return copy;
+    }
+
+    /**
+     * Return a new array copy.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+     * @return a new array.
+     */
+    public static char[] copyThenMoveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+
+        final char[] copy = N.isNullOrEmpty(a) ? a : a.clone();
+
+        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+
+        return copy;
+    }
+
+    /**
+     * Return a new array copy.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+     * @return a new array.
+     */
+    public static byte[] copyThenMoveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+
+        final byte[] copy = N.isNullOrEmpty(a) ? a : a.clone();
+
+        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+
+        return copy;
+    }
+
+    /**
+     * Return a new array copy.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+     * @return a new array.
+     */
+    public static short[] copyThenMoveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+
+        final short[] copy = N.isNullOrEmpty(a) ? a : a.clone();
+
+        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+
+        return copy;
+    }
+
+    /**
+     * Return a new array copy.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+     * @return a new array.
+     */
+    public static int[] copyThenMoveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+
+        final int[] copy = N.isNullOrEmpty(a) ? a : a.clone();
+
+        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+
+        return copy;
+    }
+
+    /**
+     * Return a new array copy.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+     * @return a new array.
+     */
+    public static long[] copyThenMoveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+
+        final long[] copy = N.isNullOrEmpty(a) ? a : a.clone();
+
+        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+
+        return copy;
+    }
+
+    /**
+     * Return a new array copy.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+     * @return a new array.
+     */
+    public static double[] copyThenMoveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+
+        final double[] copy = N.isNullOrEmpty(a) ? a : a.clone();
+
+        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+
+        return copy;
+    }
+
+    /**
+     * Return a new array copy.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+     * @return a new array.
+     */
+    public static <T> T[] copyThenMoveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+
+        final T[] copy = N.isNullOrEmpty(a) ? a : a.clone();
+
+        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+
+        return copy;
+    }
+
+    private static void checkIndexAndStartPositionForMoveRange(final int fromIndex, final int toIndex, final int newPositionStartIndex, final int len) {
+        checkFromToIndex(fromIndex, toIndex, len);
+
+        if (newPositionStartIndex < 0 || newPositionStartIndex > (len - (toIndex - fromIndex))) {
+            throw new IndexOutOfBoundsException("newPositionStartIndex " + newPositionStartIndex + " is out-of-bounds: [0, " + (len - (toIndex - fromIndex))
+                    + "=(array.length - (toIndex - fromIndex))]");
+        }
+    }
+
+    /**
+     * Return a new array.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
+     * @return a new array.
+     */
+    public static boolean[] replaceRange(final boolean[] a, final int fromIndex, final int toIndex, final boolean[] replacement) {
+        final int len = len(a);
+
+        checkFromToIndex(fromIndex, toIndex, len);
+
+        if (N.isNullOrEmpty(a)) {
+            return N.isNullOrEmpty(replacement) ? N.EMPTY_BOOLEAN_ARRAY : replacement.clone();
+        } else if (N.isNullOrEmpty(replacement)) {
+            return N.deleteRange(a, fromIndex, toIndex);
+        }
+
+        final boolean[] result = new boolean[len - (toIndex - fromIndex) + replacement.length];
+
+        if (fromIndex > 0) {
+            N.copy(a, 0, result, 0, fromIndex);
+        }
+
+        N.copy(replacement, 0, result, fromIndex, replacement.length);
+
+        if (toIndex < len) {
+            N.copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
+        }
+
+        return result;
+    }
+
+    /**
+     * Return a new array.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
+     * @return a new array.
+     */
+    public static char[] replaceRange(final char[] a, final int fromIndex, final int toIndex, final char[] replacement) {
+        final int len = len(a);
+
+        checkFromToIndex(fromIndex, toIndex, len);
+
+        if (N.isNullOrEmpty(a)) {
+            return N.isNullOrEmpty(replacement) ? N.EMPTY_CHAR_ARRAY : replacement.clone();
+        } else if (N.isNullOrEmpty(replacement)) {
+            return N.deleteRange(a, fromIndex, toIndex);
+        }
+
+        final char[] result = new char[len - (toIndex - fromIndex) + replacement.length];
+
+        if (fromIndex > 0) {
+            N.copy(a, 0, result, 0, fromIndex);
+        }
+
+        N.copy(replacement, 0, result, fromIndex, replacement.length);
+
+        if (toIndex < len) {
+            N.copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
+        }
+
+        return result;
+    }
+
+    /**
+     * Return a new array.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
+     * @return a new array.
+     */
+    public static byte[] replaceRange(final byte[] a, final int fromIndex, final int toIndex, final byte[] replacement) {
+        final int len = len(a);
+
+        checkFromToIndex(fromIndex, toIndex, len);
+
+        if (N.isNullOrEmpty(a)) {
+            return N.isNullOrEmpty(replacement) ? N.EMPTY_BYTE_ARRAY : replacement.clone();
+        } else if (N.isNullOrEmpty(replacement)) {
+            return N.deleteRange(a, fromIndex, toIndex);
+        }
+
+        final byte[] result = new byte[len - (toIndex - fromIndex) + replacement.length];
+
+        if (fromIndex > 0) {
+            N.copy(a, 0, result, 0, fromIndex);
+        }
+
+        N.copy(replacement, 0, result, fromIndex, replacement.length);
+
+        if (toIndex < len) {
+            N.copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
+        }
+
+        return result;
+    }
+
+    /**
+     * Return a new array.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
+     * @return a new array.
+     */
+    public static short[] replaceRange(final short[] a, final int fromIndex, final int toIndex, final short[] replacement) {
+        final int len = len(a);
+
+        checkFromToIndex(fromIndex, toIndex, len);
+
+        if (N.isNullOrEmpty(a)) {
+            return N.isNullOrEmpty(replacement) ? N.EMPTY_SHORT_ARRAY : replacement.clone();
+        } else if (N.isNullOrEmpty(replacement)) {
+            return N.deleteRange(a, fromIndex, toIndex);
+        }
+
+        final short[] result = new short[len - (toIndex - fromIndex) + replacement.length];
+
+        if (fromIndex > 0) {
+            N.copy(a, 0, result, 0, fromIndex);
+        }
+
+        N.copy(replacement, 0, result, fromIndex, replacement.length);
+
+        if (toIndex < len) {
+            N.copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
+        }
+
+        return result;
+    }
+
+    /**
+     * Return a new array.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
+     * @return a new array.
+     */
+    public static int[] replaceRange(final int[] a, final int fromIndex, final int toIndex, final int[] replacement) {
+        final int len = len(a);
+
+        checkFromToIndex(fromIndex, toIndex, len);
+
+        if (N.isNullOrEmpty(a)) {
+            return N.isNullOrEmpty(replacement) ? N.EMPTY_INT_ARRAY : replacement.clone();
+        } else if (N.isNullOrEmpty(replacement)) {
+            return N.deleteRange(a, fromIndex, toIndex);
+        }
+
+        final int[] result = new int[len - (toIndex - fromIndex) + replacement.length];
+
+        if (fromIndex > 0) {
+            N.copy(a, 0, result, 0, fromIndex);
+        }
+
+        N.copy(replacement, 0, result, fromIndex, replacement.length);
+
+        if (toIndex < len) {
+            N.copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
+        }
+
+        return result;
+    }
+
+    /**
+     * Return a new array.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
+     * @return a new array.
+     */
+    public static long[] replaceRange(final long[] a, final int fromIndex, final int toIndex, final long[] replacement) {
+        final int len = len(a);
+
+        checkFromToIndex(fromIndex, toIndex, len);
+
+        if (N.isNullOrEmpty(a)) {
+            return N.isNullOrEmpty(replacement) ? N.EMPTY_LONG_ARRAY : replacement.clone();
+        } else if (N.isNullOrEmpty(replacement)) {
+            return N.deleteRange(a, fromIndex, toIndex);
+        }
+
+        final long[] result = new long[len - (toIndex - fromIndex) + replacement.length];
+
+        if (fromIndex > 0) {
+            N.copy(a, 0, result, 0, fromIndex);
+        }
+
+        N.copy(replacement, 0, result, fromIndex, replacement.length);
+
+        if (toIndex < len) {
+            N.copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
+        }
+
+        return result;
+    }
+
+    /**
+     * Return a new array.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
+     * @return a new array.
+     */
+    public static float[] replaceRange(final float[] a, final int fromIndex, final int toIndex, final float[] replacement) {
+        final int len = len(a);
+
+        checkFromToIndex(fromIndex, toIndex, len);
+
+        if (N.isNullOrEmpty(a)) {
+            return N.isNullOrEmpty(replacement) ? N.EMPTY_FLOAT_ARRAY : replacement.clone();
+        } else if (N.isNullOrEmpty(replacement)) {
+            return N.deleteRange(a, fromIndex, toIndex);
+        }
+
+        final float[] result = new float[len - (toIndex - fromIndex) + replacement.length];
+
+        if (fromIndex > 0) {
+            N.copy(a, 0, result, 0, fromIndex);
+        }
+
+        N.copy(replacement, 0, result, fromIndex, replacement.length);
+
+        if (toIndex < len) {
+            N.copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
+        }
+
+        return result;
+    }
+
+    /**
+     * Return a new array.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
+     * @return a new array.
+     */
+    public static double[] replaceRange(final double[] a, final int fromIndex, final int toIndex, final double[] replacement) {
+        final int len = len(a);
+
+        checkFromToIndex(fromIndex, toIndex, len);
+
+        if (N.isNullOrEmpty(a)) {
+            return N.isNullOrEmpty(replacement) ? N.EMPTY_DOUBLE_ARRAY : replacement.clone();
+        } else if (N.isNullOrEmpty(replacement)) {
+            return N.deleteRange(a, fromIndex, toIndex);
+        }
+
+        final double[] result = new double[len - (toIndex - fromIndex) + replacement.length];
+
+        if (fromIndex > 0) {
+            N.copy(a, 0, result, 0, fromIndex);
+        }
+
+        N.copy(replacement, 0, result, fromIndex, replacement.length);
+
+        if (toIndex < len) {
+            N.copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
+        }
+
+        return result;
+    }
+
+    /**
+     * Return a new array.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
+     * @return a new array.
+     * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
+     */
+    public static <T> T[] replaceRange(final T[] a, final int fromIndex, final int toIndex, final T[] replacement) throws IllegalArgumentException {
+        checkArgNotNull(a, "a");
+
+        final int len = len(a);
+
+        checkFromToIndex(fromIndex, toIndex, len);
+
+        if (N.isNullOrEmpty(a)) {
+            return N.isNullOrEmpty(replacement) ? a : replacement.clone();
+        } else if (N.isNullOrEmpty(replacement)) {
+            return N.deleteRange(a, fromIndex, toIndex);
+        }
+
+        final T[] result = (T[]) CommonUtil.newArray(a.getClass().getComponentType(), len - (toIndex - fromIndex) + replacement.length);
+
+        if (fromIndex > 0) {
+            N.copy(a, 0, result, 0, fromIndex);
+        }
+
+        N.copy(replacement, 0, result, fromIndex, replacement.length);
+
+        if (toIndex < len) {
+            N.copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
+        }
+
+        return result;
+    }
+
+    /**
+     * 
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
+     * @return {@code true} if the specified {@code List} is updated.
+     * @throws IllegalArgumentException if the specified <code>c</code> is <code>null</code>.
+     */
+    public static <T> boolean replaceRange(final List<T> c, final int fromIndex, final int toIndex, final Collection<? extends T> replacement)
+            throws IllegalArgumentException {
+        checkArgNotNull(c, "c");
+
+        final int size = size(c);
+
+        checkFromToIndex(fromIndex, toIndex, size);
+
+        if (N.isNullOrEmpty(replacement)) {
+            if (fromIndex == toIndex) {
+                return false;
+            }
+
+            return N.deleteRange(c, fromIndex, toIndex);
+        }
+
+        final List<T> endList = toIndex < size ? new ArrayList<>(c.subList(toIndex, size)) : null;
+
+        if (fromIndex < size) {
+            N.deleteRange(c, fromIndex, size);
+        }
+
+        c.addAll(replacement);
+
+        if (N.notNullOrEmpty(endList)) {
+            c.addAll(endList);
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns a new String.
+     * 
+     * @param str
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
+     * @return
+     */
+    @SuppressWarnings("deprecation")
+    public static String replaceRange(final String str, final int fromIndex, final int toIndex, final String replacement) {
+        final int len = len(str);
+
+        checkFromToIndex(fromIndex, toIndex, len);
+
+        if (N.isNullOrEmpty(str)) {
+            return N.isNullOrEmpty(replacement) ? str : replacement;
+        } else if (N.isNullOrEmpty(replacement)) {
+            return N.deleteRange(str, fromIndex, toIndex);
+        }
+
+        final char[] a = InternalUtil.getCharsForReadOnly(str);
+        final char[] tmp = N.replaceRange(a, fromIndex, toIndex, InternalUtil.getCharsForReadOnly(replacement));
+
+        return InternalUtil.newString(tmp, true);
     }
 
     // Primitive/Object array converters
@@ -8634,11 +9516,11 @@ public final class N extends CommonUtil {
      * </p>
      *
      * @param a
-     *            an array, must not be null or empty
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      */
     @SafeVarargs
-    public static char min(final char... a) {
+    public static char min(final char... a) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         if (isNullOrEmpty(a)) {
@@ -8676,11 +9558,11 @@ public final class N extends CommonUtil {
      * </p>
      *
      * @param a
-     *            an array, must not be null or empty
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      */
     @SafeVarargs
-    public static byte min(final byte... a) {
+    public static byte min(final byte... a) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return min(a, 0, a.length);
@@ -8714,11 +9596,11 @@ public final class N extends CommonUtil {
      * </p>
      *
      * @param a
-     *            an array, must not be null or empty
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      */
     @SafeVarargs
-    public static short min(final short... a) {
+    public static short min(final short... a) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return min(a, 0, a.length);
@@ -8752,11 +9634,11 @@ public final class N extends CommonUtil {
      * </p>
      *
      * @param a
-     *            an array, must not be null or empty
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      */
     @SafeVarargs
-    public static int min(final int... a) {
+    public static int min(final int... a) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return min(a, 0, a.length);
@@ -8792,11 +9674,11 @@ public final class N extends CommonUtil {
      * </p>
      *
      * @param a
-     *            an array, must not be null or empty
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      */
     @SafeVarargs
-    public static long min(final long... a) {
+    public static long min(final long... a) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return min(a, 0, a.length);
@@ -8830,13 +9712,13 @@ public final class N extends CommonUtil {
      * </p>
      *
      * @param a
-     *            an array, must not be null or empty
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      * @see IEEE754rUtil#min(float[]) IEEE754rUtils for a version of this method
      *      that handles NaN differently
      */
     @SafeVarargs
-    public static float min(final float... a) {
+    public static float min(final float... a) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return min(a, 0, a.length);
@@ -8872,13 +9754,13 @@ public final class N extends CommonUtil {
      * </p>
      *
      * @param a
-     *            an array, must not be null or empty
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      * @see IEEE754rUtil#min(double[]) IEEE754rUtils for a version of this
      *      method that handles NaN differently
      */
     @SafeVarargs
-    public static double min(final double... a) {
+    public static double min(final double... a) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return min(a, 0, a.length);
@@ -8912,10 +9794,11 @@ public final class N extends CommonUtil {
      * Returns the minimum element in the array.
      *
      * @param <T>
-     * @param a an array, must not be null or empty
+     * @param a
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      */
-    public static <T extends Comparable<? super T>> T min(final T[] a) {
+    public static <T extends Comparable<? super T>> T min(final T[] a) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return min(a, 0, a.length);
@@ -8937,11 +9820,12 @@ public final class N extends CommonUtil {
      * Returns the minimum element in the array.
      *
      * @param <T>
-     * @param a an array, must not be null or empty
-     * @param cmp
+     * @param a an {@code Array} which must not be null or empty
+     * @param cmp 
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      */
-    public static <T> T min(final T[] a, final Comparator<? super T> cmp) {
+    public static <T> T min(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return min(a, 0, a.length, cmp);
@@ -8980,10 +9864,11 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param c
+     * @param c 
      * @return
+     * @throws IllegalArgumentException if the specified {@code Collection} is null or empty.
      */
-    public static <T extends Comparable<? super T>> T min(final Collection<? extends T> c) {
+    public static <T extends Comparable<? super T>> T min(final Collection<? extends T> c) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(c, "The spcified collection can not be null or empty");
 
         return min(c, 0, c.size());
@@ -8994,10 +9879,11 @@ public final class N extends CommonUtil {
      * @param <T>
      * @param c
      * @param from
-     * @param to
+     * @param to 
      * @return
+     * @throws IllegalArgumentException if the specified {@code Collection} is null or empty.
      */
-    public static <T extends Comparable<? super T>> T min(final Collection<? extends T> c, final int from, final int to) {
+    public static <T extends Comparable<? super T>> T min(final Collection<? extends T> c, final int from, final int to) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(c, "The spcified collection can not be null or empty");
 
         return (T) min(c, from, to, NULL_MAX_COMPARATOR);
@@ -9009,8 +9895,9 @@ public final class N extends CommonUtil {
      * @param c
      * @param cmp
      * @return
+     * @throws IllegalArgumentException if the specified {@code Collection} is null or empty.
      */
-    public static <T> T min(final Collection<? extends T> c, Comparator<? super T> cmp) {
+    public static <T> T min(final Collection<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(c, "The spcified collection can not be null or empty");
 
         return min(c, 0, c.size(), cmp);
@@ -9410,12 +10297,12 @@ public final class N extends CommonUtil {
      * Returns the maximum value in an array.
      * </p>
      *
-     * @param a
-     *            an array, must not be null or empty
+     * @param a an {@code Array} which must not be null or empty
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      */
     @SafeVarargs
-    public static char max(final char... a) {
+    public static char max(final char... a) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return max(a, 0, a.length);
@@ -9448,12 +10335,12 @@ public final class N extends CommonUtil {
      * Returns the maximum value in an array.
      * </p>
      *
-     * @param a
-     *            an array, must not be null or empty
+     * @param a an {@code Array} which must not be null or empty
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      */
     @SafeVarargs
-    public static byte max(final byte... a) {
+    public static byte max(final byte... a) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return max(a, 0, a.length);
@@ -9486,12 +10373,12 @@ public final class N extends CommonUtil {
      * Returns the maximum value in an array.
      * </p>
      *
-     * @param a
-     *            an array, must not be null or empty
+     * @param a an {@code Array} which must not be null or empty
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      */
     @SafeVarargs
-    public static short max(final short... a) {
+    public static short max(final short... a) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return max(a, 0, a.length);
@@ -9524,12 +10411,12 @@ public final class N extends CommonUtil {
      * Returns the maximum value in an array.
      * </p>
      *
-     * @param a
-     *            an array, must not be null or empty
+     * @param a an {@code Array} which must not be null or empty
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      */
     @SafeVarargs
-    public static int max(final int... a) {
+    public static int max(final int... a) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return max(a, 0, a.length);
@@ -9562,12 +10449,12 @@ public final class N extends CommonUtil {
      * Returns the maximum value in an array.
      * </p>
      *
-     * @param a
-     *            an array, must not be null or empty
+     * @param a an {@code Array} which must not be null or empty
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      */
     @SafeVarargs
-    public static long max(final long... a) {
+    public static long max(final long... a) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return max(a, 0, a.length);
@@ -9600,14 +10487,14 @@ public final class N extends CommonUtil {
      * Returns the maximum value in an array.
      * </p>
      *
-     * @param a
-     *            an array, must not be null or empty
+     * @param a an {@code Array} which must not be null or empty
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      * @see IEEE754rUtil#max(float[]) IEEE754rUtils for a version of this method
      *      that handles NaN differently
      */
     @SafeVarargs
-    public static float max(final float... a) {
+    public static float max(final float... a) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return max(a, 0, a.length);
@@ -9642,14 +10529,14 @@ public final class N extends CommonUtil {
      * Returns the maximum value in an array.
      * </p>
      *
-     * @param a
-     *            an array, must not be null or empty
+     * @param a an {@code Array} which must not be null or empty
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      * @see IEEE754rUtil#max(double[]) IEEE754rUtils for a version of this
      *      method that handles NaN differently
      */
     @SafeVarargs
-    public static double max(final double... a) {
+    public static double max(final double... a) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return max(a, 0, a.length);
@@ -9683,11 +10570,11 @@ public final class N extends CommonUtil {
      * Returns the maximum element in the array.
      *
      * @param <T>
-     * @param a an array, must not be null or empty
+     * @param a an {@code Array} which must not be null or empty
      * @return
-     * @throws IllegalArgumentException             if <code>a</code> is <code>null</code> or empty.
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      */
-    public static <T extends Comparable<? super T>> T max(final T[] a) {
+    public static <T extends Comparable<? super T>> T max(final T[] a) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return max(a, 0, a.length);
@@ -9709,11 +10596,12 @@ public final class N extends CommonUtil {
      * Returns the maximum element in the array.
      *
      * @param <T>
-     * @param a an array, must not be null or empty
+     * @param a an {@code Array} which must not be null or empty
      * @param cmp
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      */
-    public static <T> T max(final T[] a, final Comparator<? super T> cmp) {
+    public static <T> T max(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return max(a, 0, a.length, cmp);
@@ -9754,8 +10642,9 @@ public final class N extends CommonUtil {
      * @param <T>
      * @param c
      * @return
+     * @throws IllegalArgumentException if the specified {@code Collection} is null or empty.
      */
-    public static <T extends Comparable<? super T>> T max(final Collection<? extends T> c) {
+    public static <T extends Comparable<? super T>> T max(final Collection<? extends T> c) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(c, "The spcified collection can not be null or empty");
 
         return max(c, 0, c.size());
@@ -9768,8 +10657,9 @@ public final class N extends CommonUtil {
      * @param from
      * @param to
      * @return
+     * @throws IllegalArgumentException if the specified {@code Collection} is null or empty.
      */
-    public static <T extends Comparable<? super T>> T max(final Collection<? extends T> c, final int from, final int to) {
+    public static <T extends Comparable<? super T>> T max(final Collection<? extends T> c, final int from, final int to) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(c, "The spcified collection can not be null or empty");
 
         return (T) max(c, from, to, NULL_MIN_COMPARATOR);
@@ -9781,8 +10671,9 @@ public final class N extends CommonUtil {
      * @param c
      * @param cmp
      * @return
+     * @throws IllegalArgumentException if the specified {@code Collection} is null or empty.
      */
-    public static <T> T max(final Collection<? extends T> c, Comparator<? super T> cmp) {
+    public static <T> T max(final Collection<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(c, "The spcified collection can not be null or empty");
 
         return max(c, 0, c.size(), cmp);
@@ -10129,12 +11020,13 @@ public final class N extends CommonUtil {
     /**
      * Returns the <code>length / 2 + 1</code> largest value in the specified array.
      *
-     * @param a an array, must not be null or empty
+     * @param a an {@code Array} which must not be null or empty
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      * @see #median(int...)
      */
     @SafeVarargs
-    public static char median(final char... a) {
+    public static char median(final char... a) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return median(a, 0, a.length);
@@ -10170,12 +11062,13 @@ public final class N extends CommonUtil {
     /**
      * Returns the <code>length / 2 + 1</code> largest value in the specified array.
      *
-     * @param a an array, must not be null or empty
+     * @param a an {@code Array} which must not be null or empty
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      * @see #median(int...)
      */
     @SafeVarargs
-    public static byte median(final byte... a) {
+    public static byte median(final byte... a) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return median(a, 0, a.length);
@@ -10211,12 +11104,13 @@ public final class N extends CommonUtil {
     /**
      * Returns the <code>length / 2 + 1</code> largest value in the specified array.
      *
-     * @param a an array, must not be null or empty
+     * @param a an {@code Array} which must not be null or empty
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      * @see #median(int...)
      */
     @SafeVarargs
-    public static short median(final short... a) {
+    public static short median(final short... a) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return median(a, 0, a.length);
@@ -10252,12 +11146,13 @@ public final class N extends CommonUtil {
     /**
      * Returns the <code>length / 2 + 1</code> largest value in the specified array.
      *
-     * @param a an array, must not be null or empty
+     * @param a an {@code Array} which must not be null or empty
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      * @see #median(int...)
      */
     @SafeVarargs
-    public static int median(final int... a) {
+    public static int median(final int... a) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return median(a, 0, a.length);
@@ -10293,12 +11188,13 @@ public final class N extends CommonUtil {
     /**
      * Returns the <code>length / 2 + 1</code> largest value in the specified array.
      *
-     * @param a an array, must not be null or empty
+     * @param a an {@code Array} which must not be null or empty
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      * @see #median(int...)
      */
     @SafeVarargs
-    public static long median(final long... a) {
+    public static long median(final long... a) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return median(a, 0, a.length);
@@ -10334,12 +11230,13 @@ public final class N extends CommonUtil {
     /**
      * Returns the <code>length / 2 + 1</code> largest value in the specified array.
      *
-     * @param a an array, must not be null or empty
+     * @param a an {@code Array} which must not be null or empty
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      * @see #median(int...)
      */
     @SafeVarargs
-    public static float median(final float... a) {
+    public static float median(final float... a) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return median(a, 0, a.length);
@@ -10375,12 +11272,13 @@ public final class N extends CommonUtil {
     /**
      * Returns the <code>length / 2 + 1</code> largest value in the specified array.
      *
-     * @param a an array, must not be null or empty
+     * @param a an {@code Array} which must not be null or empty
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      * @see #median(int...)
      */
     @SafeVarargs
-    public static double median(final double... a) {
+    public static double median(final double... a) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return median(a, 0, a.length);
@@ -10417,11 +11315,12 @@ public final class N extends CommonUtil {
      * Returns the <code>length / 2 + 1</code> largest value in the specified array.
      *
      * @param <T>
-     * @param a an array, must not be null or empty
+     * @param a an {@code Array} which must not be null or empty
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      * @see #median(int...)
      */
-    public static <T extends Comparable<? super T>> T median(final T[] a) {
+    public static <T extends Comparable<? super T>> T median(final T[] a) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return median(a, 0, a.length);
@@ -10447,12 +11346,13 @@ public final class N extends CommonUtil {
      * Returns the <code>length / 2 + 1</code> largest value in the specified array.
      *
      * @param <T>
-     * @param a an array, must not be null or empty
+     * @param a an {@code Array} which must not be null or empty
      * @param cmp
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty.
      * @see #median(int...)
      */
-    public static <T> T median(final T[] a, Comparator<? super T> cmp) {
+    public static <T> T median(final T[] a, Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return median(a, 0, a.length, cmp);
@@ -10487,9 +11387,10 @@ public final class N extends CommonUtil {
      * @param <T>
      * @param c
      * @return
+     * @throws IllegalArgumentException if the specified {@code Collection} is null or empty.
      * @see #median(int...)
      */
-    public static <T extends Comparable<? super T>> T median(final Collection<? extends T> c) {
+    public static <T extends Comparable<? super T>> T median(final Collection<? extends T> c) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(c, "The spcified collection can not be null or empty");
 
         return median(c, 0, c.size());
@@ -10514,9 +11415,10 @@ public final class N extends CommonUtil {
      * @param c
      * @param cmp
      * @return
+     * @throws IllegalArgumentException if the specified {@code Collection} is null or empty.
      * @see #median(int...)
      */
-    public static <T> T median(final Collection<? extends T> c, Comparator<? super T> cmp) {
+    public static <T> T median(final Collection<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(c, "The spcified collection can not be null or empty");
 
         return median(c, 0, c.size(), cmp);
@@ -10550,9 +11452,9 @@ public final class N extends CommonUtil {
      * @param a
      * @param k
      * @return
-     * @throws IllegalArgumentException if the length of the specified array is less than <code>k</code>.
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty, or its length is less than <code>k</code>.
      */
-    public static char kthLargest(final char[] a, final int k) {
+    public static char kthLargest(final char[] a, final int k) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return Array.kthLargest(a, k);
@@ -10580,9 +11482,9 @@ public final class N extends CommonUtil {
      * @param a
      * @param k
      * @return
-     * @throws IllegalArgumentException if the length of the specified array is less than <code>k</code>.
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty, or its length is less than <code>k</code>.
      */
-    public static byte kthLargest(final byte[] a, final int k) {
+    public static byte kthLargest(final byte[] a, final int k) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return Array.kthLargest(a, k);
@@ -10610,9 +11512,9 @@ public final class N extends CommonUtil {
      * @param a
      * @param k
      * @return
-     * @throws IllegalArgumentException if the length of the specified array is less than <code>k</code>.
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty, or its length is less than <code>k</code>.
      */
-    public static short kthLargest(final short[] a, final int k) {
+    public static short kthLargest(final short[] a, final int k) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return Array.kthLargest(a, k);
@@ -10640,9 +11542,9 @@ public final class N extends CommonUtil {
      * @param a
      * @param k
      * @return
-     * @throws IllegalArgumentException if the length of the specified array is less than <code>k</code>.
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty, or its length is less than <code>k</code>.
      */
-    public static int kthLargest(final int[] a, final int k) {
+    public static int kthLargest(final int[] a, final int k) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return Array.kthLargest(a, k);
@@ -10670,9 +11572,9 @@ public final class N extends CommonUtil {
      * @param a
      * @param k
      * @return
-     * @throws IllegalArgumentException if the length of the specified array is less than <code>k</code>.
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty, or its length is less than <code>k</code>.
      */
-    public static long kthLargest(final long[] a, final int k) {
+    public static long kthLargest(final long[] a, final int k) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return Array.kthLargest(a, k);
@@ -10700,9 +11602,9 @@ public final class N extends CommonUtil {
      * @param a
      * @param k
      * @return
-     * @throws IllegalArgumentException if the length of the specified array is less than <code>k</code>.
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty, or its length is less than <code>k</code>.
      */
-    public static float kthLargest(final float[] a, final int k) {
+    public static float kthLargest(final float[] a, final int k) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return Array.kthLargest(a, k);
@@ -10730,9 +11632,9 @@ public final class N extends CommonUtil {
      * @param a
      * @param k
      * @return
-     * @throws IllegalArgumentException if the length of the specified array is less than <code>k</code>.
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty, or its length is less than <code>k</code>.
      */
-    public static double kthLargest(final double[] a, final int k) {
+    public static double kthLargest(final double[] a, final int k) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return Array.kthLargest(a, k);
@@ -10761,9 +11663,9 @@ public final class N extends CommonUtil {
      * @param a
      * @param k
      * @return
-     * @throws IllegalArgumentException if the length of the specified array is less than <code>k</code>.
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty, or its length is less than <code>k</code>.
      */
-    public static <T extends Comparable<? super T>> T kthLargest(final T[] a, final int k) {
+    public static <T extends Comparable<? super T>> T kthLargest(final T[] a, final int k) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return Array.kthLargest(a, k);
@@ -10794,9 +11696,9 @@ public final class N extends CommonUtil {
      * @param k
      * @param cmp
      * @return
-     * @throws IllegalArgumentException if the length of the specified array is less than <code>k</code>.
+     * @throws IllegalArgumentException if the specified {@code Array} is null or empty, or its length is less than <code>k</code>.
      */
-    public static <T> T kthLargest(final T[] a, final int k, final Comparator<? super T> cmp) {
+    public static <T> T kthLargest(final T[] a, final int k, final Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         return Array.kthLargest(a, k, cmp);
@@ -10827,9 +11729,9 @@ public final class N extends CommonUtil {
      * @param c
      * @param k
      * @return
-     * @throws IllegalArgumentException if the length of the specified array is less than <code>k</code>.
+     * @throws IllegalArgumentException if the specified {@code Collection} is null or empty, or its size is less than <code>k</code>.
      */
-    public static <T extends Comparable<? super T>> T kthLargest(final Collection<? extends T> c, final int k) {
+    public static <T extends Comparable<? super T>> T kthLargest(final Collection<? extends T> c, final int k) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(c, "The spcified collection can not be null or empty");
 
         return Array.kthLargest(c, k);
@@ -10860,9 +11762,9 @@ public final class N extends CommonUtil {
      * @param k
      * @param cmp
      * @return
-     * @throws IllegalArgumentException if the length of the specified array is less than <code>k</code>.
+     * @throws IllegalArgumentException if the specified {@code Collection} is null or empty, or its size is less than <code>k</code>.
      */
-    public static <T> T kthLargest(final Collection<? extends T> c, final int k, final Comparator<? super T> cmp) {
+    public static <T> T kthLargest(final Collection<? extends T> c, final int k, final Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(c, "The spcified collection can not be null or empty");
 
         return Array.kthLargest(c, k, cmp);
@@ -10894,7 +11796,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws IllegalArgumentException if the specified <code>sortedArray</code> is null or empty.
      */
-    public static Map<Percentage, Character> percentiles(final char[] sortedArray) {
+    public static Map<Percentage, Character> percentiles(final char[] sortedArray) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
 
         final int len = sortedArray.length;
@@ -10914,7 +11816,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws IllegalArgumentException if the specified <code>sortedArray</code> is null or empty.
      */
-    public static Map<Percentage, Byte> percentiles(final byte[] sortedArray) {
+    public static Map<Percentage, Byte> percentiles(final byte[] sortedArray) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
 
         final int len = sortedArray.length;
@@ -10934,7 +11836,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws IllegalArgumentException if the specified <code>sortedArray</code> is null or empty.
      */
-    public static Map<Percentage, Short> percentiles(final short[] sortedArray) {
+    public static Map<Percentage, Short> percentiles(final short[] sortedArray) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
 
         final int len = sortedArray.length;
@@ -10954,7 +11856,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws IllegalArgumentException if the specified <code>sortedArray</code> is null or empty.
      */
-    public static Map<Percentage, Integer> percentiles(final int[] sortedArray) {
+    public static Map<Percentage, Integer> percentiles(final int[] sortedArray) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
 
         final int len = sortedArray.length;
@@ -10974,7 +11876,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws IllegalArgumentException if the specified <code>sortedArray</code> is null or empty.
      */
-    public static Map<Percentage, Long> percentiles(final long[] sortedArray) {
+    public static Map<Percentage, Long> percentiles(final long[] sortedArray) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
 
         final int len = sortedArray.length;
@@ -10994,7 +11896,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws IllegalArgumentException if the specified <code>sortedArray</code> is null or empty.
      */
-    public static Map<Percentage, Float> percentiles(final float[] sortedArray) {
+    public static Map<Percentage, Float> percentiles(final float[] sortedArray) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
 
         final int len = sortedArray.length;
@@ -11014,7 +11916,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws IllegalArgumentException if the specified <code>sortedArray</code> is null or empty.
      */
-    public static Map<Percentage, Double> percentiles(final double[] sortedArray) {
+    public static Map<Percentage, Double> percentiles(final double[] sortedArray) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
 
         final int len = sortedArray.length;
@@ -11035,7 +11937,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws IllegalArgumentException if the specified <code>sortedArray</code> is null or empty.
      */
-    public static <T> Map<Percentage, T> percentiles(final T[] sortedArray) {
+    public static <T> Map<Percentage, T> percentiles(final T[] sortedArray) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
 
         final int len = sortedArray.length;
@@ -11054,9 +11956,9 @@ public final class N extends CommonUtil {
      * @param <T>
      * @param sortedList
      * @return
-     * @throws IllegalArgumentException if the specified <code>sortedArray</code> is null or empty.
+     * @throws IllegalArgumentException if the specified <code>sortedList</code> is null or empty.
      */
-    public static <T> Map<Percentage, T> percentiles(final List<T> sortedList) {
+    public static <T> Map<Percentage, T> percentiles(final List<T> sortedList) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(sortedList, "The spcified 'sortedList' can not be null or empty");
 
         final int size = sortedList.size();
@@ -18984,8 +19886,9 @@ public final class N extends CommonUtil {
      *
      * @param timeout
      * @param unit
+     * @throws IllegalArgumentException if the specified <code>unit</code> is <code>null</code>.
      */
-    public static void sleep(final long timeout, final TimeUnit unit) {
+    public static void sleep(final long timeout, final TimeUnit unit) throws IllegalArgumentException {
         checkArgNotNull(unit, "unit");
 
         if (timeout <= 0) {
@@ -19048,8 +19951,9 @@ public final class N extends CommonUtil {
      *
      * @param timeout
      * @param unit
+     * @throws IllegalArgumentException if the specified <code>unit</code> is <code>null</code>.
      */
-    public static void sleepUninterruptibly(final long timeout, final TimeUnit unit) {
+    public static void sleepUninterruptibly(final long timeout, final TimeUnit unit) throws IllegalArgumentException {
         checkArgNotNull(unit, "unit");
 
         if (timeout <= 0) {
@@ -19159,10 +20063,12 @@ public final class N extends CommonUtil {
      * @param timeout
      * @param unit
      * @param cmd
+     * @throws IllegalArgumentException if the specified <code>unit/cmd</code> is <code>null</code>.
      */
-    public static void runUninterruptibly(final long timeout, final TimeUnit unit, final Throwables.BiConsumer<Long, TimeUnit, InterruptedException> cmd) {
+    public static void runUninterruptibly(final long timeout, final TimeUnit unit, final Throwables.BiConsumer<Long, TimeUnit, InterruptedException> cmd)
+            throws IllegalArgumentException {
         checkArgNotNull(unit, "unit");
-        checkArgNotNull(cmd);
+        checkArgNotNull(cmd, "cmd");
 
         boolean interrupted = false;
 
@@ -19269,10 +20175,12 @@ public final class N extends CommonUtil {
      * @param unit
      * @param cmd
      * @return
+     * @throws IllegalArgumentException if the specified <code>unit/cmd</code> is <code>null</code>.
      */
-    public static <T> T callUninterruptibly(final long timeout, final TimeUnit unit, final Throwables.BiFunction<Long, TimeUnit, T, InterruptedException> cmd) {
+    public static <T> T callUninterruptibly(final long timeout, final TimeUnit unit, final Throwables.BiFunction<Long, TimeUnit, T, InterruptedException> cmd)
+            throws IllegalArgumentException {
         checkArgNotNull(unit, "unit");
-        checkArgNotNull(cmd);
+        checkArgNotNull(cmd, "cmd");
 
         boolean interrupted = false;
 

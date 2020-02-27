@@ -65,9 +65,9 @@ public class Builder<T> {
      *
      * @param val
      * @return
-     * @throws NullPointerException if the specified {@code val} is {@code null}.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final BooleanListBuilder of(BooleanList val) {
+    public static final BooleanListBuilder of(final BooleanList val) throws IllegalArgumentException {
         return new BooleanListBuilder(val);
     }
 
@@ -75,9 +75,9 @@ public class Builder<T> {
      *
      * @param val
      * @return
-     * @throws NullPointerException if the specified {@code val} is {@code null}.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final CharListBuilder of(CharList val) {
+    public static final CharListBuilder of(final CharList val) throws IllegalArgumentException {
         return new CharListBuilder(val);
     }
 
@@ -85,9 +85,9 @@ public class Builder<T> {
      *
      * @param val
      * @return
-     * @throws NullPointerException if the specified {@code val} is {@code null}.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final ByteListBuilder of(ByteList val) {
+    public static final ByteListBuilder of(final ByteList val) throws IllegalArgumentException {
         return new ByteListBuilder(val);
     }
 
@@ -95,9 +95,9 @@ public class Builder<T> {
      *
      * @param val
      * @return
-     * @throws NullPointerException if the specified {@code val} is {@code null}.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final ShortListBuilder of(ShortList val) {
+    public static final ShortListBuilder of(final ShortList val) throws IllegalArgumentException {
         return new ShortListBuilder(val);
     }
 
@@ -105,9 +105,9 @@ public class Builder<T> {
      *
      * @param val
      * @return
-     * @throws NullPointerException if the specified {@code val} is {@code null}.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final IntListBuilder of(IntList val) {
+    public static final IntListBuilder of(final IntList val) throws IllegalArgumentException {
         return new IntListBuilder(val);
     }
 
@@ -115,9 +115,9 @@ public class Builder<T> {
      *
      * @param val
      * @return
-     * @throws NullPointerException if the specified {@code val} is {@code null}.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final LongListBuilder of(LongList val) {
+    public static final LongListBuilder of(final LongList val) throws IllegalArgumentException {
         return new LongListBuilder(val);
     }
 
@@ -125,9 +125,9 @@ public class Builder<T> {
      *
      * @param val
      * @return
-     * @throws NullPointerException if the specified {@code val} is {@code null}.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final FloatListBuilder of(FloatList val) {
+    public static final FloatListBuilder of(final FloatList val) throws IllegalArgumentException {
         return new FloatListBuilder(val);
     }
 
@@ -135,9 +135,9 @@ public class Builder<T> {
      *
      * @param val
      * @return
-     * @throws NullPointerException if the specified {@code val} is {@code null}.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final DoubleListBuilder of(DoubleList val) {
+    public static final DoubleListBuilder of(final DoubleList val) throws IllegalArgumentException {
         return new DoubleListBuilder(val);
     }
 
@@ -147,9 +147,9 @@ public class Builder<T> {
      * @param <L>
      * @param val
      * @return
-     * @throws NullPointerException if the specified {@code val} is {@code null}.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final <T, L extends List<T>> ListBuilder<T, L> of(L val) {
+    public static final <T, L extends List<T>> ListBuilder<T, L> of(L val) throws IllegalArgumentException {
         return new ListBuilder<>(val);
     }
 
@@ -159,9 +159,9 @@ public class Builder<T> {
      * @param <C>
      * @param val
      * @return
-     * @throws NullPointerException if the specified {@code val} is {@code null}.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final <T, C extends Collection<T>> CollectionBuilder<T, C> of(C val) {
+    public static final <T, C extends Collection<T>> CollectionBuilder<T, C> of(C val) throws IllegalArgumentException {
         return new CollectionBuilder<>(val);
     }
 
@@ -172,9 +172,9 @@ public class Builder<T> {
      * @param <M>
      * @param val
      * @return
-     * @throws NullPointerException if the specified {@code val} is {@code null}.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final <K, V, M extends Map<K, V>> MapBuilder<K, V, M> of(M val) {
+    public static final <K, V, M extends Map<K, V>> MapBuilder<K, V, M> of(M val) throws IllegalArgumentException {
         return new MapBuilder<>(val);
     }
 
@@ -183,9 +183,9 @@ public class Builder<T> {
      * @param <T>
      * @param val
      * @return
-     * @throws NullPointerException if the specified {@code val} is {@code null}.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final <T> MultisetBuilder<T> of(Multiset<T> val) {
+    public static final <T> MultisetBuilder<T> of(Multiset<T> val) throws IllegalArgumentException {
         return new MultisetBuilder<>(val);
     }
 
@@ -194,9 +194,9 @@ public class Builder<T> {
      * @param <T>
      * @param val
      * @return
-     * @throws NullPointerException if the specified {@code val} is {@code null}.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final <T> LongMultisetBuilder<T> of(LongMultiset<T> val) {
+    public static final <T> LongMultisetBuilder<T> of(LongMultiset<T> val) throws IllegalArgumentException {
         return new LongMultisetBuilder<>(val);
     }
 
@@ -208,9 +208,9 @@ public class Builder<T> {
      * @param <M>
      * @param val
      * @return
-     * @throws NullPointerException if the specified {@code val} is {@code null}.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> MultimapBuilder<K, E, V, M> of(M val) {
+    public static final <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> MultimapBuilder<K, E, V, M> of(M val) throws IllegalArgumentException {
         return new MultimapBuilder<>(val);
     }
 
@@ -219,9 +219,9 @@ public class Builder<T> {
      * @param <T>
      * @param val
      * @return
-     * @throws NullPointerException if the specified {@code val} is {@code null}.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final <T> DataSetBuilder of(DataSet val) {
+    public static final <T> DataSetBuilder of(final DataSet val) throws IllegalArgumentException {
         return new DataSetBuilder(val);
     }
 
@@ -272,7 +272,7 @@ public class Builder<T> {
      * @param <T>
      * @param val
      * @return
-     * @throws NullPointerException if the specified {@code val} is {@code null}.
+     * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
     @SuppressWarnings("rawtypes")
     public static final <T> Builder<T> of(T val) {
@@ -2025,8 +2025,8 @@ public class Builder<T> {
          * @return
          * @throws E the e
          */
-        public <T, E extends Exception> DataSetBuilder addColumn(int columnIndex, String newColumnName, String fromColumnName, Throwables.Function<T, ?, E> func)
-                throws E {
+        public <T, E extends Exception> DataSetBuilder addColumn(int columnIndex, String newColumnName, String fromColumnName,
+                Throwables.Function<T, ?, E> func) throws E {
             val.addColumn(columnIndex, newColumnName, fromColumnName, func);
 
             return this;
@@ -2077,8 +2077,8 @@ public class Builder<T> {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> DataSetBuilder addColumn(String newColumnName, Tuple2<String, String> fromColumnNames, Throwables.BiFunction<?, ?, ?, E> func)
-                throws E {
+        public <E extends Exception> DataSetBuilder addColumn(String newColumnName, Tuple2<String, String> fromColumnNames,
+                Throwables.BiFunction<?, ?, ?, E> func) throws E {
             val.addColumn(newColumnName, fromColumnNames, func);
 
             return this;
@@ -2314,8 +2314,8 @@ public class Builder<T> {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> DataSetBuilder combineColumns(Throwables.Predicate<String, E> columnNameFilter, String newColumnName, Class<?> newColumnClass)
-                throws E {
+        public <E extends Exception> DataSetBuilder combineColumns(Throwables.Predicate<String, E> columnNameFilter, String newColumnName,
+                Class<?> newColumnClass) throws E {
             val.combineColumns(columnNameFilter, newColumnName, newColumnClass);
 
             return this;
@@ -2366,8 +2366,8 @@ public class Builder<T> {
          * @return
          * @throws E the e
          */
-        public <T, E extends Exception> DataSetBuilder divideColumn(String columnName, Collection<String> newColumnNames, Throwables.BiConsumer<T, Object[], E> output)
-                throws E {
+        public <T, E extends Exception> DataSetBuilder divideColumn(String columnName, Collection<String> newColumnNames,
+                Throwables.BiConsumer<T, Object[], E> output) throws E {
             val.divideColumn(columnName, newColumnNames, output);
 
             return this;

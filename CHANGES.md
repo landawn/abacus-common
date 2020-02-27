@@ -1,3 +1,9 @@
+### 1.20.10
+
+* Add `N.moveRange/replaceRange`.
+* Improvements and bug fix.
+
+
 ### 1.20.9
 
 * Add `JsonXmlConfig`.

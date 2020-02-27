@@ -2289,8 +2289,9 @@ public final class Fn extends Comparators {
      * @param <T>
      * @param c
      * @return
+     * @throws IllegalArgumentException if the specified {@code c} is null or empty.
      */
-    public static <T> Predicate<T> and(final Collection<Predicate<? super T>> c) {
+    public static <T> Predicate<T> and(final Collection<Predicate<? super T>> c) throws IllegalArgumentException {
         N.checkArgNotNullOrEmpty(c, "c");
 
         return new Predicate<T>() {
@@ -2356,8 +2357,9 @@ public final class Fn extends Comparators {
      * @param <U>
      * @param c
      * @return
+     * @throws IllegalArgumentException if the specified {@code c} is null or empty.
      */
-    public static <T, U> BiPredicate<T, U> and(final List<BiPredicate<? super T, ? super U>> c) {
+    public static <T, U> BiPredicate<T, U> and(final List<BiPredicate<? super T, ? super U>> c) throws IllegalArgumentException {
         N.checkArgNotNullOrEmpty(c, "c");
 
         return new BiPredicate<T, U>() {
@@ -2457,8 +2459,9 @@ public final class Fn extends Comparators {
      * @param <T>
      * @param c
      * @return
+     * @throws IllegalArgumentException if the specified {@code c} is null or empty.
      */
-    public static <T> Predicate<T> or(final Collection<Predicate<? super T>> c) {
+    public static <T> Predicate<T> or(final Collection<Predicate<? super T>> c) throws IllegalArgumentException {
         N.checkArgNotNullOrEmpty(c, "c");
 
         return new Predicate<T>() {
@@ -2524,8 +2527,9 @@ public final class Fn extends Comparators {
      * @param <U>
      * @param c
      * @return
+     * @throws IllegalArgumentException if the specified {@code c} is null or empty.
      */
-    public static <T, U> BiPredicate<T, U> or(final List<BiPredicate<? super T, ? super U>> c) {
+    public static <T, U> BiPredicate<T, U> or(final List<BiPredicate<? super T, ? super U>> c) throws IllegalArgumentException {
         N.checkArgNotNullOrEmpty(c, "c");
 
         return new BiPredicate<T, U>() {

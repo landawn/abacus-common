@@ -491,9 +491,10 @@ class CommonUtil {
      * @param <T>
      * @param typeName
      * @return
+     * @throws IllegalArgumentException if the specified <code>typeName</code> is <code>null</code>.
      */
     @SuppressWarnings("unchecked")
-    public static <T> Type<T> typeOf(final String typeName) {
+    public static <T> Type<T> typeOf(final String typeName) throws IllegalArgumentException {
         N.checkArgNotNull(typeName, "typeName");
 
         Type<?> type = nameTypePool.get(typeName);
@@ -512,9 +513,10 @@ class CommonUtil {
      * @param <T>
      * @param cls
      * @return
+     * @throws IllegalArgumentException if the specified {@code Class} is <code>null</code>.
      */
     @SuppressWarnings("unchecked")
-    public static <T> Type<T> typeOf(final Class<?> cls) {
+    public static <T> Type<T> typeOf(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, "cls");
 
         Type<?> type = clsTypePool.get(cls);
@@ -2354,8 +2356,9 @@ class CommonUtil {
      * @param c
      * @param a
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
      */
-    public static <A, T extends A> A[] toArray(final Collection<T> c, final A[] a) {
+    public static <A, T extends A> A[] toArray(final Collection<T> c, final A[] a) throws IllegalArgumentException {
         CommonUtil.checkArgNotNull(a);
 
         if (CommonUtil.isNullOrEmpty(c)) {
@@ -2374,8 +2377,9 @@ class CommonUtil {
      * @param toIndex
      * @param a
      * @return
+     * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
      */
-    public static <A, T extends A> A[] toArray(final Collection<T> c, final int fromIndex, final int toIndex, final A[] a) {
+    public static <A, T extends A> A[] toArray(final Collection<T> c, final int fromIndex, final int toIndex, final A[] a) throws IllegalArgumentException {
         CommonUtil.checkFromToIndex(fromIndex, toIndex, size(c));
         CommonUtil.checkArgNotNull(a);
 
@@ -2468,8 +2472,9 @@ class CommonUtil {
      * @param targetClass
      * @param c
      * @return
+     * @throws IllegalArgumentException if the specified {@code Class} is <code>null</code>.
      */
-    public static <A, T extends A> A[] toArray(final Class<A[]> targetClass, final Collection<T> c) {
+    public static <A, T extends A> A[] toArray(final Class<A[]> targetClass, final Collection<T> c) throws IllegalArgumentException {
         CommonUtil.checkArgNotNull(targetClass);
 
         if (CommonUtil.isNullOrEmpty(c)) {
@@ -2488,8 +2493,10 @@ class CommonUtil {
      * @param fromIndex
      * @param toIndex
      * @return
+     * @throws IllegalArgumentException if the specified {@code Class} is <code>null</code>.
      */
-    public static <A, T extends A> A[] toArray(final Class<A[]> targetClass, final Collection<T> c, final int fromIndex, final int toIndex) {
+    public static <A, T extends A> A[] toArray(final Class<A[]> targetClass, final Collection<T> c, final int fromIndex, final int toIndex)
+            throws IllegalArgumentException {
         CommonUtil.checkArgNotNull(targetClass);
         CommonUtil.checkFromToIndex(fromIndex, toIndex, size(c));
 

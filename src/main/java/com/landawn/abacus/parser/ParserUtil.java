@@ -512,10 +512,13 @@ public final class ParserUtil {
 
                 propInfos[i++] = propInfo;
                 propInfoMap.put(propName, propInfo);
+                String jsonTagName = null;
 
                 for (JsonNameTag nameTag : propInfo.jsonNameTags) {
-                    if (!propInfoMap.containsKey(new String(nameTag.name))) {
-                        propInfoMap.put(new String(nameTag.name), propInfo);
+                    jsonTagName = new String(nameTag.name);
+
+                    if (!propInfoMap.containsKey(jsonTagName)) {
+                        propInfoMap.put(jsonTagName, propInfo);
                     }
                 }
 
