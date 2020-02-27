@@ -69,7 +69,12 @@ public final class PropertiesUtil {
     private static final String TYPE = "type";
 
     /** The Constant xsc. */
-    private static final XMLSerializationConfig xsc = XSC.of(true, true, DateTimeFormat.ISO_8601_DATETIME, Exclusion.NONE, null);
+    private static final XMLSerializationConfig xsc = XSC.create()
+            .setTagByPropertyName(true)
+            .setIgnoreTypeInfo(true)
+            .setDateTimeFormat(DateTimeFormat.ISO_8601_DATETIME)
+            .setExclusion(Exclusion.NONE)
+            .setIgnoredPropNames((Map<Class<?>, Collection<String>>) null);
 
     /** The Constant scheduledExecutor. */
     private static final ScheduledExecutorService scheduledExecutor;
