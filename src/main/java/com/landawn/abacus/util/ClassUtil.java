@@ -935,7 +935,7 @@ public final class ClassUtil {
     public static String getParameterizedTypeNameByMethod(final Method method) {
         final java.lang.reflect.Type[] genericParameterTypes = method.getGenericParameterTypes();
 
-        if (N.notNullOrDefault(genericParameterTypes)) {
+        if (N.notNullOrEmpty(genericParameterTypes)) {
             return formatParameterizedTypeName(genericParameterTypes[0].toString());
         } else {
             return formatParameterizedTypeName(method.getGenericReturnType().toString());

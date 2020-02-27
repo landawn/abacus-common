@@ -71,6 +71,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import com.landawn.abacus.DataSet;
 import com.landawn.abacus.DirtyMarker;
+import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.NullSafe;
 import com.landawn.abacus.core.DirtyMarkerUtil;
 import com.landawn.abacus.core.MapEntity;
@@ -8159,8 +8161,12 @@ class CommonUtil {
      *
      * @param s
      * @return true, if is null or default
+     * @deprecated internal only
      */
-    public static boolean isNullOrDefault(final Object value) {
+    @Deprecated
+    @Internal
+    @Beta
+     static boolean isNullOrDefault(final Object value) {
         return (value == null) || equals(value, defaultValueOf(value.getClass()));
     }
 
@@ -8362,8 +8368,12 @@ class CommonUtil {
      *
      * @param s
      * @return true, if it's not null or default
+     * @deprecated internal only
      */
-    public static boolean notNullOrDefault(final Object value) {
+    @Deprecated
+    @Internal
+    @Beta
+     static boolean notNullOrDefault(final Object value) {
         return (value != null) && !equals(value, defaultValueOf(value.getClass()));
     }
 

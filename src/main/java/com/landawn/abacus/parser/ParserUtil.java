@@ -129,7 +129,7 @@ public final class ParserUtil {
             // ignore
         }
 
-        if (jsonXmlConfig != null && N.notNullOrDefault(jsonXmlConfig.ignoredFields())) {
+        if (jsonXmlConfig != null && N.notNullOrEmpty(jsonXmlConfig.ignoredFields())) {
             String fieldName = field.getName();
 
             for (String ignoreFieldName : jsonXmlConfig.ignoredFields()) {
@@ -275,7 +275,7 @@ public final class ParserUtil {
                     // ignore
                 }
 
-                if (N.isNullOrDefault(jsonXmlFieldName)) {
+                if (N.isNullOrEmpty(jsonXmlFieldName)) {
                     try {
                         if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonProperty.class)
                                 && N.notNullOrEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value())) {
@@ -291,7 +291,7 @@ public final class ParserUtil {
         final JsonNameTag[] result = new JsonNameTag[NamingPolicy.values().length];
 
         for (NamingPolicy np : NamingPolicy.values()) {
-            result[np.ordinal()] = new JsonNameTag(N.isNullOrDefault(jsonXmlFieldName) ? convertName(propName, np) : jsonXmlFieldName);
+            result[np.ordinal()] = new JsonNameTag(N.isNullOrEmpty(jsonXmlFieldName) ? convertName(propName, np) : jsonXmlFieldName);
         }
 
         return result;
@@ -313,7 +313,7 @@ public final class ParserUtil {
                     // ignore
                 }
 
-                if (N.isNullOrDefault(jsonXmlFieldName)) {
+                if (N.isNullOrEmpty(jsonXmlFieldName)) {
                     try {
                         if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonProperty.class)
                                 && N.notNullOrEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value())) {
@@ -329,7 +329,7 @@ public final class ParserUtil {
         final XmlNameTag[] result = new XmlNameTag[NamingPolicy.values().length];
 
         for (NamingPolicy np : NamingPolicy.values()) {
-            result[np.ordinal()] = new XmlNameTag(N.isNullOrDefault(jsonXmlFieldName) ? convertName(propName, np) : jsonXmlFieldName, typeName, isEntity);
+            result[np.ordinal()] = new XmlNameTag(N.isNullOrEmpty(jsonXmlFieldName) ? convertName(propName, np) : jsonXmlFieldName, typeName, isEntity);
         }
 
         return result;

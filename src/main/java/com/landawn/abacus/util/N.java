@@ -7544,157 +7544,157 @@ public final class N extends CommonUtil {
         return InternalUtil.newString(a, true);
     }
 
-    /**
-     * Return a new array copy.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @return a new array.
-     */
-    public static boolean[] copyThenMoveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
-
-        final boolean[] copy = N.isNullOrEmpty(a) ? a : a.clone();
-
-        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
-
-        return copy;
-    }
-
-    /**
-     * Return a new array copy.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @return a new array.
-     */
-    public static char[] copyThenMoveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
-
-        final char[] copy = N.isNullOrEmpty(a) ? a : a.clone();
-
-        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
-
-        return copy;
-    }
-
-    /**
-     * Return a new array copy.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @return a new array.
-     */
-    public static byte[] copyThenMoveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
-
-        final byte[] copy = N.isNullOrEmpty(a) ? a : a.clone();
-
-        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
-
-        return copy;
-    }
-
-    /**
-     * Return a new array copy.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @return a new array.
-     */
-    public static short[] copyThenMoveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
-
-        final short[] copy = N.isNullOrEmpty(a) ? a : a.clone();
-
-        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
-
-        return copy;
-    }
-
-    /**
-     * Return a new array copy.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @return a new array.
-     */
-    public static int[] copyThenMoveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
-
-        final int[] copy = N.isNullOrEmpty(a) ? a : a.clone();
-
-        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
-
-        return copy;
-    }
-
-    /**
-     * Return a new array copy.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @return a new array.
-     */
-    public static long[] copyThenMoveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
-
-        final long[] copy = N.isNullOrEmpty(a) ? a : a.clone();
-
-        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
-
-        return copy;
-    }
-
-    /**
-     * Return a new array copy.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @return a new array.
-     */
-    public static double[] copyThenMoveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
-
-        final double[] copy = N.isNullOrEmpty(a) ? a : a.clone();
-
-        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
-
-        return copy;
-    }
-
-    /**
-     * Return a new array copy.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-     * @return a new array.
-     */
-    public static <T> T[] copyThenMoveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
-
-        final T[] copy = N.isNullOrEmpty(a) ? a : a.clone();
-
-        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
-
-        return copy;
-    }
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static boolean[] copyThenMoveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final boolean[] copy = N.isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static char[] copyThenMoveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final char[] copy = N.isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static byte[] copyThenMoveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final byte[] copy = N.isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static short[] copyThenMoveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final short[] copy = N.isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static int[] copyThenMoveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final int[] copy = N.isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static long[] copyThenMoveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final long[] copy = N.isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static double[] copyThenMoveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final double[] copy = N.isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static <T> T[] copyThenMoveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final T[] copy = N.isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
 
     private static void checkIndexAndStartPositionForMoveRange(final int fromIndex, final int toIndex, final int newPositionStartIndex, final int len) {
         checkFromToIndex(fromIndex, toIndex, len);
