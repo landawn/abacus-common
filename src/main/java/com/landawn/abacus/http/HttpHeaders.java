@@ -20,6 +20,7 @@ import java.util.Set;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.function.BiConsumer;
 
 /**
  * The Class HttpHeaders.
@@ -548,14 +549,13 @@ public final class HttpHeaders {
         return new HttpHeaders(new HashMap<>(headers));
     }
 
-    /**
-     * Sets the accept charset.
+    /** 
      *
-     * @param acceptCharset
+     * @param value
      * @return
      */
-    public HttpHeaders setAcceptCharset(String acceptCharset) {
-        set(Names.ACCEPT_CHARSET, acceptCharset);
+    public HttpHeaders setAccept(String value) {
+        set(Names.ACCEPT, value);
 
         return this;
     }
@@ -568,6 +568,18 @@ public final class HttpHeaders {
      */
     public HttpHeaders setAcceptEncoding(String acceptEncoding) {
         set(Names.ACCEPT_ENCODING, acceptEncoding);
+
+        return this;
+    }
+
+    /**
+     * Sets the accept charset.
+     *
+     * @param acceptCharset
+     * @return
+     */
+    public HttpHeaders setAcceptCharset(String acceptCharset) {
+        set(Names.ACCEPT_CHARSET, acceptCharset);
 
         return this;
     }
@@ -672,6 +684,72 @@ public final class HttpHeaders {
         return this;
     }
 
+    /** 
+     *
+     * @param value
+     * @return
+     */
+    public HttpHeaders setAuthorization(String value) {
+        set(Names.AUTHORIZATION, value);
+
+        return this;
+    }
+
+    /** 
+     *
+     * @param value
+     * @return
+     */
+    public HttpHeaders setProxyAuthorization(String value) {
+        set(Names.PROXY_AUTHORIZATION, value);
+
+        return this;
+    }
+
+    /** 
+     *
+     * @param value
+     * @return
+     */
+    public HttpHeaders setCacheControl(String value) {
+        set(Names.CACHE_CONTROL, value);
+
+        return this;
+    }
+
+    /** 
+     *
+     * @param value
+     * @return
+     */
+    public HttpHeaders setConnection(String value) {
+        set(Names.CONNECTION, value);
+
+        return this;
+    }
+
+    /** 
+     *
+     * @param value
+     * @return
+     */
+    public HttpHeaders setHost(String value) {
+        set(Names.HOST, value);
+
+        return this;
+    }
+
+    /** 
+     *
+     * @param value
+     * @return
+     */
+    public HttpHeaders setFrom(String value) {
+        set(Names.FROM, value);
+
+        return this;
+    }
+
     /**
      *
      * @param name
@@ -721,6 +799,14 @@ public final class HttpHeaders {
      */
     public Set<String> headerNameSet() {
         return map.keySet();
+    }
+
+    /**
+     * 
+     * @param action
+     */
+    public void forEach(final BiConsumer<String, Object> action) {
+        map.forEach(action);
     }
 
     /**

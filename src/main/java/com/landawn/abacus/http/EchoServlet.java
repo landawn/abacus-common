@@ -123,7 +123,8 @@ public class EchoServlet extends AbstractHttpServlet {
      * @throws UncheckedIOException the unchecked IO exception
      */
     protected void execute(HttpServletRequest request, HttpServletResponse response) throws UncheckedIOException {
-        final ContentFormat contentFormat = getContentFormat(request);
+        final ContentFormat requestContentFormat = getRequestContentFormat(request);
+        final ContentFormat responseContentFormat = getResponseContentFormat(request);
         Map<String, String[]> paramMap = null;
         Charset charset = Charsets.UTF_8;
         InputStream is = null;
@@ -152,12 +153,12 @@ public class EchoServlet extends AbstractHttpServlet {
                 paramMap = request.getParameterMap();
 
                 if (N.isNullOrEmpty(paramMap)) {
-                    is = getInputStream(request, contentFormat);
-                    os = getOutputStream(response, contentFormat);
+                    is = getInputStream(request, requestContentFormat);
+                    os = getOutputStream(response, responseContentFormat);
                 }
             } else {
-                is = getInputStream(request, contentFormat);
-                os = getOutputStream(response, contentFormat);
+                is = getInputStream(request, requestContentFormat);
+                os = getOutputStream(response, responseContentFormat);
 
                 paramMap = request.getParameterMap();
             }

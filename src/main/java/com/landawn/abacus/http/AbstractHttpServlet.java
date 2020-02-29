@@ -36,9 +36,9 @@ import com.landawn.abacus.util.N;
  * @since 0.8
  */
 public abstract class AbstractHttpServlet extends HttpServlet {
-
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -6025259563199941531L;
+
+    private static final ContentFormat DEFAULT_CONTENT_FORMAT = ContentFormat.JSON;
 
     /**
      *
@@ -75,19 +75,33 @@ public abstract class AbstractHttpServlet extends HttpServlet {
         return N.notNullOrEmpty(contentType) && contentType.indexOf(URL_ENCODED) >= 0;
     }
 
-    /**
-     * Gets the content format.
-     *
-     * @param request
-     * @return
-     */
-    protected ContentFormat getContentFormat(HttpServletRequest request) {
+    protected ContentFormat getRequestContentFormat(HttpServletRequest request) {
         String contentType = request.getHeader(HttpHeaders.Names.CONTENT_TYPE);
         String contentEncoding = request.getHeader(HttpHeaders.Names.CONTENT_ENCODING);
 
+        return getContentFormat(contentType, contentEncoding);
+    }
+
+    protected ContentFormat getResponseContentFormat(HttpServletRequest request) {
+        String accept = request.getHeader(HttpHeaders.Names.ACCEPT);
+
+        if (N.isNullOrEmpty(accept)) {
+            accept = request.getHeader(HttpHeaders.Names.CONTENT_TYPE);
+        }
+
+        String acceptEncoding = request.getHeader(HttpHeaders.Names.ACCEPT_ENCODING);
+
+        if (N.isNullOrEmpty(acceptEncoding)) {
+            acceptEncoding = request.getHeader(HttpHeaders.Names.CONTENT_ENCODING);
+        }
+
+        return getContentFormat(accept, acceptEncoding);
+    }
+
+    protected ContentFormat getContentFormat(final String contentType, final String contentEncoding) {
         ContentFormat contentFormat = HTTP.getContentFormat(contentType, contentEncoding);
 
-        return contentFormat == null || contentFormat == ContentFormat.NONE ? ContentFormat.JSON : contentFormat;
+        return contentFormat == null || contentFormat == ContentFormat.NONE ? DEFAULT_CONTENT_FORMAT : contentFormat;
     }
 
     /**

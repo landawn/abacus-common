@@ -297,7 +297,8 @@ public final class HttpClient extends AbstractHttpClient {
     private <T> T execute(final Class<T> resultClass, final OutputStream outputStream, final Writer outputWriter, final HttpMethod httpMethod,
             final Object request, final HttpSettings settings) throws UncheckedIOException {
         final ContentFormat requestContentFormat = getContentFormat(settings);
-        final HttpURLConnection connection = openConnection(httpMethod, request, request != null, settings);
+        final boolean doOutput = request != null && !(httpMethod.equals(HttpMethod.GET) || httpMethod.equals(HttpMethod.DELETE));
+        final HttpURLConnection connection = openConnection(httpMethod, request, doOutput, settings);
         final Charset requestCharset = HTTP.getCharset(settings == null || settings.headers().isEmpty() ? _settings.headers() : settings.headers());
         final long sentRequestAtMillis = System.currentTimeMillis();
         InputStream is = null;

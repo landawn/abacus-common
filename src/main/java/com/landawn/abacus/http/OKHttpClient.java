@@ -391,9 +391,11 @@ public final class OKHttpClient extends AbstractHttpClient {
         boolean closeOkHttpResponse = true;
 
         try {
-            final okhttp3.Request.Builder requestBuilder = new okhttp3.Request.Builder()
-                    .url((request != null && (httpMethod.equals(HttpMethod.GET) || httpMethod.equals(HttpMethod.DELETE))) ? URLEncodedUtil.encode(_url, request)
-                            : _url);
+            final String url = (request != null && (httpMethod.equals(HttpMethod.GET) || httpMethod.equals(HttpMethod.DELETE)))
+                    ? URLEncodedUtil.encode(_url, request)
+                    : _url;
+
+            final okhttp3.Request.Builder requestBuilder = new okhttp3.Request.Builder().url(url);
 
             setHeaders(requestBuilder, settings == null ? _settings : settings);
 

@@ -59,4 +59,28 @@ public class HttpRequest extends AbstractHttpRequest<HttpRequest> {
     public static HttpRequest url(final String url, final long connTimeout, final long readTimeout) {
         return new HttpRequest(HttpClient.create(url, 1, connTimeout, readTimeout));
     }
+
+    public HttpRequest connectionTimeout(int connTimeout) {
+        checkSettings();
+
+        settings.setConnectionTimeout(connTimeout);
+
+        return this;
+    }
+
+    public HttpRequest readTimeout(int readTimeout) {
+        checkSettings();
+
+        settings.setReadTimeout(readTimeout);
+
+        return this;
+    }
+
+    public HttpRequest useCaches(boolean useCaches) {
+        checkSettings();
+
+        settings.setUseCaches(useCaches);
+
+        return this;
+    }
 }

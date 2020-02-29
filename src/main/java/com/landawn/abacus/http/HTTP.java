@@ -38,6 +38,8 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.LZ4BlockOutputStream;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.ObjectPool;
+import com.landawn.abacus.util.StringUtil;
+import com.landawn.abacus.util.WD;
 
 /**
  * The Class HTTP.
@@ -47,6 +49,7 @@ import com.landawn.abacus.util.ObjectPool;
  */
 @Internal
 public final class HTTP {
+    static final Charset DEFAULT_CHARSET = Charsets.UTF_8;
 
     /** The Constant JSON. */
     static final String JSON = "json";
@@ -142,13 +145,13 @@ public final class HTTP {
                 contentTypeEncoding2Format.put(entry.getValue(), contentEncoding2Format);
             }
 
-            if (entry.getKey().name().contains("GZIP")) {
+            if (StringUtil.containsIgnoreCase(entry.getKey().name(), GZIP)) {
                 contentEncoding2Format.put(GZIP, entry.getKey());
-            } else if (entry.getKey().name().contains("SNAPPY")) {
+            } else if (StringUtil.containsIgnoreCase(entry.getKey().name(), SNAPPY)) {
                 contentEncoding2Format.put(SNAPPY, entry.getKey());
-            } else if (entry.getKey().name().contains("LZ4")) {
+            } else if (StringUtil.containsIgnoreCase(entry.getKey().name(), LZ4)) {
                 contentEncoding2Format.put(LZ4, entry.getKey());
-            } else if (entry.getKey().name().contains("KRYO")) {
+            } else if (StringUtil.containsIgnoreCase(entry.getKey().name(), KRYO)) {
                 contentEncoding2Format.put(KRYO, entry.getKey());
                 contentEncoding2Format.put(N.EMPTY_STRING, entry.getKey());
             } else {
@@ -217,18 +220,44 @@ public final class HTTP {
         Map<String, ContentFormat> contentEncoding2Format = contentTypeEncoding2Format.get(contentType);
 
         if (contentEncoding2Format == null) {
-            if (contentType.contains("json")) {
+            if (StringUtil.containsIgnoreCase(contentType, HttpHeaders.Values.APPLICATION_JSON)) {
                 contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_JSON);
-            } else if (contentType.contains("xml")) {
+            } else if (StringUtil.containsIgnoreCase(contentType, HttpHeaders.Values.APPLICATION_XML)) {
                 contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_XML);
-            } else if (contentType.contains("kryo")) {
+            } else if (StringUtil.containsIgnoreCase(contentType, HttpHeaders.Values.APPLICATION_KRYO)) {
+                contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_KRYO);
+            }
+        }
+
+        if (contentEncoding2Format == null) {
+            if (StringUtil.containsIgnoreCase(contentType, JSON)) {
+                contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_JSON);
+            } else if (StringUtil.containsIgnoreCase(contentType, XML)) {
+                contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_XML);
+            } else if (StringUtil.containsIgnoreCase(contentType, KRYO)) {
                 contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_KRYO);
             } else {
                 contentEncoding2Format = contentTypeEncoding2Format.get(N.EMPTY_STRING);
             }
         }
 
-        return N.defaultIfNull(contentEncoding2Format.get(contentEncoding), ContentFormat.NONE);
+        ContentFormat contentFormat = contentEncoding2Format.get(contentEncoding);
+
+        if (contentFormat == null) {
+            if (StringUtil.containsIgnoreCase(contentEncoding, GZIP)) {
+                contentFormat = contentEncoding2Format.get(GZIP);
+            } else if (StringUtil.containsIgnoreCase(contentEncoding, SNAPPY)) {
+                contentFormat = contentEncoding2Format.get(SNAPPY);
+            } else if (StringUtil.containsIgnoreCase(contentEncoding, LZ4)) {
+                contentFormat = contentEncoding2Format.get(LZ4);
+            } else if (StringUtil.containsIgnoreCase(contentEncoding, KRYO)) {
+                contentFormat = contentEncoding2Format.get(KRYO);
+            } else {
+                contentFormat = contentEncoding2Format.get(N.EMPTY_STRING);
+            }
+        }
+
+        return contentFormat == null ? ContentFormat.NONE : contentFormat;
     }
 
     /**
@@ -275,11 +304,13 @@ public final class HTTP {
             return is;
         }
 
-        if (contentFormat.name().contains("GZIP")) {
+        final String contentFormatName = contentFormat.name();
+
+        if (StringUtil.containsIgnoreCase(contentFormatName, GZIP)) {
             return IOUtil.newGZIPInputStream(is);
-        } else if (contentFormat.name().contains("SNAPPY")) {
+        } else if (StringUtil.containsIgnoreCase(contentFormatName, SNAPPY)) {
             return IOUtil.newSnappyInputStream(is);
-        } else if (contentFormat.name().contains("LZ4")) {
+        } else if (StringUtil.containsIgnoreCase(contentFormatName, LZ4)) {
             return IOUtil.newLZ4BlockInputStream(is);
         } else {
             return is;
@@ -298,11 +329,13 @@ public final class HTTP {
             return os;
         }
 
-        if (contentFormat.name().contains("GZIP")) {
+        final String contentFormatName = contentFormat.name();
+
+        if (StringUtil.containsIgnoreCase(contentFormatName, GZIP)) {
             return IOUtil.newGZIPOutputStream(os);
-        } else if (contentFormat.name().contains("SNAPPY")) {
+        } else if (StringUtil.containsIgnoreCase(contentFormatName, SNAPPY)) {
             return IOUtil.newSnappyOutputStream(os);
-        } else if (contentFormat.name().contains("LZ4")) {
+        } else if (StringUtil.containsIgnoreCase(contentFormatName, LZ4)) {
             return IOUtil.newLZ4BlockOutputStream(os);
         } else {
             return os;
@@ -418,71 +451,67 @@ public final class HTTP {
         os.flush();
     }
 
-    /**
-     * Gets the charset.
-     *
-     * @param headers
-     * @return
-     */
     public static Charset getCharset(HttpHeaders headers) {
-        Charset charset = Charsets.UTF_8;
+        Charset charset = null;
 
         if (headers != null && headers.headerNameSet().contains(HttpHeaders.Names.CONTENT_TYPE)) {
             String contentType = N.stringOf(headers.get(HttpHeaders.Names.CONTENT_TYPE));
 
-            if (N.notNullOrEmpty(contentType) && contentType.indexOf("charset=") >= 0) {
-                charset = getCharset(contentType);
+            if (N.notNullOrEmpty(contentType)) {
+                charset = getCharset(contentType, null);
             }
         }
 
-        return charset;
+        return charset == null ? DEFAULT_CHARSET : charset;
     }
 
-    /**
-     * Gets the charset.
-     *
-     * @param headers
-     * @return
-     */
     public static Charset getCharset(Map<String, ?> headers) {
-        Charset charset = Charsets.UTF_8;
+        Charset charset = null;
 
         if (headers != null && headers.containsKey(HttpHeaders.Names.CONTENT_TYPE)) {
             final Object values = headers.get(HttpHeaders.Names.CONTENT_TYPE);
 
             if (values instanceof Collection) {
                 for (String contentType : ((Collection<String>) values)) {
-                    if (N.notNullOrEmpty(contentType) && contentType.indexOf("charset=") >= 0) {
-                        charset = getCharset(contentType);
-                        break;
+                    if (N.notNullOrEmpty(contentType)) {
+                        charset = getCharset(contentType, null);
+
+                        if (charset != null) {
+                            break;
+                        }
                     }
                 }
             } else {
-                final String str = N.stringOf(values);
+                final String contentType = N.stringOf(values);
 
-                if (N.notNullOrEmpty(str) && str.indexOf("charset=") >= 0) {
-                    charset = getCharset(str);
+                if (N.notNullOrEmpty(contentType)) {
+                    charset = getCharset(contentType, null);
                 }
             }
         }
 
-        return charset;
+        return charset == null ? DEFAULT_CHARSET : charset;
     }
 
-    /**
-     * Gets the charset.
-     *
-     * @param contentType
-     * @return
-     */
     public static Charset getCharset(String contentType) {
-        if (N.notNullOrEmpty(contentType)) {
-            return Charsets.UTF_8;
+        return getCharset(contentType, DEFAULT_CHARSET);
+    }
+
+    private static final String CHARSET_SEQUAL = "charset=";
+
+    private static Charset getCharset(final String contentType, final Charset defaultIfNull) {
+        if (N.isNullOrEmpty(contentType)) {
+            return defaultIfNull;
         }
 
-        int fromIndex = contentType.indexOf("charset=");
-        int toIndex = contentType.indexOf(';', fromIndex);
+        int fromIndex = StringUtil.indexOfIgnoreCase(contentType, CHARSET_SEQUAL);
 
-        return Charsets.get(contentType.substring(fromIndex + "charset=".length(), toIndex > 0 ? toIndex : contentType.length()));
+        if (fromIndex < 0) {
+            return defaultIfNull;
+        }
+
+        int toIndex = contentType.indexOf(WD._SEMICOLON, fromIndex);
+
+        return Charsets.get(contentType.substring(fromIndex + CHARSET_SEQUAL.length(), toIndex > 0 ? toIndex : contentType.length()));
     }
 }

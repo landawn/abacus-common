@@ -544,7 +544,8 @@ public class WebServiceServlet extends AbstractHttpServlet {
                 }
             }
 
-            final ContentFormat contentFormat = getContentFormat(request);
+            final ContentFormat requestContentFormat = getRequestContentFormat(request);
+            final ContentFormat responseContentFormat = getResponseContentFormat(request);
 
             if (N.notNullOrEmpty(encryptionUserName) && N.notNullOrEmpty(encryptionPassword)) {
                 if (((SecurityDTO) parameter).decrypt(encryptionUserName, encryptionPassword, encryptionMessage) == false) {
@@ -568,13 +569,14 @@ public class WebServiceServlet extends AbstractHttpServlet {
                         ClassUtil.setPropValue(result, respMessageSetMethod, "Security issue: Invalid request.");
                     }
 
-                    postExecute(response, result, method, parameter, contentFormat);
-                    setResponse(response, result, contentFormat);
+                    postExecute(response, result, method, parameter, requestContentFormat);
+
+                    setResponse(response, result, responseContentFormat);
                     return;
                 }
             }
 
-            switch (contentFormat) {
+            switch (requestContentFormat) {
                 case JSON:
                 case JSON_LZ4:
                 case JSON_SNAPPY:
@@ -593,7 +595,7 @@ public class WebServiceServlet extends AbstractHttpServlet {
                             if (parameterClass == null) {
                                 result = ClassUtil.invokeMethod(serviceImpl, method);
                             } else {
-                                is = getInputStream(request, contentFormat);
+                                is = getInputStream(request, requestContentFormat);
                                 Type<Object> paramType = N.typeOf(parameterClass);
                                 boolean hasFieldAnnotation = parameterClass == Map.class && methodParameterNamesMap.containsKey(method.getName());
 
@@ -633,9 +635,9 @@ public class WebServiceServlet extends AbstractHttpServlet {
                         }
                     }
 
-                    postExecute(response, result, method, parameter, contentFormat);
+                    postExecute(response, result, method, parameter, requestContentFormat);
 
-                    setResponse(response, result, contentFormat);
+                    setResponse(response, result, responseContentFormat);
 
                     break;
 
@@ -645,7 +647,7 @@ public class WebServiceServlet extends AbstractHttpServlet {
                 case XML_GZIP:
 
                     if (method == null) {
-                        is = getInputStream(request, contentFormat);
+                        is = getInputStream(request, requestContentFormat);
                         parameter = xmlParser.deserialize(eleNameParameterClassMap, is, null);
                         method = parameterMethodMap.get(ClassUtil.getSimpleClassName(parameter.getClass()));
 
@@ -665,7 +667,7 @@ public class WebServiceServlet extends AbstractHttpServlet {
                             if (parameterClass == null) {
                                 result = ClassUtil.invokeMethod(serviceImpl, method);
                             } else {
-                                is = getInputStream(request, contentFormat);
+                                is = getInputStream(request, requestContentFormat);
                                 boolean hasFieldAnnotation = parameterClass == Map.class && methodParameterNamesMap.containsKey(method.getName());
 
                                 if (hasFieldAnnotation) {
@@ -691,9 +693,9 @@ public class WebServiceServlet extends AbstractHttpServlet {
                         }
                     }
 
-                    postExecute(response, result, method, parameter, contentFormat);
+                    postExecute(response, result, method, parameter, requestContentFormat);
 
-                    setResponse(response, result, contentFormat);
+                    setResponse(response, result, responseContentFormat);
 
                     break;
 
@@ -712,7 +714,7 @@ public class WebServiceServlet extends AbstractHttpServlet {
                             if (parameterClass == null) {
                                 result = ClassUtil.invokeMethod(serviceImpl, method);
                             } else {
-                                is = getInputStream(request, contentFormat);
+                                is = getInputStream(request, requestContentFormat);
                                 parameter = kryoParser.deserialize(parameterClass, is);
 
                                 final Type<Object> paramType = N.typeOf(parameter.getClass());
@@ -742,14 +744,14 @@ public class WebServiceServlet extends AbstractHttpServlet {
                         }
                     }
 
-                    postExecute(response, result, method, parameter, contentFormat);
+                    postExecute(response, result, method, parameter, requestContentFormat);
 
-                    setResponse(response, result, contentFormat);
+                    setResponse(response, result, responseContentFormat);
 
                     break;
 
                 default:
-                    String msg = "Unsupported content format: " + contentFormat;
+                    String msg = "Unsupported content format: " + requestContentFormat;
                     serviceImplLogger.error(msg);
                     throw new RuntimeException(msg);
             }
@@ -794,10 +796,10 @@ public class WebServiceServlet extends AbstractHttpServlet {
      *
      * @param response
      * @param result
-     * @param contentFormat
+     * @param responseContentFormat
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    protected void setResponse(final HttpServletResponse response, final Object result, final ContentFormat contentFormat) throws IOException {
+    protected void setResponse(final HttpServletResponse response, final Object result, final ContentFormat responseContentFormat) throws IOException {
         if (result == null) {
             return;
         }
@@ -805,9 +807,9 @@ public class WebServiceServlet extends AbstractHttpServlet {
         OutputStream os = null;
 
         try {
-            os = getOutputStream(response, contentFormat);
+            os = getOutputStream(response, responseContentFormat);
 
-            switch (contentFormat) {
+            switch (responseContentFormat) {
                 case JSON:
                 case JSON_LZ4:
                 case JSON_SNAPPY:
@@ -868,7 +870,7 @@ public class WebServiceServlet extends AbstractHttpServlet {
                 }
 
                 default:
-                    String msg = "Unsupported content type: " + contentFormat;
+                    String msg = "Unsupported content type: " + responseContentFormat;
                     serviceImplLogger.error(msg);
                     throw new RuntimeException(msg);
             }
