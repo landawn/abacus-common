@@ -38,9 +38,9 @@ import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.Fn.FnB;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.IndexedByte;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
@@ -1853,5 +1853,11 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
         }
 
         return merge(queue.poll(), queue.poll(), nextSelector);
+    }
+
+    public static abstract class ByteStreamEx extends ByteStream {
+        private ByteStreamEx(boolean sorted, Collection<Runnable> closeHandlers) {
+            super(sorted, closeHandlers);
+        }
     }
 }

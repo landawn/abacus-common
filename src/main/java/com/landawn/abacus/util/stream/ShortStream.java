@@ -35,9 +35,9 @@ import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.Fn.FnS;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.IndexedShort;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
@@ -1758,7 +1758,8 @@ public abstract class ShortStream
      * @param maxThreadNum
      * @return
      */
-    public static ShortStream parallelMerge(final Collection<? extends ShortStream> c, final ShortBiFunction<MergeResult> nextSelector, final int maxThreadNum) {
+    public static ShortStream parallelMerge(final Collection<? extends ShortStream> c, final ShortBiFunction<MergeResult> nextSelector,
+            final int maxThreadNum) {
         N.checkArgument(maxThreadNum > 0, "'maxThreadNum' must not less than 1");
 
         if (maxThreadNum <= 1) {
@@ -1828,5 +1829,11 @@ public abstract class ShortStream
         }
 
         return merge(queue.poll(), queue.poll(), nextSelector);
+    }
+
+    public static abstract class ShortStreamEx extends ShortStream {
+        private ShortStreamEx(boolean sorted, Collection<Runnable> closeHandlers) {
+            super(sorted, closeHandlers);
+        }
     }
 }

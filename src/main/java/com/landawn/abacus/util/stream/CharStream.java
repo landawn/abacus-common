@@ -2129,4 +2129,10 @@ public abstract class CharStream
 
         return merge(queue.poll(), queue.poll(), nextSelector);
     }
+
+    public static abstract class CharStreamEx extends CharStream {
+        private CharStreamEx(boolean sorted, Collection<Runnable> closeHandlers) {
+            super(sorted, closeHandlers);
+        }
+    }
 }

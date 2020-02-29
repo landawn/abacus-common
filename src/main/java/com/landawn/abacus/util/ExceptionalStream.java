@@ -2182,6 +2182,57 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }, closeHandlers);
     }
 
+    //    /**
+    //     * 
+    //     * @param mapper
+    //     * @return
+    //     */
+    //    @IntermediateOp
+    //    public ExceptionalStream<Integer, E> flattMapToInt(final Throwables.Function<? super T, ? extends int[], ? extends E> mapper) {
+    //        final Throwables.Function<T, ExceptionalStream<Integer, E>, E> mapper2 = new Throwables.Function<T, ExceptionalStream<Integer, E>, E>() {
+    //            @Override
+    //            public ExceptionalStream<Integer, E> apply(T t) throws E {
+    //                return ExceptionalStream.of(mapper.apply(t));
+    //            }
+    //        };
+    //
+    //        return flatMap(mapper2);
+    //    }
+    //
+    //    /**
+    //     * 
+    //     * @param mapper
+    //     * @return
+    //     */
+    //    @IntermediateOp
+    //    public ExceptionalStream<Long, E> flattMapToLong(final Throwables.Function<? super T, ? extends long[], ? extends E> mapper) {
+    //        final Throwables.Function<T, ExceptionalStream<Long, E>, E> mapper2 = new Throwables.Function<T, ExceptionalStream<Long, E>, E>() {
+    //            @Override
+    //            public ExceptionalStream<Long, E> apply(T t) throws E {
+    //                return ExceptionalStream.of(mapper.apply(t));
+    //            }
+    //        };
+    //
+    //        return flatMap(mapper2);
+    //    }
+    //
+    //    /**
+    //     * 
+    //     * @param mapper
+    //     * @return
+    //     */
+    //    @IntermediateOp
+    //    public ExceptionalStream<Double, E> flattMapToDouble(final Throwables.Function<? super T, ? extends double[], ? extends E> mapper) {
+    //        final Throwables.Function<T, ExceptionalStream<Double, E>, E> mapper2 = new Throwables.Function<T, ExceptionalStream<Double, E>, E>() {
+    //            @Override
+    //            public ExceptionalStream<Double, E> apply(T t) throws E {
+    //                return ExceptionalStream.of(mapper.apply(t));
+    //            }
+    //        };
+    //
+    //        return flatMap(mapper2);
+    //    }
+
     /**
      *
      * @param <R>

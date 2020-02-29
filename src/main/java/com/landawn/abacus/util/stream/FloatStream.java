@@ -39,9 +39,9 @@ import com.landawn.abacus.util.FloatSummaryStatistics;
 import com.landawn.abacus.util.Fn.FnF;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.IndexedFloat;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
@@ -1553,7 +1553,8 @@ public abstract class FloatStream
      * @param maxThreadNum
      * @return
      */
-    public static FloatStream parallelMerge(final Collection<? extends FloatStream> c, final FloatBiFunction<MergeResult> nextSelector, final int maxThreadNum) {
+    public static FloatStream parallelMerge(final Collection<? extends FloatStream> c, final FloatBiFunction<MergeResult> nextSelector,
+            final int maxThreadNum) {
         N.checkArgument(maxThreadNum > 0, "'maxThreadNum' must not less than 1");
 
         if (maxThreadNum <= 1) {
@@ -1623,5 +1624,11 @@ public abstract class FloatStream
         }
 
         return merge(queue.poll(), queue.poll(), nextSelector);
+    }
+
+    public static abstract class FloatStreamEx extends FloatStream {
+        private FloatStreamEx(boolean sorted, Collection<Runnable> closeHandlers) {
+            super(sorted, closeHandlers);
+        }
     }
 }
