@@ -125,6 +125,8 @@ public class EchoServlet extends AbstractHttpServlet {
     protected void execute(HttpServletRequest request, HttpServletResponse response) throws UncheckedIOException {
         final ContentFormat requestContentFormat = getRequestContentFormat(request);
         final ContentFormat responseContentFormat = getResponseContentFormat(request);
+        final String acceptCharset = request.getHeader(HttpHeaders.Names.ACCEPT_CHARSET);
+
         Map<String, String[]> paramMap = null;
         Charset charset = Charsets.UTF_8;
         InputStream is = null;
@@ -142,7 +144,7 @@ public class EchoServlet extends AbstractHttpServlet {
                     headers.put(headerName, request.getHeader(headerName));
                 }
 
-                charset = HTTP.getCharset(headers);
+                charset = HttpUtil.getCharset(headers);
 
                 logger.info("Request Headers: " + N.toJSON(headers));
             }
@@ -154,11 +156,11 @@ public class EchoServlet extends AbstractHttpServlet {
 
                 if (N.isNullOrEmpty(paramMap)) {
                     is = getInputStream(request, requestContentFormat);
-                    os = getOutputStream(response, responseContentFormat);
+                    os = getOutputStream(response, responseContentFormat, acceptCharset);
                 }
             } else {
                 is = getInputStream(request, requestContentFormat);
-                os = getOutputStream(response, responseContentFormat);
+                os = getOutputStream(response, responseContentFormat, acceptCharset);
 
                 paramMap = request.getParameterMap();
             }

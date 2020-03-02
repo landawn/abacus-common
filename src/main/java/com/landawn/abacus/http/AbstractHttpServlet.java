@@ -14,7 +14,7 @@
 
 package com.landawn.abacus.http;
 
-import static com.landawn.abacus.http.HTTP.URL_ENCODED;
+import static com.landawn.abacus.http.HttpUtil.URL_ENCODED;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -82,7 +82,7 @@ public abstract class AbstractHttpServlet extends HttpServlet {
         return getContentFormat(contentType, contentEncoding);
     }
 
-    protected ContentFormat getResponseContentFormat(HttpServletRequest request) {
+    protected ContentFormat getResponseContentFormat(final HttpServletRequest request) {
         String accept = request.getHeader(HttpHeaders.Names.ACCEPT);
 
         if (N.isNullOrEmpty(accept)) {
@@ -99,7 +99,7 @@ public abstract class AbstractHttpServlet extends HttpServlet {
     }
 
     protected ContentFormat getContentFormat(final String contentType, final String contentEncoding) {
-        ContentFormat contentFormat = HTTP.getContentFormat(contentType, contentEncoding);
+        ContentFormat contentFormat = HttpUtil.getContentFormat(contentType, contentEncoding);
 
         return contentFormat == null || contentFormat == ContentFormat.NONE ? DEFAULT_CONTENT_FORMAT : contentFormat;
     }
@@ -115,7 +115,7 @@ public abstract class AbstractHttpServlet extends HttpServlet {
     protected InputStream getInputStream(HttpServletRequest request, final ContentFormat contentFormat) throws IOException {
         final InputStream is = new UncloseableInputStream(request.getInputStream());
 
-        return N.defaultIfNull(HTTP.wrapInputStream(is, contentFormat), N.emptyInputStream());
+        return N.defaultIfNull(HttpUtil.wrapInputStream(is, contentFormat), N.emptyInputStream());
     }
 
     /**
@@ -123,25 +123,31 @@ public abstract class AbstractHttpServlet extends HttpServlet {
      *
      * @param response
      * @param contentFormat
+     * @param acceptCharset
      * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    protected OutputStream getOutputStream(HttpServletResponse response, ContentFormat contentFormat) throws IOException {
-        final String contentType = HTTP.getContentType(contentFormat);
+    protected OutputStream getOutputStream(final HttpServletResponse response, final ContentFormat contentFormat, final String acceptCharset)
+            throws IOException {
+        final String contentType = HttpUtil.getContentType(contentFormat);
 
         if (N.notNullOrEmpty(contentType)) {
             response.setContentType(contentType);
         }
 
-        final String contentEncoding = HTTP.getContentEncoding(contentFormat);
+        final String contentEncoding = HttpUtil.getContentEncoding(contentFormat);
 
         if (N.notNullOrEmpty(contentEncoding)) {
             response.setHeader(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding);
         }
 
+        if (N.notNullOrEmpty(acceptCharset)) {
+            response.setCharacterEncoding(acceptCharset);
+        }
+
         final OutputStream os = new UncloseableOutputStream(response.getOutputStream());
 
-        return HTTP.wrapOutputStream(os, contentFormat);
+        return HttpUtil.wrapOutputStream(os, contentFormat);
     }
 
     /**
@@ -150,7 +156,7 @@ public abstract class AbstractHttpServlet extends HttpServlet {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     protected void flush(OutputStream os) throws IOException {
-        HTTP.flush(os);
+        HttpUtil.flush(os);
     }
 
     /**

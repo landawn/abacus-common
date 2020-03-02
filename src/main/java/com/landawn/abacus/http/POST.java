@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
 @Documented
 @Target(METHOD)
 @Retention(RUNTIME)
-@RestMethod(value = "POST", hasBody = true)
+@WebService.HttpMethod(WebService.HttpMethod.POST)
 public @interface POST {
 
     /**

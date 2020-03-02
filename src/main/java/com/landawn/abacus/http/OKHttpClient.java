@@ -99,11 +99,11 @@ public final class OKHttpClient extends AbstractHttpClient {
      *
      * @param url
      * @param maxConnection
-     * @param connTimeout
+     * @param connectionTimeout
      * @param readTimeout
      */
-    protected OKHttpClient(String url, int maxConnection, long connTimeout, long readTimeout) {
-        this(url, maxConnection, connTimeout, readTimeout, null);
+    protected OKHttpClient(String url, int maxConnection, long connectionTimeout, long readTimeout) {
+        this(url, maxConnection, connectionTimeout, readTimeout, null);
     }
 
     /**
@@ -111,13 +111,13 @@ public final class OKHttpClient extends AbstractHttpClient {
      *
      * @param url
      * @param maxConnection
-     * @param connTimeout
+     * @param connectionTimeout
      * @param readTimeout
      * @param settings
      * @throws UncheckedIOException the unchecked IO exception
      */
-    protected OKHttpClient(String url, int maxConnection, long connTimeout, long readTimeout, HttpSettings settings) throws UncheckedIOException {
-        this(url, maxConnection, connTimeout, readTimeout, settings, new AtomicInteger(0));
+    protected OKHttpClient(String url, int maxConnection, long connectionTimeout, long readTimeout, HttpSettings settings) throws UncheckedIOException {
+        this(url, maxConnection, connectionTimeout, readTimeout, settings, new AtomicInteger(0));
     }
 
     /**
@@ -125,14 +125,14 @@ public final class OKHttpClient extends AbstractHttpClient {
      *
      * @param url
      * @param maxConnection
-     * @param connTimeout
+     * @param connectionTimeout
      * @param readTimeout
      * @param settings
      * @param sharedActiveConnectionCounter
      */
-    protected OKHttpClient(String url, int maxConnection, long connTimeout, long readTimeout, HttpSettings settings,
+    protected OKHttpClient(String url, int maxConnection, long connectionTimeout, long readTimeout, HttpSettings settings,
             final AtomicInteger sharedActiveConnectionCounter) {
-        super(url, maxConnection, connTimeout, readTimeout, settings);
+        super(url, maxConnection, connectionTimeout, readTimeout, settings);
 
         final SSLSocketFactory ssf = settings == null ? null : settings.getSSLSocketFactory();
         final OkHttpClient.Builder builder = new OkHttpClient.Builder();
@@ -142,7 +142,7 @@ public final class OKHttpClient extends AbstractHttpClient {
         }
 
         this.client = builder.connectionPool(new ConnectionPool(Math.min(8, maxConnection), 5, TimeUnit.MINUTES))
-                .connectTimeout(connTimeout, TimeUnit.MILLISECONDS)
+                .connectTimeout(connectionTimeout, TimeUnit.MILLISECONDS)
                 .readTimeout(readTimeout, TimeUnit.MILLISECONDS)
                 .build();
 
@@ -210,53 +210,54 @@ public final class OKHttpClient extends AbstractHttpClient {
     /**
      *
      * @param url
-     * @param connTimeout
+     * @param connectionTimeout
      * @param readTimeout
      * @return
      */
-    public static OKHttpClient create(String url, long connTimeout, long readTimeout) {
-        return new OKHttpClient(url, DEFAULT_MAX_CONNECTION, connTimeout, readTimeout);
+    public static OKHttpClient create(String url, long connectionTimeout, long readTimeout) {
+        return new OKHttpClient(url, DEFAULT_MAX_CONNECTION, connectionTimeout, readTimeout);
     }
 
     /**
      *
      * @param url
      * @param maxConnection
-     * @param connTimeout
+     * @param connectionTimeout
      * @param readTimeout
      * @return
      */
-    public static OKHttpClient create(String url, int maxConnection, long connTimeout, long readTimeout) {
-        return new OKHttpClient(url, maxConnection, connTimeout, readTimeout);
+    public static OKHttpClient create(String url, int maxConnection, long connectionTimeout, long readTimeout) {
+        return new OKHttpClient(url, maxConnection, connectionTimeout, readTimeout);
     }
 
     /**
      *
      * @param url
      * @param maxConnection
-     * @param connTimeout
+     * @param connectionTimeout
      * @param readTimeout
      * @param settings
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static OKHttpClient create(String url, int maxConnection, long connTimeout, long readTimeout, HttpSettings settings) throws UncheckedIOException {
-        return new OKHttpClient(url, maxConnection, connTimeout, readTimeout, settings);
+    public static OKHttpClient create(String url, int maxConnection, long connectionTimeout, long readTimeout, HttpSettings settings)
+            throws UncheckedIOException {
+        return new OKHttpClient(url, maxConnection, connectionTimeout, readTimeout, settings);
     }
 
     /**
      *
      * @param url
      * @param maxConnection
-     * @param connTimeout
+     * @param connectionTimeout
      * @param readTimeout
      * @param settings
      * @param sharedActiveConnectionCounter
      * @return
      */
-    public static OKHttpClient create(String url, int maxConnection, long connTimeout, long readTimeout, HttpSettings settings,
+    public static OKHttpClient create(String url, int maxConnection, long connectionTimeout, long readTimeout, HttpSettings settings,
             final AtomicInteger sharedActiveConnectionCounter) {
-        return new OKHttpClient(url, maxConnection, connTimeout, readTimeout, settings, sharedActiveConnectionCounter);
+        return new OKHttpClient(url, maxConnection, connectionTimeout, readTimeout, settings, sharedActiveConnectionCounter);
     }
 
     /**
@@ -384,7 +385,7 @@ public final class OKHttpClient extends AbstractHttpClient {
         final ContentFormat requestContentFormat = getContentFormat(settings);
         final String contentType = getContentType(settings);
         final String contentEncoding = getContentEncoding(settings);
-        final Charset requestCharset = HTTP.getCharset(settings == null || settings.headers().isEmpty() ? _settings.headers() : settings.headers());
+        final Charset requestCharset = HttpUtil.getCharset(settings == null || settings.headers().isEmpty() ? _settings.headers() : settings.headers());
 
         okhttp3.Request httpRequest = null;
         okhttp3.Response httpResponse = null;
@@ -418,7 +419,7 @@ public final class OKHttpClient extends AbstractHttpClient {
                 final ByteArrayOutputStream bos = Objectory.createByteArrayOutputStream();
 
                 try {
-                    final OutputStream os = HTTP.wrapOutputStream(bos, requestContentFormat);
+                    final OutputStream os = HttpUtil.wrapOutputStream(bos, requestContentFormat);
 
                     if (request instanceof File) {
                         try (InputStream fileInputStream = new FileInputStream((File) request)) {
@@ -442,13 +443,15 @@ public final class OKHttpClient extends AbstractHttpClient {
                         } else if (request.getClass().equals(byte[].class)) {
                             IOUtil.write(os, (byte[]) request);
                         } else {
-                            if (requestContentFormat == ContentFormat.KRYO && HTTP.kryoParser != null) {
-                                HTTP.kryoParser.serialize(os, request);
+                            if (requestContentFormat == ContentFormat.KRYO && HttpUtil.kryoParser != null) {
+                                HttpUtil.kryoParser.serialize(os, request);
+                            } else if (requestContentFormat == ContentFormat.FormUrlEncoded) {
+                                IOUtil.write(os, URLEncodedUtil.encode(request, requestCharset).getBytes(requestCharset));
                             } else {
                                 final BufferedWriter bw = Objectory.createBufferedWriter(new OutputStreamWriter(os, requestCharset));
 
                                 try {
-                                    HTTP.getParser(requestContentFormat).serialize(bw, request);
+                                    HttpUtil.getParser(requestContentFormat).serialize(bw, request);
 
                                     bw.flush();
                                 } finally {
@@ -458,7 +461,7 @@ public final class OKHttpClient extends AbstractHttpClient {
                         }
                     }
 
-                    HTTP.flush(os);
+                    HttpUtil.flush(os);
 
                     body = RequestBody.create(mediaType, bos.toByteArray());
                 } finally {
@@ -481,10 +484,9 @@ public final class OKHttpClient extends AbstractHttpClient {
             httpResponse = client.newCall(httpRequest).execute();
 
             final Map<String, List<String>> respHeaders = httpResponse.headers().toMultimap();
-            final Charset respCharset = HTTP.getCharset(respHeaders);
-            final ContentFormat respContentFormat = HTTP.getContentFormat(httpResponse.header(HttpHeaders.Names.CONTENT_TYPE),
-                    httpResponse.header(HttpHeaders.Names.CONTENT_ENCODING));
-            final InputStream is = N.defaultIfNull(HTTP.wrapInputStream(httpResponse.body().byteStream(), respContentFormat), N.emptyInputStream());
+            final Charset respCharset = HttpUtil.getCharset(respHeaders);
+            final ContentFormat respContentFormat = HttpUtil.getResponseContentFormat(respHeaders, requestContentFormat);
+            final InputStream is = N.defaultIfNull(HttpUtil.wrapInputStream(httpResponse.body().byteStream(), respContentFormat), N.emptyInputStream());
 
             if (httpResponse.isSuccessful() == false
                     && (resultClass == null || !(resultClass.equals(HttpResponse.class) || resultClass.equals(okhttp3.Response.class)))) {
@@ -516,20 +518,22 @@ public final class OKHttpClient extends AbstractHttpClient {
                 } else {
                     if (resultClass != null && resultClass.equals(HttpResponse.class)) {
                         return (T) new HttpResponse(httpResponse.sentRequestAtMillis(), httpResponse.receivedResponseAtMillis(), httpResponse.code(),
-                                httpResponse.message(), respHeaders, IOUtil.readAllBytes(is), respContentFormat);
+                                httpResponse.message(), respHeaders, IOUtil.readAllBytes(is), respContentFormat, respCharset);
                     } else {
                         if (resultClass == null || resultClass.equals(String.class)) {
                             return (T) IOUtil.readString(is, respCharset);
                         } else if (byte[].class.equals(resultClass)) {
                             return (T) IOUtil.readAllBytes(is);
                         } else {
-                            if (respContentFormat == ContentFormat.KRYO && HTTP.kryoParser != null) {
-                                return HTTP.kryoParser.deserialize(resultClass, is);
+                            if (respContentFormat == ContentFormat.KRYO && HttpUtil.kryoParser != null) {
+                                return HttpUtil.kryoParser.deserialize(resultClass, is);
+                            } else if (respContentFormat == ContentFormat.FormUrlEncoded) {
+                                return URLEncodedUtil.decode(resultClass, IOUtil.readString(is, respCharset));
                             } else {
                                 final BufferedReader br = Objectory.createBufferedReader(new InputStreamReader(is, respCharset));
 
                                 try {
-                                    return HTTP.getParser(respContentFormat).deserialize(resultClass, br);
+                                    return HttpUtil.getParser(respContentFormat).deserialize(resultClass, br);
                                 } finally {
                                     Objectory.recycle(br);
                                 }

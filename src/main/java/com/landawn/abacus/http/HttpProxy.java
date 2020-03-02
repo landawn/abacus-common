@@ -18,20 +18,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
+import java.lang.invoke.MethodHandle;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.HttpURLConnection;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -40,23 +43,33 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.landawn.abacus.core.DirtyMarkerUtil;
 import com.landawn.abacus.core.MapEntity;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.DeserializationConfig;
 import com.landawn.abacus.parser.Parser;
+import com.landawn.abacus.parser.ParserUtil;
+import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.AndroidUtil;
+import com.landawn.abacus.util.Array;
+import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.ClassUtil;
+import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.IOUtil;
-import com.landawn.abacus.util.Maps;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
+import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.Result;
 import com.landawn.abacus.util.StringUtil;
-import com.landawn.abacus.util.function.Function;
+import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.Tuple;
+import com.landawn.abacus.util.Tuple.Tuple2;
+import com.landawn.abacus.util.URLEncodedUtil;
+import com.landawn.abacus.util.WD;
+import com.landawn.abacus.util.function.Predicate;
 
 /**
  * The client and server communicate by xml/json(may compressed by lz4/snappy/gzip)
@@ -96,88 +109,115 @@ public final class HttpProxy {
      * Creates the client proxy.
      *
      * @param <T>
-     * @param interfaceClass
-     * @param contentFormat
-     * @param url
+     * @param interfaceClass 
+     * @param baseUrl
      * @return
      */
-    public static <T> T createClientProxy(final Class<T> interfaceClass, final ContentFormat contentFormat, final String url) {
-        return createClientProxy(interfaceClass, contentFormat, url, DEFAULT_MAX_CONNECTION, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_READ_TIMEOUT);
+    public static <T> T createClientProxy(final Class<T> interfaceClass, final String baseUrl) {
+        return createClientProxy(interfaceClass, baseUrl, null);
     }
 
     /**
      * Creates the client proxy.
      *
      * @param <T>
-     * @param interfaceClass
-     * @param contentFormat
-     * @param url
+     * @param interfaceClass 
+     * @param baseUrl
      * @param config
      * @return
      */
-    public static <T> T createClientProxy(final Class<T> interfaceClass, final ContentFormat contentFormat, final String url, final Config config) {
-        return createClientProxy(interfaceClass, contentFormat, url, DEFAULT_MAX_CONNECTION, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_READ_TIMEOUT, config);
+    public static <T> T createClientProxy(final Class<T> interfaceClass, final String baseUrl, final Config config) {
+        final WebService wsAnno = interfaceClass.getAnnotation(WebService.class);
+        final int maxConnection = wsAnno != null && wsAnno.maxConnection() > 0 ? wsAnno.maxConnection() : DEFAULT_MAX_CONNECTION;
+        final long connectionTimeout = wsAnno != null && wsAnno.connectionTimeout() > 0 ? wsAnno.connectionTimeout() : DEFAULT_CONNECTION_TIMEOUT;
+        final long readTimeout = wsAnno != null && wsAnno.readTimeout() > 0 ? wsAnno.readTimeout() : DEFAULT_READ_TIMEOUT;
+
+        return createClientProxy(interfaceClass, baseUrl, maxConnection, connectionTimeout, readTimeout, config);
     }
 
     /**
      * Creates the client proxy.
      *
      * @param <T>
-     * @param interfaceClass
-     * @param contentFormat
-     * @param url
+     * @param interfaceClass 
+     * @param baseUrl
      * @param maxConnection
-     * @return
-     */
-    public static <T> T createClientProxy(final Class<T> interfaceClass, final ContentFormat contentFormat, final String url, final int maxConnection) {
-        return createClientProxy(interfaceClass, contentFormat, url, maxConnection, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_READ_TIMEOUT);
-    }
-
-    /**
-     * Creates the client proxy.
-     *
-     * @param <T>
-     * @param interfaceClass
-     * @param contentFormat
-     * @param url
-     * @param maxConnection
-     * @param connTimeout
+     * @param connectionTimeout
      * @param readTimeout
      * @return
      */
-    public static <T> T createClientProxy(final Class<T> interfaceClass, final ContentFormat contentFormat, final String url, final int maxConnection,
-            final long connTimeout, final long readTimeout) {
-        return createClientProxy(interfaceClass, contentFormat, url, maxConnection, connTimeout, readTimeout, null);
+    public static <T> T createClientProxy(final Class<T> interfaceClass, final String baseUrl, final int maxConnection, final long connectionTimeout,
+            final long readTimeout) {
+        return createClientProxy(interfaceClass, baseUrl, maxConnection, connectionTimeout, readTimeout, null);
     }
 
     /**
-     * Creates the client proxy.
-     *
+     * 
      * @param <T>
      * @param interfaceClass
-     * @param contentFormat
-     * @param url
+     * @param baseUrl
      * @param maxConnection
-     * @param connTimeout
+     * @param connectionTimeout
      * @param readTimeout
      * @param config
      * @return
      */
-    public static <T> T createClientProxy(final Class<T> interfaceClass, final ContentFormat contentFormat, final String url, final int maxConnection,
-            final long connTimeout, final long readTimeout, final Config config) {
+    public static <T> T createClientProxy(final Class<T> interfaceClass, final String baseUrl, final int maxConnection, final long connectionTimeout,
+            final long readTimeout, final Config config) {
+        return createClientProxy(interfaceClass, null, baseUrl, maxConnection, connectionTimeout, readTimeout, config);
+    }
 
-        if (contentFormat == null || contentFormat == ContentFormat.NONE) {
-            throw new IllegalArgumentException("Content format can't be null or NONE");
-        }
+    /**
+     * Creates the client proxy.
+     *
+     * @param <T>
+     * @param interfaceClass 
+     * @param contentformat add for test only
+     * @param baseUrl
+     * @param maxConnection
+     * @param connectionTimeout
+     * @param readTimeout
+     * @param config
+     * @return
+     */
+    static <T> T createClientProxy(final Class<T> interfaceClass, final ContentFormat contentformat, final String baseUrl, final int maxConnection,
+            final long connectionTimeout, final long readTimeout, final Config config) {
+
+        N.checkArgNotNull(interfaceClass, "interfaceClass");
+        N.checkArgPositive(maxConnection, "maxConnection");
+        N.checkArgPositive(connectionTimeout, "connectionTimeout");
+        N.checkArgPositive(readTimeout, "readTimeout");
+
+        final Annotation[] interfaceAnnos = interfaceClass.getAnnotations();
+        final WebService wsAnno = interfaceClass.getAnnotation(WebService.class);
+        final String finalBaseUrl = N.isNullOrEmpty(baseUrl) && wsAnno != null ? wsAnno.baseUrl() : baseUrl;
+
+        N.checkArgNotNull(finalBaseUrl, "baseUrl");
 
         InvocationHandler h = new InvocationHandler() {
             private final Logger _logger = LoggerFactory.getLogger(interfaceClass);
-            private final ContentFormat _contentFormat = contentFormat;
-            private final String _url = url;
+
+            private final String _baseUrl = composeUrl(finalBaseUrl, HttpUtil.getHttpPath(interfaceAnnos));
             private final int _maxConnection = maxConnection;
-            private final long _connTimeout = connTimeout;
+            private final long _connectionTimeout = connectionTimeout;
             private final long _readTimeout = readTimeout;
+
+            private final ContentFormat _contentFormat = contentformat == null || contentformat == ContentFormat.NONE
+                    ? HttpUtil.getContentFormat(interfaceAnnos, ContentFormat.JSON)
+                    : contentformat;
+            private final ContentFormat _acceptFormat = HttpUtil.getAcceptFormat(interfaceAnnos, ContentFormat.JSON);
+
+            private final String _contentCharset = wsAnno == null ? null : wsAnno.contentCharset();
+            private final String _acceptCharset = wsAnno == null ? null : wsAnno.accepCharset();
+
+            private final int _maxRetryTimes = wsAnno == null ? 0 : wsAnno.maxRetryTimes();
+            private final long _retryInterval = wsAnno == null ? 0 : wsAnno.retryInterval();
+
+            private final Map<String, String> _httpHeaders = HttpUtil.getHttpHeaders(interfaceAnnos);
+
             private final Config _config = config == null ? new Config() : N.copy(config);
+
+            private boolean _hasFutureReturnType = false;
 
             {
                 final Set<Method> declaredMethods = N.asLinkedHashSet(interfaceClass.getDeclaredMethods());
@@ -186,14 +226,31 @@ public final class HttpProxy {
                     declaredMethods.addAll(Arrays.asList(superClass.getDeclaredMethods()));
                 }
 
+                final Set<String> declaredMethodNames = new HashSet<>(declaredMethods.size());
+
+                for (Method method : declaredMethods) {
+                    declaredMethodNames.add(method.getName());
+                }
+
                 if (_config.parser == null) {
-                    _config.setParser(HTTP.getParser(_contentFormat));
+                    _config.setParser(HttpUtil.getParser(_contentFormat));
+                }
+
+                if (config != null && config.getRequestSettings() != null) {
+                    _config.setRequestSettings(config.getRequestSettings().copy());
+                } else {
+                    _config.setRequestSettings(HttpSettings.create());
                 }
 
                 // set operation configuration.
                 final Map<String, OperationConfig> newOperationConfigs = new HashMap<>(N.initHashCapacity(declaredMethods.size()));
+
                 if (config != null && N.notNullOrEmpty(config.operationConfigs)) {
                     for (Map.Entry<String, OperationConfig> entry : config.operationConfigs.entrySet()) {
+                        if (!declaredMethodNames.contains(entry.getKey())) {
+                            throw new IllegalArgumentException("No method found by name: " + entry.getKey() + " for OperationConfig");
+                        }
+
                         OperationConfig copy = entry.getValue() == null ? new OperationConfig() : N.copy(entry.getValue());
 
                         if (entry.getValue() != null && entry.getValue().getRequestSettings() != null) {
@@ -203,6 +260,7 @@ public final class HttpProxy {
                         newOperationConfigs.put(entry.getKey(), copy);
                     }
                 }
+
                 _config.setOperationConfigs(newOperationConfigs);
 
                 for (Method method : declaredMethods) {
@@ -214,49 +272,109 @@ public final class HttpProxy {
 
                     if (operationConfig == null) {
                         operationConfig = new OperationConfig();
-                        _config.operationConfigs.put(methodName, operationConfig);
                     }
+
+                    if (operationConfig.getRequestSettings() == null) {
+                        if (_config.getRequestSettings() != null) {
+                            operationConfig.setRequestSettings(_config.getRequestSettings().copy());
+                        } else {
+                            operationConfig.setRequestSettings(HttpSettings.create());
+                        }
+                    }
+
+                    _config.methodConfigs.put(method, operationConfig);
 
                     operationConfig.requestEntityName = StringUtil.capitalize(methodName) + "Request";
                     operationConfig.responseEntityName = StringUtil.capitalize(methodName) + "Response";
 
-                    RestMethod methodInfo = null;
-                    for (Annotation methodAnnotation : method.getAnnotations()) {
-                        Class<? extends Annotation> annotationType = methodAnnotation.annotationType();
+                    final Annotation[] methdAnnos = method.getAnnotations();
+                    final WebMethod wmAnnno = method.getAnnotation(WebMethod.class);
 
-                        for (Annotation innerAnnotation : annotationType.getAnnotations()) {
-                            if (RestMethod.class == innerAnnotation.annotationType()) {
-                                methodInfo = (RestMethod) innerAnnotation;
+                    operationConfig.httpMethod = HttpUtil.getHttpMethod(method);
+                    operationConfig.path = HttpUtil.getHttpPath(method);
+                    operationConfig.requestUrl = composeUrl(_baseUrl, operationConfig.path);
+                    operationConfig.connectionTimeout = wmAnnno == null || wmAnnno.connectionTimeout() <= 0 ? _connectionTimeout : wmAnnno.connectionTimeout();
+                    operationConfig.readTimeout = wmAnnno == null || wmAnnno.readTimeout() <= 0 ? _readTimeout : wmAnnno.readTimeout();
+                    operationConfig.maxRetryTimes = wmAnnno == null || wmAnnno.maxRetryTimes() < 0 ? _maxRetryTimes : wmAnnno.maxRetryTimes();
+                    operationConfig.retryInterval = wmAnnno == null || wmAnnno.retryInterval() < 0 ? _retryInterval : wmAnnno.retryInterval();
 
-                                break;
-                            }
-                        }
+                    operationConfig.contentFormat = HttpUtil.getContentFormat(methdAnnos, _contentFormat);
+                    operationConfig.acceptFormat = HttpUtil.getAcceptFormat(methdAnnos, _acceptFormat);
 
-                        if (methodInfo != null) {
-                            if (N.isNullOrEmpty(operationConfig.getRequestUrl())) {
-                                try {
-                                    String path = (String) annotationType.getMethod("value").invoke(methodAnnotation);
+                    operationConfig.contentCharset = wmAnnno == null || N.isNullOrEmpty(wmAnnno.contentCharset()) ? _contentCharset : wmAnnno.contentCharset();
+                    operationConfig.acceptCharset = wmAnnno == null || N.isNullOrEmpty(wmAnnno.acceptCharset()) ? _acceptCharset : wmAnnno.acceptCharset();
 
-                                    if (N.notNullOrEmpty(path)) {
-                                        operationConfig.setRequestUrl(path);
-                                    }
-                                } catch (Exception e) {
-                                    throw new RuntimeException("Failed to extract String 'value' from @%s annotation:" + annotationType.getSimpleName());
-                                }
-                            }
+                    if (N.notNullOrEmpty(_httpHeaders)) {
+                        operationConfig.getRequestSettings().headers(_httpHeaders);
+                    }
 
-                            if (operationConfig.getHttpMethod() == null) {
-                                operationConfig.setHttpMethod(HttpMethod.valueOf(methodInfo.value()));
-                            }
+                    if (wmAnnno != null && N.notNullOrEmpty(wmAnnno.headers())) {
+                        operationConfig.getRequestSettings().headers(N.asMap((Object[]) wmAnnno.headers()));
+                    }
 
-                            break;
+                    operationConfig.getRequestSettings().setContentFormat(operationConfig.contentFormat);
+
+                    String contentType = (String) operationConfig.requestSettings.headers().get(HttpHeaders.Names.CONTENT_TYPE);
+
+                    if (N.isNullOrEmpty(contentType)) {
+                        if (operationConfig.contentFormat != null && operationConfig.contentFormat != ContentFormat.NONE) {
+                            contentType = operationConfig.contentFormat.contentType();
+                            operationConfig.requestSettings.header(HttpHeaders.Names.CONTENT_TYPE, contentType);
                         }
                     }
 
-                    if (N.isNullOrEmpty(operationConfig.paramNameTypeMap)) {
+                    if (N.notNullOrEmpty(operationConfig.contentCharset)) {
+                        if (N.isNullOrEmpty(contentType)) {
+                            operationConfig.requestSettings.header(HttpHeaders.Names.CONTENT_TYPE, "charset=" + operationConfig.contentCharset);
+                        } else if (StringUtil.indexOfIgnoreCase(contentType, "charset=") < 0) {
+                            operationConfig.requestSettings.header(HttpHeaders.Names.CONTENT_TYPE, contentType + "; charset=" + operationConfig.contentCharset);
+                        }
+                    }
+
+                    if (N.isNullOrEmpty((String) operationConfig.requestSettings.headers().get(HttpHeaders.Names.CONTENT_ENCODING))) {
+                        if (operationConfig.contentFormat != null && operationConfig.contentFormat != ContentFormat.NONE) {
+                            operationConfig.requestSettings.header(HttpHeaders.Names.CONTENT_ENCODING, operationConfig.contentFormat.contentEncoding());
+                        }
+                    }
+
+                    if (N.isNullOrEmpty((String) operationConfig.requestSettings.headers().get(HttpHeaders.Names.ACCEPT))) {
+                        if (operationConfig.acceptFormat != null && operationConfig.acceptFormat != ContentFormat.NONE) {
+                            operationConfig.requestSettings.header(HttpHeaders.Names.ACCEPT, operationConfig.acceptFormat.contentType());
+                        }
+                    }
+
+                    if (N.isNullOrEmpty((String) operationConfig.requestSettings.headers().get(HttpHeaders.Names.ACCEPT_ENCODING))) {
+                        if (operationConfig.acceptFormat != null && operationConfig.acceptFormat != ContentFormat.NONE) {
+                            operationConfig.requestSettings.header(HttpHeaders.Names.ACCEPT_ENCODING, operationConfig.acceptFormat.contentEncoding());
+                        }
+                    }
+
+                    if (N.isNullOrEmpty((String) operationConfig.requestSettings.headers().get(HttpHeaders.Names.ACCEPT_CHARSET))) {
+                        if (N.notNullOrEmpty(operationConfig.acceptCharset)) {
+                            operationConfig.requestSettings.header(HttpHeaders.Names.ACCEPT_CHARSET, operationConfig.acceptCharset);
+                        }
+                    }
+
+                    operationConfig.parser = operationConfig.contentFormat == _contentFormat ? _config.parser
+                            : HttpUtil.getParser(operationConfig.contentFormat);
+
+                    if (operationConfig.parser.getClass().equals(_config.parser.getClass())) {
+                        operationConfig.sc = _config.sc;
+                        operationConfig.dc = _config.dc;
+                    } else {
+                        operationConfig.sc = null;
+                        operationConfig.dc = null;
+                    }
+
+                    {
                         operationConfig.paramTypes = new Type[parameterCount];
-                        operationConfig.paramFields = new Field[parameterCount];
-                        operationConfig.paramPaths = new Path[parameterCount];
+                        operationConfig.fieldParams = new Field[parameterCount];
+                        operationConfig.fieldNameSet = new HashSet<>(parameterCount);
+                        operationConfig.pathParams = new Tuple2[parameterCount];
+                        operationConfig.pathParamNameSet = new HashSet<>(parameterCount);
+                        operationConfig.queryParams = new String[parameterCount];
+                        operationConfig.queryParamNameSet = new HashSet<>(parameterCount);
+                        operationConfig.pathAndQueryParamNameSet = new HashSet<>(parameterCount);
                         operationConfig.paramNameTypeMap = new HashMap<>();
 
                         final Annotation[][] parameterAnnotationArrays = method.getParameterAnnotations();
@@ -265,20 +383,111 @@ public final class HttpProxy {
 
                             for (Annotation parameterAnnotation : parameterAnnotationArrays[i]) {
                                 if (parameterAnnotation.annotationType() == Field.class) {
-                                    operationConfig.paramFields[i] = (Field) parameterAnnotation;
+                                    operationConfig.fieldParams[i] = (Field) parameterAnnotation;
 
-                                    if (operationConfig.paramNameTypeMap.put(operationConfig.paramFields[i].value(), operationConfig.paramTypes[i]) != null) {
-                                        throw new RuntimeException("Duplicated parameter names: " + operationConfig.paramFields[i].value());
+                                    if (operationConfig.paramNameTypeMap.put(operationConfig.fieldParams[i].value(),
+                                            Tuple.of(i, operationConfig.paramTypes[i])) != null) {
+                                        throw new IllegalArgumentException("Duplicated field parameter names: " + operationConfig.fieldParams[i].value()
+                                                + " in method: " + method.getName());
                                     }
-                                } else if (parameterAnnotation.annotationType() == Path.class) {
-                                    operationConfig.validatePathName(((Path) parameterAnnotation).value());
 
-                                    operationConfig.paramPaths[i] = (Path) parameterAnnotation;
+                                    operationConfig.fieldNameSet.add(operationConfig.fieldParams[i].value());
+                                } else if (parameterAnnotation.annotationType() == PathParam.class) {
+                                    final PathParam pathParam = (PathParam) parameterAnnotation;
 
-                                    if (operationConfig.paramNameTypeMap.put(operationConfig.paramPaths[i].value(), operationConfig.paramTypes[i]) != null) {
-                                        throw new RuntimeException("Duplicated parameter names: " + operationConfig.paramPaths[i].value());
+                                    operationConfig.validatePathName(pathParam.value());
+                                    operationConfig.pathParams[i] = Tuple.of(pathParam.value(), pathParam.encode());
+
+                                    if (operationConfig.paramNameTypeMap.put(operationConfig.pathParams[i]._1,
+                                            Tuple.of(i, operationConfig.paramTypes[i])) != null) {
+                                        throw new IllegalArgumentException(
+                                                "Duplicated path parameter names: " + operationConfig.pathParams[i]._1 + " in method: " + method.getName());
+                                    }
+
+                                    operationConfig.pathParamNameSet.add(operationConfig.pathParams[i]._1);
+                                    operationConfig.pathAndQueryParamNameSet.add(operationConfig.pathParams[i]._1);
+                                } else if (parameterAnnotation.annotationType() == QueryParam.class) {
+                                    final QueryParam queryParam = (QueryParam) parameterAnnotation;
+
+                                    operationConfig.queryParams[i] = queryParam.value();
+
+                                    if (operationConfig.paramNameTypeMap.put(operationConfig.queryParams[i],
+                                            Tuple.of(i, operationConfig.paramTypes[i])) != null) {
+                                        throw new IllegalArgumentException(
+                                                "Duplicated query parameter names: " + operationConfig.queryParams[i] + " in method: " + method.getName());
+                                    }
+
+                                    operationConfig.queryParamNameSet.add(operationConfig.queryParams[i]);
+                                    operationConfig.pathAndQueryParamNameSet.add(operationConfig.queryParams[i]);
+                                } else {
+                                    try {
+                                        if (parameterAnnotation.annotationType() == javax.ws.rs.PathParam.class) {
+                                            final javax.ws.rs.PathParam pathParam = (javax.ws.rs.PathParam) parameterAnnotation;
+
+                                            operationConfig.validatePathName(pathParam.value());
+                                            operationConfig.pathParams[i] = Tuple.of(pathParam.value(), true);
+
+                                            if (operationConfig.paramNameTypeMap.put(operationConfig.pathParams[i]._1,
+                                                    Tuple.of(i, operationConfig.paramTypes[i])) != null) {
+                                                throw new IllegalArgumentException("Duplicated path parameter names: " + operationConfig.pathParams[i]._1
+                                                        + " in method: " + method.getName());
+                                            }
+
+                                            operationConfig.pathParamNameSet.add(operationConfig.pathParams[i]._1);
+                                            operationConfig.pathAndQueryParamNameSet.add(operationConfig.pathParams[i]._1);
+                                        }
+                                    } catch (Throwable e) {
+                                        // ignore
+                                    }
+
+                                    try {
+                                        if (parameterAnnotation.annotationType() == javax.ws.rs.QueryParam.class) {
+                                            final javax.ws.rs.QueryParam queryParam = (javax.ws.rs.QueryParam) parameterAnnotation;
+
+                                            operationConfig.queryParams[i] = queryParam.value();
+
+                                            if (operationConfig.paramNameTypeMap.put(operationConfig.queryParams[i],
+                                                    Tuple.of(i, operationConfig.paramTypes[i])) != null) {
+                                                throw new IllegalArgumentException("Duplicated query parameter names: " + operationConfig.queryParams[i]
+                                                        + " in method: " + method.getName());
+                                            }
+
+                                            operationConfig.queryParamNameSet.add(operationConfig.queryParams[i]);
+                                            operationConfig.pathAndQueryParamNameSet.add(operationConfig.queryParams[i]);
+                                        }
+                                    } catch (Throwable e) {
+                                        // ignore
                                     }
                                 }
+
+                                if (operationConfig.fieldParams[i] == null && operationConfig.pathParams[i] == null && operationConfig.queryParams[i] == null) {
+                                    throw new IllegalArgumentException("Parameter is not named by annoation @Field/@FieldParam/@QueryParam at position: " + i
+                                            + " in method: " + method.getName());
+                                }
+                            }
+                        }
+
+                        operationConfig.urlPartsSplittedByParaNames = operationConfig.requestUrl.split(PARAM_URL_REGEX.pattern());
+
+                        if (operationConfig.urlPartsSplittedByParaNames.length > 1) {
+                            final List<String> patterns = new ArrayList<>(operationConfig.urlPartsSplittedByParaNames.length);
+                            final Matcher m = PARAM_URL_REGEX.matcher(operationConfig.requestUrl);
+                            while (m.find()) {
+                                patterns.add(m.group(1));
+                            }
+                            operationConfig.urlParamNames = patterns.toArray(new String[patterns.size()]);
+                        } else {
+                            operationConfig.urlParamNames = N.EMPTY_STRING_ARRAY;
+                        }
+
+                        operationConfig.urlParamNameSet = N.asSet(operationConfig.urlParamNames);
+
+                        if (N.notNullOrEmpty(operationConfig.paramNameTypeMap)) {
+                            final List<String> diff = N.symmetricDifference(operationConfig.urlParamNameSet, operationConfig.pathParamNameSet);
+
+                            if (N.notNullOrEmpty(diff)) {
+                                throw new IllegalArgumentException("Path parameters: " + diff + " are not configured in path: " + operationConfig.path
+                                        + " in method: " + method.getName());
                             }
                         }
                     }
@@ -293,46 +502,6 @@ public final class HttpProxy {
                     if (parameterCount > 1 && operationConfig.paramNameTypeMap.isEmpty()) {
                         throw new IllegalArgumentException("Unsupported web service method: " + method.getName()
                                 + ". Only one parameter or multi parameters with Field/Path annotaions are supported");
-                    }
-
-                    if (N.notNullOrEmpty(operationConfig.requestUrl)) {
-                        if (StringUtil.startsWithIgnoreCase(operationConfig.requestUrl, "http:")
-                                || StringUtil.startsWithIgnoreCase(operationConfig.requestUrl, "https:")) {
-                            // no action took
-                        } else {
-                            if (_url.endsWith("/") || _url.endsWith("\\")) {
-                                if (operationConfig.requestUrl.startsWith("/") || operationConfig.requestUrl.startsWith("\\")) {
-                                    operationConfig.requestUrl = _url + operationConfig.requestUrl.substring(1);
-                                } else {
-                                    operationConfig.requestUrl = _url + operationConfig.requestUrl;
-                                }
-                            } else {
-                                if (operationConfig.requestUrl.startsWith("/") || operationConfig.requestUrl.startsWith("\\")) {
-                                    operationConfig.requestUrl = _url + operationConfig.requestUrl;
-                                } else {
-                                    operationConfig.requestUrl = _url + "/" + operationConfig.requestUrl;
-                                }
-                            }
-                        }
-                    } else if (_config.requestByOperatioName) {
-                        String operationNameUrl = null;
-
-                        if (_config.requestUrlNamingPolicy == NamingPolicy.LOWER_CASE_WITH_UNDERSCORE) {
-                            operationNameUrl = ClassUtil.toLowerCaseWithUnderscore(methodName);
-                        } else if (_config.requestUrlNamingPolicy == NamingPolicy.UPPER_CASE_WITH_UNDERSCORE) {
-                            operationNameUrl = ClassUtil.toUpperCaseWithUnderscore(methodName);
-                        } else {
-                            operationNameUrl = methodName;
-                        }
-
-                        if (_url.endsWith("/") || _url.endsWith("\\")) {
-                            operationConfig.requestUrl = _url + operationNameUrl;
-                        } else {
-                            operationConfig.requestUrl = _url + "/" + operationNameUrl;
-                        }
-
-                    } else {
-                        operationConfig.requestUrl = _url;
                     }
 
                     if ((N.notNullOrEmpty(_config.getEncryptionUserName()) || N.notNullOrEmpty(_config.getEncryptionPassword()))
@@ -353,23 +522,81 @@ public final class HttpProxy {
                             operationConfig.setEncryptionMessage(MessageEncryption.NONE);
                         }
                     }
-                }
 
-                if (config != null && config.getRequestSettings() != null) {
-                    _config.setRequestSettings(config.getRequestSettings().copy());
+                    operationConfig.returnType = N.typeOf(method.getGenericReturnType().toString());
+
+                    operationConfig.concreteReturnType = Future.class.isAssignableFrom(method.getReturnType())
+                            ? (Type<Object>) operationConfig.returnType.getParameterTypes()[0]
+                            : operationConfig.returnType;
+
+                    if (Future.class.isAssignableFrom(method.getReturnType())) {
+                        operationConfig.isFutureReturnType = true;
+
+                        if (ContinuableFuture.class.isAssignableFrom(method.getReturnType())) {
+                            operationConfig.isContinuableFutureReturnType = true;
+                        }
+
+                        _hasFutureReturnType = true;
+                    }
+
+                    if (!Modifier.isAbstract(method.getModifiers())) {
+                        final OperationConfig finalOperationConfig = operationConfig;
+                        final int paramLen = method.getParameterCount();
+
+                        final WebMethod[] lastParam = paramLen > 0 && method.getParameterTypes()[paramLen - 1].isAssignableFrom(WebMethod[].class)
+                                && wmAnnno != null ? Array.oF(wmAnnno) : new WebMethod[0];
+
+                        final MethodHandle methodHandle = ClassUtil.createMethodHandle(method);
+
+                        final Throwables.BiFunction<Object, Object[], Object, Exception> call = new Throwables.BiFunction<Object, Object[], Object, Exception>() {
+                            @Override
+                            public Object apply(final Object proxy, final Object[] args) throws Exception {
+                                if (lastParam != null) {
+                                    args[paramLen - 1] = lastParam;
+                                }
+
+                                if (_logger.isInfoEnabled()) {
+                                    _logger.info(finalOperationConfig.parser.serialize(args, finalOperationConfig.sc));
+                                }
+
+                                Object result = null;
+
+                                try {
+                                    result = methodHandle.bindTo(proxy).invokeWithArguments(args);
+                                } catch (Throwable e) {
+                                    if (e instanceof Exception) {
+                                        throw (Exception) e;
+                                    }
+
+                                    throw N.toRuntimeException(e);
+                                }
+
+                                if (_logger.isInfoEnabled()) {
+                                    if (!finalOperationConfig.concreteReturnType.clazz().equals(void.class)
+                                            && finalOperationConfig.concreteReturnType.isSerializable()) {
+                                        _logger.info(finalOperationConfig.concreteReturnType.stringOf(result));
+                                    } else {
+                                        _logger.info(finalOperationConfig.parser.serialize(result, finalOperationConfig.sc));
+                                    }
+                                }
+
+                                return result;
+                            }
+                        };
+
+                        _config.methodCalls.put(method, call);
+                    }
                 }
             }
 
             private final AtomicInteger sharedActiveConnectionCounter = new AtomicInteger(0);
-            private final Map<String, HttpClient> _httpClientPool = new HashMap<>(N.initHashCapacity(_config.operationConfigs.size()));
-            private final HttpClient _httpClient = HttpClient.create(_url, _maxConnection, _connTimeout, _readTimeout, _config.getRequestSettings(),
-                    sharedActiveConnectionCounter);
-
+            private final Map<Method, HttpClient> _httpClientPool = new HashMap<>(N.initHashCapacity(_config.operationConfigs.size()));
             private final Executor _asyncExecutor;
+
             {
                 Executor executor = null;
 
-                if (_config.executedByThreadPool) {
+                if (_config.executedByThreadPool || _hasFutureReturnType) {
                     if (_config.getAsyncExecutor() != null) {
                         executor = _config.getAsyncExecutor();
                     } else if (IOUtil.IS_PLATFORM_ANDROID) {
@@ -411,51 +638,49 @@ public final class HttpProxy {
             public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
                 // If the method is a method from Object then defer to normal invocation.
                 if (method.getDeclaringClass() == Object.class) {
-                    return method.invoke(this, args);
+                    return method.invoke(proxy, args);
                 }
 
-                final String methodName = method.getName();
-                final OperationConfig operationConfig = _config.operationConfigs.get(methodName);
+                final OperationConfig operationConfig = _config.methodConfigs.get(method);
 
-                if (operationConfig.getRetryTimes() > 0) {
-                    try {
-                        return invoke(method, args);
-                    } catch (Exception e) {
-                        _logger.error("Failed to call: " + method.getName(), e);
+                if (operationConfig.maxRetryTimes > 0) {
+                    final Predicate<Result<Object, Throwable>> ifRetry = _config.getIfRetry();
+                    int retriedTimes = 0;
+                    Result<Object, Throwable> result = null;
+                    Throwable throwable = null;
 
-                        final int retryTimes = operationConfig.getRetryTimes();
-                        final long retryInterval = operationConfig.getRetryInterval();
-                        final Function<Throwable, Boolean> ifRetry = operationConfig.getIfRetry();
-
-                        int retriedTimes = 0;
-                        Throwable throwable = e;
-
-                        while (retriedTimes++ < retryTimes && (ifRetry == null || ifRetry.apply(e).booleanValue())) {
-                            try {
-                                if (retryInterval > 0) {
-                                    N.sleep(retryInterval);
-                                }
-
-                                return invoke(method, args);
-                            } catch (Exception e2) {
-                                throwable = e2;
-                            }
+                    do {
+                        if (result != null && operationConfig.retryInterval > 0) {
+                            N.sleepUninterruptibly(operationConfig.retryInterval);
                         }
 
-                        throw N.toRuntimeException(throwable);
-                    }
+                        try {
+                            result = Result.of(invoke2(proxy, method, args, operationConfig), null);
+                        } catch (Throwable e) {
+                            if (throwable == null) {
+                                throwable = e;
+                            }
+
+                            result = Result.of(null, e);
+
+                            _logger.error("Failed to call: " + method.getName(), e);
+                        }
+                    } while (retriedTimes++ < operationConfig.maxRetryTimes
+                            && ((ifRetry == null && result.isFailure()) || (ifRetry != null && ifRetry.test(result))));
+
+                    return result.orElseThrow(throwable);
                 } else {
-                    return invoke(method, args);
+                    return invoke2(proxy, method, args, operationConfig);
                 }
             }
 
-            private Object invoke(final Method method, final Object[] args) throws InterruptedException, ExecutionException {
-                if (_config.executedByThreadPool) {
+            private Object invoke2(Object proxy, final Method method, final Object[] args, final OperationConfig operationConfig) throws Throwable {
+                if (_config.executedByThreadPool || operationConfig.isFutureReturnType) {
                     final Callable<Object> cmd = new Callable<Object>() {
                         @Override
                         public Object call() throws Exception {
                             if (_config.handler == null) {
-                                return execute(method, args);
+                                return invoke3(proxy, method, args, operationConfig);
                             } else {
                                 _config.handler.preInvoke(method, args);
 
@@ -463,8 +688,8 @@ public final class HttpProxy {
                                 Throwable exception = null;
 
                                 try {
-                                    result = execute(method, args);
-                                } catch (Exception e) {
+                                    result = invoke3(proxy, method, args, operationConfig);
+                                } catch (Throwable e) {
                                     exception = e;
                                 } finally {
                                     result = _config.handler.postInvoke(exception, result, method, args);
@@ -476,11 +701,19 @@ public final class HttpProxy {
                     };
 
                     final FutureTask<Object> futureTask = new FutureTask<>(cmd);
+
                     _asyncExecutor.execute(futureTask);
-                    return futureTask.get();
+
+                    if (operationConfig.isContinuableFutureReturnType) {
+                        return ContinuableFuture.wrap(futureTask);
+                    } else if (operationConfig.isFutureReturnType) {
+                        return futureTask;
+                    } else {
+                        return futureTask.get();
+                    }
                 } else {
                     if (_config.handler == null) {
-                        return execute(method, args);
+                        return invoke3(proxy, method, args, operationConfig);
                     } else {
                         _config.handler.preInvoke(method, args);
 
@@ -488,8 +721,8 @@ public final class HttpProxy {
                         Throwable exception = null;
 
                         try {
-                            result = execute(method, args);
-                        } catch (Exception e) {
+                            result = invoke3(proxy, method, args, operationConfig);
+                        } catch (Throwable e) {
                             exception = e;
                         } finally {
                             result = _config.handler.postInvoke(exception, result, method, args);
@@ -500,21 +733,179 @@ public final class HttpProxy {
                 }
             }
 
-            private Object execute(final Method method, final Object[] args) {
-                final String methodName = method.getName();
-                final OperationConfig operationConfig = _config.operationConfigs.get(methodName);
-                final Object requestParameter = readRequestParameter(args, operationConfig);
+            private Object invoke3(Object proxy, final Method method, final Object[] args, final OperationConfig operationConfig) throws Exception {
+                if (_logger.isInfoEnabled()) {
+                    _logger.info(operationConfig.parser.serialize(args, operationConfig.sc));
+                }
+
+                if (!Modifier.isAbstract(method.getModifiers())) {
+                    final Object result = _config.methodCalls.get(method).apply(proxy, args);
+
+                    if (_logger.isInfoEnabled()) {
+                        _logger.info(operationConfig.parser.serialize(result, operationConfig.sc));
+                    }
+
+                    return result;
+                }
+
+                final Charset requestCharset = N.isNullOrEmpty(operationConfig.contentCharset) ? Charsets.UTF_8 : Charsets.get(operationConfig.contentCharset);
+
+                String newRequestUrl = operationConfig.requestUrl;
+
+                if (N.notNullOrEmpty(operationConfig.urlParamNames)) {
+                    final StringBuilder sb = Objectory.createStringBuilder();
+
+                    try {
+                        if (N.isNullOrEmpty(operationConfig.paramNameTypeMap)) {
+                            final Type<Object> type = N.typeOf(N.checkArgNotNull(args[0]).getClass());
+
+                            if (type.isMap()) {
+                                final Map<String, Object> map = (Map<String, Object>) args[0];
+                                Object value = null;
+
+                                for (int i = 0, len = operationConfig.urlParamNames.length; i < len; i++) {
+                                    value = map.get(operationConfig.urlParamNames[i]);
+
+                                    if (value == null && !map.containsKey(operationConfig.urlParamNames[i])) {
+                                        throw new IllegalArgumentException(
+                                                "No value is set for path parameter: " + operationConfig.urlParamNames[i] + " in method: " + method.getName());
+                                    }
+
+                                    sb.append(operationConfig.urlPartsSplittedByParaNames[i]);
+
+                                    sb.append(N.urlEncode(N.stringOf(value)));
+                                }
+                            } else if (type.isEntity()) {
+                                final Object entity = args[0];
+                                final EntityInfo entityInfo = ParserUtil.getEntityInfo(entity.getClass());
+                                Object value = null;
+
+                                for (int i = 0, len = operationConfig.urlParamNames.length; i < len; i++) {
+                                    value = entityInfo.getPropValue(entity, operationConfig.urlParamNames[i]);
+
+                                    sb.append(operationConfig.urlPartsSplittedByParaNames[i]);
+
+                                    sb.append(N.urlEncode(N.stringOf(value)));
+                                }
+                            } else {
+                                throw new IllegalArgumentException("Unsupported path parameter type: " + type.name() + " in method: " + method.getName());
+                            }
+                        } else {
+                            Tuple2<Integer, Type<Object>> tp = null;
+
+                            for (int i = 0, len = operationConfig.urlParamNames.length; i < len; i++) {
+                                sb.append(operationConfig.urlPartsSplittedByParaNames[i]);
+
+                                tp = operationConfig.paramNameTypeMap.get(operationConfig.urlParamNames[i]);
+
+                                if (operationConfig.pathParams[tp._1]._2) {
+                                    sb.append(N.urlEncode(tp._2.stringOf(args[tp._1])));
+                                } else {
+                                    sb.append(tp._2.stringOf(args[tp._1]));
+                                }
+                            }
+                        }
+
+                        sb.append(operationConfig.urlPartsSplittedByParaNames[operationConfig.urlParamNames.length]);
+
+                        if (N.notNullOrEmpty(operationConfig.queryParamNameSet)) {
+                            Map<String, Object> queryParams = new HashMap<>(operationConfig.queryParamNameSet.size());
+                            Tuple2<Integer, Type<Object>> tp = null;
+
+                            for (String qureyParamName : operationConfig.queryParamNameSet) {
+                                tp = operationConfig.paramNameTypeMap.get(qureyParamName);
+                                queryParams.put(qureyParamName, tp._2.stringOf(args[tp._1]));
+                            }
+
+                            sb.append(WD._QUESTION_MARK);
+
+                            URLEncodedUtil.encode(sb, queryParams);
+                        }
+
+                        newRequestUrl = sb.toString();
+                    } finally {
+                        Objectory.recycle(sb);
+                    }
+                } else if (N.notNullOrEmpty(operationConfig.queryParamNameSet)) {
+                    final Map<String, Object> queryParams = new HashMap<>(operationConfig.queryParamNameSet.size());
+                    Tuple2<Integer, Type<Object>> tp = null;
+
+                    for (String qureyParamName : operationConfig.queryParamNameSet) {
+                        tp = operationConfig.paramNameTypeMap.get(qureyParamName);
+                        queryParams.put(qureyParamName, tp._2.stringOf(args[tp._1]));
+                    }
+
+                    newRequestUrl = URLEncodedUtil.encode(newRequestUrl, queryParams);
+                }
+
+                Object requestParameter = null;
+
+                if (N.notNullOrEmpty(operationConfig.fieldNameSet)) {
+                    final Map<String, Object> queryParams = new HashMap<>(operationConfig.fieldNameSet.size());
+                    Tuple2<Integer, Type<Object>> tp = null;
+
+                    for (String fieldName : operationConfig.fieldNameSet) {
+                        tp = operationConfig.paramNameTypeMap.get(fieldName);
+                        queryParams.put(fieldName, tp._2.stringOf(args[tp._1]));
+                    }
+                } else if (operationConfig.httpMethod == HttpMethod.POST || operationConfig.httpMethod == HttpMethod.PUT) {
+                    //    if (N.isNullOrEmpty(operationConfig.pathAndQueryParamNameSet)) {
+                    //        requestParameter = args[0];
+                    //    } else if (args[0] != null) {
+                    //        requestParameter = args[0];
+                    //        final Type<?> type = N.typeOf(args[0].getClass());
+                    //
+                    //        if (type.isMap()) {
+                    //            final Map<String, Object> map = (Map<String, Object>) args[0];
+                    //
+                    //            if (N.containsAny(map.keySet(), operationConfig.pathAndQueryParamNameSet)) {
+                    //                final Map<String, Object> tmp = N.newInstance(map.getClass());
+                    //
+                    //                for (Map.Entry<String, Object> entry : map.entrySet()) {
+                    //                    if (!operationConfig.pathAndQueryParamNameSet.contains(entry.getKey())) {
+                    //                        tmp.put(entry.getKey(), entry.getValue());
+                    //                    }
+                    //                }
+                    //
+                    //                requestParameter = tmp;
+                    //            }
+                    //        } else if (type.isEntity()) {
+                    //            if (N.notNullOrEmpty(operationConfig.getEncryptionUserName()) && N.notNullOrEmpty(operationConfig.getEncryptionPassword())) {
+                    //
+                    //            } else {
+                    //                requestParameter = Maps.entity2Map(args[0], operationConfig.pathAndQueryParamNameSet);
+                    //            }
+                    //        }
+                    //    }
+
+                    requestParameter = args != null && args.length == 1 ? args[0] : args;
+                } else if (operationConfig.httpMethod == HttpMethod.GET || operationConfig.httpMethod == HttpMethod.DELETE) {
+                    if (args != null && args.length == 1) {
+                        newRequestUrl = URLEncodedUtil.encode(newRequestUrl, args[0], requestCharset, _config.queryParamNamingPolicy);
+                    }
+                }
 
                 if (N.notNullOrEmpty(operationConfig.getEncryptionUserName()) && N.notNullOrEmpty(operationConfig.getEncryptionPassword())) {
                     ((SecurityDTO) requestParameter).encrypt(operationConfig.getEncryptionUserName(), operationConfig.getEncryptionPassword(),
                             operationConfig.getEncryptionMessage());
                 }
 
-                final HttpClient httpClient = getHttpClient(method, requestParameter, operationConfig);
-                final Class<T> returnType = (Class<T>) method.getReturnType();
+                HttpClient httpClient = null;
 
-                if (_logger.isInfoEnabled()) {
-                    _logger.info(_config.parser.serialize(requestParameter, _config.sc));
+                if (newRequestUrl.equals(operationConfig.requestUrl)) {
+                    synchronized (_httpClientPool) {
+                        httpClient = _httpClientPool.get(method);
+
+                        if (httpClient == null) {
+                            httpClient = HttpClient.create(operationConfig.requestUrl, _maxConnection, operationConfig.connectionTimeout,
+                                    operationConfig.readTimeout, operationConfig.getRequestSettings(), sharedActiveConnectionCounter);
+
+                            _httpClientPool.put(method, httpClient);
+                        }
+                    }
+                } else {
+                    httpClient = HttpClient.create(newRequestUrl, _maxConnection, operationConfig.connectionTimeout, operationConfig.readTimeout,
+                            operationConfig.getRequestSettings(), sharedActiveConnectionCounter);
                 }
 
                 InputStream is = null;
@@ -524,9 +915,10 @@ public final class HttpProxy {
 
                 try {
                     if (requestParameter != null && (operationConfig.httpMethod == HttpMethod.POST || operationConfig.httpMethod == HttpMethod.PUT)) {
-                        os = HTTP.getOutputStream(connection, _contentFormat);
+                        os = HttpUtil.getOutputStream(connection, operationConfig.contentFormat, operationConfig.requestSettings.getContentType(),
+                                operationConfig.requestSettings.getContentEncoding());
 
-                        switch (_contentFormat) {
+                        switch (operationConfig.contentFormat) {
                             case JSON:
                             case JSON_LZ4:
                             case JSON_SNAPPY:
@@ -534,9 +926,9 @@ public final class HttpProxy {
                                 Type<Object> type = N.typeOf(requestParameter.getClass());
 
                                 if (type.isSerializable()) {
-                                    os.write(type.stringOf(requestParameter).getBytes());
+                                    os.write(type.stringOf(requestParameter).getBytes(requestCharset));
                                 } else {
-                                    _config.parser.serialize(os, requestParameter, _config.sc);
+                                    operationConfig.parser.serialize(os, requestParameter, operationConfig.sc);
                                 }
 
                                 break;
@@ -546,65 +938,75 @@ public final class HttpProxy {
                             case XML_SNAPPY:
                             case XML_GZIP:
                                 if (requestParameter instanceof Map) {
-                                    _config.parser.serialize(os, MapEntity.valueOf(operationConfig.requestEntityName, (Map<String, Object>) requestParameter),
-                                            _config.sc);
+                                    operationConfig.parser.serialize(os,
+                                            MapEntity.valueOf(operationConfig.requestEntityName, (Map<String, Object>) requestParameter), operationConfig.sc);
                                 } else {
-                                    _config.parser.serialize(os, requestParameter, _config.sc);
+                                    operationConfig.parser.serialize(os, requestParameter, operationConfig.sc);
                                 }
 
                                 break;
 
+                            case FormUrlEncoded:
+                                os.write(URLEncodedUtil.encode(requestParameter, requestCharset).getBytes(requestCharset));
+
+                                break;
+
                             case KRYO:
-                                _config.parser.serialize(os, requestParameter, _config.sc);
+                                operationConfig.parser.serialize(os, requestParameter, operationConfig.sc);
 
                                 break;
 
                             default:
-                                throw new IllegalArgumentException("Unsupported content type: " + _contentFormat.toString());
+                                throw new IllegalArgumentException("Unsupported content type: " + operationConfig.contentFormat.toString());
                         }
 
-                        HTTP.flush(os);
+                        HttpUtil.flush(os);
                     } else {
-                        String contentType = HTTP.getContentType(_contentFormat);
-                        // TODO
+                        String contentType = HttpUtil.getContentType(operationConfig.contentFormat);
 
                         if (N.notNullOrEmpty(contentType)) {
                             connection.setRequestProperty(HttpHeaders.Names.CONTENT_TYPE, contentType);
                         }
 
-                        String contentEncoding = HTTP.getContentEncoding(_contentFormat);
+                        String contentEncoding = HttpUtil.getContentEncoding(operationConfig.contentFormat);
 
                         if (N.notNullOrEmpty(contentEncoding)) {
                             connection.setRequestProperty(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding);
                         }
                     }
 
-                    final ContentFormat responseContentFormat = HTTP.getContentFormat(connection);
+                    final int code = connection.getResponseCode();
                     final Map<String, List<String>> respHeaders = connection.getHeaderFields();
-                    final Charset charset = HTTP.getCharset(respHeaders);
-                    final Parser<SerializationConfig<?>, DeserializationConfig<?>> responseParser = responseContentFormat == _contentFormat ? _config.parser
-                            : HTTP.getParser(responseContentFormat);
+                    final Charset respCharset = HttpUtil.getCharset(respHeaders);
+                    final ContentFormat responseContentFormat = HttpUtil.getResponseContentFormat(respHeaders, operationConfig.contentFormat);
+                    final Parser<SerializationConfig<?>, DeserializationConfig<?>> responseParser = responseContentFormat == operationConfig.contentFormat
+                            ? operationConfig.parser
+                            : HttpUtil.getParser(responseContentFormat);
+                    final SerializationConfig<?> responseSC = responseContentFormat == operationConfig.contentFormat ? operationConfig.sc : null;
+                    final DeserializationConfig<?> responseDC = responseContentFormat == operationConfig.contentFormat ? operationConfig.dc : null;
 
-                    is = HTTP.getInputStream(connection, responseContentFormat);
+                    if (code < 200 || code >= 300) {
+                        throw new UncheckedIOException(new IOException(
+                                code + ": " + connection.getResponseMessage() + ". " + IOUtil.readString(connection.getErrorStream(), respCharset)));
+                    }
 
-                    if (void.class.equals(returnType)) {
+                    is = HttpUtil.getInputStream(connection, responseContentFormat);
+
+                    if (void.class.equals(operationConfig.concreteReturnType.clazz())) {
                         return null;
                     } else {
-                        T result = null;
-                        Type<T> type = null;
+                        Object result = null;
 
                         switch (responseContentFormat) {
                             case JSON:
                             case JSON_LZ4:
                             case JSON_SNAPPY:
                             case JSON_GZIP:
-
-                                type = N.typeOf(returnType);
-
-                                if (type.isSerializable()) {
-                                    result = type.valueOf(IOUtil.readString(is, charset));
+                                if (operationConfig.concreteReturnType.isSerializable()) {
+                                    result = operationConfig.concreteReturnType.valueOf(IOUtil.readString(is, respCharset));
                                 } else {
-                                    result = responseParser.deserialize(returnType, IOUtil.newBufferedReader(is, charset), _config.dc);
+                                    result = responseParser.deserialize(operationConfig.concreteReturnType.clazz(), IOUtil.newBufferedReader(is, respCharset),
+                                            responseDC);
                                 }
 
                                 break;
@@ -613,11 +1015,17 @@ public final class HttpProxy {
                             case XML_LZ4:
                             case XML_SNAPPY:
                             case XML_GZIP:
-                                result = responseParser.deserialize(returnType, IOUtil.newBufferedReader(is, charset), _config.dc);
+                                result = responseParser.deserialize(operationConfig.concreteReturnType.clazz(), IOUtil.newBufferedReader(is, respCharset),
+                                        responseDC);
+                                break;
+
+                            case FormUrlEncoded:
+                                result = URLEncodedUtil.decode(operationConfig.concreteReturnType.clazz(), IOUtil.readString(is, respCharset));
+
                                 break;
 
                             case KRYO:
-                                result = responseParser.deserialize(returnType, is, _config.dc);
+                                result = responseParser.deserialize(operationConfig.concreteReturnType.clazz(), is, responseDC);
                                 break;
 
                             default:
@@ -625,10 +1033,10 @@ public final class HttpProxy {
                         }
 
                         if (_logger.isInfoEnabled()) {
-                            if (type != null && type.isSerializable()) {
-                                _logger.info(type.stringOf(result));
+                            if (!operationConfig.concreteReturnType.clazz().equals(void.class) && operationConfig.concreteReturnType.isSerializable()) {
+                                _logger.info(operationConfig.concreteReturnType.stringOf(result));
                             } else {
-                                _logger.info(_config.parser.serialize(result, _config.sc));
+                                _logger.info(responseParser.serialize(result, responseSC));
                             }
                         }
 
@@ -640,172 +1048,57 @@ public final class HttpProxy {
                     httpClient.close(os, is, connection);
                 }
             }
-
-            private Object readRequestParameter(final Object[] args, final OperationConfig operationConfig) {
-                if (N.isNullOrEmpty(args)) {
-                    return null;
-                } else if (operationConfig.paramNameTypeMap.isEmpty()) {
-                    return args[0];
-                } else {
-                    final Map<String, Object> parameterMap = new HashMap<>();
-
-                    for (int i = 0, len = args.length; i < len; i++) {
-                        if (operationConfig.paramFields[i] != null) {
-                            parameterMap.put(operationConfig.paramFields[i].value(), args[i]);
-                        } else if (operationConfig.paramPaths[i] != null) {
-                            parameterMap.put(operationConfig.paramPaths[i].value(), args[i] == null ? "null"
-                                    : (operationConfig.paramPaths[i].encode() ? N.urlEncode(N.stringOf(args[i])) : N.stringOf(args[i])));
-                        }
-                    }
-
-                    return parameterMap;
-                }
-            }
-
-            private HttpClient getHttpClient(final Method method, final Object parameter, final OperationConfig operationConfig) {
-                final String methodName = method.getName();
-                HttpClient httpClient = null;
-
-                if (operationConfig.httpMethod == HttpMethod.POST || operationConfig.httpMethod == HttpMethod.PUT || parameter == null) {
-                    synchronized (_httpClientPool) {
-                        httpClient = _httpClientPool.get(methodName);
-
-                        if (httpClient == null) {
-                            if (operationConfig.requestUrl.equals(_url)) {
-                                httpClient = _httpClient;
-                            } else {
-                                httpClient = HttpClient.create(operationConfig.requestUrl, _maxConnection, _connTimeout, _readTimeout,
-                                        _config.getRequestSettings(), sharedActiveConnectionCounter);
-                            }
-
-                            _httpClientPool.put(methodName, httpClient);
-                        }
-                    }
-                } else {
-                    final Type<?> type = N.typeOf(parameter.getClass());
-                    String requestUrl = operationConfig.requestUrl;
-
-                    if (N.notNullOrEmpty(operationConfig.requestUrlParamNames)) {
-                        final Map<String, Object> m = (Map<String, Object>) parameter;
-
-                        for (Map.Entry<String, String> entry : operationConfig.requestUrlParamNames.entrySet()) {
-                            requestUrl = requestUrl.replace(entry.getValue(), m.remove(entry.getKey()).toString());
-                        }
-                    }
-
-                    if (type.isMap() && ((Map<String, Object>) parameter).size() == 0) {
-                        // ignore.
-                    } else {
-                        if (_config.requestParamNamingPolicy == null || _config.requestParamNamingPolicy == NamingPolicy.LOWER_CAMEL_CASE) {
-                            requestUrl = requestUrl + "?" + N.urlEncode(parameter);
-                        } else {
-                            Object newParameter = parameter;
-
-                            if (type.isEntity()) {
-                                newParameter = Maps.entity2Map(parameter, !DirtyMarkerUtil.isDirtyMarker(parameter.getClass()), null,
-                                        _config.requestParamNamingPolicy);
-                            } else if (type.isMap()) {
-                                final Map<String, Object> m = ((Map<String, Object>) parameter);
-                                final Map<String, Object> newMap = new LinkedHashMap<>();
-
-                                switch (_config.requestParamNamingPolicy) {
-                                    case LOWER_CASE_WITH_UNDERSCORE:
-                                    case UPPER_CASE_WITH_UNDERSCORE: {
-                                        for (Map.Entry<String, Object> entry : m.entrySet()) {
-                                            newMap.put(_config.requestParamNamingPolicy.convert(entry.getKey()), entry.getValue());
-                                        }
-                                        break;
-                                    }
-
-                                    case LOWER_CAMEL_CASE: {
-                                        newMap.putAll(m);
-                                        break;
-                                    }
-
-                                    default:
-                                        throw new IllegalArgumentException("Unsupported Naming policy: " + _config.requestParamNamingPolicy);
-                                }
-
-                                newParameter = newMap;
-                            }
-
-                            requestUrl = requestUrl + "?" + N.urlEncode(newParameter);
-                        }
-                    }
-
-                    httpClient = HttpClient.create(requestUrl, _maxConnection, _connTimeout, _readTimeout, _config.getRequestSettings(),
-                            sharedActiveConnectionCounter);
-                }
-
-                return httpClient;
-            }
         };
 
         return (T) N.newProxyInstance(N.asArray(interfaceClass), h);
     }
 
-    /**
-     * Gets the set of unique path parameters used in the given URI. If a parameter is used twice
-     * in the URI, it will only show up once in the set.
-     *
-     * @param path
-     * @return
-     */
-    static Set<String> parsePathParameters(final String path) {
-        Matcher m = PARAM_URL_REGEX.matcher(path);
-        Set<String> patterns = N.newLinkedHashSet();
-        while (m.find()) {
-            patterns.add(m.group(1));
+    static String composeUrl(final String baseUrl, final String path) {
+        String result = baseUrl;
+
+        if (N.notNullOrEmpty(path)) {
+            if (baseUrl.endsWith("/") || baseUrl.endsWith("\\")) {
+                if (path.startsWith("/") || path.startsWith("\\")) {
+                    result = baseUrl + path.substring(1);
+                } else {
+                    result = baseUrl + path;
+                }
+            } else {
+                if (path.startsWith("/") || path.startsWith("\\")) {
+                    result = baseUrl + path;
+                } else {
+                    result = baseUrl + "/" + path;
+                }
+            }
         }
-        return patterns;
+
+        if (result.endsWith("/") || result.endsWith("\\")) {
+            result = result.substring(0, result.length() - 1);
+        }
+
+        return result;
     }
 
     /**
      * The Class Config.
      */
     public static final class Config {
-
-        /** The parser. */
         private Parser<SerializationConfig<?>, DeserializationConfig<?>> parser;
-
-        /** The sc. */
         private SerializationConfig<?> sc;
-
-        /** The dc. */
         private DeserializationConfig<?> dc;
-
-        /** The handler. */
         private Handler handler;
-
-        /** The executed by thread pool. */
         private boolean executedByThreadPool;
-
-        /** The async executor. */
         private Executor asyncExecutor;
-
-        /** The request settings. */
+        private Predicate<Result<Object, Throwable>> ifRetry;
         private HttpSettings requestSettings;
-
-        /** The operation configs. */
         private Map<String, OperationConfig> operationConfigs;
-
-        /** The request by operatio name. */
-        private boolean requestByOperatioName;
-
-        /** The request url naming policy. */
-        private NamingPolicy requestUrlNamingPolicy;
-
-        /** The request param naming policy. */
-        private NamingPolicy requestParamNamingPolicy;
-
-        /** The encryption user name. */
+        private NamingPolicy queryParamNamingPolicy;
         private String encryptionUserName;
-
-        /** The encryption password. */
         private byte[] encryptionPassword;
-
-        /** The encryption message. */
         private MessageEncryption encryptionMessage;
+
+        final Map<Method, OperationConfig> methodConfigs = new HashMap<>();
+        final Map<Method, Throwables.BiFunction<Object, Object[], Object, Exception>> methodCalls = new HashMap<>();
 
         /**
          * Gets the parser.
@@ -913,6 +1206,27 @@ public final class HttpProxy {
         }
 
         /**
+         * Gets the if retry.
+         *
+         * @return
+         */
+        public Predicate<Result<Object, Throwable>> getIfRetry() {
+            return ifRetry;
+        }
+
+        /**
+         * Sets the if retry.
+         *
+         * @param ifRetry
+         * @return
+         */
+        public Config setIfRetry(final Predicate<Result<Object, Throwable>> ifRetry) {
+            this.ifRetry = ifRetry;
+
+            return this;
+        }
+
+        /**
          * Gets the handler.
          *
          * @return
@@ -955,64 +1269,22 @@ public final class HttpProxy {
         }
 
         /**
-         * Checks if is request by operatio name.
-         *
-         * @return true, if is request by operatio name
-         */
-        public boolean isRequestByOperatioName() {
-            return requestByOperatioName;
-        }
-
-        /**
-         * Sets the request by operatio name.
-         *
-         * @param requestByOperatioName
-         * @return
-         */
-        public Config setRequestByOperatioName(final boolean requestByOperatioName) {
-            this.requestByOperatioName = requestByOperatioName;
-
-            return this;
-        }
-
-        /**
-         * Gets the request url naming policy.
+         * Gets the query param naming policy.
          *
          * @return
          */
-        public NamingPolicy getRequestUrlNamingPolicy() {
-            return requestUrlNamingPolicy;
+        public NamingPolicy getQueryParamNamingPolicy() {
+            return queryParamNamingPolicy;
         }
 
         /**
-         * Sets the request url naming policy.
+         * Sets the query param naming policy.
          *
-         * @param requestUrlNamingPolicy
+         * @param queryParamNamingPolicy
          * @return
          */
-        public Config setRequestUrlNamingPolicy(final NamingPolicy requestUrlNamingPolicy) {
-            this.requestUrlNamingPolicy = requestUrlNamingPolicy;
-
-            return this;
-        }
-
-        /**
-         * Gets the request param naming policy.
-         *
-         * @return
-         */
-        public NamingPolicy getRequestParamNamingPolicy() {
-            return requestParamNamingPolicy;
-        }
-
-        /**
-         * Sets the request param naming policy.
-         *
-         * @param requestParamNamingPolicy
-         * @return
-         */
-        public Config setRequestParamNamingPolicy(final NamingPolicy requestParamNamingPolicy) {
-            this.requestParamNamingPolicy = requestParamNamingPolicy;
+        public Config setQueryParamNamingPolicy(final NamingPolicy queryParamNamingPolicy) {
+            this.queryParamNamingPolicy = queryParamNamingPolicy;
 
             return this;
         }
@@ -1110,10 +1382,9 @@ public final class HttpProxy {
          */
         @Override
         public String toString() {
-            return "{parser=" + parser + ", sc=" + sc + ", dc=" + dc + ", handler=" + handler + ", executedByThreadPool=" + executedByThreadPool
-                    + ", asyncExecutor=" + asyncExecutor + ", requestSettings=" + requestSettings + ", requestByOperatioName=" + requestByOperatioName
-                    + ", requestUrlNamingPolicy=" + requestUrlNamingPolicy + ", requestParamNamingPolicy=" + requestParamNamingPolicy + ", operationConfigs="
-                    + operationConfigs + "}";
+            return "{parser=" + parser + ", sc=" + sc + ", dc=" + dc + ", handler=" + handler + ", executedByThreadPool=" + executedByThreadPool + ", ifRetry="
+                    + ifRetry + ", asyncExecutor=" + asyncExecutor + ", requestSettings=" + requestSettings + ", queryParamNamingPolicy="
+                    + queryParamNamingPolicy + ", operationConfigs=" + operationConfigs + "}";
         }
     }
 
@@ -1121,102 +1392,49 @@ public final class HttpProxy {
      * The Class OperationConfig.
      */
     public static class OperationConfig {
-
-        /** The request url. */
-        private String requestUrl;
-
-        /** The http method. */
-        private HttpMethod httpMethod;
-
-        /** The request settings. */
         private HttpSettings requestSettings;
-
-        /** The retry times. */
-        private int retryTimes;
-
-        /** The retry interval. */
-        private long retryInterval;
-
-        /** The if retry. */
-        private Function<Throwable, Boolean> ifRetry;
-
-        /** The encryption user name. */
         private String encryptionUserName;
-
-        /** The encryption password. */
         private byte[] encryptionPassword;
-
-        /** The encryption message. */
         private MessageEncryption encryptionMessage;
 
-        /** The request entity name. */
-        String requestEntityName;
+        String requestUrl;
+        String path;
+        HttpMethod httpMethod;
+        long connectionTimeout;
+        long readTimeout;
+        int maxRetryTimes;
+        long retryInterval;
 
-        /** The response entity name. */
+        String requestEntityName;
         String responseEntityName;
 
-        /** The request url param names. */
-        Map<String, String> requestUrlParamNames;
+        String[] urlPartsSplittedByParaNames;
+        String[] urlParamNames;
+        Set<String> urlParamNameSet;
+        Type<Object>[] paramTypes;
+        Field[] fieldParams;
+        Set<String> fieldNameSet;
+        Tuple2<String, Boolean>[] pathParams;
+        Set<String> pathParamNameSet;
+        String[] queryParams;
+        Set<String> queryParamNameSet;
+        Set<String> pathAndQueryParamNameSet;
+        Map<String, Tuple2<Integer, Type<Object>>> paramNameTypeMap;
+        ContentFormat contentFormat = null;
+        ContentFormat acceptFormat = null;
 
-        /** The param types. */
-        Type<?>[] paramTypes;
+        String contentCharset = null;
+        String acceptCharset = null;
 
-        /** The param fields. */
-        Field[] paramFields;
+        Parser<SerializationConfig<?>, DeserializationConfig<?>> parser;
+        SerializationConfig<?> sc;
+        DeserializationConfig<?> dc;
 
-        /** The param paths. */
-        Path[] paramPaths;
+        Type<Object> returnType = null;
+        Type<Object> concreteReturnType = null;
 
-        /** The param name type map. */
-        Map<String, Type<?>> paramNameTypeMap;
-
-        /**
-         * Gets the request url.
-         *
-         * @return
-         */
-        public String getRequestUrl() {
-            return requestUrl;
-        }
-
-        /**
-         * Sets the request url.
-         *
-         * @param requestUrl
-         * @return
-         */
-        public OperationConfig setRequestUrl(final String requestUrl) {
-            this.requestUrl = requestUrl;
-            requestUrlParamNames = new LinkedHashMap<>();
-
-            Matcher m = PARAM_URL_REGEX.matcher(requestUrl);
-            while (m.find()) {
-                requestUrlParamNames.put(m.group(1), m.group());
-            }
-
-            return this;
-        }
-
-        /**
-         * Gets the http method.
-         *
-         * @return
-         */
-        public HttpMethod getHttpMethod() {
-            return httpMethod;
-        }
-
-        /**
-         * Sets the http method.
-         *
-         * @param httpMethod
-         * @return
-         */
-        public OperationConfig setHttpMethod(final HttpMethod httpMethod) {
-            this.httpMethod = httpMethod;
-
-            return this;
-        }
+        boolean isFutureReturnType = false;
+        boolean isContinuableFutureReturnType = false;
 
         /**
          * Gets the request settings.
@@ -1235,69 +1453,6 @@ public final class HttpProxy {
          */
         public OperationConfig setRequestSettings(final HttpSettings requestSettings) {
             this.requestSettings = requestSettings;
-
-            return this;
-        }
-
-        /**
-         * Gets the retry times.
-         *
-         * @return
-         */
-        public int getRetryTimes() {
-            return retryTimes;
-        }
-
-        /**
-         * Sets the retry times.
-         *
-         * @param retryTimes
-         * @return
-         */
-        public OperationConfig setRetryTimes(final int retryTimes) {
-            this.retryTimes = retryTimes;
-
-            return this;
-        }
-
-        /**
-         * Gets the retry interval.
-         *
-         * @return
-         */
-        public long getRetryInterval() {
-            return retryInterval;
-        }
-
-        /**
-         * Sets the retry interval.
-         *
-         * @param retryInterval
-         * @return
-         */
-        public OperationConfig setRetryInterval(final long retryInterval) {
-            this.retryInterval = retryInterval;
-
-            return this;
-        }
-
-        /**
-         * Gets the if retry.
-         *
-         * @return
-         */
-        public Function<Throwable, Boolean> getIfRetry() {
-            return ifRetry;
-        }
-
-        /**
-         * Sets the if retry.
-         *
-         * @param ifRetry
-         * @return
-         */
-        public OperationConfig setIfRetry(final Function<Throwable, Boolean> ifRetry) {
-            this.ifRetry = ifRetry;
 
             return this;
         }
@@ -1375,56 +1530,13 @@ public final class HttpProxy {
          */
         void validatePathName(final String name) {
             if (!PARAM_NAME_REGEX.matcher(name).matches()) {
-                throw new RuntimeException(String.format("@Path parameter name must match %s. Found: %s", PARAM_URL_REGEX.pattern(), name));
+                throw new IllegalArgumentException(String.format("@Path parameter name must match %s. Found: %s", PARAM_URL_REGEX.pattern(), name));
             }
 
             // Verify URL replacement name is actually present in the URL path.
-            if (!requestUrlParamNames.containsKey(name)) {
-                throw new RuntimeException(String.format("URL \"%s\" does not contain \"{%s}\".", requestUrl, name));
+            if (!urlParamNameSet.contains(name)) {
+                throw new IllegalArgumentException(String.format("URL \"%s\" does not contain \"{%s}\".", path, name));
             }
-        }
-
-        /**
-         *
-         * @return
-         */
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((httpMethod == null) ? 0 : httpMethod.hashCode());
-            result = prime * result + ((requestUrl == null) ? 0 : requestUrl.hashCode());
-            result = prime * result + ((requestSettings == null) ? 0 : requestSettings.hashCode());
-            result = prime * result + retryTimes;
-            result = prime * result + (int) retryInterval;
-            result = prime * result + ((ifRetry == null) ? 0 : ifRetry.hashCode());
-            result = prime * result + ((encryptionUserName == null) ? 0 : encryptionUserName.hashCode());
-            result = prime * result + ((encryptionPassword == null) ? 0 : N.hashCode(encryptionPassword));
-            result = prime * result + ((encryptionMessage == null) ? 0 : encryptionMessage.hashCode());
-            return result;
-        }
-
-        /**
-         *
-         * @param obj
-         * @return true, if successful
-         */
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-
-            if (obj instanceof OperationConfig) {
-                OperationConfig other = (OperationConfig) obj;
-
-                return N.equals(httpMethod, other.httpMethod) && N.equals(requestUrl, other.requestUrl) && N.equals(requestSettings, other.requestSettings)
-                        && N.equals(retryTimes, other.retryTimes) && N.equals(retryInterval, other.retryInterval) && N.equals(ifRetry, other.ifRetry)
-                        && N.equals(encryptionUserName, other.encryptionUserName) && N.equals(encryptionPassword, other.encryptionPassword)
-                        && N.equals(encryptionMessage, other.encryptionMessage);
-            }
-
-            return false;
         }
 
         /**
@@ -1433,8 +1545,8 @@ public final class HttpProxy {
          */
         @Override
         public String toString() {
-            return "{httpMethod=" + httpMethod + ", requestUrl=" + requestUrl + ", requestSettings=" + requestSettings + ", retryTimes=" + retryTimes
-                    + ", retryInterval=" + retryInterval + ", ifRetry=" + ifRetry + "}";
+            return "{httpMethod=" + httpMethod + ", requestUrl=" + requestUrl + ", requestSettings=" + requestSettings + ", maxRetryTimes=" + maxRetryTimes
+                    + ", retryInterval=" + retryInterval + "}";
         }
     }
 

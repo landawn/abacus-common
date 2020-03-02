@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
 @Documented
 @Target(METHOD)
 @Retention(RUNTIME)
-@RestMethod("GET")
+@WebService.HttpMethod(WebService.HttpMethod.GET)
 public @interface GET {
 
     /**

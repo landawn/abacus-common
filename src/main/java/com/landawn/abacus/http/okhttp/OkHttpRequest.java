@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
@@ -31,8 +32,10 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 
 import com.landawn.abacus.http.ContentFormat;
-import com.landawn.abacus.http.HTTP;
 import com.landawn.abacus.http.HttpHeaders;
+import com.landawn.abacus.http.HttpMethod;
+import com.landawn.abacus.http.HttpResponse;
+import com.landawn.abacus.http.HttpUtil;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.KryoParser;
@@ -48,6 +51,7 @@ import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.URLEncodedUtil;
 
 import okhttp3.CacheControl;
 import okhttp3.FormBody;
@@ -110,6 +114,7 @@ public class OkHttpRequest {
     final OkHttpClient httpClient;
     final Request.Builder builder = new Request.Builder();
     RequestBody body;
+    Request request;
 
     OkHttpRequest(OkHttpClient httpClient) {
         this.httpClient = httpClient;
@@ -345,61 +350,66 @@ public class OkHttpRequest {
     }
 
     public Response get() throws IOException {
-        return execute("GET");
+        return execute(HttpMethod.GET);
     }
 
     public <T> T get(Class<T> resultClass) throws IOException {
-        return execute(resultClass, "GET");
+        return execute(resultClass, HttpMethod.GET);
     }
 
     public Response post() throws IOException {
-        return execute("POST");
+        return execute(HttpMethod.POST);
     }
 
     public <T> T post(Class<T> resultClass) throws IOException {
-        return execute(resultClass, "POST");
+        return execute(resultClass, HttpMethod.POST);
     }
 
     public Response put() throws IOException {
-        return execute("PUT");
+        return execute(HttpMethod.PUT);
     }
 
     public <T> T put(Class<T> resultClass) throws IOException {
-        return execute(resultClass, "PUT");
+        return execute(resultClass, HttpMethod.PUT);
     }
 
     public Response delete() throws IOException {
-        return execute("DELETE");
+        return execute(HttpMethod.DELETE);
     }
 
     public <T> T delete(Class<T> resultClass) throws IOException {
-        return execute(resultClass, "DELETE");
+        return execute(resultClass, HttpMethod.DELETE);
     }
 
     public Response head() throws IOException {
-        return execute("HEAD");
+        return execute(HttpMethod.HEAD);
     }
 
     public Response patch() throws IOException {
-        return execute("PATCH");
+        return execute(HttpMethod.PATCH);
     }
 
-    protected Response execute(String method) throws IOException {
-        body = (body == null && "DELETE".equals(method)) ? Util.EMPTY_REQUEST : body;
+    protected Response execute(final HttpMethod httpMethod) throws IOException {
+        body = (body == null && HttpMethod.DELETE.equals(httpMethod)) ? Util.EMPTY_REQUEST : body;
 
-        return httpClient.newCall(builder.method(method, body).build()).execute();
+        request = builder.method(httpMethod.name(), body).build();
+
+        return httpClient.newCall(request).execute();
     }
 
-    protected <T> T execute(Class<T> resultClass, String method) throws IOException {
+    protected <T> T execute(final Class<T> resultClass, final HttpMethod httpMethod) throws IOException {
         N.checkArgNotNull(resultClass, "resultClass");
+        N.checkArgument(!HttpResponse.class.equals(resultClass), "Return type can't be HttpResponse");
 
-        try (Response resp = execute(method)) {
+        try (Response resp = execute(httpMethod)) {
             if (resp.isSuccessful()) {
-                final ContentFormat respContentFormat = HTTP.getContentFormat(resp.header(HttpHeaders.Names.CONTENT_TYPE),
-                        resp.header(HttpHeaders.Names.CONTENT_ENCODING));
-                final Charset respCharset = HTTP.getCharset(resp.header(HttpHeaders.Names.CONTENT_TYPE));
+                final ContentFormat requestContentFormat = HttpUtil.getContentFormat(request.header(HttpHeaders.Names.CONTENT_TYPE),
+                        request.header(HttpHeaders.Names.CONTENT_ENCODING));
+                final Map<String, List<String>> respHeaders = resp.headers().toMultimap();
+                final Charset respCharset = HttpUtil.getCharset(respHeaders);
+                final ContentFormat respContentFormat = HttpUtil.getResponseContentFormat(respHeaders, requestContentFormat);
 
-                final InputStream is = HTTP.wrapInputStream(resp.body().byteStream(), respContentFormat);
+                final InputStream is = HttpUtil.wrapInputStream(resp.body().byteStream(), respContentFormat);
 
                 if (resultClass == null || resultClass.equals(String.class)) {
                     return (T) IOUtil.readString(is, respCharset);
@@ -408,11 +418,13 @@ public class OkHttpRequest {
                 } else {
                     if (respContentFormat == ContentFormat.KRYO && kryoParser != null) {
                         return kryoParser.deserialize(resultClass, is);
+                    } else if (respContentFormat == ContentFormat.FormUrlEncoded) {
+                        return URLEncodedUtil.decode(resultClass, IOUtil.readString(is, respCharset));
                     } else {
                         final BufferedReader br = Objectory.createBufferedReader(new InputStreamReader(is, respCharset));
 
                         try {
-                            return HTTP.getParser(respContentFormat).deserialize(resultClass, br);
+                            return HttpUtil.getParser(respContentFormat).deserialize(resultClass, br);
                         } finally {
                             Objectory.recycle(br);
                         }

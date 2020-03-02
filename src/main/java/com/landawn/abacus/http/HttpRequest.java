@@ -52,18 +52,18 @@ public class HttpRequest extends AbstractHttpRequest<HttpRequest> {
     /**
      *
      * @param url
-     * @param connTimeout
+     * @param connectionTimeout
      * @param readTimeout
      * @return
      */
-    public static HttpRequest url(final String url, final long connTimeout, final long readTimeout) {
-        return new HttpRequest(HttpClient.create(url, 1, connTimeout, readTimeout));
+    public static HttpRequest url(final String url, final long connectionTimeout, final long readTimeout) {
+        return new HttpRequest(HttpClient.create(url, 1, connectionTimeout, readTimeout));
     }
 
-    public HttpRequest connectionTimeout(int connTimeout) {
+    public HttpRequest connectionTimeout(int connectionTimeout) {
         checkSettings();
 
-        settings.setConnectionTimeout(connTimeout);
+        settings.setConnectionTimeout(connectionTimeout);
 
         return this;
     }

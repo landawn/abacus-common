@@ -103,11 +103,11 @@ public final class HttpClient extends AbstractHttpClient {
      *
      * @param url
      * @param maxConnection
-     * @param connTimeout
+     * @param connectionTimeout
      * @param readTimeout
      */
-    protected HttpClient(String url, int maxConnection, long connTimeout, long readTimeout) {
-        this(url, maxConnection, connTimeout, readTimeout, null);
+    protected HttpClient(String url, int maxConnection, long connectionTimeout, long readTimeout) {
+        this(url, maxConnection, connectionTimeout, readTimeout, null);
     }
 
     /**
@@ -115,13 +115,13 @@ public final class HttpClient extends AbstractHttpClient {
      *
      * @param url
      * @param maxConnection
-     * @param connTimeout
+     * @param connectionTimeout
      * @param readTimeout
      * @param settings
      * @throws UncheckedIOException the unchecked IO exception
      */
-    protected HttpClient(String url, int maxConnection, long connTimeout, long readTimeout, HttpSettings settings) throws UncheckedIOException {
-        this(url, maxConnection, connTimeout, readTimeout, settings, new AtomicInteger(0));
+    protected HttpClient(String url, int maxConnection, long connectionTimeout, long readTimeout, HttpSettings settings) throws UncheckedIOException {
+        this(url, maxConnection, connectionTimeout, readTimeout, settings, new AtomicInteger(0));
     }
 
     /**
@@ -129,14 +129,14 @@ public final class HttpClient extends AbstractHttpClient {
      *
      * @param url
      * @param maxConnection
-     * @param connTimeout
+     * @param connectionTimeout
      * @param readTimeout
      * @param settings
      * @param sharedActiveConnectionCounter
      */
-    protected HttpClient(String url, int maxConnection, long connTimeout, long readTimeout, HttpSettings settings,
+    protected HttpClient(String url, int maxConnection, long connectionTimeout, long readTimeout, HttpSettings settings,
             final AtomicInteger sharedActiveConnectionCounter) {
-        super(url, maxConnection, connTimeout, readTimeout, settings);
+        super(url, maxConnection, connectionTimeout, readTimeout, settings);
 
         try {
             this._netURL = new URL(url);
@@ -169,53 +169,54 @@ public final class HttpClient extends AbstractHttpClient {
     /**
      *
      * @param url
-     * @param connTimeout
+     * @param connectionTimeout
      * @param readTimeout
      * @return
      */
-    public static HttpClient create(String url, long connTimeout, long readTimeout) {
-        return new HttpClient(url, DEFAULT_MAX_CONNECTION, connTimeout, readTimeout);
+    public static HttpClient create(String url, long connectionTimeout, long readTimeout) {
+        return new HttpClient(url, DEFAULT_MAX_CONNECTION, connectionTimeout, readTimeout);
     }
 
     /**
      *
      * @param url
      * @param maxConnection
-     * @param connTimeout
+     * @param connectionTimeout
      * @param readTimeout
      * @return
      */
-    public static HttpClient create(String url, int maxConnection, long connTimeout, long readTimeout) {
-        return new HttpClient(url, maxConnection, connTimeout, readTimeout);
+    public static HttpClient create(String url, int maxConnection, long connectionTimeout, long readTimeout) {
+        return new HttpClient(url, maxConnection, connectionTimeout, readTimeout);
     }
 
     /**
      *
      * @param url
      * @param maxConnection
-     * @param connTimeout
+     * @param connectionTimeout
      * @param readTimeout
      * @param settings
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static HttpClient create(String url, int maxConnection, long connTimeout, long readTimeout, HttpSettings settings) throws UncheckedIOException {
-        return new HttpClient(url, maxConnection, connTimeout, readTimeout, settings);
+    public static HttpClient create(String url, int maxConnection, long connectionTimeout, long readTimeout, HttpSettings settings)
+            throws UncheckedIOException {
+        return new HttpClient(url, maxConnection, connectionTimeout, readTimeout, settings);
     }
 
     /**
      *
      * @param url
      * @param maxConnection
-     * @param connTimeout
+     * @param connectionTimeout
      * @param readTimeout
      * @param settings
      * @param sharedActiveConnectionCounter
      * @return
      */
-    public static HttpClient create(String url, int maxConnection, long connTimeout, long readTimeout, HttpSettings settings,
+    public static HttpClient create(String url, int maxConnection, long connectionTimeout, long readTimeout, HttpSettings settings,
             final AtomicInteger sharedActiveConnectionCounter) {
-        return new HttpClient(url, maxConnection, connTimeout, readTimeout, settings, sharedActiveConnectionCounter);
+        return new HttpClient(url, maxConnection, connectionTimeout, readTimeout, settings, sharedActiveConnectionCounter);
     }
 
     /**
@@ -299,14 +300,14 @@ public final class HttpClient extends AbstractHttpClient {
         final ContentFormat requestContentFormat = getContentFormat(settings);
         final boolean doOutput = request != null && !(httpMethod.equals(HttpMethod.GET) || httpMethod.equals(HttpMethod.DELETE));
         final HttpURLConnection connection = openConnection(httpMethod, request, doOutput, settings);
-        final Charset requestCharset = HTTP.getCharset(settings == null || settings.headers().isEmpty() ? _settings.headers() : settings.headers());
+        final Charset requestCharset = HttpUtil.getCharset(settings == null || settings.headers().isEmpty() ? _settings.headers() : settings.headers());
         final long sentRequestAtMillis = System.currentTimeMillis();
         InputStream is = null;
         OutputStream os = null;
 
         try {
             if (request != null && (httpMethod.equals(HttpMethod.POST) || httpMethod.equals(HttpMethod.PUT))) {
-                os = HTTP.getOutputStream(connection, requestContentFormat, getContentType(settings), getContentEncoding(settings));
+                os = HttpUtil.getOutputStream(connection, requestContentFormat, getContentType(settings), getContentEncoding(settings));
 
                 Type<Object> type = N.typeOf(request.getClass());
 
@@ -332,13 +333,15 @@ public final class HttpClient extends AbstractHttpClient {
                     } else if (request.getClass().equals(byte[].class)) {
                         IOUtil.write(os, (byte[]) request);
                     } else {
-                        if (requestContentFormat == ContentFormat.KRYO && HTTP.kryoParser != null) {
-                            HTTP.kryoParser.serialize(os, request);
+                        if (requestContentFormat == ContentFormat.KRYO && HttpUtil.kryoParser != null) {
+                            HttpUtil.kryoParser.serialize(os, request);
+                        } else if (requestContentFormat == ContentFormat.FormUrlEncoded) {
+                            IOUtil.write(os, URLEncodedUtil.encode(request, requestCharset).getBytes(requestCharset));
                         } else {
                             final BufferedWriter bw = Objectory.createBufferedWriter(new OutputStreamWriter(os, requestCharset));
 
                             try {
-                                HTTP.getParser(requestContentFormat).serialize(bw, request);
+                                HttpUtil.getParser(requestContentFormat).serialize(bw, request);
 
                                 bw.flush();
                             } finally {
@@ -348,18 +351,20 @@ public final class HttpClient extends AbstractHttpClient {
                     }
                 }
 
-                HTTP.flush(os);
+                HttpUtil.flush(os);
             }
 
-            final ContentFormat respContentFormat = HTTP.getContentFormat(connection);
             final int code = connection.getResponseCode();
             final Map<String, List<String>> respHeaders = connection.getHeaderFields();
-            final Charset respCharset = HTTP.getCharset(respHeaders);
-            is = HTTP.getInputOrErrorStream(connection, respContentFormat);
+            final Charset respCharset = HttpUtil.getCharset(respHeaders);
+            final ContentFormat respContentFormat = HttpUtil.getResponseContentFormat(respHeaders, requestContentFormat);
 
             if ((code < 200 || code >= 300) && (resultClass == null || !resultClass.equals(HttpResponse.class))) {
-                throw new UncheckedIOException(new IOException(code + ": " + connection.getResponseMessage() + ". " + IOUtil.readString(is, respCharset)));
+                throw new UncheckedIOException(
+                        new IOException(code + ": " + connection.getResponseMessage() + ". " + IOUtil.readString(connection.getErrorStream(), respCharset)));
             }
+
+            is = HttpUtil.getInputStream(connection, respContentFormat);
 
             if (isOneWayRequest(settings)) {
                 return null;
@@ -381,20 +386,22 @@ public final class HttpClient extends AbstractHttpClient {
                 } else {
                     if (resultClass != null && resultClass.equals(HttpResponse.class)) {
                         return (T) new HttpResponse(sentRequestAtMillis, System.currentTimeMillis(), code, connection.getResponseMessage(), respHeaders,
-                                IOUtil.readAllBytes(is), respContentFormat);
+                                IOUtil.readAllBytes(is), respContentFormat, respCharset);
                     } else {
                         if (resultClass == null || resultClass.equals(String.class)) {
                             return (T) IOUtil.readString(is, respCharset);
                         } else if (byte[].class.equals(resultClass)) {
                             return (T) IOUtil.readAllBytes(is);
                         } else {
-                            if (respContentFormat == ContentFormat.KRYO && HTTP.kryoParser != null) {
-                                return HTTP.kryoParser.deserialize(resultClass, is);
+                            if (respContentFormat == ContentFormat.KRYO && HttpUtil.kryoParser != null) {
+                                return HttpUtil.kryoParser.deserialize(resultClass, is);
+                            } else if (respContentFormat == ContentFormat.FormUrlEncoded) {
+                                return URLEncodedUtil.decode(resultClass, IOUtil.readString(is, respCharset));
                             } else {
                                 final BufferedReader br = Objectory.createBufferedReader(new InputStreamReader(is, respCharset));
 
                                 try {
-                                    return HTTP.getParser(respContentFormat).deserialize(resultClass, br);
+                                    return HttpUtil.getParser(respContentFormat).deserialize(resultClass, br);
                                 } finally {
                                     Objectory.recycle(br);
                                 }
@@ -488,14 +495,14 @@ public final class HttpClient extends AbstractHttpClient {
                 }
             }
 
-            int connTimeout = _connTimeout > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) _connTimeout;
+            int connectionTimeout = _connectionTimeout > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) _connectionTimeout;
 
             if (settings != null) {
-                connTimeout = settings.getConnectionTimeout();
+                connectionTimeout = settings.getConnectionTimeout();
             }
 
-            if (connTimeout > 0) {
-                connection.setConnectTimeout(connTimeout);
+            if (connectionTimeout > 0) {
+                connection.setConnectTimeout(connectionTimeout);
             }
 
             int readTimeout = _readTimeout > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) _readTimeout;

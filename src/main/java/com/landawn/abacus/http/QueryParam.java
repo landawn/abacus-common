@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 HaiYang Li
+ * Copyright (C) 2020 HaiYang Li
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -14,11 +14,17 @@
 
 package com.landawn.abacus.http;
 
-/**
- * 
- * @author haiyangl
- *
- */
-public enum HttpMethod {
-    GET, POST, PUT, DELETE, HEAD, OPTIONS, TRACE, CONNECT, PATCH;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+@Documented
+@Retention(RUNTIME)
+@Target(PARAMETER)
+public @interface QueryParam {
+
+    String value();
 }

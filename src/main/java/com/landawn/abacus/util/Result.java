@@ -186,6 +186,20 @@ public final class Result<T, E extends Throwable> {
     /**
      * Or else throw.
      *
+     * @return
+     * @throws E the e
+     */
+    public T orElseThrow(E exception) throws E {
+        if (exception == null) {
+            return value;
+        } else {
+            throw exception;
+        }
+    }
+
+    /**
+     * Or else throw.
+     *
      * @param <E2>
      * @param exceptionSupplierIfErrorOccurred
      * @return

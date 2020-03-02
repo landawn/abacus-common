@@ -17,13 +17,28 @@ package com.landawn.abacus.http;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.nio.charset.Charset;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.GZIPOutputStream;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.parser.DeserializationConfig;
@@ -48,7 +63,7 @@ import com.landawn.abacus.util.WD;
  * @since 0.8
  */
 @Internal
-public final class HTTP {
+public final class HttpUtil {
     static final Charset DEFAULT_CHARSET = Charsets.UTF_8;
 
     /** The Constant JSON. */
@@ -93,6 +108,7 @@ public final class HTTP {
         contentFormat2Parser.put(ContentFormat.XML_LZ4, xmlParser);
         contentFormat2Parser.put(ContentFormat.XML_SNAPPY, xmlParser);
         contentFormat2Parser.put(ContentFormat.XML_GZIP, xmlParser);
+        contentFormat2Parser.put(ContentFormat.FormUrlEncoded, jsonParser);
         contentFormat2Parser.put(ContentFormat.KRYO, kryoParser);
 
         // by default
@@ -106,14 +122,15 @@ public final class HTTP {
     private static final Map<ContentFormat, String> contentFormat2Type = new EnumMap<>(ContentFormat.class);
 
     static {
-        contentFormat2Type.put(ContentFormat.XML, HttpHeaders.Values.APPLICATION_XML);
-        contentFormat2Type.put(ContentFormat.XML_LZ4, HttpHeaders.Values.APPLICATION_XML);
-        contentFormat2Type.put(ContentFormat.XML_SNAPPY, HttpHeaders.Values.APPLICATION_XML);
-        contentFormat2Type.put(ContentFormat.XML_GZIP, HttpHeaders.Values.APPLICATION_XML);
         contentFormat2Type.put(ContentFormat.JSON, HttpHeaders.Values.APPLICATION_JSON);
         contentFormat2Type.put(ContentFormat.JSON_LZ4, HttpHeaders.Values.APPLICATION_JSON);
         contentFormat2Type.put(ContentFormat.JSON_SNAPPY, HttpHeaders.Values.APPLICATION_JSON);
         contentFormat2Type.put(ContentFormat.JSON_GZIP, HttpHeaders.Values.APPLICATION_JSON);
+        contentFormat2Type.put(ContentFormat.XML, HttpHeaders.Values.APPLICATION_XML);
+        contentFormat2Type.put(ContentFormat.XML_LZ4, HttpHeaders.Values.APPLICATION_XML);
+        contentFormat2Type.put(ContentFormat.XML_SNAPPY, HttpHeaders.Values.APPLICATION_XML);
+        contentFormat2Type.put(ContentFormat.XML_GZIP, HttpHeaders.Values.APPLICATION_XML);
+        contentFormat2Type.put(ContentFormat.FormUrlEncoded, HttpHeaders.Values.APPLICATION_URL_ENCODED);
         contentFormat2Type.put(ContentFormat.KRYO, HttpHeaders.Values.APPLICATION_KRYO);
     }
 
@@ -184,7 +201,7 @@ public final class HTTP {
             return null;
         }
 
-        return contentFormat2Type.get(contentFormat);
+        return contentFormat.contentType();
     }
 
     /**
@@ -198,7 +215,7 @@ public final class HTTP {
             return null;
         }
 
-        return contentFormat2Encoding.get(contentFormat);
+        return contentFormat.contentEncoding();
     }
 
     /**
@@ -224,6 +241,8 @@ public final class HTTP {
                 contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_JSON);
             } else if (StringUtil.containsIgnoreCase(contentType, HttpHeaders.Values.APPLICATION_XML)) {
                 contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_XML);
+            } else if (StringUtil.containsIgnoreCase(contentType, HttpHeaders.Values.APPLICATION_URL_ENCODED)) {
+                contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_URL_ENCODED);
             } else if (StringUtil.containsIgnoreCase(contentType, HttpHeaders.Values.APPLICATION_KRYO)) {
                 contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_KRYO);
             }
@@ -234,6 +253,8 @@ public final class HTTP {
                 contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_JSON);
             } else if (StringUtil.containsIgnoreCase(contentType, XML)) {
                 contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_XML);
+            } else if (StringUtil.containsIgnoreCase(contentType, URL_ENCODED)) {
+                contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_URL_ENCODED);
             } else if (StringUtil.containsIgnoreCase(contentType, KRYO)) {
                 contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_KRYO);
             } else {
@@ -268,6 +289,29 @@ public final class HTTP {
      */
     public static ContentFormat getContentFormat(final HttpURLConnection connection) {
         return getContentFormat(connection.getHeaderField(HttpHeaders.Names.CONTENT_TYPE), connection.getHeaderField(HttpHeaders.Names.CONTENT_ENCODING));
+    }
+
+    public static ContentFormat getResponseContentFormat(final Map<String, ?> respHeaders, final ContentFormat requestContentFormat) {
+        String contentType = null;
+        String contentEncoding = null;
+
+        if (respHeaders != null && respHeaders.containsKey(HttpHeaders.Names.CONTENT_TYPE)) {
+            contentType = N.stringOf(respHeaders.get(HttpHeaders.Names.CONTENT_TYPE));
+        }
+
+        if (N.isNullOrEmpty(contentType) && requestContentFormat != null) {
+            contentType = requestContentFormat.contentType();
+        }
+
+        if (respHeaders != null && respHeaders.containsKey(HttpHeaders.Names.CONTENT_ENCODING)) {
+            contentEncoding = N.stringOf(respHeaders.get(HttpHeaders.Names.CONTENT_ENCODING));
+        }
+
+        if (N.isNullOrEmpty(contentEncoding) && requestContentFormat != null) {
+            contentEncoding = requestContentFormat.contentEncoding();
+        }
+
+        return getContentFormat(contentType, contentEncoding);
     }
 
     /**
@@ -347,18 +391,6 @@ public final class HTTP {
      *
      * @param connection
      * @param contentFormat
-     * @return
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    public static OutputStream getOutputStream(final HttpURLConnection connection, final ContentFormat contentFormat) throws IOException {
-        return getOutputStream(connection, contentFormat, HTTP.getContentType(contentFormat), HTTP.getContentEncoding(contentFormat));
-    }
-
-    /**
-     * Gets the output stream.
-     *
-     * @param connection
-     * @param contentFormat
      * @param contentType
      * @param contentEncoding
      * @return
@@ -390,49 +422,21 @@ public final class HTTP {
      * Gets the input stream.
      *
      * @param connection
-     * @return
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    public static InputStream getInputStream(final HttpURLConnection connection) throws IOException {
-        return getInputStream(connection, getContentFormat(connection));
-    }
-
-    /**
-     * Gets the input stream.
-     *
-     * @param connection
      * @param contentFormat
      * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public static InputStream getInputStream(final HttpURLConnection connection, ContentFormat contentFormat) throws IOException {
-        return wrapInputStream(connection.getInputStream(), contentFormat);
-    }
+        final int code = connection.getResponseCode();
 
-    /**
-     * Gets the input or error stream.
-     *
-     * @param connection
-     * @return
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    public static InputStream getInputOrErrorStream(final HttpURLConnection connection) throws IOException {
-        return getInputOrErrorStream(connection, getContentFormat(connection));
-    }
-
-    /**
-     * Gets the input or error stream.
-     *
-     * @param connection
-     * @param contentFormat
-     * @return
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    public static InputStream getInputOrErrorStream(final HttpURLConnection connection, ContentFormat contentFormat) throws IOException {
-        try {
-            return N.defaultIfNull(wrapInputStream(connection.getInputStream(), contentFormat), N.emptyInputStream());
-        } catch (IOException e) {
-            return N.defaultIfNull(wrapInputStream(connection.getErrorStream(), contentFormat), N.emptyInputStream());
+        if (code >= 200 && code < 300) {
+            try {
+                return N.defaultIfNull(wrapInputStream(connection.getInputStream(), contentFormat), N.emptyInputStream());
+            } catch (IOException e) {
+                return N.defaultIfNull(connection.getErrorStream(), N.emptyInputStream());
+            }
+        } else {
+            return N.defaultIfNull(connection.getErrorStream(), N.emptyInputStream());
         }
     }
 
@@ -499,7 +503,7 @@ public final class HTTP {
 
     private static final String CHARSET_SEQUAL = "charset=";
 
-    private static Charset getCharset(final String contentType, final Charset defaultIfNull) {
+    public static Charset getCharset(final String contentType, final Charset defaultIfNull) {
         if (N.isNullOrEmpty(contentType)) {
             return defaultIfNull;
         }
@@ -513,5 +517,282 @@ public final class HTTP {
         int toIndex = contentType.indexOf(WD._SEMICOLON, fromIndex);
 
         return Charsets.get(contentType.substring(fromIndex + CHARSET_SEQUAL.length(), toIndex > 0 ? toIndex : contentType.length()));
+    }
+
+    public static HttpMethod getHttpMethod(final Method method) {
+        final Set<HttpMethod> httpMethods = getHttpMethods(method);
+
+        return N.firstOrNullIfEmpty(httpMethods);
+    }
+
+    public static Set<HttpMethod> getHttpMethods(final Method method) {
+        final Set<HttpMethod> result = new HashSet<>();
+
+        for (Annotation methodAnnotation : N.nullToEmpty(method.getAnnotations(), Annotation[].class)) {
+            if (methodAnnotation.annotationType() == WebMethod.class) {
+                final String methodAttr = ((WebMethod) methodAnnotation).httpMethod();
+
+                if (N.notNullOrEmpty(methodAttr)) {
+                    result.add(HttpMethod.valueOf(methodAttr.toUpperCase()));
+                }
+            }
+        }
+
+        for (Annotation methodAnnotation : N.nullToEmpty(method.getAnnotations(), Annotation[].class)) {
+            Class<? extends Annotation> annotationType = methodAnnotation.annotationType();
+
+            for (Annotation innerAnnotation : annotationType.getAnnotations()) {
+                if (WebService.HttpMethod.class == innerAnnotation.annotationType()) {
+                    result.add(HttpMethod.valueOf(((WebService.HttpMethod) innerAnnotation).value().toUpperCase()));
+                }
+            }
+        }
+
+        try {
+            for (Annotation methodAnnotation : N.nullToEmpty(method.getAnnotations(), Annotation[].class)) {
+                Class<? extends Annotation> annotationType = methodAnnotation.annotationType();
+
+                for (Annotation innerAnnotation : annotationType.getAnnotations()) {
+                    if (javax.ws.rs.HttpMethod.class == innerAnnotation.annotationType()) {
+                        result.add(HttpMethod.valueOf(((javax.ws.rs.HttpMethod) innerAnnotation).value().toUpperCase()));
+                    }
+                }
+            }
+        } catch (Throwable e) {
+            // ignore.
+        }
+
+        return result;
+    }
+
+    public static String getHttpPath(final Method method) {
+        return getHttpPath(method.getAnnotations());
+    }
+
+    public static String getHttpPath(final Annotation[] annotations) {
+        if (N.isNullOrEmpty(annotations)) {
+            return null;
+        }
+
+        String result = null;
+
+        for (Annotation methodAnnotation : annotations) {
+            if (methodAnnotation.annotationType() == WebService.class) {
+                final String value = ((WebService) methodAnnotation).path();
+
+                if (N.notNullOrEmpty(value)) {
+                    result = value;
+
+                    break;
+                }
+            }
+        }
+
+        for (Annotation methodAnnotation : annotations) {
+            if (methodAnnotation.annotationType() == WebMethod.class) {
+                final String value = ((WebMethod) methodAnnotation).path();
+
+                if (N.notNullOrEmpty(value)) {
+                    result = value;
+
+                    break;
+                }
+            }
+        }
+
+        for (Annotation methodAnnotation : annotations) {
+            Class<? extends Annotation> annotationType = methodAnnotation.annotationType();
+
+            for (Annotation innerAnnotation : annotationType.getAnnotations()) {
+                if (WebService.HttpMethod.class == innerAnnotation.annotationType()) {
+                    try {
+                        final String value = (String) annotationType.getMethod("value").invoke(methodAnnotation);
+
+                        if (N.notNullOrEmpty(value)) {
+                            result = value;
+
+                            break;
+                        }
+                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+                        throw new RuntimeException("Failed to extract String 'value' from @%s annotation:" + annotationType.getSimpleName());
+                    }
+                }
+            }
+        }
+
+        for (Annotation methodAnnotation : annotations) {
+            if (methodAnnotation.annotationType() == Path.class) {
+                final String value = ((Path) methodAnnotation).value();
+
+                if (N.notNullOrEmpty(value)) {
+                    result = value;
+
+                    break;
+                }
+            }
+        }
+
+        try {
+            for (Annotation methodAnnotation : annotations) {
+                if (methodAnnotation.annotationType() == javax.ws.rs.Path.class) {
+                    final String value = ((javax.ws.rs.Path) methodAnnotation).value();
+
+                    if (N.notNullOrEmpty(value)) {
+                        result = value;
+
+                        break;
+                    }
+                }
+            }
+        } catch (Throwable e) {
+            // ignore.
+        }
+
+        return result;
+    }
+
+    public static ContentFormat getContentFormat(final Annotation[] annotations, final ContentFormat defaultContentFormat) {
+        if (N.isNullOrEmpty(annotations)) {
+            return defaultContentFormat;
+        }
+
+        ContentFormat result = null;
+
+        for (Annotation methodAnnotation : annotations) {
+            if (methodAnnotation.annotationType() == WebService.class) {
+                final ContentFormat value = ((WebService) methodAnnotation).contentFormat();
+
+                if (value != null && value != ContentFormat.NONE) {
+                    result = value;
+
+                    break;
+                }
+            }
+        }
+
+        for (Annotation methodAnnotation : annotations) {
+            if (methodAnnotation.annotationType() == WebMethod.class) {
+                final ContentFormat value = ((WebMethod) methodAnnotation).contentFormat();
+
+                if (value != null && value != ContentFormat.NONE) {
+                    result = value;
+
+                    break;
+                }
+            }
+        }
+
+        return result == null || result == ContentFormat.NONE ? defaultContentFormat : result;
+    }
+
+    public static ContentFormat getAcceptFormat(final Annotation[] annotations, final ContentFormat defaultContentFormat) {
+        if (N.isNullOrEmpty(annotations)) {
+            return defaultContentFormat;
+        }
+
+        ContentFormat result = null;
+
+        for (Annotation methodAnnotation : annotations) {
+            if (methodAnnotation.annotationType() == WebService.class) {
+                final ContentFormat value = ((WebService) methodAnnotation).acceptFormat();
+
+                if (value != null && value != ContentFormat.NONE) {
+                    result = value;
+
+                    break;
+                }
+            }
+        }
+
+        for (Annotation methodAnnotation : annotations) {
+            if (methodAnnotation.annotationType() == WebMethod.class) {
+                final ContentFormat value = ((WebMethod) methodAnnotation).acceptFormat();
+
+                if (value != null && value != ContentFormat.NONE) {
+                    result = value;
+
+                    break;
+                }
+            }
+        }
+
+        return result == null || result == ContentFormat.NONE ? defaultContentFormat : result;
+    }
+
+    public static Map<String, String> getHttpHeaders(final Annotation[] annotations) {
+        if (N.isNullOrEmpty(annotations)) {
+            return null;
+        }
+
+        Map<String, String> result = null;
+
+        for (Annotation methodAnnotation : annotations) {
+            if (methodAnnotation.annotationType() == WebService.class) {
+                final String[] value = ((WebService) methodAnnotation).headers();
+
+                if (N.notNullOrEmpty(value)) {
+                    result = N.asMap((Object[]) value);
+
+                    break;
+                }
+            }
+        }
+
+        for (Annotation methodAnnotation : annotations) {
+            if (methodAnnotation.annotationType() == WebMethod.class) {
+                final String[] value = ((WebMethod) methodAnnotation).headers();
+
+                if (N.notNullOrEmpty(value)) {
+                    result = N.asMap((Object[]) value);
+
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * For test only. Don't use it on production.
+     */
+    // copied from: https://nakov.com/blog/2009/07/16/disable-certificate-validation-in-java-ssl-connections/
+    @Deprecated
+    public static void turnOffCertificateValidation() {
+        // Create a trust manager that does not validate certificate chains
+        final TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+            @Override
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return null;
+            }
+
+            @Override
+            public void checkClientTrusted(X509Certificate[] certs, String authType) {
+            }
+
+            @Override
+            public void checkServerTrusted(X509Certificate[] certs, String authType) {
+            }
+        } };
+
+        try {
+            // Install the all-trusting trust manager
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+            // Create all-trusting host name verifier
+            HostnameVerifier allHostsValid = new HostnameVerifier() {
+                @Override
+                public boolean verify(String hostname, SSLSession session) {
+                    return true;
+                }
+            };
+
+            // Install the all-trusting host verifier
+            HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+        } catch (KeyManagementException | NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

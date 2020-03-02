@@ -15,14 +15,12 @@
 package com.landawn.abacus.http;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
-import com.landawn.abacus.util.BufferedReader;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.URLEncodedUtil;
 
 /**
  * The Class HttpResponse.
@@ -53,6 +51,8 @@ public class HttpResponse {
     /** The body format. */
     private final ContentFormat bodyFormat;
 
+    private final Charset respCharset;
+
     /**
      * Instantiates a new http response.
      *
@@ -63,16 +63,18 @@ public class HttpResponse {
      * @param headers
      * @param body
      * @param bodyFormat
+     * @param respCharset
      */
-    HttpResponse(long sentRequestAtMillis, long receivedResponseAtMillis, int code, String message, Map<String, List<String>> headers, byte[] body,
-            ContentFormat bodyFormat) {
+    HttpResponse(final long sentRequestAtMillis, final long receivedResponseAtMillis, final int code, final String message,
+            final Map<String, List<String>> headers, final byte[] body, final ContentFormat bodyFormat, final Charset respCharset) {
         this.sentRequestAtMillis = sentRequestAtMillis;
         this.receivedResponseAtMillis = receivedResponseAtMillis;
         this.code = code;
         this.message = message;
         this.headers = headers;
         this.body = body;
-        this.bodyFormat = bodyFormat;
+        this.bodyFormat = bodyFormat == null ? ContentFormat.NONE : bodyFormat;
+        this.respCharset = respCharset;
     }
 
     /**
@@ -148,23 +150,17 @@ public class HttpResponse {
             return (T) body;
         }
 
-        final Charset respCharset = HTTP.getCharset(headers);
-
         if (resultClass == null || resultClass.equals(String.class)) {
             return (T) new String(body, respCharset);
         } else if (byte[].class.equals(resultClass)) {
             return (T) body;
         } else {
-            if (bodyFormat == ContentFormat.KRYO && HTTP.kryoParser != null) {
-                return HTTP.kryoParser.deserialize(resultClass, new ByteArrayInputStream(body));
+            if (bodyFormat == ContentFormat.KRYO && HttpUtil.kryoParser != null) {
+                return HttpUtil.kryoParser.deserialize(resultClass, new ByteArrayInputStream(body));
+            } else if (bodyFormat == ContentFormat.FormUrlEncoded) {
+                return URLEncodedUtil.decode(resultClass, new String(body, respCharset));
             } else {
-                final BufferedReader br = Objectory.createBufferedReader(new InputStreamReader(new ByteArrayInputStream(body), respCharset));
-
-                try {
-                    return HTTP.getParser(bodyFormat).deserialize(resultClass, br);
-                } finally {
-                    Objectory.recycle(br);
-                }
+                return HttpUtil.getParser(bodyFormat).deserialize(resultClass, new String(body, respCharset));
             }
         }
     }

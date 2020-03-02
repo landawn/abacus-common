@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
 @Documented
 @Target(METHOD)
 @Retention(RUNTIME)
-@RestMethod("DELETE")
+@WebService.HttpMethod(WebService.HttpMethod.DELETE)
 public @interface DELETE {
 
     /**

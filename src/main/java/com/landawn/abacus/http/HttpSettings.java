@@ -82,11 +82,11 @@ public final class HttpSettings implements Cloneable {
     /**
      * Note: Only for {@code HttpClient}, not for {@code OKHttpClient}.
      *
-     * @param connTimeout
+     * @param connectionTimeout
      * @return
      */
-    public HttpSettings setConnectionTimeout(int connTimeout) {
-        this.connectionTimeout = connTimeout;
+    public HttpSettings setConnectionTimeout(int connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
 
         return this;
     }
@@ -228,7 +228,7 @@ public final class HttpSettings implements Cloneable {
      */
     public ContentFormat getContentFormat() {
         if ((contentFormat == null || contentFormat == ContentFormat.NONE) && headers != null) {
-            contentFormat = HTTP.getContentFormat((String) headers.get(HttpHeaders.Names.CONTENT_TYPE),
+            contentFormat = HttpUtil.getContentFormat((String) headers.get(HttpHeaders.Names.CONTENT_TYPE),
                     (String) headers.get(HttpHeaders.Names.CONTENT_ENCODING));
         }
 
@@ -285,7 +285,7 @@ public final class HttpSettings implements Cloneable {
         String contentType = (String) headers().get(HttpHeaders.Names.CONTENT_TYPE);
 
         if (N.isNullOrEmpty(contentType) && contentFormat != null) {
-            contentType = HTTP.getContentType(contentFormat);
+            contentType = HttpUtil.getContentType(contentFormat);
 
             if (N.notNullOrEmpty(contentType)) {
                 header(HttpHeaders.Names.CONTENT_TYPE, contentType);
@@ -305,7 +305,7 @@ public final class HttpSettings implements Cloneable {
         String contentEncoding = (String) headers().get(HttpHeaders.Names.CONTENT_ENCODING);
 
         if (N.isNullOrEmpty(contentEncoding) && contentFormat != null) {
-            contentEncoding = HTTP.getContentEncoding(contentFormat);
+            contentEncoding = HttpUtil.getContentEncoding(contentFormat);
 
             if (N.notNullOrEmpty(contentEncoding)) {
                 header(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding);

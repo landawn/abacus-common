@@ -58,7 +58,7 @@ public abstract class AbstractHttpClient implements Closeable {
     protected final int _maxConnection;
 
     /** The conn timeout. */
-    protected final long _connTimeout;
+    protected final long _connectionTimeout;
 
     /** The read timeout. */
     protected final long _readTimeout;
@@ -93,11 +93,11 @@ public abstract class AbstractHttpClient implements Closeable {
      *
      * @param url
      * @param maxConnection
-     * @param connTimeout
+     * @param connectionTimeout
      * @param readTimeout
      */
-    protected AbstractHttpClient(String url, int maxConnection, long connTimeout, long readTimeout) {
-        this(url, maxConnection, connTimeout, readTimeout, null);
+    protected AbstractHttpClient(String url, int maxConnection, long connectionTimeout, long readTimeout) {
+        this(url, maxConnection, connectionTimeout, readTimeout, null);
     }
 
     /**
@@ -105,24 +105,24 @@ public abstract class AbstractHttpClient implements Closeable {
      *
      * @param url
      * @param maxConnection
-     * @param connTimeout
+     * @param connectionTimeout
      * @param readTimeout
      * @param settings
      * @throws UncheckedIOException the unchecked IO exception
      */
-    protected AbstractHttpClient(String url, int maxConnection, long connTimeout, long readTimeout, HttpSettings settings) throws UncheckedIOException {
+    protected AbstractHttpClient(String url, int maxConnection, long connectionTimeout, long readTimeout, HttpSettings settings) throws UncheckedIOException {
         if (N.isNullOrEmpty(url)) {
             throw new IllegalArgumentException("url can't be null or empty");
         }
 
-        if ((maxConnection < 0) || (connTimeout < 0) || (readTimeout < 0)) {
+        if ((maxConnection < 0) || (connectionTimeout < 0) || (readTimeout < 0)) {
             throw new IllegalArgumentException(
-                    "maxConnection, connTimeout or readTimeout can't be less than 0: " + maxConnection + ", " + connTimeout + ", " + readTimeout);
+                    "maxConnection, connectionTimeout or readTimeout can't be less than 0: " + maxConnection + ", " + connectionTimeout + ", " + readTimeout);
         }
 
         this._url = url;
         this._maxConnection = (maxConnection == 0) ? DEFAULT_MAX_CONNECTION : maxConnection;
-        this._connTimeout = (connTimeout == 0) ? DEFAULT_CONNECTION_TIMEOUT : connTimeout;
+        this._connectionTimeout = (connectionTimeout == 0) ? DEFAULT_CONNECTION_TIMEOUT : connectionTimeout;
         this._readTimeout = (readTimeout == 0) ? DEFAULT_READ_TIMEOUT : readTimeout;
         this._settings = settings == null ? HttpSettings.create() : settings;
 
@@ -878,7 +878,7 @@ public abstract class AbstractHttpClient implements Closeable {
             contentFormat = settings.getContentFormat();
         }
 
-        if (contentFormat == null) {
+        if (contentFormat == null || contentFormat == ContentFormat.NONE) {
             contentFormat = _settings.getContentFormat();
         }
 

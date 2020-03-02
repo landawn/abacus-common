@@ -160,7 +160,7 @@ public abstract class SecurityDTO implements Serializable {
                 final ByteArrayOutputStream os = Objectory.createByteArrayOutputStream();
 
                 try {
-                    HTTP.jsonParser.serialize(os, this, jsc);
+                    HttpUtil.jsonParser.serialize(os, this, jsc);
                     nonce = os.toByteArray();
                 } finally {
                     Objectory.recycle(os);
@@ -173,7 +173,7 @@ public abstract class SecurityDTO implements Serializable {
                 final ByteArrayOutputStream os = Objectory.createByteArrayOutputStream();
 
                 try {
-                    HTTP.kryoParser.serialize(os, this);
+                    HttpUtil.kryoParser.serialize(os, this);
                     nonce = os.toByteArray();
                 } finally {
                     Objectory.recycle(os);
@@ -243,7 +243,7 @@ public abstract class SecurityDTO implements Serializable {
                     final ByteArrayOutputStream os = Objectory.createByteArrayOutputStream();
 
                     try {
-                        HTTP.jsonParser.serialize(os, this, jsc);
+                        HttpUtil.jsonParser.serialize(os, this, jsc);
                         nonce = os.toByteArray();
                     } finally {
                         Objectory.recycle(os);
@@ -256,7 +256,7 @@ public abstract class SecurityDTO implements Serializable {
                     final ByteArrayOutputStream os = Objectory.createByteArrayOutputStream();
 
                     try {
-                        HTTP.kryoParser.serialize(os, this);
+                        HttpUtil.kryoParser.serialize(os, this);
                         nonce = os.toByteArray();
                     } finally {
                         Objectory.recycle(os);

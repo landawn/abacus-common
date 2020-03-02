@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
 @Documented
 @Target(METHOD)
 @Retention(RUNTIME)
-@RestMethod(value = "PUT", hasBody = true)
+@WebService.HttpMethod(WebService.HttpMethod.PUT)
 public @interface PUT {
 
     /**

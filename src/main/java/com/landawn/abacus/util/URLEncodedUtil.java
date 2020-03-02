@@ -363,10 +363,21 @@ public final class URLEncodedUtil {
      * @return
      */
     public static String encode(final Object parameters, final Charset charset) {
+        return encode(parameters, charset, NamingPolicy.LOWER_CAMEL_CASE);
+    }
+
+    /**
+     *
+     * @param parameters
+     * @param charset
+     * @param namingPolicy
+     * @return
+     */
+    public static String encode(final Object parameters, final Charset charset, final NamingPolicy namingPolicy) {
         final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
-            encode(sb, parameters, charset);
+            encode(sb, parameters, charset, namingPolicy);
 
             return sb.toString();
         } finally {
@@ -391,8 +402,20 @@ public final class URLEncodedUtil {
      * @param charset
      * @return
      */
-    @SuppressWarnings("rawtypes")
     public static String encode(final String url, final Object parameters, final Charset charset) {
+        return encode(url, parameters, charset, NamingPolicy.LOWER_CAMEL_CASE);
+    }
+
+    /**
+     *
+     * @param url
+     * @param parameters
+     * @param charset
+     * @param namingPolicy
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public static String encode(final String url, final Object parameters, final Charset charset, final NamingPolicy namingPolicy) {
         if (parameters == null || (parameters instanceof Map && ((Map) parameters).isEmpty())) {
             return url;
         }
@@ -402,7 +425,7 @@ public final class URLEncodedUtil {
         try {
             sb.append(url);
             sb.append(WD._QUESTION_MARK);
-            encode(sb, parameters, charset);
+            encode(sb, parameters, charset, namingPolicy);
 
             return sb.toString();
         } finally {
@@ -425,11 +448,23 @@ public final class URLEncodedUtil {
      * @param parameters
      * @param charset
      */
-    @SuppressWarnings("rawtypes")
     public static void encode(final StringBuilder output, final Object parameters, final Charset charset) {
+        encode(output, parameters, charset, NamingPolicy.LOWER_CAMEL_CASE);
+    }
+
+    /**
+     *
+     * @param output
+     * @param parameters
+     * @param charset
+     */
+    @SuppressWarnings("rawtypes")
+    public static void encode(final StringBuilder output, final Object parameters, final Charset charset, final NamingPolicy namingPolicy) {
         if (parameters == null || (parameters instanceof Map && ((Map) parameters).isEmpty())) {
             return;
         }
+
+        final boolean isDefaultNamingPolicy = namingPolicy == null || namingPolicy == NamingPolicy.LOWER_CAMEL_CASE;
 
         if (parameters instanceof Map) {
             final Map<String, Object> map = (Map<String, Object>) parameters;
@@ -439,14 +474,18 @@ public final class URLEncodedUtil {
                     output.append(QP_SEP_A);
                 }
 
-                encodeFormFields(output, entry.getKey(), charset);
+                if (isDefaultNamingPolicy) {
+                    encodeFormFields(output, entry.getKey(), charset);
+                } else {
+                    encodeFormFields(output, namingPolicy.convert(entry.getKey()), charset);
+                }
 
                 output.append(NAME_VALUE_SEPARATOR);
 
                 encodeFormFields(output, N.stringOf(entry.getValue()), charset);
             }
         } else if (ClassUtil.isEntity(parameters.getClass())) {
-            encode(output, Maps.entity2Map(parameters, true), charset);
+            encode(output, Maps.entity2Map(parameters, true), charset, namingPolicy);
         } else if (parameters instanceof Object[]) {
             final Object[] a = (Object[]) parameters;
 
@@ -460,7 +499,11 @@ public final class URLEncodedUtil {
                     output.append(QP_SEP_A);
                 }
 
-                encodeFormFields(output, (String) a[i], charset);
+                if (isDefaultNamingPolicy) {
+                    encodeFormFields(output, (String) a[i], charset);
+                } else {
+                    encodeFormFields(output, namingPolicy.convert((String) a[i]), charset);
+                }
 
                 output.append(NAME_VALUE_SEPARATOR);
 

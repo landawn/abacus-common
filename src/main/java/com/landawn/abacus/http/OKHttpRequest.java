@@ -52,11 +52,11 @@ public class OKHttpRequest extends AbstractHttpRequest<OKHttpRequest> {
     /**
      *
      * @param url
-     * @param connTimeout
+     * @param connectionTimeout
      * @param readTimeout
      * @return
      */
-    public static OKHttpRequest url(String url, long connTimeout, long readTimeout) {
-        return new OKHttpRequest(OKHttpClient.create(url, 1, connTimeout, readTimeout));
+    public static OKHttpRequest url(String url, long connectionTimeout, long readTimeout) {
+        return new OKHttpRequest(OKHttpClient.create(url, 1, connectionTimeout, readTimeout));
     }
 }

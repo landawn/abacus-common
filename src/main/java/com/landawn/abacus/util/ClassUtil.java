@@ -28,6 +28,9 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -2942,6 +2945,29 @@ public final class ClassUtil {
         }
 
         return true;
+    }
+    
+    public static MethodHandle createMethodHandle(final Method method) {
+        final Class<?> declaringClass = method.getDeclaringClass();
+
+        try {
+            return MethodHandles.lookup().in(declaringClass).unreflectSpecial(method, declaringClass);
+        } catch (Exception e) {
+            try {
+                final Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class);
+                ClassUtil.setAccessible(constructor, true);
+
+                return constructor.newInstance(declaringClass).in(declaringClass).unreflectSpecial(method, declaringClass);
+            } catch (Exception ex) {
+                try {
+                    return MethodHandles.lookup()
+                            .findSpecial(declaringClass, method.getName(), MethodType.methodType(method.getReturnType(), method.getParameterTypes()),
+                                    declaringClass);
+                } catch (Exception exx) {
+                    throw new UnsupportedOperationException(exx);
+                }
+            }
+        }
     }
 
     //    private static Class[] getTypeArguments(Class cls) {

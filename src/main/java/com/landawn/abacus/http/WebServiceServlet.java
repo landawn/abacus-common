@@ -14,9 +14,9 @@
 
 package com.landawn.abacus.http;
 
-import static com.landawn.abacus.http.HTTP.jsonParser;
-import static com.landawn.abacus.http.HTTP.kryoParser;
-import static com.landawn.abacus.http.HTTP.xmlParser;
+import static com.landawn.abacus.http.HttpUtil.jsonParser;
+import static com.landawn.abacus.http.HttpUtil.kryoParser;
+import static com.landawn.abacus.http.HttpUtil.xmlParser;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,6 +24,7 @@ import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,11 +41,11 @@ import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
 import com.landawn.abacus.parser.XMLDeserializationConfig;
 import com.landawn.abacus.type.Type;
+import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.URLEncodedUtil;
-import com.landawn.abacus.util.WD;
 
 /**
  * It's a quick way to deploy json/xml web service by
@@ -88,11 +89,11 @@ public class WebServiceServlet extends AbstractHttpServlet {
     /** The Constant SERVICE_FACTORY_METHOD. */
     protected static final String SERVICE_FACTORY_METHOD = "serviceFactoryMethod";
 
-    /** The Constant PATH_MAPPER. */
-    protected static final String PATH_MAPPER = "pathMapper";
-
-    /** The Constant HTTP_METHOD_MAPPER. */
-    protected static final String HTTP_METHOD_MAPPER = "httpMethodMapper";
+    //    /** The Constant PATH_MAPPER. */
+    //    protected static final String PATH_MAPPER = "pathMapper";
+    //
+    //    /** The Constant HTTP_METHOD_MAPPER. */
+    //    protected static final String HTTP_METHOD_MAPPER = "httpMethodMapper";
 
     /** The Constant ENCRYPTION_USER_NAME. */
     protected static final String ENCRYPTION_USER_NAME = "encryptionUserName";
@@ -275,34 +276,17 @@ public class WebServiceServlet extends AbstractHttpServlet {
                 }
             }
 
-            String path = methodName;
-            RestMethod methodInfo = null;
+            final Set<HttpMethod> httpMethods = HttpUtil.getHttpMethods(method);
 
-            for (Annotation methodAnnotation : method.getAnnotations()) {
-                Class<? extends Annotation> annotationType = methodAnnotation.annotationType();
+            methodHttpMethodMap.put(methodName, httpMethods);
 
-                for (Annotation innerAnnotation : annotationType.getAnnotations()) {
-                    if (RestMethod.class == innerAnnotation.annotationType()) {
-                        methodInfo = (RestMethod) innerAnnotation;
+            final String httpPath = HttpUtil.getHttpPath(method);
 
-                        break;
-                    }
-                }
-
-                if (methodInfo != null) {
-                    try {
-                        path = (String) annotationType.getMethod("value").invoke(methodAnnotation);
-                    } catch (Exception e) {
-                        throw new RuntimeException("Failed to extract String 'value' from @%s annotation:" + annotationType.getSimpleName());
-                    }
-
-                    methodHttpMethodMap.put(methodName, N.asSet(HttpMethod.valueOf(methodInfo.value())));
-
-                    break;
-                }
+            if (N.notNullOrEmpty(httpPath)) {
+                pathMethodMap.put(httpPath, method);
+            } else {
+                pathMethodMap.put(methodName, method);
             }
-
-            pathMethodMap.put(path, method);
 
             if (parameterCount == 0) {
                 // ignore.
@@ -360,46 +344,46 @@ public class WebServiceServlet extends AbstractHttpServlet {
             }
         }
 
-        String urlMethodMapperParameter = getInitParameter(config, PATH_MAPPER);
-
-        if (N.notNullOrEmpty(urlMethodMapperParameter)) {
-            urlMethodMapperParameter = urlMethodMapperParameter.trim();
-
-            String[] sts = urlMethodMapperParameter.split(WD.SEMICOLON);
-
-            for (String st : sts) {
-                String[] tmp = st.split(WD.EQUAL);
-                pathMethodMap.put(tmp[1].trim(), findDeclaredMethodByName(serviceImplClass, tmp[0].trim()));
-            }
-        }
-
-        String httpMethodMapperParameter = getInitParameter(config, HTTP_METHOD_MAPPER);
-
-        if (N.notNullOrEmpty(httpMethodMapperParameter)) {
-            httpMethodMapperParameter = httpMethodMapperParameter.trim();
-
-            final String[] sts = httpMethodMapperParameter.split(WD.SEMICOLON);
-
-            for (String st : sts) {
-                final String[] tmp = st.split(WD.EQUAL);
-                final String[] httpMethods = tmp[1].split(WD.COMMA);
-                final String methodName = tmp[0].trim();
-
-                if (N.notNullOrEmpty(httpMethods)) {
-                    if ("ALL".equalsIgnoreCase(httpMethods[0].trim())) {
-                        methodHttpMethodMap.put(methodName, N.asSet(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE));
-                    } else {
-                        final Set<HttpMethod> set = N.newHashSet();
-
-                        for (String e : httpMethods) {
-                            set.add(HttpMethod.valueOf(e.trim().toUpperCase()));
-                        }
-
-                        methodHttpMethodMap.put(methodName, set);
-                    }
-                }
-            }
-        }
+        //    String urlMethodMapperParameter = getInitParameter(config, PATH_MAPPER);
+        //
+        //    if (N.notNullOrEmpty(urlMethodMapperParameter)) {
+        //        urlMethodMapperParameter = urlMethodMapperParameter.trim();
+        //
+        //        String[] sts = urlMethodMapperParameter.split(WD.SEMICOLON);
+        //
+        //        for (String st : sts) {
+        //            String[] tmp = st.split(WD.EQUAL);
+        //            pathMethodMap.put(tmp[1].trim(), findDeclaredMethodByName(serviceImplClass, tmp[0].trim()));
+        //        }
+        //    }
+        //
+        //    String httpMethodMapperParameter = getInitParameter(config, HTTP_METHOD_MAPPER);
+        //
+        //    if (N.notNullOrEmpty(httpMethodMapperParameter)) {
+        //        httpMethodMapperParameter = httpMethodMapperParameter.trim();
+        //
+        //        final String[] sts = httpMethodMapperParameter.split(WD.SEMICOLON);
+        //
+        //        for (String st : sts) {
+        //            final String[] tmp = st.split(WD.EQUAL);
+        //            final String[] httpMethods = tmp[1].split(WD.COMMA);
+        //            final String methodName = tmp[0].trim();
+        //
+        //            if (N.notNullOrEmpty(httpMethods)) {
+        //                if ("ALL".equalsIgnoreCase(httpMethods[0].trim())) {
+        //                    methodHttpMethodMap.put(methodName, N.asSet(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE));
+        //                } else {
+        //                    final Set<HttpMethod> set = N.newHashSet();
+        //
+        //                    for (String e : httpMethods) {
+        //                        set.add(HttpMethod.valueOf(e.trim().toUpperCase()));
+        //                    }
+        //
+        //                    methodHttpMethodMap.put(methodName, set);
+        //                }
+        //            }
+        //        }
+        //    }
 
         //        for (String key : new ArrayList<>(urlMethodMap.keySet())) {
         //            urlMethodMap.put(key.toLowerCase(), urlMethodMap.get(key));
@@ -546,6 +530,8 @@ public class WebServiceServlet extends AbstractHttpServlet {
 
             final ContentFormat requestContentFormat = getRequestContentFormat(request);
             final ContentFormat responseContentFormat = getResponseContentFormat(request);
+            final Charset requestContentCharset = HttpUtil.getCharset(request.getHeader(HttpHeaders.Names.CONTENT_TYPE), Charsets.UTF_8);
+            final String acceptCharset = request.getHeader(HttpHeaders.Names.ACCEPT_CHARSET);
 
             if (N.notNullOrEmpty(encryptionUserName) && N.notNullOrEmpty(encryptionPassword)) {
                 if (((SecurityDTO) parameter).decrypt(encryptionUserName, encryptionPassword, encryptionMessage) == false) {
@@ -568,46 +554,54 @@ public class WebServiceServlet extends AbstractHttpServlet {
                     if (respMessageSetMethod != null) {
                         ClassUtil.setPropValue(result, respMessageSetMethod, "Security issue: Invalid request.");
                     }
-
-                    postExecute(response, result, method, parameter, requestContentFormat);
-
-                    setResponse(response, result, responseContentFormat);
-                    return;
                 }
-            }
+            } else {
+                switch (requestContentFormat) {
+                    case JSON:
+                    case JSON_LZ4:
+                    case JSON_SNAPPY:
+                    case JSON_GZIP:
 
-            switch (requestContentFormat) {
-                case JSON:
-                case JSON_LZ4:
-                case JSON_SNAPPY:
-                case JSON_GZIP:
+                        if (method == null) {
+                            String msg = "Unsupported opearation";
+                            serviceImplLogger.error(msg);
+                            throw new RuntimeException(msg);
+                        } else {
+                            checkHttpMethod(method, httpMethodName);
 
-                    if (method == null) {
-                        String msg = "Unsupported opearation";
-                        serviceImplLogger.error(msg);
-                        throw new RuntimeException(msg);
-                    } else {
-                        checkHttpMethod(method, httpMethodName);
+                            if (parameter == null) {
+                                parameterClass = methodParameterClassMap.get(method.getName());
 
-                        if (parameter == null) {
-                            parameterClass = methodParameterClassMap.get(method.getName());
-
-                            if (parameterClass == null) {
-                                result = ClassUtil.invokeMethod(serviceImpl, method);
-                            } else {
-                                is = getInputStream(request, requestContentFormat);
-                                Type<Object> paramType = N.typeOf(parameterClass);
-                                boolean hasFieldAnnotation = parameterClass == Map.class && methodParameterNamesMap.containsKey(method.getName());
-
-                                if (hasFieldAnnotation) {
-                                    parameter = jsonParser.deserialize(parameterClass, is, methodJSONDeserializationConfigMap.get(method.getName()));
+                                if (parameterClass == null) {
+                                    result = ClassUtil.invokeMethod(serviceImpl, method);
                                 } else {
-                                    if (paramType.isSerializable()) {
-                                        parameter = paramType.valueOf(IOUtil.readString(is));
+                                    is = getInputStream(request, requestContentFormat);
+                                    Type<Object> paramType = N.typeOf(parameterClass);
+                                    boolean hasFieldAnnotation = parameterClass == Map.class && methodParameterNamesMap.containsKey(method.getName());
+
+                                    if (hasFieldAnnotation) {
+                                        parameter = jsonParser.deserialize(parameterClass, is, methodJSONDeserializationConfigMap.get(method.getName()));
                                     } else {
-                                        parameter = jsonParser.deserialize(parameterClass, is);
+                                        if (paramType.isSerializable()) {
+                                            parameter = paramType.valueOf(IOUtil.readString(is, requestContentCharset));
+                                        } else {
+                                            parameter = jsonParser.deserialize(parameterClass, is);
+                                        }
                                     }
+
+                                    if (serviceRRLogger.isInfoEnabled()) {
+                                        if (paramType.isSerializable()) {
+                                            serviceRRLogger.info(paramType.stringOf(parameter));
+                                        } else {
+                                            serviceRRLogger.info(jsonParser.serialize(parameter));
+                                        }
+                                    }
+
+                                    result = invoke(method, parameter, hasFieldAnnotation);
                                 }
+                            } else {
+                                boolean hasFieldAnnotation = parameterClass == Map.class && methodParameterNamesMap.containsKey(method.getName());
+                                final Type<Object> paramType = N.typeOf(parameter.getClass());
 
                                 if (serviceRRLogger.isInfoEnabled()) {
                                     if (paramType.isSerializable()) {
@@ -619,62 +613,53 @@ public class WebServiceServlet extends AbstractHttpServlet {
 
                                 result = invoke(method, parameter, hasFieldAnnotation);
                             }
-                        } else {
-                            boolean hasFieldAnnotation = parameterClass == Map.class && methodParameterNamesMap.containsKey(method.getName());
-                            final Type<Object> paramType = N.typeOf(parameter.getClass());
+                        }
+
+                        break;
+
+                    case XML:
+                    case XML_LZ4:
+                    case XML_SNAPPY:
+                    case XML_GZIP:
+
+                        if (method == null) {
+                            is = getInputStream(request, requestContentFormat);
+                            parameter = xmlParser.deserialize(eleNameParameterClassMap, is, null);
+                            method = parameterMethodMap.get(ClassUtil.getSimpleClassName(parameter.getClass()));
+
+                            checkHttpMethod(method, httpMethodName);
 
                             if (serviceRRLogger.isInfoEnabled()) {
-                                if (paramType.isSerializable()) {
-                                    serviceRRLogger.info(paramType.stringOf(parameter));
-                                } else {
-                                    serviceRRLogger.info(jsonParser.serialize(parameter));
-                                }
+                                serviceRRLogger.info(xmlParser.serialize(parameter));
                             }
 
-                            result = invoke(method, parameter, hasFieldAnnotation);
-                        }
-                    }
+                            result = ClassUtil.invokeMethod(serviceImpl, method, parameter);
+                        } else {
+                            checkHttpMethod(method, httpMethodName);
 
-                    postExecute(response, result, method, parameter, requestContentFormat);
+                            if (parameter == null) {
+                                parameterClass = methodParameterClassMap.get(method.getName());
 
-                    setResponse(response, result, responseContentFormat);
-
-                    break;
-
-                case XML:
-                case XML_LZ4:
-                case XML_SNAPPY:
-                case XML_GZIP:
-
-                    if (method == null) {
-                        is = getInputStream(request, requestContentFormat);
-                        parameter = xmlParser.deserialize(eleNameParameterClassMap, is, null);
-                        method = parameterMethodMap.get(ClassUtil.getSimpleClassName(parameter.getClass()));
-
-                        checkHttpMethod(method, httpMethodName);
-
-                        if (serviceRRLogger.isInfoEnabled()) {
-                            serviceRRLogger.info(xmlParser.serialize(parameter));
-                        }
-
-                        result = ClassUtil.invokeMethod(serviceImpl, method, parameter);
-                    } else {
-                        checkHttpMethod(method, httpMethodName);
-
-                        if (parameter == null) {
-                            parameterClass = methodParameterClassMap.get(method.getName());
-
-                            if (parameterClass == null) {
-                                result = ClassUtil.invokeMethod(serviceImpl, method);
-                            } else {
-                                is = getInputStream(request, requestContentFormat);
-                                boolean hasFieldAnnotation = parameterClass == Map.class && methodParameterNamesMap.containsKey(method.getName());
-
-                                if (hasFieldAnnotation) {
-                                    parameter = xmlParser.deserialize(parameterClass, is, methodXMLDeserializationConfigMap.get(method.getName()));
+                                if (parameterClass == null) {
+                                    result = ClassUtil.invokeMethod(serviceImpl, method);
                                 } else {
-                                    parameter = xmlParser.deserialize(parameterClass, is);
+                                    is = getInputStream(request, requestContentFormat);
+                                    boolean hasFieldAnnotation = parameterClass == Map.class && methodParameterNamesMap.containsKey(method.getName());
+
+                                    if (hasFieldAnnotation) {
+                                        parameter = xmlParser.deserialize(parameterClass, is, methodXMLDeserializationConfigMap.get(method.getName()));
+                                    } else {
+                                        parameter = xmlParser.deserialize(parameterClass, is);
+                                    }
+
+                                    if (serviceRRLogger.isInfoEnabled()) {
+                                        serviceRRLogger.info(xmlParser.serialize(parameter));
+                                    }
+
+                                    result = invoke(method, parameter, hasFieldAnnotation);
                                 }
+                            } else {
+                                boolean hasFieldAnnotation = parameterClass == Map.class && methodParameterNamesMap.containsKey(method.getName());
 
                                 if (serviceRRLogger.isInfoEnabled()) {
                                     serviceRRLogger.info(xmlParser.serialize(parameter));
@@ -682,41 +667,89 @@ public class WebServiceServlet extends AbstractHttpServlet {
 
                                 result = invoke(method, parameter, hasFieldAnnotation);
                             }
-                        } else {
-                            boolean hasFieldAnnotation = parameterClass == Map.class && methodParameterNamesMap.containsKey(method.getName());
-
-                            if (serviceRRLogger.isInfoEnabled()) {
-                                serviceRRLogger.info(xmlParser.serialize(parameter));
-                            }
-
-                            result = invoke(method, parameter, hasFieldAnnotation);
                         }
-                    }
 
-                    postExecute(response, result, method, parameter, requestContentFormat);
+                        break;
 
-                    setResponse(response, result, responseContentFormat);
+                    case FormUrlEncoded:
+                        if (method == null) {
+                            String msg = "Unsupported opearation";
+                            serviceImplLogger.error(msg);
+                            throw new RuntimeException(msg);
+                        } else {
+                            checkHttpMethod(method, httpMethodName);
 
-                    break;
+                            if (parameter == null) {
+                                parameterClass = methodParameterClassMap.get(method.getName());
 
-                case KRYO:
+                                if (parameterClass == null) {
+                                    result = ClassUtil.invokeMethod(serviceImpl, method);
+                                } else {
+                                    is = getInputStream(request, requestContentFormat);
+                                    Type<Object> paramType = N.typeOf(parameterClass);
+                                    boolean hasFieldAnnotation = parameterClass == Map.class && methodParameterNamesMap.containsKey(method.getName());
 
-                    if (method == null) {
-                        String msg = "Unsupported opearation";
-                        serviceImplLogger.error(msg);
-                        throw new RuntimeException(msg);
-                    } else {
-                        checkHttpMethod(method, httpMethodName);
+                                    parameter = URLEncodedUtil.decode(parameterClass, IOUtil.readString(is, requestContentCharset));
 
-                        if (parameter == null) {
-                            parameterClass = methodParameterClassMap.get(method.getName());
+                                    if (serviceRRLogger.isInfoEnabled()) {
+                                        if (paramType.isSerializable()) {
+                                            serviceRRLogger.info(paramType.stringOf(parameter));
+                                        } else {
+                                            serviceRRLogger.info(jsonParser.serialize(parameter));
+                                        }
+                                    }
 
-                            if (parameterClass == null) {
-                                result = ClassUtil.invokeMethod(serviceImpl, method);
+                                    result = invoke(method, parameter, hasFieldAnnotation);
+                                }
                             } else {
-                                is = getInputStream(request, requestContentFormat);
-                                parameter = kryoParser.deserialize(parameterClass, is);
+                                boolean hasFieldAnnotation = parameterClass == Map.class && methodParameterNamesMap.containsKey(method.getName());
+                                final Type<Object> paramType = N.typeOf(parameter.getClass());
 
+                                if (serviceRRLogger.isInfoEnabled()) {
+                                    if (paramType.isSerializable()) {
+                                        serviceRRLogger.info(paramType.stringOf(parameter));
+                                    } else {
+                                        serviceRRLogger.info(jsonParser.serialize(parameter));
+                                    }
+                                }
+
+                                result = invoke(method, parameter, hasFieldAnnotation);
+                            }
+                        }
+
+                        break;
+
+                    case KRYO:
+
+                        if (method == null) {
+                            String msg = "Unsupported opearation";
+                            serviceImplLogger.error(msg);
+                            throw new RuntimeException(msg);
+                        } else {
+                            checkHttpMethod(method, httpMethodName);
+
+                            if (parameter == null) {
+                                parameterClass = methodParameterClassMap.get(method.getName());
+
+                                if (parameterClass == null) {
+                                    result = ClassUtil.invokeMethod(serviceImpl, method);
+                                } else {
+                                    is = getInputStream(request, requestContentFormat);
+                                    parameter = kryoParser.deserialize(parameterClass, is);
+
+                                    final Type<Object> paramType = N.typeOf(parameter.getClass());
+
+                                    if (serviceRRLogger.isInfoEnabled()) {
+                                        if (paramType.isSerializable()) {
+                                            serviceRRLogger.info(paramType.stringOf(parameter));
+                                        } else {
+                                            serviceRRLogger.info(jsonParser.serialize(parameter));
+                                        }
+                                    }
+
+                                    result = ClassUtil.invokeMethod(serviceImpl, method, parameter);
+                                }
+                            } else {
                                 final Type<Object> paramType = N.typeOf(parameter.getClass());
 
                                 if (serviceRRLogger.isInfoEnabled()) {
@@ -729,32 +762,20 @@ public class WebServiceServlet extends AbstractHttpServlet {
 
                                 result = ClassUtil.invokeMethod(serviceImpl, method, parameter);
                             }
-                        } else {
-                            final Type<Object> paramType = N.typeOf(parameter.getClass());
-
-                            if (serviceRRLogger.isInfoEnabled()) {
-                                if (paramType.isSerializable()) {
-                                    serviceRRLogger.info(paramType.stringOf(parameter));
-                                } else {
-                                    serviceRRLogger.info(jsonParser.serialize(parameter));
-                                }
-                            }
-
-                            result = ClassUtil.invokeMethod(serviceImpl, method, parameter);
                         }
-                    }
 
-                    postExecute(response, result, method, parameter, requestContentFormat);
+                        break;
 
-                    setResponse(response, result, responseContentFormat);
-
-                    break;
-
-                default:
-                    String msg = "Unsupported content format: " + requestContentFormat;
-                    serviceImplLogger.error(msg);
-                    throw new RuntimeException(msg);
+                    default:
+                        String msg = "Unsupported content format: " + requestContentFormat;
+                        serviceImplLogger.error(msg);
+                        throw new RuntimeException(msg);
+                }
             }
+
+            postExecute(response, result, method, parameter, requestContentFormat);
+
+            setResponse(response, result, responseContentFormat, acceptCharset);
         } catch (IOException e) {
             String msg = "Failed to process request";
             serviceImplLogger.error(msg, e);
@@ -797,17 +818,20 @@ public class WebServiceServlet extends AbstractHttpServlet {
      * @param response
      * @param result
      * @param responseContentFormat
+     * @param acceptCharset
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    protected void setResponse(final HttpServletResponse response, final Object result, final ContentFormat responseContentFormat) throws IOException {
+    protected void setResponse(final HttpServletResponse response, final Object result, final ContentFormat responseContentFormat, final String acceptCharset)
+            throws IOException {
         if (result == null) {
             return;
         }
 
+        final Charset responseCharset = N.isNullOrEmpty(acceptCharset) ? Charsets.UTF_8 : Charsets.get(acceptCharset);
         OutputStream os = null;
 
         try {
-            os = getOutputStream(response, responseContentFormat);
+            os = getOutputStream(response, responseContentFormat, acceptCharset);
 
             switch (responseContentFormat) {
                 case JSON:
@@ -849,6 +873,16 @@ public class WebServiceServlet extends AbstractHttpServlet {
                     } else {
                         xmlParser.serialize(os, result);
                     }
+
+                    break;
+                }
+
+                case FormUrlEncoded: {
+                    if (serviceRRLogger.isInfoEnabled()) {
+                        serviceRRLogger.info(jsonParser.serialize(result));
+                    }
+
+                    os.write(URLEncodedUtil.encode(result, responseCharset).getBytes(responseCharset));
 
                     break;
                 }

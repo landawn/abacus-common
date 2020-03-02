@@ -15,37 +15,39 @@
 package com.landawn.abacus.http;
 
 /**
- * The Enum ContentFormat.
+ * 
+ * @author haiyangl
  *
- * @author Haiyang Li
- * @since 0.8
  */
 public enum ContentFormat {
+    NONE("", ""), //
+    JSON("application/json", ""), //
+    JSON_LZ4("application/json", "lz4"), //
+    JSON_SNAPPY("application/json", "snappy"), //
+    JSON_GZIP("application/json", "gzip"), //
+    XML("application/xml", ""), //
+    XML_LZ4("application/xml", "lz4"), //
+    XML_SNAPPY("application/xml", "snappy"), //
+    XML_GZIP("application/xml", "gzip"), //
+    FormUrlEncoded("application/x-www-form-urlencoded", ""), //
+    KRYO("", "kryo"), //
+    LZ4("", "lz4"), //
+    SNAPPY("", "snappy"), //
+    GZIP("", "gzip");
 
-    /** The none. */
-    NONE,
-    /** The xml. */
-    XML,
-    /** The xml lz4. */
-    XML_LZ4,
-    /** The xml snappy. */
-    XML_SNAPPY,
-    /** The xml gzip. */
-    XML_GZIP,
-    /** The json. */
-    JSON,
-    /** The json lz4. */
-    JSON_LZ4,
-    /** The json snappy. */
-    JSON_SNAPPY,
-    /** The json gzip. */
-    JSON_GZIP,
-    /** The kryo. */
-    KRYO,
-    /** The lz4. */
-    LZ4,
-    /** The snappy. */
-    SNAPPY,
-    /** The gzip. */
-    GZIP;
+    private final String contentType;
+    private final String contentEncoding;
+
+    ContentFormat(final String contentType, final String contentEncoding) {
+        this.contentType = contentType;
+        this.contentEncoding = contentEncoding;
+    }
+
+    public String contentType() {
+        return contentType;
+    }
+
+    public String contentEncoding() {
+        return contentEncoding;
+    }
 }
