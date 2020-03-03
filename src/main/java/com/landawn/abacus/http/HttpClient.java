@@ -39,6 +39,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 
 import com.landawn.abacus.exception.UncheckedIOException;
+import com.landawn.abacus.http.HttpHeaders.Names;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.type.Type;
@@ -297,10 +298,11 @@ public final class HttpClient extends AbstractHttpClient {
      */
     private <T> T execute(final Class<T> resultClass, final OutputStream outputStream, final Writer outputWriter, final HttpMethod httpMethod,
             final Object request, final HttpSettings settings) throws UncheckedIOException {
+        final Charset requestCharset = HttpUtil.getRequestCharset(settings == null || settings.headers().isEmpty() ? _settings.headers() : settings.headers());
         final ContentFormat requestContentFormat = getContentFormat(settings);
         final boolean doOutput = request != null && !(httpMethod.equals(HttpMethod.GET) || httpMethod.equals(HttpMethod.DELETE));
+
         final HttpURLConnection connection = openConnection(httpMethod, request, doOutput, settings);
-        final Charset requestCharset = HttpUtil.getCharset(settings == null || settings.headers().isEmpty() ? _settings.headers() : settings.headers());
         final long sentRequestAtMillis = System.currentTimeMillis();
         InputStream is = null;
         OutputStream os = null;
@@ -356,15 +358,14 @@ public final class HttpClient extends AbstractHttpClient {
 
             final int code = connection.getResponseCode();
             final Map<String, List<String>> respHeaders = connection.getHeaderFields();
-            final Charset respCharset = HttpUtil.getCharset(respHeaders);
+            final Charset respCharset = HttpUtil.getResponseCharset(respHeaders, requestCharset);
             final ContentFormat respContentFormat = HttpUtil.getResponseContentFormat(respHeaders, requestContentFormat);
 
-            if ((code < 200 || code >= 300) && (resultClass == null || !resultClass.equals(HttpResponse.class))) {
-                throw new UncheckedIOException(
-                        new IOException(code + ": " + connection.getResponseMessage() + ". " + IOUtil.readString(connection.getErrorStream(), respCharset)));
-            }
-
             is = HttpUtil.getInputStream(connection, respContentFormat);
+
+            if ((code < 200 || code >= 300) && (resultClass == null || !resultClass.equals(HttpResponse.class))) {
+                throw new UncheckedIOException(new IOException(code + ": " + connection.getResponseMessage() + ". " + IOUtil.readString(is, respCharset)));
+            }
 
             if (isOneWayRequest(settings)) {
                 return null;
@@ -551,6 +552,14 @@ public final class HttpClient extends AbstractHttpClient {
             Object headerValue = null;
 
             for (String headerName : headers.headerNameSet()) {
+                // lazy set content-encoding 
+                // because if content-encoding(lz4/snappy/kryo...) is set but no parameter/result write to OutputStream, 
+                // error may happen when read the input stream in sever side.
+
+                if (Names.CONTENT_ENCODING.equalsIgnoreCase(headerName)) {
+                    continue;
+                }
+
                 headerValue = headers.get(headerName);
 
                 if (headerValue instanceof Collection) {

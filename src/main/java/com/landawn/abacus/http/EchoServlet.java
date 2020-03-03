@@ -30,7 +30,6 @@ import javax.servlet.http.HttpServletResponse;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
-import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
@@ -124,11 +123,9 @@ public class EchoServlet extends AbstractHttpServlet {
      */
     protected void execute(HttpServletRequest request, HttpServletResponse response) throws UncheckedIOException {
         final ContentFormat requestContentFormat = getRequestContentFormat(request);
-        final ContentFormat responseContentFormat = getResponseContentFormat(request);
-        final String acceptCharset = request.getHeader(HttpHeaders.Names.ACCEPT_CHARSET);
+        final Charset requestCharset = HttpUtil.getCharset(getContentType(request));
 
         Map<String, String[]> paramMap = null;
-        Charset charset = Charsets.UTF_8;
         InputStream is = null;
         OutputStream os = null;
 
@@ -144,8 +141,6 @@ public class EchoServlet extends AbstractHttpServlet {
                     headers.put(headerName, request.getHeader(headerName));
                 }
 
-                charset = HttpUtil.getCharset(headers);
-
                 logger.info("Request Headers: " + N.toJSON(headers));
             }
 
@@ -156,11 +151,9 @@ public class EchoServlet extends AbstractHttpServlet {
 
                 if (N.isNullOrEmpty(paramMap)) {
                     is = getInputStream(request, requestContentFormat);
-                    os = getOutputStream(response, responseContentFormat, acceptCharset);
                 }
             } else {
                 is = getInputStream(request, requestContentFormat);
-                os = getOutputStream(response, responseContentFormat, acceptCharset);
 
                 paramMap = request.getParameterMap();
             }
@@ -168,7 +161,9 @@ public class EchoServlet extends AbstractHttpServlet {
             if (N.isNullOrEmpty(paramMap)) {
                 bytes = IOUtil.readAllBytes(is);
 
-                logger.info("Request body: " + new String(bytes, charset));
+                logger.info("Request body: " + new String(bytes, requestCharset));
+
+                os = getOutputStream(response, requestContentFormat, requestCharset);
 
                 IOUtil.write(os, bytes);
             } else {
@@ -195,6 +190,8 @@ public class EchoServlet extends AbstractHttpServlet {
                     if (N.isNullOrEmpty(queryParts)) {
                         logger.info("Request query: " + N.toJSON(queryParts));
                     }
+
+                    os = getOutputStream(response, requestContentFormat, requestCharset);
 
                     IOUtil.write(os, queryParts);
                 } finally {

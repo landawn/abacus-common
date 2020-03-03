@@ -403,10 +403,12 @@ public class OkHttpRequest {
 
         try (Response resp = execute(httpMethod)) {
             if (resp.isSuccessful()) {
-                final ContentFormat requestContentFormat = HttpUtil.getContentFormat(request.header(HttpHeaders.Names.CONTENT_TYPE),
-                        request.header(HttpHeaders.Names.CONTENT_ENCODING));
+                final String contentType = request.header(HttpHeaders.Names.CONTENT_TYPE);
+                final String contentEncoding = request.header(HttpHeaders.Names.CONTENT_ENCODING);
+                final ContentFormat requestContentFormat = HttpUtil.getContentFormat(contentType, contentEncoding);
+                final Charset requestCharset = HttpUtil.getCharset(contentType);
                 final Map<String, List<String>> respHeaders = resp.headers().toMultimap();
-                final Charset respCharset = HttpUtil.getCharset(respHeaders);
+                final Charset respCharset = HttpUtil.getResponseCharset(respHeaders, requestCharset);
                 final ContentFormat respContentFormat = HttpUtil.getResponseContentFormat(respHeaders, requestContentFormat);
 
                 final InputStream is = HttpUtil.wrapInputStream(resp.body().byteStream(), respContentFormat);

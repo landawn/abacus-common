@@ -64,7 +64,9 @@ import com.landawn.abacus.util.WD;
  */
 @Internal
 public final class HttpUtil {
-    static final Charset DEFAULT_CHARSET = Charsets.UTF_8;
+    public static final Charset DEFAULT_CHARSET = Charsets.UTF_8;
+
+    public static final ContentFormat DEFAULT_CONTENT_FORMAT = ContentFormat.JSON;
 
     /** The Constant JSON. */
     static final String JSON = "json";
@@ -190,6 +192,218 @@ public final class HttpUtil {
         contentEncoding2Format.put(N.EMPTY_STRING, ContentFormat.NONE);
     }
 
+    private static String readValue(Object value) {
+        if (value != null) {
+            if (value instanceof Collection) {
+                return N.firstOrNullIfEmpty((Collection<String>) value);
+            } else {
+                return N.stringOf(value);
+            }
+        }
+
+        return null;
+    }
+
+    public static String getContentType(final Map<String, ?> httpHeaders) {
+        if (httpHeaders == null) {
+            return null;
+        }
+
+        Object value = httpHeaders.get(HttpHeaders.Names.CONTENT_TYPE);
+
+        if (value == null) {
+            value = httpHeaders.get(HttpHeaders.Names.L_CONTENT_TYPE);
+        }
+
+        return readValue(value);
+    }
+
+    public static String getContentType(final HttpHeaders httpHeaders) {
+        if (httpHeaders == null) {
+            return null;
+        }
+
+        Object value = httpHeaders.get(HttpHeaders.Names.CONTENT_TYPE);
+
+        if (value == null) {
+            value = httpHeaders.get(HttpHeaders.Names.L_CONTENT_TYPE);
+        }
+
+        return readValue(value);
+    }
+
+    public static String getContentType(final HttpSettings httpSettings) {
+        if (httpSettings == null || httpSettings.headers() == null) {
+            return null;
+        }
+
+        return getContentType(httpSettings.headers());
+    }
+
+    public static String getContentType(final HttpURLConnection connection) {
+        return getContentType(connection.getHeaderFields());
+    }
+
+    public static String getContentEncoding(final Map<String, ?> httpHeaders) {
+        if (httpHeaders == null) {
+            return null;
+        }
+
+        Object value = httpHeaders.get(HttpHeaders.Names.CONTENT_ENCODING);
+
+        if (value == null) {
+            value = httpHeaders.get(HttpHeaders.Names.L_CONTENT_ENCODING);
+        }
+
+        return readValue(value);
+    }
+
+    public static String getContentEncoding(final HttpHeaders httpHeaders) {
+        if (httpHeaders == null) {
+            return null;
+        }
+
+        Object value = httpHeaders.get(HttpHeaders.Names.CONTENT_ENCODING);
+
+        if (value == null) {
+            value = httpHeaders.get(HttpHeaders.Names.L_CONTENT_ENCODING);
+        }
+
+        return readValue(value);
+    }
+
+    public static String getContentEncoding(final HttpSettings httpSettings) {
+        if (httpSettings == null || httpSettings.headers() == null) {
+            return null;
+        }
+
+        return getContentEncoding(httpSettings.headers());
+    }
+
+    public static String getContentEncoding(final HttpURLConnection connection) {
+        return getContentEncoding(connection.getHeaderFields());
+    }
+
+    public static String getAccept(final Map<String, ?> httpHeaders) {
+        if (httpHeaders == null) {
+            return null;
+        }
+
+        Object value = httpHeaders.get(HttpHeaders.Names.ACCEPT);
+
+        if (value == null) {
+            value = httpHeaders.get(HttpHeaders.Names.L_ACCEPT);
+        }
+
+        return readValue(value);
+    }
+
+    public static String getAccept(final HttpHeaders httpHeaders) {
+        if (httpHeaders == null) {
+            return null;
+        }
+
+        Object value = httpHeaders.get(HttpHeaders.Names.ACCEPT);
+
+        if (value == null) {
+            value = httpHeaders.get(HttpHeaders.Names.L_ACCEPT);
+        }
+
+        return readValue(value);
+    }
+
+    public static String getAccept(final HttpSettings httpSettings) {
+        if (httpSettings == null || httpSettings.headers() == null) {
+            return null;
+        }
+
+        return getAccept(httpSettings.headers());
+    }
+
+    public static String getAccept(final HttpURLConnection connection) {
+        return getAccept(connection.getHeaderFields());
+    }
+
+    public static String getAcceptEncoding(final Map<String, ?> httpHeaders) {
+        if (httpHeaders == null) {
+            return null;
+        }
+
+        Object value = httpHeaders.get(HttpHeaders.Names.ACCEPT_ENCODING);
+
+        if (value == null) {
+            value = httpHeaders.get(HttpHeaders.Names.L_ACCEPT_ENCODING);
+        }
+
+        return readValue(value);
+    }
+
+    public static String getAcceptEncoding(final HttpHeaders httpHeaders) {
+        if (httpHeaders == null) {
+            return null;
+        }
+
+        Object value = httpHeaders.get(HttpHeaders.Names.ACCEPT_ENCODING);
+
+        if (value == null) {
+            value = httpHeaders.get(HttpHeaders.Names.L_ACCEPT_ENCODING);
+        }
+
+        return readValue(value);
+    }
+
+    public static String getAcceptEncoding(final HttpSettings httpSettings) {
+        if (httpSettings == null || httpSettings.headers() == null) {
+            return null;
+        }
+
+        return getAcceptEncoding(httpSettings.headers());
+    }
+
+    public static String getAcceptEncoding(final HttpURLConnection connection) {
+        return getAcceptEncoding(connection.getHeaderFields());
+    }
+
+    public static String getAcceptCharset(final Map<String, ?> httpHeaders) {
+        if (httpHeaders == null) {
+            return null;
+        }
+
+        Object value = httpHeaders.get(HttpHeaders.Names.ACCEPT_CHARSET);
+
+        if (value == null) {
+            value = httpHeaders.get(HttpHeaders.Names.L_ACCEPT_CHARSET);
+        }
+
+        return readValue(value);
+    }
+
+    public static String getAcceptCharset(final HttpHeaders httpHeaders) {
+        if (httpHeaders == null) {
+            return null;
+        }
+
+        Object value = httpHeaders.get(HttpHeaders.Names.ACCEPT_CHARSET);
+
+        if (value == null) {
+            value = httpHeaders.get(HttpHeaders.Names.L_ACCEPT_CHARSET);
+        }
+
+        return readValue(value);
+    }
+
+    public static String getAcceptCharset(final HttpSettings httpSettings) {
+        if (httpSettings == null || httpSettings.headers() == null) {
+            return null;
+        }
+
+        return getAcceptCharset(httpSettings.headers());
+    }
+
+    public static String getAcceptCharset(final HttpURLConnection connection) {
+        return getAcceptCharset(connection.getHeaderFields());
+    }
+
     /**
      * Gets the content type.
      *
@@ -288,28 +502,22 @@ public final class HttpUtil {
      * @return
      */
     public static ContentFormat getContentFormat(final HttpURLConnection connection) {
-        return getContentFormat(connection.getHeaderField(HttpHeaders.Names.CONTENT_TYPE), connection.getHeaderField(HttpHeaders.Names.CONTENT_ENCODING));
+        return getContentFormat(getContentType(connection), getContentEncoding(connection));
     }
 
     public static ContentFormat getResponseContentFormat(final Map<String, ?> respHeaders, final ContentFormat requestContentFormat) {
-        String contentType = null;
-        String contentEncoding = null;
-
-        if (respHeaders != null && respHeaders.containsKey(HttpHeaders.Names.CONTENT_TYPE)) {
-            contentType = N.stringOf(respHeaders.get(HttpHeaders.Names.CONTENT_TYPE));
-        }
+        String contentType = getContentType(respHeaders);
 
         if (N.isNullOrEmpty(contentType) && requestContentFormat != null) {
             contentType = requestContentFormat.contentType();
         }
 
-        if (respHeaders != null && respHeaders.containsKey(HttpHeaders.Names.CONTENT_ENCODING)) {
-            contentEncoding = N.stringOf(respHeaders.get(HttpHeaders.Names.CONTENT_ENCODING));
-        }
+        String contentEncoding = getContentEncoding(respHeaders);
 
-        if (N.isNullOrEmpty(contentEncoding) && requestContentFormat != null) {
-            contentEncoding = requestContentFormat.contentEncoding();
-        }
+        // Content encoding should be specified explicitly
+        //    if (N.isNullOrEmpty(contentEncoding) && requestContentFormat != null) {
+        //        contentEncoding = requestContentFormat.contentEncoding();
+        //    }
 
         return getContentFormat(contentType, contentEncoding);
     }
@@ -427,15 +635,9 @@ public final class HttpUtil {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public static InputStream getInputStream(final HttpURLConnection connection, ContentFormat contentFormat) throws IOException {
-        final int code = connection.getResponseCode();
-
-        if (code >= 200 && code < 300) {
-            try {
-                return N.defaultIfNull(wrapInputStream(connection.getInputStream(), contentFormat), N.emptyInputStream());
-            } catch (IOException e) {
-                return N.defaultIfNull(connection.getErrorStream(), N.emptyInputStream());
-            }
-        } else {
+        try {
+            return N.defaultIfNull(wrapInputStream(connection.getInputStream(), contentFormat), N.emptyInputStream());
+        } catch (IOException e) {
             return N.defaultIfNull(connection.getErrorStream(), N.emptyInputStream());
         }
     }
@@ -455,46 +657,12 @@ public final class HttpUtil {
         os.flush();
     }
 
-    public static Charset getCharset(HttpHeaders headers) {
-        Charset charset = null;
-
-        if (headers != null && headers.headerNameSet().contains(HttpHeaders.Names.CONTENT_TYPE)) {
-            String contentType = N.stringOf(headers.get(HttpHeaders.Names.CONTENT_TYPE));
-
-            if (N.notNullOrEmpty(contentType)) {
-                charset = getCharset(contentType, null);
-            }
-        }
-
-        return charset == null ? DEFAULT_CHARSET : charset;
+    public static Charset getRequestCharset(final HttpHeaders headers) {
+        return getCharset(getContentType(headers), HttpUtil.DEFAULT_CHARSET);
     }
 
-    public static Charset getCharset(Map<String, ?> headers) {
-        Charset charset = null;
-
-        if (headers != null && headers.containsKey(HttpHeaders.Names.CONTENT_TYPE)) {
-            final Object values = headers.get(HttpHeaders.Names.CONTENT_TYPE);
-
-            if (values instanceof Collection) {
-                for (String contentType : ((Collection<String>) values)) {
-                    if (N.notNullOrEmpty(contentType)) {
-                        charset = getCharset(contentType, null);
-
-                        if (charset != null) {
-                            break;
-                        }
-                    }
-                }
-            } else {
-                final String contentType = N.stringOf(values);
-
-                if (N.notNullOrEmpty(contentType)) {
-                    charset = getCharset(contentType, null);
-                }
-            }
-        }
-
-        return charset == null ? DEFAULT_CHARSET : charset;
+    public static Charset getResponseCharset(Map<String, ?> headers, final Charset requestCharset) {
+        return getCharset(getContentType(headers), requestCharset);
     }
 
     public static Charset getCharset(String contentType) {

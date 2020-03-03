@@ -15,20 +15,7 @@
 			<param-name>serviceImplClass</param-name>
 			<param-value>com.landawn.abacus.http.demo.AccountServiceImpl</param-value>
 		</init-param>
-		<init-param>
-			<param-name>pathMapper</param-name>
-			<param-value>getAccount=getAccount1; getAccount2=getAccount2; addAccount=addAccount</param-value>
-		</init-param>
-		<init-param>
-			<param-name>httpMethodMapper</param-name>
-			<param-value>getAccount=ALL; getAccount2=GET, POST; addAccount=POST, PUT</param-value>
-		</init-param>
 	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>Account</servlet-name>
-		<url-pattern>/AccountService/*</url-pattern>
-	</servlet-mapping>
 
 	<servlet>
 		<servlet-name>echo</servlet-name>
@@ -43,5 +30,21 @@
 			<param-value>true</param-value>
 		</init-param>
 	</servlet>
+
+
+	<servlet-mapping>
+		<servlet-name>Account</servlet-name>
+		<url-pattern>/AccountService/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>echo</servlet-name>
+		<url-pattern>/echo/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>getFirst</servlet-name>
+		<url-pattern>/getFirst/*</url-pattern>
+	</servlet-mapping>
 
 </web-app>

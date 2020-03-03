@@ -996,7 +996,7 @@ public final class ClassUtil {
      * @param parameterizedTypeName
      * @return
      */
-    static String formatParameterizedTypeName(final String parameterizedTypeName) {
+    public static String formatParameterizedTypeName(final String parameterizedTypeName) {
         String res = builtinTypeNameMap.get(parameterizedTypeName);
 
         if (res != null) {

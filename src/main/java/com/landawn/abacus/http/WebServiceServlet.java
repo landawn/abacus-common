@@ -41,7 +41,6 @@ import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
 import com.landawn.abacus.parser.XMLDeserializationConfig;
 import com.landawn.abacus.type.Type;
-import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
@@ -529,9 +528,9 @@ public class WebServiceServlet extends AbstractHttpServlet {
             }
 
             final ContentFormat requestContentFormat = getRequestContentFormat(request);
-            final ContentFormat responseContentFormat = getResponseContentFormat(request);
-            final Charset requestContentCharset = HttpUtil.getCharset(request.getHeader(HttpHeaders.Names.CONTENT_TYPE), Charsets.UTF_8);
-            final String acceptCharset = request.getHeader(HttpHeaders.Names.ACCEPT_CHARSET);
+            final Charset requestCharset = HttpUtil.getCharset(getContentType(request));
+            final ContentFormat responseContentFormat = getResponseContentFormat(request, requestContentFormat);
+            final Charset acceptCharset = HttpUtil.getCharset(getAcceptCharset(request), requestCharset);
 
             if (N.notNullOrEmpty(encryptionUserName) && N.notNullOrEmpty(encryptionPassword)) {
                 if (((SecurityDTO) parameter).decrypt(encryptionUserName, encryptionPassword, encryptionMessage) == false) {
@@ -583,7 +582,7 @@ public class WebServiceServlet extends AbstractHttpServlet {
                                         parameter = jsonParser.deserialize(parameterClass, is, methodJSONDeserializationConfigMap.get(method.getName()));
                                     } else {
                                         if (paramType.isSerializable()) {
-                                            parameter = paramType.valueOf(IOUtil.readString(is, requestContentCharset));
+                                            parameter = paramType.valueOf(IOUtil.readString(is, requestCharset));
                                         } else {
                                             parameter = jsonParser.deserialize(parameterClass, is);
                                         }
@@ -689,7 +688,7 @@ public class WebServiceServlet extends AbstractHttpServlet {
                                     Type<Object> paramType = N.typeOf(parameterClass);
                                     boolean hasFieldAnnotation = parameterClass == Map.class && methodParameterNamesMap.containsKey(method.getName());
 
-                                    parameter = URLEncodedUtil.decode(parameterClass, IOUtil.readString(is, requestContentCharset));
+                                    parameter = URLEncodedUtil.decode(parameterClass, IOUtil.readString(is, requestCharset));
 
                                     if (serviceRRLogger.isInfoEnabled()) {
                                         if (paramType.isSerializable()) {
@@ -821,13 +820,12 @@ public class WebServiceServlet extends AbstractHttpServlet {
      * @param acceptCharset
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    protected void setResponse(final HttpServletResponse response, final Object result, final ContentFormat responseContentFormat, final String acceptCharset)
+    protected void setResponse(final HttpServletResponse response, final Object result, final ContentFormat responseContentFormat, final Charset acceptCharset)
             throws IOException {
         if (result == null) {
             return;
         }
 
-        final Charset responseCharset = N.isNullOrEmpty(acceptCharset) ? Charsets.UTF_8 : Charsets.get(acceptCharset);
         OutputStream os = null;
 
         try {
@@ -882,7 +880,7 @@ public class WebServiceServlet extends AbstractHttpServlet {
                         serviceRRLogger.info(jsonParser.serialize(result));
                     }
 
-                    os.write(URLEncodedUtil.encode(result, responseCharset).getBytes(responseCharset));
+                    os.write(URLEncodedUtil.encode(result, acceptCharset).getBytes(acceptCharset));
 
                     break;
                 }

@@ -50,6 +50,14 @@ public final class HttpHeaders {
         public static final String CONTENT_LENGTH = "Content-Length";
         /** The HTTP {@code Content-Type} header field name. */
         public static final String CONTENT_TYPE = "Content-Type";
+
+        /** The HTTP {@code Content-Encoding} header field name. */
+        public static final String CONTENT_ENCODING = "Content-Encoding";
+        /** The HTTP {@code Content-Type} header field name. */
+        static final String L_CONTENT_TYPE = "content-type";
+        /** The HTTP {@code Content-Encoding} header field name. */
+        static final String L_CONTENT_ENCODING = "content-encoding";
+
         /** The HTTP {@code Date} header field name. */
         public static final String DATE = "Date";
         /** The HTTP {@code Pragma} header field name. */
@@ -63,10 +71,16 @@ public final class HttpHeaders {
 
         /** The HTTP {@code Accept} header field name. */
         public static final String ACCEPT = "Accept";
-        /** The HTTP {@code Accept-Charset} header field name. */
-        public static final String ACCEPT_CHARSET = "Accept-Charset";
+        /** The HTTP {@code Accept} header field name. */
+        static final String L_ACCEPT = "accept";
         /** The HTTP {@code Accept-Encoding} header field name. */
         public static final String ACCEPT_ENCODING = "Accept-Encoding";
+        /** The HTTP {@code Accept-Encoding} header field name. */
+        static final String L_ACCEPT_ENCODING = "accept-encoding";
+        /** The HTTP {@code Accept-Charset} header field name. */
+        public static final String ACCEPT_CHARSET = "Accept-Charset";
+        /** The HTTP {@code Accept-Charset} header field name. */
+        static final String L_ACCEPT_CHARSET = "accept-charset";
         /** The HTTP {@code Accept-Language} header field name. */
         public static final String ACCEPT_LANGUAGE = "Accept-Language";
         /** The HTTP {@code Access-Control-Request-Headers} header field name. */
@@ -176,8 +190,6 @@ public final class HttpHeaders {
         public static final String ALLOW = "Allow";
         /** The HTTP {@code Content-Disposition} header field name. */
         public static final String CONTENT_DISPOSITION = "Content-Disposition";
-        /** The HTTP {@code Content-Encoding} header field name. */
-        public static final String CONTENT_ENCODING = "Content-Encoding";
         /** The HTTP {@code Content-Language} header field name. */
         public static final String CONTENT_LANGUAGE = "Content-Language";
         /** The HTTP {@code Content-Location} header field name. */

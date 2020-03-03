@@ -19,6 +19,7 @@ import static com.landawn.abacus.http.HttpUtil.URL_ENCODED;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.Map;
 
 import javax.servlet.ServletConfig;
@@ -36,9 +37,7 @@ import com.landawn.abacus.util.N;
  * @since 0.8
  */
 public abstract class AbstractHttpServlet extends HttpServlet {
-    private static final long serialVersionUID = -6025259563199941531L;
-
-    private static final ContentFormat DEFAULT_CONTENT_FORMAT = ContentFormat.JSON;
+    private static final long serialVersionUID = 2996815402031635727L;
 
     /**
      *
@@ -56,10 +55,60 @@ public abstract class AbstractHttpServlet extends HttpServlet {
      * @param parameterName
      * @return
      */
-    protected String getInitParameter(ServletConfig config, String parameterName) {
+    protected static String getInitParameter(ServletConfig config, String parameterName) {
         String parameterValue = config.getInitParameter(parameterName);
 
         return N.isNullOrEmpty(parameterValue) ? parameterValue : parameterValue.trim();
+    }
+
+    protected static String getContentType(HttpServletRequest request) {
+        String contentType = request.getHeader(HttpHeaders.Names.CONTENT_TYPE);
+
+        if (N.isNullOrEmpty(contentType)) {
+            contentType = request.getHeader(HttpHeaders.Names.L_CONTENT_TYPE);
+        }
+
+        return contentType;
+    }
+
+    protected static String getContentEncoding(HttpServletRequest request) {
+        String contentEncoding = request.getHeader(HttpHeaders.Names.CONTENT_ENCODING);
+
+        if (N.isNullOrEmpty(contentEncoding)) {
+            contentEncoding = request.getHeader(HttpHeaders.Names.L_CONTENT_ENCODING);
+        }
+
+        return contentEncoding;
+    }
+
+    protected static String getAccept(HttpServletRequest request) {
+        String accept = request.getHeader(HttpHeaders.Names.ACCEPT);
+
+        if (N.isNullOrEmpty(accept)) {
+            accept = request.getHeader(HttpHeaders.Names.L_ACCEPT);
+        }
+
+        return accept;
+    }
+
+    protected static String getAcceptEncoding(HttpServletRequest request) {
+        String acceptEncoding = request.getHeader(HttpHeaders.Names.ACCEPT_ENCODING);
+
+        if (N.isNullOrEmpty(acceptEncoding)) {
+            acceptEncoding = request.getHeader(HttpHeaders.Names.L_ACCEPT_ENCODING);
+        }
+
+        return acceptEncoding;
+    }
+
+    protected static String getAcceptCharset(HttpServletRequest request) {
+        String acceptCharset = request.getHeader(HttpHeaders.Names.ACCEPT_CHARSET);
+
+        if (N.isNullOrEmpty(acceptCharset)) {
+            acceptCharset = request.getHeader(HttpHeaders.Names.L_ACCEPT_CHARSET);
+        }
+
+        return acceptCharset;
     }
 
     /**
@@ -69,39 +118,37 @@ public abstract class AbstractHttpServlet extends HttpServlet {
      * @return true, if is url encoded
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    protected boolean isUrlEncoded(HttpServletRequest request) throws IOException {
-        String contentType = request.getHeader(HttpHeaders.Names.CONTENT_TYPE);
+    protected static boolean isUrlEncoded(HttpServletRequest request) throws IOException {
+        String contentType = getContentType(request);
 
         return N.notNullOrEmpty(contentType) && contentType.indexOf(URL_ENCODED) >= 0;
     }
 
-    protected ContentFormat getRequestContentFormat(HttpServletRequest request) {
-        String contentType = request.getHeader(HttpHeaders.Names.CONTENT_TYPE);
-        String contentEncoding = request.getHeader(HttpHeaders.Names.CONTENT_ENCODING);
-
-        return getContentFormat(contentType, contentEncoding);
+    protected static ContentFormat getRequestContentFormat(HttpServletRequest request) {
+        return getContentFormat(getContentType(request), getContentEncoding(request));
     }
 
-    protected ContentFormat getResponseContentFormat(final HttpServletRequest request) {
-        String accept = request.getHeader(HttpHeaders.Names.ACCEPT);
+    protected static ContentFormat getResponseContentFormat(final HttpServletRequest request, final ContentFormat requestContentFormat) {
+        String accept = getAccept(request);
 
         if (N.isNullOrEmpty(accept)) {
-            accept = request.getHeader(HttpHeaders.Names.CONTENT_TYPE);
+            accept = requestContentFormat.contentType();
         }
 
-        String acceptEncoding = request.getHeader(HttpHeaders.Names.ACCEPT_ENCODING);
+        String acceptEncoding = getAcceptEncoding(request);
 
-        if (N.isNullOrEmpty(acceptEncoding)) {
-            acceptEncoding = request.getHeader(HttpHeaders.Names.CONTENT_ENCODING);
-        }
+        // Content encoding should be specified explicitly
+        //    if (N.isNullOrEmpty(acceptEncoding)) {
+        //        acceptEncoding = request.getHeader(HttpHeaders.Names.CONTENT_ENCODING);
+        //    }
 
         return getContentFormat(accept, acceptEncoding);
     }
 
-    protected ContentFormat getContentFormat(final String contentType, final String contentEncoding) {
+    protected static ContentFormat getContentFormat(final String contentType, final String contentEncoding) {
         ContentFormat contentFormat = HttpUtil.getContentFormat(contentType, contentEncoding);
 
-        return contentFormat == null || contentFormat == ContentFormat.NONE ? DEFAULT_CONTENT_FORMAT : contentFormat;
+        return contentFormat == null || contentFormat == ContentFormat.NONE ? HttpUtil.DEFAULT_CONTENT_FORMAT : contentFormat;
     }
 
     /**
@@ -112,7 +159,7 @@ public abstract class AbstractHttpServlet extends HttpServlet {
      * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    protected InputStream getInputStream(HttpServletRequest request, final ContentFormat contentFormat) throws IOException {
+    protected static InputStream getInputStream(HttpServletRequest request, final ContentFormat contentFormat) throws IOException {
         final InputStream is = new UncloseableInputStream(request.getInputStream());
 
         return N.defaultIfNull(HttpUtil.wrapInputStream(is, contentFormat), N.emptyInputStream());
@@ -122,32 +169,32 @@ public abstract class AbstractHttpServlet extends HttpServlet {
      * Gets the output stream.
      *
      * @param response
-     * @param contentFormat
+     * @param responseContentFormat
      * @param acceptCharset
      * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    protected OutputStream getOutputStream(final HttpServletResponse response, final ContentFormat contentFormat, final String acceptCharset)
+    protected static OutputStream getOutputStream(final HttpServletResponse response, final ContentFormat responseContentFormat, final Charset acceptCharset)
             throws IOException {
-        final String contentType = HttpUtil.getContentType(contentFormat);
+        final String responseContentType = HttpUtil.getContentType(responseContentFormat);
 
-        if (N.notNullOrEmpty(contentType)) {
-            response.setContentType(contentType);
+        if (N.notNullOrEmpty(responseContentType)) {
+            response.setContentType(responseContentType);
         }
 
-        final String contentEncoding = HttpUtil.getContentEncoding(contentFormat);
+        final String contentEncoding = HttpUtil.getContentEncoding(responseContentFormat);
 
         if (N.notNullOrEmpty(contentEncoding)) {
             response.setHeader(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding);
         }
 
-        if (N.notNullOrEmpty(acceptCharset)) {
-            response.setCharacterEncoding(acceptCharset);
+        if (acceptCharset != null) {
+            response.setCharacterEncoding(acceptCharset.name());
         }
 
         final OutputStream os = new UncloseableOutputStream(response.getOutputStream());
 
-        return HttpUtil.wrapOutputStream(os, contentFormat);
+        return HttpUtil.wrapOutputStream(os, responseContentFormat);
     }
 
     /**
@@ -155,7 +202,7 @@ public abstract class AbstractHttpServlet extends HttpServlet {
      * @param os
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    protected void flush(OutputStream os) throws IOException {
+    protected static void flush(OutputStream os) throws IOException {
         HttpUtil.flush(os);
     }
 
@@ -166,7 +213,7 @@ public abstract class AbstractHttpServlet extends HttpServlet {
      * @param parameterName
      * @return
      */
-    protected String getParameter(Map<String, String[]> parameterMap, String parameterName) {
+    protected static String getParameter(Map<String, String[]> parameterMap, String parameterName) {
         final String[] values = parameterMap.get(parameterName);
 
         return N.isNullOrEmpty(values) ? null : values[0];
@@ -180,7 +227,7 @@ public abstract class AbstractHttpServlet extends HttpServlet {
      * @param defaultValue
      * @return
      */
-    protected String getParameter(Map<String, String[]> parameterMap, String parameterName, String defaultValue) {
+    protected static String getParameter(Map<String, String[]> parameterMap, String parameterName, String defaultValue) {
         final String[] values = parameterMap.get(parameterName);
 
         return N.isNullOrEmpty(values) ? defaultValue : values[0];
@@ -195,7 +242,7 @@ public abstract class AbstractHttpServlet extends HttpServlet {
      * @param parameterName
      * @return
      */
-    protected <T> T getParameter(Class<T> cls, Map<String, String[]> parameterMap, String parameterName) {
+    protected static <T> T getParameter(Class<T> cls, Map<String, String[]> parameterMap, String parameterName) {
         final String[] values = parameterMap.get(parameterName);
 
         return N.isNullOrEmpty(values) ? N.defaultValueOf(cls) : N.convert(values[0], cls);
@@ -211,7 +258,7 @@ public abstract class AbstractHttpServlet extends HttpServlet {
      * @param defaultValue
      * @return
      */
-    protected <T> T getParameter(Class<T> cls, Map<String, String[]> parameterMap, String parameterName, T defaultValue) {
+    protected static <T> T getParameter(Class<T> cls, Map<String, String[]> parameterMap, String parameterName, T defaultValue) {
         final String[] values = parameterMap.get(parameterName);
 
         return N.isNullOrEmpty(values) ? defaultValue : N.convert(values[0], cls);

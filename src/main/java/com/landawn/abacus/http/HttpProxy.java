@@ -184,9 +184,9 @@ public final class HttpProxy {
             final long connectionTimeout, final long readTimeout, final Config config) {
 
         N.checkArgNotNull(interfaceClass, "interfaceClass");
-        N.checkArgPositive(maxConnection, "maxConnection");
-        N.checkArgPositive(connectionTimeout, "connectionTimeout");
-        N.checkArgPositive(readTimeout, "readTimeout");
+        N.checkArgPositive(maxConnection == 0 ? DEFAULT_MAX_CONNECTION : maxConnection, "maxConnection");
+        N.checkArgPositive(connectionTimeout == 0 ? DEFAULT_CONNECTION_TIMEOUT : connectionTimeout, "connectionTimeout");
+        N.checkArgPositive(readTimeout == 0 ? DEFAULT_READ_TIMEOUT : readTimeout, "readTimeout");
 
         final Annotation[] interfaceAnnos = interfaceClass.getAnnotations();
         final WebService wsAnno = interfaceClass.getAnnotation(WebService.class);
@@ -198,9 +198,9 @@ public final class HttpProxy {
             private final Logger _logger = LoggerFactory.getLogger(interfaceClass);
 
             private final String _baseUrl = composeUrl(finalBaseUrl, HttpUtil.getHttpPath(interfaceAnnos));
-            private final int _maxConnection = maxConnection;
-            private final long _connectionTimeout = connectionTimeout;
-            private final long _readTimeout = readTimeout;
+            private final int _maxConnection = maxConnection == 0 ? DEFAULT_MAX_CONNECTION : maxConnection;
+            private final long _connectionTimeout = connectionTimeout == 0 ? DEFAULT_CONNECTION_TIMEOUT : connectionTimeout;
+            private final long _readTimeout = readTimeout == 0 ? DEFAULT_READ_TIMEOUT : readTimeout;
 
             private final ContentFormat _contentFormat = contentformat == null || contentformat == ContentFormat.NONE
                     ? HttpUtil.getContentFormat(interfaceAnnos, ContentFormat.JSON)
@@ -314,7 +314,7 @@ public final class HttpProxy {
 
                     operationConfig.getRequestSettings().setContentFormat(operationConfig.contentFormat);
 
-                    String contentType = (String) operationConfig.requestSettings.headers().get(HttpHeaders.Names.CONTENT_TYPE);
+                    String contentType = HttpUtil.getContentType(operationConfig.requestSettings);
 
                     if (N.isNullOrEmpty(contentType)) {
                         if (operationConfig.contentFormat != null && operationConfig.contentFormat != ContentFormat.NONE) {
@@ -331,25 +331,25 @@ public final class HttpProxy {
                         }
                     }
 
-                    if (N.isNullOrEmpty((String) operationConfig.requestSettings.headers().get(HttpHeaders.Names.CONTENT_ENCODING))) {
+                    if (N.isNullOrEmpty(HttpUtil.getContentEncoding(operationConfig.requestSettings))) {
                         if (operationConfig.contentFormat != null && operationConfig.contentFormat != ContentFormat.NONE) {
                             operationConfig.requestSettings.header(HttpHeaders.Names.CONTENT_ENCODING, operationConfig.contentFormat.contentEncoding());
                         }
                     }
 
-                    if (N.isNullOrEmpty((String) operationConfig.requestSettings.headers().get(HttpHeaders.Names.ACCEPT))) {
+                    if (N.isNullOrEmpty(HttpUtil.getAccept(operationConfig.requestSettings))) {
                         if (operationConfig.acceptFormat != null && operationConfig.acceptFormat != ContentFormat.NONE) {
                             operationConfig.requestSettings.header(HttpHeaders.Names.ACCEPT, operationConfig.acceptFormat.contentType());
                         }
                     }
 
-                    if (N.isNullOrEmpty((String) operationConfig.requestSettings.headers().get(HttpHeaders.Names.ACCEPT_ENCODING))) {
+                    if (N.isNullOrEmpty(HttpUtil.getAcceptEncoding(operationConfig.requestSettings))) {
                         if (operationConfig.acceptFormat != null && operationConfig.acceptFormat != ContentFormat.NONE) {
                             operationConfig.requestSettings.header(HttpHeaders.Names.ACCEPT_ENCODING, operationConfig.acceptFormat.contentEncoding());
                         }
                     }
 
-                    if (N.isNullOrEmpty((String) operationConfig.requestSettings.headers().get(HttpHeaders.Names.ACCEPT_CHARSET))) {
+                    if (N.isNullOrEmpty(HttpUtil.getAcceptCharset(operationConfig.requestSettings))) {
                         if (N.notNullOrEmpty(operationConfig.acceptCharset)) {
                             operationConfig.requestSettings.header(HttpHeaders.Names.ACCEPT_CHARSET, operationConfig.acceptCharset);
                         }
@@ -523,7 +523,7 @@ public final class HttpProxy {
                         }
                     }
 
-                    operationConfig.returnType = N.typeOf(method.getGenericReturnType().toString());
+                    operationConfig.returnType = N.typeOf(ClassUtil.formatParameterizedTypeName(method.getGenericReturnType().toString()));
 
                     operationConfig.concreteReturnType = Future.class.isAssignableFrom(method.getReturnType())
                             ? (Type<Object>) operationConfig.returnType.getParameterTypes()[0]
@@ -806,7 +806,9 @@ public final class HttpProxy {
                             }
                         }
 
-                        sb.append(operationConfig.urlPartsSplittedByParaNames[operationConfig.urlParamNames.length]);
+                        if (operationConfig.urlPartsSplittedByParaNames.length > operationConfig.urlParamNames.length) {
+                            sb.append(operationConfig.urlPartsSplittedByParaNames[operationConfig.urlParamNames.length]);
+                        }
 
                         if (N.notNullOrEmpty(operationConfig.queryParamNameSet)) {
                             Map<String, Object> queryParams = new HashMap<>(operationConfig.queryParamNameSet.size());
@@ -819,7 +821,7 @@ public final class HttpProxy {
 
                             sb.append(WD._QUESTION_MARK);
 
-                            URLEncodedUtil.encode(sb, queryParams);
+                            URLEncodedUtil.encode(sb, queryParams, requestCharset);
                         }
 
                         newRequestUrl = sb.toString();
@@ -835,7 +837,7 @@ public final class HttpProxy {
                         queryParams.put(qureyParamName, tp._2.stringOf(args[tp._1]));
                     }
 
-                    newRequestUrl = URLEncodedUtil.encode(newRequestUrl, queryParams);
+                    newRequestUrl = URLEncodedUtil.encode(newRequestUrl, queryParams, requestCharset);
                 }
 
                 Object requestParameter = null;
@@ -847,6 +849,12 @@ public final class HttpProxy {
                     for (String fieldName : operationConfig.fieldNameSet) {
                         tp = operationConfig.paramNameTypeMap.get(fieldName);
                         queryParams.put(fieldName, tp._2.stringOf(args[tp._1]));
+                    }
+
+                    if (operationConfig.httpMethod == HttpMethod.GET || operationConfig.httpMethod == HttpMethod.DELETE) {
+                        newRequestUrl = URLEncodedUtil.encode(newRequestUrl, queryParams, requestCharset);
+                    } else {
+                        requestParameter = queryParams;
                     }
                 } else if (operationConfig.httpMethod == HttpMethod.POST || operationConfig.httpMethod == HttpMethod.PUT) {
                     //    if (N.isNullOrEmpty(operationConfig.pathAndQueryParamNameSet)) {
@@ -977,7 +985,7 @@ public final class HttpProxy {
 
                     final int code = connection.getResponseCode();
                     final Map<String, List<String>> respHeaders = connection.getHeaderFields();
-                    final Charset respCharset = HttpUtil.getCharset(respHeaders);
+                    final Charset respCharset = HttpUtil.getResponseCharset(respHeaders, requestCharset);
                     final ContentFormat responseContentFormat = HttpUtil.getResponseContentFormat(respHeaders, operationConfig.contentFormat);
                     final Parser<SerializationConfig<?>, DeserializationConfig<?>> responseParser = responseContentFormat == operationConfig.contentFormat
                             ? operationConfig.parser
@@ -987,7 +995,7 @@ public final class HttpProxy {
 
                     if (code < 200 || code >= 300) {
                         throw new UncheckedIOException(new IOException(
-                                code + ": " + connection.getResponseMessage() + ". " + IOUtil.readString(connection.getErrorStream(), respCharset)));
+                                code + ": " + connection.getResponseMessage() + ". " + IOUtil.readString(connection.getInputStream(), respCharset)));
                     }
 
                     is = HttpUtil.getInputStream(connection, responseContentFormat);

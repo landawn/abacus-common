@@ -228,8 +228,7 @@ public final class HttpSettings implements Cloneable {
      */
     public ContentFormat getContentFormat() {
         if ((contentFormat == null || contentFormat == ContentFormat.NONE) && headers != null) {
-            contentFormat = HttpUtil.getContentFormat((String) headers.get(HttpHeaders.Names.CONTENT_TYPE),
-                    (String) headers.get(HttpHeaders.Names.CONTENT_ENCODING));
+            contentFormat = HttpUtil.getContentFormat(HttpUtil.getContentType(headers), HttpUtil.getContentEncoding(headers));
         }
 
         return contentFormat;
@@ -282,7 +281,7 @@ public final class HttpSettings implements Cloneable {
     }
 
     public String getContentType() {
-        String contentType = (String) headers().get(HttpHeaders.Names.CONTENT_TYPE);
+        String contentType = HttpUtil.getContentType(headers);
 
         if (N.isNullOrEmpty(contentType) && contentFormat != null) {
             contentType = HttpUtil.getContentType(contentFormat);
@@ -302,7 +301,7 @@ public final class HttpSettings implements Cloneable {
     }
 
     public String getContentEncoding() {
-        String contentEncoding = (String) headers().get(HttpHeaders.Names.CONTENT_ENCODING);
+        String contentEncoding = HttpUtil.getContentEncoding(headers);
 
         if (N.isNullOrEmpty(contentEncoding) && contentFormat != null) {
             contentEncoding = HttpUtil.getContentEncoding(contentFormat);

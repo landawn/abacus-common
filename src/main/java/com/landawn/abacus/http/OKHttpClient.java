@@ -37,6 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.net.ssl.SSLSocketFactory;
 
 import com.landawn.abacus.exception.UncheckedIOException;
+import com.landawn.abacus.http.HttpHeaders.Names;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.type.Type;
@@ -385,7 +386,7 @@ public final class OKHttpClient extends AbstractHttpClient {
         final ContentFormat requestContentFormat = getContentFormat(settings);
         final String contentType = getContentType(settings);
         final String contentEncoding = getContentEncoding(settings);
-        final Charset requestCharset = HttpUtil.getCharset(settings == null || settings.headers().isEmpty() ? _settings.headers() : settings.headers());
+        final Charset requestCharset = HttpUtil.getRequestCharset(settings == null || settings.headers().isEmpty() ? _settings.headers() : settings.headers());
 
         okhttp3.Request httpRequest = null;
         okhttp3.Response httpResponse = null;
@@ -398,9 +399,13 @@ public final class OKHttpClient extends AbstractHttpClient {
 
             final okhttp3.Request.Builder requestBuilder = new okhttp3.Request.Builder().url(url);
 
-            setHeaders(requestBuilder, settings == null ? _settings : settings);
+            final HttpSettings settingToUse = settings == null ? _settings : settings;
+
+            setHeaders(requestBuilder, settingToUse);
 
             if (request != null && (httpMethod.equals(HttpMethod.POST) || httpMethod.equals(HttpMethod.PUT))) {
+                setHeader(requestBuilder, HttpHeaders.Names.CONTENT_ENCODING, HttpUtil.getContentEncoding(settingToUse));
+
                 MediaType mediaType = null;
 
                 if (N.notNullOrEmpty(contentType)) {
@@ -484,7 +489,7 @@ public final class OKHttpClient extends AbstractHttpClient {
             httpResponse = client.newCall(httpRequest).execute();
 
             final Map<String, List<String>> respHeaders = httpResponse.headers().toMultimap();
-            final Charset respCharset = HttpUtil.getCharset(respHeaders);
+            final Charset respCharset = HttpUtil.getResponseCharset(respHeaders, requestCharset);
             final ContentFormat respContentFormat = HttpUtil.getResponseContentFormat(respHeaders, requestContentFormat);
             final InputStream is = N.defaultIfNull(HttpUtil.wrapInputStream(httpResponse.body().byteStream(), respContentFormat), N.emptyInputStream());
 
@@ -564,26 +569,37 @@ public final class OKHttpClient extends AbstractHttpClient {
         final HttpHeaders headers = settings.headers();
 
         if (headers != null) {
-
-            Object headerValue = null;
-
             for (String headerName : headers.headerNameSet()) {
-                headerValue = headers.get(headerName);
+                // lazy set content-encoding 
+                // because if content-encoding(lz4/snappy/kryo...) is set but no parameter/result write to OutputStream, 
+                // error may happen when read the input stream in sever side.
 
-                if (headerValue instanceof Collection) {
-                    final Iterator<Object> iter = ((Collection<Object>) headerValue).iterator();
-
-                    if (iter.hasNext()) {
-                        requestBuilder.header(headerName, N.stringOf(iter.next()));
-                    }
-
-                    while (iter.hasNext()) {
-                        requestBuilder.addHeader(headerName, N.stringOf(iter.next()));
-                    }
-                } else {
-                    requestBuilder.header(headerName, N.stringOf(headerValue));
+                if (Names.CONTENT_ENCODING.equalsIgnoreCase(headerName)) {
+                    continue;
                 }
+
+                setHeader(requestBuilder, headerName, headers.get(headerName));
             }
+        }
+    }
+
+    private void setHeader(okhttp3.Request.Builder requestBuilder, String headerName, Object headerValue) {
+        if (headerValue == null) {
+            return;
+        }
+
+        if (headerValue instanceof Collection) {
+            final Iterator<Object> iter = ((Collection<Object>) headerValue).iterator();
+
+            if (iter.hasNext()) {
+                requestBuilder.header(headerName, N.stringOf(iter.next()));
+            }
+
+            while (iter.hasNext()) {
+                requestBuilder.addHeader(headerName, N.stringOf(iter.next()));
+            }
+        } else {
+            requestBuilder.header(headerName, N.stringOf(headerValue));
         }
     }
 }
