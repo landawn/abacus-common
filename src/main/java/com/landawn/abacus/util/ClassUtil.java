@@ -2946,7 +2946,7 @@ public final class ClassUtil {
 
         return true;
     }
-    
+
     public static MethodHandle createMethodHandle(final Method method) {
         final Class<?> declaringClass = method.getDeclaringClass();
 

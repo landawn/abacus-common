@@ -688,7 +688,7 @@ public final class InternalUtil {
      * @param share the same array will be shared with the new created ArrayList
      *            if it's true.
      * @return
-     */ 
+     */
     static String newString(final char[] a, final boolean share) {
         if (share && sharedStringConstructor != null) {
             try {

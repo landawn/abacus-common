@@ -1051,15 +1051,17 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @return
      */
     public int indexOf(final int fromIndex, long e) {
-        checkFromToIndex(fromIndex, size);
+        if (fromIndex >= size) {
+            return N.INDEX_NOT_FOUND;
+        }
 
-        for (int i = fromIndex; i < size; i++) {
+        for (int i = N.max(fromIndex, 0); i < size; i++) {
             if (elementData[i] == e) {
                 return i;
             }
         }
 
-        return -1;
+        return N.INDEX_NOT_FOUND;
     }
 
     /**
@@ -1080,15 +1082,17 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @return
      */
     public int lastIndexOf(final int fromIndex, long e) {
-        checkFromToIndex(0, fromIndex);
+        if (fromIndex < 0 || size == 0) {
+            return N.INDEX_NOT_FOUND;
+        }
 
-        for (int i = fromIndex == size ? size - 1 : fromIndex; i >= 0; i--) {
+        for (int i = N.min(fromIndex, size - 1); i >= 0; i--) {
             if (elementData[i] == e) {
                 return i;
             }
         }
 
-        return -1;
+        return N.INDEX_NOT_FOUND;
     }
 
     /**

@@ -321,8 +321,8 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @return
      * @throws X the x
      */
-    public static <T, K, X extends Exception> ListMultimap<K, T> from(final Collection<? extends T> c, final Throwables.Function<? super T, ? extends K, X> keyMapper)
-            throws X {
+    public static <T, K, X extends Exception> ListMultimap<K, T> from(final Collection<? extends T> c,
+            final Throwables.Function<? super T, ? extends K, X> keyMapper) throws X {
         N.checkArgNotNull(keyMapper);
 
         final ListMultimap<K, T> multimap = N.newListMultimap(N.initHashCapacity(N.size(c)));
@@ -682,7 +682,8 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      */
     @Deprecated
     public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M concat(final Map<? extends K, ? extends E> a,
-            final Map<? extends K, ? extends E> b, final Map<? extends K, ? extends E> c, final IntFunction<? extends M> multimapSupplier) throws UnsupportedOperationException {
+            final Map<? extends K, ? extends E> b, final Map<? extends K, ? extends E> c, final IntFunction<? extends M> multimapSupplier)
+            throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -696,7 +697,8 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @return
      */
     @Deprecated
-    public static <K, E, V extends Collection<E>> Multimap<K, E, V> wrap(final Map<K, V> map, final Supplier<? extends V> valueSupplier) throws UnsupportedOperationException {
+    public static <K, E, V extends Collection<E>> Multimap<K, E, V> wrap(final Map<K, V> map, final Supplier<? extends V> valueSupplier)
+            throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 

@@ -1008,15 +1008,17 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return
      */
     public int indexOf(final int fromIndex, double e) {
-        checkFromToIndex(fromIndex, size);
+        if (fromIndex >= size) {
+            return N.INDEX_NOT_FOUND;
+        }
 
-        for (int i = fromIndex; i < size; i++) {
+        for (int i = N.max(fromIndex, 0); i < size; i++) {
             if (N.equals(elementData[i], e)) {
                 return i;
             }
         }
 
-        return -1;
+        return N.INDEX_NOT_FOUND;
     }
 
     /**
@@ -1037,15 +1039,17 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return
      */
     public int lastIndexOf(final int fromIndex, double e) {
-        checkFromToIndex(0, fromIndex);
+        if (fromIndex < 0 || size == 0) {
+            return N.INDEX_NOT_FOUND;
+        }
 
-        for (int i = fromIndex == size ? size - 1 : fromIndex; i >= 0; i--) {
+        for (int i = N.min(fromIndex, size - 1); i >= 0; i--) {
             if (N.equals(elementData[i], e)) {
                 return i;
             }
         }
 
-        return -1;
+        return N.INDEX_NOT_FOUND;
     }
 
     /**

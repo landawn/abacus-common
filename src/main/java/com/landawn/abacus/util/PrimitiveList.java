@@ -46,9 +46,9 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * Default initial capacity.
      */
     static final int DEFAULT_CAPACITY = 10;
- 
+
     static final int MAX_ARRAY_SIZE = N.MAX_ARRAY_SIZE;
- 
+
     /**
      * Returned the backed array.
      *

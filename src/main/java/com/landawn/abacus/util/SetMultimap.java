@@ -681,7 +681,8 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      */
     @Deprecated
     public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M concat(final Map<? extends K, ? extends E> a,
-            final Map<? extends K, ? extends E> b, final Map<? extends K, ? extends E> c, final IntFunction<? extends M> multimapSupplier) throws UnsupportedOperationException {
+            final Map<? extends K, ? extends E> b, final Map<? extends K, ? extends E> c, final IntFunction<? extends M> multimapSupplier)
+            throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -695,7 +696,8 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @return
      */
     @Deprecated
-    public static <K, E, V extends Collection<E>> Multimap<K, E, V> wrap(final Map<K, V> map, final Supplier<? extends V> valueSupplier) throws UnsupportedOperationException {
+    public static <K, E, V extends Collection<E>> Multimap<K, E, V> wrap(final Map<K, V> map, final Supplier<? extends V> valueSupplier)
+            throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 

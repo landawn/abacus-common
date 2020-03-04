@@ -674,7 +674,7 @@ public final class HttpProxy {
                 }
             }
 
-            private Object invoke2(Object proxy, final Method method, final Object[] args, final OperationConfig operationConfig) throws Throwable {
+            private Object invoke2(final Object proxy, final Method method, final Object[] args, final OperationConfig operationConfig) throws Throwable {
                 if (_config.executedByThreadPool || operationConfig.isFutureReturnType) {
                     final Callable<Object> cmd = new Callable<Object>() {
                         @Override
@@ -733,7 +733,7 @@ public final class HttpProxy {
                 }
             }
 
-            private Object invoke3(Object proxy, final Method method, final Object[] args, final OperationConfig operationConfig) throws Exception {
+            private Object invoke3(final Object proxy, final Method method, final Object[] args, final OperationConfig operationConfig) throws Exception {
                 if (_logger.isInfoEnabled()) {
                     _logger.info(operationConfig.parser.serialize(args, operationConfig.sc));
                 }

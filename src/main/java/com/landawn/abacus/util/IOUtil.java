@@ -5795,8 +5795,8 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      */
-    public static <E extends Exception> void parse(final List<File> files, final long lineOffset, final long count, final Throwables.Consumer<String, E> lineParser)
-            throws UncheckedIOException, E {
+    public static <E extends Exception> void parse(final List<File> files, final long lineOffset, final long count,
+            final Throwables.Consumer<String, E> lineParser) throws UncheckedIOException, E {
         parse(files, lineOffset, count, lineParser, Fn.emptyAction());
     }
 
@@ -6104,8 +6104,8 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      */
-    public static <E extends Exception> void parse(final InputStream is, final long lineOffset, final long count, final Throwables.Consumer<String, E> lineParser)
-            throws UncheckedIOException, E {
+    public static <E extends Exception> void parse(final InputStream is, final long lineOffset, final long count,
+            final Throwables.Consumer<String, E> lineParser) throws UncheckedIOException, E {
         parse(is, lineOffset, count, lineParser, Fn.emptyAction());
     }
 
@@ -6210,8 +6210,8 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      */
-    public static <E extends Exception> void parse(final Reader reader, final long lineOffset, final long count, final Throwables.Consumer<String, E> lineParser)
-            throws UncheckedIOException, E {
+    public static <E extends Exception> void parse(final Reader reader, final long lineOffset, final long count,
+            final Throwables.Consumer<String, E> lineParser) throws UncheckedIOException, E {
         parse(reader, lineOffset, count, lineParser, Fn.emptyAction());
     }
 

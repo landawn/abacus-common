@@ -7004,13 +7004,24 @@ class CommonUtil {
     /**
      * Any null or empty.
      *
-     * @param cs1
-     * @param cs2
-     * @param cs3
+     * @param a
+     * @param b
      * @return true, if successful
      */
-    public static boolean anyNullOrEmpty(final CharSequence cs1, final CharSequence cs2, final CharSequence cs3) {
-        return CommonUtil.isNullOrEmpty(cs1) || CommonUtil.isNullOrEmpty(cs2) || CommonUtil.isNullOrEmpty(cs3);
+    public static boolean anyNullOrEmpty(final CharSequence a, final CharSequence b) {
+        return a == null || a.length() == 0 || b == null || b.length() == 0;
+    }
+
+    /**
+     * Any null or empty.
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return true, if successful
+     */
+    public static boolean anyNullOrEmpty(final CharSequence a, final CharSequence b, final CharSequence c) {
+        return a == null || a.length() == 0 || b == null || b.length() == 0 || c == null || c.length() == 0;
     }
 
     /**
@@ -7026,7 +7037,7 @@ class CommonUtil {
         }
 
         for (CharSequence cs : css) {
-            if (CommonUtil.isNullOrEmpty(cs)) {
+            if (cs == null || cs.length() == 0) {
                 return true;
             }
         }
@@ -7046,12 +7057,69 @@ class CommonUtil {
         }
 
         for (CharSequence cs : css) {
-            if (CommonUtil.isNullOrEmpty(cs)) {
+            if (cs == null || cs.length() == 0) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
+     */
+    public static <T> boolean anyNullOrEmpty(final T[] a, final T[] b) {
+        return a == null || a.length == 0 || b == null || b.length == 0;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
+    public static <T> boolean anyNullOrEmpty(final T a[], final T[] b, final T[] c) {
+        return a == null || a.length == 0 || b == null || b.length == 0 || c == null || c.length == 0;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
+     */
+    public static <T extends Collection<?>> boolean anyNullOrEmpty(final T a, final T b) {
+        return a == null || a.size() == 0 || b == null || b.size() == 0;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
+    public static <T extends Collection<?>> boolean anyNullOrEmpty(final T a, final T b, final T c) {
+        return a == null || a.size() == 0 || b == null || b.size() == 0 || c == null || c.size() == 0;
+    }
+
+    /**
+     * All null or empty.
+     *
+     * @param cs1
+     * @param cs2
+     * @return true, if successful
+     */
+    public static boolean allNullOrEmpty(final CharSequence cs1, final CharSequence cs2) {
+        return CommonUtil.isNullOrEmpty(cs1) && CommonUtil.isNullOrEmpty(cs2);
     }
 
     /**
@@ -7110,6 +7178,52 @@ class CommonUtil {
     /**
      *
      * @param <T>
+     * @param a
+     * @param b
+     * @return
+     */
+    public static <T> boolean allNullOrEmpty(final T[] a, final T[] b) {
+        return isNullOrEmpty(a) && isNullOrEmpty(b);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
+    public static <T> boolean allNullOrEmpty(final T a[], final T[] b, final T[] c) {
+        return isNullOrEmpty(a) && isNullOrEmpty(b) && isNullOrEmpty(c);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
+     */
+    public static <T extends Collection<?>> boolean allNullOrEmpty(final T a, final T b) {
+        return isNullOrEmpty(a) && isNullOrEmpty(b);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
+    public static <T extends Collection<?>> boolean allNullOrEmpty(final T a, final T b, final T c) {
+        return isNullOrEmpty(a) && isNullOrEmpty(b) && isNullOrEmpty(c);
+    }
+
+    /**
+     *
+     * @param <T>
      * @param c
      * @return
      */
@@ -7149,30 +7263,6 @@ class CommonUtil {
         } else {
             return Iterators.last(c.iterator());
         }
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return
-     */
-    public static <T extends CharSequence> Optional<T> firstNonEmpty(final T a, final T b) {
-        return a != null && a.length() > 0 ? Optional.of(a) : (b != null && b.length() > 0 ? Optional.of(b) : Optional.<T> empty());
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param a
-     * @param b
-     * @param c
-     * @return
-     */
-    public static <T extends CharSequence> Optional<T> firstNonEmpty(final T a, final T b, final T c) {
-        return a != null && a.length() > 0 ? Optional.of(a)
-                : (b != null && b.length() > 0 ? Optional.of(b) : (c != null && c.length() > 0 ? Optional.of(c) : Optional.<T> empty()));
     }
 
     /**
@@ -7335,6 +7425,78 @@ class CommonUtil {
         }
 
         return Optional.empty();
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
+     */
+    public static <T extends CharSequence> Optional<T> firstNonEmpty(final T a, final T b) {
+        return a != null && a.length() > 0 ? Optional.of(a) : (b != null && b.length() > 0 ? Optional.of(b) : Optional.<T> empty());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
+    public static <T extends CharSequence> Optional<T> firstNonEmpty(final T a, final T b, final T c) {
+        return a != null && a.length() > 0 ? Optional.of(a)
+                : (b != null && b.length() > 0 ? Optional.of(b) : (c != null && c.length() > 0 ? Optional.of(c) : Optional.<T> empty()));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
+     */
+    public static <T> Optional<T[]> firstNonEmpty(final T[] a, final T b[]) {
+        return a != null && a.length > 0 ? Optional.of(a) : (b != null && b.length > 0 ? Optional.of(b) : Optional.<T[]> empty());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
+    public static <T> Optional<T[]> firstNonEmpty(final T a[], final T b[], final T[] c) {
+        return a != null && a.length > 0 ? Optional.of(a)
+                : (b != null && b.length > 0 ? Optional.of(b) : (c != null && c.length > 0 ? Optional.of(c) : Optional.<T[]> empty()));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
+     */
+    public static <T extends Collection<?>> Optional<T> firstNonEmpty(final T a, final T b) {
+        return a != null && a.size() > 0 ? Optional.of(a) : (b != null && b.size() > 0 ? Optional.of(b) : Optional.<T> empty());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
+    public static <T extends Collection<?>> Optional<T> firstNonEmpty(final T a, final T b, final T c) {
+        return a != null && a.size() > 0 ? Optional.of(a)
+                : (b != null && b.size() > 0 ? Optional.of(b) : (c != null && c.size() > 0 ? Optional.of(c) : Optional.<T> empty()));
     }
 
     /**
@@ -8166,7 +8328,7 @@ class CommonUtil {
     @Deprecated
     @Internal
     @Beta
-     static boolean isNullOrDefault(final Object value) {
+    static boolean isNullOrDefault(final Object value) {
         return (value == null) || equals(value, defaultValueOf(value.getClass()));
     }
 
@@ -8373,7 +8535,7 @@ class CommonUtil {
     @Deprecated
     @Internal
     @Beta
-     static boolean notNullOrDefault(final Object value) {
+    static boolean notNullOrDefault(final Object value) {
         return (value != null) && !equals(value, defaultValueOf(value.getClass()));
     }
 
@@ -9029,7 +9191,7 @@ class CommonUtil {
      */
     public static <T extends CharSequence> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
         if (CommonUtil.isNullOrEmpty(arg)) {
-            if (argNameOrErrorMsg.indexOf(' ') == CommonUtil.INDEX_NOT_FOUND) {
+            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
@@ -9049,7 +9211,7 @@ class CommonUtil {
      */
     public static boolean[] checkArgNotNullOrEmpty(final boolean[] arg, final String argNameOrErrorMsg) {
         if (CommonUtil.isNullOrEmpty(arg)) {
-            if (argNameOrErrorMsg.indexOf(' ') == CommonUtil.INDEX_NOT_FOUND) {
+            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
@@ -9069,7 +9231,7 @@ class CommonUtil {
      */
     public static char[] checkArgNotNullOrEmpty(final char[] arg, final String argNameOrErrorMsg) {
         if (CommonUtil.isNullOrEmpty(arg)) {
-            if (argNameOrErrorMsg.indexOf(' ') == CommonUtil.INDEX_NOT_FOUND) {
+            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
@@ -9089,7 +9251,7 @@ class CommonUtil {
      */
     public static byte[] checkArgNotNullOrEmpty(final byte[] arg, final String argNameOrErrorMsg) {
         if (CommonUtil.isNullOrEmpty(arg)) {
-            if (argNameOrErrorMsg.indexOf(' ') == CommonUtil.INDEX_NOT_FOUND) {
+            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
@@ -9109,7 +9271,7 @@ class CommonUtil {
      */
     public static short[] checkArgNotNullOrEmpty(final short[] arg, final String argNameOrErrorMsg) {
         if (CommonUtil.isNullOrEmpty(arg)) {
-            if (argNameOrErrorMsg.indexOf(' ') == CommonUtil.INDEX_NOT_FOUND) {
+            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
@@ -9129,7 +9291,7 @@ class CommonUtil {
      */
     public static int[] checkArgNotNullOrEmpty(final int[] arg, final String argNameOrErrorMsg) {
         if (CommonUtil.isNullOrEmpty(arg)) {
-            if (argNameOrErrorMsg.indexOf(' ') == CommonUtil.INDEX_NOT_FOUND) {
+            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
@@ -9149,7 +9311,7 @@ class CommonUtil {
      */
     public static long[] checkArgNotNullOrEmpty(final long[] arg, final String argNameOrErrorMsg) {
         if (CommonUtil.isNullOrEmpty(arg)) {
-            if (argNameOrErrorMsg.indexOf(' ') == CommonUtil.INDEX_NOT_FOUND) {
+            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
@@ -9169,7 +9331,7 @@ class CommonUtil {
      */
     public static float[] checkArgNotNullOrEmpty(final float[] arg, final String argNameOrErrorMsg) {
         if (CommonUtil.isNullOrEmpty(arg)) {
-            if (argNameOrErrorMsg.indexOf(' ') == CommonUtil.INDEX_NOT_FOUND) {
+            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
@@ -9189,7 +9351,7 @@ class CommonUtil {
      */
     public static double[] checkArgNotNullOrEmpty(final double[] arg, final String argNameOrErrorMsg) {
         if (CommonUtil.isNullOrEmpty(arg)) {
-            if (argNameOrErrorMsg.indexOf(' ') == CommonUtil.INDEX_NOT_FOUND) {
+            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
@@ -9210,7 +9372,7 @@ class CommonUtil {
      */
     public static <T> T[] checkArgNotNullOrEmpty(final T[] arg, final String argNameOrErrorMsg) {
         if (CommonUtil.isNullOrEmpty(arg)) {
-            if (argNameOrErrorMsg.indexOf(' ') == CommonUtil.INDEX_NOT_FOUND) {
+            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
@@ -9231,7 +9393,7 @@ class CommonUtil {
      */
     public static <T extends Collection<?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
         if (CommonUtil.isNullOrEmpty(arg)) {
-            if (argNameOrErrorMsg.indexOf(' ') == CommonUtil.INDEX_NOT_FOUND) {
+            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
@@ -9252,7 +9414,7 @@ class CommonUtil {
      */
     public static <T extends Map<?, ?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
         if (CommonUtil.isNullOrEmpty(arg)) {
-            if (argNameOrErrorMsg.indexOf(' ') == CommonUtil.INDEX_NOT_FOUND) {
+            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
@@ -9294,7 +9456,7 @@ class CommonUtil {
      */
     public static int checkArgNotNegative(final int arg, final String argNameOrErrorMsg) {
         if (arg < 0) {
-            if (argNameOrErrorMsg.indexOf(' ') == CommonUtil.INDEX_NOT_FOUND) {
+            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg);
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
@@ -9314,7 +9476,7 @@ class CommonUtil {
      */
     public static long checkArgNotNegative(final long arg, final String argNameOrErrorMsg) {
         if (arg < 0) {
-            if (argNameOrErrorMsg.indexOf(' ') == CommonUtil.INDEX_NOT_FOUND) {
+            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg);
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
@@ -9334,7 +9496,7 @@ class CommonUtil {
      */
     public static double checkArgNotNegative(final double arg, final String argNameOrErrorMsg) {
         if (arg < 0) {
-            if (argNameOrErrorMsg.indexOf(' ') == CommonUtil.INDEX_NOT_FOUND) {
+            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg);
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
@@ -9354,7 +9516,7 @@ class CommonUtil {
      */
     public static int checkArgPositive(final int arg, final String argNameOrErrorMsg) {
         if (arg <= 0) {
-            if (argNameOrErrorMsg.indexOf(' ') == CommonUtil.INDEX_NOT_FOUND) {
+            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be zero or negative: " + arg);
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
@@ -9374,7 +9536,7 @@ class CommonUtil {
      */
     public static long checkArgPositive(final long arg, final String argNameOrErrorMsg) {
         if (arg <= 0) {
-            if (argNameOrErrorMsg.indexOf(' ') == CommonUtil.INDEX_NOT_FOUND) {
+            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be zero or negative: " + arg);
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
@@ -9394,7 +9556,7 @@ class CommonUtil {
      */
     public static double checkArgPositive(final double arg, final String argNameOrErrorMsg) {
         if (arg <= 0) {
-            if (argNameOrErrorMsg.indexOf(' ') == CommonUtil.INDEX_NOT_FOUND) {
+            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be zero or negative: " + arg);
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
@@ -17628,11 +17790,13 @@ class CommonUtil {
      * @return
      */
     public static int indexOf(final boolean[] a, final int fromIndex, final boolean e) {
-        if (CommonUtil.isNullOrEmpty(a)) {
-            return CommonUtil.INDEX_NOT_FOUND;
+        final int len = len(a);
+
+        if (len == 0 || fromIndex >= len) {
+            return INDEX_NOT_FOUND;
         }
 
-        for (int i = fromIndex, len = a.length; i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (a[i] == e) {
                 return i;
             }
@@ -17659,11 +17823,13 @@ class CommonUtil {
      * @return
      */
     public static int indexOf(final char[] a, final int fromIndex, final char e) {
-        if (CommonUtil.isNullOrEmpty(a)) {
-            return CommonUtil.INDEX_NOT_FOUND;
+        final int len = len(a);
+
+        if (len == 0 || fromIndex >= len) {
+            return INDEX_NOT_FOUND;
         }
 
-        for (int i = fromIndex, len = a.length; i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (a[i] == e) {
                 return i;
             }
@@ -17691,11 +17857,13 @@ class CommonUtil {
      * @return
      */
     public static int indexOf(final byte[] a, final int fromIndex, final byte e) {
-        if (CommonUtil.isNullOrEmpty(a)) {
-            return CommonUtil.INDEX_NOT_FOUND;
+        final int len = len(a);
+
+        if (len == 0 || fromIndex >= len) {
+            return INDEX_NOT_FOUND;
         }
 
-        for (int i = fromIndex, len = a.length; i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (a[i] == e) {
                 return i;
             }
@@ -17722,11 +17890,13 @@ class CommonUtil {
      * @return
      */
     public static int indexOf(final short[] a, final int fromIndex, final short e) {
-        if (CommonUtil.isNullOrEmpty(a)) {
-            return CommonUtil.INDEX_NOT_FOUND;
+        final int len = len(a);
+
+        if (len == 0 || fromIndex >= len) {
+            return INDEX_NOT_FOUND;
         }
 
-        for (int i = fromIndex, len = a.length; i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (a[i] == e) {
                 return i;
             }
@@ -17753,11 +17923,13 @@ class CommonUtil {
      * @return
      */
     public static int indexOf(final int[] a, final int fromIndex, final int e) {
-        if (CommonUtil.isNullOrEmpty(a)) {
-            return CommonUtil.INDEX_NOT_FOUND;
+        final int len = len(a);
+
+        if (len == 0 || fromIndex >= len) {
+            return INDEX_NOT_FOUND;
         }
 
-        for (int i = fromIndex, len = a.length; i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (a[i] == e) {
                 return i;
             }
@@ -17784,11 +17956,13 @@ class CommonUtil {
      * @return
      */
     public static int indexOf(final long[] a, final int fromIndex, final long e) {
-        if (CommonUtil.isNullOrEmpty(a)) {
-            return CommonUtil.INDEX_NOT_FOUND;
+        final int len = len(a);
+
+        if (len == 0 || fromIndex >= len) {
+            return INDEX_NOT_FOUND;
         }
 
-        for (int i = fromIndex, len = a.length; i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (a[i] == e) {
                 return i;
             }
@@ -17815,11 +17989,13 @@ class CommonUtil {
      * @return
      */
     public static int indexOf(final float[] a, final int fromIndex, final float e) {
-        if (CommonUtil.isNullOrEmpty(a)) {
-            return CommonUtil.INDEX_NOT_FOUND;
+        final int len = len(a);
+
+        if (len == 0 || fromIndex >= len) {
+            return INDEX_NOT_FOUND;
         }
 
-        for (int i = fromIndex, len = a.length; i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (Float.compare(a[i], e) == 0) {
                 return i;
             }
@@ -17846,11 +18022,13 @@ class CommonUtil {
      * @return
      */
     public static int indexOf(final double[] a, final int fromIndex, final double e) {
-        if (CommonUtil.isNullOrEmpty(a)) {
-            return CommonUtil.INDEX_NOT_FOUND;
+        final int len = len(a);
+
+        if (len == 0 || fromIndex >= len) {
+            return INDEX_NOT_FOUND;
         }
 
-        for (int i = fromIndex, len = a.length; i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (Double.compare(a[i], e) == 0) {
                 return i;
             }
@@ -17877,11 +18055,13 @@ class CommonUtil {
      * @return
      */
     public static int indexOf(final Object[] a, final int fromIndex, final Object e) {
-        if (CommonUtil.isNullOrEmpty(a)) {
-            return CommonUtil.INDEX_NOT_FOUND;
+        final int len = len(a);
+
+        if (len == 0 || fromIndex >= len) {
+            return INDEX_NOT_FOUND;
         }
 
-        for (int i = fromIndex, len = a.length; i < len; i++) {
+        for (int i = N.max(fromIndex, 0); i < len; i++) {
             if (equals(a[i], e)) {
                 return i;
             }
@@ -17908,13 +18088,29 @@ class CommonUtil {
      * @return
      */
     public static int indexOf(final List<?> list, final int fromIndex, final Object e) {
-        if (CommonUtil.isNullOrEmpty(list)) {
-            return CommonUtil.INDEX_NOT_FOUND;
+        final int len = size(list);
+
+        if (len == 0 || fromIndex >= len) {
+            return INDEX_NOT_FOUND;
         }
 
-        for (int i = fromIndex, len = list.size(); i < len; i++) {
-            if (equals(list.get(i), e)) {
-                return i;
+        if (list instanceof RandomAccess) {
+            for (int i = N.max(fromIndex, 0); i < len; i++) {
+                if (equals(list.get(i), e)) {
+                    return i;
+                }
+            }
+        } else {
+            final ListIterator<?> iter = list.listIterator(N.max(fromIndex, 0));
+
+            int idx = fromIndex;
+
+            while (iter.hasNext()) {
+                if (equals(iter.next(), e)) {
+                    return idx;
+                }
+
+                idx++;
             }
         }
 
@@ -17931,7 +18127,7 @@ class CommonUtil {
      */
     public static int indexOfSubList(final List<?> sourceList, final List<?> targetSubList) {
         if (CommonUtil.isNullOrEmpty(sourceList) || CommonUtil.isNullOrEmpty(targetSubList)) {
-            return CommonUtil.INDEX_NOT_FOUND;
+            return INDEX_NOT_FOUND;
         }
 
         return Collections.indexOfSubList(sourceList, targetSubList);
@@ -17957,11 +18153,13 @@ class CommonUtil {
      * @return
      */
     public static int lastIndexOf(final boolean[] a, final int fromIndex, final boolean e) {
-        if (CommonUtil.isNullOrEmpty(a)) {
-            return CommonUtil.INDEX_NOT_FOUND;
+        final int len = len(a);
+
+        if (len == 0 || fromIndex < 0) {
+            return INDEX_NOT_FOUND;
         }
 
-        for (int i = N.min(fromIndex, a.length - 1); i >= 0; i--) {
+        for (int i = N.min(fromIndex, len - 1); i >= 0; i--) {
             if (a[i] == e) {
                 return i;
             }
@@ -17994,11 +18192,13 @@ class CommonUtil {
      * @return
      */
     public static int lastIndexOf(final char[] a, final int fromIndex, final char e) {
-        if (CommonUtil.isNullOrEmpty(a)) {
-            return CommonUtil.INDEX_NOT_FOUND;
+        final int len = len(a);
+
+        if (len == 0 || fromIndex < 0) {
+            return INDEX_NOT_FOUND;
         }
 
-        for (int i = N.min(fromIndex, a.length - 1); i >= 0; i--) {
+        for (int i = N.min(fromIndex, len - 1); i >= 0; i--) {
             if (a[i] == e) {
                 return i;
             }
@@ -18032,11 +18232,13 @@ class CommonUtil {
      * @return
      */
     public static int lastIndexOf(final byte[] a, final int fromIndex, final byte e) {
-        if (CommonUtil.isNullOrEmpty(a)) {
-            return CommonUtil.INDEX_NOT_FOUND;
+        final int len = len(a);
+
+        if (len == 0 || fromIndex < 0) {
+            return INDEX_NOT_FOUND;
         }
 
-        for (int i = N.min(fromIndex, a.length - 1); i >= 0; i--) {
+        for (int i = N.min(fromIndex, len - 1); i >= 0; i--) {
             if (a[i] == e) {
                 return i;
             }
@@ -18069,11 +18271,13 @@ class CommonUtil {
      * @return
      */
     public static int lastIndexOf(final short[] a, final int fromIndex, final short e) {
-        if (CommonUtil.isNullOrEmpty(a)) {
-            return CommonUtil.INDEX_NOT_FOUND;
+        final int len = len(a);
+
+        if (len == 0 || fromIndex < 0) {
+            return INDEX_NOT_FOUND;
         }
 
-        for (int i = N.min(fromIndex, a.length - 1); i >= 0; i--) {
+        for (int i = N.min(fromIndex, len - 1); i >= 0; i--) {
             if (a[i] == e) {
                 return i;
             }
@@ -18106,11 +18310,13 @@ class CommonUtil {
      * @return
      */
     public static int lastIndexOf(final int[] a, final int fromIndex, final int e) {
-        if (CommonUtil.isNullOrEmpty(a)) {
-            return CommonUtil.INDEX_NOT_FOUND;
+        final int len = len(a);
+
+        if (len == 0 || fromIndex < 0) {
+            return INDEX_NOT_FOUND;
         }
 
-        for (int i = N.min(fromIndex, a.length - 1); i >= 0; i--) {
+        for (int i = N.min(fromIndex, len - 1); i >= 0; i--) {
             if (a[i] == e) {
                 return i;
             }
@@ -18143,11 +18349,13 @@ class CommonUtil {
      * @return
      */
     public static int lastIndexOf(final long[] a, final int fromIndex, final long e) {
-        if (CommonUtil.isNullOrEmpty(a)) {
-            return CommonUtil.INDEX_NOT_FOUND;
+        final int len = len(a);
+
+        if (len == 0 || fromIndex < 0) {
+            return INDEX_NOT_FOUND;
         }
 
-        for (int i = N.min(fromIndex, a.length - 1); i >= 0; i--) {
+        for (int i = N.min(fromIndex, len - 1); i >= 0; i--) {
             if (a[i] == e) {
                 return i;
             }
@@ -18180,11 +18388,13 @@ class CommonUtil {
      * @return
      */
     public static int lastIndexOf(final float[] a, final int fromIndex, final float e) {
-        if (CommonUtil.isNullOrEmpty(a)) {
-            return CommonUtil.INDEX_NOT_FOUND;
+        final int len = len(a);
+
+        if (len == 0 || fromIndex < 0) {
+            return INDEX_NOT_FOUND;
         }
 
-        for (int i = N.min(fromIndex, a.length - 1); i >= 0; i--) {
+        for (int i = N.min(fromIndex, len - 1); i >= 0; i--) {
             if (Float.compare(a[i], e) == 0) {
                 return i;
             }
@@ -18217,11 +18427,13 @@ class CommonUtil {
      * @return
      */
     public static int lastIndexOf(final double[] a, final int fromIndex, final double e) {
-        if (CommonUtil.isNullOrEmpty(a)) {
-            return CommonUtil.INDEX_NOT_FOUND;
+        final int len = len(a);
+
+        if (len == 0 || fromIndex < 0) {
+            return INDEX_NOT_FOUND;
         }
 
-        for (int i = N.min(fromIndex, a.length - 1); i >= 0; i--) {
+        for (int i = N.min(fromIndex, len - 1); i >= 0; i--) {
             if (Double.compare(a[i], e) == 0) {
                 return i;
             }
@@ -18254,11 +18466,13 @@ class CommonUtil {
      * @return
      */
     public static int lastIndexOf(final Object[] a, final int fromIndex, final Object e) {
-        if (CommonUtil.isNullOrEmpty(a)) {
-            return CommonUtil.INDEX_NOT_FOUND;
+        final int len = len(a);
+
+        if (len == 0 || fromIndex < 0) {
+            return INDEX_NOT_FOUND;
         }
 
-        for (int i = N.min(fromIndex, a.length - 1); i >= 0; i--) {
+        for (int i = N.min(fromIndex, len - 1); i >= 0; i--) {
             if (equals(a[i], e)) {
                 return i;
             }
@@ -18291,13 +18505,28 @@ class CommonUtil {
      * @return
      */
     public static int lastIndexOf(final List<?> list, final int fromIndex, final Object e) {
-        if (CommonUtil.isNullOrEmpty(list)) {
-            return CommonUtil.INDEX_NOT_FOUND;
+        final int len = size(list);
+
+        if (len == 0 || fromIndex < 0) {
+            return INDEX_NOT_FOUND;
         }
 
-        for (int i = N.min(fromIndex, list.size() - 1); i >= 0; i--) {
-            if (equals(list.get(i), e)) {
-                return i;
+        if (list instanceof RandomAccess) {
+            for (int i = N.min(fromIndex, len - 1); i >= 0; i--) {
+                if (equals(list.get(i), e)) {
+                    return i;
+                }
+            }
+        } else {
+            int startIndexFromBack = N.min(fromIndex, len - 1);
+            final ListIterator<?> iter = list.listIterator(startIndexFromBack + 1);
+
+            while (iter.hasPrevious()) {
+                if (equals(iter.previous(), e)) {
+                    return startIndexFromBack;
+                }
+
+                startIndexFromBack--;
             }
         }
 
@@ -18314,7 +18543,7 @@ class CommonUtil {
      */
     public static int lastIndexOfSubList(final List<?> sourceList, final List<?> targetSubList) {
         if (CommonUtil.isNullOrEmpty(sourceList) || CommonUtil.isNullOrEmpty(targetSubList)) {
-            return CommonUtil.INDEX_NOT_FOUND;
+            return INDEX_NOT_FOUND;
         }
 
         return Collections.lastIndexOfSubList(sourceList, targetSubList);

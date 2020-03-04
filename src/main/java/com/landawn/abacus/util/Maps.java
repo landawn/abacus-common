@@ -2367,8 +2367,7 @@ public final class Maps {
      * @param remappingFunction
      * @throws E the e
      */
-    static <K, V, E extends Exception> void merge(Map<K, V> map, K key, V value, Throwables.BinaryOperator<V, E> remappingFunction)
-            throws E {
+    static <K, V, E extends Exception> void merge(Map<K, V> map, K key, V value, Throwables.BinaryOperator<V, E> remappingFunction) throws E {
         final V oldValue = map.get(key);
 
         if (oldValue == null && map.containsKey(key) == false) {
