@@ -1,3 +1,9 @@
+### 1.20.12
+
+* Improve `Index`.
+* Improvements and bug fix.
+
+
 ### 1.20.11
 
 * Improvements and bug fix.
