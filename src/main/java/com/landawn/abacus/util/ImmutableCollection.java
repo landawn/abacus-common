@@ -213,7 +213,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> {
      */
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof ImmutableCollection && ((ImmutableCollection<E>) obj).coll.equals(coll);
+        return obj instanceof Collection && coll.equals(obj);
     }
 
     /**

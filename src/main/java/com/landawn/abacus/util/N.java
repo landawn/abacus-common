@@ -6937,7 +6937,7 @@ public final class N extends CommonUtil {
      * @return a new array
      */
     public static boolean[] deleteRange(final boolean[] a, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, a.length);
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
             return a == null ? N.EMPTY_BOOLEAN_ARRAY : a.clone();
@@ -6966,7 +6966,7 @@ public final class N extends CommonUtil {
      * @return a new array
      */
     public static char[] deleteRange(final char[] a, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, a.length);
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
             return a == null ? N.EMPTY_CHAR_ARRAY : a.clone();
@@ -6995,7 +6995,7 @@ public final class N extends CommonUtil {
      * @return a new array
      */
     public static byte[] deleteRange(final byte[] a, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, a.length);
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
             return a == null ? N.EMPTY_BYTE_ARRAY : a.clone();
@@ -7024,7 +7024,7 @@ public final class N extends CommonUtil {
      * @return a new array
      */
     public static short[] deleteRange(final short[] a, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, a.length);
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
             return a == null ? N.EMPTY_SHORT_ARRAY : a.clone();
@@ -7053,7 +7053,7 @@ public final class N extends CommonUtil {
      * @return a new array
      */
     public static int[] deleteRange(final int[] a, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, a.length);
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
             return a == null ? N.EMPTY_INT_ARRAY : a.clone();
@@ -7082,7 +7082,7 @@ public final class N extends CommonUtil {
      * @return a new array
      */
     public static long[] deleteRange(final long[] a, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, a.length);
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
             return a == null ? N.EMPTY_LONG_ARRAY : a.clone();
@@ -7111,7 +7111,7 @@ public final class N extends CommonUtil {
      * @return a new array
      */
     public static float[] deleteRange(final float[] a, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, a.length);
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
             return a == null ? N.EMPTY_FLOAT_ARRAY : a.clone();
@@ -7140,7 +7140,7 @@ public final class N extends CommonUtil {
      * @return a new array
      */
     public static double[] deleteRange(final double[] a, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, a.length);
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
             return a == null ? N.EMPTY_DOUBLE_ARRAY : a.clone();
@@ -7173,7 +7173,7 @@ public final class N extends CommonUtil {
     public static <T> T[] deleteRange(final T[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
         checkArgNotNull(a, "a");
 
-        checkFromToIndex(fromIndex, toIndex, a.length);
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
             return a.clone();
@@ -7204,13 +7204,13 @@ public final class N extends CommonUtil {
      */
     @SuppressWarnings({ "unchecked", "deprecation" })
     public static <T> boolean deleteRange(final List<T> c, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, c.size());
+        checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
             return false;
         }
 
-        final int size = c.size();
+        final int size = size(c);
 
         if (c instanceof LinkedList || toIndex - fromIndex <= 3) {
             c.subList(fromIndex, toIndex).clear();
@@ -8129,7 +8129,7 @@ public final class N extends CommonUtil {
      * @return true, if successful
      */
     static boolean hasDuplicates(final char[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
-        checkFromToIndex(fromIndex, toIndex, a.length);
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isNullOrEmpty(a) || toIndex - fromIndex < 2) {
             return false;
@@ -8195,7 +8195,7 @@ public final class N extends CommonUtil {
      * @return true, if successful
      */
     static boolean hasDuplicates(final byte[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
-        checkFromToIndex(fromIndex, toIndex, a.length);
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isNullOrEmpty(a) || toIndex - fromIndex < 2) {
             return false;
@@ -8261,7 +8261,7 @@ public final class N extends CommonUtil {
      * @return true, if successful
      */
     static boolean hasDuplicates(final short[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
-        checkFromToIndex(fromIndex, toIndex, a.length);
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isNullOrEmpty(a) || toIndex - fromIndex < 2) {
             return false;
@@ -8327,7 +8327,7 @@ public final class N extends CommonUtil {
      * @return true, if successful
      */
     static boolean hasDuplicates(final int[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
-        checkFromToIndex(fromIndex, toIndex, a.length);
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isNullOrEmpty(a) || toIndex - fromIndex < 2) {
             return false;
@@ -8393,7 +8393,7 @@ public final class N extends CommonUtil {
      * @return true, if successful
      */
     static boolean hasDuplicates(final long[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
-        checkFromToIndex(fromIndex, toIndex, a.length);
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isNullOrEmpty(a) || toIndex - fromIndex < 2) {
             return false;
@@ -8459,7 +8459,7 @@ public final class N extends CommonUtil {
      * @return true, if successful
      */
     static boolean hasDuplicates(final float[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
-        checkFromToIndex(fromIndex, toIndex, a.length);
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isNullOrEmpty(a) || toIndex - fromIndex < 2) {
             return false;
@@ -8525,7 +8525,7 @@ public final class N extends CommonUtil {
      * @return true, if successful
      */
     static boolean hasDuplicates(final double[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
-        checkFromToIndex(fromIndex, toIndex, a.length);
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isNullOrEmpty(a) || toIndex - fromIndex < 2) {
             return false;
@@ -8594,7 +8594,7 @@ public final class N extends CommonUtil {
      * @return true, if successful
      */
     static <T> boolean hasDuplicates(final T[] a, final int fromIndex, final int toIndex, final boolean isSorted) {
-        checkFromToIndex(fromIndex, toIndex, a.length);
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isNullOrEmpty(a) || toIndex - fromIndex < 2) {
             return false;

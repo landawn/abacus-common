@@ -510,7 +510,7 @@ public class ImmutableMap<K, V> implements Map<K, V> {
      */
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof ImmutableMap && ((ImmutableMap<K, V>) obj).map.equals(map);
+        return obj instanceof Map && map.equals(obj);
     }
 
     /**
