@@ -25,6 +25,8 @@ public class ParseException extends RuntimeException {
     /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 7678894353902496315L;
 
+    private int token = -2;
+
     /**
      * Constructor for ParseException.
      */
@@ -45,6 +47,17 @@ public class ParseException extends RuntimeException {
      * Constructor for ParseException.
      *
      * @param message
+     */
+    public ParseException(int token, String message) {
+        super(message);
+
+        this.token = token;
+    }
+
+    /**
+     * Constructor for ParseException.
+     *
+     * @param message
      * @param cause
      */
     public ParseException(String message, Throwable cause) {
@@ -58,5 +71,9 @@ public class ParseException extends RuntimeException {
      */
     public ParseException(Throwable cause) {
         super(cause);
+    }
+
+    public int getToken() {
+        return token;
     }
 }

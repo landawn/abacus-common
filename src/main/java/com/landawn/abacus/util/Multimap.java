@@ -648,17 +648,14 @@ public class Multimap<K, E, V extends Collection<E>> {
      * <pre>
      * <code>
      * ListMultimap<String, Integer> listMultimap = ListMultimap.of("a", 1, "b", 2, "a", 2, "a", 2); // -> {a=[1, 2, 2], b=[2]}
-     * listMultimap.removeAll(N.asMap("a", 2)); // -> {a=[1, 2], b=[2]}
-     * 
-     * SetMultimap<String, Integer> setMultimap = SetMultimap.of("a", 1, "b", 2, "a", 2); // -> {a=[1, 2, 2], b=[2]}
-     * setMultimap.removeAll(N.asMap("a", 2)); // -> {a=[1], b=[2]}
+     * listMultimap.removeAll(N.asMap("a", N.asList(2))); // -> {a=[1], b=[2]}
      * </code>
      * </pre>
      *
      * @param m
      * @return true, if successful
      */
-    public boolean removeAll(final Map<? extends K, ? extends E> m) {
+    public boolean removeAll(final Map<?, ? extends Collection<?>> m) {
         if (N.isNullOrEmpty(m)) {
             return false;
         }
@@ -667,15 +664,15 @@ public class Multimap<K, E, V extends Collection<E>> {
         Object key = null;
         V val = null;
 
-        for (Map.Entry<?, ?> e : m.entrySet()) {
+        for (Map.Entry<?, ? extends Collection<?>> e : m.entrySet()) {
             key = e.getKey();
             val = valueMap.get(key);
 
             if (N.notNullOrEmpty(val)) {
                 if (result == false) {
-                    result = val.remove(e.getValue());
+                    result = val.removeAll(e.getValue());
                 } else {
-                    val.remove(e.getValue());
+                    val.removeAll(e.getValue());
                 }
 
                 if (val.isEmpty()) {

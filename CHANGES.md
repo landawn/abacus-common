@@ -1,3 +1,11 @@
+### 1.20.13
+
+* Add `JSONParser.stream`.
+* Refactoring: change `Multimap.removeAll(Map<? extends K, ? extends E>)` to `Multimap.removeAll(Map<?, ? Collection<?>>)`.
+* Refactoring: `Base64EncodedType`.
+* Improvements and bug fix.
+
+
 ### 1.20.12
 
 * Improve `Index`.
