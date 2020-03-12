@@ -19614,28 +19614,29 @@ public final class N extends CommonUtil {
      * @return
      */
     private static <C extends DeserializationConfig<C>> C setConfig(final Type<?> targetType, final C config, boolean isJSON) {
-        C res = config;
+        C configToReturn = config;
 
-        if (targetType.isCollection()) {
+        if (targetType.isCollection() || targetType.isArray()) {
             if (config == null || config.getElementType() == null) {
-                res = config == null ? (C) (isJSON ? JDC.create() : XDC.create()) : (C) config.copy();
-                res.setElementType(targetType.getParameterTypes()[0]);
+                configToReturn = config == null ? (C) (isJSON ? JDC.create() : XDC.create()) : (C) config.copy();
+
+                configToReturn.setElementType(targetType.getParameterTypes()[0]);
             }
         } else if (targetType.isMap()) {
             if (config == null || config.getMapKeyType() == null || config.getMapValueType() == null) {
-                res = config == null ? (C) (isJSON ? JDC.create() : XDC.create()) : (C) config.copy();
+                configToReturn = config == null ? (C) (isJSON ? JDC.create() : XDC.create()) : (C) config.copy();
 
-                if (res.getMapKeyType() == null) {
-                    res.setMapKeyType(targetType.getParameterTypes()[0]);
+                if (configToReturn.getMapKeyType() == null) {
+                    configToReturn.setMapKeyType(targetType.getParameterTypes()[0]);
                 }
 
-                if (res.getMapValueType() == null) {
-                    res.setMapValueType(targetType.getParameterTypes()[1]);
+                if (configToReturn.getMapValueType() == null) {
+                    configToReturn.setMapValueType(targetType.getParameterTypes()[1]);
                 }
             }
         }
 
-        return res;
+        return configToReturn;
     }
 
     /**

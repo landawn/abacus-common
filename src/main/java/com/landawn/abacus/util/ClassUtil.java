@@ -919,6 +919,10 @@ public final class ClassUtil {
         }
     }
 
+    public static String getTypeName(final java.lang.reflect.Type type) {
+        return formatParameterizedTypeName(type.getTypeName());
+    }
+
     /**
      * Gets the parameterized type name by method.
      *
@@ -926,7 +930,7 @@ public final class ClassUtil {
      * @return
      */
     public static String getParameterizedTypeNameByField(final Field field) {
-        return formatParameterizedTypeName(field.getGenericType().toString());
+        return formatParameterizedTypeName(field.getGenericType().getTypeName());
     }
 
     /**
@@ -939,9 +943,9 @@ public final class ClassUtil {
         final java.lang.reflect.Type[] genericParameterTypes = method.getGenericParameterTypes();
 
         if (N.notNullOrEmpty(genericParameterTypes)) {
-            return formatParameterizedTypeName(genericParameterTypes[0].toString());
+            return formatParameterizedTypeName(genericParameterTypes[0].getTypeName());
         } else {
-            return formatParameterizedTypeName(method.getGenericReturnType().toString());
+            return formatParameterizedTypeName(method.getGenericReturnType().getTypeName());
         }
     }
 

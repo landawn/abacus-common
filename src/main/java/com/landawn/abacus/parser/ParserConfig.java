@@ -108,7 +108,7 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
     public C copy() {
         try {
             return (C) super.clone();
-        } catch (CloneNotSupportedException e) { 
+        } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e); // should never happen.
         }
     }

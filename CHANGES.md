@@ -1,3 +1,8 @@
+### 1.20.14
+
+* Improvements and bug fix.
+
+
 ### 1.20.13
 
 * Add `JSONParser.stream`.
