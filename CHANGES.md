@@ -1,3 +1,9 @@
+### 1.20.15
+
+* Add `JSONHttpMessageConverter`.
+* Improvements and bug fix.
+
+
 ### 1.20.14
 
 * Improvements and bug fix.
