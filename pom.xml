@@ -233,14 +233,7 @@
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.47</version>
 			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-jdbc</artifactId>
-			<version>5.1.8.RELEASE</version>
-			<scope>provided</scope>
-		</dependency>
+		</dependency> 
 
 		<dependency>
 			<groupId>org.springframework</groupId>
