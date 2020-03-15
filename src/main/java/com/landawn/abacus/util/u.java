@@ -674,13 +674,12 @@ public class u {
             return orElseThrow();
         }
 
-        /**
-         * Checks if is present.
-         *
-         * @return true, if is present
-         */
         public boolean isPresent() {
             return isPresent;
+        }
+
+        public boolean isEmpty() {
+            return !isPresent;
         }
 
         /**
@@ -1102,13 +1101,12 @@ public class u {
             return orElseThrow();
         }
 
-        /**
-         * Checks if is present.
-         *
-         * @return true, if is present
-         */
         public boolean isPresent() {
             return isPresent;
+        }
+
+        public boolean isEmpty() {
+            return !isPresent;
         }
 
         /**
@@ -1542,13 +1540,12 @@ public class u {
             return orElseThrow();
         }
 
-        /**
-         * Checks if is present.
-         *
-         * @return true, if is present
-         */
         public boolean isPresent() {
             return isPresent;
+        }
+
+        public boolean isEmpty() {
+            return !isPresent;
         }
 
         /**
@@ -1973,13 +1970,12 @@ public class u {
             return orElseThrow();
         }
 
-        /**
-         * Checks if is present.
-         *
-         * @return true, if is present
-         */
         public boolean isPresent() {
             return isPresent;
+        }
+
+        public boolean isEmpty() {
+            return !isPresent;
         }
 
         /**
@@ -2432,13 +2428,12 @@ public class u {
             return orElseThrow();
         }
 
-        /**
-         * Checks if is present.
-         *
-         * @return true, if is present
-         */
         public boolean isPresent() {
             return isPresent;
+        }
+
+        public boolean isEmpty() {
+            return !isPresent;
         }
 
         /**
@@ -2906,13 +2901,12 @@ public class u {
             return orElseThrow();
         }
 
-        /**
-         * Checks if is present.
-         *
-         * @return true, if is present
-         */
         public boolean isPresent() {
             return isPresent;
+        }
+
+        public boolean isEmpty() {
+            return !isPresent;
         }
 
         /**
@@ -3367,13 +3361,12 @@ public class u {
             return orElseThrow();
         }
 
-        /**
-         * Checks if is present.
-         *
-         * @return true, if is present
-         */
         public boolean isPresent() {
             return isPresent;
+        }
+
+        public boolean isEmpty() {
+            return !isPresent;
         }
 
         /**
@@ -3811,13 +3804,12 @@ public class u {
             return orElseThrow();
         }
 
-        /**
-         * Checks if is present.
-         *
-         * @return true, if is present
-         */
         public boolean isPresent() {
             return isPresent;
+        }
+
+        public boolean isEmpty() {
+            return !isPresent;
         }
 
         /**

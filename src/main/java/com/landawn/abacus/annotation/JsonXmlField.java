@@ -77,4 +77,12 @@ public @interface JsonXmlField {
      * @return true if target field type is a JSON String.
      */
     boolean isJsonRawValue() default false;
+
+    //    /**
+    //     *
+    //     * @return
+    //     * @deprecated should use the order of fields defined.
+    //     */
+    //    @Deprecated
+    //    int ordinal() default -1;
 }

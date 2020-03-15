@@ -74,6 +74,7 @@ public final class LoggerFactory {
 
                             if (initialized == false) {
                                 jdkLogger.info("Initialized with Android Logger");
+                                logger.info("Initialized with Android Logger");
                             }
 
                             logType = 0;
@@ -92,6 +93,7 @@ public final class LoggerFactory {
 
                             if (initialized == false) {
                                 jdkLogger.info("Initialized with SLF4J Logger");
+                                logger.info("Initialized with SLF4J Logger");
                             }
 
                             logType = 1;
@@ -110,6 +112,7 @@ public final class LoggerFactory {
 
                             if (initialized == false) {
                                 jdkLogger.info("Initialized with Log4j v2 Logger");
+                                logger.info("Initialized with Log4j v2 Logger");
                             }
 
                             logType = 2;
@@ -127,6 +130,7 @@ public final class LoggerFactory {
 
                         if (initialized == false) {
                             jdkLogger.info("Initialized with JDK Logger");
+                            logger.info("Initialized with JDK Logger");
                         }
 
                         logType = 3;
