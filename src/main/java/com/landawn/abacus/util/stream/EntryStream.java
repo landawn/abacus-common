@@ -40,12 +40,12 @@ import com.landawn.abacus.util.ImmutableMap;
 import com.landawn.abacus.util.Joiner;
 import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.LongMultiset;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Multimap;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NoCachingNoUpdating;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableEntry;
-import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Throwables;
@@ -936,6 +936,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
 
     public EntryStream<K, V> appendIfEmpty(final Supplier<? extends EntryStream<K, V>> supplier) {
         return EntryStream.of(s.appendIfEmpty(new Supplier<Stream<Map.Entry<K, V>>>() {
+            @SuppressWarnings("resource")
             @Override
             public Stream<Map.Entry<K, V>> get() {
                 return supplier.get().s;
