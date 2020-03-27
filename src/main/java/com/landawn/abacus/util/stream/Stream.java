@@ -3086,6 +3086,10 @@ public abstract class Stream<T>
 
     @SequentialOnly
     @TerminalOp
+    public abstract long persist(Throwables.Function<? super T, String, IOException> toLine, String header, String tail, Writer writer) throws IOException;
+
+    @SequentialOnly
+    @TerminalOp
     public abstract long persist(final Connection conn, final String insertSQL, final int batchSize, final int batchInterval,
             final Throwables.BiConsumer<? super PreparedStatement, ? super T, SQLException> stmtSetter) throws SQLException;
 

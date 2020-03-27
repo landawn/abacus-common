@@ -4561,7 +4561,12 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public long persist(final Throwables.Function<? super T, String, IOException> toLine, final Writer writer) throws IOException {
+    public long persist(Throwables.Function<? super T, String, IOException> toLine, Writer writer) throws IOException {
+        return persist(toLine, null, null, writer);
+    }
+
+    @Override
+    public long persist(Throwables.Function<? super T, String, IOException> toLine, String header, String tail, Writer writer) throws IOException {
         assertNotClosed();
 
         try {
@@ -4571,10 +4576,20 @@ abstract class AbstractStream<T> extends Stream<T> {
             long cnt = 0;
 
             try {
+                if (header != null) {
+                    bw.write(header);
+                    bw.write(IOUtil.LINE_SEPARATOR);
+                }
+
                 while (iter.hasNext()) {
                     bw.write(toLine.apply(iter.next()));
                     bw.write(IOUtil.LINE_SEPARATOR);
                     cnt++;
+                }
+
+                if (tail != null) {
+                    bw.write(tail);
+                    bw.write(IOUtil.LINE_SEPARATOR);
                 }
 
                 bw.flush();

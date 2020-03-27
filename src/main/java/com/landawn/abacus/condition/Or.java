@@ -14,7 +14,9 @@
 
 package com.landawn.abacus.condition;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * The Class Or.
@@ -51,5 +53,14 @@ public class Or extends Junction {
      */
     public Or(Collection<? extends Condition> conditions) {
         super(Operator.OR, conditions);
+    }
+
+    @Override
+    public Or or(Condition condition) throws UnsupportedOperationException {
+        final List<Condition> condList = new ArrayList<>(conditionList.size() + 1);
+
+        condList.add(condition);
+
+        return new Or(condList);
     }
 }

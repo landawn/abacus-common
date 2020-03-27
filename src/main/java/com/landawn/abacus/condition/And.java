@@ -14,7 +14,9 @@
 
 package com.landawn.abacus.condition;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * The Class And.
@@ -51,5 +53,14 @@ public class And extends Junction {
      */
     public And(Collection<? extends Condition> conditions) {
         super(Operator.AND, conditions);
+    }
+
+    @Override
+    public And and(Condition condition) throws UnsupportedOperationException {
+        final List<Condition> condList = new ArrayList<>(conditionList.size() + 1);
+
+        condList.add(condition);
+
+        return new And(condList);
     }
 }

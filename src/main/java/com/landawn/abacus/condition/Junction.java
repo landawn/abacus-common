@@ -40,7 +40,7 @@ public class Junction extends AbstractCondition {
     private static final long serialVersionUID = -5520467185002717755L;
 
     /** The condition list. */
-    private List<Condition> conditionList;
+    List<Condition> conditionList;
 
     /**
      * Instantiates a new junction.
