@@ -421,6 +421,10 @@ public abstract class SQLBuilder {
             defaultPropNamesPool.remove(entityClass);
 
             entityTablePropColumnNameMap.remove(entityClass);
+
+            for (NamingPolicy np : NamingPolicy.values()) {
+                fullSelectPartsPool.get(np).remove(entityClass);
+            }
         }
     }
 
