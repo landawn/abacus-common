@@ -1022,6 +1022,8 @@ public final class ParserUtil {
         /** The has format. */
         final boolean hasFormat;
 
+        public final boolean isMarkedToColumn;
+
         public final Optional<String> columnName;
 
         /**
@@ -1055,6 +1057,7 @@ public final class ParserUtil {
             numberFormat = null;
             hasFormat = false;
 
+            isMarkedToColumn = false;
             columnName = Optional.<String> empty();
         }
 
@@ -1117,8 +1120,11 @@ public final class ParserUtil {
             this.hasFormat = N.notNullOrEmpty(dateFormat) || numberFormat != null;
 
             String tmpColumnName = null;
+            boolean tmpIsMarkedToColumn = false;
 
             if (this.annotations.containsKey(Column.class)) {
+                tmpIsMarkedToColumn = true;
+
                 tmpColumnName = ((Column) this.annotations.get(Column.class)).value();
 
                 if (N.isNullOrEmpty(tmpColumnName)) {
@@ -1127,12 +1133,16 @@ public final class ParserUtil {
             } else {
                 try {
                     if (this.annotations.containsKey(javax.persistence.Column.class)) {
+                        tmpIsMarkedToColumn = true;
+
                         tmpColumnName = ((javax.persistence.Column) this.annotations.get(javax.persistence.Column.class)).name();
                     }
                 } catch (Throwable e) {
                     // ignore
                 }
             }
+
+            this.isMarkedToColumn = tmpIsMarkedToColumn;
 
             this.columnName = N.isNullOrEmpty(tmpColumnName) ? Optional.<String> empty() : Optional.ofNullable(tmpColumnName);
         }

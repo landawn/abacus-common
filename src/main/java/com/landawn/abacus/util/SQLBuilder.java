@@ -333,7 +333,7 @@ public abstract class SQLBuilder {
 
     static {
         for (NamingPolicy np : NamingPolicy.values()) {
-            fullSelectPartsPool.put(np, new ConcurrentHashMap<>());
+            fullSelectPartsPool.put(np, new ConcurrentHashMap<Class<?>, String>());
         }
     }
 
@@ -691,8 +691,7 @@ public abstract class SQLBuilder {
                 final Set<String> subEntityPropNameSet = N.newLinkedHashSet();
 
                 for (PropInfo propInfo : entityInfo.propInfoList) {
-                    if (!propInfo.columnName.isPresent()
-                            && (propInfo.type.isEntity() || (propInfo.type.isCollection() && propInfo.type.getElementType().isEntity()))
+                    if (!propInfo.isMarkedToColumn && (propInfo.type.isEntity() || (propInfo.type.isCollection() && propInfo.type.getElementType().isEntity()))
                             && (nonSubEntityPropNames == null || !nonSubEntityPropNames.contains(propInfo.name))) {
                         subEntityPropNameSet.add(propInfo.name);
                     }

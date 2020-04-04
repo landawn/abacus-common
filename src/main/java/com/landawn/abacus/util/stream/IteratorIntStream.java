@@ -30,6 +30,7 @@ import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.StreamSupport;
 
+import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.ByteIterator;
 import com.landawn.abacus.util.CharIterator;
@@ -44,7 +45,6 @@ import com.landawn.abacus.util.LongIterator;
 import com.landawn.abacus.util.LongMultiset;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Primitives;
 import com.landawn.abacus.util.ShortIterator;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u.Holder;
@@ -1318,7 +1318,7 @@ class IteratorIntStream extends AbstractIntStream {
                             queue.offer(elements.nextInt());
                         }
 
-                        aar = Primitives.unbox(N.EMPTY_INT_OBJ_ARRAY);
+                        aar = Array.unbox(N.EMPTY_INT_OBJ_ARRAY);
                     } else {
                         final Queue<Integer> heap = new PriorityQueue<>(n, comparator);
 
@@ -1336,7 +1336,7 @@ class IteratorIntStream extends AbstractIntStream {
                             }
                         }
 
-                        aar = Primitives.unbox(heap.toArray(N.EMPTY_INT_OBJ_ARRAY));
+                        aar = Array.unbox(heap.toArray(N.EMPTY_INT_OBJ_ARRAY));
                     }
 
                     to = aar.length;

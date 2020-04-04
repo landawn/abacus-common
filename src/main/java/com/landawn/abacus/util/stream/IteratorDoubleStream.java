@@ -30,6 +30,7 @@ import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.StreamSupport;
 
+import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.DoubleIterator;
 import com.landawn.abacus.util.DoubleList;
@@ -42,7 +43,6 @@ import com.landawn.abacus.util.LongIterator;
 import com.landawn.abacus.util.LongMultiset;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Primitives;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Optional;
@@ -1031,7 +1031,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                             queue.offer(elements.nextDouble());
                         }
 
-                        aar = Primitives.unbox(N.EMPTY_DOUBLE_OBJ_ARRAY);
+                        aar = Array.unbox(N.EMPTY_DOUBLE_OBJ_ARRAY);
                     } else {
                         final Queue<Double> heap = new PriorityQueue<>(n, comparator);
 
@@ -1049,7 +1049,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                             }
                         }
 
-                        aar = Primitives.unbox(heap.toArray(N.EMPTY_DOUBLE_OBJ_ARRAY));
+                        aar = Array.unbox(heap.toArray(N.EMPTY_DOUBLE_OBJ_ARRAY));
                     }
 
                     to = aar.length;

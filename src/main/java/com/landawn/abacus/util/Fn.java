@@ -1819,6 +1819,39 @@ public final class Fn extends Comparators {
     }
 
     /**
+     * 
+     * @param <T>
+     * @param targetValue1
+     * @param targetValue2
+     * @return
+     */
+    public static <T> Predicate<T> eqOr(final Object targetValue1, final Object targetValue2) {
+        return new Predicate<T>() {
+            @Override
+            public boolean test(T value) {
+                return N.equals(value, targetValue1) || N.equals(value, targetValue2);
+            }
+        };
+    }
+
+    /**
+     * 
+     * @param <T>
+     * @param targetValue1
+     * @param targetValue2
+     * @param targetValue3
+     * @return
+     */
+    public static <T> Predicate<T> eqOr(final Object targetValue1, final Object targetValue2, final Object targetValue3) {
+        return new Predicate<T>() {
+            @Override
+            public boolean test(T value) {
+                return N.equals(value, targetValue1) || N.equals(value, targetValue2) || N.equals(value, targetValue3);
+            }
+        };
+    }
+
+    /**
      *
      * @param <T>
      * @param target
@@ -1895,12 +1928,65 @@ public final class Fn extends Comparators {
 
     /**
      * Checks if the value/element: {@code minValue < e < maxValue}.
-     *
+     * 
      * @param <T>
      * @param minValue
      * @param maxValue
      * @return
      */
+    public static <T extends Comparable<? super T>> Predicate<T> gtAndLt(final T minValue, final T maxValue) {
+        return new Predicate<T>() {
+            @Override
+            public boolean test(T value) {
+                return N.compare(value, minValue) > 0 && N.compare(value, maxValue) < 0;
+            }
+        };
+    }
+
+    /**
+     * Checks if the value/element: {@code minValue <= e < maxValue}.
+     * 
+     * @param <T>
+     * @param minValue
+     * @param maxValue
+     * @return
+     */
+    public static <T extends Comparable<? super T>> Predicate<T> geAndLt(final T minValue, final T maxValue) {
+        return new Predicate<T>() {
+            @Override
+            public boolean test(T value) {
+                return N.compare(value, minValue) >= 0 && N.compare(value, maxValue) < 0;
+            }
+        };
+    }
+
+    /**
+     * Checks if the value/element: {@code minValue <= e <= maxValue}.
+     * 
+     * @param <T>
+     * @param minValue
+     * @param maxValue
+     * @return
+     */
+    public static <T extends Comparable<? super T>> Predicate<T> geAndLe(final T minValue, final T maxValue) {
+        return new Predicate<T>() {
+            @Override
+            public boolean test(T value) {
+                return N.compare(value, minValue) >= 0 && N.compare(value, maxValue) <= 0;
+            }
+        };
+    }
+
+    /**
+     * Checks if the value/element: {@code minValue < e < maxValue}.
+     *
+     * @param <T>
+     * @param minValue
+     * @param maxValue
+     * @return
+     * @deprecated replaced by {@code gtAndLt}.
+     */
+    @Deprecated
     public static <T extends Comparable<? super T>> Predicate<T> between(final T minValue, final T maxValue) {
         return new Predicate<T>() {
             @Override

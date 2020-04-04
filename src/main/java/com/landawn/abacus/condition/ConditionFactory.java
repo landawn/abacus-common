@@ -24,8 +24,8 @@ import com.landawn.abacus.EntityId;
 import com.landawn.abacus.condition.Expression.Expr;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.EntityInfo;
+import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Primitives;
 import com.landawn.abacus.util.SQLBuilder;
 import com.landawn.abacus.util.SortDirection;
 import com.landawn.abacus.util.WD;
@@ -1340,7 +1340,7 @@ public class ConditionFactory {
      * @return
      */
     public static In in(final String propName, final int[] values) {
-        return in(propName, Primitives.box(values));
+        return in(propName, Array.box(values));
     }
 
     /**
@@ -1350,7 +1350,7 @@ public class ConditionFactory {
      * @return
      */
     public static In in(final String propName, final long[] values) {
-        return in(propName, Primitives.box(values));
+        return in(propName, Array.box(values));
     }
 
     /**
@@ -1360,7 +1360,7 @@ public class ConditionFactory {
      * @return
      */
     public static In in(final String propName, final double[] values) {
-        return in(propName, Primitives.box(values));
+        return in(propName, Array.box(values));
     }
 
     /**

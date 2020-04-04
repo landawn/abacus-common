@@ -253,7 +253,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         public Boolean[] box() {
-            return Primitives.box(a);
+            return Array.box(a);
         }
 
         /**
@@ -370,7 +370,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         public Character[] box() {
-            return Primitives.box(a);
+            return Array.box(a);
         }
 
         /**
@@ -519,7 +519,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         public Byte[] box() {
-            return Primitives.box(a);
+            return Array.box(a);
         }
 
         /**
@@ -668,7 +668,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         public Short[] box() {
-            return Primitives.box(a);
+            return Array.box(a);
         }
 
         /**
@@ -817,7 +817,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         public Integer[] box() {
-            return Primitives.box(a);
+            return Array.box(a);
         }
 
         /**
@@ -966,7 +966,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         public Long[] box() {
-            return Primitives.box(a);
+            return Array.box(a);
         }
 
         /**
@@ -1115,7 +1115,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         public Float[] box() {
-            return Primitives.box(a);
+            return Array.box(a);
         }
 
         /**
@@ -1264,7 +1264,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         public Double[] box() {
-            return Primitives.box(a);
+            return Array.box(a);
         }
 
         /**

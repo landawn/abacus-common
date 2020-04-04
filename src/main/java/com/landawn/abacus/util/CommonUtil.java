@@ -71,8 +71,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import com.landawn.abacus.DataSet;
 import com.landawn.abacus.DirtyMarker;
-import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.NullSafe;
 import com.landawn.abacus.core.DirtyMarkerUtil;
 import com.landawn.abacus.core.MapEntity;
@@ -6331,7 +6329,7 @@ class CommonUtil {
                     for (String propName : signedPropNames) {
                         propValue = srcEntityInfo.getPropValue(sourceEntity, propName);
 
-                        if (N.notNullOrDefault(propValue)) {
+                        if (Primitives.notNullOrDefault(propValue)) {
                             targetEntityInfo.setPropValue(targetEntity, propName, propValue, ignoreUnknownProperty);
                         }
                     }
@@ -6342,7 +6340,7 @@ class CommonUtil {
                 for (PropInfo propInfo : srcEntityInfo.propInfoList) {
                     propValue = srcEntityInfo.getPropValue(sourceEntity, propInfo.name);
 
-                    if (N.notNullOrDefault(propValue)) {
+                    if (Primitives.notNullOrDefault(propValue)) {
                         targetEntityInfo.setPropValue(targetEntity, propInfo.name, propValue, ignoreUnknownProperty);
                     }
                 }
@@ -6427,7 +6425,7 @@ class CommonUtil {
                     if (ignorePropNames == null || ignorePropNames.contains(propName) == false) {
                         propValue = srcEntityInfo.getPropValue(sourceEntity, propName);
 
-                        if (N.notNullOrDefault(propValue)) {
+                        if (Primitives.notNullOrDefault(propValue)) {
                             targetEntityInfo.setPropValue(targetEntity, propName, propValue, ignoreUnknownProperty);
                         }
                     }
@@ -6440,7 +6438,7 @@ class CommonUtil {
                 if (ignorePropNames == null || ignorePropNames.contains(propInfo.name) == false) {
                     propValue = propInfo.getPropValue(sourceEntity);
 
-                    if (N.notNullOrDefault(propValue)) {
+                    if (Primitives.notNullOrDefault(propValue)) {
                         targetEntityInfo.setPropValue(targetEntity, propInfo.name, propValue, ignoreUnknownProperty);
                     }
                 }
@@ -8318,19 +8316,19 @@ class CommonUtil {
         return map == null ? ImmutableBiMap.<K, V> empty() : map;
     }
 
-    /**
-     * Checks if is null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
-     *
-     * @param s
-     * @return true, if is null or default
-     * @deprecated internal only
-     */
-    @Deprecated
-    @Internal
-    @Beta
-    static boolean isNullOrDefault(final Object value) {
-        return (value == null) || equals(value, defaultValueOf(value.getClass()));
-    }
+//    /**
+//     * Checks if is null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
+//     *
+//     * @param s
+//     * @return true, if is null or default
+//     * @deprecated internal only
+//     */
+//    @Deprecated
+//    @Internal
+//    @Beta
+//    static boolean isNullOrDefault(final Object value) {
+//        return (value == null) || equals(value, defaultValueOf(value.getClass()));
+//    }
 
     /**
      * Checks if is null or empty.
@@ -8524,20 +8522,20 @@ class CommonUtil {
         return true;
     }
 
-    /**
-     * Checks if it's not null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
-     *
-     *
-     * @param s
-     * @return true, if it's not null or default
-     * @deprecated internal only
-     */
-    @Deprecated
-    @Internal
-    @Beta
-    static boolean notNullOrDefault(final Object value) {
-        return (value != null) && !equals(value, defaultValueOf(value.getClass()));
-    }
+//    /**
+//     * Checks if it's not null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
+//     *
+//     *
+//     * @param s
+//     * @return true, if it's not null or default
+//     * @deprecated internal only
+//     */
+//    @Deprecated
+//    @Internal
+//    @Beta
+//    static boolean notNullOrDefault(final Object value) {
+//        return (value != null) && !equals(value, defaultValueOf(value.getClass()));
+//    }
 
     /**
      * Not null or empty.
