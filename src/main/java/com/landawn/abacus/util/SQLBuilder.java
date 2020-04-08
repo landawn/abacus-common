@@ -3164,25 +3164,30 @@ public abstract class SQLBuilder {
                 }
             }
         } else if (cond instanceof Expression) {
+            // ==== version 1
             // sb.append(cond.toString());
 
-            final List<String> words = SQLParser.parse(((Expression) cond).getLiteral());
-            final Map<String, String> propColumnNameMap = getPropColumnNameMap(entityClass, namingPolicy);
+            // ==== version 2
+            //    final List<String> words = SQLParser.parse(((Expression) cond).getLiteral());
+            //    final Map<String, String> propColumnNameMap = getPropColumnNameMap(entityClass, namingPolicy);
+            //
+            //    String word = null;
+            //
+            //    for (int i = 0, size = words.size(); i < size; i++) {
+            //        word = words.get(i);
+            //
+            //        if ((i > 2) && WD.AS.equalsIgnoreCase(words.get(i - 2))) {
+            //            sb.append(word);
+            //        } else if ((i > 1) && WD.SPACE.equalsIgnoreCase(words.get(i - 1))
+            //                && (propColumnNameMap.containsKey(words.get(i - 2)) || propColumnNameMap.containsValue(words.get(i - 2)))) {
+            //            sb.append(word);
+            //        } else {
+            //            sb.append(formalizeColumnName(propColumnNameMap, word));
+            //        }
+            //    }
 
-            String word = null;
-
-            for (int i = 0, size = words.size(); i < size; i++) {
-                word = words.get(i);
-
-                if ((i > 2) && WD.AS.equalsIgnoreCase(words.get(i - 2))) {
-                    sb.append(word);
-                } else if ((i > 1) && WD.SPACE.equalsIgnoreCase(words.get(i - 1))
-                        && (propColumnNameMap.containsKey(words.get(i - 2)) || propColumnNameMap.containsValue(words.get(i - 2)))) {
-                    sb.append(word);
-                } else {
-                    sb.append(formalizeColumnName(propColumnNameMap, word));
-                }
-            }
+            // ==== version 3
+            appendStringExpr(((Expression) cond).getLiteral());
         } else {
             throw new IllegalArgumentException("Unsupported condtion: " + cond.toString());
         }
