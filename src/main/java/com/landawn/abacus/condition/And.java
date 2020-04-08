@@ -59,6 +59,7 @@ public class And extends Junction {
     public And and(Condition condition) throws UnsupportedOperationException {
         final List<Condition> condList = new ArrayList<>(conditionList.size() + 1);
 
+        condList.addAll(conditionList);
         condList.add(condition);
 
         return new And(condList);

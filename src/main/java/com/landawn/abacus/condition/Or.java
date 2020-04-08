@@ -59,6 +59,7 @@ public class Or extends Junction {
     public Or or(Condition condition) throws UnsupportedOperationException {
         final List<Condition> condList = new ArrayList<>(conditionList.size() + 1);
 
+        condList.addAll(conditionList);
         condList.add(condition);
 
         return new Or(condList);

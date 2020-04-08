@@ -42,13 +42,17 @@ import com.landawn.abacus.annotation.Transient;
 import com.landawn.abacus.condition.Between;
 import com.landawn.abacus.condition.Binary;
 import com.landawn.abacus.condition.Cell;
+import com.landawn.abacus.condition.Clause;
 import com.landawn.abacus.condition.Condition;
 import com.landawn.abacus.condition.ConditionFactory.CF;
+import com.landawn.abacus.condition.Criteria;
 import com.landawn.abacus.condition.Expression;
 import com.landawn.abacus.condition.Having;
 import com.landawn.abacus.condition.In;
 import com.landawn.abacus.condition.InSubQuery;
+import com.landawn.abacus.condition.Join;
 import com.landawn.abacus.condition.Junction;
+import com.landawn.abacus.condition.Limit;
 import com.landawn.abacus.condition.SubQuery;
 import com.landawn.abacus.condition.Where;
 import com.landawn.abacus.core.DirtyMarkerUtil;
@@ -895,13 +899,13 @@ public abstract class SQLBuilder {
 
         sb.append(tableName);
 
-        sb.append(WD._SPACE);
+        sb.append(_SPACE);
         sb.append(WD._PARENTHESES_L);
 
         final Map<String, String> propColumnNameMap = getPropColumnNameMap(entityClass, namingPolicy);
 
         if (N.notNullOrEmpty(columnNames)) {
-            if (columnNames.length == 1 && columnNames[0].indexOf(WD._SPACE) > 0) {
+            if (columnNames.length == 1 && columnNames[0].indexOf(_SPACE) > 0) {
                 sb.append(columnNames[0]);
             } else {
                 for (int i = 0, len = columnNames.length; i < len; i++) {
@@ -1074,8 +1078,8 @@ public abstract class SQLBuilder {
         expr = expr.trim();
         String tableName = expr.indexOf(WD._COMMA) > 0 ? StringUtil.substring(expr, 0, WD._COMMA).get() : expr;
 
-        if (tableName.indexOf(WD._SPACE) > 0) {
-            tableName = StringUtil.substring(tableName, 0, WD._SPACE).get();
+        if (tableName.indexOf(_SPACE) > 0) {
+            tableName = StringUtil.substring(tableName, 0, _SPACE).get();
         }
 
         return from(tableName.trim(), expr);
@@ -1139,11 +1143,11 @@ public abstract class SQLBuilder {
         this.tableName = tableName;
 
         sb.append(_SELECT);
-        sb.append(WD._SPACE);
+        sb.append(_SPACE);
 
         if (N.notNullOrEmpty(predicates)) {
             sb.append(predicates);
-            sb.append(WD._SPACE);
+            sb.append(_SPACE);
         }
 
         final Map<String, String> propColumnNameMap = getPropColumnNameMap(entityClass, namingPolicy);
@@ -1571,14 +1575,6 @@ public abstract class SQLBuilder {
         return this;
     }
 
-    private SQLBuilder appendClause(final Condition cond) {
-        init(true);
-
-        appendCondition(cond);
-
-        return this;
-    }
-
     /**
      *
      * @param expr
@@ -1587,7 +1583,7 @@ public abstract class SQLBuilder {
     public SQLBuilder groupBy(final String expr) {
         sb.append(_SPACE_GROUP_BY_SPACE);
 
-        if (expr.indexOf(WD._SPACE) > 0) {
+        if (expr.indexOf(_SPACE) > 0) {
             // sb.append(columnNames[0]);
             appendStringExpr(expr);
         } else {
@@ -1607,7 +1603,7 @@ public abstract class SQLBuilder {
         sb.append(_SPACE_GROUP_BY_SPACE);
 
         if (columnNames.length == 1) {
-            if (columnNames[0].indexOf(WD._SPACE) > 0) {
+            if (columnNames[0].indexOf(_SPACE) > 0) {
                 // sb.append(columnNames[0]);
                 appendStringExpr(columnNames[0]);
             } else {
@@ -1637,7 +1633,7 @@ public abstract class SQLBuilder {
     public SQLBuilder groupBy(final String columnName, final SortDirection direction) {
         groupBy(columnName);
 
-        sb.append(WD._SPACE);
+        sb.append(_SPACE);
         sb.append(direction.toString());
 
         return this;
@@ -1673,7 +1669,7 @@ public abstract class SQLBuilder {
     public SQLBuilder groupBy(final Collection<String> columnNames, final SortDirection direction) {
         groupBy(columnNames);
 
-        sb.append(WD._SPACE);
+        sb.append(_SPACE);
         sb.append(direction.toString());
 
         return this;
@@ -1697,7 +1693,7 @@ public abstract class SQLBuilder {
 
             sb.append(formalizeColumnName(propColumnNameMap, entry.getKey()));
 
-            sb.append(WD._SPACE);
+            sb.append(_SPACE);
             sb.append(entry.getValue().toString());
         }
 
@@ -1738,7 +1734,7 @@ public abstract class SQLBuilder {
     public SQLBuilder orderBy(final String expr) {
         sb.append(_SPACE_ORDER_BY_SPACE);
 
-        if (expr.indexOf(WD._SPACE) > 0) {
+        if (expr.indexOf(_SPACE) > 0) {
             // sb.append(columnNames[0]);
             appendStringExpr(expr);
         } else {
@@ -1758,7 +1754,7 @@ public abstract class SQLBuilder {
         sb.append(_SPACE_ORDER_BY_SPACE);
 
         if (columnNames.length == 1) {
-            if (columnNames[0].indexOf(WD._SPACE) > 0) {
+            if (columnNames[0].indexOf(_SPACE) > 0) {
                 // sb.append(columnNames[0]);
                 appendStringExpr(columnNames[0]);
             } else {
@@ -1788,7 +1784,7 @@ public abstract class SQLBuilder {
     public SQLBuilder orderBy(final String columnName, final SortDirection direction) {
         orderBy(columnName);
 
-        sb.append(WD._SPACE);
+        sb.append(_SPACE);
         sb.append(direction.toString());
 
         return this;
@@ -1824,7 +1820,7 @@ public abstract class SQLBuilder {
     public SQLBuilder orderBy(final Collection<String> columnNames, final SortDirection direction) {
         orderBy(columnNames);
 
-        sb.append(WD._SPACE);
+        sb.append(_SPACE);
         sb.append(direction.toString());
 
         return this;
@@ -1848,7 +1844,7 @@ public abstract class SQLBuilder {
 
             sb.append(formalizeColumnName(propColumnNameMap, entry.getKey()));
 
-            sb.append(WD._SPACE);
+            sb.append(_SPACE);
             sb.append(entry.getValue().toString());
         }
 
@@ -1909,6 +1905,102 @@ public abstract class SQLBuilder {
         sb.append(" ROWNUM ");
 
         sb.append(count);
+
+        return this;
+    }
+
+    public SQLBuilder append(final Condition cond) {
+        init(true);
+
+        if (cond instanceof Criteria) {
+            final Criteria criteria = (Criteria) cond;
+
+            final Collection<Join> joins = criteria.getJoins();
+
+            if (N.notNullOrEmpty(joins)) {
+                for (Join join : joins) {
+                    sb.append(_SPACE).append(join.getOperator()).append(_SPACE);
+
+                    if (join.getJoinEntities().size() == 1) {
+                        sb.append(join.getJoinEntities().get(0));
+                    } else {
+                        sb.append(WD._PARENTHESES_L);
+                        int idx = 0;
+
+                        for (String joinTableName : join.getJoinEntities()) {
+                            if (idx++ > 0) {
+                                sb.append(_COMMA_SPACE);
+                            }
+
+                            sb.append(joinTableName);
+                        }
+
+                        sb.append(WD._PARENTHESES_R);
+                    }
+
+                    appendCondition(((Clause) cond).getCondition());
+                }
+            }
+
+            final Cell where = criteria.getWhere();
+
+            if ((where != null)) {
+                sb.append(_SPACE).append(where.getOperator());
+                appendCondition(where.getCondition());
+            }
+
+            final Cell groupBy = criteria.getGroupBy();
+
+            if (groupBy != null) {
+                sb.append(_SPACE).append(groupBy.getOperator());
+                appendCondition(groupBy.getCondition());
+            }
+
+            final Cell having = criteria.getHaving();
+
+            if (having != null) {
+                sb.append(_SPACE).append(having.getOperator());
+                appendCondition(having.getCondition());
+            }
+
+            List<Cell> aggregations = criteria.getAggregation();
+
+            if (N.notNullOrEmpty(aggregations)) {
+                for (Cell aggregation : aggregations) {
+                    sb.append(_SPACE).append(aggregation.getOperator());
+                    appendCondition(aggregation.getCondition());
+                }
+            }
+
+            final Cell orderBy = criteria.getOrderBy();
+
+            if (orderBy != null) {
+                sb.append(_SPACE).append(orderBy.getOperator());
+                appendCondition(orderBy.getCondition());
+            }
+
+            final Limit limit = criteria.getLimit();
+
+            if (limit != null) {
+                if (N.notNullOrEmpty(limit.getExpr())) {
+                    sb.append(_SPACE).append(limit.getExpr());
+                } else {
+                    if (limit.getOffset() > 0) {
+                        limit(limit.getOffset(), limit.getCount());
+                    } else {
+                        limit(limit.getCount());
+                    }
+                }
+            }
+        } else if (cond instanceof Clause) {
+            sb.append(_SPACE).append(cond.getOperator());
+
+            appendCondition(((Clause) cond).getCondition());
+        } else {
+            sb.append(_SPACE_WHERE_SPACE);
+
+            appendCondition(cond);
+        }
 
         return this;
     }
@@ -2663,7 +2755,7 @@ public abstract class SQLBuilder {
         if (op == OperationType.UPDATE) {
             sb.append(_UPDATE);
 
-            sb.append(WD._SPACE);
+            sb.append(_SPACE);
             sb.append(tableName);
 
             sb.append(_SPACE_SET_SPACE);
@@ -2877,15 +2969,19 @@ public abstract class SQLBuilder {
      * @param cond
      */
     private void appendCondition(final Condition cond) {
+        if (sb.charAt(sb.length() - 1) != _SPACE) {
+            sb.append(_SPACE);
+        }
+
         if (cond instanceof Binary) {
             final Binary binary = (Binary) cond;
             final String propName = binary.getPropName();
 
             sb.append(formalizeColumnName(propName));
 
-            sb.append(WD._SPACE);
+            sb.append(_SPACE);
             sb.append(binary.getOperator().toString());
-            sb.append(WD._SPACE);
+            sb.append(_SPACE);
 
             Object propValue = binary.getPropValue();
             setParameter(propName, propValue);
@@ -2895,9 +2991,9 @@ public abstract class SQLBuilder {
 
             sb.append(formalizeColumnName(propName));
 
-            sb.append(WD._SPACE);
+            sb.append(_SPACE);
             sb.append(bt.getOperator().toString());
-            sb.append(WD._SPACE);
+            sb.append(_SPACE);
 
             Object minValue = bt.getMinValue();
             if (sqlPolicy == SQLPolicy.NAMED_SQL || sqlPolicy == SQLPolicy.IBATIS_SQL) {
@@ -2906,9 +3002,9 @@ public abstract class SQLBuilder {
                 setParameter(propName, minValue);
             }
 
-            sb.append(WD._SPACE);
+            sb.append(_SPACE);
             sb.append(WD.AND);
-            sb.append(WD._SPACE);
+            sb.append(_SPACE);
 
             Object maxValue = bt.getMaxValue();
             if (sqlPolicy == SQLPolicy.NAMED_SQL || sqlPolicy == SQLPolicy.IBATIS_SQL) {
@@ -2923,7 +3019,7 @@ public abstract class SQLBuilder {
 
             sb.append(formalizeColumnName(propName));
 
-            sb.append(WD._SPACE);
+            sb.append(_SPACE);
             sb.append(in.getOperator().toString());
             sb.append(WD.SPACE_PARENTHESES_L);
 
@@ -2946,7 +3042,7 @@ public abstract class SQLBuilder {
 
             sb.append(formalizeColumnName(propName));
 
-            sb.append(WD._SPACE);
+            sb.append(_SPACE);
             sb.append(inSubQuery.getOperator().toString());
             sb.append(WD.SPACE_PARENTHESES_L);
 
@@ -2956,17 +3052,17 @@ public abstract class SQLBuilder {
         } else if (cond instanceof Where || cond instanceof Having) {
             final Cell cell = (Cell) cond;
 
-            sb.append(WD._SPACE);
+            sb.append(_SPACE);
             sb.append(cell.getOperator().toString());
-            sb.append(WD._SPACE);
+            sb.append(_SPACE);
 
             appendCondition(cell.getCondition());
         } else if (cond instanceof Cell) {
             final Cell cell = (Cell) cond;
 
-            sb.append(WD._SPACE);
+            sb.append(_SPACE);
             sb.append(cell.getOperator().toString());
-            sb.append(WD._SPACE);
+            sb.append(_SPACE);
 
             sb.append(_PARENTHESES_L);
             appendCondition(cell.getCondition());
@@ -3011,57 +3107,57 @@ public abstract class SQLBuilder {
             } else {
                 if (subQuery.getEntityClass() != null) {
                     if (this instanceof SCSB) {
-                        sb.append(SCSB.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).appendClause(subCond).sql());
+                        sb.append(SCSB.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).append(subCond).sql());
                     } else if (this instanceof PSC) {
-                        sb.append(PSC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).appendClause(subCond).sql());
+                        sb.append(PSC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).append(subCond).sql());
                     } else if (this instanceof MSC) {
-                        sb.append(MSC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).appendClause(subCond).sql());
+                        sb.append(MSC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).append(subCond).sql());
                     } else if (this instanceof NSC) {
-                        sb.append(NSC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).appendClause(subCond).sql());
+                        sb.append(NSC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).append(subCond).sql());
                     } else if (this instanceof ACSB) {
-                        sb.append(ACSB.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).appendClause(subCond).sql());
+                        sb.append(ACSB.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).append(subCond).sql());
                     } else if (this instanceof PAC) {
-                        sb.append(PAC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).appendClause(subCond).sql());
+                        sb.append(PAC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).append(subCond).sql());
                     } else if (this instanceof MAC) {
-                        sb.append(MAC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).appendClause(subCond).sql());
+                        sb.append(MAC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).append(subCond).sql());
                     } else if (this instanceof NAC) {
-                        sb.append(NAC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).appendClause(subCond).sql());
+                        sb.append(NAC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).append(subCond).sql());
                     } else if (this instanceof LCSB) {
-                        sb.append(LCSB.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).appendClause(subCond).sql());
+                        sb.append(LCSB.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).append(subCond).sql());
                     } else if (this instanceof PLC) {
-                        sb.append(PLC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).appendClause(subCond).sql());
+                        sb.append(PLC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).append(subCond).sql());
                     } else if (this instanceof MLC) {
-                        sb.append(MLC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).appendClause(subCond).sql());
+                        sb.append(MLC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).append(subCond).sql());
                     } else if (this instanceof NLC) {
-                        sb.append(NLC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).appendClause(subCond).sql());
+                        sb.append(NLC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).append(subCond).sql());
                     } else {
                         throw new RuntimeException("Unsupproted subQuery condition: " + cond);
                     }
                 } else {
                     if (this instanceof SCSB) {
-                        sb.append(SCSB.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).appendClause(subCond).sql());
+                        sb.append(SCSB.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).append(subCond).sql());
                     } else if (this instanceof PSC) {
-                        sb.append(PSC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).appendClause(subCond).sql());
+                        sb.append(PSC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).append(subCond).sql());
                     } else if (this instanceof MSC) {
-                        sb.append(MSC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).appendClause(subCond).sql());
+                        sb.append(MSC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).append(subCond).sql());
                     } else if (this instanceof NSC) {
-                        sb.append(NSC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).appendClause(subCond).sql());
+                        sb.append(NSC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).append(subCond).sql());
                     } else if (this instanceof ACSB) {
-                        sb.append(ACSB.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).appendClause(subCond).sql());
+                        sb.append(ACSB.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).append(subCond).sql());
                     } else if (this instanceof PAC) {
-                        sb.append(PAC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).appendClause(subCond).sql());
+                        sb.append(PAC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).append(subCond).sql());
                     } else if (this instanceof MAC) {
-                        sb.append(MAC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).appendClause(subCond).sql());
+                        sb.append(MAC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).append(subCond).sql());
                     } else if (this instanceof NAC) {
-                        sb.append(NAC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).appendClause(subCond).sql());
+                        sb.append(NAC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).append(subCond).sql());
                     } else if (this instanceof LCSB) {
-                        sb.append(LCSB.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).appendClause(subCond).sql());
+                        sb.append(LCSB.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).append(subCond).sql());
                     } else if (this instanceof PLC) {
-                        sb.append(PLC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).appendClause(subCond).sql());
+                        sb.append(PLC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).append(subCond).sql());
                     } else if (this instanceof MLC) {
-                        sb.append(MLC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).appendClause(subCond).sql());
+                        sb.append(MLC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).append(subCond).sql());
                     } else if (this instanceof NLC) {
-                        sb.append(NLC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).appendClause(subCond).sql());
+                        sb.append(NLC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).append(subCond).sql());
                     } else {
                         throw new RuntimeException("Unsupproted subQuery condition: " + cond);
                     }
@@ -9062,7 +9158,9 @@ public abstract class SQLBuilder {
         /**
          *
          * @return
+         * @deprecated useless?
          */
+        @Deprecated
         public Pair<String, List<Object>> __() {
             return Pair.of(sql, parameters);
         }

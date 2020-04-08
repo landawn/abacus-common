@@ -1,3 +1,9 @@
+### 1.20.18
+
+* Add `SQLBuilder.append(Condition)`.
+* Improvements and bug fix.
+
+
 ### 1.20.17
 
 * Move `Primitives.box/unbox` to `Array.box/unbox`.

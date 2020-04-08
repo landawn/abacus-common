@@ -1564,6 +1564,15 @@ public class ConditionFactory {
     }
 
     /**
+     * 
+     * @param expr
+     * @return
+     */
+    public static Limit limit(final String expr) {
+        return new Limit(expr);
+    }
+
+    /**
      *
      * @return
      */

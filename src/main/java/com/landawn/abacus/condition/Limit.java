@@ -39,6 +39,8 @@ public class Limit extends AbstractCondition {
     /** The offset. */
     private int offset;
 
+    private String expr;
+
     /**
      * Instantiates a new limit.
      */
@@ -65,6 +67,16 @@ public class Limit extends AbstractCondition {
         super(Operator.LIMIT);
         this.count = count;
         this.offset = offset;
+    }
+
+    public Limit(final String expr) {
+        this(0, Integer.MAX_VALUE);
+
+        this.expr = expr;
+    }
+
+    public String getExpr() {
+        return expr;
     }
 
     /**
@@ -140,7 +152,11 @@ public class Limit extends AbstractCondition {
      */
     @Override
     public String toString(NamingPolicy namingPolicy) {
-        return offset > 0 ? WD.LIMIT + _SPACE + count + _SPACE + WD.OFFSET + _SPACE + offset : WD.LIMIT + _SPACE + count;
+        if (N.notNullOrEmpty(expr)) {
+            return expr;
+        } else {
+            return offset > 0 ? WD.LIMIT + _SPACE + count + _SPACE + WD.OFFSET + _SPACE + offset : WD.LIMIT + _SPACE + count;
+        }
     }
 
     /**
@@ -149,11 +165,15 @@ public class Limit extends AbstractCondition {
      */
     @Override
     public int hashCode() {
-        int h = 17;
-        h = (h * 31) + count;
-        h = (h * 31) + offset;
+        if (N.notNullOrEmpty(expr)) {
+            return expr.hashCode();
+        } else {
+            int h = 17;
+            h = (h * 31) + count;
+            h = (h * 31) + offset;
 
-        return h;
+            return h;
+        }
     }
 
     /**
@@ -168,9 +188,13 @@ public class Limit extends AbstractCondition {
         }
 
         if (obj instanceof Limit) {
-            Limit other = (Limit) obj;
+            final Limit other = (Limit) obj;
 
-            return (count == other.count) && (offset == other.offset);
+            if (N.notNullOrEmpty(expr)) {
+                return this.expr.equals(other.expr);
+            } else {
+                return (count == other.count) && (offset == other.offset);
+            }
         }
 
         return false;
