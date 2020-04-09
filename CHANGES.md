@@ -1,3 +1,8 @@
+### 1.20.19
+
+* Improvements and bug fix.
+
+
 ### 1.20.18
 
 * Add `SQLBuilder.append(Condition)`.

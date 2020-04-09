@@ -1585,10 +1585,187 @@ public class ConditionFactory {
      */
     public static final class CF extends ConditionFactory {
 
-        /**
-         * Instantiates a new cf.
-         */
         private CF() {
+            // singleton for utility class.
+        }
+    }
+
+    public static final class CB {
+
+        private CB() {
+            // singleton for utility class.
+        }
+
+        public static Criteria where(final Condition condition) {
+            return CF.criteria().where(condition);
+        }
+
+        public static Criteria where(final String condition) {
+            return CF.criteria().where(condition);
+        }
+
+        /**
+         *
+         * @param condition
+         * @return
+         */
+        public static Criteria groupBy(Condition condition) {
+            return CF.criteria().groupBy(condition);
+        }
+
+        /**
+         *
+         * @param propNames
+         * @return
+         */
+        @SafeVarargs
+        public final Criteria groupBy(String... propNames) {
+            return CF.criteria().groupBy(propNames);
+        }
+
+        /**
+         *
+         * @param propName
+         * @param direction
+         * @return
+         */
+        public static Criteria groupBy(String propName, SortDirection direction) {
+            return CF.criteria().groupBy(propName, direction);
+        }
+
+        /**
+         *
+         * @param propNames
+         * @return
+         */
+        public static Criteria groupBy(Collection<String> propNames) {
+            return CF.criteria().groupBy(propNames);
+        }
+
+        /**
+         *
+         * @param propNames
+         * @param direction
+         * @return
+         */
+        public static Criteria groupBy(Collection<String> propNames, SortDirection direction) {
+            return CF.criteria().groupBy(propNames, direction);
+        }
+
+        /**
+         *
+         * @param orders
+         * @return
+         */
+        public static Criteria groupBy(Map<String, SortDirection> orders) {
+            return CF.criteria().groupBy(orders);
+        }
+
+        /**
+         *
+         * @param condition
+         * @return
+         */
+        public static Criteria having(Condition condition) {
+            return CF.criteria().having(condition);
+        }
+
+        /**
+         *
+         * @param condition
+         * @return
+         */
+        public static Criteria having(String condition) {
+            return CF.criteria().having(condition);
+        }
+
+        /**
+         *
+         * @param condition
+         * @return
+         */
+        public static Criteria orderBy(Condition condition) {
+            return CF.criteria().orderBy(condition);
+        }
+
+        /**
+         *
+         * @param propNames
+         * @return
+         */
+        @SafeVarargs
+        public final Criteria orderBy(String... propNames) {
+            return CF.criteria().orderBy(propNames);
+        }
+
+        /**
+         *
+         * @param propName
+         * @param direction
+         * @return
+         */
+        public static Criteria orderBy(String propName, SortDirection direction) {
+            return CF.criteria().orderBy(propName, direction);
+        }
+
+        /**
+         *
+         * @param propNames
+         * @return
+         */
+        public static Criteria orderBy(Collection<String> propNames) {
+            return CF.criteria().orderBy(propNames);
+        }
+
+        /**
+         *
+         * @param propNames
+         * @param direction
+         * @return
+         */
+        public static Criteria orderBy(Collection<String> propNames, SortDirection direction) {
+            return CF.criteria().orderBy(propNames, direction);
+        }
+
+        /**
+         *
+         * @param orders
+         * @return
+         */
+        public static Criteria orderBy(Map<String, SortDirection> orders) {
+            return CF.criteria().orderBy(orders);
+        }
+
+        /**
+         *
+         * @param condition
+         * @return
+         */
+        public static Criteria limit(Limit condition) {
+            return CF.criteria().limit(condition);
+        }
+
+        /**
+         *
+         * @param count
+         * @return
+         */
+        public static Criteria limit(final int count) {
+            return CF.criteria().limit(count);
+        }
+
+        /**
+         *
+         * @param offset
+         * @param count
+         * @return
+         */
+        public static Criteria limit(final int offset, final int count) {
+            return CF.criteria().limit(offset, count);
+        }
+
+        public static Criteria limit(final String expr) {
+            return CF.criteria().limit(expr);
         }
     }
 }
