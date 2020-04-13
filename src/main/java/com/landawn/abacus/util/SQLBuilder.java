@@ -3219,33 +3219,6 @@ public abstract class SQLBuilder {
     }
 
     /**
-     * Formalize column name.
-     *
-     * @param propName
-     * @return
-     */
-    private String formalizeColumnName(final String propName) {
-        return formalizeColumnName(getPropColumnNameMap(entityClass, namingPolicy), propName);
-    }
-
-    /**
-     * Formalize column name.
-     *
-     * @param propColumnNameMap
-     * @param propName
-     * @return
-     */
-    private String formalizeColumnName(final Map<String, String> propColumnNameMap, final String propName) {
-        final String columnName = propColumnNameMap == null ? null : propColumnNameMap.get(propName);
-
-        if (columnName != null) {
-            return columnName;
-        }
-
-        return formalizeColumnName(propName, namingPolicy);
-    }
-
-    /**
      * Checks if is sub query.
      *
      * @param columnNames
@@ -3314,11 +3287,6 @@ public abstract class SQLBuilder {
         return result;
     }
 
-    /**
-     * Register entity prop column name map.
-     *
-     * @param entityClass annotated with @Table, @Column
-     */
     private static ImmutableMap<String, String> registerEntityPropColumnNameMap(final Class<?> entityClass, final NamingPolicy namingPolicy,
             final Set<Class<?>> registeringClasses) {
         N.checkArgNotNull(entityClass);
@@ -3385,6 +3353,11 @@ public abstract class SQLBuilder {
         return result;
     }
 
+    private String formalizeColumnName(final String propName) {
+        return entityClass == null ? formalizeColumnName(propName, namingPolicy)
+                : formalizeColumnName(getPropColumnNameMap(entityClass, namingPolicy), propName);
+    }
+
     private static String formalizeColumnName(final String word, final NamingPolicy namingPolicy) {
         if (sqlKeyWords.contains(word)) {
             return word;
@@ -3395,13 +3368,16 @@ public abstract class SQLBuilder {
         }
     }
 
-    /**
-     * Parses the insert entity.
-     *
-     * @param instance
-     * @param entity
-     * @param excludedPropNames
-     */
+    private String formalizeColumnName(final Map<String, String> propColumnNameMap, final String propName) {
+        final String columnName = propColumnNameMap == null ? null : propColumnNameMap.get(propName);
+
+        if (columnName != null) {
+            return columnName;
+        }
+
+        return formalizeColumnName(propName, namingPolicy);
+    }
+
     private static void parseInsertEntity(final SQLBuilder instance, final Object entity, final Set<String> excludedPropNames) {
         if (entity instanceof String) {
             instance.columnNames = N.asArray((String) entity);
@@ -3425,12 +3401,6 @@ public abstract class SQLBuilder {
         }
     }
 
-    /**
-     * To insert props list.
-     *
-     * @param propsList
-     * @return
-     */
     private static Collection<Map<String, Object>> toInsertPropsList(final Collection<?> propsList) {
         final Optional<?> first = N.firstNonNull(propsList);
 
