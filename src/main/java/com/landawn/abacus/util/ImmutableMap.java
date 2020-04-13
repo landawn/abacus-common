@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util;
 
+import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,7 +34,7 @@ import java.util.function.Function;
  * @param <V> the value type
  * @since 0.8
  */
-public class ImmutableMap<K, V> implements Map<K, V> {
+public class ImmutableMap<K, V> extends AbstractMap<K, V> {
 
     /** The Constant EMPTY. */
     @SuppressWarnings("rawtypes")
@@ -501,34 +502,6 @@ public class ImmutableMap<K, V> implements Map<K, V> {
     @Override
     public int size() {
         return map.size();
-    }
-
-    /**
-     *
-     * @param obj
-     * @return true, if successful
-     */
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof Map && map.equals(obj);
-    }
-
-    /**
-     *
-     * @return
-     */
-    @Override
-    public int hashCode() {
-        return map.hashCode();
-    }
-
-    /**
-     *
-     * @return
-     */
-    @Override
-    public String toString() {
-        return map.toString();
     }
 
     public static <K, V> Builder<K, V> builder() {

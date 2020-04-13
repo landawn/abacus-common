@@ -20,11 +20,13 @@ import static com.landawn.abacus.util.WD._PARENTHESES_L;
 import static com.landawn.abacus.util.WD._PARENTHESES_R;
 import static com.landawn.abacus.util.WD._SPACE;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -320,6 +322,31 @@ public abstract class SQLBuilder {
 
     /** The Constant SPACE_AS_SPACE. */
     static final String SPACE_AS_SPACE = WD.SPACE + WD.AS + WD.SPACE;
+
+    private static final Set<String> sqlKeyWords = new HashSet<>(1024);
+
+    static {
+        final Field[] fields = WD.class.getDeclaredFields();
+        int m = 0;
+
+        for (Field field : fields) {
+            m = field.getModifiers();
+
+            if (Modifier.isPublic(m) && Modifier.isStatic(m) && Modifier.isFinal(m) && field.getType().equals(String.class)) {
+                try {
+                    final String value = (String) field.get(null);
+
+                    for (String e : StringUtil.split(value, ' ', true)) {
+                        sqlKeyWords.add(e);
+                        sqlKeyWords.add(e.toUpperCase());
+                        sqlKeyWords.add(e.toLowerCase());
+                    }
+                } catch (Exception e) {
+                    // ignore, should never happen.
+                }
+            }
+        }
+    }
 
     /** The Constant entityTablePropColumnNameMap. */
     private static final Map<Class<?>, Map<NamingPolicy, ImmutableMap<String, String>>> entityTablePropColumnNameMap = new ObjectPool<>(N.POOL_SIZE);
@@ -1945,21 +1972,21 @@ public abstract class SQLBuilder {
             final Cell where = criteria.getWhere();
 
             if ((where != null)) {
-                sb.append(_SPACE).append(where.getOperator());
+                sb.append(_SPACE_WHERE_SPACE);
                 appendCondition(where.getCondition());
             }
 
             final Cell groupBy = criteria.getGroupBy();
 
             if (groupBy != null) {
-                sb.append(_SPACE).append(groupBy.getOperator());
+                sb.append(_SPACE_GROUP_BY_SPACE);
                 appendCondition(groupBy.getCondition());
             }
 
             final Cell having = criteria.getHaving();
 
             if (having != null) {
-                sb.append(_SPACE).append(having.getOperator());
+                sb.append(_SPACE_HAVING_SPACE);
                 appendCondition(having.getCondition());
             }
 
@@ -1967,7 +1994,7 @@ public abstract class SQLBuilder {
 
             if (N.notNullOrEmpty(aggregations)) {
                 for (Cell aggregation : aggregations) {
-                    sb.append(_SPACE).append(aggregation.getOperator());
+                    sb.append(_SPACE).append(aggregation.getOperator()).append(_SPACE);
                     appendCondition(aggregation.getCondition());
                 }
             }
@@ -1975,7 +2002,7 @@ public abstract class SQLBuilder {
             final Cell orderBy = criteria.getOrderBy();
 
             if (orderBy != null) {
-                sb.append(_SPACE).append(orderBy.getOperator());
+                sb.append(_SPACE_ORDER_BY_SPACE);
                 appendCondition(orderBy.getCondition());
             }
 
@@ -1993,12 +2020,10 @@ public abstract class SQLBuilder {
                 }
             }
         } else if (cond instanceof Clause) {
-            sb.append(_SPACE).append(cond.getOperator());
-
+            sb.append(_SPACE).append(cond.getOperator()).append(_SPACE);
             appendCondition(((Clause) cond).getCondition());
         } else {
             sb.append(_SPACE_WHERE_SPACE);
-
             appendCondition(cond);
         }
 
@@ -2969,9 +2994,9 @@ public abstract class SQLBuilder {
      * @param cond
      */
     private void appendCondition(final Condition cond) {
-        if (sb.charAt(sb.length() - 1) != _SPACE) {
-            sb.append(_SPACE);
-        }
+        //    if (sb.charAt(sb.length() - 1) != _SPACE) {
+        //        sb.append(_SPACE);
+        //    }
 
         if (cond instanceof Binary) {
             final Binary binary = (Binary) cond;
@@ -3360,11 +3385,13 @@ public abstract class SQLBuilder {
         return result;
     }
 
-    private static String formalizeColumnName(final String propName, final NamingPolicy namingPolicy) {
-        if (namingPolicy == NamingPolicy.LOWER_CAMEL_CASE) {
-            return ClassUtil.formalizePropName(propName);
+    private static String formalizeColumnName(final String word, final NamingPolicy namingPolicy) {
+        if (sqlKeyWords.contains(word)) {
+            return word;
+        } else if (namingPolicy == NamingPolicy.LOWER_CAMEL_CASE) {
+            return ClassUtil.formalizePropName(word);
         } else {
-            return namingPolicy.convert(propName);
+            return namingPolicy.convert(word);
         }
     }
 
