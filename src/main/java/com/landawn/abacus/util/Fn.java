@@ -47,6 +47,8 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
@@ -3550,49 +3552,48 @@ public final class Fn extends Comparators {
         };
     }
 
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param supplier
-    //     * @return
-    //     */
-    //    @Beta
-    //    public static <T> Function<Future<T>, T> getOrDefaultOnError(final T defaultValue) {
-    //        return new Function<Future<T>, T>() {
-    //            @Override
-    //            public T apply(Future<T> f) {
-    //                try {
-    //                    return f.get();
-    //                } catch (InterruptedException | ExecutionException e) {
-    //                    // throw N.toRuntimeException(e);
-    //                    return defaultValue;
-    //                }
-    //            }
-    //        };
-    //    }
-    //
-    //    private static final Function<Future<Object>, Object> GET_OR_THROW = new Function<Future<Object>, Object>() {
-    //        @Override
-    //        public Object apply(Future<Object> f) {
-    //            try {
-    //                return f.get();
-    //            } catch (InterruptedException | ExecutionException e) {
-    //                return N.toRuntimeException(e);
-    //            }
-    //        }
-    //    };
-    //
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param supplier
-    //     * @return
-    //     */
-    //    @SuppressWarnings("rawtypes")
-    //    @Beta
-    //    public static <T> Function<Future<T>, T> getOrThrowOnError() {
-    //        return (Function) GET_OR_THROW;
-    //    }
+    /**
+     *
+     * @param <T>
+     * @param defaultValue
+     * @return
+     */
+    @Beta
+    public static <T> Function<Future<T>, T> futureGetOrDefaultOnError(final T defaultValue) {
+        return new Function<Future<T>, T>() {
+            @Override
+            public T apply(Future<T> f) {
+                try {
+                    return f.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    // throw N.toRuntimeException(e);
+                    return defaultValue;
+                }
+            }
+        };
+    }
+
+    private static final Function<Future<Object>, Object> FUTURE_GETTER = new Function<Future<Object>, Object>() {
+        @Override
+        public Object apply(Future<Object> f) {
+            try {
+                return f.get();
+            } catch (InterruptedException | ExecutionException e) {
+                return N.toRuntimeException(e);
+            }
+        }
+    };
+
+    /**
+     *
+     * @param <T>
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    @Beta
+    public static <T> Function<Future<T>, T> futureGet() {
+        return (Function) FUTURE_GETTER;
+    }
 
     /**
      *
