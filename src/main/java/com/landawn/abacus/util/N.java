@@ -43,6 +43,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import com.landawn.abacus.core.MapEntity;
 import com.landawn.abacus.exception.DuplicatedResultException;
 import com.landawn.abacus.exception.UncheckedException;
 import com.landawn.abacus.parser.DeserializationConfig;
@@ -19390,6 +19391,17 @@ public final class N extends CommonUtil {
 
     /**
      *
+     * @param xml
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static String formatXML(final String xml) {
+        return formatXML(MapEntity.class, xml);
+    }
+
+    /**
+     *
      * @param <T>
      * @param targetClass
      * @param xml
@@ -19637,6 +19649,30 @@ public final class N extends CommonUtil {
         }
 
         return configToReturn;
+    }
+
+    /**
+     *
+     * @param type
+     * @param xml
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static String formatXML(final Class<?> type, final String xml) {
+        return toXML(fromXML(type, xml), Utils.xscPrettyFormat);
+    }
+
+    /**
+     *
+     * @param type
+     * @param xml
+     * @return
+     * @see com.landawn.abacus.util.TypeReference
+     * @see com.landawn.abacus.util.TypeReference.TypeToken
+     */
+    public static String formatXML(final Type<?> type, final String xml) {
+        return toXML(fromXML(type, xml), Utils.xscPrettyFormat);
     }
 
     /**
