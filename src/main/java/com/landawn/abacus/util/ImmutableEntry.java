@@ -25,7 +25,7 @@ import java.util.Map;
  * @param <V> the value type
  * @since 0.9
  */
-public class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry<K, V> implements Map.Entry<K, V> {
+public class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry<K, V> implements Map.Entry<K, V>, Immutable {
 
     /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -7667037689002186862L;

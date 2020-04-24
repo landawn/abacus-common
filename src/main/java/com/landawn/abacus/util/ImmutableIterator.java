@@ -29,7 +29,7 @@ import com.landawn.abacus.util.function.Supplier;
  * @param <T>
  * @since 0.9
  */
-abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
+abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable {
 
     /**
      *

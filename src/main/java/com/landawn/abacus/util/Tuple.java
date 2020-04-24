@@ -29,7 +29,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @author Haiyang Li
  * @since 0.8
  */
-public abstract class Tuple<TP> {
+public abstract class Tuple<TP> implements Immutable {
 
     /** The Constant EMPTY. */
     private static final Tuple0 EMPTY = new Tuple0();

@@ -40,6 +40,7 @@ import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.JsonXmlConfig;
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.annotation.Table;
+import com.landawn.abacus.annotation.Transient;
 import com.landawn.abacus.annotation.Type.EnumBy;
 import com.landawn.abacus.annotation.Type.Scope;
 import com.landawn.abacus.core.DirtyMarkerUtil;
@@ -103,7 +104,11 @@ public final class ParserUtil {
     private static final Map<Class<?>, EntityInfo> entityInfoPool = new ObjectPool<>(POOL_SIZE);
 
     static boolean isJsonXmlSerializable(final Field field, final JsonXmlConfig jsonXmlConfig) {
-        if (field == null || Modifier.isStatic(field.getModifiers())) {
+        if (field == null) {
+            return true;
+        }
+
+        if (Modifier.isStatic(field.getModifiers())) {
             return false;
         }
 
@@ -531,7 +536,7 @@ public final class ParserUtil {
                 } else {
                     seriPropInfoList.add(propInfo);
 
-                    if (propInfo.field != null && Modifier.isTransient(propInfo.field.getModifiers())) {
+                    if (propInfo.isTransient) {
                         transientSeriPropNameSet.add(propName);
 
                         transientSeriPropInfoList.add(propInfo);
@@ -1022,6 +1027,8 @@ public final class ParserUtil {
         /** The has format. */
         final boolean hasFormat;
 
+        public final boolean isTransient;
+
         public final boolean isMarkedToColumn;
 
         public final Optional<String> columnName;
@@ -1057,6 +1064,7 @@ public final class ParserUtil {
             numberFormat = null;
             hasFormat = false;
 
+            isTransient = false;
             isMarkedToColumn = false;
             columnName = Optional.<String> empty();
         }
@@ -1071,6 +1079,8 @@ public final class ParserUtil {
             this.getMethod = getMethod;
             this.setMethod = ClassUtil.getPropSetMethod(declaringClass, propName);
             this.annotations = ImmutableMap.of(getAnnotations());
+            this.isTransient = annotations.containsKey(Transient.class) || (field != null && Modifier.isTransient(field.getModifiers()));
+
             this.clazz = (Class<Object>) (field == null ? (setMethod == null ? getMethod.getReturnType() : setMethod.getParameterTypes()[0]) : field.getType());
             this.type = getType(getAnnoType(this.field, this.getMethod, this.setMethod, clazz, jsonXmlConfig), this.field, this.getMethod, this.setMethod,
                     clazz, declaringClass);

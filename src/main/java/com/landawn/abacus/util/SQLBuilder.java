@@ -38,9 +38,9 @@ import com.landawn.abacus.DirtyMarker;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.NonUpdatable;
+import com.landawn.abacus.annotation.NotColumn;
 import com.landawn.abacus.annotation.ReadOnly;
 import com.landawn.abacus.annotation.ReadOnlyId;
-import com.landawn.abacus.annotation.Transient;
 import com.landawn.abacus.condition.Between;
 import com.landawn.abacus.condition.Binary;
 import com.landawn.abacus.condition.Cell;
@@ -661,31 +661,31 @@ public abstract class SQLBuilder {
                     }
                 }
 
-                final Set<String> readOnlyPropNames = N.newHashSet();
+                final Set<String> nonUpdatableNonWritablePropNames = N.newHashSet();
                 final Set<String> nonUpdatablePropNames = N.newHashSet();
                 final Set<String> transientPropNames = N.newHashSet();
 
                 for (PropInfo propInfo : entityInfo.propInfoList) {
                     if (propInfo.isAnnotationPresent(ReadOnly.class) || propInfo.isAnnotationPresent(ReadOnlyId.class)) {
-                        readOnlyPropNames.add(propInfo.name);
+                        nonUpdatableNonWritablePropNames.add(propInfo.name);
                     }
 
                     if (propInfo.isAnnotationPresent(NonUpdatable.class)) {
                         nonUpdatablePropNames.add(propInfo.name);
                     }
 
-                    if (propInfo.isAnnotationPresent(Transient.class) || (propInfo.field != null && Modifier.isTransient(propInfo.field.getModifiers()))) {
-                        readOnlyPropNames.add(propInfo.name);
+                    if (propInfo.isTransient || propInfo.isAnnotationPresent(NotColumn.class)) {
+                        nonUpdatableNonWritablePropNames.add(propInfo.name);
                         transientPropNames.add(propInfo.name);
                     }
                 }
 
-                nonUpdatablePropNames.addAll(readOnlyPropNames);
+                nonUpdatablePropNames.addAll(nonUpdatableNonWritablePropNames);
 
                 val[0].removeAll(transientPropNames);
                 val[1].removeAll(transientPropNames);
-                val[2].removeAll(readOnlyPropNames);
-                val[3].removeAll(readOnlyPropNames);
+                val[2].removeAll(nonUpdatableNonWritablePropNames);
+                val[3].removeAll(nonUpdatableNonWritablePropNames);
                 val[4].removeAll(nonUpdatablePropNames);
 
                 for (String idPropName : ClassUtil.getIdFieldNames(entityClass)) {
@@ -693,11 +693,11 @@ public abstract class SQLBuilder {
                     val[3].remove(ClassUtil.getPropNameByMethod(ClassUtil.getPropGetMethod(entityClass, idPropName)));
                 }
 
-                val[0] = ImmutableSet.of(val[0]);
-                val[1] = ImmutableSet.of(val[1]);
-                val[2] = ImmutableSet.of(val[2]);
-                val[3] = ImmutableSet.of(val[3]);
-                val[4] = ImmutableSet.of(val[4]);
+                val[0] = ImmutableSet.of(val[0]); // for select, including sub entity properties.
+                val[1] = ImmutableSet.of(val[1]); // for select, no sub entity properties.
+                val[2] = ImmutableSet.of(val[2]); // for insert with id
+                val[3] = ImmutableSet.of(val[3]); // for insert without id
+                val[4] = ImmutableSet.of(val[4]); // for update.
 
                 defaultPropNamesPool.put(entityClass, val);
             }

@@ -34,7 +34,7 @@ import java.util.function.Function;
  * @param <V> the value type
  * @since 0.8
  */
-public class ImmutableMap<K, V> extends AbstractMap<K, V> {
+public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
 
     /** The Constant EMPTY. */
     @SuppressWarnings("rawtypes")

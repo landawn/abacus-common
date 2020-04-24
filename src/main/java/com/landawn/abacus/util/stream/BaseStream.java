@@ -29,12 +29,13 @@ import com.landawn.abacus.annotation.TerminalOp;
 import com.landawn.abacus.annotation.TerminalOpTriggered;
 import com.landawn.abacus.exception.DuplicatedResultException;
 import com.landawn.abacus.util.If.OrElse;
+import com.landawn.abacus.util.Immutable;
 import com.landawn.abacus.util.ImmutableList;
 import com.landawn.abacus.util.ImmutableSet;
 import com.landawn.abacus.util.IntList;
 import com.landawn.abacus.util.LongMultiset;
-import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.MergeResult;
+import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u.Optional;
@@ -58,7 +59,7 @@ import com.landawn.abacus.util.function.Supplier;
  * @see LongStream
  * @see DoubleStream
  */
-public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T, A, P, C, PL, OT, IT, ITER, S>> extends AutoCloseable {
+public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T, A, P, C, PL, OT, IT, ITER, S>> extends AutoCloseable, Immutable {
 
     /**
      * Returns a stream consisting of the elements of this stream that match the given predicate.

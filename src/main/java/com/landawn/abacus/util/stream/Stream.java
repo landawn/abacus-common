@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -3437,6 +3438,24 @@ public abstract class Stream<T>
             @Override
             public void run() {
                 stream.close();
+            }
+        });
+    }
+
+    public static <T> Stream<T> of(final Enumeration<? extends T> enumeration) {
+        if (enumeration == null) {
+            return empty();
+        }
+
+        return new IteratorStream<>(new ObjIteratorEx<T>() {
+            @Override
+            public boolean hasNext() {
+                return enumeration.hasMoreElements();
+            }
+
+            @Override
+            public T next() {
+                return enumeration.nextElement();
             }
         });
     }
