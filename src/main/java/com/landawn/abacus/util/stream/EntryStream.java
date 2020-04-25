@@ -30,6 +30,7 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.IntermediateOp;
 import com.landawn.abacus.annotation.ParallelSupported;
 import com.landawn.abacus.annotation.SequentialOnly;
+import com.landawn.abacus.annotation.TerminalOp;
 import com.landawn.abacus.annotation.TerminalOpTriggered;
 import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.BiIterator;
@@ -1017,7 +1018,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     @ParallelSupported
     public <E extends Exception> void forEachIndexed(final Throwables.IndexedConsumer<? super Map.Entry<K, V>, E> action) throws E {
         s.forEachIndexed(action);
-    } 
+    }
 
     @ParallelSupported
     public Optional<Map.Entry<K, V>> min(Comparator<? super Map.Entry<K, V>> comparator) {
@@ -1559,9 +1560,39 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     @SequentialOnly
+    @IntermediateOp
     @Beta
     public <KK, VV> EntryStream<KK, VV> __(Function<? super EntryStream<K, V>, EntryStream<KK, VV>> transfer) {
         return transfer.apply(this);
+    }
+
+    /**
+     * 
+     * @param <U>
+     * @param <R>
+     * @param terminalOp should be terminal operation.
+     * @param mapper
+     * @return
+     */
+    @TerminalOp
+    @Beta
+    public <U, R> R __(final Function<? super EntryStream<K, V>, U> terminalOp, final Function<U, R> mapper) {
+        return mapper.apply(terminalOp.apply(this));
+    }
+
+    /**
+     * 
+     * @param <R>
+     * @param terminalOp should be terminal operation.
+     * @param action
+     * @return
+     */
+    @TerminalOp
+    @Beta
+    public <R> R __(final Function<? super EntryStream<K, V>, R> terminalOp, final Consumer<R> action) {
+        final R result = terminalOp.apply(this);
+        action.accept(result);
+        return result;
     }
 
     public EntryStream<K, V> sequential() {

@@ -461,6 +461,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     abstract ByteIteratorEx iteratorEx();
 
     @SequentialOnly
+    @IntermediateOp
     @Beta
     @SuppressWarnings("rawtypes")
     @Override

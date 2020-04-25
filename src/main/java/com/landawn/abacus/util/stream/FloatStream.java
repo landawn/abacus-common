@@ -452,6 +452,7 @@ public abstract class FloatStream
     abstract FloatIteratorEx iteratorEx();
 
     @SequentialOnly
+    @IntermediateOp
     @Beta
     @SuppressWarnings("rawtypes")
     @Override

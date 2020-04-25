@@ -3226,6 +3226,7 @@ public abstract class Stream<T>
     }
 
     @SequentialOnly
+    @IntermediateOp
     @Beta
     @SuppressWarnings("rawtypes")
     @Override
@@ -3237,27 +3238,27 @@ public abstract class Stream<T>
      * 
      * @param <U>
      * @param <R>
-     * @param func should be terminal operation.
-     * @param action
+     * @param terminalOp should be terminal operation.
+     * @param mapper
      * @return
      */
-    @SequentialOnly
+    @TerminalOp
     @Beta
-    public <U, R> R __(final Function<? super Stream<T>, U> func, final Function<U, R> action) {
-        return action.apply(func.apply(this));
+    public <U, R> R __(final Function<? super Stream<T>, U> terminalOp, final Function<U, R> mapper) {
+        return mapper.apply(terminalOp.apply(this));
     }
 
     /**
      * 
      * @param <R>
-     * @param func should be terminal operation.
+     * @param terminalOp should be terminal operation.
      * @param action
      * @return
      */
-    @SequentialOnly
+    @TerminalOp
     @Beta
-    public <R> R __(final Function<? super Stream<T>, R> func, final Consumer<R> action) {
-        final R result = func.apply(this);
+    public <R> R __(final Function<? super Stream<T>, R> terminalOp, final Consumer<R> action) {
+        final R result = terminalOp.apply(this);
         action.accept(result);
         return result;
     }

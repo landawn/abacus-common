@@ -7075,6 +7075,35 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
     }
 
     /**
+     * 
+     * @param <U>
+     * @param <R> 
+     * @param terminalOp should be terminal operation.
+     * @param mapper
+     * @return
+     */
+    @TerminalOp
+    @Beta
+    public <U, R> R __(final Function<? super ExceptionalStream<T, E>, U> terminalOp, final Throwables.Function<U, R, E> mapper) throws E {
+        return mapper.apply(terminalOp.apply(this));
+    }
+
+    /**
+     * 
+     * @param <R>
+     * @param terminalOp should be terminal operation.
+     * @param action
+     * @return
+     */
+    @TerminalOp
+    @Beta
+    public <R> R __(final Function<? super ExceptionalStream<T, E>, R> terminalOp, final Throwables.Consumer<R, E> action) throws E {
+        final R result = terminalOp.apply(this);
+        action.accept(result);
+        return result;
+    }
+
+    /**
      *
      *
      * @param action a terminal operation should be called.

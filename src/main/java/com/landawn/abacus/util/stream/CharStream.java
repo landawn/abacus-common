@@ -652,6 +652,7 @@ public abstract class CharStream
     abstract CharIteratorEx iteratorEx();
 
     @SequentialOnly
+    @IntermediateOp
     @Beta
     @SuppressWarnings("rawtypes")
     @Override

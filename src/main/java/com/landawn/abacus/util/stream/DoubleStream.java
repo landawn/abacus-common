@@ -40,9 +40,9 @@ import com.landawn.abacus.util.DoubleSummaryStatistics;
 import com.landawn.abacus.util.Fn.FnD;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.IndexedDouble;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
@@ -452,6 +452,7 @@ public abstract class DoubleStream
     abstract DoubleIteratorEx iteratorEx();
 
     @SequentialOnly
+    @IntermediateOp
     @Beta
     @SuppressWarnings("rawtypes")
     @Override

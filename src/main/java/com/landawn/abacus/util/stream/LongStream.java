@@ -42,9 +42,9 @@ import com.landawn.abacus.util.IndexedLong;
 import com.landawn.abacus.util.LongIterator;
 import com.landawn.abacus.util.LongList;
 import com.landawn.abacus.util.LongSummaryStatistics;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
@@ -463,6 +463,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     abstract LongIteratorEx iteratorEx();
 
     @SequentialOnly
+    @IntermediateOp
     @Beta
     @SuppressWarnings("rawtypes")
     @Override

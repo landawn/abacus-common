@@ -435,6 +435,7 @@ public abstract class ShortStream
     abstract ShortIteratorEx iteratorEx();
 
     @SequentialOnly
+    @IntermediateOp
     @Beta
     @SuppressWarnings("rawtypes")
     @Override
