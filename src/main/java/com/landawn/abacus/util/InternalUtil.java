@@ -506,18 +506,18 @@ public final class InternalUtil {
         ImmutableMap<String, String> result = column2FieldNameMapPool.get(entityClass);
 
         if (result == null) {
-            final Map<String, String> biMap = N.newBiMap(LinkedHashMap.class, LinkedHashMap.class);
+            final Map<String, String> map = new HashMap<>();
             final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
 
             for (PropInfo propInfo : entityInfo.propInfoList) {
                 if (propInfo.columnName.isPresent()) {
-                    biMap.put(propInfo.columnName.get(), propInfo.name);
-                    biMap.put(propInfo.columnName.get().toLowerCase(), propInfo.name);
-                    biMap.put(propInfo.columnName.get().toUpperCase(), propInfo.name);
+                    map.put(propInfo.columnName.get(), propInfo.name);
+                    map.put(propInfo.columnName.get().toLowerCase(), propInfo.name);
+                    map.put(propInfo.columnName.get().toUpperCase(), propInfo.name);
                 }
             }
 
-            result = ImmutableMap.of(biMap);
+            result = ImmutableMap.copyOf(map);
 
             column2FieldNameMapPool.put(entityClass, result);
         }

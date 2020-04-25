@@ -3234,6 +3234,35 @@ public abstract class Stream<T>
     }
 
     /**
+     * 
+     * @param <U>
+     * @param <R>
+     * @param func should be terminal operation.
+     * @param action
+     * @return
+     */
+    @SequentialOnly
+    @Beta
+    public <U, R> R __(final Function<? super Stream<T>, U> func, final Function<U, R> action) {
+        return action.apply(func.apply(this));
+    }
+
+    /**
+     * 
+     * @param <R>
+     * @param func should be terminal operation.
+     * @param action
+     * @return
+     */
+    @SequentialOnly
+    @Beta
+    public <R> R __(final Function<? super Stream<T>, R> func, final Consumer<R> action) {
+        final R result = func.apply(this);
+        action.accept(result);
+        return result;
+    }
+
+    /**
      * To reduce the memory footprint, Only one instance of <code>DisposableEntry</code> is created,
      * and the same entry instance is returned and set with different keys/values during iteration of the returned stream.
      * The elements only can be retrieved one by one, can't be modified or saved.
