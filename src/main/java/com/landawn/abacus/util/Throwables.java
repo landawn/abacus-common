@@ -439,26 +439,6 @@ public final class Throwables {
          * @throws E the e
          */
         R apply(T t) throws E;
-
-        /**
-         *
-         * @param <T>
-         * @param <E>
-         * @param consumer
-         * @return
-         */
-        public static <T, E extends Throwable> Function<T, Void, E> convert(final Consumer<T, E> consumer) {
-            N.checkArgNotNull(consumer);
-
-            return new Function<T, Void, E>() {
-                @Override
-                public Void apply(T t) throws E {
-                    consumer.accept(t);
-
-                    return null;
-                }
-            };
-        }
     }
 
     /**
@@ -479,27 +459,6 @@ public final class Throwables {
          * @throws E the e
          */
         R apply(T t, U u) throws E;
-
-        /**
-         *
-         * @param <T>
-         * @param <U>
-         * @param <E>
-         * @param biConsumer
-         * @return
-         */
-        public static <T, U, E extends Throwable> BiFunction<T, U, Void, E> convert(final BiConsumer<T, U, E> biConsumer) {
-            N.checkArgNotNull(biConsumer);
-
-            return new BiFunction<T, U, Void, E>() {
-                @Override
-                public Void apply(T t, U u) throws E {
-                    biConsumer.accept(t, u);
-
-                    return null;
-                }
-            };
-        }
     }
 
     /**
@@ -522,28 +481,6 @@ public final class Throwables {
          * @throws E the e
          */
         R apply(A a, B b, C c) throws E;
-
-        /**
-         *
-         * @param <A>
-         * @param <B>
-         * @param <C>
-         * @param <E>
-         * @param triConsumer
-         * @return
-         */
-        public static <A, B, C, E extends Throwable> TriFunction<A, B, C, Void, E> convert(final TriConsumer<A, B, C, E> triConsumer) {
-            N.checkArgNotNull(triConsumer);
-
-            return new TriFunction<A, B, C, Void, E>() {
-                @Override
-                public Void apply(A a, B b, C c) throws E {
-                    triConsumer.accept(a, b, c);
-
-                    return null;
-                }
-            };
-        }
     }
 
     /**
@@ -584,25 +521,6 @@ public final class Throwables {
          * @throws E the e
          */
         void accept(T t) throws E;
-
-        /**
-         *
-         * @param <T>
-         * @param <R>
-         * @param <E>
-         * @param func
-         * @return
-         */
-        public static <T, R, E extends Throwable> Consumer<T, E> convert(final Function<T, R, E> func) {
-            N.checkArgNotNull(func);
-
-            return new Consumer<T, E>() {
-                @Override
-                public void accept(T t) throws E {
-                    func.apply(t);
-                }
-            };
-        }
     }
 
     /**
@@ -621,26 +539,6 @@ public final class Throwables {
          * @throws E the e
          */
         void accept(T t, U u) throws E;
-
-        /**
-         *
-         * @param <T>
-         * @param <U>
-         * @param <R>
-         * @param <E>
-         * @param func
-         * @return
-         */
-        public static <T, U, R, E extends Throwable> BiConsumer<T, U, E> convert(final BiFunction<T, U, R, E> func) {
-            N.checkArgNotNull(func);
-
-            return new BiConsumer<T, U, E>() {
-                @Override
-                public void accept(T t, U u) throws E {
-                    func.apply(t, u);
-                }
-            };
-        }
     }
 
     /**
@@ -661,27 +559,6 @@ public final class Throwables {
          * @throws E the e
          */
         void accept(A a, B b, C c) throws E;
-
-        /**
-         *
-         * @param <A>
-         * @param <B>
-         * @param <C>
-         * @param <R>
-         * @param <E>
-         * @param func
-         * @return
-         */
-        public static <A, B, C, R, E extends Throwable> TriConsumer<A, B, C, E> convert(final TriFunction<A, B, C, R, E> func) {
-            N.checkArgNotNull(func);
-
-            return new TriConsumer<A, B, C, E>() {
-                @Override
-                public void accept(A a, B b, C c) throws E {
-                    func.apply(a, b, c);
-                }
-            };
-        }
     }
 
     /**

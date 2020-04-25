@@ -4796,6 +4796,82 @@ public final class Fn extends Comparators {
         };
     }
 
+    public static <T> Function<T, Void> c2f(final Consumer<? super T> action) {
+        N.checkArgNotNull(action);
+
+        return new Function<T, Void>() {
+            @Override
+            public Void apply(T t) {
+                action.accept(t);
+                return null;
+            }
+        };
+    }
+
+    public static <T, U> BiFunction<T, U, Void> c2f(final BiConsumer<? super T, ? super U> action) {
+        N.checkArgNotNull(action);
+
+        return new BiFunction<T, U, Void>() {
+            @Override
+            public Void apply(T t, U u) {
+                action.accept(t, u);
+                return null;
+            }
+        };
+    }
+
+    public static <A, B, C> TriFunction<A, B, C, Void> cf2(final TriConsumer<? super A, ? super B, ? super C> action) {
+        N.checkArgNotNull(action);
+
+        return new TriFunction<A, B, C, Void>() {
+            @Override
+            public Void apply(A a, B b, C c) {
+                action.accept(a, b, c);
+                return null;
+            }
+        };
+    }
+
+    /**
+     * Returns a <code>Consumer</code> which calls the specified <code>func</code>.
+     *
+     * @param <T>
+     * @param func
+     * @return
+     */
+    public static <T> Consumer<T> f2c(final Function<? super T, ?> func) {
+        N.checkArgNotNull(func);
+
+        return new Consumer<T>() {
+            @Override
+            public void accept(T t) {
+                func.apply(t);
+            }
+        };
+    }
+
+    public static <T, U> BiConsumer<T, U> f2c(final BiFunction<? super T, ? super U, ?> func) {
+        N.checkArgNotNull(func);
+
+        return new BiConsumer<T, U>() {
+            @Override
+            public void accept(T t, U u) {
+                func.apply(t, u);
+            }
+        };
+    }
+
+    public static <A, B, C> TriConsumer<A, B, C> f2c(final TriFunction<? super A, ? super B, ? super C, ?> func) {
+        N.checkArgNotNull(func);
+
+        return new TriConsumer<A, B, C>() {
+            @Override
+            public void accept(A a, B b, C c) {
+                func.apply(a, b, c);
+            }
+        };
+    }
+
     public static <E extends Exception> com.landawn.abacus.util.function.Runnable rr(final Throwables.Runnable<E> runnbale) {
         return new com.landawn.abacus.util.function.Runnable() {
             @Override
@@ -7972,24 +8048,6 @@ public final class Fn extends Comparators {
         }
 
         /**
-         * Returns a <code>Consumer</code> which calls the specified <code>func</code>.
-         *
-         * @param <T>
-         * @param func
-         * @return
-         */
-        public static <T> Consumer<T> convert(final Function<? super T, ?> func) {
-            N.checkArgNotNull(func);
-
-            return new Consumer<T>() {
-                @Override
-                public void accept(T t) {
-                    func.apply(t);
-                }
-            };
-        }
-
-        /**
          * Returns a stateful <code>BiPredicate</code>. Don't save it or use it in parallel stream.
          *
          * @param <T>
@@ -8252,25 +8310,6 @@ public final class Fn extends Comparators {
         }
 
         /**
-         * Returns a <code>BiConsumer</code> which calls the specified <code>func</code>.
-         *
-         * @param <T>
-         * @param <U>
-         * @param func
-         * @return
-         */
-        public static <T, U> BiConsumer<T, U> convert(final BiFunction<? super T, ? super U, ?> func) {
-            N.checkArgNotNull(func);
-
-            return new BiConsumer<T, U>() {
-                @Override
-                public void accept(T t, U u) {
-                    func.apply(t, u);
-                }
-            };
-        }
-
-        /**
          * Returns a stateful <code>BiPredicate</code>. Don't save it or use it in parallel stream.
          *
          *
@@ -8307,26 +8346,6 @@ public final class Fn extends Comparators {
         protected TriConsumers() {
             // for extention.
         }
-
-        /**
-         * Returns a <code>TriConsumer</code> which calls the specified <code>func</code>.
-         *
-         * @param <A>
-         * @param <B>
-         * @param <C>
-         * @param func
-         * @return
-         */
-        public static <A, B, C> TriConsumer<A, B, C> convert(final TriFunction<? super A, ? super B, ? super C, ?> func) {
-            N.checkArgNotNull(func);
-
-            return new TriConsumer<A, B, C>() {
-                @Override
-                public void accept(A a, B b, C c) {
-                    func.apply(a, b, c);
-                }
-            };
-        }
     }
 
     /**
@@ -8339,24 +8358,6 @@ public final class Fn extends Comparators {
          */
         protected Functions() {
             // for extention.
-        }
-
-        /**
-         *
-         * @param <T>
-         * @param action
-         * @return
-         */
-        public static <T> Function<T, Void> convert(final Consumer<? super T> action) {
-            N.checkArgNotNull(action);
-
-            return new Function<T, Void>() {
-                @Override
-                public Void apply(T t) {
-                    action.accept(t);
-                    return null;
-                }
-            };
         }
 
         /**
@@ -8651,25 +8652,6 @@ public final class Fn extends Comparators {
         }
 
         /**
-         *
-         * @param <T>
-         * @param <U>
-         * @param action
-         * @return
-         */
-        public static <T, U> BiFunction<T, U, Void> convert(final BiConsumer<? super T, ? super U> action) {
-            N.checkArgNotNull(action);
-
-            return new BiFunction<T, U, Void>() {
-                @Override
-                public Void apply(T t, U u) {
-                    action.accept(t, u);
-                    return null;
-                }
-            };
-        }
-
-        /**
          * Returns a stateful <code>BiPredicate</code>. Don't save it or use it in parallel stream.
          *
          * @param <U>
@@ -8705,26 +8687,6 @@ public final class Fn extends Comparators {
          */
         protected TriFunctions() {
             // for extention.
-        }
-
-        /**
-         *
-         * @param <A>
-         * @param <B>
-         * @param <C>
-         * @param action
-         * @return
-         */
-        public static <A, B, C> TriFunction<A, B, C, Void> convert(final TriConsumer<? super A, ? super B, ? super C> action) {
-            N.checkArgNotNull(action);
-
-            return new TriFunction<A, B, C, Void>() {
-                @Override
-                public Void apply(A a, B b, C c) {
-                    action.accept(a, b, c);
-                    return null;
-                }
-            };
         }
     }
 
@@ -12884,6 +12846,78 @@ public final class Fn extends Comparators {
                     synchronized (mutex) {
                         return biFunction.apply(t, u);
                     }
+                }
+            };
+        }
+
+        public static <T, E extends Throwable> Throwables.Function<T, Void, E> c2f(final Throwables.Consumer<T, E> consumer) {
+            N.checkArgNotNull(consumer);
+
+            return new Throwables.Function<T, Void, E>() {
+                @Override
+                public Void apply(T t) throws E {
+                    consumer.accept(t);
+
+                    return null;
+                }
+            };
+        }
+
+        public static <T, U, E extends Throwable> Throwables.BiFunction<T, U, Void, E> c2f(final Throwables.BiConsumer<T, U, E> biConsumer) {
+            N.checkArgNotNull(biConsumer);
+
+            return new Throwables.BiFunction<T, U, Void, E>() {
+                @Override
+                public Void apply(T t, U u) throws E {
+                    biConsumer.accept(t, u);
+
+                    return null;
+                }
+            };
+        }
+
+        public static <A, B, C, E extends Throwable> Throwables.TriFunction<A, B, C, Void, E> c2f(final Throwables.TriConsumer<A, B, C, E> triConsumer) {
+            N.checkArgNotNull(triConsumer);
+
+            return new Throwables.TriFunction<A, B, C, Void, E>() {
+                @Override
+                public Void apply(A a, B b, C c) throws E {
+                    triConsumer.accept(a, b, c);
+
+                    return null;
+                }
+            };
+        }
+
+        public static <T, R, E extends Throwable> Throwables.Consumer<T, E> f2c(final Throwables.Function<T, R, E> func) {
+            N.checkArgNotNull(func);
+
+            return new Throwables.Consumer<T, E>() {
+                @Override
+                public void accept(T t) throws E {
+                    func.apply(t);
+                }
+            };
+        }
+
+        public static <T, U, R, E extends Throwable> Throwables.BiConsumer<T, U, E> f2c(final Throwables.BiFunction<T, U, R, E> func) {
+            N.checkArgNotNull(func);
+
+            return new Throwables.BiConsumer<T, U, E>() {
+                @Override
+                public void accept(T t, U u) throws E {
+                    func.apply(t, u);
+                }
+            };
+        }
+
+        public static <A, B, C, R, E extends Throwable> Throwables.TriConsumer<A, B, C, E> f2c(final Throwables.TriFunction<A, B, C, R, E> func) {
+            N.checkArgNotNull(func);
+
+            return new Throwables.TriConsumer<A, B, C, E>() {
+                @Override
+                public void accept(A a, B b, C c) throws E {
+                    func.apply(a, b, c);
                 }
             };
         }
