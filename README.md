@@ -128,7 +128,7 @@ more [Collectors](https://htmlpreview.github.io/?https://github.com/landawn/abac
 [KryoParser](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/KryoParser_view.html), 
 [ParserFactory](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/ParserFactory_view.html)...
 
-* Http client:
+* Http:
 [HttpClient](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/HttpClient_view.html), 
 [OkHttpRequest](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/OkHttpRequest_view.html), 
 and [More](https://www.javadoc.io/static/com.landawn/abacus-util/1.20.22/com/landawn/abacus/http/package-summary.html) ...
