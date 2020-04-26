@@ -1417,8 +1417,13 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     @SequentialOnly
-    public <R> R groupToAndThen(Function<? super Map<K, List<V>>, R> func) {
+    public <R> R groupToAndThen(final Function<? super Map<K, List<V>>, R> func) {
         return func.apply(groupTo());
+    }
+
+    @SequentialOnly
+    public <M extends Map<K, List<V>>, R> R groupToAndThen(final Supplier<? extends M> mapFactory, final Function<? super M, R> func) {
+        return func.apply(groupTo(mapFactory));
     }
 
     /**
@@ -1565,34 +1570,34 @@ public final class EntryStream<K, V> implements AutoCloseable {
         return transfer.apply(this);
     }
 
-//    /**
-//     * 
-//     * @param <U>
-//     * @param <R>
-//     * @param terminalOp should be terminal operation.
-//     * @param mapper
-//     * @return
-//     */
-//    @TerminalOp
-//    @Beta
-//    public <U, R> R __(final Function<? super EntryStream<K, V>, U> terminalOp, final Function<U, R> mapper) {
-//        return mapper.apply(terminalOp.apply(this));
-//    }
-//
-//    /**
-//     * 
-//     * @param <R>
-//     * @param terminalOp should be terminal operation.
-//     * @param action
-//     * @return
-//     */
-//    @TerminalOp
-//    @Beta
-//    public <R> R __(final Function<? super EntryStream<K, V>, R> terminalOp, final Consumer<R> action) {
-//        final R result = terminalOp.apply(this);
-//        action.accept(result);
-//        return result;
-//    }
+    //    /**
+    //     * 
+    //     * @param <U>
+    //     * @param <R>
+    //     * @param terminalOp should be terminal operation.
+    //     * @param mapper
+    //     * @return
+    //     */
+    //    @TerminalOp
+    //    @Beta
+    //    public <U, R> R __(final Function<? super EntryStream<K, V>, U> terminalOp, final Function<U, R> mapper) {
+    //        return mapper.apply(terminalOp.apply(this));
+    //    }
+    //
+    //    /**
+    //     * 
+    //     * @param <R>
+    //     * @param terminalOp should be terminal operation.
+    //     * @param action
+    //     * @return
+    //     */
+    //    @TerminalOp
+    //    @Beta
+    //    public <R> R __(final Function<? super EntryStream<K, V>, R> terminalOp, final Consumer<R> action) {
+    //        final R result = terminalOp.apply(this);
+    //        action.accept(result);
+    //        return result;
+    //    }
 
     public EntryStream<K, V> sequential() {
         return s.isParallel() ? of(s.sequential()) : this;

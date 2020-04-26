@@ -226,12 +226,21 @@ public class OkHttpRequest {
      *
      * <p>Note that for some headers including {@code Content-Length} and {@code Content-Encoding},
      * OkHttp may replace {@code value} with a header derived from the request body.
+     * @deprecated no use case?
      */
+    @Deprecated
     public OkHttpRequest addHeader(String name, String value) {
         builder.addHeader(name, value);
         return this;
     }
 
+    /**
+     * 
+     * @param name
+     * @return
+     * @deprecated no use case?
+     */
+    @Deprecated
     public OkHttpRequest removeHeader(String name) {
         builder.removeHeader(name);
         return this;

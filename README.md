@@ -7,10 +7,10 @@ A general programming library in Java. It's easy to learn and simple to use with
 
 ## Features:
 
-* Most daily used APIs: [N](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/N_view.html), 
+* Most daily used APIs: [CommonUtil](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/CommonUtil_view.html), 
+[N](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/N_view.html), 
 [StringUtil](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/StringUtil_view.html), 
-[Array](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/Array_view.html), 
-[Primitives](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/Primitives_view.html), 
+[Array](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/Array_view.html),  
 [Iterables](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/Iterables_view.html),
 [Iterators](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/Iterators_view.html),
 [Maps](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/Maps_view.html), 
@@ -52,8 +52,7 @@ A general programming library in Java. It's easy to learn and simple to use with
 [AsyncExecutor](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/AsyncExecutor_view.html), 
 [ContinuableFuture](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/ContinuableFuture_view.html), 
 [Futures](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/Futures_view.html), 
-[Profiler](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/Profiler_view.html), 
-[CodeGenerator](https://htmlpreview.github.io/?https://github.com/landa.wn/abacus-util/master/docs/CodeGenerator_view.html)...
+[Profiler](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/Profiler_view.html)...
 
 * Primitive Mutable: 
 [MutableBoolean](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/MutableBoolean_view.html), 
@@ -144,7 +143,9 @@ and [More](https://www.javadoc.io/static/com.landawn/abacus-util/1.20.22/com/lan
 [JRedis](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/JRedis_view.html), 
 [MemcachedLock](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/MemcachedLock_view.html).
 
-* More: 
+* More:
+[Primitives](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/Primitives_view.html),
+[CodeGenerator](https://htmlpreview.github.io/?https://github.com/landa.wn/abacus-util/master/docs/CodeGenerator_view.html), 
 [Charsets](https://static.javadoc.io/com.landawn/abacus-util/1.20.22/com/landawn/abacus/util/Charsets.html),
 [Ascii](https://static.javadoc.io/com.landawn/abacus-util/1.20.22/com/landawn/abacus/util/Ascii.html),
 [CalendarUnit](https://static.javadoc.io/com.landawn/abacus-util/1.20.22/com/landawn/abacus/util/CalendarUnit.html),
