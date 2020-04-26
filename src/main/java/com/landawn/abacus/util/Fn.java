@@ -4899,6 +4899,81 @@ public final class Fn extends Comparators {
     }
 
     /**
+     *
+     * @param runnable
+     * @return
+     */
+    public static com.landawn.abacus.util.function.Callable<Void> r2c(final com.landawn.abacus.util.function.Runnable runnable) {
+        N.checkArgNotNull(runnable);
+
+        return new com.landawn.abacus.util.function.Callable<Void>() {
+            @Override
+            public Void call() {
+                runnable.run();
+                return null;
+            }
+        };
+    }
+
+    /**
+     *
+     * @param runnable
+     * @param result
+     * @return
+     */
+    public static <T> com.landawn.abacus.util.function.Callable<T> r2c(final com.landawn.abacus.util.function.Runnable runnable, final T result) {
+        N.checkArgNotNull(runnable);
+
+        return new com.landawn.abacus.util.function.Callable<T>() {
+            @Override
+            public T call() {
+                runnable.run();
+                return result;
+            }
+        };
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param callable
+     * @return
+     */
+    public static <R> com.landawn.abacus.util.function.Runnable c2r(final com.landawn.abacus.util.function.Callable<R> callable) {
+        N.checkArgNotNull(callable);
+
+        return new com.landawn.abacus.util.function.Runnable() {
+            @Override
+            public void run() {
+                callable.call();
+            }
+        };
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param callable
+     * @return
+     */
+    public static <R> com.landawn.abacus.util.function.Callable<R> callable(final com.landawn.abacus.util.function.Callable<R> callable) {
+        N.checkArgNotNull(callable);
+
+        return callable;
+    }
+
+    /**
+     *
+     * @param runnable
+     * @return
+     */
+    public static com.landawn.abacus.util.function.Runnable runnable(final com.landawn.abacus.util.function.Runnable runnable) {
+        N.checkArgNotNull(runnable);
+
+        return runnable;
+    }
+
+    /**
      * Split this stream by the specified duration.
      *
      * <pre>
@@ -5627,81 +5702,6 @@ public final class Fn extends Comparators {
                         s.close();
                     }
                 });
-            }
-        };
-    }
-
-    /**
-     *
-     * @param <R>
-     * @param callable
-     * @return
-     */
-    public static <R> com.landawn.abacus.util.function.Callable<R> callable(final com.landawn.abacus.util.function.Callable<R> callable) {
-        N.checkArgNotNull(callable);
-
-        return callable;
-    }
-
-    /**
-     *
-     * @param runnable
-     * @return
-     */
-    public static com.landawn.abacus.util.function.Runnable runnable(final com.landawn.abacus.util.function.Runnable runnable) {
-        N.checkArgNotNull(runnable);
-
-        return runnable;
-    }
-
-    /**
-     *
-     * @param runnable
-     * @return
-     */
-    public static com.landawn.abacus.util.function.Callable<Void> toCallable(final com.landawn.abacus.util.function.Runnable runnable) {
-        N.checkArgNotNull(runnable);
-
-        return new com.landawn.abacus.util.function.Callable<Void>() {
-            @Override
-            public Void call() {
-                runnable.run();
-                return null;
-            }
-        };
-    }
-
-    /**
-     *
-     * @param runnable
-     * @param result
-     * @return
-     */
-    public static <T> com.landawn.abacus.util.function.Callable<T> toCallable(final com.landawn.abacus.util.function.Runnable runnable, final T result) {
-        N.checkArgNotNull(runnable);
-
-        return new com.landawn.abacus.util.function.Callable<T>() {
-            @Override
-            public T call() {
-                runnable.run();
-                return result;
-            }
-        };
-    }
-
-    /**
-     *
-     * @param <R>
-     * @param callable
-     * @return
-     */
-    public static <R> com.landawn.abacus.util.function.Runnable toRunnable(final com.landawn.abacus.util.function.Callable<R> callable) {
-        N.checkArgNotNull(callable);
-
-        return new com.landawn.abacus.util.function.Runnable() {
-            @Override
-            public void run() {
-                callable.call();
             }
         };
     }
@@ -12932,6 +12932,86 @@ public final class Fn extends Comparators {
 
         /**
          *
+         * @param <E>
+         * @param runnable
+         * @return
+         */
+        public static <E extends Exception> Throwables.Callable<Void, E> r2c(final Throwables.Runnable<E> runnable) {
+            N.checkArgNotNull(runnable);
+        
+            return new Throwables.Callable<Void, E>() {
+                @Override
+                public Void call() throws E {
+                    runnable.run();
+                    return null;
+                }
+            };
+        }
+
+        /**
+         *
+         * @param <E>
+         * @param runnable
+         * @param result
+         * @return
+         */
+        public static <T, E extends Exception> Throwables.Callable<T, E> r2c(final Throwables.Runnable<E> runnable, final T result) {
+            N.checkArgNotNull(runnable);
+        
+            return new Throwables.Callable<T, E>() {
+                @Override
+                public T call() throws E {
+                    runnable.run();
+                    return result;
+                }
+            };
+        }
+
+        /**
+         *
+         * @param <R>
+         * @param <E>
+         * @param callable
+         * @return
+         */
+        public static <R, E extends Exception> Throwables.Runnable<E> c2r(final Throwables.Callable<R, E> callable) {
+            N.checkArgNotNull(callable);
+        
+            return new Throwables.Runnable<E>() {
+                @Override
+                public void run() throws E {
+                    callable.call();
+                }
+            };
+        }
+
+        /**
+         *
+         * @param <R>
+         * @param <E>
+         * @param callable
+         * @return
+         */
+        public static <R, E extends Exception> Throwables.Callable<R, E> callable(final Throwables.Callable<R, E> callable) {
+            N.checkArgNotNull(callable);
+        
+            return callable;
+        }
+
+        /**
+         *
+         * @param <E>
+         * @param runnable
+         * @return
+         */
+        public static <E extends Exception> Throwables.Runnable<E> runnable(final Throwables.Runnable<E> runnable) {
+            N.checkArgNotNull(runnable);
+        
+            return runnable;
+        }
+
+        /**
+         *
          * @param <T>
          * @param <E>
          * @return
@@ -12958,86 +13038,6 @@ public final class Fn extends Comparators {
          */
         public static <T, E extends Exception> Throwables.BinaryOperator<T, E> replacingMerger() {
             return BinaryOperators.REPLACING_MERGER;
-        }
-
-        /**
-         *
-         * @param <R>
-         * @param <E>
-         * @param callable
-         * @return
-         */
-        public static <R, E extends Exception> Throwables.Callable<R, E> callable(final Throwables.Callable<R, E> callable) {
-            N.checkArgNotNull(callable);
-
-            return callable;
-        }
-
-        /**
-         *
-         * @param <E>
-         * @param runnable
-         * @return
-         */
-        public static <E extends Exception> Throwables.Runnable<E> runnable(final Throwables.Runnable<E> runnable) {
-            N.checkArgNotNull(runnable);
-
-            return runnable;
-        }
-
-        /**
-         *
-         * @param <E>
-         * @param runnable
-         * @return
-         */
-        public static <E extends Exception> Throwables.Callable<Void, E> toCallable(final Throwables.Runnable<E> runnable) {
-            N.checkArgNotNull(runnable);
-
-            return new Throwables.Callable<Void, E>() {
-                @Override
-                public Void call() throws E {
-                    runnable.run();
-                    return null;
-                }
-            };
-        }
-
-        /**
-         *
-         * @param <E>
-         * @param runnable
-         * @param result
-         * @return
-         */
-        public static <T, E extends Exception> Throwables.Callable<T, E> toCallable(final Throwables.Runnable<E> runnable, final T result) {
-            N.checkArgNotNull(runnable);
-
-            return new Throwables.Callable<T, E>() {
-                @Override
-                public T call() throws E {
-                    runnable.run();
-                    return result;
-                }
-            };
-        }
-
-        /**
-         *
-         * @param <R>
-         * @param <E>
-         * @param callable
-         * @return
-         */
-        public static <R, E extends Exception> Throwables.Runnable<E> toRunnable(final Throwables.Callable<R, E> callable) {
-            N.checkArgNotNull(callable);
-
-            return new Throwables.Runnable<E>() {
-                @Override
-                public void run() throws E {
-                    callable.call();
-                }
-            };
         }
     }
 }

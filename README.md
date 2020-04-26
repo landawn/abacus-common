@@ -52,8 +52,6 @@ A general programming library in Java. It's easy to learn and simple to use with
 [AsyncExecutor](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/AsyncExecutor_view.html), 
 [ContinuableFuture](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/ContinuableFuture_view.html), 
 [Futures](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/Futures_view.html), 
-[HttpClient](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/HttpClient_view.html), 
-[OkHttpRequest](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/OkHttpRequest_view.html), 
 [Profiler](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/Profiler_view.html), 
 [CodeGenerator](https://htmlpreview.github.io/?https://github.com/landa.wn/abacus-util/master/docs/CodeGenerator_view.html)...
 
@@ -129,6 +127,11 @@ more [Collectors](https://htmlpreview.github.io/?https://github.com/landawn/abac
 [XMLParser](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/XMLParser_view.html), 
 [KryoParser](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/KryoParser_view.html), 
 [ParserFactory](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/ParserFactory_view.html)...
+
+* Http client:
+[HttpClient](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/HttpClient_view.html), 
+[OkHttpRequest](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/OkHttpRequest_view.html), 
+and [More](https://www.javadoc.io/static/com.landawn/abacus-util/1.20.22/com/landawn/abacus/http/package-summary.html) ...
 
 * Pool: 
 [Pool](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/Pool_view.html), 
