@@ -71,6 +71,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import com.landawn.abacus.DataSet;
 import com.landawn.abacus.DirtyMarker;
+import com.landawn.abacus.annotation.Immutable;
 import com.landawn.abacus.annotation.NullSafe;
 import com.landawn.abacus.core.DirtyMarkerUtil;
 import com.landawn.abacus.core.MapEntity;
@@ -4609,6 +4610,54 @@ class CommonUtil {
         return newMap(new LinkedHashMap<K, V>(CommonUtil.initHashCapacity(a.length / 2)), a);
     }
 
+    public static Map<String, Object> asProps(final String propName, final Object propValue) {
+        final Map<String, Object> props = new LinkedHashMap<>(1);
+        props.put(propName, propValue);
+
+        return props;
+    }
+
+    public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2) {
+        final Map<String, Object> props = new LinkedHashMap<>(2);
+        props.put(propName1, propValue1);
+        props.put(propName2, propValue2);
+
+        return props;
+    }
+
+    public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2,
+            final String propName3, final Object propValue3) {
+        final Map<String, Object> props = new LinkedHashMap<>(3);
+        props.put(propName1, propValue1);
+        props.put(propName2, propValue2);
+        props.put(propName3, propValue3);
+
+        return props;
+    }
+
+    public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2,
+            final String propName3, final Object propValue3, final String propName4, final Object propValue4) {
+        final Map<String, Object> props = new LinkedHashMap<>(4);
+        props.put(propName1, propValue1);
+        props.put(propName2, propValue2);
+        props.put(propName3, propValue3);
+        props.put(propName4, propValue4);
+
+        return props;
+    }
+
+    public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2,
+            final String propName3, final Object propValue3, final String propName4, final Object propValue4, final String propName5, final Object propValue5) {
+        final Map<String, Object> props = new LinkedHashMap<>(5);
+        props.put(propName1, propValue1);
+        props.put(propName2, propValue2);
+        props.put(propName3, propValue3);
+        props.put(propName4, propValue4);
+        props.put(propName5, propValue5);
+
+        return props;
+    }
+
     /**
      *
      * @param a pairs of property name and value or a Java Entity Object what
@@ -5603,9 +5652,10 @@ class CommonUtil {
      *
      * @param <T>
      * @param o
-     * @return
+     * @return an immutable list
      * @see java.util.Collections#singletonList(Object)
      */
+    @Immutable
     public static <T> List<T> asSingletonList(final T o) {
         return Collections.singletonList(o);
     }
@@ -5615,9 +5665,10 @@ class CommonUtil {
      *
      * @param <T>
      * @param o
-     * @return
+     * @return an immutable set
      * @see java.util.Collections#singleton(Object)
      */
+    @Immutable
     public static <T> Set<T> asSingletonSet(final T o) {
         return Collections.singleton(o);
     }
@@ -5629,9 +5680,10 @@ class CommonUtil {
      * @param <V> the value type
      * @param key
      * @param value
-     * @return
+     * @return an immutable Map
      * @see java.util.Collections#singletonMap(Object, Object)
      */
+    @Immutable
     public static <K, V> Map<K, V> asSingletonMap(final K key, final V value) {
         return Collections.singletonMap(key, value);
     }
@@ -6758,87 +6810,94 @@ class CommonUtil {
     }
 
     /**
-     * Returns an empty {@code List} that is immutable.
+     * Returns an empty immutable {@code List}.
      *
      * @param <T>
      * @return
      * @see Collections#emptyList()
      */
+    @Immutable
     public static <T> List<T> emptyList() {
         return EMPTY_LIST;
     }
 
     /**
-     * Returns an empty {@code Set} that is immutable.
+     * Returns an empty immutable {@code Set}.
      *
      * @param <T>
      * @return
      * @see Collections#emptySet()
      */
+    @Immutable
     public static <T> Set<T> emptySet() {
         return EMPTY_SET;
     }
 
     /**
-     * Returns an empty {@code SortedSet} that is immutable.
+     * Returns an empty immutable {@code SortedSet}.
      *
      * @param <T>
      * @return
      * @see Collections#emptySortedSet()
      */
+    @Immutable
     public static <T> SortedSet<T> emptySortedSet() {
         return EMPTY_SORTED_SET;
     }
 
     /**
-     * Returns an empty {@code emptyNavigableSet} that is immutable.
+     * Returns an empty immutable {@code NavigableSet}.
      *
      * @param <T>
      * @return
      * @see Collections#emptyNavigableSet()
      */
+    @Immutable
     public static <T> NavigableSet<T> emptyNavigableSet() {
         return EMPTY_NAVIGABLE_SET;
     }
 
     /**
-     * Returns an empty {@code Map} that is immutable.
+     * Returns an empty immutable {@code Map}.
      *
      * @param <K> the key type
      * @param <V> the value type
      * @return
      * @see Collections#emptyMap()
      */
+    @Immutable
     public static <K, V> Map<K, V> emptyMap() {
         return EMPTY_MAP;
     }
 
     /**
-     * Returns an empty {@code SortedMap} that is immutable.
+     * Returns an empty immutable {@code SortedMap}.
      *
      * @param <K> the key type
      * @param <V> the value type
      * @return
      * @see Collections#emptySortedMap()
      */
+    @Immutable
     public static <K, V> SortedMap<K, V> emptySortedMap() {
         return EMPTY_SORTED_MAP;
     }
 
     /**
-     * Returns an empty {@code NavigableMap} that is immutable.
+     * Returns an empty immutable {@code NavigableMap}.
      *
      * @param <K> the key type
      * @param <V> the value type
      * @return
      * @see Collections#emptyNavigableMap()
      */
+    @Immutable
     public static <K, V> NavigableMap<K, V> emptyNavigableMap() {
         return EMPTY_NAVIGABLE_MAP;
     }
 
     /**
-     * Returns an empty {@code Iterator} that is immutable.
+     * Returns an empty immutable {@code Iterator}.
      *
      * @param <T>
      * @return
@@ -6849,12 +6908,13 @@ class CommonUtil {
     }
 
     /**
-     * Returns an empty {@code ListIterator} that is immutable.
+     * Returns an empty immutable {@code ListIterator}.
      *
      * @param <T>
      * @return
      * @see Collections#emptyListIterator()
      */
+    @Immutable
     public static <T> ListIterator<T> emptyListIterator() {
         return EMPTY_LIST_ITERATOR;
     }
@@ -6863,10 +6923,11 @@ class CommonUtil {
     private static final ByteArrayInputStream EMPTY_INPUT_STREAM = new ByteArrayInputStream(CommonUtil.EMPTY_BYTE_ARRAY);
 
     /**
-     * Empty input stream.
+     * Returns an empty immutable {@code InputStream}.
      *
      * @return
      */
+    @Immutable
     public static InputStream emptyInputStream() {
         return EMPTY_INPUT_STREAM;
     }
@@ -8316,19 +8377,19 @@ class CommonUtil {
         return map == null ? ImmutableBiMap.<K, V> empty() : map;
     }
 
-//    /**
-//     * Checks if is null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
-//     *
-//     * @param s
-//     * @return true, if is null or default
-//     * @deprecated internal only
-//     */
-//    @Deprecated
-//    @Internal
-//    @Beta
-//    static boolean isNullOrDefault(final Object value) {
-//        return (value == null) || equals(value, defaultValueOf(value.getClass()));
-//    }
+    //    /**
+    //     * Checks if is null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
+    //     *
+    //     * @param s
+    //     * @return true, if is null or default
+    //     * @deprecated internal only
+    //     */
+    //    @Deprecated
+    //    @Internal
+    //    @Beta
+    //    static boolean isNullOrDefault(final Object value) {
+    //        return (value == null) || equals(value, defaultValueOf(value.getClass()));
+    //    }
 
     /**
      * Checks if is null or empty.
@@ -8522,20 +8583,20 @@ class CommonUtil {
         return true;
     }
 
-//    /**
-//     * Checks if it's not null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
-//     *
-//     *
-//     * @param s
-//     * @return true, if it's not null or default
-//     * @deprecated internal only
-//     */
-//    @Deprecated
-//    @Internal
-//    @Beta
-//    static boolean notNullOrDefault(final Object value) {
-//        return (value != null) && !equals(value, defaultValueOf(value.getClass()));
-//    }
+    //    /**
+    //     * Checks if it's not null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
+    //     *
+    //     *
+    //     * @param s
+    //     * @return true, if it's not null or default
+    //     * @deprecated internal only
+    //     */
+    //    @Deprecated
+    //    @Internal
+    //    @Beta
+    //    static boolean notNullOrDefault(final Object value) {
+    //        return (value != null) && !equals(value, defaultValueOf(value.getClass()));
+    //    }
 
     /**
      * Not null or empty.
@@ -10909,6 +10970,22 @@ class CommonUtil {
         final Comparator<T> cmp = NATURAL_ORDER;
 
         return compare(a, b, cmp);
+    }
+
+    /**
+     * 
+     * @param <T>
+     * @param a
+     * @param fromIndexA
+     * @param b
+     * @param fromIndexB
+     * @param len
+     * @return
+     */
+    public static <T> int compare(final Collection<T> a, int fromIndexA, final Collection<T> b, int fromIndexB, final int len) {
+        final Comparator<T> cmp = NATURAL_ORDER;
+
+        return compare(a, fromIndexA, b, fromIndexB, len, cmp);
     }
 
     /**

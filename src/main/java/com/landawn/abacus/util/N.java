@@ -20,6 +20,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -56,7 +58,11 @@ import com.landawn.abacus.parser.XMLSerializationConfig;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.u.Nullable;
+import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
+import com.landawn.abacus.util.u.OptionalFloat;
+import com.landawn.abacus.util.u.OptionalInt;
+import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.function.BiPredicate;
 import com.landawn.abacus.util.function.IntFunction;
 import com.landawn.abacus.util.function.Predicate;
@@ -21202,4 +21208,39 @@ public final class N extends CommonUtil {
     //            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
     //        return Iterables.rightJoin(a, b, predicate);
     //    }
+
+    @SuppressWarnings("deprecation")
+    public static OptionalInt createInteger(final String str) {
+        return StringUtil.createInteger(str);
+    }
+
+    @SuppressWarnings("deprecation")
+    public static OptionalLong createLong(final String str) {
+        return StringUtil.createLong(str);
+    }
+
+    @SuppressWarnings("deprecation")
+    public static OptionalFloat createFloat(final String str) {
+        return StringUtil.createFloat(str);
+    }
+
+    @SuppressWarnings("deprecation")
+    public static OptionalDouble createDouble(final String str) {
+        return StringUtil.createDouble(str);
+    }
+
+    @SuppressWarnings("deprecation")
+    public static Optional<BigInteger> createBigInteger(final String str) {
+        return StringUtil.createBigInteger(str);
+    }
+
+    @SuppressWarnings("deprecation")
+    public static Optional<BigDecimal> createBigDecimal(final String str) {
+        return StringUtil.createBigDecimal(str);
+    }
+
+    @SuppressWarnings("deprecation")
+    public static Optional<Number> createNumber(final String str) {
+        return StringUtil.createNumber(str);
+    }
 }

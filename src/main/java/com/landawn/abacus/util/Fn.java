@@ -3250,7 +3250,7 @@ public final class Fn extends Comparators {
     private static Function<String, Number> CREATE_NUMBER_FUNC = new Function<String, Number>() {
         @Override
         public Number apply(final String t) {
-            return N.isNullOrEmpty(t) ? null : StringUtil.createNumber(t).orElseThrow(new Supplier<NumberFormatException>() {
+            return N.isNullOrEmpty(t) ? null : N.createNumber(t).orElseThrow(new Supplier<NumberFormatException>() {
                 @Override
                 public NumberFormatException get() {
                     return new NumberFormatException("Invalid number: " + t);
