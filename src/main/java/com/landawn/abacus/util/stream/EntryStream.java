@@ -30,7 +30,6 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.IntermediateOp;
 import com.landawn.abacus.annotation.ParallelSupported;
 import com.landawn.abacus.annotation.SequentialOnly;
-import com.landawn.abacus.annotation.TerminalOp;
 import com.landawn.abacus.annotation.TerminalOpTriggered;
 import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.BiIterator;
@@ -1566,34 +1565,34 @@ public final class EntryStream<K, V> implements AutoCloseable {
         return transfer.apply(this);
     }
 
-    /**
-     * 
-     * @param <U>
-     * @param <R>
-     * @param terminalOp should be terminal operation.
-     * @param mapper
-     * @return
-     */
-    @TerminalOp
-    @Beta
-    public <U, R> R __(final Function<? super EntryStream<K, V>, U> terminalOp, final Function<U, R> mapper) {
-        return mapper.apply(terminalOp.apply(this));
-    }
-
-    /**
-     * 
-     * @param <R>
-     * @param terminalOp should be terminal operation.
-     * @param action
-     * @return
-     */
-    @TerminalOp
-    @Beta
-    public <R> R __(final Function<? super EntryStream<K, V>, R> terminalOp, final Consumer<R> action) {
-        final R result = terminalOp.apply(this);
-        action.accept(result);
-        return result;
-    }
+//    /**
+//     * 
+//     * @param <U>
+//     * @param <R>
+//     * @param terminalOp should be terminal operation.
+//     * @param mapper
+//     * @return
+//     */
+//    @TerminalOp
+//    @Beta
+//    public <U, R> R __(final Function<? super EntryStream<K, V>, U> terminalOp, final Function<U, R> mapper) {
+//        return mapper.apply(terminalOp.apply(this));
+//    }
+//
+//    /**
+//     * 
+//     * @param <R>
+//     * @param terminalOp should be terminal operation.
+//     * @param action
+//     * @return
+//     */
+//    @TerminalOp
+//    @Beta
+//    public <R> R __(final Function<? super EntryStream<K, V>, R> terminalOp, final Consumer<R> action) {
+//        final R result = terminalOp.apply(this);
+//        action.accept(result);
+//        return result;
+//    }
 
     public EntryStream<K, V> sequential() {
         return s.isParallel() ? of(s.sequential()) : this;

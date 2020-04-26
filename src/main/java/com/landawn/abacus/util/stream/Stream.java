@@ -3234,34 +3234,34 @@ public abstract class Stream<T>
         return transfer.apply(this);
     }
 
-    /**
-     * 
-     * @param <U>
-     * @param <R>
-     * @param terminalOp should be terminal operation.
-     * @param mapper
-     * @return
-     */
-    @TerminalOp
-    @Beta
-    public <U, R> R __(final Function<? super Stream<T>, U> terminalOp, final Function<U, R> mapper) {
-        return mapper.apply(terminalOp.apply(this));
-    }
-
-    /**
-     * 
-     * @param <R>
-     * @param terminalOp should be terminal operation.
-     * @param action
-     * @return
-     */
-    @TerminalOp
-    @Beta
-    public <R> R __(final Function<? super Stream<T>, R> terminalOp, final Consumer<R> action) {
-        final R result = terminalOp.apply(this);
-        action.accept(result);
-        return result;
-    }
+//    /**
+//     * 
+//     * @param <U>
+//     * @param <R>
+//     * @param terminalOp should be terminal operation.
+//     * @param mapper
+//     * @return
+//     */
+//    @TerminalOp
+//    @Beta
+//    public <U, R> R __(final Function<? super Stream<T>, U> terminalOp, final Function<U, R> mapper) {
+//        return mapper.apply(terminalOp.apply(this));
+//    }
+//
+//    /**
+//     * 
+//     * @param <R>
+//     * @param terminalOp should be terminal operation.
+//     * @param action
+//     * @return
+//     */
+//    @TerminalOp
+//    @Beta
+//    public <R> R __(final Function<? super Stream<T>, R> terminalOp, final Consumer<R> action) {
+//        final R result = terminalOp.apply(this);
+//        action.accept(result);
+//        return result;
+//    }
 
     /**
      * To reduce the memory footprint, Only one instance of <code>DisposableEntry</code> is created,

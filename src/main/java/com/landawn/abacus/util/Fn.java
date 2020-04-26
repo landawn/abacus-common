@@ -4796,38 +4796,38 @@ public final class Fn extends Comparators {
         };
     }
 
-    public static <T> Function<T, Void> c2f(final Consumer<? super T> action) {
+    public static <T> Function<T, T> c2f(final Consumer<? super T> action) {
         N.checkArgNotNull(action);
 
-        return new Function<T, Void>() {
+        return new Function<T, T>() {
             @Override
-            public Void apply(T t) {
+            public T apply(T t) {
                 action.accept(t);
-                return null;
+                return t;
             }
         };
     }
 
-    public static <T, U> BiFunction<T, U, Void> c2f(final BiConsumer<? super T, ? super U> action) {
+    public static <T, U> BiFunction<T, U, T> c2f(final BiConsumer<? super T, ? super U> action) {
         N.checkArgNotNull(action);
 
-        return new BiFunction<T, U, Void>() {
+        return new BiFunction<T, U, T>() {
             @Override
-            public Void apply(T t, U u) {
+            public T apply(T t, U u) {
                 action.accept(t, u);
-                return null;
+                return t;
             }
         };
     }
 
-    public static <A, B, C> TriFunction<A, B, C, Void> cf2(final TriConsumer<? super A, ? super B, ? super C> action) {
+    public static <A, B, C> TriFunction<A, B, C, A> c2f(final TriConsumer<? super A, ? super B, ? super C> action) {
         N.checkArgNotNull(action);
 
-        return new TriFunction<A, B, C, Void>() {
+        return new TriFunction<A, B, C, A>() {
             @Override
-            public Void apply(A a, B b, C c) {
+            public A apply(A a, B b, C c) {
                 action.accept(a, b, c);
-                return null;
+                return a;
             }
         };
     }
@@ -12850,41 +12850,41 @@ public final class Fn extends Comparators {
             };
         }
 
-        public static <T, E extends Throwable> Throwables.Function<T, Void, E> c2f(final Throwables.Consumer<T, E> consumer) {
+        public static <T, E extends Throwable> Throwables.Function<T, T, E> c2f(final Throwables.Consumer<T, E> consumer) {
             N.checkArgNotNull(consumer);
 
-            return new Throwables.Function<T, Void, E>() {
+            return new Throwables.Function<T, T, E>() {
                 @Override
-                public Void apply(T t) throws E {
+                public T apply(T t) throws E {
                     consumer.accept(t);
 
-                    return null;
+                    return t;
                 }
             };
         }
 
-        public static <T, U, E extends Throwable> Throwables.BiFunction<T, U, Void, E> c2f(final Throwables.BiConsumer<T, U, E> biConsumer) {
+        public static <T, U, E extends Throwable> Throwables.BiFunction<T, U, T, E> c2f(final Throwables.BiConsumer<T, U, E> biConsumer) {
             N.checkArgNotNull(biConsumer);
 
-            return new Throwables.BiFunction<T, U, Void, E>() {
+            return new Throwables.BiFunction<T, U, T, E>() {
                 @Override
-                public Void apply(T t, U u) throws E {
+                public T apply(T t, U u) throws E {
                     biConsumer.accept(t, u);
 
-                    return null;
+                    return t;
                 }
             };
         }
 
-        public static <A, B, C, E extends Throwable> Throwables.TriFunction<A, B, C, Void, E> c2f(final Throwables.TriConsumer<A, B, C, E> triConsumer) {
+        public static <A, B, C, E extends Throwable> Throwables.TriFunction<A, B, C, A, E> c2f(final Throwables.TriConsumer<A, B, C, E> triConsumer) {
             N.checkArgNotNull(triConsumer);
 
-            return new Throwables.TriFunction<A, B, C, Void, E>() {
+            return new Throwables.TriFunction<A, B, C, A, E>() {
                 @Override
-                public Void apply(A a, B b, C c) throws E {
+                public A apply(A a, B b, C c) throws E {
                     triConsumer.accept(a, b, c);
 
-                    return null;
+                    return a;
                 }
             };
         }
