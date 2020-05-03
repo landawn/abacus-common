@@ -64,6 +64,7 @@ import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
+import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.u.Optional;
 
 /**
@@ -410,6 +411,10 @@ public abstract class SQLBuilder {
     /** The column aliases. */
     private Map<String, String> columnAliases;
 
+    private List<Tuple3<Class<?>, String, Set<String>>> multiSelects;
+
+    private Map<String, Map<String, String>> aliasPropColumnNameMap;
+
     /** The props. */
     private Map<String, Object> props;
 
@@ -735,6 +740,92 @@ public abstract class SQLBuilder {
 
             return subEntityPropNames;
         }
+    }
+
+    /**
+     * Gets the prop column name map.
+     *
+     * @return
+     */
+    public static ImmutableMap<String, String> getPropColumnNameMap(final Class<?> entityClass, final NamingPolicy namingPolicy) {
+        if (entityClass == null || Map.class.isAssignableFrom(entityClass)) {
+            return ImmutableMap.empty();
+        }
+
+        final Map<NamingPolicy, ImmutableMap<String, String>> namingColumnNameMap = entityTablePropColumnNameMap.get(entityClass);
+        ImmutableMap<String, String> result = null;
+
+        if (namingColumnNameMap == null || (result = namingColumnNameMap.get(namingPolicy)) == null) {
+            result = registerEntityPropColumnNameMap(entityClass, namingPolicy, null);
+        }
+
+        return result;
+    }
+
+    private static ImmutableMap<String, String> registerEntityPropColumnNameMap(final Class<?> entityClass, final NamingPolicy namingPolicy,
+            final Set<Class<?>> registeringClasses) {
+        N.checkArgNotNull(entityClass);
+
+        if (registeringClasses != null) {
+            if (registeringClasses.contains(entityClass)) {
+                throw new RuntimeException("Cycling references found among: " + registeringClasses);
+            } else {
+                registeringClasses.add(entityClass);
+            }
+        }
+
+        Map<String, String> propColumnNameMap = new HashMap<>();
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
+
+        for (PropInfo propInfo : entityInfo.propInfoList) {
+            if (propInfo.columnName.isPresent()) {
+                propColumnNameMap.put(propInfo.name, propInfo.columnName.get());
+            } else {
+                propColumnNameMap.put(propInfo.name, formalizeColumnName(propInfo.name, namingPolicy));
+
+                final Type<?> propType = propInfo.type.isCollection() ? propInfo.type.getElementType() : propInfo.type;
+
+                if (propType.isEntity() && (registeringClasses == null || !registeringClasses.contains(propType.clazz()))) {
+                    final Set<Class<?>> newRegisteringClasses = registeringClasses == null ? N.<Class<?>> newLinkedHashSet() : registeringClasses;
+                    newRegisteringClasses.add(entityClass);
+
+                    final Map<String, String> subPropColumnNameMap = registerEntityPropColumnNameMap(propType.clazz(), namingPolicy, newRegisteringClasses);
+
+                    if (N.notNullOrEmpty(subPropColumnNameMap)) {
+                        final String subTableName = getTableName(propType.clazz(), namingPolicy);
+
+                        for (Map.Entry<String, String> entry : subPropColumnNameMap.entrySet()) {
+                            propColumnNameMap.put(propInfo.name + WD.PERIOD + entry.getKey(), subTableName + WD.PERIOD + entry.getValue());
+                        }
+                    }
+                }
+            }
+        }
+
+        //    final Map<String, String> tmp = entityTablePropColumnNameMap.get(entityClass);
+        //
+        //    if (N.notNullOrEmpty(tmp)) {
+        //        propColumnNameMap.putAll(tmp);
+        //    }
+
+        if (N.isNullOrEmpty(propColumnNameMap)) {
+            propColumnNameMap = N.<String, String> emptyMap();
+        }
+
+        final ImmutableMap<String, String> result = ImmutableMap.of(propColumnNameMap);
+
+        Map<NamingPolicy, ImmutableMap<String, String>> namingPropColumnMap = entityTablePropColumnNameMap.get(entityClass);
+
+        if (namingPropColumnMap == null) {
+            namingPropColumnMap = new EnumMap<>(NamingPolicy.class);
+            // TODO not necessary?
+            // namingPropColumnMap = Collections.synchronizedMap(namingPropColumnMap)
+            entityTablePropColumnNameMap.put(entityClass, namingPropColumnMap);
+        }
+
+        namingPropColumnMap.put(namingPolicy, result);
+
+        return result;
     }
 
     /**
@@ -1163,7 +1254,7 @@ public abstract class SQLBuilder {
             throw new RuntimeException("Invalid operation: " + op);
         }
 
-        if (N.isNullOrEmpty(columnNames) && N.isNullOrEmpty(columnNameList) && N.isNullOrEmpty(columnAliases)) {
+        if (N.isNullOrEmpty(columnNames) && N.isNullOrEmpty(columnNameList) && N.isNullOrEmpty(columnAliases) && N.isNullOrEmpty(multiSelects)) {
             throw new RuntimeException("Column names or props must be set first by select");
         }
 
@@ -1286,7 +1377,7 @@ public abstract class SQLBuilder {
                     }
                 }
             }
-        } else {
+        } else if (N.notNullOrEmpty(columnAliases)) {
             int i = 0;
             for (Map.Entry<String, String> entry : columnAliases.entrySet()) {
                 if (i++ > 0) {
@@ -1303,6 +1394,42 @@ public abstract class SQLBuilder {
                     sb.append(WD._QUOTATION_D);
                 }
             }
+        } else if (N.notNullOrEmpty(multiSelects)) {
+            int i = 0;
+
+            aliasPropColumnNameMap = new HashMap<>(multiSelects.size());
+
+            for (Tuple3<Class<?>, String, Set<String>> tp : multiSelects) {
+                if (N.notNullOrEmpty(tp._2)) {
+                    aliasPropColumnNameMap.put(tp._2, getPropColumnNameMap(tp._1, namingPolicy));
+                }
+            }
+
+            for (Tuple3<Class<?>, String, Set<String>> tp : multiSelects) {
+                final String tableAlias = tp._2;
+                final boolean withTableAlias = N.notNullOrEmpty(tableAlias);
+                final Map<String, String> eachPropColumnNameMap = getPropColumnNameMap(tp._1, namingPolicy);
+
+                for (String propName : getSelectPropNamesByClass(tp._1, false, tp._3)) {
+                    if (i++ > 0) {
+                        sb.append(_COMMA_SPACE);
+                    }
+
+                    sb.append(formalizeColumnName(eachPropColumnNameMap, propName));
+
+                    sb.append(_SPACE_AS_SPACE);
+                    sb.append(WD._QUOTATION_D);
+
+                    if (withTableAlias) {
+                        sb.append(tableAlias).append(WD._PERIOD);
+                    }
+
+                    sb.append(propName);
+                    sb.append(WD._QUOTATION_D);
+                }
+            }
+        } else {
+            throw new UnsupportedOperationException("No select part specified");
         }
 
         sb.append(_SPACE_FROM_SPACE);
@@ -1323,6 +1450,29 @@ public abstract class SQLBuilder {
         }
 
         return from(getTableName(entityClass, namingPolicy));
+    }
+
+    /**
+     *
+     * @param entityClass
+     * @return
+     */
+    public SQLBuilder from(final Class<?> entityClass, final String alias) {
+        if (this.entityClass == null) {
+            this.entityClass = entityClass;
+        }
+
+        addPropColumnMapForAlias(entityClass, alias);
+
+        return from(getTableName(entityClass, namingPolicy) + " " + alias);
+    }
+
+    private void addPropColumnMapForAlias(final Class<?> entityClass, final String alias) {
+        if (aliasPropColumnNameMap == null) {
+            aliasPropColumnNameMap = new HashMap<>();
+        }
+
+        aliasPropColumnNameMap.put(alias, getPropColumnNameMap(entityClass, namingPolicy));
     }
 
     private SQLBuilder from(final Class<?> entityClass, final Collection<String> tableNames) {
@@ -1360,6 +1510,22 @@ public abstract class SQLBuilder {
     }
 
     /**
+     * 
+     * @param entityClass
+     * @param alias
+     * @return
+     */
+    public SQLBuilder join(final Class<?> entityClass, final String alias) {
+        addPropColumnMapForAlias(entityClass, alias);
+
+        sb.append(_SPACE_JOIN_SPACE);
+
+        sb.append(getTableName(entityClass, namingPolicy));
+
+        return this;
+    }
+
+    /**
      *
      * @param expr
      * @return
@@ -1378,6 +1544,22 @@ public abstract class SQLBuilder {
      * @return
      */
     public SQLBuilder innerJoin(final Class<?> entityClass) {
+        sb.append(_SPACE_INNER_JOIN_SPACE);
+
+        sb.append(getTableName(entityClass, namingPolicy));
+
+        return this;
+    }
+
+    /**
+     *
+     * @param entityClass
+     * @param alias
+     * @return
+     */
+    public SQLBuilder innerJoin(final Class<?> entityClass, final String alias) {
+        addPropColumnMapForAlias(entityClass, alias);
+
         sb.append(_SPACE_INNER_JOIN_SPACE);
 
         sb.append(getTableName(entityClass, namingPolicy));
@@ -1413,6 +1595,22 @@ public abstract class SQLBuilder {
 
     /**
      *
+     * @param entityClass
+     * @param alias
+     * @return
+     */
+    public SQLBuilder leftJoin(final Class<?> entityClass, final String alias) {
+        addPropColumnMapForAlias(entityClass, alias);
+
+        sb.append(_SPACE_LEFT_JOIN_SPACE);
+
+        sb.append(getTableName(entityClass, namingPolicy));
+
+        return this;
+    }
+
+    /**
+     *
      * @param expr
      * @return
      */
@@ -1430,6 +1628,22 @@ public abstract class SQLBuilder {
      * @return
      */
     public SQLBuilder rightJoin(final Class<?> entityClass) {
+        sb.append(_SPACE_RIGHT_JOIN_SPACE);
+
+        sb.append(getTableName(entityClass, namingPolicy));
+
+        return this;
+    }
+
+    /**
+     *
+     * @param entityClass
+     * @param alias
+     * @return
+     */
+    public SQLBuilder rightJoin(final Class<?> entityClass, final String alias) {
+        addPropColumnMapForAlias(entityClass, alias);
+
         sb.append(_SPACE_RIGHT_JOIN_SPACE);
 
         sb.append(getTableName(entityClass, namingPolicy));
@@ -1465,6 +1679,22 @@ public abstract class SQLBuilder {
 
     /**
      *
+     * @param entityClass
+     * @param alias
+     * @return
+     */
+    public SQLBuilder fullJoin(final Class<?> entityClass, final String alias) {
+        addPropColumnMapForAlias(entityClass, alias);
+
+        sb.append(_SPACE_FULL_JOIN_SPACE);
+
+        sb.append(getTableName(entityClass, namingPolicy));
+
+        return this;
+    }
+
+    /**
+     *
      * @param expr
      * @return
      */
@@ -1491,6 +1721,22 @@ public abstract class SQLBuilder {
 
     /**
      *
+     * @param entityClass
+     * @param alias
+     * @return
+     */
+    public SQLBuilder crossJoin(final Class<?> entityClass, final String alias) {
+        addPropColumnMapForAlias(entityClass, alias);
+
+        sb.append(_SPACE_CROSS_JOIN_SPACE);
+
+        sb.append(getTableName(entityClass, namingPolicy));
+
+        return this;
+    }
+
+    /**
+     *
      * @param expr
      * @return
      */
@@ -1508,6 +1754,22 @@ public abstract class SQLBuilder {
      * @return
      */
     public SQLBuilder naturalJoin(final Class<?> entityClass) {
+        sb.append(_SPACE_NATURAL_JOIN_SPACE);
+
+        sb.append(getTableName(entityClass, namingPolicy));
+
+        return this;
+    }
+
+    /**
+     *
+     * @param entityClass
+     * @param alias
+     * @return
+     */
+    public SQLBuilder naturalJoin(final Class<?> entityClass, final String alias) {
+        addPropColumnMapForAlias(entityClass, alias);
+
         sb.append(_SPACE_NATURAL_JOIN_SPACE);
 
         sb.append(getTableName(entityClass, namingPolicy));
@@ -3267,92 +3529,6 @@ public abstract class SQLBuilder {
         return sql();
     }
 
-    /**
-     * Gets the prop column name map.
-     *
-     * @return
-     */
-    public static ImmutableMap<String, String> getPropColumnNameMap(final Class<?> entityClass, final NamingPolicy namingPolicy) {
-        if (entityClass == null || Map.class.isAssignableFrom(entityClass)) {
-            return ImmutableMap.empty();
-        }
-
-        final Map<NamingPolicy, ImmutableMap<String, String>> namingColumnNameMap = entityTablePropColumnNameMap.get(entityClass);
-        ImmutableMap<String, String> result = null;
-
-        if (namingColumnNameMap == null || (result = namingColumnNameMap.get(namingPolicy)) == null) {
-            result = registerEntityPropColumnNameMap(entityClass, namingPolicy, null);
-        }
-
-        return result;
-    }
-
-    private static ImmutableMap<String, String> registerEntityPropColumnNameMap(final Class<?> entityClass, final NamingPolicy namingPolicy,
-            final Set<Class<?>> registeringClasses) {
-        N.checkArgNotNull(entityClass);
-
-        if (registeringClasses != null) {
-            if (registeringClasses.contains(entityClass)) {
-                throw new RuntimeException("Cycling references found among: " + registeringClasses);
-            } else {
-                registeringClasses.add(entityClass);
-            }
-        }
-
-        Map<String, String> propColumnNameMap = new HashMap<>();
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
-
-        for (PropInfo propInfo : entityInfo.propInfoList) {
-            if (propInfo.columnName.isPresent()) {
-                propColumnNameMap.put(propInfo.name, propInfo.columnName.get());
-            } else {
-                propColumnNameMap.put(propInfo.name, formalizeColumnName(propInfo.name, namingPolicy));
-
-                final Type<?> propType = propInfo.type.isCollection() ? propInfo.type.getElementType() : propInfo.type;
-
-                if (propType.isEntity() && (registeringClasses == null || !registeringClasses.contains(propType.clazz()))) {
-                    final Set<Class<?>> newRegisteringClasses = registeringClasses == null ? N.<Class<?>> newLinkedHashSet() : registeringClasses;
-                    newRegisteringClasses.add(entityClass);
-
-                    final Map<String, String> subPropColumnNameMap = registerEntityPropColumnNameMap(propType.clazz(), namingPolicy, newRegisteringClasses);
-
-                    if (N.notNullOrEmpty(subPropColumnNameMap)) {
-                        final String subTableName = getTableName(propType.clazz(), namingPolicy);
-
-                        for (Map.Entry<String, String> entry : subPropColumnNameMap.entrySet()) {
-                            propColumnNameMap.put(propInfo.name + WD.PERIOD + entry.getKey(), subTableName + WD.PERIOD + entry.getValue());
-                        }
-                    }
-                }
-            }
-        }
-
-        //    final Map<String, String> tmp = entityTablePropColumnNameMap.get(entityClass);
-        //
-        //    if (N.notNullOrEmpty(tmp)) {
-        //        propColumnNameMap.putAll(tmp);
-        //    }
-
-        if (N.isNullOrEmpty(propColumnNameMap)) {
-            propColumnNameMap = N.<String, String> emptyMap();
-        }
-
-        final ImmutableMap<String, String> result = ImmutableMap.of(propColumnNameMap);
-
-        Map<NamingPolicy, ImmutableMap<String, String>> namingPropColumnMap = entityTablePropColumnNameMap.get(entityClass);
-
-        if (namingPropColumnMap == null) {
-            namingPropColumnMap = new EnumMap<>(NamingPolicy.class);
-            // TODO not necessary?
-            // namingPropColumnMap = Collections.synchronizedMap(namingPropColumnMap)
-            entityTablePropColumnNameMap.put(entityClass, namingPropColumnMap);
-        }
-
-        namingPropColumnMap.put(namingPolicy, result);
-
-        return result;
-    }
-
     private String formalizeColumnName(final String propName) {
         return entityClass == null ? formalizeColumnName(propName, namingPolicy)
                 : formalizeColumnName(getPropColumnNameMap(entityClass, namingPolicy), propName);
@@ -3369,10 +3545,28 @@ public abstract class SQLBuilder {
     }
 
     private String formalizeColumnName(final Map<String, String> propColumnNameMap, final String propName) {
-        final String columnName = propColumnNameMap == null ? null : propColumnNameMap.get(propName);
+        String columnName = propColumnNameMap == null ? null : propColumnNameMap.get(propName);
 
         if (columnName != null) {
             return columnName;
+        }
+
+        if (aliasPropColumnNameMap != null && aliasPropColumnNameMap.size() > 0) {
+            int index = propName.indexOf('.');
+
+            if (index > 0) {
+                final String alias = propName.substring(0, index);
+                final Map<String, String> newPropColumnNameMap = aliasPropColumnNameMap.get(alias);
+
+                if (newPropColumnNameMap != null) {
+                    final String newPropName = propName.substring(index + 1);
+                    columnName = newPropColumnNameMap.get(newPropName);
+
+                    if (columnName != null) {
+                        return alias + "." + columnName;
+                    }
+                }
+            }
         }
 
         return formalizeColumnName(propName, namingPolicy);
@@ -3423,6 +3617,14 @@ public abstract class SQLBuilder {
             }
 
             return newPropsList;
+        }
+    }
+
+    static void checkMultiSelects(final List<Tuple3<Class<?>, String, Set<String>>> multiSelects) {
+        N.checkArgNotNullOrEmpty(multiSelects, "multiSelects");
+
+        for (Tuple3<Class<?>, String, Set<String>> tp : multiSelects) {
+            N.checkArgNotNull(tp._1, "Class can't be null in 'multiSelects'");
         }
     }
 
@@ -3846,6 +4048,131 @@ public abstract class SQLBuilder {
                 return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
             } else {
                 return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
+            }
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB) {
+            return select(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB,
+                final Class<?> entityClassC, final String tableAliasC) {
+            return select(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null, entityClassC, tableAliasC, null);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB));
+
+            return select(multiSelects);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB, final Class<?> entityClassC,
+                final String tableAliasC, final Set<String> excludedPropNamesC) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassC, tableAliasC, excludedPropNamesC));
+
+            return select(multiSelects);
+        }
+
+        public static SQLBuilder select(final List<Tuple3<Class<?>, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.entityClass = multiSelects.get(0)._1;
+            instance.multiSelects = multiSelects;
+
+            return instance;
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB) {
+            return selectFrom(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB,
+                final Class<?> entityClassC, final String tableAliasC) {
+            return selectFrom(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null, entityClassC, tableAliasC, null);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB));
+
+            return selectFrom(multiSelects);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB, final Class<?> entityClassC,
+                final String tableAliasC, final Set<String> excludedPropNamesC) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassC, tableAliasC, excludedPropNamesC));
+
+            return selectFrom(multiSelects);
+        }
+
+        public static SQLBuilder selectFrom(final List<Tuple3<Class<?>, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final NamingPolicy namingPolicy = NamingPolicy.LOWER_CASE_WITH_UNDERSCORE;
+
+            if (multiSelects.size() == 1) {
+                final Tuple3<Class<?>, String, Set<String>> tp = multiSelects.get(0);
+
+                if (N.isNullOrEmpty(tp._2)) {
+                    return selectFrom(tp._1, tp._3);
+                } else {
+                    return select(tp._1, tp._3).from(getTableName(tp._1, namingPolicy) + " " + tp._2);
+                }
+            } else if (multiSelects.size() == 2) {
+                final Tuple3<Class<?>, String, Set<String>> tpA = multiSelects.get(0);
+                final Tuple3<Class<?>, String, Set<String>> tpB = multiSelects.get(1);
+
+                final String fromClause = getTableName(tpA._1, namingPolicy) + (N.isNullOrEmpty(tpA._2) ? "" : " " + tpA._2) + ", "
+                        + getTableName(tpB._1, namingPolicy) + (N.isNullOrEmpty(tpB._2) ? "" : " " + tpB._2);
+
+                return select(multiSelects).from(fromClause);
+            } else if (multiSelects.size() == 3) {
+                final Tuple3<Class<?>, String, Set<String>> tpA = multiSelects.get(0);
+                final Tuple3<Class<?>, String, Set<String>> tpB = multiSelects.get(1);
+                final Tuple3<Class<?>, String, Set<String>> tpC = multiSelects.get(2);
+
+                final String fromClause = getTableName(tpA._1, namingPolicy) + (N.isNullOrEmpty(tpA._2) ? "" : " " + tpA._2) //
+                        + ", " + getTableName(tpB._1, namingPolicy) + (N.isNullOrEmpty(tpB._2) ? "" : " " + tpB._2) //
+                        + ", " + getTableName(tpC._1, namingPolicy) + (N.isNullOrEmpty(tpC._2) ? "" : " " + tpC._2);
+
+                return select(multiSelects).from(fromClause);
+            } else {
+                final StringBuilder sb = Objectory.createStringBuilder();
+                int idx = 0;
+
+                for (Tuple3<Class<?>, String, Set<String>> tp : multiSelects) {
+                    if (idx++ > 0) {
+                        sb.append(_COMMA_SPACE);
+                    }
+
+                    sb.append(getTableName(tp._1, namingPolicy));
+
+                    if (N.notNullOrEmpty(tp._2)) {
+                        sb.append(' ').append(tp._2);
+                    }
+                }
+
+                String fromClause = sb.toString();
+
+                Objectory.recycle(sb);
+
+                return select(multiSelects).from(fromClause);
             }
         }
 
@@ -4327,6 +4654,131 @@ public abstract class SQLBuilder {
             }
         }
 
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB) {
+            return select(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB,
+                final Class<?> entityClassC, final String tableAliasC) {
+            return select(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null, entityClassC, tableAliasC, null);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB));
+
+            return select(multiSelects);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB, final Class<?> entityClassC,
+                final String tableAliasC, final Set<String> excludedPropNamesC) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassC, tableAliasC, excludedPropNamesC));
+
+            return select(multiSelects);
+        }
+
+        public static SQLBuilder select(final List<Tuple3<Class<?>, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.entityClass = multiSelects.get(0)._1;
+            instance.multiSelects = multiSelects;
+
+            return instance;
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB) {
+            return selectFrom(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB,
+                final Class<?> entityClassC, final String tableAliasC) {
+            return selectFrom(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null, entityClassC, tableAliasC, null);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB));
+
+            return selectFrom(multiSelects);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB, final Class<?> entityClassC,
+                final String tableAliasC, final Set<String> excludedPropNamesC) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassC, tableAliasC, excludedPropNamesC));
+
+            return selectFrom(multiSelects);
+        }
+
+        public static SQLBuilder selectFrom(final List<Tuple3<Class<?>, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final NamingPolicy namingPolicy = NamingPolicy.UPPER_CASE_WITH_UNDERSCORE;
+
+            if (multiSelects.size() == 1) {
+                final Tuple3<Class<?>, String, Set<String>> tp = multiSelects.get(0);
+
+                if (N.isNullOrEmpty(tp._2)) {
+                    return selectFrom(tp._1, tp._3);
+                } else {
+                    return select(tp._1, tp._3).from(getTableName(tp._1, namingPolicy) + " " + tp._2);
+                }
+            } else if (multiSelects.size() == 2) {
+                final Tuple3<Class<?>, String, Set<String>> tpA = multiSelects.get(0);
+                final Tuple3<Class<?>, String, Set<String>> tpB = multiSelects.get(1);
+
+                final String fromClause = getTableName(tpA._1, namingPolicy) + (N.isNullOrEmpty(tpA._2) ? "" : " " + tpA._2) + ", "
+                        + getTableName(tpB._1, namingPolicy) + (N.isNullOrEmpty(tpB._2) ? "" : " " + tpB._2);
+
+                return select(multiSelects).from(fromClause);
+            } else if (multiSelects.size() == 3) {
+                final Tuple3<Class<?>, String, Set<String>> tpA = multiSelects.get(0);
+                final Tuple3<Class<?>, String, Set<String>> tpB = multiSelects.get(1);
+                final Tuple3<Class<?>, String, Set<String>> tpC = multiSelects.get(2);
+
+                final String fromClause = getTableName(tpA._1, namingPolicy) + (N.isNullOrEmpty(tpA._2) ? "" : " " + tpA._2) //
+                        + ", " + getTableName(tpB._1, namingPolicy) + (N.isNullOrEmpty(tpB._2) ? "" : " " + tpB._2) //
+                        + ", " + getTableName(tpC._1, namingPolicy) + (N.isNullOrEmpty(tpC._2) ? "" : " " + tpC._2);
+
+                return select(multiSelects).from(fromClause);
+            } else {
+                final StringBuilder sb = Objectory.createStringBuilder();
+                int idx = 0;
+
+                for (Tuple3<Class<?>, String, Set<String>> tp : multiSelects) {
+                    if (idx++ > 0) {
+                        sb.append(_COMMA_SPACE);
+                    }
+
+                    sb.append(getTableName(tp._1, namingPolicy));
+
+                    if (N.notNullOrEmpty(tp._2)) {
+                        sb.append(' ').append(tp._2);
+                    }
+                }
+
+                String fromClause = sb.toString();
+
+                Objectory.recycle(sb);
+
+                return select(multiSelects).from(fromClause);
+            }
+        }
+
         /**
          *
          * @param tableName
@@ -4805,6 +5257,131 @@ public abstract class SQLBuilder {
             }
         }
 
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB) {
+            return select(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB,
+                final Class<?> entityClassC, final String tableAliasC) {
+            return select(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null, entityClassC, tableAliasC, null);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB));
+
+            return select(multiSelects);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB, final Class<?> entityClassC,
+                final String tableAliasC, final Set<String> excludedPropNamesC) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassC, tableAliasC, excludedPropNamesC));
+
+            return select(multiSelects);
+        }
+
+        public static SQLBuilder select(final List<Tuple3<Class<?>, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.entityClass = multiSelects.get(0)._1;
+            instance.multiSelects = multiSelects;
+
+            return instance;
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB) {
+            return selectFrom(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB,
+                final Class<?> entityClassC, final String tableAliasC) {
+            return selectFrom(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null, entityClassC, tableAliasC, null);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB));
+
+            return selectFrom(multiSelects);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB, final Class<?> entityClassC,
+                final String tableAliasC, final Set<String> excludedPropNamesC) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassC, tableAliasC, excludedPropNamesC));
+
+            return selectFrom(multiSelects);
+        }
+
+        public static SQLBuilder selectFrom(final List<Tuple3<Class<?>, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final NamingPolicy namingPolicy = NamingPolicy.LOWER_CAMEL_CASE;
+
+            if (multiSelects.size() == 1) {
+                final Tuple3<Class<?>, String, Set<String>> tp = multiSelects.get(0);
+
+                if (N.isNullOrEmpty(tp._2)) {
+                    return selectFrom(tp._1, tp._3);
+                } else {
+                    return select(tp._1, tp._3).from(getTableName(tp._1, namingPolicy) + " " + tp._2);
+                }
+            } else if (multiSelects.size() == 2) {
+                final Tuple3<Class<?>, String, Set<String>> tpA = multiSelects.get(0);
+                final Tuple3<Class<?>, String, Set<String>> tpB = multiSelects.get(1);
+
+                final String fromClause = getTableName(tpA._1, namingPolicy) + (N.isNullOrEmpty(tpA._2) ? "" : " " + tpA._2) + ", "
+                        + getTableName(tpB._1, namingPolicy) + (N.isNullOrEmpty(tpB._2) ? "" : " " + tpB._2);
+
+                return select(multiSelects).from(fromClause);
+            } else if (multiSelects.size() == 3) {
+                final Tuple3<Class<?>, String, Set<String>> tpA = multiSelects.get(0);
+                final Tuple3<Class<?>, String, Set<String>> tpB = multiSelects.get(1);
+                final Tuple3<Class<?>, String, Set<String>> tpC = multiSelects.get(2);
+
+                final String fromClause = getTableName(tpA._1, namingPolicy) + (N.isNullOrEmpty(tpA._2) ? "" : " " + tpA._2) //
+                        + ", " + getTableName(tpB._1, namingPolicy) + (N.isNullOrEmpty(tpB._2) ? "" : " " + tpB._2) //
+                        + ", " + getTableName(tpC._1, namingPolicy) + (N.isNullOrEmpty(tpC._2) ? "" : " " + tpC._2);
+
+                return select(multiSelects).from(fromClause);
+            } else {
+                final StringBuilder sb = Objectory.createStringBuilder();
+                int idx = 0;
+
+                for (Tuple3<Class<?>, String, Set<String>> tp : multiSelects) {
+                    if (idx++ > 0) {
+                        sb.append(_COMMA_SPACE);
+                    }
+
+                    sb.append(getTableName(tp._1, namingPolicy));
+
+                    if (N.notNullOrEmpty(tp._2)) {
+                        sb.append(' ').append(tp._2);
+                    }
+                }
+
+                String fromClause = sb.toString();
+
+                Objectory.recycle(sb);
+
+                return select(multiSelects).from(fromClause);
+            }
+        }
+
         /**
          *
          * @param tableName
@@ -5277,6 +5854,131 @@ public abstract class SQLBuilder {
                 return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
             } else {
                 return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
+            }
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB) {
+            return select(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB,
+                final Class<?> entityClassC, final String tableAliasC) {
+            return select(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null, entityClassC, tableAliasC, null);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB));
+
+            return select(multiSelects);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB, final Class<?> entityClassC,
+                final String tableAliasC, final Set<String> excludedPropNamesC) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassC, tableAliasC, excludedPropNamesC));
+
+            return select(multiSelects);
+        }
+
+        public static SQLBuilder select(final List<Tuple3<Class<?>, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.entityClass = multiSelects.get(0)._1;
+            instance.multiSelects = multiSelects;
+
+            return instance;
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB) {
+            return selectFrom(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB,
+                final Class<?> entityClassC, final String tableAliasC) {
+            return selectFrom(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null, entityClassC, tableAliasC, null);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB));
+
+            return selectFrom(multiSelects);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB, final Class<?> entityClassC,
+                final String tableAliasC, final Set<String> excludedPropNamesC) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassC, tableAliasC, excludedPropNamesC));
+
+            return selectFrom(multiSelects);
+        }
+
+        public static SQLBuilder selectFrom(final List<Tuple3<Class<?>, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final NamingPolicy namingPolicy = NamingPolicy.LOWER_CASE_WITH_UNDERSCORE;
+
+            if (multiSelects.size() == 1) {
+                final Tuple3<Class<?>, String, Set<String>> tp = multiSelects.get(0);
+
+                if (N.isNullOrEmpty(tp._2)) {
+                    return selectFrom(tp._1, tp._3);
+                } else {
+                    return select(tp._1, tp._3).from(getTableName(tp._1, namingPolicy) + " " + tp._2);
+                }
+            } else if (multiSelects.size() == 2) {
+                final Tuple3<Class<?>, String, Set<String>> tpA = multiSelects.get(0);
+                final Tuple3<Class<?>, String, Set<String>> tpB = multiSelects.get(1);
+
+                final String fromClause = getTableName(tpA._1, namingPolicy) + (N.isNullOrEmpty(tpA._2) ? "" : " " + tpA._2) + ", "
+                        + getTableName(tpB._1, namingPolicy) + (N.isNullOrEmpty(tpB._2) ? "" : " " + tpB._2);
+
+                return select(multiSelects).from(fromClause);
+            } else if (multiSelects.size() == 3) {
+                final Tuple3<Class<?>, String, Set<String>> tpA = multiSelects.get(0);
+                final Tuple3<Class<?>, String, Set<String>> tpB = multiSelects.get(1);
+                final Tuple3<Class<?>, String, Set<String>> tpC = multiSelects.get(2);
+
+                final String fromClause = getTableName(tpA._1, namingPolicy) + (N.isNullOrEmpty(tpA._2) ? "" : " " + tpA._2) //
+                        + ", " + getTableName(tpB._1, namingPolicy) + (N.isNullOrEmpty(tpB._2) ? "" : " " + tpB._2) //
+                        + ", " + getTableName(tpC._1, namingPolicy) + (N.isNullOrEmpty(tpC._2) ? "" : " " + tpC._2);
+
+                return select(multiSelects).from(fromClause);
+            } else {
+                final StringBuilder sb = Objectory.createStringBuilder();
+                int idx = 0;
+
+                for (Tuple3<Class<?>, String, Set<String>> tp : multiSelects) {
+                    if (idx++ > 0) {
+                        sb.append(_COMMA_SPACE);
+                    }
+
+                    sb.append(getTableName(tp._1, namingPolicy));
+
+                    if (N.notNullOrEmpty(tp._2)) {
+                        sb.append(' ').append(tp._2);
+                    }
+                }
+
+                String fromClause = sb.toString();
+
+                Objectory.recycle(sb);
+
+                return select(multiSelects).from(fromClause);
             }
         }
 
@@ -5755,6 +6457,131 @@ public abstract class SQLBuilder {
             }
         }
 
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB) {
+            return select(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB,
+                final Class<?> entityClassC, final String tableAliasC) {
+            return select(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null, entityClassC, tableAliasC, null);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB));
+
+            return select(multiSelects);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB, final Class<?> entityClassC,
+                final String tableAliasC, final Set<String> excludedPropNamesC) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassC, tableAliasC, excludedPropNamesC));
+
+            return select(multiSelects);
+        }
+
+        public static SQLBuilder select(final List<Tuple3<Class<?>, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.entityClass = multiSelects.get(0)._1;
+            instance.multiSelects = multiSelects;
+
+            return instance;
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB) {
+            return selectFrom(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB,
+                final Class<?> entityClassC, final String tableAliasC) {
+            return selectFrom(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null, entityClassC, tableAliasC, null);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB));
+
+            return selectFrom(multiSelects);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB, final Class<?> entityClassC,
+                final String tableAliasC, final Set<String> excludedPropNamesC) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassC, tableAliasC, excludedPropNamesC));
+
+            return selectFrom(multiSelects);
+        }
+
+        public static SQLBuilder selectFrom(final List<Tuple3<Class<?>, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final NamingPolicy namingPolicy = NamingPolicy.UPPER_CASE_WITH_UNDERSCORE;
+
+            if (multiSelects.size() == 1) {
+                final Tuple3<Class<?>, String, Set<String>> tp = multiSelects.get(0);
+
+                if (N.isNullOrEmpty(tp._2)) {
+                    return selectFrom(tp._1, tp._3);
+                } else {
+                    return select(tp._1, tp._3).from(getTableName(tp._1, namingPolicy) + " " + tp._2);
+                }
+            } else if (multiSelects.size() == 2) {
+                final Tuple3<Class<?>, String, Set<String>> tpA = multiSelects.get(0);
+                final Tuple3<Class<?>, String, Set<String>> tpB = multiSelects.get(1);
+
+                final String fromClause = getTableName(tpA._1, namingPolicy) + (N.isNullOrEmpty(tpA._2) ? "" : " " + tpA._2) + ", "
+                        + getTableName(tpB._1, namingPolicy) + (N.isNullOrEmpty(tpB._2) ? "" : " " + tpB._2);
+
+                return select(multiSelects).from(fromClause);
+            } else if (multiSelects.size() == 3) {
+                final Tuple3<Class<?>, String, Set<String>> tpA = multiSelects.get(0);
+                final Tuple3<Class<?>, String, Set<String>> tpB = multiSelects.get(1);
+                final Tuple3<Class<?>, String, Set<String>> tpC = multiSelects.get(2);
+
+                final String fromClause = getTableName(tpA._1, namingPolicy) + (N.isNullOrEmpty(tpA._2) ? "" : " " + tpA._2) //
+                        + ", " + getTableName(tpB._1, namingPolicy) + (N.isNullOrEmpty(tpB._2) ? "" : " " + tpB._2) //
+                        + ", " + getTableName(tpC._1, namingPolicy) + (N.isNullOrEmpty(tpC._2) ? "" : " " + tpC._2);
+
+                return select(multiSelects).from(fromClause);
+            } else {
+                final StringBuilder sb = Objectory.createStringBuilder();
+                int idx = 0;
+
+                for (Tuple3<Class<?>, String, Set<String>> tp : multiSelects) {
+                    if (idx++ > 0) {
+                        sb.append(_COMMA_SPACE);
+                    }
+
+                    sb.append(getTableName(tp._1, namingPolicy));
+
+                    if (N.notNullOrEmpty(tp._2)) {
+                        sb.append(' ').append(tp._2);
+                    }
+                }
+
+                String fromClause = sb.toString();
+
+                Objectory.recycle(sb);
+
+                return select(multiSelects).from(fromClause);
+            }
+        }
+
         /**
          *
          * @param tableName
@@ -6227,6 +7054,131 @@ public abstract class SQLBuilder {
                 return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
             } else {
                 return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
+            }
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB) {
+            return select(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB,
+                final Class<?> entityClassC, final String tableAliasC) {
+            return select(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null, entityClassC, tableAliasC, null);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB));
+
+            return select(multiSelects);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB, final Class<?> entityClassC,
+                final String tableAliasC, final Set<String> excludedPropNamesC) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassC, tableAliasC, excludedPropNamesC));
+
+            return select(multiSelects);
+        }
+
+        public static SQLBuilder select(final List<Tuple3<Class<?>, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.entityClass = multiSelects.get(0)._1;
+            instance.multiSelects = multiSelects;
+
+            return instance;
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB) {
+            return selectFrom(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB,
+                final Class<?> entityClassC, final String tableAliasC) {
+            return selectFrom(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null, entityClassC, tableAliasC, null);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB));
+
+            return selectFrom(multiSelects);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB, final Class<?> entityClassC,
+                final String tableAliasC, final Set<String> excludedPropNamesC) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassC, tableAliasC, excludedPropNamesC));
+
+            return selectFrom(multiSelects);
+        }
+
+        public static SQLBuilder selectFrom(final List<Tuple3<Class<?>, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final NamingPolicy namingPolicy = NamingPolicy.LOWER_CAMEL_CASE;
+
+            if (multiSelects.size() == 1) {
+                final Tuple3<Class<?>, String, Set<String>> tp = multiSelects.get(0);
+
+                if (N.isNullOrEmpty(tp._2)) {
+                    return selectFrom(tp._1, tp._3);
+                } else {
+                    return select(tp._1, tp._3).from(getTableName(tp._1, namingPolicy) + " " + tp._2);
+                }
+            } else if (multiSelects.size() == 2) {
+                final Tuple3<Class<?>, String, Set<String>> tpA = multiSelects.get(0);
+                final Tuple3<Class<?>, String, Set<String>> tpB = multiSelects.get(1);
+
+                final String fromClause = getTableName(tpA._1, namingPolicy) + (N.isNullOrEmpty(tpA._2) ? "" : " " + tpA._2) + ", "
+                        + getTableName(tpB._1, namingPolicy) + (N.isNullOrEmpty(tpB._2) ? "" : " " + tpB._2);
+
+                return select(multiSelects).from(fromClause);
+            } else if (multiSelects.size() == 3) {
+                final Tuple3<Class<?>, String, Set<String>> tpA = multiSelects.get(0);
+                final Tuple3<Class<?>, String, Set<String>> tpB = multiSelects.get(1);
+                final Tuple3<Class<?>, String, Set<String>> tpC = multiSelects.get(2);
+
+                final String fromClause = getTableName(tpA._1, namingPolicy) + (N.isNullOrEmpty(tpA._2) ? "" : " " + tpA._2) //
+                        + ", " + getTableName(tpB._1, namingPolicy) + (N.isNullOrEmpty(tpB._2) ? "" : " " + tpB._2) //
+                        + ", " + getTableName(tpC._1, namingPolicy) + (N.isNullOrEmpty(tpC._2) ? "" : " " + tpC._2);
+
+                return select(multiSelects).from(fromClause);
+            } else {
+                final StringBuilder sb = Objectory.createStringBuilder();
+                int idx = 0;
+
+                for (Tuple3<Class<?>, String, Set<String>> tp : multiSelects) {
+                    if (idx++ > 0) {
+                        sb.append(_COMMA_SPACE);
+                    }
+
+                    sb.append(getTableName(tp._1, namingPolicy));
+
+                    if (N.notNullOrEmpty(tp._2)) {
+                        sb.append(' ').append(tp._2);
+                    }
+                }
+
+                String fromClause = sb.toString();
+
+                Objectory.recycle(sb);
+
+                return select(multiSelects).from(fromClause);
             }
         }
 
@@ -6705,6 +7657,131 @@ public abstract class SQLBuilder {
             }
         }
 
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB) {
+            return select(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB,
+                final Class<?> entityClassC, final String tableAliasC) {
+            return select(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null, entityClassC, tableAliasC, null);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB));
+
+            return select(multiSelects);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB, final Class<?> entityClassC,
+                final String tableAliasC, final Set<String> excludedPropNamesC) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassC, tableAliasC, excludedPropNamesC));
+
+            return select(multiSelects);
+        }
+
+        public static SQLBuilder select(final List<Tuple3<Class<?>, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.entityClass = multiSelects.get(0)._1;
+            instance.multiSelects = multiSelects;
+
+            return instance;
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB) {
+            return selectFrom(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB,
+                final Class<?> entityClassC, final String tableAliasC) {
+            return selectFrom(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null, entityClassC, tableAliasC, null);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB));
+
+            return selectFrom(multiSelects);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB, final Class<?> entityClassC,
+                final String tableAliasC, final Set<String> excludedPropNamesC) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassC, tableAliasC, excludedPropNamesC));
+
+            return selectFrom(multiSelects);
+        }
+
+        public static SQLBuilder selectFrom(final List<Tuple3<Class<?>, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final NamingPolicy namingPolicy = NamingPolicy.LOWER_CASE_WITH_UNDERSCORE;
+
+            if (multiSelects.size() == 1) {
+                final Tuple3<Class<?>, String, Set<String>> tp = multiSelects.get(0);
+
+                if (N.isNullOrEmpty(tp._2)) {
+                    return selectFrom(tp._1, tp._3);
+                } else {
+                    return select(tp._1, tp._3).from(getTableName(tp._1, namingPolicy) + " " + tp._2);
+                }
+            } else if (multiSelects.size() == 2) {
+                final Tuple3<Class<?>, String, Set<String>> tpA = multiSelects.get(0);
+                final Tuple3<Class<?>, String, Set<String>> tpB = multiSelects.get(1);
+
+                final String fromClause = getTableName(tpA._1, namingPolicy) + (N.isNullOrEmpty(tpA._2) ? "" : " " + tpA._2) + ", "
+                        + getTableName(tpB._1, namingPolicy) + (N.isNullOrEmpty(tpB._2) ? "" : " " + tpB._2);
+
+                return select(multiSelects).from(fromClause);
+            } else if (multiSelects.size() == 3) {
+                final Tuple3<Class<?>, String, Set<String>> tpA = multiSelects.get(0);
+                final Tuple3<Class<?>, String, Set<String>> tpB = multiSelects.get(1);
+                final Tuple3<Class<?>, String, Set<String>> tpC = multiSelects.get(2);
+
+                final String fromClause = getTableName(tpA._1, namingPolicy) + (N.isNullOrEmpty(tpA._2) ? "" : " " + tpA._2) //
+                        + ", " + getTableName(tpB._1, namingPolicy) + (N.isNullOrEmpty(tpB._2) ? "" : " " + tpB._2) //
+                        + ", " + getTableName(tpC._1, namingPolicy) + (N.isNullOrEmpty(tpC._2) ? "" : " " + tpC._2);
+
+                return select(multiSelects).from(fromClause);
+            } else {
+                final StringBuilder sb = Objectory.createStringBuilder();
+                int idx = 0;
+
+                for (Tuple3<Class<?>, String, Set<String>> tp : multiSelects) {
+                    if (idx++ > 0) {
+                        sb.append(_COMMA_SPACE);
+                    }
+
+                    sb.append(getTableName(tp._1, namingPolicy));
+
+                    if (N.notNullOrEmpty(tp._2)) {
+                        sb.append(' ').append(tp._2);
+                    }
+                }
+
+                String fromClause = sb.toString();
+
+                Objectory.recycle(sb);
+
+                return select(multiSelects).from(fromClause);
+            }
+        }
+
         /**
          *
          * @param tableName
@@ -7180,6 +8257,131 @@ public abstract class SQLBuilder {
             }
         }
 
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB) {
+            return select(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB,
+                final Class<?> entityClassC, final String tableAliasC) {
+            return select(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null, entityClassC, tableAliasC, null);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB));
+
+            return select(multiSelects);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB, final Class<?> entityClassC,
+                final String tableAliasC, final Set<String> excludedPropNamesC) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassC, tableAliasC, excludedPropNamesC));
+
+            return select(multiSelects);
+        }
+
+        public static SQLBuilder select(final List<Tuple3<Class<?>, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.entityClass = multiSelects.get(0)._1;
+            instance.multiSelects = multiSelects;
+
+            return instance;
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB) {
+            return selectFrom(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB,
+                final Class<?> entityClassC, final String tableAliasC) {
+            return selectFrom(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null, entityClassC, tableAliasC, null);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB));
+
+            return selectFrom(multiSelects);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB, final Class<?> entityClassC,
+                final String tableAliasC, final Set<String> excludedPropNamesC) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassC, tableAliasC, excludedPropNamesC));
+
+            return selectFrom(multiSelects);
+        }
+
+        public static SQLBuilder selectFrom(final List<Tuple3<Class<?>, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final NamingPolicy namingPolicy = NamingPolicy.UPPER_CASE_WITH_UNDERSCORE;
+
+            if (multiSelects.size() == 1) {
+                final Tuple3<Class<?>, String, Set<String>> tp = multiSelects.get(0);
+
+                if (N.isNullOrEmpty(tp._2)) {
+                    return selectFrom(tp._1, tp._3);
+                } else {
+                    return select(tp._1, tp._3).from(getTableName(tp._1, namingPolicy) + " " + tp._2);
+                }
+            } else if (multiSelects.size() == 2) {
+                final Tuple3<Class<?>, String, Set<String>> tpA = multiSelects.get(0);
+                final Tuple3<Class<?>, String, Set<String>> tpB = multiSelects.get(1);
+
+                final String fromClause = getTableName(tpA._1, namingPolicy) + (N.isNullOrEmpty(tpA._2) ? "" : " " + tpA._2) + ", "
+                        + getTableName(tpB._1, namingPolicy) + (N.isNullOrEmpty(tpB._2) ? "" : " " + tpB._2);
+
+                return select(multiSelects).from(fromClause);
+            } else if (multiSelects.size() == 3) {
+                final Tuple3<Class<?>, String, Set<String>> tpA = multiSelects.get(0);
+                final Tuple3<Class<?>, String, Set<String>> tpB = multiSelects.get(1);
+                final Tuple3<Class<?>, String, Set<String>> tpC = multiSelects.get(2);
+
+                final String fromClause = getTableName(tpA._1, namingPolicy) + (N.isNullOrEmpty(tpA._2) ? "" : " " + tpA._2) //
+                        + ", " + getTableName(tpB._1, namingPolicy) + (N.isNullOrEmpty(tpB._2) ? "" : " " + tpB._2) //
+                        + ", " + getTableName(tpC._1, namingPolicy) + (N.isNullOrEmpty(tpC._2) ? "" : " " + tpC._2);
+
+                return select(multiSelects).from(fromClause);
+            } else {
+                final StringBuilder sb = Objectory.createStringBuilder();
+                int idx = 0;
+
+                for (Tuple3<Class<?>, String, Set<String>> tp : multiSelects) {
+                    if (idx++ > 0) {
+                        sb.append(_COMMA_SPACE);
+                    }
+
+                    sb.append(getTableName(tp._1, namingPolicy));
+
+                    if (N.notNullOrEmpty(tp._2)) {
+                        sb.append(' ').append(tp._2);
+                    }
+                }
+
+                String fromClause = sb.toString();
+
+                Objectory.recycle(sb);
+
+                return select(multiSelects).from(fromClause);
+            }
+        }
+
         /**
          *
          * @param tableName
@@ -7652,6 +8854,131 @@ public abstract class SQLBuilder {
                 return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
             } else {
                 return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
+            }
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB) {
+            return select(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB,
+                final Class<?> entityClassC, final String tableAliasC) {
+            return select(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null, entityClassC, tableAliasC, null);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB));
+
+            return select(multiSelects);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB, final Class<?> entityClassC,
+                final String tableAliasC, final Set<String> excludedPropNamesC) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassC, tableAliasC, excludedPropNamesC));
+
+            return select(multiSelects);
+        }
+
+        public static SQLBuilder select(final List<Tuple3<Class<?>, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.entityClass = multiSelects.get(0)._1;
+            instance.multiSelects = multiSelects;
+
+            return instance;
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB) {
+            return selectFrom(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB,
+                final Class<?> entityClassC, final String tableAliasC) {
+            return selectFrom(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null, entityClassC, tableAliasC, null);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB));
+
+            return selectFrom(multiSelects);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB, final Class<?> entityClassC,
+                final String tableAliasC, final Set<String> excludedPropNamesC) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassC, tableAliasC, excludedPropNamesC));
+
+            return selectFrom(multiSelects);
+        }
+
+        public static SQLBuilder selectFrom(final List<Tuple3<Class<?>, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final NamingPolicy namingPolicy = NamingPolicy.LOWER_CAMEL_CASE;
+
+            if (multiSelects.size() == 1) {
+                final Tuple3<Class<?>, String, Set<String>> tp = multiSelects.get(0);
+
+                if (N.isNullOrEmpty(tp._2)) {
+                    return selectFrom(tp._1, tp._3);
+                } else {
+                    return select(tp._1, tp._3).from(getTableName(tp._1, namingPolicy) + " " + tp._2);
+                }
+            } else if (multiSelects.size() == 2) {
+                final Tuple3<Class<?>, String, Set<String>> tpA = multiSelects.get(0);
+                final Tuple3<Class<?>, String, Set<String>> tpB = multiSelects.get(1);
+
+                final String fromClause = getTableName(tpA._1, namingPolicy) + (N.isNullOrEmpty(tpA._2) ? "" : " " + tpA._2) + ", "
+                        + getTableName(tpB._1, namingPolicy) + (N.isNullOrEmpty(tpB._2) ? "" : " " + tpB._2);
+
+                return select(multiSelects).from(fromClause);
+            } else if (multiSelects.size() == 3) {
+                final Tuple3<Class<?>, String, Set<String>> tpA = multiSelects.get(0);
+                final Tuple3<Class<?>, String, Set<String>> tpB = multiSelects.get(1);
+                final Tuple3<Class<?>, String, Set<String>> tpC = multiSelects.get(2);
+
+                final String fromClause = getTableName(tpA._1, namingPolicy) + (N.isNullOrEmpty(tpA._2) ? "" : " " + tpA._2) //
+                        + ", " + getTableName(tpB._1, namingPolicy) + (N.isNullOrEmpty(tpB._2) ? "" : " " + tpB._2) //
+                        + ", " + getTableName(tpC._1, namingPolicy) + (N.isNullOrEmpty(tpC._2) ? "" : " " + tpC._2);
+
+                return select(multiSelects).from(fromClause);
+            } else {
+                final StringBuilder sb = Objectory.createStringBuilder();
+                int idx = 0;
+
+                for (Tuple3<Class<?>, String, Set<String>> tp : multiSelects) {
+                    if (idx++ > 0) {
+                        sb.append(_COMMA_SPACE);
+                    }
+
+                    sb.append(getTableName(tp._1, namingPolicy));
+
+                    if (N.notNullOrEmpty(tp._2)) {
+                        sb.append(' ').append(tp._2);
+                    }
+                }
+
+                String fromClause = sb.toString();
+
+                Objectory.recycle(sb);
+
+                return select(multiSelects).from(fromClause);
             }
         }
 
@@ -8131,6 +9458,131 @@ public abstract class SQLBuilder {
             }
         }
 
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB) {
+            return select(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB,
+                final Class<?> entityClassC, final String tableAliasC) {
+            return select(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null, entityClassC, tableAliasC, null);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB));
+
+            return select(multiSelects);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB, final Class<?> entityClassC,
+                final String tableAliasC, final Set<String> excludedPropNamesC) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassC, tableAliasC, excludedPropNamesC));
+
+            return select(multiSelects);
+        }
+
+        public static SQLBuilder select(final List<Tuple3<Class<?>, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.entityClass = multiSelects.get(0)._1;
+            instance.multiSelects = multiSelects;
+
+            return instance;
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB) {
+            return selectFrom(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB,
+                final Class<?> entityClassC, final String tableAliasC) {
+            return selectFrom(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null, entityClassC, tableAliasC, null);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB));
+
+            return selectFrom(multiSelects);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB, final Class<?> entityClassC,
+                final String tableAliasC, final Set<String> excludedPropNamesC) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassC, tableAliasC, excludedPropNamesC));
+
+            return selectFrom(multiSelects);
+        }
+
+        public static SQLBuilder selectFrom(final List<Tuple3<Class<?>, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final NamingPolicy namingPolicy = NamingPolicy.LOWER_CASE_WITH_UNDERSCORE;
+
+            if (multiSelects.size() == 1) {
+                final Tuple3<Class<?>, String, Set<String>> tp = multiSelects.get(0);
+
+                if (N.isNullOrEmpty(tp._2)) {
+                    return selectFrom(tp._1, tp._3);
+                } else {
+                    return select(tp._1, tp._3).from(getTableName(tp._1, namingPolicy) + " " + tp._2);
+                }
+            } else if (multiSelects.size() == 2) {
+                final Tuple3<Class<?>, String, Set<String>> tpA = multiSelects.get(0);
+                final Tuple3<Class<?>, String, Set<String>> tpB = multiSelects.get(1);
+
+                final String fromClause = getTableName(tpA._1, namingPolicy) + (N.isNullOrEmpty(tpA._2) ? "" : " " + tpA._2) + ", "
+                        + getTableName(tpB._1, namingPolicy) + (N.isNullOrEmpty(tpB._2) ? "" : " " + tpB._2);
+
+                return select(multiSelects).from(fromClause);
+            } else if (multiSelects.size() == 3) {
+                final Tuple3<Class<?>, String, Set<String>> tpA = multiSelects.get(0);
+                final Tuple3<Class<?>, String, Set<String>> tpB = multiSelects.get(1);
+                final Tuple3<Class<?>, String, Set<String>> tpC = multiSelects.get(2);
+
+                final String fromClause = getTableName(tpA._1, namingPolicy) + (N.isNullOrEmpty(tpA._2) ? "" : " " + tpA._2) //
+                        + ", " + getTableName(tpB._1, namingPolicy) + (N.isNullOrEmpty(tpB._2) ? "" : " " + tpB._2) //
+                        + ", " + getTableName(tpC._1, namingPolicy) + (N.isNullOrEmpty(tpC._2) ? "" : " " + tpC._2);
+
+                return select(multiSelects).from(fromClause);
+            } else {
+                final StringBuilder sb = Objectory.createStringBuilder();
+                int idx = 0;
+
+                for (Tuple3<Class<?>, String, Set<String>> tp : multiSelects) {
+                    if (idx++ > 0) {
+                        sb.append(_COMMA_SPACE);
+                    }
+
+                    sb.append(getTableName(tp._1, namingPolicy));
+
+                    if (N.notNullOrEmpty(tp._2)) {
+                        sb.append(' ').append(tp._2);
+                    }
+                }
+
+                String fromClause = sb.toString();
+
+                Objectory.recycle(sb);
+
+                return select(multiSelects).from(fromClause);
+            }
+        }
+
         /**
          *
          * @param tableName
@@ -8607,6 +10059,131 @@ public abstract class SQLBuilder {
             }
         }
 
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB) {
+            return select(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB,
+                final Class<?> entityClassC, final String tableAliasC) {
+            return select(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null, entityClassC, tableAliasC, null);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB));
+
+            return select(multiSelects);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB, final Class<?> entityClassC,
+                final String tableAliasC, final Set<String> excludedPropNamesC) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassC, tableAliasC, excludedPropNamesC));
+
+            return select(multiSelects);
+        }
+
+        public static SQLBuilder select(final List<Tuple3<Class<?>, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.entityClass = multiSelects.get(0)._1;
+            instance.multiSelects = multiSelects;
+
+            return instance;
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB) {
+            return selectFrom(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB,
+                final Class<?> entityClassC, final String tableAliasC) {
+            return selectFrom(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null, entityClassC, tableAliasC, null);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB));
+
+            return selectFrom(multiSelects);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB, final Class<?> entityClassC,
+                final String tableAliasC, final Set<String> excludedPropNamesC) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassC, tableAliasC, excludedPropNamesC));
+
+            return selectFrom(multiSelects);
+        }
+
+        public static SQLBuilder selectFrom(final List<Tuple3<Class<?>, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final NamingPolicy namingPolicy = NamingPolicy.UPPER_CASE_WITH_UNDERSCORE;
+
+            if (multiSelects.size() == 1) {
+                final Tuple3<Class<?>, String, Set<String>> tp = multiSelects.get(0);
+
+                if (N.isNullOrEmpty(tp._2)) {
+                    return selectFrom(tp._1, tp._3);
+                } else {
+                    return select(tp._1, tp._3).from(getTableName(tp._1, namingPolicy) + " " + tp._2);
+                }
+            } else if (multiSelects.size() == 2) {
+                final Tuple3<Class<?>, String, Set<String>> tpA = multiSelects.get(0);
+                final Tuple3<Class<?>, String, Set<String>> tpB = multiSelects.get(1);
+
+                final String fromClause = getTableName(tpA._1, namingPolicy) + (N.isNullOrEmpty(tpA._2) ? "" : " " + tpA._2) + ", "
+                        + getTableName(tpB._1, namingPolicy) + (N.isNullOrEmpty(tpB._2) ? "" : " " + tpB._2);
+
+                return select(multiSelects).from(fromClause);
+            } else if (multiSelects.size() == 3) {
+                final Tuple3<Class<?>, String, Set<String>> tpA = multiSelects.get(0);
+                final Tuple3<Class<?>, String, Set<String>> tpB = multiSelects.get(1);
+                final Tuple3<Class<?>, String, Set<String>> tpC = multiSelects.get(2);
+
+                final String fromClause = getTableName(tpA._1, namingPolicy) + (N.isNullOrEmpty(tpA._2) ? "" : " " + tpA._2) //
+                        + ", " + getTableName(tpB._1, namingPolicy) + (N.isNullOrEmpty(tpB._2) ? "" : " " + tpB._2) //
+                        + ", " + getTableName(tpC._1, namingPolicy) + (N.isNullOrEmpty(tpC._2) ? "" : " " + tpC._2);
+
+                return select(multiSelects).from(fromClause);
+            } else {
+                final StringBuilder sb = Objectory.createStringBuilder();
+                int idx = 0;
+
+                for (Tuple3<Class<?>, String, Set<String>> tp : multiSelects) {
+                    if (idx++ > 0) {
+                        sb.append(_COMMA_SPACE);
+                    }
+
+                    sb.append(getTableName(tp._1, namingPolicy));
+
+                    if (N.notNullOrEmpty(tp._2)) {
+                        sb.append(' ').append(tp._2);
+                    }
+                }
+
+                String fromClause = sb.toString();
+
+                Objectory.recycle(sb);
+
+                return select(multiSelects).from(fromClause);
+            }
+        }
+
         /**
          *
          * @param tableName
@@ -9080,6 +10657,131 @@ public abstract class SQLBuilder {
                 return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass, selectTableNames);
             } else {
                 return select(expr, getSelectPropNamesByClass(entityClass, includeSubEntityProperties, excludedPropNames)).from(entityClass);
+            }
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB) {
+            return select(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB,
+                final Class<?> entityClassC, final String tableAliasC) {
+            return select(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null, entityClassC, tableAliasC, null);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB));
+
+            return select(multiSelects);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB, final Class<?> entityClassC,
+                final String tableAliasC, final Set<String> excludedPropNamesC) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassC, tableAliasC, excludedPropNamesC));
+
+            return select(multiSelects);
+        }
+
+        public static SQLBuilder select(final List<Tuple3<Class<?>, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.entityClass = multiSelects.get(0)._1;
+            instance.multiSelects = multiSelects;
+
+            return instance;
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB) {
+            return selectFrom(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Class<?> entityClassB, final String tableAliasB,
+                final Class<?> entityClassC, final String tableAliasC) {
+            return selectFrom(entityClassA, tableAliasA, null, entityClassB, tableAliasB, null, entityClassC, tableAliasC, null);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB));
+
+            return selectFrom(multiSelects);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final Set<String> excludedPropNamesB, final Class<?> entityClassC,
+                final String tableAliasC, final Set<String> excludedPropNamesC) {
+            final List<Tuple3<Class<?>, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassA, tableAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassB, tableAliasB, excludedPropNamesB),
+                    Tuple.<Class<?>, String, Set<String>> of(entityClassC, tableAliasC, excludedPropNamesC));
+
+            return selectFrom(multiSelects);
+        }
+
+        public static SQLBuilder selectFrom(final List<Tuple3<Class<?>, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final NamingPolicy namingPolicy = NamingPolicy.LOWER_CAMEL_CASE;
+
+            if (multiSelects.size() == 1) {
+                final Tuple3<Class<?>, String, Set<String>> tp = multiSelects.get(0);
+
+                if (N.isNullOrEmpty(tp._2)) {
+                    return selectFrom(tp._1, tp._3);
+                } else {
+                    return select(tp._1, tp._3).from(getTableName(tp._1, namingPolicy) + " " + tp._2);
+                }
+            } else if (multiSelects.size() == 2) {
+                final Tuple3<Class<?>, String, Set<String>> tpA = multiSelects.get(0);
+                final Tuple3<Class<?>, String, Set<String>> tpB = multiSelects.get(1);
+
+                final String fromClause = getTableName(tpA._1, namingPolicy) + (N.isNullOrEmpty(tpA._2) ? "" : " " + tpA._2) + ", "
+                        + getTableName(tpB._1, namingPolicy) + (N.isNullOrEmpty(tpB._2) ? "" : " " + tpB._2);
+
+                return select(multiSelects).from(fromClause);
+            } else if (multiSelects.size() == 3) {
+                final Tuple3<Class<?>, String, Set<String>> tpA = multiSelects.get(0);
+                final Tuple3<Class<?>, String, Set<String>> tpB = multiSelects.get(1);
+                final Tuple3<Class<?>, String, Set<String>> tpC = multiSelects.get(2);
+
+                final String fromClause = getTableName(tpA._1, namingPolicy) + (N.isNullOrEmpty(tpA._2) ? "" : " " + tpA._2) //
+                        + ", " + getTableName(tpB._1, namingPolicy) + (N.isNullOrEmpty(tpB._2) ? "" : " " + tpB._2) //
+                        + ", " + getTableName(tpC._1, namingPolicy) + (N.isNullOrEmpty(tpC._2) ? "" : " " + tpC._2);
+
+                return select(multiSelects).from(fromClause);
+            } else {
+                final StringBuilder sb = Objectory.createStringBuilder();
+                int idx = 0;
+
+                for (Tuple3<Class<?>, String, Set<String>> tp : multiSelects) {
+                    if (idx++ > 0) {
+                        sb.append(_COMMA_SPACE);
+                    }
+
+                    sb.append(getTableName(tp._1, namingPolicy));
+
+                    if (N.notNullOrEmpty(tp._2)) {
+                        sb.append(' ').append(tp._2);
+                    }
+                }
+
+                String fromClause = sb.toString();
+
+                Objectory.recycle(sb);
+
+                return select(multiSelects).from(fromClause);
             }
         }
 

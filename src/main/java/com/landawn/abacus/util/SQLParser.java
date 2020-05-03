@@ -33,12 +33,16 @@ public final class SQLParser {
     /** The Constant ENTER. */
     private static final char ENTER = '\n';
 
+    /** The Constant ENTER. */
+    private static final char ENTER_2 = '\r';
+
     /** The Constant seperators. */
     private static final Set<Object> seperators = N.newHashSet();
 
     static {
         seperators.add(TAB);
         seperators.add(ENTER);
+        seperators.add(ENTER_2);
         seperators.add(' ');
         seperators.add('?');
         seperators.add(',');
@@ -215,7 +219,7 @@ public final class SQLParser {
                 } else if ((index < (sqlLength - 1)) && seperators.contains(temp = sql.substring(index, index + 2))) {
                     words.add(temp);
                     index += 1;
-                } else if (c == WD._SPACE || c == TAB || c == ENTER) {
+                } else if (c == WD._SPACE || c == TAB || c == ENTER || c == ENTER_2) {
                     if ((words.size() > 0) && !words.get(words.size() - 1).equals(WD.SPACE)) {
                         words.add(WD.SPACE);
                     }
@@ -296,7 +300,7 @@ public final class SQLParser {
                         }
 
                         sb.setLength(0);
-                    } else if (c == WD._SPACE || c == TAB || c == ENTER) {
+                    } else if (c == WD._SPACE || c == TAB || c == ENTER || c == ENTER_2) {
                         // skip white char
                         continue;
                     }
@@ -393,7 +397,7 @@ public final class SQLParser {
             } else if (isSeperator(sql, sqlLength, index, c)) {
                 if (sb.length() > 0) {
                     break;
-                } else if (c == WD._SPACE || c == TAB || c == ENTER) {
+                } else if (c == WD._SPACE || c == TAB || c == ENTER || c == ENTER_2) {
                     // skip white char
                     continue;
                 }
