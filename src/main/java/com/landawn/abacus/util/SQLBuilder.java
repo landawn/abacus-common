@@ -1520,7 +1520,7 @@ public abstract class SQLBuilder {
 
         sb.append(_SPACE_JOIN_SPACE);
 
-        sb.append(getTableName(entityClass, namingPolicy));
+        sb.append(getTableName(entityClass, namingPolicy) + " " + alias);
 
         return this;
     }
@@ -1562,7 +1562,7 @@ public abstract class SQLBuilder {
 
         sb.append(_SPACE_INNER_JOIN_SPACE);
 
-        sb.append(getTableName(entityClass, namingPolicy));
+        sb.append(getTableName(entityClass, namingPolicy) + " " + alias);
 
         return this;
     }
@@ -1604,7 +1604,7 @@ public abstract class SQLBuilder {
 
         sb.append(_SPACE_LEFT_JOIN_SPACE);
 
-        sb.append(getTableName(entityClass, namingPolicy));
+        sb.append(getTableName(entityClass, namingPolicy) + " " + alias);
 
         return this;
     }
@@ -1646,7 +1646,7 @@ public abstract class SQLBuilder {
 
         sb.append(_SPACE_RIGHT_JOIN_SPACE);
 
-        sb.append(getTableName(entityClass, namingPolicy));
+        sb.append(getTableName(entityClass, namingPolicy) + " " + alias);
 
         return this;
     }
@@ -1688,7 +1688,7 @@ public abstract class SQLBuilder {
 
         sb.append(_SPACE_FULL_JOIN_SPACE);
 
-        sb.append(getTableName(entityClass, namingPolicy));
+        sb.append(getTableName(entityClass, namingPolicy) + " " + alias);
 
         return this;
     }
@@ -1730,7 +1730,7 @@ public abstract class SQLBuilder {
 
         sb.append(_SPACE_CROSS_JOIN_SPACE);
 
-        sb.append(getTableName(entityClass, namingPolicy));
+        sb.append(getTableName(entityClass, namingPolicy) + " " + alias);
 
         return this;
     }
@@ -1772,7 +1772,7 @@ public abstract class SQLBuilder {
 
         sb.append(_SPACE_NATURAL_JOIN_SPACE);
 
-        sb.append(getTableName(entityClass, namingPolicy));
+        sb.append(getTableName(entityClass, namingPolicy) + " " + alias);
 
         return this;
     }
@@ -2227,7 +2227,7 @@ public abstract class SQLBuilder {
                         sb.append(WD._PARENTHESES_R);
                     }
 
-                    appendCondition(((Clause) cond).getCondition());
+                    appendCondition(join.getCondition());
                 }
             }
 

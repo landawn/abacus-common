@@ -33,7 +33,7 @@ public interface NoCachingNoUpdating {
     @Beta
     @SequentialOnly
     @Stateful
-    public static class DisposableArray<T> implements NoCachingNoUpdating {
+    public static class DisposableArray<T> implements NoCachingNoUpdating, Cloneable {
 
         /** The a. */
         private final T[] a;
@@ -198,7 +198,7 @@ public interface NoCachingNoUpdating {
     @Beta
     @SequentialOnly
     @Stateful
-    public static class DisposableBooleanArray implements NoCachingNoUpdating {
+    public static class DisposableBooleanArray implements NoCachingNoUpdating, Cloneable {
 
         /** The a. */
         private final boolean[] a;
@@ -315,7 +315,7 @@ public interface NoCachingNoUpdating {
     @Beta
     @SequentialOnly
     @Stateful
-    public static class DisposableCharArray implements NoCachingNoUpdating {
+    public static class DisposableCharArray implements NoCachingNoUpdating, Cloneable {
 
         /** The a. */
         private final char[] a;
@@ -464,7 +464,7 @@ public interface NoCachingNoUpdating {
     @Beta
     @SequentialOnly
     @Stateful
-    public static class DisposableByteArray implements NoCachingNoUpdating {
+    public static class DisposableByteArray implements NoCachingNoUpdating, Cloneable {
 
         /** The a. */
         private final byte[] a;
@@ -613,7 +613,7 @@ public interface NoCachingNoUpdating {
     @Beta
     @SequentialOnly
     @Stateful
-    public static class DisposableShortArray implements NoCachingNoUpdating {
+    public static class DisposableShortArray implements NoCachingNoUpdating, Cloneable {
 
         /** The a. */
         private final short[] a;
@@ -762,7 +762,7 @@ public interface NoCachingNoUpdating {
     @Beta
     @SequentialOnly
     @Stateful
-    public static class DisposableIntArray implements NoCachingNoUpdating {
+    public static class DisposableIntArray implements NoCachingNoUpdating, Cloneable {
 
         /** The a. */
         private final int[] a;
@@ -911,7 +911,7 @@ public interface NoCachingNoUpdating {
     @Beta
     @SequentialOnly
     @Stateful
-    public static class DisposableLongArray implements NoCachingNoUpdating {
+    public static class DisposableLongArray implements NoCachingNoUpdating, Cloneable {
 
         /** The a. */
         private final long[] a;
@@ -1060,7 +1060,7 @@ public interface NoCachingNoUpdating {
     @Beta
     @SequentialOnly
     @Stateful
-    public static class DisposableFloatArray implements NoCachingNoUpdating {
+    public static class DisposableFloatArray implements NoCachingNoUpdating, Cloneable {
 
         /** The a. */
         private final float[] a;
@@ -1209,7 +1209,7 @@ public interface NoCachingNoUpdating {
     @Beta
     @SequentialOnly
     @Stateful
-    public static class DisposableDoubleArray implements NoCachingNoUpdating {
+    public static class DisposableDoubleArray implements NoCachingNoUpdating, Cloneable {
 
         /** The a. */
         private final double[] a;
