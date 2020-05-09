@@ -4252,27 +4252,29 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public <R, A, RR> RR collectAndThen(Collector<? super T, A, R> downstream, Function<? super R, RR> func) {
+    public <R, A, RR, E extends Exception> RR collectAndThen(Collector<? super T, A, R> downstream, Throwables.Function<? super R, RR, E> func) throws E {
         return func.apply(collect(downstream));
     }
 
     @Override
-    public <R, A, RR> RR collectAndThen(java.util.stream.Collector<? super T, A, R> downstream, java.util.function.Function<? super R, RR> func) {
+    public <R, A, RR, E extends Exception> RR collectAndThen(java.util.stream.Collector<? super T, A, R> downstream, Throwables.Function<? super R, RR, E> func)
+            throws E {
         return func.apply(collect(downstream));
     }
 
     @Override
-    public <R> R toListAndThen(final Function<? super List<T>, R> func) {
+    public <R, E extends Exception> R toListAndThen(final Throwables.Function<? super List<T>, R, E> func)throws E {
         return func.apply(toList());
     }
 
     @Override
-    public <R> R toSetAndThen(final Function<? super Set<T>, R> func) {
+    public <R, E extends Exception> R toSetAndThen(final Throwables.Function<? super Set<T>, R, E> func) throws E {
         return func.apply(toSet());
     }
 
     @Override
-    public <R, CC extends Collection<T>> R toCollectionAndThen(final Supplier<? extends CC> supplier, final Function<? super CC, R> func) {
+    public <R, CC extends Collection<T>, E extends Exception> R toCollectionAndThen(final Supplier<? extends CC> supplier,
+            final Throwables.Function<? super CC, R, E> func) throws E {
         return func.apply(toCollection(supplier));
     }
 

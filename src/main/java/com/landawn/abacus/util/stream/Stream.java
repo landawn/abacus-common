@@ -2133,23 +2133,23 @@ public abstract class Stream<T>
 
     @ParallelSupported
     @TerminalOp
-    public abstract <R, A, RR> RR collectAndThen(Collector<? super T, A, R> downstream, Function<? super R, RR> func);
+    public abstract <R, A, RR, E extends Exception> RR collectAndThen(Collector<? super T, A, R> downstream, Throwables.Function<? super R, RR, E> func) throws E;
 
     @ParallelSupported
     @TerminalOp
-    public abstract <R, A, RR> RR collectAndThen(java.util.stream.Collector<? super T, A, R> downstream, java.util.function.Function<? super R, RR> func);
+    public abstract <R, A, RR, E extends Exception> RR collectAndThen(java.util.stream.Collector<? super T, A, R> downstream, Throwables.Function<? super R, RR, E> func) throws E;
 
     @SequentialOnly
     @TerminalOp
-    public abstract <R> R toListAndThen(Function<? super List<T>, R> func);
+    public abstract <R, E extends Exception> R toListAndThen(Throwables.Function<? super List<T>, R, E> func) throws E ;
 
     @SequentialOnly
     @TerminalOp
-    public abstract <R> R toSetAndThen(Function<? super Set<T>, R> func);
+    public abstract <R, E extends Exception> R toSetAndThen(Throwables.Function<? super Set<T>, R, E> func) throws E ;
 
     @SequentialOnly
     @TerminalOp
-    public abstract <R, CC extends Collection<T>> R toCollectionAndThen(final Supplier<? extends CC> supplier, final Function<? super CC, R> func);
+    public abstract <R, CC extends Collection<T>, E extends Exception> R toCollectionAndThen(Supplier<? extends CC> supplier, Throwables.Function<? super CC, R, E> func) throws E;
 
     @ParallelSupported
     @TerminalOp

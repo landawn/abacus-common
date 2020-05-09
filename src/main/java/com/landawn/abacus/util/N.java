@@ -6885,10 +6885,6 @@ public final class N extends CommonUtil {
      * @return <code>true</code> if there is one or more duplicated elements are removed. otherwise <code>false</code> is returned.
      */
     public static boolean removeDuplicates(final Collection<?> c) {
-        if (isNullOrEmpty(c) || c.size() == 1) {
-            return false;
-        }
-
         return removeDuplicates(c, false);
     }
 
@@ -6901,8 +6897,18 @@ public final class N extends CommonUtil {
      */
     @SuppressWarnings("rawtypes")
     public static boolean removeDuplicates(final Collection<?> c, final boolean isSorted) {
-        if (isNullOrEmpty(c) || c.size() == 1) {
+        if (isNullOrEmpty(c) || c.size() == 1 || c instanceof Set) {
             return false;
+        } else if (c.size() == 2) {
+            final Iterator<?> iter = c.iterator();
+            final Object first = iter.next();
+
+            if (N.equals(first, iter.next())) {
+                iter.remove();
+                return true;
+            } else {
+                return false;
+            }
         }
 
         if (isSorted) {

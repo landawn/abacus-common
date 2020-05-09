@@ -1503,6 +1503,52 @@ public interface DataSet {
             Collection<String> valueColumnNames, int fromRowIndex, int toRowIndex, IntFunction<? extends M> supplier);
 
     /**
+     * 
+     * @param <T>
+     * @param entityClass
+     * @return
+     */
+    <T> List<T> toMergedEntities(Class<T> entityClass);
+
+    /**
+     * 
+     * @param <T>
+     * @param entityClass
+     * @param selectPropNames
+     * @return
+     */
+    <T> List<T> toMergedEntities(Class<T> entityClass, Collection<String> selectPropNames);
+
+    /**
+     * 
+     * @param <T>
+     * @param entityClass
+     * @param idPropName
+     * @return
+     */
+    <T> List<T> toMergedEntities(Class<T> entityClass, String idPropName);
+
+    /**
+     * 
+     * @param <T>
+     * @param entityClass
+     * @param idPropName
+     * @param selectPropNames
+     * @return
+     */
+    <T> List<T> toMergedEntities(Class<T> entityClass, String idPropName, Collection<String> selectPropNames);
+
+    /**
+     * 
+     * @param <T>
+     * @param entityClass
+     * @param idPropNames
+     * @param selectPropNames
+     * @return
+     */
+    <T> List<T> toMergedEntities(Class<T> entityClass, List<String> idPropNames, Collection<String> selectPropNames);
+
+    /**
      *
      * @return
      */
@@ -2138,7 +2184,7 @@ public interface DataSet {
      *
      * @param columnNames
      * @return 
-     */ 
+     */
     DataSet groupBy(Collection<String> columnNames);
 
     /**
@@ -3571,6 +3617,14 @@ public interface DataSet {
      * @return
      */
     PaginatedDataSet paginate(int pageSize);
+
+    /**
+     * 
+     * @param columnNames
+     * @param pageSize
+     * @return
+     */
+    PaginatedDataSet paginate(Collection<String> columnNames, int pageSize);
 
     /**
      *

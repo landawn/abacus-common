@@ -1,3 +1,9 @@
+### 1.20.26
+
+* Add `DataSet.toMergedEntities`.
+* Improvements and bug fix.
+
+
 ### 1.20.25
 
 * Improvements and bug fix.

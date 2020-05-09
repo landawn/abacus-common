@@ -93,6 +93,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import com.landawn.abacus.DataSet;
 import com.landawn.abacus.annotation.Id;
+import com.landawn.abacus.annotation.Immutable;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.ReadOnlyId;
 import com.landawn.abacus.core.DirtyMarkerUtil;
@@ -437,8 +438,8 @@ public final class ClassUtil {
     /** The Constant entityInlinePropGetMethodPool. */
     private static final Map<Class<?>, Map<String, List<Method>>> entityInlinePropGetMethodPool = new ObjectPool<>(POOL_SIZE);
 
-    /** The Constant entityInlinePropSetMethodPool. */
-    private static final Map<Class<?>, Map<String, List<Method>>> entityInlinePropSetMethodPool = new ObjectPool<>(POOL_SIZE);
+    //    /** The Constant entityInlinePropSetMethodPool. */
+    //    private static final Map<Class<?>, Map<String, List<Method>>> entityInlinePropSetMethodPool = new ObjectPool<>(POOL_SIZE);
 
     /** The Constant formalizedPropNamePool. */
     // ...
@@ -2465,7 +2466,9 @@ public final class ClassUtil {
      * @param entity
      * @param propName is case insensitive
      * @param propValue
+     * @deprecated replaced by {@link EntityInfo#setPropValue(Object, String, Object)}
      */
+    @Deprecated
     public static void setPropValue(final Object entity, final String propName, final Object propValue) {
         setPropValue(entity, propName, propValue, false);
     }
@@ -2479,108 +2482,112 @@ public final class ClassUtil {
      * @param ignoreUnknownProperty
      * @return true if the property value has been set.
      * @throws IllegalArgumentException if the specified property can't be set and ignoreUnknownProperty is false.
+     * @deprecated replaced by {@link EntityInfo#setPropValue(Object, String, Object, boolean)}
      */
+    @Deprecated
     public static boolean setPropValue(final Object entity, final String propName, final Object propValue, final boolean ignoreUnknownProperty) {
-        final Class<?> cls = entity.getClass();
-        final PropInfo propInfo = ParserUtil.getEntityInfo(cls).getPropInfo(propName);
+        //    final Class<?> cls = entity.getClass();
+        //    final PropInfo propInfo = ParserUtil.getEntityInfo(cls).getPropInfo(propName);
+        //
+        //    if (propInfo != null) {
+        //        propInfo.setPropValue(entity, propValue);
+        //    } else {
+        //        Method getMethod = getPropGetMethod(cls, propName);
+        //
+        //        if (getMethod == null) {
+        //            Map<String, List<Method>> inlinePropSetMethodMap = entityInlinePropSetMethodPool.get(cls);
+        //            List<Method> inlinePropSetMethodQueue = null;
+        //
+        //            if (inlinePropSetMethodMap == null) {
+        //                inlinePropSetMethodMap = new ObjectPool<>(ClassUtil.getPropNameList(cls).size());
+        //                entityInlinePropSetMethodPool.put(cls, inlinePropSetMethodMap);
+        //            } else {
+        //                inlinePropSetMethodQueue = inlinePropSetMethodMap.get(propName);
+        //            }
+        //
+        //            if (inlinePropSetMethodQueue == null) {
+        //                inlinePropSetMethodQueue = new ArrayList<>();
+        //
+        //                final String[] strs = Splitter.with(PROP_NAME_SEPARATOR).splitToArray(propName);
+        //
+        //                if (strs.length > 1) {
+        //                    Method setMethod = null;
+        //                    Class<?> propClass = cls;
+        //
+        //                    for (int i = 0, len = strs.length; i < len; i++) {
+        //                        if (i == (len - 1)) {
+        //                            setMethod = getPropSetMethod(propClass, strs[i]);
+        //
+        //                            if (setMethod == null) {
+        //                                getMethod = getPropGetMethod(propClass, strs[i]);
+        //
+        //                                if (getMethod == null) {
+        //                                    inlinePropSetMethodQueue.clear();
+        //
+        //                                    break;
+        //                                }
+        //
+        //                                inlinePropSetMethodQueue.add(getMethod);
+        //                            } else {
+        //                                inlinePropSetMethodQueue.add(setMethod);
+        //                            }
+        //                        } else {
+        //                            getMethod = getPropGetMethod(propClass, strs[i]);
+        //
+        //                            if (getMethod == null) {
+        //                                inlinePropSetMethodQueue.clear();
+        //
+        //                                break;
+        //                            }
+        //
+        //                            inlinePropSetMethodQueue.add(getMethod);
+        //                            propClass = getMethod.getReturnType();
+        //                        }
+        //                    }
+        //                }
+        //
+        //                inlinePropSetMethodMap.put(propName, N.isNullOrEmpty(inlinePropSetMethodQueue) ? N.<Method> emptyList() : inlinePropSetMethodQueue);
+        //            }
+        //
+        //            if (inlinePropSetMethodQueue.size() == 0) {
+        //                if (ignoreUnknownProperty) {
+        //                    return false;
+        //                } else {
+        //                    throw new IllegalArgumentException("No property method found with property name: " + propName + " in class " + cls.getCanonicalName());
+        //                }
+        //            } else {
+        //                Object propEntity = entity;
+        //                Method method = null;
+        //
+        //                for (int i = 0, len = inlinePropSetMethodQueue.size(); i < len; i++) {
+        //                    method = inlinePropSetMethodQueue.get(i);
+        //
+        //                    if (i == (len - 1)) {
+        //                        if (N.isNullOrEmpty(method.getParameterTypes())) {
+        //                            setPropValueByGet(propEntity, method, propValue);
+        //                        } else {
+        //                            setPropValue(propEntity, method, propValue);
+        //                        }
+        //                    } else {
+        //                        Object tmp = ClassUtil.getPropValue(propEntity, method);
+        //
+        //                        if (tmp == null) {
+        //                            tmp = N.newInstance(method.getReturnType());
+        //                            ClassUtil.setPropValue(propEntity, ClassUtil.getPropNameByMethod(method), tmp);
+        //                        }
+        //
+        //                        propEntity = tmp;
+        //                    }
+        //                }
+        //            }
+        //        } else {
+        //            setPropValueByGet(entity, getMethod, propValue);
+        //        }
+        //    }
+        //
+        //    return true;
 
-        if (propInfo != null) {
-            propInfo.setPropValue(entity, propValue);
-        } else {
-            Method getMethod = getPropGetMethod(cls, propName);
-
-            if (getMethod == null) {
-                Map<String, List<Method>> inlinePropSetMethodMap = entityInlinePropSetMethodPool.get(cls);
-                List<Method> inlinePropSetMethodQueue = null;
-
-                if (inlinePropSetMethodMap == null) {
-                    inlinePropSetMethodMap = new ObjectPool<>(ClassUtil.getPropNameList(cls).size());
-                    entityInlinePropSetMethodPool.put(cls, inlinePropSetMethodMap);
-                } else {
-                    inlinePropSetMethodQueue = inlinePropSetMethodMap.get(propName);
-                }
-
-                if (inlinePropSetMethodQueue == null) {
-                    inlinePropSetMethodQueue = new ArrayList<>();
-
-                    final String[] strs = Splitter.with(PROP_NAME_SEPARATOR).splitToArray(propName);
-
-                    if (strs.length > 1) {
-                        Method setMethod = null;
-                        Class<?> propClass = cls;
-
-                        for (int i = 0, len = strs.length; i < len; i++) {
-                            if (i == (len - 1)) {
-                                setMethod = getPropSetMethod(propClass, strs[i]);
-
-                                if (setMethod == null) {
-                                    getMethod = getPropGetMethod(propClass, strs[i]);
-
-                                    if (getMethod == null) {
-                                        inlinePropSetMethodQueue.clear();
-
-                                        break;
-                                    }
-
-                                    inlinePropSetMethodQueue.add(getMethod);
-                                } else {
-                                    inlinePropSetMethodQueue.add(setMethod);
-                                }
-                            } else {
-                                getMethod = getPropGetMethod(propClass, strs[i]);
-
-                                if (getMethod == null) {
-                                    inlinePropSetMethodQueue.clear();
-
-                                    break;
-                                }
-
-                                inlinePropSetMethodQueue.add(getMethod);
-                                propClass = getMethod.getReturnType();
-                            }
-                        }
-                    }
-
-                    inlinePropSetMethodMap.put(propName, N.isNullOrEmpty(inlinePropSetMethodQueue) ? N.<Method> emptyList() : inlinePropSetMethodQueue);
-                }
-
-                if (inlinePropSetMethodQueue.size() == 0) {
-                    if (ignoreUnknownProperty) {
-                        return false;
-                    } else {
-                        throw new IllegalArgumentException("No property method found with property name: " + propName + " in class " + cls.getCanonicalName());
-                    }
-                } else {
-                    Object propEntity = entity;
-                    Method method = null;
-
-                    for (int i = 0, len = inlinePropSetMethodQueue.size(); i < len; i++) {
-                        method = inlinePropSetMethodQueue.get(i);
-
-                        if (i == (len - 1)) {
-                            if (N.isNullOrEmpty(method.getParameterTypes())) {
-                                setPropValueByGet(propEntity, method, propValue);
-                            } else {
-                                setPropValue(propEntity, method, propValue);
-                            }
-                        } else {
-                            Object tmp = ClassUtil.getPropValue(propEntity, method);
-
-                            if (tmp == null) {
-                                tmp = N.newInstance(method.getReturnType());
-                                ClassUtil.setPropValue(propEntity, ClassUtil.getPropNameByMethod(method), tmp);
-                            }
-
-                            propEntity = tmp;
-                        }
-                    }
-                }
-            } else {
-                setPropValueByGet(entity, getMethod, propValue);
-            }
-        }
-
-        return true;
+        return ParserUtil.getEntityInfo(entity.getClass()).setPropValue(entity, propName, propValue, ignoreUnknownProperty);
     }
 
     /**
@@ -2815,20 +2822,21 @@ public final class ClassUtil {
     }
 
     /** The Constant idPropNamesMap. */
-    private static final Map<Class<?>, List<String>> idPropNamesMap = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, ImmutableList<String>> idPropNamesMap = new ConcurrentHashMap<>();
 
     /** The Constant fakeIds. */
-    private static final List<String> fakeIds = ImmutableList.of("not_defined_fake_id_in_abacus_" + N.uuid());
+    private static final ImmutableList<String> fakeIds = ImmutableList.of("not_defined_fake_id_in_abacus_" + N.uuid());
 
     /**
      * Gets the id field names.
      *
      * @param targetClass
-     * @return
+     * @return an immutable List.
      * @deprecated for internal only.
      */
     @Deprecated
     @Internal
+    @Immutable
     public static List<String> getIdFieldNames(final Class<?> targetClass) {
         return getIdFieldNames(targetClass, false);
     }
@@ -2838,13 +2846,14 @@ public final class ClassUtil {
      *
      * @param targetClass
      * @param fakeIdForEmpty
-     * @return
+     * @return an immutable List.
      * @deprecated for internal only.
      */
     @Deprecated
     @Internal
+    @Immutable
     public static List<String> getIdFieldNames(final Class<?> targetClass, boolean fakeIdForEmpty) {
-        List<String> idPropNames = idPropNamesMap.get(targetClass);
+        ImmutableList<String> idPropNames = idPropNamesMap.get(targetClass);
 
         if (idPropNames == null) {
             final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);

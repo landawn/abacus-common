@@ -2788,6 +2788,18 @@ public final class Throwables {
         void accept(T t, double value) throws E;
     }
 
+    public static interface BiIntObjConsumer<T, E extends Throwable> {
+
+        /**
+         * 
+         * @param i
+         * @param j
+         * @param t
+         * @throws E
+         */
+        void accept(int i, int j, T t) throws E;
+    }
+
     public static final class EE {
         private EE() {
             // Singleton. Utility class.

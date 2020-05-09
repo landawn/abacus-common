@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -114,6 +115,9 @@ import com.landawn.abacus.util.stream.Stream;
  * @since 0.8
  */
 public class RowDataSet implements DataSet, Cloneable {
+
+    /** The Constant PROP_NAME_SEPARATOR. */
+    static final char PROP_NAME_SEPARATOR = '.';
 
     /** The Constant NULL_STRING. */
     static final String NULL_STRING = "null".intern();
@@ -2781,23 +2785,24 @@ public class RowDataSet implements DataSet, Cloneable {
 
             final boolean ignoreUnknownProperty = columnNames == _columnNameList;
             final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
+            List<Object> column = null;
             String propName = null;
             PropInfo propInfo = null;
 
             for (int columnIndex : columnIndexes) {
+                column = _columnList.get(columnIndex);
                 propName = _columnNameList.get(columnIndex);
                 propInfo = entityInfo.getPropInfo(propName);
 
                 if (propInfo == null) {
                     for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                        if (entityInfo.setPropValue(rowList.get(rowIndex - fromRowIndex), propName, _columnList.get(columnIndex).get(rowIndex),
-                                ignoreUnknownProperty) == false) {
+                        if (entityInfo.setPropValue(rowList.get(rowIndex - fromRowIndex), propName, column.get(rowIndex), ignoreUnknownProperty) == false) {
                             break;
                         }
                     }
                 } else {
                     for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                        propInfo.setPropValue(rowList.get(rowIndex - fromRowIndex), _columnList.get(columnIndex).get(rowIndex));
+                        propInfo.setPropValue(rowList.get(rowIndex - fromRowIndex), column.get(rowIndex));
                     }
                 }
             }
@@ -2924,23 +2929,24 @@ public class RowDataSet implements DataSet, Cloneable {
 
             final boolean ignoreUnknownProperty = columnNames == _columnNameList;
             final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
+            List<Object> column = null;
             String propName = null;
             PropInfo propInfo = null;
 
             for (int columnIndex : columnIndexes) {
+                column = _columnList.get(columnIndex);
                 propName = _columnNameList.get(columnIndex);
                 propInfo = entityInfo.getPropInfo(propName);
 
                 if (propInfo == null) {
                     for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                        if (entityInfo.setPropValue(rowList.get(rowIndex - fromRowIndex), propName, _columnList.get(columnIndex).get(rowIndex),
-                                ignoreUnknownProperty) == false) {
+                        if (entityInfo.setPropValue(rowList.get(rowIndex - fromRowIndex), propName, column.get(rowIndex), ignoreUnknownProperty) == false) {
                             break;
                         }
                     }
                 } else {
                     for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                        propInfo.setPropValue(rowList.get(rowIndex - fromRowIndex), _columnList.get(columnIndex).get(rowIndex));
+                        propInfo.setPropValue(rowList.get(rowIndex - fromRowIndex), column.get(rowIndex));
                     }
                 }
             }
@@ -3613,6 +3619,255 @@ public class RowDataSet implements DataSet, Cloneable {
         }
 
         return resultMap;
+    }
+
+    @Override
+    public <T> List<T> toMergedEntities(final Class<T> entityClass) {
+        return toMergedEntities(entityClass, this._columnNameList);
+    }
+
+    @Override
+    public <T> List<T> toMergedEntities(final Class<T> entityClass, final Collection<String> selectPropNames) {
+        N.checkArgNotNull(entityClass, "entityClass");
+
+        @SuppressWarnings("deprecation")
+        final List<String> idPropNames = ClassUtil.getIdFieldNames(entityClass);
+
+        if (N.isNullOrEmpty(idPropNames)) {
+            throw new IllegalArgumentException("No id property defined in class: " + entityClass);
+        }
+
+        return toMergedEntities(entityClass, idPropNames, selectPropNames);
+    }
+
+    @Override
+    public <T> List<T> toMergedEntities(final Class<T> entityClass, final String idPropName) {
+        return toMergedEntities(entityClass, idPropName, this._columnNameList);
+    }
+
+    @Override
+    public <T> List<T> toMergedEntities(final Class<T> entityClass, final String idPropName, final Collection<String> selectPropNames) {
+        return toMergedEntities(entityClass, N.asList(idPropName), selectPropNames);
+    }
+
+    @Override
+    public <T> List<T> toMergedEntities(final Class<T> entityClass, final List<String> idPropNames, final Collection<String> selectPropNames) {
+        return toMergedEntities(entityClass, idPropNames, selectPropNames, false);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private <T> List<T> toMergedEntities(final Class<T> entityClass, final List<String> idPropNames, Collection<String> selectPropNames,
+            final boolean returnAllList) {
+        N.checkArgNotNull(entityClass, "entityClass");
+        N.checkArgNotNull(idPropNames, "idPropNames");
+        N.checkArgument(this._columnNameList.containsAll(idPropNames), "Some id properties {} are not found in DataSet: {}", idPropNames, this._columnNameList);
+        N.checkArgument(N.isNullOrEmpty(selectPropNames) || selectPropNames == this._columnNameList || this._columnNameList.containsAll(selectPropNames),
+                "Some select properties {} are not found in DataSet: {}", selectPropNames, this._columnNameList);
+
+        selectPropNames = N.isNullOrEmpty(selectPropNames) ? this._columnNameList : selectPropNames;
+
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
+
+        final int rowCount = size();
+        final int columnCount = _columnList.size();
+        final int[] idColumnIndexes = getColumnIndexes(idPropNames);
+        final boolean ignoreUnknownProperty = selectPropNames == this._columnNameList;
+
+        final Object[] resultEntities = new Object[rowCount];
+        final Map<Object, Object> idEntityMap = new LinkedHashMap<>(N.min(64, rowCount));
+        Object entity = null;
+
+        if (idColumnIndexes.length == 1) {
+            final List<Object> idColumn = _columnList.get(idColumnIndexes[0]);
+            Object rowKey = null;
+            Object key = null;
+
+            for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+                key = idColumn.get(rowIndex);
+
+                if (key == null) {
+                    continue;
+                }
+
+                rowKey = getHashKey(key);
+                entity = idEntityMap.get(rowKey);
+
+                if (entity == null) {
+                    entity = N.newInstance(entityClass);
+                    idEntityMap.put(rowKey, entity);
+                }
+
+                resultEntities[rowIndex] = entity;
+            }
+        } else {
+            final int idColumnCount = idColumnIndexes.length;
+
+            Object[] keyRow = Objectory.createObjectArray(idColumnCount);
+            Wrapper<Object[]> rowKey = null;
+            boolean isAllKeyNull = true;
+
+            for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+                isAllKeyNull = true;
+
+                for (int i = 0; i < idColumnCount; i++) {
+                    keyRow[i] = _columnList.get(idColumnIndexes[i]).get(rowIndex);
+
+                    if (keyRow[i] != null) {
+                        isAllKeyNull = false;
+                    }
+                }
+
+                if (isAllKeyNull) {
+                    continue;
+                }
+
+                rowKey = Wrapper.of(keyRow);
+                entity = idEntityMap.get(rowKey);
+
+                if (entity == null) {
+                    entity = N.newInstance(entityClass);
+                    idEntityMap.put(rowKey, entity);
+
+                    keyRow = Objectory.createObjectArray(idColumnCount);
+                }
+
+                resultEntities[rowIndex] = entity;
+            }
+
+            if (keyRow != null) {
+                Objectory.recycle(keyRow);
+                keyRow = null;
+            }
+        }
+
+        final List<Collection<Object>> listPropValuesToDeduplicate = new ArrayList<>();
+
+        try {
+            final Set<String> mergedPropNames = new HashSet<>();
+            List<Object> curColumn = null;
+            int curColumnIndex = 0;
+            PropInfo propInfo = null;
+
+            for (String propName : selectPropNames) {
+                if (mergedPropNames.contains(propName)) {
+                    continue;
+                }
+
+                curColumnIndex = checkColumnName(propName);
+                curColumn = _columnList.get(curColumnIndex);
+
+                propInfo = entityInfo.getPropInfo(propName);
+
+                if (propInfo != null) {
+                    for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+                        if (resultEntities[rowIndex] != null) {
+                            propInfo.setPropValue(resultEntities[rowIndex], curColumn.get(rowIndex));
+                        }
+                    }
+                } else {
+                    final int idx = propName.indexOf(PROP_NAME_SEPARATOR);
+
+                    if (idx <= 0) {
+                        if (ignoreUnknownProperty) {
+                            continue;
+                        } else {
+                            throw new IllegalArgumentException("Property " + propName + " is not found in class: " + entityClass);
+                        }
+                    } else {
+                        final String realPropName = propName.substring(0, idx);
+                        propInfo = entityInfo.getPropInfo(realPropName);
+
+                        if (propInfo == null) {
+                            if (ignoreUnknownProperty) {
+                                continue;
+                            } else {
+                                throw new IllegalArgumentException("Property " + propName + " is not found in class: " + entityClass);
+                            }
+                        } else {
+                            final Type<?> propEntityType = propInfo.type.isCollection() ? propInfo.type.getElementType() : propInfo.type;
+
+                            if (!propEntityType.isEntity()) {
+                                throw new UnsupportedOperationException("Property: " + propInfo.name + " in class: " + entityClass + " is not an entity type");
+                            }
+
+                            final Class<?> propEntityClass = propEntityType.clazz();
+                            @SuppressWarnings("deprecation")
+                            final List<String> propEntityIdPropNames = ClassUtil.getIdFieldNames(propEntityClass);
+                            final List<String> newPropEntityIdNames = N.isNullOrEmpty(propEntityIdPropNames) ? new ArrayList<>() : propEntityIdPropNames;
+                            final List<String> newTmpColumnNameList = new ArrayList<>();
+                            final List<List<Object>> newTmpColumnList = new ArrayList<>();
+
+                            String columnName = null;
+                            String newColumnName = null;
+
+                            for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+                                columnName = this._columnNameList.get(columnIndex);
+
+                                if (columnName.length() > idx && columnName.charAt(idx) == PROP_NAME_SEPARATOR && columnName.startsWith(realPropName)) {
+                                    newColumnName = columnName.substring(idx + 1);
+                                    newTmpColumnNameList.add(newColumnName);
+                                    newTmpColumnList.add(_columnList.get(columnIndex));
+
+                                    mergedPropNames.add(columnName);
+
+                                    if (N.isNullOrEmpty(propEntityIdPropNames) && newColumnName.indexOf(PROP_NAME_SEPARATOR) < 0) {
+                                        newPropEntityIdNames.add(newColumnName);
+                                    }
+                                }
+                            }
+
+                            final RowDataSet tmp = new RowDataSet(newTmpColumnNameList, newTmpColumnList);
+                            final List<?> propValueList = tmp.toMergedEntities(propEntityClass, newPropEntityIdNames, tmp._columnNameList, true);
+
+                            if (propInfo.type.isCollection()) {
+                                Collection<Object> c = null;
+
+                                for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+                                    if (resultEntities[rowIndex] == null || propValueList.get(rowIndex) == null) {
+                                        continue;
+                                    }
+
+                                    c = propInfo.getPropValue(resultEntities[rowIndex]);
+
+                                    if (c == null) {
+                                        c = (Collection<Object>) N.newInstance(propInfo.clazz);
+                                        propInfo.setPropValue(resultEntities[rowIndex], c);
+
+                                        if (!(c instanceof Set)) {
+                                            listPropValuesToDeduplicate.add(c);
+                                        }
+                                    }
+
+                                    c.add(propValueList.get(rowIndex));
+                                }
+                            } else {
+                                for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+                                    if (resultEntities[rowIndex] == null || propValueList.get(rowIndex) == null) {
+                                        continue;
+                                    }
+
+                                    propInfo.setPropValue(resultEntities[rowIndex], propValueList.get(rowIndex));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (N.notNullOrEmpty(listPropValuesToDeduplicate)) {
+                for (Collection<Object> list : listPropValuesToDeduplicate) {
+                    N.removeDuplicates(list);
+                }
+            }
+
+            return returnAllList ? (List<T>) N.asList(resultEntities) : new ArrayList<>((Collection<T>) idEntityMap.values());
+        } finally {
+            if (idColumnIndexes.length > 1) {
+                for (Wrapper<Object[]> e : ((Map<Wrapper<Object[]>, Object>) ((Map) idEntityMap)).keySet()) {
+                    Objectory.recycle(e.value());
+                }
+            }
+        }
     }
 
     /**
@@ -10155,7 +10410,12 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public PaginatedDataSet paginate(final int pageSize) {
-        return new PaginatedRowDataSet(pageSize);
+        return paginate(_columnNameList, pageSize);
+    }
+
+    @Override
+    public PaginatedDataSet paginate(final Collection<String> columnNames, final int pageSize) {
+        return new PaginatedRowDataSet(N.isNullOrEmpty(columnNames) ? _columnNameList : columnNames, pageSize);
     }
 
     //    @SuppressWarnings("rawtypes")
@@ -11190,6 +11450,8 @@ public class RowDataSet implements DataSet, Cloneable {
         /** The page pool. */
         private final Map<Integer, DataSet> pagePool = new HashMap<>();
 
+        private final Collection<String> columnNames;
+
         /** The page size. */
         private final int pageSize;
 
@@ -11204,7 +11466,8 @@ public class RowDataSet implements DataSet, Cloneable {
          *
          * @param pageSize
          */
-        private PaginatedRowDataSet(final int pageSize) {
+        private PaginatedRowDataSet(final Collection<String> columnNames, final int pageSize) {
+            this.columnNames = columnNames;
             this.pageSize = pageSize;
 
             this.totalPages = ((RowDataSet.this.size() % pageSize) == 0) ? (RowDataSet.this.size() / pageSize) : ((RowDataSet.this.size() / pageSize) + 1);
@@ -11292,11 +11555,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 if (page == null) {
                     int offset = pageNum * pageSize;
-                    page = RowDataSet.this.copy(RowDataSet.this.columnNameList(), offset, Math.min(offset + pageSize, RowDataSet.this.size()));
-
-                    if (RowDataSet.this.frozen()) {
-                        page.freeze();
-                    }
+                    page = RowDataSet.this.slice(columnNames, offset, Math.min(offset + pageSize, RowDataSet.this.size()));
 
                     pagePool.put(pageNum, page);
                 }

@@ -28,6 +28,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,7 +80,7 @@ public final class ParserUtil {
     private static final PropInfo PROP_INFO_MASK = new PropInfo("PROP_INFO_MASK");
 
     /** The Constant PROP_NAME_SEPARATOR. */
-    private static final String PROP_NAME_SEPARATOR = ".".intern();
+    private static final char PROP_NAME_SEPARATOR = '.';
 
     /** The Constant GET. */
     // ...
@@ -697,6 +698,7 @@ public final class ParserUtil {
          * @param propValue
          * @param ignoreUnknownProperty
          */
+        @SuppressWarnings("rawtypes")
         public boolean setPropValue(final Object obj, final String propName, final Object propValue, final boolean ignoreUnknownProperty) {
             PropInfo propInfo = getPropInfo(propName);
 
@@ -722,8 +724,21 @@ public final class ParserUtil {
                             subPropValue = propInfo.getPropValue(propEntity);
 
                             if (subPropValue == null) {
-                                subPropValue = N.newInstance(propInfo.clazz);
-                                propInfo.setPropValue(propEntity, subPropValue);
+                                if (propInfo.type.isCollection()) {
+                                    subPropValue = N.newInstance(propInfo.type.getElementType().clazz());
+                                    final Collection c = (Collection) N.newInstance(propInfo.type.clazz());
+                                    c.add(subPropValue);
+                                    propInfo.setPropValue(propEntity, c);
+                                } else {
+                                    subPropValue = N.newInstance(propInfo.clazz);
+                                    propInfo.setPropValue(propEntity, subPropValue);
+                                }
+                            } else if (propInfo.type.isCollection()) {
+                                if (propInfo.type.isList()) {
+                                    subPropValue = ((List) subPropValue).get(0);
+                                } else {
+                                    subPropValue = N.firstOrNullIfEmpty((Collection) subPropValue);
+                                }
                             }
 
                             propEntity = subPropValue;
@@ -790,7 +805,11 @@ public final class ParserUtil {
 
                         propInfoQueue.add(propInfo);
 
-                        propClass = propInfo.clazz;
+                        if (propInfo.type.isCollection()) {
+                            propClass = propInfo.type.getElementType().clazz();
+                        } else {
+                            propClass = propInfo.clazz;
+                        }
                     }
                 }
 

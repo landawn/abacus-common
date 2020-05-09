@@ -24,15 +24,19 @@ import com.landawn.abacus.util.stream.Stream;
  * @since 0.8
  */
 public interface PaginatedDataSet extends Iterable<DataSet> {
+    
     /**
+     * Returns a frozen {@code DataSet}.
      *
-     * @return DataSet
+     * @return a frozen {@code DataSet}.
+     * @see DataSet#slice(java.util.Collection, int, int)
      */
     DataSet currentPage();
 
     /**
      *
-     * @return DataSet
+     * @return a frozen {@code DataSet}.
+     * @see DataSet#slice(java.util.Collection, int, int)
      */
     DataSet previousPage();
 
@@ -45,29 +49,33 @@ public interface PaginatedDataSet extends Iterable<DataSet> {
 
     /**
      *
-     * @return DataSet
+     * @return a frozen {@code DataSet}.
+     * @see DataSet#slice(java.util.Collection, int, int)
      */
     DataSet nextPage();
 
     /**
      * Returns the first page.
      *
-     * @return DataSet
+     * @return a frozen {@code DataSet}.
+     * @see DataSet#slice(java.util.Collection, int, int)
      */
     Optional<DataSet> firstPage();
 
     /**
      * Returns the last page.
      *
-     * @return DataSet
+     * @return a frozen {@code DataSet}.
+     * @see DataSet#slice(java.util.Collection, int, int)
      */
     Optional<DataSet> lastPage();
 
     /**
      *
      * @param pageNum
-     * @return
+     * @return a frozen {@code DataSet}.
      * @throws IllegalArgumentException the illegal argument exception
+     * @see DataSet#slice(java.util.Collection, int, int)
      */
     DataSet getPage(int pageNum);
 

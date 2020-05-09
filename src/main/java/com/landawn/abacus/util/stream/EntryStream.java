@@ -1361,7 +1361,7 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     @SequentialOnly
-    public <R> R toMapAndThen(Function<? super Map<K, V>, R> func) {
+    public <R, E extends Exception> R toMapAndThen(Throwables.Function<? super Map<K, V>, R, E> func) throws E {
         return func.apply(toMap());
     }
 
@@ -1417,12 +1417,12 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     @SequentialOnly
-    public <R> R groupToAndThen(final Function<? super Map<K, List<V>>, R> func) {
+    public <R, E extends Exception> R groupToAndThen(final Throwables.Function<? super Map<K, List<V>>, R, E> func) throws E {
         return func.apply(groupTo());
     }
 
     @SequentialOnly
-    public <M extends Map<K, List<V>>, R> R groupToAndThen(final Supplier<? extends M> mapFactory, final Function<? super M, R> func) {
+    public <M extends Map<K, List<V>>, R, E extends Exception> R groupToAndThen(final Supplier<? extends M> mapFactory, final Throwables.Function<? super M, R, E> func) throws E {
         return func.apply(groupTo(mapFactory));
     }
 
@@ -1515,13 +1515,13 @@ public final class EntryStream<K, V> implements AutoCloseable {
     }
 
     @ParallelSupported
-    public <R, A, RR> RR collectAndThen(final Collector<? super Map.Entry<K, V>, A, R> downstream, final Function<? super R, RR> finisher) {
+    public <R, A, RR, E extends Exception> RR collectAndThen(final Collector<? super Map.Entry<K, V>, A, R> downstream, final Throwables.Function<? super R, RR, E> finisher) throws E {
         return s.collectAndThen(downstream, finisher);
     }
 
     @ParallelSupported
-    public <R, A, RR> RR collectAndThen(final java.util.stream.Collector<? super Map.Entry<K, V>, A, R> downstream,
-            final java.util.function.Function<? super R, RR> finisher) {
+    public <R, A, RR, E extends Exception> RR collectAndThen(final java.util.stream.Collector<? super Map.Entry<K, V>, A, R> downstream,
+            final Throwables.Function<? super R, RR, E> finisher) throws E {
         return s.collectAndThen(downstream, finisher);
     }
 
