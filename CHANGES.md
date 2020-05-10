@@ -1,3 +1,9 @@
+### 1.20.27
+
+* Remove `DataSetUtil`.
+* Improvements and bug fix.
+
+
 ### 1.20.26
 
 * Add `DataSet.toMergedEntities`.

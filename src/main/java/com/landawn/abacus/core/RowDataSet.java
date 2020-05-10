@@ -10190,6 +10190,87 @@ public class RowDataSet implements DataSet, Cloneable {
 
     /**
      *
+     * @param a
+     * @param b
+     * @return
+     */
+    @Override
+    public DataSet merge(final DataSet a, final DataSet b) {
+        return merge(Arrays.asList(a, b));
+    }
+
+    /**
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
+    @Override
+    public DataSet merge(final DataSet a, final DataSet b, final DataSet c) {
+        return merge(Arrays.asList(a, b, c));
+    }
+
+    @Override
+    public DataSet merge(final Collection<? extends DataSet> dss) {
+        final List<DataSet> dsList = new ArrayList<>(N.size(dss) + 1);
+        dsList.add(this);
+        dsList.addAll(dss);
+
+        return doMerge(dsList);
+    }
+
+    private DataSet doMerge(final Collection<? extends DataSet> dss) {
+        if (N.isNullOrEmpty(dss)) {
+            return N.newEmptyDataSet();
+        } else if (dss.size() == 1) {
+            return N.newEmptyDataSet().merge(dss.iterator().next());
+        } else {
+            final Set<String> columnNameSet = N.newLinkedHashSet();
+            final Properties<String, Object> props = new Properties<>();
+            int totalSize = 0;
+
+            for (DataSet ds : dss) {
+                columnNameSet.addAll(ds.columnNameList());
+                totalSize += ds.size();
+
+                if (N.notNullOrEmpty(ds.properties())) {
+                    props.putAll(ds.properties());
+                }
+            }
+
+            final int newColumnCount = columnNameSet.size();
+            final List<String> newColumnNameList = new ArrayList<>(columnNameSet);
+            final List<List<Object>> newColumnList = new ArrayList<>(newColumnCount);
+
+            for (int i = 0; i < newColumnCount; i++) {
+                newColumnList.add(new ArrayList<>(totalSize));
+            }
+
+            for (DataSet ds : dss) {
+                if (ds.size() == 0) {
+                    continue;
+                }
+
+                List<Object> column = null;
+
+                for (int i = 0; i < newColumnCount; i++) {
+                    column = newColumnList.get(i);
+
+                    if (ds.containsColumn(newColumnNameList.get(i))) {
+                        column.addAll(ds.getColumn(newColumnNameList.get(i)));
+                    } else {
+                        N.fill(column, column.size(), column.size() + ds.size(), null);
+                    }
+                }
+            }
+
+            return new RowDataSet(newColumnNameList, newColumnList, props);
+        }
+    }
+
+    /**
+     *
      * @param b
      * @return
      */

@@ -3439,6 +3439,30 @@ public interface DataSet {
      */
     DataSet merge(DataSet from, Collection<String> columnNames, int fromRowIndex, int toRowIndex);
 
+
+    /**
+     *
+     * @param a
+     * @param b
+     * @return
+     */
+     DataSet merge(final DataSet a, final DataSet b);
+
+    /**
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
+    DataSet merge(final DataSet a, final DataSet b, final DataSet c);
+
+    /**
+     *
+     * @param dss
+     * @return
+     */
+    DataSet merge(final Collection<? extends DataSet> dss);
     /**
      *
      * @param b
