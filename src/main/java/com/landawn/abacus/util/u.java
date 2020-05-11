@@ -231,6 +231,24 @@ public class u {
         }
 
         /**
+         *
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws E the e
+         */
+        public <U, E extends Exception> Optional<U> mapToNonNull(final Throwables.Function<? super T, ? extends U, E> mapper) throws E {
+            N.checkArgNotNull(mapper, "mapper");
+
+            if (isPresent()) {
+                return Optional.<U> of(mapper.apply(value));
+            } else {
+                return Optional.<U> empty();
+            }
+        }
+
+        /**
          * Map to boolean.
          *
          * @param <E>
@@ -777,6 +795,16 @@ public class u {
             }
         }
 
+        public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.BooleanFunction<T, E> mapper) throws E {
+            N.checkArgNotNull(mapper, "mapper");
+
+            if (isPresent) {
+                return Optional.of(mapper.apply(value));
+            } else {
+                return Optional.<T> empty();
+            }
+        }
+
         /**
          *
          * @param <E>
@@ -1222,6 +1250,16 @@ public class u {
             }
         }
 
+        public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.CharFunction<T, E> mapper) throws E {
+            N.checkArgNotNull(mapper, "mapper");
+
+            if (isPresent) {
+                return Optional.of(mapper.apply(value));
+            } else {
+                return Optional.<T> empty();
+            }
+        }
+
         /**
          *
          * @param <E>
@@ -1661,6 +1699,16 @@ public class u {
             }
         }
 
+        public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.ByteFunction<T, E> mapper) throws E {
+            N.checkArgNotNull(mapper, "mapper");
+
+            if (isPresent) {
+                return Optional.of(mapper.apply(value));
+            } else {
+                return Optional.<T> empty();
+            }
+        }
+
         /**
          *
          * @param <E>
@@ -2088,6 +2136,16 @@ public class u {
                 return Nullable.of(mapper.apply(value));
             } else {
                 return Nullable.<T> empty();
+            }
+        }
+
+        public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.ShortFunction<T, E> mapper) throws E {
+            N.checkArgNotNull(mapper, "mapper");
+
+            if (isPresent) {
+                return Optional.of(mapper.apply(value));
+            } else {
+                return Optional.<T> empty();
             }
         }
 
@@ -2567,6 +2625,16 @@ public class u {
             }
         }
 
+        public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.IntFunction<T, E> mapper) throws E {
+            N.checkArgNotNull(mapper, "mapper");
+
+            if (isPresent) {
+                return Optional.of(mapper.apply(value));
+            } else {
+                return Optional.<T> empty();
+            }
+        }
+
         /**
          *
          * @param <E>
@@ -3040,6 +3108,16 @@ public class u {
             }
         }
 
+        public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.LongFunction<T, E> mapper) throws E {
+            N.checkArgNotNull(mapper, "mapper");
+
+            if (isPresent) {
+                return Optional.of(mapper.apply(value));
+            } else {
+                return Optional.<T> empty();
+            }
+        }
+
         /**
          *
          * @param <E>
@@ -3479,6 +3557,16 @@ public class u {
                 return Nullable.of(mapper.apply(value));
             } else {
                 return Nullable.<T> empty();
+            }
+        }
+
+        public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.FloatFunction<T, E> mapper) throws E {
+            N.checkArgNotNull(mapper, "mapper");
+
+            if (isPresent) {
+                return Optional.of(mapper.apply(value));
+            } else {
+                return Optional.<T> empty();
             }
         }
 
@@ -3940,6 +4028,16 @@ public class u {
                 return Nullable.of(mapper.apply(value));
             } else {
                 return Nullable.<T> empty();
+            }
+        }
+
+        public <T, E extends Exception> Optional<T> mapToNonNull(final Throwables.DoubleFunction<T, E> mapper) throws E {
+            N.checkArgNotNull(mapper, "mapper");
+
+            if (isPresent) {
+                return Optional.of(mapper.apply(value));
+            } else {
+                return Optional.<T> empty();
             }
         }
 
@@ -4475,6 +4573,24 @@ public class u {
         }
 
         /**
+         *
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws E the e
+         */
+        public <U, E extends Exception> Optional<U> mapToNonNull(Throwables.Function<? super T, ? extends U, E> mapper) throws E {
+            N.checkArgNotNull(mapper, "mapper");
+
+            if (isPresent()) {
+                return Optional.of((U) mapper.apply(value));
+            } else {
+                return Optional.<U> empty();
+            }
+        }
+
+        /**
          * Map to boolean.
          *
          * @param <E>
@@ -4634,6 +4750,25 @@ public class u {
                 return Nullable.of((U) mapper.apply(value));
             } else {
                 return empty();
+            }
+        }
+
+        /**
+         * Map if not null.
+         *
+         * @param <U>
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws E the e
+         */
+        public <U, E extends Exception> Optional<U> mapToNonNullIfNotNull(Throwables.Function<? super T, ? extends U, E> mapper) throws E {
+            N.checkArgNotNull(mapper, "mapper");
+
+            if (isNotNull()) {
+                return Optional.of((U) mapper.apply(value));
+            } else {
+                return Optional.<U> empty();
             }
         }
 

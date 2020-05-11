@@ -1,3 +1,9 @@
+### 1.20.28
+
+* Add `Optional/Nullable/OptionalBoolean/OptionalInt/...OptionalDouble.mapToNonNull`.
+* Improvements and bug fix.
+
+
 ### 1.20.27
 
 * Remove `DataSetUtil`.
