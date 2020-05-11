@@ -5642,6 +5642,16 @@ public class u {
             }
         }
 
+        public <U, E extends Exception> Optional<U> mapToNonNullIfNotNull(final Throwables.Function<? super T, ? extends U, E> mapper) throws E {
+            N.checkArgNotNull(mapper, "mapper");
+
+            if (isNotNull()) {
+                return Optional.of((U) mapper.apply(value));
+            } else {
+                return Optional.<U> empty();
+            }
+        }
+
         /**
          *
          * @param <E>

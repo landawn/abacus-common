@@ -2299,6 +2299,70 @@ class CommonUtil {
         return new RowDataSet(columnNameList, columnList);
     }
 
+    public static DataSet merge(final DataSet a, final DataSet b) {
+        N.checkArgNotNull(a);
+        N.checkArgNotNull(b);
+
+        return a.merge(b);
+    }
+
+    public static DataSet merge(final DataSet a, final DataSet b, final DataSet c) {
+        N.checkArgNotNull(a);
+        N.checkArgNotNull(b);
+        N.checkArgNotNull(c);
+
+        return merge(N.asList(a, b, c));
+    }
+
+    public static DataSet merge(final Collection<? extends DataSet> dss) {
+        if (N.isNullOrEmpty(dss)) {
+            return N.newEmptyDataSet();
+        } else if (dss.size() == 1) {
+            return N.newEmptyDataSet().merge(dss.iterator().next());
+        } else {
+            final Set<String> columnNameSet = N.newLinkedHashSet();
+            final Properties<String, Object> props = new Properties<>();
+            int totalSize = 0;
+
+            for (DataSet ds : dss) {
+                columnNameSet.addAll(ds.columnNameList());
+                totalSize += ds.size();
+
+                if (N.notNullOrEmpty(ds.properties())) {
+                    props.putAll(ds.properties());
+                }
+            }
+
+            final int newColumnCount = columnNameSet.size();
+            final List<String> newColumnNameList = new ArrayList<>(columnNameSet);
+            final List<List<Object>> newColumnList = new ArrayList<>(newColumnCount);
+
+            for (int i = 0; i < newColumnCount; i++) {
+                newColumnList.add(new ArrayList<>(totalSize));
+            }
+
+            for (DataSet ds : dss) {
+                if (ds.size() == 0) {
+                    continue;
+                }
+
+                List<Object> column = null;
+
+                for (int i = 0; i < newColumnCount; i++) {
+                    column = newColumnList.get(i);
+
+                    if (ds.containsColumn(newColumnNameList.get(i))) {
+                        column.addAll(ds.getColumn(newColumnNameList.get(i)));
+                    } else {
+                        N.fill(column, column.size(), column.size() + ds.size(), null);
+                    }
+                }
+            }
+
+            return new RowDataSet(newColumnNameList, newColumnList, props);
+        }
+    }
+
     /**
      * Returns an empty array if the specified collection is null or empty.
      *
