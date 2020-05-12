@@ -3450,15 +3450,6 @@ public interface DataSet {
 
     /**
      *
-     * @param a
-     * @param b
-     * @param c
-     * @return
-     */
-    DataSet merge(final DataSet a, final DataSet b, final DataSet c);
-
-    /**
-     *
      * @param dss
      * @return
      */

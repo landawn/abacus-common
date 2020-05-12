@@ -2319,6 +2319,9 @@ class CommonUtil {
             return N.newEmptyDataSet();
         } else if (dss.size() == 1) {
             return N.newEmptyDataSet().merge(dss.iterator().next());
+        } else if (dss.size() == 2) {
+            final Iterator<? extends DataSet> iter = dss.iterator();
+            return iter.next().merge(iter.next());
         } else {
             final Set<String> columnNameSet = N.newLinkedHashSet();
             final Properties<String, Object> props = new Properties<>();

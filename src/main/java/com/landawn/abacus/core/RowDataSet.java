@@ -10199,18 +10199,6 @@ public class RowDataSet implements DataSet, Cloneable {
         return N.merge(this, a, b);
     }
 
-    /**
-     *
-     * @param a
-     * @param b
-     * @param c
-     * @return
-     */
-    @Override
-    public DataSet merge(final DataSet a, final DataSet b, final DataSet c) {
-        return N.merge(Arrays.asList(this, a, b, c));
-    }
-
     @Override
     public DataSet merge(final Collection<? extends DataSet> dss) {
         if (N.isNullOrEmpty(dss)) {
