@@ -519,47 +519,6 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
         return iterator == null ? empty() : new IteratorIntStream(iterator);
     }
 
-    /**
-     * Lazy evaluation.
-     * @param supplier
-     * @return
-     */
-    public static IntStream of(final Supplier<IntList> supplier) {
-        final IntIterator iter = new IntIteratorEx() {
-            private IntIterator iterator = null;
-
-            @Override
-            public boolean hasNext() {
-                if (iterator == null) {
-                    init();
-                }
-
-                return iterator.hasNext();
-            }
-
-            @Override
-            public int nextInt() {
-                if (iterator == null) {
-                    init();
-                }
-
-                return iterator.nextInt();
-            }
-
-            private void init() {
-                final IntList c = supplier.get();
-
-                if (N.isNullOrEmpty(c)) {
-                    iterator = IntIterator.empty();
-                } else {
-                    iterator = c.iterator();
-                }
-            }
-        };
-
-        return of(iter);
-    }
-
     public static IntStream of(final java.util.stream.IntStream stream) {
         return of(new IntIteratorEx() {
             private PrimitiveIterator.OfInt iter = null;
@@ -643,6 +602,37 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
         };
 
         return of(iter);
+    }
+
+    /**
+     * Lazy evaluation.
+     * <br />
+     *  
+     * This is equal to: {@code Stream.just(supplier).flatMapToInt(it -> it.get().stream())}.
+     * 
+     * @param supplier
+     * @return
+     */
+    public static IntStream of(final Supplier<IntList> supplier) {
+        N.checkArgNotNull(supplier, "supplier");
+
+        return Stream.just(supplier).flatMapToInt(it -> it.get().stream());
+    }
+
+    /**
+     * Lazy evaluation.
+     * <br />
+     *  
+     * This is equal to: {@code Stream.just(supplier).flatMapToInt(it -> it.get())}.
+     *  
+     * @param <T>
+     * @param supplier
+     * @return
+     */
+    public static IntStream from(final Supplier<IntStream> supplier) {
+        N.checkArgNotNull(supplier, "supplier");
+
+        return Stream.just(supplier).flatMapToInt(it -> it.get());
     }
 
     private static final Function<int[], IntStream> flatMapper = new Function<int[], IntStream>() {

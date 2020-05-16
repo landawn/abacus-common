@@ -474,43 +474,33 @@ public abstract class ShortStream
 
     /**
      * Lazy evaluation.
+     * <br />
+     *  
+     * This is equal to: {@code Stream.just(supplier).flatMapToShort(it -> it.get().stream())}.
+     * 
      * @param supplier
      * @return
      */
     public static ShortStream of(final Supplier<ShortList> supplier) {
-        final ShortIterator iter = new ShortIteratorEx() {
-            private ShortIterator iterator = null;
+        N.checkArgNotNull(supplier, "supplier");
 
-            @Override
-            public boolean hasNext() {
-                if (iterator == null) {
-                    init();
-                }
+        return Stream.just(supplier).flatMapToShort(it -> it.get().stream());
+    }
 
-                return iterator.hasNext();
-            }
+    /**
+     * Lazy evaluation.
+     * <br />
+     *  
+     * This is equal to: {@code Stream.just(supplier).flatMapToShort(it -> it.get())}.
+     *  
+     * @param <T>
+     * @param supplier
+     * @return
+     */
+    public static ShortStream from(final Supplier<ShortStream> supplier) {
+        N.checkArgNotNull(supplier, "supplier");
 
-            @Override
-            public short nextShort() {
-                if (iterator == null) {
-                    init();
-                }
-
-                return iterator.nextShort();
-            }
-
-            private void init() {
-                final ShortList c = supplier.get();
-
-                if (N.isNullOrEmpty(c)) {
-                    iterator = ShortIterator.empty();
-                } else {
-                    iterator = c.iterator();
-                }
-            }
-        };
-
-        return of(iter);
+        return Stream.just(supplier).flatMapToShort(it -> it.get());
     }
 
     private static final Function<short[], ShortStream> flatMapper = new Function<short[], ShortStream>() {

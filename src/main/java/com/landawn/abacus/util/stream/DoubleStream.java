@@ -98,7 +98,7 @@ public abstract class DoubleStream
             }
         });
     }
-    
+
     public abstract DoubleStream map(DoubleUnaryOperator mapper);
 
     public abstract IntStream mapToInt(DoubleToIntFunction mapper);
@@ -489,61 +489,6 @@ public abstract class DoubleStream
         return iterator == null ? empty() : new IteratorDoubleStream(iterator);
     }
 
-    /**
-     * Lazy evaluation.
-     * @param supplier
-     * @return
-     */
-    public static DoubleStream of(final Supplier<DoubleList> supplier) {
-        final DoubleIterator iter = new DoubleIteratorEx() {
-            private DoubleIterator iterator = null;
-
-            @Override
-            public boolean hasNext() {
-                if (iterator == null) {
-                    init();
-                }
-
-                return iterator.hasNext();
-            }
-
-            @Override
-            public double nextDouble() {
-                if (iterator == null) {
-                    init();
-                }
-
-                return iterator.nextDouble();
-            }
-
-            private void init() {
-                final DoubleList c = supplier.get();
-
-                if (N.isNullOrEmpty(c)) {
-                    iterator = DoubleIterator.empty();
-                } else {
-                    iterator = c.iterator();
-                }
-            }
-        };
-
-        return of(iter);
-    }
-
-    private static final Function<double[], DoubleStream> flatMapper = new Function<double[], DoubleStream>() {
-        @Override
-        public DoubleStream apply(double[] t) {
-            return DoubleStream.of(t);
-        }
-    };
-
-    private static final Function<double[][], DoubleStream> flatMappper = new Function<double[][], DoubleStream>() {
-        @Override
-        public DoubleStream apply(double[][] t) {
-            return DoubleStream.flatten(t);
-        }
-    };
-
     public static DoubleStream of(final java.util.stream.DoubleStream stream) {
         return of(new DoubleIteratorEx() {
             private PrimitiveIterator.OfDouble iter = null;
@@ -591,6 +536,51 @@ public abstract class DoubleStream
             }
         });
     }
+
+    /**
+     * Lazy evaluation.
+     * <br />
+     *  
+     * This is equal to: {@code Stream.just(supplier).flatMapToDouble(it -> it.get().stream())}.
+     * 
+     * @param supplier
+     * @return
+     */
+    public static DoubleStream of(final Supplier<DoubleList> supplier) {
+        N.checkArgNotNull(supplier, "supplier");
+
+        return Stream.just(supplier).flatMapToDouble(it -> it.get().stream());
+    }
+
+    /**
+     * Lazy evaluation.
+     * <br />
+     *  
+     * This is equal to: {@code Stream.just(supplier).flatMapToDouble(it -> it.get())}.
+     *  
+     * @param <T>
+     * @param supplier
+     * @return
+     */
+    public static DoubleStream from(final Supplier<DoubleStream> supplier) {
+        N.checkArgNotNull(supplier, "supplier");
+
+        return Stream.just(supplier).flatMapToDouble(it -> it.get());
+    }
+
+    private static final Function<double[], DoubleStream> flatMapper = new Function<double[], DoubleStream>() {
+        @Override
+        public DoubleStream apply(double[] t) {
+            return DoubleStream.of(t);
+        }
+    };
+
+    private static final Function<double[][], DoubleStream> flatMappper = new Function<double[][], DoubleStream>() {
+        @Override
+        public DoubleStream apply(double[][] t) {
+            return DoubleStream.flatten(t);
+        }
+    };
 
     public static DoubleStream flatten(final double[][] a) {
         return N.isNullOrEmpty(a) ? empty() : Stream.of(a).flatMapToDouble(flatMapper);
@@ -1657,7 +1647,8 @@ public abstract class DoubleStream
      * @param maxThreadNum
      * @return
      */
-    public static DoubleStream parallelMerge(final Collection<? extends DoubleStream> c, final DoubleBiFunction<MergeResult> nextSelector, final int maxThreadNum) {
+    public static DoubleStream parallelMerge(final Collection<? extends DoubleStream> c, final DoubleBiFunction<MergeResult> nextSelector,
+            final int maxThreadNum) {
         N.checkArgument(maxThreadNum > 0, "'maxThreadNum' must not less than 1");
 
         if (maxThreadNum <= 1) {

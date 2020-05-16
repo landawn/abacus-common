@@ -491,43 +491,33 @@ public abstract class FloatStream
 
     /**
      * Lazy evaluation.
+     * <br />
+     *  
+     * This is equal to: {@code Stream.just(supplier).flatMapToFloat(it -> it.get().stream())}.
+     * 
      * @param supplier
      * @return
      */
     public static FloatStream of(final Supplier<FloatList> supplier) {
-        final FloatIterator iter = new FloatIteratorEx() {
-            private FloatIterator iterator = null;
+        N.checkArgNotNull(supplier, "supplier");
 
-            @Override
-            public boolean hasNext() {
-                if (iterator == null) {
-                    init();
-                }
+        return Stream.just(supplier).flatMapToFloat(it -> it.get().stream());
+    }
 
-                return iterator.hasNext();
-            }
+    /**
+     * Lazy evaluation.
+     * <br />
+     *  
+     * This is equal to: {@code Stream.just(supplier).flatMapToFloat(it -> it.get())}.
+     *  
+     * @param <T>
+     * @param supplier
+     * @return
+     */
+    public static FloatStream from(final Supplier<FloatStream> supplier) {
+        N.checkArgNotNull(supplier, "supplier");
 
-            @Override
-            public float nextFloat() {
-                if (iterator == null) {
-                    init();
-                }
-
-                return iterator.nextFloat();
-            }
-
-            private void init() {
-                final FloatList c = supplier.get();
-
-                if (N.isNullOrEmpty(c)) {
-                    iterator = FloatIterator.empty();
-                } else {
-                    iterator = c.iterator();
-                }
-            }
-        };
-
-        return of(iter);
+        return Stream.just(supplier).flatMapToFloat(it -> it.get());
     }
 
     private static final Function<float[], FloatStream> flatMapper = new Function<float[], FloatStream>() {

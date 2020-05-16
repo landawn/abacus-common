@@ -500,43 +500,33 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
 
     /**
      * Lazy evaluation.
+     * <br />
+     *  
+     * This is equal to: {@code Stream.just(supplier).flatMapToByte(it -> it.get().stream())}.
+     * 
      * @param supplier
      * @return
      */
     public static ByteStream of(final Supplier<ByteList> supplier) {
-        final ByteIterator iter = new ByteIteratorEx() {
-            private ByteIterator iterator = null;
+        N.checkArgNotNull(supplier, "supplier");
 
-            @Override
-            public boolean hasNext() {
-                if (iterator == null) {
-                    init();
-                }
+        return Stream.just(supplier).flatMapToByte(it -> it.get().stream());
+    }
 
-                return iterator.hasNext();
-            }
+    /**
+     * Lazy evaluation.
+     * <br />
+     *  
+     * This is equal to: {@code Stream.just(supplier).flatMapToByte(it -> it.get())}.
+     *  
+     * @param <T>
+     * @param supplier
+     * @return
+     */
+    public static ByteStream from(final Supplier<ByteStream> supplier) {
+        N.checkArgNotNull(supplier, "supplier");
 
-            @Override
-            public byte nextByte() {
-                if (iterator == null) {
-                    init();
-                }
-
-                return iterator.nextByte();
-            }
-
-            private void init() {
-                final ByteList c = supplier.get();
-
-                if (N.isNullOrEmpty(c)) {
-                    iterator = ByteIterator.empty();
-                } else {
-                    iterator = c.iterator();
-                }
-            }
-        };
-
-        return of(iter);
+        return Stream.just(supplier).flatMapToByte(it -> it.get());
     }
 
     private static final Function<byte[], ByteStream> flatMapper = new Function<byte[], ByteStream>() {

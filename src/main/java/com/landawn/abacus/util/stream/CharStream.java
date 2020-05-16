@@ -743,43 +743,33 @@ public abstract class CharStream
 
     /**
      * Lazy evaluation.
+     * <br />
+     *  
+     * This is equal to: {@code Stream.just(supplier).flatMapToChar(it -> it.get().stream())}.
+     * 
      * @param supplier
      * @return
      */
     public static CharStream of(final Supplier<CharList> supplier) {
-        final CharIterator iter = new CharIteratorEx() {
-            private CharIterator iterator = null;
+        N.checkArgNotNull(supplier, "supplier");
 
-            @Override
-            public boolean hasNext() {
-                if (iterator == null) {
-                    init();
-                }
+        return Stream.just(supplier).flatMapToChar(it -> it.get().stream());
+    }
 
-                return iterator.hasNext();
-            }
+    /**
+     * Lazy evaluation.
+     * <br />
+     *  
+     * This is equal to: {@code Stream.just(supplier).flatMapToChar(it -> it.get())}.
+     *  
+     * @param <T>
+     * @param supplier
+     * @return
+     */
+    public static CharStream from(final Supplier<CharStream> supplier) {
+        N.checkArgNotNull(supplier, "supplier");
 
-            @Override
-            public char nextChar() {
-                if (iterator == null) {
-                    init();
-                }
-
-                return iterator.nextChar();
-            }
-
-            private void init() {
-                final CharList c = supplier.get();
-
-                if (N.isNullOrEmpty(c)) {
-                    iterator = CharIterator.empty();
-                } else {
-                    iterator = c.iterator();
-                }
-            }
-        };
-
-        return of(iter);
+        return Stream.just(supplier).flatMapToChar(it -> it.get());
     }
 
     private static final Function<char[], CharStream> flatMapper = new Function<char[], CharStream>() {

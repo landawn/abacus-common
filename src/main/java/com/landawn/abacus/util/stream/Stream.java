@@ -2133,23 +2133,26 @@ public abstract class Stream<T>
 
     @ParallelSupported
     @TerminalOp
-    public abstract <R, A, RR, E extends Exception> RR collectAndThen(Collector<? super T, A, R> downstream, Throwables.Function<? super R, RR, E> func) throws E;
+    public abstract <R, A, RR, E extends Exception> RR collectAndThen(Collector<? super T, A, R> downstream, Throwables.Function<? super R, RR, E> func)
+            throws E;
 
     @ParallelSupported
     @TerminalOp
-    public abstract <R, A, RR, E extends Exception> RR collectAndThen(java.util.stream.Collector<? super T, A, R> downstream, Throwables.Function<? super R, RR, E> func) throws E;
+    public abstract <R, A, RR, E extends Exception> RR collectAndThen(java.util.stream.Collector<? super T, A, R> downstream,
+            Throwables.Function<? super R, RR, E> func) throws E;
 
     @SequentialOnly
     @TerminalOp
-    public abstract <R, E extends Exception> R toListAndThen(Throwables.Function<? super List<T>, R, E> func) throws E ;
+    public abstract <R, E extends Exception> R toListAndThen(Throwables.Function<? super List<T>, R, E> func) throws E;
 
     @SequentialOnly
     @TerminalOp
-    public abstract <R, E extends Exception> R toSetAndThen(Throwables.Function<? super Set<T>, R, E> func) throws E ;
+    public abstract <R, E extends Exception> R toSetAndThen(Throwables.Function<? super Set<T>, R, E> func) throws E;
 
     @SequentialOnly
     @TerminalOp
-    public abstract <R, CC extends Collection<T>, E extends Exception> R toCollectionAndThen(Supplier<? extends CC> supplier, Throwables.Function<? super CC, R, E> func) throws E;
+    public abstract <R, CC extends Collection<T>, E extends Exception> R toCollectionAndThen(Supplier<? extends CC> supplier,
+            Throwables.Function<? super CC, R, E> func) throws E;
 
     @ParallelSupported
     @TerminalOp
@@ -3234,34 +3237,34 @@ public abstract class Stream<T>
         return transfer.apply(this);
     }
 
-//    /**
-//     * 
-//     * @param <U>
-//     * @param <R>
-//     * @param terminalOp should be terminal operation.
-//     * @param mapper
-//     * @return
-//     */
-//    @TerminalOp
-//    @Beta
-//    public <U, R> R __(final Function<? super Stream<T>, U> terminalOp, final Function<U, R> mapper) {
-//        return mapper.apply(terminalOp.apply(this));
-//    }
-//
-//    /**
-//     * 
-//     * @param <R>
-//     * @param terminalOp should be terminal operation.
-//     * @param action
-//     * @return
-//     */
-//    @TerminalOp
-//    @Beta
-//    public <R> R __(final Function<? super Stream<T>, R> terminalOp, final Consumer<R> action) {
-//        final R result = terminalOp.apply(this);
-//        action.accept(result);
-//        return result;
-//    }
+    //    /**
+    //     * 
+    //     * @param <U>
+    //     * @param <R>
+    //     * @param terminalOp should be terminal operation.
+    //     * @param mapper
+    //     * @return
+    //     */
+    //    @TerminalOp
+    //    @Beta
+    //    public <U, R> R __(final Function<? super Stream<T>, U> terminalOp, final Function<U, R> mapper) {
+    //        return mapper.apply(terminalOp.apply(this));
+    //    }
+    //
+    //    /**
+    //     * 
+    //     * @param <R>
+    //     * @param terminalOp should be terminal operation.
+    //     * @param action
+    //     * @return
+    //     */
+    //    @TerminalOp
+    //    @Beta
+    //    public <R> R __(final Function<? super Stream<T>, R> terminalOp, final Consumer<R> action) {
+    //        final R result = terminalOp.apply(this);
+    //        action.accept(result);
+    //        return result;
+    //    }
 
     /**
      * To reduce the memory footprint, Only one instance of <code>DisposableEntry</code> is created,
@@ -3947,6 +3950,10 @@ public abstract class Stream<T>
 
     /**
      * Lazy evaluation.
+     * <br />
+     *  
+     * This is equal to: {@code Stream.just(supplier).flattMap(it -> it.get())}.
+     *  
      * @param supplier
      * @return
      */
@@ -3954,6 +3961,22 @@ public abstract class Stream<T>
         N.checkArgNotNull(supplier, "supplier");
 
         return Stream.just(supplier).flattMap(it -> it.get());
+    }
+
+    /**
+     * Lazy evaluation.
+     * <br />
+     *  
+     * This is equal to: {@code Stream.just(supplier).flatMap(it -> it.get())}.
+     *  
+     * @param <T>
+     * @param supplier
+     * @return
+     */
+    public static <T> Stream<T> from(final Supplier<Stream<? extends T>> supplier) {
+        N.checkArgNotNull(supplier, "supplier");
+
+        return Stream.just(supplier).flatMap(it -> it.get());
     }
 
     public static <K> Stream<K> ofKeys(final Map<K, ?> map) {

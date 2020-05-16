@@ -3520,6 +3520,10 @@ public abstract class SQLBuilder {
     //        return false;
     //    }
 
+    public void println() {
+        N.println(sql());
+    }
+
     /**
      *
      * @return

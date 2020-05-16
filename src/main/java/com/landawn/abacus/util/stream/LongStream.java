@@ -500,47 +500,6 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
         return iterator == null ? empty() : new IteratorLongStream(iterator);
     }
 
-    /**
-     * Lazy evaluation.
-     * @param supplier
-     * @return
-     */
-    public static LongStream of(final Supplier<LongList> supplier) {
-        final LongIterator iter = new LongIteratorEx() {
-            private LongIterator iterator = null;
-
-            @Override
-            public boolean hasNext() {
-                if (iterator == null) {
-                    init();
-                }
-
-                return iterator.hasNext();
-            }
-
-            @Override
-            public long nextLong() {
-                if (iterator == null) {
-                    init();
-                }
-
-                return iterator.nextLong();
-            }
-
-            private void init() {
-                final LongList c = supplier.get();
-
-                if (N.isNullOrEmpty(c)) {
-                    iterator = LongIterator.empty();
-                } else {
-                    iterator = c.iterator();
-                }
-            }
-        };
-
-        return of(iter);
-    }
-
     public static LongStream of(final java.util.stream.LongStream stream) {
         return of(new LongIteratorEx() {
             private PrimitiveIterator.OfLong iter = null;
@@ -587,6 +546,37 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
                 stream.close();
             }
         });
+    }
+
+    /**
+     * Lazy evaluation.
+     * <br />
+     *  
+     * This is equal to: {@code Stream.just(supplier).flatMapToLong(it -> it.get().stream())}.
+     * 
+     * @param supplier
+     * @return
+     */
+    public static LongStream of(final Supplier<LongList> supplier) {
+        N.checkArgNotNull(supplier, "supplier");
+
+        return Stream.just(supplier).flatMapToLong(it -> it.get().stream());
+    }
+
+    /**
+     * Lazy evaluation.
+     * <br />
+     *  
+     * This is equal to: {@code Stream.just(supplier).flatMapToLong(it -> it.get())}.
+     *  
+     * @param <T>
+     * @param supplier
+     * @return
+     */
+    public static LongStream from(final Supplier<LongStream> supplier) {
+        N.checkArgNotNull(supplier, "supplier");
+
+        return Stream.just(supplier).flatMapToLong(it -> it.get());
     }
 
     private static final Function<long[], LongStream> flatMapper = new Function<long[], LongStream>() {

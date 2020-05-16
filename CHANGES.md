@@ -1,3 +1,9 @@
+### 1.20.29
+
+* Add `Stream.from(Supplier<Stream<T>> supplier)`.
+* Improvements and bug fix.
+
+
 ### 1.20.28
 
 * Add `Optional/Nullable/OptionalBoolean/OptionalInt/...OptionalDouble.mapToNonNull`.

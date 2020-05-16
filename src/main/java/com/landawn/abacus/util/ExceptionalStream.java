@@ -603,6 +603,10 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
 
     /**
      * Lazy evaluation.
+     * <br />
+     *  
+     * This is equal to: {@code ExceptionalStream.just(supplier).flattMap(it -> it.get())}.
+     * 
      * @param supplier
      * @return
      */
@@ -613,6 +617,27 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
                 .flattMap(new Throwables.Function<Supplier<Collection<? extends T>>, Collection<? extends T>, E>() {
                     @Override
                     public Collection<? extends T> apply(Supplier<Collection<? extends T>> t) throws E {
+                        return t.get();
+                    }
+                });
+    }
+
+    /**
+     * Lazy evaluation.
+     * <br />
+     *  
+     * This is equal to: {@code ExceptionalStream.just(supplier).flatMap(it -> it.get())}.
+     * 
+     * @param supplier
+     * @return
+     */
+    public static <T, E extends Exception> ExceptionalStream<T, E> from(final Supplier<ExceptionalStream<? extends T, ? extends E>> supplier) {
+        N.checkArgNotNull(supplier, "supplier");
+
+        return ExceptionalStream.<Supplier<ExceptionalStream<? extends T, ? extends E>>, E> just(supplier)
+                .flatMap(new Throwables.Function<Supplier<ExceptionalStream<? extends T, ? extends E>>, ExceptionalStream<? extends T, ? extends E>, E>() {
+                    @Override
+                    public ExceptionalStream<? extends T, ? extends E> apply(Supplier<ExceptionalStream<? extends T, ? extends E>> t) throws E {
                         return t.get();
                     }
                 });
@@ -7074,34 +7099,34 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         return transfer.apply(this);
     }
 
-//    /**
-//     * 
-//     * @param <U>
-//     * @param <R> 
-//     * @param terminalOp should be terminal operation.
-//     * @param mapper
-//     * @return
-//     */
-//    @TerminalOp
-//    @Beta
-//    public <U, R> R __(final Function<? super ExceptionalStream<T, E>, U> terminalOp, final Throwables.Function<U, R, E> mapper) throws E {
-//        return mapper.apply(terminalOp.apply(this));
-//    }
-//
-//    /**
-//     * 
-//     * @param <R>
-//     * @param terminalOp should be terminal operation.
-//     * @param action
-//     * @return
-//     */
-//    @TerminalOp
-//    @Beta
-//    public <R> R __(final Function<? super ExceptionalStream<T, E>, R> terminalOp, final Throwables.Consumer<R, E> action) throws E {
-//        final R result = terminalOp.apply(this);
-//        action.accept(result);
-//        return result;
-//    }
+    //    /**
+    //     * 
+    //     * @param <U>
+    //     * @param <R> 
+    //     * @param terminalOp should be terminal operation.
+    //     * @param mapper
+    //     * @return
+    //     */
+    //    @TerminalOp
+    //    @Beta
+    //    public <U, R> R __(final Function<? super ExceptionalStream<T, E>, U> terminalOp, final Throwables.Function<U, R, E> mapper) throws E {
+    //        return mapper.apply(terminalOp.apply(this));
+    //    }
+    //
+    //    /**
+    //     * 
+    //     * @param <R>
+    //     * @param terminalOp should be terminal operation.
+    //     * @param action
+    //     * @return
+    //     */
+    //    @TerminalOp
+    //    @Beta
+    //    public <R> R __(final Function<? super ExceptionalStream<T, E>, R> terminalOp, final Throwables.Consumer<R, E> action) throws E {
+    //        final R result = terminalOp.apply(this);
+    //        action.accept(result);
+    //        return result;
+    //    }
 
     /**
      *
