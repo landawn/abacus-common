@@ -610,13 +610,13 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @param supplier
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> of(final Supplier<Collection<? extends T>> supplier) {
+    public static <T, E extends Exception> ExceptionalStream<T, E> of(final Throwables.Supplier<Collection<? extends T>, ? extends E> supplier) {
         N.checkArgNotNull(supplier, "supplier");
 
-        return ExceptionalStream.<Supplier<Collection<? extends T>>, E> just(supplier)
-                .flattMap(new Throwables.Function<Supplier<Collection<? extends T>>, Collection<? extends T>, E>() {
+        return ExceptionalStream.<Throwables.Supplier<Collection<? extends T>, ? extends E>, E> just(supplier)
+                .flattMap(new Throwables.Function<Throwables.Supplier<Collection<? extends T>, ? extends E>, Collection<? extends T>, E>() {
                     @Override
-                    public Collection<? extends T> apply(Supplier<Collection<? extends T>> t) throws E {
+                    public Collection<? extends T> apply(Throwables.Supplier<Collection<? extends T>, ? extends E> t) throws E {
                         return t.get();
                     }
                 });
@@ -631,16 +631,19 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      * @param supplier
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> from(final Supplier<ExceptionalStream<? extends T, ? extends E>> supplier) {
+    public static <T, E extends Exception> ExceptionalStream<T, E> from(
+            final Throwables.Supplier<ExceptionalStream<? extends T, ? extends E>, ? extends E> supplier) {
         N.checkArgNotNull(supplier, "supplier");
 
-        return ExceptionalStream.<Supplier<ExceptionalStream<? extends T, ? extends E>>, E> just(supplier)
-                .flatMap(new Throwables.Function<Supplier<ExceptionalStream<? extends T, ? extends E>>, ExceptionalStream<? extends T, ? extends E>, E>() {
-                    @Override
-                    public ExceptionalStream<? extends T, ? extends E> apply(Supplier<ExceptionalStream<? extends T, ? extends E>> t) throws E {
-                        return t.get();
-                    }
-                });
+        return ExceptionalStream.<Throwables.Supplier<ExceptionalStream<? extends T, ? extends E>, ? extends E>, E> just(supplier)
+                .flatMap(
+                        new Throwables.Function<Throwables.Supplier<ExceptionalStream<? extends T, ? extends E>, ? extends E>, ExceptionalStream<? extends T, ? extends E>, E>() {
+                            @Override
+                            public ExceptionalStream<? extends T, ? extends E> apply(
+                                    Throwables.Supplier<ExceptionalStream<? extends T, ? extends E>, ? extends E> t) throws E {
+                                return t.get();
+                            }
+                        });
     }
 
     public static <K, E extends Exception> ExceptionalStream<K, E> ofKeys(final Map<K, ?> map) {
