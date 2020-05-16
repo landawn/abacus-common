@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.stream;
 
+import java.io.Closeable;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -70,7 +71,7 @@ import com.landawn.abacus.util.stream.BaseStream.Splitor;
  * @see BaseStream
  * @see Stream
  */
-public final class EntryStream<K, V> implements AutoCloseable {
+public final class EntryStream<K, V> implements Closeable {
 
     private static final Function<Map<Object, Object>, Stream<Map.Entry<Object, Object>>> mapper_func = new Function<Map<Object, Object>, Stream<Map.Entry<Object, Object>>>() {
         @Override

@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.stream;
 
+import java.io.Closeable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +60,7 @@ import com.landawn.abacus.util.function.Supplier;
  * @see LongStream
  * @see DoubleStream
  */
-public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T, A, P, C, PL, OT, IT, ITER, S>> extends AutoCloseable, Immutable {
+public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T, A, P, C, PL, OT, IT, ITER, S>> extends Closeable, Immutable {
 
     /**
      * Returns a stream consisting of the elements of this stream that match the given predicate.

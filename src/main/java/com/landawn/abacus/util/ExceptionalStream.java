@@ -15,6 +15,7 @@
 package com.landawn.abacus.util;
 
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
@@ -80,7 +81,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @see Stream
  */
 @SequentialOnly
-public class ExceptionalStream<T, E extends Exception> implements AutoCloseable {
+public class ExceptionalStream<T, E extends Exception> implements Closeable {
 
     /** The Constant logger. */
     static final Logger logger = LoggerFactory.getLogger(ExceptionalStream.class);
@@ -7244,7 +7245,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
      */
     @TerminalOp
     @Override
-    public synchronized void close() throws E {
+    public synchronized void close() {
         if (isClosed) {
             return;
         }
@@ -7283,11 +7284,7 @@ public class ExceptionalStream<T, E extends Exception> implements AutoCloseable 
         }
 
         if (ex != null) {
-            if (ex instanceof RuntimeException) {
-                throw (RuntimeException) ex;
-            } else {
-                throw (E) ex;
-            }
+            throw N.toRuntimeException(ex);
         }
     }
 

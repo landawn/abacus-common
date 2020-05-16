@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util;
 
+import java.io.Closeable;
 import java.util.Collection;
 import java.util.Map;
 
@@ -29,7 +30,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @author haiyangl
  * @since 1.3
  */
-public class Joiner implements AutoCloseable {
+public class Joiner implements Closeable {
 
     /** The Constant DEFAULT_DELIMITER. */
     public static final String DEFAULT_DELIMITER = N.ELEMENT_SEPARATOR;
