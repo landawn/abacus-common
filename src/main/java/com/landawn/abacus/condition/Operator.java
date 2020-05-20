@@ -209,6 +209,7 @@ public enum Operator {
      * Field SPACE.
      */
     EMPTY(N.EMPTY_STRING);
+
     /**
      * Field name.
      */

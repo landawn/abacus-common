@@ -68,6 +68,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream distinct() {
+        assertNotClosed();
+
         final Set<Object> set = N.newHashSet();
 
         return newStream(this.sequential().filter(new IntPredicate() {
@@ -80,6 +82,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream flattMap(final IntFunction<int[]> mapper) {
+        assertNotClosed();
+
         return flatMap(new IntFunction<IntStream>() {
             @Override
             public IntStream apply(int t) {
@@ -90,6 +94,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public <T> Stream<T> flattMapToObj(final IntFunction<? extends Collection<T>> mapper) {
+        assertNotClosed();
+
         return flatMapToObj(new IntFunction<Stream<T>>() {
             @Override
             public Stream<T> apply(int t) {
@@ -100,6 +106,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public <T> Stream<T> flatMappToObj(final IntFunction<T[]> mapper) {
+        assertNotClosed();
+
         return flatMapToObj(new IntFunction<Stream<T>>() {
             @Override
             public Stream<T> apply(int t) {
@@ -110,6 +118,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream rangeMap(final IntBiPredicate sameRange, final IntBinaryOperator mapper) {
+        assertNotClosed();
+
         final IntIteratorEx iter = iteratorEx();
 
         return newStream(new IntIteratorEx() {
@@ -143,6 +153,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public <T> Stream<T> rangeMapToObj(final IntBiPredicate sameRange, final IntBiFunction<T> mapper) {
+        assertNotClosed();
+
         final IntIteratorEx iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<T>() {
@@ -176,6 +188,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public Stream<IntList> collapse(final IntBiPredicate collapsible) {
+        assertNotClosed();
+
         final IntIteratorEx iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<IntList>() {
@@ -207,6 +221,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream collapse(final IntBiPredicate collapsible, final IntBinaryOperator mergeFunction) {
+        assertNotClosed();
+
         final IntIteratorEx iter = iteratorEx();
 
         return newStream(new IntIteratorEx() {
@@ -237,6 +253,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream skip(final long n, final IntConsumer action) {
+        assertNotClosed();
+
         final IntPredicate filter = isParallel() ? new IntPredicate() {
             final AtomicLong cnt = new AtomicLong(n);
 
@@ -258,6 +276,7 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream removeIf(final IntPredicate predicate) {
+        assertNotClosed();
 
         return filter(new IntPredicate() {
             @Override
@@ -269,6 +288,7 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream removeIf(final IntPredicate predicate, final IntConsumer actionOnDroppedItem) {
+        assertNotClosed();
 
         return filter(new IntPredicate() {
             @Override
@@ -285,6 +305,7 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream filter(final IntPredicate predicate, final IntConsumer actionOnDroppedItem) {
+        assertNotClosed();
 
         return filter(new IntPredicate() {
             @Override
@@ -301,6 +322,7 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream dropWhile(final IntPredicate predicate, final IntConsumer actionOnDroppedItem) {
+        assertNotClosed();
 
         return dropWhile(new IntPredicate() {
             @Override
@@ -317,6 +339,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream step(final long step) {
+        assertNotClosed();
+
         checkArgPositive(step, "step");
 
         final long skip = step - 1;
@@ -341,6 +365,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public Stream<IntStream> split(final int chunkSize) {
+        assertNotClosed();
+
         return splitToList(chunkSize).map(new Function<IntList, IntStream>() {
             @Override
             public IntStream apply(IntList t) {
@@ -351,6 +377,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public Stream<IntStream> split(final IntPredicate predicate) {
+        assertNotClosed();
+
         return splitToList(predicate).map(new Function<IntList, IntStream>() {
             @Override
             public IntStream apply(IntList t) {
@@ -361,6 +389,7 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public Stream<IntStream> splitBy(final IntPredicate where) {
+        assertNotClosed();
 
         final IntIteratorEx iter = iteratorEx();
 
@@ -469,6 +498,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public Stream<IntStream> sliding(final int windowSize, final int increment) {
+        assertNotClosed();
+
         return slidingToList(windowSize, increment).map(new Function<IntList, IntStream>() {
             @Override
             public IntStream apply(IntList t) {
@@ -479,6 +510,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream scan(final IntBinaryOperator accumulator) {
+        assertNotClosed();
+
         final IntIteratorEx iter = iteratorEx();
 
         return newStream(new IntIteratorEx() {
@@ -504,6 +537,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream scan(final int init, final IntBinaryOperator accumulator) {
+        assertNotClosed();
+
         final IntIteratorEx iter = iteratorEx();
 
         return newStream(new IntIteratorEx() {
@@ -523,6 +558,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream scan(final int init, final IntBinaryOperator accumulator, final boolean initIncluded) {
+        assertNotClosed();
+
         if (initIncluded == false) {
             return scan(init, accumulator);
         }
@@ -552,11 +589,15 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream top(int n) {
+        assertNotClosed();
+
         return top(n, INT_COMPARATOR);
     }
 
     @Override
     public IntStream intersection(final Collection<?> c) {
+        assertNotClosed();
+
         final Multiset<?> multiset = Multiset.from(c);
 
         return newStream(this.sequential().filter(new IntPredicate() {
@@ -569,6 +610,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream difference(final Collection<?> c) {
+        assertNotClosed();
+
         final Multiset<?> multiset = Multiset.from(c);
 
         return newStream(this.sequential().filter(new IntPredicate() {
@@ -581,6 +624,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream symmetricDifference(final Collection<Integer> c) {
+        assertNotClosed();
+
         final Multiset<?> multiset = Multiset.from(c);
 
         return newStream(this.sequential().filter(new IntPredicate() {
@@ -598,6 +643,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream reversed() {
+        assertNotClosed();
+
         return newStream(new IntIteratorEx() {
             private boolean initialized = false;
 
@@ -680,6 +727,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream rotated(final int distance) {
+        assertNotClosed();
+
         return newStream(new IntIteratorEx() {
             private boolean initialized = false;
 
@@ -770,6 +819,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream shuffled(final Random rnd) {
+        assertNotClosed();
+
         checkArgNotNull(rnd, "random");
 
         return lazyLoad(new Function<int[], int[]>() {
@@ -783,6 +834,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream sorted() {
+        assertNotClosed();
+
         if (sorted) {
             return newStream(iteratorEx(), sorted);
         }
@@ -803,6 +856,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public IntStream reverseSorted() {
+        assertNotClosed();
+
         return newStream(new IntIteratorEx() {
             private boolean initialized = false;
             private int[] aar;
@@ -954,6 +1009,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public Stream<IndexedInt> indexed() {
+        assertNotClosed();
+
         final MutableLong idx = MutableLong.of(0);
 
         return newStream(this.sequential().mapToObj(new IntFunction<IndexedInt>() {
@@ -967,53 +1024,73 @@ abstract class AbstractIntStream extends IntStream {
     @Override
     @SafeVarargs
     public final IntStream prepend(final int... a) {
+        assertNotClosed();
+
         return prepend(IntStream.of(a));
     }
 
     @Override
     public IntStream prepend(IntStream stream) {
+        assertNotClosed();
+
         return IntStream.concat(stream, this);
     }
 
     @Override
     @SafeVarargs
     public final IntStream append(final int... a) {
+        assertNotClosed();
+
         return append(IntStream.of(a));
     }
 
     @Override
     public IntStream append(IntStream stream) {
+        assertNotClosed();
+
         return IntStream.concat(this, stream);
     }
 
     @Override
     @SafeVarargs
     public final IntStream appendIfEmpty(final int... a) {
+        assertNotClosed();
+
         return appendIfEmpty(() -> IntStream.of(a));
     }
 
     @Override
     public IntStream merge(IntStream b, IntBiFunction<MergeResult> nextSelector) {
+        assertNotClosed();
+
         return IntStream.merge(this, b, nextSelector);
     }
 
     @Override
     public IntStream zipWith(IntStream b, IntBinaryOperator zipFunction) {
+        assertNotClosed();
+
         return IntStream.zip(this, b, zipFunction);
     }
 
     @Override
     public IntStream zipWith(IntStream b, IntStream c, IntTernaryOperator zipFunction) {
+        assertNotClosed();
+
         return IntStream.zip(this, b, c, zipFunction);
     }
 
     @Override
     public IntStream zipWith(IntStream b, int valueForNoneA, int valueForNoneB, IntBinaryOperator zipFunction) {
+        assertNotClosed();
+
         return IntStream.zip(this, b, valueForNoneA, valueForNoneB, zipFunction);
     }
 
     @Override
     public IntStream zipWith(IntStream b, IntStream c, int valueForNoneA, int valueForNoneB, int valueForNoneC, IntTernaryOperator zipFunction) {
+        assertNotClosed();
+
         return IntStream.zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     }
 
@@ -1024,26 +1101,36 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public <K, V> Map<K, V> toMap(IntFunction<? extends K> keyMapper, IntFunction<? extends V> valueMapper) {
+        assertNotClosed();
+
         return toMap(keyMapper, valueMapper, Suppliers.<K, V> ofMap());
     }
 
     @Override
     public <K, V, M extends Map<K, V>> M toMap(IntFunction<? extends K> keyMapper, IntFunction<? extends V> valueMapper, Supplier<? extends M> mapFactory) {
+        assertNotClosed();
+
         return toMap(keyMapper, valueMapper, Fn.<V> throwingMerger(), mapFactory);
     }
 
     @Override
     public <K, V> Map<K, V> toMap(IntFunction<? extends K> keyMapper, IntFunction<? extends V> valueMapper, BinaryOperator<V> mergeFunction) {
+        assertNotClosed();
+
         return toMap(keyMapper, valueMapper, mergeFunction, Suppliers.<K, V> ofMap());
     }
 
     @Override
     public <K, A, D> Map<K, D> toMap(IntFunction<? extends K> keyMapper, Collector<Integer, A, D> downstream) {
+        assertNotClosed();
+
         return toMap(keyMapper, downstream, Suppliers.<K, D> ofMap());
     }
 
-    @Override 
+    @Override
     public <E extends Exception> void forEachIndexed(Throwables.IndexedIntConsumer<E> action) throws E {
+        assertNotClosed();
+
         if (isParallel()) {
             final AtomicInteger idx = new AtomicInteger(0);
 
@@ -1122,6 +1209,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public <E extends Exception> OptionalInt findAny(final Throwables.IntPredicate<E> predicate) throws E {
+        assertNotClosed();
+
         return findFirst(predicate);
     }
 
@@ -1209,6 +1298,8 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public <R> R collect(Supplier<R> supplier, ObjIntConsumer<? super R> accumulator) {
+        assertNotClosed();
+
         final BiConsumer<R, R> combiner = collectingCombiner;
 
         return collect(supplier, accumulator, combiner);

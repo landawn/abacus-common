@@ -741,6 +741,8 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
 
     @Override
     public OptionalFloat min() {
+        assertNotClosed();
+
         boolean isDone = true;
 
         try {
@@ -800,6 +802,8 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
 
     @Override
     public OptionalFloat max() {
+        assertNotClosed();
+
         boolean isDone = true;
 
         try {
@@ -959,6 +963,8 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
 
     @Override
     public FloatSummaryStatistics summarize() {
+        assertNotClosed();
+
         boolean isDone = true;
 
         try {
@@ -1540,6 +1546,8 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
 
     @Override
     public Stream<Float> boxed() {
+        assertNotClosed();
+
         Stream<Float> tmp = boxed;
 
         if (tmp == null) {
@@ -1552,48 +1560,66 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
 
     @Override
     public FloatStream append(FloatStream stream) {
+        assertNotClosed();
+
         return new ParallelIteratorFloatStream(FloatStream.concat(this, stream), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public FloatStream prepend(FloatStream stream) {
+        assertNotClosed();
+
         return new ParallelIteratorFloatStream(FloatStream.concat(stream, this), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public FloatStream merge(final FloatStream b, final FloatBiFunction<MergeResult> nextSelector) {
+        assertNotClosed();
+
         return new ParallelIteratorFloatStream(FloatStream.merge(this, b, nextSelector), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public FloatStream zipWith(FloatStream b, FloatBinaryOperator zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorFloatStream(FloatStream.zip(this, b, zipFunction), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public FloatStream zipWith(FloatStream b, FloatStream c, FloatTernaryOperator zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorFloatStream(FloatStream.zip(this, b, c, zipFunction), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public FloatStream zipWith(FloatStream b, float valueForNoneA, float valueForNoneB, FloatBinaryOperator zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorFloatStream(FloatStream.zip(this, b, valueForNoneA, valueForNoneB, zipFunction), false, maxThreadNum, splitor, asyncExecutor,
                 closeHandlers);
     }
 
     @Override
     public FloatStream zipWith(FloatStream b, FloatStream c, float valueForNoneA, float valueForNoneB, float valueForNoneC, FloatTernaryOperator zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorFloatStream(FloatStream.zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction), false, maxThreadNum,
                 splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public boolean isParallel() {
+        assertNotClosed();
+
         return true;
     }
 
     @Override
     public FloatStream sequential() {
+        assertNotClosed();
+
         ArrayFloatStream tmp = sequential;
 
         if (tmp == null) {
@@ -1606,21 +1632,29 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
 
     @Override
     protected int maxThreadNum() {
+        assertNotClosed();
+
         return maxThreadNum;
     }
 
     @Override
     protected BaseStream.Splitor splitor() {
+        assertNotClosed();
+
         return splitor;
     }
 
     @Override
     protected AsyncExecutor asyncExecutor() {
+        assertNotClosed();
+
         return asyncExecutor;
     }
 
     @Override
     public FloatStream onClose(Runnable closeHandler) {
+        assertNotClosed();
+
         final Deque<Runnable> newCloseHandlers = new LocalArrayDeque<>(N.isNullOrEmpty(this.closeHandlers) ? 1 : this.closeHandlers.size() + 1);
 
         newCloseHandlers.add(wrapCloseHandlers(closeHandler));

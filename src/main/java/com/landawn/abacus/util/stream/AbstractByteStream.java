@@ -69,6 +69,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public ByteStream distinct() {
+        assertNotClosed();
+
         final Set<Object> set = N.newHashSet();
 
         return newStream(this.sequential().filter(new BytePredicate() {
@@ -81,6 +83,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public ByteStream flattMap(final ByteFunction<byte[]> mapper) {
+        assertNotClosed();
+
         return flatMap(new ByteFunction<ByteStream>() {
             @Override
             public ByteStream apply(byte t) {
@@ -91,6 +95,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public <T> Stream<T> flattMapToObj(final ByteFunction<? extends Collection<T>> mapper) {
+        assertNotClosed();
+
         return flatMapToObj(new ByteFunction<Stream<T>>() {
             @Override
             public Stream<T> apply(byte t) {
@@ -101,6 +107,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public <T> Stream<T> flatMappToObj(final ByteFunction<T[]> mapper) {
+        assertNotClosed();
+
         return flatMapToObj(new ByteFunction<Stream<T>>() {
             @Override
             public Stream<T> apply(byte t) {
@@ -111,6 +119,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public ByteStream rangeMap(final ByteBiPredicate sameRange, final ByteBinaryOperator mapper) {
+        assertNotClosed();
+
         final ByteIteratorEx iter = iteratorEx();
 
         return newStream(new ByteIteratorEx() {
@@ -144,6 +154,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public <T> Stream<T> rangeMapToObj(final ByteBiPredicate sameRange, final ByteBiFunction<T> mapper) {
+        assertNotClosed();
+
         final ByteIteratorEx iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<T>() {
@@ -177,6 +189,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public Stream<ByteList> collapse(final ByteBiPredicate collapsible) {
+        assertNotClosed();
+
         final ByteIteratorEx iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<ByteList>() {
@@ -208,6 +222,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public ByteStream collapse(final ByteBiPredicate collapsible, final ByteBinaryOperator mergeFunction) {
+        assertNotClosed();
+
         final ByteIteratorEx iter = iteratorEx();
 
         return newStream(new ByteIteratorEx() {
@@ -238,6 +254,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public ByteStream skip(final long n, final ByteConsumer action) {
+        assertNotClosed();
+
         final BytePredicate filter = isParallel() ? new BytePredicate() {
             final AtomicLong cnt = new AtomicLong(n);
 
@@ -259,6 +277,7 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public ByteStream removeIf(final BytePredicate predicate) {
+        assertNotClosed();
 
         return filter(new BytePredicate() {
             @Override
@@ -270,6 +289,7 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public ByteStream removeIf(final BytePredicate predicate, final ByteConsumer actionOnDroppedItem) {
+        assertNotClosed();
 
         return filter(new BytePredicate() {
             @Override
@@ -286,6 +306,7 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public ByteStream filter(final BytePredicate predicate, final ByteConsumer actionOnDroppedItem) {
+        assertNotClosed();
 
         return filter(new BytePredicate() {
             @Override
@@ -302,6 +323,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public ByteStream dropWhile(final BytePredicate predicate, final ByteConsumer actionOnDroppedItem) {
+        assertNotClosed();
+
         return dropWhile(new BytePredicate() {
             @Override
             public boolean test(byte value) {
@@ -317,6 +340,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public ByteStream step(final long step) {
+        assertNotClosed();
+
         checkArgPositive(step, "step");
 
         final long skip = step - 1;
@@ -341,6 +366,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public Stream<ByteStream> split(final int chunkSize) {
+        assertNotClosed();
+
         return splitToList(chunkSize).map(new Function<ByteList, ByteStream>() {
             @Override
             public ByteStream apply(ByteList t) {
@@ -351,6 +378,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public Stream<ByteStream> split(final BytePredicate predicate) {
+        assertNotClosed();
+
         return splitToList(predicate).map(new Function<ByteList, ByteStream>() {
             @Override
             public ByteStream apply(ByteList t) {
@@ -361,6 +390,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public Stream<ByteStream> splitBy(final BytePredicate where) {
+        assertNotClosed();
+
         final ByteIteratorEx iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<ByteStream>() {
@@ -468,6 +499,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public Stream<ByteStream> sliding(final int windowSize, final int increment) {
+        assertNotClosed();
+
         return slidingToList(windowSize, increment).map(new Function<ByteList, ByteStream>() {
             @Override
             public ByteStream apply(ByteList t) {
@@ -478,6 +511,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public ByteStream scan(final ByteBinaryOperator accumulator) {
+        assertNotClosed();
+
         final ByteIteratorEx iter = iteratorEx();
 
         return newStream(new ByteIteratorEx() {
@@ -503,6 +538,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public ByteStream scan(final byte init, final ByteBinaryOperator accumulator) {
+        assertNotClosed();
+
         final ByteIteratorEx iter = iteratorEx();
 
         return newStream(new ByteIteratorEx() {
@@ -522,6 +559,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public ByteStream scan(final byte init, final ByteBinaryOperator accumulator, final boolean initIncluded) {
+        assertNotClosed();
+
         if (initIncluded == false) {
             return scan(init, accumulator);
         }
@@ -551,6 +590,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public ByteStream intersection(final Collection<?> c) {
+        assertNotClosed();
+
         final Multiset<?> multiset = Multiset.from(c);
 
         return newStream(this.sequential().filter(new BytePredicate() {
@@ -563,6 +604,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public ByteStream difference(final Collection<?> c) {
+        assertNotClosed();
+
         final Multiset<?> multiset = Multiset.from(c);
 
         return newStream(this.sequential().filter(new BytePredicate() {
@@ -575,6 +618,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public ByteStream symmetricDifference(final Collection<Byte> c) {
+        assertNotClosed();
+
         final Multiset<?> multiset = Multiset.from(c);
 
         return newStream(this.sequential().filter(new BytePredicate() {
@@ -592,6 +637,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public ByteStream reversed() {
+        assertNotClosed();
+
         return newStream(new ByteIteratorEx() {
             private boolean initialized = false;
 
@@ -674,6 +721,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public ByteStream rotated(final int distance) {
+        assertNotClosed();
+
         return newStream(new ByteIteratorEx() {
             private boolean initialized = false;
 
@@ -764,6 +813,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public ByteStream shuffled(final Random rnd) {
+        assertNotClosed();
+
         checkArgNotNull(rnd, "random");
 
         return lazyLoad(new Function<byte[], byte[]>() {
@@ -777,6 +828,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public ByteStream sorted() {
+        assertNotClosed();
+
         if (sorted) {
             return newStream(iteratorEx(), sorted);
         }
@@ -797,6 +850,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public ByteStream reverseSorted() {
+        assertNotClosed();
+
         return newStream(new ByteIteratorEx() {
             private boolean initialized = false;
             private byte[] aar;
@@ -948,6 +1003,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public Stream<IndexedByte> indexed() {
+        assertNotClosed();
+
         final MutableLong idx = MutableLong.of(0);
 
         return newStream(this.sequential().mapToObj(new ByteFunction<IndexedByte>() {
@@ -961,78 +1018,108 @@ abstract class AbstractByteStream extends ByteStream {
     @Override
     @SafeVarargs
     public final ByteStream prepend(final byte... a) {
+        assertNotClosed();
+
         return prepend(ByteStream.of(a));
     }
 
     @Override
     public ByteStream prepend(ByteStream stream) {
+        assertNotClosed();
+
         return ByteStream.concat(stream, this);
     }
 
     @Override
     @SafeVarargs
     public final ByteStream append(final byte... a) {
+        assertNotClosed();
+
         return append(ByteStream.of(a));
     }
 
     @Override
     public ByteStream append(ByteStream stream) {
+        assertNotClosed();
+
         return ByteStream.concat(this, stream);
     }
 
     @Override
     @SafeVarargs
     public final ByteStream appendIfEmpty(final byte... a) {
+        assertNotClosed();
+
         return appendIfEmpty(() -> ByteStream.of(a));
     }
 
     @Override
     public ByteStream merge(ByteStream b, ByteBiFunction<MergeResult> nextSelector) {
+        assertNotClosed();
+
         return ByteStream.merge(this, b, nextSelector);
     }
 
     @Override
     public ByteStream zipWith(ByteStream b, ByteBinaryOperator zipFunction) {
+        assertNotClosed();
+
         return ByteStream.zip(this, b, zipFunction);
     }
 
     @Override
     public ByteStream zipWith(ByteStream b, ByteStream c, ByteTernaryOperator zipFunction) {
+        assertNotClosed();
+
         return ByteStream.zip(this, b, c, zipFunction);
     }
 
     @Override
     public ByteStream zipWith(ByteStream b, byte valueForNoneA, byte valueForNoneB, ByteBinaryOperator zipFunction) {
+        assertNotClosed();
+
         return ByteStream.zip(this, b, valueForNoneA, valueForNoneB, zipFunction);
     }
 
     @Override
     public ByteStream zipWith(ByteStream b, ByteStream c, byte valueForNoneA, byte valueForNoneB, byte valueForNoneC, ByteTernaryOperator zipFunction) {
+        assertNotClosed();
+
         return ByteStream.zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     }
 
     @Override
     public <K, V> Map<K, V> toMap(ByteFunction<? extends K> keyMapper, ByteFunction<? extends V> valueMapper) {
+        assertNotClosed();
+
         return toMap(keyMapper, valueMapper, Suppliers.<K, V> ofMap());
     }
 
     @Override
     public <K, V, M extends Map<K, V>> M toMap(ByteFunction<? extends K> keyMapper, ByteFunction<? extends V> valueMapper, Supplier<? extends M> mapFactory) {
+        assertNotClosed();
+
         return toMap(keyMapper, valueMapper, Fn.<V> throwingMerger(), mapFactory);
     }
 
     @Override
     public <K, V> Map<K, V> toMap(ByteFunction<? extends K> keyMapper, ByteFunction<? extends V> valueMapper, BinaryOperator<V> mergeFunction) {
+        assertNotClosed();
+
         return toMap(keyMapper, valueMapper, mergeFunction, Suppliers.<K, V> ofMap());
     }
 
     @Override
     public <K, A, D> Map<K, D> toMap(ByteFunction<? extends K> keyMapper, Collector<Byte, A, D> downstream) {
+        assertNotClosed();
+
         return toMap(keyMapper, downstream, Suppliers.<K, D> ofMap());
     }
 
-    @Override 
+    @Override
     public <E extends Exception> void forEachIndexed(Throwables.IndexedByteConsumer<E> action) throws E {
+        assertNotClosed();
+
         if (isParallel()) {
             final AtomicInteger idx = new AtomicInteger(0);
 
@@ -1111,6 +1198,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public <E extends Exception> OptionalByte findAny(final Throwables.BytePredicate<E> predicate) throws E {
+        assertNotClosed();
+
         return findFirst(predicate);
     }
 
@@ -1198,6 +1287,8 @@ abstract class AbstractByteStream extends ByteStream {
 
     @Override
     public <R> R collect(Supplier<R> supplier, ObjByteConsumer<? super R> accumulator) {
+        assertNotClosed();
+
         final BiConsumer<R, R> combiner = collectingCombiner;
 
         return collect(supplier, accumulator, combiner);

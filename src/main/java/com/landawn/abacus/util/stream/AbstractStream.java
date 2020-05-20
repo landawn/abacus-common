@@ -102,6 +102,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> skip(final long n, final Consumer<? super T> action) {
+        assertNotClosed();
+
         final Predicate<T> filter = isParallel() ? new Predicate<T>() {
             final AtomicLong cnt = new AtomicLong(n);
 
@@ -123,6 +125,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> peekFirst(final Consumer<? super T> action) {
+        assertNotClosed();
+
         final Function<? super T, ? extends T> mapperForFirst = new Function<T, T>() {
             @Override
             public T apply(T t) {
@@ -136,6 +140,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> peekLast(final Consumer<? super T> action) {
+        assertNotClosed();
+
         final Function<? super T, ? extends T> mapperForLast = new Function<T, T>() {
             @Override
             public T apply(T t) {
@@ -149,6 +155,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> removeIf(final Predicate<? super T> predicate) {
+        assertNotClosed();
 
         return filter(new Predicate<T>() {
             @Override
@@ -160,6 +167,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> removeIf(final Predicate<? super T> predicate, final Consumer<? super T> actionOnDroppedItem) {
+        assertNotClosed();
 
         return filter(new Predicate<T>() {
             @Override
@@ -176,6 +184,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> filter(final Predicate<? super T> predicate, final Consumer<? super T> actionOnDroppedItem) {
+        assertNotClosed();
 
         return filter(new Predicate<T>() {
             @Override
@@ -192,6 +201,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> dropWhile(final Predicate<? super T> predicate, final Consumer<? super T> actionOnDroppedItem) {
+        assertNotClosed();
 
         return dropWhile(new Predicate<T>() {
             @Override
@@ -208,6 +218,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> step(final long step) {
+        assertNotClosed();
+
         checkArgPositive(step, "step");
 
         final long skip = step - 1;
@@ -242,26 +254,36 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <R> Stream<R> slidingMap(BiFunction<? super T, ? super T, R> mapper) {
+        assertNotClosed();
+
         return slidingMap(mapper, 1);
     }
 
     @Override
     public <R> Stream<R> slidingMap(BiFunction<? super T, ? super T, R> mapper, int increment) {
+        assertNotClosed();
+
         return slidingMap(mapper, increment, false);
     }
 
     @Override
     public <R> Stream<R> slidingMap(TriFunction<? super T, ? super T, ? super T, R> mapper) {
+        assertNotClosed();
+
         return slidingMap(mapper, 1);
     }
 
     @Override
     public <R> Stream<R> slidingMap(TriFunction<? super T, ? super T, ? super T, R> mapper, int increment) {
+        assertNotClosed();
+
         return slidingMap(mapper, increment, false);
     }
 
     @Override
     public <K, V> EntryStream<K, V> mapToEntry(final Function<? super T, ? extends Map.Entry<? extends K, ? extends V>> mapper) {
+        assertNotClosed();
+
         final Function<T, T> mapper2 = Fn.identity();
 
         if (mapper == mapper2) {
@@ -273,6 +295,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <K, V> EntryStream<K, V> mapToEntry(final Function<? super T, ? extends K> keyMapper, final Function<? super T, ? extends V> valueMapper) {
+        assertNotClosed();
+
         final Function<T, Map.Entry<K, V>> mapper = new Function<T, Map.Entry<K, V>>() {
             @Override
             public Entry<K, V> apply(T t) {
@@ -306,6 +330,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <R> Stream<R> flattMap(final Function<? super T, ? extends Collection<? extends R>> mapper) {
+        assertNotClosed();
+
         return flatMap(new Function<T, Stream<? extends R>>() {
             @Override
             public Stream<? extends R> apply(T t) {
@@ -316,6 +342,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <R> Stream<R> flatMapp(final Function<? super T, R[]> mapper) {
+        assertNotClosed();
+
         return flattMap(new Function<T, Collection<? extends R>>() {
             @Override
             public Collection<? extends R> apply(T t) {
@@ -326,6 +354,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public CharStream flattMapToChar(final Function<? super T, char[]> mapper) {
+        assertNotClosed();
+
         return flatMapToChar(new Function<T, CharStream>() {
             @Override
             public CharStream apply(T t) {
@@ -336,6 +366,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public ByteStream flattMapToByte(final Function<? super T, byte[]> mapper) {
+        assertNotClosed();
+
         return flatMapToByte(new Function<T, ByteStream>() {
             @Override
             public ByteStream apply(T t) {
@@ -346,6 +378,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public ShortStream flattMapToShort(final Function<? super T, short[]> mapper) {
+        assertNotClosed();
+
         return flatMapToShort(new Function<T, ShortStream>() {
             @Override
             public ShortStream apply(T t) {
@@ -356,6 +390,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public IntStream flattMapToInt(final Function<? super T, int[]> mapper) {
+        assertNotClosed();
+
         return flatMapToInt(new Function<T, IntStream>() {
             @Override
             public IntStream apply(T t) {
@@ -366,6 +402,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public LongStream flattMapToLong(final Function<? super T, long[]> mapper) {
+        assertNotClosed();
+
         return flatMapToLong(new Function<T, LongStream>() {
             @Override
             public LongStream apply(T t) {
@@ -376,6 +414,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public FloatStream flattMapToFloat(final Function<? super T, float[]> mapper) {
+        assertNotClosed();
+
         return flatMapToFloat(new Function<T, FloatStream>() {
             @Override
             public FloatStream apply(T t) {
@@ -386,6 +426,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public DoubleStream flattMapToDouble(final Function<? super T, double[]> mapper) {
+        assertNotClosed();
+
         return flatMapToDouble(new Function<T, DoubleStream>() {
             @Override
             public DoubleStream apply(T t) {
@@ -396,12 +438,16 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <K, V> EntryStream<K, V> flatMapToEntry(final Function<? super T, ? extends Stream<? extends Map.Entry<? extends K, ? extends V>>> mapper) {
+        assertNotClosed();
+
         return EntryStream.of(flatMap(mapper));
     }
 
     @Override
     @ParallelSupported
     public <K, V> EntryStream<K, V> flattMapToEntry(final Function<? super T, ? extends Map<? extends K, ? extends V>> mapper) {
+        assertNotClosed();
+
         final Function<? super T, ? extends Stream<Entry<K, V>>> mapper2 = new Function<T, Stream<Entry<K, V>>>() {
             @Override
             public Stream<Entry<K, V>> apply(T t) {
@@ -415,6 +461,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     @ParallelSupported
     public <K, V> EntryStream<K, V> flatMappToEntry(final Function<? super T, ? extends EntryStream<? extends K, ? extends V>> mapper) {
+        assertNotClosed();
+
         final Function<? super T, ? extends Stream<? extends Entry<? extends K, ? extends V>>> mapper2 = new Function<T, Stream<? extends Entry<? extends K, ? extends V>>>() {
             @Override
             public Stream<? extends Entry<? extends K, ? extends V>> apply(T t) {
@@ -446,6 +494,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U> Stream<U> rangeMap(final BiPredicate<? super T, ? super T> sameRange, final BiFunction<? super T, ? super T, ? extends U> mapper) {
+        assertNotClosed();
+
         final ObjIteratorEx<T> iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<U>() {
@@ -479,11 +529,15 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<Stream<T>> collapse(final BiPredicate<? super T, ? super T> collapsible) {
+        assertNotClosed();
+
         return collapse(collapsible, Suppliers.<T> ofList()).map(listToStreamMapper());
     }
 
     @Override
     public <C extends Collection<T>> Stream<C> collapse(final BiPredicate<? super T, ? super T> collapsible, final Supplier<? extends C> supplier) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<C>() {
             private final ObjIteratorEx<T> iter = iteratorEx();
             private boolean hasNext = false;
@@ -518,6 +572,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> collapse(final BiPredicate<? super T, ? super T> collapsible, final BiFunction<? super T, ? super T, T> mergeFunction) {
+        assertNotClosed();
+
         final ObjIteratorEx<T> iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<T>() {
@@ -548,6 +604,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U> Stream<U> collapse(final BiPredicate<? super T, ? super T> collapsible, final U init, final BiFunction<U, ? super T, U> op) {
+        assertNotClosed();
+
         final ObjIteratorEx<T> iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<U>() {
@@ -579,6 +637,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <R> Stream<R> collapse(final BiPredicate<? super T, ? super T> collapsible, final Supplier<R> supplier,
             final BiConsumer<? super R, ? super T> accumulator) {
+        assertNotClosed();
+
         final ObjIteratorEx<T> iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<R>() {
@@ -610,6 +670,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <R, A> Stream<R> collapse(final BiPredicate<? super T, ? super T> collapsible, final Collector<? super T, A, R> collector) {
+        assertNotClosed();
+
         final Supplier<A> supplier = collector.supplier();
         final BiConsumer<A, ? super T> accumulator = collector.accumulator();
         final Function<A, R> finisher = collector.finisher();
@@ -644,6 +706,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> scan(final BiFunction<? super T, ? super T, T> accumulator) {
+        assertNotClosed();
+
         final ObjIteratorEx<T> iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<T>() {
@@ -669,6 +733,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U> Stream<U> scan(final U init, final BiFunction<U, ? super T, U> accumulator) {
+        assertNotClosed();
+
         final ObjIteratorEx<T> iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<U>() {
@@ -688,6 +754,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U> Stream<U> scan(final U init, final BiFunction<U, ? super T, U> accumulator, boolean initIncluded) {
+        assertNotClosed();
+
         if (initIncluded == false) {
             return scan(init, accumulator);
         }
@@ -718,6 +786,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     @SuppressWarnings("rawtypes")
     public Stream<T> sortedBy(final Function<? super T, ? extends Comparable> keyMapper) {
+        assertNotClosed();
+
         final Comparator<? super T> comparator = new Comparator<T>() {
             @Override
             public int compare(T o1, T o2) {
@@ -730,6 +800,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> sortedByInt(final ToIntFunction<? super T> keyMapper) {
+        assertNotClosed();
+
         final Comparator<? super T> comparator = Comparators.comparingInt(keyMapper);
 
         return sorted(comparator);
@@ -737,6 +809,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> sortedByLong(final ToLongFunction<? super T> keyMapper) {
+        assertNotClosed();
+
         final Comparator<? super T> comparator = Comparators.comparingLong(keyMapper);
 
         return sorted(comparator);
@@ -744,6 +818,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> sortedByDouble(final ToDoubleFunction<? super T> keyMapper) {
+        assertNotClosed();
+
         final Comparator<? super T> comparator = Comparators.comparingDouble(keyMapper);
 
         return sorted(comparator);
@@ -751,36 +827,49 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<Stream<T>> split(final int chunkSize) {
+        assertNotClosed();
+
         return splitToList(chunkSize).map(listToStreamMapper());
     }
 
     @Override
     public Stream<List<T>> splitToList(final int chunkSize) {
+        assertNotClosed();
+
         return split(chunkSize, Factory.<T> ofList());
     }
 
     @Override
     public Stream<Set<T>> splitToSet(final int chunkSize) {
+        assertNotClosed();
+
         return split(chunkSize, Factory.<T> ofSet());
     }
 
     @Override
     public Stream<Stream<T>> split(final Predicate<? super T> predicate) {
+        assertNotClosed();
+
         return splitToList(predicate).map(listToStreamMapper());
     }
 
     @Override
     public Stream<List<T>> splitToList(final Predicate<? super T> predicate) {
+        assertNotClosed();
+
         return split(predicate, Suppliers.<T> ofList());
     }
 
     @Override
     public Stream<Set<T>> splitToSet(final Predicate<? super T> predicate) {
+        assertNotClosed();
+
         return split(predicate, Suppliers.<T> ofSet());
     }
 
     @Override
     public Stream<Stream<T>> splitBy(final Predicate<? super T> where) {
+        assertNotClosed();
 
         final IteratorEx<T> iter = iteratorEx();
 
@@ -889,6 +978,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <A, R> Stream<R> splitBy(final Predicate<? super T> where, Collector<? super T, A, R> collector) {
+        assertNotClosed();
+
         final Supplier<A> supplier = collector.supplier();
         final BiConsumer<? super A, ? super T> accumulator = collector.accumulator();
         final Function<A, R> finisher = collector.finisher();
@@ -974,21 +1065,29 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<Stream<T>> sliding(final int windowSize, final int increment) {
+        assertNotClosed();
+
         return slidingToList(windowSize, increment).map(listToStreamMapper());
     }
 
     @Override
     public Stream<List<T>> slidingToList(final int windowSize, final int increment) {
+        assertNotClosed();
+
         return sliding(windowSize, increment, Factory.<T> ofList());
     }
 
     @Override
     public <C extends Collection<T>> Stream<C> sliding(final int windowSize, IntFunction<? extends C> collectionSupplier) {
+        assertNotClosed();
+
         return sliding(windowSize, 1, collectionSupplier);
     }
 
     @Override
     public <A, R> Stream<R> sliding(int windowSize, Collector<? super T, A, R> collector) {
+        assertNotClosed();
+
         return sliding(windowSize, 1, collector);
     }
 
@@ -1001,31 +1100,43 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<Stream<T>> window(final Duration duration) {
+        assertNotClosed();
+
         return windowToList(duration).map(listToStreamMapper());
     }
 
     @Override
     public Stream<Stream<T>> window(final Duration duration, final LongSupplier startTime) {
+        assertNotClosed();
+
         return window(duration, startTime, Suppliers.<T> ofList()).map(listToStreamMapper());
     }
 
     @Override
     public Stream<List<T>> windowToList(final Duration duration) {
+        assertNotClosed();
+
         return window(duration, Suppliers.<T> ofList());
     }
 
     @Override
     public Stream<Set<T>> windowToSet(final Duration duration) {
+        assertNotClosed();
+
         return window(duration, Suppliers.<T> ofSet());
     }
 
     @Override
     public <C extends Collection<T>> Stream<C> window(final Duration duration, final Supplier<? extends C> collectionSupplier) {
+        assertNotClosed();
+
         return window(duration, sysTimeGetter, collectionSupplier);
     }
 
     @Override
     public <C extends Collection<T>> Stream<C> window(final Duration duration, final LongSupplier startTime, final Supplier<? extends C> collectionSupplier) {
+        assertNotClosed();
+
         checkArgNotNull(duration, "duration");
         checkArgPositive(duration.toMillis(), "duration");
 
@@ -1034,11 +1145,15 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <A, R> Stream<R> window(Duration duration, Collector<? super T, A, R> collector) {
+        assertNotClosed();
+
         return window(duration, sysTimeGetter, collector);
     }
 
     @Override
     public <A, R> Stream<R> window(Duration duration, final LongSupplier startTime, Collector<? super T, A, R> collector) {
+        assertNotClosed();
+
         checkArgNotNull(duration, "duration");
         checkArgPositive(duration.toMillis(), "duration");
 
@@ -1047,32 +1162,44 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<Stream<T>> window(final Duration duration, final long incrementInMillis) {
+        assertNotClosed();
+
         return windowToList(duration, incrementInMillis).map(listToStreamMapper());
     }
 
     @Override
     public Stream<Stream<T>> window(final Duration duration, final long incrementInMillis, final LongSupplier startTime) {
+        assertNotClosed();
+
         return window(duration, incrementInMillis, startTime, Suppliers.<T> ofList()).map(listToStreamMapper());
     }
 
     @Override
     public Stream<List<T>> windowToList(final Duration duration, final long incrementInMillis) {
+        assertNotClosed();
+
         return window(duration, incrementInMillis, Suppliers.<T> ofList());
     }
 
     @Override
     public Stream<Set<T>> windowToSet(final Duration duration, final long incrementInMillis) {
+        assertNotClosed();
+
         return window(duration, incrementInMillis, Suppliers.<T> ofSet());
     }
 
     @Override
     public <C extends Collection<T>> Stream<C> window(final Duration duration, final long incrementInMillis, final Supplier<? extends C> collectionSupplier) {
+        assertNotClosed();
+
         return window(duration, incrementInMillis, sysTimeGetter, collectionSupplier);
     }
 
     @Override
     public <C extends Collection<T>> Stream<C> window(final Duration duration, final long incrementInMillis, final LongSupplier startTime,
             final Supplier<? extends C> collectionSupplier) {
+        assertNotClosed();
+
         checkArgNotNull(duration, "duration");
         checkArgPositive(duration.toMillis(), "duration");
         checkArgPositive(incrementInMillis, "incrementInMillis");
@@ -1224,12 +1351,16 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <A, R> Stream<R> window(final Duration duration, final long incrementInMillis, final Collector<? super T, A, R> collector) {
+        assertNotClosed();
+
         return window(duration, incrementInMillis, sysTimeGetter, collector);
     }
 
     @Override
     public <A, R> Stream<R> window(final Duration duration, final long incrementInMillis, final LongSupplier startTime,
             final Collector<? super T, A, R> collector) {
+        assertNotClosed();
+
         checkArgNotNull(duration, "duration");
         checkArgPositive(duration.toMillis(), "duration");
         checkArgPositive(incrementInMillis, "incrementInMillis");
@@ -1398,22 +1529,30 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<Stream<T>> window(final int maxWindowSize, final Duration maxDuration) {
+        assertNotClosed();
+
         return window(maxWindowSize, maxDuration, Suppliers.<T> ofList()).map(listToStreamMapper());
     }
 
     @Override
     public Stream<Stream<T>> window(final int maxWindowSize, final Duration maxDuration, final LongSupplier startTime) {
+        assertNotClosed();
+
         return window(maxWindowSize, maxDuration, startTime, Suppliers.<T> ofList()).map(listToStreamMapper());
     }
 
     @Override
     public <C extends Collection<T>> Stream<C> window(final int maxWindowSize, final Duration maxDuration, final Supplier<? extends C> collectionSupplier) {
+        assertNotClosed();
+
         return window(maxWindowSize, maxDuration, sysTimeGetter, collectionSupplier);
     }
 
     @Override
     public <C extends Collection<T>> Stream<C> window(final int maxWindowSize, final Duration maxDuration, final LongSupplier startTime,
             final Supplier<? extends C> collectionSupplier) {
+        assertNotClosed();
+
         checkArgPositive(maxWindowSize, "maxWindowSize");
         checkArgNotNull(maxDuration, "maxDuration");
         checkArgPositive(maxDuration.toMillis(), "maxDuration");
@@ -1501,12 +1640,16 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <A, R> Stream<R> window(final int maxWindowSize, final Duration maxDuration, Collector<? super T, A, R> collector) {
+        assertNotClosed();
+
         return window(maxWindowSize, maxDuration, sysTimeGetter, collector);
     }
 
     @Override
     public <A, R> Stream<R> window(final int maxWindowSize, final Duration maxDuration, final LongSupplier startTime,
             final Collector<? super T, A, R> collector) {
+        assertNotClosed();
+
         checkArgPositive(maxWindowSize, "maxWindowSize");
         checkArgNotNull(maxDuration, "maxDuration");
         checkArgPositive(maxDuration.toMillis(), "maxDuration");
@@ -1603,6 +1746,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> intersperse(final T delimiter) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<T>() {
             private final Iterator<T> iter = iteratorEx();
             private boolean toInsert = false;
@@ -1632,6 +1777,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <E extends Exception> void forEach(Throwables.Consumer<? super T, E> action) throws E {
+        assertNotClosed();
+
         forEach(action, Fn.emptyAction());
     }
 
@@ -1639,6 +1786,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     @ParallelSupported
     @TerminalOp
     public <E extends Exception> void forEachIndexed(Throwables.IndexedConsumer<? super T, E> action) throws E {
+        assertNotClosed();
+
         if (isParallel()) {
             final AtomicInteger idx = new AtomicInteger(0);
 
@@ -1662,55 +1811,75 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <E extends Exception> void forEachPair(final Throwables.BiConsumer<? super T, ? super T, E> action) throws E {
+        assertNotClosed();
+
         forEachPair(action, 1);
     }
 
     @Override
     public <E extends Exception> void forEachTriple(final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action) throws E {
+        assertNotClosed();
+
         forEachTriple(action, 1);
     }
 
     @Override
     public <K> Stream<Entry<K, List<T>>> groupBy(final Function<? super T, ? extends K> keyMapper) {
+        assertNotClosed();
+
         return groupBy(keyMapper, Suppliers.<K, List<T>> ofMap());
     }
 
     @Override
     public <K> Stream<Entry<K, List<T>>> groupBy(final Function<? super T, ? extends K> keyMapper, Supplier<? extends Map<K, List<T>>> mapFactory) {
+        assertNotClosed();
+
         return groupBy(keyMapper, Fn.<T> identity(), mapFactory);
     }
 
     @Override
     public <K, V> Stream<Entry<K, List<V>>> groupBy(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
+        assertNotClosed();
+
         return groupBy(keyMapper, valueMapper, Suppliers.<K, List<V>> ofMap());
     }
 
     @Override
     public <K, V> Stream<Map.Entry<K, List<V>>> groupBy(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper,
             Supplier<? extends Map<K, List<V>>> mapFactory) {
+        assertNotClosed();
+
         return groupBy(keyMapper, valueMapper, Collectors.<V> toList(), mapFactory);
     }
 
     @Override
     public <K, A, D> Stream<Entry<K, D>> groupBy(final Function<? super T, ? extends K> keyMapper, Collector<? super T, A, D> downstream) {
+        assertNotClosed();
+
         return groupBy(keyMapper, downstream, Suppliers.<K, D> ofMap());
     }
 
     @Override
     public <K, A, D> Stream<Entry<K, D>> groupBy(final Function<? super T, ? extends K> keyMapper, final Collector<? super T, A, D> downstream,
             final Supplier<? extends Map<K, D>> mapFactory) {
+        assertNotClosed();
+
         return groupBy(keyMapper, Fn.<T> identity(), downstream, mapFactory);
     }
 
     @Override
     public <K, V, A, D> Stream<Entry<K, D>> groupBy(final Function<? super T, ? extends K> keyMapper, final Function<? super T, ? extends V> valueMapper,
             Collector<? super V, A, D> downstream) {
+        assertNotClosed();
+
         return groupBy(keyMapper, valueMapper, downstream, Suppliers.<K, D> ofMap());
     }
 
     @Override
     public <K, V, A, D> Stream<Entry<K, D>> groupBy(final Function<? super T, ? extends K> keyMapper, final Function<? super T, ? extends V> valueMapper,
             final Collector<? super V, A, D> downstream, final Supplier<? extends Map<K, D>> mapFactory) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<Entry<K, D>>() {
             private boolean initialized = false;
             private Iterator<Entry<K, D>> iter = null;
@@ -1746,12 +1915,16 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <K, V> Stream<Entry<K, V>> groupBy(final Function<? super T, ? extends K> keyMapper, final Function<? super T, ? extends V> valueMapper,
             BinaryOperator<V> mergeFunction) {
+        assertNotClosed();
+
         return groupBy(keyMapper, valueMapper, mergeFunction, Suppliers.<K, V> ofMap());
     }
 
     @Override
     public <K, V> Stream<Entry<K, V>> groupBy(final Function<? super T, ? extends K> keyMapper, final Function<? super T, ? extends V> valueMapper,
             final BinaryOperator<V> mergeFunction, final Supplier<? extends Map<K, V>> mapFactory) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<Entry<K, V>>() {
             private Iterator<Entry<K, V>> iter = null;
 
@@ -1978,11 +2151,15 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<Entry<Boolean, List<T>>> partitionBy(Predicate<? super T> predicate) {
+        assertNotClosed();
+
         return partitionBy(predicate, Collectors.<T> toList());
     }
 
     @Override
     public <A, D> Stream<Entry<Boolean, D>> partitionBy(final Predicate<? super T> predicate, final Collector<? super T, A, D> downstream) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<Entry<Boolean, D>>() {
             private Iterator<Entry<Boolean, D>> iter = null;
 
@@ -2008,100 +2185,136 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public EntryStream<Boolean, List<T>> partitionByToEntry(Predicate<? super T> predicate) {
+        assertNotClosed();
+
         return partitionByToEntry(predicate, Collectors.<T> toList());
     }
 
     @Override
     public <A, D> EntryStream<Boolean, D> partitionByToEntry(Predicate<? super T> predicate, Collector<? super T, A, D> downstream) {
+        assertNotClosed();
+
         return partitionBy(predicate, downstream).mapToEntry(Fn.<Map.Entry<Boolean, D>> identity());
     }
 
     @Override
     public <K> EntryStream<K, List<T>> groupByToEntry(Function<? super T, ? extends K> keyMapper) {
+        assertNotClosed();
+
         return groupByToEntry(keyMapper, Suppliers.<K, List<T>> ofMap());
     }
 
     @Override
     public <K> EntryStream<K, List<T>> groupByToEntry(Function<? super T, ? extends K> keyMapper, Supplier<? extends Map<K, List<T>>> mapFactory) {
+        assertNotClosed();
+
         return groupByToEntry(keyMapper, Fn.<T> identity(), mapFactory);
     }
 
     @Override
     public <K, V> EntryStream<K, List<V>> groupByToEntry(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
+        assertNotClosed();
+
         return groupByToEntry(keyMapper, valueMapper, Suppliers.<K, List<V>> ofMap());
     }
 
     @Override
     public <K, V> EntryStream<K, List<V>> groupByToEntry(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper,
             Supplier<? extends Map<K, List<V>>> mapFactory) {
+        assertNotClosed();
+
         return groupBy(keyMapper, valueMapper, mapFactory).mapToEntry(Fn.<Map.Entry<K, List<V>>> identity());
     }
 
     @Override
     public <K, A, D> EntryStream<K, D> groupByToEntry(Function<? super T, ? extends K> keyMapper, Collector<? super T, A, D> downstream) {
+        assertNotClosed();
+
         return groupByToEntry(keyMapper, downstream, Suppliers.<K, D> ofMap());
     }
 
     @Override
     public <K, A, D> EntryStream<K, D> groupByToEntry(Function<? super T, ? extends K> keyMapper, Collector<? super T, A, D> downstream,
             Supplier<? extends Map<K, D>> mapFactory) {
+        assertNotClosed();
+
         return groupBy(keyMapper, downstream, mapFactory).mapToEntry(Fn.<Map.Entry<K, D>> identity());
     }
 
     @Override
     public <K, V, A, D> EntryStream<K, D> groupByToEntry(final Function<? super T, ? extends K> keyMapper, final Function<? super T, ? extends V> valueMapper,
             Collector<? super V, A, D> downstream) {
+        assertNotClosed();
+
         return groupByToEntry(keyMapper, valueMapper, downstream, Suppliers.<K, D> ofMap());
     }
 
     @Override
     public <K, V, A, D> EntryStream<K, D> groupByToEntry(final Function<? super T, ? extends K> keyMapper, final Function<? super T, ? extends V> valueMapper,
             Collector<? super V, A, D> downstream, Supplier<? extends Map<K, D>> mapFactory) {
+        assertNotClosed();
+
         return groupBy(keyMapper, valueMapper, downstream, mapFactory).mapToEntry(Fn.<Map.Entry<K, D>> identity());
     }
 
     @Override
     public <K, V> EntryStream<K, V> groupByToEntry(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper,
             BinaryOperator<V> mergeFunction) {
+        assertNotClosed();
+
         return groupByToEntry(keyMapper, valueMapper, mergeFunction, Suppliers.<K, V> ofMap());
     }
 
     @Override
     public <K, V> EntryStream<K, V> groupByToEntry(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper,
             BinaryOperator<V> mergeFunction, Supplier<? extends Map<K, V>> mapFactory) {
+        assertNotClosed();
+
         return groupBy(keyMapper, valueMapper, mergeFunction, mapFactory).mapToEntry(Fn.<Map.Entry<K, V>> identity());
     }
 
     @Override
     public <K, V> Map<K, V> toMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
+        assertNotClosed();
+
         return toMap(keyMapper, valueMapper, Suppliers.<K, V> ofMap());
     }
 
     @Override
     public <K, V, M extends Map<K, V>> M toMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper,
             Supplier<? extends M> mapFactory) {
+        assertNotClosed();
+
         return toMap(keyMapper, valueMapper, Fn.<V> throwingMerger(), mapFactory);
     }
 
     @Override
     public <K, V> Map<K, V> toMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper, BinaryOperator<V> mergeFunction) {
+        assertNotClosed();
+
         return toMap(keyMapper, valueMapper, mergeFunction, Suppliers.<K, V> ofMap());
     }
 
     @Override
     public <K, A, D> Map<K, D> toMap(Function<? super T, ? extends K> keyMapper, Collector<? super T, A, D> downstream) {
+        assertNotClosed();
+
         return toMap(keyMapper, downstream, Suppliers.<K, D> ofMap());
     }
 
     @Override
     public <K, V, A, D> Map<K, D> toMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper,
             Collector<? super V, A, D> downstream) {
+        assertNotClosed();
+
         return toMap(keyMapper, valueMapper, downstream, Suppliers.<K, D> ofMap());
     }
 
     @Override
     public <K, A, D, M extends Map<K, D>> M toMap(final Function<? super T, ? extends K> keyMapper, final Collector<? super T, A, D> downstream,
             final Supplier<? extends M> mapFactory) {
+        assertNotClosed();
+
         return toMap(keyMapper, Fn.<T> identity(), downstream, mapFactory);
     }
 
@@ -2200,22 +2413,30 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <K> Map<K, List<T>> groupTo(Function<? super T, ? extends K> keyMapper) {
+        assertNotClosed();
+
         return groupTo(keyMapper, Suppliers.<K, List<T>> ofMap());
     }
 
     @Override
     public <K, M extends Map<K, List<T>>> M groupTo(Function<? super T, ? extends K> keyMapper, Supplier<? extends M> mapFactory) {
+        assertNotClosed();
+
         return toMap(keyMapper, Collectors.<T> toList(), mapFactory);
     }
 
     @Override
     public <K, V> Map<K, List<V>> groupTo(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
+        assertNotClosed();
+
         return groupTo(keyMapper, valueMapper, Suppliers.<K, List<V>> ofMap());
     }
 
     @Override
     public <K, V, M extends Map<K, List<V>>> M groupTo(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper,
             Supplier<? extends M> mapFactory) {
+        assertNotClosed();
+
         return toMap(keyMapper, valueMapper, Collectors.<V> toList(), mapFactory);
     }
 
@@ -2266,72 +2487,100 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Map<Boolean, List<T>> partitionTo(Predicate<? super T> predicate) {
+        assertNotClosed();
+
         return partitionTo(predicate, Collectors.<T> toList());
     }
 
     @Override
     public <A, D> Map<Boolean, D> partitionTo(Predicate<? super T> predicate, Collector<? super T, A, D> downstream) {
+        assertNotClosed();
+
         return collect(Collectors.partitioningBy(predicate, downstream));
     }
 
     @Override
     public <K> ListMultimap<K, T> toMultimap(Function<? super T, ? extends K> keyMapper) {
+        assertNotClosed();
+
         return toMultimap(keyMapper, Suppliers.<K, T> ofListMultimap());
     }
 
     @Override
     public <K, V extends Collection<T>, M extends Multimap<K, T, V>> M toMultimap(Function<? super T, ? extends K> keyMapper,
             Supplier<? extends M> mapFactory) {
+        assertNotClosed();
+
         return toMultimap(keyMapper, Fn.<T> identity(), mapFactory);
     }
 
     @Override
     public <K, V> ListMultimap<K, V> toMultimap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
+        assertNotClosed();
+
         return toMultimap(keyMapper, valueMapper, Suppliers.<K, V> ofListMultimap());
     }
 
     @Override
     public long sumInt(ToIntFunction<? super T> mapper) {
+        assertNotClosed();
+
         return collect(Collectors.summingInt(mapper));
     }
 
     @Override
     public long sumLong(ToLongFunction<? super T> mapper) {
+        assertNotClosed();
+
         return collect(Collectors.summingLong(mapper));
     }
 
     @Override
     public double sumDouble(ToDoubleFunction<? super T> mapper) {
+        assertNotClosed();
+
         return collect(Collectors.summingDouble(mapper));
     }
 
     @Override
     public OptionalDouble averageInt(ToIntFunction<? super T> mapper) {
+        assertNotClosed();
+
         return collect(Collectors.averagingInt(mapper));
     }
 
     @Override
     public OptionalDouble averageLong(ToLongFunction<? super T> mapper) {
+        assertNotClosed();
+
         return collect(Collectors.averagingLong(mapper));
     }
 
     @Override
     public OptionalDouble averageDouble(ToDoubleFunction<? super T> mapper) {
+        assertNotClosed();
+
         return collect(Collectors.averagingDouble(mapper));
     }
 
     @Override
     public <U> Stream<Pair<T, U>> crossJoin(final Collection<? extends U> b) {
+        assertNotClosed();
+
         return crossJoin(b, Fn.<T, U> pair());
     }
 
     @Override
     public <U, R> Stream<R> crossJoin(final Collection<? extends U> b, final BiFunction<? super T, ? super U, R> func) {
+        assertNotClosed();
+
         return flatMap(t -> Stream.of(b).map(u -> func.apply(t, u)));
     }
 
     @Override
     public <U, R> Stream<R> crossJoin(final Stream<? extends U> b, final BiFunction<? super T, ? super U, R> func) {
+        assertNotClosed();
+
         checkArgNotNull(b, "stream");
 
         return flatMap(new Function<T, Stream<R>>() {
@@ -2355,12 +2604,16 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <U, K> Stream<Pair<T, U>> innerJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper) {
+        assertNotClosed();
+
         return innerJoin(b, leftKeyMapper, rightKeyMapper, Fn.<T, U> pair());
     }
 
     @Override
     public <U, K, R> Stream<R> innerJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func) {
+        assertNotClosed();
+
         //    checkArgNotNull(b, "b");
         //    checkArgNotNull(leftKeyMapper, "leftKeyMapper");
         //    checkArgNotNull(rightKeyMapper, "rightKeyMapper");
@@ -2391,12 +2644,16 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <K, R> Stream<R> innerJoin(Collection<? extends T> b, Function<? super T, ? extends K> keyMapper, BiFunction<? super T, ? super T, R> func) {
+        assertNotClosed();
+
         return innerJoin(b, keyMapper, keyMapper, func);
     }
 
     @Override
     public <U, K, R> Stream<R> innerJoin(final Stream<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func) {
+        assertNotClosed();
+
         checkArgNotNull(b, "stream");
         //    checkArgNotNull(leftKeyMapper, "leftKeyMapper");
         //    checkArgNotNull(rightKeyMapper, "rightKeyMapper");
@@ -2427,6 +2684,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U> Stream<Pair<T, U>> innerJoin(final Collection<? extends U> b, final BiPredicate<? super T, ? super U> predicate) {
+        assertNotClosed();
+
         //    checkArgNotNull(b, "b");
         //    checkArgNotNull(predicate, "predicate");
 
@@ -2451,12 +2710,16 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <U, K> Stream<Pair<T, U>> fullJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper) {
+        assertNotClosed();
+
         return fullJoin(b, leftKeyMapper, rightKeyMapper, Fn.<T, U> pair());
     }
 
     @Override
     public <U, K, R> Stream<R> fullJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func) {
+        assertNotClosed();
+
         //    checkArgNotNull(b, "b");
         //    checkArgNotNull(leftKeyMapper, "leftKeyMapper");
         //    checkArgNotNull(rightKeyMapper, "rightKeyMapper");
@@ -2510,12 +2773,16 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <K, R> Stream<R> fullJoin(Collection<? extends T> b, Function<? super T, ? extends K> keyMapper, BiFunction<? super T, ? super T, R> func) {
+        assertNotClosed();
+
         return fullJoin(b, keyMapper, keyMapper, func);
     }
 
     @Override
     public <U, K, R> Stream<R> fullJoin(final Stream<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func) {
+        assertNotClosed();
+
         checkArgNotNull(b, "stream");
         //    checkArgNotNull(leftKeyMapper, "leftKeyMapper");
         //    checkArgNotNull(rightKeyMapper, "rightKeyMapper");
@@ -2572,6 +2839,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U> Stream<Pair<T, U>> fullJoin(final Collection<? extends U> b, final BiPredicate<? super T, ? super U> predicate) {
+        assertNotClosed();
+
         //    checkArgNotNull(b, "b");
         //    checkArgNotNull(predicate, "predicate");
 
@@ -2617,12 +2886,16 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <U, K> Stream<Pair<T, U>> leftJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper) {
+        assertNotClosed();
+
         return leftJoin(b, leftKeyMapper, rightKeyMapper, Fn.<T, U> pair());
     }
 
     @Override
     public <U, K, R> Stream<R> leftJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func) {
+        assertNotClosed();
+
         //    checkArgNotNull(b, "b");
         //    checkArgNotNull(leftKeyMapper, "leftKeyMapper");
         //    checkArgNotNull(rightKeyMapper, "rightKeyMapper");
@@ -2655,12 +2928,16 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <K, R> Stream<R> leftJoin(Collection<? extends T> b, Function<? super T, ? extends K> keyMapper, BiFunction<? super T, ? super T, R> func) {
+        assertNotClosed();
+
         return leftJoin(b, keyMapper, keyMapper, func);
     }
 
     @Override
     public <U, K, R> Stream<R> leftJoin(final Stream<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func) {
+        assertNotClosed();
+
         checkArgNotNull(b, "stream");
         //    checkArgNotNull(leftKeyMapper, "leftKeyMapper");
         //    checkArgNotNull(rightKeyMapper, "rightKeyMapper");
@@ -2693,6 +2970,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U> Stream<Pair<T, U>> leftJoin(final Collection<? extends U> b, final BiPredicate<? super T, ? super U> predicate) {
+        assertNotClosed();
+
         //    checkArgNotNull(b, "b");
         //    checkArgNotNull(predicate, "predicate");
 
@@ -2717,12 +2996,16 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <U, K> Stream<Pair<T, U>> rightJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper) {
+        assertNotClosed();
+
         return rightJoin(b, leftKeyMapper, rightKeyMapper, Fn.<T, U> pair());
     }
 
     @Override
     public <U, K, R> Stream<R> rightJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func) {
+        assertNotClosed();
+
         //    checkArgNotNull(b, "b");
         //    checkArgNotNull(leftKeyMapper, "leftKeyMapper");
         //    checkArgNotNull(rightKeyMapper, "rightKeyMapper");
@@ -2774,12 +3057,16 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <K, R> Stream<R> rightJoin(Collection<? extends T> b, Function<? super T, ? extends K> keyMapper, BiFunction<? super T, ? super T, R> func) {
+        assertNotClosed();
+
         return rightJoin(b, keyMapper, keyMapper, func);
     }
 
     @Override
     public <U, K, R> Stream<R> rightJoin(final Stream<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super U, R> func) {
+        assertNotClosed();
+
         checkArgNotNull(b, "stream");
         //    checkArgNotNull(leftKeyMapper, "leftKeyMapper");
         //    checkArgNotNull(rightKeyMapper, "rightKeyMapper");
@@ -2834,6 +3121,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U> Stream<Pair<T, U>> rightJoin(final Collection<? extends U> b, final BiPredicate<? super T, ? super U> predicate) {
+        assertNotClosed();
+
         //    checkArgNotNull(b, "b");
         //    checkArgNotNull(predicate, "predicate");
 
@@ -2879,12 +3168,16 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <U, K> Stream<Pair<T, List<U>>> groupJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper) {
+        assertNotClosed();
+
         return groupJoin(b, leftKeyMapper, rightKeyMapper, Fn.<T, List<U>> pair());
     }
 
     @Override
     public <U, K, R> Stream<R> groupJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super List<U>, R> func) {
+        assertNotClosed();
+
         //    checkArgNotNull(b, "b");
         //    checkArgNotNull(leftKeyMapper, "leftKeyMapper");
         //    checkArgNotNull(rightKeyMapper, "rightKeyMapper");
@@ -2936,12 +3229,16 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <K, R> Stream<R> groupJoin(Collection<? extends T> b, Function<? super T, ? extends K> keyMapper, BiFunction<? super T, ? super List<T>, R> func) {
+        assertNotClosed();
+
         return groupJoin(b, keyMapper, keyMapper, func);
     }
 
     @Override
     public <U, K, R> Stream<R> groupJoin(final Stream<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final BiFunction<? super T, ? super List<U>, R> func) {
+        assertNotClosed();
+
         checkArgNotNull(b, "stream");
         //    checkArgNotNull(leftKeyMapper, "leftKeyMapper");
         //    checkArgNotNull(rightKeyMapper, "rightKeyMapper");
@@ -2994,12 +3291,16 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <U, K> Stream<Pair<T, U>> groupJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final BinaryOperator<U> mergeFunction) {
+        assertNotClosed();
+
         return groupJoin(b, leftKeyMapper, rightKeyMapper, mergeFunction, Fn.<T, U> pair());
     }
 
     @Override
     public <U, K, R> Stream<R> groupJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final BinaryOperator<U> mergeFunction, final BiFunction<? super T, ? super U, R> func) {
+        assertNotClosed();
+
         //    checkArgNotNull(b, "b");
         //    checkArgNotNull(leftKeyMapper, "leftKeyMapper");
         //    checkArgNotNull(rightKeyMapper, "rightKeyMapper");
@@ -3058,6 +3359,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <U, K, R> Stream<R> groupJoin(final Stream<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final BinaryOperator<U> mergeFunction, final BiFunction<? super T, ? super U, R> func) {
+        assertNotClosed();
+
         checkArgNotNull(b, "stream");
         //    checkArgNotNull(leftKeyMapper, "leftKeyMapper");
         //    checkArgNotNull(rightKeyMapper, "rightKeyMapper");
@@ -3116,6 +3419,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <U, K, A, D> Stream<Pair<T, D>> groupJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final Collector<? super U, A, D> downstream) {
+        assertNotClosed();
+
         return groupJoin(b, leftKeyMapper, rightKeyMapper, downstream, Fn.<T, D> pair());
     }
 
@@ -3123,6 +3428,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     public <U, K, A, D, R> Stream<R> groupJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final Collector<? super U, A, D> downstream,
             final BiFunction<? super T, ? super D, R> func) {
+        assertNotClosed();
+
         //    checkArgNotNull(b, "b");
         //    checkArgNotNull(leftKeyMapper, "leftKeyMapper");
         //    checkArgNotNull(rightKeyMapper, "rightKeyMapper");
@@ -3182,6 +3489,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     public <U, K, A, D, R> Stream<R> groupJoin(final Stream<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final Collector<? super U, A, D> downstream,
             final BiFunction<? super T, ? super D, R> func) {
+        assertNotClosed();
+
         checkArgNotNull(b, "stream");
         //    checkArgNotNull(leftKeyMapper, "leftKeyMapper");
         //    checkArgNotNull(rightKeyMapper, "rightKeyMapper");
@@ -3239,6 +3548,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <E extends Exception> Optional<T> findAny(final Throwables.Predicate<? super T, E> predicate) throws E {
+        assertNotClosed();
+
         return findFirst(predicate);
     }
 
@@ -3499,16 +3810,22 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> skipNull() {
+        assertNotClosed();
+
         return filter(Fn.notNull());
     }
 
     @Override
     public Stream<List<T>> slidingToList(int windowSize) {
+        assertNotClosed();
+
         return slidingToList(windowSize, 1);
     }
 
     @Override
     public Stream<T> intersection(final Collection<?> c) {
+        assertNotClosed();
+
         final Multiset<?> multiset = Multiset.from(c);
 
         return newStream(this.sequential().filter(new Predicate<T>() {
@@ -3521,6 +3838,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> intersection(final Function<? super T, ?> mapper, final Collection<?> c) {
+        assertNotClosed();
+
         final Multiset<?> multiset = Multiset.from(c);
 
         return newStream(this.sequential().filter(new Predicate<T>() {
@@ -3533,6 +3852,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> difference(final Collection<?> c) {
+        assertNotClosed();
+
         final Multiset<?> multiset = Multiset.from(c);
 
         return newStream(this.sequential().filter(new Predicate<T>() {
@@ -3545,6 +3866,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> difference(final Function<? super T, ?> mapper, final Collection<?> c) {
+        assertNotClosed();
+
         final Multiset<?> multiset = Multiset.from(c);
 
         return newStream(this.sequential().filter(new Predicate<T>() {
@@ -3557,6 +3880,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> symmetricDifference(final Collection<T> c) {
+        assertNotClosed();
+
         final Multiset<?> multiset = Multiset.from(c);
 
         return newStream(this.sequential().filter(new Predicate<T>() {
@@ -3574,6 +3899,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> reversed() {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<T>() {
             private boolean initialized = false;
 
@@ -3656,6 +3983,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> rotated(final int distance) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<T>() {
             private boolean initialized = false;
 
@@ -3746,6 +4075,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> shuffled(final Random rnd) {
+        assertNotClosed();
+
         checkArgNotNull(rnd, "random");
 
         return lazyLoad(new Function<Object[], Object[]>() {
@@ -3759,16 +4090,22 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> sorted() {
+        assertNotClosed();
+
         return sorted(NATURAL_COMPARATOR);
     }
 
     @Override
     public Stream<T> reverseSorted() {
+        assertNotClosed();
+
         return sorted(REVERSED_COMPARATOR);
     }
 
     @Override
     public Stream<T> sorted(final Comparator<? super T> comparator) {
+        assertNotClosed();
+
         final Comparator<? super T> cmp = comparator == null ? NATURAL_COMPARATOR : comparator;
 
         if (sorted && cmp == this.cmp) {
@@ -3863,6 +4200,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> distinct() {
+        assertNotClosed();
+
         final Set<Object> set = N.newHashSet();
 
         return newStream(this.sequential().filter(new Predicate<T>() {
@@ -3875,6 +4214,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> distinctBy(final Function<? super T, ?> keyMapper) {
+        assertNotClosed();
+
         //    final Set<Object> set = N.newHashSet();
         //
         //    final Predicate<T> predicate = isParallel() ? new Predicate<T>() {
@@ -3914,6 +4255,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> top(int n) {
+        assertNotClosed();
+
         return top(n, NATURAL_COMPARATOR);
     }
 
@@ -3965,6 +4308,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<List<T>> combinations() {
+        assertNotClosed();
+
         if (this instanceof ArrayStream) {
             @SuppressWarnings("resource")
             final ArrayStream<T> s = ((ArrayStream<T>) this);
@@ -3983,6 +4328,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<List<T>> combinations(final int len) {
+        assertNotClosed();
+
         if (this instanceof ArrayStream) {
             @SuppressWarnings("resource")
             final ArrayStream<T> s = ((ArrayStream<T>) this);
@@ -4045,6 +4392,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<List<T>> combinations(final int len, final boolean repeat) {
+        assertNotClosed();
+
         if (repeat == false) {
             return combinations(len);
         } else {
@@ -4103,16 +4452,22 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<List<T>> permutations() {
+        assertNotClosed();
+
         return newStream(PermutationIterator.of(toList()), false, null);
     }
 
     @Override
     public Stream<List<T>> orderedPermutations() {
+        assertNotClosed();
+
         return orderedPermutations(NATURAL_COMPARATOR);
     }
 
     @Override
     public Stream<List<T>> orderedPermutations(Comparator<? super T> comparator) {
+        assertNotClosed();
+
         final Iterator<List<T>> iter = PermutationIterator.ordered(toList(), comparator == null ? NATURAL_COMPARATOR : comparator);
 
         return newStream(iter, false, null);
@@ -4120,6 +4475,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<List<T>> cartesianProduct(final Collection<? extends Collection<? extends T>> cs) {
+        assertNotClosed();
+
         final List<Collection<? extends T>> cList = new ArrayList<>(cs.size() + 1);
         cList.add(this.toList());
         cList.addAll(cs);
@@ -4193,11 +4550,15 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public DataSet toDataSet() {
+        assertNotClosed();
+
         return N.newDataSet(toList());
     }
 
     @Override
     public DataSet toDataSet(List<String> columnNames) {
+        assertNotClosed();
+
         return N.newDataSet(columnNames, toList());
     }
 
@@ -4241,6 +4602,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <R> R collect(Supplier<R> supplier, BiConsumer<? super R, ? super T> accumulator) {
+        assertNotClosed();
+
         final BiConsumer<R, R> combiner = collectingCombiner;
 
         return collect(supplier, accumulator, combiner);
@@ -4248,38 +4611,52 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <R, A> R collect(java.util.stream.Collector<? super T, A, R> collector) {
+        assertNotClosed();
+
         return collect(Collector.from(collector));
     }
 
     @Override
     public <R, A, RR, E extends Exception> RR collectAndThen(Collector<? super T, A, R> downstream, Throwables.Function<? super R, RR, E> func) throws E {
+        assertNotClosed();
+
         return func.apply(collect(downstream));
     }
 
     @Override
     public <R, A, RR, E extends Exception> RR collectAndThen(java.util.stream.Collector<? super T, A, R> downstream, Throwables.Function<? super R, RR, E> func)
             throws E {
+        assertNotClosed();
+
         return func.apply(collect(downstream));
     }
 
     @Override
-    public <R, E extends Exception> R toListAndThen(final Throwables.Function<? super List<T>, R, E> func)throws E {
+    public <R, E extends Exception> R toListAndThen(final Throwables.Function<? super List<T>, R, E> func) throws E {
+        assertNotClosed();
+
         return func.apply(toList());
     }
 
     @Override
     public <R, E extends Exception> R toSetAndThen(final Throwables.Function<? super Set<T>, R, E> func) throws E {
+        assertNotClosed();
+
         return func.apply(toSet());
     }
 
     @Override
     public <R, CC extends Collection<T>, E extends Exception> R toCollectionAndThen(final Supplier<? extends CC> supplier,
             final Throwables.Function<? super CC, R, E> func) throws E {
+        assertNotClosed();
+
         return func.apply(toCollection(supplier));
     }
 
     @Override
     public Stream<Indexed<T>> indexed() {
+        assertNotClosed();
+
         final MutableLong idx = MutableLong.of(0);
 
         return newStream(this.sequential().map(new Function<T, Indexed<T>>() {
@@ -4292,6 +4669,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> cycled() {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<T>() {
             private Iterator<T> iter;
             private List<T> list;
@@ -4346,6 +4725,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> cycled(long times) {
+        assertNotClosed();
+
         checkArgNotNegative(times, "times");
 
         return newStream(new ObjIteratorEx<T>() {
@@ -4408,6 +4789,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<List<T>> rollup() {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<List<T>>() {
             private boolean initialized = false;
             private List<T> elements;
@@ -4469,16 +4852,22 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> queued() {
+        assertNotClosed();
+
         return queued(DEFAULT_QUEUE_SIZE_PER_ITERATOR);
     }
 
     @Override
     public Stream<T> append(Stream<T> stream) {
+        assertNotClosed();
+
         return Stream.concat(this, stream);
     }
 
     @Override
     public Stream<T> append(Collection<? extends T> c) {
+        assertNotClosed();
+
         return append(Stream.of(c));
     }
 
@@ -4489,11 +4878,15 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> prepend(Stream<T> stream) {
+        assertNotClosed();
+
         return Stream.concat(stream, this);
     }
 
     @Override
     public Stream<T> prepend(Collection<? extends T> c) {
+        assertNotClosed();
+
         return prepend(Stream.of(c));
     }
 
@@ -4504,27 +4897,37 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> merge(final Stream<? extends T> b, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
+        assertNotClosed();
+
         return Stream.merge(this, b, nextSelector);
     }
 
     @Override
     public <T2, R> Stream<R> zipWith(Stream<T2> b, BiFunction<? super T, ? super T2, R> zipFunction) {
+        assertNotClosed();
+
         return Stream.zip(this, b, zipFunction);
     }
 
     @Override
     public <T2, T3, R> Stream<R> zipWith(Stream<T2> b, Stream<T3> c, TriFunction<? super T, ? super T2, ? super T3, R> zipFunction) {
+        assertNotClosed();
+
         return Stream.zip(this, b, c, zipFunction);
     }
 
     @Override
     public <T2, R> Stream<R> zipWith(Stream<T2> b, T valueForNoneA, T2 valueForNoneB, BiFunction<? super T, ? super T2, R> zipFunction) {
+        assertNotClosed();
+
         return Stream.zip(this, b, valueForNoneA, valueForNoneB, zipFunction);
     }
 
     @Override
     public <T2, T3, R> Stream<R> zipWith(Stream<T2> b, Stream<T3> c, T valueForNoneA, T2 valueForNoneB, T3 valueForNoneC,
             TriFunction<? super T, ? super T2, ? super T3, R> zipFunction) {
+        assertNotClosed();
+
         return Stream.zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     }
 
@@ -4537,11 +4940,15 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public long persist(final File file) throws IOException {
+        assertNotClosed();
+
         return persist(TO_LINE_OF_STRING, file);
     }
 
     @Override
     public long persist(final Throwables.Function<? super T, String, IOException> toLine, final File file) throws IOException {
+        assertNotClosed();
+
         final Writer writer = new FileWriter(file);
 
         try {
@@ -4553,6 +4960,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public long persist(final Throwables.Function<? super T, String, IOException> toLine, final OutputStream os) throws IOException {
+        assertNotClosed();
+
         final BufferedWriter bw = Objectory.createBufferedWriter(os);
 
         try {
@@ -4564,6 +4973,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public long persist(Throwables.Function<? super T, String, IOException> toLine, Writer writer) throws IOException {
+        assertNotClosed();
+
         return persist(toLine, null, null, writer);
     }
 
@@ -4610,6 +5021,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public long persist(final Connection conn, final String insertSQL, final int batchSize, final int batchInterval,
             final Throwables.BiConsumer<? super PreparedStatement, ? super T, SQLException> stmtSetter) throws SQLException {
+        assertNotClosed();
+
         PreparedStatement stmt = null;
 
         try {
@@ -4624,9 +5037,10 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public long persist(final PreparedStatement stmt, final int batchSize, final int batchInterval,
             final Throwables.BiConsumer<? super PreparedStatement, ? super T, SQLException> stmtSetter) throws SQLException {
+        assertNotClosed();
+
         checkArgument(batchSize > 0 && batchInterval >= 0, "'batchSize'=%s must be greater than 0 and 'batchInterval'=%s can't be negative", batchSize,
                 batchInterval);
-        assertNotClosed();
 
         try {
             final Iterator<T> iter = iteratorEx();
@@ -4678,6 +5092,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <K, V> Stream<DisposableEntry<K, V>> mapToDisposableEntry(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper) {
+        assertNotClosed();
+
         checkState(isParallel() == false, "mapToDisposableEntry can't be applied to parallel stream");
 
         final Function<T, DisposableEntry<K, V>> mapper = new Function<T, DisposableEntry<K, V>>() {

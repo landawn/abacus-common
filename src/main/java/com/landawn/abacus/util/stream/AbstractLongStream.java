@@ -68,6 +68,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream distinct() {
+        assertNotClosed();
+
         final Set<Object> set = N.newHashSet();
 
         return newStream(this.sequential().filter(new LongPredicate() {
@@ -80,6 +82,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream flattMap(final LongFunction<long[]> mapper) {
+        assertNotClosed();
+
         return flatMap(new LongFunction<LongStream>() {
             @Override
             public LongStream apply(long t) {
@@ -90,6 +94,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public <T> Stream<T> flattMapToObj(final LongFunction<? extends Collection<T>> mapper) {
+        assertNotClosed();
+
         return flatMapToObj(new LongFunction<Stream<T>>() {
             @Override
             public Stream<T> apply(long t) {
@@ -100,6 +106,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public <T> Stream<T> flatMappToObj(final LongFunction<T[]> mapper) {
+        assertNotClosed();
+
         return flatMapToObj(new LongFunction<Stream<T>>() {
             @Override
             public Stream<T> apply(long t) {
@@ -110,6 +118,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream rangeMap(final LongBiPredicate sameRange, final LongBinaryOperator mapper) {
+        assertNotClosed();
+
         final LongIteratorEx iter = iteratorEx();
 
         return newStream(new LongIteratorEx() {
@@ -143,6 +153,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public <T> Stream<T> rangeMapToObj(final LongBiPredicate sameRange, final LongBiFunction<T> mapper) {
+        assertNotClosed();
+
         final LongIteratorEx iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<T>() {
@@ -176,6 +188,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public Stream<LongList> collapse(final LongBiPredicate collapsible) {
+        assertNotClosed();
+
         final LongIteratorEx iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<LongList>() {
@@ -207,6 +221,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream collapse(final LongBiPredicate collapsible, final LongBinaryOperator mergeFunction) {
+        assertNotClosed();
+
         final LongIteratorEx iter = iteratorEx();
 
         return newStream(new LongIteratorEx() {
@@ -237,6 +253,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream skip(final long n, final LongConsumer action) {
+        assertNotClosed();
+
         final LongPredicate filter = isParallel() ? new LongPredicate() {
             final AtomicLong cnt = new AtomicLong(n);
 
@@ -258,6 +276,7 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream removeIf(final LongPredicate predicate) {
+        assertNotClosed();
 
         return filter(new LongPredicate() {
             @Override
@@ -269,6 +288,7 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream removeIf(final LongPredicate predicate, final LongConsumer actionOnDroppedItem) {
+        assertNotClosed();
 
         return filter(new LongPredicate() {
             @Override
@@ -285,6 +305,7 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream filter(final LongPredicate predicate, final LongConsumer actionOnDroppedItem) {
+        assertNotClosed();
 
         return filter(new LongPredicate() {
             @Override
@@ -301,6 +322,7 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream dropWhile(final LongPredicate predicate, final LongConsumer actionOnDroppedItem) {
+        assertNotClosed();
 
         return dropWhile(new LongPredicate() {
             @Override
@@ -317,6 +339,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream step(final long step) {
+        assertNotClosed();
+
         checkArgPositive(step, "step");
 
         final long skip = step - 1;
@@ -341,6 +365,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public Stream<LongStream> split(final int chunkSize) {
+        assertNotClosed();
+
         return splitToList(chunkSize).map(new Function<LongList, LongStream>() {
             @Override
             public LongStream apply(LongList t) {
@@ -351,6 +377,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public Stream<LongStream> split(final LongPredicate predicate) {
+        assertNotClosed();
+
         return splitToList(predicate).map(new Function<LongList, LongStream>() {
             @Override
             public LongStream apply(LongList t) {
@@ -361,6 +389,7 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public Stream<LongStream> splitBy(final LongPredicate where) {
+        assertNotClosed();
 
         final LongIteratorEx iter = iteratorEx();
 
@@ -469,6 +498,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public Stream<LongStream> sliding(final int windowSize, final int increment) {
+        assertNotClosed();
+
         return slidingToList(windowSize, increment).map(new Function<LongList, LongStream>() {
             @Override
             public LongStream apply(LongList t) {
@@ -479,6 +510,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream scan(final LongBinaryOperator accumulator) {
+        assertNotClosed();
+
         final LongIteratorEx iter = iteratorEx();
 
         return newStream(new LongIteratorEx() {
@@ -504,6 +537,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream scan(final long init, final LongBinaryOperator accumulator) {
+        assertNotClosed();
+
         final LongIteratorEx iter = iteratorEx();
 
         return newStream(new LongIteratorEx() {
@@ -523,6 +558,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream scan(final long init, final LongBinaryOperator accumulator, final boolean initIncluded) {
+        assertNotClosed();
+
         if (initIncluded == false) {
             return scan(init, accumulator);
         }
@@ -552,11 +589,15 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream top(int n) {
+        assertNotClosed();
+
         return top(n, LONG_COMPARATOR);
     }
 
     @Override
     public LongStream intersection(final Collection<?> c) {
+        assertNotClosed();
+
         final Multiset<?> multiset = Multiset.from(c);
 
         return newStream(this.sequential().filter(new LongPredicate() {
@@ -569,6 +610,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream difference(final Collection<?> c) {
+        assertNotClosed();
+
         final Multiset<?> multiset = Multiset.from(c);
 
         return newStream(this.sequential().filter(new LongPredicate() {
@@ -581,6 +624,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream symmetricDifference(final Collection<Long> c) {
+        assertNotClosed();
+
         final Multiset<?> multiset = Multiset.from(c);
 
         return newStream(this.sequential().filter(new LongPredicate() {
@@ -598,6 +643,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream reversed() {
+        assertNotClosed();
+
         return newStream(new LongIteratorEx() {
             private boolean initialized = false;
 
@@ -680,6 +727,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream rotated(final int distance) {
+        assertNotClosed();
+
         return newStream(new LongIteratorEx() {
             private boolean initialized = false;
 
@@ -770,6 +819,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream shuffled(final Random rnd) {
+        assertNotClosed();
+
         checkArgNotNull(rnd, "random");
 
         return lazyLoad(new Function<long[], long[]>() {
@@ -783,6 +834,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream sorted() {
+        assertNotClosed();
+
         if (sorted) {
             return newStream(iteratorEx(), sorted);
         }
@@ -803,6 +856,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public LongStream reverseSorted() {
+        assertNotClosed();
+
         return newStream(new LongIteratorEx() {
             private boolean initialized = false;
             private long[] aar;
@@ -954,6 +1009,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public Stream<IndexedLong> indexed() {
+        assertNotClosed();
+
         final MutableLong idx = MutableLong.of(0);
 
         return newStream(this.sequential().mapToObj(new LongFunction<IndexedLong>() {
@@ -967,53 +1024,73 @@ abstract class AbstractLongStream extends LongStream {
     @Override
     @SafeVarargs
     public final LongStream prepend(final long... a) {
+        assertNotClosed();
+
         return prepend(LongStream.of(a));
     }
 
     @Override
     public LongStream prepend(LongStream stream) {
+        assertNotClosed();
+
         return LongStream.concat(stream, this);
     }
 
     @Override
     @SafeVarargs
     public final LongStream append(final long... a) {
+        assertNotClosed();
+
         return append(LongStream.of(a));
     }
 
     @Override
     public LongStream append(LongStream stream) {
+        assertNotClosed();
+
         return LongStream.concat(this, stream);
     }
 
     @Override
     @SafeVarargs
     public final LongStream appendIfEmpty(final long... a) {
+        assertNotClosed();
+
         return appendIfEmpty(() -> LongStream.of(a));
     }
 
     @Override
     public LongStream merge(LongStream b, LongBiFunction<MergeResult> nextSelector) {
+        assertNotClosed();
+
         return LongStream.merge(this, b, nextSelector);
     }
 
     @Override
     public LongStream zipWith(LongStream b, LongBinaryOperator zipFunction) {
+        assertNotClosed();
+
         return LongStream.zip(this, b, zipFunction);
     }
 
     @Override
     public LongStream zipWith(LongStream b, LongStream c, LongTernaryOperator zipFunction) {
+        assertNotClosed();
+
         return LongStream.zip(this, b, c, zipFunction);
     }
 
     @Override
     public LongStream zipWith(LongStream b, long valueForNoneA, long valueForNoneB, LongBinaryOperator zipFunction) {
+        assertNotClosed();
+
         return LongStream.zip(this, b, valueForNoneA, valueForNoneB, zipFunction);
     }
 
     @Override
     public LongStream zipWith(LongStream b, LongStream c, long valueForNoneA, long valueForNoneB, long valueForNoneC, LongTernaryOperator zipFunction) {
+        assertNotClosed();
+
         return LongStream.zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     }
 
@@ -1024,26 +1101,36 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public <K, V> Map<K, V> toMap(LongFunction<? extends K> keyMapper, LongFunction<? extends V> valueMapper) {
+        assertNotClosed();
+
         return toMap(keyMapper, valueMapper, Suppliers.<K, V> ofMap());
     }
 
     @Override
     public <K, V, M extends Map<K, V>> M toMap(LongFunction<? extends K> keyMapper, LongFunction<? extends V> valueMapper, Supplier<? extends M> mapFactory) {
+        assertNotClosed();
+
         return toMap(keyMapper, valueMapper, Fn.<V> throwingMerger(), mapFactory);
     }
 
     @Override
     public <K, V> Map<K, V> toMap(LongFunction<? extends K> keyMapper, LongFunction<? extends V> valueMapper, BinaryOperator<V> mergeFunction) {
+        assertNotClosed();
+
         return toMap(keyMapper, valueMapper, mergeFunction, Suppliers.<K, V> ofMap());
     }
 
     @Override
     public <K, A, D> Map<K, D> toMap(LongFunction<? extends K> keyMapper, Collector<Long, A, D> downstream) {
+        assertNotClosed();
+
         return toMap(keyMapper, downstream, Suppliers.<K, D> ofMap());
     }
 
-    @Override 
+    @Override
     public <E extends Exception> void forEachIndexed(Throwables.IndexedLongConsumer<E> action) throws E {
+        assertNotClosed();
+
         if (isParallel()) {
             final AtomicInteger idx = new AtomicInteger(0);
 
@@ -1122,6 +1209,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public <E extends Exception> OptionalLong findAny(final Throwables.LongPredicate<E> predicate) throws E {
+        assertNotClosed();
+
         return findFirst(predicate);
     }
 
@@ -1209,6 +1298,8 @@ abstract class AbstractLongStream extends LongStream {
 
     @Override
     public <R> R collect(Supplier<R> supplier, ObjLongConsumer<? super R> accumulator) {
+        assertNotClosed();
+
         final BiConsumer<R, R> combiner = collectingCombiner;
 
         return collect(supplier, accumulator, combiner);

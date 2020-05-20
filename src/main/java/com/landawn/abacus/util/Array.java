@@ -5378,7 +5378,7 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         return box(a, 0, a.length);
     }
 
@@ -5395,13 +5395,13 @@ public final class Array {
         } else if (toIndex - fromIndex == 0) {
             return N.EMPTY_BOOLEAN_OBJECT_ARRAY;
         }
-    
+
         final Boolean[] result = new Boolean[toIndex - fromIndex];
-    
+
         for (int i = 0, j = fromIndex; j < toIndex; i++, j++) {
             result[i] = Boolean.valueOf(a[j]);
         }
-    
+
         return result;
     }
 
@@ -5423,7 +5423,7 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         return box(a, 0, a.length);
     }
 
@@ -5440,13 +5440,13 @@ public final class Array {
         } else if (toIndex - fromIndex == 0) {
             return N.EMPTY_CHARACTER_OBJECT_ARRAY;
         }
-    
+
         final Character[] result = new Character[toIndex - fromIndex];
-    
+
         for (int i = 0, j = fromIndex; j < toIndex; i++, j++) {
             result[i] = Character.valueOf(a[j]);
         }
-    
+
         return result;
     }
 
@@ -5468,7 +5468,7 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         return box(a, 0, a.length);
     }
 
@@ -5485,13 +5485,13 @@ public final class Array {
         } else if (toIndex - fromIndex == 0) {
             return N.EMPTY_BYTE_OBJECT_ARRAY;
         }
-    
+
         final Byte[] result = new Byte[toIndex - fromIndex];
-    
+
         for (int i = 0, j = fromIndex; j < toIndex; i++, j++) {
             result[i] = Byte.valueOf(a[j]);
         }
-    
+
         return result;
     }
 
@@ -5513,7 +5513,7 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         return box(a, 0, a.length);
     }
 
@@ -5530,13 +5530,13 @@ public final class Array {
         } else if (toIndex - fromIndex == 0) {
             return N.EMPTY_SHORT_OBJECT_ARRAY;
         }
-    
+
         final Short[] result = new Short[toIndex - fromIndex];
-    
+
         for (int i = 0, j = fromIndex; j < toIndex; i++, j++) {
             result[i] = Short.valueOf(a[j]);
         }
-    
+
         return result;
     }
 
@@ -5558,7 +5558,7 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         return box(a, 0, a.length);
     }
 
@@ -5575,13 +5575,13 @@ public final class Array {
         } else if (toIndex - fromIndex == 0) {
             return N.EMPTY_INTEGER_OBJECT_ARRAY;
         }
-    
+
         final Integer[] result = new Integer[toIndex - fromIndex];
-    
+
         for (int i = 0, j = fromIndex; j < toIndex; i++, j++) {
             result[i] = Integer.valueOf(a[j]);
         }
-    
+
         return result;
     }
 
@@ -5603,7 +5603,7 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         return box(a, 0, a.length);
     }
 
@@ -5620,13 +5620,13 @@ public final class Array {
         } else if (toIndex - fromIndex == 0) {
             return N.EMPTY_LONG_OBJECT_ARRAY;
         }
-    
+
         final Long[] result = new Long[toIndex - fromIndex];
-    
+
         for (int i = 0, j = fromIndex; j < toIndex; i++, j++) {
             result[i] = Long.valueOf(a[j]);
         }
-    
+
         return result;
     }
 
@@ -5648,7 +5648,7 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         return box(a, 0, a.length);
     }
 
@@ -5665,13 +5665,13 @@ public final class Array {
         } else if (toIndex - fromIndex == 0) {
             return N.EMPTY_FLOAT_OBJECT_ARRAY;
         }
-    
+
         final Float[] result = new Float[toIndex - fromIndex];
-    
+
         for (int i = 0, j = fromIndex; j < toIndex; i++, j++) {
             result[i] = Float.valueOf(a[j]);
         }
-    
+
         return result;
     }
 
@@ -5693,7 +5693,7 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         return box(a, 0, a.length);
     }
 
@@ -5710,13 +5710,13 @@ public final class Array {
         } else if (toIndex - fromIndex == 0) {
             return N.EMPTY_DOUBLE_OBJECT_ARRAY;
         }
-    
+
         final Double[] result = new Double[toIndex - fromIndex];
-    
+
         for (int i = 0, j = fromIndex; j < toIndex; i++, j++) {
             result[i] = Double.valueOf(a[j]);
         }
-    
+
         return result;
     }
 
@@ -5729,13 +5729,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final Boolean[][] result = new Boolean[a.length][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = box(a[i]);
         }
-    
+
         return result;
     }
 
@@ -5748,13 +5748,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final Character[][] result = new Character[a.length][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = box(a[i]);
         }
-    
+
         return result;
     }
 
@@ -5767,13 +5767,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final Byte[][] result = new Byte[a.length][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = box(a[i]);
         }
-    
+
         return result;
     }
 
@@ -5786,13 +5786,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final Short[][] result = new Short[a.length][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = box(a[i]);
         }
-    
+
         return result;
     }
 
@@ -5805,13 +5805,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final Integer[][] result = new Integer[a.length][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = box(a[i]);
         }
-    
+
         return result;
     }
 
@@ -5824,13 +5824,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final Long[][] result = new Long[a.length][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = box(a[i]);
         }
-    
+
         return result;
     }
 
@@ -5843,13 +5843,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final Float[][] result = new Float[a.length][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = box(a[i]);
         }
-    
+
         return result;
     }
 
@@ -5862,13 +5862,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final Double[][] result = new Double[a.length][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = box(a[i]);
         }
-    
+
         return result;
     }
 
@@ -5881,13 +5881,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final Boolean[][][] result = new Boolean[a.length][][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = box(a[i]);
         }
-    
+
         return result;
     }
 
@@ -5900,13 +5900,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final Character[][][] result = new Character[a.length][][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = box(a[i]);
         }
-    
+
         return result;
     }
 
@@ -5919,13 +5919,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final Byte[][][] result = new Byte[a.length][][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = box(a[i]);
         }
-    
+
         return result;
     }
 
@@ -5938,13 +5938,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final Short[][][] result = new Short[a.length][][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = box(a[i]);
         }
-    
+
         return result;
     }
 
@@ -5957,13 +5957,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final Integer[][][] result = new Integer[a.length][][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = box(a[i]);
         }
-    
+
         return result;
     }
 
@@ -5976,13 +5976,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final Long[][][] result = new Long[a.length][][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = box(a[i]);
         }
-    
+
         return result;
     }
 
@@ -5995,13 +5995,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final Float[][][] result = new Float[a.length][][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = box(a[i]);
         }
-    
+
         return result;
     }
 
@@ -6014,13 +6014,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final Double[][][] result = new Double[a.length][][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = box(a[i]);
         }
-    
+
         return result;
     }
 
@@ -6063,7 +6063,7 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         return unbox(a, 0, a.length, valueForNull);
     }
 
@@ -6081,13 +6081,13 @@ public final class Array {
         } else if (toIndex - fromIndex == 0) {
             return N.EMPTY_BOOLEAN_ARRAY;
         }
-    
+
         final boolean[] result = new boolean[toIndex - fromIndex];
-    
+
         for (int i = 0, j = fromIndex; j < toIndex; i++, j++) {
             result[i] = (a[j] == null ? valueForNull : a[j].booleanValue());
         }
-    
+
         return result;
     }
 
@@ -6131,7 +6131,7 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         return unbox(a, 0, a.length, valueForNull);
     }
 
@@ -6149,13 +6149,13 @@ public final class Array {
         } else if (toIndex - fromIndex == 0) {
             return N.EMPTY_CHAR_ARRAY;
         }
-    
+
         final char[] result = new char[toIndex - fromIndex];
-    
+
         for (int i = 0, j = fromIndex; j < toIndex; i++, j++) {
             result[i] = (a[j] == null ? valueForNull : a[j].charValue());
         }
-    
+
         return result;
     }
 
@@ -6198,7 +6198,7 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         return unbox(a, 0, a.length, valueForNull);
     }
 
@@ -6216,13 +6216,13 @@ public final class Array {
         } else if (toIndex - fromIndex == 0) {
             return N.EMPTY_BYTE_ARRAY;
         }
-    
+
         final byte[] result = new byte[toIndex - fromIndex];
-    
+
         for (int i = 0, j = fromIndex; j < toIndex; i++, j++) {
             result[i] = (a[j] == null ? valueForNull : a[j].byteValue());
         }
-    
+
         return result;
     }
 
@@ -6265,7 +6265,7 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         return unbox(a, 0, a.length, valueForNull);
     }
 
@@ -6283,13 +6283,13 @@ public final class Array {
         } else if (toIndex - fromIndex == 0) {
             return N.EMPTY_SHORT_ARRAY;
         }
-    
+
         final short[] result = new short[toIndex - fromIndex];
-    
+
         for (int i = 0, j = fromIndex; j < toIndex; i++, j++) {
             result[i] = (a[j] == null ? valueForNull : a[j].shortValue());
         }
-    
+
         return result;
     }
 
@@ -6332,7 +6332,7 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         return unbox(a, 0, a.length, valueForNull);
     }
 
@@ -6350,13 +6350,13 @@ public final class Array {
         } else if (toIndex - fromIndex == 0) {
             return N.EMPTY_INT_ARRAY;
         }
-    
+
         final int[] result = new int[toIndex - fromIndex];
-    
+
         for (int i = 0, j = fromIndex; j < toIndex; i++, j++) {
             result[i] = (a[j] == null ? valueForNull : a[j].intValue());
         }
-    
+
         return result;
     }
 
@@ -6399,7 +6399,7 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         return unbox(a, 0, a.length, valueForNull);
     }
 
@@ -6417,13 +6417,13 @@ public final class Array {
         } else if (toIndex - fromIndex == 0) {
             return N.EMPTY_LONG_ARRAY;
         }
-    
+
         final long[] result = new long[toIndex - fromIndex];
-    
+
         for (int i = 0, j = fromIndex; j < toIndex; i++, j++) {
             result[i] = (a[j] == null ? valueForNull : a[j].longValue());
         }
-    
+
         return result;
     }
 
@@ -6466,7 +6466,7 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         return unbox(a, 0, a.length, valueForNull);
     }
 
@@ -6484,13 +6484,13 @@ public final class Array {
         } else if (toIndex - fromIndex == 0) {
             return N.EMPTY_FLOAT_ARRAY;
         }
-    
+
         final float[] result = new float[toIndex - fromIndex];
-    
+
         for (int i = 0, j = fromIndex; j < toIndex; i++, j++) {
             result[i] = (a[j] == null ? valueForNull : a[j].floatValue());
         }
-    
+
         return result;
     }
 
@@ -6533,7 +6533,7 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         return unbox(a, 0, a.length, valueForNull);
     }
 
@@ -6551,13 +6551,13 @@ public final class Array {
         } else if (toIndex - fromIndex == 0) {
             return N.EMPTY_DOUBLE_ARRAY;
         }
-    
+
         final double[] result = new double[toIndex - fromIndex];
-    
+
         for (int i = 0, j = fromIndex; j < toIndex; i++, j++) {
             result[i] = (a[j] == null ? valueForNull : a[j].doubleValue());
         }
-    
+
         return result;
     }
 
@@ -6580,13 +6580,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final boolean[][] result = new boolean[a.length][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = unbox(a[i], valueForNull);
         }
-    
+
         return result;
     }
 
@@ -6609,13 +6609,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final char[][] result = new char[a.length][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = unbox(a[i], valueForNull);
         }
-    
+
         return result;
     }
 
@@ -6638,13 +6638,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final byte[][] result = new byte[a.length][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = unbox(a[i], valueForNull);
         }
-    
+
         return result;
     }
 
@@ -6667,13 +6667,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final short[][] result = new short[a.length][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = unbox(a[i], valueForNull);
         }
-    
+
         return result;
     }
 
@@ -6696,13 +6696,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final int[][] result = new int[a.length][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = unbox(a[i], valueForNull);
         }
-    
+
         return result;
     }
 
@@ -6725,13 +6725,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final long[][] result = new long[a.length][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = unbox(a[i], valueForNull);
         }
-    
+
         return result;
     }
 
@@ -6754,13 +6754,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final float[][] result = new float[a.length][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = unbox(a[i], valueForNull);
         }
-    
+
         return result;
     }
 
@@ -6783,13 +6783,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final double[][] result = new double[a.length][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = unbox(a[i], valueForNull);
         }
-    
+
         return result;
     }
 
@@ -6812,13 +6812,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final boolean[][][] result = new boolean[a.length][][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = unbox(a[i], valueForNull);
         }
-    
+
         return result;
     }
 
@@ -6841,13 +6841,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final char[][][] result = new char[a.length][][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = unbox(a[i], valueForNull);
         }
-    
+
         return result;
     }
 
@@ -6870,13 +6870,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final byte[][][] result = new byte[a.length][][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = unbox(a[i], valueForNull);
         }
-    
+
         return result;
     }
 
@@ -6899,13 +6899,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final short[][][] result = new short[a.length][][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = unbox(a[i], valueForNull);
         }
-    
+
         return result;
     }
 
@@ -6928,13 +6928,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final int[][][] result = new int[a.length][][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = unbox(a[i], valueForNull);
         }
-    
+
         return result;
     }
 
@@ -6957,13 +6957,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final long[][][] result = new long[a.length][][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = unbox(a[i], valueForNull);
         }
-    
+
         return result;
     }
 
@@ -6986,13 +6986,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final float[][][] result = new float[a.length][][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = unbox(a[i], valueForNull);
         }
-    
+
         return result;
     }
 
@@ -7015,13 +7015,13 @@ public final class Array {
         if (a == null) {
             return null;
         }
-    
+
         final double[][][] result = new double[a.length][][];
-    
+
         for (int i = 0, len = a.length; i < len; i++) {
             result[i] = unbox(a[i], valueForNull);
         }
-    
+
         return result;
     }
 

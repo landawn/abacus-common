@@ -1050,6 +1050,8 @@ final class ParallelIteratorIntStream extends IteratorIntStream {
 
     @Override
     public Stream<Integer> boxed() {
+        assertNotClosed();
+
         Stream<Integer> tmp = boxed;
 
         if (tmp == null) {
@@ -1062,48 +1064,66 @@ final class ParallelIteratorIntStream extends IteratorIntStream {
 
     @Override
     public IntStream append(IntStream stream) {
+        assertNotClosed();
+
         return new ParallelIteratorIntStream(IntStream.concat(this, stream), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public IntStream prepend(IntStream stream) {
+        assertNotClosed();
+
         return new ParallelIteratorIntStream(IntStream.concat(stream, this), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public IntStream merge(final IntStream b, final IntBiFunction<MergeResult> nextSelector) {
+        assertNotClosed();
+
         return new ParallelIteratorIntStream(IntStream.merge(this, b, nextSelector), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public IntStream zipWith(IntStream b, IntBinaryOperator zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorIntStream(IntStream.zip(this, b, zipFunction), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public IntStream zipWith(IntStream b, IntStream c, IntTernaryOperator zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorIntStream(IntStream.zip(this, b, c, zipFunction), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public IntStream zipWith(IntStream b, int valueForNoneA, int valueForNoneB, IntBinaryOperator zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorIntStream(IntStream.zip(this, b, valueForNoneA, valueForNoneB, zipFunction), false, maxThreadNum, splitor, asyncExecutor,
                 closeHandlers);
     }
 
     @Override
     public IntStream zipWith(IntStream b, IntStream c, int valueForNoneA, int valueForNoneB, int valueForNoneC, IntTernaryOperator zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorIntStream(IntStream.zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction), false, maxThreadNum, splitor,
                 asyncExecutor, closeHandlers);
     }
 
     @Override
     public boolean isParallel() {
+        assertNotClosed();
+
         return true;
     }
 
     @Override
     public IntStream sequential() {
+        assertNotClosed();
+
         IteratorIntStream tmp = sequential;
 
         if (tmp == null) {
@@ -1116,21 +1136,29 @@ final class ParallelIteratorIntStream extends IteratorIntStream {
 
     @Override
     protected int maxThreadNum() {
+        assertNotClosed();
+
         return maxThreadNum;
     }
 
     @Override
     protected BaseStream.Splitor splitor() {
+        assertNotClosed();
+
         return splitor;
     }
 
     @Override
     protected AsyncExecutor asyncExecutor() {
+        assertNotClosed();
+
         return asyncExecutor;
     }
 
     @Override
     public IntStream onClose(Runnable closeHandler) {
+        assertNotClosed();
+
         final Deque<Runnable> newCloseHandlers = new LocalArrayDeque<>(N.isNullOrEmpty(this.closeHandlers) ? 1 : this.closeHandlers.size() + 1);
 
         newCloseHandlers.add(wrapCloseHandlers(closeHandler));

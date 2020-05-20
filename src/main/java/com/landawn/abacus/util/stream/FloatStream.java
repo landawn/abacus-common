@@ -91,6 +91,8 @@ public abstract class FloatStream
     @IntermediateOp
     @Beta
     public FloatStream skipUntil(final FloatPredicate predicate) {
+        assertNotClosed();
+
         return dropWhile(new FloatPredicate() {
             @Override
             public boolean test(final float t) {
@@ -440,6 +442,8 @@ public abstract class FloatStream
     @SequentialOnly
     @Override
     public FloatIterator iterator() {
+        assertNotClosed();
+
         if (isEmptyCloseHandlers(closeHandlers) == false) {
             if (logger.isWarnEnabled()) {
                 logger.warn("### Remember to close " + ClassUtil.getSimpleClassName(getClass()));
@@ -457,6 +461,8 @@ public abstract class FloatStream
     @SuppressWarnings("rawtypes")
     @Override
     public <SS extends BaseStream> SS __(Function<? super FloatStream, SS> transfer) {
+        assertNotClosed();
+
         return transfer.apply(this);
     }
 

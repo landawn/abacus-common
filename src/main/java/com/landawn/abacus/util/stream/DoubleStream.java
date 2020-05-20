@@ -91,6 +91,8 @@ public abstract class DoubleStream
     @IntermediateOp
     @Beta
     public DoubleStream skipUntil(final DoublePredicate predicate) {
+        assertNotClosed();
+
         return dropWhile(new DoublePredicate() {
             @Override
             public boolean test(final double t) {
@@ -440,6 +442,8 @@ public abstract class DoubleStream
      */
     @Override
     public DoubleIterator iterator() {
+        assertNotClosed();
+
         if (isEmptyCloseHandlers(closeHandlers) == false) {
             if (logger.isWarnEnabled()) {
                 logger.warn("### Remember to close " + ClassUtil.getSimpleClassName(getClass()));
@@ -457,6 +461,8 @@ public abstract class DoubleStream
     @SuppressWarnings("rawtypes")
     @Override
     public <SS extends BaseStream> SS __(Function<? super DoubleStream, SS> transfer) {
+        assertNotClosed();
+
         return transfer.apply(this);
     }
 

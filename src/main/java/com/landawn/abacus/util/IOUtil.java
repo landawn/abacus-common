@@ -562,7 +562,7 @@ public final class IOUtil {
      * @param charset
      * @return
      */
-    public static char[] bytes2Chars(final byte bytes[], final int offset, final int len, Charset charset) {
+    public static char[] bytes2Chars(final byte[] bytes, final int offset, final int len, Charset charset) {
         if (len == 0 && N.len(bytes) >= offset) {
             return N.EMPTY_CHAR_ARRAY;
         }

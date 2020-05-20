@@ -1423,7 +1423,8 @@ public final class EntryStream<K, V> implements Closeable {
     }
 
     @SequentialOnly
-    public <M extends Map<K, List<V>>, R, E extends Exception> R groupToAndThen(final Supplier<? extends M> mapFactory, final Throwables.Function<? super M, R, E> func) throws E {
+    public <M extends Map<K, List<V>>, R, E extends Exception> R groupToAndThen(final Supplier<? extends M> mapFactory,
+            final Throwables.Function<? super M, R, E> func) throws E {
         return func.apply(groupTo(mapFactory));
     }
 
@@ -1516,7 +1517,8 @@ public final class EntryStream<K, V> implements Closeable {
     }
 
     @ParallelSupported
-    public <R, A, RR, E extends Exception> RR collectAndThen(final Collector<? super Map.Entry<K, V>, A, R> downstream, final Throwables.Function<? super R, RR, E> finisher) throws E {
+    public <R, A, RR, E extends Exception> RR collectAndThen(final Collector<? super Map.Entry<K, V>, A, R> downstream,
+            final Throwables.Function<? super R, RR, E> finisher) throws E {
         return s.collectAndThen(downstream, finisher);
     }
 

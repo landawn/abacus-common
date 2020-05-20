@@ -3439,14 +3439,13 @@ public interface DataSet {
      */
     DataSet merge(DataSet from, Collection<String> columnNames, int fromRowIndex, int toRowIndex);
 
-
     /**
      *
      * @param a
      * @param b
      * @return
      */
-     DataSet merge(final DataSet a, final DataSet b);
+    DataSet merge(final DataSet a, final DataSet b);
 
     /**
      *
@@ -3454,6 +3453,7 @@ public interface DataSet {
      * @return
      */
     DataSet merge(final Collection<? extends DataSet> dss);
+
     /**
      *
      * @param b

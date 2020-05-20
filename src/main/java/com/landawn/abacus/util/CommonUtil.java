@@ -7210,7 +7210,7 @@ class CommonUtil {
      * @param c
      * @return
      */
-    public static <T> boolean anyNullOrEmpty(final T a[], final T[] b, final T[] c) {
+    public static <T> boolean anyNullOrEmpty(final T[] a, final T[] b, final T[] c) {
         return a == null || a.length == 0 || b == null || b.length == 0 || c == null || c.length == 0;
     }
 
@@ -7320,7 +7320,7 @@ class CommonUtil {
      * @param c
      * @return
      */
-    public static <T> boolean allNullOrEmpty(final T a[], final T[] b, final T[] c) {
+    public static <T> boolean allNullOrEmpty(final T[] a, final T[] b, final T[] c) {
         return isNullOrEmpty(a) && isNullOrEmpty(b) && isNullOrEmpty(c);
     }
 
@@ -7584,7 +7584,7 @@ class CommonUtil {
      * @param b
      * @return
      */
-    public static <T> Optional<T[]> firstNonEmpty(final T[] a, final T b[]) {
+    public static <T> Optional<T[]> firstNonEmpty(final T[] a, final T[] b) {
         return a != null && a.length > 0 ? Optional.of(a) : (b != null && b.length > 0 ? Optional.of(b) : Optional.<T[]> empty());
     }
 
@@ -7596,7 +7596,7 @@ class CommonUtil {
      * @param c
      * @return
      */
-    public static <T> Optional<T[]> firstNonEmpty(final T a[], final T b[], final T[] c) {
+    public static <T> Optional<T[]> firstNonEmpty(final T[] a, final T[] b, final T[] c) {
         return a != null && a.length > 0 ? Optional.of(a)
                 : (b != null && b.length > 0 ? Optional.of(b) : (c != null && c.length > 0 ? Optional.of(c) : Optional.<T[]> empty()));
     }

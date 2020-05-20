@@ -860,6 +860,8 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
 
     @Override
     public Stream<Short> boxed() {
+        assertNotClosed();
+
         Stream<Short> tmp = boxed;
 
         if (tmp == null) {
@@ -872,48 +874,66 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
 
     @Override
     public ShortStream append(ShortStream stream) {
+        assertNotClosed();
+
         return new ParallelIteratorShortStream(ShortStream.concat(this, stream), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public ShortStream prepend(ShortStream stream) {
+        assertNotClosed();
+
         return new ParallelIteratorShortStream(ShortStream.concat(stream, this), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public ShortStream merge(final ShortStream b, final ShortBiFunction<MergeResult> nextSelector) {
+        assertNotClosed();
+
         return new ParallelIteratorShortStream(ShortStream.merge(this, b, nextSelector), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public ShortStream zipWith(ShortStream b, ShortBinaryOperator zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorShortStream(ShortStream.zip(this, b, zipFunction), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public ShortStream zipWith(ShortStream b, ShortStream c, ShortTernaryOperator zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorShortStream(ShortStream.zip(this, b, c, zipFunction), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public ShortStream zipWith(ShortStream b, short valueForNoneA, short valueForNoneB, ShortBinaryOperator zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorShortStream(ShortStream.zip(this, b, valueForNoneA, valueForNoneB, zipFunction), false, maxThreadNum, splitor, asyncExecutor,
                 closeHandlers);
     }
 
     @Override
     public ShortStream zipWith(ShortStream b, ShortStream c, short valueForNoneA, short valueForNoneB, short valueForNoneC, ShortTernaryOperator zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorShortStream(ShortStream.zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction), false, maxThreadNum,
                 splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public boolean isParallel() {
+        assertNotClosed();
+
         return true;
     }
 
     @Override
     public ShortStream sequential() {
+        assertNotClosed();
+
         IteratorShortStream tmp = sequential;
 
         if (tmp == null) {
@@ -926,21 +946,29 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
 
     @Override
     protected int maxThreadNum() {
+        assertNotClosed();
+
         return maxThreadNum;
     }
 
     @Override
     protected BaseStream.Splitor splitor() {
+        assertNotClosed();
+
         return splitor;
     }
 
     @Override
     protected AsyncExecutor asyncExecutor() {
+        assertNotClosed();
+
         return asyncExecutor;
     }
 
     @Override
     public ShortStream onClose(Runnable closeHandler) {
+        assertNotClosed();
+
         final Deque<Runnable> newCloseHandlers = new LocalArrayDeque<>(N.isNullOrEmpty(this.closeHandlers) ? 1 : this.closeHandlers.size() + 1);
 
         newCloseHandlers.add(wrapCloseHandlers(closeHandler));

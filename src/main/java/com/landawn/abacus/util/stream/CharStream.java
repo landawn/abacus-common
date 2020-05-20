@@ -89,6 +89,8 @@ public abstract class CharStream
     @IntermediateOp
     @Beta
     public CharStream skipUntil(final CharPredicate predicate) {
+        assertNotClosed();
+
         return dropWhile(new CharPredicate() {
             @Override
             public boolean test(final char t) {
@@ -640,6 +642,8 @@ public abstract class CharStream
     @SequentialOnly
     @Override
     public CharIterator iterator() {
+        assertNotClosed();
+
         if (isEmptyCloseHandlers(closeHandlers) == false) {
             if (logger.isWarnEnabled()) {
                 logger.warn("### Remember to close " + ClassUtil.getSimpleClassName(getClass()));
@@ -657,6 +661,8 @@ public abstract class CharStream
     @SuppressWarnings("rawtypes")
     @Override
     public <SS extends BaseStream> SS __(Function<? super CharStream, SS> transfer) {
+        assertNotClosed();
+
         return transfer.apply(this);
     }
 

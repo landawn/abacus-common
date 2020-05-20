@@ -104,6 +104,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public IntStream filter(final IntPredicate predicate) {
+        assertNotClosed();
+
         return newStream(new IntIteratorEx() {
             private boolean hasNext = false;
             private int cursor = fromIndex;
@@ -137,6 +139,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public IntStream takeWhile(final IntPredicate predicate) {
+        assertNotClosed();
+
         return newStream(new IntIteratorEx() {
             private boolean hasMore = true;
             private boolean hasNext = false;
@@ -170,6 +174,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public IntStream dropWhile(final IntPredicate predicate) {
+        assertNotClosed();
+
         return newStream(new IntIteratorEx() {
             private boolean hasNext = false;
             private int cursor = fromIndex;
@@ -210,6 +216,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public IntStream step(final long step) {
+        assertNotClosed();
+
         checkArgPositive(step, "step");
 
         if (step == 1 || fromIndex == toIndex) {
@@ -261,6 +269,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public IntStream map(final IntUnaryOperator mapper) {
+        assertNotClosed();
+
         return newStream(new IntIteratorEx() {
             private int cursor = fromIndex;
 
@@ -305,6 +315,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public CharStream mapToChar(final IntToCharFunction mapper) {
+        assertNotClosed();
+
         return newStream(new CharIteratorEx() {
             private int cursor = fromIndex;
 
@@ -349,6 +361,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public ByteStream mapToByte(final IntToByteFunction mapper) {
+        assertNotClosed();
+
         return newStream(new ByteIteratorEx() {
             private int cursor = fromIndex;
 
@@ -393,6 +407,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public ShortStream mapToShort(final IntToShortFunction mapper) {
+        assertNotClosed();
+
         return newStream(new ShortIteratorEx() {
             private int cursor = fromIndex;
 
@@ -437,6 +453,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public LongStream mapToLong(final IntToLongFunction mapper) {
+        assertNotClosed();
+
         return newStream(new LongIteratorEx() {
             private int cursor = fromIndex;
 
@@ -481,6 +499,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public FloatStream mapToFloat(final IntToFloatFunction mapper) {
+        assertNotClosed();
+
         return newStream(new FloatIteratorEx() {
             private int cursor = fromIndex;
 
@@ -525,6 +545,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public DoubleStream mapToDouble(final IntToDoubleFunction mapper) {
+        assertNotClosed();
+
         return newStream(new DoubleIteratorEx() {
             private int cursor = fromIndex;
 
@@ -569,6 +591,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public <U> Stream<U> mapToObj(final IntFunction<? extends U> mapper) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<U>() {
             private int cursor = fromIndex;
 
@@ -613,6 +637,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public IntStream flatMap(final IntFunction<? extends IntStream> mapper) {
+        assertNotClosed();
+
         final IntIteratorEx iter = new IntIteratorEx() {
             private int cursor = fromIndex;
             private IntIterator cur = null;
@@ -680,6 +706,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public CharStream flatMapToChar(final IntFunction<? extends CharStream> mapper) {
+        assertNotClosed();
+
         final CharIteratorEx iter = new CharIteratorEx() {
             private int cursor = fromIndex;
             private CharIterator cur = null;
@@ -747,6 +775,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public ByteStream flatMapToByte(final IntFunction<? extends ByteStream> mapper) {
+        assertNotClosed();
+
         final ByteIteratorEx iter = new ByteIteratorEx() {
             private int cursor = fromIndex;
             private ByteIterator cur = null;
@@ -814,6 +844,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public ShortStream flatMapToShort(final IntFunction<? extends ShortStream> mapper) {
+        assertNotClosed();
+
         final ShortIteratorEx iter = new ShortIteratorEx() {
             private int cursor = fromIndex;
             private ShortIterator cur = null;
@@ -881,6 +913,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public LongStream flatMapToLong(final IntFunction<? extends LongStream> mapper) {
+        assertNotClosed();
+
         final LongIteratorEx iter = new LongIteratorEx() {
             private int cursor = fromIndex;
             private LongIterator cur = null;
@@ -948,6 +982,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public FloatStream flatMapToFloat(final IntFunction<? extends FloatStream> mapper) {
+        assertNotClosed();
+
         final FloatIteratorEx iter = new FloatIteratorEx() {
             private int cursor = fromIndex;
             private FloatIterator cur = null;
@@ -1015,6 +1051,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public DoubleStream flatMapToDouble(final IntFunction<? extends DoubleStream> mapper) {
+        assertNotClosed();
+
         final DoubleIteratorEx iter = new DoubleIteratorEx() {
             private int cursor = fromIndex;
             private DoubleIterator cur = null;
@@ -1082,6 +1120,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public <T> Stream<T> flatMapToObj(final IntFunction<? extends Stream<T>> mapper) {
+        assertNotClosed();
+
         final ObjIteratorEx<T> iter = new ObjIteratorEx<T>() {
             private int cursor = fromIndex;
             private Iterator<T> cur = null;
@@ -1149,6 +1189,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public Stream<IntStream> split(final int chunkSize) {
+        assertNotClosed();
+
         checkArgPositive(chunkSize, "chunkSize");
 
         return newStream(new ObjIteratorEx<IntStream>() {
@@ -1184,6 +1226,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public Stream<IntList> splitToList(final int chunkSize) {
+        assertNotClosed();
+
         checkArgPositive(chunkSize, "chunkSize");
 
         return newStream(new ObjIteratorEx<IntList>() {
@@ -1219,6 +1263,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public Stream<IntStream> split(final IntPredicate predicate) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<IntStream>() {
             private int cursor = fromIndex;
             private boolean preCondition = false;
@@ -1254,6 +1300,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public Stream<IntList> splitToList(final IntPredicate predicate) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<IntList>() {
             private int cursor = fromIndex;
             private boolean preCondition = false;
@@ -1290,6 +1338,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public Stream<IntStream> splitAt(final int where) {
+        assertNotClosed();
+
         checkArgNotNegative(where, "where");
 
         final IntStream[] a = new IntStream[2];
@@ -1302,6 +1352,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public Stream<IntStream> sliding(final int windowSize, final int increment) {
+        assertNotClosed();
+
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
 
         return newStream(new ObjIteratorEx<IntStream>() {
@@ -1350,6 +1402,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public Stream<IntList> slidingToList(final int windowSize, final int increment) {
+        assertNotClosed();
+
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
 
         return newStream(new ObjIteratorEx<IntList>() {
@@ -1399,6 +1453,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public IntStream top(final int n, final Comparator<? super Integer> comparator) {
+        assertNotClosed();
+
         checkArgPositive(n, "n");
 
         if (n >= toIndex - fromIndex) {
@@ -1483,6 +1539,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public IntStream peek(final IntConsumer action) {
+        assertNotClosed();
+
         return newStream(new IntIteratorEx() {
             private int cursor = fromIndex;
 
@@ -1519,6 +1577,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public IntStream limit(final long maxSize) {
+        assertNotClosed();
+
         checkArgNotNegative(maxSize, "maxSize");
 
         return newStream(elements, fromIndex, maxSize < toIndex - fromIndex ? (int) (fromIndex + maxSize) : toIndex, sorted);
@@ -1526,6 +1586,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public IntStream skip(long n) {
+        assertNotClosed();
+
         checkArgNotNegative(n, "n");
 
         if (n >= toIndex - fromIndex) {
@@ -1879,8 +1941,9 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public OptionalInt kthLargest(int k) {
-        checkArgPositive(k, "k");
         assertNotClosed();
+
+        checkArgPositive(k, "k");
 
         try {
             if (k > toIndex - fromIndex) {
@@ -1932,105 +1995,105 @@ class ArrayIntStream extends AbstractIntStream {
         }
     }
 
-//    @Override
-//    public IntStream reversed() {
-//        return newStream(new IntIteratorEx() {
-//            private int cursor = toIndex;
-//
-//            @Override
-//            public boolean hasNext() {
-//                return cursor > fromIndex;
-//            }
-//
-//            @Override
-//            public int nextInt() {
-//                if (cursor <= fromIndex) {
-//                    throw new NoSuchElementException();
-//                }
-//                return elements[--cursor];
-//            }
-//
-//            @Override
-//            public long count() {
-//                return cursor - fromIndex;
-//            }
-//
-//            @Override
-//            public void skip(long n) {
-//                cursor = n < cursor - fromIndex ? cursor - (int) n : fromIndex;
-//            }
-//
-//            @Override
-//            public int[] toArray() {
-//                final int[] a = new int[cursor - fromIndex];
-//
-//                for (int i = 0, len = cursor - fromIndex; i < len; i++) {
-//                    a[i] = elements[cursor - i - 1];
-//                }
-//
-//                return a;
-//            }
-//        }, false);
-//    }
-//
-//    @Override
-//    public IntStream rotated(final int distance) {
-//        if (distance == 0 || toIndex - fromIndex <= 1 || distance % (toIndex - fromIndex) == 0) {
-//            return newStream(elements, fromIndex, toIndex, sorted);
-//        }
-//
-//        return newStream(new IntIteratorEx() {
-//            private final int len = toIndex - fromIndex;
-//            private int start;
-//            private int cnt = 0;
-//
-//            {
-//
-//                start = distance % len;
-//
-//                if (start < 0) {
-//                    start += len;
-//                }
-//
-//                start = len - start;
-//            }
-//
-//            @Override
-//            public boolean hasNext() {
-//                return cnt < len;
-//            }
-//
-//            @Override
-//            public int nextInt() {
-//                if (hasNext() == false) {
-//                    throw new NoSuchElementException();
-//                }
-//
-//                return elements[((start + cnt++) % len) + fromIndex];
-//            }
-//
-//            @Override
-//            public long count() {
-//                return len - cnt;
-//            }
-//
-//            @Override
-//            public void skip(long n) {
-//                cnt = n < len - cnt ? cnt + (int) n : len;
-//            }
-//
-//            @Override
-//            public int[] toArray() {
-//                final int[] a = new int[len - cnt];
-//
-//                for (int i = cnt; i < len; i++) {
-//                    a[i - cnt] = elements[((start + i) % len) + fromIndex];
-//                }
-//
-//                return a;
-//            }
-//        }, false);
-//    }
+    //    @Override
+    //    public IntStream reversed() {
+    //        return newStream(new IntIteratorEx() {
+    //            private int cursor = toIndex;
+    //
+    //            @Override
+    //            public boolean hasNext() {
+    //                return cursor > fromIndex;
+    //            }
+    //
+    //            @Override
+    //            public int nextInt() {
+    //                if (cursor <= fromIndex) {
+    //                    throw new NoSuchElementException();
+    //                }
+    //                return elements[--cursor];
+    //            }
+    //
+    //            @Override
+    //            public long count() {
+    //                return cursor - fromIndex;
+    //            }
+    //
+    //            @Override
+    //            public void skip(long n) {
+    //                cursor = n < cursor - fromIndex ? cursor - (int) n : fromIndex;
+    //            }
+    //
+    //            @Override
+    //            public int[] toArray() {
+    //                final int[] a = new int[cursor - fromIndex];
+    //
+    //                for (int i = 0, len = cursor - fromIndex; i < len; i++) {
+    //                    a[i] = elements[cursor - i - 1];
+    //                }
+    //
+    //                return a;
+    //            }
+    //        }, false);
+    //    }
+    //
+    //    @Override
+    //    public IntStream rotated(final int distance) {
+    //        if (distance == 0 || toIndex - fromIndex <= 1 || distance % (toIndex - fromIndex) == 0) {
+    //            return newStream(elements, fromIndex, toIndex, sorted);
+    //        }
+    //
+    //        return newStream(new IntIteratorEx() {
+    //            private final int len = toIndex - fromIndex;
+    //            private int start;
+    //            private int cnt = 0;
+    //
+    //            {
+    //
+    //                start = distance % len;
+    //
+    //                if (start < 0) {
+    //                    start += len;
+    //                }
+    //
+    //                start = len - start;
+    //            }
+    //
+    //            @Override
+    //            public boolean hasNext() {
+    //                return cnt < len;
+    //            }
+    //
+    //            @Override
+    //            public int nextInt() {
+    //                if (hasNext() == false) {
+    //                    throw new NoSuchElementException();
+    //                }
+    //
+    //                return elements[((start + cnt++) % len) + fromIndex];
+    //            }
+    //
+    //            @Override
+    //            public long count() {
+    //                return len - cnt;
+    //            }
+    //
+    //            @Override
+    //            public void skip(long n) {
+    //                cnt = n < len - cnt ? cnt + (int) n : len;
+    //            }
+    //
+    //            @Override
+    //            public int[] toArray() {
+    //                final int[] a = new int[len - cnt];
+    //
+    //                for (int i = cnt; i < len; i++) {
+    //                    a[i - cnt] = elements[((start + i) % len) + fromIndex];
+    //                }
+    //
+    //                return a;
+    //            }
+    //        }, false);
+    //    }
 
     @Override
     public IntSummaryStatistics summarize() {
@@ -2136,6 +2199,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public LongStream asLongStream() {
+        assertNotClosed();
+
         return newStream(new LongIteratorEx() {
             private int cursor = fromIndex;
 
@@ -2178,6 +2243,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public FloatStream asFloatStream() {
+        assertNotClosed();
+
         return newStream(new FloatIteratorEx() {
             private int cursor = fromIndex;
 
@@ -2220,6 +2287,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public DoubleStream asDoubleStream() {
+        assertNotClosed();
+
         return newStream(new DoubleIteratorEx() {
             private int cursor = fromIndex;
 
@@ -2262,6 +2331,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public java.util.stream.IntStream toJdkStream() {
+        assertNotClosed();
+
         java.util.stream.IntStream s = java.util.stream.IntStream.of(elements);
 
         if (fromIndex > 0) {
@@ -2285,6 +2356,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public Stream<Integer> boxed() {
+        assertNotClosed();
+
         return new IteratorStream<>(iteratorEx(), sorted, sorted ? INT_COMPARATOR : null, closeHandlers);
     }
 
@@ -2295,11 +2368,15 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     IntIteratorEx iteratorEx() {
+        assertNotClosed();
+
         return IntIteratorEx.of(elements, fromIndex, toIndex);
     }
 
     @Override
     public IntStream appendIfEmpty(final Supplier<? extends IntStream> supplier) {
+        assertNotClosed();
+
         if (fromIndex == toIndex) {
             final Holder<IntStream> holder = new Holder<>();
 
@@ -2357,6 +2434,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super IntStream, R, E> func) throws E {
+        assertNotClosed();
+
         try {
             if (fromIndex < toIndex) {
                 return Optional.of(func.apply(this));
@@ -2370,6 +2449,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super IntStream, E> action) throws E {
+        assertNotClosed();
+
         try {
             if (fromIndex < toIndex) {
                 action.accept(this);
@@ -2385,6 +2466,8 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     Tuple3<int[], Integer, Integer> array() {
+        assertNotClosed();
+
         close();
 
         return Tuple.of(elements, fromIndex, toIndex);
@@ -2392,11 +2475,15 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     protected IntStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor) {
+        assertNotClosed();
+
         return new ParallelArrayIntStream(elements, fromIndex, toIndex, sorted, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public IntStream onClose(Runnable closeHandler) {
+        assertNotClosed();
+
         final Deque<Runnable> newCloseHandlers = new LocalArrayDeque<>(N.isNullOrEmpty(this.closeHandlers) ? 1 : this.closeHandlers.size() + 1);
 
         newCloseHandlers.add(wrapCloseHandlers(closeHandler));

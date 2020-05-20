@@ -663,6 +663,8 @@ final class ParallelArrayByteStream extends ArrayByteStream {
 
     @Override
     public OptionalByte min() {
+        assertNotClosed();
+
         boolean isDone = true;
 
         try {
@@ -722,6 +724,8 @@ final class ParallelArrayByteStream extends ArrayByteStream {
 
     @Override
     public OptionalByte max() {
+        assertNotClosed();
+
         boolean isDone = true;
 
         try {
@@ -780,6 +784,8 @@ final class ParallelArrayByteStream extends ArrayByteStream {
 
     @Override
     public long sum() {
+        assertNotClosed();
+
         boolean isDone = true;
 
         try {
@@ -847,6 +853,8 @@ final class ParallelArrayByteStream extends ArrayByteStream {
 
     @Override
     public ByteSummaryStatistics summarize() {
+        assertNotClosed();
+
         boolean isDone = true;
 
         try {
@@ -1428,6 +1436,8 @@ final class ParallelArrayByteStream extends ArrayByteStream {
 
     @Override
     public Stream<Byte> boxed() {
+        assertNotClosed();
+
         Stream<Byte> tmp = boxed;
 
         if (tmp == null) {
@@ -1440,48 +1450,66 @@ final class ParallelArrayByteStream extends ArrayByteStream {
 
     @Override
     public ByteStream append(ByteStream stream) {
+        assertNotClosed();
+
         return new ParallelIteratorByteStream(ByteStream.concat(this, stream), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public ByteStream prepend(ByteStream stream) {
+        assertNotClosed();
+
         return new ParallelIteratorByteStream(ByteStream.concat(stream, this), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public ByteStream merge(final ByteStream b, final ByteBiFunction<MergeResult> nextSelector) {
+        assertNotClosed();
+
         return new ParallelIteratorByteStream(ByteStream.merge(this, b, nextSelector), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public ByteStream zipWith(ByteStream b, ByteBinaryOperator zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorByteStream(ByteStream.zip(this, b, zipFunction), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public ByteStream zipWith(ByteStream b, ByteStream c, ByteTernaryOperator zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorByteStream(ByteStream.zip(this, b, c, zipFunction), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public ByteStream zipWith(ByteStream b, byte valueForNoneA, byte valueForNoneB, ByteBinaryOperator zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorByteStream(ByteStream.zip(this, b, valueForNoneA, valueForNoneB, zipFunction), false, maxThreadNum, splitor, asyncExecutor,
                 closeHandlers);
     }
 
     @Override
     public ByteStream zipWith(ByteStream b, ByteStream c, byte valueForNoneA, byte valueForNoneB, byte valueForNoneC, ByteTernaryOperator zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorByteStream(ByteStream.zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction), false, maxThreadNum,
                 splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public boolean isParallel() {
+        assertNotClosed();
+
         return true;
     }
 
     @Override
     public ByteStream sequential() {
+        assertNotClosed();
+
         ArrayByteStream tmp = sequential;
 
         if (tmp == null) {
@@ -1494,21 +1522,29 @@ final class ParallelArrayByteStream extends ArrayByteStream {
 
     @Override
     protected int maxThreadNum() {
+        assertNotClosed();
+
         return maxThreadNum;
     }
 
     @Override
     protected BaseStream.Splitor splitor() {
+        assertNotClosed();
+
         return splitor;
     }
 
     @Override
     protected AsyncExecutor asyncExecutor() {
+        assertNotClosed();
+
         return asyncExecutor;
     }
 
     @Override
     public ByteStream onClose(Runnable closeHandler) {
+        assertNotClosed();
+
         final Deque<Runnable> newCloseHandlers = new LocalArrayDeque<>(N.isNullOrEmpty(this.closeHandlers) ? 1 : this.closeHandlers.size() + 1);
 
         newCloseHandlers.add(wrapCloseHandlers(closeHandler));

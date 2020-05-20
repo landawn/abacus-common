@@ -95,6 +95,8 @@ class IteratorByteStream extends AbstractByteStream {
 
     @Override
     public ByteStream filter(final BytePredicate predicate) {
+        assertNotClosed();
+
         return newStream(new ByteIteratorEx() {
             private boolean hasNext = false;
             private byte next = 0;
@@ -130,6 +132,8 @@ class IteratorByteStream extends AbstractByteStream {
 
     @Override
     public ByteStream takeWhile(final BytePredicate predicate) {
+        assertNotClosed();
+
         return newStream(new ByteIteratorEx() {
             private boolean hasMore = true;
             private boolean hasNext = false;
@@ -166,6 +170,8 @@ class IteratorByteStream extends AbstractByteStream {
 
     @Override
     public ByteStream dropWhile(final BytePredicate predicate) {
+        assertNotClosed();
+
         return newStream(new ByteIteratorEx() {
             private boolean hasNext = false;
             private byte next = 0;
@@ -210,6 +216,8 @@ class IteratorByteStream extends AbstractByteStream {
 
     @Override
     public ByteStream map(final ByteUnaryOperator mapper) {
+        assertNotClosed();
+
         return newStream(new ByteIteratorEx() {
             @Override
             public boolean hasNext() {
@@ -237,6 +245,8 @@ class IteratorByteStream extends AbstractByteStream {
 
     @Override
     public IntStream mapToInt(final ByteToIntFunction mapper) {
+        assertNotClosed();
+
         return newStream(new IntIteratorEx() {
             @Override
             public boolean hasNext() {
@@ -264,6 +274,8 @@ class IteratorByteStream extends AbstractByteStream {
 
     @Override
     public <U> Stream<U> mapToObj(final ByteFunction<? extends U> mapper) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<U>() {
             @Override
             public boolean hasNext() {
@@ -291,6 +303,8 @@ class IteratorByteStream extends AbstractByteStream {
 
     @Override
     public ByteStream flatMap(final ByteFunction<? extends ByteStream> mapper) {
+        assertNotClosed();
+
         final ByteIteratorEx iter = new ByteIteratorEx() {
             private ByteIterator cur = null;
             private ByteStream s = null;
@@ -357,6 +371,8 @@ class IteratorByteStream extends AbstractByteStream {
 
     @Override
     public IntStream flatMapToInt(final ByteFunction<? extends IntStream> mapper) {
+        assertNotClosed();
+
         final IntIteratorEx iter = new IntIteratorEx() {
             private IntIterator cur = null;
             private IntStream s = null;
@@ -423,6 +439,8 @@ class IteratorByteStream extends AbstractByteStream {
 
     @Override
     public <T> Stream<T> flatMapToObj(final ByteFunction<? extends Stream<T>> mapper) {
+        assertNotClosed();
+
         final ObjIteratorEx<T> iter = new ObjIteratorEx<T>() {
             private Iterator<? extends T> cur = null;
             private Stream<? extends T> s = null;
@@ -489,6 +507,8 @@ class IteratorByteStream extends AbstractByteStream {
 
     @Override
     public Stream<ByteList> splitToList(final int chunkSize) {
+        assertNotClosed();
+
         checkArgPositive(chunkSize, "chunkSize");
 
         return newStream(new ObjIteratorEx<ByteList>() {
@@ -527,6 +547,8 @@ class IteratorByteStream extends AbstractByteStream {
 
     @Override
     public Stream<ByteList> splitToList(final BytePredicate predicate) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<ByteList>() {
             private byte next;
             private boolean hasNext = false;
@@ -571,6 +593,8 @@ class IteratorByteStream extends AbstractByteStream {
 
     @Override
     public Stream<ByteStream> splitAt(final int where) {
+        assertNotClosed();
+
         checkArgNotNegative(where, "where");
 
         return newStream(new ObjIteratorEx<ByteStream>() {
@@ -635,6 +659,8 @@ class IteratorByteStream extends AbstractByteStream {
 
     @Override
     public Stream<ByteList> slidingToList(final int windowSize, final int increment) {
+        assertNotClosed();
+
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
 
         return newStream(new ObjIteratorEx<ByteList>() {
@@ -748,6 +774,8 @@ class IteratorByteStream extends AbstractByteStream {
 
     @Override
     public ByteStream peek(final ByteConsumer action) {
+        assertNotClosed();
+
         return newStream(new ByteIteratorEx() {
             @Override
             public boolean hasNext() {
@@ -766,6 +794,8 @@ class IteratorByteStream extends AbstractByteStream {
 
     @Override
     public ByteStream limit(final long maxSize) {
+        assertNotClosed();
+
         checkArgNotNegative(maxSize, "maxSize");
 
         return newStream(new ByteIteratorEx() {
@@ -795,6 +825,8 @@ class IteratorByteStream extends AbstractByteStream {
 
     @Override
     public ByteStream skip(final long n) {
+        assertNotClosed();
+
         checkArgNotNegative(n, "n");
 
         return newStream(new ByteIteratorEx() {
@@ -889,11 +921,15 @@ class IteratorByteStream extends AbstractByteStream {
 
     @Override
     public List<Byte> toList() {
+        assertNotClosed();
+
         return toCollection(Suppliers.<Byte> ofList());
     }
 
     @Override
     public Set<Byte> toSet() {
+        assertNotClosed();
+
         return toCollection(Suppliers.<Byte> ofSet());
     }
 
@@ -916,6 +952,8 @@ class IteratorByteStream extends AbstractByteStream {
 
     @Override
     public Multiset<Byte> toMultiset() {
+        assertNotClosed();
+
         return toMultiset(Suppliers.<Byte> ofMultiset());
     }
 
@@ -938,6 +976,8 @@ class IteratorByteStream extends AbstractByteStream {
 
     @Override
     public LongMultiset<Byte> toLongMultiset() {
+        assertNotClosed();
+
         return toLongMultiset(Suppliers.<Byte> ofLongMultiset());
     }
 
@@ -1139,8 +1179,9 @@ class IteratorByteStream extends AbstractByteStream {
 
     @Override
     public OptionalByte kthLargest(int k) {
-        checkArgPositive(k, "k");
         assertNotClosed();
+
+        checkArgPositive(k, "k");
 
         try {
             if (elements.hasNext() == false) {
@@ -1323,6 +1364,8 @@ class IteratorByteStream extends AbstractByteStream {
 
     @Override
     public IntStream asIntStream() {
+        assertNotClosed();
+
         return newStream(new IntIteratorEx() {
             @Override
             public boolean hasNext() {
@@ -1348,16 +1391,22 @@ class IteratorByteStream extends AbstractByteStream {
 
     @Override
     public Stream<Byte> boxed() {
+        assertNotClosed();
+
         return new IteratorStream<>(iteratorEx(), sorted, sorted ? BYTE_COMPARATOR : null, closeHandlers);
     }
 
     @Override
     ByteIteratorEx iteratorEx() {
+        assertNotClosed();
+
         return elements;
     }
 
     @Override
     public ByteStream appendIfEmpty(final Supplier<? extends ByteStream> supplier) {
+        assertNotClosed();
+
         final Holder<ByteStream> holder = new Holder<>();
 
         return newStream(new ByteIteratorEx() {
@@ -1415,6 +1464,8 @@ class IteratorByteStream extends AbstractByteStream {
 
     @Override
     public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super ByteStream, R, E> func) throws E {
+        assertNotClosed();
+
         try {
             if (elements.hasNext()) {
                 return Optional.of(func.apply(this));
@@ -1428,6 +1479,8 @@ class IteratorByteStream extends AbstractByteStream {
 
     @Override
     public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super ByteStream, E> action) throws E {
+        assertNotClosed();
+
         try {
             if (elements.hasNext()) {
                 action.accept(this);
@@ -1443,11 +1496,15 @@ class IteratorByteStream extends AbstractByteStream {
 
     @Override
     protected ByteStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor) {
+        assertNotClosed();
+
         return new ParallelIteratorByteStream(elements, sorted, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public ByteStream onClose(Runnable closeHandler) {
+        assertNotClosed();
+
         final Deque<Runnable> newCloseHandlers = new LocalArrayDeque<>(N.isNullOrEmpty(this.closeHandlers) ? 1 : this.closeHandlers.size() + 1);
 
         newCloseHandlers.add(wrapCloseHandlers(closeHandler));

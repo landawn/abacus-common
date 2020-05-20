@@ -69,6 +69,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public ShortStream distinct() {
+        assertNotClosed();
+
         final Set<Object> set = N.newHashSet();
 
         return newStream(this.sequential().filter(new ShortPredicate() {
@@ -81,6 +83,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public ShortStream flattMap(final ShortFunction<short[]> mapper) {
+        assertNotClosed();
+
         return flatMap(new ShortFunction<ShortStream>() {
             @Override
             public ShortStream apply(short t) {
@@ -91,6 +95,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public <T> Stream<T> flattMapToObj(final ShortFunction<? extends Collection<T>> mapper) {
+        assertNotClosed();
+
         return flatMapToObj(new ShortFunction<Stream<T>>() {
             @Override
             public Stream<T> apply(short t) {
@@ -101,6 +107,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public <T> Stream<T> flatMappToObj(final ShortFunction<T[]> mapper) {
+        assertNotClosed();
+
         return flatMapToObj(new ShortFunction<Stream<T>>() {
             @Override
             public Stream<T> apply(short t) {
@@ -111,6 +119,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public ShortStream rangeMap(final ShortBiPredicate sameRange, final ShortBinaryOperator mapper) {
+        assertNotClosed();
+
         final ShortIteratorEx iter = iteratorEx();
 
         return newStream(new ShortIteratorEx() {
@@ -144,6 +154,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public <T> Stream<T> rangeMapToObj(final ShortBiPredicate sameRange, final ShortBiFunction<T> mapper) {
+        assertNotClosed();
+
         final ShortIteratorEx iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<T>() {
@@ -177,6 +189,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public Stream<ShortList> collapse(final ShortBiPredicate collapsible) {
+        assertNotClosed();
+
         final ShortIteratorEx iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<ShortList>() {
@@ -208,6 +222,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public ShortStream collapse(final ShortBiPredicate collapsible, final ShortBinaryOperator mergeFunction) {
+        assertNotClosed();
+
         final ShortIteratorEx iter = iteratorEx();
 
         return newStream(new ShortIteratorEx() {
@@ -238,6 +254,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public ShortStream skip(final long n, final ShortConsumer action) {
+        assertNotClosed();
+
         final ShortPredicate filter = isParallel() ? new ShortPredicate() {
             final AtomicLong cnt = new AtomicLong(n);
 
@@ -259,6 +277,7 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public ShortStream removeIf(final ShortPredicate predicate) {
+        assertNotClosed();
 
         return filter(new ShortPredicate() {
             @Override
@@ -270,6 +289,7 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public ShortStream removeIf(final ShortPredicate predicate, final ShortConsumer actionOnDroppedItem) {
+        assertNotClosed();
 
         return filter(new ShortPredicate() {
             @Override
@@ -286,6 +306,7 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public ShortStream filter(final ShortPredicate predicate, final ShortConsumer actionOnDroppedItem) {
+        assertNotClosed();
 
         return filter(new ShortPredicate() {
             @Override
@@ -302,6 +323,7 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public ShortStream dropWhile(final ShortPredicate predicate, final ShortConsumer actionOnDroppedItem) {
+        assertNotClosed();
 
         return dropWhile(new ShortPredicate() {
             @Override
@@ -318,6 +340,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public ShortStream step(final long step) {
+        assertNotClosed();
+
         checkArgPositive(step, "step");
 
         final long skip = step - 1;
@@ -342,6 +366,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public Stream<ShortStream> split(final int chunkSize) {
+        assertNotClosed();
+
         return splitToList(chunkSize).map(new Function<ShortList, ShortStream>() {
             @Override
             public ShortStream apply(ShortList t) {
@@ -352,6 +378,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public Stream<ShortStream> split(final ShortPredicate predicate) {
+        assertNotClosed();
+
         return splitToList(predicate).map(new Function<ShortList, ShortStream>() {
             @Override
             public ShortStream apply(ShortList t) {
@@ -362,6 +390,7 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public Stream<ShortStream> splitBy(final ShortPredicate where) {
+        assertNotClosed();
 
         final ShortIteratorEx iter = iteratorEx();
 
@@ -470,6 +499,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public Stream<ShortStream> sliding(final int windowSize, final int increment) {
+        assertNotClosed();
+
         return slidingToList(windowSize, increment).map(new Function<ShortList, ShortStream>() {
             @Override
             public ShortStream apply(ShortList t) {
@@ -480,6 +511,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public ShortStream scan(final ShortBinaryOperator accumulator) {
+        assertNotClosed();
+
         final ShortIteratorEx iter = iteratorEx();
 
         return newStream(new ShortIteratorEx() {
@@ -505,6 +538,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public ShortStream scan(final short init, final ShortBinaryOperator accumulator) {
+        assertNotClosed();
+
         final ShortIteratorEx iter = iteratorEx();
 
         return newStream(new ShortIteratorEx() {
@@ -524,6 +559,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public ShortStream scan(final short init, final ShortBinaryOperator accumulator, final boolean initIncluded) {
+        assertNotClosed();
+
         if (initIncluded == false) {
             return scan(init, accumulator);
         }
@@ -553,11 +590,15 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public ShortStream top(int n) {
+        assertNotClosed();
+
         return top(n, SHORT_COMPARATOR);
     }
 
     @Override
     public ShortStream intersection(final Collection<?> c) {
+        assertNotClosed();
+
         final Multiset<?> multiset = Multiset.from(c);
 
         return newStream(this.sequential().filter(new ShortPredicate() {
@@ -570,6 +611,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public ShortStream difference(final Collection<?> c) {
+        assertNotClosed();
+
         final Multiset<?> multiset = Multiset.from(c);
 
         return newStream(this.sequential().filter(new ShortPredicate() {
@@ -582,6 +625,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public ShortStream symmetricDifference(final Collection<Short> c) {
+        assertNotClosed();
+
         final Multiset<?> multiset = Multiset.from(c);
 
         return newStream(this.sequential().filter(new ShortPredicate() {
@@ -599,6 +644,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public ShortStream reversed() {
+        assertNotClosed();
+
         return newStream(new ShortIteratorEx() {
             private boolean initialized = false;
 
@@ -681,6 +728,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public ShortStream rotated(final int distance) {
+        assertNotClosed();
+
         return newStream(new ShortIteratorEx() {
             private boolean initialized = false;
 
@@ -771,6 +820,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public ShortStream shuffled(final Random rnd) {
+        assertNotClosed();
+
         checkArgNotNull(rnd, "random");
 
         return lazyLoad(new Function<short[], short[]>() {
@@ -784,6 +835,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public ShortStream sorted() {
+        assertNotClosed();
+
         if (sorted) {
             return newStream(iteratorEx(), sorted);
         }
@@ -804,6 +857,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public ShortStream reverseSorted() {
+        assertNotClosed();
+
         return newStream(new ShortIteratorEx() {
             private boolean initialized = false;
             private short[] aar;
@@ -955,6 +1010,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public Stream<IndexedShort> indexed() {
+        assertNotClosed();
+
         return newStream(this.sequential().mapToObj(new ShortFunction<IndexedShort>() {
             final MutableLong idx = MutableLong.of(0);
 
@@ -968,53 +1025,73 @@ abstract class AbstractShortStream extends ShortStream {
     @Override
     @SafeVarargs
     public final ShortStream prepend(final short... a) {
+        assertNotClosed();
+
         return prepend(ShortStream.of(a));
     }
 
     @Override
     public ShortStream prepend(ShortStream stream) {
+        assertNotClosed();
+
         return ShortStream.concat(stream, this);
     }
 
     @Override
     @SafeVarargs
     public final ShortStream append(final short... a) {
+        assertNotClosed();
+
         return append(ShortStream.of(a));
     }
 
     @Override
     public ShortStream append(ShortStream stream) {
+        assertNotClosed();
+
         return ShortStream.concat(this, stream);
     }
 
     @Override
     @SafeVarargs
     public final ShortStream appendIfEmpty(final short... a) {
+        assertNotClosed();
+
         return appendIfEmpty(() -> ShortStream.of(a));
     }
 
     @Override
     public ShortStream merge(ShortStream b, ShortBiFunction<MergeResult> nextSelector) {
+        assertNotClosed();
+
         return ShortStream.merge(this, b, nextSelector);
     }
 
     @Override
     public ShortStream zipWith(ShortStream b, ShortBinaryOperator zipFunction) {
+        assertNotClosed();
+
         return ShortStream.zip(this, b, zipFunction);
     }
 
     @Override
     public ShortStream zipWith(ShortStream b, ShortStream c, ShortTernaryOperator zipFunction) {
+        assertNotClosed();
+
         return ShortStream.zip(this, b, c, zipFunction);
     }
 
     @Override
     public ShortStream zipWith(ShortStream b, short valueForNoneA, short valueForNoneB, ShortBinaryOperator zipFunction) {
+        assertNotClosed();
+
         return ShortStream.zip(this, b, valueForNoneA, valueForNoneB, zipFunction);
     }
 
     @Override
     public ShortStream zipWith(ShortStream b, ShortStream c, short valueForNoneA, short valueForNoneB, short valueForNoneC, ShortTernaryOperator zipFunction) {
+        assertNotClosed();
+
         return ShortStream.zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     }
 
@@ -1025,26 +1102,36 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public <K, V> Map<K, V> toMap(ShortFunction<? extends K> keyMapper, ShortFunction<? extends V> valueMapper) {
+        assertNotClosed();
+
         return toMap(keyMapper, valueMapper, Suppliers.<K, V> ofMap());
     }
 
     @Override
     public <K, V, M extends Map<K, V>> M toMap(ShortFunction<? extends K> keyMapper, ShortFunction<? extends V> valueMapper, Supplier<? extends M> mapFactory) {
+        assertNotClosed();
+
         return toMap(keyMapper, valueMapper, Fn.<V> throwingMerger(), mapFactory);
     }
 
     @Override
     public <K, V> Map<K, V> toMap(ShortFunction<? extends K> keyMapper, ShortFunction<? extends V> valueMapper, BinaryOperator<V> mergeFunction) {
+        assertNotClosed();
+
         return toMap(keyMapper, valueMapper, mergeFunction, Suppliers.<K, V> ofMap());
     }
 
     @Override
     public <K, A, D> Map<K, D> toMap(ShortFunction<? extends K> keyMapper, Collector<Short, A, D> downstream) {
+        assertNotClosed();
+
         return toMap(keyMapper, downstream, Suppliers.<K, D> ofMap());
     }
 
-    @Override 
+    @Override
     public <E extends Exception> void forEachIndexed(Throwables.IndexedShortConsumer<E> action) throws E {
+        assertNotClosed();
+
         if (isParallel()) {
             final AtomicInteger idx = new AtomicInteger(0);
 
@@ -1123,6 +1210,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public <E extends Exception> OptionalShort findAny(final Throwables.ShortPredicate<E> predicate) throws E {
+        assertNotClosed();
+
         return findFirst(predicate);
     }
 
@@ -1210,6 +1299,8 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public <R> R collect(Supplier<R> supplier, ObjShortConsumer<? super R> accumulator) {
+        assertNotClosed();
+
         final BiConsumer<R, R> combiner = collectingCombiner;
 
         return collect(supplier, accumulator, combiner);

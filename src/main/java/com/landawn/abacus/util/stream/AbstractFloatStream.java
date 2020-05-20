@@ -71,6 +71,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream distinct() {
+        assertNotClosed();
+
         final Set<Object> set = N.newHashSet();
 
         return newStream(this.sequential().filter(new FloatPredicate() {
@@ -83,6 +85,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream flattMap(final FloatFunction<float[]> mapper) {
+        assertNotClosed();
+
         return flatMap(new FloatFunction<FloatStream>() {
             @Override
             public FloatStream apply(float t) {
@@ -93,6 +97,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public <T> Stream<T> flattMapToObj(final FloatFunction<? extends Collection<T>> mapper) {
+        assertNotClosed();
+
         return flatMapToObj(new FloatFunction<Stream<T>>() {
             @Override
             public Stream<T> apply(float t) {
@@ -103,6 +109,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public <T> Stream<T> flatMappToObj(final FloatFunction<T[]> mapper) {
+        assertNotClosed();
+
         return flatMapToObj(new FloatFunction<Stream<T>>() {
             @Override
             public Stream<T> apply(float t) {
@@ -113,6 +121,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream rangeMap(final FloatBiPredicate sameRange, final FloatBinaryOperator mapper) {
+        assertNotClosed();
+
         final FloatIteratorEx iter = iteratorEx();
 
         return newStream(new FloatIteratorEx() {
@@ -146,6 +156,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public <T> Stream<T> rangeMapToObj(final FloatBiPredicate sameRange, final FloatBiFunction<T> mapper) {
+        assertNotClosed();
+
         final FloatIteratorEx iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<T>() {
@@ -179,6 +191,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public Stream<FloatList> collapse(final FloatBiPredicate collapsible) {
+        assertNotClosed();
+
         final FloatIteratorEx iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<FloatList>() {
@@ -210,6 +224,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream collapse(final FloatBiPredicate collapsible, final FloatBinaryOperator mergeFunction) {
+        assertNotClosed();
+
         final FloatIteratorEx iter = iteratorEx();
 
         return newStream(new FloatIteratorEx() {
@@ -240,6 +256,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream skip(final long n, final FloatConsumer action) {
+        assertNotClosed();
+
         final FloatPredicate filter = isParallel() ? new FloatPredicate() {
             final AtomicLong cnt = new AtomicLong(n);
 
@@ -261,6 +279,7 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream removeIf(final FloatPredicate predicate) {
+        assertNotClosed();
 
         return filter(new FloatPredicate() {
             @Override
@@ -272,6 +291,7 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream removeIf(final FloatPredicate predicate, final FloatConsumer actionOnDroppedItem) {
+        assertNotClosed();
 
         return filter(new FloatPredicate() {
             @Override
@@ -288,6 +308,7 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream filter(final FloatPredicate predicate, final FloatConsumer actionOnDroppedItem) {
+        assertNotClosed();
 
         return filter(new FloatPredicate() {
             @Override
@@ -304,6 +325,7 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream dropWhile(final FloatPredicate predicate, final FloatConsumer actionOnDroppedItem) {
+        assertNotClosed();
 
         return dropWhile(new FloatPredicate() {
             @Override
@@ -320,6 +342,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream step(final long step) {
+        assertNotClosed();
+
         checkArgPositive(step, "step");
 
         final long skip = step - 1;
@@ -344,6 +368,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public Stream<FloatStream> split(final int chunkSize) {
+        assertNotClosed();
+
         return splitToList(chunkSize).map(new Function<FloatList, FloatStream>() {
             @Override
             public FloatStream apply(FloatList t) {
@@ -354,6 +380,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public Stream<FloatStream> split(final FloatPredicate predicate) {
+        assertNotClosed();
+
         return splitToList(predicate).map(new Function<FloatList, FloatStream>() {
             @Override
             public FloatStream apply(FloatList t) {
@@ -364,6 +392,7 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public Stream<FloatStream> splitBy(final FloatPredicate where) {
+        assertNotClosed();
 
         final FloatIteratorEx iter = iteratorEx();
 
@@ -472,6 +501,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public Stream<FloatStream> sliding(final int windowSize, final int increment) {
+        assertNotClosed();
+
         return slidingToList(windowSize, increment).map(new Function<FloatList, FloatStream>() {
             @Override
             public FloatStream apply(FloatList t) {
@@ -482,6 +513,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream scan(final FloatBinaryOperator accumulator) {
+        assertNotClosed();
+
         final FloatIteratorEx iter = iteratorEx();
 
         return newStream(new FloatIteratorEx() {
@@ -507,6 +540,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream scan(final float init, final FloatBinaryOperator accumulator) {
+        assertNotClosed();
+
         final FloatIteratorEx iter = iteratorEx();
 
         return newStream(new FloatIteratorEx() {
@@ -526,6 +561,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream scan(final float init, final FloatBinaryOperator accumulator, final boolean initIncluded) {
+        assertNotClosed();
+
         if (initIncluded == false) {
             return scan(init, accumulator);
         }
@@ -555,11 +592,15 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream top(int n) {
+        assertNotClosed();
+
         return top(n, FLOAT_COMPARATOR);
     }
 
     @Override
     public FloatStream intersection(final Collection<?> c) {
+        assertNotClosed();
+
         final Multiset<?> multiset = Multiset.from(c);
 
         return newStream(this.sequential().filter(new FloatPredicate() {
@@ -572,6 +613,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream difference(final Collection<?> c) {
+        assertNotClosed();
+
         final Multiset<?> multiset = Multiset.from(c);
 
         return newStream(this.sequential().filter(new FloatPredicate() {
@@ -584,6 +627,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream symmetricDifference(final Collection<Float> c) {
+        assertNotClosed();
+
         final Multiset<?> multiset = Multiset.from(c);
 
         return newStream(this.sequential().filter(new FloatPredicate() {
@@ -601,6 +646,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream reversed() {
+        assertNotClosed();
+
         return newStream(new FloatIteratorEx() {
             private boolean initialized = false;
 
@@ -683,6 +730,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream rotated(final int distance) {
+        assertNotClosed();
+
         return newStream(new FloatIteratorEx() {
             private boolean initialized = false;
 
@@ -773,6 +822,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream shuffled(final Random rnd) {
+        assertNotClosed();
+
         checkArgNotNull(rnd, "random");
 
         return lazyLoad(new Function<float[], float[]>() {
@@ -786,6 +837,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream sorted() {
+        assertNotClosed();
+
         if (sorted) {
             return newStream(iteratorEx(), sorted);
         }
@@ -806,6 +859,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public FloatStream reverseSorted() {
+        assertNotClosed();
+
         return newStream(new FloatIteratorEx() {
             private boolean initialized = false;
             private float[] aar;
@@ -957,6 +1012,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public Stream<IndexedFloat> indexed() {
+        assertNotClosed();
+
         final MutableLong idx = MutableLong.of(0);
 
         return newStream(this.sequential().mapToObj(new FloatFunction<IndexedFloat>() {
@@ -970,53 +1027,73 @@ abstract class AbstractFloatStream extends FloatStream {
     @Override
     @SafeVarargs
     public final FloatStream prepend(final float... a) {
+        assertNotClosed();
+
         return prepend(FloatStream.of(a));
     }
 
     @Override
     public FloatStream prepend(FloatStream stream) {
+        assertNotClosed();
+
         return FloatStream.concat(stream, this);
     }
 
     @Override
     @SafeVarargs
     public final FloatStream append(final float... a) {
+        assertNotClosed();
+
         return append(FloatStream.of(a));
     }
 
     @Override
     public FloatStream append(FloatStream stream) {
+        assertNotClosed();
+
         return FloatStream.concat(this, stream);
     }
 
     @Override
     @SafeVarargs
     public final FloatStream appendIfEmpty(final float... a) {
+        assertNotClosed();
+
         return appendIfEmpty(() -> FloatStream.of(a));
     }
 
     @Override
     public FloatStream merge(FloatStream b, FloatBiFunction<MergeResult> nextSelector) {
+        assertNotClosed();
+
         return FloatStream.merge(this, b, nextSelector);
     }
 
     @Override
     public FloatStream zipWith(FloatStream b, FloatBinaryOperator zipFunction) {
+        assertNotClosed();
+
         return FloatStream.zip(this, b, zipFunction);
     }
 
     @Override
     public FloatStream zipWith(FloatStream b, FloatStream c, FloatTernaryOperator zipFunction) {
+        assertNotClosed();
+
         return FloatStream.zip(this, b, c, zipFunction);
     }
 
     @Override
     public FloatStream zipWith(FloatStream b, float valueForNoneA, float valueForNoneB, FloatBinaryOperator zipFunction) {
+        assertNotClosed();
+
         return FloatStream.zip(this, b, valueForNoneA, valueForNoneB, zipFunction);
     }
 
     @Override
     public FloatStream zipWith(FloatStream b, FloatStream c, float valueForNoneA, float valueForNoneB, float valueForNoneC, FloatTernaryOperator zipFunction) {
+        assertNotClosed();
+
         return FloatStream.zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     }
 
@@ -1027,26 +1104,36 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public <K, V> Map<K, V> toMap(FloatFunction<? extends K> keyMapper, FloatFunction<? extends V> valueMapper) {
+        assertNotClosed();
+
         return toMap(keyMapper, valueMapper, Suppliers.<K, V> ofMap());
     }
 
     @Override
     public <K, V, M extends Map<K, V>> M toMap(FloatFunction<? extends K> keyMapper, FloatFunction<? extends V> valueMapper, Supplier<? extends M> mapFactory) {
+        assertNotClosed();
+
         return toMap(keyMapper, valueMapper, Fn.<V> throwingMerger(), mapFactory);
     }
 
     @Override
     public <K, V> Map<K, V> toMap(FloatFunction<? extends K> keyMapper, FloatFunction<? extends V> valueMapper, BinaryOperator<V> mergeFunction) {
+        assertNotClosed();
+
         return toMap(keyMapper, valueMapper, mergeFunction, Suppliers.<K, V> ofMap());
     }
 
     @Override
     public <K, A, D> Map<K, D> toMap(FloatFunction<? extends K> keyMapper, Collector<Float, A, D> downstream) {
+        assertNotClosed();
+
         return toMap(keyMapper, downstream, Suppliers.<K, D> ofMap());
     }
 
-    @Override 
+    @Override
     public <E extends Exception> void forEachIndexed(Throwables.IndexedFloatConsumer<E> action) throws E {
+        assertNotClosed();
+
         if (isParallel()) {
             final AtomicInteger idx = new AtomicInteger(0);
 
@@ -1161,6 +1248,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public <E extends Exception> OptionalFloat findAny(final Throwables.FloatPredicate<E> predicate) throws E {
+        assertNotClosed();
+
         return findFirst(predicate);
     }
 
@@ -1248,6 +1337,8 @@ abstract class AbstractFloatStream extends FloatStream {
 
     @Override
     public <R> R collect(Supplier<R> supplier, ObjFloatConsumer<? super R> accumulator) {
+        assertNotClosed();
+
         final BiConsumer<R, R> combiner = collectingCombiner;
 
         return collect(supplier, accumulator, combiner);

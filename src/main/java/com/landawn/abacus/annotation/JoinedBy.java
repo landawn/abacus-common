@@ -21,7 +21,6 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-
 /**
  * Sample for one-one or one-many join:
  * 
@@ -73,7 +72,7 @@ import java.lang.annotation.Target;
  * 
  */
 @Documented
-@Target(value = { FIELD /*, METHOD */})
+@Target(value = { FIELD /*, METHOD */ })
 @Retention(RUNTIME)
 public @interface JoinedBy {
 

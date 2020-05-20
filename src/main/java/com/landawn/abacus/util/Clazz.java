@@ -60,9 +60,14 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public final class Clazz {
 
-    /** The Constant PROPS_MAP. */
     @SuppressWarnings("rawtypes")
-    public static final Class<Map<String, Object>> PROPS_MAP = (Class) Map.class;
+    public static final Class<Map<String, Object>> PROPS_MAP = (Class) LinkedHashMap.class;
+
+    @SuppressWarnings("rawtypes")
+    public static final Class<Map<String, Object>> MAP = (Class) Map.class;
+
+    @SuppressWarnings("rawtypes")
+    public static final Class<Map<String, Object>> LINKED_HASH_MAP = (Class) LinkedHashMap.class;
 
     /** The Constant STRING_LIST. */
     @SuppressWarnings("rawtypes")

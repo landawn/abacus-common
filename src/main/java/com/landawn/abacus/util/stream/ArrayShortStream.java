@@ -94,6 +94,8 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public ShortStream filter(final ShortPredicate predicate) {
+        assertNotClosed();
+
         return newStream(new ShortIteratorEx() {
             private boolean hasNext = false;
             private int cursor = fromIndex;
@@ -127,6 +129,8 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public ShortStream takeWhile(final ShortPredicate predicate) {
+        assertNotClosed();
+
         return newStream(new ShortIteratorEx() {
             private boolean hasMore = true;
             private boolean hasNext = false;
@@ -160,6 +164,8 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public ShortStream dropWhile(final ShortPredicate predicate) {
+        assertNotClosed();
+
         return newStream(new ShortIteratorEx() {
             private boolean hasNext = false;
             private int cursor = fromIndex;
@@ -200,6 +206,8 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public ShortStream step(final long step) {
+        assertNotClosed();
+
         checkArgPositive(step, "step");
 
         if (step == 1 || fromIndex == toIndex) {
@@ -251,6 +259,8 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public ShortStream map(final ShortUnaryOperator mapper) {
+        assertNotClosed();
+
         return newStream(new ShortIteratorEx() {
             private int cursor = fromIndex;
 
@@ -295,6 +305,8 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public IntStream mapToInt(final ShortToIntFunction mapper) {
+        assertNotClosed();
+
         return newStream(new IntIteratorEx() {
             private int cursor = fromIndex;
 
@@ -339,6 +351,8 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public <U> Stream<U> mapToObj(final ShortFunction<? extends U> mapper) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<U>() {
             private int cursor = fromIndex;
 
@@ -383,6 +397,8 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public ShortStream flatMap(final ShortFunction<? extends ShortStream> mapper) {
+        assertNotClosed();
+
         final ShortIteratorEx iter = new ShortIteratorEx() {
             private int cursor = fromIndex;
             private ShortIterator cur = null;
@@ -450,6 +466,8 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public IntStream flatMapToInt(final ShortFunction<? extends IntStream> mapper) {
+        assertNotClosed();
+
         final IntIteratorEx iter = new IntIteratorEx() {
             private int cursor = fromIndex;
             private IntIterator cur = null;
@@ -517,6 +535,8 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public <T> Stream<T> flatMapToObj(final ShortFunction<? extends Stream<T>> mapper) {
+        assertNotClosed();
+
         final ObjIteratorEx<T> iter = new ObjIteratorEx<T>() {
             private int cursor = fromIndex;
             private Iterator<T> cur = null;
@@ -584,6 +604,8 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public Stream<ShortStream> split(final int chunkSize) {
+        assertNotClosed();
+
         checkArgPositive(chunkSize, "chunkSize");
 
         return newStream(new ObjIteratorEx<ShortStream>() {
@@ -619,6 +641,8 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public Stream<ShortList> splitToList(final int chunkSize) {
+        assertNotClosed();
+
         checkArgPositive(chunkSize, "chunkSize");
 
         return newStream(new ObjIteratorEx<ShortList>() {
@@ -654,6 +678,8 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public Stream<ShortStream> split(final ShortPredicate predicate) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<ShortStream>() {
             private int cursor = fromIndex;
             private boolean preCondition = false;
@@ -689,6 +715,8 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public Stream<ShortList> splitToList(final ShortPredicate predicate) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<ShortList>() {
             private int cursor = fromIndex;
             private boolean preCondition = false;
@@ -725,6 +753,8 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public Stream<ShortStream> splitAt(final int where) {
+        assertNotClosed();
+
         checkArgNotNegative(where, "where");
 
         final ShortStream[] a = new ShortStream[2];
@@ -737,6 +767,8 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public Stream<ShortStream> sliding(final int windowSize, final int increment) {
+        assertNotClosed();
+
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
 
         return newStream(new ObjIteratorEx<ShortStream>() {
@@ -786,6 +818,8 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public Stream<ShortList> slidingToList(final int windowSize, final int increment) {
+        assertNotClosed();
+
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
 
         return newStream(new ObjIteratorEx<ShortList>() {
@@ -834,6 +868,8 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public ShortStream top(final int n, final Comparator<? super Short> comparator) {
+        assertNotClosed();
+
         checkArgPositive(n, "n");
 
         if (n >= toIndex - fromIndex) {
@@ -918,6 +954,8 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public ShortStream peek(final ShortConsumer action) {
+        assertNotClosed();
+
         return newStream(new ShortIteratorEx() {
             private int cursor = fromIndex;
 
@@ -954,6 +992,8 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public ShortStream limit(final long maxSize) {
+        assertNotClosed();
+
         checkArgNotNegative(maxSize, "maxSize");
 
         return newStream(elements, fromIndex, maxSize < toIndex - fromIndex ? (int) (fromIndex + maxSize) : toIndex, sorted);
@@ -961,6 +1001,8 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public ShortStream skip(long n) {
+        assertNotClosed();
+
         checkArgNotNegative(n, "n");
 
         if (n >= toIndex - fromIndex) {
@@ -1314,8 +1356,9 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public OptionalShort kthLargest(int k) {
-        checkArgPositive(k, "k");
         assertNotClosed();
+
+        checkArgPositive(k, "k");
 
         try {
             if (k > toIndex - fromIndex) {
@@ -1367,105 +1410,105 @@ class ArrayShortStream extends AbstractShortStream {
         }
     }
 
-//    @Override
-//    public ShortStream reversed() {
-//        return newStream(new ShortIteratorEx() {
-//            private int cursor = toIndex;
-//
-//            @Override
-//            public boolean hasNext() {
-//                return cursor > fromIndex;
-//            }
-//
-//            @Override
-//            public short nextShort() {
-//                if (cursor <= fromIndex) {
-//                    throw new NoSuchElementException();
-//                }
-//                return elements[--cursor];
-//            }
-//
-//            @Override
-//            public long count() {
-//                return cursor - fromIndex;
-//            }
-//
-//            @Override
-//            public void skip(long n) {
-//                cursor = n < cursor - fromIndex ? cursor - (int) n : fromIndex;
-//            }
-//
-//            @Override
-//            public short[] toArray() {
-//                final short[] a = new short[cursor - fromIndex];
-//
-//                for (int i = 0, len = cursor - fromIndex; i < len; i++) {
-//                    a[i] = elements[cursor - i - 1];
-//                }
-//
-//                return a;
-//            }
-//        }, false);
-//    }
-//
-//    @Override
-//    public ShortStream rotated(final int distance) {
-//        if (distance == 0 || toIndex - fromIndex <= 1 || distance % (toIndex - fromIndex) == 0) {
-//            return newStream(elements, fromIndex, toIndex, sorted);
-//        }
-//
-//        return newStream(new ShortIteratorEx() {
-//            private final int len = toIndex - fromIndex;
-//            private int start;
-//            private int cnt = 0;
-//
-//            {
-//
-//                start = distance % len;
-//
-//                if (start < 0) {
-//                    start += len;
-//                }
-//
-//                start = len - start;
-//            }
-//
-//            @Override
-//            public boolean hasNext() {
-//                return cnt < len;
-//            }
-//
-//            @Override
-//            public short nextShort() {
-//                if (hasNext() == false) {
-//                    throw new NoSuchElementException();
-//                }
-//
-//                return elements[((start + cnt++) % len) + fromIndex];
-//            }
-//
-//            @Override
-//            public long count() {
-//                return len - cnt;
-//            }
-//
-//            @Override
-//            public void skip(long n) {
-//                cnt = n < len - cnt ? cnt + (int) n : len;
-//            }
-//
-//            @Override
-//            public short[] toArray() {
-//                final short[] a = new short[len - cnt];
-//
-//                for (int i = cnt; i < len; i++) {
-//                    a[i - cnt] = elements[((start + i) % len) + fromIndex];
-//                }
-//
-//                return a;
-//            }
-//        }, false);
-//    }
+    //    @Override
+    //    public ShortStream reversed() {
+    //        return newStream(new ShortIteratorEx() {
+    //            private int cursor = toIndex;
+    //
+    //            @Override
+    //            public boolean hasNext() {
+    //                return cursor > fromIndex;
+    //            }
+    //
+    //            @Override
+    //            public short nextShort() {
+    //                if (cursor <= fromIndex) {
+    //                    throw new NoSuchElementException();
+    //                }
+    //                return elements[--cursor];
+    //            }
+    //
+    //            @Override
+    //            public long count() {
+    //                return cursor - fromIndex;
+    //            }
+    //
+    //            @Override
+    //            public void skip(long n) {
+    //                cursor = n < cursor - fromIndex ? cursor - (int) n : fromIndex;
+    //            }
+    //
+    //            @Override
+    //            public short[] toArray() {
+    //                final short[] a = new short[cursor - fromIndex];
+    //
+    //                for (int i = 0, len = cursor - fromIndex; i < len; i++) {
+    //                    a[i] = elements[cursor - i - 1];
+    //                }
+    //
+    //                return a;
+    //            }
+    //        }, false);
+    //    }
+    //
+    //    @Override
+    //    public ShortStream rotated(final int distance) {
+    //        if (distance == 0 || toIndex - fromIndex <= 1 || distance % (toIndex - fromIndex) == 0) {
+    //            return newStream(elements, fromIndex, toIndex, sorted);
+    //        }
+    //
+    //        return newStream(new ShortIteratorEx() {
+    //            private final int len = toIndex - fromIndex;
+    //            private int start;
+    //            private int cnt = 0;
+    //
+    //            {
+    //
+    //                start = distance % len;
+    //
+    //                if (start < 0) {
+    //                    start += len;
+    //                }
+    //
+    //                start = len - start;
+    //            }
+    //
+    //            @Override
+    //            public boolean hasNext() {
+    //                return cnt < len;
+    //            }
+    //
+    //            @Override
+    //            public short nextShort() {
+    //                if (hasNext() == false) {
+    //                    throw new NoSuchElementException();
+    //                }
+    //
+    //                return elements[((start + cnt++) % len) + fromIndex];
+    //            }
+    //
+    //            @Override
+    //            public long count() {
+    //                return len - cnt;
+    //            }
+    //
+    //            @Override
+    //            public void skip(long n) {
+    //                cnt = n < len - cnt ? cnt + (int) n : len;
+    //            }
+    //
+    //            @Override
+    //            public short[] toArray() {
+    //                final short[] a = new short[len - cnt];
+    //
+    //                for (int i = cnt; i < len; i++) {
+    //                    a[i - cnt] = elements[((start + i) % len) + fromIndex];
+    //                }
+    //
+    //                return a;
+    //            }
+    //        }, false);
+    //    }
 
     @Override
     public ShortSummaryStatistics summarize() {
@@ -1571,6 +1614,8 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public IntStream asIntStream() {
+        assertNotClosed();
+
         return newStream(new IntIteratorEx() {
             private int cursor = fromIndex;
 
@@ -1613,6 +1658,8 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public Stream<Short> boxed() {
+        assertNotClosed();
+
         return new IteratorStream<>(iteratorEx(), sorted, sorted ? SHORT_COMPARATOR : null, closeHandlers);
     }
 
@@ -1623,11 +1670,15 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     ShortIteratorEx iteratorEx() {
+        assertNotClosed();
+
         return ShortIteratorEx.of(elements, fromIndex, toIndex);
     }
 
     @Override
     public ShortStream appendIfEmpty(final Supplier<? extends ShortStream> supplier) {
+        assertNotClosed();
+
         if (fromIndex == toIndex) {
             final Holder<ShortStream> holder = new Holder<>();
 
@@ -1685,6 +1736,8 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super ShortStream, R, E> func) throws E {
+        assertNotClosed();
+
         try {
             if (fromIndex < toIndex) {
                 return Optional.of(func.apply(this));
@@ -1698,6 +1751,8 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super ShortStream, E> action) throws E {
+        assertNotClosed();
+
         try {
             if (fromIndex < toIndex) {
                 action.accept(this);
@@ -1711,9 +1766,10 @@ class ArrayShortStream extends AbstractShortStream {
         return OrElse.FALSE;
     }
 
-
     @Override
     Tuple3<short[], Integer, Integer> array() {
+        assertNotClosed();
+
         close();
 
         return Tuple.of(elements, fromIndex, toIndex);
@@ -1721,11 +1777,15 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     protected ShortStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor) {
+        assertNotClosed();
+
         return new ParallelArrayShortStream(elements, fromIndex, toIndex, sorted, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public ShortStream onClose(Runnable closeHandler) {
+        assertNotClosed();
+
         final Deque<Runnable> newCloseHandlers = new LocalArrayDeque<>(N.isNullOrEmpty(this.closeHandlers) ? 1 : this.closeHandlers.size() + 1);
 
         newCloseHandlers.add(wrapCloseHandlers(closeHandler));

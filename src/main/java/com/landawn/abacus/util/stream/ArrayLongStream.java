@@ -98,6 +98,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public LongStream filter(final LongPredicate predicate) {
+        assertNotClosed();
+
         return newStream(new LongIteratorEx() {
             private boolean hasNext = false;
             private int cursor = fromIndex;
@@ -131,6 +133,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public LongStream takeWhile(final LongPredicate predicate) {
+        assertNotClosed();
+
         return newStream(new LongIteratorEx() {
             private boolean hasMore = true;
             private boolean hasNext = false;
@@ -164,6 +168,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public LongStream dropWhile(final LongPredicate predicate) {
+        assertNotClosed();
+
         return newStream(new LongIteratorEx() {
             private boolean hasNext = false;
             private int cursor = fromIndex;
@@ -204,6 +210,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public LongStream step(final long step) {
+        assertNotClosed();
+
         checkArgPositive(step, "step");
 
         if (step == 1 || fromIndex == toIndex) {
@@ -255,6 +263,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public LongStream map(final LongUnaryOperator mapper) {
+        assertNotClosed();
+
         return newStream(new LongIteratorEx() {
             private int cursor = fromIndex;
 
@@ -299,6 +309,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public IntStream mapToInt(final LongToIntFunction mapper) {
+        assertNotClosed();
+
         return newStream(new IntIteratorEx() {
             private int cursor = fromIndex;
 
@@ -343,6 +355,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public FloatStream mapToFloat(final LongToFloatFunction mapper) {
+        assertNotClosed();
+
         return newStream(new FloatIteratorEx() {
             private int cursor = fromIndex;
 
@@ -387,6 +401,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public DoubleStream mapToDouble(final LongToDoubleFunction mapper) {
+        assertNotClosed();
+
         return newStream(new DoubleIteratorEx() {
             private int cursor = fromIndex;
 
@@ -431,6 +447,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public <U> Stream<U> mapToObj(final LongFunction<? extends U> mapper) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<U>() {
             private int cursor = fromIndex;
 
@@ -475,6 +493,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public LongStream flatMap(final LongFunction<? extends LongStream> mapper) {
+        assertNotClosed();
+
         final LongIteratorEx iter = new LongIteratorEx() {
             private int cursor = fromIndex;
             private LongIterator cur = null;
@@ -542,6 +562,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public IntStream flatMapToInt(final LongFunction<? extends IntStream> mapper) {
+        assertNotClosed();
+
         final IntIteratorEx iter = new IntIteratorEx() {
             private int cursor = fromIndex;
             private IntIterator cur = null;
@@ -609,6 +631,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public FloatStream flatMapToFloat(final LongFunction<? extends FloatStream> mapper) {
+        assertNotClosed();
+
         final FloatIteratorEx iter = new FloatIteratorEx() {
             private int cursor = fromIndex;
             private FloatIterator cur = null;
@@ -676,6 +700,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public DoubleStream flatMapToDouble(final LongFunction<? extends DoubleStream> mapper) {
+        assertNotClosed();
+
         final DoubleIteratorEx iter = new DoubleIteratorEx() {
             private int cursor = fromIndex;
             private DoubleIterator cur = null;
@@ -743,6 +769,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public <T> Stream<T> flatMapToObj(final LongFunction<? extends Stream<T>> mapper) {
+        assertNotClosed();
+
         final ObjIteratorEx<T> iter = new ObjIteratorEx<T>() {
             private int cursor = fromIndex;
             private Iterator<T> cur = null;
@@ -810,6 +838,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public Stream<LongStream> split(final int chunkSize) {
+        assertNotClosed();
+
         checkArgPositive(chunkSize, "chunkSize");
 
         return newStream(new ObjIteratorEx<LongStream>() {
@@ -845,6 +875,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public Stream<LongList> splitToList(final int chunkSize) {
+        assertNotClosed();
+
         checkArgPositive(chunkSize, "chunkSize");
 
         return newStream(new ObjIteratorEx<LongList>() {
@@ -880,6 +912,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public Stream<LongStream> split(final LongPredicate predicate) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<LongStream>() {
             private int cursor = fromIndex;
             private boolean preCondition = false;
@@ -915,6 +949,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public Stream<LongList> splitToList(final LongPredicate predicate) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<LongList>() {
             private int cursor = fromIndex;
             private boolean preCondition = false;
@@ -951,6 +987,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public Stream<LongStream> splitAt(final int where) {
+        assertNotClosed();
+
         checkArgNotNegative(where, "where");
 
         final LongStream[] a = new LongStream[2];
@@ -963,6 +1001,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public Stream<LongStream> sliding(final int windowSize, final int increment) {
+        assertNotClosed();
+
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
 
         return newStream(new ObjIteratorEx<LongStream>() {
@@ -1012,6 +1052,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public Stream<LongList> slidingToList(final int windowSize, final int increment) {
+        assertNotClosed();
+
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
 
         return newStream(new ObjIteratorEx<LongList>() {
@@ -1060,6 +1102,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public LongStream top(final int n, final Comparator<? super Long> comparator) {
+        assertNotClosed();
+
         checkArgPositive(n, "n");
 
         if (n >= toIndex - fromIndex) {
@@ -1144,6 +1188,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public LongStream peek(final LongConsumer action) {
+        assertNotClosed();
+
         return newStream(new LongIteratorEx() {
             private int cursor = fromIndex;
 
@@ -1180,6 +1226,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public LongStream limit(final long maxSize) {
+        assertNotClosed();
+
         checkArgNotNegative(maxSize, "maxSize");
 
         return newStream(elements, fromIndex, maxSize < toIndex - fromIndex ? (int) (fromIndex + maxSize) : toIndex, sorted);
@@ -1187,6 +1235,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public LongStream skip(long n) {
+        assertNotClosed();
+
         checkArgNotNegative(n, "n");
 
         if (n >= toIndex - fromIndex) {
@@ -1540,8 +1590,9 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public OptionalLong kthLargest(int k) {
-        checkArgPositive(k, "k");
         assertNotClosed();
+
+        checkArgPositive(k, "k");
 
         try {
             if (k > toIndex - fromIndex) {
@@ -1593,105 +1644,105 @@ class ArrayLongStream extends AbstractLongStream {
         }
     }
 
-//    @Override
-//    public LongStream reversed() {
-//        return newStream(new LongIteratorEx() {
-//            private int cursor = toIndex;
-//
-//            @Override
-//            public boolean hasNext() {
-//                return cursor > fromIndex;
-//            }
-//
-//            @Override
-//            public long nextLong() {
-//                if (cursor <= fromIndex) {
-//                    throw new NoSuchElementException();
-//                }
-//                return elements[--cursor];
-//            }
-//
-//            @Override
-//            public long count() {
-//                return cursor - fromIndex;
-//            }
-//
-//            @Override
-//            public void skip(long n) {
-//                cursor = n < cursor - fromIndex ? cursor - (int) n : fromIndex;
-//            }
-//
-//            @Override
-//            public long[] toArray() {
-//                final long[] a = new long[cursor - fromIndex];
-//
-//                for (int i = 0, len = cursor - fromIndex; i < len; i++) {
-//                    a[i] = elements[cursor - i - 1];
-//                }
-//
-//                return a;
-//            }
-//        }, false);
-//    }
-//
-//    @Override
-//    public LongStream rotated(final int distance) {
-//        if (distance == 0 || toIndex - fromIndex <= 1 || distance % (toIndex - fromIndex) == 0) {
-//            return newStream(elements, fromIndex, toIndex, sorted);
-//        }
-//
-//        return newStream(new LongIteratorEx() {
-//            private final int len = toIndex - fromIndex;
-//            private int start;
-//            private int cnt = 0;
-//
-//            {
-//
-//                start = distance % len;
-//
-//                if (start < 0) {
-//                    start += len;
-//                }
-//
-//                start = len - start;
-//            }
-//
-//            @Override
-//            public boolean hasNext() {
-//                return cnt < len;
-//            }
-//
-//            @Override
-//            public long nextLong() {
-//                if (hasNext() == false) {
-//                    throw new NoSuchElementException();
-//                }
-//
-//                return elements[((start + cnt++) % len) + fromIndex];
-//            }
-//
-//            @Override
-//            public long count() {
-//                return len - cnt;
-//            }
-//
-//            @Override
-//            public void skip(long n) {
-//                cnt = n < len - cnt ? cnt + (int) n : len;
-//            }
-//
-//            @Override
-//            public long[] toArray() {
-//                final long[] a = new long[len - cnt];
-//
-//                for (int i = cnt; i < len; i++) {
-//                    a[i - cnt] = elements[((start + i) % len) + fromIndex];
-//                }
-//
-//                return a;
-//            }
-//        }, false);
-//    }
+    //    @Override
+    //    public LongStream reversed() {
+    //        return newStream(new LongIteratorEx() {
+    //            private int cursor = toIndex;
+    //
+    //            @Override
+    //            public boolean hasNext() {
+    //                return cursor > fromIndex;
+    //            }
+    //
+    //            @Override
+    //            public long nextLong() {
+    //                if (cursor <= fromIndex) {
+    //                    throw new NoSuchElementException();
+    //                }
+    //                return elements[--cursor];
+    //            }
+    //
+    //            @Override
+    //            public long count() {
+    //                return cursor - fromIndex;
+    //            }
+    //
+    //            @Override
+    //            public void skip(long n) {
+    //                cursor = n < cursor - fromIndex ? cursor - (int) n : fromIndex;
+    //            }
+    //
+    //            @Override
+    //            public long[] toArray() {
+    //                final long[] a = new long[cursor - fromIndex];
+    //
+    //                for (int i = 0, len = cursor - fromIndex; i < len; i++) {
+    //                    a[i] = elements[cursor - i - 1];
+    //                }
+    //
+    //                return a;
+    //            }
+    //        }, false);
+    //    }
+    //
+    //    @Override
+    //    public LongStream rotated(final int distance) {
+    //        if (distance == 0 || toIndex - fromIndex <= 1 || distance % (toIndex - fromIndex) == 0) {
+    //            return newStream(elements, fromIndex, toIndex, sorted);
+    //        }
+    //
+    //        return newStream(new LongIteratorEx() {
+    //            private final int len = toIndex - fromIndex;
+    //            private int start;
+    //            private int cnt = 0;
+    //
+    //            {
+    //
+    //                start = distance % len;
+    //
+    //                if (start < 0) {
+    //                    start += len;
+    //                }
+    //
+    //                start = len - start;
+    //            }
+    //
+    //            @Override
+    //            public boolean hasNext() {
+    //                return cnt < len;
+    //            }
+    //
+    //            @Override
+    //            public long nextLong() {
+    //                if (hasNext() == false) {
+    //                    throw new NoSuchElementException();
+    //                }
+    //
+    //                return elements[((start + cnt++) % len) + fromIndex];
+    //            }
+    //
+    //            @Override
+    //            public long count() {
+    //                return len - cnt;
+    //            }
+    //
+    //            @Override
+    //            public void skip(long n) {
+    //                cnt = n < len - cnt ? cnt + (int) n : len;
+    //            }
+    //
+    //            @Override
+    //            public long[] toArray() {
+    //                final long[] a = new long[len - cnt];
+    //
+    //                for (int i = cnt; i < len; i++) {
+    //                    a[i - cnt] = elements[((start + i) % len) + fromIndex];
+    //                }
+    //
+    //                return a;
+    //            }
+    //        }, false);
+    //    }
 
     @Override
     public LongSummaryStatistics summarize() {
@@ -1797,6 +1848,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public FloatStream asFloatStream() {
+        assertNotClosed();
+
         return newStream(new FloatIteratorEx() {
             private int cursor = fromIndex;
 
@@ -1839,6 +1892,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public DoubleStream asDoubleStream() {
+        assertNotClosed();
+
         return newStream(new DoubleIteratorEx() {
             private int cursor = fromIndex;
 
@@ -1881,6 +1936,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public java.util.stream.LongStream toJdkStream() {
+        assertNotClosed();
+
         java.util.stream.LongStream s = java.util.stream.LongStream.of(elements);
 
         if (fromIndex > 0) {
@@ -1904,6 +1961,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public Stream<Long> boxed() {
+        assertNotClosed();
+
         return new IteratorStream<>(iteratorEx(), sorted, sorted ? LONG_COMPARATOR : null, closeHandlers);
     }
 
@@ -1914,11 +1973,15 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     LongIteratorEx iteratorEx() {
+        assertNotClosed();
+
         return LongIteratorEx.of(elements, fromIndex, toIndex);
     }
 
     @Override
     public LongStream appendIfEmpty(final Supplier<? extends LongStream> supplier) {
+        assertNotClosed();
+
         if (fromIndex == toIndex) {
             final Holder<LongStream> holder = new Holder<>();
 
@@ -1976,6 +2039,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super LongStream, R, E> func) throws E {
+        assertNotClosed();
+
         try {
             if (fromIndex < toIndex) {
                 return Optional.of(func.apply(this));
@@ -1989,6 +2054,8 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super LongStream, E> action) throws E {
+        assertNotClosed();
+
         try {
             if (fromIndex < toIndex) {
                 action.accept(this);
@@ -2002,9 +2069,10 @@ class ArrayLongStream extends AbstractLongStream {
         return OrElse.FALSE;
     }
 
-
     @Override
     Tuple3<long[], Integer, Integer> array() {
+        assertNotClosed();
+
         close();
 
         return Tuple.of(elements, fromIndex, toIndex);
@@ -2012,11 +2080,15 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     protected LongStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor) {
+        assertNotClosed();
+
         return new ParallelArrayLongStream(elements, fromIndex, toIndex, sorted, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public LongStream onClose(Runnable closeHandler) {
+        assertNotClosed();
+
         final Deque<Runnable> newCloseHandlers = new LocalArrayDeque<>(N.isNullOrEmpty(this.closeHandlers) ? 1 : this.closeHandlers.size() + 1);
 
         newCloseHandlers.add(wrapCloseHandlers(closeHandler));

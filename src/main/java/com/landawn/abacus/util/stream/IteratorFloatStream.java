@@ -103,6 +103,8 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public FloatStream filter(final FloatPredicate predicate) {
+        assertNotClosed();
+
         return newStream(new FloatIteratorEx() {
             private boolean hasNext = false;
             private float next = 0;
@@ -138,6 +140,8 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public FloatStream takeWhile(final FloatPredicate predicate) {
+        assertNotClosed();
+
         return newStream(new FloatIteratorEx() {
             private boolean hasMore = true;
             private boolean hasNext = false;
@@ -174,6 +178,8 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public FloatStream dropWhile(final FloatPredicate predicate) {
+        assertNotClosed();
+
         return newStream(new FloatIteratorEx() {
             private boolean hasNext = false;
             private float next = 0;
@@ -218,6 +224,8 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public FloatStream map(final FloatUnaryOperator mapper) {
+        assertNotClosed();
+
         return newStream(new FloatIteratorEx() {
             @Override
             public boolean hasNext() {
@@ -245,6 +253,8 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public IntStream mapToInt(final FloatToIntFunction mapper) {
+        assertNotClosed();
+
         return newStream(new IntIteratorEx() {
             @Override
             public boolean hasNext() {
@@ -272,6 +282,8 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public LongStream mapToLong(final FloatToLongFunction mapper) {
+        assertNotClosed();
+
         return newStream(new LongIteratorEx() {
             @Override
             public boolean hasNext() {
@@ -299,6 +311,8 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public DoubleStream mapToDouble(final FloatToDoubleFunction mapper) {
+        assertNotClosed();
+
         return newStream(new DoubleIteratorEx() {
             @Override
             public boolean hasNext() {
@@ -326,6 +340,8 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public <U> Stream<U> mapToObj(final FloatFunction<? extends U> mapper) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<U>() {
             @Override
             public boolean hasNext() {
@@ -353,6 +369,8 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public FloatStream flatMap(final FloatFunction<? extends FloatStream> mapper) {
+        assertNotClosed();
+
         final FloatIteratorEx iter = new FloatIteratorEx() {
             private FloatIterator cur = null;
             private FloatStream s = null;
@@ -419,6 +437,8 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public IntStream flatMapToInt(final FloatFunction<? extends IntStream> mapper) {
+        assertNotClosed();
+
         final IntIteratorEx iter = new IntIteratorEx() {
             private IntIterator cur = null;
             private IntStream s = null;
@@ -485,6 +505,8 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public LongStream flatMapToLong(final FloatFunction<? extends LongStream> mapper) {
+        assertNotClosed();
+
         final LongIteratorEx iter = new LongIteratorEx() {
             private LongIterator cur = null;
             private LongStream s = null;
@@ -551,6 +573,8 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public DoubleStream flatMapToDouble(final FloatFunction<? extends DoubleStream> mapper) {
+        assertNotClosed();
+
         final DoubleIteratorEx iter = new DoubleIteratorEx() {
             private DoubleIterator cur = null;
             private DoubleStream s = null;
@@ -617,6 +641,8 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public <T> Stream<T> flatMapToObj(final FloatFunction<? extends Stream<T>> mapper) {
+        assertNotClosed();
+
         final ObjIteratorEx<T> iter = new ObjIteratorEx<T>() {
             private Iterator<? extends T> cur = null;
             private Stream<? extends T> s = null;
@@ -683,6 +709,8 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public Stream<FloatList> splitToList(final int chunkSize) {
+        assertNotClosed();
+
         checkArgPositive(chunkSize, "chunkSize");
 
         return newStream(new ObjIteratorEx<FloatList>() {
@@ -721,6 +749,8 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public Stream<FloatList> splitToList(final FloatPredicate predicate) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<FloatList>() {
             private float next;
             private boolean hasNext = false;
@@ -765,6 +795,8 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public Stream<FloatStream> splitAt(final int where) {
+        assertNotClosed();
+
         checkArgNotNegative(where, "where");
 
         return newStream(new ObjIteratorEx<FloatStream>() {
@@ -829,6 +861,8 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public Stream<FloatList> slidingToList(final int windowSize, final int increment) {
+        assertNotClosed();
+
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
 
         return newStream(new ObjIteratorEx<FloatList>() {
@@ -942,11 +976,15 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public FloatStream top(int n) {
+        assertNotClosed();
+
         return top(n, FLOAT_COMPARATOR);
     }
 
     @Override
     public FloatStream top(final int n, final Comparator<? super Float> comparator) {
+        assertNotClosed();
+
         checkArgPositive(n, "n");
 
         return newStream(new FloatIteratorEx() {
@@ -1056,6 +1094,8 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public FloatStream peek(final FloatConsumer action) {
+        assertNotClosed();
+
         return newStream(new FloatIteratorEx() {
             @Override
             public boolean hasNext() {
@@ -1073,6 +1113,8 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public FloatStream limit(final long maxSize) {
+        assertNotClosed();
+
         checkArgNotNegative(maxSize, "maxSize");
 
         return newStream(new FloatIteratorEx() {
@@ -1102,6 +1144,8 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public FloatStream skip(final long n) {
+        assertNotClosed();
+
         checkArgNotNegative(n, "n");
 
         return newStream(new FloatIteratorEx() {
@@ -1196,11 +1240,15 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public List<Float> toList() {
+        assertNotClosed();
+
         return toCollection(Suppliers.<Float> ofList());
     }
 
     @Override
     public Set<Float> toSet() {
+        assertNotClosed();
+
         return toCollection(Suppliers.<Float> ofSet());
     }
 
@@ -1223,6 +1271,8 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public Multiset<Float> toMultiset() {
+        assertNotClosed();
+
         return toMultiset(Suppliers.<Float> ofMultiset());
     }
 
@@ -1245,6 +1295,8 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public LongMultiset<Float> toLongMultiset() {
+        assertNotClosed();
+
         return toLongMultiset(Suppliers.<Float> ofLongMultiset());
     }
 
@@ -1446,8 +1498,9 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public OptionalFloat kthLargest(int k) {
-        checkArgPositive(k, "k");
         assertNotClosed();
+
+        checkArgPositive(k, "k");
 
         try {
             if (elements.hasNext() == false) {
@@ -1590,6 +1643,8 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public DoubleStream asDoubleStream() {
+        assertNotClosed();
+
         return newStream(new DoubleIteratorEx() {
             @Override
             public boolean hasNext() {
@@ -1615,16 +1670,22 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public Stream<Float> boxed() {
+        assertNotClosed();
+
         return new IteratorStream<>(iteratorEx(), sorted, sorted ? FLOAT_COMPARATOR : null, closeHandlers);
     }
 
     @Override
     FloatIteratorEx iteratorEx() {
+        assertNotClosed();
+
         return elements;
     }
 
     @Override
     public FloatStream appendIfEmpty(final Supplier<? extends FloatStream> supplier) {
+        assertNotClosed();
+
         final Holder<FloatStream> holder = new Holder<>();
 
         return newStream(new FloatIteratorEx() {
@@ -1682,6 +1743,8 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super FloatStream, R, E> func) throws E {
+        assertNotClosed();
+
         try {
             if (elements.hasNext()) {
                 return Optional.of(func.apply(this));
@@ -1695,6 +1758,8 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super FloatStream, E> action) throws E {
+        assertNotClosed();
+
         try {
             if (elements.hasNext()) {
                 action.accept(this);
@@ -1710,11 +1775,15 @@ class IteratorFloatStream extends AbstractFloatStream {
 
     @Override
     protected FloatStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor) {
+        assertNotClosed();
+
         return new ParallelIteratorFloatStream(elements, sorted, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public FloatStream onClose(Runnable closeHandler) {
+        assertNotClosed();
+
         final Deque<Runnable> newCloseHandlers = new LocalArrayDeque<>(N.isNullOrEmpty(this.closeHandlers) ? 1 : this.closeHandlers.size() + 1);
 
         newCloseHandlers.add(wrapCloseHandlers(closeHandler));

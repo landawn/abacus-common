@@ -12938,7 +12938,7 @@ public final class Fn extends Comparators {
          */
         public static <E extends Exception> Throwables.Callable<Void, E> r2c(final Throwables.Runnable<E> runnable) {
             N.checkArgNotNull(runnable);
-        
+
             return new Throwables.Callable<Void, E>() {
                 @Override
                 public Void call() throws E {
@@ -12957,7 +12957,7 @@ public final class Fn extends Comparators {
          */
         public static <T, E extends Exception> Throwables.Callable<T, E> r2c(final Throwables.Runnable<E> runnable, final T result) {
             N.checkArgNotNull(runnable);
-        
+
             return new Throwables.Callable<T, E>() {
                 @Override
                 public T call() throws E {
@@ -12976,7 +12976,7 @@ public final class Fn extends Comparators {
          */
         public static <R, E extends Exception> Throwables.Runnable<E> c2r(final Throwables.Callable<R, E> callable) {
             N.checkArgNotNull(callable);
-        
+
             return new Throwables.Runnable<E>() {
                 @Override
                 public void run() throws E {
@@ -12994,7 +12994,7 @@ public final class Fn extends Comparators {
          */
         public static <R, E extends Exception> Throwables.Callable<R, E> callable(final Throwables.Callable<R, E> callable) {
             N.checkArgNotNull(callable);
-        
+
             return callable;
         }
 
@@ -13006,7 +13006,7 @@ public final class Fn extends Comparators {
          */
         public static <E extends Exception> Throwables.Runnable<E> runnable(final Throwables.Runnable<E> runnable) {
             N.checkArgNotNull(runnable);
-        
+
             return runnable;
         }
 

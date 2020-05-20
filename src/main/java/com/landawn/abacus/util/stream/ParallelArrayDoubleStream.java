@@ -740,6 +740,8 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
 
     @Override
     public OptionalDouble min() {
+        assertNotClosed();
+
         boolean isDone = true;
 
         try {
@@ -799,6 +801,8 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
 
     @Override
     public OptionalDouble max() {
+        assertNotClosed();
+
         boolean isDone = true;
 
         try {
@@ -957,6 +961,8 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
 
     @Override
     public DoubleSummaryStatistics summarize() {
+        assertNotClosed();
+
         boolean isDone = true;
 
         try {
@@ -1538,6 +1544,8 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
 
     @Override
     public Stream<Double> boxed() {
+        assertNotClosed();
+
         Stream<Double> tmp = boxed;
 
         if (tmp == null) {
@@ -1550,31 +1558,43 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
 
     @Override
     public DoubleStream append(DoubleStream stream) {
+        assertNotClosed();
+
         return new ParallelIteratorDoubleStream(DoubleStream.concat(this, stream), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public DoubleStream prepend(DoubleStream stream) {
+        assertNotClosed();
+
         return new ParallelIteratorDoubleStream(DoubleStream.concat(stream, this), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public DoubleStream merge(final DoubleStream b, final DoubleBiFunction<MergeResult> nextSelector) {
+        assertNotClosed();
+
         return new ParallelIteratorDoubleStream(DoubleStream.merge(this, b, nextSelector), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public DoubleStream zipWith(DoubleStream b, DoubleBinaryOperator zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorDoubleStream(DoubleStream.zip(this, b, zipFunction), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public DoubleStream zipWith(DoubleStream b, DoubleStream c, DoubleTernaryOperator zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorDoubleStream(DoubleStream.zip(this, b, c, zipFunction), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public DoubleStream zipWith(DoubleStream b, double valueForNoneA, double valueForNoneB, DoubleBinaryOperator zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorDoubleStream(DoubleStream.zip(this, b, valueForNoneA, valueForNoneB, zipFunction), false, maxThreadNum, splitor,
                 asyncExecutor, closeHandlers);
     }
@@ -1582,17 +1602,23 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
     @Override
     public DoubleStream zipWith(DoubleStream b, DoubleStream c, double valueForNoneA, double valueForNoneB, double valueForNoneC,
             DoubleTernaryOperator zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorDoubleStream(DoubleStream.zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction), false, maxThreadNum,
                 splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public boolean isParallel() {
+        assertNotClosed();
+
         return true;
     }
 
     @Override
     public DoubleStream sequential() {
+        assertNotClosed();
+
         ArrayDoubleStream tmp = sequential;
 
         if (tmp == null) {
@@ -1605,21 +1631,29 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
 
     @Override
     protected int maxThreadNum() {
+        assertNotClosed();
+
         return maxThreadNum;
     }
 
     @Override
     protected BaseStream.Splitor splitor() {
+        assertNotClosed();
+
         return splitor;
     }
 
     @Override
     protected AsyncExecutor asyncExecutor() {
+        assertNotClosed();
+
         return asyncExecutor;
     }
 
     @Override
     public DoubleStream onClose(Runnable closeHandler) {
+        assertNotClosed();
+
         final Deque<Runnable> newCloseHandlers = new LocalArrayDeque<>(N.isNullOrEmpty(this.closeHandlers) ? 1 : this.closeHandlers.size() + 1);
 
         newCloseHandlers.add(wrapCloseHandlers(closeHandler));

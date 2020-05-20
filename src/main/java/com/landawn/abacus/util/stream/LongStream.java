@@ -93,6 +93,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     @IntermediateOp
     @Beta
     public LongStream skipUntil(final LongPredicate predicate) {
+        assertNotClosed();
+
         return dropWhile(new LongPredicate() {
             @Override
             public boolean test(final long t) {
@@ -451,6 +453,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     @SequentialOnly
     @Override
     public LongIterator iterator() {
+        assertNotClosed();
+
         if (isEmptyCloseHandlers(closeHandlers) == false) {
             if (logger.isWarnEnabled()) {
                 logger.warn("### Remember to close " + ClassUtil.getSimpleClassName(getClass()));
@@ -468,6 +472,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     @SuppressWarnings("rawtypes")
     @Override
     public <SS extends BaseStream> SS __(Function<? super LongStream, SS> transfer) {
+        assertNotClosed();
+
         return transfer.apply(this);
     }
 

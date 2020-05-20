@@ -570,6 +570,8 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
     @Override
     public <R> Stream<R> mapFirstOrElse(final Function<? super T, ? extends R> mapperForFirst, final Function<? super T, ? extends R> mapperForElse) {
+        assertNotClosed();
+
         if (maxThreadNum <= 1) {
             return super.mapFirstOrElse(mapperForFirst, mapperForElse);
         }
@@ -587,6 +589,8 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
     @Override
     public <R> Stream<R> mapLastOrElse(final Function<? super T, ? extends R> mapperForLast, final Function<? super T, ? extends R> mapperForElse) {
+        assertNotClosed();
+
         if (maxThreadNum <= 1) {
             return super.mapLastOrElse(mapperForLast, mapperForElse);
         }
@@ -2548,6 +2552,8 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
     @Override
     public <A, D> Map<Boolean, D> partitionTo(final Predicate<? super T> predicate, Collector<? super T, A, D> downstream) {
+        assertNotClosed();
+
         final Function<T, Boolean> keyMapper = new Function<T, Boolean>() {
             @Override
             public Boolean apply(T t) {
@@ -2906,6 +2912,8 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
     @Override
     public Optional<T> min(Comparator<? super T> comparator) {
+        assertNotClosed();
+
         boolean isDone = true;
 
         try {
@@ -2929,6 +2937,8 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
     @Override
     public Optional<T> max(Comparator<? super T> comparator) {
+        assertNotClosed();
+
         boolean isDone = true;
 
         try {
@@ -3105,11 +3115,11 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
     @Override
     public <E extends Exception> boolean nMatch(final long atLeast, final long atMost, final Throwables.Predicate<? super T, E> predicate) throws E {
+        assertNotClosed();
+
         checkArgNotNegative(atLeast, "atLeast");
         checkArgNotNegative(atMost, "atMost");
         checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
-
-        assertNotClosed();
 
         if (maxThreadNum <= 1) {
             return super.nMatch(atLeast, atMost, predicate);
@@ -3367,31 +3377,43 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
     @Override
     public Stream<T> append(Stream<T> stream) {
+        assertNotClosed();
+
         return new ParallelIteratorStream<>(Stream.concat(this, stream), false, null, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public Stream<T> prepend(Stream<T> stream) {
+        assertNotClosed();
+
         return new ParallelIteratorStream<>(Stream.concat(stream, this), false, null, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public Stream<T> merge(final Stream<? extends T> b, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
+        assertNotClosed();
+
         return new ParallelIteratorStream<>(Stream.merge(this, b, nextSelector), false, null, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public <T2, R> Stream<R> zipWith(Stream<T2> b, BiFunction<? super T, ? super T2, R> zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorStream<>(Stream.parallelZip(this, b, zipFunction), false, null, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public <T2, T3, R> Stream<R> zipWith(Stream<T2> b, Stream<T3> c, TriFunction<? super T, ? super T2, ? super T3, R> zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorStream<>(Stream.parallelZip(this, b, c, zipFunction), false, null, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public <T2, R> Stream<R> zipWith(Stream<T2> b, T valueForNoneA, T2 valueForNoneB, BiFunction<? super T, ? super T2, R> zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorStream<>(Stream.parallelZip(this, b, valueForNoneA, valueForNoneB, zipFunction), false, null, maxThreadNum, splitor,
                 asyncExecutor, closeHandlers);
     }
@@ -3399,6 +3421,8 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
     @Override
     public <T2, T3, R> Stream<R> zipWith(Stream<T2> b, Stream<T3> c, T valueForNoneA, T2 valueForNoneB, T3 valueForNoneC,
             TriFunction<? super T, ? super T2, ? super T3, R> zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorStream<>(Stream.parallelZip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction), false, null, maxThreadNum,
                 splitor, asyncExecutor, closeHandlers);
     }
@@ -3467,11 +3491,15 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
     @Override
     public boolean isParallel() {
+        assertNotClosed();
+
         return true;
     }
 
     @Override
     public Stream<T> sequential() {
+        assertNotClosed();
+
         IteratorStream<T> tmp = sequential;
 
         if (tmp == null) {
@@ -3484,21 +3512,29 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
     @Override
     protected int maxThreadNum() {
+        assertNotClosed();
+
         return maxThreadNum;
     }
 
     @Override
     protected BaseStream.Splitor splitor() {
+        assertNotClosed();
+
         return splitor;
     }
 
     @Override
     protected AsyncExecutor asyncExecutor() {
+        assertNotClosed();
+
         return asyncExecutor;
     }
 
     @Override
     public Stream<T> onClose(Runnable closeHandler) {
+        assertNotClosed();
+
         final Deque<Runnable> newCloseHandlers = new LocalArrayDeque<>(N.isNullOrEmpty(this.closeHandlers) ? 1 : this.closeHandlers.size() + 1);
 
         newCloseHandlers.add(wrapCloseHandlers(closeHandler));

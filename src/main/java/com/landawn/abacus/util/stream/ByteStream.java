@@ -89,6 +89,8 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     @IntermediateOp
     @Beta
     public ByteStream skipUntil(final BytePredicate predicate) {
+        assertNotClosed();
+
         return dropWhile(new BytePredicate() {
             @Override
             public boolean test(final byte t) {
@@ -449,6 +451,8 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     @SequentialOnly
     @Override
     public ByteIterator iterator() {
+        assertNotClosed();
+
         if (isEmptyCloseHandlers(closeHandlers) == false) {
             if (logger.isWarnEnabled()) {
                 logger.warn("### Remember to close " + ClassUtil.getSimpleClassName(getClass()));
@@ -466,6 +470,8 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     @SuppressWarnings("rawtypes")
     @Override
     public <SS extends BaseStream> SS __(Function<? super ByteStream, SS> transfer) {
+        assertNotClosed();
+
         return transfer.apply(this);
     }
 

@@ -24,7 +24,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @since 0.8
  */
 public interface PaginatedDataSet extends Iterable<DataSet> {
-    
+
     /**
      * Returns a frozen {@code DataSet}.
      *

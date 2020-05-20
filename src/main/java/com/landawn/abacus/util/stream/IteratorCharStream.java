@@ -95,6 +95,8 @@ class IteratorCharStream extends AbstractCharStream {
 
     @Override
     public CharStream filter(final CharPredicate predicate) {
+        assertNotClosed();
+
         return newStream(new CharIteratorEx() {
             private boolean hasNext = false;
             private char next = 0;
@@ -130,6 +132,8 @@ class IteratorCharStream extends AbstractCharStream {
 
     @Override
     public CharStream takeWhile(final CharPredicate predicate) {
+        assertNotClosed();
+
         return newStream(new CharIteratorEx() {
             private boolean hasMore = true;
             private boolean hasNext = false;
@@ -166,6 +170,8 @@ class IteratorCharStream extends AbstractCharStream {
 
     @Override
     public CharStream dropWhile(final CharPredicate predicate) {
+        assertNotClosed();
+
         return newStream(new CharIteratorEx() {
             private boolean hasNext = false;
             private char next = 0;
@@ -210,6 +216,8 @@ class IteratorCharStream extends AbstractCharStream {
 
     @Override
     public CharStream map(final CharUnaryOperator mapper) {
+        assertNotClosed();
+
         return newStream(new CharIteratorEx() {
             @Override
             public boolean hasNext() {
@@ -237,6 +245,8 @@ class IteratorCharStream extends AbstractCharStream {
 
     @Override
     public IntStream mapToInt(final CharToIntFunction mapper) {
+        assertNotClosed();
+
         return newStream(new IntIteratorEx() {
             @Override
             public boolean hasNext() {
@@ -264,6 +274,8 @@ class IteratorCharStream extends AbstractCharStream {
 
     @Override
     public <U> Stream<U> mapToObj(final CharFunction<? extends U> mapper) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<U>() {
             @Override
             public boolean hasNext() {
@@ -291,6 +303,8 @@ class IteratorCharStream extends AbstractCharStream {
 
     @Override
     public CharStream flatMap(final CharFunction<? extends CharStream> mapper) {
+        assertNotClosed();
+
         final CharIteratorEx iter = new CharIteratorEx() {
             private CharIterator cur = null;
             private CharStream s = null;
@@ -357,6 +371,8 @@ class IteratorCharStream extends AbstractCharStream {
 
     @Override
     public IntStream flatMapToInt(final CharFunction<? extends IntStream> mapper) {
+        assertNotClosed();
+
         final IntIteratorEx iter = new IntIteratorEx() {
             private IntIterator cur = null;
             private IntStream s = null;
@@ -423,6 +439,8 @@ class IteratorCharStream extends AbstractCharStream {
 
     @Override
     public <T> Stream<T> flatMapToObj(final CharFunction<? extends Stream<T>> mapper) {
+        assertNotClosed();
+
         final ObjIteratorEx<T> iter = new ObjIteratorEx<T>() {
             private Iterator<? extends T> cur = null;
             private Stream<? extends T> s = null;
@@ -489,6 +507,8 @@ class IteratorCharStream extends AbstractCharStream {
 
     @Override
     public Stream<CharList> splitToList(final int chunkSize) {
+        assertNotClosed();
+
         checkArgPositive(chunkSize, "chunkSize");
 
         return newStream(new ObjIteratorEx<CharList>() {
@@ -527,6 +547,8 @@ class IteratorCharStream extends AbstractCharStream {
 
     @Override
     public Stream<CharList> splitToList(final CharPredicate predicate) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<CharList>() {
             private char next;
             private boolean hasNext = false;
@@ -571,6 +593,8 @@ class IteratorCharStream extends AbstractCharStream {
 
     @Override
     public Stream<CharStream> splitAt(final int where) {
+        assertNotClosed();
+
         checkArgNotNegative(where, "where");
 
         return newStream(new ObjIteratorEx<CharStream>() {
@@ -635,6 +659,8 @@ class IteratorCharStream extends AbstractCharStream {
 
     @Override
     public Stream<CharList> slidingToList(final int windowSize, final int increment) {
+        assertNotClosed();
+
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
 
         return newStream(new ObjIteratorEx<CharList>() {
@@ -748,6 +774,8 @@ class IteratorCharStream extends AbstractCharStream {
 
     @Override
     public CharStream peek(final CharConsumer action) {
+        assertNotClosed();
+
         return newStream(new CharIteratorEx() {
             @Override
             public boolean hasNext() {
@@ -766,6 +794,8 @@ class IteratorCharStream extends AbstractCharStream {
 
     @Override
     public CharStream limit(final long maxSize) {
+        assertNotClosed();
+
         checkArgNotNegative(maxSize, "maxSize");
 
         return newStream(new CharIteratorEx() {
@@ -795,6 +825,8 @@ class IteratorCharStream extends AbstractCharStream {
 
     @Override
     public CharStream skip(final long n) {
+        assertNotClosed();
+
         checkArgNotNegative(n, "n");
 
         return newStream(new CharIteratorEx() {
@@ -889,11 +921,15 @@ class IteratorCharStream extends AbstractCharStream {
 
     @Override
     public List<Character> toList() {
+        assertNotClosed();
+
         return toCollection(Suppliers.<Character> ofList());
     }
 
     @Override
     public Set<Character> toSet() {
+        assertNotClosed();
+
         return toCollection(Suppliers.<Character> ofSet());
     }
 
@@ -916,6 +952,8 @@ class IteratorCharStream extends AbstractCharStream {
 
     @Override
     public Multiset<Character> toMultiset() {
+        assertNotClosed();
+
         return toMultiset(Suppliers.<Character> ofMultiset());
     }
 
@@ -938,6 +976,8 @@ class IteratorCharStream extends AbstractCharStream {
 
     @Override
     public LongMultiset<Character> toLongMultiset() {
+        assertNotClosed();
+
         return toLongMultiset(Suppliers.<Character> ofLongMultiset());
     }
 
@@ -1139,8 +1179,9 @@ class IteratorCharStream extends AbstractCharStream {
 
     @Override
     public OptionalChar kthLargest(int k) {
-        checkArgPositive(k, "k");
         assertNotClosed();
+
+        checkArgPositive(k, "k");
 
         try {
             if (elements.hasNext() == false) {
@@ -1323,6 +1364,8 @@ class IteratorCharStream extends AbstractCharStream {
 
     @Override
     public IntStream asIntStream() {
+        assertNotClosed();
+
         return newStream(new IntIteratorEx() {
             @Override
             public boolean hasNext() {
@@ -1348,16 +1391,22 @@ class IteratorCharStream extends AbstractCharStream {
 
     @Override
     public Stream<Character> boxed() {
+        assertNotClosed();
+
         return new IteratorStream<>(iteratorEx(), sorted, sorted ? CHAR_COMPARATOR : null, closeHandlers);
     }
 
     @Override
     CharIteratorEx iteratorEx() {
+        assertNotClosed();
+
         return elements;
     }
 
     @Override
     public CharStream appendIfEmpty(final Supplier<? extends CharStream> supplier) {
+        assertNotClosed();
+
         final Holder<CharStream> holder = new Holder<>();
 
         return newStream(new CharIteratorEx() {
@@ -1415,6 +1464,8 @@ class IteratorCharStream extends AbstractCharStream {
 
     @Override
     public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super CharStream, R, E> func) throws E {
+        assertNotClosed();
+
         try {
             if (elements.hasNext()) {
                 return Optional.of(func.apply(this));
@@ -1428,6 +1479,8 @@ class IteratorCharStream extends AbstractCharStream {
 
     @Override
     public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super CharStream, E> action) throws E {
+        assertNotClosed();
+
         try {
             if (elements.hasNext()) {
                 action.accept(this);
@@ -1443,11 +1496,15 @@ class IteratorCharStream extends AbstractCharStream {
 
     @Override
     protected CharStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor) {
+        assertNotClosed();
+
         return new ParallelIteratorCharStream(elements, sorted, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public CharStream onClose(Runnable closeHandler) {
+        assertNotClosed();
+
         final Deque<Runnable> newCloseHandlers = new LocalArrayDeque<>(N.isNullOrEmpty(this.closeHandlers) ? 1 : this.closeHandlers.size() + 1);
 
         newCloseHandlers.add(wrapCloseHandlers(closeHandler));

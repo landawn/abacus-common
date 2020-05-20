@@ -256,10 +256,10 @@ final class LittleEndianByteArray {
               Unsafe.getLong() at all, but the performance benefit on x86_64 is too great to ignore, so as
               a compromise, we enable the optimization only on platforms that we specifically know to
               work.
-
+            
               In the future, the use of Unsafe.getLong() should be replaced by ByteBuffer.getLong(), which
               will have an efficient native implementation in JDK 9.
-
+            
             */
             final String arch = System.getProperty("os.arch");
             if ("amd64".equals(arch)) {

@@ -118,6 +118,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public Stream<T> filter(final Predicate<? super T> predicate) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<T>() {
             private boolean hasNext = false;
             private T next = null;
@@ -153,6 +155,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public Stream<T> takeWhile(final Predicate<? super T> predicate) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<T>() {
             private boolean hasMore = true;
             private boolean hasNext = false;
@@ -189,6 +193,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public Stream<T> dropWhile(final Predicate<? super T> predicate) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<T>() {
             private boolean hasNext = false;
             private T next = null;
@@ -233,6 +239,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <R> Stream<R> map(final Function<? super T, ? extends R> mapper) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<R>() {
             @Override
             public boolean hasNext() {
@@ -364,6 +372,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <R> Stream<R> slidingMap(final BiFunction<? super T, ? super T, R> mapper, final int increment, final boolean ignoreNotPaired) {
+        assertNotClosed();
+
         final int windowSize = 2;
 
         checkArgPositive(increment, "increment");
@@ -416,6 +426,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <R> Stream<R> slidingMap(final TriFunction<? super T, ? super T, ? super T, R> mapper, final int increment, final boolean ignoreNotPaired) {
+        assertNotClosed();
+
         final int windowSize = 3;
 
         checkArgPositive(increment, "increment");
@@ -484,6 +496,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public Stream<T> mapFirst(final Function<? super T, ? extends T> mapperForFirst) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<T>() {
             private boolean isFirst = true;
 
@@ -545,6 +559,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <R> Stream<R> mapFirstOrElse(final Function<? super T, ? extends R> mapperForFirst, final Function<? super T, ? extends R> mapperForElse) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<R>() {
             private boolean isFirst = true;
 
@@ -585,6 +601,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public Stream<T> mapLast(final Function<? super T, ? extends T> mapperForLast) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<T>() {
             @Override
             public boolean hasNext() {
@@ -618,6 +636,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <R> Stream<R> mapLastOrElse(final Function<? super T, ? extends R> mapperForLast, final Function<? super T, ? extends R> mapperForElse) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<R>() {
             @Override
             public boolean hasNext() {
@@ -651,6 +671,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public CharStream mapToChar(final ToCharFunction<? super T> mapper) {
+        assertNotClosed();
+
         return newStream(new CharIteratorEx() {
             @Override
             public boolean hasNext() {
@@ -678,6 +700,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public ByteStream mapToByte(final ToByteFunction<? super T> mapper) {
+        assertNotClosed();
+
         return newStream(new ByteIteratorEx() {
             @Override
             public boolean hasNext() {
@@ -705,6 +729,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public ShortStream mapToShort(final ToShortFunction<? super T> mapper) {
+        assertNotClosed();
+
         return newStream(new ShortIteratorEx() {
             @Override
             public boolean hasNext() {
@@ -732,6 +758,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public IntStream mapToInt(final ToIntFunction<? super T> mapper) {
+        assertNotClosed();
+
         return newStream(new IntIteratorEx() {
             @Override
             public boolean hasNext() {
@@ -759,6 +787,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public LongStream mapToLong(final ToLongFunction<? super T> mapper) {
+        assertNotClosed();
+
         return newStream(new LongIteratorEx() {
             @Override
             public boolean hasNext() {
@@ -786,6 +816,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public FloatStream mapToFloat(final ToFloatFunction<? super T> mapper) {
+        assertNotClosed();
+
         return newStream(new FloatIteratorEx() {
             @Override
             public boolean hasNext() {
@@ -813,6 +845,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public DoubleStream mapToDouble(final ToDoubleFunction<? super T> mapper) {
+        assertNotClosed();
+
         return newStream(new DoubleIteratorEx() {
             @Override
             public boolean hasNext() {
@@ -840,6 +874,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <R> Stream<R> flatMap(final Function<? super T, ? extends Stream<? extends R>> mapper) {
+        assertNotClosed();
+
         final ObjIteratorEx<R> iter = new ObjIteratorEx<R>() {
             private Iterator<? extends R> cur = null;
             private Stream<? extends R> s = null;
@@ -906,6 +942,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <R> Stream<R> flattMap(final Function<? super T, ? extends Collection<? extends R>> mapper) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<R>() {
             private Iterator<? extends R> cur = null;
             private Collection<? extends R> c = null;
@@ -933,6 +971,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public CharStream flatMapToChar(final Function<? super T, ? extends CharStream> mapper) {
+        assertNotClosed();
+
         final CharIteratorEx iter = new CharIteratorEx() {
             private CharIterator cur = null;
             private CharStream s = null;
@@ -999,6 +1039,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public ByteStream flatMapToByte(final Function<? super T, ? extends ByteStream> mapper) {
+        assertNotClosed();
+
         final ByteIteratorEx iter = new ByteIteratorEx() {
             private ByteIterator cur = null;
             private ByteStream s = null;
@@ -1065,6 +1107,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public ShortStream flatMapToShort(final Function<? super T, ? extends ShortStream> mapper) {
+        assertNotClosed();
+
         final ShortIteratorEx iter = new ShortIteratorEx() {
             private ShortIterator cur = null;
             private ShortStream s = null;
@@ -1131,6 +1175,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public IntStream flatMapToInt(final Function<? super T, ? extends IntStream> mapper) {
+        assertNotClosed();
+
         final IntIteratorEx iter = new IntIteratorEx() {
             private IntIterator cur = null;
             private IntStream s = null;
@@ -1197,6 +1243,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public LongStream flatMapToLong(final Function<? super T, ? extends LongStream> mapper) {
+        assertNotClosed();
+
         final LongIteratorEx iter = new LongIteratorEx() {
             private LongIterator cur = null;
             private LongStream s = null;
@@ -1263,6 +1311,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public FloatStream flatMapToFloat(final Function<? super T, ? extends FloatStream> mapper) {
+        assertNotClosed();
+
         final FloatIteratorEx iter = new FloatIteratorEx() {
             private FloatIterator cur = null;
             private FloatStream s = null;
@@ -1329,6 +1379,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public DoubleStream flatMapToDouble(final Function<? super T, ? extends DoubleStream> mapper) {
+        assertNotClosed();
+
         final DoubleIteratorEx iter = new DoubleIteratorEx() {
             private DoubleIterator cur = null;
             private DoubleStream s = null;
@@ -1395,8 +1447,10 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <C extends Collection<T>> Stream<C> split(final int chunkSize, final IntFunction<? extends C> collectionSupplier) {
+        assertNotClosed();
+
         checkArgPositive(chunkSize, "chunkSize");
-        
+
         return newStream(new ObjIteratorEx<C>() {
             @Override
             public boolean hasNext() {
@@ -1435,8 +1489,10 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <A, R> Stream<R> split(final int chunkSize, final Collector<? super T, A, R> collector) {
+        assertNotClosed();
+
         checkArgPositive(chunkSize, "chunkSize");
-        
+
         final Supplier<A> supplier = collector.supplier();
         final BiConsumer<A, ? super T> accumulator = collector.accumulator();
         final Function<A, R> finisher = collector.finisher();
@@ -1479,6 +1535,7 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <C extends Collection<T>> Stream<C> split(final Predicate<? super T> predicate, final Supplier<? extends C> collectionSupplier) {
+        assertNotClosed();
 
         return newStream(new ObjIteratorEx<C>() {
             private T next = (T) NONE;
@@ -1525,6 +1582,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <A, R> Stream<R> split(final Predicate<? super T> predicate, final Collector<? super T, A, R> collector) {
+        assertNotClosed();
+
         final Supplier<A> supplier = collector.supplier();
         final BiConsumer<A, ? super T> accumulator = collector.accumulator();
         final Function<A, R> finisher = collector.finisher();
@@ -1574,6 +1633,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public Stream<Stream<T>> splitAt(final int where) {
+        assertNotClosed();
+
         checkArgNotNegative(where, "where");
 
         return newStream(new ObjIteratorEx<Stream<T>>() {
@@ -1638,6 +1699,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <A, R> Stream<R> splitAt(final int where, final Collector<? super T, A, R> collector) {
+        assertNotClosed();
+
         checkArgNotNegative(where, "where");
 
         final Supplier<A> supplier = collector.supplier();
@@ -1705,6 +1768,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public Stream<List<T>> slidingToList(final int windowSize, final int increment) {
+        assertNotClosed();
+
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
 
         return newStream(new ObjIteratorEx<List<T>>() {
@@ -1810,6 +1875,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <C extends Collection<T>> Stream<C> sliding(final int windowSize, final int increment, final IntFunction<? extends C> collectionSupplier) {
+        assertNotClosed();
+
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
         checkArgNotNull(collectionSupplier, "collectionSupplier");
 
@@ -1937,8 +2004,10 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <A, R> Stream<R> sliding(final int windowSize, final int increment, final Collector<? super T, A, R> collector) {
+        assertNotClosed();
+
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
-        
+
         final Supplier<A> supplier = collector.supplier();
         final BiConsumer<A, ? super T> accumulator = collector.accumulator();
         final Function<A, R> finisher = collector.finisher();
@@ -2067,6 +2136,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public Stream<T> top(final int n, final Comparator<? super T> comparator) {
+        assertNotClosed();
+
         checkArgPositive(n, "n");
 
         return newStream(new ObjIteratorEx<T>() {
@@ -2171,6 +2242,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public Stream<T> peek(final Consumer<? super T> action) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<T>() {
             @Override
             public boolean hasNext() {
@@ -2188,6 +2261,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public Stream<T> limit(final long maxSize) {
+        assertNotClosed();
+
         checkArgNotNegative(maxSize, "maxSize");
 
         return newStream(new ObjIteratorEx<T>() {
@@ -2217,6 +2292,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public Stream<T> skip(final long n) {
+        assertNotClosed();
+
         checkArgNotNegative(n, "n");
 
         return newStream(new ObjIteratorEx<T>() {
@@ -2349,9 +2426,10 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <E extends Exception> void forEachPair(final Throwables.BiConsumer<? super T, ? super T, E> action, final int increment) throws E {
+        assertNotClosed();
+
         final int windowSize = 2;
         checkArgPositive(increment, "increment");
-        assertNotClosed();
 
         try {
             boolean isFirst = true;
@@ -2385,9 +2463,10 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <E extends Exception> void forEachTriple(final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action, final int increment) throws E {
+        assertNotClosed();
+
         final int windowSize = 3;
         checkArgPositive(increment, "increment");
-        assertNotClosed();
 
         try {
             boolean isFirst = true;
@@ -2427,6 +2506,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public Object[] toArray() {
+        assertNotClosed();
+
         return toArray(N.EMPTY_OBJECT_ARRAY);
     }
 
@@ -2896,6 +2977,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public Stream<T> last(final int n) {
+        assertNotClosed();
+
         checkArgNotNegative(n, "n");
 
         if (n == 0) {
@@ -2950,6 +3033,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public Stream<T> skipLast(final int n) {
+        assertNotClosed();
+
         if (n <= 0) {
             return newStream(elements, sorted, cmp);
         }
@@ -3049,8 +3134,9 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public Optional<T> kthLargest(int k, Comparator<? super T> comparator) {
-        checkArgPositive(k, "k");
         assertNotClosed();
+
+        checkArgPositive(k, "k");
 
         try {
             if (elements.hasNext() == false) {
@@ -3156,11 +3242,11 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <E extends Exception> boolean nMatch(final long atLeast, final long atMost, Throwables.Predicate<? super T, E> predicate) throws E {
+        assertNotClosed();
+
         checkArgNotNegative(atLeast, "atLeast");
         checkArgNotNegative(atMost, "atMost");
         checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
-
-        assertNotClosed();
 
         long cnt = 0;
 
@@ -3228,6 +3314,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public Stream<T> appendIfEmpty(final Collection<? extends T> c) {
+        assertNotClosed();
+
         if (N.isNullOrEmpty(c)) {
             return newStream(elements, sorted, cmp);
         }
@@ -3291,6 +3379,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public Stream<T> appendIfEmpty(final Supplier<? extends Stream<T>> supplier) {
+        assertNotClosed();
+
         final Holder<Stream<T>> holder = new Holder<>();
 
         return newStream(new ObjIteratorEx<T>() {
@@ -3348,6 +3438,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super Stream<T>, R, E> func) throws E {
+        assertNotClosed();
+
         try {
             if (elements.hasNext()) {
                 return Optional.of(func.apply(this));
@@ -3361,6 +3453,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super Stream<T>, E> action) throws E {
+        assertNotClosed();
+
         try {
             if (elements.hasNext()) {
                 action.accept(this);
@@ -3383,6 +3477,8 @@ class IteratorStream<T> extends AbstractStream<T> {
      */
     @Override
     public Stream<T> queued(int queueSize) {
+        assertNotClosed();
+
         final Iterator<T> iter = iteratorEx();
 
         if (iter instanceof QueuedIterator && ((QueuedIterator<? extends T>) iter).max() >= queueSize) {
@@ -3394,16 +3490,22 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     ObjIteratorEx<T> iteratorEx() {
+        assertNotClosed();
+
         return elements;
     }
 
     @Override
     protected Stream<T> parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor) {
+        assertNotClosed();
+
         return new ParallelIteratorStream<>(elements, sorted, cmp, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public java.util.stream.Stream<T> toJdkStream() {
+        assertNotClosed();
+
         final Spliterator<T> spliterator = Spliterators.spliteratorUnknownSize(elements, Spliterator.ORDERED);
 
         if (N.isNullOrEmpty(closeHandlers)) {
@@ -3416,6 +3518,8 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public Stream<T> onClose(Runnable closeHandler) {
+        assertNotClosed();
+
         final Deque<Runnable> newCloseHandlers = new LocalArrayDeque<>(N.isNullOrEmpty(this.closeHandlers) ? 1 : this.closeHandlers.size() + 1);
 
         newCloseHandlers.add(wrapCloseHandlers(closeHandler));

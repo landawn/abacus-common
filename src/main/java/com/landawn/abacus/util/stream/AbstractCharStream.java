@@ -69,6 +69,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream distinct() {
+        assertNotClosed();
+
         final Set<Object> set = N.newHashSet();
 
         return newStream(this.sequential().filter(new CharPredicate() {
@@ -81,6 +83,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream flattMap(final CharFunction<char[]> mapper) {
+        assertNotClosed();
+
         return flatMap(new CharFunction<CharStream>() {
             @Override
             public CharStream apply(char t) {
@@ -91,6 +95,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public <T> Stream<T> flattMapToObj(final CharFunction<? extends Collection<T>> mapper) {
+        assertNotClosed();
+
         return flatMapToObj(new CharFunction<Stream<T>>() {
             @Override
             public Stream<T> apply(char t) {
@@ -101,6 +107,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public <T> Stream<T> flatMappToObj(final CharFunction<T[]> mapper) {
+        assertNotClosed();
+
         return flatMapToObj(new CharFunction<Stream<T>>() {
             @Override
             public Stream<T> apply(char t) {
@@ -111,6 +119,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream rangeMap(final CharBiPredicate sameRange, final CharBinaryOperator mapper) {
+        assertNotClosed();
+
         final CharIteratorEx iter = iteratorEx();
 
         return newStream(new CharIteratorEx() {
@@ -144,6 +154,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public <T> Stream<T> rangeMapToObj(final CharBiPredicate sameRange, final CharBiFunction<T> mapper) {
+        assertNotClosed();
+
         final CharIteratorEx iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<T>() {
@@ -177,6 +189,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public Stream<CharList> collapse(final CharBiPredicate collapsible) {
+        assertNotClosed();
+
         final CharIteratorEx iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<CharList>() {
@@ -208,6 +222,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream collapse(final CharBiPredicate collapsible, final CharBinaryOperator mergeFunction) {
+        assertNotClosed();
+
         final CharIteratorEx iter = iteratorEx();
 
         return newStream(new CharIteratorEx() {
@@ -238,6 +254,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream skip(final long n, final CharConsumer action) {
+        assertNotClosed();
+
         final CharPredicate filter = isParallel() ? new CharPredicate() {
             final AtomicLong cnt = new AtomicLong(n);
 
@@ -259,6 +277,7 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream removeIf(final CharPredicate predicate) {
+        assertNotClosed();
 
         return filter(new CharPredicate() {
             @Override
@@ -270,6 +289,7 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream removeIf(final CharPredicate predicate, final CharConsumer actionOnDroppedItem) {
+        assertNotClosed();
 
         return filter(new CharPredicate() {
             @Override
@@ -286,6 +306,7 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream filter(final CharPredicate predicate, final CharConsumer actionOnDroppedItem) {
+        assertNotClosed();
 
         return filter(new CharPredicate() {
             @Override
@@ -302,6 +323,7 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream dropWhile(final CharPredicate predicate, final CharConsumer actionOnDroppedItem) {
+        assertNotClosed();
 
         return dropWhile(new CharPredicate() {
             @Override
@@ -318,6 +340,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream step(final long step) {
+        assertNotClosed();
+
         checkArgPositive(step, "step");
 
         final long skip = step - 1;
@@ -342,6 +366,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public Stream<CharStream> split(final int chunkSize) {
+        assertNotClosed();
+
         return splitToList(chunkSize).map(new Function<CharList, CharStream>() {
             @Override
             public CharStream apply(CharList t) {
@@ -352,6 +378,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public Stream<CharStream> split(final CharPredicate predicate) {
+        assertNotClosed();
+
         return splitToList(predicate).map(new Function<CharList, CharStream>() {
             @Override
             public CharStream apply(CharList t) {
@@ -362,6 +390,7 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public Stream<CharStream> splitBy(final CharPredicate where) {
+        assertNotClosed();
 
         final CharIteratorEx iter = iteratorEx();
 
@@ -470,6 +499,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public Stream<CharStream> sliding(final int windowSize, final int increment) {
+        assertNotClosed();
+
         return slidingToList(windowSize, increment).map(new Function<CharList, CharStream>() {
             @Override
             public CharStream apply(CharList t) {
@@ -480,6 +511,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream scan(final CharBinaryOperator accumulator) {
+        assertNotClosed();
+
         final CharIteratorEx iter = iteratorEx();
 
         return newStream(new CharIteratorEx() {
@@ -505,6 +538,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream scan(final char init, final CharBinaryOperator accumulator) {
+        assertNotClosed();
+
         final CharIteratorEx iter = iteratorEx();
 
         return newStream(new CharIteratorEx() {
@@ -524,6 +559,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream scan(final char init, final CharBinaryOperator accumulator, final boolean initIncluded) {
+        assertNotClosed();
+
         if (initIncluded == false) {
             return scan(init, accumulator);
         }
@@ -553,6 +590,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream intersection(final Collection<?> c) {
+        assertNotClosed();
+
         final Multiset<?> multiset = Multiset.from(c);
 
         return newStream(this.sequential().filter(new CharPredicate() {
@@ -565,6 +604,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream difference(final Collection<?> c) {
+        assertNotClosed();
+
         final Multiset<?> multiset = Multiset.from(c);
 
         return newStream(this.sequential().filter(new CharPredicate() {
@@ -577,6 +618,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream symmetricDifference(final Collection<Character> c) {
+        assertNotClosed();
+
         final Multiset<?> multiset = Multiset.from(c);
 
         return newStream(this.sequential().filter(new CharPredicate() {
@@ -594,6 +637,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream reversed() {
+        assertNotClosed();
+
         return newStream(new CharIteratorEx() {
             private boolean initialized = false;
 
@@ -676,6 +721,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream rotated(final int distance) {
+        assertNotClosed();
+
         return newStream(new CharIteratorEx() {
             private boolean initialized = false;
 
@@ -766,6 +813,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream shuffled(final Random rnd) {
+        assertNotClosed();
+
         checkArgNotNull(rnd, "random");
 
         return lazyLoad(new Function<char[], char[]>() {
@@ -779,6 +828,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream sorted() {
+        assertNotClosed();
+
         if (sorted) {
             return newStream(iteratorEx(), sorted);
         }
@@ -799,6 +850,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream reverseSorted() {
+        assertNotClosed();
+
         return newStream(new CharIteratorEx() {
             private boolean initialized = false;
             private char[] aar;
@@ -950,6 +1003,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public Stream<IndexedChar> indexed() {
+        assertNotClosed();
+
         final MutableLong idx = MutableLong.of(0);
 
         return newStream(this.sequential().mapToObj(new CharFunction<IndexedChar>() {
@@ -963,53 +1018,73 @@ abstract class AbstractCharStream extends CharStream {
     @Override
     @SafeVarargs
     public final CharStream prepend(final char... a) {
+        assertNotClosed();
+
         return prepend(CharStream.of(a));
     }
 
     @Override
     public CharStream prepend(CharStream stream) {
+        assertNotClosed();
+
         return CharStream.concat(stream, this);
     }
 
     @Override
     @SafeVarargs
     public final CharStream append(final char... a) {
+        assertNotClosed();
+
         return append(CharStream.of(a));
     }
 
     @Override
     public CharStream append(CharStream stream) {
+        assertNotClosed();
+
         return CharStream.concat(this, stream);
     }
 
     @Override
     @SafeVarargs
     public final CharStream appendIfEmpty(final char... a) {
+        assertNotClosed();
+
         return appendIfEmpty(() -> CharStream.of(a));
     }
 
     @Override
     public CharStream merge(CharStream b, CharBiFunction<MergeResult> nextSelector) {
+        assertNotClosed();
+
         return CharStream.merge(this, b, nextSelector);
     }
 
     @Override
     public CharStream zipWith(CharStream b, CharBinaryOperator zipFunction) {
+        assertNotClosed();
+
         return CharStream.zip(this, b, zipFunction);
     }
 
     @Override
     public CharStream zipWith(CharStream b, CharStream c, CharTernaryOperator zipFunction) {
+        assertNotClosed();
+
         return CharStream.zip(this, b, c, zipFunction);
     }
 
     @Override
     public CharStream zipWith(CharStream b, char valueForNoneA, char valueForNoneB, CharBinaryOperator zipFunction) {
+        assertNotClosed();
+
         return CharStream.zip(this, b, valueForNoneA, valueForNoneB, zipFunction);
     }
 
     @Override
     public CharStream zipWith(CharStream b, CharStream c, char valueForNoneA, char valueForNoneB, char valueForNoneC, CharTernaryOperator zipFunction) {
+        assertNotClosed();
+
         return CharStream.zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     }
 
@@ -1020,26 +1095,36 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public <K, V> Map<K, V> toMap(CharFunction<? extends K> keyMapper, CharFunction<? extends V> valueMapper) {
+        assertNotClosed();
+
         return toMap(keyMapper, valueMapper, Suppliers.<K, V> ofMap());
     }
 
     @Override
     public <K, V, M extends Map<K, V>> M toMap(CharFunction<? extends K> keyMapper, CharFunction<? extends V> valueMapper, Supplier<? extends M> mapFactory) {
+        assertNotClosed();
+
         return toMap(keyMapper, valueMapper, Fn.<V> throwingMerger(), mapFactory);
     }
 
     @Override
     public <K, V> Map<K, V> toMap(CharFunction<? extends K> keyMapper, CharFunction<? extends V> valueMapper, BinaryOperator<V> mergeFunction) {
+        assertNotClosed();
+
         return toMap(keyMapper, valueMapper, mergeFunction, Suppliers.<K, V> ofMap());
     }
 
     @Override
     public <K, A, D> Map<K, D> toMap(CharFunction<? extends K> keyMapper, Collector<Character, A, D> downstream) {
+        assertNotClosed();
+
         return toMap(keyMapper, downstream, Suppliers.<K, D> ofMap());
     }
 
-    @Override 
+    @Override
     public <E extends Exception> void forEachIndexed(Throwables.IndexedCharConsumer<E> action) throws E {
+        assertNotClosed();
+
         if (isParallel()) {
             final AtomicInteger idx = new AtomicInteger(0);
 
@@ -1118,6 +1203,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public <E extends Exception> OptionalChar findAny(final Throwables.CharPredicate<E> predicate) throws E {
+        assertNotClosed();
+
         return findFirst(predicate);
     }
 
@@ -1205,6 +1292,8 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public <R> R collect(Supplier<R> supplier, ObjCharConsumer<? super R> accumulator) {
+        assertNotClosed();
+
         final BiConsumer<R, R> combiner = collectingCombiner;
 
         return collect(supplier, accumulator, combiner);

@@ -88,6 +88,8 @@ public abstract class ShortStream
     @IntermediateOp
     @Beta
     public ShortStream skipUntil(final ShortPredicate predicate) {
+        assertNotClosed();
+
         return dropWhile(new ShortPredicate() {
             @Override
             public boolean test(final short t) {
@@ -423,6 +425,8 @@ public abstract class ShortStream
     @SequentialOnly
     @Override
     public ShortIterator iterator() {
+        assertNotClosed();
+
         if (isEmptyCloseHandlers(closeHandlers) == false) {
             if (logger.isWarnEnabled()) {
                 logger.warn("### Remember to close " + ClassUtil.getSimpleClassName(getClass()));
@@ -440,6 +444,8 @@ public abstract class ShortStream
     @SuppressWarnings("rawtypes")
     @Override
     public <SS extends BaseStream> SS __(Function<? super ShortStream, SS> transfer) {
+        assertNotClosed();
+
         return transfer.apply(this);
     }
 

@@ -183,6 +183,8 @@ public abstract class Stream<T>
     @IntermediateOp
     @Beta
     public Stream<T> skipUntil(final Predicate<? super T> predicate) {
+        assertNotClosed();
+
         return dropWhile(Fn.not(predicate));
     }
 
@@ -3145,6 +3147,8 @@ public abstract class Stream<T>
     @SequentialOnly
     @Override
     public ObjIterator<T> iterator() {
+        assertNotClosed();
+
         if (isEmptyCloseHandlers(closeHandlers) == false) {
             if (logger.isWarnEnabled()) {
                 logger.warn("### Remember to close " + ClassUtil.getSimpleClassName(getClass()));
@@ -3234,6 +3238,8 @@ public abstract class Stream<T>
     @SuppressWarnings("rawtypes")
     @Override
     public <SS extends BaseStream> SS __(Function<? super Stream<T>, SS> transfer) {
+        assertNotClosed();
+
         return transfer.apply(this);
     }
 

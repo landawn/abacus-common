@@ -95,6 +95,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     @IntermediateOp
     @Beta
     public IntStream skipUntil(final IntPredicate predicate) {
+        assertNotClosed();
+
         return dropWhile(new IntPredicate() {
             @Override
             public boolean test(final int t) {
@@ -470,6 +472,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     @SequentialOnly
     @Override
     public IntIterator iterator() {
+        assertNotClosed();
+
         if (isEmptyCloseHandlers(closeHandlers) == false) {
             if (logger.isWarnEnabled()) {
                 logger.warn("### Remember to close " + ClassUtil.getSimpleClassName(getClass()));
@@ -487,6 +491,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     @SuppressWarnings("rawtypes")
     @Override
     public <SS extends BaseStream> SS __(Function<? super IntStream, SS> transfer) {
+        assertNotClosed();
+
         return transfer.apply(this);
     }
 

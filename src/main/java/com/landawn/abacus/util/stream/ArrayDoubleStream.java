@@ -97,6 +97,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public DoubleStream filter(final DoublePredicate predicate) {
+        assertNotClosed();
+
         return newStream(new DoubleIteratorEx() {
             private boolean hasNext = false;
             private int cursor = fromIndex;
@@ -130,6 +132,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public DoubleStream takeWhile(final DoublePredicate predicate) {
+        assertNotClosed();
+
         return newStream(new DoubleIteratorEx() {
             private boolean hasMore = true;
             private boolean hasNext = false;
@@ -163,6 +167,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public DoubleStream dropWhile(final DoublePredicate predicate) {
+        assertNotClosed();
+
         return newStream(new DoubleIteratorEx() {
             private boolean hasNext = false;
             private int cursor = fromIndex;
@@ -203,6 +209,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public DoubleStream step(final long step) {
+        assertNotClosed();
+
         checkArgPositive(step, "step");
 
         if (step == 1 || fromIndex == toIndex) {
@@ -254,6 +262,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public DoubleStream map(final DoubleUnaryOperator mapper) {
+        assertNotClosed();
+
         return newStream(new DoubleIteratorEx() {
             private int cursor = fromIndex;
 
@@ -298,6 +308,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public IntStream mapToInt(final DoubleToIntFunction mapper) {
+        assertNotClosed();
+
         return newStream(new IntIteratorEx() {
             private int cursor = fromIndex;
 
@@ -342,6 +354,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public LongStream mapToLong(final DoubleToLongFunction mapper) {
+        assertNotClosed();
+
         return newStream(new LongIteratorEx() {
             private int cursor = fromIndex;
 
@@ -386,6 +400,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public FloatStream mapToFloat(final DoubleToFloatFunction mapper) {
+        assertNotClosed();
+
         return newStream(new FloatIteratorEx() {
             private int cursor = fromIndex;
 
@@ -430,6 +446,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public <U> Stream<U> mapToObj(final DoubleFunction<? extends U> mapper) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<U>() {
             private int cursor = fromIndex;
 
@@ -474,6 +492,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public DoubleStream flatMap(final DoubleFunction<? extends DoubleStream> mapper) {
+        assertNotClosed();
+
         final DoubleIteratorEx iter = new DoubleIteratorEx() {
             private int cursor = fromIndex;
             private DoubleIterator cur = null;
@@ -541,6 +561,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public IntStream flatMapToInt(final DoubleFunction<? extends IntStream> mapper) {
+        assertNotClosed();
+
         final IntIteratorEx iter = new IntIteratorEx() {
             private int cursor = fromIndex;
             private IntIterator cur = null;
@@ -608,6 +630,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public LongStream flatMapToLong(final DoubleFunction<? extends LongStream> mapper) {
+        assertNotClosed();
+
         final LongIteratorEx iter = new LongIteratorEx() {
             private int cursor = fromIndex;
             private LongIterator cur = null;
@@ -675,6 +699,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public FloatStream flatMapToFloat(final DoubleFunction<? extends FloatStream> mapper) {
+        assertNotClosed();
+
         final FloatIteratorEx iter = new FloatIteratorEx() {
             private int cursor = fromIndex;
             private FloatIterator cur = null;
@@ -742,6 +768,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public <T> Stream<T> flatMapToObj(final DoubleFunction<? extends Stream<T>> mapper) {
+        assertNotClosed();
+
         final ObjIteratorEx<T> iter = new ObjIteratorEx<T>() {
             private int cursor = fromIndex;
             private Iterator<T> cur = null;
@@ -809,6 +837,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public Stream<DoubleStream> split(final int chunkSize) {
+        assertNotClosed();
+
         checkArgPositive(chunkSize, "chunkSize");
 
         return newStream(new ObjIteratorEx<DoubleStream>() {
@@ -844,6 +874,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public Stream<DoubleList> splitToList(final int chunkSize) {
+        assertNotClosed();
+
         checkArgPositive(chunkSize, "chunkSize");
 
         return newStream(new ObjIteratorEx<DoubleList>() {
@@ -879,6 +911,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public Stream<DoubleStream> split(final DoublePredicate predicate) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<DoubleStream>() {
             private int cursor = fromIndex;
             private boolean preCondition = false;
@@ -914,6 +948,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public Stream<DoubleList> splitToList(final DoublePredicate predicate) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<DoubleList>() {
             private int cursor = fromIndex;
             private boolean preCondition = false;
@@ -950,6 +986,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public Stream<DoubleStream> splitAt(final int where) {
+        assertNotClosed();
+
         checkArgNotNegative(where, "where");
 
         final DoubleStream[] a = new DoubleStream[2];
@@ -962,6 +1000,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public Stream<DoubleStream> sliding(final int windowSize, final int increment) {
+        assertNotClosed();
+
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
 
         return newStream(new ObjIteratorEx<DoubleStream>() {
@@ -1011,6 +1051,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public Stream<DoubleList> slidingToList(final int windowSize, final int increment) {
+        assertNotClosed();
+
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
 
         return newStream(new ObjIteratorEx<DoubleList>() {
@@ -1059,6 +1101,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public DoubleStream top(final int n, final Comparator<? super Double> comparator) {
+        assertNotClosed();
+
         checkArgPositive(n, "n");
 
         if (n >= toIndex - fromIndex) {
@@ -1143,6 +1187,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public DoubleStream peek(final DoubleConsumer action) {
+        assertNotClosed();
+
         return newStream(new DoubleIteratorEx() {
             private int cursor = fromIndex;
 
@@ -1179,6 +1225,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public DoubleStream limit(final long maxSize) {
+        assertNotClosed();
+
         checkArgNotNegative(maxSize, "maxSize");
 
         return newStream(elements, fromIndex, maxSize < toIndex - fromIndex ? (int) (fromIndex + maxSize) : toIndex, sorted);
@@ -1186,6 +1234,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public DoubleStream skip(long n) {
+        assertNotClosed();
+
         checkArgNotNegative(n, "n");
 
         if (n >= toIndex - fromIndex) {
@@ -1539,8 +1589,9 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public OptionalDouble kthLargest(int k) {
-        checkArgPositive(k, "k");
         assertNotClosed();
+
+        checkArgPositive(k, "k");
 
         try {
             if (k > toIndex - fromIndex) {
@@ -1566,105 +1617,105 @@ class ArrayDoubleStream extends AbstractDoubleStream {
         }
     }
 
-//    @Override
-//    public DoubleStream reversed() {
-//        return newStream(new DoubleIteratorEx() {
-//            private int cursor = toIndex;
-//
-//            @Override
-//            public boolean hasNext() {
-//                return cursor > fromIndex;
-//            }
-//
-//            @Override
-//            public double nextDouble() {
-//                if (cursor <= fromIndex) {
-//                    throw new NoSuchElementException();
-//                }
-//                return elements[--cursor];
-//            }
-//
-//            @Override
-//            public long count() {
-//                return cursor - fromIndex;
-//            }
-//
-//            @Override
-//            public void skip(long n) {
-//                cursor = n < cursor - fromIndex ? cursor - (int) n : fromIndex;
-//            }
-//
-//            @Override
-//            public double[] toArray() {
-//                final double[] a = new double[cursor - fromIndex];
-//
-//                for (int i = 0, len = cursor - fromIndex; i < len; i++) {
-//                    a[i] = elements[cursor - i - 1];
-//                }
-//
-//                return a;
-//            }
-//        }, false);
-//    }
-//
-//    @Override
-//    public DoubleStream rotated(final int distance) {
-//        if (distance == 0 || toIndex - fromIndex <= 1 || distance % (toIndex - fromIndex) == 0) {
-//            return newStream(elements, fromIndex, toIndex, sorted);
-//        }
-//
-//        return newStream(new DoubleIteratorEx() {
-//            private final int len = toIndex - fromIndex;
-//            private int start;
-//            private int cnt = 0;
-//
-//            {
-//
-//                start = distance % len;
-//
-//                if (start < 0) {
-//                    start += len;
-//                }
-//
-//                start = len - start;
-//            }
-//
-//            @Override
-//            public boolean hasNext() {
-//                return cnt < len;
-//            }
-//
-//            @Override
-//            public double nextDouble() {
-//                if (hasNext() == false) {
-//                    throw new NoSuchElementException();
-//                }
-//
-//                return elements[((start + cnt++) % len) + fromIndex];
-//            }
-//
-//            @Override
-//            public long count() {
-//                return len - cnt;
-//            }
-//
-//            @Override
-//            public void skip(long n) {
-//                cnt = n < len - cnt ? cnt + (int) n : len;
-//            }
-//
-//            @Override
-//            public double[] toArray() {
-//                final double[] a = new double[len - cnt];
-//
-//                for (int i = cnt; i < len; i++) {
-//                    a[i - cnt] = elements[((start + i) % len) + fromIndex];
-//                }
-//
-//                return a;
-//            }
-//        }, false);
-//    }
+    //    @Override
+    //    public DoubleStream reversed() {
+    //        return newStream(new DoubleIteratorEx() {
+    //            private int cursor = toIndex;
+    //
+    //            @Override
+    //            public boolean hasNext() {
+    //                return cursor > fromIndex;
+    //            }
+    //
+    //            @Override
+    //            public double nextDouble() {
+    //                if (cursor <= fromIndex) {
+    //                    throw new NoSuchElementException();
+    //                }
+    //                return elements[--cursor];
+    //            }
+    //
+    //            @Override
+    //            public long count() {
+    //                return cursor - fromIndex;
+    //            }
+    //
+    //            @Override
+    //            public void skip(long n) {
+    //                cursor = n < cursor - fromIndex ? cursor - (int) n : fromIndex;
+    //            }
+    //
+    //            @Override
+    //            public double[] toArray() {
+    //                final double[] a = new double[cursor - fromIndex];
+    //
+    //                for (int i = 0, len = cursor - fromIndex; i < len; i++) {
+    //                    a[i] = elements[cursor - i - 1];
+    //                }
+    //
+    //                return a;
+    //            }
+    //        }, false);
+    //    }
+    //
+    //    @Override
+    //    public DoubleStream rotated(final int distance) {
+    //        if (distance == 0 || toIndex - fromIndex <= 1 || distance % (toIndex - fromIndex) == 0) {
+    //            return newStream(elements, fromIndex, toIndex, sorted);
+    //        }
+    //
+    //        return newStream(new DoubleIteratorEx() {
+    //            private final int len = toIndex - fromIndex;
+    //            private int start;
+    //            private int cnt = 0;
+    //
+    //            {
+    //
+    //                start = distance % len;
+    //
+    //                if (start < 0) {
+    //                    start += len;
+    //                }
+    //
+    //                start = len - start;
+    //            }
+    //
+    //            @Override
+    //            public boolean hasNext() {
+    //                return cnt < len;
+    //            }
+    //
+    //            @Override
+    //            public double nextDouble() {
+    //                if (hasNext() == false) {
+    //                    throw new NoSuchElementException();
+    //                }
+    //
+    //                return elements[((start + cnt++) % len) + fromIndex];
+    //            }
+    //
+    //            @Override
+    //            public long count() {
+    //                return len - cnt;
+    //            }
+    //
+    //            @Override
+    //            public void skip(long n) {
+    //                cnt = n < len - cnt ? cnt + (int) n : len;
+    //            }
+    //
+    //            @Override
+    //            public double[] toArray() {
+    //                final double[] a = new double[len - cnt];
+    //
+    //                for (int i = cnt; i < len; i++) {
+    //                    a[i - cnt] = elements[((start + i) % len) + fromIndex];
+    //                }
+    //
+    //                return a;
+    //            }
+    //        }, false);
+    //    }
 
     @Override
     public DoubleSummaryStatistics summarize() {
@@ -1770,6 +1821,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public java.util.stream.DoubleStream toJdkStream() {
+        assertNotClosed();
+
         java.util.stream.DoubleStream s = java.util.stream.DoubleStream.of(elements);
 
         if (fromIndex > 0) {
@@ -1793,6 +1846,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public Stream<Double> boxed() {
+        assertNotClosed();
+
         return new IteratorStream<>(iteratorEx(), sorted, sorted ? DOUBLE_COMPARATOR : null, closeHandlers);
     }
 
@@ -1803,11 +1858,15 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     DoubleIteratorEx iteratorEx() {
+        assertNotClosed();
+
         return DoubleIteratorEx.of(elements, fromIndex, toIndex);
     }
 
     @Override
     public DoubleStream appendIfEmpty(final Supplier<? extends DoubleStream> supplier) {
+        assertNotClosed();
+
         if (fromIndex == toIndex) {
             final Holder<DoubleStream> holder = new Holder<>();
 
@@ -1865,6 +1924,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super DoubleStream, R, E> func) throws E {
+        assertNotClosed();
+
         try {
             if (fromIndex < toIndex) {
                 return Optional.of(func.apply(this));
@@ -1878,6 +1939,8 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super DoubleStream, E> action) throws E {
+        assertNotClosed();
+
         try {
             if (fromIndex < toIndex) {
                 action.accept(this);
@@ -1891,9 +1954,10 @@ class ArrayDoubleStream extends AbstractDoubleStream {
         return OrElse.FALSE;
     }
 
-
     @Override
     Tuple3<double[], Integer, Integer> array() {
+        assertNotClosed();
+
         close();
 
         return Tuple.of(elements, fromIndex, toIndex);
@@ -1901,11 +1965,15 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     @Override
     protected DoubleStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor) {
+        assertNotClosed();
+
         return new ParallelArrayDoubleStream(elements, fromIndex, toIndex, sorted, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public DoubleStream onClose(Runnable closeHandler) {
+        assertNotClosed();
+
         final Deque<Runnable> newCloseHandlers = new LocalArrayDeque<>(N.isNullOrEmpty(this.closeHandlers) ? 1 : this.closeHandlers.size() + 1);
 
         newCloseHandlers.add(wrapCloseHandlers(closeHandler));

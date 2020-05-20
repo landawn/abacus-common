@@ -132,8 +132,6 @@ public final class Primitives {
         return unwrapped == null ? cls : unwrapped;
     }
 
-    
-
     //    public static boolean unboxOrDefault(Boolean b) {
     //        if (b == null) {
     //            return false;
@@ -325,8 +323,6 @@ public final class Primitives {
     //
     //        return b.doubleValue();
     //    }
-    
-
 
     /**
      * Checks if is null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.

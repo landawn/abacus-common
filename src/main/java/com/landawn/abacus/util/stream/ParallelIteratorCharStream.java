@@ -860,6 +860,8 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
 
     @Override
     public Stream<Character> boxed() {
+        assertNotClosed();
+
         Stream<Character> tmp = boxed;
 
         if (tmp == null) {
@@ -872,48 +874,66 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
 
     @Override
     public CharStream append(CharStream stream) {
+        assertNotClosed();
+
         return new ParallelIteratorCharStream(CharStream.concat(this, stream), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public CharStream prepend(CharStream stream) {
+        assertNotClosed();
+
         return new ParallelIteratorCharStream(CharStream.concat(stream, this), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public CharStream merge(final CharStream b, final CharBiFunction<MergeResult> nextSelector) {
+        assertNotClosed();
+
         return new ParallelIteratorCharStream(CharStream.merge(this, b, nextSelector), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public CharStream zipWith(CharStream b, CharBinaryOperator zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorCharStream(CharStream.zip(this, b, zipFunction), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public CharStream zipWith(CharStream b, CharStream c, CharTernaryOperator zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorCharStream(CharStream.zip(this, b, c, zipFunction), false, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public CharStream zipWith(CharStream b, char valueForNoneA, char valueForNoneB, CharBinaryOperator zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorCharStream(CharStream.zip(this, b, valueForNoneA, valueForNoneB, zipFunction), false, maxThreadNum, splitor, asyncExecutor,
                 closeHandlers);
     }
 
     @Override
     public CharStream zipWith(CharStream b, CharStream c, char valueForNoneA, char valueForNoneB, char valueForNoneC, CharTernaryOperator zipFunction) {
+        assertNotClosed();
+
         return new ParallelIteratorCharStream(CharStream.zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction), false, maxThreadNum,
                 splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public boolean isParallel() {
+        assertNotClosed();
+
         return true;
     }
 
     @Override
     public CharStream sequential() {
+        assertNotClosed();
+
         IteratorCharStream tmp = sequential;
 
         if (tmp == null) {
@@ -926,21 +946,29 @@ final class ParallelIteratorCharStream extends IteratorCharStream {
 
     @Override
     protected int maxThreadNum() {
+        assertNotClosed();
+
         return maxThreadNum;
     }
 
     @Override
     protected BaseStream.Splitor splitor() {
+        assertNotClosed();
+
         return splitor;
     }
 
     @Override
     protected AsyncExecutor asyncExecutor() {
+        assertNotClosed();
+
         return asyncExecutor;
     }
 
     @Override
     public CharStream onClose(Runnable closeHandler) {
+        assertNotClosed();
+
         final Deque<Runnable> newCloseHandlers = new LocalArrayDeque<>(N.isNullOrEmpty(this.closeHandlers) ? 1 : this.closeHandlers.size() + 1);
 
         newCloseHandlers.add(wrapCloseHandlers(closeHandler));

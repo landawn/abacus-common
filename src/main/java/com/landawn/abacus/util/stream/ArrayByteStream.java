@@ -93,6 +93,8 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     public ByteStream filter(final BytePredicate predicate) {
+        assertNotClosed();
+
         return newStream(new ByteIteratorEx() {
             private boolean hasNext = false;
             private int cursor = fromIndex;
@@ -126,6 +128,8 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     public ByteStream takeWhile(final BytePredicate predicate) {
+        assertNotClosed();
+
         return newStream(new ByteIteratorEx() {
             private boolean hasMore = true;
             private boolean hasNext = false;
@@ -159,6 +163,8 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     public ByteStream dropWhile(final BytePredicate predicate) {
+        assertNotClosed();
+
         return newStream(new ByteIteratorEx() {
             private boolean hasNext = false;
             private int cursor = fromIndex;
@@ -199,6 +205,8 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     public ByteStream step(final long step) {
+        assertNotClosed();
+
         checkArgPositive(step, "step");
 
         if (step == 1 || fromIndex == toIndex) {
@@ -250,6 +258,8 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     public ByteStream map(final ByteUnaryOperator mapper) {
+        assertNotClosed();
+
         return newStream(new ByteIteratorEx() {
             private int cursor = fromIndex;
 
@@ -294,6 +304,8 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     public IntStream mapToInt(final ByteToIntFunction mapper) {
+        assertNotClosed();
+
         return newStream(new IntIteratorEx() {
             private int cursor = fromIndex;
 
@@ -338,6 +350,8 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     public <U> Stream<U> mapToObj(final ByteFunction<? extends U> mapper) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<U>() {
             private int cursor = fromIndex;
 
@@ -382,6 +396,8 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     public ByteStream flatMap(final ByteFunction<? extends ByteStream> mapper) {
+        assertNotClosed();
+
         final ByteIteratorEx iter = new ByteIteratorEx() {
             private int cursor = fromIndex;
             private ByteIterator cur = null;
@@ -449,6 +465,8 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     public IntStream flatMapToInt(final ByteFunction<? extends IntStream> mapper) {
+        assertNotClosed();
+
         final IntIteratorEx iter = new IntIteratorEx() {
             private int cursor = fromIndex;
             private IntIterator cur = null;
@@ -516,6 +534,8 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     public <T> Stream<T> flatMapToObj(final ByteFunction<? extends Stream<T>> mapper) {
+        assertNotClosed();
+
         final ObjIteratorEx<T> iter = new ObjIteratorEx<T>() {
             private int cursor = fromIndex;
             private Iterator<T> cur = null;
@@ -583,6 +603,8 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     public Stream<ByteStream> split(final int chunkSize) {
+        assertNotClosed();
+
         checkArgPositive(chunkSize, "chunkSize");
 
         return newStream(new ObjIteratorEx<ByteStream>() {
@@ -618,6 +640,8 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     public Stream<ByteList> splitToList(final int chunkSize) {
+        assertNotClosed();
+
         checkArgPositive(chunkSize, "chunkSize");
 
         return newStream(new ObjIteratorEx<ByteList>() {
@@ -653,6 +677,8 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     public Stream<ByteStream> split(final BytePredicate predicate) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<ByteStream>() {
             private int cursor = fromIndex;
             private boolean preCondition = false;
@@ -688,6 +714,8 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     public Stream<ByteList> splitToList(final BytePredicate predicate) {
+        assertNotClosed();
+
         return newStream(new ObjIteratorEx<ByteList>() {
             private int cursor = fromIndex;
             private boolean preCondition = false;
@@ -724,6 +752,8 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     public Stream<ByteStream> splitAt(final int where) {
+        assertNotClosed();
+
         checkArgNotNegative(where, "where");
 
         final ByteStream[] a = new ByteStream[2];
@@ -736,6 +766,8 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     public Stream<ByteStream> sliding(final int windowSize, final int increment) {
+        assertNotClosed();
+
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
 
         return newStream(new ObjIteratorEx<ByteStream>() {
@@ -785,6 +817,8 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     public Stream<ByteList> slidingToList(final int windowSize, final int increment) {
+        assertNotClosed();
+
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
 
         return newStream(new ObjIteratorEx<ByteList>() {
@@ -833,6 +867,8 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     public ByteStream peek(final ByteConsumer action) {
+        assertNotClosed();
+
         return newStream(new ByteIteratorEx() {
             private int cursor = fromIndex;
 
@@ -869,6 +905,8 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     public ByteStream limit(final long maxSize) {
+        assertNotClosed();
+
         checkArgNotNegative(maxSize, "maxSize");
 
         return newStream(elements, fromIndex, maxSize < toIndex - fromIndex ? (int) (fromIndex + maxSize) : toIndex, sorted);
@@ -876,6 +914,8 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     public ByteStream skip(long n) {
+        assertNotClosed();
+
         checkArgNotNegative(n, "n");
 
         if (n >= toIndex - fromIndex) {
@@ -1229,8 +1269,9 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     public OptionalByte kthLargest(int k) {
-        checkArgPositive(k, "k");
         assertNotClosed();
+
+        checkArgPositive(k, "k");
 
         try {
             if (k > toIndex - fromIndex) {
@@ -1486,6 +1527,8 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     public IntStream asIntStream() {
+        assertNotClosed();
+
         return newStream(new IntIteratorEx() {
             private int cursor = fromIndex;
 
@@ -1528,6 +1571,8 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     public Stream<Byte> boxed() {
+        assertNotClosed();
+
         return new IteratorStream<>(iteratorEx(), sorted, sorted ? BYTE_COMPARATOR : null, closeHandlers);
     }
 
@@ -1538,11 +1583,15 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     ByteIteratorEx iteratorEx() {
+        assertNotClosed();
+
         return ByteIteratorEx.of(elements, fromIndex, toIndex);
     }
 
     @Override
     public ByteStream appendIfEmpty(final Supplier<? extends ByteStream> supplier) {
+        assertNotClosed();
+
         if (fromIndex == toIndex) {
             final Holder<ByteStream> holder = new Holder<>();
 
@@ -1600,6 +1649,8 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super ByteStream, R, E> func) throws E {
+        assertNotClosed();
+
         try {
             if (fromIndex < toIndex) {
                 return Optional.of(func.apply(this));
@@ -1613,6 +1664,8 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super ByteStream, E> action) throws E {
+        assertNotClosed();
+
         try {
             if (fromIndex < toIndex) {
                 action.accept(this);
@@ -1628,6 +1681,8 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     Tuple3<byte[], Integer, Integer> array() {
+        assertNotClosed();
+
         close();
 
         return Tuple.of(elements, fromIndex, toIndex);
@@ -1635,11 +1690,15 @@ class ArrayByteStream extends AbstractByteStream {
 
     @Override
     protected ByteStream parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor) {
+        assertNotClosed();
+
         return new ParallelArrayByteStream(elements, fromIndex, toIndex, sorted, maxThreadNum, splitor, asyncExecutor, closeHandlers);
     }
 
     @Override
     public ByteStream onClose(Runnable closeHandler) {
+        assertNotClosed();
+
         final Deque<Runnable> newCloseHandlers = new LocalArrayDeque<>(N.isNullOrEmpty(this.closeHandlers) ? 1 : this.closeHandlers.size() + 1);
 
         newCloseHandlers.add(wrapCloseHandlers(closeHandler));

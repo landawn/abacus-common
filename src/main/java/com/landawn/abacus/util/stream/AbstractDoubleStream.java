@@ -70,6 +70,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream distinct() {
+        assertNotClosed();
+
         final Set<Object> set = N.newHashSet();
 
         return newStream(this.sequential().filter(new DoublePredicate() {
@@ -82,6 +84,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream flattMap(final DoubleFunction<double[]> mapper) {
+        assertNotClosed();
+
         return flatMap(new DoubleFunction<DoubleStream>() {
             @Override
             public DoubleStream apply(double t) {
@@ -92,6 +96,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public <T> Stream<T> flattMapToObj(final DoubleFunction<? extends Collection<T>> mapper) {
+        assertNotClosed();
+
         return flatMapToObj(new DoubleFunction<Stream<T>>() {
             @Override
             public Stream<T> apply(double t) {
@@ -102,6 +108,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public <T> Stream<T> flatMappToObj(final DoubleFunction<T[]> mapper) {
+        assertNotClosed();
+
         return flatMapToObj(new DoubleFunction<Stream<T>>() {
             @Override
             public Stream<T> apply(double t) {
@@ -112,6 +120,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream rangeMap(final DoubleBiPredicate sameRange, final DoubleBinaryOperator mapper) {
+        assertNotClosed();
+
         final DoubleIteratorEx iter = iteratorEx();
 
         return newStream(new DoubleIteratorEx() {
@@ -145,6 +155,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public <T> Stream<T> rangeMapToObj(final DoubleBiPredicate sameRange, final DoubleBiFunction<T> mapper) {
+        assertNotClosed();
+
         final DoubleIteratorEx iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<T>() {
@@ -178,6 +190,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public Stream<DoubleList> collapse(final DoubleBiPredicate collapsible) {
+        assertNotClosed();
+
         final DoubleIteratorEx iter = iteratorEx();
 
         return newStream(new ObjIteratorEx<DoubleList>() {
@@ -209,6 +223,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream collapse(final DoubleBiPredicate collapsible, final DoubleBinaryOperator mergeFunction) {
+        assertNotClosed();
+
         final DoubleIteratorEx iter = iteratorEx();
 
         return newStream(new DoubleIteratorEx() {
@@ -239,6 +255,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream skip(final long n, final DoubleConsumer action) {
+        assertNotClosed();
+
         final DoublePredicate filter = isParallel() ? new DoublePredicate() {
             final AtomicLong cnt = new AtomicLong(n);
 
@@ -260,6 +278,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream removeIf(final DoublePredicate predicate) {
+        assertNotClosed();
 
         return filter(new DoublePredicate() {
             @Override
@@ -271,6 +290,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream removeIf(final DoublePredicate predicate, final DoubleConsumer actionOnDroppedItem) {
+        assertNotClosed();
 
         return filter(new DoublePredicate() {
             @Override
@@ -287,6 +307,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream filter(final DoublePredicate predicate, final DoubleConsumer actionOnDroppedItem) {
+        assertNotClosed();
 
         return filter(new DoublePredicate() {
             @Override
@@ -303,6 +324,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream dropWhile(final DoublePredicate predicate, final DoubleConsumer actionOnDroppedItem) {
+        assertNotClosed();
 
         return dropWhile(new DoublePredicate() {
             @Override
@@ -319,6 +341,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream step(final long step) {
+        assertNotClosed();
+
         checkArgPositive(step, "step");
 
         final long skip = step - 1;
@@ -343,6 +367,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public Stream<DoubleStream> split(final int chunkSize) {
+        assertNotClosed();
+
         return splitToList(chunkSize).map(new Function<DoubleList, DoubleStream>() {
             @Override
             public DoubleStream apply(DoubleList t) {
@@ -353,6 +379,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public Stream<DoubleStream> split(final DoublePredicate predicate) {
+        assertNotClosed();
+
         return splitToList(predicate).map(new Function<DoubleList, DoubleStream>() {
             @Override
             public DoubleStream apply(DoubleList t) {
@@ -363,6 +391,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public Stream<DoubleStream> splitBy(final DoublePredicate where) {
+        assertNotClosed();
 
         final DoubleIteratorEx iter = iteratorEx();
 
@@ -471,6 +500,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public Stream<DoubleStream> sliding(final int windowSize, final int increment) {
+        assertNotClosed();
+
         return slidingToList(windowSize, increment).map(new Function<DoubleList, DoubleStream>() {
             @Override
             public DoubleStream apply(DoubleList t) {
@@ -481,6 +512,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream scan(final DoubleBinaryOperator accumulator) {
+        assertNotClosed();
+
         final DoubleIteratorEx iter = iteratorEx();
 
         return newStream(new DoubleIteratorEx() {
@@ -506,6 +539,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream scan(final double init, final DoubleBinaryOperator accumulator) {
+        assertNotClosed();
+
         final DoubleIteratorEx iter = iteratorEx();
 
         return newStream(new DoubleIteratorEx() {
@@ -525,6 +560,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream scan(final double init, final DoubleBinaryOperator accumulator, final boolean initIncluded) {
+        assertNotClosed();
+
         if (initIncluded == false) {
             return scan(init, accumulator);
         }
@@ -554,6 +591,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream intersection(final Collection<?> c) {
+        assertNotClosed();
+
         final Multiset<?> multiset = Multiset.from(c);
 
         return newStream(this.sequential().filter(new DoublePredicate() {
@@ -566,6 +605,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream difference(final Collection<?> c) {
+        assertNotClosed();
+
         final Multiset<?> multiset = Multiset.from(c);
 
         return newStream(this.sequential().filter(new DoublePredicate() {
@@ -578,6 +619,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream symmetricDifference(final Collection<Double> c) {
+        assertNotClosed();
+
         final Multiset<?> multiset = Multiset.from(c);
 
         return newStream(this.sequential().filter(new DoublePredicate() {
@@ -595,6 +638,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream reversed() {
+        assertNotClosed();
+
         return newStream(new DoubleIteratorEx() {
             private boolean initialized = false;
 
@@ -677,6 +722,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream rotated(final int distance) {
+        assertNotClosed();
+
         return newStream(new DoubleIteratorEx() {
             private boolean initialized = false;
 
@@ -767,6 +814,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream shuffled(final Random rnd) {
+        assertNotClosed();
+
         checkArgNotNull(rnd, "random");
 
         return lazyLoad(new Function<double[], double[]>() {
@@ -780,6 +829,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream sorted() {
+        assertNotClosed();
+
         if (sorted) {
             return newStream(iteratorEx(), sorted);
         }
@@ -800,6 +851,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public DoubleStream reverseSorted() {
+        assertNotClosed();
+
         return newStream(new DoubleIteratorEx() {
             private boolean initialized = false;
             private double[] aar;
@@ -951,6 +1004,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public Stream<IndexedDouble> indexed() {
+        assertNotClosed();
+
         final MutableLong idx = MutableLong.of(0);
 
         return newStream(this.sequential().mapToObj(new DoubleFunction<IndexedDouble>() {
@@ -964,59 +1019,81 @@ abstract class AbstractDoubleStream extends DoubleStream {
     @Override
     @SafeVarargs
     public final DoubleStream prepend(final double... a) {
+        assertNotClosed();
+
         return prepend(DoubleStream.of(a));
     }
 
     @Override
     public DoubleStream prepend(DoubleStream stream) {
+        assertNotClosed();
+
         return DoubleStream.concat(stream, this);
     }
 
     @Override
     @SafeVarargs
     public final DoubleStream append(final double... a) {
+        assertNotClosed();
+
         return append(DoubleStream.of(a));
     }
 
     @Override
     public DoubleStream append(DoubleStream stream) {
+        assertNotClosed();
+
         return DoubleStream.concat(this, stream);
     }
 
     @Override
     @SafeVarargs
     public final DoubleStream appendIfEmpty(final double... a) {
+        assertNotClosed();
+
         return appendIfEmpty(() -> DoubleStream.of(a));
     }
 
     @Override
     public DoubleStream merge(DoubleStream b, DoubleBiFunction<MergeResult> nextSelector) {
+        assertNotClosed();
+
         return DoubleStream.merge(this, b, nextSelector);
     }
 
     @Override
     public DoubleStream zipWith(DoubleStream b, DoubleBinaryOperator zipFunction) {
+        assertNotClosed();
+
         return DoubleStream.zip(this, b, zipFunction);
     }
 
     @Override
     public DoubleStream zipWith(DoubleStream b, DoubleStream c, DoubleTernaryOperator zipFunction) {
+        assertNotClosed();
+
         return DoubleStream.zip(this, b, c, zipFunction);
     }
 
     @Override
     public DoubleStream zipWith(DoubleStream b, double valueForNoneA, double valueForNoneB, DoubleBinaryOperator zipFunction) {
+        assertNotClosed();
+
         return DoubleStream.zip(this, b, valueForNoneA, valueForNoneB, zipFunction);
     }
 
     @Override
     public DoubleStream zipWith(DoubleStream b, DoubleStream c, double valueForNoneA, double valueForNoneB, double valueForNoneC,
             DoubleTernaryOperator zipFunction) {
+        assertNotClosed();
+
         return DoubleStream.zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     }
 
     @Override
     public DoubleStream top(int n) {
+        assertNotClosed();
+
         return top(n, DOUBLE_COMPARATOR);
     }
 
@@ -1027,27 +1104,37 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public <K, V> Map<K, V> toMap(DoubleFunction<? extends K> keyMapper, DoubleFunction<? extends V> valueMapper) {
+        assertNotClosed();
+
         return toMap(keyMapper, valueMapper, Suppliers.<K, V> ofMap());
     }
 
     @Override
     public <K, V, M extends Map<K, V>> M toMap(DoubleFunction<? extends K> keyMapper, DoubleFunction<? extends V> valueMapper,
             Supplier<? extends M> mapFactory) {
+        assertNotClosed();
+
         return toMap(keyMapper, valueMapper, Fn.<V> throwingMerger(), mapFactory);
     }
 
     @Override
     public <K, V> Map<K, V> toMap(DoubleFunction<? extends K> keyMapper, DoubleFunction<? extends V> valueMapper, BinaryOperator<V> mergeFunction) {
+        assertNotClosed();
+
         return toMap(keyMapper, valueMapper, mergeFunction, Suppliers.<K, V> ofMap());
     }
 
     @Override
     public <K, A, D> Map<K, D> toMap(DoubleFunction<? extends K> keyMapper, Collector<Double, A, D> downstream) {
+        assertNotClosed();
+
         return toMap(keyMapper, downstream, Suppliers.<K, D> ofMap());
     }
 
-    @Override 
+    @Override
     public <E extends Exception> void forEachIndexed(Throwables.IndexedDoubleConsumer<E> action) throws E {
+        assertNotClosed();
+
         if (isParallel()) {
             final AtomicInteger idx = new AtomicInteger(0);
 
@@ -1162,6 +1249,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public <E extends Exception> OptionalDouble findAny(final Throwables.DoublePredicate<E> predicate) throws E {
+        assertNotClosed();
+
         return findFirst(predicate);
     }
 
@@ -1250,6 +1339,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
 
     @Override
     public <R> R collect(Supplier<R> supplier, ObjDoubleConsumer<? super R> accumulator) {
+        assertNotClosed();
+
         final BiConsumer<R, R> combiner = collectingCombiner;
 
         return collect(supplier, accumulator, combiner);
