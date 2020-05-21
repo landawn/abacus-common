@@ -1996,8 +1996,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
     @IntermediateOp
     @Beta
     public ExceptionalStream<T, E> skipUntil(final Throwables.Predicate<? super T, ? extends E> predicate) {
-        assertNotClosed();
-
         return dropWhile(Fnn.not(predicate));
     }
 
@@ -3328,6 +3326,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
         }
 
         return OrElse.FALSE;
+    }
+
+    /**
+     *
+     * @param action
+     * @return
+     */
+    @IntermediateOp
+    public ExceptionalStream<T, E> onEach(final Throwables.Consumer<? super T, ? extends E> action) {
+        return peek(action);
     }
 
     /**

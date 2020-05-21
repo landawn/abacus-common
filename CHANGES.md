@@ -1,3 +1,9 @@
+### 1.20.30
+
+* Rename `Stream.carry` to `Stream.onEach`.
+* Improvements and bug fix.
+
+
 ### 1.20.29
 
 * Add `Stream.from(Supplier<Stream<T>> supplier)`.

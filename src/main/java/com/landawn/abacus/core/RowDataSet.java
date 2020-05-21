@@ -6298,7 +6298,7 @@ public class RowDataSet implements DataSet, Cloneable {
         return Stream.of(Iterables.powerSet(N.newLinkedHashSet(columnNames)))
                 .groupByToEntry(TO_SIZE_FUNC)
                 .values()
-                .carry(REVERSE_ACTION)
+                .onEach(REVERSE_ACTION)
                 .flattMap(Fn.<List<Set<String>>> identity())
                 .reversed();
     }

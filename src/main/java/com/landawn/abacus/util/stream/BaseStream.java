@@ -213,7 +213,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     Stream<S> splitAt(int where);
 
     /**
-     * Split the stream into two pieces at <code>where</code> turns to {@code false}
+     * Split the stream into two pieces at <code>where</code> turns to {@code false}.
      * The first piece will be loaded into memory.
      *
      * <pre>
@@ -497,7 +497,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      */
     @ParallelSupported
     @IntermediateOp
-    S carry(C action);
+    S onEach(C action);
 
     @SequentialOnly
     @IntermediateOp

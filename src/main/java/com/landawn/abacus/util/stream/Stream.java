@@ -950,10 +950,30 @@ public abstract class Stream<T>
     @IntermediateOp
     public abstract <A, R> Stream<R> split(Predicate<? super T> predicate, Collector<? super T, A, R> collector);
 
+    /**
+     * Split the stream into two pieces at <code>where</code> turns to {@code false}.
+     * The first piece will be loaded into memory.
+     *
+     * @param <A>
+     * @param <R>
+     * @param where
+     * @param collector
+     * @return
+     */
     @SequentialOnly
     @IntermediateOp
     public abstract <A, R> Stream<R> splitAt(int where, Collector<? super T, A, R> collector);
 
+    /**
+     * Split the stream into two pieces at <code>where</code> turns to {@code false}.
+     * The first piece will be loaded into memory.
+     *
+     * @param <A>
+     * @param <R>
+     * @param where
+     * @param collector
+     * @return
+     */
     @SequentialOnly
     @IntermediateOp
     public abstract <A, R> Stream<R> splitBy(Predicate<? super T> where, Collector<? super T, A, R> collector);

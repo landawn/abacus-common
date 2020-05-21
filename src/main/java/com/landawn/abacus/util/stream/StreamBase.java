@@ -612,7 +612,7 @@ abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, 
     }
 
     @Override
-    public S carry(C action) {
+    public S onEach(C action) {
         return peek(action);
     }
 
