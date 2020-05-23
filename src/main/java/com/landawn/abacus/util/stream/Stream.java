@@ -24,7 +24,6 @@ import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,7 +52,6 @@ import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.annotation.TerminalOp;
 import com.landawn.abacus.annotation.TerminalOpTriggered;
 import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.ByteIterator;
@@ -4500,78 +4498,6 @@ public abstract class Stream<T>
         N.checkArgNotNull(s);
 
         return LongStream.interval(delay, interval, unit).mapToObj(s);
-    }
-
-    /**
-     * It's user's responsibility to close the input <code>resultSet</code> after the stream is finished.
-     *
-     * @param resultSet
-     * @return
-     * @throws UncheckedSQLException
-     */
-    public static Stream<Object[]> rows(final ResultSet resultSet) throws UncheckedSQLException {
-        return rows(Object[].class, resultSet);
-    }
-
-    /**
-     * It's user's responsibility to close the input <code>resultSet</code> after the stream is finished.
-     *
-     * @param targetClass Array/List/Map or Entity with getter/setter methods.
-     * @param resultSet
-     * @return
-     * @throws UncheckedSQLException
-     */
-    public static <T> Stream<T> rows(final Class<T> targetClass, final ResultSet resultSet) throws UncheckedSQLException {
-        return ExceptionalStream.rows(targetClass, resultSet).unchecked();
-    }
-
-    /**
-     * It's user's responsibility to close the input <code>resultSet</code> after the stream is finished.
-     *
-     * @param resultSet
-     * @param rowMapper
-     * @return
-     * @throws UncheckedSQLException
-     */
-    public static <T> Stream<T> rows(final ResultSet resultSet, final Throwables.Function<ResultSet, T, SQLException> rowMapper) throws UncheckedSQLException {
-        return ExceptionalStream.rows(resultSet, rowMapper).unchecked();
-    }
-
-    /**
-     * It's user's responsibility to close the input <code>resultSet</code> after the stream is finished.
-     *
-     * @param resultSet
-     * @param rowMapper
-     * @return
-     * @throws UncheckedSQLException
-     */
-    public static <T> Stream<T> rows(final ResultSet resultSet, final Throwables.BiFunction<ResultSet, List<String>, T, SQLException> rowMapper)
-            throws UncheckedSQLException {
-        return ExceptionalStream.rows(resultSet, rowMapper).unchecked();
-    }
-
-    /**
-     * It's user's responsibility to close the input <code>resultSet</code> after the stream is finished.
-     *
-     * @param resultSet
-     * @param columnIndex starts from 0, not 1.
-     * @return
-     * @throws UncheckedSQLException
-     */
-    public static <T> Stream<T> rows(final ResultSet resultSet, final int columnIndex) throws UncheckedSQLException {
-        return ExceptionalStream.<T> rows(resultSet, columnIndex).unchecked();
-    }
-
-    /**
-     * It's user's responsibility to close the input <code>resultSet</code> after the stream is finished.
-     *
-     * @param resultSet
-     * @param columnName
-     * @return
-     * @throws UncheckedSQLException
-     */
-    public static <T> Stream<T> rows(final ResultSet resultSet, final String columnName) throws UncheckedSQLException {
-        return ExceptionalStream.<T> rows(resultSet, columnName).unchecked();
     }
 
     public static Stream<String> lines(final File file) throws UncheckedIOException {

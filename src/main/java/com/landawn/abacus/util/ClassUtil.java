@@ -2983,6 +2983,38 @@ public final class ClassUtil {
         }
     }
 
+    /** The Constant column2FieldNameMapPool. */
+    private static final Map<Class<?>, ImmutableMap<String, String>> column2FieldNameMapPool = new ConcurrentHashMap<>();
+
+    /**
+     * Gets the column 2 field name map.
+     *
+     * @param entityClass
+     * @return
+     */
+    public static ImmutableMap<String, String> getColumn2FieldNameMap(Class<?> entityClass) {
+        ImmutableMap<String, String> result = column2FieldNameMapPool.get(entityClass);
+
+        if (result == null) {
+            final Map<String, String> map = new HashMap<>();
+            final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
+
+            for (PropInfo propInfo : entityInfo.propInfoList) {
+                if (propInfo.columnName.isPresent()) {
+                    map.put(propInfo.columnName.get(), propInfo.name);
+                    map.put(propInfo.columnName.get().toLowerCase(), propInfo.name);
+                    map.put(propInfo.columnName.get().toUpperCase(), propInfo.name);
+                }
+            }
+
+            result = ImmutableMap.copyOf(map);
+
+            column2FieldNameMapPool.put(entityClass, result);
+        }
+
+        return result;
+    }
+
     //    private static Class[] getTypeArguments(Class cls) {
     //        java.lang.reflect.Type[] typeArgs = null;
     //        java.lang.reflect.Type[] genericInterfaces = cls.getGenericInterfaces();

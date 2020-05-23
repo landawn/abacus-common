@@ -1,3 +1,10 @@
+### 1.20.31
+
+* Move `CSVUtil` to `abacus-jdbc`.
+* Move `ExceptionalStream.rows(...)` to `JdbcUtil.stream(...)` in `abacus-util`.
+* Improvements and bug fix.
+
+
 ### 1.20.30
 
 * Rename `Stream.carry` to `Stream.onEach`.
