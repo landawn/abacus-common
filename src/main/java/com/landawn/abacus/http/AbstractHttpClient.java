@@ -651,6 +651,94 @@ public abstract class AbstractHttpClient implements Closeable {
 
     /**
      *
+     * @param request
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public String patch(final Object request) throws UncheckedIOException {
+        return patch(String.class, request);
+    }
+
+    /**
+     *
+     * @param request
+     * @param settings
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public String patch(final Object request, final HttpSettings settings) throws UncheckedIOException {
+        return patch(String.class, request, settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param request
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public <T> T patch(final Class<T> resultClass, final Object request) throws UncheckedIOException {
+        return patch(resultClass, request, _settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param request
+     * @param settings
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public <T> T patch(final Class<T> resultClass, final Object request, final HttpSettings settings) throws UncheckedIOException {
+        return execute(resultClass, HttpMethod.PATCH, request, settings);
+    }
+
+    /**
+     *
+     * @param request
+     * @return
+     */
+    public ContinuableFuture<String> asyncPatch(final Object request) {
+        return asyncPatch(String.class, request);
+    }
+
+    /**
+     *
+     * @param request
+     * @param settings
+     * @return
+     */
+    public ContinuableFuture<String> asyncPatch(final Object request, final HttpSettings settings) {
+        return asyncPatch(String.class, request, settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param request
+     * @return
+     */
+    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Object request) {
+        return asyncPatch(resultClass, request, _settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param request
+     * @param settings
+     * @return
+     */
+    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Object request, final HttpSettings settings) {
+        return asyncExecute(resultClass, HttpMethod.PATCH, request, settings);
+    }
+
+    /**
+     *
      * @param httpMethod
      * @param request
      * @return

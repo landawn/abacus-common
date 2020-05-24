@@ -206,7 +206,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 }
             }
 
-            if (memoryMeasure != null && memoryMeasure.sizeOf(key, e) > maxMemorySize - usedMemorySize) {
+            final long memorySize = memoryMeasure == null ? 0 : memoryMeasure.sizeOf(key, e);
+
+            if (memoryMeasure != null && memorySize > maxMemorySize - usedMemorySize) {
                 // ignore.
 
                 return false;
@@ -218,7 +220,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 }
 
                 if (memoryMeasure != null) {
-                    usedMemorySize += memoryMeasure.sizeOf(key, e);
+                    usedMemorySize += memorySize;
                 }
 
                 notEmpty.signal();

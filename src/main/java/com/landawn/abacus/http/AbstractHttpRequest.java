@@ -232,6 +232,31 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
 
     /**
      *
+     * @param body
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public String patch(Object body) throws UncheckedIOException {
+        return patch(String.class, body);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param body
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public <T> T patch(Class<T> resultClass, Object body) throws UncheckedIOException {
+        this.httpMethod = HttpMethod.PATCH;
+        this.request = body;
+
+        return execute(resultClass);
+    }
+
+    /**
+     *
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
@@ -357,6 +382,29 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
      */
     public <T> ContinuableFuture<T> asyncPut(Class<T> resultClass, Object body) {
         this.httpMethod = HttpMethod.PUT;
+        this.request = body;
+
+        return asyncExecute(resultClass);
+    }
+
+    /**
+     *
+     * @param body
+     * @return
+     */
+    public ContinuableFuture<String> asyncPatch(Object body) {
+        return asyncPatch(String.class, body);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param body
+     * @return
+     */
+    public <T> ContinuableFuture<T> asyncPatch(Class<T> resultClass, Object body) {
+        this.httpMethod = HttpMethod.PATCH;
         this.request = body;
 
         return asyncExecute(resultClass);

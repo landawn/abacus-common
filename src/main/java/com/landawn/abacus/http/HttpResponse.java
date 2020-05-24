@@ -146,10 +146,6 @@ public class HttpResponse {
     public <T> T body(Class<T> resultClass) {
         N.checkArgNotNull(resultClass, "resultClass");
 
-        if (byte[].class.equals(resultClass)) {
-            return (T) body;
-        }
-
         if (resultClass == null || resultClass.equals(String.class)) {
             return (T) new String(body, respCharset);
         } else if (byte[].class.equals(resultClass)) {
