@@ -388,7 +388,7 @@ abstract class AbstractIntStream extends IntStream {
     }
 
     @Override
-    public Stream<IntStream> splitBy(final IntPredicate where) {
+    public Stream<IntStream> splitAt(final IntPredicate where) {
         assertNotClosed();
 
         final IntIteratorEx iter = iteratorEx();
@@ -417,7 +417,7 @@ abstract class AbstractIntStream extends IntStream {
                     while (iter.hasNext()) {
                         next = iter.nextInt();
 
-                        if (where.test(next)) {
+                        if (!where.test(next)) {
                             list.add(next);
                         } else {
                             hasNext = true;

@@ -388,7 +388,7 @@ abstract class AbstractLongStream extends LongStream {
     }
 
     @Override
-    public Stream<LongStream> splitBy(final LongPredicate where) {
+    public Stream<LongStream> splitAt(final LongPredicate where) {
         assertNotClosed();
 
         final LongIteratorEx iter = iteratorEx();
@@ -417,7 +417,7 @@ abstract class AbstractLongStream extends LongStream {
                     while (iter.hasNext()) {
                         next = iter.nextLong();
 
-                        if (where.test(next)) {
+                        if (!where.test(next)) {
                             list.add(next);
                         } else {
                             hasNext = true;

@@ -974,7 +974,7 @@ public abstract class Stream<T>
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract <A, R> Stream<R> splitBy(Predicate<? super T> where, Collector<? super T, A, R> collector);
+    public abstract <A, R> Stream<R> splitAt(Predicate<? super T> where, Collector<? super T, A, R> collector);
 
     @SequentialOnly
     @IntermediateOp

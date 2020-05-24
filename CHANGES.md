@@ -1,3 +1,9 @@
+### 1.20.32
+
+* Replace `Stream.splitBy` with `Stream.splitAt`.
+* Improvements and bug fix.
+
+
 ### 1.20.31
 
 * Move `CSVUtil` to `abacus-jdbc`.

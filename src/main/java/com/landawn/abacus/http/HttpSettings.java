@@ -316,6 +316,16 @@ public final class HttpSettings implements Cloneable {
 
     /**
      *
+     * @param user
+     * @param password
+     * @return
+     */
+    public HttpSettings basicAuth(String user, Object password) {
+        return header(HttpHeaders.Names.AUTHORIZATION, "Basic " + N.base64Encode((user + ":" + password).getBytes()));
+    }
+
+    /**
+     *
      * @param name
      * @param value
      * @return

@@ -213,12 +213,12 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     Stream<S> splitAt(int where);
 
     /**
-     * Split the stream into two pieces at <code>where</code> turns to {@code false}.
+     * Split the stream into two pieces at <code>where</code> turns to {@code true}.
      * The first piece will be loaded into memory.
      *
      * <pre>
      * <code>
-     * Stream.of(1, 3, 2, 4, 2, 5).splitBy(i -> i <= 3).forEach(s -> s.println()); // [1, 3, 2], [4, 2, 5]
+     * Stream.of(1, 3, 2, 4, 2, 5).splitAt(it -> it >= 4).forEach(s -> s.println()); // [1, 3, 2], [4, 2, 5]
      * </code>
      * </pre>
      *
@@ -227,7 +227,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
      */
     @SequentialOnly
     @IntermediateOp
-    Stream<S> splitBy(P where);
+    Stream<S> splitAt(P where);
 
     /**
      *

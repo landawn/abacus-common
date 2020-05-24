@@ -30,12 +30,12 @@ import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.IndexedChar;
 import com.landawn.abacus.util.Joiner;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.MutableChar;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.StringUtil.Strings;
@@ -389,7 +389,7 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public Stream<CharStream> splitBy(final CharPredicate where) {
+    public Stream<CharStream> splitAt(final CharPredicate where) {
         assertNotClosed();
 
         final CharIteratorEx iter = iteratorEx();
@@ -418,7 +418,7 @@ abstract class AbstractCharStream extends CharStream {
                     while (iter.hasNext()) {
                         next = iter.nextChar();
 
-                        if (where.test(next)) {
+                        if (!where.test(next)) {
                             list.add(next);
                         } else {
                             hasNext = true;

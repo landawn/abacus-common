@@ -391,7 +391,7 @@ abstract class AbstractFloatStream extends FloatStream {
     }
 
     @Override
-    public Stream<FloatStream> splitBy(final FloatPredicate where) {
+    public Stream<FloatStream> splitAt(final FloatPredicate where) {
         assertNotClosed();
 
         final FloatIteratorEx iter = iteratorEx();
@@ -420,7 +420,7 @@ abstract class AbstractFloatStream extends FloatStream {
                     while (iter.hasNext()) {
                         next = iter.nextFloat();
 
-                        if (where.test(next)) {
+                        if (!where.test(next)) {
                             list.add(next);
                         } else {
                             hasNext = true;

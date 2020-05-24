@@ -189,6 +189,17 @@ public class OkHttpRequest {
     }
 
     /**
+     * 
+     * @param user
+     * @param password
+     * @return
+     */
+    public OkHttpRequest basicAuth(String user, Object password) {
+        builder.header(HttpHeaders.Names.AUTHORIZATION, "Basic " + N.base64Encode((user + ":" + password).getBytes()));
+        return this;
+    }
+
+    /**
      * Sets the header named {@code name} to {@code value}. If this request already has any headers
      * with that name, they are all replaced.
      */

@@ -868,7 +868,7 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public Stream<Stream<T>> splitBy(final Predicate<? super T> where) {
+    public Stream<Stream<T>> splitAt(final Predicate<? super T> where) {
         assertNotClosed();
 
         final IteratorEx<T> iter = iteratorEx();
@@ -897,7 +897,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                     while (iter.hasNext()) {
                         next = iter.next();
 
-                        if (where.test(next)) {
+                        if (!where.test(next)) {
                             list.add(next);
                         } else {
                             hasNext = true;
@@ -977,7 +977,7 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public <A, R> Stream<R> splitBy(final Predicate<? super T> where, Collector<? super T, A, R> collector) {
+    public <A, R> Stream<R> splitAt(final Predicate<? super T> where, Collector<? super T, A, R> collector) {
         assertNotClosed();
 
         final Supplier<A> supplier = collector.supplier();
@@ -1008,7 +1008,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                     while (iter.hasNext()) {
                         next = iter.next();
 
-                        if (where.test(next)) {
+                        if (!where.test(next)) {
                             accumulator.accept(container, next);
                         } else {
                             hasNext = true;

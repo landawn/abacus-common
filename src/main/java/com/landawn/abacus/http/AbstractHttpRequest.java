@@ -50,6 +50,20 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     }
 
     /**
+     * 
+     * @param user
+     * @param password
+     * @return
+     */
+    public S basicAuth(String user, Object password) {
+        checkSettings();
+
+        settings.basicAuth(user, password);
+
+        return (S) this;
+    }
+
+    /**
      *
      * @param name
      * @param value

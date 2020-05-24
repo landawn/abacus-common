@@ -30,12 +30,12 @@ import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.IndexedByte;
 import com.landawn.abacus.util.Joiner;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.MutableByte;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.StringUtil.Strings;
@@ -389,7 +389,7 @@ abstract class AbstractByteStream extends ByteStream {
     }
 
     @Override
-    public Stream<ByteStream> splitBy(final BytePredicate where) {
+    public Stream<ByteStream> splitAt(final BytePredicate where) {
         assertNotClosed();
 
         final ByteIteratorEx iter = iteratorEx();
@@ -418,7 +418,7 @@ abstract class AbstractByteStream extends ByteStream {
                     while (iter.hasNext()) {
                         next = iter.nextByte();
 
-                        if (where.test(next)) {
+                        if (!where.test(next)) {
                             list.add(next);
                         } else {
                             hasNext = true;

@@ -389,7 +389,7 @@ abstract class AbstractShortStream extends ShortStream {
     }
 
     @Override
-    public Stream<ShortStream> splitBy(final ShortPredicate where) {
+    public Stream<ShortStream> splitAt(final ShortPredicate where) {
         assertNotClosed();
 
         final ShortIteratorEx iter = iteratorEx();
@@ -418,7 +418,7 @@ abstract class AbstractShortStream extends ShortStream {
                     while (iter.hasNext()) {
                         next = iter.nextShort();
 
-                        if (where.test(next)) {
+                        if (!where.test(next)) {
                             list.add(next);
                         } else {
                             hasNext = true;

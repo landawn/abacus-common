@@ -390,7 +390,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
     }
 
     @Override
-    public Stream<DoubleStream> splitBy(final DoublePredicate where) {
+    public Stream<DoubleStream> splitAt(final DoublePredicate where) {
         assertNotClosed();
 
         final DoubleIteratorEx iter = iteratorEx();
@@ -419,7 +419,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
                     while (iter.hasNext()) {
                         next = iter.nextDouble();
 
-                        if (where.test(next)) {
+                        if (!where.test(next)) {
                             list.add(next);
                         } else {
                             hasNext = true;
