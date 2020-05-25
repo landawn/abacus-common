@@ -393,6 +393,14 @@ public class OkHttpRequest {
         return execute(resultClass, HttpMethod.PUT);
     }
 
+    public Response patch() throws IOException {
+        return execute(HttpMethod.PATCH);
+    }
+
+    public <T> T patch(Class<T> resultClass) throws IOException {
+        return execute(resultClass, HttpMethod.PATCH);
+    }
+
     public Response delete() throws IOException {
         return execute(HttpMethod.DELETE);
     }
@@ -405,11 +413,7 @@ public class OkHttpRequest {
         return execute(HttpMethod.HEAD);
     }
 
-    public Response patch() throws IOException {
-        return execute(HttpMethod.PATCH);
-    }
-
-    protected Response execute(final HttpMethod httpMethod) throws IOException {
+    public Response execute(final HttpMethod httpMethod) throws IOException {
         body = (body == null && HttpMethod.DELETE.equals(httpMethod)) ? Util.EMPTY_REQUEST : body;
 
         request = builder.method(httpMethod.name(), body).build();
@@ -417,7 +421,7 @@ public class OkHttpRequest {
         return httpClient.newCall(request).execute();
     }
 
-    protected <T> T execute(final Class<T> resultClass, final HttpMethod httpMethod) throws IOException {
+    public <T> T execute(final Class<T> resultClass, final HttpMethod httpMethod) throws IOException {
         N.checkArgNotNull(resultClass, "resultClass");
         N.checkArgument(!HttpResponse.class.equals(resultClass), "Return type can't be HttpResponse");
 
@@ -542,6 +546,34 @@ public class OkHttpRequest {
         }, executor);
     }
 
+    public ContinuableFuture<Response> asyncPatch() {
+        return asyncPatch(DEFAULT_EXECUTOR);
+    }
+
+    public ContinuableFuture<Response> asyncPatch(final Executor executor) {
+        return ContinuableFuture.call(new Callable<Response>() {
+            @Override
+            public Response call() throws IOException {
+                return patch();
+            }
+
+        }, executor);
+    }
+
+    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass) {
+        return asyncPatch(resultClass, DEFAULT_EXECUTOR);
+    }
+
+    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Executor executor) {
+        return ContinuableFuture.call(new Callable<T>() {
+            @Override
+            public T call() throws IOException {
+                return patch(resultClass);
+            }
+
+        }, executor);
+    }
+
     public ContinuableFuture<Response> asyncDelete() {
         return asyncDelete(DEFAULT_EXECUTOR);
     }
@@ -584,15 +616,29 @@ public class OkHttpRequest {
         }, executor);
     }
 
-    public ContinuableFuture<Response> asyncPatch() {
-        return asyncPatch(DEFAULT_EXECUTOR);
+    public ContinuableFuture<Response> asyncExecute(final HttpMethod httpMethod) {
+        return asyncExecute(httpMethod, DEFAULT_EXECUTOR);
     }
 
-    public ContinuableFuture<Response> asyncPatch(final Executor executor) {
+    public ContinuableFuture<Response> asyncExecute(final HttpMethod httpMethod, final Executor executor) {
         return ContinuableFuture.call(new Callable<Response>() {
             @Override
             public Response call() throws IOException {
-                return patch();
+                return execute(httpMethod);
+            }
+
+        }, executor);
+    }
+
+    public <T> ContinuableFuture<T> asyncExecute(final Class<T> resultClass, final HttpMethod httpMethod) {
+        return asyncExecute(resultClass, httpMethod, DEFAULT_EXECUTOR);
+    }
+
+    public <T> ContinuableFuture<T> asyncExecute(final Class<T> resultClass, final HttpMethod httpMethod, final Executor executor) {
+        return ContinuableFuture.call(new Callable<T>() {
+            @Override
+            public T call() throws IOException {
+                return execute(resultClass, httpMethod);
             }
 
         }, executor);

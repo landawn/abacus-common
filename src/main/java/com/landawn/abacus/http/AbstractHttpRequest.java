@@ -14,10 +14,14 @@
 
 package com.landawn.abacus.http;
 
+import java.io.File;
+import java.io.OutputStream;
+import java.io.Writer;
 import java.util.Map;
 
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.util.ContinuableFuture;
+import com.landawn.abacus.util.N;
 
 /**
  * The Class AbstractHttpRequest.
@@ -153,7 +157,7 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public <T> T get(Class<T> resultClass) throws UncheckedIOException {
+    public <T> T get(final Class<T> resultClass) throws UncheckedIOException {
         return get(resultClass, null);
     }
 
@@ -174,7 +178,7 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public <T> T get(Class<T> resultClass, Object query) throws UncheckedIOException {
+    public <T> T get(final Class<T> resultClass, final Object query) throws UncheckedIOException {
         this.httpMethod = HttpMethod.GET;
         this.request = query;
 
@@ -198,7 +202,7 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public <T> T post(Class<T> resultClass, Object body) throws UncheckedIOException {
+    public <T> T post(final Class<T> resultClass, final Object body) throws UncheckedIOException {
         this.httpMethod = HttpMethod.POST;
         this.request = body;
 
@@ -223,7 +227,7 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public <T> T put(Class<T> resultClass, Object body) throws UncheckedIOException {
+    public <T> T put(final Class<T> resultClass, final Object body) throws UncheckedIOException {
         this.httpMethod = HttpMethod.PUT;
         this.request = body;
 
@@ -248,7 +252,7 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public <T> T patch(Class<T> resultClass, Object body) throws UncheckedIOException {
+    public <T> T patch(final Class<T> resultClass, final Object body) throws UncheckedIOException {
         this.httpMethod = HttpMethod.PATCH;
         this.request = body;
 
@@ -271,7 +275,7 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public <T> T delete(Class<T> resultClass) throws UncheckedIOException {
+    public <T> T delete(final Class<T> resultClass) throws UncheckedIOException {
         return delete(resultClass, null);
     }
 
@@ -293,11 +297,89 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public <T> T delete(Class<T> resultClass, Object query) throws UncheckedIOException {
+    public <T> T delete(final Class<T> resultClass, final Object query) throws UncheckedIOException {
         this.httpMethod = HttpMethod.DELETE;
         this.request = query;
 
         return execute(resultClass);
+    }
+
+    /**
+     * 
+     * @param httpMethod
+     * @return
+     * @throws UncheckedIOException
+     */
+    public String execute(final HttpMethod httpMethod) throws UncheckedIOException {
+        return execute(String.class, httpMethod);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param httpMethod
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public <T> T execute(final Class<T> resultClass, final HttpMethod httpMethod) throws UncheckedIOException {
+        return execute(resultClass, httpMethod, null);
+    }
+
+    /**
+     * 
+     * @param httpMethod
+     * @param body
+     * @return
+     * @throws UncheckedIOException
+     */
+    public String execute(final HttpMethod httpMethod, final Object body) throws UncheckedIOException {
+        return execute(String.class, httpMethod, body);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param httpMethod
+     * @param body
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public <T> T execute(final Class<T> resultClass, final HttpMethod httpMethod, final Object body) throws UncheckedIOException {
+        N.checkArgNotNull(httpMethod, "httpMethod");
+
+        this.httpMethod = httpMethod;
+        this.request = body;
+
+        return execute(resultClass);
+    }
+
+    public void execute(final File output, final HttpMethod httpMethod, final Object body) throws UncheckedIOException {
+        N.checkArgNotNull(httpMethod, "httpMethod");
+
+        this.httpMethod = httpMethod;
+        this.request = body;
+
+        httpClient.execute(output, this.httpMethod, this.request, settings);
+    }
+
+    public void execute(final OutputStream output, final HttpMethod httpMethod, final Object body) throws UncheckedIOException {
+        N.checkArgNotNull(httpMethod, "httpMethod");
+
+        this.httpMethod = httpMethod;
+        this.request = body;
+
+        httpClient.execute(output, this.httpMethod, this.request, settings);
+    }
+
+    public void execute(final Writer output, final HttpMethod httpMethod, final Object body) throws UncheckedIOException {
+        N.checkArgNotNull(httpMethod, "httpMethod");
+
+        this.httpMethod = httpMethod;
+        this.request = body;
+
+        httpClient.execute(output, this.httpMethod, this.request, settings);
     }
 
     /**
@@ -314,7 +396,7 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
      * @param resultClass
      * @return
      */
-    public <T> ContinuableFuture<T> asyncGet(Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass) {
         return asyncGet(resultClass, null);
     }
 
@@ -334,7 +416,7 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
      * @param query
      * @return
      */
-    public <T> ContinuableFuture<T> asyncGet(Class<T> resultClass, Object query) {
+    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Object query) {
         this.httpMethod = HttpMethod.GET;
         this.request = query;
 
@@ -357,7 +439,7 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
      * @param body
      * @return
      */
-    public <T> ContinuableFuture<T> asyncPost(Class<T> resultClass, Object body) {
+    public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Object body) {
         this.httpMethod = HttpMethod.POST;
         this.request = body;
 
@@ -380,7 +462,7 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
      * @param body
      * @return
      */
-    public <T> ContinuableFuture<T> asyncPut(Class<T> resultClass, Object body) {
+    public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass, final Object body) {
         this.httpMethod = HttpMethod.PUT;
         this.request = body;
 
@@ -403,7 +485,7 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
      * @param body
      * @return
      */
-    public <T> ContinuableFuture<T> asyncPatch(Class<T> resultClass, Object body) {
+    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Object body) {
         this.httpMethod = HttpMethod.PATCH;
         this.request = body;
 
@@ -424,7 +506,7 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
      * @param resultClass
      * @return
      */
-    public <T> ContinuableFuture<T> asyncDelete(Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass) {
         return asyncDelete(resultClass, null);
     }
 
@@ -444,11 +526,73 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
      * @param query
      * @return
      */
-    public <T> ContinuableFuture<T> asyncDelete(Class<T> resultClass, Object query) {
+    public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final Object query) {
         this.httpMethod = HttpMethod.DELETE;
         this.request = query;
 
         return asyncExecute(resultClass);
+    }
+
+    /**
+     *
+     * @return
+     */
+    public ContinuableFuture<String> asyncExecute(final HttpMethod httpMethod) {
+        return asyncExecute(String.class, httpMethod);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @return
+     */
+    public <T> ContinuableFuture<T> asyncExecute(final Class<T> resultClass, final HttpMethod httpMethod) {
+        return asyncExecute(resultClass, httpMethod, null);
+    }
+
+    /**
+     *
+     * @param body
+     * @return
+     */
+    public ContinuableFuture<String> asyncExecute(final HttpMethod httpMethod, Object body) {
+        return asyncExecute(String.class, httpMethod, body);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param body
+     * @return
+     */
+    public <T> ContinuableFuture<T> asyncExecute(final Class<T> resultClass, final HttpMethod httpMethod, final Object body) {
+        this.httpMethod = httpMethod;
+        this.request = body;
+
+        return asyncExecute(resultClass);
+    }
+
+    public ContinuableFuture<Void> asyncExecute(final File output, final HttpMethod httpMethod, final Object body) {
+        this.httpMethod = httpMethod;
+        this.request = body;
+
+        return httpClient.asyncExecute(output, this.httpMethod, this.request, settings);
+    }
+
+    public ContinuableFuture<Void> asyncExecute(final OutputStream output, final HttpMethod httpMethod, final Object body) {
+        this.httpMethod = httpMethod;
+        this.request = body;
+
+        return httpClient.asyncExecute(output, this.httpMethod, this.request, settings);
+    }
+
+    public ContinuableFuture<Void> asyncExecute(final Writer output, final HttpMethod httpMethod, final Object body) {
+        this.httpMethod = httpMethod;
+        this.request = body;
+
+        return httpClient.asyncExecute(output, this.httpMethod, this.request, settings);
     }
 
     /**
@@ -462,22 +606,7 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
             throw new RuntimeException("HTTP method is not set");
         }
 
-        switch (httpMethod) {
-            case GET:
-                return httpClient.get(resultClass, request, settings);
-
-            case POST:
-                return httpClient.post(resultClass, request, settings);
-
-            case PUT:
-                return httpClient.put(resultClass, request, settings);
-
-            case DELETE:
-                return httpClient.delete(resultClass, request, settings);
-
-            default:
-                throw new RuntimeException("Unsupported HTTP method: " + httpMethod);
-        }
+        return httpClient.execute(resultClass, httpMethod, request, settings);
     }
 
     /**

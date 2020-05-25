@@ -224,6 +224,10 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
         return values.entrySet();
     }
 
+    public Map<String, Object> props() {
+        return values;
+    }
+
     /**
      *
      * @return

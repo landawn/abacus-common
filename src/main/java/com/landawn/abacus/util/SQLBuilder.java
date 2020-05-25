@@ -2976,7 +2976,7 @@ public abstract class SQLBuilder {
         String sql = null;
 
         try {
-            sql = sb.toString();
+            sql = sb.charAt(0) == ' ' ? sb.substring(1) : sb.toString();
         } finally {
             Objectory.recycle(sb);
             sb = null;
@@ -3035,6 +3035,8 @@ public abstract class SQLBuilder {
      * @param setForUpdate
      */
     void init(boolean setForUpdate) {
+        // Note: any change, please take a look at: parse(final Class<?> entityClass, final Condition cond) first.
+
         if (sb.length() > 0) {
             return;
         }
@@ -3680,6 +3682,25 @@ public abstract class SQLBuilder {
         }
 
         /**
+         * To generate {@code sql} part for the specified {@code cond} only.
+         *
+         * @param cond
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder parse(final Condition cond, final Class<?> entityClass) {
+            N.checkArgNotNull(cond, "cond");
+
+            final SQLBuilder instance = createInstance();
+
+            instance.entityClass = entityClass;
+            instance.op = OperationType.QUERY;
+            instance.append(cond);
+
+            return instance;
+        }
+
+        /**
          *
          * @param expr
          * @return
@@ -4280,6 +4301,25 @@ public abstract class SQLBuilder {
          */
         static ACSB createInstance() {
             return new ACSB();
+        }
+
+        /**
+         * To generate {@code sql} part for the specified {@code cond} only.
+         *
+         * @param cond
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder parse(final Condition cond, final Class<?> entityClass) {
+            N.checkArgNotNull(cond, "cond");
+
+            final SQLBuilder instance = createInstance();
+
+            instance.entityClass = entityClass;
+            instance.op = OperationType.QUERY;
+            instance.append(cond);
+
+            return instance;
         }
 
         /**
@@ -4886,6 +4926,25 @@ public abstract class SQLBuilder {
         }
 
         /**
+         * To generate {@code sql} part for the specified {@code cond} only.
+         *
+         * @param cond
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder parse(final Condition cond, final Class<?> entityClass) {
+            N.checkArgNotNull(cond, "cond");
+
+            final SQLBuilder instance = createInstance();
+
+            instance.entityClass = entityClass;
+            instance.op = OperationType.QUERY;
+            instance.append(cond);
+
+            return instance;
+        }
+
+        /**
          *
          * @param expr
          * @return
@@ -5483,6 +5542,25 @@ public abstract class SQLBuilder {
          */
         static PSC createInstance() {
             return new PSC();
+        }
+
+        /**
+         * To generate {@code sql} part for the specified {@code cond} only.
+         *
+         * @param cond
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder parse(final Condition cond, final Class<?> entityClass) {
+            N.checkArgNotNull(cond, "cond");
+
+            final SQLBuilder instance = createInstance();
+
+            instance.entityClass = entityClass;
+            instance.op = OperationType.QUERY;
+            instance.append(cond);
+
+            return instance;
         }
 
         /**
@@ -6086,6 +6164,25 @@ public abstract class SQLBuilder {
         }
 
         /**
+         * To generate {@code sql} part for the specified {@code cond} only.
+         *
+         * @param cond
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder parse(final Condition cond, final Class<?> entityClass) {
+            N.checkArgNotNull(cond, "cond");
+
+            final SQLBuilder instance = createInstance();
+
+            instance.entityClass = entityClass;
+            instance.op = OperationType.QUERY;
+            instance.append(cond);
+
+            return instance;
+        }
+
+        /**
          *
          * @param expr
          * @return
@@ -6683,6 +6780,25 @@ public abstract class SQLBuilder {
          */
         static PLC createInstance() {
             return new PLC();
+        }
+
+        /**
+         * To generate {@code sql} part for the specified {@code cond} only.
+         *
+         * @param cond
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder parse(final Condition cond, final Class<?> entityClass) {
+            N.checkArgNotNull(cond, "cond");
+
+            final SQLBuilder instance = createInstance();
+
+            instance.entityClass = entityClass;
+            instance.op = OperationType.QUERY;
+            instance.append(cond);
+
+            return instance;
         }
 
         /**
@@ -7286,6 +7402,25 @@ public abstract class SQLBuilder {
         }
 
         /**
+         * To generate {@code sql} part for the specified {@code cond} only.
+         *
+         * @param cond
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder parse(final Condition cond, final Class<?> entityClass) {
+            N.checkArgNotNull(cond, "cond");
+
+            final SQLBuilder instance = createInstance();
+
+            instance.entityClass = entityClass;
+            instance.op = OperationType.QUERY;
+            instance.append(cond);
+
+            return instance;
+        }
+
+        /**
          *
          * @param expr
          * @return
@@ -7886,6 +8021,25 @@ public abstract class SQLBuilder {
         }
 
         /**
+         * To generate {@code sql} part for the specified {@code cond} only.
+         *
+         * @param cond
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder parse(final Condition cond, final Class<?> entityClass) {
+            N.checkArgNotNull(cond, "cond");
+
+            final SQLBuilder instance = createInstance();
+
+            instance.entityClass = entityClass;
+            instance.op = OperationType.QUERY;
+            instance.append(cond);
+
+            return instance;
+        }
+
+        /**
          *
          * @param expr
          * @return
@@ -8483,6 +8637,25 @@ public abstract class SQLBuilder {
          */
         static NLC createInstance() {
             return new NLC();
+        }
+
+        /**
+         * To generate {@code sql} part for the specified {@code cond} only.
+         *
+         * @param cond
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder parse(final Condition cond, final Class<?> entityClass) {
+            N.checkArgNotNull(cond, "cond");
+
+            final SQLBuilder instance = createInstance();
+
+            instance.entityClass = entityClass;
+            instance.op = OperationType.QUERY;
+            instance.append(cond);
+
+            return instance;
         }
 
         /**
@@ -9087,6 +9260,25 @@ public abstract class SQLBuilder {
         }
 
         /**
+         * To generate {@code sql} part for the specified {@code cond} only.
+         *
+         * @param cond
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder parse(final Condition cond, final Class<?> entityClass) {
+            N.checkArgNotNull(cond, "cond");
+
+            final SQLBuilder instance = createInstance();
+
+            instance.entityClass = entityClass;
+            instance.op = OperationType.QUERY;
+            instance.append(cond);
+
+            return instance;
+        }
+
+        /**
          *
          * @param expr
          * @return
@@ -9688,6 +9880,25 @@ public abstract class SQLBuilder {
         }
 
         /**
+         * To generate {@code sql} part for the specified {@code cond} only.
+         *
+         * @param cond
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder parse(final Condition cond, final Class<?> entityClass) {
+            N.checkArgNotNull(cond, "cond");
+
+            final SQLBuilder instance = createInstance();
+
+            instance.entityClass = entityClass;
+            instance.op = OperationType.QUERY;
+            instance.append(cond);
+
+            return instance;
+        }
+
+        /**
          *
          * @param expr
          * @return
@@ -10286,6 +10497,25 @@ public abstract class SQLBuilder {
          */
         static MLC createInstance() {
             return new MLC();
+        }
+
+        /**
+         * To generate {@code sql} part for the specified {@code cond} only.
+         *
+         * @param cond
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder parse(final Condition cond, final Class<?> entityClass) {
+            N.checkArgNotNull(cond, "cond");
+
+            final SQLBuilder instance = createInstance();
+
+            instance.entityClass = entityClass;
+            instance.op = OperationType.QUERY;
+            instance.append(cond);
+
+            return instance;
         }
 
         /**
