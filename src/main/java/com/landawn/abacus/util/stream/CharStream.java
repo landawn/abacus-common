@@ -14,6 +14,12 @@
 
 package com.landawn.abacus.util.stream;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.nio.CharBuffer;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,12 +35,14 @@ import com.landawn.abacus.annotation.IntermediateOp;
 import com.landawn.abacus.annotation.ParallelSupported;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.annotation.TerminalOp;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.CharIterator;
 import com.landawn.abacus.util.CharList;
 import com.landawn.abacus.util.CharSummaryStatistics;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ContinuableFuture;
+import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.Fn.FnC;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.IndexedChar;
@@ -760,6 +768,69 @@ public abstract class CharStream
         N.checkArgNotNull(supplier, "supplier");
 
         return Stream.just(supplier).flatMapToChar(it -> it.get().stream());
+    }
+
+    public static CharStream of(final CharBuffer buf) {
+        if (buf == null) {
+            return empty();
+        }
+
+        return IntStream.range(buf.position(), buf.limit()).mapToChar(buf::get);
+    }
+
+    public static CharStream of(final File file) {
+        try {
+            return of(new FileReader(file), true);
+        } catch (FileNotFoundException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public static CharStream of(final Reader reader) {
+        return of(reader, false);
+    }
+
+    public static CharStream of(final Reader reader, final boolean closeReaderAferExecution) {
+        if (reader == null) {
+            return empty();
+        }
+
+        final CharIterator iter = new CharIterator() {
+            private final char[] buf = new char[8192];
+            private boolean isEnd = false;
+            private int count = 0;
+            private int idx = 0;
+
+            @Override
+            public boolean hasNext() {
+                if (idx >= count && isEnd == false) {
+                    try {
+                        count = reader.read(buf);
+                        idx = 0;
+                        isEnd = count <= 0;
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                }
+
+                return count > idx;
+            }
+
+            @Override
+            public char nextChar() {
+                if (hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                return buf[idx++];
+            }
+        };
+
+        if (closeReaderAferExecution) {
+            return of(iter).onClose(Fn.close(reader));
+        } else {
+            return of(iter);
+        }
     }
 
     /**

@@ -15,6 +15,7 @@
 package com.landawn.abacus.util.stream;
 
 import java.math.BigInteger;
+import java.nio.LongBuffer;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -552,6 +553,14 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
                 stream.close();
             }
         });
+    }
+
+    public static LongStream of(final LongBuffer buf) {
+        if (buf == null) {
+            return empty();
+        }
+
+        return IntStream.range(buf.position(), buf.limit()).mapToLong(buf::get);
     }
 
     /**

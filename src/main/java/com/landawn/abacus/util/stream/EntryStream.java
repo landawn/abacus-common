@@ -806,6 +806,13 @@ public final class EntryStream<K, V> implements Closeable {
         return of(s.distinct());
     }
 
+    @ParallelSupported
+    @IntermediateOp
+    @TerminalOpTriggered
+    public EntryStream<K, V> distinct(BinaryOperator<Map.Entry<K, V>> mergeFunction) {
+        return of(s.distinct(mergeFunction));
+    }
+
     @SequentialOnly
     @IntermediateOp
     public EntryStream<K, V> distinctByKey() {

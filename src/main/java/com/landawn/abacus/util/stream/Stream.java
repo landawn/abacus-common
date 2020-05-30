@@ -1308,17 +1308,55 @@ public abstract class Stream<T>
     public abstract Stream<T> intersperse(T delimiter);
 
     /**
+     * Distinct and merge duplicated elements.
+     *
+     * @param mergeFunction
+     * @return
+     * @see #groupBy(Function, Function, BinaryOperator)
+     */
+    @ParallelSupported
+    @IntermediateOp
+    @TerminalOpTriggered
+    public Stream<T> distinct(final BinaryOperator<T> mergeFunction) {
+        // ConcurrentHashMap is not required for parallel stream and it doesn't support null key.
+        // final Supplier<? extends Map<T, T>> supplier = isParallel() ? Suppliers.<T, T> ofConcurrentHashMap() : Suppliers.<T, T> ofLinkedHashMap();
+
+        final Supplier<? extends Map<T, T>> supplier = Suppliers.<T, T> ofLinkedHashMap();
+
+        if (isParallel()) {
+            return groupBy(Fn.<T> identity(), Fn.<T> identity(), mergeFunction, supplier) //
+                    .sequential()
+                    .map(Fn.value())
+                    .parallel(maxThreadNum(), splitor(), asyncExecutor());
+        } else {
+            return groupBy(Fn.<T> identity(), Fn.<T> identity(), mergeFunction, supplier).map(Fn.value());
+        }
+    }
+
+    /**
      * Distinct and filter by occurrences.
      *
      * @param occurrencesFilter
      * @return
      */
-    @ParallelSupported
+    @SequentialOnly
     @IntermediateOp
     public Stream<T> distinct(final Predicate<? super Long> occurrencesFilter) {
-        final Supplier<? extends Map<T, Long>> supplier = isParallel() ? Suppliers.<T, Long> ofConcurrentHashMap() : Suppliers.<T, Long> ofLinkedHashMap();
+        // ConcurrentHashMap is not required for parallel stream and it doesn't support null key.
+        // final Supplier<? extends Map<T, Long>> supplier = isParallel() ? Suppliers.<T, Long> ofConcurrentHashMap() : Suppliers.<T, Long> ofLinkedHashMap();
+        final Supplier<? extends Map<T, Long>> supplier = Suppliers.<T, Long> ofLinkedHashMap();
 
-        return groupBy(Fn.<T> identity(), Collectors.counting(), supplier).filter(Fn.<T, Long> testByValue(occurrencesFilter)).map(Fn.<T, Long> key());
+        if (isParallel()) {
+            return sequential() //
+                    .groupBy(Fn.<T> identity(), Collectors.counting(), supplier)
+                    .filter(Fn.<T, Long> testByValue(occurrencesFilter)) //
+                    .map(Fn.<T, Long> key())
+                    .parallel(maxThreadNum(), splitor(), asyncExecutor());
+        } else {
+            return groupBy(Fn.<T> identity(), Collectors.counting(), supplier) //
+                    .filter(Fn.<T, Long> testByValue(occurrencesFilter))
+                    .map(Fn.<T, Long> key());
+        }
     }
 
     /**
@@ -1342,15 +1380,27 @@ public abstract class Stream<T>
     @ParallelSupported
     @IntermediateOp
     public <K> Stream<T> distinctBy(final Function<? super T, K> keyMapper, final Predicate<? super Long> occurrencesFilter) {
-        final Supplier<? extends Map<Keyed<K, T>, Long>> supplier = isParallel() ? Suppliers.<Keyed<K, T>, Long> ofConcurrentHashMap()
-                : Suppliers.<Keyed<K, T>, Long> ofLinkedHashMap();
+        // ConcurrentHashMap is not required for parallel stream and it doesn't support null key.
+        // final Supplier<? extends Map<Keyed<K, T>, Long>> supplier = isParallel() ? Suppliers.<Keyed<K, T>, Long> ofConcurrentHashMap()
+        //        : Suppliers.<Keyed<K, T>, Long> ofLinkedHashMap();
 
-        return groupBy(Fn.<K, T> keyed(keyMapper), Collectors.counting(), supplier).filter(Fn.<Keyed<K, T>, Long> testByValue(occurrencesFilter))
-                .map(Fn.<T, K, Long> kk());
+        final Supplier<? extends Map<Keyed<K, T>, Long>> supplier = Suppliers.<Keyed<K, T>, Long> ofLinkedHashMap();
+
+        if (isParallel()) {
+            return groupBy(Fn.<K, T> keyed(keyMapper), Collectors.counting(), supplier) //
+                    .sequential()
+                    .filter(Fn.<Keyed<K, T>, Long> testByValue(occurrencesFilter))
+                    .map(Fn.<T, K, Long> kk())
+                    .parallel(maxThreadNum(), splitor(), asyncExecutor());
+        } else {
+            return groupBy(Fn.<K, T> keyed(keyMapper), Collectors.counting(), supplier) //
+                    .filter(Fn.<Keyed<K, T>, Long> testByValue(occurrencesFilter))
+                    .map(Fn.<T, K, Long> kk());
+        }
     }
 
     /**
-     * Distinct and filter by occurrences.
+     * Distinct and merge duplicated elements.
      *
      * @param keyMapper
      * @param mergeFunction
@@ -1361,9 +1411,18 @@ public abstract class Stream<T>
     @IntermediateOp
     @TerminalOpTriggered
     public <K> Stream<T> distinctBy(final Function<? super T, K> keyMapper, final BinaryOperator<T> mergeFunction) {
-        final Supplier<? extends Map<K, T>> supplier = isParallel() ? Suppliers.<K, T> ofConcurrentHashMap() : Suppliers.<K, T> ofLinkedHashMap();
+        // ConcurrentHashMap is not required for parallel stream and it doesn't support null key.
+        // final Supplier<? extends Map<K, T>> supplier = isParallel() ? Suppliers.<K, T> ofConcurrentHashMap() : Suppliers.<K, T> ofLinkedHashMap();
+        final Supplier<? extends Map<K, T>> supplier = Suppliers.<K, T> ofLinkedHashMap();
 
-        return groupBy(keyMapper, Fn.<T> identity(), mergeFunction, supplier).map(Fn.value());
+        if (isParallel()) {
+            return groupBy(keyMapper, Fn.<T> identity(), mergeFunction, supplier) //
+                    .sequential()
+                    .map(Fn.value())
+                    .parallel(maxThreadNum(), splitor(), asyncExecutor());
+        } else {
+            return groupBy(keyMapper, Fn.<T> identity(), mergeFunction, supplier).sequential().map(Fn.value());
+        }
     }
 
     @ParallelSupported
@@ -4960,7 +5019,7 @@ public abstract class Stream<T>
     //     *
     //     * @param a
     //     * @param readThreadNum - count of threads used to read elements from iterator to queue. Default value is min(8, a.length)
-    //     * @param queueSize Default value is N.min(128, a.length * 16)
+    //     * @param queueSize
     //     * @return
     //     */
     //    public static <T> Stream<T> parallelConcat(final T[][] a, final int readThreadNum, final int queueSize) {
@@ -4992,7 +5051,7 @@ public abstract class Stream<T>
     //     *
     //     * @param a
     //     * @param readThreadNum - count of threads used to read elements from iterator to queue. Default value is min(8, a.length)
-    //     * @param queueSize Default value is N.min(128, a.length * 16)
+    //     * @param queueSize
     //     * @return
     //     */
     //    public static <T> Stream<T> parallelConcat(final Collection<? extends T>[] a, final int readThreadNum, final int queueSize) {
@@ -5023,7 +5082,7 @@ public abstract class Stream<T>
      *
      * @param a
      * @param readThreadNum - count of threads used to read elements from iterator to queue. Default value is min(8, a.length)
-     * @param queueSize Default value is N.min(128, a.length * 16)
+     * @param queueSize
      * @return
      */
     public static <T> Stream<T> parallelConcat(final Iterator<? extends T>[] a, final int readThreadNum, final int queueSize) {
@@ -5050,7 +5109,7 @@ public abstract class Stream<T>
      *
      * @param a
      * @param readThreadNum - count of threads used to read elements from iterator to queue. Default value is min(8, a.length)
-     * @param queueSize Default value is N.min(128, a.length * 16)
+     * @param queueSize
      * @return
      */
     public static <T> Stream<T> parallelConcat(final Stream<? extends T>[] a, final int readThreadNum, final int queueSize) {
@@ -8271,7 +8330,7 @@ public abstract class Stream<T>
     //     * @param a
     //     * @param b
     //     * @param zipFunction
-    //     * @param queueSize for each iterator. Default value is 32
+    //     * @param queueSize
     //     * @return
     //     */
     //    public static <A, B, R> Stream<R> parallelZip(final A[] a, final B[] b, final BiFunction<? super A, ? super B, R> zipFunction, final int queueSize) {
@@ -8288,7 +8347,7 @@ public abstract class Stream<T>
     //     * @param b
     //     * @param c
     //     * @param zipFunction
-    //     * @param queueSize for each iterator. Default value is 32
+    //     * @param queueSize
     //     * @return
     //     */
     //    public static <A, B, C, R> Stream<R> parallelZip(final A[] a, final B[] b, final C[] c, final TriFunction<? super A, ? super B, ? super C, R> zipFunction,
@@ -8313,7 +8372,7 @@ public abstract class Stream<T>
     //     * @param a
     //     * @param b
     //     * @param zipFunction
-    //     * @param queueSize for each iterator. Default value is 32
+    //     * @param queueSize
     //     * @return
     //     */
     //    public static <A, B, R> Stream<R> parallelZip(final Collection<? extends A> a, final Collection<? extends B> b,
@@ -8332,7 +8391,7 @@ public abstract class Stream<T>
     //     * @param b
     //     * @param c
     //     * @param zipFunction
-    //     * @param queueSize for each iterator. Default value is 32
+    //     * @param queueSize
     //     * @return
     //     */
     //    public static <A, B, C, R> Stream<R> parallelZip(final Collection<? extends A> a, final Collection<? extends B> b, final Collection<? extends C> c,
@@ -8357,7 +8416,7 @@ public abstract class Stream<T>
      * @param a
      * @param b
      * @param zipFunction
-     * @param queueSize for each iterator. Default value is 32
+     * @param queueSize
      * @return
      */
     public static <A, B, R> Stream<R> parallelZip(final Iterator<? extends A> a, final Iterator<? extends B> b,
@@ -8450,7 +8509,7 @@ public abstract class Stream<T>
      * @param b
      * @param c
      * @param zipFunction
-     * @param queueSize for each iterator. Default value is 32
+     * @param queueSize
      * @return
      */
     public static <A, B, C, R> Stream<R> parallelZip(final Iterator<? extends A> a, final Iterator<? extends B> b, final Iterator<? extends C> c,
@@ -8562,7 +8621,7 @@ public abstract class Stream<T>
      * @param a
      * @param b
      * @param zipFunction
-     * @param queueSize for each iterator. Default value is 32
+     * @param queueSize
      * @return
      */
     public static <A, B, R> Stream<R> parallelZip(final Stream<A> a, final Stream<B> b, final BiFunction<? super A, ? super B, R> zipFunction,
@@ -8581,7 +8640,7 @@ public abstract class Stream<T>
      * @param b
      * @param c
      * @param zipFunction
-     * @param queueSize for each iterator. Default value is 32
+     * @param queueSize
      * @return
      */
     public static <A, B, C, R> Stream<R> parallelZip(final Stream<A> a, final Stream<B> b, final Stream<C> c,
@@ -8625,7 +8684,7 @@ public abstract class Stream<T>
      * @param b
      * @param c
      * @param zipFunction
-     * @param queueSize for each iterator. Default value is 32
+     * @param queueSize
      * @return
      */
     public static <T, R> Stream<R> parallelZip(final Collection<? extends Stream<? extends T>> c, final Function<? super List<? extends T>, R> zipFunction,
@@ -8660,7 +8719,7 @@ public abstract class Stream<T>
      * @param b
      * @param c
      * @param zipFunction
-     * @param queueSize for each iterator. Default value is 32
+     * @param queueSize
      * @return
      */
     public static <T, R> Stream<R> parallelZipp(final Collection<? extends Iterator<? extends T>> c, final Function<? super List<? extends T>, R> zipFunction,
@@ -8772,7 +8831,7 @@ public abstract class Stream<T>
     //     * @param valueForNoneA
     //     * @param valueForNoneB
     //     * @param zipFunction
-    //     * @param queueSize for each iterator. Default value is 32
+    //     * @param queueSize
     //     * @return
     //     */
     //    public static <A, B, R> Stream<R> parallelZip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
@@ -8805,7 +8864,7 @@ public abstract class Stream<T>
     //     * @param valueForNoneB
     //     * @param valueForNoneC
     //     * @param zipFunction
-    //     * @param queueSize for each iterator. Default value is 32
+    //     * @param queueSize
     //     * @return
     //     */
     //    public static <A, B, C, R> Stream<R> parallelZip(final A[] a, final B[] b, final C[] c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
@@ -8832,7 +8891,7 @@ public abstract class Stream<T>
     //     * @param valueForNoneA
     //     * @param valueForNoneB
     //     * @param zipFunction
-    //     * @param queueSize for each iterator. Default value is 32
+    //     * @param queueSize
     //     * @return
     //     */
     //    public static <A, B, R> Stream<R> parallelZip(final Collection<? extends A> a, final Collection<? extends B> b, final A valueForNoneA,
@@ -8865,7 +8924,7 @@ public abstract class Stream<T>
     //     * @param valueForNoneB
     //     * @param valueForNoneC
     //     * @param zipFunction
-    //     * @param queueSize for each iterator. Default value is 32
+    //     * @param queueSize
     //     * @return
     //     */
     //    public static <A, B, C, R> Stream<R> parallelZip(final Collection<? extends A> a, final Collection<? extends B> b, final Collection<? extends C> c,
@@ -8895,7 +8954,7 @@ public abstract class Stream<T>
      * @param valueForNoneA
      * @param valueForNoneB
      * @param zipFunction
-     * @param queueSize for each iterator. Default value is 32
+     * @param queueSize
      * @return
      */
     public static <A, B, R> Stream<R> parallelZip(final Iterator<? extends A> a, final Iterator<? extends B> b, final A valueForNoneA, final B valueForNoneB,
@@ -8997,7 +9056,7 @@ public abstract class Stream<T>
      * @param valueForNoneB
      * @param valueForNoneC
      * @param zipFunction
-     * @param queueSize for each iterator. Default value is 32
+     * @param queueSize
      * @return
      */
     public static <A, B, C, R> Stream<R> parallelZip(final Iterator<? extends A> a, final Iterator<? extends B> b, final Iterator<? extends C> c,
@@ -9106,7 +9165,7 @@ public abstract class Stream<T>
      * @param valueForNoneA
      * @param valueForNoneB
      * @param zipFunction
-     * @param queueSize for each iterator. Default value is 32
+     * @param queueSize
      * @return
      */
     public static <A, B, R> Stream<R> parallelZip(final Stream<A> a, final Stream<B> b, final A valueForNoneA, final B valueForNoneB,
@@ -9139,7 +9198,7 @@ public abstract class Stream<T>
      * @param valueForNoneB
      * @param valueForNoneC
      * @param zipFunction
-     * @param queueSize for each iterator. Default value is 32
+     * @param queueSize
      * @return
      */
     public static <A, B, C, R> Stream<R> parallelZip(final Stream<A> a, final Stream<B> b, final Stream<C> c, final A valueForNoneA, final B valueForNoneB,
@@ -9191,7 +9250,7 @@ public abstract class Stream<T>
      * @param c
      * @param valuesForNone
      * @param zipFunction
-     * @param queueSize for each iterator. Default value is 32
+     * @param queueSize
      * @return
      */
     public static <T, R> Stream<R> parallelZip(final Collection<? extends Stream<? extends T>> c, final List<? extends T> valuesForNone,
@@ -9232,7 +9291,7 @@ public abstract class Stream<T>
      * @param c
      * @param valuesForNone
      * @param zipFunction
-     * @param queueSize for each iterator. Default value is 32
+     * @param queueSize
      * @return
      */
     public static <T, R> Stream<R> parallelZipp(final Collection<? extends Iterator<? extends T>> c, final List<? extends T> valuesForNone,

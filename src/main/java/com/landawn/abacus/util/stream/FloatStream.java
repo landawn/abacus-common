@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.stream;
 
+import java.nio.FloatBuffer;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -493,6 +494,14 @@ public abstract class FloatStream
 
     public static FloatStream of(final FloatIterator iterator) {
         return iterator == null ? empty() : new IteratorFloatStream(iterator);
+    }
+
+    public static FloatStream of(final FloatBuffer buf) {
+        if (buf == null) {
+            return empty();
+        }
+
+        return IntStream.range(buf.position(), buf.limit()).mapToFloat(buf::get);
     }
 
     /**

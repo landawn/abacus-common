@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.stream;
 
+import java.nio.DoubleBuffer;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -541,6 +542,14 @@ public abstract class DoubleStream
                 stream.close();
             }
         });
+    }
+
+    public static DoubleStream of(final DoubleBuffer buf) {
+        if (buf == null) {
+            return empty();
+        }
+
+        return IntStream.range(buf.position(), buf.limit()).mapToDouble(buf::get);
     }
 
     /**

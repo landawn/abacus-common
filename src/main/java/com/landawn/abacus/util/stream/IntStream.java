@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.stream;
 
+import java.nio.IntBuffer;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -571,6 +572,14 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
                 stream.close();
             }
         });
+    }
+
+    public static IntStream of(final IntBuffer buf) {
+        if (buf == null) {
+            return empty();
+        }
+
+        return range(buf.position(), buf.limit()).map(buf::get);
     }
 
     public static IntStream ofCodePoints(final CharSequence str) {

@@ -13,6 +13,7 @@
  */
 package com.landawn.abacus.util.stream;
 
+import java.nio.ShortBuffer;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -476,6 +477,14 @@ public abstract class ShortStream
 
     public static ShortStream of(final ShortIterator iterator) {
         return iterator == null ? empty() : new IteratorShortStream(iterator);
+    }
+
+    public static ShortStream of(final ShortBuffer buf) {
+        if (buf == null) {
+            return empty();
+        }
+
+        return IntStream.range(buf.position(), buf.limit()).mapToShort(buf::get);
     }
 
     /**

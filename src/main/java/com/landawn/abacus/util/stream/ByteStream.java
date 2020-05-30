@@ -14,6 +14,12 @@
 
 package com.landawn.abacus.util.stream;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,12 +35,14 @@ import com.landawn.abacus.annotation.IntermediateOp;
 import com.landawn.abacus.annotation.ParallelSupported;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.annotation.TerminalOp;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.ByteIterator;
 import com.landawn.abacus.util.ByteList;
 import com.landawn.abacus.util.ByteSummaryStatistics;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ContinuableFuture;
+import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.Fn.FnB;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.IndexedByte;
@@ -502,6 +510,69 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
 
     public static ByteStream of(final ByteIterator iterator) {
         return iterator == null ? empty() : new IteratorByteStream(iterator);
+    }
+
+    public static ByteStream of(final ByteBuffer buf) {
+        if (buf == null) {
+            return empty();
+        }
+
+        return IntStream.range(buf.position(), buf.limit()).mapToByte(buf::get);
+    }
+
+    public static ByteStream of(final File file) {
+        try {
+            return of(new FileInputStream(file), true);
+        } catch (FileNotFoundException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public static ByteStream of(final InputStream is) {
+        return of(is, false);
+    }
+
+    public static ByteStream of(final InputStream is, final boolean closeReaderAferExecution) {
+        if (is == null) {
+            return empty();
+        }
+
+        final ByteIterator iter = new ByteIterator() {
+            private final byte[] buf = new byte[8192];
+            private boolean isEnd = false;
+            private int count = 0;
+            private int idx = 0;
+
+            @Override
+            public boolean hasNext() {
+                if (idx >= count && isEnd == false) {
+                    try {
+                        count = is.read(buf);
+                        idx = 0;
+                        isEnd = count <= 0;
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                }
+
+                return count > idx;
+            }
+
+            @Override
+            public byte nextByte() {
+                if (hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                return buf[idx++];
+            }
+        };
+
+        if (closeReaderAferExecution) {
+            return of(iter).onClose(Fn.close(is));
+        } else {
+            return of(iter);
+        }
     }
 
     /**

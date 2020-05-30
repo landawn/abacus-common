@@ -3468,13 +3468,6 @@ class IteratorStream<T> extends AbstractStream<T> {
         return OrElse.FALSE;
     }
 
-    /**
-     * Returns a Stream with elements from a temporary queue which is filled by reading the elements from the specified iterator asynchronously.
-     *
-     * @param stream
-     * @param queueSize Default value is 8
-     * @return
-     */
     @Override
     public Stream<T> queued(int queueSize) {
         assertNotClosed();
@@ -3482,7 +3475,7 @@ class IteratorStream<T> extends AbstractStream<T> {
         final Iterator<T> iter = iteratorEx();
 
         if (iter instanceof QueuedIterator && ((QueuedIterator<? extends T>) iter).max() >= queueSize) {
-            return newStream(elements, sorted, cmp);
+            return newStream(iter, sorted, cmp);
         } else {
             return newStream(Stream.parallelConcatt(Arrays.asList(iter), 1, queueSize), sorted, cmp);
         }

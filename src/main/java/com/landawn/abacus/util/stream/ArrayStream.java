@@ -3526,14 +3526,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
         }, false, null);
     }
-
-    /**
-     * Returns a Stream with elements from a temporary queue which is filled by reading the elements from the specified iterator asynchronously.
-     *
-     * @param stream
-     * @param queueSize Default value is 8
-     * @return
-     */
+ 
     @Override
     public Stream<T> queued(int queueSize) {
         assertNotClosed();
