@@ -1031,6 +1031,13 @@ abstract class AbstractByteStream extends ByteStream {
     }
 
     @Override
+    public ByteStream prepend(final OptionalByte op) {
+        assertNotClosed();
+
+        return prepend(op.stream());
+    }
+
+    @Override
     @SafeVarargs
     public final ByteStream append(final byte... a) {
         assertNotClosed();
@@ -1043,6 +1050,13 @@ abstract class AbstractByteStream extends ByteStream {
         assertNotClosed();
 
         return ByteStream.concat(this, stream);
+    }
+
+    @Override
+    public ByteStream append(final OptionalByte op) {
+        assertNotClosed();
+
+        return prepend(op.stream());
     }
 
     @Override

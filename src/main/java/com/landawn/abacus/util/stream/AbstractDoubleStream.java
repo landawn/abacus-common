@@ -31,12 +31,12 @@ import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.IndexedDouble;
 import com.landawn.abacus.util.Joiner;
 import com.landawn.abacus.util.KahanSummation;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.MutableDouble;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.StringUtil.Strings;
@@ -1032,6 +1032,13 @@ abstract class AbstractDoubleStream extends DoubleStream {
     }
 
     @Override
+    public DoubleStream prepend(final OptionalDouble op) {
+        assertNotClosed();
+
+        return prepend(op.stream());
+    }
+
+    @Override
     @SafeVarargs
     public final DoubleStream append(final double... a) {
         assertNotClosed();
@@ -1044,6 +1051,13 @@ abstract class AbstractDoubleStream extends DoubleStream {
         assertNotClosed();
 
         return DoubleStream.concat(this, stream);
+    }
+
+    @Override
+    public DoubleStream append(final OptionalDouble op) {
+        assertNotClosed();
+
+        return prepend(op.stream());
     }
 
     @Override

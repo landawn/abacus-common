@@ -467,17 +467,6 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
 
     abstract LongIteratorEx iteratorEx();
 
-    @SequentialOnly
-    @IntermediateOp
-    @Beta
-    @SuppressWarnings("rawtypes")
-    @Override
-    public <SS extends BaseStream> SS __(Function<? super LongStream, SS> transfer) {
-        assertNotClosed();
-
-        return transfer.apply(this);
-    }
-
     public static LongStream empty() {
         return new ArrayLongStream(N.EMPTY_LONG_ARRAY, true, null);
     }

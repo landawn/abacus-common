@@ -456,17 +456,6 @@ public abstract class FloatStream
 
     abstract FloatIteratorEx iteratorEx();
 
-    @SequentialOnly
-    @IntermediateOp
-    @Beta
-    @SuppressWarnings("rawtypes")
-    @Override
-    public <SS extends BaseStream> SS __(Function<? super FloatStream, SS> transfer) {
-        assertNotClosed();
-
-        return transfer.apply(this);
-    }
-
     public static FloatStream empty() {
         return new ArrayFloatStream(N.EMPTY_FLOAT_ARRAY, true, null);
     }

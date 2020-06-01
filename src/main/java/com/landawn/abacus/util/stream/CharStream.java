@@ -663,17 +663,6 @@ public abstract class CharStream
 
     abstract CharIteratorEx iteratorEx();
 
-    @SequentialOnly
-    @IntermediateOp
-    @Beta
-    @SuppressWarnings("rawtypes")
-    @Override
-    public <SS extends BaseStream> SS __(Function<? super CharStream, SS> transfer) {
-        assertNotClosed();
-
-        return transfer.apply(this);
-    }
-
     public static CharStream empty() {
         return new ArrayCharStream(N.EMPTY_CHAR_ARRAY, true, null);
     }

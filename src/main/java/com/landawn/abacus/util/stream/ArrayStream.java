@@ -3526,7 +3526,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
         }, false, null);
     }
- 
+
     @Override
     public Stream<T> queued(int queueSize) {
         assertNotClosed();

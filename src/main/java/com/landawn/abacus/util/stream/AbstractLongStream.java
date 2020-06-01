@@ -30,11 +30,11 @@ import com.landawn.abacus.util.Joiner;
 import com.landawn.abacus.util.LongIterator;
 import com.landawn.abacus.util.LongList;
 import com.landawn.abacus.util.LongSummaryStatistics;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.StringUtil.Strings;
@@ -1037,6 +1037,13 @@ abstract class AbstractLongStream extends LongStream {
     }
 
     @Override
+    public LongStream prepend(final OptionalLong op) {
+        assertNotClosed();
+
+        return prepend(op.stream());
+    }
+
+    @Override
     @SafeVarargs
     public final LongStream append(final long... a) {
         assertNotClosed();
@@ -1049,6 +1056,13 @@ abstract class AbstractLongStream extends LongStream {
         assertNotClosed();
 
         return LongStream.concat(this, stream);
+    }
+
+    @Override
+    public LongStream append(final OptionalLong op) {
+        assertNotClosed();
+
+        return prepend(op.stream());
     }
 
     @Override

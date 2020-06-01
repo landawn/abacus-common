@@ -3309,17 +3309,6 @@ public abstract class Stream<T>
         }, executor);
     }
 
-    @SequentialOnly
-    @IntermediateOp
-    @Beta
-    @SuppressWarnings("rawtypes")
-    @Override
-    public <SS extends BaseStream> SS __(Function<? super Stream<T>, SS> transfer) {
-        assertNotClosed();
-
-        return transfer.apply(this);
-    }
-
     //    /**
     //     * 
     //     * @param <U>

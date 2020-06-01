@@ -439,17 +439,6 @@ public abstract class ShortStream
 
     abstract ShortIteratorEx iteratorEx();
 
-    @SequentialOnly
-    @IntermediateOp
-    @Beta
-    @SuppressWarnings("rawtypes")
-    @Override
-    public <SS extends BaseStream> SS __(Function<? super ShortStream, SS> transfer) {
-        assertNotClosed();
-
-        return transfer.apply(this);
-    }
-
     public static ShortStream empty() {
         return new ArrayShortStream(N.EMPTY_SHORT_ARRAY, true, null);
     }

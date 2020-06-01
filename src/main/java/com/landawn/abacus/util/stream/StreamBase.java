@@ -33,6 +33,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.annotation.IntermediateOp;
+import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.AsyncExecutor;
@@ -79,6 +82,7 @@ import com.landawn.abacus.util.Wrapper;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.function.BiConsumer;
 import com.landawn.abacus.util.function.BinaryOperator;
+import com.landawn.abacus.util.function.Function;
 
 /**
  *
@@ -666,6 +670,17 @@ abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, 
     }
 
     @Override
+    @SequentialOnly
+    @IntermediateOp
+    @Beta
+    @SuppressWarnings("rawtypes")
+    public <SS extends BaseStream> SS __(final Function<? super S, ? extends SS> transfer) {
+        assertNotClosed();
+
+        return transfer.apply((S) this);
+    }
+
+    @Override
     public boolean isParallel() {
         return false;
     }
@@ -711,6 +726,17 @@ abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, 
     }
 
     protected abstract S parallel(final int maxThreadNum, final Splitor splitor, final AsyncExecutor asyncExecutor);
+
+    @Override
+    @SequentialOnly
+    @IntermediateOp
+    @Beta
+    @SuppressWarnings("rawtypes")
+    public <SS extends BaseStream> SS psp(final Function<? super S, ? extends SS> ops) {
+        assertNotClosed();
+
+        return (SS) ((StreamBase) ops.apply(this.sequential())).parallel(maxThreadNum(), splitor(), asyncExecutor());
+    }
 
     //    @Deprecated
     //    @Override

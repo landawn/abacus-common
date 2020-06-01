@@ -1031,6 +1031,13 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
+    public CharStream prepend(final OptionalChar op) {
+        assertNotClosed();
+
+        return prepend(op.stream());
+    }
+
+    @Override
     @SafeVarargs
     public final CharStream append(final char... a) {
         assertNotClosed();
@@ -1043,6 +1050,13 @@ abstract class AbstractCharStream extends CharStream {
         assertNotClosed();
 
         return CharStream.concat(this, stream);
+    }
+
+    @Override
+    public CharStream append(final OptionalChar op) {
+        assertNotClosed();
+
+        return prepend(op.stream());
     }
 
     @Override

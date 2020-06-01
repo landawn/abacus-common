@@ -486,17 +486,6 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
 
     abstract IntIteratorEx iteratorEx();
 
-    @SequentialOnly
-    @IntermediateOp
-    @Beta
-    @SuppressWarnings("rawtypes")
-    @Override
-    public <SS extends BaseStream> SS __(Function<? super IntStream, SS> transfer) {
-        assertNotClosed();
-
-        return transfer.apply(this);
-    }
-
     public static IntStream empty() {
         return new ArrayIntStream(N.EMPTY_INT_ARRAY, true, null);
     }

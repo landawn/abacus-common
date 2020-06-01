@@ -31,12 +31,12 @@ import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.IndexedFloat;
 import com.landawn.abacus.util.Joiner;
 import com.landawn.abacus.util.KahanSummation;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.MutableFloat;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.StringUtil.Strings;
@@ -1040,6 +1040,13 @@ abstract class AbstractFloatStream extends FloatStream {
     }
 
     @Override
+    public FloatStream prepend(final OptionalFloat op) {
+        assertNotClosed();
+
+        return prepend(op.stream());
+    }
+
+    @Override
     @SafeVarargs
     public final FloatStream append(final float... a) {
         assertNotClosed();
@@ -1052,6 +1059,13 @@ abstract class AbstractFloatStream extends FloatStream {
         assertNotClosed();
 
         return FloatStream.concat(this, stream);
+    }
+
+    @Override
+    public FloatStream append(final OptionalFloat op) {
+        assertNotClosed();
+
+        return prepend(op.stream());
     }
 
     @Override

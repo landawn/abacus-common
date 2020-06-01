@@ -30,11 +30,11 @@ import com.landawn.abacus.util.IntIterator;
 import com.landawn.abacus.util.IntList;
 import com.landawn.abacus.util.IntSummaryStatistics;
 import com.landawn.abacus.util.Joiner;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.StringUtil.Strings;
@@ -1037,6 +1037,13 @@ abstract class AbstractIntStream extends IntStream {
     }
 
     @Override
+    public IntStream prepend(final OptionalInt op) {
+        assertNotClosed();
+
+        return prepend(op.stream());
+    }
+
+    @Override
     @SafeVarargs
     public final IntStream append(final int... a) {
         assertNotClosed();
@@ -1049,6 +1056,13 @@ abstract class AbstractIntStream extends IntStream {
         assertNotClosed();
 
         return IntStream.concat(this, stream);
+    }
+
+    @Override
+    public IntStream append(final OptionalInt op) {
+        assertNotClosed();
+
+        return prepend(op.stream());
     }
 
     @Override

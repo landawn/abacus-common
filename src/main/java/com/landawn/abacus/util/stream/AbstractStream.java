@@ -4871,6 +4871,13 @@ abstract class AbstractStream<T> extends Stream<T> {
         return append(Stream.of(c));
     }
 
+    @Override
+    public Stream<T> append(final Optional<T> op) {
+        assertNotClosed();
+
+        return prepend(op.stream());
+    }
+
     //    @Override
     //    public Stream<T> appendAlll(Collection<? extends Collection<? extends T>> cs) {
     //        return append(Stream.of(cs).flattMap(Fn.<Collection<? extends T>> identity()));
@@ -4888,6 +4895,13 @@ abstract class AbstractStream<T> extends Stream<T> {
         assertNotClosed();
 
         return prepend(Stream.of(c));
+    }
+
+    @Override
+    public Stream<T> prepend(final Optional<T> op) {
+        assertNotClosed();
+
+        return prepend(op.stream());
     }
 
     //    @Override

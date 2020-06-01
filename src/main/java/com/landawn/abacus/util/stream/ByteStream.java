@@ -472,17 +472,6 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
 
     abstract ByteIteratorEx iteratorEx();
 
-    @SequentialOnly
-    @IntermediateOp
-    @Beta
-    @SuppressWarnings("rawtypes")
-    @Override
-    public <SS extends BaseStream> SS __(Function<? super ByteStream, SS> transfer) {
-        assertNotClosed();
-
-        return transfer.apply(this);
-    }
-
     public static ByteStream empty() {
         return new ArrayByteStream(N.EMPTY_BYTE_ARRAY, true, null);
     }

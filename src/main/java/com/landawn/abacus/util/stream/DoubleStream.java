@@ -456,17 +456,6 @@ public abstract class DoubleStream
 
     abstract DoubleIteratorEx iteratorEx();
 
-    @SequentialOnly
-    @IntermediateOp
-    @Beta
-    @SuppressWarnings("rawtypes")
-    @Override
-    public <SS extends BaseStream> SS __(Function<? super DoubleStream, SS> transfer) {
-        assertNotClosed();
-
-        return transfer.apply(this);
-    }
-
     public static DoubleStream empty() {
         return new ArrayDoubleStream(N.EMPTY_DOUBLE_ARRAY, true, null);
     }

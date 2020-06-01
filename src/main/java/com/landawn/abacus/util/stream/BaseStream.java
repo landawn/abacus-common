@@ -505,7 +505,15 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
 
     @SequentialOnly
     @IntermediateOp
+    S prepend(OT op);
+
+    @SequentialOnly
+    @IntermediateOp
     S append(S s);
+
+    @SequentialOnly
+    @IntermediateOp
+    S append(OT op);
 
     @SequentialOnly
     @IntermediateOp
@@ -654,7 +662,7 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     @IntermediateOp
     @Beta
     @SuppressWarnings("rawtypes")
-    <SS extends BaseStream> SS __(Function<? super S, SS> transfer);
+    <SS extends BaseStream> SS __(Function<? super S, ? extends SS> transfer);
 
     //    @SequentialOnly
     //    Try<S> tried();
@@ -909,6 +917,21 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     @SequentialOnly
     @IntermediateOp
     S parallel(Executor executor);
+
+    /**
+     * Temporarily switch the stream to sequence for operations {@code ops} and then switch back to parallel stream with same {@code maxThreadNum/splitor/asyncExecutor}.
+     * <br />
+     * {@code parallelStream().sequence().map(ops).parallel(sameMaxThreadNum, sameSplitor, sameAsyncExecutor)}
+     * 
+     * @param <SS>
+     * @param ops
+     * @return
+     */
+    @SequentialOnly
+    @IntermediateOp
+    @Beta
+    @SuppressWarnings("rawtypes")
+    <SS extends BaseStream> SS psp(Function<? super S, ? extends SS> ops);
 
     //    /**
     //     * Returns a new sequential {@code SS} by apply {@code thisStream.parallel()} to the specified {@code func}.

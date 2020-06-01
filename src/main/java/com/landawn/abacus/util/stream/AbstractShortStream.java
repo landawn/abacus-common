@@ -27,12 +27,12 @@ import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.IndexedShort;
 import com.landawn.abacus.util.Joiner;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.MutableShort;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.ShortIterator;
@@ -1038,6 +1038,13 @@ abstract class AbstractShortStream extends ShortStream {
     }
 
     @Override
+    public ShortStream prepend(final OptionalShort op) {
+        assertNotClosed();
+
+        return prepend(op.stream());
+    }
+
+    @Override
     @SafeVarargs
     public final ShortStream append(final short... a) {
         assertNotClosed();
@@ -1050,6 +1057,13 @@ abstract class AbstractShortStream extends ShortStream {
         assertNotClosed();
 
         return ShortStream.concat(this, stream);
+    }
+
+    @Override
+    public ShortStream append(final OptionalShort op) {
+        assertNotClosed();
+
+        return prepend(op.stream());
     }
 
     @Override
