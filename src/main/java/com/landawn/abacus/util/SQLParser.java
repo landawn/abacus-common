@@ -189,6 +189,7 @@ public final class SQLParser {
 
         String temp = "";
         char quoteChar = 0;
+        int keepComments = -1;
 
         for (int index = 0; index < sqlLength; index++) {
             // TODO [performance improvement]. will it improve performance if
@@ -196,16 +197,98 @@ public final class SQLParser {
             // char c = sqlCharArray[charIndex];
             char c = sql.charAt(index);
 
-            // is it in a quoted identifier?
             if (quoteChar != 0) {
+                // is it in a quoted identifier?
                 sb.append(c);
 
                 // end in quote.
-                if (c == quoteChar) {
+                if (c == quoteChar && sql.charAt(index - 1) != '\\') {
                     words.add(sb.toString());
                     sb.setLength(0);
 
                     quoteChar = 0;
+                }
+            } else if (c == '-' && index < sqlLength - 1 && sql.charAt(index + 1) == '-') {
+                if (sb.length() > 0) {
+                    words.add(sb.toString());
+                    sb.setLength(0);
+                }
+
+                //    if (keepComments == -1) {
+                //        keepComments = StringUtil.startsWithIgnoreCase(sql, "-- Keep comments") ? 1 : 0;
+                //    }
+                //
+                //    if (keepComments == 1) {
+                //        sb.append(c);
+                //
+                //        while (++index < sqlLength) {
+                //            c = sql.charAt(index);
+                //            sb.append(c);
+                //
+                //            if (c == ENTER || c == ENTER_2) {
+                //                final String tmp = sb.toString();
+                //
+                //                if (!StringUtil.startsWithIgnoreCase(tmp, "-- Keep comments")) {
+                //                    words.add(sb.toString());
+                //                }
+                //
+                //                sb.setLength(0);
+                //
+                //                break;
+                //            }
+                //        }
+                //    } else {
+                //        while (++index < sqlLength) {
+                //            c = sql.charAt(index);
+                //
+                //            if (c == ENTER || c == ENTER_2) {
+                //                break;
+                //            }
+                //        }
+                //    }
+
+                while (++index < sqlLength) {
+                    c = sql.charAt(index);
+
+                    if (c == ENTER || c == ENTER_2) {
+                        break;
+                    }
+                }
+            } else if (c == '/' && index < sqlLength - 1 && sql.charAt(index + 1) == '*') {
+                if (sb.length() > 0) {
+                    words.add(sb.toString());
+                    sb.setLength(0);
+                }
+
+                if (keepComments == -1) {
+                    keepComments = StringUtil.startsWithIgnoreCase(sql, "-- Keep comments") ? 1 : 0;
+                }
+
+                if (keepComments == 1) {
+                    sb.append(c);
+
+                    while (++index < sqlLength) {
+                        c = sql.charAt(index);
+                        sb.append(c);
+
+                        if (c == '*' && index < sqlLength - 1 && sql.charAt(index + 1) == '/') {
+                            sb.append(sql.charAt(++index));
+
+                            words.add(sb.toString());
+                            sb.setLength(0);
+
+                            break;
+                        }
+                    }
+                } else {
+                    while (++index < sqlLength) {
+                        c = sql.charAt(index);
+
+                        if (c == '*' && index < sqlLength - 1 && sql.charAt(index + 1) == '/') {
+                            index++;
+                            break;
+                        }
+                    }
                 }
             } else if (isSeperator(sql, sqlLength, index, c)) {
                 if (sb.length() > 0) {
