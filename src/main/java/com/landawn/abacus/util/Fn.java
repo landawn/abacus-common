@@ -11827,6 +11827,38 @@ public final class Fn extends Comparators {
             }
         };
 
+        //    public static <E extends Exception> Throwables.Runnable<E> close(final AutoCloseable closeable) {
+        //        return new Throwables.Runnable<E>() {
+        //            private volatile boolean isClosed = false;
+        //
+        //            @Override
+        //            public void run() throws E {
+        //                if (isClosed) {
+        //                    return;
+        //                }
+        //
+        //                isClosed = true;
+        //                IOUtil.close(closeable);
+        //            }
+        //        };
+        //    }
+        //
+        //    public static <E extends Exception> Throwables.Runnable<E> closeQuietly(final AutoCloseable closeable) {
+        //        return new Throwables.Runnable<E>() {
+        //            private volatile boolean isClosed = false;
+        //
+        //            @Override
+        //            public void run() {
+        //                if (isClosed) {
+        //                    return;
+        //                }
+        //
+        //                isClosed = true;
+        //                IOUtil.closeQuietly(closeable);
+        //            }
+        //        };
+        //    }
+
         public static <T extends AutoCloseable> Throwables.Consumer<T, Exception> close() {
             return (Throwables.Consumer<T, Exception>) CLOSE;
         }

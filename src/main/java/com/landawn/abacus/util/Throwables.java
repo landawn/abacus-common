@@ -2798,6 +2798,15 @@ public final class Throwables {
          * @throws E
          */
         void accept(int i, int j, T t) throws E;
+
+        default BiIntObjConsumer<T, E> andThen(final BiIntObjConsumer<? super T, E> after) {
+            N.checkArgNotNull(after);
+
+            return (i, j, t) -> {
+                accept(i, j, t);
+                after.accept(i, j, t);
+            };
+        }
     }
 
     public static final class EE {

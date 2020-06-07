@@ -461,41 +461,62 @@ public abstract class StringUtil {
      * @param delimiter
      * @return
      */
+    public static String repeat(final String str, final int n, final String delimiter) {
+        return repeat(str, n, delimiter, N.EMPTY_STRING, N.EMPTY_STRING);
+    }
+
+    /**
+     * 
+     * @param str
+     * @param n
+     * @param delimiter
+     * @param prefix
+     * @param suffix
+     * @return
+     */
     @SuppressWarnings("deprecation")
-    public static String repeat(String str, final int n, String delimiter) {
+    public static String repeat(String str, final int n, String delimiter, String prefix, String suffix) {
         N.checkArgNotNegative(n, "n");
 
         str = str == null ? N.EMPTY_STRING : str;
         delimiter = delimiter == null ? N.EMPTY_STRING : delimiter;
+        prefix = prefix == null ? N.EMPTY_STRING : prefix;
+        suffix = suffix == null ? N.EMPTY_STRING : suffix;
 
         if (n == 0 || (N.isNullOrEmpty(str) && N.isNullOrEmpty(delimiter))) {
-            return N.EMPTY_STRING;
+            return prefix + suffix;
         } else if (n == 1) {
-            return str;
+            return prefix + str + suffix;
         }
 
         final int strLen = str.length();
         final int delimiterLen = delimiter.length();
+        final int prefixLen = prefix.length();
+        final int suffixLen = suffix.length();
         final int len = strLen + delimiterLen;
-        if (Integer.MAX_VALUE / len < n) {
+
+        if ((Integer.MAX_VALUE - prefixLen - suffixLen) / len < n) {
             throw new ArrayIndexOutOfBoundsException("Required array size too large: " + 1L * len * n);
         }
 
-        final int size = len * n - delimiterLen;
+        final int size = len * n - delimiterLen + prefixLen + suffixLen;
         final char[] cbuf = new char[size];
 
-        str.getChars(0, strLen, cbuf, 0);
-        delimiter.getChars(0, delimiterLen, cbuf, strLen);
+        prefix.getChars(0, prefixLen, cbuf, 0);
+        str.getChars(0, strLen, cbuf, prefixLen);
+        delimiter.getChars(0, delimiterLen, cbuf, strLen + prefixLen);
 
         int cnt = 0;
 
         for (cnt = len; cnt < size - cnt; cnt <<= 1) {
-            N.copy(cbuf, 0, cbuf, cnt, cnt);
+            N.copy(cbuf, prefixLen, cbuf, cnt + prefixLen, cnt);
         }
 
-        if (cnt < size) {
-            N.copy(cbuf, 0, cbuf, cnt, size - cnt);
+        if (cnt < size - (prefixLen + suffixLen)) {
+            N.copy(cbuf, prefixLen, cbuf, cnt + prefixLen, size - cnt - prefixLen - suffixLen);
         }
+
+        suffix.getChars(0, suffixLen, cbuf, size - suffixLen);
 
         return InternalUtil.newString(cbuf, true);
     }

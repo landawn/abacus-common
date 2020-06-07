@@ -890,7 +890,7 @@ abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, 
 
     void assertNotClosed() {
         if (isClosed) {
-            throw new IllegalStateException("This stream has been closed");
+            throw new IllegalStateException("This stream is already terminated.");
         }
     }
 
