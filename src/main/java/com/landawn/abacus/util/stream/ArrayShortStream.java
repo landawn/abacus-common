@@ -1026,13 +1026,15 @@ class ArrayShortStream extends AbstractShortStream {
     }
 
     @Override
-    public short[] toArray() {
+    short[] toArray(final boolean closeStream) {
         assertNotClosed();
 
         try {
             return N.copyOfRange(elements, fromIndex, toIndex);
         } finally {
-            close();
+            if (closeStream) {
+                close();
+            }
         }
     }
 
@@ -1769,8 +1771,6 @@ class ArrayShortStream extends AbstractShortStream {
     @Override
     Tuple3<short[], Integer, Integer> array() {
         assertNotClosed();
-
-        close();
 
         return Tuple.of(elements, fromIndex, toIndex);
     }

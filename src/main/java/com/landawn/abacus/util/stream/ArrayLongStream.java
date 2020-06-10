@@ -1260,13 +1260,15 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public long[] toArray() {
+    long[] toArray(final boolean closeStream) {
         assertNotClosed();
 
         try {
             return N.copyOfRange(elements, fromIndex, toIndex);
         } finally {
-            close();
+            if (closeStream) {
+                close();
+            }
         }
     }
 
@@ -2072,8 +2074,6 @@ class ArrayLongStream extends AbstractLongStream {
     @Override
     Tuple3<long[], Integer, Integer> array() {
         assertNotClosed();
-
-        close();
 
         return Tuple.of(elements, fromIndex, toIndex);
     }

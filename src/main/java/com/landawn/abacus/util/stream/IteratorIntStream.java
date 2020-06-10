@@ -1520,13 +1520,15 @@ class IteratorIntStream extends AbstractIntStream {
     }
 
     @Override
-    public int[] toArray() {
+    int[] toArray(final boolean closeStream) {
         assertNotClosed();
 
         try {
             return elements.toArray();
         } finally {
-            close();
+            if (closeStream) {
+                close();
+            }
         }
     }
 

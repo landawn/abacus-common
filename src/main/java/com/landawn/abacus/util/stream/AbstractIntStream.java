@@ -921,7 +921,7 @@ abstract class AbstractIntStream extends IntStream {
             private void init() {
                 if (initialized == false) {
                     initialized = true;
-                    aar = AbstractIntStream.this.toArray();
+                    aar = AbstractIntStream.this.toArray(false);
 
                     if (isParallel()) {
                         N.parallelSort(aar);
@@ -1000,7 +1000,7 @@ abstract class AbstractIntStream extends IntStream {
             private void init() {
                 if (initialized == false) {
                     initialized = true;
-                    aar = op.apply(AbstractIntStream.this.toArray());
+                    aar = op.apply(AbstractIntStream.this.toArray(false));
                     len = aar.length;
                 }
             }

@@ -924,7 +924,7 @@ abstract class AbstractFloatStream extends FloatStream {
             private void init() {
                 if (initialized == false) {
                     initialized = true;
-                    aar = AbstractFloatStream.this.toArray();
+                    aar = AbstractFloatStream.this.toArray(false);
 
                     if (isParallel()) {
                         N.parallelSort(aar);
@@ -1003,7 +1003,7 @@ abstract class AbstractFloatStream extends FloatStream {
             private void init() {
                 if (initialized == false) {
                     initialized = true;
-                    aar = op.apply(AbstractFloatStream.this.toArray());
+                    aar = op.apply(AbstractFloatStream.this.toArray(false));
                     len = aar.length;
                 }
             }

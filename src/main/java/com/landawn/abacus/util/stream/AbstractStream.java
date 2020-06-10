@@ -4191,7 +4191,7 @@ abstract class AbstractStream<T> extends Stream<T> {
             private void init() {
                 if (initialized == false) {
                     initialized = true;
-                    aar = (T[]) op.apply(AbstractStream.this.toArray());
+                    aar = (T[]) op.apply(AbstractStream.this.toArray(false));
                     len = aar.length;
                 }
             }

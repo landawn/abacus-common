@@ -160,7 +160,7 @@ public final class InternalUtil {
         try {
             tmpConstructor = String.class.getDeclaredConstructor(char[].class, boolean.class);
             ClassUtil.setAccessibleQuietly(tmpConstructor, true);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             // ignore.
         }
 
@@ -184,7 +184,7 @@ public final class InternalUtil {
                     isStringCharsGettable = false;
                 }
 
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 // ignore.
                 isStringCharsGettable = false;
             }
@@ -205,7 +205,7 @@ public final class InternalUtil {
         if (share && sharedStringConstructor != null) {
             try {
                 return sharedStringConstructor.newInstance(a, true);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 throw N.toRuntimeException(e);
             }
         } else {

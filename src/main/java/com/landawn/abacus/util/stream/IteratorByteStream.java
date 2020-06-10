@@ -898,13 +898,15 @@ class IteratorByteStream extends AbstractByteStream {
     }
 
     @Override
-    public byte[] toArray() {
+    byte[] toArray(final boolean closeStream) {
         assertNotClosed();
 
         try {
             return elements.toArray();
         } finally {
-            close();
+            if (closeStream) {
+                close();
+            }
         }
     }
 

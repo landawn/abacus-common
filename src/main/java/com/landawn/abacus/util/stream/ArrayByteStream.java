@@ -939,13 +939,15 @@ class ArrayByteStream extends AbstractByteStream {
     }
 
     @Override
-    public byte[] toArray() {
+    byte[] toArray(final boolean closeStream) {
         assertNotClosed();
 
         try {
             return N.copyOfRange(elements, fromIndex, toIndex);
         } finally {
-            close();
+            if (closeStream) {
+                close();
+            }
         }
     }
 
@@ -1682,8 +1684,6 @@ class ArrayByteStream extends AbstractByteStream {
     @Override
     Tuple3<byte[], Integer, Integer> array() {
         assertNotClosed();
-
-        close();
 
         return Tuple.of(elements, fromIndex, toIndex);
     }

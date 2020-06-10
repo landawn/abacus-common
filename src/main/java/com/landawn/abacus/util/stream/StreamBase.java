@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.IntermediateOp;
 import com.landawn.abacus.annotation.SequentialOnly;
+import com.landawn.abacus.annotation.TerminalOp;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.AsyncExecutor;
@@ -810,8 +811,17 @@ abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, 
     //        return Try.of((S) this);
     //    }
 
+    @SequentialOnly
+    @TerminalOp
+    @Override
+    public A toArray() {
+        return toArray(true);
+    }
+
+    abstract A toArray(boolean closeStream);
+
     Tuple3<A, Integer, Integer> array() {
-        final A a = toArray();
+        final A a = toArray(false);
 
         return Tuple.of(a, 0, Array.getLength(a));
     }

@@ -922,7 +922,7 @@ abstract class AbstractShortStream extends ShortStream {
             private void init() {
                 if (initialized == false) {
                     initialized = true;
-                    aar = AbstractShortStream.this.toArray();
+                    aar = AbstractShortStream.this.toArray(false);
 
                     if (isParallel()) {
                         N.parallelSort(aar);
@@ -1001,7 +1001,7 @@ abstract class AbstractShortStream extends ShortStream {
             private void init() {
                 if (initialized == false) {
                     initialized = true;
-                    aar = op.apply(AbstractShortStream.this.toArray());
+                    aar = op.apply(AbstractShortStream.this.toArray(false));
                     len = aar.length;
                 }
             }

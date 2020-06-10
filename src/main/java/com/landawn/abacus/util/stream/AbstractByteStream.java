@@ -915,7 +915,7 @@ abstract class AbstractByteStream extends ByteStream {
             private void init() {
                 if (initialized == false) {
                     initialized = true;
-                    aar = AbstractByteStream.this.toArray();
+                    aar = AbstractByteStream.this.toArray(false);
 
                     if (isParallel()) {
                         N.parallelSort(aar);
@@ -994,7 +994,7 @@ abstract class AbstractByteStream extends ByteStream {
             private void init() {
                 if (initialized == false) {
                     initialized = true;
-                    aar = op.apply(AbstractByteStream.this.toArray());
+                    aar = op.apply(AbstractByteStream.this.toArray(false));
                     len = aar.length;
                 }
             }

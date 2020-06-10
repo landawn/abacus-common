@@ -2539,13 +2539,15 @@ class ArrayStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public Object[] toArray() {
+    Object[] toArray(final boolean closeStream) {
         assertNotClosed();
 
         try {
             return N.copyOfRange(elements, fromIndex, toIndex);
         } finally {
-            close();
+            if (closeStream) {
+                close();
+            }
         }
     }
 
@@ -3545,8 +3547,6 @@ class ArrayStream<T> extends AbstractStream<T> {
     @Override
     Tuple3<Object[], Integer, Integer> array() {
         assertNotClosed();
-
-        close();
 
         return Tuple.of(elements, fromIndex, toIndex);
     }

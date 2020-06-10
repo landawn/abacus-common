@@ -915,7 +915,7 @@ abstract class AbstractCharStream extends CharStream {
             private void init() {
                 if (initialized == false) {
                     initialized = true;
-                    aar = AbstractCharStream.this.toArray();
+                    aar = AbstractCharStream.this.toArray(false);
 
                     if (isParallel()) {
                         N.parallelSort(aar);
@@ -994,7 +994,7 @@ abstract class AbstractCharStream extends CharStream {
             private void init() {
                 if (initialized == false) {
                     initialized = true;
-                    aar = op.apply(AbstractCharStream.this.toArray());
+                    aar = op.apply(AbstractCharStream.this.toArray(false));
                     len = aar.length;
                 }
             }

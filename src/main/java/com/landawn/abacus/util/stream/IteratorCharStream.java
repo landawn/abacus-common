@@ -898,13 +898,15 @@ class IteratorCharStream extends AbstractCharStream {
     }
 
     @Override
-    public char[] toArray() {
+    char[] toArray(final boolean closeStream) {
         assertNotClosed();
 
         try {
             return elements.toArray();
         } finally {
-            close();
+            if (closeStream) {
+                close();
+            }
         }
     }
 

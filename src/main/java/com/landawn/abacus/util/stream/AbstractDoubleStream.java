@@ -916,7 +916,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
             private void init() {
                 if (initialized == false) {
                     initialized = true;
-                    aar = AbstractDoubleStream.this.toArray();
+                    aar = AbstractDoubleStream.this.toArray(false);
 
                     if (isParallel()) {
                         N.parallelSort(aar);
@@ -995,7 +995,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
             private void init() {
                 if (initialized == false) {
                     initialized = true;
-                    aar = op.apply(AbstractDoubleStream.this.toArray());
+                    aar = op.apply(AbstractDoubleStream.this.toArray(false));
                     len = aar.length;
                 }
             }

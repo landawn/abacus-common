@@ -3634,7 +3634,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
             private void init() throws E {
                 if (initialized == false) {
                     initialized = true;
-                    aar = (T[]) ExceptionalStream.this.toArray();
+                    aar = (T[]) ExceptionalStream.this.toArray(false);
                     cursor = aar.length;
                 }
             }
@@ -3696,7 +3696,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
             private void init() throws E {
                 if (initialized == false) {
                     initialized = true;
-                    aar = (T[]) ExceptionalStream.this.toArray();
+                    aar = (T[]) ExceptionalStream.this.toArray(false);
                     len = aar.length;
 
                     if (len > 0) {
@@ -3710,7 +3710,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
                     }
                 }
             }
-        });
+        }, false, null, closeHandlers);
     }
 
     @IntermediateOp
@@ -3860,7 +3860,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
             private void init() throws E {
                 if (initialized == false) {
                     initialized = true;
-                    aar = (T[]) op.apply(ExceptionalStream.this.toArray());
+                    aar = (T[]) op.apply(ExceptionalStream.this.toArray(false));
                     len = aar.length;
                 }
             }
@@ -5789,12 +5789,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
      */
     @TerminalOp
     public Object[] toArray() throws E {
+        return toArray(true);
+    }
+
+    private Object[] toArray(final boolean closeStream) throws E {
         assertNotClosed();
 
         try {
             return toList().toArray();
         } finally {
-            close();
+            if (closeStream) {
+                close();
+            }
         }
     }
 

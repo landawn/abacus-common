@@ -2505,19 +2505,15 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public Object[] toArray() {
-        assertNotClosed();
-
-        return toArray(N.EMPTY_OBJECT_ARRAY);
-    }
-
-    <A> A[] toArray(A[] a) {
+    Object[] toArray(final boolean closeStream) {
         assertNotClosed();
 
         try {
-            return elements.toArray(a);
+            return elements.toArray(N.EMPTY_OBJECT_ARRAY);
         } finally {
-            close();
+            if (closeStream) {
+                close();
+            }
         }
     }
 

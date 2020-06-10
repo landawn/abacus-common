@@ -24,10 +24,10 @@ import java.util.concurrent.ExecutionException;
 
 import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.ContinuableFuture;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.ShortIterator;
 import com.landawn.abacus.util.Throwables;
@@ -925,8 +925,6 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
 
     @Override
     public boolean isParallel() {
-        assertNotClosed();
-
         return true;
     }
 

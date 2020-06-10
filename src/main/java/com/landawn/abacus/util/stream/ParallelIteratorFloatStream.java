@@ -25,10 +25,10 @@ import java.util.concurrent.ExecutionException;
 import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.FloatIterator;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u.Holder;
@@ -1001,8 +1001,6 @@ final class ParallelIteratorFloatStream extends IteratorFloatStream {
 
     @Override
     public boolean isParallel() {
-        assertNotClosed();
-
         return true;
     }
 

@@ -1221,13 +1221,15 @@ class IteratorDoubleStream extends AbstractDoubleStream {
     }
 
     @Override
-    public double[] toArray() {
+    double[] toArray(final boolean closeStream) {
         assertNotClosed();
 
         try {
             return elements.toArray();
         } finally {
-            close();
+            if (closeStream) {
+                close();
+            }
         }
     }
 

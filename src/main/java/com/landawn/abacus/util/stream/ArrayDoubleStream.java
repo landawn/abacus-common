@@ -1259,13 +1259,15 @@ class ArrayDoubleStream extends AbstractDoubleStream {
     }
 
     @Override
-    public double[] toArray() {
+    double[] toArray(final boolean closeStream) {
         assertNotClosed();
 
         try {
             return N.copyOfRange(elements, fromIndex, toIndex);
         } finally {
-            close();
+            if (closeStream) {
+                close();
+            }
         }
     }
 
@@ -1957,8 +1959,6 @@ class ArrayDoubleStream extends AbstractDoubleStream {
     @Override
     Tuple3<double[], Integer, Integer> array() {
         assertNotClosed();
-
-        close();
 
         return Tuple.of(elements, fromIndex, toIndex);
     }

@@ -939,13 +939,15 @@ class ArrayCharStream extends AbstractCharStream {
     }
 
     @Override
-    public char[] toArray() {
+    char[] toArray(final boolean closeStream) {
         assertNotClosed();
 
         try {
             return N.copyOfRange(elements, fromIndex, toIndex);
         } finally {
-            close();
+            if (closeStream) {
+                close();
+            }
         }
     }
 
@@ -1682,8 +1684,6 @@ class ArrayCharStream extends AbstractCharStream {
     @Override
     Tuple3<char[], Integer, Integer> array() {
         assertNotClosed();
-
-        close();
 
         return Tuple.of(elements, fromIndex, toIndex);
     }

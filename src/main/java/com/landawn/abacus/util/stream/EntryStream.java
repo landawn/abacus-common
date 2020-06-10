@@ -1013,6 +1013,16 @@ public final class EntryStream<K, V> implements Closeable {
     }
 
     @ParallelSupported
+    public EntryStream<K, V> onEach(final Consumer<? super Map.Entry<K, V>> action) {
+        return of(s.onEach(action));
+    }
+
+    @ParallelSupported
+    public EntryStream<K, V> onEach(final BiConsumer<? super K, ? super V> action) {
+        return of(s.onEach(Fn.Entries.c(action)));
+    }
+
+    @ParallelSupported
     public <E extends Exception> void forEach(final Throwables.Consumer<? super Map.Entry<K, V>, E> action) throws E {
         s.forEach(action);
     }

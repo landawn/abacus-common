@@ -1259,13 +1259,15 @@ class ArrayFloatStream extends AbstractFloatStream {
     }
 
     @Override
-    public float[] toArray() {
+    float[] toArray(final boolean closeStream) {
         assertNotClosed();
 
         try {
             return N.copyOfRange(elements, fromIndex, toIndex);
         } finally {
-            close();
+            if (closeStream) {
+                close();
+            }
         }
     }
 
@@ -1976,8 +1978,6 @@ class ArrayFloatStream extends AbstractFloatStream {
     @Override
     Tuple3<float[], Integer, Integer> array() {
         assertNotClosed();
-
-        close();
 
         return Tuple.of(elements, fromIndex, toIndex);
     }

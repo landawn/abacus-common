@@ -35,12 +35,12 @@ import com.landawn.abacus.util.FloatIterator;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.IntIterator;
 import com.landawn.abacus.util.LongIterator;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Multimap;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.ShortIterator;
 import com.landawn.abacus.util.Throwables;
@@ -2800,23 +2800,6 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
     }
 
     @Override
-    <A> A[] toArray(A[] a) {
-        assertNotClosed();
-
-        try {
-            if (a.length < (toIndex - fromIndex)) {
-                a = N.newArray(a.getClass().getComponentType(), toIndex - fromIndex);
-            }
-
-            N.copy(elements, fromIndex, a, 0, toIndex - fromIndex);
-
-            return a;
-        } finally {
-            close();
-        }
-    }
-
-    @Override
     public <K, V, M extends Map<K, V>> M toMap(final Function<? super T, ? extends K> keyMapper, final Function<? super T, ? extends V> valueMapper,
             final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory) {
         assertNotClosed();
@@ -4911,8 +4894,6 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
     @Override
     public boolean isParallel() {
-        assertNotClosed();
-
         return true;
     }
 

@@ -1217,13 +1217,15 @@ class IteratorFloatStream extends AbstractFloatStream {
     }
 
     @Override
-    public float[] toArray() {
+    float[] toArray(final boolean closeStream) {
         assertNotClosed();
 
         try {
             return elements.toArray();
         } finally {
-            close();
+            if (closeStream) {
+                close();
+            }
         }
     }
 
