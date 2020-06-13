@@ -72,6 +72,8 @@ import okhttp3.internal.Util;
 public class OkHttpRequest {
     private static final Logger logger = LoggerFactory.getLogger(OkHttpRequest.class);
 
+    private static final MediaType APPLICATION_JSON_MEDIA_TYPE = MediaType.get("application/json");
+
     private static final Executor DEFAULT_EXECUTOR;
 
     static {
@@ -223,6 +225,16 @@ public class OkHttpRequest {
         return this;
     }
 
+    public OkHttpRequest headers(final Map<String, ?> headers) {
+        if (N.notNullOrEmpty(headers)) {
+            for (Map.Entry<String, ?> entry : headers.entrySet()) {
+                builder.header(entry.getKey(), HttpHeaders.valueOf(entry.getValue()));
+            }
+        }
+
+        return this;
+    }
+
     /**
      * Removes all headers on this builder and adds {@code headers}.
      */
@@ -258,12 +270,30 @@ public class OkHttpRequest {
     }
 
     /**
+     * 
+     * @param json
+     * @return
+     */
+    public OkHttpRequest jsonBody(final String json) {
+        return body(json, APPLICATION_JSON_MEDIA_TYPE);
+    }
+
+    /**
+     * 
+     * @param obj
+     * @return
+     */
+    public OkHttpRequest jsonBody(final Object obj) {
+        return body(N.toJSON(obj), APPLICATION_JSON_MEDIA_TYPE);
+    }
+
+    /**
      *
      * @param formBodyByMap
      * @return
      * @see {@code FormBody.Builder}
      */
-    public OkHttpRequest body(final Map<?, ?> formBodyByMap) {
+    public OkHttpRequest formBody(final Map<?, ?> formBodyByMap) {
         if (N.isNullOrEmpty(formBodyByMap)) {
             this.body = Util.EMPTY_REQUEST;
             return this;
@@ -285,7 +315,7 @@ public class OkHttpRequest {
      * @return
      * @see {@code FormBody.Builder}
      */
-    public OkHttpRequest body(final Object formBodyByEntity) {
+    public OkHttpRequest formBody(final Object formBodyByEntity) {
         if (formBodyByEntity == null) {
             this.body = Util.EMPTY_REQUEST;
             return this;
@@ -303,6 +333,30 @@ public class OkHttpRequest {
 
         this.body = builder.build();
         return this;
+    }
+
+    /**
+     *
+     * @param formBodyByMap
+     * @return
+     * @see {@code FormBody.Builder}
+     * @deprecated replaced by {@link #formBody(Map)}.
+     */
+    @Deprecated
+    public OkHttpRequest body(final Map<?, ?> formBodyByMap) {
+        return formBody(formBodyByMap);
+    }
+
+    /**
+     *
+     * @param formBodyByEntity
+     * @return
+     * @see {@code FormBody.Builder}
+     * @deprecated replaced by {@link #formBody(Object)}.
+     */
+    @Deprecated
+    public OkHttpRequest body(final Object formBodyByEntity) {
+        return formBody(formBodyByEntity);
     }
 
     /**
@@ -414,8 +468,7 @@ public class OkHttpRequest {
     }
 
     public Response execute(final HttpMethod httpMethod) throws IOException {
-        body = (body == null && HttpMethod.DELETE.equals(httpMethod)) ? Util.EMPTY_REQUEST : body;
-
+        // body = (body == null && HttpMethod.DELETE.equals(httpMethod)) ? Util.EMPTY_REQUEST : body;
         request = builder.method(httpMethod.name(), body).build();
 
         return httpClient.newCall(request).execute();

@@ -29,8 +29,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -562,19 +560,7 @@ public final class HttpClient extends AbstractHttpClient {
 
                 headerValue = headers.get(headerName);
 
-                if (headerValue instanceof Collection) {
-                    final Iterator<Object> iter = ((Collection<Object>) headerValue).iterator();
-
-                    if (iter.hasNext()) {
-                        connection.setRequestProperty(headerName, N.stringOf(iter.next()));
-                    }
-
-                    while (iter.hasNext()) {
-                        connection.addRequestProperty(headerName, N.stringOf(iter.next()));
-                    }
-                } else {
-                    connection.setRequestProperty(headerName, N.stringOf(headerValue));
-                }
+                connection.setRequestProperty(headerName, HttpHeaders.valueOf(headerValue));
             }
         }
     }

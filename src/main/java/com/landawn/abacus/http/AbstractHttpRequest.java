@@ -234,30 +234,30 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
         return execute(resultClass);
     }
 
-    /**
-     *
-     * @param body
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public String patch(Object body) throws UncheckedIOException {
-        return patch(String.class, body);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param resultClass
-     * @param body
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public <T> T patch(final Class<T> resultClass, final Object body) throws UncheckedIOException {
-        this.httpMethod = HttpMethod.PATCH;
-        this.request = body;
-
-        return execute(resultClass);
-    }
+//    /**
+//     *
+//     * @param body
+//     * @return
+//     * @throws UncheckedIOException the unchecked IO exception
+//     */
+//    public String patch(Object body) throws UncheckedIOException {
+//        return patch(String.class, body);
+//    }
+//
+//    /**
+//     *
+//     * @param <T>
+//     * @param resultClass
+//     * @param body
+//     * @return
+//     * @throws UncheckedIOException the unchecked IO exception
+//     */
+//    public <T> T patch(final Class<T> resultClass, final Object body) throws UncheckedIOException {
+//        this.httpMethod = HttpMethod.PATCH;
+//        this.request = body;
+//
+//        return execute(resultClass);
+//    }
 
     /**
      *
@@ -469,28 +469,28 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
         return asyncExecute(resultClass);
     }
 
-    /**
-     *
-     * @param body
-     * @return
-     */
-    public ContinuableFuture<String> asyncPatch(Object body) {
-        return asyncPatch(String.class, body);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param resultClass
-     * @param body
-     * @return
-     */
-    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Object body) {
-        this.httpMethod = HttpMethod.PATCH;
-        this.request = body;
-
-        return asyncExecute(resultClass);
-    }
+    //    /**
+    //     *
+    //     * @param body
+    //     * @return
+    //     */
+    //    public ContinuableFuture<String> asyncPatch(Object body) {
+    //        return asyncPatch(String.class, body);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param resultClass
+    //     * @param body
+    //     * @return
+    //     */
+    //    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Object body) {
+    //        this.httpMethod = HttpMethod.PATCH;
+    //        this.request = body;
+    //
+    //        return asyncExecute(resultClass);
+    //    }
 
     /**
      *

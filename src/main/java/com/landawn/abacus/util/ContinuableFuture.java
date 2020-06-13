@@ -18,11 +18,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -41,30 +38,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
 public class ContinuableFuture<T> implements Future<T> {
 
     /** The Constant logger. */
-    private static final Logger logger = LoggerFactory.getLogger(ContinuableFuture.class);
-
-    /** The Constant DEFAULT_EXECUTOR. */
-    private static final ExecutorService DEFAULT_EXECUTOR = new ThreadPoolExecutor(Math.max(8, IOUtil.CPU_CORES), Math.max(64, IOUtil.CPU_CORES), 180L,
-            TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-
-    static {
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                logger.warn("Starting to shutdown task in ContinuableFuture");
-
-                try {
-                    DEFAULT_EXECUTOR.shutdown();
-
-                    DEFAULT_EXECUTOR.awaitTermination(60, TimeUnit.SECONDS);
-                } catch (InterruptedException e) {
-                    logger.warn("Not all the requests/tasks executed in ContinuableFuture are completed successfully before shutdown.");
-                } finally {
-                    logger.warn("Completed to shutdown task in ContinuableFuture");
-                }
-            }
-        });
-    }
+    static final Logger logger = LoggerFactory.getLogger(ContinuableFuture.class);
 
     /** The future. */
     final Future<T> future;
@@ -94,7 +68,7 @@ public class ContinuableFuture<T> implements Future<T> {
     ContinuableFuture(final Future<T> future, final List<ContinuableFuture<?>> upFutures, final Executor asyncExecutor) {
         this.future = future;
         this.upFutures = upFutures;
-        this.asyncExecutor = asyncExecutor == null ? DEFAULT_EXECUTOR : asyncExecutor;
+        this.asyncExecutor = asyncExecutor == null ? N.asyncExecutor.getExecutor() : asyncExecutor;
     }
 
     /**
@@ -107,7 +81,7 @@ public class ContinuableFuture<T> implements Future<T> {
      */
     @Deprecated
     public static <E extends Exception> ContinuableFuture<Void> run(final Throwables.Runnable<E> action) {
-        return run(action, DEFAULT_EXECUTOR);
+        return run(action, N.asyncExecutor.getExecutor());
     }
 
     /**
@@ -142,7 +116,7 @@ public class ContinuableFuture<T> implements Future<T> {
      */
     @Deprecated
     public static <T> ContinuableFuture<T> call(final Callable<T> action) {
-        return call(action, DEFAULT_EXECUTOR);
+        return call(action, N.asyncExecutor.getExecutor());
     }
 
     /**
@@ -198,7 +172,7 @@ public class ContinuableFuture<T> implements Future<T> {
             public T get(final long timeout, final TimeUnit unit) {
                 return result;
             }
-        }, null, DEFAULT_EXECUTOR);
+        }, null, N.asyncExecutor.getExecutor());
     }
 
     /**

@@ -24,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.ContinuableFuture;
-import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 
 /**
@@ -44,11 +43,6 @@ public abstract class AbstractHttpClient implements Closeable {
 
     /** The Constant DEFAULT_READ_TIMEOUT. */
     public static final int DEFAULT_READ_TIMEOUT = 16000;
-
-    /** The Constant asyncExecutor. */
-    // for static asynchronization operation.
-    protected static final AsyncExecutor asyncExecutor = new AsyncExecutor(Math.max(8, IOUtil.CPU_CORES), Math.max(256, IOUtil.CPU_CORES), 180L,
-            TimeUnit.SECONDS);
 
     /** The url. */
     // ...
@@ -649,93 +643,94 @@ public abstract class AbstractHttpClient implements Closeable {
         return asyncExecute(resultClass, HttpMethod.PUT, request, settings);
     }
 
-    /**
-     *
-     * @param request
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public String patch(final Object request) throws UncheckedIOException {
-        return patch(String.class, request);
-    }
-
-    /**
-     *
-     * @param request
-     * @param settings
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public String patch(final Object request, final HttpSettings settings) throws UncheckedIOException {
-        return patch(String.class, request, settings);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param resultClass
-     * @param request
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public <T> T patch(final Class<T> resultClass, final Object request) throws UncheckedIOException {
-        return patch(resultClass, request, _settings);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param resultClass
-     * @param request
-     * @param settings
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public <T> T patch(final Class<T> resultClass, final Object request, final HttpSettings settings) throws UncheckedIOException {
-        return execute(resultClass, HttpMethod.PATCH, request, settings);
-    }
-
-    /**
-     *
-     * @param request
-     * @return
-     */
-    public ContinuableFuture<String> asyncPatch(final Object request) {
-        return asyncPatch(String.class, request);
-    }
-
-    /**
-     *
-     * @param request
-     * @param settings
-     * @return
-     */
-    public ContinuableFuture<String> asyncPatch(final Object request, final HttpSettings settings) {
-        return asyncPatch(String.class, request, settings);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param resultClass
-     * @param request
-     * @return
-     */
-    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Object request) {
-        return asyncPatch(resultClass, request, _settings);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param resultClass
-     * @param request
-     * @param settings
-     * @return
-     */
-    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Object request, final HttpSettings settings) {
-        return asyncExecute(resultClass, HttpMethod.PATCH, request, settings);
-    }
+    // TODO HTTP METHOD PATCH is not supported by HttpURLConnection.
+    //    /**
+    //     *
+    //     * @param request
+    //     * @return
+    //     * @throws UncheckedIOException the unchecked IO exception
+    //     */
+    //    public String patch(final Object request) throws UncheckedIOException {
+    //        return patch(String.class, request);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param request
+    //     * @param settings
+    //     * @return
+    //     * @throws UncheckedIOException the unchecked IO exception
+    //     */
+    //    public String patch(final Object request, final HttpSettings settings) throws UncheckedIOException {
+    //        return patch(String.class, request, settings);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param resultClass
+    //     * @param request
+    //     * @return
+    //     * @throws UncheckedIOException the unchecked IO exception
+    //     */
+    //    public <T> T patch(final Class<T> resultClass, final Object request) throws UncheckedIOException {
+    //        return patch(resultClass, request, _settings);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param resultClass
+    //     * @param request
+    //     * @param settings
+    //     * @return
+    //     * @throws UncheckedIOException the unchecked IO exception
+    //     */
+    //    public <T> T patch(final Class<T> resultClass, final Object request, final HttpSettings settings) throws UncheckedIOException {
+    //        return execute(resultClass, HttpMethod.PATCH, request, settings);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param request
+    //     * @return
+    //     */
+    //    public ContinuableFuture<String> asyncPatch(final Object request) {
+    //        return asyncPatch(String.class, request);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param request
+    //     * @param settings
+    //     * @return
+    //     */
+    //    public ContinuableFuture<String> asyncPatch(final Object request, final HttpSettings settings) {
+    //        return asyncPatch(String.class, request, settings);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param resultClass
+    //     * @param request
+    //     * @return
+    //     */
+    //    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Object request) {
+    //        return asyncPatch(resultClass, request, _settings);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param resultClass
+    //     * @param request
+    //     * @param settings
+    //     * @return
+    //     */
+    //    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Object request, final HttpSettings settings) {
+    //        return asyncExecute(resultClass, HttpMethod.PATCH, request, settings);
+    //    }
 
     /**
      *

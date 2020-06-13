@@ -14,12 +14,14 @@
 
 package com.landawn.abacus.http;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.StringUtil;
 import com.landawn.abacus.util.function.BiConsumer;
 
 /**
@@ -559,6 +561,16 @@ public final class HttpHeaders {
         N.checkArgNotNull(headers);
 
         return new HttpHeaders(new HashMap<>(headers));
+    }
+
+    public static String valueOf(final Object headerValue) {
+        if (headerValue instanceof String) {
+            return (String) headerValue;
+        } else if (headerValue instanceof Collection) {
+            return StringUtil.join((Collection<?>) headerValue, "; ");
+        } else {
+            return N.stringOf(headerValue);
+        }
     }
 
     /** 

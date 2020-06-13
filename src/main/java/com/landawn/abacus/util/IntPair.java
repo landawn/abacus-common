@@ -15,7 +15,6 @@
 package com.landawn.abacus.util;
 
 import com.landawn.abacus.util.u.Optional;
-import com.landawn.abacus.util.stream.IntStream;
 
 /**
  * The Class IntPair.
@@ -23,12 +22,9 @@ import com.landawn.abacus.util.stream.IntStream;
  * @author Haiyang Li
  * @since 1.2
  */
-public final class IntPair extends PrimitivePair<IntPair> {
+public final class IntPair {
 
-    /** The  1. */
     public final int _1;
-
-    /** The  2. */
     public final int _2;
 
     /**
@@ -101,22 +97,6 @@ public final class IntPair extends PrimitivePair<IntPair> {
 
     /**
      *
-     * @return
-     */
-    public int[] toArray() {
-        return new int[] { _1, _2 };
-    }
-
-    /**
-     *
-     * @return
-     */
-    public IntList toList() {
-        return IntList.of(_1, _2);
-    }
-
-    /**
-     *
      * @param <E>
      * @param comsumer
      * @throws E the e
@@ -157,14 +137,6 @@ public final class IntPair extends PrimitivePair<IntPair> {
      */
     public <E extends Exception> Optional<IntPair> filter(final Throwables.IntBiPredicate<E> predicate) throws E {
         return predicate.test(_1, _2) ? Optional.of(this) : Optional.<IntPair> empty();
-    }
-
-    /**
-     *
-     * @return
-     */
-    public IntStream stream() {
-        return IntStream.of(_1, _2);
     }
 
     /**
