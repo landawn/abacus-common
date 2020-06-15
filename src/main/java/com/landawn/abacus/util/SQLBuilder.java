@@ -94,232 +94,156 @@ import com.landawn.abacus.util.u.Optional;
 @SuppressWarnings("deprecation")
 public abstract class SQLBuilder {
 
-    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(SQLBuilder.class);
 
-    /** The Constant ALL. */
     public static final String ALL = WD.ALL;
 
-    /** The Constant TOP. */
     public static final String TOP = WD.TOP;
 
-    /** The Constant UNIQUE. */
     public static final String UNIQUE = WD.UNIQUE;
 
-    /** The Constant DISTINCT. */
     public static final String DISTINCT = WD.DISTINCT;
 
-    /** The Constant DISTINCTROW. */
     public static final String DISTINCTROW = WD.DISTINCTROW;
 
-    /** The Constant ASTERISK. */
     public static final String ASTERISK = WD.ASTERISK;
 
-    /** The Constant COUNT_ALL. */
     public static final String COUNT_ALL = "count(*)";
 
-    /** The Constant _1. */
     public static final String _1 = "1";
 
-    /** The Constant _1_list. */
     public static final List<String> _1_list = ImmutableList.of(_1);
 
-    /** The Constant _INSERT. */
     static final char[] _INSERT = WD.INSERT.toCharArray();
 
-    /** The Constant _SPACE_INSERT_SPACE. */
     static final char[] _SPACE_INSERT_SPACE = (WD.SPACE + WD.INSERT + WD.SPACE).toCharArray();
 
-    /** The Constant _INTO. */
     static final char[] _INTO = WD.INTO.toCharArray();
 
-    /** The Constant _SPACE_INTO_SPACE. */
     static final char[] _SPACE_INTO_SPACE = (WD.SPACE + WD.INTO + WD.SPACE).toCharArray();
 
-    /** The Constant _VALUES. */
     static final char[] _VALUES = WD.VALUES.toCharArray();
 
-    /** The Constant _SPACE_VALUES_SPACE. */
     static final char[] _SPACE_VALUES_SPACE = (WD.SPACE + WD.VALUES + WD.SPACE).toCharArray();
 
-    /** The Constant _SELECT. */
     static final char[] _SELECT = WD.SELECT.toCharArray();
 
-    /** The Constant _SPACE_SELECT_SPACE. */
     static final char[] _SPACE_SELECT_SPACE = (WD.SPACE + WD.SELECT + WD.SPACE).toCharArray();
 
-    /** The Constant _FROM. */
     static final char[] _FROM = WD.FROM.toCharArray();
 
-    /** The Constant _SPACE_FROM_SPACE. */
     static final char[] _SPACE_FROM_SPACE = (WD.SPACE + WD.FROM + WD.SPACE).toCharArray();
 
-    /** The Constant _UPDATE. */
     static final char[] _UPDATE = WD.UPDATE.toCharArray();
 
-    /** The Constant _SPACE_UPDATE_SPACE. */
     static final char[] _SPACE_UPDATE_SPACE = (WD.SPACE + WD.UPDATE + WD.SPACE).toCharArray();
 
-    /** The Constant _SET. */
     static final char[] _SET = WD.SET.toCharArray();
 
-    /** The Constant _SPACE_SET_SPACE. */
     static final char[] _SPACE_SET_SPACE = (WD.SPACE + WD.SET + WD.SPACE).toCharArray();
 
-    /** The Constant _DELETE. */
     static final char[] _DELETE = WD.DELETE.toCharArray();
 
-    /** The Constant _SPACE_DELETE_SPACE. */
     static final char[] _SPACE_DELETE_SPACE = (WD.SPACE + WD.DELETE + WD.SPACE).toCharArray();
 
-    /** The Constant _JOIN. */
     static final char[] _JOIN = WD.JOIN.toCharArray();
 
-    /** The Constant _SPACE_JOIN_SPACE. */
     static final char[] _SPACE_JOIN_SPACE = (WD.SPACE + WD.JOIN + WD.SPACE).toCharArray();
 
-    /** The Constant _LEFT_JOIN. */
     static final char[] _LEFT_JOIN = WD.LEFT_JOIN.toCharArray();
 
-    /** The Constant _SPACE_LEFT_JOIN_SPACE. */
     static final char[] _SPACE_LEFT_JOIN_SPACE = (WD.SPACE + WD.LEFT_JOIN + WD.SPACE).toCharArray();
 
-    /** The Constant _RIGHT_JOIN. */
     static final char[] _RIGHT_JOIN = WD.RIGHT_JOIN.toCharArray();
 
-    /** The Constant _SPACE_RIGHT_JOIN_SPACE. */
     static final char[] _SPACE_RIGHT_JOIN_SPACE = (WD.SPACE + WD.RIGHT_JOIN + WD.SPACE).toCharArray();
 
-    /** The Constant _FULL_JOIN. */
     static final char[] _FULL_JOIN = WD.FULL_JOIN.toCharArray();
 
-    /** The Constant _SPACE_FULL_JOIN_SPACE. */
     static final char[] _SPACE_FULL_JOIN_SPACE = (WD.SPACE + WD.FULL_JOIN + WD.SPACE).toCharArray();
 
-    /** The Constant _CROSS_JOIN. */
     static final char[] _CROSS_JOIN = WD.CROSS_JOIN.toCharArray();
 
-    /** The Constant _SPACE_CROSS_JOIN_SPACE. */
     static final char[] _SPACE_CROSS_JOIN_SPACE = (WD.SPACE + WD.CROSS_JOIN + WD.SPACE).toCharArray();
 
-    /** The Constant _INNER_JOIN. */
     static final char[] _INNER_JOIN = WD.INNER_JOIN.toCharArray();
 
-    /** The Constant _SPACE_INNER_JOIN_SPACE. */
     static final char[] _SPACE_INNER_JOIN_SPACE = (WD.SPACE + WD.INNER_JOIN + WD.SPACE).toCharArray();
 
-    /** The Constant _NATURAL_JOIN. */
     static final char[] _NATURAL_JOIN = WD.NATURAL_JOIN.toCharArray();
 
-    /** The Constant _SPACE_NATURAL_JOIN_SPACE. */
     static final char[] _SPACE_NATURAL_JOIN_SPACE = (WD.SPACE + WD.NATURAL_JOIN + WD.SPACE).toCharArray();
 
-    /** The Constant _ON. */
     static final char[] _ON = WD.ON.toCharArray();
 
-    /** The Constant _SPACE_ON_SPACE. */
     static final char[] _SPACE_ON_SPACE = (WD.SPACE + WD.ON + WD.SPACE).toCharArray();
 
-    /** The Constant _USING. */
     static final char[] _USING = WD.USING.toCharArray();
 
-    /** The Constant _SPACE_USING_SPACE. */
     static final char[] _SPACE_USING_SPACE = (WD.SPACE + WD.USING + WD.SPACE).toCharArray();
 
-    /** The Constant _WHERE. */
     static final char[] _WHERE = WD.WHERE.toCharArray();
 
-    /** The Constant _SPACE_WHERE_SPACE. */
     static final char[] _SPACE_WHERE_SPACE = (WD.SPACE + WD.WHERE + WD.SPACE).toCharArray();
 
-    /** The Constant _GROUP_BY. */
     static final char[] _GROUP_BY = WD.GROUP_BY.toCharArray();
 
-    /** The Constant _SPACE_GROUP_BY_SPACE. */
     static final char[] _SPACE_GROUP_BY_SPACE = (WD.SPACE + WD.GROUP_BY + WD.SPACE).toCharArray();
 
-    /** The Constant _HAVING. */
     static final char[] _HAVING = WD.HAVING.toCharArray();
 
-    /** The Constant _SPACE_HAVING_SPACE. */
     static final char[] _SPACE_HAVING_SPACE = (WD.SPACE + WD.HAVING + WD.SPACE).toCharArray();
 
-    /** The Constant _ORDER_BY. */
     static final char[] _ORDER_BY = WD.ORDER_BY.toCharArray();
 
-    /** The Constant _SPACE_ORDER_BY_SPACE. */
     static final char[] _SPACE_ORDER_BY_SPACE = (WD.SPACE + WD.ORDER_BY + WD.SPACE).toCharArray();
 
-    /** The Constant _LIMIT. */
     static final char[] _LIMIT = (WD.SPACE + WD.LIMIT + WD.SPACE).toCharArray();
 
-    /** The Constant _SPACE_LIMIT_SPACE. */
     static final char[] _SPACE_LIMIT_SPACE = (WD.SPACE + WD.LIMIT + WD.SPACE).toCharArray();
 
-    /** The Constant _OFFSET. */
     static final char[] _OFFSET = WD.OFFSET.toCharArray();
 
-    /** The Constant _SPACE_OFFSET_SPACE. */
     static final char[] _SPACE_OFFSET_SPACE = (WD.SPACE + WD.OFFSET + WD.SPACE).toCharArray();
 
-    /** The Constant _AND. */
     static final char[] _AND = WD.AND.toCharArray();
 
-    /** The Constant _SPACE_AND_SPACE. */
     static final char[] _SPACE_AND_SPACE = (WD.SPACE + WD.AND + WD.SPACE).toCharArray();
 
-    /** The Constant _OR. */
     static final char[] _OR = WD.OR.toCharArray();
 
-    /** The Constant _SPACE_OR_SPACE. */
     static final char[] _SPACE_OR_SPACE = (WD.SPACE + WD.OR + WD.SPACE).toCharArray();
 
-    /** The Constant _UNION. */
     static final char[] _UNION = WD.UNION.toCharArray();
 
-    /** The Constant _SPACE_UNION_SPACE. */
     static final char[] _SPACE_UNION_SPACE = (WD.SPACE + WD.UNION + WD.SPACE).toCharArray();
 
-    /** The Constant _UNION_ALL. */
     static final char[] _UNION_ALL = WD.UNION_ALL.toCharArray();
 
-    /** The Constant _SPACE_UNION_ALL_SPACE. */
     static final char[] _SPACE_UNION_ALL_SPACE = (WD.SPACE + WD.UNION_ALL + WD.SPACE).toCharArray();
 
-    /** The Constant _INTERSECT. */
     static final char[] _INTERSECT = WD.INTERSECT.toCharArray();
 
-    /** The Constant _SPACE_INTERSECT_SPACE. */
     static final char[] _SPACE_INTERSECT_SPACE = (WD.SPACE + WD.INTERSECT + WD.SPACE).toCharArray();
 
-    /** The Constant _EXCEPT. */
     static final char[] _EXCEPT = WD.EXCEPT.toCharArray();
 
-    /** The Constant _SPACE_EXCEPT_SPACE. */
     static final char[] _SPACE_EXCEPT_SPACE = (WD.SPACE + WD.EXCEPT + WD.SPACE).toCharArray();
 
-    /** The Constant _EXCEPT2. */
     static final char[] _EXCEPT2 = WD.EXCEPT2.toCharArray();
 
-    /** The Constant _SPACE_EXCEPT2_SPACE. */
     static final char[] _SPACE_EXCEPT2_SPACE = (WD.SPACE + WD.EXCEPT2 + WD.SPACE).toCharArray();
 
-    /** The Constant _AS. */
     static final char[] _AS = WD.AS.toCharArray();
 
-    /** The Constant _SPACE_AS_SPACE. */
     static final char[] _SPACE_AS_SPACE = (WD.SPACE + WD.AS + WD.SPACE).toCharArray();
 
-    /** The Constant _SPACE_EQUAL_SPACE. */
     static final char[] _SPACE_EQUAL_SPACE = (WD.SPACE + WD.EQUAL + WD.SPACE).toCharArray();
 
-    /** The Constant _SPACE_FOR_UPDATE. */
     static final char[] _SPACE_FOR_UPDATE = (WD.SPACE + WD.FOR_UPDATE).toCharArray();
 
-    /** The Constant _COMMA_SPACE. */
     static final char[] _COMMA_SPACE = WD.COMMA_SPACE.toCharArray();
 
-    /** The Constant SPACE_AS_SPACE. */
     static final String SPACE_AS_SPACE = WD.SPACE + WD.AS + WD.SPACE;
 
     private static final Set<String> sqlKeyWords = new HashSet<>(1024);
@@ -346,13 +270,11 @@ public abstract class SQLBuilder {
             }
         }
     }
-    /** The Constant subEntityPropNamesPool. */
+
     private static final Map<Class<?>, ImmutableSet<String>> subEntityPropNamesPool = new ObjectPool<>(N.POOL_SIZE);
 
-    /** The Constant nonSubEntityPropNamesPool. */
     private static final Map<Class<?>, ImmutableSet<String>> nonSubEntityPropNamesPool = new ObjectPool<>(N.POOL_SIZE);
 
-    /** The Constant defaultPropNamesPool. */
     private static final Map<Class<?>, Set<String>[]> defaultPropNamesPool = new ObjectPool<>(N.POOL_SIZE);
 
     private static final Map<NamingPolicy, Map<Class<?>, String>> fullSelectPartsPool = new HashMap<>(NamingPolicy.values().length);
@@ -363,13 +285,10 @@ public abstract class SQLBuilder {
         }
     }
 
-    /** The Constant tableDeleteFrom. */
     private static final Map<String, char[]> tableDeleteFrom = new ConcurrentHashMap<>();
 
-    /** The Constant classTableNameMap. */
     private static final Map<Class<?>, String[]> classTableNameMap = new ConcurrentHashMap<>();
 
-    /** The Constant activeStringBuilderCounter. */
     private static final AtomicInteger activeStringBuilderCounter = new AtomicInteger();
 
     private final NamingPolicy namingPolicy;
@@ -1074,20 +993,20 @@ public abstract class SQLBuilder {
 
     /**
      * 
-     * @param expr <code>ALL | DISTINCT | DISTINCTROW...</code>
+     * @param preselect <code>ALL | DISTINCT | DISTINCTROW...</code>
      * @return
      */
-    public SQLBuilder preselect(final String expr) {
-        N.checkArgNotNull(expr, "expr");
+    public SQLBuilder preselect(final String preselect) {
+        N.checkArgNotNull(preselect, "preselect");
 
         if (sb.length() > 0) {
             throw new IllegalStateException("'distinct|preselect' must be called before 'from' operation");
         }
 
-        if (N.isNullOrEmpty(preselect)) {
-            preselect = expr;
+        if (N.isNullOrEmpty(this.preselect)) {
+            this.preselect = preselect;
         } else {
-            preselect = preselect + expr;
+            this.preselect += preselect;
         }
 
         return this;
@@ -1138,268 +1057,6 @@ public abstract class SQLBuilder {
 
     /**
      *
-     * @param tableName
-     * @param fromCause
-     * @return
-     */
-    private SQLBuilder from(final String tableName, final String fromCause) {
-        if (op != OperationType.QUERY) {
-            throw new RuntimeException("Invalid operation: " + op);
-        }
-
-        if (N.isNullOrEmpty(columnNames) && N.isNullOrEmpty(columnNameList) && N.isNullOrEmpty(columnAliases) && N.isNullOrEmpty(multiSelects)) {
-            throw new RuntimeException("Column names or props must be set first by select");
-        }
-
-        int idx = tableName.indexOf(' ');
-
-        if (idx > 0) {
-            this.tableName = tableName.substring(0, idx).trim();
-            alias = tableName.substring(idx + 1).trim();
-        } else {
-            this.tableName = tableName.trim();
-        }
-
-        if (entityClass != null && N.notNullOrEmpty(alias)) {
-            addPropColumnMapForAlias(entityClass, alias);
-        }
-
-        sb.append(_SELECT);
-        sb.append(_SPACE);
-
-        if (N.notNullOrEmpty(preselect)) {
-            sb.append(preselect);
-            sb.append(_SPACE);
-        }
-
-        final boolean withAlias = N.notNullOrEmpty(alias);
-
-        final Map<String, String> propColumnNameMap = ClassUtil.getProp2ColumnNameMap(entityClass, namingPolicy);
-
-        if (N.notNullOrEmpty(columnNames)) {
-            if (columnNames.length == 1) {
-                final String columnName = StringUtil.trim(columnNames[0]);
-                idx = columnName.indexOf(' ');
-
-                if (idx < 0) {
-                    idx = columnName.indexOf(',');
-                }
-
-                if (idx > 0) {
-                    sb.append(columnName);
-                } else {
-                    if (withAlias && columnName.indexOf(WD._PERIOD) < 0) {
-                        sb.append(alias).append(WD._PERIOD);
-                    }
-
-                    sb.append(formalizeColumnName(propColumnNameMap, columnName));
-
-                    if (namingPolicy != NamingPolicy.LOWER_CAMEL_CASE && !WD.ASTERISK.equals(columnName)) {
-                        sb.append(_SPACE_AS_SPACE);
-
-                        sb.append(WD._QUOTATION_D);
-                        sb.append(columnName);
-                        sb.append(WD._QUOTATION_D);
-                    }
-                }
-            } else {
-                String columnName = null;
-
-                for (int i = 0, len = columnNames.length; i < len; i++) {
-                    columnName = StringUtil.trim(columnNames[i]);
-
-                    if (i > 0) {
-                        sb.append(_COMMA_SPACE);
-                    }
-
-                    idx = columnName.indexOf(' ');
-
-                    if (idx > 0) {
-                        int idx2 = columnName.indexOf(" AS ", idx);
-
-                        if (idx2 < 0) {
-                            idx2 = columnName.indexOf(" as ", idx);
-                        }
-
-                        if (withAlias && columnName.indexOf(WD._PERIOD) < 0) {
-                            sb.append(alias).append(WD._PERIOD);
-                        }
-
-                        sb.append(formalizeColumnName(propColumnNameMap, columnName.substring(0, idx).trim()));
-
-                        sb.append(_SPACE_AS_SPACE);
-
-                        sb.append(WD._QUOTATION_D);
-                        sb.append(columnName.substring(idx2 > 0 ? idx2 + 4 : idx + 1).trim());
-                        sb.append(WD._QUOTATION_D);
-                    } else {
-                        if (withAlias && columnName.indexOf(WD._PERIOD) < 0) {
-                            sb.append(alias).append(WD._PERIOD);
-                        }
-
-                        sb.append(formalizeColumnName(propColumnNameMap, columnName));
-
-                        if (namingPolicy != NamingPolicy.LOWER_CAMEL_CASE && !WD.ASTERISK.equals(columnName)) {
-                            sb.append(_SPACE_AS_SPACE);
-
-                            sb.append(WD._QUOTATION_D);
-                            sb.append(columnName);
-                            sb.append(WD._QUOTATION_D);
-                        }
-                    }
-                }
-            }
-        } else if (N.notNullOrEmpty(columnNameList)) {
-            if (entityClass != null) {
-                final Set<String> subEntityPropNames = getSubEntityPropNames(entityClass);
-
-                if (N.notNullOrEmpty(subEntityPropNames) && N.containsAny(subEntityPropNames, columnNameList)) {
-                    final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
-                    final List<String> tmp = new ArrayList<>(columnNameList.size() + 16);
-                    PropInfo propInfo = null;
-
-                    for (String propName : columnNameList) {
-                        if (subEntityPropNames.contains(propName)) {
-                            propInfo = entityInfo.getPropInfo(propName);
-
-                            final Collection<String> subSelectPropNames = getSelectPropNames(
-                                    propInfo.type.isCollection() ? propInfo.type.getElementType().clazz() : propInfo.clazz, false, null);
-
-                            for (String subPropName : subSelectPropNames) {
-                                tmp.add(propName + WD.PERIOD + subPropName);
-                            }
-                        } else {
-                            tmp.add(propName);
-                        }
-                    }
-
-                    columnNameList = tmp;
-                }
-            }
-
-            if (entityClass != null && withAlias == false && columnNameList == getSelectPropNames(entityClass, false, null)) {
-                String fullSelectParts = fullSelectPartsPool.get(namingPolicy).get(entityClass);
-
-                if (N.isNullOrEmpty(fullSelectParts)) {
-                    fullSelectParts = "";
-
-                    int i = 0;
-                    for (String columnName : columnNameList) {
-                        if (i++ > 0) {
-                            fullSelectParts += WD.COMMA_SPACE;
-                        }
-
-                        fullSelectParts += formalizeColumnName(propColumnNameMap, columnName);
-
-                        if (namingPolicy != NamingPolicy.LOWER_CAMEL_CASE && !WD.ASTERISK.equals(columnName)) {
-                            fullSelectParts += " AS ";
-
-                            fullSelectParts += WD.QUOTATION_D;
-                            fullSelectParts += columnName;
-                            fullSelectParts += WD.QUOTATION_D;
-                        }
-                    }
-
-                    fullSelectPartsPool.get(namingPolicy).put(entityClass, fullSelectParts);
-                }
-
-                sb.append(fullSelectParts);
-            } else {
-                int i = 0;
-                for (String columnName : columnNameList) {
-                    if (i++ > 0) {
-                        sb.append(_COMMA_SPACE);
-                    }
-
-                    if (withAlias && columnName.indexOf(WD._PERIOD) < 0) {
-                        sb.append(alias).append(WD._PERIOD);
-                    }
-
-                    sb.append(formalizeColumnName(propColumnNameMap, columnName));
-
-                    if (namingPolicy != NamingPolicy.LOWER_CAMEL_CASE && !WD.ASTERISK.equals(columnName)) {
-                        sb.append(_SPACE_AS_SPACE);
-
-                        sb.append(WD._QUOTATION_D);
-                        sb.append(columnName);
-                        sb.append(WD._QUOTATION_D);
-                    }
-                }
-            }
-        } else if (N.notNullOrEmpty(columnAliases)) {
-            int i = 0;
-            for (Map.Entry<String, String> entry : columnAliases.entrySet()) {
-                if (i++ > 0) {
-                    sb.append(_COMMA_SPACE);
-                }
-
-                if (withAlias && entry.getKey().indexOf(WD._PERIOD) < 0) {
-                    sb.append(alias).append(WD._PERIOD);
-                }
-
-                sb.append(formalizeColumnName(propColumnNameMap, entry.getKey()));
-
-                if (N.notNullOrEmpty(entry.getValue())) {
-                    sb.append(_SPACE_AS_SPACE);
-
-                    sb.append(WD._QUOTATION_D);
-                    sb.append(entry.getValue());
-                    sb.append(WD._QUOTATION_D);
-                }
-            }
-        } else if (N.notNullOrEmpty(multiSelects)) {
-            int i = 0;
-
-            aliasPropColumnNameMap = new HashMap<>(multiSelects.size());
-
-            for (Tuple4<Class<?>, String, String, Set<String>> tp : multiSelects) {
-                if (N.notNullOrEmpty(tp._2)) {
-                    aliasPropColumnNameMap.put(tp._2, ClassUtil.getProp2ColumnNameMap(tp._1, namingPolicy));
-                }
-            }
-
-            for (Tuple4<Class<?>, String, String, Set<String>> tp : multiSelects) {
-                final String tableAlias = tp._2;
-                final String classAlias = tp._3;
-                final boolean withTableAlias = N.notNullOrEmpty(tableAlias);
-                final boolean withClassAlias = N.notNullOrEmpty(classAlias);
-                final Map<String, String> eachPropColumnNameMap = ClassUtil.getProp2ColumnNameMap(tp._1, namingPolicy);
-
-                for (String propName : getSelectPropNames(tp._1, false, tp._4)) {
-                    if (i++ > 0) {
-                        sb.append(_COMMA_SPACE);
-                    }
-
-                    if (withTableAlias) {
-                        sb.append(tableAlias).append(WD._PERIOD);
-                    }
-
-                    sb.append(formalizeColumnName(eachPropColumnNameMap, propName));
-
-                    sb.append(_SPACE_AS_SPACE);
-                    sb.append(WD._QUOTATION_D);
-
-                    if (withClassAlias) {
-                        sb.append(classAlias).append(WD._PERIOD);
-                    }
-
-                    sb.append(propName);
-                    sb.append(WD._QUOTATION_D);
-                }
-            }
-        } else {
-            throw new UnsupportedOperationException("No select part specified");
-        }
-
-        sb.append(_SPACE_FROM_SPACE);
-
-        sb.append(fromCause);
-
-        return this;
-    }
-
-    /**
-     *
      * @param entityClass
      * @return
      */
@@ -1430,20 +1087,282 @@ public abstract class SQLBuilder {
         }
     }
 
-    private void addPropColumnMapForAlias(final Class<?> entityClass, final String alias) {
-        if (aliasPropColumnNameMap == null) {
-            aliasPropColumnNameMap = new HashMap<>();
-        }
-
-        aliasPropColumnNameMap.put(alias, ClassUtil.getProp2ColumnNameMap(entityClass, namingPolicy));
-    }
-
     private SQLBuilder from(final Class<?> entityClass, final Collection<String> tableNames) {
         if (this.entityClass == null) {
             this.entityClass = entityClass;
         }
 
         return from(tableNames);
+    }
+
+    /**
+     *
+     * @param tableName
+     * @param fromCause
+     * @return
+     */
+    private SQLBuilder from(final String tableName, final String fromCause) {
+        if (op != OperationType.QUERY) {
+            throw new RuntimeException("Invalid operation: " + op);
+        }
+    
+        if (N.isNullOrEmpty(columnNames) && N.isNullOrEmpty(columnNameList) && N.isNullOrEmpty(columnAliases) && N.isNullOrEmpty(multiSelects)) {
+            throw new RuntimeException("Column names or props must be set first by select");
+        }
+    
+        int idx = tableName.indexOf(' ');
+    
+        if (idx > 0) {
+            this.tableName = tableName.substring(0, idx).trim();
+            alias = tableName.substring(idx + 1).trim();
+        } else {
+            this.tableName = tableName.trim();
+        }
+    
+        if (entityClass != null && N.notNullOrEmpty(alias)) {
+            addPropColumnMapForAlias(entityClass, alias);
+        }
+    
+        sb.append(_SELECT);
+        sb.append(_SPACE);
+    
+        if (N.notNullOrEmpty(preselect)) {
+            sb.append(preselect);
+            sb.append(_SPACE);
+        }
+    
+        final boolean withAlias = N.notNullOrEmpty(alias);
+    
+        final Map<String, String> propColumnNameMap = ClassUtil.getProp2ColumnNameMap(entityClass, namingPolicy);
+    
+        if (N.notNullOrEmpty(columnNames)) {
+            if (columnNames.length == 1) {
+                final String columnName = StringUtil.trim(columnNames[0]);
+                idx = columnName.indexOf(' ');
+    
+                if (idx < 0) {
+                    idx = columnName.indexOf(',');
+                }
+    
+                if (idx > 0) {
+                    sb.append(columnName);
+                } else {
+                    if (withAlias && columnName.indexOf(WD._PERIOD) < 0) {
+                        sb.append(alias).append(WD._PERIOD);
+                    }
+    
+                    sb.append(formalizeColumnName(propColumnNameMap, columnName));
+    
+                    if (namingPolicy != NamingPolicy.LOWER_CAMEL_CASE && !WD.ASTERISK.equals(columnName)) {
+                        sb.append(_SPACE_AS_SPACE);
+    
+                        sb.append(WD._QUOTATION_D);
+                        sb.append(columnName);
+                        sb.append(WD._QUOTATION_D);
+                    }
+                }
+            } else {
+                String columnName = null;
+    
+                for (int i = 0, len = columnNames.length; i < len; i++) {
+                    columnName = StringUtil.trim(columnNames[i]);
+    
+                    if (i > 0) {
+                        sb.append(_COMMA_SPACE);
+                    }
+    
+                    idx = columnName.indexOf(' ');
+    
+                    if (idx > 0) {
+                        int idx2 = columnName.indexOf(" AS ", idx);
+    
+                        if (idx2 < 0) {
+                            idx2 = columnName.indexOf(" as ", idx);
+                        }
+    
+                        if (withAlias && columnName.indexOf(WD._PERIOD) < 0) {
+                            sb.append(alias).append(WD._PERIOD);
+                        }
+    
+                        sb.append(formalizeColumnName(propColumnNameMap, columnName.substring(0, idx).trim()));
+    
+                        sb.append(_SPACE_AS_SPACE);
+    
+                        sb.append(WD._QUOTATION_D);
+                        sb.append(columnName.substring(idx2 > 0 ? idx2 + 4 : idx + 1).trim());
+                        sb.append(WD._QUOTATION_D);
+                    } else {
+                        if (withAlias && columnName.indexOf(WD._PERIOD) < 0) {
+                            sb.append(alias).append(WD._PERIOD);
+                        }
+    
+                        sb.append(formalizeColumnName(propColumnNameMap, columnName));
+    
+                        if (namingPolicy != NamingPolicy.LOWER_CAMEL_CASE && !WD.ASTERISK.equals(columnName)) {
+                            sb.append(_SPACE_AS_SPACE);
+    
+                            sb.append(WD._QUOTATION_D);
+                            sb.append(columnName);
+                            sb.append(WD._QUOTATION_D);
+                        }
+                    }
+                }
+            }
+        } else if (N.notNullOrEmpty(columnNameList)) {
+            if (entityClass != null) {
+                final Set<String> subEntityPropNames = getSubEntityPropNames(entityClass);
+    
+                if (N.notNullOrEmpty(subEntityPropNames) && N.containsAny(subEntityPropNames, columnNameList)) {
+                    final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
+                    final List<String> tmp = new ArrayList<>(columnNameList.size() + 16);
+                    PropInfo propInfo = null;
+    
+                    for (String propName : columnNameList) {
+                        if (subEntityPropNames.contains(propName)) {
+                            propInfo = entityInfo.getPropInfo(propName);
+    
+                            final Collection<String> subSelectPropNames = getSelectPropNames(
+                                    propInfo.type.isCollection() ? propInfo.type.getElementType().clazz() : propInfo.clazz, false, null);
+    
+                            for (String subPropName : subSelectPropNames) {
+                                tmp.add(propName + WD.PERIOD + subPropName);
+                            }
+                        } else {
+                            tmp.add(propName);
+                        }
+                    }
+    
+                    columnNameList = tmp;
+                }
+            }
+    
+            if (entityClass != null && withAlias == false && columnNameList == getSelectPropNames(entityClass, false, null)) {
+                String fullSelectParts = fullSelectPartsPool.get(namingPolicy).get(entityClass);
+    
+                if (N.isNullOrEmpty(fullSelectParts)) {
+                    fullSelectParts = "";
+    
+                    int i = 0;
+                    for (String columnName : columnNameList) {
+                        if (i++ > 0) {
+                            fullSelectParts += WD.COMMA_SPACE;
+                        }
+    
+                        fullSelectParts += formalizeColumnName(propColumnNameMap, columnName);
+    
+                        if (namingPolicy != NamingPolicy.LOWER_CAMEL_CASE && !WD.ASTERISK.equals(columnName)) {
+                            fullSelectParts += " AS ";
+    
+                            fullSelectParts += WD.QUOTATION_D;
+                            fullSelectParts += columnName;
+                            fullSelectParts += WD.QUOTATION_D;
+                        }
+                    }
+    
+                    fullSelectPartsPool.get(namingPolicy).put(entityClass, fullSelectParts);
+                }
+    
+                sb.append(fullSelectParts);
+            } else {
+                int i = 0;
+                for (String columnName : columnNameList) {
+                    if (i++ > 0) {
+                        sb.append(_COMMA_SPACE);
+                    }
+    
+                    if (withAlias && columnName.indexOf(WD._PERIOD) < 0) {
+                        sb.append(alias).append(WD._PERIOD);
+                    }
+    
+                    sb.append(formalizeColumnName(propColumnNameMap, columnName));
+    
+                    if (namingPolicy != NamingPolicy.LOWER_CAMEL_CASE && !WD.ASTERISK.equals(columnName)) {
+                        sb.append(_SPACE_AS_SPACE);
+    
+                        sb.append(WD._QUOTATION_D);
+                        sb.append(columnName);
+                        sb.append(WD._QUOTATION_D);
+                    }
+                }
+            }
+        } else if (N.notNullOrEmpty(columnAliases)) {
+            int i = 0;
+            for (Map.Entry<String, String> entry : columnAliases.entrySet()) {
+                if (i++ > 0) {
+                    sb.append(_COMMA_SPACE);
+                }
+    
+                if (withAlias && entry.getKey().indexOf(WD._PERIOD) < 0) {
+                    sb.append(alias).append(WD._PERIOD);
+                }
+    
+                sb.append(formalizeColumnName(propColumnNameMap, entry.getKey()));
+    
+                if (N.notNullOrEmpty(entry.getValue())) {
+                    sb.append(_SPACE_AS_SPACE);
+    
+                    sb.append(WD._QUOTATION_D);
+                    sb.append(entry.getValue());
+                    sb.append(WD._QUOTATION_D);
+                }
+            }
+        } else if (N.notNullOrEmpty(multiSelects)) {
+            int i = 0;
+    
+            aliasPropColumnNameMap = new HashMap<>(multiSelects.size());
+    
+            for (Tuple4<Class<?>, String, String, Set<String>> tp : multiSelects) {
+                if (N.notNullOrEmpty(tp._2)) {
+                    aliasPropColumnNameMap.put(tp._2, ClassUtil.getProp2ColumnNameMap(tp._1, namingPolicy));
+                }
+            }
+    
+            for (Tuple4<Class<?>, String, String, Set<String>> tp : multiSelects) {
+                final String tableAlias = tp._2;
+                final String classAlias = tp._3;
+                final boolean withTableAlias = N.notNullOrEmpty(tableAlias);
+                final boolean withClassAlias = N.notNullOrEmpty(classAlias);
+                final Map<String, String> eachPropColumnNameMap = ClassUtil.getProp2ColumnNameMap(tp._1, namingPolicy);
+    
+                for (String propName : getSelectPropNames(tp._1, false, tp._4)) {
+                    if (i++ > 0) {
+                        sb.append(_COMMA_SPACE);
+                    }
+    
+                    if (withTableAlias) {
+                        sb.append(tableAlias).append(WD._PERIOD);
+                    }
+    
+                    sb.append(formalizeColumnName(eachPropColumnNameMap, propName));
+    
+                    sb.append(_SPACE_AS_SPACE);
+                    sb.append(WD._QUOTATION_D);
+    
+                    if (withClassAlias) {
+                        sb.append(classAlias).append(WD._PERIOD);
+                    }
+    
+                    sb.append(propName);
+                    sb.append(WD._QUOTATION_D);
+                }
+            }
+        } else {
+            throw new UnsupportedOperationException("No select part specified");
+        }
+    
+        sb.append(_SPACE_FROM_SPACE);
+    
+        sb.append(fromCause);
+    
+        return this;
+    }
+
+    private void addPropColumnMapForAlias(final Class<?> entityClass, final String alias) {
+        if (aliasPropColumnNameMap == null) {
+            aliasPropColumnNameMap = new HashMap<>();
+        }
+
+        aliasPropColumnNameMap.put(alias, ClassUtil.getProp2ColumnNameMap(entityClass, namingPolicy));
     }
 
     /**
@@ -3883,6 +3802,8 @@ public abstract class SQLBuilder {
          */
         @SafeVarargs
         public static SQLBuilder select(final String... columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -3897,6 +3818,8 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder select(final Collection<String> columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -3911,6 +3834,8 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder select(final Map<String, String> columnAliases) {
+            N.checkArgNotNullOrEmpty(columnAliases, "columnAliases");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -4396,6 +4321,8 @@ public abstract class SQLBuilder {
          */
         @SafeVarargs
         public static SQLBuilder select(final String... columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -4426,6 +4353,8 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder select(final Map<String, String> columnAliases) {
+            N.checkArgNotNullOrEmpty(columnAliases, "columnAliases");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -4911,6 +4840,8 @@ public abstract class SQLBuilder {
          */
         @SafeVarargs
         public static SQLBuilder select(final String... columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -4925,6 +4856,8 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder select(final Collection<String> columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -4939,6 +4872,8 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder select(final Map<String, String> columnAliases) {
+            N.checkArgNotNullOrEmpty(columnAliases, "columnAliases");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -5421,6 +5356,8 @@ public abstract class SQLBuilder {
          */
         @SafeVarargs
         public static SQLBuilder select(final String... columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -5435,6 +5372,8 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder select(final Collection<String> columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -5449,6 +5388,8 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder select(final Map<String, String> columnAliases) {
+            N.checkArgNotNullOrEmpty(columnAliases, "columnAliases");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -5931,6 +5872,8 @@ public abstract class SQLBuilder {
          */
         @SafeVarargs
         public static SQLBuilder select(final String... columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -5945,6 +5888,8 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder select(final Collection<String> columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -5959,6 +5904,8 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder select(final Map<String, String> columnAliases) {
+            N.checkArgNotNullOrEmpty(columnAliases, "columnAliases");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -6441,6 +6388,8 @@ public abstract class SQLBuilder {
          */
         @SafeVarargs
         public static SQLBuilder select(final String... columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -6455,6 +6404,8 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder select(final Collection<String> columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -6469,6 +6420,8 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder select(final Map<String, String> columnAliases) {
+            N.checkArgNotNullOrEmpty(columnAliases, "columnAliases");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -6951,6 +6904,8 @@ public abstract class SQLBuilder {
          */
         @SafeVarargs
         public static SQLBuilder select(final String... columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -6965,6 +6920,8 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder select(final Collection<String> columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -6979,6 +6936,8 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder select(final Map<String, String> columnAliases) {
+            N.checkArgNotNullOrEmpty(columnAliases, "columnAliases");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -7461,6 +7420,8 @@ public abstract class SQLBuilder {
          */
         @SafeVarargs
         public static SQLBuilder select(final String... columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -7475,6 +7436,8 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder select(final Collection<String> columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -7489,6 +7452,8 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder select(final Map<String, String> columnAliases) {
+            N.checkArgNotNullOrEmpty(columnAliases, "columnAliases");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -7971,6 +7936,8 @@ public abstract class SQLBuilder {
          */
         @SafeVarargs
         public static SQLBuilder select(final String... columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -7985,6 +7952,8 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder select(final Collection<String> columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -7999,6 +7968,8 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder select(final Map<String, String> columnAliases) {
+            N.checkArgNotNullOrEmpty(columnAliases, "columnAliases");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -8482,6 +8453,8 @@ public abstract class SQLBuilder {
          */
         @SafeVarargs
         public static SQLBuilder select(final String... columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -8496,6 +8469,8 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder select(final Collection<String> columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -8510,6 +8485,8 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder select(final Map<String, String> columnAliases) {
+            N.checkArgNotNullOrEmpty(columnAliases, "columnAliases");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -8993,6 +8970,8 @@ public abstract class SQLBuilder {
          */
         @SafeVarargs
         public static SQLBuilder select(final String... columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -9007,6 +8986,8 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder select(final Collection<String> columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -9021,6 +9002,8 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder select(final Map<String, String> columnAliases) {
+            N.checkArgNotNullOrEmpty(columnAliases, "columnAliases");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -9504,6 +9487,8 @@ public abstract class SQLBuilder {
          */
         @SafeVarargs
         public static SQLBuilder select(final String... columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -9518,6 +9503,8 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder select(final Collection<String> columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
@@ -9532,6 +9519,8 @@ public abstract class SQLBuilder {
          * @return
          */
         public static SQLBuilder select(final Map<String, String> columnAliases) {
+            N.checkArgNotNullOrEmpty(columnAliases, "columnAliases");
+
             final SQLBuilder instance = createInstance();
 
             instance.op = OperationType.QUERY;
