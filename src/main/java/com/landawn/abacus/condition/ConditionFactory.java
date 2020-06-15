@@ -223,7 +223,7 @@ public class ConditionFactory {
      * @return
      */
     public static Or eqOr(final Object entity) {
-        return eqOr(entity, SQLBuilder.getSelectPropNamesByClass(entity.getClass(), false, null));
+        return eqOr(entity, SQLBuilder.getSelectPropNames(entity.getClass(), false, null));
     }
 
     /**
@@ -304,7 +304,7 @@ public class ConditionFactory {
      * @return
      */
     public static And eqAnd(final Object entity) {
-        return eqAnd(entity, SQLBuilder.getSelectPropNamesByClass(entity.getClass(), false, null));
+        return eqAnd(entity, SQLBuilder.getSelectPropNames(entity.getClass(), false, null));
     }
 
     /**
@@ -366,7 +366,7 @@ public class ConditionFactory {
     public static Or eqAndOr(final Collection<?> entities) {
         N.checkArgNotNullOrEmpty(entities, "entities");
 
-        return eqAndOr(entities, SQLBuilder.getSelectPropNamesByClass(N.firstNonNull(entities).orNull().getClass(), false, null));
+        return eqAndOr(entities, SQLBuilder.getSelectPropNames(N.firstNonNull(entities).orNull().getClass(), false, null));
     }
 
     /**

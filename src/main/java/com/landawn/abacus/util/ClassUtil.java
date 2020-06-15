@@ -54,6 +54,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Deque;
+import java.util.EnumMap;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -2967,7 +2968,7 @@ public final class ClassUtil {
     }
 
     /** The Constant column2FieldNameMapPool. */
-    private static final Map<Class<?>, ImmutableMap<String, String>> column2FieldNameMapPool = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, ImmutableMap<String, String>> column2PropNameNameMapPool = new ConcurrentHashMap<>();
 
     /**
      * Gets the column 2 field name map.
@@ -2975,8 +2976,8 @@ public final class ClassUtil {
      * @param entityClass
      * @return
      */
-    public static ImmutableMap<String, String> getColumn2FieldNameMap(Class<?> entityClass) {
-        ImmutableMap<String, String> result = column2FieldNameMapPool.get(entityClass);
+    public static ImmutableMap<String, String> getColumn2PropNameMap(Class<?> entityClass) {
+        ImmutableMap<String, String> result = column2PropNameNameMapPool.get(entityClass);
 
         if (result == null) {
             final Map<String, String> map = new HashMap<>();
@@ -2992,7 +2993,7 @@ public final class ClassUtil {
 
             result = ImmutableMap.copyOf(map);
 
-            column2FieldNameMapPool.put(entityClass, result);
+            column2PropNameNameMapPool.put(entityClass, result);
         }
 
         return result;
@@ -3079,5 +3080,94 @@ public final class ClassUtil {
          */
         static void methodMask() {
         }
+    }
+
+    /** The Constant entityTablePropColumnNameMap. */
+    static final Map<Class<?>, Map<NamingPolicy, ImmutableMap<String, String>>> entityTablePropColumnNameMap = new ObjectPool<>(N.POOL_SIZE);
+
+    /**
+     * Gets the prop column name map.
+     *
+     * @return
+     */
+    public static ImmutableMap<String, String> getProp2ColumnNameMap(final Class<?> entityClass, final NamingPolicy namingPolicy) {
+        if (entityClass == null || Map.class.isAssignableFrom(entityClass)) {
+            return ImmutableMap.empty();
+        }
+
+        final Map<NamingPolicy, ImmutableMap<String, String>> namingColumnNameMap = entityTablePropColumnNameMap.get(entityClass);
+        ImmutableMap<String, String> result = null;
+
+        if (namingColumnNameMap == null || (result = namingColumnNameMap.get(namingPolicy)) == null) {
+            result = ClassUtil.registerEntityPropColumnNameMap(entityClass, namingPolicy, null);
+        }
+
+        return result;
+    }
+
+    static ImmutableMap<String, String> registerEntityPropColumnNameMap(final Class<?> entityClass, final NamingPolicy namingPolicy,
+            final Set<Class<?>> registeringClasses) {
+        N.checkArgNotNull(entityClass);
+
+        if (registeringClasses != null) {
+            if (registeringClasses.contains(entityClass)) {
+                throw new RuntimeException("Cycling references found among: " + registeringClasses);
+            } else {
+                registeringClasses.add(entityClass);
+            }
+        }
+
+        Map<String, String> propColumnNameMap = new HashMap<>();
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
+
+        for (PropInfo propInfo : entityInfo.propInfoList) {
+            if (propInfo.columnName.isPresent()) {
+                propColumnNameMap.put(propInfo.name, propInfo.columnName.get());
+            } else {
+                propColumnNameMap.put(propInfo.name, SQLBuilder.formalizeColumnName(propInfo.name, namingPolicy));
+
+                final Type<?> propType = propInfo.type.isCollection() ? propInfo.type.getElementType() : propInfo.type;
+
+                if (propType.isEntity() && (registeringClasses == null || !registeringClasses.contains(propType.clazz()))) {
+                    final Set<Class<?>> newRegisteringClasses = registeringClasses == null ? N.<Class<?>> newLinkedHashSet() : registeringClasses;
+                    newRegisteringClasses.add(entityClass);
+
+                    final Map<String, String> subPropColumnNameMap = registerEntityPropColumnNameMap(propType.clazz(), namingPolicy, newRegisteringClasses);
+
+                    if (N.notNullOrEmpty(subPropColumnNameMap)) {
+                        final String subTableName = SQLBuilder.getTableName(propType.clazz(), namingPolicy);
+
+                        for (Map.Entry<String, String> entry : subPropColumnNameMap.entrySet()) {
+                            propColumnNameMap.put(propInfo.name + WD.PERIOD + entry.getKey(), subTableName + WD.PERIOD + entry.getValue());
+                        }
+                    }
+                }
+            }
+        }
+
+        //    final Map<String, String> tmp = entityTablePropColumnNameMap.get(entityClass);
+        //
+        //    if (N.notNullOrEmpty(tmp)) {
+        //        propColumnNameMap.putAll(tmp);
+        //    }
+
+        if (N.isNullOrEmpty(propColumnNameMap)) {
+            propColumnNameMap = N.<String, String> emptyMap();
+        }
+
+        final ImmutableMap<String, String> result = ImmutableMap.of(propColumnNameMap);
+
+        Map<NamingPolicy, ImmutableMap<String, String>> namingPropColumnMap = entityTablePropColumnNameMap.get(entityClass);
+
+        if (namingPropColumnMap == null) {
+            namingPropColumnMap = new EnumMap<>(NamingPolicy.class);
+            // TODO not necessary?
+            // namingPropColumnMap = Collections.synchronizedMap(namingPropColumnMap)
+            entityTablePropColumnNameMap.put(entityClass, namingPropColumnMap);
+        }
+
+        namingPropColumnMap.put(namingPolicy, result);
+
+        return result;
     }
 }

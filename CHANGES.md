@@ -1,3 +1,9 @@
+### 1.20.39
+
+* Refactoring `SQLBuilder`.
+* Improvements and bug fix.
+
+
 ### 1.20.38
 
 * Remove primitive pairs/triples.
