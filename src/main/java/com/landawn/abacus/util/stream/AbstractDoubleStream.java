@@ -1338,7 +1338,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
         assertNotClosed();
 
         try {
-            final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseCachedBuffer(true);
+            final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseCachedBuffer();
             final DoubleIteratorEx iter = this.iteratorEx();
 
             while (iter.hasNext()) {

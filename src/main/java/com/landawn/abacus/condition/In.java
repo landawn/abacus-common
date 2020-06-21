@@ -137,10 +137,10 @@ public class In extends AbstractCondition {
     public String toString(NamingPolicy namingPolicy) {
         if (namingPolicy == NamingPolicy.LOWER_CAMEL_CASE) {
             return propName + WD._SPACE + getOperator().toString()
-                    + Joiner.with(WD.COMMA_SPACE, WD.SPACE_PARENTHESES_L, WD.PARENTHESES_R).reuseCachedBuffer(true).appendAll(values).toString();
+                    + Joiner.with(WD.COMMA_SPACE, WD.SPACE_PARENTHESES_L, WD.PARENTHESES_R).reuseCachedBuffer().appendAll(values).toString();
         } else {
             return namingPolicy.convert(propName) + WD._SPACE + getOperator().toString()
-                    + Joiner.with(WD.COMMA_SPACE, WD.SPACE_PARENTHESES_L, WD.PARENTHESES_R).reuseCachedBuffer(true).appendAll(values).toString();
+                    + Joiner.with(WD.COMMA_SPACE, WD.SPACE_PARENTHESES_L, WD.PARENTHESES_R).reuseCachedBuffer().appendAll(values).toString();
         }
     }
 

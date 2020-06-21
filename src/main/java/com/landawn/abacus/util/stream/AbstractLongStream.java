@@ -1297,7 +1297,7 @@ abstract class AbstractLongStream extends LongStream {
         assertNotClosed();
 
         try {
-            final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseCachedBuffer(true);
+            final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseCachedBuffer();
             final LongIteratorEx iter = this.iteratorEx();
 
             while (iter.hasNext()) {

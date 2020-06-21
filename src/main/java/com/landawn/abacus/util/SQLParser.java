@@ -160,13 +160,13 @@ public final class SQLParser {
             e = e.toLowerCase();
 
             if (!compositeWords.containsKey(e)) {
-                compositeWords.put(e, Splitter.with(WD.SPACE).trim(true).splitToArray(e));
+                compositeWords.put(e, Splitter.with(WD.SPACE).trimResults().splitToArray(e));
             }
 
             e = e.toUpperCase();
 
             if (!compositeWords.containsKey(e)) {
-                compositeWords.put(e, Splitter.with(WD.SPACE).trim(true).splitToArray(e));
+                compositeWords.put(e, Splitter.with(WD.SPACE).trimResults().splitToArray(e));
             }
         }
     }
@@ -340,7 +340,7 @@ public final class SQLParser {
         String[] subWords = compositeWords.get(word);
 
         if (subWords == null) {
-            subWords = Splitter.with(WD.SPACE).trim(true).splitToArray(word);
+            subWords = Splitter.with(WD.SPACE).trimResults().splitToArray(word);
             compositeWords.put(word, subWords);
         }
 

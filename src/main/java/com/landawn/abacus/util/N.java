@@ -20262,9 +20262,9 @@ public final class N extends CommonUtil {
     @SuppressWarnings("rawtypes")
     public static <T> T println(final T obj) {
         if (obj instanceof Collection) {
-            System.out.println(Joiner.with(ELEMENT_SEPARATOR, "[", "]").reuseCachedBuffer(true).appendAll((Collection) obj));
+            System.out.println(Joiner.with(ELEMENT_SEPARATOR, "[", "]").reuseCachedBuffer().appendAll((Collection) obj));
         } else if (obj instanceof Map) {
-            System.out.println(Joiner.with(ELEMENT_SEPARATOR, "=", "{", "}").reuseCachedBuffer(true).appendEntries((Map) obj));
+            System.out.println(Joiner.with(ELEMENT_SEPARATOR, "=", "{", "}").reuseCachedBuffer().appendEntries((Map) obj));
         } else {
             System.out.println(toString(obj));
         }

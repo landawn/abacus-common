@@ -80,19 +80,10 @@ public final class Splitter {
         }
     };
 
-    /** The strategy. */
     private final Strategy strategy;
-
-    /** The omit empty strings. */
     private boolean omitEmptyStrings = false;
-
-    /** The trim. */
-    private boolean trim = false;
-
-    /** The strip. */
-    private boolean strip = false;
-
-    /** The limit. */
+    private boolean trimResults = false;
+    private boolean stripResults = false;
     private int limit = Integer.MAX_VALUE;
 
     /**
@@ -384,9 +375,17 @@ public final class Splitter {
      *
      * @param omitEmptyStrings
      * @return
+     * @deprecated replaced with {@link #omitEmptyStrings()}
      */
+    @Deprecated
     public Splitter omitEmptyStrings(boolean omitEmptyStrings) {
         this.omitEmptyStrings = omitEmptyStrings;
+
+        return this;
+    }
+
+    public Splitter omitEmptyStrings() {
+        this.omitEmptyStrings = true;
 
         return this;
     }
@@ -395,9 +394,17 @@ public final class Splitter {
      *
      * @param trim
      * @return
+     * @deprecated replaced with {@link #trimResults()}
      */
+    @Deprecated
     public Splitter trim(boolean trim) {
-        this.trim = trim;
+        this.trimResults = trim;
+
+        return this;
+    }
+
+    public Splitter trimResults() {
+        this.trimResults = true;
 
         return this;
     }
@@ -408,9 +415,21 @@ public final class Splitter {
      * @param strip
      * @return
      * @see Character#isWhitespace(char)
+     * @deprecated replaced with {@link #stripResults()}
      */
+    @Deprecated
     public Splitter strip(boolean strip) {
-        this.strip = strip;
+        this.stripResults = strip;
+
+        return this;
+    }
+
+    /**
+     * 
+     * @return
+     */
+    public Splitter stripResults() {
+        this.stripResults = true;
 
         return this;
     }
@@ -700,7 +719,7 @@ public final class Splitter {
      * @return
      */
     ObjIterator<String> iterate(final CharSequence source) {
-        return strategy.split(source, omitEmptyStrings, trim, strip, limit);
+        return strategy.split(source, omitEmptyStrings, trimResults, stripResults, limit);
     }
 
     /**
@@ -775,9 +794,17 @@ public final class Splitter {
          *
          * @param omitEmptyStrings
          * @return
+         * @deprecated replaced with {@link #omitEmptyStrings()}
          */
+        @Deprecated
         public MapSplitter omitEmptyStrings(boolean omitEmptyStrings) {
             keyValueSplitter.omitEmptyStrings(omitEmptyStrings);
+
+            return this;
+        }
+
+        public MapSplitter omitEmptyStrings() {
+            keyValueSplitter.omitEmptyStrings();
 
             return this;
         }
@@ -786,10 +813,19 @@ public final class Splitter {
          *
          * @param trim
          * @return
+         * @deprecated replaced with {@link #trimResults()}
          */
+        @Deprecated
         public MapSplitter trim(boolean trim) {
             entrySplitter.trim(trim);
             keyValueSplitter.trim(trim);
+
+            return this;
+        }
+
+        public MapSplitter trimResults() {
+            entrySplitter.trimResults();
+            keyValueSplitter.trimResults();
 
             return this;
         }
@@ -800,10 +836,19 @@ public final class Splitter {
          * @param strip
          * @return
          * @see Character#isWhitespace(char)
+         * @deprecated replaced with {@link #stripResults()}
          */
+        @Deprecated
         public MapSplitter strip(boolean strip) {
             entrySplitter.strip(strip);
             keyValueSplitter.strip(strip);
+
+            return this;
+        }
+
+        public MapSplitter stripResults() {
+            entrySplitter.stripResults();
+            keyValueSplitter.stripResults();
 
             return this;
         }
@@ -875,7 +920,7 @@ public final class Splitter {
         public <M extends Map<String, String>> M split(final M output, final CharSequence source) {
             N.checkArgNotNull(output, "output");
 
-            entrySplitter.omitEmptyStrings(true);
+            entrySplitter.omitEmptyStrings();
             keyValueSplitter.limit(2);
 
             final ObjIterator<String> iter = entrySplitter.iterate(source);
@@ -946,7 +991,7 @@ public final class Splitter {
             N.checkArgNotNull(keyType, "keyType");
             N.checkArgNotNull(valueType, "valueType");
 
-            entrySplitter.omitEmptyStrings(true);
+            entrySplitter.omitEmptyStrings();
             keyValueSplitter.limit(2);
 
             final ObjIterator<String> iter = entrySplitter.iterate(source);
@@ -1051,7 +1096,7 @@ public final class Splitter {
          * @return
          */
         public Stream<Map.Entry<String, String>> splitToStream(final CharSequence source) {
-            entrySplitter.omitEmptyStrings(true);
+            entrySplitter.omitEmptyStrings();
             keyValueSplitter.limit(2);
 
             return Stream.of(new ObjIteratorEx<Map.Entry<String, String>>() {

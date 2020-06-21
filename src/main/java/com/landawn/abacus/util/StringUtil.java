@@ -82,18 +82,18 @@ public abstract class StringUtil {
                 "##", " # ", "=", "==", " = ", "|", " | ", "||", " || ", "&", "&&", "@", "@@", "$", "$$", "*", "**", "+", "++");
 
         for (String delimiter : delimiters) {
-            splitterPool.put(delimiter, Splitter.with(delimiter).omitEmptyStrings(true));
-            trimSplitterPool.put(delimiter, Splitter.with(delimiter).omitEmptyStrings(true).trim(true));
+            splitterPool.put(delimiter, Splitter.with(delimiter).omitEmptyStrings());
+            trimSplitterPool.put(delimiter, Splitter.with(delimiter).omitEmptyStrings().trimResults());
             preserveSplitterPool.put(delimiter, Splitter.with(delimiter));
-            trimPreserveSplitterPool.put(delimiter, Splitter.with(delimiter).trim(true));
+            trimPreserveSplitterPool.put(delimiter, Splitter.with(delimiter).trimResults());
 
             if (delimiter.length() == 1) {
                 char delimiterChar = delimiter.charAt(0);
 
-                splitterPool.put(delimiterChar, Splitter.with(delimiterChar).omitEmptyStrings(true));
-                trimSplitterPool.put(delimiterChar, Splitter.with(delimiterChar).omitEmptyStrings(true).trim(true));
+                splitterPool.put(delimiterChar, Splitter.with(delimiterChar).omitEmptyStrings());
+                trimSplitterPool.put(delimiterChar, Splitter.with(delimiterChar).omitEmptyStrings().trimResults());
                 preserveSplitterPool.put(delimiterChar, Splitter.with(delimiterChar));
-                trimPreserveSplitterPool.put(delimiterChar, Splitter.with(delimiterChar).trim(true));
+                trimPreserveSplitterPool.put(delimiterChar, Splitter.with(delimiterChar).trimResults());
             }
         }
     }
@@ -234,7 +234,7 @@ public abstract class StringUtil {
 
         N.reverse(strs);
 
-        return Joiner.with(delimiter).reuseCachedBuffer(true).appendAll(strs).toString();
+        return Joiner.with(delimiter).reuseCachedBuffer().appendAll(strs).toString();
     }
 
     /**
@@ -1560,7 +1560,7 @@ public abstract class StringUtil {
     public static String[] split(final String str, final char delimiter) {
         final Splitter splitter = splitterPool.get(delimiter);
 
-        return (splitter == null ? Splitter.with(delimiter).omitEmptyStrings(true) : splitter).splitToArray(str);
+        return (splitter == null ? Splitter.with(delimiter).omitEmptyStrings() : splitter).splitToArray(str);
     }
 
     /**
@@ -1570,10 +1570,11 @@ public abstract class StringUtil {
      * @param trim
      * @return
      */
+    @SuppressWarnings("deprecation")
     public static String[] split(final String str, final char delimiter, final boolean trim) {
         if (trim) {
             final Splitter splitter = trimSplitterPool.get(delimiter);
-            return (splitter == null ? Splitter.with(delimiter).omitEmptyStrings(true).trim(trim) : splitter).splitToArray(str);
+            return (splitter == null ? Splitter.with(delimiter).omitEmptyStrings().trim(trim) : splitter).splitToArray(str);
         } else {
             return split(str, delimiter);
         }
@@ -1588,7 +1589,7 @@ public abstract class StringUtil {
     public static String[] split(final String str, final String delimiter) {
         final Splitter splitter = splitterPool.get(delimiter);
 
-        return (splitter == null ? Splitter.with(delimiter).omitEmptyStrings(true) : splitter).splitToArray(str);
+        return (splitter == null ? Splitter.with(delimiter).omitEmptyStrings() : splitter).splitToArray(str);
     }
 
     /**
@@ -1598,10 +1599,11 @@ public abstract class StringUtil {
      * @param trim
      * @return
      */
+    @SuppressWarnings("deprecation")
     public static String[] split(final String str, final String delimiter, final boolean trim) {
         if (trim) {
             final Splitter splitter = trimSplitterPool.get(delimiter);
-            return (splitter == null ? Splitter.with(delimiter).omitEmptyStrings(true).trim(trim) : splitter).splitToArray(str);
+            return (splitter == null ? Splitter.with(delimiter).omitEmptyStrings().trim(trim) : splitter).splitToArray(str);
         } else {
             return split(str, delimiter);
         }
@@ -1617,7 +1619,7 @@ public abstract class StringUtil {
      */
     @Deprecated
     public static String[] split(final String str, final String delimiter, final int max) {
-        return Splitter.with(delimiter).omitEmptyStrings(true).limit(max).splitToArray(str);
+        return Splitter.with(delimiter).omitEmptyStrings().limit(max).splitToArray(str);
     }
 
     /**
@@ -1631,7 +1633,7 @@ public abstract class StringUtil {
      */
     @Deprecated
     public static String[] split(final String str, final String delimiter, final int max, final boolean trim) {
-        return Splitter.with(delimiter).omitEmptyStrings(true).trim(trim).limit(max).splitToArray(str);
+        return Splitter.with(delimiter).omitEmptyStrings().trim(trim).limit(max).splitToArray(str);
     }
 
     /**
@@ -1655,6 +1657,7 @@ public abstract class StringUtil {
      * @param trim
      * @return
      */
+    @SuppressWarnings("deprecation")
     public static String[] splitPreserveAllTokens(final String str, final char delimiter, boolean trim) {
         if (trim) {
             final Splitter splitter = trimPreserveSplitterPool.get(delimiter);
@@ -1685,6 +1688,7 @@ public abstract class StringUtil {
      * @param trim
      * @return
      */
+    @SuppressWarnings("deprecation")
     public static String[] splitPreserveAllTokens(final String str, final String delimiter, boolean trim) {
         if (trim) {
             final Splitter splitter = trimPreserveSplitterPool.get(delimiter);

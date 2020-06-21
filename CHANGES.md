@@ -1,3 +1,9 @@
+### 1.21.0
+
+* Add `JsonXmlValue` and `JsonXmlCreator`.
+* Improvements and bug fix.
+
+
 ### 1.20.39
 
 * Refactoring `SQLBuilder`.

@@ -1336,7 +1336,7 @@ abstract class AbstractFloatStream extends FloatStream {
         assertNotClosed();
 
         try {
-            final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseCachedBuffer(true);
+            final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseCachedBuffer();
             final FloatIteratorEx iter = this.iteratorEx();
 
             while (iter.hasNext()) {

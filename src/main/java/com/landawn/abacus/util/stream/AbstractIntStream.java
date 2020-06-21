@@ -1297,7 +1297,7 @@ abstract class AbstractIntStream extends IntStream {
         assertNotClosed();
 
         try {
-            final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseCachedBuffer(true);
+            final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseCachedBuffer();
             final IntIteratorEx iter = this.iteratorEx();
 
             while (iter.hasNext()) {

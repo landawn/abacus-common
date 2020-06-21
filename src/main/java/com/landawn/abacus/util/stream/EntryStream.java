@@ -1565,7 +1565,7 @@ public final class EntryStream<K, V> implements Closeable {
         s.assertNotClosed();
 
         try {
-            final Joiner joiner = Joiner.with(delimiter, keyValueDelimiter, prefix, suffix).reuseCachedBuffer(true);
+            final Joiner joiner = Joiner.with(delimiter, keyValueDelimiter, prefix, suffix).reuseCachedBuffer();
             final Iterator<Entry<K, V>> iter = s.iteratorEx();
 
             while (iter.hasNext()) {

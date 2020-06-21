@@ -1105,57 +1105,57 @@ public abstract class SQLBuilder {
         if (op != OperationType.QUERY) {
             throw new RuntimeException("Invalid operation: " + op);
         }
-    
+
         if (N.isNullOrEmpty(columnNames) && N.isNullOrEmpty(columnNameList) && N.isNullOrEmpty(columnAliases) && N.isNullOrEmpty(multiSelects)) {
             throw new RuntimeException("Column names or props must be set first by select");
         }
-    
+
         int idx = tableName.indexOf(' ');
-    
+
         if (idx > 0) {
             this.tableName = tableName.substring(0, idx).trim();
             alias = tableName.substring(idx + 1).trim();
         } else {
             this.tableName = tableName.trim();
         }
-    
+
         if (entityClass != null && N.notNullOrEmpty(alias)) {
             addPropColumnMapForAlias(entityClass, alias);
         }
-    
+
         sb.append(_SELECT);
         sb.append(_SPACE);
-    
+
         if (N.notNullOrEmpty(preselect)) {
             sb.append(preselect);
             sb.append(_SPACE);
         }
-    
+
         final boolean withAlias = N.notNullOrEmpty(alias);
-    
+
         final Map<String, String> propColumnNameMap = ClassUtil.getProp2ColumnNameMap(entityClass, namingPolicy);
-    
+
         if (N.notNullOrEmpty(columnNames)) {
             if (columnNames.length == 1) {
                 final String columnName = StringUtil.trim(columnNames[0]);
                 idx = columnName.indexOf(' ');
-    
+
                 if (idx < 0) {
                     idx = columnName.indexOf(',');
                 }
-    
+
                 if (idx > 0) {
                     sb.append(columnName);
                 } else {
                     if (withAlias && columnName.indexOf(WD._PERIOD) < 0) {
                         sb.append(alias).append(WD._PERIOD);
                     }
-    
+
                     sb.append(formalizeColumnName(propColumnNameMap, columnName));
-    
+
                     if (namingPolicy != NamingPolicy.LOWER_CAMEL_CASE && !WD.ASTERISK.equals(columnName)) {
                         sb.append(_SPACE_AS_SPACE);
-    
+
                         sb.append(WD._QUOTATION_D);
                         sb.append(columnName);
                         sb.append(WD._QUOTATION_D);
@@ -1163,31 +1163,31 @@ public abstract class SQLBuilder {
                 }
             } else {
                 String columnName = null;
-    
+
                 for (int i = 0, len = columnNames.length; i < len; i++) {
                     columnName = StringUtil.trim(columnNames[i]);
-    
+
                     if (i > 0) {
                         sb.append(_COMMA_SPACE);
                     }
-    
+
                     idx = columnName.indexOf(' ');
-    
+
                     if (idx > 0) {
                         int idx2 = columnName.indexOf(" AS ", idx);
-    
+
                         if (idx2 < 0) {
                             idx2 = columnName.indexOf(" as ", idx);
                         }
-    
+
                         if (withAlias && columnName.indexOf(WD._PERIOD) < 0) {
                             sb.append(alias).append(WD._PERIOD);
                         }
-    
+
                         sb.append(formalizeColumnName(propColumnNameMap, columnName.substring(0, idx).trim()));
-    
+
                         sb.append(_SPACE_AS_SPACE);
-    
+
                         sb.append(WD._QUOTATION_D);
                         sb.append(columnName.substring(idx2 > 0 ? idx2 + 4 : idx + 1).trim());
                         sb.append(WD._QUOTATION_D);
@@ -1195,12 +1195,12 @@ public abstract class SQLBuilder {
                         if (withAlias && columnName.indexOf(WD._PERIOD) < 0) {
                             sb.append(alias).append(WD._PERIOD);
                         }
-    
+
                         sb.append(formalizeColumnName(propColumnNameMap, columnName));
-    
+
                         if (namingPolicy != NamingPolicy.LOWER_CAMEL_CASE && !WD.ASTERISK.equals(columnName)) {
                             sb.append(_SPACE_AS_SPACE);
-    
+
                             sb.append(WD._QUOTATION_D);
                             sb.append(columnName);
                             sb.append(WD._QUOTATION_D);
@@ -1209,76 +1209,76 @@ public abstract class SQLBuilder {
                 }
             }
         } else if (N.notNullOrEmpty(columnNameList)) {
-            if (entityClass != null) {
-                final Set<String> subEntityPropNames = getSubEntityPropNames(entityClass);
-    
-                if (N.notNullOrEmpty(subEntityPropNames) && N.containsAny(subEntityPropNames, columnNameList)) {
-                    final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
-                    final List<String> tmp = new ArrayList<>(columnNameList.size() + 16);
-                    PropInfo propInfo = null;
-    
-                    for (String propName : columnNameList) {
-                        if (subEntityPropNames.contains(propName)) {
-                            propInfo = entityInfo.getPropInfo(propName);
-    
-                            final Collection<String> subSelectPropNames = getSelectPropNames(
-                                    propInfo.type.isCollection() ? propInfo.type.getElementType().clazz() : propInfo.clazz, false, null);
-    
-                            for (String subPropName : subSelectPropNames) {
-                                tmp.add(propName + WD.PERIOD + subPropName);
-                            }
-                        } else {
-                            tmp.add(propName);
-                        }
-                    }
-    
-                    columnNameList = tmp;
-                }
-            }
-    
             if (entityClass != null && withAlias == false && columnNameList == getSelectPropNames(entityClass, false, null)) {
                 String fullSelectParts = fullSelectPartsPool.get(namingPolicy).get(entityClass);
-    
+
                 if (N.isNullOrEmpty(fullSelectParts)) {
                     fullSelectParts = "";
-    
+
                     int i = 0;
                     for (String columnName : columnNameList) {
                         if (i++ > 0) {
                             fullSelectParts += WD.COMMA_SPACE;
                         }
-    
+
                         fullSelectParts += formalizeColumnName(propColumnNameMap, columnName);
-    
+
                         if (namingPolicy != NamingPolicy.LOWER_CAMEL_CASE && !WD.ASTERISK.equals(columnName)) {
                             fullSelectParts += " AS ";
-    
+
                             fullSelectParts += WD.QUOTATION_D;
                             fullSelectParts += columnName;
                             fullSelectParts += WD.QUOTATION_D;
                         }
                     }
-    
+
                     fullSelectPartsPool.get(namingPolicy).put(entityClass, fullSelectParts);
                 }
-    
+
                 sb.append(fullSelectParts);
             } else {
+                if (entityClass != null) {
+                    final Set<String> subEntityPropNames = getSubEntityPropNames(entityClass);
+
+                    if (N.notNullOrEmpty(subEntityPropNames) && N.containsAny(subEntityPropNames, columnNameList)) {
+                        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
+                        final List<String> tmp = new ArrayList<>(columnNameList.size() + 16);
+                        PropInfo propInfo = null;
+
+                        for (String propName : columnNameList) {
+                            if (subEntityPropNames.contains(propName)) {
+                                propInfo = entityInfo.getPropInfo(propName);
+
+                                final Collection<String> subSelectPropNames = getSelectPropNames(
+                                        propInfo.type.isCollection() ? propInfo.type.getElementType().clazz() : propInfo.clazz, false, null);
+
+                                for (String subPropName : subSelectPropNames) {
+                                    tmp.add(propName + WD.PERIOD + subPropName);
+                                }
+                            } else {
+                                tmp.add(propName);
+                            }
+                        }
+
+                        columnNameList = tmp;
+                    }
+                }
+
                 int i = 0;
                 for (String columnName : columnNameList) {
                     if (i++ > 0) {
                         sb.append(_COMMA_SPACE);
                     }
-    
+
                     if (withAlias && columnName.indexOf(WD._PERIOD) < 0) {
                         sb.append(alias).append(WD._PERIOD);
                     }
-    
+
                     sb.append(formalizeColumnName(propColumnNameMap, columnName));
-    
+
                     if (namingPolicy != NamingPolicy.LOWER_CAMEL_CASE && !WD.ASTERISK.equals(columnName)) {
                         sb.append(_SPACE_AS_SPACE);
-    
+
                         sb.append(WD._QUOTATION_D);
                         sb.append(columnName);
                         sb.append(WD._QUOTATION_D);
@@ -1291,16 +1291,16 @@ public abstract class SQLBuilder {
                 if (i++ > 0) {
                     sb.append(_COMMA_SPACE);
                 }
-    
+
                 if (withAlias && entry.getKey().indexOf(WD._PERIOD) < 0) {
                     sb.append(alias).append(WD._PERIOD);
                 }
-    
+
                 sb.append(formalizeColumnName(propColumnNameMap, entry.getKey()));
-    
+
                 if (N.notNullOrEmpty(entry.getValue())) {
                     sb.append(_SPACE_AS_SPACE);
-    
+
                     sb.append(WD._QUOTATION_D);
                     sb.append(entry.getValue());
                     sb.append(WD._QUOTATION_D);
@@ -1308,40 +1308,40 @@ public abstract class SQLBuilder {
             }
         } else if (N.notNullOrEmpty(multiSelects)) {
             int i = 0;
-    
+
             aliasPropColumnNameMap = new HashMap<>(multiSelects.size());
-    
+
             for (Tuple4<Class<?>, String, String, Set<String>> tp : multiSelects) {
                 if (N.notNullOrEmpty(tp._2)) {
                     aliasPropColumnNameMap.put(tp._2, ClassUtil.getProp2ColumnNameMap(tp._1, namingPolicy));
                 }
             }
-    
+
             for (Tuple4<Class<?>, String, String, Set<String>> tp : multiSelects) {
                 final String tableAlias = tp._2;
                 final String classAlias = tp._3;
                 final boolean withTableAlias = N.notNullOrEmpty(tableAlias);
                 final boolean withClassAlias = N.notNullOrEmpty(classAlias);
                 final Map<String, String> eachPropColumnNameMap = ClassUtil.getProp2ColumnNameMap(tp._1, namingPolicy);
-    
+
                 for (String propName : getSelectPropNames(tp._1, false, tp._4)) {
                     if (i++ > 0) {
                         sb.append(_COMMA_SPACE);
                     }
-    
+
                     if (withTableAlias) {
                         sb.append(tableAlias).append(WD._PERIOD);
                     }
-    
+
                     sb.append(formalizeColumnName(eachPropColumnNameMap, propName));
-    
+
                     sb.append(_SPACE_AS_SPACE);
                     sb.append(WD._QUOTATION_D);
-    
+
                     if (withClassAlias) {
                         sb.append(classAlias).append(WD._PERIOD);
                     }
-    
+
                     sb.append(propName);
                     sb.append(WD._QUOTATION_D);
                 }
@@ -1349,11 +1349,11 @@ public abstract class SQLBuilder {
         } else {
             throw new UnsupportedOperationException("No select part specified");
         }
-    
+
         sb.append(_SPACE_FROM_SPACE);
-    
+
         sb.append(fromCause);
-    
+
         return this;
     }
 
@@ -2044,11 +2044,11 @@ public abstract class SQLBuilder {
     public SQLBuilder limit(final int offset, final int count) {
         sb.append(_SPACE_LIMIT_SPACE);
 
-        sb.append(offset);
-
-        sb.append(_COMMA_SPACE);
-
         sb.append(count);
+
+        sb.append(_SPACE_OFFSET_SPACE);
+
+        sb.append(offset);
 
         return this;
     }
@@ -2066,16 +2066,14 @@ public abstract class SQLBuilder {
         return this;
     }
 
-    /**
-     * Limit by row num.
-     *
-     * @param count
-     * @return
-     */
-    public SQLBuilder limitByRowNum(final int count) {
-        sb.append(" ROWNUM ");
+    public SQLBuilder fetchNextNRowsOnly(final int count) {
+        sb.append(" FETCH NEXT ").append(count).append(" ROWS ONLY");
 
-        sb.append(count);
+        return this;
+    }
+
+    public SQLBuilder fetchFirstNRowsOnly(final int count) {
+        sb.append(" FETCH FIRST ").append(count).append(" ROWS ONLY");
 
         return this;
     }
@@ -2170,6 +2168,12 @@ public abstract class SQLBuilder {
             sb.append(_SPACE_WHERE_SPACE);
             appendCondition(cond);
         }
+
+        return this;
+    }
+
+    public SQLBuilder append(final String expr) {
+        sb.append(expr);
 
         return this;
     }

@@ -76,7 +76,7 @@ public final class IOUtil {
     private static final Logger logger = LoggerFactory.getLogger(IOUtil.class);
 
     /** The Constant pathSplitter. */
-    private static final Splitter pathSplitter = Splitter.with('/').trim(true);
+    private static final Splitter pathSplitter = Splitter.with('/').trimResults();
 
     /** The Constant DEFAULT_QUEUE_SIZE_FOR_ROW_PARSER. */
     static final int DEFAULT_QUEUE_SIZE_FOR_ROW_PARSER = 1024;

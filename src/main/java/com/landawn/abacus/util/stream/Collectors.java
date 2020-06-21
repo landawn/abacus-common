@@ -1571,7 +1571,7 @@ public abstract class Collectors {
         final Supplier<Joiner> supplier = new Supplier<Joiner>() {
             @Override
             public Joiner get() {
-                return Joiner.with(delimiter, prefix, suffix).reuseCachedBuffer(true);
+                return Joiner.with(delimiter, prefix, suffix).reuseCachedBuffer();
             }
         };
 

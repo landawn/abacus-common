@@ -1286,7 +1286,7 @@ abstract class AbstractByteStream extends ByteStream {
         assertNotClosed();
 
         try {
-            final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseCachedBuffer(true);
+            final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseCachedBuffer();
             final ByteIteratorEx iter = this.iteratorEx();
 
             while (iter.hasNext()) {

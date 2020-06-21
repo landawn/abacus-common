@@ -144,7 +144,7 @@ public final class TypeAttrParser {
             }
 
             String str = attr.substring(beginIndex + 1, attr.lastIndexOf(_PARENTHESES_R));
-            parameters = COMMA.equals(str.trim()) ? new String[] { COMMA } : Splitter.with(WD.COMMA).trim(true).splitToArray(str);
+            parameters = COMMA.equals(str.trim()) ? new String[] { COMMA } : Splitter.with(WD.COMMA).trimResults().splitToArray(str);
         }
 
         if (className == null) {

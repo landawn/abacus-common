@@ -6769,7 +6769,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
         assertNotClosed();
 
         try {
-            final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseCachedBuffer(true);
+            final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseCachedBuffer();
 
             while (elements.hasNext()) {
                 joiner.append(elements.next());

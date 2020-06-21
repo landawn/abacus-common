@@ -57,10 +57,10 @@ public class Joiner implements Closeable {
     private final boolean isEmptyKeyValueDelimiter;
 
     /** The trim. */
-    private boolean trim = false;
+    private boolean trimBeforeAppend = false;
 
     /** The skip null. */
-    private boolean skipNull = false;
+    private boolean skipNulls = false;
 
     /** The use cached buffer. */
     private boolean useCachedBuffer = false;
@@ -194,9 +194,17 @@ public class Joiner implements Closeable {
      *
      * @param trim
      * @return
+     * @deprecated replaced with {@link #trimBeforeAppend()}
      */
+    @Deprecated
     public Joiner trim(boolean trim) {
-        this.trim = trim;
+        this.trimBeforeAppend = trim;
+
+        return this;
+    }
+
+    public Joiner trimBeforeAppend() {
+        this.trimBeforeAppend = true;
 
         return this;
     }
@@ -206,9 +214,17 @@ public class Joiner implements Closeable {
      *
      * @param skipNull
      * @return
+     * @deprecated replaced with {@link #skipNulls()}
      */
+    @Deprecated
     public Joiner skipNull(boolean skipNull) {
-        this.skipNull = skipNull;
+        this.skipNulls = skipNull;
+
+        return this;
+    }
+
+    public Joiner skipNulls() {
+        this.skipNulls = true;
 
         return this;
     }
@@ -248,13 +264,25 @@ public class Joiner implements Closeable {
      *
      * @param useCachedBuffer
      * @return
+     * @deprecated replaced with {@link #reuseCachedBuffer()}
      */
+    @Deprecated
     public Joiner reuseCachedBuffer(boolean useCachedBuffer) {
         if (buffer != null) {
             throw new IllegalStateException("Can't reset because the buffer has been created");
         }
 
         this.useCachedBuffer = useCachedBuffer;
+
+        return this;
+    }
+
+    public Joiner reuseCachedBuffer() {
+        if (buffer != null) {
+            throw new IllegalStateException("Can't reset because the buffer has been created");
+        }
+
+        this.useCachedBuffer = true;
 
         return this;
     }
@@ -325,8 +353,8 @@ public class Joiner implements Closeable {
      * @return
      */
     public Joiner append(String element) {
-        if (element != null || skipNull == false) {
-            prepareBuilder().append(element == null ? nullText : (trim ? element.trim() : element));
+        if (element != null || skipNulls == false) {
+            prepareBuilder().append(element == null ? nullText : (trimBeforeAppend ? element.trim() : element));
         }
 
         return this;
@@ -338,8 +366,8 @@ public class Joiner implements Closeable {
      * @return
      */
     public Joiner append(CharSequence element) {
-        if (element != null || skipNull == false) {
-            prepareBuilder().append(element == null ? nullText : (trim ? element.toString().trim() : element));
+        if (element != null || skipNulls == false) {
+            prepareBuilder().append(element == null ? nullText : (trimBeforeAppend ? element.toString().trim() : element));
         }
 
         return this;
@@ -353,10 +381,10 @@ public class Joiner implements Closeable {
      * @return
      */
     public Joiner append(CharSequence element, final int start, final int end) {
-        if (element != null || skipNull == false) {
+        if (element != null || skipNulls == false) {
             if (element == null) {
                 prepareBuilder().append(nullText);
-            } else if (trim) {
+            } else if (trimBeforeAppend) {
                 prepareBuilder().append(element.subSequence(start, end).toString().trim());
             } else {
                 prepareBuilder().append(element, start, end);
@@ -372,7 +400,7 @@ public class Joiner implements Closeable {
      * @return
      */
     public Joiner append(StringBuffer element) {
-        if (element != null || skipNull == false) {
+        if (element != null || skipNulls == false) {
             if (element == null) {
                 prepareBuilder().append(nullText);
             } else {
@@ -389,7 +417,7 @@ public class Joiner implements Closeable {
      * @return
      */
     public Joiner append(char[] element) {
-        if (element != null || skipNull == false) {
+        if (element != null || skipNulls == false) {
             if (element == null) {
                 prepareBuilder().append(nullText);
             } else {
@@ -408,7 +436,7 @@ public class Joiner implements Closeable {
      * @return
      */
     public Joiner append(char[] element, final int offset, final int len) {
-        if (element != null || skipNull == false) {
+        if (element != null || skipNulls == false) {
             if (element == null) {
                 prepareBuilder().append(nullText);
             } else {
@@ -425,7 +453,7 @@ public class Joiner implements Closeable {
      * @return
      */
     public Joiner append(Object element) {
-        if (element != null || skipNull == false) {
+        if (element != null || skipNulls == false) {
             prepareBuilder().append(toString(element));
         }
 
@@ -842,7 +870,7 @@ public class Joiner implements Closeable {
         StringBuilder sb = null;
 
         for (int i = fromIndex; i < toIndex; i++) {
-            if (a[i] != null || skipNull == false) {
+            if (a[i] != null || skipNulls == false) {
                 if (sb == null) {
                     sb = prepareBuilder().append(toString(a[i]));
                 } else {
@@ -1133,7 +1161,7 @@ public class Joiner implements Closeable {
                 continue;
             }
 
-            if (e != null || skipNull == false) {
+            if (e != null || skipNulls == false) {
                 if (sb == null) {
                     sb = prepareBuilder().append(toString(e));
                 } else {
@@ -1256,11 +1284,11 @@ public class Joiner implements Closeable {
      * @return
      */
     public Joiner appendEntry(String key, String value) {
-        if (value != null || skipNull == false) {
+        if (value != null || skipNulls == false) {
             if (isEmptyKeyValueDelimiter) {
-                prepareBuilder().append(key).append(value == null ? nullText : (trim ? value.trim() : value));
+                prepareBuilder().append(key).append(value == null ? nullText : (trimBeforeAppend ? value.trim() : value));
             } else {
-                prepareBuilder().append(key).append(keyValueDelimiter).append(value == null ? nullText : (trim ? value.trim() : value));
+                prepareBuilder().append(key).append(keyValueDelimiter).append(value == null ? nullText : (trimBeforeAppend ? value.trim() : value));
             }
         }
 
@@ -1274,11 +1302,11 @@ public class Joiner implements Closeable {
      * @return
      */
     public Joiner appendEntry(String key, CharSequence value) {
-        if (value != null || skipNull == false) {
+        if (value != null || skipNulls == false) {
             if (isEmptyKeyValueDelimiter) {
-                prepareBuilder().append(key).append(value == null ? nullText : (trim ? value.toString().trim() : value));
+                prepareBuilder().append(key).append(value == null ? nullText : (trimBeforeAppend ? value.toString().trim() : value));
             } else {
-                prepareBuilder().append(key).append(keyValueDelimiter).append(value == null ? nullText : (trim ? value.toString().trim() : value));
+                prepareBuilder().append(key).append(keyValueDelimiter).append(value == null ? nullText : (trimBeforeAppend ? value.toString().trim() : value));
             }
         }
 
@@ -1292,7 +1320,7 @@ public class Joiner implements Closeable {
      * @return
      */
     public Joiner appendEntry(String key, StringBuffer value) {
-        if (value != null || skipNull == false) {
+        if (value != null || skipNulls == false) {
             if (value == null) {
                 if (isEmptyKeyValueDelimiter) {
                     prepareBuilder().append(key).append(nullText);
@@ -1318,7 +1346,7 @@ public class Joiner implements Closeable {
      * @return
      */
     public Joiner appendEntry(String key, char[] value) {
-        if (value != null || skipNull == false) {
+        if (value != null || skipNulls == false) {
             if (value == null) {
                 if (isEmptyKeyValueDelimiter) {
                     prepareBuilder().append(key).append(nullText);
@@ -1344,7 +1372,7 @@ public class Joiner implements Closeable {
      * @return
      */
     public Joiner appendEntry(String key, Object value) {
-        if (value != null || skipNull == false) {
+        if (value != null || skipNulls == false) {
             if (isEmptyKeyValueDelimiter) {
                 prepareBuilder().append(key).append(toString(value));
             } else {
@@ -1361,7 +1389,7 @@ public class Joiner implements Closeable {
      * @return
      */
     public Joiner appendEntry(Map.Entry<?, ?> entry) {
-        if (skipNull == false || (entry != null && entry.getValue() != null)) {
+        if (skipNulls == false || (entry != null && entry.getValue() != null)) {
             if (entry == null) {
                 append(nullText);
             } else {
@@ -1423,7 +1451,7 @@ public class Joiner implements Closeable {
                 continue;
             }
 
-            if (entry.getValue() != null || skipNull == false) {
+            if (entry.getValue() != null || skipNulls == false) {
                 if (sb == null) {
                     sb = prepareBuilder().append(toString(entry.getKey())).append(keyValueDelimiter).append(toString(entry.getValue()));
                 } else {
@@ -1473,7 +1501,7 @@ public class Joiner implements Closeable {
         for (String propName : ClassUtil.getPropNameList(cls)) {
             propValue = entityInfo.getPropValue(entity, propName);
 
-            if (propValue != null || skipNull == false) {
+            if (propValue != null || skipNulls == false) {
                 if (sb == null) {
                     sb = prepareBuilder().append(propName).append(keyValueDelimiter).append(toString(propValue));
                 } else {
@@ -1580,7 +1608,7 @@ public class Joiner implements Closeable {
      * @return
      */
     private String toString(Object obj) {
-        return obj == null ? nullText : (trim ? N.toString(obj).trim() : N.toString(obj));
+        return obj == null ? nullText : (trimBeforeAppend ? N.toString(obj).trim() : N.toString(obj));
     }
 
     /**

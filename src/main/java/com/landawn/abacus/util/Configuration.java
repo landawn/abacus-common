@@ -710,7 +710,7 @@ public abstract class Configuration {
      * @return
      */
     protected String[] string2Array(String st) {
-        return Splitter.with(WD.COMMA).trim(true).splitToArray(st);
+        return Splitter.with(WD.COMMA).trimResults().splitToArray(st);
     }
 
     /**
@@ -720,7 +720,7 @@ public abstract class Configuration {
      * @return
      */
     protected List<String> string2List(String st) {
-        return Splitter.with(WD.COMMA).trim(true).split(st);
+        return Splitter.with(WD.COMMA).trimResults().split(st);
     }
 
     /**
@@ -730,7 +730,7 @@ public abstract class Configuration {
      * @return
      */
     protected Set<String> string2Set(String st) {
-        return Splitter.with(WD.COMMA).trim(true).split(N.newHashSet(), st);
+        return Splitter.with(WD.COMMA).trimResults().split(N.newHashSet(), st);
     }
 
     /**

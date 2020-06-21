@@ -94,10 +94,10 @@ public final class SQLMapper {
      * @return
      */
     public static SQLMapper fromFile(String filePath) {
-        String[] filePaths = Splitter.with(WD.COMMA).trim(true).splitToArray(filePath);
+        String[] filePaths = Splitter.with(WD.COMMA).trimResults().splitToArray(filePath);
 
         if (filePaths.length == 1) {
-            filePaths = Splitter.with(WD.SEMICOLON).trim(true).splitToArray(filePath);
+            filePaths = Splitter.with(WD.SEMICOLON).trimResults().splitToArray(filePath);
         }
 
         final SQLMapper sqlMapper = new SQLMapper();

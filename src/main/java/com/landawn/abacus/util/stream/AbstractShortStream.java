@@ -1298,7 +1298,7 @@ abstract class AbstractShortStream extends ShortStream {
         assertNotClosed();
 
         try {
-            final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseCachedBuffer(true);
+            final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseCachedBuffer();
             final ShortIteratorEx iter = this.iteratorEx();
 
             while (iter.hasNext()) {

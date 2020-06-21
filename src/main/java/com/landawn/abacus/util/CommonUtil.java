@@ -12224,7 +12224,7 @@ class CommonUtil {
             return typeOf(obj.getClass()).toString(obj);
         } else if (obj instanceof Iterator) {
             final Iterator<?> iter = (Iterator<?>) obj;
-            final Joiner joiner = Joiner.with(", ", "[", "]").reuseCachedBuffer(true);
+            final Joiner joiner = Joiner.with(", ", "[", "]").reuseCachedBuffer();
 
             while (iter.hasNext()) {
                 joiner.append(CommonUtil.toString(iter.next()));

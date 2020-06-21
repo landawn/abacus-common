@@ -37,7 +37,7 @@ public final class AddrUtil {
     private static final String URL_SEPERATOR = "(?:\\s|,)+";
 
     /** The Constant URL_SPLITTER. */
-    private static final Splitter URL_SPLITTER = Splitter.pattern(URL_SEPERATOR).omitEmptyStrings(true).trim(true);
+    private static final Splitter URL_SPLITTER = Splitter.pattern(URL_SEPERATOR).omitEmptyStrings().trimResults();
 
     /**
      * Instantiates a new addr util.

@@ -1291,7 +1291,7 @@ abstract class AbstractCharStream extends CharStream {
         assertNotClosed();
 
         try {
-            final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseCachedBuffer(true);
+            final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseCachedBuffer();
             final CharIteratorEx iter = this.iteratorEx();
 
             while (iter.hasNext()) {
