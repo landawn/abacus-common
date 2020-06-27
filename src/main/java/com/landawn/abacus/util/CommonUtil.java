@@ -6448,9 +6448,11 @@ class CommonUtil {
                     for (String propName : signedPropNames) {
                         propValue = srcEntityInfo.getPropValue(sourceEntity, propName);
 
-                        if (Primitives.notNullOrDefault(propValue)) {
-                            targetEntityInfo.setPropValue(targetEntity, propName, propValue, ignoreUnknownProperty);
-                        }
+                        //    if (Primitives.notNullOrDefault(propValue)) {
+                        //        targetEntityInfo.setPropValue(targetEntity, propName, propValue, ignoreUnknownProperty);
+                        //    }
+
+                        targetEntityInfo.setPropValue(targetEntity, propName, propValue, ignoreUnknownProperty);
                     }
                 }
             } else {
@@ -6544,9 +6546,11 @@ class CommonUtil {
                     if (ignorePropNames == null || ignorePropNames.contains(propName) == false) {
                         propValue = srcEntityInfo.getPropValue(sourceEntity, propName);
 
-                        if (Primitives.notNullOrDefault(propValue)) {
-                            targetEntityInfo.setPropValue(targetEntity, propName, propValue, ignoreUnknownProperty);
-                        }
+                        //    if (Primitives.notNullOrDefault(propValue)) {
+                        //        targetEntityInfo.setPropValue(targetEntity, propName, propValue, ignoreUnknownProperty);
+                        //    }
+
+                        targetEntityInfo.setPropValue(targetEntity, propName, propValue, ignoreUnknownProperty);
                     }
                 }
             }

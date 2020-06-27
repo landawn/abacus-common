@@ -7355,27 +7355,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
     }
 
     /**
-     * The Class StreamE.
-     *
-     * @param <T>
-     * @param <E>
-     */
-    public static final class StreamE<T, E extends Exception> extends ExceptionalStream<T, E> {
-
-        /**
-         * Instantiates a new stream E.
-         *
-         * @param iter
-         * @param sorted
-         * @param comparator
-         * @param closeHandlers
-         */
-        StreamE(ExceptionalIterator<T, E> iter, boolean sorted, Comparator<? super T> comparator, Deque<Throwables.Runnable<? extends E>> closeHandlers) {
-            super(iter, sorted, comparator, closeHandlers);
-        }
-    }
-
-    /**
      * The Class ExceptionalIterator.
      *
      * @param <T>
@@ -7610,6 +7589,117 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
          */
         public void close() throws E {
             // Nothing to do by default.
+        }
+    }
+
+    public static final class StreamE<T, E extends Exception> extends ExceptionalStream<T, E> {
+
+        StreamE(ExceptionalIterator<T, E> iter, boolean sorted, Comparator<? super T> comparator, Deque<Throwables.Runnable<? extends E>> closeHandlers) {
+            super(iter, sorted, comparator, closeHandlers);
+        }
+    }
+
+    /**
+     * Mostly it's for android.
+     * 
+     * @deprecated Mostly it's for android.
+     */
+    @Deprecated
+    public static final class StreamR {
+        private StreamR() {
+            // singleton for utility class.
+        }
+
+        public static <T> ExceptionalStream<T, RuntimeException> empty() {
+            return ExceptionalStream.<T, RuntimeException> empty();
+        }
+
+        public static <T> ExceptionalStream<T, RuntimeException> just(final T e) {
+            return ExceptionalStream.<T, RuntimeException> just(e);
+        }
+
+        public static <T> ExceptionalStream<T, RuntimeException> ofNullable(final T e) {
+            return ExceptionalStream.<T, RuntimeException> ofNullable(e);
+        }
+
+        public static <T> ExceptionalStream<T, RuntimeException> of(final T... a) {
+            return ExceptionalStream.<T, RuntimeException> of(a);
+        }
+
+        public static <T> ExceptionalStream<T, RuntimeException> of(final Collection<? extends T> c) {
+            return ExceptionalStream.<T, RuntimeException> of(c);
+        }
+
+        public static <T> ExceptionalStream<T, RuntimeException> of(final Iterator<? extends T> iter) {
+            return ExceptionalStream.<T, RuntimeException> of(iter);
+        }
+
+        public static <T> ExceptionalStream<T, RuntimeException> of(final Iterable<? extends T> iterable) {
+            return ExceptionalStream.<T, RuntimeException> of(iterable);
+        }
+
+        public static <K, V> ExceptionalStream<Map.Entry<K, V>, RuntimeException> of(final Map<K, V> m) {
+            return ExceptionalStream.<K, V, RuntimeException> of(m);
+        }
+
+        public static <T> ExceptionalStream<T, RuntimeException> of(final Stream<? extends T> stream) {
+            return ExceptionalStream.<T, RuntimeException> of(stream);
+        }
+
+        public static ExceptionalStream<Integer, RuntimeException> of(final int[] a) {
+            return ExceptionalStream.<RuntimeException> of(a);
+        }
+
+        public static ExceptionalStream<Long, RuntimeException> of(final long[] a) {
+            return ExceptionalStream.<RuntimeException> of(a);
+        }
+
+        public static ExceptionalStream<Double, RuntimeException> of(final double[] a) {
+            return ExceptionalStream.<RuntimeException> of(a);
+        }
+
+        public static <T> ExceptionalStream<T, RuntimeException> of(final Throwables.Supplier<Collection<? extends T>, RuntimeException> supplier) {
+            return ExceptionalStream.<T, RuntimeException> of(supplier);
+        }
+
+        public static <T> ExceptionalStream<T, RuntimeException> from(
+                final Throwables.Supplier<ExceptionalStream<? extends T, ? extends RuntimeException>, RuntimeException> supplier) {
+            return ExceptionalStream.<T, RuntimeException> from(supplier);
+        }
+
+        public static <K> ExceptionalStream<K, RuntimeException> ofKeys(final Map<K, ?> map) {
+            return ExceptionalStream.<K, RuntimeException> ofKeys(map);
+        }
+
+        public static <V> ExceptionalStream<V, RuntimeException> ofValues(final Map<?, V> map) {
+            return ExceptionalStream.<V, RuntimeException> ofValues(map);
+        }
+
+        public static <T> ExceptionalStream<T, RuntimeException> iterate(final Throwables.BooleanSupplier<? extends RuntimeException> hasNext,
+                final Throwables.Supplier<? extends T, RuntimeException> next) {
+            return ExceptionalStream.<T, RuntimeException> iterate(hasNext, next);
+        }
+
+        public static <T> ExceptionalStream<T, RuntimeException> iterate(final T init, final Throwables.BooleanSupplier<? extends RuntimeException> hasNext,
+                final Throwables.UnaryOperator<T, ? extends RuntimeException> f) {
+            return ExceptionalStream.<T, RuntimeException> iterate(init, hasNext, f);
+        }
+
+        public static <T> ExceptionalStream<T, RuntimeException> iterate(final T init, final Throwables.Predicate<? super T, RuntimeException> hasNext,
+                final Throwables.UnaryOperator<T, RuntimeException> f) {
+            return ExceptionalStream.<T, RuntimeException> iterate(init, hasNext, f);
+        }
+
+        public static <T> ExceptionalStream<T, RuntimeException> iterate(final T init, final Throwables.UnaryOperator<T, RuntimeException> f) {
+            return ExceptionalStream.<T, RuntimeException> iterate(init, f);
+        }
+
+        public static <T> ExceptionalStream<T, RuntimeException> generate(final Throwables.Supplier<T, RuntimeException> supplier) {
+            return ExceptionalStream.<T, RuntimeException> generate(supplier);
+        }
+
+        public static <T> ExceptionalStream<T, RuntimeException> repeat(final T element, final long n) {
+            return ExceptionalStream.<T, RuntimeException> repeat(element, n);
         }
     }
 }

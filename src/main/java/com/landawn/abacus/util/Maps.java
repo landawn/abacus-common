@@ -1489,55 +1489,61 @@ public final class Maps {
     public static <M extends Map<String, Object>> M entity2Map(final M resultMap, final Object entity, final boolean ignoreNullProperty,
             final Collection<String> ignoredPropNames, NamingPolicy keyNamingPolicy) {
         keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
+        final boolean isLowerCamelCase = NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy);
         final boolean hasIgnoredPropNames = N.notNullOrEmpty(ignoredPropNames);
         final Class<?> entityClass = entity.getClass();
-
-        Set<String> signedPropNames = null;
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
 
         if (entity instanceof DirtyMarker) {
-            signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) entity);
+            final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) entity);
 
-            if (signedPropNames.size() == 0) {
-                // logger.warn("no property is signed in the specified source entity: "
-                // + toString(entity));
-
-                return resultMap;
-            } else {
-                final Set<String> tmp = N.newHashSet(N.initHashCapacity(signedPropNames.size()));
+            if (N.notNullOrEmpty(signedPropNames)) {
+                Object propValue = null;
+                PropInfo propInfo = null;
 
                 for (String propName : signedPropNames) {
-                    tmp.add(ClassUtil.getPropNameByMethod(ClassUtil.getPropGetMethod(entityClass, propName)));
+                    propInfo = entityInfo.getPropInfo(propName);
+                    propName = propInfo.name;
+
+                    if (hasIgnoredPropNames && ignoredPropNames.contains(propName)) {
+                        continue;
+                    }
+
+                    propValue = propInfo.getPropValue(entity);
+
+                    if (ignoreNullProperty && (propValue == null)) {
+                        continue;
+                    }
+
+                    if (isLowerCamelCase) {
+                        resultMap.put(propName, propValue);
+                    } else {
+                        resultMap.put(keyNamingPolicy.convert(propName), propValue);
+                    }
+                }
+            }
+        } else {
+            String propName = null;
+            Object propValue = null;
+
+            for (PropInfo propInfo : entityInfo.propInfoList) {
+                propName = propInfo.name;
+
+                if (hasIgnoredPropNames && ignoredPropNames.contains(propName)) {
+                    continue;
                 }
 
-                signedPropNames = tmp;
-            }
-        }
+                propValue = propInfo.getPropValue(entity);
 
-        final boolean isLowerCamelCase = NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy);
-        String propName = null;
-        Object propValue = null;
+                if (ignoreNullProperty && (propValue == null)) {
+                    continue;
+                }
 
-        for (PropInfo propInfo : ParserUtil.getEntityInfo(entityClass).propInfoList) {
-            propName = propInfo.name;
-
-            if (signedPropNames != null && signedPropNames.contains(propName) == false) {
-                continue;
-            }
-
-            if (hasIgnoredPropNames && ignoredPropNames.contains(propName)) {
-                continue;
-            }
-
-            propValue = propInfo.getPropValue(entity);
-
-            if (ignoreNullProperty && (propValue == null)) {
-                continue;
-            }
-
-            if (isLowerCamelCase) {
-                resultMap.put(propName, propValue);
-            } else {
-                resultMap.put(keyNamingPolicy.convert(propName), propValue);
+                if (isLowerCamelCase) {
+                    resultMap.put(propName, propValue);
+                } else {
+                    resultMap.put(keyNamingPolicy.convert(propName), propValue);
+                }
             }
         }
 
@@ -1752,62 +1758,76 @@ public final class Maps {
     public static <M extends Map<String, Object>> M deepEntity2Map(final M resultMap, final Object entity, final boolean ignoreNullProperty,
             final Collection<String> ignoredPropNames, NamingPolicy keyNamingPolicy) {
         keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
+        final boolean isLowerCamelCase = NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy);
         final boolean hasIgnoredPropNames = N.notNullOrEmpty(ignoredPropNames);
         final Class<?> entityClass = entity.getClass();
-
-        Set<String> signedPropNames = null;
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
 
         if (entity instanceof DirtyMarker) {
-            signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) entity);
+            final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) entity);
 
-            if (signedPropNames.size() == 0) {
-                // logger.warn("no property is signed in the specified source entity: "
-                // + toString(entity));
-
-                return resultMap;
-            } else {
-                final Set<String> tmp = N.newHashSet(N.initHashCapacity(signedPropNames.size()));
+            if (N.notNullOrEmpty(signedPropNames)) {
+                Object propValue = null;
+                PropInfo propInfo = null;
 
                 for (String propName : signedPropNames) {
-                    tmp.add(ClassUtil.getPropNameByMethod(ClassUtil.getPropGetMethod(entityClass, propName)));
+                    propInfo = entityInfo.getPropInfo(propName);
+                    propName = propInfo.name;
+
+                    if (hasIgnoredPropNames && ignoredPropNames.contains(propName)) {
+                        continue;
+                    }
+
+                    propValue = propInfo.getPropValue(entity);
+
+                    if (ignoreNullProperty && (propValue == null)) {
+                        continue;
+                    }
+
+                    if ((propValue == null) || !propInfo.jsonXmlType.isEntity()) {
+                        if (isLowerCamelCase) {
+                            resultMap.put(propName, propValue);
+                        } else {
+                            resultMap.put(keyNamingPolicy.convert(propName), propValue);
+                        }
+                    } else {
+                        if (isLowerCamelCase) {
+                            resultMap.put(propName, deepEntity2Map(propValue, ignoreNullProperty, null, keyNamingPolicy));
+                        } else {
+                            resultMap.put(keyNamingPolicy.convert(propName), deepEntity2Map(propValue, ignoreNullProperty, null, keyNamingPolicy));
+                        }
+                    }
+                }
+            }
+        } else {
+            Object propValue = null;
+            String propName = null;
+
+            for (PropInfo propInfo : entityInfo.propInfoList) {
+                propName = propInfo.name;
+
+                if (hasIgnoredPropNames && ignoredPropNames.contains(propName)) {
+                    continue;
                 }
 
-                signedPropNames = tmp;
-            }
-        }
+                propValue = propInfo.getPropValue(entity);
 
-        final boolean isLowerCamelCase = NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy);
-        Object propValue = null;
-        String propName = null;
-
-        for (PropInfo propInfo : ParserUtil.getEntityInfo(entityClass).propInfoList) {
-            propName = propInfo.name;
-
-            if (signedPropNames != null && signedPropNames.contains(propName) == false) {
-                continue;
-            }
-
-            if (hasIgnoredPropNames && ignoredPropNames.contains(propName)) {
-                continue;
-            }
-
-            propValue = propInfo.getPropValue(entity);
-
-            if (ignoreNullProperty && (propValue == null)) {
-                continue;
-            }
-
-            if ((propValue == null) || !propInfo.jsonXmlType.isEntity()) {
-                if (isLowerCamelCase) {
-                    resultMap.put(propName, propValue);
-                } else {
-                    resultMap.put(keyNamingPolicy.convert(propName), propValue);
+                if (ignoreNullProperty && (propValue == null)) {
+                    continue;
                 }
-            } else {
-                if (isLowerCamelCase) {
-                    resultMap.put(propName, deepEntity2Map(propValue, ignoreNullProperty, null, keyNamingPolicy));
+
+                if ((propValue == null) || !propInfo.jsonXmlType.isEntity()) {
+                    if (isLowerCamelCase) {
+                        resultMap.put(propName, propValue);
+                    } else {
+                        resultMap.put(keyNamingPolicy.convert(propName), propValue);
+                    }
                 } else {
-                    resultMap.put(keyNamingPolicy.convert(propName), deepEntity2Map(propValue, ignoreNullProperty, null, keyNamingPolicy));
+                    if (isLowerCamelCase) {
+                        resultMap.put(propName, deepEntity2Map(propValue, ignoreNullProperty, null, keyNamingPolicy));
+                    } else {
+                        resultMap.put(keyNamingPolicy.convert(propName), deepEntity2Map(propValue, ignoreNullProperty, null, keyNamingPolicy));
+                    }
                 }
             }
         }
