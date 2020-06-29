@@ -65,36 +65,28 @@ import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.function.BiPredicate;
 
 /**
- * The Class IOUtil.
  *
  * @author Haiyang Li
  * @version $Revision: 0.8 $
  */
 public final class IOUtil {
 
-    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(IOUtil.class);
 
-    /** The Constant pathSplitter. */
     private static final Splitter pathSplitter = Splitter.with('/').trimResults();
 
-    /** The Constant DEFAULT_QUEUE_SIZE_FOR_ROW_PARSER. */
     static final int DEFAULT_QUEUE_SIZE_FOR_ROW_PARSER = 1024;
 
-    /** The Constant ZIP. */
     // ...
     private static final String ZIP = ".zip";
 
-    /** The Constant GZ. */
     private static final String GZ = ".gz";
 
     /** The file copy buffer size (32 MB). */
     private static final long FILE_COPY_BUFFER_SIZE = (1024 * 1024) * 32;
 
-    /** The Constant stringEncodeMethod. */
     static final Method stringEncodeMethod;
 
-    /** The Constant stringDecodeMethod. */
     static final Method stringDecodeMethod;
 
     static {
@@ -129,7 +121,6 @@ public final class IOUtil {
         stringDecodeMethod = decodeMethod;
     }
 
-    /** The Constant HOST_NAME. */
     public static final String HOST_NAME;
 
     static {
@@ -160,163 +151,112 @@ public final class IOUtil {
         HOST_NAME = hostName;
     }
 
-    /** The Constant CPU_CORES. */
     public static final int CPU_CORES = Runtime.getRuntime().availableProcessors();
 
-    /** The Constant ONE_KB. */
     public static final long ONE_KB = 1024;
 
-    /** The Constant ONE_MB. */
     public static final long ONE_MB = 1024 * ONE_KB;
 
-    /** The Constant ONE_GB. */
     public static final long ONE_GB = 1024 * ONE_MB;
 
-    /** The Constant ONE_TB. */
     public static final long ONE_TB = 1024 * ONE_GB;
 
-    /** The Constant ONE_PB. */
     public static final long ONE_PB = 1024 * ONE_TB;
 
-    /** The Constant ONE_EB. */
     public static final long ONE_EB = 1024 * ONE_PB;
 
-    /** The Constant ONE_ZB. */
     public static final long ONE_ZB = 1024 * ONE_EB;
 
-    /** The Constant MAX_MEMORY_IN_MB. */
     public static final int MAX_MEMORY_IN_MB = (int) (Runtime.getRuntime().maxMemory() / (1024 * 1024));
 
-    /** The Constant OS_NAME. */
     // ...
     public static final String OS_NAME = System.getProperty("os.name");
 
-    /** The Constant OS_VERSION. */
     public static final String OS_VERSION = System.getProperty("os.version");
 
-    /** The Constant OS_ARCH. */
     public static final String OS_ARCH = System.getProperty("os.arch");
 
-    /** The Constant IS_OS_WINDOWS. */
     //...
     public static final boolean IS_OS_WINDOWS = OS_NAME.toUpperCase().contains("WINDOWS");
 
-    /** The Constant IS_OS_MAC. */
     public static final boolean IS_OS_MAC = OS_NAME.toUpperCase().contains("MAC");
 
-    /** The Constant IS_OS_MAC_OSX. */
     public static final boolean IS_OS_MAC_OSX = OS_NAME.toUpperCase().contains("MAC OS X");
 
-    /** The Constant IS_OS_LINUX. */
     public static final boolean IS_OS_LINUX = OS_NAME.toUpperCase().contains("LINUX");
 
-    /** The Constant IS_PLATFORM_ANDROID. */
     public static final boolean IS_PLATFORM_ANDROID = System.getProperty("java.vendor").toUpperCase().contains("ANDROID")
             || System.getProperty("java.vm.vendor").toUpperCase().contains("ANDROID");
 
-    /** The Constant JAVA_HOME. */
     // ...
     public static final String JAVA_HOME = System.getProperty("java.home");
 
-    /** The Constant JAVA_VERSION. */
     public static final String JAVA_VERSION = System.getProperty("java.version");
 
-    /** The Constant JAVA_VENDOR. */
     public static final String JAVA_VENDOR = System.getProperty("java.vendor");
 
-    /** The Constant JAVA_CLASS_PATH. */
     public static final String JAVA_CLASS_PATH = System.getProperty("java.class.path");
 
-    /** The Constant JAVA_CLASS_VERSION. */
     public static final String JAVA_CLASS_VERSION = System.getProperty("java.class.version");
 
-    /** The Constant JAVA_RUNTIME_NAME. */
     public static final String JAVA_RUNTIME_NAME = System.getProperty("java.runtime.name");
 
-    /** The Constant JAVA_RUNTIME_VERSION. */
     public static final String JAVA_RUNTIME_VERSION = System.getProperty("java.runtime.version");
 
-    /** The Constant JAVA_SPECIFICATION_NAME. */
     public static final String JAVA_SPECIFICATION_NAME = System.getProperty("java.specification.name");
 
-    /** The Constant JAVA_SPECIFICATION_VENDOR. */
     public static final String JAVA_SPECIFICATION_VENDOR = System.getProperty("java.specification.vendor");
 
-    /** The Constant JAVA_SPECIFICATION_VERSION. */
     public static final String JAVA_SPECIFICATION_VERSION = System.getProperty("java.specification.version");
 
-    /** The Constant JAVA_VM_INFO. */
     public static final String JAVA_VM_INFO = System.getProperty("java.vm.info");
 
-    /** The Constant JAVA_VM_NAME. */
     public static final String JAVA_VM_NAME = System.getProperty("java.vm.name");
 
-    /** The Constant JAVA_VM_SPECIFICATION_NAME. */
     public static final String JAVA_VM_SPECIFICATION_NAME = System.getProperty("java.vm.specification.name");
 
-    /** The Constant JAVA_VM_SPECIFICATION_VENDOR. */
     public static final String JAVA_VM_SPECIFICATION_VENDOR = System.getProperty("java.vm.specification.vendor");
 
-    /** The Constant JAVA_VM_SPECIFICATION_VERSION. */
     public static final String JAVA_VM_SPECIFICATION_VERSION = System.getProperty("java.vm.specification.version");
 
-    /** The Constant JAVA_VM_VENDOR. */
     public static final String JAVA_VM_VENDOR = System.getProperty("java.vm.vendor");
 
-    /** The Constant JAVA_VM_VERSION. */
     public static final String JAVA_VM_VERSION = System.getProperty("java.vm.version");
 
-    /** The Constant JAVA_IO_TMPDIR. */
     public static final String JAVA_IO_TMPDIR = System.getProperty("java.io.tmpdir");
 
-    /** The Constant JAVA_VENDOR_URL. */
     static final String JAVA_VENDOR_URL = System.getProperty("java.vendor.url");
 
-    /** The Constant JAVA_LIBRARY_PATH. */
     static final String JAVA_LIBRARY_PATH = System.getProperty("java.library.path");
 
-    /** The Constant JAVA_COMPILER. */
     static final String JAVA_COMPILER = System.getProperty("java.compiler");
 
-    /** The Constant JAVA_ENDORSED_DIRS. */
     static final String JAVA_ENDORSED_DIRS = System.getProperty("java.endorsed.dirs");
 
-    /** The Constant JAVA_EXT_DIRS. */
     static final String JAVA_EXT_DIRS = System.getProperty("java.ext.dirs");
 
-    /** The Constant JAVA_AWT_FONTS. */
     // ...
     static final String JAVA_AWT_FONTS = System.getProperty("java.awt.fonts");
 
-    /** The Constant JAVA_AWT_GRAPHICSENV. */
     static final String JAVA_AWT_GRAPHICSENV = System.getProperty("java.awt.graphicsenv");
 
-    /** The Constant JAVA_AWT_HEADLESS. */
     static final String JAVA_AWT_HEADLESS = System.getProperty("java.awt.headless");
 
-    /** The Constant JAVA_AWT_PRINTERJOB. */
     static final String JAVA_AWT_PRINTERJOB = System.getProperty("java.awt.printerjob");
 
-    /** The Constant JAVA_UTIL_PREFS_PREFERENCES_FACTORY. */
     static final String JAVA_UTIL_PREFS_PREFERENCES_FACTORY = System.getProperty("java.util.prefs.PreferencesFactory");
 
-    /** The Constant USER_DIR. */
     // ...
     public static final String USER_DIR = System.getProperty("user.dir");
 
-    /** The Constant USER_HOME. */
     public static final String USER_HOME = System.getProperty("user.home");
 
-    /** The Constant USER_NAME. */
     public static final String USER_NAME = System.getProperty("user.name");
 
-    /** The Constant USER_TIMEZONE. */
     public static final String USER_TIMEZONE = System.getProperty("user.timezone");
 
-    /** The Constant USER_LANGUAGE. */
     public static final String USER_LANGUAGE = System.getProperty("user.language");
 
-    /** The Constant USER_COUNTRY. */
     public static final String USER_COUNTRY = System.getProperty("user.country") == null ? System.getProperty("user.region")
             : System.getProperty("user.country");
 
@@ -328,21 +268,16 @@ public final class IOUtil {
         CURRENT_PATH = path.charAt(path.length() - 1) == '.' ? path.substring(0, path.length() - 1) : path;
     }
 
-    /** The Constant PATH_SEPARATOR. */
     // ...
     public static final String PATH_SEPARATOR = System.getProperty("path.separator");
 
-    /** The Constant FILE_SEPARATOR. */
     public static final String FILE_SEPARATOR = System.getProperty("file.separator");
 
-    /** The Constant LINE_SEPARATOR. */
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
-    /** The Constant EOF. */
     // ...
     public static final int EOF = -1;
 
-    /** The Constant all_files_filter. */
     private static final BiPredicate<File, File> all_files_filter = new BiPredicate<File, File>() {
         @Override
         public boolean test(File parentDir, File file) {
@@ -350,7 +285,6 @@ public final class IOUtil {
         }
     };
 
-    /** The Constant directories_excluded_filter. */
     private static final BiPredicate<File, File> directories_excluded_filter = new BiPredicate<File, File>() {
         @Override
         public boolean test(File parentDir, File file) {
@@ -358,7 +292,6 @@ public final class IOUtil {
         }
     };
 
-    /** The Constant directories_only_filter. */
     private static final BiPredicate<File, File> directories_only_filter = new BiPredicate<File, File>() {
         @Override
         public boolean test(File parentDir, File file) {

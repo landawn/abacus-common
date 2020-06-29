@@ -29,9 +29,5 @@ import java.lang.annotation.Target;
 @WebService.HttpMethod(WebService.HttpMethod.GET)
 public @interface GET {
 
-    /**
-     *
-     * @return
-     */
     String value() default "";
 }

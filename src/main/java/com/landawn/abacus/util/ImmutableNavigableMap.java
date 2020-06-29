@@ -20,7 +20,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 /**
- * The Class ImmutableNavigableMap.
  *
  * @author Haiyang Li
  * @param <K> the key type
@@ -29,18 +28,11 @@ import java.util.TreeMap;
  */
 public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implements NavigableMap<K, V> {
 
-    /** The Constant EMPTY. */
     @SuppressWarnings("rawtypes")
     private static final ImmutableNavigableMap EMPTY = new ImmutableNavigableMap(N.emptyNavigableMap());
 
-    /** The navigable map. */
     private final NavigableMap<K, V> navigableMap;
 
-    /**
-     * Instantiates a new immutable navigable map.
-     *
-     * @param navigableMap
-     */
     ImmutableNavigableMap(NavigableMap<? extends K, ? extends V> navigableMap) {
         super(navigableMap);
         this.navigableMap = (NavigableMap<K, V>) navigableMap;
@@ -377,19 +369,11 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
         return navigableMap.higherKey(key);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Map.Entry<K, V> firstEntry() {
         return navigableMap.firstEntry();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Map.Entry<K, V> lastEntry() {
         return navigableMap.lastEntry();
@@ -415,10 +399,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
         return navigableMap.pollLastEntry();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public NavigableMap<K, V> descendingMap() {
         return of(navigableMap.descendingMap());

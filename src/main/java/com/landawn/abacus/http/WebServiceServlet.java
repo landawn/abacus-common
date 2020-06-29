@@ -76,16 +76,12 @@ import com.landawn.abacus.util.URLEncodedUtil;
  */
 public class WebServiceServlet extends AbstractHttpServlet {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -7919235560292201779L;
 
-    /** The Constant SERVICE_IMPL_CLASS. */
     protected static final String SERVICE_IMPL_CLASS = "serviceImplClass";
 
-    /** The Constant SERVICE_FACTORY_CLASS. */
     protected static final String SERVICE_FACTORY_CLASS = "serviceFactoryClass";
 
-    /** The Constant SERVICE_FACTORY_METHOD. */
     protected static final String SERVICE_FACTORY_METHOD = "serviceFactoryMethod";
 
     //    /** The Constant PATH_MAPPER. */
@@ -94,65 +90,46 @@ public class WebServiceServlet extends AbstractHttpServlet {
     //    /** The Constant HTTP_METHOD_MAPPER. */
     //    protected static final String HTTP_METHOD_MAPPER = "httpMethodMapper";
 
-    /** The Constant ENCRYPTION_USER_NAME. */
     protected static final String ENCRYPTION_USER_NAME = "encryptionUserName";
 
-    /** The Constant ENCRYPTION_PASSWORD. */
     protected static final String ENCRYPTION_PASSWORD = "encryptionPassword";
 
-    /** The Constant ENCRYPTION_MESSAGE. */
     protected static final String ENCRYPTION_MESSAGE = "encryptionMessage";
 
-    /** The path method map. */
     private final Map<String, Method> pathMethodMap = new HashMap<>();
 
-    /** The method parameter class map. */
     private final Map<String, Class<?>> methodParameterClassMap = new HashMap<>();
 
-    /** The parameter method map. */
     private final Map<String, Method> parameterMethodMap = new HashMap<>();
 
-    /** The ele name method map. */
     private final Map<String, Method> eleNameMethodMap = new HashMap<>();
 
-    /** The ele name parameter class map. */
     private final Map<String, Class<?>> eleNameParameterClassMap = new HashMap<>();
 
-    /** The method http method map. */
     private final Map<String, Set<HttpMethod>> methodHttpMethodMap = new HashMap<>();
 
-    /** The method parameter names map. */
     private final Map<String, String[]> methodParameterNamesMap = new HashMap<>();
 
-    /** The method parameter naming types map. */
     private final Map<String, Map<String, Type<?>>> methodParameterNamingTypesMap = new HashMap<>();
 
-    /** The method JSON deserialization config map. */
     private final Map<String, JSONDeserializationConfig> methodJSONDeserializationConfigMap = new HashMap<>();
 
-    /** The method XML deserialization config map. */
     private final Map<String, XMLDeserializationConfig> methodXMLDeserializationConfigMap = new HashMap<>();
 
     static {
         LoggerFactory.getLogger(WebServiceServlet.class).warn(IOUtil.JAVA_VERSION);
     }
 
-    /** The service impl. */
     private Object serviceImpl;
 
-    /** The encryption user name. */
     private String encryptionUserName;
 
-    /** The encryption password. */
     private byte[] encryptionPassword;
 
-    /** The encryption message. */
     private MessageEncryption encryptionMessage;
 
-    /** The service RR logger. */
     private Logger serviceRRLogger;
 
-    /** The service impl logger. */
     private Logger serviceImplLogger;
 
     /**

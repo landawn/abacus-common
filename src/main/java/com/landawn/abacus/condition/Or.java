@@ -19,38 +19,23 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * The Class Or.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class Or extends Junction {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -2842422533648510863L;
 
-    /**
-     * Instantiates a new or.
-     */
     // For Kryo
     Or() {
     }
 
-    /**
-     * Instantiates a new or.
-     *
-     * @param condition
-     */
     @SafeVarargs
     public Or(Condition... condition) {
         super(Operator.OR, condition);
     }
 
-    /**
-     * Instantiates a new or.
-     *
-     * @param conditions
-     */
     public Or(Collection<? extends Condition> conditions) {
         super(Operator.OR, conditions);
     }

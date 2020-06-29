@@ -20,21 +20,14 @@ import java.io.InputStream;
 import com.landawn.abacus.util.N;
 
 /**
- * The Class UncloseableInputStream.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 final class UncloseableInputStream extends InputStream {
 
-    /** The in. */
     private final InputStream in;
 
-    /**
-     * Instantiates a new uncloseable input stream.
-     *
-     * @param is
-     */
     public UncloseableInputStream(InputStream is) {
         this.in = is;
     }
@@ -57,10 +50,6 @@ final class UncloseableInputStream extends InputStream {
         // ignore. do nothing.
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return in.hashCode();
@@ -86,10 +75,6 @@ final class UncloseableInputStream extends InputStream {
         return false;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return in.toString();

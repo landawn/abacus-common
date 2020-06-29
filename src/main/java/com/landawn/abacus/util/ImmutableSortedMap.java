@@ -19,7 +19,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 /**
- * The Class ImmutableSortedMap.
  *
  * @author Haiyang Li
  * @param <K> the key type
@@ -28,18 +27,11 @@ import java.util.TreeMap;
  */
 public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements SortedMap<K, V> {
 
-    /** The Constant EMPTY. */
     @SuppressWarnings("rawtypes")
     private static final ImmutableSortedMap EMPTY = new ImmutableSortedMap(N.emptySortedMap());
 
-    /** The sorted map. */
     private final SortedMap<K, V> sortedMap;
 
-    /**
-     * Instantiates a new immutable sorted map.
-     *
-     * @param sortedMap
-     */
     ImmutableSortedMap(SortedMap<? extends K, ? extends V> sortedMap) {
         super(sortedMap);
         this.sortedMap = (SortedMap<K, V>) sortedMap;
@@ -309,10 +301,6 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
         throw new UnsupportedOperationException();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Comparator<? super K> comparator() {
         return sortedMap.comparator();
@@ -349,19 +337,11 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
         return of(sortedMap.tailMap(fromKey));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public K firstKey() {
         return sortedMap.firstKey();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public K lastKey() {
         return sortedMap.lastKey();

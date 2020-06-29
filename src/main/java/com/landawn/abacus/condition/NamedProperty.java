@@ -22,33 +22,22 @@ import com.landawn.abacus.condition.ConditionFactory.CF;
 import com.landawn.abacus.util.N;
 
 /**
- * The Class NamedProperty.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public final class NamedProperty {
 
-    /** The Constant instancePool. */
     private static final Map<String, NamedProperty> instancePool = new ConcurrentHashMap<>();
 
-    /** The prop name. */
     // for Kryo
     final String propName;
 
-    /**
-     * Instantiates a new named property.
-     */
     // For Kryo
     NamedProperty() {
         propName = null;
     }
 
-    /**
-     * Instantiates a new named property.
-     *
-     * @param propName
-     */
     public NamedProperty(String propName) {
         this.propName = propName;
     }
@@ -250,10 +239,6 @@ public final class NamedProperty {
         return CF.in(propName, values);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return propName.hashCode();
@@ -269,10 +254,6 @@ public final class NamedProperty {
         return this == obj || (obj instanceof NamedProperty && N.equals(((NamedProperty) obj).propName, propName));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return propName;

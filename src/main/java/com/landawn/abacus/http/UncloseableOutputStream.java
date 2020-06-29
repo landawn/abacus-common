@@ -20,21 +20,14 @@ import java.io.OutputStream;
 import com.landawn.abacus.util.N;
 
 /**
- * The Class UncloseableOutputStream.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 final class UncloseableOutputStream extends OutputStream {
 
-    /** The out. */
     private final OutputStream out;
 
-    /**
-     * Instantiates a new uncloseable output stream.
-     *
-     * @param os
-     */
     public UncloseableOutputStream(OutputStream os) {
         this.out = os;
     }
@@ -60,10 +53,6 @@ final class UncloseableOutputStream extends OutputStream {
         out.flush();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return out.hashCode();
@@ -89,10 +78,6 @@ final class UncloseableOutputStream extends OutputStream {
         return false;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return out.toString();

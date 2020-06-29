@@ -32,10 +32,6 @@ import com.landawn.abacus.util.function.BiConsumer;
  */
 abstract class AbstractNonStreamingHashFunction implements HashFunction {
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Hasher newHasher() {
         return new BufferingHasher(32);

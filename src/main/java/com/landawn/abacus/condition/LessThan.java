@@ -15,29 +15,18 @@
 package com.landawn.abacus.condition;
 
 /**
- * The Class LessThan.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class LessThan extends Binary {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -6086778092673028493L;
 
-    /**
-     * Instantiates a new less than.
-     */
     // For Kryo
     LessThan() {
     }
 
-    /**
-     * Instantiates a new less than.
-     *
-     * @param propName
-     * @param propValue
-     */
     public LessThan(String propName, Object propValue) {
         super(propName, Operator.LESS_THAN, propValue);
     }

@@ -18,24 +18,16 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * The Class Password.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public final class Password {
 
-    /** The algorithm. */
     private final String algorithm;
 
-    /** The md. */
     private final MessageDigest MD;
 
-    /**
-     * Instantiates a new password.
-     *
-     * @param algorithm
-     */
     public Password(String algorithm) {
         this.algorithm = algorithm;
 
@@ -84,10 +76,6 @@ public final class Password {
         return (plainPassword == null) ? (encryptedPassword == null) : ((encryptedPassword != null) && encryptedPassword.equals(encrypt(plainPassword)));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -107,10 +95,6 @@ public final class Password {
         return obj == this || (obj instanceof Password && ((Password) obj).algorithm.equals(algorithm));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "{algorithm=" + algorithm + "}";

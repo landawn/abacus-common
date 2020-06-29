@@ -51,64 +51,33 @@ public final class BiMap<K, V> implements Map<K, V> {
      */
     static final float DEFAULT_LOAD_FACTOR = 0.75f;
 
-    /** The key map supplier. */
     final Supplier<? extends Map<K, V>> keyMapSupplier;
 
-    /** The value map supplier. */
     final Supplier<? extends Map<V, K>> valueMapSupplier;
 
-    /** The key map. */
     final Map<K, V> keyMap;
 
-    /** The value map. */
     final Map<V, K> valueMap;
 
-    /** The inverse. */
     private transient BiMap<V, K> inverse;
 
-    /**
-     * Instantiates a new bi map.
-     */
     public BiMap() {
         this(DEFAULT_INITIAL_CAPACITY);
     }
 
-    /**
-     * Instantiates a new bi map.
-     *
-     * @param initialCapacity
-     */
     public BiMap(int initialCapacity) {
         this(initialCapacity, DEFAULT_LOAD_FACTOR);
     }
 
-    /**
-     * Instantiates a new bi map.
-     *
-     * @param initialCapacity
-     * @param loadFactor
-     */
     public BiMap(int initialCapacity, float loadFactor) {
         this(new HashMap<K, V>(initialCapacity, loadFactor), new HashMap<V, K>(initialCapacity, loadFactor));
     }
 
-    /**
-     * Instantiates a new bi map.
-     *
-     * @param keyMapType
-     * @param valueMapType
-     */
     @SuppressWarnings("rawtypes")
     public BiMap(final Class<? extends Map> keyMapType, final Class<? extends Map> valueMapType) {
         this(Maps.mapType2Supplier(keyMapType), Maps.mapType2Supplier(valueMapType));
     }
 
-    /**
-     * Instantiates a new bi map.
-     *
-     * @param keyMapSupplier
-     * @param valueMapSupplier
-     */
     public BiMap(final Supplier<? extends Map<K, V>> keyMapSupplier, final Supplier<? extends Map<V, K>> valueMapSupplier) {
         this.keyMapSupplier = keyMapSupplier;
         this.valueMapSupplier = valueMapSupplier;
@@ -116,12 +85,6 @@ public final class BiMap<K, V> implements Map<K, V> {
         this.valueMap = valueMapSupplier.get();
     }
 
-    /**
-     * Instantiates a new bi map.
-     *
-     * @param keyMap The keyMap and this BiMap share the same data; any changes to one will appear in the other.
-     * @param valueMap The valueMap and this BiMap share the same data; any changes to one will appear in the other.
-     */
     @Internal
     BiMap(final Map<K, V> keyMap, final Map<V, K> valueMap) {
         this.keyMapSupplier = Maps.mapType2Supplier(keyMap.getClass());
@@ -597,10 +560,6 @@ public final class BiMap<K, V> implements Map<K, V> {
         return (inverse == null) ? inverse = new BiMap<>(valueMap, keyMap) : inverse;
     }
 
-    /**
-     *
-     * @return
-     */
     public BiMap<K, V> copy() {
         final BiMap<K, V> copy = new BiMap<>(keyMapSupplier, valueMapSupplier);
 
@@ -628,10 +587,6 @@ public final class BiMap<K, V> implements Map<K, V> {
         return keyMap.isEmpty();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int size() {
         return keyMap.size();
@@ -641,10 +596,6 @@ public final class BiMap<K, V> implements Map<K, V> {
     //        return Stream.of(keyMap.entrySet());
     //    }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return keyMap.hashCode();
@@ -661,10 +612,6 @@ public final class BiMap<K, V> implements Map<K, V> {
         return obj == this || (obj instanceof BiMap && keyMap.equals(((BiMap<K, V>) obj).keyMap));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return keyMap.toString();

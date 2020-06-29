@@ -39,7 +39,6 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
      */
     private static final long serialVersionUID = 1587163916L;
 
-    /** The mutable value. */
     private double value;
 
     /**
@@ -68,10 +67,6 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
         return new MutableDouble(value);
     }
 
-    /**
-     *
-     * @return
-     */
     public double value() {
         return value;
     }

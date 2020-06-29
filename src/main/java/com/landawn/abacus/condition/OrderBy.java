@@ -25,67 +25,35 @@ import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.SortDirection;
 
 /**
- * The Class OrderBy.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class OrderBy extends Clause {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 6430369852069478807L;
 
-    /**
-     * Instantiates a new order by.
-     */
     // For Kryo
     OrderBy() {
     }
 
-    /**
-     * Instantiates a new order by.
-     *
-     * @param condition
-     */
     public OrderBy(Condition condition) {
         super(Operator.ORDER_BY, condition);
     }
 
-    /**
-     * Instantiates a new order by.
-     *
-     * @param propNames
-     */
     @SafeVarargs
     public OrderBy(String... propNames) {
         this(CF.expr(createCondition(propNames)));
     }
 
-    /**
-     * Instantiates a new order by.
-     *
-     * @param propName
-     * @param direction
-     */
     public OrderBy(String propName, SortDirection direction) {
         this(CF.expr(createCondition(propName, direction)));
     }
 
-    /**
-     * Instantiates a new order by.
-     *
-     * @param propNames
-     * @param direction
-     */
     public OrderBy(Collection<String> propNames, SortDirection direction) {
         this(CF.expr(createCondition(propNames, direction)));
     }
 
-    /**
-     * Instantiates a new order by.
-     *
-     * @param orders
-     */
     public OrderBy(Map<String, SortDirection> orders) {
         this(createCondition(orders));
     }

@@ -27,7 +27,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
- * The Class ImmutableMap.
  *
  * @author Haiyang Li
  * @param <K> the key type
@@ -36,18 +35,11 @@ import java.util.function.Function;
  */
 public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
 
-    /** The Constant EMPTY. */
     @SuppressWarnings("rawtypes")
     private static final ImmutableMap EMPTY = new ImmutableMap(Collections.EMPTY_MAP);
 
-    /** The map. */
     private final Map<K, V> map;
 
-    /**
-     * Instantiates a new immutable map.
-     *
-     * @param map
-     */
     ImmutableMap(final Map<? extends K, ? extends V> map) {
         this.map = Collections.unmodifiableMap(map);
     }
@@ -468,37 +460,21 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
         return map.get(key);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Set<K> keySet() {
         return map.keySet();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Collection<V> values() {
         return map.values();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Set<java.util.Map.Entry<K, V>> entrySet() {
         return map.entrySet();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int size() {
         return map.size();
@@ -508,11 +484,21 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
         return new Builder<>();
     }
 
+    public static <K, V> Builder<K, V> builder(final Map<K, V> backedMap) {
+        N.checkArgNotNull(backedMap);
+
+        return new Builder<>(backedMap);
+    }
+
     public static class Builder<K, V> {
         private final Map<K, V> map;
 
         Builder() {
             map = new HashMap<>();
+        }
+
+        Builder(final Map<K, V> backedMap) {
+            map = backedMap;
         }
 
         public Builder<K, V> put(final K key, final V value) {

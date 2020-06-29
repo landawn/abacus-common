@@ -37,17 +37,13 @@ public final class InternalUtil {
         // singleton for utility class
     }
 
-    /** The Constant listElementDataField. */
     // ...
     static final Field listElementDataField;
 
-    /** The Constant listSizeField. */
     static final Field listSizeField;
 
-    /** The is list element data field gettable. */
     static volatile boolean isListElementDataFieldGettable = true;
 
-    /** The is list element data field settable. */
     static volatile boolean isListElementDataFieldSettable = true;
 
     static {
@@ -137,13 +133,10 @@ public final class InternalUtil {
         return CommonUtil.asList(a);
     }
 
-    /** The Constant strValueField. */
     static final Field strValueField;
 
-    /** The is string chars gettable. */
     static volatile boolean isStringCharsGettable = true;
 
-    /** The Constant sharedStringConstructor. */
     static final Constructor<String> sharedStringConstructor;
 
     static {

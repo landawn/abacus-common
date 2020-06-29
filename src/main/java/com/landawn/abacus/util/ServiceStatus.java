@@ -22,39 +22,14 @@ package com.landawn.abacus.util;
  */
 public enum ServiceStatus {
 
-    /** The default. */
-    DEFAULT(0),
-    /** The active. */
-    ACTIVE(1),
-    /** The suspended. */
-    SUSPENDED(2),
-    /** The expired. */
-    EXPIRED(3),
-    /** The concluded. */
-    CONCLUDED(4),
-    /** The revoked. */
-    REVOKED(5),
-    /** The refunded. */
-    REFUNDED(6),
-    /** The cancelled. */
-    CANCELLED(7);
+    DEFAULT(0), ACTIVE(1), SUSPENDED(2), EXPIRED(3), CONCLUDED(4), REVOKED(5), REFUNDED(6), CANCELLED(7);
 
-    /** The int value. */
     private int intValue;
 
-    /**
-     * Instantiates a new service status.
-     *
-     * @param intValue
-     */
     ServiceStatus(int intValue) {
         this.intValue = intValue;
     }
 
-    /**
-     *
-     * @return
-     */
     public int intValue() {
         return intValue;
     }

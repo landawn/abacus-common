@@ -16,37 +16,19 @@ package com.landawn.abacus.util;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.function.CharConsumer;
 
-/**
- * The Class CharSummaryStatistics.
- */
 public class CharSummaryStatistics implements CharConsumer {
 
-    /** The count. */
     private long count;
 
-    /** The sum. */
     private long sum;
 
-    /** The min. */
     private char min = Character.MAX_VALUE;
 
-    /** The max. */
     private char max = Character.MIN_VALUE;
 
-    /**
-     * Instantiates a new char summary statistics.
-     */
     public CharSummaryStatistics() {
     }
 
-    /**
-     * Instantiates a new char summary statistics.
-     *
-     * @param count
-     * @param sum
-     * @param min
-     * @param max
-     */
     public CharSummaryStatistics(long count, long sum, char min, char max) {
         this.count = count;
         this.sum = sum;
@@ -122,18 +104,10 @@ public class CharSummaryStatistics implements CharConsumer {
         return getCount() > 0 ? (double) getSum() / getCount() : 0.0d;
     }
 
-    /**
-     *
-     * @return
-     */
     public final int sum() {
         return N.toIntExact(sum);
     }
 
-    /**
-     *
-     * @return
-     */
     public final OptionalDouble average() {
         if (count == 0) {
             return OptionalDouble.empty();
@@ -142,10 +116,6 @@ public class CharSummaryStatistics implements CharConsumer {
         return OptionalDouble.of(getAverage());
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return String.format("{min=%c, max=%c, count=%d, sum=%d, average=%f}", getMin(), getMax(), getCount(), getSum(), getAverage());

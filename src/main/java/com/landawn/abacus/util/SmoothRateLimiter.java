@@ -387,11 +387,6 @@ abstract class SmoothRateLimiter extends RateLimiter {
      */
     private long nextFreeTicketMicros = 0L; // could be either in the past or future
 
-    /**
-     * Instantiates a new smooth rate limiter.
-     *
-     * @param stopwatch
-     */
     private SmoothRateLimiter(SleepingStopwatch stopwatch) {
         super(stopwatch);
     }

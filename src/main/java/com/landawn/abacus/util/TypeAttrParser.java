@@ -24,29 +24,18 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * The Class TypeAttrParser.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public final class TypeAttrParser {
 
-    /** The class name. */
     private final String className;
 
-    /** The type parameters. */
     private final String[] typeParameters;
 
-    /** The parameters. */
     private final String[] parameters;
 
-    /**
-     * Instantiates a new type attr parser.
-     *
-     * @param className
-     * @param typeParameters
-     * @param parameters
-     */
     private TypeAttrParser(String className, String[] typeParameters, String[] parameters) {
         this.className = className;
 

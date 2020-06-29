@@ -17,7 +17,6 @@ package com.landawn.abacus.exception;
 import java.sql.SQLException;
 
 /**
- * The Class UncheckedSQLException.
  *
  * @author Haiyang Li
  * @since 0.8

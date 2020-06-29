@@ -35,11 +35,9 @@ import com.landawn.abacus.util.N;
  */
 final class SipHashFunction extends AbstractStreamingHashFunction implements Serializable {
 
-    /** The c. */
     // The number of compression rounds.
     private final int c;
 
-    /** The d. */
     // The number of finalization rounds.
     private final int d;
 
@@ -50,14 +48,6 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
     /** The k 1. */
     private final long k1;
 
-    /**
-     * Instantiates a new sip hash function.
-     *
-     * @param c the number of compression rounds (must be positive)
-     * @param d the number of finalization rounds (must be positive)
-     * @param k0 the first half of the key
-     * @param k1 the second half of the key
-     */
     SipHashFunction(int c, int d, long k0, long k1) {
         N.checkArgument(c > 0, "The number of SipRound iterations (c=%s) during Compression must be positive.", c);
         N.checkArgument(d > 0, "The number of SipRound iterations (d=%s) during Finalization must be positive.", d);
@@ -67,19 +57,11 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
         this.k1 = k1;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int bits() {
         return 64;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Hasher newHasher() {
         return new SipHasher(c, d, k0, k1);
@@ -87,10 +69,6 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
 
     // TODO(kak): Implement and benchmark the hashFoo() shortcuts.
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "Hashing.sipHash" + c + "" + d + "(" + k0 + ", " + k1 + ")";
@@ -110,10 +88,6 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
         return false;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return (int) (getClass().hashCode() ^ c ^ d ^ k0 ^ k1);
@@ -250,6 +224,5 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
         }
     }
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 0L;
 }

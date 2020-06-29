@@ -43,71 +43,49 @@ import com.landawn.abacus.logging.LoggerFactory;
 @Internal
 public final class Objectory {
 
-    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(Objectory.class);
 
-    /** The created. */
     private static AtomicInteger created = new AtomicInteger();
 
-    /** The Constant POOL_SIZE. */
     static final int POOL_SIZE = 1024;
 
-    /** The Constant POOLABLE_SIZE. */
     static final int POOLABLE_SIZE = 8192;
 
-    /** The Constant BUFFER_SIZE. */
     static final int BUFFER_SIZE = Math.max(IOUtil.MAX_MEMORY_IN_MB * 1024, 8192);
 
-    /** The Constant POOLABLE_ARRAY_LENGTH. */
     private static final int POOLABLE_ARRAY_LENGTH = 128;
 
-    /** The Constant MAX_ARRAY_POOL_SIZE. */
     private static final int MAX_ARRAY_POOL_SIZE = IOUtil.IS_PLATFORM_ANDROID ? 8 : 64;
 
-    /** The Constant MAX_ARRAY_LENGTH. */
     private static final int MAX_ARRAY_LENGTH = IOUtil.IS_PLATFORM_ANDROID ? 128 : 1024;
 
-    /** The Constant listPool. */
     private static final Queue<List<?>> listPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
-    /** The Constant setPool. */
     private static final Queue<Set<?>> setPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
-    /** The Constant linkedHashSetPool. */
     private static final Queue<Set<?>> linkedHashSetPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
-    /** The Constant mapPool. */
     private static final Queue<Map<?, ?>> mapPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
-    /** The Constant linkedHashMapPool. */
     private static final Queue<Map<?, ?>> linkedHashMapPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
-    /** The Constant objectArrayPool. */
     @SuppressWarnings("unchecked")
     private static final Queue<Object[]>[] objectArrayPool = new Queue[POOLABLE_SIZE + 1];
 
-    /** The Constant charArrayBufferPool. */
     private static final Queue<char[]> charArrayBufferPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
-    /** The Constant byteArrayBufferPool. */
     private static final Queue<byte[]> byteArrayBufferPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
-    /** The Constant stringBuilderPool. */
     private static final Queue<StringBuilder> stringBuilderPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
-    /** The Constant byteArrayOutputStreamPool. */
     private static final Queue<ByteArrayOutputStream> byteArrayOutputStreamPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
-    /** The Constant bufferedWriterPool. */
     private static final Queue<BufferedWriter> bufferedWriterPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
-    /** The Constant bufferedXMLWriterPool. */
     private static final Queue<BufferedXMLWriter> bufferedXMLWriterPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
-    /** The Constant bufferedJSONWriterPool. */
     private static final Queue<BufferedJSONWriter> bufferedJSONWriterPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
-    /** The Constant bufferedReaderPool. */
     private static final Queue<BufferedReader> bufferedReaderPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
     /**

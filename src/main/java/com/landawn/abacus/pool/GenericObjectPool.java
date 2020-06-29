@@ -31,7 +31,6 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 
 /**
- * The Class GenericObjectPool.
  *
  * @author Haiyang Li
  * @param <E>
@@ -39,75 +38,32 @@ import com.landawn.abacus.util.Objectory;
  */
 public class GenericObjectPool<E extends Poolable> extends AbstractPool implements ObjectPool<E> {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -5055744987721643286L;
 
-    /** The max memory size. */
     private final long maxMemorySize;
 
-    /** The memory measure. */
     private final ObjectPool.MemoryMeasure<E> memoryMeasure;
 
-    /** The used memory size. */
     private volatile long usedMemorySize = 0;
 
-    /** The pool. */
     final Deque<E> pool;
 
-    /** The cmp. */
     final Comparator<E> cmp;
 
-    /** The schedule future. */
     ScheduledFuture<?> scheduleFuture;
 
-    /**
-     * Instantiates a new generic object pool.
-     *
-     * @param capacity
-     * @param evictDelay
-     * @param evictionPolicy
-     */
     protected GenericObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy) {
         this(capacity, evictDelay, evictionPolicy, 0, null);
     }
 
-    /**
-     * Instantiates a new generic object pool.
-     *
-     * @param capacity
-     * @param evictDelay
-     * @param evictionPolicy
-     * @param maxMemorySize
-     * @param memoryMeasure
-     */
     protected GenericObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, long maxMemorySize, ObjectPool.MemoryMeasure<E> memoryMeasure) {
         this(capacity, evictDelay, evictionPolicy, true, DEFAULT_BALANCE_FACTOR, maxMemorySize, memoryMeasure);
     }
 
-    /**
-     * Instantiates a new generic object pool.
-     *
-     * @param capacity
-     * @param evictDelay
-     * @param evictionPolicy
-     * @param autoBalance
-     * @param balanceFactor
-     */
     protected GenericObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, boolean autoBalance, float balanceFactor) {
         this(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor, 0, null);
     }
 
-    /**
-     * Instantiates a new generic object pool.
-     *
-     * @param capacity
-     * @param evictDelay
-     * @param evictionPolicy
-     * @param autoBalance
-     * @param balanceFactor
-     * @param maxMemorySize
-     * @param memoryMeasure
-     */
     protected GenericObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, boolean autoBalance, float balanceFactor, long maxMemorySize,
             ObjectPool.MemoryMeasure<E> memoryMeasure) {
         super(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor);
@@ -329,10 +285,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         return sucess;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public E take() {
         assertNotClosed();
@@ -481,10 +433,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         }
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int size() {
         // assertNotClosed();
@@ -492,10 +440,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         return pool.size();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return pool.hashCode();
@@ -512,10 +456,6 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         return this == obj || (obj instanceof GenericObjectPool && N.equals(((GenericObjectPool<E>) obj).pool, pool));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return pool.toString();

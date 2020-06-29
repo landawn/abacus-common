@@ -56,9 +56,5 @@ import java.lang.annotation.Target;
 @Retention(RUNTIME)
 public @interface Field {
 
-    /**
-     *
-     * @return
-     */
     String value();
 }

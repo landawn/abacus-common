@@ -36,16 +36,12 @@ import com.landawn.abacus.util.Tuple.Tuple6;
 import com.landawn.abacus.util.Tuple.Tuple7;
 
 /**
- * The Class Futures.
  *
  * @author Haiyang Li
  * @since 0.9
  */
 public final class Futures {
 
-    /**
-     * Instantiates a new futures.
-     */
     private Futures() {
         // singleton.
     }

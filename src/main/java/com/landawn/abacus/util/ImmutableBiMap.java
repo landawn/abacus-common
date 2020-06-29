@@ -17,7 +17,6 @@ package com.landawn.abacus.util;
 import java.util.Map;
 
 /**
- * The Class ImmutableBiMap.
  *
  * @author Haiyang Li
  * @param <K> the key type
@@ -26,18 +25,11 @@ import java.util.Map;
  */
 public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
 
-    /** The Constant EMPTY. */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private static final ImmutableBiMap EMPTY = new ImmutableBiMap(new BiMap<>());
 
-    /** The bi map. */
     private final BiMap<K, V> biMap;
 
-    /**
-     * Instantiates a new immutable bi map.
-     *
-     * @param map
-     */
     @SuppressWarnings("unchecked")
     ImmutableBiMap(final BiMap<? extends K, ? extends V> map) {
         super(map);

@@ -25,7 +25,6 @@ import com.landawn.abacus.util.function.IntFunction;
 import com.landawn.abacus.util.function.Supplier;
 
 /**
- * The Class ListMultimap.
  *
  * @author Haiyang Li
  * @param <K> the key type
@@ -37,61 +36,29 @@ import com.landawn.abacus.util.function.Supplier;
  */
 public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
 
-    /**
-     * Instantiates a new list multimap.
-     */
     ListMultimap() {
         this(HashMap.class, ArrayList.class);
     }
 
-    /**
-     * Instantiates a new list multimap.
-     *
-     * @param initialCapacity
-     */
     ListMultimap(int initialCapacity) {
         this(new HashMap<K, List<E>>(initialCapacity), ArrayList.class);
     }
 
-    /**
-     * Instantiates a new list multimap.
-     *
-     * @param mapType
-     * @param valueType
-     */
     @SuppressWarnings("rawtypes")
     ListMultimap(final Class<? extends Map> mapType, final Class<? extends List> valueType) {
         super(mapType, valueType);
     }
 
-    /**
-     * Instantiates a new list multimap.
-     *
-     * @param mapSupplier
-     * @param valueSupplier
-     */
     ListMultimap(final Supplier<? extends Map<K, List<E>>> mapSupplier, final Supplier<? extends List<E>> valueSupplier) {
         super(mapSupplier, valueSupplier);
     }
 
-    /**
-     * Instantiates a new list multimap.
-     *
-     * @param valueMap
-     * @param valueType
-     */
     @Internal
     @SuppressWarnings("rawtypes")
     ListMultimap(final Map<K, List<E>> valueMap, final Class<? extends List> valueType) {
         super(valueMap, valueType2Supplier(valueType));
     }
 
-    /**
-     * Instantiates a new list multimap.
-     *
-     * @param valueMap
-     * @param valueSupplier
-     */
     @Internal
     ListMultimap(final Map<K, List<E>> valueMap, final Supplier<? extends List<E>> valueSupplier) {
         super(valueMap, valueSupplier);
@@ -764,10 +731,6 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
         return result;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public ListMultimap<K, E> copy() {
         final ListMultimap<K, E> copy = new ListMultimap<>(mapSupplier, valueSupplier);

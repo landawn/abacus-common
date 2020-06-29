@@ -22,26 +22,14 @@ package com.landawn.abacus.util;
  */
 public enum SortDirection {
 
-    /** The asc. */
-    ASC("ASC"),
-    /** The desc. */
-    DESC("DESC");
+    ASC("ASC"), DESC("DESC");
 
-    /** The name. */
     private String name;
 
-    /**
-     * Instantiates a new sort direction.
-     */
     // For Kryo
     SortDirection() {
     }
 
-    /**
-     * Instantiates a new sort direction.
-     *
-     * @param name
-     */
     SortDirection(String name) {
         this.name = name;
     }
@@ -55,10 +43,6 @@ public enum SortDirection {
         return name;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return name;

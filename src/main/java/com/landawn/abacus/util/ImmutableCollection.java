@@ -19,10 +19,10 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.function.Predicate;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * The Class ImmutableCollection.
  *
  * @author Haiyang Li
  * @param <E>
@@ -30,14 +30,8 @@ import com.landawn.abacus.util.stream.Stream;
  */
 public class ImmutableCollection<E> extends AbstractCollection<E> implements Immutable {
 
-    /** The coll. */
     final Collection<E> coll;
 
-    /**
-     * Instantiates a new immutable collection.
-     *
-     * @param c
-     */
     protected ImmutableCollection(Collection<? extends E> c) {
         this.coll = (Collection<E>) c;
     }
@@ -160,28 +154,16 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
         return coll.contains(o);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Iterator<E> iterator() {
         return coll.iterator();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int size() {
         return coll.size();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Object[] toArray() {
         return coll.toArray();
@@ -199,9 +181,12 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     }
 
     /**
-     *
+     * 
      * @return
+     * @deprecated
      */
+    @Deprecated
+    @Beta
     public Stream<E> streamm() {
         return Stream.of(coll);
     }
@@ -216,19 +201,11 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
         return obj instanceof Collection && coll.equals(obj);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return coll.hashCode();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return coll.toString();

@@ -23,48 +23,28 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.URLEncodedUtil;
 
 /**
- * The Class HttpResponse.
  *
  * @author Haiyang Li
  * @since 1.3
  */
 public class HttpResponse {
 
-    /** The sent request at millis. */
     private final long sentRequestAtMillis;
 
-    /** The received response at millis. */
     private final long receivedResponseAtMillis;
 
-    /** The code. */
     private final int code;
 
-    /** The message. */
     private final String message;
 
-    /** The headers. */
     private final Map<String, List<String>> headers;
 
-    /** The body. */
     private final byte[] body;
 
-    /** The body format. */
     private final ContentFormat bodyFormat;
 
     private final Charset respCharset;
 
-    /**
-     * Instantiates a new http response.
-     *
-     * @param sentRequestAtMillis
-     * @param receivedResponseAtMillis
-     * @param code
-     * @param message
-     * @param headers
-     * @param body
-     * @param bodyFormat
-     * @param respCharset
-     */
     HttpResponse(final long sentRequestAtMillis, final long receivedResponseAtMillis, final int code, final String message,
             final Map<String, List<String>> headers, final byte[] body, final ContentFormat bodyFormat, final Charset respCharset) {
         this.sentRequestAtMillis = sentRequestAtMillis;
@@ -105,34 +85,18 @@ public class HttpResponse {
         return receivedResponseAtMillis;
     }
 
-    /**
-     *
-     * @return
-     */
     public int code() {
         return code;
     }
 
-    /**
-     *
-     * @return
-     */
     public String message() {
         return message;
     }
 
-    /**
-     *
-     * @return
-     */
     public Map<String, List<String>> headers() {
         return headers;
     }
 
-    /**
-     *
-     * @return
-     */
     public byte[] body() {
         return body;
     }
@@ -161,10 +125,6 @@ public class HttpResponse {
         }
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -198,10 +158,6 @@ public class HttpResponse {
         return false;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "{sentRequestAtMillis=" + sentRequestAtMillis + ", receivedResponseAtMillis=" + receivedResponseAtMillis + ", code=" + code + ", message="

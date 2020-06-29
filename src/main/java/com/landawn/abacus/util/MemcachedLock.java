@@ -21,7 +21,6 @@ import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 
 /**
- * The Class MemcachedLock.
  *
  * @author Haiyang Li
  * @param <K> the key type
@@ -30,17 +29,10 @@ import com.landawn.abacus.logging.LoggerFactory;
  */
 public final class MemcachedLock<K, V> {
 
-    /** The Constant logger. */
     static final Logger logger = LoggerFactory.getLogger(MemcachedLock.class);
 
-    /** The mc. */
     private final SpyMemcached<V> mc;
 
-    /**
-     * Instantiates a new memcached lock.
-     *
-     * @param serverUrl
-     */
     public MemcachedLock(String serverUrl) {
         mc = new SpyMemcached<V>(serverUrl);
     }
@@ -115,10 +107,6 @@ public final class MemcachedLock<K, V> {
         return N.stringOf(target);
     }
 
-    /**
-     *
-     * @return
-     */
     public SpyMemcached<V> client() {
         return mc;
     }

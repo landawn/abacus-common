@@ -24,7 +24,6 @@ import com.landawn.abacus.util.function.IntFunction;
 import com.landawn.abacus.util.function.Supplier;
 
 /**
- * The Class SetMultimap.
  *
  * @author Haiyang Li
  * @param <K> the key type
@@ -36,61 +35,29 @@ import com.landawn.abacus.util.function.Supplier;
  */
 public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
 
-    /**
-     * Instantiates a new sets the multimap.
-     */
     SetMultimap() {
         this(HashMap.class, HashSet.class);
     }
 
-    /**
-     * Instantiates a new sets the multimap.
-     *
-     * @param initialCapacity
-     */
     SetMultimap(int initialCapacity) {
         this(new HashMap<K, Set<E>>(initialCapacity), HashSet.class);
     }
 
-    /**
-     * Instantiates a new sets the multimap.
-     *
-     * @param mapType
-     * @param valueType
-     */
     @SuppressWarnings("rawtypes")
     SetMultimap(final Class<? extends Map> mapType, final Class<? extends Set> valueType) {
         super(mapType, valueType);
     }
 
-    /**
-     * Instantiates a new sets the multimap.
-     *
-     * @param mapSupplier
-     * @param valueSupplier
-     */
     SetMultimap(final Supplier<? extends Map<K, Set<E>>> mapSupplier, final Supplier<? extends Set<E>> valueSupplier) {
         super(mapSupplier, valueSupplier);
     }
 
-    /**
-     * Instantiates a new sets the multimap.
-     *
-     * @param valueMap
-     * @param valueType
-     */
     @Internal
     @SuppressWarnings("rawtypes")
     SetMultimap(final Map<K, Set<E>> valueMap, final Class<? extends Set> valueType) {
         super(valueMap, valueType2Supplier(valueType));
     }
 
-    /**
-     * Instantiates a new sets the multimap.
-     *
-     * @param valueMap
-     * @param valueSupplier
-     */
     @Internal
     SetMultimap(final Map<K, Set<E>> valueMap, final Supplier<? extends Set<E>> valueSupplier) {
         super(valueMap, valueSupplier);
@@ -763,10 +730,6 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
         return result;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public SetMultimap<K, E> copy() {
         final SetMultimap<K, E> copy = new SetMultimap<>(mapSupplier, valueSupplier);

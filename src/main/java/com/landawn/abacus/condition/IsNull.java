@@ -17,14 +17,12 @@ package com.landawn.abacus.condition;
 import com.landawn.abacus.condition.ConditionFactory.CF;
 
 /**
- * The Class IsNull.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class IsNull extends Is {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -3579906022393069657L;
 
     /**
@@ -32,18 +30,10 @@ public class IsNull extends Is {
      */
     static final Expression NULL = CF.expr("NULL");
 
-    /**
-     * Instantiates a new checks if is null.
-     */
     // For Kryo
     IsNull() {
     }
 
-    /**
-     * Instantiates a new checks if is null.
-     *
-     * @param propName
-     */
     public IsNull(String propName) {
         super(propName, NULL);
     }

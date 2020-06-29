@@ -17,14 +17,12 @@ package com.landawn.abacus.util;
 import java.util.regex.Pattern;
 
 /**
- * The Class ValidatorUtil.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class ValidatorUtil {
 
-    /** The Constant emailPattern. */
     private static final Pattern emailPattern = Pattern
             .compile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$");
 
@@ -33,7 +31,6 @@ public class ValidatorUtil {
     //    (?=.*[A-Z])      : This matches the presence of at least one capital letter.
     //    (?=.*[0-9])      : This matches the presence of at least one digit i.e. 0-9.
     //    (?=.*[`~!@#$%^&*()-_=+[{]}\\|;:'\",<.>/?])     : This matches the presence of at least one special character.
-    /** The Constant passwordPattern. */
     //    {6,16}           : This limits the length of password from minimum 6 letters to maximum 16 letters.
     private static final Pattern passwordPattern = Pattern
             .compile("((?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[" + escapeSpeicalChars("`~!@#$%^&*()-_=+[{]}\\|;:'\",<.>/?") + "]).{6,16})");

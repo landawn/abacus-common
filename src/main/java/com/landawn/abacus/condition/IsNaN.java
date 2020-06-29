@@ -17,14 +17,12 @@ package com.landawn.abacus.condition;
 import com.landawn.abacus.condition.ConditionFactory.CF;
 
 /**
- * The Class IsNaN.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class IsNaN extends Is {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 7088820715466964254L;
 
     /**
@@ -32,18 +30,10 @@ public class IsNaN extends Is {
      */
     static final Expression NAN = CF.expr("NAN");
 
-    /**
-     * Instantiates a new checks if is na N.
-     */
     // For Kryo
     IsNaN() {
     }
 
-    /**
-     * Instantiates a new checks if is na N.
-     *
-     * @param propName
-     */
     public IsNaN(String propName) {
         super(propName, NAN);
     }

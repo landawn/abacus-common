@@ -37,26 +37,20 @@ import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 
 /**
- * The Class Configuration.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public abstract class Configuration {
 
-    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(Configuration.class);
 
-    /** The Constant CVS_NAME. */
     private static final String CVS_NAME = ".cvs";
 
-    /** The Constant SVN_NAME. */
     private static final String SVN_NAME = ".svn";
 
-    /** The Constant GIT_NAME. */
     private static final String GIT_NAME = ".git";
 
-    /** The Constant COMMON_CONFIG_PATH. */
     private static final List<String> COMMON_CONFIG_PATH = new ArrayList<>();
 
     static {
@@ -97,13 +91,10 @@ public abstract class Configuration {
         COMMON_CONFIG_PATH.add("./../resources");
     }
 
-    /** The Constant configFilePathPool. */
     private static final Map<String, String> configFilePathPool = new ConcurrentHashMap<>();
 
-    /** The attrs. */
     protected final Map<String, String> attrs = new HashMap<>();
 
-    /** The props. */
     protected final Map<String, String> props = new HashMap<>();
 
     /**
@@ -733,10 +724,6 @@ public abstract class Configuration {
         return Splitter.with(WD.COMMA).trimResults().split(N.newHashSet(), st);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return attrs.hashCode();
@@ -752,10 +739,6 @@ public abstract class Configuration {
         return this == obj || (obj instanceof Configuration && N.equals(((Configuration) obj).attrs, attrs));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return attrs.toString();

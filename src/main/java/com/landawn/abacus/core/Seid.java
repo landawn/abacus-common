@@ -36,14 +36,12 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 
 /**
- * The Class Seid.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class Seid implements EntityId, Cloneable {
 
-    /** The Constant keyComparator. */
     private static final Comparator<String> keyComparator = new Comparator<String>() {
         @Override
         public int compare(String a, String b) {
@@ -51,29 +49,17 @@ public class Seid implements EntityId, Cloneable {
         }
     };
 
-    /** The entity name. */
     private final String entityName;
 
-    /** The values. */
     private Map<String, Object> values = Collections.emptyMap();
 
-    /** The str value. */
     private String strValue;
 
-    /**
-     * Instantiates a new seid.
-     */
     // for Kryo.
     protected Seid() {
         entityName = N.EMPTY_STRING;
     }
 
-    /**
-     * Instantiates a new seid.
-     *
-     * @param entityName
-     * @deprecated for internal use only
-     */
     @Deprecated
     @Internal
     public Seid(String entityName) {
@@ -84,23 +70,12 @@ public class Seid implements EntityId, Cloneable {
         this.entityName = entityName == null ? N.EMPTY_STRING : entityName;
     }
 
-    /**
-     * Instantiates a new seid.
-     *
-     * @param propName
-     * @param propValue
-     */
     public Seid(String propName, Object propValue) {
         this(NameUtil.getParentName(propName));
 
         set(propName, propValue);
     }
 
-    /**
-     * Instantiates a new seid.
-     *
-     * @param nameValues
-     */
     public Seid(Map<String, Object> nameValues) {
         this(NameUtil.getParentName(nameValues.keySet().iterator().next()));
 
@@ -218,10 +193,6 @@ public class Seid implements EntityId, Cloneable {
         return seid;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String entityName() {
         return entityName;
@@ -397,28 +368,16 @@ public class Seid implements EntityId, Cloneable {
         }
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Set<String> keySet() {
         return values.keySet();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Set<Entry<String, Object>> entrySet() {
         return values.entrySet();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int size() {
         return values.size();
@@ -488,28 +447,16 @@ public class Seid implements EntityId, Cloneable {
         return (obj instanceof EntityId) ? toString().equals(obj.toString()) : false;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return toString().hashCode();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return stringValue();
     }
 
-    /**
-     *
-     * @return
-     */
     private String stringValue() {
         if (strValue == null) {
 

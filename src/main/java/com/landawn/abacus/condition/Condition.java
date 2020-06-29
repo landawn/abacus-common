@@ -19,7 +19,6 @@ import java.util.List;
 import com.landawn.abacus.util.NamingPolicy;
 
 /**
- * The Interface Condition.
  *
  * @author Haiyang Li
  * @since 0.8

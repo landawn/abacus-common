@@ -17,48 +17,26 @@ package com.landawn.abacus.condition;
 import java.util.Collection;
 
 /**
- * The Class NaturalJoin.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class NaturalJoin extends Join {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -8632289581598653781L;
 
-    /**
-     * Instantiates a new natural join.
-     */
     // For Kryo
     NaturalJoin() {
     }
 
-    /**
-     * Instantiates a new natural join.
-     *
-     * @param joinEntity
-     */
     public NaturalJoin(String joinEntity) {
         super(Operator.NATURAL_JOIN, joinEntity);
     }
 
-    /**
-     * Instantiates a new natural join.
-     *
-     * @param joinEntity
-     * @param condition
-     */
     public NaturalJoin(String joinEntity, Condition condition) {
         super(Operator.NATURAL_JOIN, joinEntity, condition);
     }
 
-    /**
-     * Instantiates a new natural join.
-     *
-     * @param joinEntities
-     * @param condition
-     */
     public NaturalJoin(Collection<String> joinEntities, Condition condition) {
         super(Operator.NATURAL_JOIN, joinEntities, condition);
     }

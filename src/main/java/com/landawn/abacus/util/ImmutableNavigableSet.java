@@ -21,7 +21,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
- * The Class ImmutableNavigableSet.
  *
  * @author Haiyang Li
  * @param <E>
@@ -29,18 +28,11 @@ import java.util.TreeSet;
  */
 public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implements NavigableSet<E> {
 
-    /** The Constant EMPTY. */
     @SuppressWarnings("rawtypes")
     private static final ImmutableNavigableSet EMPTY = new ImmutableNavigableSet(N.emptyNavigableSet());
 
-    /** The navigable set. */
     private final NavigableSet<E> navigableSet;
 
-    /**
-     * Instantiates a new immutable navigable set.
-     *
-     * @param navigableSet
-     */
     ImmutableNavigableSet(NavigableSet<? extends E> navigableSet) {
         super(navigableSet);
         this.navigableSet = (NavigableSet<E>) navigableSet;
@@ -153,37 +145,21 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
         return navigableSet.higher(e);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public E pollFirst() {
         return navigableSet.pollFirst();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public E pollLast() {
         return navigableSet.pollLast();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public NavigableSet<E> descendingSet() {
         return of(navigableSet.descendingSet());
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Iterator<E> descendingIterator() {
         return ObjIterator.of(navigableSet.descendingIterator());

@@ -20,14 +20,12 @@ import org.apache.logging.log4j.spi.ExtendedLogger;
 import com.landawn.abacus.util.function.Supplier;
 
 /**
- * The Class Log4Jv2Logger.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 class Log4Jv2Logger extends AbstractLogger {
 
-    /** The Constant FQCN. */
     public static final String FQCN = Log4Jv2Logger.class.getName();
 
     // private static final String LOG4J_XML = "log4j.xml";
@@ -45,15 +43,9 @@ class Log4Jv2Logger extends AbstractLogger {
     //
     // existsLog4JFile = temp;
     // }
-    /** The logger impl. */
     //
     private final ExtendedLogger loggerImpl;
 
-    /**
-     * Instantiates a new log 4 jv 2 logger.
-     *
-     * @param name
-     */
     public Log4Jv2Logger(String name) {
         super(name);
         // if (!existsLog4JFile) {

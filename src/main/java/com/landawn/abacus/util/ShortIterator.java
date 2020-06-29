@@ -22,14 +22,12 @@ import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.ShortStream;
 
 /**
- * The Class ShortIterator.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public abstract class ShortIterator extends ImmutableIterator<Short> {
 
-    /** The Constant EMPTY. */
     public static final ShortIterator EMPTY = new ShortIterator() {
         @Override
         public boolean hasNext() {
@@ -42,10 +40,6 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
         }
     };
 
-    /**
-     *
-     * @return
-     */
     public static ShortIterator empty() {
         return EMPTY;
     }
@@ -250,24 +244,12 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
         return nextShort();
     }
 
-    /**
-     *
-     * @return
-     */
     public abstract short nextShort();
 
-    /**
-     *
-     * @return
-     */
     public short[] toArray() {
         return toList().trimToSize().array();
     }
 
-    /**
-     *
-     * @return
-     */
     public ShortList toList() {
         final ShortList list = new ShortList();
 
@@ -278,10 +260,6 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
         return list;
     }
 
-    /**
-     *
-     * @return
-     */
     public ShortStream stream() {
         return ShortStream.of(this);
     }

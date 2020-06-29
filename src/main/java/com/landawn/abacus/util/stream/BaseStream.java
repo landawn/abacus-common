@@ -571,10 +571,6 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     //    @SequentialOnly
     //    S slice(long from, long to);
 
-    /**
-     *
-     * @return
-     */
     @SequentialOnly
     @TerminalOp
     long count();
@@ -596,10 +592,6 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     @TerminalOp
     OT onlyOne() throws DuplicatedResultException;
 
-    /**
-     *
-     * @return
-     */
     @SequentialOnly
     @TerminalOp
     A toArray();
@@ -683,24 +675,12 @@ public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T
     @Override
     void close();
 
-    /**
-     *
-     * @return
-     */
     boolean isParallel();
 
-    /**
-     *
-     * @return
-     */
     @SequentialOnly
     @IntermediateOp
     S sequential();
 
-    /**
-     *
-     * @return
-     */
     @SequentialOnly
     @IntermediateOp
     S parallel();

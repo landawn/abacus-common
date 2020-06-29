@@ -65,16 +65,12 @@ public abstract class StringUtil {
      */
     private static final Pattern WHITESPACE_PATTERN = Pattern.compile("(?: |\\u00A0|\\s|[\\s&&[^ ]])\\s*");
 
-    /** The Constant splitterPool. */
     private static final Map<Object, Splitter> splitterPool = new HashMap<>();
 
-    /** The Constant trimSplitterPool. */
     private static final Map<Object, Splitter> trimSplitterPool = new HashMap<>();
 
-    /** The Constant preserveSplitterPool. */
     private static final Map<Object, Splitter> preserveSplitterPool = new HashMap<>();
 
-    /** The Constant trimPreserveSplitterPool. */
     private static final Map<Object, Splitter> trimPreserveSplitterPool = new HashMap<>();
 
     static {
@@ -98,9 +94,6 @@ public abstract class StringUtil {
         }
     }
 
-    /**
-     * Instantiates a new string util.
-     */
     private StringUtil() {
         // Singleton. Utility class.
     }
@@ -2282,7 +2275,6 @@ public abstract class StringUtil {
         return pattern_accent.matcher(decomposed).replaceAll("");//$NON-NLS-1$
     }
 
-    /** The Constant pattern_accent. */
     private static final Pattern pattern_accent = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");//$NON-NLS-1$
 
     /**
@@ -7487,7 +7479,6 @@ public abstract class StringUtil {
         }
     }
 
-    /** The alphanumerics. */
     private static boolean[] alphanumerics = new boolean[128];
 
     static {

@@ -64,14 +64,8 @@ public final class SafeInitializer<T> implements Supplier<T> {
     /** Holds the reference to the managed object. */
     private final AtomicReference<T> reference = new AtomicReference<>();
 
-    /** The supplier. */
     private final Supplier<T> supplier;
 
-    /**
-     * Instantiates a new safe initializer.
-     *
-     * @param supplier
-     */
     SafeInitializer(final Supplier<T> supplier) {
         N.checkArgNotNull(supplier, "supplier");
 

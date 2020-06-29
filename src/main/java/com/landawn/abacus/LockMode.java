@@ -101,7 +101,6 @@ public enum LockMode {
      */
     RAUD(R.intValue + A.intValue + U.intValue + D.intValue);
 
-    /** The int value. */
     private final int intValue;
 
     /**

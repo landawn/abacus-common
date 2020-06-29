@@ -15,22 +15,14 @@
 package com.landawn.abacus.util;
 
 /**
- * The Class IndexedDouble.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public final class IndexedDouble extends AbstractIndexed {
 
-    /** The value. */
     private final double value;
 
-    /**
-     * Instantiates a new indexed double.
-     *
-     * @param index
-     * @param value
-     */
     IndexedDouble(long index, double value) {
         super(index);
         this.value = value;
@@ -105,18 +97,10 @@ public final class IndexedDouble extends AbstractIndexed {
         };
     }
 
-    /**
-     *
-     * @return
-     */
     public double value() {
         return value;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return (int) index + (int) (value * 31);
@@ -132,10 +116,6 @@ public final class IndexedDouble extends AbstractIndexed {
         return obj instanceof IndexedDouble && ((IndexedDouble) obj).index == index && N.equals(((IndexedDouble) obj).value, value);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "[" + index + "]=" + value;

@@ -31,37 +31,26 @@ import java.util.TreeSet;
  */
 public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
 
-    /** The Constant EMPTY_BOOLEAN_COLUMN. */
     public static final HBaseColumn<Boolean> EMPTY_BOOLEAN_COLUMN = HBaseColumn.valueOf(false, 0);
 
-    /** The Constant EMPTY_CHAR_COLUMN. */
     public static final HBaseColumn<Character> EMPTY_CHAR_COLUMN = HBaseColumn.valueOf((char) 0, 0);
 
-    /** The Constant EMPTY_BYTE_COLUMN. */
     public static final HBaseColumn<Byte> EMPTY_BYTE_COLUMN = HBaseColumn.valueOf((byte) 0, 0);
 
-    /** The Constant EMPTY_SHORT_COLUMN. */
     public static final HBaseColumn<Short> EMPTY_SHORT_COLUMN = HBaseColumn.valueOf((short) 0, 0);
 
-    /** The Constant EMPTY_INT_COLUMN. */
     public static final HBaseColumn<Integer> EMPTY_INT_COLUMN = HBaseColumn.valueOf(0, 0);
 
-    /** The Constant EMPTY_LONG_COLUMN. */
     public static final HBaseColumn<Long> EMPTY_LONG_COLUMN = HBaseColumn.valueOf(0L, 0);
 
-    /** The Constant EMPTY_FLOAT_COLUMN. */
     public static final HBaseColumn<Float> EMPTY_FLOAT_COLUMN = HBaseColumn.valueOf(0f, 0);
 
-    /** The Constant EMPTY_DOUBLE_COLUMN. */
     public static final HBaseColumn<Double> EMPTY_DOUBLE_COLUMN = HBaseColumn.valueOf(0d, 0);
 
-    /** The Constant EMPTY_OBJECT_COLUMN. */
     public static final HBaseColumn<Object> EMPTY_OBJECT_COLUMN = HBaseColumn.valueOf(null, 0);
 
-    /** The Constant LATEST_TIMESTAMP. */
     private static final long LATEST_TIMESTAMP = Long.MAX_VALUE;
 
-    /** The Constant emptyColumnPool. */
     private static final BiMap<Class<?>, HBaseColumn<?>> emptyColumnPool = new BiMap<>();
 
     static {
@@ -76,7 +65,6 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
         emptyColumnPool.put(String.class, EMPTY_OBJECT_COLUMN);
     }
 
-    /** The Constant DESC_HBASE_COLUMN_COMPARATOR. */
     public static final Comparator<HBaseColumn<?>> DESC_HBASE_COLUMN_COMPARATOR = new Comparator<HBaseColumn<?>>() {
         @Override
         public int compare(HBaseColumn<?> o1, HBaseColumn<?> o2) {
@@ -84,7 +72,6 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
         }
     };
 
-    /** The Constant DESC_HBASE_VERSION_COMPARATOR. */
     public static final Comparator<Long> DESC_HBASE_VERSION_COMPARATOR = new Comparator<Long>() {
         @Override
         public int compare(Long o1, Long o2) {
@@ -92,27 +79,14 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
         }
     };
 
-    /** The value. */
     private final T value;
 
-    /** The version. */
     private final long version;
 
-    /**
-     * Instantiates a new h base column.
-     *
-     * @param value
-     */
     public HBaseColumn(T value) {
         this(value, LATEST_TIMESTAMP);
     }
 
-    /**
-     * Instantiates a new h base column.
-     *
-     * @param value
-     * @param version
-     */
     public HBaseColumn(T value, long version) {
         this.value = value;
         this.version = version;
@@ -332,26 +306,14 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
         return map;
     }
 
-    /**
-     *
-     * @return
-     */
     public T value() {
         return value;
     }
 
-    /**
-     *
-     * @return
-     */
     public long version() {
         return version;
     }
 
-    /**
-     *
-     * @return
-     */
     public HBaseColumn<T> copy() {
         return new HBaseColumn<T>(this.value, this.version);
     }
@@ -375,10 +337,6 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
         return version > o.version ? 1 : version == o.version ? 0 : -1;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         int h = 17;
@@ -411,10 +369,6 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
         return false;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return version + ":" + N.stringOf(value);

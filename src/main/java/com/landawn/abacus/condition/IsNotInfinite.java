@@ -15,28 +15,18 @@
 package com.landawn.abacus.condition;
 
 /**
- * The Class IsNotInfinite.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class IsNotInfinite extends IsNot {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -3454957673703217646L;
 
-    /**
-     * Instantiates a new checks if is not infinite.
-     */
     // For Kryo
     IsNotInfinite() {
     }
 
-    /**
-     * Instantiates a new checks if is not infinite.
-     *
-     * @param propName
-     */
     public IsNotInfinite(String propName) {
         super(propName, IsInfinite.INFINITE);
     }

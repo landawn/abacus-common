@@ -18,33 +18,18 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * The Class LZ4BlockOutputStream.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public final class LZ4BlockOutputStream extends OutputStream {
 
-    /** The out. */
     private final net.jpountz.lz4.LZ4BlockOutputStream out;
 
-    /**
-     * Instantiates a new LZ 4 block output stream.
-     *
-     * @param os
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
     public LZ4BlockOutputStream(OutputStream os) throws IOException {
         this.out = new net.jpountz.lz4.LZ4BlockOutputStream(os);
     }
 
-    /**
-     * Instantiates a new LZ 4 block output stream.
-     *
-     * @param os
-     * @param blockSize
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
     public LZ4BlockOutputStream(OutputStream os, int blockSize) throws IOException {
         this.out = new net.jpountz.lz4.LZ4BlockOutputStream(os, blockSize);
     }

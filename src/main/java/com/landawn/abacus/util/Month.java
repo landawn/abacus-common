@@ -22,47 +22,14 @@ package com.landawn.abacus.util;
  */
 public enum Month {
 
-    /** The january. */
-    JANUARY(1),
-    /** The february. */
-    FEBRUARY(2),
-    /** The march. */
-    MARCH(3),
-    /** The april. */
-    APRIL(4),
-    /** The may. */
-    MAY(5),
-    /** The june. */
-    JUNE(6),
-    /** The july. */
-    JULY(7),
-    /** The august. */
-    AUGUST(8),
-    /** The september. */
-    SEPTEMBER(9),
-    /** The october. */
-    OCTOBER(10),
-    /** The november. */
-    NOVEMBER(11),
-    /** The december. */
-    DECEMBER(12);
+    JANUARY(1), FEBRUARY(2), MARCH(3), APRIL(4), MAY(5), JUNE(6), JULY(7), AUGUST(8), SEPTEMBER(9), OCTOBER(10), NOVEMBER(11), DECEMBER(12);
 
-    /** The int value. */
     private int intValue;
 
-    /**
-     * Instantiates a new month.
-     *
-     * @param intValue
-     */
     Month(int intValue) {
         this.intValue = intValue;
     }
 
-    /**
-     *
-     * @return
-     */
     public int intValue() {
         return intValue;
     }

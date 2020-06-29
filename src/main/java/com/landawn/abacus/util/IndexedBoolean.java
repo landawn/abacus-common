@@ -15,22 +15,14 @@
 package com.landawn.abacus.util;
 
 /**
- * The Class IndexedBoolean.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public final class IndexedBoolean extends AbstractIndexed {
 
-    /** The value. */
     private final boolean value;
 
-    /**
-     * Instantiates a new indexed boolean.
-     *
-     * @param index
-     * @param value
-     */
     IndexedBoolean(long index, boolean value) {
         super(index);
         this.value = value;
@@ -113,10 +105,6 @@ public final class IndexedBoolean extends AbstractIndexed {
         return value;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return (int) index + (value ? 0 : 31);
@@ -132,10 +120,6 @@ public final class IndexedBoolean extends AbstractIndexed {
         return obj instanceof IndexedBoolean && ((IndexedBoolean) obj).index == index && N.equals(((IndexedBoolean) obj).value, value);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "[" + index + "]=" + value;

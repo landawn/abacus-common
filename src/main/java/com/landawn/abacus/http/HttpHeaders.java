@@ -25,7 +25,6 @@ import com.landawn.abacus.util.StringUtil;
 import com.landawn.abacus.util.function.BiConsumer;
 
 /**
- * The Class HttpHeaders.
  *
  * @author Haiyang Li
  * @since 0.8
@@ -513,30 +512,17 @@ public final class HttpHeaders {
         public static final String UNSAFE_URL = "unsafe-url";
     }
 
-    /** The map. */
     final Map<String, Object> map;
 
-    /**
-     * Instantiates a new http headers.
-     */
     HttpHeaders() {
         this.map = new HashMap<>();
     }
 
-    /**
-     * Instantiates a new http headers.
-     *
-     * @param headers
-     */
     @SuppressWarnings("rawtypes")
     HttpHeaders(final Map<String, ?> headers) {
         this.map = (Map) headers;
     }
 
-    /**
-     *
-     * @return
-     */
     public static HttpHeaders create() {
         return new HttpHeaders();
     }
@@ -849,18 +835,10 @@ public final class HttpHeaders {
         return map.isEmpty();
     }
 
-    /**
-     *
-     * @return
-     */
     public HttpHeaders copy() {
         return new HttpHeaders().setAll(this.map);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return map.hashCode();
@@ -876,10 +854,6 @@ public final class HttpHeaders {
         return obj instanceof HttpHeaders && this.map.equals(((HttpHeaders) obj).map);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return map.toString();

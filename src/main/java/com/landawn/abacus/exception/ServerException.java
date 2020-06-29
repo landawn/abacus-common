@@ -15,7 +15,6 @@
 package com.landawn.abacus.exception;
 
 /**
- * The Class ServerException.
  *
  * @author Haiyang Li
  * @since 0.8

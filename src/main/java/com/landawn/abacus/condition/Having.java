@@ -15,28 +15,18 @@
 package com.landawn.abacus.condition;
 
 /**
- * The Class Having.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class Having extends Clause {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -8949030071011185833L;
 
-    /**
-     * Instantiates a new having.
-     */
     // For Kryo
     Having() {
     }
 
-    /**
-     * Instantiates a new having.
-     *
-     * @param condition
-     */
     public Having(Condition condition) {
         super(Operator.HAVING, condition);
     }

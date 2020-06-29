@@ -40,7 +40,6 @@ import com.landawn.abacus.util.function.ToShortFunction;
  */
 public abstract class Comparators {
 
-    /** The Constant NULL_FIRST_COMPARATOR. */
     @SuppressWarnings("rawtypes")
     static final Comparator NULL_FIRST_COMPARATOR = new Comparator<Comparable>() {
         @Override
@@ -49,7 +48,6 @@ public abstract class Comparators {
         }
     };
 
-    /** The Constant NULL_LAST_COMPARATOR. */
     @SuppressWarnings("rawtypes")
     static final Comparator NULL_LAST_COMPARATOR = new Comparator<Comparable>() {
         @Override
@@ -58,15 +56,12 @@ public abstract class Comparators {
         }
     };
 
-    /** The Constant NATURAL_ORDER. */
     @SuppressWarnings("rawtypes")
     static final Comparator NATURAL_ORDER = NULL_FIRST_COMPARATOR;
 
-    /** The Constant REVERSED_ORDER. */
     @SuppressWarnings("rawtypes")
     static final Comparator REVERSED_ORDER = Collections.reverseOrder(NATURAL_ORDER);
 
-    /** The Constant COMPARING_IGNORE_CASE. */
     static final Comparator<String> COMPARING_IGNORE_CASE = new Comparator<String>() {
         @Override
         public int compare(String a, String b) {
@@ -74,7 +69,6 @@ public abstract class Comparators {
         }
     };
 
-    /** The Constant COMPARING_BY_LENGTH. */
     static final Comparator<CharSequence> COMPARING_BY_LENGTH = new Comparator<CharSequence>() {
         @Override
         public int compare(CharSequence a, CharSequence b) {
@@ -82,7 +76,6 @@ public abstract class Comparators {
         }
     };
 
-    /** The Constant COMPARING_BY_SIZE. */
     @SuppressWarnings("rawtypes")
     static final Comparator<Collection> COMPARING_BY_SIZE = new Comparator<Collection>() {
         @Override
@@ -91,7 +84,6 @@ public abstract class Comparators {
         }
     };
 
-    /** The Constant COMPARING_BY_SIZEE. */
     @SuppressWarnings("rawtypes")
     static final Comparator<Map> COMPARING_BY_SIZEE = new Comparator<Map>() {
         @Override
@@ -100,9 +92,6 @@ public abstract class Comparators {
         }
     };
 
-    /**
-     * Instantiates a new comparators.
-     */
     Comparators() {
         // Singleton
     }

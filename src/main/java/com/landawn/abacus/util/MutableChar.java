@@ -31,7 +31,6 @@ package com.landawn.abacus.util;
  * @since 2.1
  */
 public final class MutableChar implements Comparable<MutableChar>, Mutable {
-    /** The mutable value. */
     private char value;
 
     /**
@@ -60,10 +59,6 @@ public final class MutableChar implements Comparable<MutableChar>, Mutable {
         return new MutableChar(value);
     }
 
-    /**
-     *
-     * @return
-     */
     public char value() {
         return value;
     }

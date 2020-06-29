@@ -33,7 +33,6 @@ import com.landawn.abacus.util.N;
  */
 abstract class AbstractByteHasher extends AbstractHasher {
 
-    /** The scratch. */
     private final ByteBuffer scratch = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN);
 
     /**

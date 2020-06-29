@@ -24,91 +24,54 @@ public enum Status {
 
     /** General account/service status. */
     BLANK,
-    /** The active. */
     ACTIVE,
-    /** The suspended. */
     SUSPENDED,
-    /** The expired. */
     EXPIRED,
-    /** The retired. */
     RETIRED,
-    /** The concluded. */
     CONCLUDED,
-    /** The revoked. */
     REVOKED,
-    /** The refunded. */
     REFUNDED,
-    /** The cancelled. */
     CANCELLED,
-    /** The closed. */
     CLOSED,
-    /** The removed. */
     REMOVED,
-    /** The deleted. */
     DELETED,
 
     /** Running status. */
     STARTED,
-    /** The running. */
     RUNNING,
-    /** The paused. */
     PAUSED,
-    /** The stopped. */
     STOPPED,
 
     /** order/process status. */
     PREPARING,
-    /** The pending. */
     PENDING,
-    /** The processing. */
     PROCESSING,
-    /** The processed. */
     PROCESSED,
-    /** The approved. */
     APPROVED,
-    /** The placed. */
     PLACED,
-    /** The shipped. */
     SHIPPED,
-    /** The delivered. */
     DELIVERED,
-    /** The accepted. */
     ACCEPTED,
-    /** The returned. */
     RETURNED,
 
     /** development. */
     DEVELOPING,
-    /** The testing. */
     TESTING,
-    /** The released. */
     RELEASED,
-    /** The deployed. */
     DEPLOYED,
 
     /** privilege. */
     READ_ONLY,
-    /** The updatable. */
     UPDATABLE,
-    /** The insertable. */
     INSERTABLE,
-    /** The writable. */
     WRITABLE,
 
-    /** The frozen. */
     FROZEN,
-    /** The finalized. */
     FINALIZED,
-    /** The locked. */
     LOCKED,
-    /** The unlocked. */
     UNLOCKED,
-    /** The available. */
     AVAILABLE,
-    /** The unavailable. */
     UNAVAILABLE,
-    /** The disabled. */
     DISABLED,
-    /** The destroyed. */
     DESTROYED;
 }

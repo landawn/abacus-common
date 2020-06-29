@@ -69,49 +69,36 @@ public final class Clazz {
     @SuppressWarnings("rawtypes")
     public static final Class<Map<String, Object>> LINKED_HASH_MAP = (Class) LinkedHashMap.class;
 
-    /** The Constant STRING_LIST. */
     @SuppressWarnings("rawtypes")
     public static final Class<List<String>> STRING_LIST = (Class) List.class;
 
-    /** The Constant INTEGER_LIST. */
     @SuppressWarnings("rawtypes")
     public static final Class<List<Integer>> INTEGER_LIST = (Class) List.class;
 
-    /** The Constant LONG_LIST. */
     @SuppressWarnings("rawtypes")
     public static final Class<List<Long>> LONG_LIST = (Class) List.class;
 
-    /** The Constant DOUBLE_LIST. */
     @SuppressWarnings("rawtypes")
     public static final Class<List<Double>> DOUBLE_LIST = (Class) List.class;
 
-    /** The Constant OBJECT_LIST. */
     @SuppressWarnings("rawtypes")
     public static final Class<List<Object>> OBJECT_LIST = (Class) List.class;
 
-    /** The Constant STRING_SET. */
     @SuppressWarnings("rawtypes")
     public static final Class<Set<String>> STRING_SET = (Class) Set.class;
 
-    /** The Constant INTEGER_SET. */
     @SuppressWarnings("rawtypes")
     public static final Class<Set<Integer>> INTEGER_SET = (Class) Set.class;
 
-    /** The Constant LONG_SET. */
     @SuppressWarnings("rawtypes")
     public static final Class<Set<Long>> LONG_SET = (Class) Set.class;
 
-    /** The Constant DOUBLE_SET. */
     @SuppressWarnings("rawtypes")
     public static final Class<Set<Double>> DOUBLE_SET = (Class) Set.class;
 
-    /** The Constant OBJECT_SET. */
     @SuppressWarnings("rawtypes")
     public static final Class<Set<Object>> OBJECT_SET = (Class) Set.class;
 
-    /**
-     * Instantiates a new clazz.
-     */
     private Clazz() {
         // singleton.
     }

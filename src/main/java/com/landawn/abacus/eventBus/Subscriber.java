@@ -15,7 +15,6 @@
 package com.landawn.abacus.eventBus;
 
 /**
- * The Interface Subscriber.
  *
  * @author Haiyang Li
  * @param <E>

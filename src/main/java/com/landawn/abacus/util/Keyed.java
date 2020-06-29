@@ -23,18 +23,10 @@ package com.landawn.abacus.util;
  */
 public class Keyed<K, T> {
 
-    /** The key. */
     private final K key;
 
-    /** The val. */
     private final T val;
 
-    /**
-     * Instantiates a new keyed.
-     *
-     * @param key
-     * @param val
-     */
     Keyed(K key, T val) {
         this.key = key;
         this.val = val;
@@ -52,26 +44,14 @@ public class Keyed<K, T> {
         return new Keyed<>(key, val);
     }
 
-    /**
-     *
-     * @return
-     */
     public K key() {
         return key;
     }
 
-    /**
-     *
-     * @return
-     */
     public T val() {
         return val;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return N.hashCode(key);
@@ -96,10 +76,6 @@ public class Keyed<K, T> {
         return false;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "{key=" + N.toString(key) + ", val=" + val + "}";

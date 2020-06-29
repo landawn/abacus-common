@@ -15,28 +15,18 @@
 package com.landawn.abacus.condition;
 
 /**
- * The Class Union.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class Union extends Clause {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 4109708453785423124L;
 
-    /**
-     * Instantiates a new union.
-     */
     // For Kryo
     Union() {
     }
 
-    /**
-     * Instantiates a new union.
-     *
-     * @param condition
-     */
     public Union(SubQuery condition) {
         super(Operator.UNION, condition);
     }

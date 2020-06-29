@@ -15,29 +15,18 @@
 package com.landawn.abacus.condition;
 
 /**
- * The Class Equal.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class Equal extends Binary {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 7021976594945773433L;
 
-    /**
-     * Instantiates a new equal.
-     */
     // For Kryo
     Equal() {
     }
 
-    /**
-     * Instantiates a new equal.
-     *
-     * @param propName
-     * @param propValue
-     */
     public Equal(String propName, Object propValue) {
         super(propName, Operator.EQUAL, propValue);
     }

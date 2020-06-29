@@ -74,7 +74,6 @@ public enum CalendarUnit {
      */
     YEAR(Calendar.YEAR);
 
-    /** The m. */
     private static Map<Integer, CalendarUnit> m = new HashMap<Integer, CalendarUnit>();
 
     static {
@@ -83,14 +82,8 @@ public enum CalendarUnit {
         }
     }
 
-    /** The int value. */
     private int intValue;
 
-    /**
-     * Instantiates a new calendar unit.
-     *
-     * @param intValue
-     */
     CalendarUnit(int intValue) {
         this.intValue = intValue;
     }
@@ -110,10 +103,6 @@ public enum CalendarUnit {
         return result;
     }
 
-    /**
-     *
-     * @return
-     */
     public int intValue() {
         return intValue;
     }

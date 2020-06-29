@@ -39,7 +39,6 @@ import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * The Class Builder.
  *
  * @author haiyangl
  * @param <T>
@@ -47,14 +46,8 @@ import com.landawn.abacus.util.stream.Stream;
  */
 public class Builder<T> {
 
-    /** The val. */
     final T val;
 
-    /**
-     * Instantiates a new builder.
-     *
-     * @param val
-     */
     Builder(T val) {
         N.checkArgNotNull(val);
 
@@ -311,10 +304,6 @@ public class Builder<T> {
     //        return new Builder<>(supplier.get());
     //    }
 
-    /**
-     *
-     * @return
-     */
     public T val() {
         return val;
     }
@@ -368,10 +357,6 @@ public class Builder<T> {
         return func.apply(val);
     }
 
-    /**
-     *
-     * @return
-     */
     public Stream<T> stream() {
         return Stream.of(val);
     }

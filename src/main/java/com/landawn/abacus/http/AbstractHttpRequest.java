@@ -24,7 +24,6 @@ import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.N;
 
 /**
- * The Class AbstractHttpRequest.
  *
  * @author Haiyang Li
  * @param <S>
@@ -32,23 +31,14 @@ import com.landawn.abacus.util.N;
  */
 abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
 
-    /** The http client. */
     final AbstractHttpClient httpClient;
 
-    /** The http method. */
     HttpMethod httpMethod;
 
-    /** The settings. */
     HttpSettings settings;
 
-    /** The request. */
     Object request;
 
-    /**
-     * Instantiates a new abstract http request.
-     *
-     * @param httpClient
-     */
     AbstractHttpRequest(AbstractHttpClient httpClient) {
         this.httpClient = httpClient;
     }
@@ -234,30 +224,30 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
         return execute(resultClass);
     }
 
-//    /**
-//     *
-//     * @param body
-//     * @return
-//     * @throws UncheckedIOException the unchecked IO exception
-//     */
-//    public String patch(Object body) throws UncheckedIOException {
-//        return patch(String.class, body);
-//    }
-//
-//    /**
-//     *
-//     * @param <T>
-//     * @param resultClass
-//     * @param body
-//     * @return
-//     * @throws UncheckedIOException the unchecked IO exception
-//     */
-//    public <T> T patch(final Class<T> resultClass, final Object body) throws UncheckedIOException {
-//        this.httpMethod = HttpMethod.PATCH;
-//        this.request = body;
-//
-//        return execute(resultClass);
-//    }
+    //    /**
+    //     *
+    //     * @param body
+    //     * @return
+    //     * @throws UncheckedIOException the unchecked IO exception
+    //     */
+    //    public String patch(Object body) throws UncheckedIOException {
+    //        return patch(String.class, body);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param resultClass
+    //     * @param body
+    //     * @return
+    //     * @throws UncheckedIOException the unchecked IO exception
+    //     */
+    //    public <T> T patch(final Class<T> resultClass, final Object body) throws UncheckedIOException {
+    //        this.httpMethod = HttpMethod.PATCH;
+    //        this.request = body;
+    //
+    //        return execute(resultClass);
+    //    }
 
     /**
      *
@@ -382,10 +372,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
         httpClient.execute(output, this.httpMethod, this.request, settings);
     }
 
-    /**
-     *
-     * @return
-     */
     public ContinuableFuture<String> asyncGet() {
         return asyncGet(String.class);
     }
@@ -492,10 +478,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
     //        return asyncExecute(resultClass);
     //    }
 
-    /**
-     *
-     * @return
-     */
     public ContinuableFuture<String> asyncDelete() {
         return asyncDelete(String.class);
     }
@@ -533,10 +515,6 @@ abstract class AbstractHttpRequest<S extends AbstractHttpRequest<S>> {
         return asyncExecute(resultClass);
     }
 
-    /**
-     *
-     * @return
-     */
     public ContinuableFuture<String> asyncExecute(final HttpMethod httpMethod) {
         return asyncExecute(String.class, httpMethod);
     }

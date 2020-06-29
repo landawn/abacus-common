@@ -15,28 +15,18 @@
 package com.landawn.abacus.condition;
 
 /**
- * The Class IsNotNull.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class IsNotNull extends IsNot {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -5087506621604713900L;
 
-    /**
-     * Instantiates a new checks if is not null.
-     */
     // For Kryo
     IsNotNull() {
     }
 
-    /**
-     * Instantiates a new checks if is not null.
-     *
-     * @param propName
-     */
     public IsNotNull(String propName) {
         super(propName, IsNull.NULL);
     }

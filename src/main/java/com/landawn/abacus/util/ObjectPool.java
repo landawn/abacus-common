@@ -35,32 +35,20 @@ import com.landawn.abacus.annotation.Internal;
 @Internal
 public final class ObjectPool<K, V> extends AbstractMap<K, V> {
 
-    /** The capacity. */
     final int capacity;
 
-    /** The table. */
     private final Entry<K, V>[] table;
 
-    /** The index mask. */
     private final int indexMask;
 
-    /** The size. */
     private int size = 0;
 
-    /** The key set. */
     private Set<K> keySet = null;
 
-    /** The values. */
     private Collection<V> values = null;
 
-    /** The entry set. */
     private Set<java.util.Map.Entry<K, V>> entrySet;
 
-    /**
-     * Instantiates a new object pool.
-     *
-     * @param capacity
-     */
     @SuppressWarnings("unchecked")
     public ObjectPool(int capacity) {
         this.capacity = capacity;
@@ -232,10 +220,6 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         return false;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Set<K> keySet() {
         Set<K> tmp = keySet;
@@ -259,10 +243,6 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         return tmp;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Collection<V> values() {
         Collection<V> tmp = values;
@@ -290,10 +270,6 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         return tmp;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Set<java.util.Map.Entry<K, V>> entrySet() {
         Set<java.util.Map.Entry<K, V>> tmp = entrySet;
@@ -317,10 +293,6 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         return tmp;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int size() {
         return size;

@@ -22,7 +22,6 @@ import java.lang.annotation.Target;
 import com.landawn.abacus.util.ThreadMode;
 
 /**
- * The Interface Subscribe.
  *
  * @author Haiyang Li
  * @since 0.8
@@ -31,10 +30,6 @@ import com.landawn.abacus.util.ThreadMode;
 @Target(ElementType.METHOD)
 public @interface Subscribe {
 
-    /**
-     *
-     * @return
-     */
     ThreadMode threadMode() default ThreadMode.DEFAULT;
 
     /**

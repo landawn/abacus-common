@@ -405,10 +405,6 @@ public final class Fraction extends Number implements Comparable<Fraction> {
         return numerator;
     }
 
-    /**
-     *
-     * @return
-     */
     public int numerator() {
         return numerator;
     }
@@ -426,10 +422,6 @@ public final class Fraction extends Number implements Comparable<Fraction> {
         return denominator;
     }
 
-    /**
-     *
-     * @return
-     */
     public int denominator() {
         return denominator;
     }
@@ -457,10 +449,6 @@ public final class Fraction extends Number implements Comparable<Fraction> {
         return Math.abs(numerator % denominator);
     }
 
-    /**
-     *
-     * @return
-     */
     public int properNumerator() {
         return Math.abs(numerator % denominator);
     }
@@ -488,10 +476,6 @@ public final class Fraction extends Number implements Comparable<Fraction> {
         return numerator / denominator;
     }
 
-    /**
-     *
-     * @return
-     */
     public int properWhole() {
         return numerator / denominator;
     }

@@ -163,36 +163,28 @@ import com.landawn.abacus.util.stream.Stream;
  */
 public final class Fn extends Comparators {
 
-    /** The Constant NONE. */
     private static final Object NONE = new Object();
 
-    /** The Constant timer. */
     private static final Timer timer = new Timer();
 
-    /** The Constant FACTORY_OF_MAP. */
     @SuppressWarnings("rawtypes")
     public static final IntFunction<Map<String, Object>> FACTORY_OF_MAP = (IntFunction) Factory.MAP_FACTORY;
 
-    /** The Constant FACTORY_OF_LINKED_HASH_MAP. */
     @SuppressWarnings("rawtypes")
     public static final IntFunction<LinkedHashMap<String, Object>> FACTORY_OF_LINKED_HASH_MAP = (IntFunction) Factory.LINKED_HASH_MAP_FACTORY;
 
-    /** The Constant SUPPLIER_OF_MAP. */
     @SuppressWarnings("rawtypes")
     public static final Supplier<Map<String, Object>> SUPPLIER_OF_MAP = (Supplier) Suppliers.MAP;
 
-    /** The Constant SUPPLIER_OF_LINKED_HASH_MAP. */
     @SuppressWarnings("rawtypes")
     public static final Supplier<LinkedHashMap<String, Object>> SUPPLIER_OF_LINKED_HASH_MAP = (Supplier) Suppliers.LINKED_HASH_MAP;
 
-    /** The Constant EMPTY_ACTION. */
     private static final com.landawn.abacus.util.function.Runnable EMPTY_ACTION = new com.landawn.abacus.util.function.Runnable() {
         @Override
         public void run() {
         }
     };
 
-    /** The Constant DO_NOTHING. */
     @SuppressWarnings("rawtypes")
     private static final Consumer DO_NOTHING = new Consumer() {
         @Override
@@ -201,7 +193,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant CLOSE. */
     private static final Consumer<AutoCloseable> CLOSE = new Consumer<AutoCloseable>() {
         @Override
         public void accept(AutoCloseable closeable) {
@@ -209,7 +200,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant CLOSE_QUIETLY. */
     private static final Consumer<AutoCloseable> CLOSE_QUIETLY = new Consumer<AutoCloseable>() {
         @Override
         public void accept(AutoCloseable closeable) {
@@ -217,7 +207,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant PRINTLN_EQUAL. */
     @SuppressWarnings("rawtypes")
     private static final BiConsumer PRINTLN_EQUAL = new BiConsumer() {
         @Override
@@ -226,7 +215,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant PRINTLN_HYPHEN. */
     @SuppressWarnings("rawtypes")
     private static final BiConsumer PRINTLN_HYPHEN = new BiConsumer() {
         @Override
@@ -235,7 +223,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant PRINTLN_UNDERSCORE. */
     @SuppressWarnings("rawtypes")
     private static final BiConsumer PRINTLN_UNDERSCORE = new BiConsumer() {
         @Override
@@ -244,7 +231,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant PRINTLN_COLON. */
     @SuppressWarnings("rawtypes")
     private static final BiConsumer PRINTLN_COLON = new BiConsumer() {
         @Override
@@ -253,7 +239,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant PRINTLN_COLON_SPACE. */
     @SuppressWarnings("rawtypes")
     private static final BiConsumer PRINTLN_COLON_SPACE = new BiConsumer() {
         @Override
@@ -262,7 +247,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant PRINTLN_COMMA. */
     @SuppressWarnings("rawtypes")
     private static final BiConsumer PRINTLN_COMMA = new BiConsumer() {
         @Override
@@ -271,7 +255,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant PRINTLN_COMMA_SPACE. */
     @SuppressWarnings("rawtypes")
     private static final BiConsumer PRINTLN_COMMA_SPACE = new BiConsumer() {
         @Override
@@ -280,7 +263,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant PRINTLN_EMPTY. */
     @SuppressWarnings("rawtypes")
     private static final BiConsumer PRINTLN_EMPTY = new BiConsumer() {
         @Override
@@ -289,7 +271,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant PRINTLN. */
     @SuppressWarnings("rawtypes")
     private static final Consumer PRINTLN = new Consumer() {
         @Override
@@ -298,7 +279,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant TO_STRING. */
     @SuppressWarnings("rawtypes")
     private static final Function TO_STRING = new Function() {
         @Override
@@ -307,7 +287,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant TO_CAMEL_CASE. */
     private static final Function<String, String> TO_CAMEL_CASE = new Function<String, String>() {
         @Override
         public String apply(String t) {
@@ -315,7 +294,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant TO_LOWER_CASE. */
     private static final Function<String, String> TO_LOWER_CASE = new Function<String, String>() {
         @Override
         public String apply(String t) {
@@ -323,7 +301,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant TO_LOWER_CASE_WITH_UNDERSCORE. */
     private static final Function<String, String> TO_LOWER_CASE_WITH_UNDERSCORE = new Function<String, String>() {
         @Override
         public String apply(String t) {
@@ -331,7 +308,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant TO_UPPER_CASE. */
     private static final Function<String, String> TO_UPPER_CASE = new Function<String, String>() {
         @Override
         public String apply(String t) {
@@ -339,7 +315,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant TO_UPPER_CASE_WITH_UNDERSCORE. */
     private static final Function<String, String> TO_UPPER_CASE_WITH_UNDERSCORE = new Function<String, String>() {
         @Override
         public String apply(String t) {
@@ -347,7 +322,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant COMPARE. */
     @SuppressWarnings("rawtypes")
     private static final BiFunction COMPARE = new BiFunction<Comparable, Comparable, Integer>() {
         @Override
@@ -356,7 +330,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant IDENTITY. */
     @SuppressWarnings("rawtypes")
     private static final Function IDENTITY = new Function() {
         @Override
@@ -365,7 +338,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant TRIM. */
     private static final Function<String, String> TRIM = new Function<String, String>() {
         @Override
         public String apply(String t) {
@@ -373,7 +345,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant TRIM_TO_EMPTY. */
     private static final Function<String, String> TRIM_TO_EMPTY = new Function<String, String>() {
         @Override
         public String apply(String t) {
@@ -381,7 +352,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant TRIM_TO_NULL. */
     private static final Function<String, String> TRIM_TO_NULL = new Function<String, String>() {
         @Override
         public String apply(String t) {
@@ -393,7 +363,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant NULL_TO_EMPTY. */
     private static final Function<String, String> NULL_TO_EMPTY = new Function<String, String>() {
         @Override
         public String apply(String t) {
@@ -401,7 +370,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant NULL_TO_EMPTY_L. */
     @SuppressWarnings("rawtypes")
     private static final Function<List, List> NULL_TO_EMPTY_LIST = new Function<List, List>() {
         @Override
@@ -410,7 +378,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant NULL_TO_EMPTY_S. */
     @SuppressWarnings("rawtypes")
     private static final Function<Set, Set> NULL_TO_EMPTY_SET = new Function<Set, Set>() {
         @Override
@@ -419,7 +386,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant NULL_TO_EMPTY_M. */
     @SuppressWarnings("rawtypes")
     private static final Function<Map, Map> NULL_TO_EMPTY_MAP = new Function<Map, Map>() {
         @Override
@@ -428,7 +394,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant LENGTH. */
     private static final Function<CharSequence, Integer> LENGTH = new Function<CharSequence, Integer>() {
         @Override
         public Integer apply(CharSequence t) {
@@ -436,7 +401,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant LEN. */
     private static final Function<Object[], Integer> LEN = new Function<Object[], Integer>() {
         @Override
         public Integer apply(Object[] t) {
@@ -444,7 +408,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant SIZE. */
     @SuppressWarnings("rawtypes")
     private static final Function<Collection, Integer> SIZE = new Function<Collection, Integer>() {
         @Override
@@ -453,7 +416,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant SIZE_M. */
     @SuppressWarnings("rawtypes")
     private static final Function<Map, Integer> SIZE_MAP = new Function<Map, Integer>() {
         @Override
@@ -462,7 +424,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant KEY. */
     private static final Function<Map.Entry<Object, Object>, Object> KEY = new Function<Map.Entry<Object, Object>, Object>() {
         @Override
         public Object apply(Map.Entry<Object, Object> t) {
@@ -470,7 +431,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant VALUE. */
     private static final Function<Map.Entry<Object, Object>, Object> VALUE = new Function<Map.Entry<Object, Object>, Object>() {
         @Override
         public Object apply(Map.Entry<Object, Object> t) {
@@ -492,7 +452,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant INVERSE. */
     private static final Function<Map.Entry<Object, Object>, Map.Entry<Object, Object>> INVERSE = new Function<Map.Entry<Object, Object>, Map.Entry<Object, Object>>() {
         @Override
         public Map.Entry<Object, Object> apply(Map.Entry<Object, Object> t) {
@@ -500,7 +459,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant ENTRY. */
     private static final BiFunction<Object, Object, Map.Entry<Object, Object>> ENTRY = new BiFunction<Object, Object, Map.Entry<Object, Object>>() {
         @Override
         public Map.Entry<Object, Object> apply(Object key, Object value) {
@@ -508,7 +466,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant PAIR. */
     private static final BiFunction<Object, Object, Pair<Object, Object>> PAIR = new BiFunction<Object, Object, Pair<Object, Object>>() {
         @Override
         public Pair<Object, Object> apply(Object key, Object value) {
@@ -516,7 +473,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant TRIPLE. */
     private static final TriFunction<Object, Object, Object, Triple<Object, Object, Object>> TRIPLE = new TriFunction<Object, Object, Object, Triple<Object, Object, Object>>() {
         @Override
         public Triple<Object, Object, Object> apply(Object a, Object b, Object c) {
@@ -524,7 +480,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant TUPLE_1. */
     private static final Function<Object, Tuple1<Object>> TUPLE_1 = new Function<Object, Tuple1<Object>>() {
         @Override
         public Tuple1<Object> apply(Object t) {
@@ -532,7 +487,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant TUPLE_2. */
     private static final BiFunction<Object, Object, Tuple2<Object, Object>> TUPLE_2 = new BiFunction<Object, Object, Tuple2<Object, Object>>() {
         @Override
         public Tuple2<Object, Object> apply(Object t, Object u) {
@@ -540,7 +494,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant TUPLE_3. */
     private static final TriFunction<Object, Object, Object, Tuple3<Object, Object, Object>> TUPLE_3 = new TriFunction<Object, Object, Object, Tuple3<Object, Object, Object>>() {
         @Override
         public Tuple3<Object, Object, Object> apply(Object a, Object b, Object c) {
@@ -548,7 +501,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant TUPLE_4. */
     private static final QuadFunction<Object, Object, Object, Object, Tuple4<Object, Object, Object, Object>> TUPLE_4 = new QuadFunction<Object, Object, Object, Object, Tuple4<Object, Object, Object, Object>>() {
         @Override
         public Tuple4<Object, Object, Object, Object> apply(Object a, Object b, Object c, Object d) {
@@ -556,7 +508,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant ALWAYS_TRUE. */
     @SuppressWarnings("rawtypes")
     private static final Predicate ALWAYS_TRUE = new Predicate() {
         @Override
@@ -565,7 +516,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant ALWAYS_FALSE. */
     @SuppressWarnings("rawtypes")
     private static final Predicate ALWAYS_FALSE = new Predicate() {
         @Override
@@ -574,7 +524,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant IS_NULL. */
     @SuppressWarnings("rawtypes")
     private static final Predicate IS_NULL = new Predicate() {
         @Override
@@ -583,7 +532,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant IS_NULL_OR_EMPTY. */
     private static final Predicate<CharSequence> IS_NULL_OR_EMPTY = new Predicate<CharSequence>() {
         @Override
         public boolean test(CharSequence value) {
@@ -591,7 +539,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant IS_NULL_OR_EMPTY_OR_BLANK. */
     private static final Predicate<CharSequence> IS_NULL_OR_EMPTY_OR_BLANK = new Predicate<CharSequence>() {
         @Override
         public boolean test(CharSequence value) {
@@ -599,7 +546,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant NOT_NULL. */
     @SuppressWarnings("rawtypes")
     private static final Predicate NOT_NULL = new Predicate() {
         @Override
@@ -608,7 +554,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant NOT_NULL_OR_EMPTY. */
     private static final Predicate<CharSequence> NOT_NULL_OR_EMPTY = new Predicate<CharSequence>() {
         @Override
         public boolean test(CharSequence value) {
@@ -616,7 +561,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant NOT_NULL_OR_EMPTY_OR_BLANK. */
     private static final Predicate<CharSequence> NOT_NULL_OR_EMPTY_OR_BLANK = new Predicate<CharSequence>() {
         @Override
         public boolean test(CharSequence value) {
@@ -624,7 +568,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant IS_FILE. */
     private static final Predicate<File> IS_FILE = new Predicate<File>() {
         @Override
         public boolean test(File value) {
@@ -632,7 +575,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant IS_DIRECTORY. */
     private static final Predicate<File> IS_DIRECTORY = new Predicate<File>() {
         @Override
         public boolean test(File value) {
@@ -640,9 +582,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /**
-     * Instantiates a new fn.
-     */
     protected Fn() {
         super();
         // for extention.
@@ -917,10 +856,6 @@ public final class Fn extends Comparators {
         };
     }
 
-    /**
-     *
-     * @return
-     */
     public static com.landawn.abacus.util.function.Runnable emptyAction() {
         return EMPTY_ACTION;
     }
@@ -1147,7 +1082,6 @@ public final class Fn extends Comparators {
         };
     }
 
-    /** The Constant VAL. */
     private static final Function<Keyed<?, Object>, Object> VAL = new Function<Keyed<?, Object>, Object>() {
         @Override
         public Object apply(Keyed<?, Object> t) {
@@ -1155,7 +1089,6 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** The Constant KK. */
     private static final Function<Map.Entry<Keyed<Object, Object>, Object>, Object> KK = new Function<Map.Entry<Keyed<Object, Object>, Object>, Object>() {
         @Override
         public Object apply(Map.Entry<Keyed<Object, Object>, Object> t) {
@@ -1186,7 +1119,6 @@ public final class Fn extends Comparators {
         return (Function) KK;
     }
 
-    /** The Constant WRAP. */
     private static final Function<Object, Wrapper<Object>> WRAP = new Function<Object, Wrapper<Object>>() {
         @Override
         public Wrapper<Object> apply(Object t) {
@@ -1223,7 +1155,6 @@ public final class Fn extends Comparators {
         };
     }
 
-    /** The Constant UNWRAP. */
     private static final Function<Wrapper<Object>, Object> UNWRAP = new Function<Wrapper<Object>, Object>() {
         @Override
         public Object apply(Wrapper<Object> t) {
@@ -1459,10 +1390,6 @@ public final class Fn extends Comparators {
         return (QuadFunction) TUPLE_4;
     }
 
-    /**
-     *
-     * @return
-     */
     public static Function<String, String> trim() {
         return TRIM;
     }
@@ -1485,10 +1412,6 @@ public final class Fn extends Comparators {
         return TRIM_TO_NULL;
     }
 
-    /**
-     *
-     * @return
-     */
     public static Function<String, String> nullToEmpty() {
         return NULL_TO_EMPTY;
     }
@@ -3144,7 +3067,6 @@ public final class Fn extends Comparators {
         };
     }
 
-    /** The parse byte func. */
     private static Function<String, Byte> PARSE_BYTE_FUNC = new Function<String, Byte>() {
         @Override
         public Byte apply(String t) {
@@ -3161,7 +3083,6 @@ public final class Fn extends Comparators {
         return PARSE_BYTE_FUNC;
     }
 
-    /** The parse short func. */
     private static Function<String, Short> PARSE_SHORT_FUNC = new Function<String, Short>() {
         @Override
         public Short apply(String t) {
@@ -3178,7 +3099,6 @@ public final class Fn extends Comparators {
         return PARSE_SHORT_FUNC;
     }
 
-    /** The parse int func. */
     private static Function<String, Integer> PARSE_INT_FUNC = new Function<String, Integer>() {
         @Override
         public Integer apply(String t) {
@@ -3195,7 +3115,6 @@ public final class Fn extends Comparators {
         return PARSE_INT_FUNC;
     }
 
-    /** The parse long func. */
     private static Function<String, Long> PARSE_LONG_FUNC = new Function<String, Long>() {
         @Override
         public Long apply(String t) {
@@ -3212,7 +3131,6 @@ public final class Fn extends Comparators {
         return PARSE_LONG_FUNC;
     }
 
-    /** The parse float func. */
     private static Function<String, Float> PARSE_FLOAT_FUNC = new Function<String, Float>() {
         @Override
         public Float apply(String t) {
@@ -3229,7 +3147,6 @@ public final class Fn extends Comparators {
         return PARSE_FLOAT_FUNC;
     }
 
-    /** The parse double func. */
     private static Function<String, Double> PARSE_DOUBLE_FUNC = new Function<String, Double>() {
         @Override
         public Double apply(String t) {
@@ -3246,7 +3163,6 @@ public final class Fn extends Comparators {
         return PARSE_DOUBLE_FUNC;
     }
 
-    /** The create number func. */
     private static Function<String, Number> CREATE_NUMBER_FUNC = new Function<String, Number>() {
         @Override
         public Number apply(final String t) {

@@ -914,9 +914,6 @@ public final class Hashing {
         }
     }
 
-    /**
-     * Instantiates a new hashing.
-     */
     private Hashing() {
     }
 }

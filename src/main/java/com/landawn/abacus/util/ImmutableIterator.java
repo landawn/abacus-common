@@ -23,7 +23,6 @@ import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.function.Supplier;
 
 /**
- * The Class ImmutableIterator.
  *
  * @author Haiyang Li
  * @param <T>
@@ -41,10 +40,6 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
         throw new UnsupportedOperationException();
     }
 
-    /**
-     *
-     * @return
-     */
     public Set<T> toSet() {
         final Set<T> set = N.newHashSet();
 
@@ -71,18 +66,10 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
         return c;
     }
 
-    /**
-     *
-     * @return
-     */
     public ImmutableList<T> toImmutableList() {
         return ImmutableList.of(toCollection(Suppliers.<T> ofList()));
     }
 
-    /**
-     *
-     * @return
-     */
     public ImmutableSet<T> toImmutableSet() {
         return ImmutableSet.of(toSet());
     }

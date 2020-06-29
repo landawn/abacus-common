@@ -15,28 +15,18 @@
 package com.landawn.abacus.condition;
 
 /**
- * The Class Some.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class Some extends Cell {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 4763591336208948744L;
 
-    /**
-     * Instantiates a new some.
-     */
     // For Kryo
     Some() {
     }
 
-    /**
-     * Instantiates a new some.
-     *
-     * @param condition
-     */
     public Some(SubQuery condition) {
         super(Operator.SOME, condition);
     }

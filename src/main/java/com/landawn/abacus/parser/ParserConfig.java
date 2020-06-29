@@ -21,7 +21,6 @@ import java.util.Map;
 import com.landawn.abacus.annotation.JsonXmlField;
 
 /**
- * The Class ParserConfig.
  *
  * @author Haiyang Li
  * @param <C>
@@ -30,7 +29,6 @@ import com.landawn.abacus.annotation.JsonXmlField;
  */
 public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneable {
 
-    /** The ignored prop names. */
     Map<Class<?>, Collection<String>> ignoredPropNames = null;
 
     /**
@@ -101,10 +99,6 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
         return (C) this;
     }
 
-    /**
-     *
-     * @return
-     */
     public C copy() {
         try {
             return (C) super.clone();

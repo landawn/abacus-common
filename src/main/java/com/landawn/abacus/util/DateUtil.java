@@ -36,18 +36,15 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import com.landawn.abacus.exception.UncheckedIOException;
 
 /**
- * The Class DateUtil.
  *
  * @author Haiyang Li
  * @since 1.2.6
  */
 public abstract class DateUtil {
 
-    /** The Constant UTC_TIME_ZONE. */
     // ...
     public static final TimeZone UTC_TIME_ZONE = TimeZone.getTimeZone("UTC");
 
-    /** The system default time zone. */
     public static final TimeZone LOCAL_TIME_ZONE = TimeZone.getDefault();
 
     /**
@@ -55,31 +52,22 @@ public abstract class DateUtil {
      */
     public static final String LOCAL_YEAR_FORMAT = "yyyy";
 
-    /** The Constant LOCAL_MONTH_DAY_FORMAT. */
     public static final String LOCAL_MONTH_DAY_FORMAT = "MM-dd";
 
-    /** The Constant LOCAL_MONTH_DAY_FORMAT_SLASH. */
     static final String LOCAL_MONTH_DAY_FORMAT_SLASH = "MM/dd";
 
-    /** The Constant LOCAL_DATE_FORMAT. */
     public static final String LOCAL_DATE_FORMAT = "yyyy-MM-dd";
 
-    /** The Constant LOCAL_DATE_FORMAT_SLASH. */
     static final String LOCAL_DATE_FORMAT_SLASH = "yyyy/MM/dd";
 
-    /** The Constant LOCAL_TIME_FORMAT. */
     public static final String LOCAL_TIME_FORMAT = "HH:mm:ss";
 
-    /** The Constant LOCAL_DATETIME_FORMAT. */
     public static final String LOCAL_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
-    /** The Constant LOCAL_DATETIME_FORMAT_SLASH. */
     static final String LOCAL_DATETIME_FORMAT_SLASH = "yyyy/MM/dd HH:mm:ss";
 
-    /** The Constant LOCAL_TIMESTAMP_FORMAT. */
     public static final String LOCAL_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
 
-    /** The Constant LOCAL_TIMESTAMP_FORMAT_SLASH. */
     static final String LOCAL_TIMESTAMP_FORMAT_SLASH = "yyyy/MM/dd HH:mm:ss.SSS";
 
     /**
@@ -87,14 +75,12 @@ public abstract class DateUtil {
      */
     public static final String ISO_8601_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 
-    /** The Constant ISO_8601_DATETIME_FORMAT_SLASH. */
     static final String ISO_8601_DATETIME_FORMAT_SLASH = "yyyy/MM/dd'T'HH:mm:ss'Z'";
     /**
      * It's default timestamp format.
      */
     public static final String ISO_8601_TIMESTAMP_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
-    /** The Constant ISO_8601_TIMESTAMP_FORMAT_SLASH. */
     static final String ISO_8601_TIMESTAMP_FORMAT_SLASH = "yyyy/MM/dd'T'HH:mm:ss.SSS'Z'";
 
     /**
@@ -110,7 +96,6 @@ public abstract class DateUtil {
      */
     public static final int SEMI_MONTH = 1001;
 
-    /** The Constant fields. */
     private static final int[][] fields = { { Calendar.MILLISECOND }, { Calendar.SECOND }, { Calendar.MINUTE }, { Calendar.HOUR_OF_DAY, Calendar.HOUR },
             { Calendar.DATE, Calendar.DAY_OF_MONTH, Calendar.AM_PM
             /* Calendar.DAY_OF_YEAR, Calendar.DAY_OF_WEEK, Calendar.DAY_OF_WEEK_IN_MONTH */
@@ -184,26 +169,19 @@ public abstract class DateUtil {
         return dataTypeFactory.newXMLGregorianCalendar(currentGregorianCalendar());
     }
 
-    /** The Constant dfPool. */
     private static final Map<String, Queue<DateFormat>> dfPool = new ObjectPool<>(64);
 
-    /** The Constant calendarPool. */
     private static final Map<TimeZone, Queue<Calendar>> calendarPool = new ObjectPool<>(64);
 
-    /** The Constant utcTimestampDFPool. */
     private static final Queue<DateFormat> utcTimestampDFPool = new ArrayBlockingQueue<>(Internals.POOL_SIZE);
 
-    /** The Constant utcDateTimeDFPool. */
     private static final Queue<DateFormat> utcDateTimeDFPool = new ArrayBlockingQueue<>(Internals.POOL_SIZE);
 
-    /** The Constant utcCalendarPool. */
     private static final Queue<Calendar> utcCalendarPool = new ArrayBlockingQueue<>(Internals.POOL_SIZE);
 
-    /** The Constant utcTimestampFormatCharsPool. */
     // ...
     private static final Queue<char[]> utcTimestampFormatCharsPool = new ArrayBlockingQueue<>(Internals.POOL_SIZE);
 
-    /** The Constant dataTypeFactory. */
     private static final DatatypeFactory dataTypeFactory;
 
     static {
@@ -220,7 +198,6 @@ public abstract class DateUtil {
         dataTypeFactory = temp;
     }
 
-    /** The Constant cbufOfSTDInt. */
     // ...
     private static final char[][][] cbufOfSTDInt = new char[5][][];
 
@@ -260,9 +237,6 @@ public abstract class DateUtil {
         }
     }
 
-    /**
-     * Instantiates a new date util.
-     */
     DateUtil() {
         // singleton
     }

@@ -66,15 +66,10 @@ import com.landawn.abacus.logging.LoggerFactory;
  */
 public final class Profiler {
 
-    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(Profiler.class);
 
-    /** The Constant elapsedTimeFormat. */
     private static final DecimalFormat elapsedTimeFormat = new DecimalFormat("#0.000");
 
-    /**
-     * Instantiates a new profiler.
-     */
     private Profiler() {
         // singleton
     }
@@ -461,7 +456,6 @@ public final class Profiler {
         N.sleep(3000);
     }
 
-    /** The suspended. */
     private static boolean suspended = false;
 
     /**

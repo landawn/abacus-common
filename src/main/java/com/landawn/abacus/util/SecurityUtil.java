@@ -15,7 +15,6 @@
 package com.landawn.abacus.util;
 
 /**
- * The Class SecurityUtil.
  *
  * @author Haiyang Li
  * @since 0.8

@@ -35,9 +35,6 @@ package com.landawn.abacus.util;
  */
 public final class IEEE754rUtil {
 
-    /**
-     * Instantiates a new IEEE 754 r util.
-     */
     private IEEE754rUtil() {
         // singleton.
     }

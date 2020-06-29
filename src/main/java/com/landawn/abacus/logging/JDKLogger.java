@@ -18,27 +18,18 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 /**
- * The Class JDKLogger.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 class JDKLogger extends AbstractLogger {
 
-    /** The Constant SELF. */
     static final String SELF = JDKLogger.class.getName();
 
-    /** The Constant SUPER. */
     static final String SUPER = AbstractLogger.class.getName();
 
-    /** The logger impl. */
     private final java.util.logging.Logger loggerImpl;
 
-    /**
-     * Instantiates a new JDK logger.
-     *
-     * @param name
-     */
     public JDKLogger(String name) {
         super(name);
         loggerImpl = java.util.logging.Logger.getLogger(name);

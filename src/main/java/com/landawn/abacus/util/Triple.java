@@ -22,7 +22,6 @@ import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * The Class Triple.
  *
  * @author Haiyang Li
  * @param <L>
@@ -32,28 +31,15 @@ import com.landawn.abacus.util.stream.Stream;
  */
 public final class Triple<L, M, R> {
 
-    /** The left. */
     public L left;
 
-    /** The middle. */
     public M middle;
 
-    /** The right. */
     public R right;
 
-    /**
-     * Instantiates a new triple.
-     */
     public Triple() {
     }
 
-    /**
-     * Instantiates a new triple.
-     *
-     * @param l
-     * @param m
-     * @param r
-     */
     Triple(final L l, final M m, final R r) {
         this.left = l;
         this.middle = m;
@@ -320,18 +306,10 @@ public final class Triple<L, M, R> {
         return new Triple<>(this.right, this.middle, this.left);
     }
 
-    /**
-     *
-     * @return
-     */
     public Triple<L, M, R> copy() {
         return new Triple<>(this.left, this.middle, this.right);
     }
 
-    /**
-     *
-     * @return
-     */
     public Object[] toArray() {
         return new Object[] { left, middle, right };
     }
@@ -434,10 +412,6 @@ public final class Triple<L, M, R> {
         return predicate.test(this) ? Optional.of(this) : Optional.<Triple<L, M, R>> empty();
     }
 
-    /**
-     *
-     * @return
-     */
     public Stream<Triple<L, M, R>> stream() {
         return Stream.of(this);
     }
@@ -450,18 +424,10 @@ public final class Triple<L, M, R> {
         return Optional.of(this);
     }
 
-    /**
-     *
-     * @return
-     */
     public Tuple3<L, M, R> toTuple() {
         return Tuple.of(left, middle, right);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -492,10 +458,6 @@ public final class Triple<L, M, R> {
         return false;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "[" + N.toString(left) + ", " + N.toString(middle) + ", " + N.toString(right) + "]";

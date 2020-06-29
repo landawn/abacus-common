@@ -15,22 +15,14 @@
 package com.landawn.abacus.util;
 
 /**
- * The Class IndexedByte.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public final class IndexedByte extends AbstractIndexed {
 
-    /** The value. */
     private final byte value;
 
-    /**
-     * Instantiates a new indexed byte.
-     *
-     * @param index
-     * @param value
-     */
     IndexedByte(long index, byte value) {
         super(index);
         this.value = value;
@@ -105,18 +97,10 @@ public final class IndexedByte extends AbstractIndexed {
         };
     }
 
-    /**
-     *
-     * @return
-     */
     public byte value() {
         return value;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return (int) index + value * 31;
@@ -132,10 +116,6 @@ public final class IndexedByte extends AbstractIndexed {
         return obj instanceof IndexedByte && ((IndexedByte) obj).index == index && N.equals(((IndexedByte) obj).value, value);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "[" + index + "]=" + value;

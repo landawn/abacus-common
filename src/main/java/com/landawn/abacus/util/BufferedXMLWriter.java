@@ -5,7 +5,6 @@ import java.io.OutputStream;
 import java.io.Writer;
 
 /**
- * The Class BufferedXMLWriter.
  *
  * @author Haiyang Li
  * @since 0.8
@@ -30,7 +29,6 @@ public final class BufferedXMLWriter extends CharacterWriter {
      * under the License.
      */
 
-    /** The Constant REPLACEMENT_CHARS. */
     /*
      * From RFC 4627, "All Unicode characters may be placed within the quotation
      * marks except for the characters that must be escaped: quotation mark,
@@ -69,27 +67,14 @@ public final class BufferedXMLWriter extends CharacterWriter {
         // REPLACEMENT_CHARS['\f'] = getHexString('\f');
     }
 
-    /**
-     * Instantiates a new buffered XML writer.
-     */
     BufferedXMLWriter() {
         super(REPLACEMENT_CHARS);
     }
 
-    /**
-     * Instantiates a new buffered XML writer.
-     *
-     * @param os
-     */
     BufferedXMLWriter(OutputStream os) {
         super(os, REPLACEMENT_CHARS);
     }
 
-    /**
-     * Instantiates a new buffered XML writer.
-     *
-     * @param writer
-     */
     BufferedXMLWriter(Writer writer) {
         super(writer, REPLACEMENT_CHARS);
     }

@@ -20,7 +20,6 @@ import java.util.concurrent.Executors;
 import com.landawn.abacus.annotation.Internal;
 
 /**
- * The Class AndroidUtil.
  *
  * @author haiyangl
  *
@@ -28,10 +27,8 @@ import com.landawn.abacus.annotation.Internal;
 @Internal
 public final class AndroidUtil {
 
-    /** The Constant SERIAL_EXECUTOR. */
     private static final Executor SERIAL_EXECUTOR;
 
-    /** The Constant TP_EXECUTOR. */
     private static final Executor TP_EXECUTOR;
 
     static {
@@ -44,9 +41,6 @@ public final class AndroidUtil {
         }
     }
 
-    /**
-     * Instantiates a new android util.
-     */
     private AndroidUtil() {
         // utility class;
     }

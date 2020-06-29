@@ -17,7 +17,6 @@ package com.landawn.abacus.util;
 import java.util.Iterator;
 
 /**
- * The Class Indexed.
  *
  * @author Haiyang Li
  * @param <T>
@@ -25,15 +24,8 @@ import java.util.Iterator;
  */
 public final class Indexed<T> extends AbstractIndexed {
 
-    /** The value. */
     private final T value;
 
-    /**
-     * Instantiates a new indexed.
-     *
-     * @param index
-     * @param value
-     */
     Indexed(long index, T value) {
         super(index);
         this.value = value;
@@ -113,18 +105,10 @@ public final class Indexed<T> extends AbstractIndexed {
         };
     }
 
-    /**
-     *
-     * @return
-     */
     public T value() {
         return value;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return (int) (index * 31 + (value == null ? 0 : value.hashCode()));
@@ -150,10 +134,6 @@ public final class Indexed<T> extends AbstractIndexed {
         return false;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "[" + index + "]=" + N.toString(value);

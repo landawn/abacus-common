@@ -22,10 +22,5 @@ package com.landawn.abacus.http;
  */
 public enum MessageEncryption {
 
-    /** The none. */
-    NONE,
-    /** The json. */
-    JSON,
-    /** The kryo. */
-    KRYO;
+    NONE, JSON, KRYO;
 }

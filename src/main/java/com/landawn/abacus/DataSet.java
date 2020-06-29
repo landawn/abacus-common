@@ -45,7 +45,6 @@ import com.landawn.abacus.util.stream.Collector;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * The Interface DataSet.
  *
  * @author Haiyang Li
  * @see com.landawn.abacus.util.DataSetUtil
@@ -1174,10 +1173,6 @@ public interface DataSet {
     <E extends Exception> void forEach(Tuple3<String, String, String> columnNames, int fromRowIndex, int toRowIndex, Throwables.TriConsumer<?, ?, ?, E> action)
             throws E;
 
-    /**
-     *
-     * @return
-     */
     List<Object[]> toList();
 
     /**
@@ -1548,10 +1543,6 @@ public interface DataSet {
      */
     <T> List<T> toMergedEntities(Class<T> entityClass, List<String> idPropNames, Collection<String> selectPropNames);
 
-    /**
-     *
-     * @return
-     */
     String toJSON();
 
     /**
@@ -1649,10 +1640,6 @@ public interface DataSet {
      */
     void toJSON(Writer out, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
-    /**
-     *
-     * @return
-     */
     String toXML();
 
     /**
@@ -1863,10 +1850,6 @@ public interface DataSet {
      */
     void toXML(Writer out, String rowElementName, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
-    /**
-     *
-     * @return
-     */
     String toCSV();
 
     /**
@@ -3826,22 +3809,10 @@ public interface DataSet {
      */
     int size();
 
-    /**
-     *
-     * @return
-     */
     Properties<String, Object> properties();
 
-    /**
-     *
-     * @return
-     */
     Stream<String> columnNames();
 
-    /**
-     *
-     * @return
-     */
     Stream<ImmutableList<Object>> columns();
 
     /**

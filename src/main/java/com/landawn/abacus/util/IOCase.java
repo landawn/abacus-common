@@ -63,10 +63,8 @@ enum IOCase implements Serializable {
     /** Serialization version. */
     private static final long serialVersionUID = -6343169151696340687L;
 
-    /** The enumeration name. */
     private final String name;
 
-    /** The sensitivity flag. */
     private final transient boolean sensitive;
 
     //-----------------------------------------------------------------------

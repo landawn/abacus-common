@@ -20,39 +20,23 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 
 /**
- * The Class IdentityHashSet.
  *
  * @param <T>
  */
 public class IdentityHashSet<T> extends AbstractSet<T> {
 
-    /** The Constant VAL. */
     private static final Object VAL = new Object();
 
-    /** The map. */
     private final IdentityHashMap<T, Object> map;
 
-    /**
-     * Instantiates a new identity hash set.
-     */
     public IdentityHashSet() {
         map = new IdentityHashMap<>();
     }
 
-    /**
-     * Instantiates a new identity hash set.
-     *
-     * @param initialCapacity
-     */
     public IdentityHashSet(int initialCapacity) {
         map = new IdentityHashMap<>(initialCapacity);
     }
 
-    /**
-     * Instantiates a new identity hash set.
-     *
-     * @param c
-     */
     public IdentityHashSet(Collection<? extends T> c) {
         map = new IdentityHashMap<>(N.size(c));
 
@@ -176,19 +160,11 @@ public class IdentityHashSet<T> extends AbstractSet<T> {
         return map.containsKey(o);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Iterator<T> iterator() {
         return map.keySet().iterator();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Object[] toArray() {
         return map.keySet().toArray();
@@ -205,10 +181,6 @@ public class IdentityHashSet<T> extends AbstractSet<T> {
         return map.keySet().toArray(a);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int size() {
         return map.size();

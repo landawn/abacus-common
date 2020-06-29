@@ -15,29 +15,18 @@
 package com.landawn.abacus.condition;
 
 /**
- * The Class Like.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class Like extends Binary {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 4304684222139290618L;
 
-    /**
-     * Instantiates a new like.
-     */
     // For Kryo
     Like() {
     }
 
-    /**
-     * Instantiates a new like.
-     *
-     * @param propName
-     * @param propValue
-     */
     public Like(String propName, Object propValue) {
         super(propName, Operator.LIKE, propValue);
     }

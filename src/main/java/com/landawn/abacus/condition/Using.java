@@ -30,31 +30,17 @@ import com.landawn.abacus.util.N;
 @Deprecated
 public class Using extends Cell {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -7269824120390077165L;
 
-    /**
-     * Instantiates a new using.
-     */
     // For Kryo
     Using() {
     }
 
-    /**
-     * Instantiates a new using.
-     *
-     * @param columnNames
-     */
     @SafeVarargs
     public Using(String... columnNames) {
         super(Operator.USING, createUsingCondition(columnNames));
     }
 
-    /**
-     * Instantiates a new using.
-     *
-     * @param columnNames
-     */
     public Using(Collection<String> columnNames) {
         super(Operator.USING, createUsingCondition(columnNames));
     }

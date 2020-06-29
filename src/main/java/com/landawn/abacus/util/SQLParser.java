@@ -20,23 +20,20 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * The Class SQLParser.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public final class SQLParser {
 
-    /** The Constant TAB. */
+    private static final String KEEP_COMMENTS = "-- Keep comments";
+
     private static final char TAB = '\t';
 
-    /** The Constant ENTER. */
     private static final char ENTER = '\n';
 
-    /** The Constant ENTER. */
     private static final char ENTER_2 = '\r';
 
-    /** The Constant seperators. */
     private static final Set<Object> seperators = N.newHashSet();
 
     static {
@@ -126,7 +123,6 @@ public final class SQLParser {
         seperators.add("|*=");
     }
 
-    /** The Constant compositeWords. */
     private static final Map<String, String[]> compositeWords = new ObjectPool<String, String[]>(64);
 
     static {
@@ -171,9 +167,6 @@ public final class SQLParser {
         }
     }
 
-    /**
-     * Instantiates a new SQL parser.
-     */
     private SQLParser() {
     }
 
@@ -261,7 +254,7 @@ public final class SQLParser {
                 }
 
                 if (keepComments == -1) {
-                    keepComments = StringUtil.startsWithIgnoreCase(sql, "-- Keep comments") ? 1 : 0;
+                    keepComments = StringUtil.startsWithIgnoreCase(sql, KEEP_COMMENTS) ? 1 : 0;
                 }
 
                 if (keepComments == 1) {

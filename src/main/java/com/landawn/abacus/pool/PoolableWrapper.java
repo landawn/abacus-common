@@ -17,7 +17,6 @@ package com.landawn.abacus.pool;
 import com.landawn.abacus.util.N;
 
 /**
- * The Class PoolableWrapper.
  *
  * @author Haiyang Li
  * @param <T>
@@ -25,7 +24,6 @@ import com.landawn.abacus.util.N;
  */
 public final class PoolableWrapper<T> extends AbstractPoolable {
 
-    /** The src object. */
     private T srcObject;
 
     /**
@@ -37,13 +35,6 @@ public final class PoolableWrapper<T> extends AbstractPoolable {
         this(srcObject, Long.MAX_VALUE, Long.MAX_VALUE);
     }
 
-    /**
-     * Instantiates a new poolable wrapper.
-     *
-     * @param srcObject
-     * @param liveTime
-     * @param maxIdleTime
-     */
     public PoolableWrapper(T srcObject, long liveTime, long maxIdleTime) {
         super(liveTime, maxIdleTime);
         this.srcObject = srcObject;
@@ -91,10 +82,6 @@ public final class PoolableWrapper<T> extends AbstractPoolable {
         // srcObject = null;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return N.hashCode(srcObject.hashCode());
@@ -111,10 +98,6 @@ public final class PoolableWrapper<T> extends AbstractPoolable {
         return this == obj || (obj instanceof PoolableWrapper && N.equals(((PoolableWrapper<?>) obj).srcObject, srcObject));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "{srcObject=" + srcObject + "; activityPrint=" + activityPrint + "}";

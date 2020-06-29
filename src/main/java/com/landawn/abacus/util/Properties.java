@@ -21,7 +21,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * The Class Properties.
  *
  * @author Haiyang Li
  * @param <K> the key type
@@ -30,21 +29,12 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Properties<K, V> implements Map<K, V> {
 
-    /** The values. */
     protected final Map<K, V> values;
 
-    /**
-     * Instantiates a new properties.
-     */
     public Properties() {
         this(new ConcurrentHashMap<K, V>());
     }
 
-    /**
-     * Instantiates a new properties.
-     *
-     * @param valueMap The valueMap and this Properties share the same data; any changes to one will appear in the other.
-     */
     Properties(final ConcurrentHashMap<? extends K, ? extends V> valueMap) {
         this.values = (Map<K, V>) valueMap;
     }
@@ -254,28 +244,16 @@ public class Properties<K, V> implements Map<K, V> {
         return values.containsValue(value);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Set<K> keySet() {
         return values.keySet();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Collection<V> values() {
         return values.values();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Set<java.util.Map.Entry<K, V>> entrySet() {
         return values.entrySet();
@@ -291,10 +269,6 @@ public class Properties<K, V> implements Map<K, V> {
         return values.isEmpty();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int size() {
         return values.size();
@@ -308,10 +282,6 @@ public class Properties<K, V> implements Map<K, V> {
         values.clear();
     }
 
-    /**
-     *
-     * @return
-     */
     public Properties<K, V> copy() {
         final Properties<K, V> copy = new Properties<K, V>();
 
@@ -320,10 +290,6 @@ public class Properties<K, V> implements Map<K, V> {
         return copy;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return 31 + ((values == null) ? 0 : values.hashCode());
@@ -339,10 +305,6 @@ public class Properties<K, V> implements Map<K, V> {
         return this == obj || (obj instanceof Properties && N.equals(((Properties<K, V>) obj).values, values));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return values.toString();

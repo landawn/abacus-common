@@ -22,14 +22,12 @@ import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.IntStream;
 
 /**
- * The Class IntIterator.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public abstract class IntIterator extends ImmutableIterator<Integer> {
 
-    /** The Constant EMPTY. */
     public static final IntIterator EMPTY = new IntIterator() {
         @Override
         public boolean hasNext() {
@@ -42,10 +40,6 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
         }
     };
 
-    /**
-     *
-     * @return
-     */
     public static IntIterator empty() {
         return EMPTY;
     }
@@ -250,24 +244,12 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
         return nextInt();
     }
 
-    /**
-     *
-     * @return
-     */
     public abstract int nextInt();
 
-    /**
-     *
-     * @return
-     */
     public int[] toArray() {
         return toList().trimToSize().array();
     }
 
-    /**
-     *
-     * @return
-     */
     public IntList toList() {
         final IntList list = new IntList();
 
@@ -278,10 +260,6 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
         return list;
     }
 
-    /**
-     *
-     * @return
-     */
     public IntStream stream() {
         return IntStream.of(this);
     }

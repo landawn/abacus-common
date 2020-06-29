@@ -19,21 +19,14 @@ import com.landawn.abacus.util.N;
 import android.util.Log;
 
 /**
- * The Class AndroidLogger.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 class AndroidLogger extends AbstractLogger {
 
-    /** The Constant MAX_TAG_SIZE. */
     private static final int MAX_TAG_SIZE = 23;
 
-    /**
-     * Instantiates a new android logger.
-     *
-     * @param name
-     */
     public AndroidLogger(String name) {
         super(name.startsWith("com.landawn.abacus") ? "Abacus"
                 : (name.length() > MAX_TAG_SIZE ? name.substring(N.max(name.length() - MAX_TAG_SIZE, name.lastIndexOf('.') + 1)) : name));

@@ -35,35 +35,19 @@ import com.landawn.abacus.util.N;
 @Internal
 public final class MapEntity extends AbstractDirtyMarker implements Serializable {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -6595007303962724540L;
 
-    /** The values. */
     private final Map<String, Object> values = new HashMap<String, Object>();
 
-    /**
-     * Instantiates a new map entity.
-     */
     // For Kryo
     MapEntity() {
         this(N.EMPTY_STRING);
     }
 
-    /**
-     * Instantiates a new map entity.
-     *
-     * @param entityName
-     */
     public MapEntity(String entityName) {
         super(entityName);
     }
 
-    /**
-     * Instantiates a new map entity.
-     *
-     * @param entityName
-     * @param props
-     */
     public MapEntity(String entityName, Map<String, Object> props) {
         this(entityName);
 
@@ -216,10 +200,6 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
         return values.keySet();
     }
 
-    /**
-     *
-     * @return
-     */
     public Set<Map.Entry<String, Object>> entrySet() {
         return values.entrySet();
     }
@@ -228,10 +208,6 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
         return values;
     }
 
-    /**
-     *
-     * @return
-     */
     public int size() {
         return values.size();
     }
@@ -256,10 +232,6 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
         values.clear();
     }
 
-    /**
-     *
-     * @return
-     */
     public MapEntity copy() {
         final MapEntity copy = new MapEntity(this.entityName, this.values);
 
@@ -270,10 +242,6 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
         return copy;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         int h = 17;
@@ -303,10 +271,6 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
         return false;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return values.toString();

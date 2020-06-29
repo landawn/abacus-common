@@ -38,16 +38,12 @@ import com.landawn.abacus.util.function.IntFunction;
 import com.landawn.abacus.util.function.Supplier;
 
 /**
- * The Class Maps.
  *
  * @author Haiyang Li
  * @since 1.3
  */
 public final class Maps {
 
-    /**
-     * Instantiates a new maps.
-     */
     private Maps() {
         // Utility class.
     }

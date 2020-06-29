@@ -30,17 +30,14 @@ import com.landawn.abacus.util.stream.ObjIteratorEx;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * The Class Splitter.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public final class Splitter {
 
-    /** The Constant WHITE_SPACE_PATTERN. */
     public static final Pattern WHITE_SPACE_PATTERN = Pattern.compile("\\s+");
 
-    /** The Constant defaultSubStringFunc. */
     private static final SubStringFunc defaultSubStringFunc = new SubStringFunc() {
         @Override
         public String subString(CharSequence source, int start, int end) {
@@ -48,7 +45,6 @@ public final class Splitter {
         }
     };
 
-    /** The Constant trimSubStringFunc. */
     private static final SubStringFunc trimSubStringFunc = new SubStringFunc() {
         @Override
         public String subString(CharSequence source, int start, int end) {
@@ -64,7 +60,6 @@ public final class Splitter {
         }
     };
 
-    /** The Constant stripSubStringFunc. */
     private static final SubStringFunc stripSubStringFunc = new SubStringFunc() {
         @Override
         public String subString(CharSequence source, int start, int end) {
@@ -86,11 +81,6 @@ public final class Splitter {
     private boolean stripResults = false;
     private int limit = Integer.MAX_VALUE;
 
-    /**
-     * Instantiates a new splitter.
-     *
-     * @param strategy
-     */
     Splitter(Strategy strategy) {
         this.strategy = strategy;
     }

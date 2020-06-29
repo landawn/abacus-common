@@ -29,9 +29,6 @@ import java.util.regex.Pattern;
  */
 public final class RegExUtil {
 
-    /**
-     * Instantiates a new reg ex util.
-     */
     private RegExUtil() {
         // Singleton for utility class.
     }

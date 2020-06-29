@@ -31,28 +31,16 @@ import com.landawn.abacus.util.N;
  */
 final class MacHashFunction extends AbstractStreamingHashFunction {
 
-    /** The prototype. */
     private final Mac prototype;
 
-    /** The key. */
     private final Key key;
 
-    /** The to string. */
     private final String toString;
 
-    /** The bits. */
     private final int bits;
 
-    /** The supports clone. */
     private final boolean supportsClone;
 
-    /**
-     * Instantiates a new mac hash function.
-     *
-     * @param algorithmName
-     * @param key
-     * @param toString
-     */
     MacHashFunction(String algorithmName, Key key, String toString) {
         this.prototype = getMac(algorithmName, key);
         this.key = N.checkArgNotNull(key);
@@ -61,10 +49,6 @@ final class MacHashFunction extends AbstractStreamingHashFunction {
         this.supportsClone = supportsClone(prototype);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int bits() {
         return bits;
@@ -103,10 +87,6 @@ final class MacHashFunction extends AbstractStreamingHashFunction {
         }
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Hasher newHasher() {
         if (supportsClone) {
@@ -119,10 +99,6 @@ final class MacHashFunction extends AbstractStreamingHashFunction {
         return new MacHasher(getMac(prototype.getAlgorithm(), key));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return toString;

@@ -29,22 +29,12 @@ import com.landawn.abacus.util.function.Supplier;
  */
 final class ChecksumHashFunction extends AbstractStreamingHashFunction implements Serializable {
 
-    /** The checksum supplier. */
     private final Supplier<? extends Checksum> checksumSupplier;
 
-    /** The bits. */
     private final int bits;
 
-    /** The to string. */
     private final String toString;
 
-    /**
-     * Instantiates a new checksum hash function.
-     *
-     * @param checksumSupplier
-     * @param bits
-     * @param toString
-     */
     ChecksumHashFunction(Supplier<? extends Checksum> checksumSupplier, int bits, String toString) {
         this.checksumSupplier = N.checkArgNotNull(checksumSupplier);
         N.checkArgument(bits == 32 || bits == 64, "bits (%s) must be either 32 or 64", bits);
@@ -52,28 +42,16 @@ final class ChecksumHashFunction extends AbstractStreamingHashFunction implement
         this.toString = N.checkArgNotNull(toString);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int bits() {
         return bits;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Hasher newHasher() {
         return new ChecksumHasher(checksumSupplier.get());
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return toString;
@@ -136,6 +114,5 @@ final class ChecksumHashFunction extends AbstractStreamingHashFunction implement
         }
     }
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 0L;
 }

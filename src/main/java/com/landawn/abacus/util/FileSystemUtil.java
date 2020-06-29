@@ -59,7 +59,6 @@ final class FileSystemUtil {
     /** Operating system state flag for Posix flavour Unix. */
     private static final int POSIX_UNIX = 3;
 
-    /** The operating system flag. */
     private static final int OS;
 
     /**  The path to df. */

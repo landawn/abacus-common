@@ -39,7 +39,6 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      */
     private static final long serialVersionUID = -1585823265L;
 
-    /** The mutable value. */
     private byte value;
 
     /**
@@ -68,10 +67,6 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
         return new MutableByte(value);
     }
 
-    /**
-     *
-     * @return
-     */
     public byte value() {
         return value;
     }

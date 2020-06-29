@@ -35,23 +35,18 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 
 /**
- * The Class EchoServlet.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class EchoServlet extends AbstractHttpServlet {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -8506987801604338536L;
 
-    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(HttpClient.class);
 
-    /** The Constant IS_GET_FIRST. */
     public static final String IS_GET_FIRST = "isGetFirst";
 
-    /** The is get first. */
     private boolean isGetFirst;
 
     /**

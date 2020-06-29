@@ -18,7 +18,6 @@ import java.util.AbstractMap;
 import java.util.Map;
 
 /**
- * The Class ImmutableEntry.
  *
  * @author Haiyang Li
  * @param <K> the key type
@@ -27,24 +26,12 @@ import java.util.Map;
  */
 public class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry<K, V> implements Map.Entry<K, V>, Immutable {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -7667037689002186862L;
 
-    /**
-     * Instantiates a new immutable entry.
-     *
-     * @param key
-     * @param value
-     */
     public ImmutableEntry(K key, V value) {
         super(key, value);
     }
 
-    /**
-     * Instantiates a new immutable entry.
-     *
-     * @param entry
-     */
     public ImmutableEntry(Map.Entry<? extends K, ? extends V> entry) {
         super(entry);
     }

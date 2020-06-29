@@ -39,7 +39,6 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      */
     private static final long serialVersionUID = 62986528375L;
 
-    /** The mutable value. */
     private long value;
 
     /**
@@ -68,10 +67,6 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
         return new MutableLong(value);
     }
 
-    /**
-     *
-     * @return
-     */
     public long value() {
         return value;
     }

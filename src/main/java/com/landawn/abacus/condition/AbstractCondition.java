@@ -24,32 +24,21 @@ import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.Objectory;
 
 /**
- * The Class AbstractCondition.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public abstract class AbstractCondition implements Condition, Serializable, Cloneable {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -8343776796087792859L;
 
-    /** The operator. */
     protected final Operator operator;
 
-    /**
-     * Instantiates a new abstract condition.
-     */
     // For Kryo
     AbstractCondition() {
         operator = null;
     }
 
-    /**
-     * Instantiates a new abstract condition.
-     *
-     * @param operator
-     */
     protected AbstractCondition(Operator operator) {
         this.operator = operator;
     }
@@ -84,10 +73,6 @@ public abstract class AbstractCondition implements Condition, Serializable, Clon
         return new Or(this, condition);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Not not() {
         return new Not(this);
@@ -112,10 +97,6 @@ public abstract class AbstractCondition implements Condition, Serializable, Clon
         return (T) copy;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return toString(NamingPolicy.LOWER_CAMEL_CASE);

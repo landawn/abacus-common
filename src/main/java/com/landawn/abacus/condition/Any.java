@@ -15,28 +15,18 @@
 package com.landawn.abacus.condition;
 
 /**
- * The Class Any.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class Any extends Cell {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 3567757378847210261L;
 
-    /**
-     * Instantiates a new any.
-     */
     // For Kryo
     Any() {
     }
 
-    /**
-     * Instantiates a new any.
-     *
-     * @param condition
-     */
     public Any(SubQuery condition) {
         super(Operator.ANY, condition);
     }

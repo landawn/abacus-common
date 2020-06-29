@@ -27,83 +27,45 @@ import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.N;
 
 /**
- * The Class AbstractHttpClient.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public abstract class AbstractHttpClient implements Closeable {
 
-    /** The Constant DEFAULT_MAX_CONNECTION. */
     // ...
     public static final int DEFAULT_MAX_CONNECTION = 16;
 
     /** Unit is milliseconds. */
     public static final int DEFAULT_CONNECTION_TIMEOUT = 8000;
 
-    /** The Constant DEFAULT_READ_TIMEOUT. */
     public static final int DEFAULT_READ_TIMEOUT = 16000;
 
-    /** The url. */
     // ...
     protected final String _url;
 
-    /** The max connection. */
     protected final int _maxConnection;
 
-    /** The conn timeout. */
     protected final long _connectionTimeout;
 
-    /** The read timeout. */
     protected final long _readTimeout;
 
-    /** The settings. */
     protected final HttpSettings _settings;
 
-    /** The async executor. */
     protected final AsyncExecutor _asyncExecutor;
 
-    /**
-     * Instantiates a new abstract http client.
-     *
-     * @param url
-     */
     protected AbstractHttpClient(String url) {
         this(url, DEFAULT_MAX_CONNECTION, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_READ_TIMEOUT);
     }
 
-    /**
-     * Instantiates a new abstract http client.
-     *
-     * @param url
-     * @param maxConnection
-     */
     protected AbstractHttpClient(String url, int maxConnection) {
         this(url, maxConnection, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_READ_TIMEOUT);
     }
 
-    /**
-     * Instantiates a new abstract http client.
-     *
-     * @param url
-     * @param maxConnection
-     * @param connectionTimeout
-     * @param readTimeout
-     */
     protected AbstractHttpClient(String url, int maxConnection, long connectionTimeout, long readTimeout) {
         this(url, maxConnection, connectionTimeout, readTimeout, null);
     }
 
-    /**
-     * Instantiates a new abstract http client.
-     *
-     * @param url
-     * @param maxConnection
-     * @param connectionTimeout
-     * @param readTimeout
-     * @param settings
-     * @throws UncheckedIOException the unchecked IO exception
-     */
     protected AbstractHttpClient(String url, int maxConnection, long connectionTimeout, long readTimeout, HttpSettings settings) throws UncheckedIOException {
         if (N.isNullOrEmpty(url)) {
             throw new IllegalArgumentException("url can't be null or empty");
@@ -123,10 +85,6 @@ public abstract class AbstractHttpClient implements Closeable {
         _asyncExecutor = new AsyncExecutor(Math.min(8, this._maxConnection), this._maxConnection, 300L, TimeUnit.SECONDS);
     }
 
-    /**
-     *
-     * @return
-     */
     public String url() {
         return _url;
     }
@@ -219,10 +177,6 @@ public abstract class AbstractHttpClient implements Closeable {
         return execute(resultClass, HttpMethod.GET, queryParameters, settings);
     }
 
-    /**
-     *
-     * @return
-     */
     public ContinuableFuture<String> asyncGet() {
         return asyncGet(String.class);
     }
@@ -387,10 +341,6 @@ public abstract class AbstractHttpClient implements Closeable {
         return execute(resultClass, HttpMethod.DELETE, queryParameters, settings);
     }
 
-    /**
-     *
-     * @return
-     */
     public ContinuableFuture<String> asyncDelete() {
         return asyncDelete(String.class);
     }

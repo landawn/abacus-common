@@ -21,7 +21,6 @@ import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.Supplier;
 
 /**
- * The Class Result.
  *
  * @author Haiyang Li
  * @param <T>
@@ -29,18 +28,10 @@ import com.landawn.abacus.util.function.Supplier;
  */
 public final class Result<T, E extends Throwable> {
 
-    /** The value. */
     private final T value;
 
-    /** The exception. */
     private final E exception;
 
-    /**
-     * Instantiates a new result.
-     *
-     * @param value
-     * @param exception
-     */
     Result(T value, E exception) {
         this.value = value;
         this.exception = exception;
@@ -234,26 +225,14 @@ public final class Result<T, E extends Throwable> {
     //        return exception == null ? Nullable.of(value) : Nullable.<T> empty();
     //    }
 
-    /**
-     *
-     * @return
-     */
     public Pair<T, E> toPair() {
         return Pair.of(value, exception);
     }
 
-    /**
-     *
-     * @return
-     */
     public Tuple2<T, E> toTuple() {
         return Tuple.of(value, exception);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return (exception == null) ? N.hashCode(value) : exception.hashCode();
@@ -270,10 +249,6 @@ public final class Result<T, E extends Throwable> {
         return this == obj || (obj instanceof Result && (N.equals(((Result) obj).value, value) && N.equals(((Result) obj).exception, exception)));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "{value=" + N.toString(value) + ", exception=" + N.toString(exception) + "}";

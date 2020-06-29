@@ -15,29 +15,18 @@
 package com.landawn.abacus.condition;
 
 /**
- * The Class GreaterThan.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class GreaterThan extends Binary {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 2373254037255944162L;
 
-    /**
-     * Instantiates a new greater than.
-     */
     // For Kryo
     GreaterThan() {
     }
 
-    /**
-     * Instantiates a new greater than.
-     *
-     * @param propName
-     * @param propValue
-     */
     public GreaterThan(String propName, Object propValue) {
         super(propName, Operator.GREATER_THAN, propValue);
     }

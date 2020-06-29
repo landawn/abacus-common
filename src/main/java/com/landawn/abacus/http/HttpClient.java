@@ -58,7 +58,6 @@ import com.landawn.abacus.util.URLEncodedUtil;
  */
 public final class HttpClient extends AbstractHttpClient {
 
-    /** The Constant logger. */
     static final Logger logger = LoggerFactory.getLogger(HttpClient.class);
 
     static {
@@ -72,67 +71,26 @@ public final class HttpClient extends AbstractHttpClient {
         }
     }
 
-    /** The net URL. */
     protected final URL _netURL;
 
-    /** The active connection counter. */
     protected final AtomicInteger _activeConnectionCounter;
 
-    /**
-     * Instantiates a new http client.
-     *
-     * @param url
-     */
     protected HttpClient(String url) {
         this(url, DEFAULT_MAX_CONNECTION);
     }
 
-    /**
-     * Instantiates a new http client.
-     *
-     * @param url
-     * @param maxConnection
-     */
     protected HttpClient(String url, int maxConnection) {
         this(url, maxConnection, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_READ_TIMEOUT);
     }
 
-    /**
-     * Instantiates a new http client.
-     *
-     * @param url
-     * @param maxConnection
-     * @param connectionTimeout
-     * @param readTimeout
-     */
     protected HttpClient(String url, int maxConnection, long connectionTimeout, long readTimeout) {
         this(url, maxConnection, connectionTimeout, readTimeout, null);
     }
 
-    /**
-     * Instantiates a new http client.
-     *
-     * @param url
-     * @param maxConnection
-     * @param connectionTimeout
-     * @param readTimeout
-     * @param settings
-     * @throws UncheckedIOException the unchecked IO exception
-     */
     protected HttpClient(String url, int maxConnection, long connectionTimeout, long readTimeout, HttpSettings settings) throws UncheckedIOException {
         this(url, maxConnection, connectionTimeout, readTimeout, settings, new AtomicInteger(0));
     }
 
-    /**
-     * Instantiates a new http client.
-     *
-     * @param url
-     * @param maxConnection
-     * @param connectionTimeout
-     * @param readTimeout
-     * @param settings
-     * @param sharedActiveConnectionCounter
-     */
     protected HttpClient(String url, int maxConnection, long connectionTimeout, long readTimeout, HttpSettings settings,
             final AtomicInteger sharedActiveConnectionCounter) {
         super(url, maxConnection, connectionTimeout, readTimeout, settings);

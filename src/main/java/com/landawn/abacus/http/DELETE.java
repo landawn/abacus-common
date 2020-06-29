@@ -29,9 +29,5 @@ import java.lang.annotation.Target;
 @WebService.HttpMethod(WebService.HttpMethod.DELETE)
 public @interface DELETE {
 
-    /**
-     *
-     * @return
-     */
     String value() default "";
 }

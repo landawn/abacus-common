@@ -15,28 +15,18 @@
 package com.landawn.abacus.condition;
 
 /**
- * The Class Minus.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class Minus extends Clause {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -8632773061797279191L;
 
-    /**
-     * Instantiates a new minus.
-     */
     // For Kryo
     Minus() {
     }
 
-    /**
-     * Instantiates a new minus.
-     *
-     * @param condition
-     */
     public Minus(SubQuery condition) {
         super(Operator.MINUS, condition);
     }

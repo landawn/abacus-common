@@ -46,9 +46,6 @@ import com.landawn.abacus.util.function.TriFunction;
  */
 public final class Iterators {
 
-    /**
-     * Instantiates a new iterators.
-     */
     private Iterators() {
         // singleton.
     }

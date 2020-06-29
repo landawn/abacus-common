@@ -28,20 +28,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * The Class AddrUtil.
- */
 public final class AddrUtil {
 
-    /** The Constant URL_SEPERATOR. */
     private static final String URL_SEPERATOR = "(?:\\s|,)+";
 
-    /** The Constant URL_SPLITTER. */
     private static final Splitter URL_SPLITTER = Splitter.pattern(URL_SEPERATOR).omitEmptyStrings().trimResults();
 
-    /**
-     * Instantiates a new addr util.
-     */
     private AddrUtil() {
         // singleton
     }

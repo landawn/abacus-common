@@ -15,28 +15,18 @@
 package com.landawn.abacus.condition;
 
 /**
- * The Class Exists.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class Exists extends Cell {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -4506182213388891672L;
 
-    /**
-     * Instantiates a new exists.
-     */
     // For Kryo
     Exists() {
     }
 
-    /**
-     * Instantiates a new exists.
-     *
-     * @param condition
-     */
     public Exists(SubQuery condition) {
         super(Operator.EXISTS, condition);
     }

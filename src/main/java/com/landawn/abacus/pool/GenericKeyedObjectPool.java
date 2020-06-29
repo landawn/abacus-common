@@ -32,7 +32,6 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 
 /**
- * The Class GenericKeyedObjectPool.
  *
  * @author Haiyang Li
  * @param <K> the key type
@@ -41,76 +40,33 @@ import com.landawn.abacus.util.Objectory;
  */
 public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool implements KeyedObjectPool<K, E> {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 2208516321399679864L;
 
-    /** The max memory size. */
     private final long maxMemorySize;
 
-    /** The memory measure. */
     private final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure;
 
-    /** The used memory size. */
     private volatile long usedMemorySize = 0;
 
-    /** The pool. */
     final Map<K, E> pool;
 
-    /** The cmp. */
     final Comparator<Map.Entry<K, E>> cmp;
 
-    /** The schedule future. */
     ScheduledFuture<?> scheduleFuture;
 
-    /**
-     * Instantiates a new generic keyed object pool.
-     *
-     * @param capacity
-     * @param evictDelay
-     * @param evictionPolicy
-     */
     protected GenericKeyedObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy) {
         this(capacity, evictDelay, evictionPolicy, 0, null);
     }
 
-    /**
-     * Instantiates a new generic keyed object pool.
-     *
-     * @param capacity
-     * @param evictDelay
-     * @param evictionPolicy
-     * @param maxMemorySize
-     * @param memoryMeasure
-     */
     protected GenericKeyedObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, long maxMemorySize,
             KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
         this(capacity, evictDelay, evictionPolicy, true, DEFAULT_BALANCE_FACTOR, maxMemorySize, memoryMeasure);
     }
 
-    /**
-     * Instantiates a new generic keyed object pool.
-     *
-     * @param capacity
-     * @param evictDelay
-     * @param evictionPolicy
-     * @param autoBalance
-     * @param balanceFactor
-     */
     protected GenericKeyedObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, boolean autoBalance, float balanceFactor) {
         this(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor, 0, null);
     }
 
-    /**
-     * Instantiates a new generic keyed object pool.
-     *
-     * @param capacity
-     * @param evictDelay
-     * @param evictionPolicy
-     * @param autoBalance
-     * @param balanceFactor
-     * @param maxMemorySize
-     * @param memoryMeasure
-     */
     protected GenericKeyedObjectPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, boolean autoBalance, float balanceFactor, long maxMemorySize,
             KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
         super(capacity, evictDelay, evictionPolicy, autoBalance, balanceFactor);
@@ -374,10 +330,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Set<K> keySet() {
         assertNotClosed();
@@ -391,10 +343,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Collection<E> values() {
         assertNotClosed();
@@ -456,10 +404,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int size() {
         // assertNotClosed();
@@ -467,10 +411,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         return pool.size();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return pool.hashCode();
@@ -487,10 +427,6 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         return this == obj || (obj instanceof GenericKeyedObjectPool && N.equals(((GenericKeyedObjectPool<K, E>) obj).pool, pool));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return pool.toString();

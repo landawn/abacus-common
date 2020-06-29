@@ -61,12 +61,8 @@ import com.landawn.abacus.util.stream.Stream;
  */
 public final class Iterables {
 
-    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(Iterables.class);
 
-    /**
-     * Instantiates a new iterables.
-     */
     private Iterables() {
         // singleton.
     }

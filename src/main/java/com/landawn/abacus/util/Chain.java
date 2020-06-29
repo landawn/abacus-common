@@ -19,15 +19,11 @@ package com.landawn.abacus.util;
 import java.util.Comparator;
 
 /**
- * The Class Chain.
  *
  * @author HaiYang Li
  */
 public final class Chain {
 
-    /**
-     * Instantiates a new chain.
-     */
     private Chain() {
         // singleton
     }

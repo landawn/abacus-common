@@ -21,51 +21,34 @@ import javax.net.ssl.SSLSocketFactory;
 import com.landawn.abacus.util.N;
 
 /**
- * The Class HttpSettings.
  *
  * @author Haiyang Li
  * @since 1.3
  */
 public final class HttpSettings implements Cloneable {
 
-    /** The connection timeout. */
     private int connectionTimeout;
 
-    /** The read timeout. */
     private int readTimeout;
 
-    /** The ssl socket factory. */
     private SSLSocketFactory sslSocketFactory;
 
-    /** The use caches. */
     private boolean useCaches = false;
 
-    /** The do input. */
     private boolean doInput = true;
 
-    /** The do output. */
     private boolean doOutput = true;
 
-    /** The is one way request. */
     private boolean isOneWayRequest = false;
 
-    /** The content format. */
     private ContentFormat contentFormat;
 
-    /** The headers. */
     private HttpHeaders headers = null;
 
-    /**
-     * Instantiates a new http settings.
-     */
     public HttpSettings() {
         super();
     }
 
-    /**
-     *
-     * @return
-     */
     public static HttpSettings create() {
         return new HttpSettings();
     }
@@ -395,10 +378,6 @@ public final class HttpSettings implements Cloneable {
         return this;
     }
 
-    /**
-     *
-     * @return
-     */
     public HttpHeaders headers() {
         if (headers == null) {
             headers = HttpHeaders.create();
@@ -407,10 +386,6 @@ public final class HttpSettings implements Cloneable {
         return headers;
     }
 
-    /**
-     *
-     * @return
-     */
     public HttpSettings copy() {
         return new HttpSettings().setConnectionTimeout(connectionTimeout)
                 .setReadTimeout(readTimeout)
@@ -423,10 +398,6 @@ public final class HttpSettings implements Cloneable {
                 .headers(headers == null ? null : headers.copy());
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "{connectionTimeout=" + connectionTimeout + ", readTimeout=" + readTimeout + ", sslSocketFactory=" + sslSocketFactory + ", useCaches="

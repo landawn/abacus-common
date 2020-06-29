@@ -19,21 +19,14 @@ import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.function.Supplier;
 
 /**
- * The Class AbstractLogger.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public abstract class AbstractLogger implements Logger {
 
-    /** The name. */
     protected final String name;
 
-    /**
-     * Instantiates a new abstract logger.
-     *
-     * @param name
-     */
     protected AbstractLogger(String name) {
         this.name = name;
     }

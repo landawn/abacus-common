@@ -198,21 +198,9 @@ public interface EntityId {
      */
     Set<String> keySet();
 
-    /**
-     *
-     * @return
-     */
     Set<Map.Entry<String, Object>> entrySet();
 
-    /**
-     *
-     * @return
-     */
     int size();
 
-    /**
-     *
-     * @return
-     */
     boolean isEmpty();
 }

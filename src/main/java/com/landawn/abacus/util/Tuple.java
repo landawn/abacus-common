@@ -24,26 +24,17 @@ import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * The Class Tuple.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public abstract class Tuple<TP> implements Immutable {
 
-    /** The Constant EMPTY. */
     private static final Tuple0 EMPTY = new Tuple0();
 
-    /**
-     * Instantiates a new tuple.
-     */
     Tuple() {
     }
 
-    /**
-     *
-     * @return
-     */
     public abstract int arity();
 
     /**
@@ -65,10 +56,6 @@ public abstract class Tuple<TP> implements Immutable {
      */
     public abstract boolean contains(final Object objToFind);
 
-    /**
-     *
-     * @return
-     */
     public abstract Object[] toArray();
 
     /**
@@ -120,18 +107,10 @@ public abstract class Tuple<TP> implements Immutable {
         return predicate.test((TP) this) ? Optional.of((TP) this) : Optional.<TP> empty();
     }
 
-    /**
-     *
-     * @return
-     */
     public Stream<TP> stream() {
         return Stream.of((TP) this);
     }
 
-    /**
-     *
-     * @return
-     */
     public <T, E extends Exception> Stream<T> stream(final Throwables.Function<? super TP, Stream<T>, E> func) throws E {
         return func.apply((TP) this);
     }

@@ -17,14 +17,12 @@ package com.landawn.abacus.condition;
 import com.landawn.abacus.condition.ConditionFactory.CF;
 
 /**
- * The Class IsInfinite.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class IsInfinite extends Is {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -5615587022187148300L;
 
     /**
@@ -32,11 +30,6 @@ public class IsInfinite extends Is {
      */
     static final Expression INFINITE = CF.expr("INFINITE");
 
-    /**
-     * Instantiates a new checks if is infinite.
-     *
-     * @param propName
-     */
     public IsInfinite(String propName) {
         super(propName, INFINITE);
     }

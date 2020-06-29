@@ -29,7 +29,6 @@ import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.function.IntFunction;
 
 /**
- * The Class PrimitiveList.
  *
  * @author Haiyang Li
  * @param <B>
@@ -39,7 +38,6 @@ import com.landawn.abacus.util.function.IntFunction;
  */
 public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> implements RandomAccess, java.io.Serializable {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 1504784980113045443L;
 
     /**
@@ -259,10 +257,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     //     */
     //    public abstract List<L> split(final int fromIndex, final int toIndex, P predicate);
 
-    /**
-     *
-     * @return
-     */
     public String join() {
         return join(N.ELEMENT_SEPARATOR);
     }
@@ -332,22 +326,10 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      */
     public abstract boolean isEmpty();
 
-    /**
-     *
-     * @return
-     */
     public abstract int size();
 
-    /**
-     *
-     * @return
-     */
     public abstract A toArray();
 
-    /**
-     *
-     * @return
-     */
     public List<B> toList() {
         return toList(0, size());
     }
@@ -362,10 +344,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
         return toCollection(fromIndex, toIndex, Factory.<B> ofList());
     }
 
-    /**
-     *
-     * @return
-     */
     public Set<B> toSet() {
         return toSet(0, size());
     }
@@ -400,10 +378,6 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      */
     public abstract <C extends Collection<B>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier);
 
-    /**
-     *
-     * @return
-     */
     public Multiset<B> toMultiset() {
         return toMultiset(0, size());
     }

@@ -34,22 +34,16 @@ import com.landawn.abacus.util.WSSecurityUtil;
  */
 public abstract class SecurityDTO implements Serializable {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -386078752923025834L;
 
-    /** The Constant jsc. */
     private static final JSONSerializationConfig jsc = JSC.create().setQuotePropName(false).setQuoteMapKey(false);
 
-    /** The user name. */
     private String userName;
 
-    /** The password. */
     private String password;
 
-    /** The nonce. */
     private String nonce;
 
-    /** The created. */
     private String created;
 
     /**
@@ -278,10 +272,6 @@ public abstract class SecurityDTO implements Serializable {
         }
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -314,10 +304,6 @@ public abstract class SecurityDTO implements Serializable {
         return false;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "{userName=" + userName + ", password=" + password + ", nonce=" + nonce + ", created=" + created + "}";

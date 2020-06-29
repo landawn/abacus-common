@@ -41,7 +41,6 @@ import com.landawn.abacus.util.u.Optional;
  */
 public final class Range<T extends Comparable<? super T>> implements Serializable {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 545606166758706779L;
 
     /**
@@ -53,16 +52,8 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      */
     private final UpperEndpoint<T> upperEndpoint;
 
-    /** The bound type. */
     private final BoundType boundType;
 
-    /**
-     * Instantiates a new range.
-     *
-     * @param lowerEndpoint
-     * @param upperEndpoint
-     * @param boundType
-     */
     @SuppressWarnings("unchecked")
     private Range(final LowerEndpoint<T> lowerEndpoint, final UpperEndpoint<T> upperEndpoint, final BoundType boundType) {
         this.lowerEndpoint = lowerEndpoint;
@@ -154,10 +145,6 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
         return new Range<>(new LowerEndpoint<>(min, true), new UpperEndpoint<>(max, true), BoundType.CLOSED_CLOSED);
     }
 
-    /**
-     *
-     * @return
-     */
     public BoundType boundType() {
         return boundType;
     }
@@ -530,10 +517,6 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
         return result;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return lowerEndpoint.toString() + ", " + upperEndpoint.toString();

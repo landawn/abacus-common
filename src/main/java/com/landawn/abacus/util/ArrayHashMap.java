@@ -34,30 +34,16 @@ import java.util.Set;
  */
 public class ArrayHashMap<K, V> implements Map<K, V> {
 
-    /** The map. */
     private final Map<Wrapper<K>, V> map;
 
-    /**
-     * Instantiates a new array hash map.
-     */
     public ArrayHashMap() {
         map = new HashMap<>();
     }
 
-    /**
-     * Instantiates a new array hash map.
-     *
-     * @param initialCapacity
-     */
     public ArrayHashMap(final int initialCapacity) {
         map = new HashMap<>(initialCapacity);
     }
 
-    /**
-     * Instantiates a new array hash map.
-     *
-     * @param mapType
-     */
     @SuppressWarnings("rawtypes")
     public ArrayHashMap(final Class<? extends Map> mapType) {
         //  StackOverflowError
@@ -85,11 +71,6 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         }
     }
 
-    /**
-     * Instantiates a new array hash map.
-     *
-     * @param m
-     */
     public ArrayHashMap(final Map<? extends K, ? extends V> m) {
         if (N.isNullOrEmpty(m)) {
             map = new HashMap<>();
@@ -166,37 +147,21 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         return map.containsValue(value);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Set<K> keySet() {
         return new ArrayHashSet<>(map.keySet());
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Collection<V> values() {
         return map.values();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Set<java.util.Map.Entry<K, V>> entrySet() {
         return new ArrayEntrySet<>(map.entrySet());
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int size() {
         return map.size();
@@ -220,10 +185,6 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         map.clear();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return map.hashCode();
@@ -239,10 +200,6 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         return obj == this || (obj instanceof ArrayHashMap && ((ArrayHashMap<K, V>) obj).map.equals(map));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return map.toString();

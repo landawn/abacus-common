@@ -38,22 +38,12 @@ public enum OperationType {
      */
     DELETE(8);
 
-    /** The int value. */
     private final int intValue;
 
-    /**
-     * Instantiates a new operation type.
-     *
-     * @param intValue
-     */
     OperationType(int intValue) {
         this.intValue = intValue;
     }
 
-    /**
-     *
-     * @return
-     */
     public int intValue() {
         return intValue;
     }

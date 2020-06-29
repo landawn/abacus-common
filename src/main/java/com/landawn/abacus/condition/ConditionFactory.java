@@ -42,37 +42,22 @@ public class ConditionFactory {
      */
     public static final Expression QME = Expr.of(WD.QUESTION_MARK);
 
-    /** The Constant ASC. */
     public static final SortDirection ASC = SortDirection.ASC;
 
-    /** The Constant DESC. */
     public static final SortDirection DESC = SortDirection.DESC;
 
-    /** The Constant ALWAYS_TRUE. */
     private static final Expression ALWAYS_TRUE = Expression.of("1 < 2");
 
-    /** The Constant ALWAYS_FALSE. */
     private static final Expression ALWAYS_FALSE = Expression.of("1 > 2");
 
-    /**
-     * Instantiates a new condition factory.
-     */
     private ConditionFactory() {
         // No instance;
     }
 
-    /**
-     *
-     * @return
-     */
     public static Expression alwaysTrue() {
         return ALWAYS_TRUE;
     }
 
-    /**
-     *
-     * @return
-     */
     @Deprecated
     public static Expression alwaysFalse() {
         return ALWAYS_FALSE;
@@ -1572,10 +1557,6 @@ public class ConditionFactory {
         return new Limit(expr);
     }
 
-    /**
-     *
-     * @return
-     */
     public static Criteria criteria() {
         return new Criteria();
     }

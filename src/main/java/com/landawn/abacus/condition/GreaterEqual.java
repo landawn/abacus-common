@@ -15,29 +15,18 @@
 package com.landawn.abacus.condition;
 
 /**
- * The Class GreaterEqual.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class GreaterEqual extends Binary {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 5771377223349523638L;
 
-    /**
-     * Instantiates a new greater equal.
-     */
     // For Kryo
     GreaterEqual() {
     }
 
-    /**
-     * Instantiates a new greater equal.
-     *
-     * @param propName
-     * @param propValue
-     */
     public GreaterEqual(String propName, Object propValue) {
         super(propName, Operator.GREATER_EQUAL, propValue);
     }

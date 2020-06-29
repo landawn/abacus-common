@@ -24,28 +24,16 @@ package com.landawn.abacus.hash;
  */
 final class Crc32cHashFunction extends AbstractStreamingHashFunction {
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int bits() {
         return 32;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Hasher newHasher() {
         return new Crc32cHasher();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "Hashing.crc32c()";

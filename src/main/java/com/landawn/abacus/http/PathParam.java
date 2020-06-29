@@ -51,10 +51,6 @@ import java.lang.annotation.Target;
 @Target(PARAMETER)
 public @interface PathParam {
 
-    /**
-     *
-     * @return
-     */
     String value();
 
     /**

@@ -22,17 +22,13 @@ package com.landawn.abacus.parser;
  */
 public final class ParserFactory {
 
-    /** The Constant isAbacusXMLAvailable. */
     // Check for Android.
     private static final boolean isAbacusXMLAvailable;
 
-    /** The Constant isXMLAvailable. */
     private static final boolean isXMLAvailable;
 
-    /** The Constant isAvroAvailable. */
     private static final boolean isAvroAvailable;
 
-    /** The Constant isKryoAvailable. */
     private static final boolean isKryoAvailable;
 
     static {
@@ -102,9 +98,6 @@ public final class ParserFactory {
         }
     }
 
-    /**
-     * Instantiates a new parser factory.
-     */
     private ParserFactory() {
         // singleton
     }

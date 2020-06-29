@@ -31,15 +31,11 @@ import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
 
 /**
- * The Class Median.
  *
  * @author Haiyang Li
  */
 public final class Median {
 
-    /**
-     * Instantiates a new median.
-     */
     private Median() {
         // no instance.
     }

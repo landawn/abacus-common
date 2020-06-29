@@ -5,7 +5,6 @@ import java.io.OutputStream;
 import java.io.Writer;
 
 /**
- * The Class BufferedJSONWriter.
  *
  * @author Haiyang Li
  * @since 0.8
@@ -26,7 +25,6 @@ public final class BufferedJSONWriter extends CharacterWriter {
      * the specific language governing permissions and limitations under the License.
      */
 
-    /** The Constant REPLACEMENT_CHARS. */
     /*
      * From RFC 4627, "All Unicode characters may be placed within the quotation marks except for the characters that
      * must be escaped: quotation mark, reverse solidus, and the control characters (U+0000 through U+001F)."
@@ -36,7 +34,6 @@ public final class BufferedJSONWriter extends CharacterWriter {
      */
     static final char[][] REPLACEMENT_CHARS;
 
-    /** The Constant HTML_SAFE_REPLACEMENT_CHARS. */
     static final char[][] HTML_SAFE_REPLACEMENT_CHARS;
 
     static {
@@ -93,32 +90,19 @@ public final class BufferedJSONWriter extends CharacterWriter {
         HTML_SAFE_REPLACEMENT_CHARS['\''] = "\\u0027".toCharArray();
     }
 
-    /** The Constant LENGTH_OF_REPLACEMENT_CHARS. */
     static final int LENGTH_OF_REPLACEMENT_CHARS = REPLACEMENT_CHARS.length - 1;
 
     // end
-    /**
-     * Instantiates a new buffered JSON writer.
-     */
+
     // <<<======================================================================================================
     BufferedJSONWriter() {
         super(REPLACEMENT_CHARS);
     }
 
-    /**
-     * Instantiates a new buffered JSON writer.
-     *
-     * @param os
-     */
     BufferedJSONWriter(OutputStream os) {
         super(os, REPLACEMENT_CHARS);
     }
 
-    /**
-     * Instantiates a new buffered JSON writer.
-     *
-     * @param writer
-     */
     BufferedJSONWriter(Writer writer) {
         super(writer, REPLACEMENT_CHARS);
     }

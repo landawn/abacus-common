@@ -15,7 +15,6 @@
 package com.landawn.abacus.pool;
 
 /**
- * The Interface Poolable.
  *
  * @author Haiyang Li
  * @since 0.8

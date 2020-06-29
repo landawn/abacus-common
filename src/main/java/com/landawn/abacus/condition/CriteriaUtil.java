@@ -22,7 +22,6 @@ import com.landawn.abacus.util.ImmutableSet;
 import com.landawn.abacus.util.N;
 
 /**
- * The Class CriteriaUtil.
  *
  * @author Haiyang Li
  * @since 0.8
@@ -30,7 +29,6 @@ import com.landawn.abacus.util.N;
 @Internal
 public final class CriteriaUtil {
 
-    /** The Constant clauseOperators. */
     private static final ImmutableSet<Operator> clauseOperators;
 
     static {
@@ -60,9 +58,6 @@ public final class CriteriaUtil {
         clauseOperators = ImmutableSet.of(set);
     }
 
-    /**
-     * Instantiates a new criteria util.
-     */
     private CriteriaUtil() {
         // singleton
     }

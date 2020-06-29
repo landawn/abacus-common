@@ -15,7 +15,6 @@
 package com.landawn.abacus.util;
 
 /**
- * The Class Timed.
  *
  * @author Haiyang Li
  * @param <T>
@@ -23,18 +22,10 @@ package com.landawn.abacus.util;
  */
 public class Timed<T> {
 
-    /** The time in millis. */
     private final long timeInMillis;
 
-    /** The value. */
     private final T value;
 
-    /**
-     * Instantiates a new timed.
-     *
-     * @param value
-     * @param timeInMillis
-     */
     Timed(T value, long timeInMillis) {
         this.value = value;
         this.timeInMillis = timeInMillis;
@@ -69,18 +60,10 @@ public class Timed<T> {
         return timeInMillis;
     }
 
-    /**
-     *
-     * @return
-     */
     public T value() {
         return value;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return (int) (timeInMillis * 31 + (value == null ? 0 : value.hashCode()));
@@ -106,10 +89,6 @@ public class Timed<T> {
         return false;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return timeInMillis + ": " + N.toString(value);

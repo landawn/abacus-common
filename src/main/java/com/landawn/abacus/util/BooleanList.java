@@ -39,37 +39,24 @@ import com.landawn.abacus.util.stream.Collector;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * The Class BooleanList.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public final class BooleanList extends PrimitiveList<Boolean, boolean[], BooleanList> {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -1194435277403867258L;
 
-    /** The Constant RAND. */
     static final Random RAND = new SecureRandom();
 
-    /** The element data. */
     private boolean[] elementData = N.EMPTY_BOOLEAN_ARRAY;
 
-    /** The size. */
     private int size = 0;
 
-    /**
-     * Instantiates a new boolean list.
-     */
     public BooleanList() {
         super();
     }
 
-    /**
-     * Instantiates a new boolean list.
-     *
-     * @param initialCapacity
-     */
     public BooleanList(int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_BOOLEAN_ARRAY : new boolean[initialCapacity];
     }
@@ -83,12 +70,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         this(a, a.length);
     }
 
-    /**
-     * Instantiates a new boolean list.
-     *
-     * @param a
-     * @param size
-     */
     public BooleanList(boolean[] a, int size) {
         N.checkFromIndexSize(0, size, a.length);
 
@@ -1119,18 +1100,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         }
     }
 
-    /**
-     *
-     * @return
-     */
     public OptionalBoolean first() {
         return size() == 0 ? OptionalBoolean.empty() : OptionalBoolean.of(elementData[0]);
     }
 
-    /**
-     *
-     * @return
-     */
     public OptionalBoolean last() {
         return size() == 0 ? OptionalBoolean.empty() : OptionalBoolean.of(elementData[size() - 1]);
     }
@@ -1669,10 +1642,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         set(i, set(j, elementData[i]));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public BooleanList copy() {
         return new BooleanList(N.copyOfRange(elementData, 0, size));
@@ -1822,19 +1791,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return size == 0;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int size() {
         return size;
     }
 
-    /**
-     *
-     * @return
-     */
     public List<Boolean> boxed() {
         return boxed(0, size);
     }
@@ -1857,10 +1818,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return res;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public boolean[] toArray() {
         return N.copyOfRange(elementData, 0, size);
@@ -2055,10 +2012,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return result;
     }
 
-    /**
-     *
-     * @return
-     */
     public BooleanIterator iterator() {
         if (isEmpty()) {
             return BooleanIterator.EMPTY;
@@ -2067,10 +2020,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return BooleanIterator.of(elementData, 0, size);
     }
 
-    /**
-     *
-     * @return
-     */
     public Stream<Boolean> stream() {
         return Stream.of(elementData, 0, size());
     }
@@ -2137,10 +2086,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return If.is(size > 0).then(this, action);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return N.hashCode(elementData, 0, size);
@@ -2166,10 +2111,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return false;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return size == 0 ? "[]" : N.toString(elementData, 0, size);

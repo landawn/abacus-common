@@ -29,67 +29,44 @@ import com.landawn.abacus.pool.PoolableWrapper;
  */
 public final class ParsedSql {
 
-    /** The Constant EVICT_TIME. */
     private static final int EVICT_TIME = 60 * 1000;
 
-    /** The Constant LIVE_TIME. */
     private static final int LIVE_TIME = 24 * 60 * 60 * 1000;
 
-    /** The Constant MAX_IDLE_TIME. */
     private static final int MAX_IDLE_TIME = 24 * 60 * 60 * 1000;
 
-    /** The Constant opSqlPrefixSet. */
     private static final Set<String> opSqlPrefixSet = N.asSet(WD.INSERT, WD.SELECT, WD.UPDATE, WD.DELETE, WD.WITH, WD.MERGE);
 
-    /** The Constant factor. */
     private static final int factor = Math.min(Math.max(1, IOUtil.MAX_MEMORY_IN_MB / 1024), 8);
 
-    /** The Constant pool. */
     private static final KeyedObjectPool<String, PoolableWrapper<ParsedSql>> pool = PoolFactory.createKeyedObjectPool(1000 * factor, EVICT_TIME);
 
-    /** The Constant PREFIX_OF_NAMED_PARAMETER. */
     private static final String PREFIX_OF_NAMED_PARAMETER = ":";
 
     private static final char _PREFIX_OF_NAMED_PARAMETER = PREFIX_OF_NAMED_PARAMETER.charAt(0);
 
-    /** The Constant LEFT_OF_IBATIS_NAMED_PARAMETER. */
     private static final String LEFT_OF_IBATIS_NAMED_PARAMETER = "#{";
 
-    /** The Constant RIGHT_OF_IBATIS_NAMED_PARAMETER. */
     private static final String RIGHT_OF_IBATIS_NAMED_PARAMETER = "}";
 
-    /** The Constant PREFIX_OF_COUCHBASE_NAMED_PARAMETER. */
     private static final String PREFIX_OF_COUCHBASE_NAMED_PARAMETER = "$";
 
-    /** The Constant PREFIX_OF_COUCHBASE_NAMED_PARAMETER. */
     private static final char _PREFIX_OF_COUCHBASE_NAMED_PARAMETER = PREFIX_OF_COUCHBASE_NAMED_PARAMETER.charAt(0);
 
-    /** The named SQL. */
     private final String sql;
 
-    /** The pure SQL. */
     private final String parameterizedSql;
 
-    /** The couchbase pure SQL. */
     private String couchbaseParameterizedSql;
 
-    /** The named parameters. */
     private final ImmutableList<String> namedParameters;
 
-    /** The couchbase named parameters. */
     private ImmutableList<String> couchbaseNamedParameters;
 
-    /** The parameter count. */
     private int parameterCount;
 
-    /** The couchbase parameter count. */
     private int couchbaseParameterCount;
 
-    /**
-     * Instantiates a new named SQL.
-     *
-     * @param sql
-     */
     @SuppressWarnings({ "unchecked" })
     private ParsedSql(String sql) {
         this.sql = sql.trim();
@@ -331,10 +308,6 @@ public final class ParsedSql {
         return !(ch < '0' || (ch > '9' && ch < 'A') || (ch > 'Z' && ch < 'a') || (ch > 'z' && ch < 128));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -364,10 +337,6 @@ public final class ParsedSql {
         return false;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "{sql=" + sql + ", parameterizedSql=" + parameterizedSql + "}";

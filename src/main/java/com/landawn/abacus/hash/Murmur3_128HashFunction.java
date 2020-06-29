@@ -42,41 +42,23 @@ import java.nio.ByteOrder;
  */
 final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implements Serializable {
 
-    /** The seed. */
     // TODO(user): when the shortcuts are implemented, update BloomFilterStrategies
     private final int seed;
 
-    /**
-     * Instantiates a new murmur 3 128 hash function.
-     *
-     * @param seed
-     */
     Murmur3_128HashFunction(int seed) {
         this.seed = seed;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int bits() {
         return 128;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Hasher newHasher() {
         return new Murmur3_128Hasher(seed);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "Hashing.murmur3_128(" + seed + ")";
@@ -96,10 +78,6 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
         return false;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return getClass().hashCode() ^ seed;
@@ -282,6 +260,5 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
         }
     }
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 0L;
 }

@@ -57,13 +57,10 @@ import com.landawn.abacus.util.stream.Stream;
  */
 public class Multimap<K, E, V extends Collection<E>> {
 
-    /** The map supplier. */
     final Supplier<? extends Map<K, V>> mapSupplier;
 
-    /** The value supplier. */
     final Supplier<? extends V> valueSupplier;
 
-    /** The value map. */
     final Map<K, V> valueMap;
 
     /**
@@ -82,35 +79,17 @@ public class Multimap<K, E, V extends Collection<E>> {
         this(new HashMap<K, V>(initialCapacity), (Supplier<V>) Suppliers.ofList());
     }
 
-    /**
-     * Instantiates a new multimap.
-     *
-     * @param mapType
-     * @param valueType
-     */
     @SuppressWarnings("rawtypes")
     Multimap(final Class<? extends Map> mapType, final Class<? extends Collection> valueType) {
         this(Maps.mapType2Supplier(mapType), valueType2Supplier(valueType));
     }
 
-    /**
-     * Instantiates a new multimap.
-     *
-     * @param mapSupplier
-     * @param valueSupplier
-     */
     Multimap(final Supplier<? extends Map<K, V>> mapSupplier, final Supplier<? extends V> valueSupplier) {
         this.mapSupplier = mapSupplier;
         this.valueSupplier = valueSupplier;
         this.valueMap = mapSupplier.get();
     }
 
-    /**
-     * Instantiates a new multimap.
-     *
-     * @param valueMap
-     * @param valueSupplier
-     */
     @Internal
     Multimap(final Map<K, V> valueMap, final Supplier<? extends V> valueSupplier) {
         this.mapSupplier = Maps.mapType2Supplier(valueMap.getClass());
@@ -1582,10 +1561,6 @@ public class Multimap<K, E, V extends Collection<E>> {
         return newValue;
     }
 
-    /**
-     *
-     * @return
-     */
     public Multimap<K, E, V> copy() {
         final Multimap<K, E, V> copy = new Multimap<>(mapSupplier, valueSupplier);
 
@@ -1598,26 +1573,14 @@ public class Multimap<K, E, V extends Collection<E>> {
         return Multimap.invertFrom(this, multimapSupplier);
     }
 
-    /**
-     *
-     * @return
-     */
     public Set<K> keySet() {
         return valueMap.keySet();
     }
 
-    /**
-     *
-     * @return
-     */
     public Collection<V> values() {
         return valueMap.values();
     }
 
-    /**
-     *
-     * @return
-     */
     public List<E> flatValues() {
         final List<E> result = new ArrayList<>(totalCountOfValues());
 
@@ -1644,18 +1607,10 @@ public class Multimap<K, E, V extends Collection<E>> {
         return result;
     }
 
-    /**
-     *
-     * @return
-     */
     public Set<Map.Entry<K, V>> entrySet() {
         return valueMap.entrySet();
     }
 
-    /**
-     *
-     * @return
-     */
     public Map<K, V> toMap() {
         final Map<K, V> result = Maps.newOrderingMap(valueMap);
 
@@ -1676,10 +1631,6 @@ public class Multimap<K, E, V extends Collection<E>> {
         return map;
     }
 
-    /**
-     *
-     * @return
-     */
     public Multiset<K> toMultiset() {
         final Multiset<K> multiset = new Multiset<>(valueMap.getClass());
 
@@ -1714,18 +1665,10 @@ public class Multimap<K, E, V extends Collection<E>> {
         return valueMap;
     }
 
-    /**
-     *
-     * @return
-     */
     public Stream<Map.Entry<K, V>> stream() {
         return Stream.of(valueMap.entrySet());
     }
 
-    /**
-     *
-     * @return
-     */
     public EntryStream<K, V> entryStream() {
         return EntryStream.of(valueMap);
     }
@@ -1737,10 +1680,6 @@ public class Multimap<K, E, V extends Collection<E>> {
         valueMap.clear();
     }
 
-    /**
-     *
-     * @return
-     */
     public int size() {
         return valueMap.size();
     }
@@ -1791,10 +1730,6 @@ public class Multimap<K, E, V extends Collection<E>> {
         action.accept(this);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return valueMap.hashCode();
@@ -1811,10 +1746,6 @@ public class Multimap<K, E, V extends Collection<E>> {
         return obj == this || (obj instanceof Multimap && valueMap.equals(((Multimap<K, E, V>) obj).valueMap));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return valueMap.toString();

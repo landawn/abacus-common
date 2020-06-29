@@ -32,14 +32,8 @@ import com.landawn.abacus.util.stream.LongStream;
 import com.landawn.abacus.util.stream.ShortStream;
 import com.landawn.abacus.util.stream.Stream;
 
-/**
- * The Class u.
- */
 public class u {
 
-    /**
-     * Instantiates a new u.
-     */
     private u() {
         // utility class
     }

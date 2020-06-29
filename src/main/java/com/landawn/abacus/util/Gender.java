@@ -22,29 +22,14 @@ package com.landawn.abacus.util;
  */
 public enum Gender {
 
-    /** The blank. */
-    BLANK(0),
-    /** The female. */
-    FEMALE(1),
-    /** The male. */
-    MALE(2);
+    BLANK(0), FEMALE(1), MALE(2);
 
-    /** The int value. */
     private int intValue;
 
-    /**
-     * Instantiates a new gender.
-     *
-     * @param intValue
-     */
     Gender(int intValue) {
         this.intValue = intValue;
     }
 
-    /**
-     *
-     * @return
-     */
     public int intValue() {
         return intValue;
     }

@@ -1197,28 +1197,16 @@ public final class EntryStream<K, V> implements Closeable {
         return s.<T> map(Fn.Entries.f(mapper)).toCollection(supplier);
     }
 
-    /**
-     *
-     * @return
-     */
     @ParallelSupported
     public ImmutableMap<K, V> toImmutableMap() {
         return ImmutableMap.of(toMap());
     }
 
-    /**
-     *
-     * @return
-     */
     @ParallelSupported
     public ImmutableMap<K, V> toImmutableMap(final BinaryOperator<V> mergeFunction) {
         return ImmutableMap.of(toMap(mergeFunction));
     }
 
-    /**
-     *
-     * @return
-     */
     @SequentialOnly
     public Map<K, V> toMap() {
         if (isParallel()) {

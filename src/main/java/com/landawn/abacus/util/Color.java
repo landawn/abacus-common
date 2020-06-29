@@ -22,41 +22,14 @@ package com.landawn.abacus.util;
  */
 public enum Color {
 
-    /** The black. */
-    BLACK(0),
-    /** The white. */
-    WHITE(1),
-    /** The red. */
-    RED(2),
-    /** The orange. */
-    ORANGE(3),
-    /** The yellow. */
-    YELLOW(4),
-    /** The green. */
-    GREEN(5),
-    /** The cyan. */
-    CYAN(6),
-    /** The blue. */
-    BLUE(7),
-    /** The purple. */
-    PURPLE(8);
+    BLACK(0), WHITE(1), RED(2), ORANGE(3), YELLOW(4), GREEN(5), CYAN(6), BLUE(7), PURPLE(8);
 
-    /** The int value. */
     private int intValue;
 
-    /**
-     * Instantiates a new color.
-     *
-     * @param intValue
-     */
     Color(int intValue) {
         this.intValue = intValue;
     }
 
-    /**
-     *
-     * @return
-     */
     public int intValue() {
         return intValue;
     }

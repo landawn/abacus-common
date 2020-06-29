@@ -36,25 +36,14 @@ import com.landawn.abacus.util.Objectory;
  */
 public class Junction extends AbstractCondition {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -5520467185002717755L;
 
-    /** The condition list. */
     List<Condition> conditionList;
 
-    /**
-     * Instantiates a new junction.
-     */
     // For Kryo
     Junction() {
     }
 
-    /**
-     * Instantiates a new junction.
-     *
-     * @param operator
-     * @param conditions
-     */
     @SafeVarargs
     public Junction(Operator operator, Condition... conditions) {
         super(operator);
@@ -62,12 +51,6 @@ public class Junction extends AbstractCondition {
         add(conditions);
     }
 
-    /**
-     * Instantiates a new junction.
-     *
-     * @param operator
-     * @param conditions
-     */
     public Junction(Operator operator, Collection<? extends Condition> conditions) {
         super(operator);
         conditionList = new ArrayList<>();
@@ -228,10 +211,6 @@ public class Junction extends AbstractCondition {
         }
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         int h = 17;

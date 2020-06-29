@@ -39,7 +39,6 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      */
     private static final long serialVersionUID = -2135791679L;
 
-    /** The mutable value. */
     private short value;
 
     /**
@@ -68,10 +67,6 @@ public final class MutableShort extends Number implements Comparable<MutableShor
         return new MutableShort(value);
     }
 
-    /**
-     *
-     * @return
-     */
     public short value() {
         return value;
     }

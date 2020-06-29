@@ -15,19 +15,14 @@
 package com.landawn.abacus.condition;
 
 /**
- * The Class Intersect.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class Intersect extends Clause {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -6777653082079650004L;
 
-    /**
-     * Instantiates a new intersect.
-     */
     // For Kryo
     Intersect() {
     }

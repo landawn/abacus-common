@@ -22,41 +22,26 @@ import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.WD;
 
 /**
- * The Class Between.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class Between extends AbstractCondition {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 486757046031623324L;
 
-    /** The prop name. */
     // For Kryo
     final String propName;
 
-    /** The min value. */
     private Object minValue;
 
-    /** The max value. */
     private Object maxValue;
 
-    /**
-     * Instantiates a new between.
-     */
     // For Kryo
     Between() {
         propName = null;
     }
 
-    /**
-     * Instantiates a new between.
-     *
-     * @param propName
-     * @param minValue
-     * @param maxValue
-     */
     public Between(String propName, Object minValue, Object maxValue) {
         super(Operator.BETWEEN);
 
@@ -197,10 +182,6 @@ public class Between extends AbstractCondition {
         }
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         int h = 17;

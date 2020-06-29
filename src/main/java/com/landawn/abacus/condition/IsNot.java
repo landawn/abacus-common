@@ -15,29 +15,18 @@
 package com.landawn.abacus.condition;
 
 /**
- * The Class IsNot.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class IsNot extends Binary {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -524152290369165587L;
 
-    /**
-     * Instantiates a new checks if is not.
-     */
     // For Kryo
     IsNot() {
     }
 
-    /**
-     * Instantiates a new checks if is not.
-     *
-     * @param propName
-     * @param propValue
-     */
     public IsNot(String propName, Object propValue) {
         super(propName, Operator.IS_NOT, propValue);
     }

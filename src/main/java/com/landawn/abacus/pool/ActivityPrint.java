@@ -17,38 +17,24 @@ package com.landawn.abacus.pool;
 import java.io.Serializable;
 
 /**
- * The Class ActivityPrint.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public final class ActivityPrint implements Cloneable, Serializable {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -45207875951748322L;
 
-    /** The create time. */
     private long createTime;
 
-    /** The live time. */
     private long liveTime;
 
-    /** The max idle time. */
     private long maxIdleTime;
 
-    /** The last access time. */
     private long lastAccessTime;
 
-    /** The access count. */
     private int accessCount;
 
-    /**
-     * Instantiates a new activity print.
-     *
-     * @param liveTime
-     * @param maxIdleTime
-     * @throws IllegalArgumentException the illegal argument exception
-     */
     public ActivityPrint(long liveTime, long maxIdleTime) throws IllegalArgumentException {
         if (liveTime <= 0) {
             throw new IllegalArgumentException("Illegal liveTime[" + liveTime + "]. ");
@@ -202,10 +188,6 @@ public final class ActivityPrint implements Cloneable, Serializable {
         return (maxIdleTime < (now - lastAccessTime)) || (liveTime < (now - createTime));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Object clone() {
         ActivityPrint result = null;
@@ -219,10 +201,6 @@ public final class ActivityPrint implements Cloneable, Serializable {
         return result;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         long h = 7;
@@ -256,10 +234,6 @@ public final class ActivityPrint implements Cloneable, Serializable {
         return false;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "{createTime=" + createTime + ", liveTime=" + liveTime + ", maxIdleTime=" + maxIdleTime + ", lastAccessedTime=" + lastAccessTime

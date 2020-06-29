@@ -45,46 +45,26 @@ import com.landawn.abacus.hash.Util.UnsignedBytes;
  */
 final class Murmur3_32HashFunction extends AbstractStreamingHashFunction implements Serializable {
 
-    /** The Constant C1. */
     private static final int C1 = 0xcc9e2d51;
 
-    /** The Constant C2. */
     private static final int C2 = 0x1b873593;
 
-    /** The seed. */
     private final int seed;
 
-    /**
-     * Instantiates a new murmur 3 32 hash function.
-     *
-     * @param seed
-     */
     Murmur3_32HashFunction(int seed) {
         this.seed = seed;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int bits() {
         return 32;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Hasher newHasher() {
         return new Murmur3_32Hasher(seed);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "Hashing.murmur3_32(" + seed + ")";
@@ -104,10 +84,6 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
         return false;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return getClass().hashCode() ^ seed;
@@ -276,6 +252,5 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
         }
     }
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 0L;
 }

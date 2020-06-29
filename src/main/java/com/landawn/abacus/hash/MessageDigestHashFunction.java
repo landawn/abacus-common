@@ -31,24 +31,14 @@ import com.landawn.abacus.util.N;
  */
 final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
 
-    /** The prototype. */
     private final MessageDigest prototype;
 
-    /** The bytes. */
     private final int bytes;
 
-    /** The supports clone. */
     private final boolean supportsClone;
 
-    /** The to string. */
     private final String toString;
 
-    /**
-     * Instantiates a new message digest hash function.
-     *
-     * @param algorithmName
-     * @param toString
-     */
     MessageDigestHashFunction(String algorithmName, String toString) {
         this.prototype = getMessageDigest(algorithmName);
         this.bytes = prototype.getDigestLength();
@@ -56,13 +46,6 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
         this.supportsClone = supportsClone(prototype);
     }
 
-    /**
-     * Instantiates a new message digest hash function.
-     *
-     * @param algorithmName
-     * @param bytes
-     * @param toString
-     */
     MessageDigestHashFunction(String algorithmName, int bytes, String toString) {
         this.toString = N.checkArgNotNull(toString);
         this.prototype = getMessageDigest(algorithmName);
@@ -86,19 +69,11 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
         }
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int bits() {
         return bytes * Byte.SIZE;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return toString;
@@ -118,10 +93,6 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
         }
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Hasher newHasher() {
         if (supportsClone) {
@@ -173,10 +144,6 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction {
         private static final long serialVersionUID = 0;
     }
 
-    /**
-     *
-     * @return
-     */
     Object writeReplace() {
         return new SerializedForm(prototype.getAlgorithm(), bytes, toString);
     }

@@ -25,86 +25,42 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
 
 /**
- * The Class Join.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class Join extends AbstractCondition {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -6241397386906482856L;
 
-    /** The join entities. */
     private List<String> joinEntities;
 
-    /** The condition. */
     private Condition condition;
 
-    /**
-     * Instantiates a new join.
-     */
     // For Kryo
     Join() {
     }
 
-    /**
-     * Instantiates a new join.
-     *
-     * @param joinEntity
-     */
     public Join(String joinEntity) {
         this(Operator.JOIN, joinEntity);
     }
 
-    /**
-     * Instantiates a new join.
-     *
-     * @param operator
-     * @param joinEntity
-     */
     protected Join(Operator operator, String joinEntity) {
         this(operator, joinEntity, null);
     }
 
-    /**
-     * Instantiates a new join.
-     *
-     * @param joinEntity
-     * @param condition
-     */
     public Join(String joinEntity, Condition condition) {
         this(Operator.JOIN, joinEntity, condition);
     }
 
-    /**
-     * Instantiates a new join.
-     *
-     * @param operator
-     * @param joinEntity
-     * @param condition
-     */
     protected Join(Operator operator, String joinEntity, Condition condition) {
         this(operator, Array.asList(joinEntity), condition);
     }
 
-    /**
-     * Instantiates a new join.
-     *
-     * @param joinEntities
-     * @param condition
-     */
     public Join(Collection<String> joinEntities, Condition condition) {
         this(Operator.JOIN, joinEntities, condition);
     }
 
-    /**
-     * Instantiates a new join.
-     *
-     * @param operator
-     * @param joinEntities
-     * @param condition
-     */
     protected Join(Operator operator, Collection<String> joinEntities, Condition condition) {
         super(operator);
         this.joinEntities = new ArrayList<>(joinEntities);
@@ -184,10 +140,6 @@ public class Join extends AbstractCondition {
                 + ((condition == null) ? N.EMPTY_STRING : (_SPACE + getCondition().toString(namingPolicy)));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         int h = 17;

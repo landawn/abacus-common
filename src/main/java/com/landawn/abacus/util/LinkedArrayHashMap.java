@@ -29,9 +29,6 @@ import java.util.LinkedHashMap;
  */
 public final class LinkedArrayHashMap<K, V> extends ArrayHashMap<K, V> {
 
-    /**
-     * Instantiates a new linked array hash map.
-     */
     public LinkedArrayHashMap() {
         super(LinkedHashMap.class);
     }

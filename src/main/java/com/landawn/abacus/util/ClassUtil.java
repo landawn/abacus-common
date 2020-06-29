@@ -129,56 +129,41 @@ import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
 
 /**
- * The Class ClassUtil.
  *
  * @author Haiyang Li
  * @since 0.9
  */
 public final class ClassUtil {
 
-    /**
-     * Instantiates a new class util.
-     */
     private ClassUtil() {
         // singleton
     }
 
-    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(ClassUtil.class);
 
-    /** The Constant JAR_POSTFIX. */
     private static final String JAR_POSTFIX = ".jar";
 
-    /** The Constant CLASS_POSTFIX. */
     private static final String CLASS_POSTFIX = ".class";
 
-    /** The Constant PROP_NAME_SEPARATOR. */
     // ...
     private static final String PROP_NAME_SEPARATOR = ".";
 
-    /** The Constant GET. */
     // ...
     private static final String GET = "get".intern();
 
-    /** The Constant SET. */
     private static final String SET = "set".intern();
 
-    /** The Constant IS. */
     private static final String IS = "is".intern();
 
-    /** The Constant HAS. */
     private static final String HAS = "has".intern();
 
     // ... it has to be big enough to make it's safety to add element to
-    /** The Constant POOL_SIZE. */
     // ArrayBlockingQueue.
     private static final int POOL_SIZE = Internals.POOL_SIZE;
 
-    /** The Constant entityClassPool. */
     // ...
     private static final Map<Class<?>, Boolean> entityClassPool = new ObjectPool<>(POOL_SIZE);
 
-    /** The Constant BUILT_IN_TYPE. */
     // formalized property name list.
     private static final Map<String, Class<?>> BUILT_IN_TYPE = new ObjectPool<>(POOL_SIZE); // new LinkedHashMap<>();
 
@@ -369,7 +354,6 @@ public final class ClassUtil {
         // }
     }
 
-    /** The symbol of primitive array class name. */
     private static Map<String, String> SYMBOL_OF_PRIMITIVE_ARRAY_CLASS_NAME = new HashMap<>();
 
     static {
@@ -383,56 +367,40 @@ public final class ClassUtil {
         SYMBOL_OF_PRIMITIVE_ARRAY_CLASS_NAME.put(double.class.getName(), "D");
     }
 
-    /** The Constant camelCasePropNamePool. */
     private static final Map<String, String> camelCasePropNamePool = new ObjectPool<>(POOL_SIZE * 2);
 
-    /** The Constant lowerCaseWithUnderscorePropNamePool. */
     private static final Map<String, String> lowerCaseWithUnderscorePropNamePool = new ObjectPool<>(POOL_SIZE * 2);
 
-    /** The Constant upperCaseWithUnderscorePropNamePool. */
     private static final Map<String, String> upperCaseWithUnderscorePropNamePool = new ObjectPool<>(POOL_SIZE * 2);
 
-    /** The Constant registeredXMLBindingClassList. */
     private static final Map<Class<?>, Boolean> registeredXMLBindingClassList = new ObjectPool<>(POOL_SIZE);
 
-    /** The Constant registeredNonPropGetSetMethodPool. */
     private static final Map<Class<?>, Set<String>> registeredNonPropGetSetMethodPool = new ObjectPool<>(POOL_SIZE);
 
-    /** The Constant entityDeclaredPropNameListPool. */
     private static final Map<Class<?>, ImmutableList<String>> entityDeclaredPropNameListPool = new ObjectPool<>(POOL_SIZE);
 
-    /** The Constant entityPropFieldPool. */
     private static final Map<Class<?>, ImmutableMap<String, Field>> entityDeclaredPropFieldPool = new ObjectPool<>(POOL_SIZE);
 
-    /** The Constant entityPropFieldPool. */
     private static final Map<Class<?>, Map<String, Field>> entityPropFieldPool = new ObjectPool<>(POOL_SIZE);
 
-    /** The Constant entityDeclaredPropGetMethodPool. */
     private static final Map<Class<?>, ImmutableMap<String, Method>> entityDeclaredPropGetMethodPool = new ObjectPool<>(POOL_SIZE);
 
-    /** The Constant entityDeclaredPropSetMethodPool. */
     private static final Map<Class<?>, ImmutableMap<String, Method>> entityDeclaredPropSetMethodPool = new ObjectPool<>(POOL_SIZE);
 
-    /** The Constant entityPropGetMethodPool. */
     private static final Map<Class<?>, Map<String, Method>> entityPropGetMethodPool = new ObjectPool<>(POOL_SIZE);
 
-    /** The Constant entityPropSetMethodPool. */
     private static final Map<Class<?>, Map<String, Method>> entityPropSetMethodPool = new ObjectPool<>(POOL_SIZE);
 
-    /** The Constant entityInlinePropGetMethodPool. */
     private static final Map<Class<?>, Map<String, List<Method>>> entityInlinePropGetMethodPool = new ObjectPool<>(POOL_SIZE);
 
     //    /** The Constant entityInlinePropSetMethodPool. */
     //    private static final Map<Class<?>, Map<String, List<Method>>> entityInlinePropSetMethodPool = new ObjectPool<>(POOL_SIZE);
 
-    /** The Constant formalizedPropNamePool. */
     // ...
     private static final Map<String, String> formalizedPropNamePool = new ObjectPool<>(POOL_SIZE * 2);
 
-    /** The Constant methodPropNamePool. */
     private static final Map<Method, String> methodPropNamePool = new ObjectPool<>(POOL_SIZE * 2);
 
-    /** The Constant keyWordMapper. */
     // reserved words.
     private static final Map<String, String> keyWordMapper = new HashMap<>(16);
 
@@ -440,7 +408,6 @@ public final class ClassUtil {
         keyWordMapper.put("class", "clazz");
     }
 
-    /** The Constant nonGetMethodName. */
     private static final Set<String> nonGetSetMethodName = N.newHashSet(16);
 
     static {
@@ -448,34 +415,24 @@ public final class ClassUtil {
         nonGetSetMethodName.add("hashCode");
     }
 
-    /** The Constant packagePool. */
     private static final Map<Class<?>, Package> packagePool = new ObjectPool<>(POOL_SIZE);
 
-    /** The Constant packageNamePool. */
     private static final Map<Class<?>, String> packageNamePool = new ObjectPool<>(POOL_SIZE);
 
-    /** The Constant clsNamePool. */
     private static final Map<String, Class<?>> clsNamePool = new ObjectPool<>(POOL_SIZE);
 
-    /** The Constant simpleClassNamePool. */
     private static final Map<Class<?>, String> simpleClassNamePool = new ObjectPool<>(POOL_SIZE);
 
-    /** The Constant nameClassPool. */
     private static final Map<Class<?>, String> nameClassPool = new ObjectPool<>(POOL_SIZE);
 
-    /** The Constant canonicalClassNamePool. */
     private static final Map<Class<?>, String> canonicalClassNamePool = new ObjectPool<>(POOL_SIZE);
 
-    /** The Constant enclosingClassPool. */
     private static final Map<Class<?>, Class<?>> enclosingClassPool = new ObjectPool<>(POOL_SIZE);
 
-    /** The Constant classDeclaredConstructorPool. */
     private static final Map<Class<?>, Map<Class<?>[], Constructor<?>>> classDeclaredConstructorPool = new ObjectPool<>(POOL_SIZE);
 
-    /** The Constant classDeclaredMethodPool. */
     private static final Map<Class<?>, Map<String, Map<Class<?>[], Method>>> classDeclaredMethodPool = new ObjectPool<>(POOL_SIZE);
 
-    /** The Constant registeredNonEntityClass. */
     private static final Map<Class<?>, Class<?>> registeredNonEntityClass = new ObjectPool<>(POOL_SIZE);
 
     static {
@@ -2805,10 +2762,8 @@ public final class ClassUtil {
         Objectory.recycle(tmp);
     }
 
-    /** The Constant idPropNamesMap. */
     private static final Map<Class<?>, ImmutableList<String>> idPropNamesMap = new ConcurrentHashMap<>();
 
-    /** The Constant fakeIds. */
     private static final ImmutableList<String> fakeIds = ImmutableList.of("not_defined_fake_id_in_abacus_" + N.uuid());
 
     /**
@@ -2967,7 +2922,6 @@ public final class ClassUtil {
         }
     }
 
-    /** The Constant column2FieldNameMapPool. */
     private static final Map<Class<?>, ImmutableMap<String, String>> column2PropNameNameMapPool = new ConcurrentHashMap<>();
 
     /**
@@ -3082,7 +3036,6 @@ public final class ClassUtil {
         }
     }
 
-    /** The Constant entityTablePropColumnNameMap. */
     static final Map<Class<?>, Map<NamingPolicy, ImmutableMap<String, String>>> entityTablePropColumnNameMap = new ObjectPool<>(N.POOL_SIZE);
 
     /**

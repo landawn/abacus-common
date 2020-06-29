@@ -17,48 +17,26 @@ package com.landawn.abacus.condition;
 import java.util.Collection;
 
 /**
- * The Class InnerJoin.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class InnerJoin extends Join {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -3913405148778272631L;
 
-    /**
-     * Instantiates a new inner join.
-     */
     // For Kryo
     InnerJoin() {
     }
 
-    /**
-     * Instantiates a new inner join.
-     *
-     * @param joinEntity
-     */
     public InnerJoin(String joinEntity) {
         super(Operator.INNER_JOIN, joinEntity);
     }
 
-    /**
-     * Instantiates a new inner join.
-     *
-     * @param joinEntity
-     * @param condition
-     */
     public InnerJoin(String joinEntity, Condition condition) {
         super(Operator.INNER_JOIN, joinEntity, condition);
     }
 
-    /**
-     * Instantiates a new inner join.
-     *
-     * @param joinEntities
-     * @param condition
-     */
     public InnerJoin(Collection<String> joinEntities, Condition condition) {
         super(Operator.INNER_JOIN, joinEntities, condition);
     }

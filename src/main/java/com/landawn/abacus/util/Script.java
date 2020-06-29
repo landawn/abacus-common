@@ -16,7 +16,6 @@ package com.landawn.abacus.util;
 
 // TODO Design to be done.
 /**
- * The Class Script.
  *
  * @author Haiyang Li
  * @since 0.8

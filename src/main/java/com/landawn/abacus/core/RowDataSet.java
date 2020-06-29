@@ -116,28 +116,20 @@ import com.landawn.abacus.util.stream.Stream;
  */
 public class RowDataSet implements DataSet, Cloneable {
 
-    /** The Constant PROP_NAME_SEPARATOR. */
     static final char PROP_NAME_SEPARATOR = '.';
 
-    /** The Constant NULL_STRING. */
     static final String NULL_STRING = "null".intern();
 
-    /** The Constant NULL_CHAR_ARRAY. */
     static final char[] NULL_CHAR_ARRAY = NULL_STRING.toCharArray();
 
-    /** The Constant TRUE. */
     static final String TRUE = Boolean.TRUE.toString().intern();
 
-    /** The Constant TRUE_CHAR_ARRAY. */
     static final char[] TRUE_CHAR_ARRAY = TRUE.toCharArray();
 
-    /** The Constant FALSE. */
     static final String FALSE = Boolean.FALSE.toString().intern();
 
-    /** The Constant FALSE_CHAR_ARRAY. */
     static final char[] FALSE_CHAR_ARRAY = FALSE.toCharArray();
 
-    /** The Constant SUPPORTED_COUNT_COLUMN_TYPES. */
     static final Set<Class<?>> SUPPORTED_COUNT_COLUMN_TYPES = N.asSet((Class<?>) int.class, Integer.class, long.class, Long.class, float.class, Float.class,
             double.class, Double.class);
 
@@ -146,28 +138,20 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     public static final String CACHED_PROP_NAMES = "cachedPropNames";
 
-    /** The Constant ROW. */
     private static final String ROW = "row";
 
-    /** The Constant jsonParser. */
     private static final JSONParser jsonParser = ParserFactory.createJSONParser();
 
-    /** The Constant xmlParser. */
     private static final XMLParser xmlParser = ParserFactory.isXMLAvailable() ? ParserFactory.createXMLParser() : null;
 
-    /** The Constant kryoParser. */
     private static final KryoParser kryoParser = ParserFactory.isKryoAvailable() ? ParserFactory.createKryoParser() : null;
 
-    /** The Constant jsc. */
     private static final JSONSerializationConfig jsc = JSC.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP);
 
-    /** The Constant xsc. */
     private static final XMLSerializationConfig xsc = XSC.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP);
 
-    /** The Constant strType. */
     private static final Type<Object> strType = N.typeOf(String.class);
 
-    /** The Constant MULTI_COLUMN_COMPARATOR. */
     @SuppressWarnings("rawtypes")
     private static final Comparator<Object[]> MULTI_COLUMN_COMPARATOR = new Comparator<Object[]>() {
         private final Comparator<Comparable> naturalOrder = Comparators.naturalOrder();
@@ -188,58 +172,34 @@ public class RowDataSet implements DataSet, Cloneable {
         }
     };
 
-    /** The column name list. */
     List<String> _columnNameList;
 
-    /** The column list. */
     List<List<Object>> _columnList;
 
-    /** The column index map. */
     Map<String, Integer> _columnIndexMap;
 
-    /** The column indexes. */
     int[] _columnIndexes;
 
-    /** The current row num. */
     int _currentRowNum = 0;
 
-    /** The is frozen. */
     boolean _isFrozen = false;
 
-    /** The properties. */
     Properties<String, Object> _properties;
 
-    /** The mod count. */
     transient int modCount = 0;
 
-    /**
-     * Instantiates a new row data set.
-     */
     // For Kryo
     protected RowDataSet() {
     }
 
-    /**
-     * Instantiates a new row data set.
-     *
-     * @param columnNameList
-     * @param columnList
-     */
     public RowDataSet(final List<String> columnNameList, final List<List<Object>> columnList) {
         this(columnNameList, columnList, null);
     }
 
-    /**
-     * Instantiates a new row data set.
-     *
-     * @param columnNameList
-     * @param columnList
-     * @param properties
-     */
     public RowDataSet(final List<String> columnNameList, final List<List<Object>> columnList, final Properties<String, Object> properties) {
         N.checkArgNotNull(columnNameList);
         N.checkArgNotNull(columnList);
-        N.checkArgument(N.hasDuplicates(columnNameList) == false, "Dupliated column names: {}", columnList);
+        N.checkArgument(N.hasDuplicates(columnNameList) == false, "Dupliated column names: {}", columnNameList);
         N.checkArgument(columnNameList.size() == columnList.size(), "the size of column name list: {} is different from the size of column list: {}",
                 columnNameList.size(), columnList.size());
 
@@ -2184,10 +2144,6 @@ public class RowDataSet implements DataSet, Cloneable {
         return row;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Optional<Object[]> firstRow() {
         return firstRow(Object[].class);
@@ -2245,10 +2201,6 @@ public class RowDataSet implements DataSet, Cloneable {
         return Optional.of(row);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Optional<Object[]> lastRow() {
         return lastRow(Object[].class);
@@ -2640,10 +2592,6 @@ public class RowDataSet implements DataSet, Cloneable {
         }
     }
 
-    /**
-     *
-     * @return
-     */
     @SuppressWarnings("unchecked")
     @Override
     public List<Object[]> toList() {
@@ -3870,10 +3818,6 @@ public class RowDataSet implements DataSet, Cloneable {
         }
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toJSON() {
         return toJSON(0, size());
@@ -4104,10 +4048,6 @@ public class RowDataSet implements DataSet, Cloneable {
         }
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toXML() {
         return toXML(ROW);
@@ -4482,10 +4422,6 @@ public class RowDataSet implements DataSet, Cloneable {
         }
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toCSV() {
         return toCSV(this.columnNameList(), 0, size());
@@ -5072,7 +5008,6 @@ public class RowDataSet implements DataSet, Cloneable {
         return new RowDataSet(newColumnNameList, newColumnList);
     }
 
-    /** The Constant CLONE. */
     private static final Function<DisposableObjArray, Object[]> CLONE = new Function<DisposableObjArray, Object[]>() {
         @Override
         public Object[] apply(DisposableObjArray t) {
@@ -6273,7 +6208,6 @@ public class RowDataSet implements DataSet, Cloneable {
         });
     }
 
-    /** The Constant TO_SIZE_FUNC. */
     private static final Function<Set<String>, Integer> TO_SIZE_FUNC = new Function<Set<String>, Integer>() {
         @Override
         public Integer apply(Set<String> t) {
@@ -6281,7 +6215,6 @@ public class RowDataSet implements DataSet, Cloneable {
         }
     };
 
-    /** The Constant REVERSE_ACTION. */
     private static final Consumer<List<Set<String>>> REVERSE_ACTION = new Consumer<List<Set<String>>>() {
         @Override
         public void accept(List<Set<String>> t) {
@@ -6823,10 +6756,6 @@ public class RowDataSet implements DataSet, Cloneable {
         return new RowDataSet(newColumnNameList, newColumnList, newProperties);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public DataSet distinct() {
         return distinctBy(this._columnNameList);
@@ -7945,10 +7874,6 @@ public class RowDataSet implements DataSet, Cloneable {
         return new RowDataSet(newColumnNameList, newColumnList);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public DataSet copy() {
         return copy(_columnNameList, 0, size());
@@ -8017,10 +7942,6 @@ public class RowDataSet implements DataSet, Cloneable {
         return new RowDataSet(newColumnNameList, newColumnList, newProperties);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public DataSet clone() {
         return clone(this._isFrozen);
@@ -11004,10 +10925,6 @@ public class RowDataSet implements DataSet, Cloneable {
         }
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int size() {
         return (_columnList.size() == 0) ? 0 : _columnList.get(0).size();
@@ -11030,10 +10947,6 @@ public class RowDataSet implements DataSet, Cloneable {
         // Runtime.getRuntime().gc();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Properties<String, Object> properties() {
         if (_properties == null) {
@@ -11066,19 +10979,11 @@ public class RowDataSet implements DataSet, Cloneable {
     //        return (T) _properties.remove(propName);
     //    }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Stream<String> columnNames() {
         return Stream.of(_columnNameList);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Stream<ImmutableList<Object>> columns() {
         return IntStream.range(0, this._columnNameList.size()).mapToObj(new IntFunction<ImmutableList<Object>>() {
@@ -11089,10 +10994,6 @@ public class RowDataSet implements DataSet, Cloneable {
         });
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Map<String, ImmutableList<Object>> columnMap() {
         final Map<String, ImmutableList<Object>> result = new LinkedHashMap<>();
@@ -11281,10 +11182,6 @@ public class RowDataSet implements DataSet, Cloneable {
         return outputWriter;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         int h = 17;
@@ -11314,10 +11211,6 @@ public class RowDataSet implements DataSet, Cloneable {
         return false;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         if (_columnNameList.size() == 0) {

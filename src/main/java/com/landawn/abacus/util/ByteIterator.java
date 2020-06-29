@@ -22,14 +22,12 @@ import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.ByteStream;
 
 /**
- * The Class ByteIterator.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public abstract class ByteIterator extends ImmutableIterator<Byte> {
 
-    /** The Constant EMPTY. */
     public static final ByteIterator EMPTY = new ByteIterator() {
         @Override
         public boolean hasNext() {
@@ -42,10 +40,6 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
         }
     };
 
-    /**
-     *
-     * @return
-     */
     public static ByteIterator empty() {
         return EMPTY;
     }
@@ -250,24 +244,12 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
         return nextByte();
     }
 
-    /**
-     *
-     * @return
-     */
     public abstract byte nextByte();
 
-    /**
-     *
-     * @return
-     */
     public byte[] toArray() {
         return toList().trimToSize().array();
     }
 
-    /**
-     *
-     * @return
-     */
     public ByteList toList() {
         final ByteList list = new ByteList();
 
@@ -278,10 +260,6 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
         return list;
     }
 
-    /**
-     *
-     * @return
-     */
     public ByteStream stream() {
         return ByteStream.of(this);
     }

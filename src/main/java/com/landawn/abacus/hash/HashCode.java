@@ -30,9 +30,6 @@ import com.landawn.abacus.util.N;
  */
 public abstract class HashCode {
 
-    /**
-     * Instantiates a new hash code.
-     */
     HashCode() {
     }
 
@@ -581,6 +578,5 @@ public abstract class HashCode {
         return sb.toString();
     }
 
-    /** The Constant hexDigits. */
     private static final char[] hexDigits = "0123456789abcdef".toCharArray();
 }

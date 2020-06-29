@@ -15,18 +15,12 @@
 package com.landawn.abacus.http;
 
 /**
- * The Class HttpRequest.
  *
  * @author Haiyang Li
  * @since 1.3
  */
 public class HttpRequest extends AbstractHttpRequest<HttpRequest> {
 
-    /**
-     * Instantiates a new http request.
-     *
-     * @param httpClient
-     */
     HttpRequest(HttpClient httpClient) {
         super(httpClient);
     }

@@ -29,9 +29,6 @@ import com.landawn.abacus.util.N;
  */
 final class Util {
 
-    /**
-     * Instantiates a new util.
-     */
     private Util() {
         // singleton
     }

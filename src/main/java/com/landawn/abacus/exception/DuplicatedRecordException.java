@@ -15,7 +15,6 @@
 package com.landawn.abacus.exception;
 
 /**
- * The Class DuplicatedRecordException.
  *
  * @author Haiyang Li
  * @since 1.3.29

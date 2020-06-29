@@ -30,11 +30,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class Reflection<T> {
 
-    /** The Constant EMPTY_CLASSES. */
     @SuppressWarnings("rawtypes")
     static final Class[] EMPTY_CLASSES = new Class[0];
 
-    /** The Constant isReflectASMAvailable. */
     static final boolean isReflectASMAvailable;
 
     static {
@@ -51,30 +49,18 @@ public final class Reflection<T> {
         isReflectASMAvailable = tmp;
     }
 
-    /** The Constant clsFieldPool. */
     static final Map<Class<?>, Map<String, Field>> clsFieldPool = new ConcurrentHashMap<>();
 
-    /** The Constant clsConstructorPool. */
     static final Map<Class<?>, Map<Wrapper<Class<?>[]>, Constructor<?>>> clsConstructorPool = new ConcurrentHashMap<>();
 
-    /** The Constant clsMethodPool. */
     static final Map<Class<?>, Map<String, Map<Wrapper<Class<?>[]>, Method>>> clsMethodPool = new ConcurrentHashMap<>();
 
-    /** The cls. */
     private final Class<T> cls;
 
-    /** The target. */
     private final T target;
 
-    /** The reflect ASM. */
     private ReflectASM<T> reflectASM;
 
-    /**
-     * Instantiates a new reflection.
-     *
-     * @param cls
-     * @param target
-     */
     Reflection(Class<T> cls, T target) {
         this.cls = cls;
         this.target = target;
@@ -111,10 +97,6 @@ public final class Reflection<T> {
         return new Reflection<>((Class<T>) target.getClass(), target);
     }
 
-    /**
-     *
-     * @return
-     */
     public Reflection<T> _new() {
         return new Reflection<>(cls, N.newInstance(cls));
     }
@@ -136,10 +118,6 @@ public final class Reflection<T> {
         return new Reflection<>(cls, ClassUtil.invokeConstructor(constructor, args));
     }
 
-    /**
-     *
-     * @return
-     */
     public T instance() {
         return target;
     }

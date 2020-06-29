@@ -35,9 +35,6 @@ import com.landawn.abacus.util.stream.ObjIteratorEx;
  */
 public final class PermutationIterator {
 
-    /**
-     * Instantiates a new permutation iterator.
-     */
     private PermutationIterator() {
     }
 

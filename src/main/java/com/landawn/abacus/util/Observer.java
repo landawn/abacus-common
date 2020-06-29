@@ -37,7 +37,6 @@ import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.Predicate;
 
 /**
- * The Class Observer.
  *
  * @author Haiyang Li
  * @param <T>
@@ -45,13 +44,10 @@ import com.landawn.abacus.util.function.Predicate;
  */
 public abstract class Observer<T> {
 
-    /** The Constant COMPLETE_FLAG. */
     private static final Object COMPLETE_FLAG = new Object();
 
-    /** The Constant INTERVAL_FACTOR. */
     protected static final double INTERVAL_FACTOR = 3;
 
-    /** The Constant EMPTY_ACTION. */
     protected static final Runnable EMPTY_ACTION = new Runnable() {
         @Override
         public void run() {
@@ -59,7 +55,6 @@ public abstract class Observer<T> {
         }
     };
 
-    /** The Constant ON_ERROR_MISSING. */
     protected static final Consumer<Exception> ON_ERROR_MISSING = new Consumer<Exception>() {
         @Override
         public void accept(Exception t) {
@@ -67,7 +62,6 @@ public abstract class Observer<T> {
         }
     };
 
-    /** The Constant asyncExecutor. */
     protected static final Executor asyncExecutor;
 
     static {
@@ -79,34 +73,22 @@ public abstract class Observer<T> {
         }
     }
 
-    /** The Constant scheduler. */
     protected static final ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(IOUtil.IS_PLATFORM_ANDROID ? IOUtil.CPU_CORES : 32);
 
     static {
         scheduler.setRemoveOnCancelPolicy(true);
     }
 
-    /** The scheduled futures. */
     protected final Map<ScheduledFuture<?>, Long> scheduledFutures = new LinkedHashMap<>();
 
-    /** The dispatcher. */
     protected final Dispatcher<Object> dispatcher;
 
-    /** The has more. */
     protected boolean hasMore = true;
 
-    /**
-     * Instantiates a new observer.
-     */
     protected Observer() {
         this(new Dispatcher<>());
     }
 
-    /**
-     * Instantiates a new observer.
-     *
-     * @param dispatcher
-     */
     protected Observer(Dispatcher<Object> dispatcher) {
         this.dispatcher = dispatcher;
     }
@@ -596,10 +578,6 @@ public abstract class Observer<T> {
         return this;
     }
 
-    /**
-     *
-     * @return
-     */
     public Observer<T> distinct() {
         dispatcher.append(new Dispatcher<Object>() {
             private Set<T> set = N.newHashSet();

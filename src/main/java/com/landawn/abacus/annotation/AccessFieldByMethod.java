@@ -21,17 +21,10 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-/**
- * The Interface Column.
- */
 @Documented
 @Target(value = { ElementType.TYPE, ElementType.FIELD })
 @Retention(RUNTIME)
 public @interface AccessFieldByMethod {
 
-    /**
-     *
-     * @return
-     */
     String value() default "";
 }

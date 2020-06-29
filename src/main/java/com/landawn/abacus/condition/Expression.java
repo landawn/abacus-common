@@ -69,66 +69,44 @@ import com.landawn.abacus.util.StringUtil;
 import com.landawn.abacus.util.WD;
 
 /**
- * The Class Expression.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class Expression extends AbstractCondition {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -1270437226702741887L;
 
-    /** The Constant NULL_STRING. */
     static final String NULL_STRING = "null".intern();
 
-    /** The Constant NULL_CHAR_ARRAY. */
     static final char[] NULL_CHAR_ARRAY = NULL_STRING.toCharArray();
 
-    /** The Constant TRUE. */
     static final String TRUE = Boolean.TRUE.toString().intern();
 
-    /** The Constant TRUE_CHAR_ARRAY. */
     static final char[] TRUE_CHAR_ARRAY = TRUE.toCharArray();
 
-    /** The Constant FALSE. */
     static final String FALSE = Boolean.FALSE.toString().intern();
 
-    /** The Constant FALSE_CHAR_ARRAY. */
     static final char[] FALSE_CHAR_ARRAY = FALSE.toCharArray();
 
-    /** The Constant LEFT_SHIFT. */
     private static final String LEFT_SHIFT = "<<";
 
-    /** The Constant RIGTH_SHIFT. */
     private static final String RIGTH_SHIFT = ">>";
 
-    /** The Constant NULL. */
     private static final String NULL = "NULL";
 
-    /** The Constant EMPTY. */
     private static final String EMPTY = "BLANK";
 
-    /** The Constant cachedExpression. */
     private static final Map<String, Expression> cachedExpression = new ConcurrentHashMap<>();
 
-    /** The literal. */
     // For Kryo
     final String literal;
 
-    /**
-     * Instantiates a new expression.
-     */
     // For Kryo
     Expression() {
         literal = null;
     }
 
-    /**
-     * Instantiates a new expression.
-     *
-     * @param literal
-     */
     public Expression(String literal) {
         super(Operator.EMPTY);
 
@@ -992,10 +970,6 @@ public class Expression extends AbstractCondition {
         return literal;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return (literal == null) ? 0 : literal.hashCode();

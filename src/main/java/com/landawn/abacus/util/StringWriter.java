@@ -25,39 +25,21 @@ import java.io.Writer;
  */
 public final class StringWriter extends Writer {
 
-    /** The buf. */
     private final StringBuilder buf;
 
-    /**
-     * Instantiates a new string writer.
-     */
     public StringWriter() {
         this(new StringBuilder());
     }
 
-    /**
-     * Instantiates a new string writer.
-     *
-     * @param initialSize
-     */
     public StringWriter(int initialSize) {
         this(new StringBuilder(initialSize));
     }
 
-    /**
-     * Instantiates a new string writer.
-     *
-     * @param sb
-     */
     public StringWriter(StringBuilder sb) {
         this.buf = sb;
         lock = buf;
     }
 
-    /**
-     *
-     * @return
-     */
     public StringBuilder stringBuilder() {
         return buf;
     }

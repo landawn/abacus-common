@@ -22,7 +22,6 @@ import com.esotericsoftware.reflectasm.FieldAccess;
 import com.esotericsoftware.reflectasm.MethodAccess;
 
 /**
- * The Class ReflectASM.
  *
  * @author Haiyang Li
  * @param <T>
@@ -30,31 +29,19 @@ import com.esotericsoftware.reflectasm.MethodAccess;
  */
 final class ReflectASM<T> {
 
-    /** The Constant EMPTY_CLASSES. */
     @SuppressWarnings("rawtypes")
     static final Class[] EMPTY_CLASSES = new Class[0];
 
-    /** The Constant clsFieldPool. */
     static final Map<Class<?>, FieldAccess> clsFieldPool = new ConcurrentHashMap<>();
 
-    /** The Constant clsConstructorPool. */
     static final Map<Class<?>, ConstructorAccess<?>> clsConstructorPool = new ConcurrentHashMap<>();
 
-    /** The Constant clsMethodPool. */
     static final Map<Class<?>, MethodAccess> clsMethodPool = new ConcurrentHashMap<>();
 
-    /** The cls. */
     private final Class<T> cls;
 
-    /** The target. */
     private final T target;
 
-    /**
-     * Instantiates a new reflect ASM.
-     *
-     * @param cls
-     * @param target
-     */
     ReflectASM(Class<T> cls, T target) {
         this.cls = cls;
         this.target = target;
@@ -90,10 +77,6 @@ final class ReflectASM<T> {
         return new ReflectASM<T>((Class<T>) target.getClass(), target);
     }
 
-    /**
-     *
-     * @return
-     */
     public ReflectASM<T> _new() {
         return new ReflectASM<T>(cls, getConstructorAccess(cls).newInstance());
     }

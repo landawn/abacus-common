@@ -21,38 +21,24 @@ import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.WD;
 
 /**
- * The Class Binary.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class Binary extends AbstractCondition {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 1552347171930293343L;
 
-    /** The prop name. */
     // For Kryo
     final String propName;
 
-    /** The prop value. */
     private Object propValue;
 
-    /**
-     * Instantiates a new binary.
-     */
     // For Kryo
     Binary() {
         propName = null;
     }
 
-    /**
-     * Instantiates a new binary.
-     *
-     * @param propName
-     * @param operator
-     * @param propValue
-     */
     public Binary(String propName, Operator operator, Object propValue) {
         super(operator);
 
@@ -150,10 +136,6 @@ public class Binary extends AbstractCondition {
         }
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         int h = 17;

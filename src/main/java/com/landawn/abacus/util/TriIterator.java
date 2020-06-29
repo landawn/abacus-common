@@ -27,7 +27,6 @@ import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * The Class TriIterator.
  *
  * @author Haiyang Li
  * @param <A>
@@ -37,7 +36,6 @@ import com.landawn.abacus.util.stream.Stream;
  */
 public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B, C>> {
 
-    /** The Constant EMPTY. */
     @SuppressWarnings("rawtypes")
     private static final TriIterator EMPTY = new TriIterator() {
         @Override

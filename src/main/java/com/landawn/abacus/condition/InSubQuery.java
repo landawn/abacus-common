@@ -21,7 +21,6 @@ import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.WD;
 
 /**
- * The Class InSubQuery.
  *
  * @author Haiyang Li
  * @since 1.10.12
@@ -29,27 +28,16 @@ import com.landawn.abacus.util.WD;
 public class InSubQuery extends AbstractCondition {
     private static final long serialVersionUID = 1212947034078244134L;
 
-    /** The prop name. */
     // For Kryo
     final String propName;
 
-    /** The subQuery. */
     private SubQuery subQuery;
 
-    /**
-     * Instantiates a new in.
-     */
     // For Kryo
     InSubQuery() {
         propName = null;
     }
 
-    /**
-     * Instantiates a new in.
-     *
-     * @param propName
-     * @param subQuery
-     */
     public InSubQuery(String propName, SubQuery subQuery) {
         super(Operator.IN);
 
@@ -135,10 +123,6 @@ public class InSubQuery extends AbstractCondition {
         }
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         int h = 17;

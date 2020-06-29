@@ -34,46 +34,27 @@ import com.landawn.abacus.exception.UncheckedIOException;
  */
 public class BufferedWriter extends Writer {
 
-    /** The out. */
     protected Writer out;
 
-    /** The value. */
     protected char[] value;
 
-    /** The count. */
     protected int count = 0;
 
-    /** The cbuf. */
     protected char[] _cbuf;
 
-    /** The next char. */
     protected int nextChar = 0;
 
-    /** The is closed. */
     protected boolean isClosed = false;
 
-    /**
-     * Instantiates a new buffered writer.
-     */
     BufferedWriter() {
         this.value = Objectory.createCharArrayBuffer();
         this.lock = value;
     }
 
-    /**
-     * Instantiates a new buffered writer.
-     *
-     * @param os
-     */
     BufferedWriter(OutputStream os) {
         this(new OutputStreamWriter(os, Charsets.UTF_8));
     }
 
-    /**
-     * Instantiates a new buffered writer.
-     *
-     * @param writer
-     */
     BufferedWriter(Writer writer) {
         this.out = writer;
         this.lock = writer;

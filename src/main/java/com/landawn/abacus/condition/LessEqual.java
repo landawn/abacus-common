@@ -15,29 +15,18 @@
 package com.landawn.abacus.condition;
 
 /**
- * The Class LessEqual.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class LessEqual extends Binary {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 2830953715407991010L;
 
-    /**
-     * Instantiates a new less equal.
-     */
     // For Kryo
     LessEqual() {
     }
 
-    /**
-     * Instantiates a new less equal.
-     *
-     * @param propName
-     * @param propValue
-     */
     public LessEqual(String propName, Object propValue) {
         super(propName, Operator.LESS_EQUAL, propValue);
     }

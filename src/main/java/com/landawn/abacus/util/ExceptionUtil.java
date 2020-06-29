@@ -38,7 +38,6 @@ public final class ExceptionUtil {
         // singleton
     }
 
-    /** The Constant toRuntimeExceptionFuncMap. */
     private static final Map<Class<? extends Throwable>, Function<Throwable, RuntimeException>> toRuntimeExceptionFuncMap = new HashMap<>();
 
     static {

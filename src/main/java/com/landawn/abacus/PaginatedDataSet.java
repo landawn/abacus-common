@@ -18,7 +18,6 @@ import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * The Interface PaginatedDataSet.
  *
  * @author Haiyang Li
  * @since 0.8
@@ -113,9 +112,5 @@ public interface PaginatedDataSet extends Iterable<DataSet> {
      */
     int totalPages();
 
-    /**
-     *
-     * @return
-     */
     Stream<DataSet> stream();
 }

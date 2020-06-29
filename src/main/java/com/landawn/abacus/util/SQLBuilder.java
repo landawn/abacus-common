@@ -757,7 +757,6 @@ public abstract class SQLBuilder {
         return m;
     }
 
-    /** The Constant QM_CACHE. */
     private static final Map<Integer, String> QM_CACHE = new HashMap<>();
 
     static {
@@ -2518,10 +2517,6 @@ public abstract class SQLBuilder {
         return this;
     }
 
-    /**
-     *
-     * @return
-     */
     public SQLBuilder forUpdate() {
         sb.append(_SPACE_FOR_UPDATE);
 
@@ -2877,10 +2872,6 @@ public abstract class SQLBuilder {
         return sql;
     }
 
-    /**
-     *
-     * @return
-     */
     public List<Object> parameters() {
         return parameters;
     }
@@ -3412,10 +3403,6 @@ public abstract class SQLBuilder {
         N.println(sql());
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return sql();

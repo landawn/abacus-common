@@ -22,37 +22,14 @@ package com.landawn.abacus.util;
  */
 public enum DayOfWeek {
 
-    /** The sunday. */
-    SUNDAY(0),
-    /** The monday. */
-    MONDAY(1),
-    /** The tuesday. */
-    TUESDAY(2),
-    /** The wednesday. */
-    WEDNESDAY(3),
-    /** The thursday. */
-    THURSDAY(4),
-    /** The friday. */
-    FRIDAY(5),
-    /** The saturday. */
-    SATURDAY(6);
+    SUNDAY(0), MONDAY(1), TUESDAY(2), WEDNESDAY(3), THURSDAY(4), FRIDAY(5), SATURDAY(6);
 
-    /** The int value. */
     private int intValue;
 
-    /**
-     * Instantiates a new day of week.
-     *
-     * @param intValue
-     */
     DayOfWeek(int intValue) {
         this.intValue = intValue;
     }
 
-    /**
-     *
-     * @return
-     */
     public int intValue() {
         return intValue;
     }

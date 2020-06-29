@@ -31,7 +31,6 @@ import javax.servlet.http.HttpServletResponse;
 import com.landawn.abacus.util.N;
 
 /**
- * The Class AbstractHttpServlet.
  *
  * @author Haiyang Li
  * @since 0.8

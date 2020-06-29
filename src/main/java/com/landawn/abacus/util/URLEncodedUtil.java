@@ -51,13 +51,10 @@ import com.landawn.abacus.type.Type;
  */
 public final class URLEncodedUtil {
 
-    /** The Constant QP_SEP_A. */
     public static final char QP_SEP_A = '&';
 
-    /** The Constant QP_SEP_S. */
     public static final char QP_SEP_S = ';';
 
-    /** The Constant NAME_VALUE_SEPARATOR. */
     public static final String NAME_VALUE_SEPARATOR = "=";
 
     /**
@@ -181,12 +178,8 @@ public final class URLEncodedUtil {
         URIC.or(UNRESERVED);
     }
 
-    /** The Constant RADIX. */
     private static final int RADIX = 16;
 
-    /**
-     * Instantiates a new URL encoded util.
-     */
     private URLEncodedUtil() {
         // singleton.
     }

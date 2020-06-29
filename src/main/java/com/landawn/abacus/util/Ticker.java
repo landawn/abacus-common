@@ -53,7 +53,6 @@ public abstract class Ticker {
         return SYSTEM_TICKER;
     }
 
-    /** The Constant SYSTEM_TICKER. */
     private static final Ticker SYSTEM_TICKER = new Ticker() {
         @Override
         public long read() {

@@ -25,68 +25,47 @@ import com.landawn.abacus.parser.XMLSerializationConfig.XSC;
 import com.landawn.abacus.type.Type;
 
 /**
- * The Class Utils.
  *
  * @author Haiyang Li
  * @since 1.2
  */
 final class Utils {
 
-    /** The Constant jsonParser. */
     // lazy initialization to avoid: NoClassDefFoundError: Could not initialize class com.landawn.abacus.parser.JSONParserImpl
     static final JSONParser jsonParser = ParserFactory.createJSONParser();
 
-    /** The Constant abacusXMLParser. */
     static final XMLParser abacusXMLParser = ParserFactory.isAbacusXMLAvailable() ? ParserFactory.createAbacusXMLParser() : null;
 
-    /** The Constant xmlParser. */
     static final XMLParser xmlParser = ParserFactory.isXMLAvailable() ? ParserFactory.createXMLParser() : null;
 
-    /** The Constant kryoParser. */
     static final KryoParser kryoParser = ParserFactory.isKryoAvailable() ? ParserFactory.createKryoParser() : null;
 
-    /** The Constant jsc. */
     static final JSONSerializationConfig jsc = JSC.create().setQuotePropName(true).setQuoteMapKey(true);
 
-    /** The Constant jscPrettyFormat. */
     static final JSONSerializationConfig jscPrettyFormat = JSC.create().setQuotePropName(true).setQuoteMapKey(true).setPrettyFormat(true);
 
-    /** The Constant xsc. */
     static final XMLSerializationConfig xsc = XSC.create();
 
-    /** The Constant xscPrettyFormat. */
     static final XMLSerializationConfig xscPrettyFormat = XSC.create().setPrettyFormat(true);
 
-    /** The Constant xscForClone. */
     static final XMLSerializationConfig xscForClone = XSC.create().setIgnoreTypeInfo(false);
 
-    /** The Constant booleanType. */
     static final Type<Boolean> booleanType = N.typeOf(boolean.class);
 
-    /** The Constant charType. */
     static final Type<Character> charType = N.typeOf(char.class);
 
-    /** The Constant byteType. */
     static final Type<Byte> byteType = N.typeOf(byte.class);
 
-    /** The Constant shortType. */
     static final Type<Short> shortType = N.typeOf(short.class);
 
-    /** The Constant intType. */
     static final Type<Integer> intType = N.typeOf(int.class);
 
-    /** The Constant longType. */
     static final Type<Long> longType = N.typeOf(long.class);
 
-    /** The Constant floatType. */
     static final Type<Float> floatType = N.typeOf(float.class);
 
-    /** The Constant doubleType. */
     static final Type<Double> doubleType = N.typeOf(double.class);
 
-    /**
-     * Instantiates a new utils.
-     */
     private Utils() {
         // singleton.
     }

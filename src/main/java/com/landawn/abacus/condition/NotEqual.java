@@ -15,29 +15,18 @@
 package com.landawn.abacus.condition;
 
 /**
- * The Class NotEqual.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class NotEqual extends Binary {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -6755432472271053865L;
 
-    /**
-     * Instantiates a new not equal.
-     */
     // For Kryo
     NotEqual() {
     }
 
-    /**
-     * Instantiates a new not equal.
-     *
-     * @param propName
-     * @param propValue
-     */
     public NotEqual(String propName, Object propValue) {
         super(propName, Operator.NOT_EQUAL, propValue);
     }

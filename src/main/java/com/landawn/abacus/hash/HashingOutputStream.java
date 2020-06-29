@@ -30,7 +30,6 @@ import com.landawn.abacus.util.N;
  */
 public final class HashingOutputStream extends FilterOutputStream {
 
-    /** The hasher. */
     private final Hasher hasher;
 
     /**

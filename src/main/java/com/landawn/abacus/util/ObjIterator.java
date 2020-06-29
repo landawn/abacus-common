@@ -27,7 +27,6 @@ import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * The Class ObjIterator.
  *
  * @author Haiyang Li
  * @param <T>
@@ -35,7 +34,6 @@ import com.landawn.abacus.util.stream.Stream;
  */
 public abstract class ObjIterator<T> extends ImmutableIterator<T> {
 
-    /** The Constant EMPTY. */
     @SuppressWarnings("rawtypes")
     private static final ObjIterator EMPTY = new ObjIterator() {
         @Override
@@ -333,10 +331,6 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
         };
     }
 
-    /**
-     *
-     * @return
-     */
     public Object[] toArray() {
         return toArray(N.EMPTY_OBJECT_ARRAY);
     }
@@ -351,10 +345,6 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
         return toList().toArray(a);
     }
 
-    /**
-     *
-     * @return
-     */
     public List<T> toList() {
         final List<T> list = new ArrayList<>();
 
@@ -365,10 +355,6 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
         return list;
     }
 
-    /**
-     *
-     * @return
-     */
     public Stream<T> stream() {
         return Stream.of(this);
     }

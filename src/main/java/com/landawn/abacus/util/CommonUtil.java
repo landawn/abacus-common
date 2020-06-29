@@ -123,7 +123,6 @@ import com.landawn.abacus.util.function.ToLongFunction;
  */
 class CommonUtil {
     // ... it has to be big enough to make it's safety to add element to
-    /** The Constant POOL_SIZE. */
     // ArrayBlockingQueue.
     static final int POOL_SIZE = Internals.POOL_SIZE;
 
@@ -164,25 +163,18 @@ class CommonUtil {
      */
     static final Class<?>[] EMPTY_CLASS_ARRAY = new Class[0];
 
-    /** The Constant NULL_STRING. */
     static final String NULL_STRING = "null".intern();
 
-    /** The Constant NULL_CHAR_ARRAY. */
     static final char[] NULL_CHAR_ARRAY = NULL_STRING.toCharArray();
 
-    /** The Constant TRUE. */
     static final String TRUE = Boolean.TRUE.toString().intern();
 
-    /** The Constant TRUE_CHAR_ARRAY. */
     static final char[] TRUE_CHAR_ARRAY = TRUE.toCharArray();
 
-    /** The Constant FALSE. */
     static final String FALSE = Boolean.FALSE.toString().intern();
 
-    /** The Constant FALSE_CHAR_ARRAY. */
     static final char[] FALSE_CHAR_ARRAY = FALSE.toCharArray();
 
-    /** The Constant CHAR_0. */
     // ...
     static final char CHAR_0 = WD.CHAR_0;
 
@@ -206,10 +198,8 @@ class CommonUtil {
      */
     static final char CHAR_CR = WD.CHAR_CR;
 
-    /** The element separator. */
     public static final String ELEMENT_SEPARATOR = ", ".intern();
 
-    /** The element separator char array. */
     public static final char[] ELEMENT_SEPARATOR_CHAR_ARRAY = ELEMENT_SEPARATOR.toCharArray();
 
     // ...
@@ -221,7 +211,6 @@ class CommonUtil {
      */
     public static final int INDEX_NOT_FOUND = -1;
 
-    /** The Constant EMPTY_STRING. */
     // ...
     public static final String EMPTY_STRING = "".intern();
 
@@ -299,76 +288,57 @@ class CommonUtil {
      */
     public static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 
-    /** The Constant EMPTY_LIST. */
     @SuppressWarnings("rawtypes")
     static final List EMPTY_LIST = Collections.emptyList();
 
-    /** The Constant EMPTY_SET. */
     @SuppressWarnings("rawtypes")
     static final Set EMPTY_SET = Collections.emptySet();
 
-    /** The Constant EMPTY_SORTED_SET. */
     @SuppressWarnings("rawtypes")
     static final SortedSet EMPTY_SORTED_SET = Collections.emptySortedSet();
 
-    /** The Constant EMPTY_NAVIGABLE_SET. */
     @SuppressWarnings("rawtypes")
     static final NavigableSet EMPTY_NAVIGABLE_SET = Collections.emptyNavigableSet();
 
-    /** The Constant EMPTY_MAP. */
     @SuppressWarnings("rawtypes")
     static final Map EMPTY_MAP = Collections.emptyMap();
 
-    /** The Constant EMPTY_SORTED_MAP. */
     @SuppressWarnings("rawtypes")
     static final SortedMap EMPTY_SORTED_MAP = Collections.emptySortedMap();
 
-    /** The Constant EMPTY_NAVIGABLE_MAP. */
     @SuppressWarnings("rawtypes")
     static final NavigableMap EMPTY_NAVIGABLE_MAP = Collections.emptyNavigableMap();
 
-    /** The Constant EMPTY_ITERATOR. */
     @SuppressWarnings("rawtypes")
     static final Iterator EMPTY_ITERATOR = Collections.emptyIterator();
 
-    /** The Constant EMPTY_LIST_ITERATOR. */
     @SuppressWarnings("rawtypes")
     static final ListIterator EMPTY_LIST_ITERATOR = Collections.emptyListIterator();
 
-    /** The Constant NULL_MASK. */
     // ...
     static final Object NULL_MASK = new NullMask();
 
-    /** The Constant BACKSLASH_ASTERISK. */
     static final String BACKSLASH_ASTERISK = "*";
 
-    /** The Constant REVERSE_THRESHOLD. */
     // ...
     static final int REVERSE_THRESHOLD = 18;
 
-    /** The Constant FILL_THRESHOLD. */
     static final int FILL_THRESHOLD = 25;
 
-    /** The Constant REPLACEALL_THRESHOLD. */
     static final int REPLACEALL_THRESHOLD = 11;
 
-    /** The Constant RAND. */
     // ...
     static final Random RAND = new SecureRandom();
 
-    /** The Constant NULL_MIN_COMPARATOR. */
     @SuppressWarnings("rawtypes")
     static final Comparator NULL_MIN_COMPARATOR = Comparators.nullsFirst();
 
-    /** The Constant NULL_MAX_COMPARATOR. */
     @SuppressWarnings("rawtypes")
     static final Comparator NULL_MAX_COMPARATOR = Comparators.nullsLast();
 
-    /** The Constant NATURAL_ORDER. */
     @SuppressWarnings("rawtypes")
     static final Comparator NATURAL_ORDER = Comparators.naturalOrder();
 
-    /** The Constant CLASS_EMPTY_ARRAY. */
     // ...
     static final Map<Class<?>, Object> CLASS_EMPTY_ARRAY = new ConcurrentHashMap<>();
 
@@ -401,7 +371,6 @@ class CommonUtil {
         CLASS_EMPTY_ARRAY.put(Object.class, CommonUtil.EMPTY_OBJECT_ARRAY);
     }
 
-    /** The Constant CLASS_TYPE_ENUM. */
     // ...
     static final Map<Class<?>, Integer> CLASS_TYPE_ENUM = new HashMap<>();
 
@@ -435,35 +404,25 @@ class CommonUtil {
         CLASS_TYPE_ENUM.put(Double.class, 28);
     }
 
-    /** The Constant enumListPool. */
     // ...
     private static final Map<Class<? extends Enum<?>>, ImmutableList<? extends Enum<?>>> enumListPool = new ObjectPool<>(POOL_SIZE);
 
-    /** The Constant enumSetPool. */
     private static final Map<Class<? extends Enum<?>>, ImmutableSet<? extends Enum<?>>> enumSetPool = new ObjectPool<>(POOL_SIZE);
 
-    /** The Constant enumMapPool. */
     private static final Map<Class<? extends Enum<?>>, ImmutableBiMap<? extends Enum<?>, String>> enumMapPool = new ObjectPool<>(POOL_SIZE);
 
-    /** The Constant nameTypePool. */
     private static final Map<String, Type<?>> nameTypePool = new ObjectPool<>(POOL_SIZE);
 
-    /** The Constant clsTypePool. */
     private static final Map<Class<?>, Type<?>> clsTypePool = new ObjectPool<>(POOL_SIZE);
 
-    /** The Constant charStringCache. */
     static final String[] charStringCache = new String[128];
 
-    /** The Constant intStringCacheLow. */
     static final int intStringCacheLow = -1001;
 
-    /** The Constant intStringCacheHigh. */
     static final int intStringCacheHigh = 10001;
 
-    /** The Constant intStringCache. */
     static final String[] intStringCache = new String[intStringCacheHigh - intStringCacheLow];
 
-    /** The Constant stringIntCache. */
     static final Map<String, Integer> stringIntCache = new HashMap<>((int) (intStringCache.length * 1.5));
 
     static {
@@ -477,7 +436,6 @@ class CommonUtil {
         }
     }
 
-    /** The Constant MIN_SIZE_FOR_COPY_ALL. */
     private static final int MIN_SIZE_FOR_COPY_ALL = 9;
 
     /**
@@ -2042,10 +2000,8 @@ class CommonUtil {
         return multiMap;
     }
 
-    /** The Constant MAX_ARRAY_SIZE. */
     static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
-    /** The Constant MAX_HASH_LENGTH. */
     static final int MAX_HASH_LENGTH = (int) (MAX_ARRAY_SIZE / 1.25) - 1;
 
     /**
@@ -6245,7 +6201,6 @@ class CommonUtil {
         return DirtyMarkerUtil.isDirtyMarker(cls);
     }
 
-    /** The Constant notKryoCompatible. */
     private static final Set<Class<?>> notKryoCompatible = CommonUtil.newHashSet();
 
     /**
@@ -6990,7 +6945,6 @@ class CommonUtil {
         return EMPTY_LIST_ITERATOR;
     }
 
-    /** The Constant EMPTY_INPUT_STREAM. */
     private static final ByteArrayInputStream EMPTY_INPUT_STREAM = new ByteArrayInputStream(CommonUtil.EMPTY_BYTE_ARRAY);
 
     /**

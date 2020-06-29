@@ -15,29 +15,18 @@
 package com.landawn.abacus.condition;
 
 /**
- * The Class Clause.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public abstract class Clause extends Cell {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -4851192970714119122L;
 
-    /**
-     * Instantiates a new clause.
-     */
     // For Kryo
     Clause() {
     }
 
-    /**
-     * Instantiates a new clause.
-     *
-     * @param operator
-     * @param condition
-     */
     protected Clause(Operator operator, Condition condition) {
         super(operator, condition);
     }
@@ -62,10 +51,6 @@ public abstract class Clause extends Cell {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Not not() throws UnsupportedOperationException {
         throw new UnsupportedOperationException();

@@ -17,7 +17,6 @@ package com.landawn.abacus.pool;
 import java.util.concurrent.TimeUnit;
 
 /**
- * The Interface ObjectPool.
  *
  * @author Haiyang Li
  * @param <E>

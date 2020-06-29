@@ -15,28 +15,18 @@
 package com.landawn.abacus.condition;
 
 /**
- * The Class Where.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class Where extends Clause {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 3408850761610296780L;
 
-    /**
-     * Instantiates a new where.
-     */
     // For Kryo
     Where() {
     }
 
-    /**
-     * Instantiates a new where.
-     *
-     * @param condition
-     */
     public Where(Condition condition) {
         super(Operator.WHERE, condition);
     }

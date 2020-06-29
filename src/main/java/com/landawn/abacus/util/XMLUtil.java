@@ -73,42 +73,32 @@ import com.landawn.abacus.parser.XMLConstants;
 import com.landawn.abacus.type.Type;
 
 /**
- * The Class XMLUtil.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public final class XMLUtil {
 
-    /** The Constant logger. */
     protected static final Logger logger = LoggerFactory.getLogger(XMLUtil.class);
 
     // ... it has to be big enougth to make it's safety to add element to
-    /** The Constant NAME. */
     // ArrayBlockingQueue.
     static final String NAME = "name";
 
-    /** The Constant TYPE. */
     static final String TYPE = "type";
 
-    /** The Constant POOL_SIZE. */
     private static final int POOL_SIZE = 1000;
 
-    /** The Constant saxParserFactory. */
     // ...
     private static final SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
 
-    /** The Constant saxParserPool. */
     private static final Queue<SAXParser> saxParserPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
-    /** The Constant docBuilderFactory. */
     // ...
     private static final DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
 
-    /** The Constant contentDocBuilderPool. */
     private static final Queue<DocumentBuilder> contentDocBuilderPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
-    /** The Constant xmlInputFactory. */
     private static final XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
 
     static {
@@ -125,24 +115,19 @@ public final class XMLUtil {
         }
     }
 
-    /** The Constant xmlOutputFactory. */
     // private static final Queue<DocumentBuilder> xmlInputPool = new ArrayBlockingQueue<>(POOL_SIZE);
     private static final XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newInstance();
     // private static final Queue<DocumentBuilder> xmlOutputPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
-    /** The Constant transferFactory. */
     // ...
     private static final TransformerFactory transferFactory = TransformerFactory.newInstance();
     // private static final Queue<DocumentBuilder> xmlTransferPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
-    /** The Constant pathJaxbContextPool. */
     // ...
     private static final Map<String, JAXBContext> pathJaxbContextPool = new ConcurrentHashMap<>(POOL_SIZE);
 
-    /** The Constant classJaxbContextPool. */
     private static final Map<Class<?>, JAXBContext> classJaxbContextPool = new ConcurrentHashMap<>(POOL_SIZE);
 
-    /** The Constant nodeTypePool. */
     private static final Map<String, NodeType> nodeTypePool = new HashMap<>();
 
     static {
@@ -155,9 +140,6 @@ public final class XMLUtil {
         nodeTypePool.put(XMLConstants.VALUE, NodeType.VALUE);
     }
 
-    /**
-     * Instantiates a new XML util.
-     */
     private XMLUtil() {
         // singleton.
     }

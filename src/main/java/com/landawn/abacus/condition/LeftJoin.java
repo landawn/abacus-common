@@ -17,48 +17,26 @@ package com.landawn.abacus.condition;
 import java.util.Collection;
 
 /**
- * The Class LeftJoin.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class LeftJoin extends Join {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -2276352219280174973L;
 
-    /**
-     * Instantiates a new left join.
-     */
     // For Kryo
     LeftJoin() {
     }
 
-    /**
-     * Instantiates a new left join.
-     *
-     * @param joinEntity
-     */
     public LeftJoin(String joinEntity) {
         super(Operator.LEFT_JOIN, joinEntity);
     }
 
-    /**
-     * Instantiates a new left join.
-     *
-     * @param joinEntity
-     * @param condition
-     */
     public LeftJoin(String joinEntity, Condition condition) {
         super(Operator.LEFT_JOIN, joinEntity, condition);
     }
 
-    /**
-     * Instantiates a new left join.
-     *
-     * @param joinEntities
-     * @param condition
-     */
     public LeftJoin(Collection<String> joinEntities, Condition condition) {
         super(Operator.LEFT_JOIN, joinEntities, condition);
     }

@@ -21,31 +21,20 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 
 /**
- * The Class ByteArrayOutputStream.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public final class ByteArrayOutputStream extends OutputStream {
 
-    /** The buf. */
     protected byte[] buf;
 
-    /** The count. */
     protected int count;
 
-    /**
-     * Instantiates a new byte array output stream.
-     */
     public ByteArrayOutputStream() {
         this(32);
     }
 
-    /**
-     * Instantiates a new byte array output stream.
-     *
-     * @param size
-     */
     public ByteArrayOutputStream(int size) {
         if (size < 0) {
             throw new IllegalArgumentException("Negative initial size: " + size);
@@ -91,26 +80,14 @@ public final class ByteArrayOutputStream extends OutputStream {
         out.write(buf, 0, count);
     }
 
-    /**
-     *
-     * @return
-     */
     public int capacity() {
         return buf == null ? 0 : buf.length;
     }
 
-    /**
-     *
-     * @return
-     */
     public byte[] array() {
         return buf;
     }
 
-    /**
-     *
-     * @return
-     */
     public int size() {
         return count;
     }
@@ -131,10 +108,6 @@ public final class ByteArrayOutputStream extends OutputStream {
         return Arrays.copyOf(buf, count);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return new String(buf, 0, count);

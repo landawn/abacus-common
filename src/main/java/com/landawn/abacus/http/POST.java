@@ -29,9 +29,5 @@ import java.lang.annotation.Target;
 @WebService.HttpMethod(WebService.HttpMethod.POST)
 public @interface POST {
 
-    /**
-     *
-     * @return
-     */
     String value() default "";
 }

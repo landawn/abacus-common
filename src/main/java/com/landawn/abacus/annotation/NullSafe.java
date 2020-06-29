@@ -20,9 +20,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * The Interface NullSafe.
- */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.PARAMETER })

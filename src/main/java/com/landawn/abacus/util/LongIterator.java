@@ -22,14 +22,12 @@ import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.LongStream;
 
 /**
- * The Class LongIterator.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public abstract class LongIterator extends ImmutableIterator<Long> {
 
-    /** The Constant EMPTY. */
     public static final LongIterator EMPTY = new LongIterator() {
         @Override
         public boolean hasNext() {
@@ -42,10 +40,6 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
         }
     };
 
-    /**
-     *
-     * @return
-     */
     public static LongIterator empty() {
         return EMPTY;
     }
@@ -250,24 +244,12 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
         return nextLong();
     }
 
-    /**
-     *
-     * @return
-     */
     public abstract long nextLong();
 
-    /**
-     *
-     * @return
-     */
     public long[] toArray() {
         return toList().trimToSize().array();
     }
 
-    /**
-     *
-     * @return
-     */
     public LongList toList() {
         final LongList list = new LongList();
 
@@ -278,10 +260,6 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
         return list;
     }
 
-    /**
-     *
-     * @return
-     */
     public LongStream stream() {
         return LongStream.of(this);
     }

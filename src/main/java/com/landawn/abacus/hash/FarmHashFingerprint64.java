@@ -39,14 +39,11 @@ import static java.lang.Long.rotateRight;
  */
 final class FarmHashFingerprint64 extends AbstractNonStreamingHashFunction {
 
-    /** The Constant K0. */
     // Some primes between 2^63 and 2^64 for various uses.
     private static final long K0 = 0xc3a5c85c97cb3127L;
 
-    /** The Constant K1. */
     private static final long K1 = 0xb492b66fbe98f273L;
 
-    /** The Constant K2. */
     private static final long K2 = 0x9ae16a3b2f90404fL;
 
     /**
@@ -62,19 +59,11 @@ final class FarmHashFingerprint64 extends AbstractNonStreamingHashFunction {
         return HashCode.fromLong(fingerprint(input, off, len));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int bits() {
         return 64;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "Hashing.farmHashFingerprint64()";

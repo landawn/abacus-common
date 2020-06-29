@@ -40,7 +40,6 @@ final class Base64 {
      */
     private static final int MIME_CHUNK_SIZE = 76;
 
-    /** The Constant DEFAULT_BUFFER_RESIZE_FACTOR. */
     private static final int DEFAULT_BUFFER_RESIZE_FACTOR = 2;
 
     /** Defines the default buffer size - currently {@value} - must be large enough for at least one encoded block+separator. */
@@ -66,10 +65,8 @@ final class Base64 {
      */
     private static final int BITS_PER_ENCODED_BYTE = 6;
 
-    /** The Constant BYTES_PER_UNENCODED_BLOCK. */
     private static final int BYTES_PER_UNENCODED_BLOCK = 3;
 
-    /** The Constant BYTES_PER_ENCODED_BLOCK. */
     private static final int BYTES_PER_ENCODED_BLOCK = 4;
 
     /**
@@ -143,7 +140,6 @@ final class Base64 {
      */
     private final byte[] encodeTable;
 
-    /** The decode table. */
     // Only one decode table currently; keep for consistency with Base32 code
     private final byte[] decodeTable = DECODE_TABLE;
 
@@ -164,7 +160,6 @@ final class Base64 {
      */
     private final int encodeSize;
 
-    /** The pad. */
     protected final byte pad; // instance variable just in case it needs to vary later
     /** Number of bytes in each full block of unencoded data, e.g. 4 for Base64 and 5 for Base32 */
     private final int unencodedBlockSize;

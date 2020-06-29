@@ -18,7 +18,6 @@ import java.util.Collection;
 import java.util.Set;
 
 /**
- * The Interface KeyedObjectPool.
  *
  * @author Haiyang Li
  * @param <K> the key type

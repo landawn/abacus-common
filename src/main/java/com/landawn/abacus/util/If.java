@@ -29,20 +29,12 @@ import com.landawn.abacus.util.function.Supplier;
 @Beta
 public final class If {
 
-    /** The Constant TRUE. */
     private static final If TRUE = new If(true);
 
-    /** The Constant FALSE. */
     private static final If FALSE = new If(false);
 
-    /** The b. */
     private final boolean b;
 
-    /**
-     * Instantiates a new if.
-     *
-     * @param b
-     */
     If(boolean b) {
         this.b = b;
     }

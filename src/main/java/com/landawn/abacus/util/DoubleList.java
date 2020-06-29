@@ -40,37 +40,24 @@ import com.landawn.abacus.util.stream.Collector;
 import com.landawn.abacus.util.stream.DoubleStream;
 
 /**
- * The Class DoubleList.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public final class DoubleList extends PrimitiveList<Double, double[], DoubleList> {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 766157472430159621L;
 
-    /** The Constant RAND. */
     static final Random RAND = new SecureRandom();
 
-    /** The element data. */
     private double[] elementData = N.EMPTY_DOUBLE_ARRAY;
 
-    /** The size. */
     private int size = 0;
 
-    /**
-     * Instantiates a new double list.
-     */
     public DoubleList() {
         super();
     }
 
-    /**
-     * Instantiates a new double list.
-     *
-     * @param initialCapacity
-     */
     public DoubleList(int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_DOUBLE_ARRAY : new double[initialCapacity];
     }
@@ -84,12 +71,6 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         this(a, a.length);
     }
 
-    /**
-     * Instantiates a new double list.
-     *
-     * @param a
-     * @param size
-     */
     public DoubleList(double[] a, int size) {
         N.checkFromIndexSize(0, size, a.length);
 
@@ -1052,10 +1033,6 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         return N.INDEX_NOT_FOUND;
     }
 
-    /**
-     *
-     * @return
-     */
     public OptionalDouble min() {
         return size() == 0 ? OptionalDouble.empty() : OptionalDouble.of(N.min(elementData, 0, size));
     }
@@ -1072,10 +1049,6 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         return fromIndex == toIndex ? OptionalDouble.empty() : OptionalDouble.of(N.min(elementData, fromIndex, toIndex));
     }
 
-    /**
-     *
-     * @return
-     */
     public OptionalDouble median() {
         return size() == 0 ? OptionalDouble.empty() : OptionalDouble.of(N.median(elementData, 0, size));
     }
@@ -1092,10 +1065,6 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         return fromIndex == toIndex ? OptionalDouble.empty() : OptionalDouble.of(N.median(elementData, fromIndex, toIndex));
     }
 
-    /**
-     *
-     * @return
-     */
     public OptionalDouble max() {
         return size() == 0 ? OptionalDouble.empty() : OptionalDouble.of(N.max(elementData, 0, size));
     }
@@ -1135,10 +1104,6 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         return toIndex - fromIndex < k ? OptionalDouble.empty() : OptionalDouble.of(N.kthLargest(elementData, fromIndex, toIndex, k));
     }
 
-    /**
-     *
-     * @return
-     */
     public double sum() {
         return sum(0, size());
     }
@@ -1155,10 +1120,6 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         return N.sum(elementData, fromIndex, toIndex);
     }
 
-    /**
-     *
-     * @return
-     */
     public OptionalDouble average() {
         return average(0, size());
     }
@@ -1243,18 +1204,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         }
     }
 
-    /**
-     *
-     * @return
-     */
     public OptionalDouble first() {
         return size() == 0 ? OptionalDouble.empty() : OptionalDouble.of(elementData[0]);
     }
 
-    /**
-     *
-     * @return
-     */
     public OptionalDouble last() {
         return size() == 0 ? OptionalDouble.empty() : OptionalDouble.of(elementData[size() - 1]);
     }
@@ -1852,10 +1805,6 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         set(i, set(j, elementData[i]));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public DoubleList copy() {
         return new DoubleList(N.copyOfRange(elementData, 0, size));
@@ -2005,19 +1954,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         return size == 0;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int size() {
         return size;
     }
 
-    /**
-     *
-     * @return
-     */
     public List<Double> boxed() {
         return boxed(0, size);
     }
@@ -2040,10 +1981,6 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         return res;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public double[] toArray() {
         return N.copyOfRange(elementData, 0, size);
@@ -2238,10 +2175,6 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         return result;
     }
 
-    /**
-     *
-     * @return
-     */
     public DoubleIterator iterator() {
         if (isEmpty()) {
             return DoubleIterator.EMPTY;
@@ -2250,10 +2183,6 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         return DoubleIterator.of(elementData, 0, size);
     }
 
-    /**
-     *
-     * @return
-     */
     public DoubleStream stream() {
         return DoubleStream.of(elementData, 0, size());
     }
@@ -2320,10 +2249,6 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         return If.is(size > 0).then(this, action);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return N.hashCode(elementData, 0, size);
@@ -2349,10 +2274,6 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         return false;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return size == 0 ? "[]" : N.toString(elementData, 0, size);

@@ -23,7 +23,6 @@ import com.landawn.abacus.util.function.BiPredicate;
 import com.landawn.abacus.util.function.Predicate;
 
 /**
- * The Class Retry.
  *
  * @author Haiyang Li
  * @param <T>
@@ -31,29 +30,17 @@ import com.landawn.abacus.util.function.Predicate;
  */
 public final class Retry<T> {
 
-    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(Retry.class);
 
-    /** The retry times. */
     private final int retryTimes;
 
-    /** The retry interval. */
     private final long retryInterval;
 
-    /** The retry condition. */
     private final Predicate<? super Exception> retryCondition;
 
     /** The retry condition 2. */
     private final BiPredicate<? super T, ? super Exception> retryCondition2;
 
-    /**
-     * Instantiates a new retry.
-     *
-     * @param retryTimes
-     * @param retryInterval
-     * @param retryCondition
-     * @param retryCondition2
-     */
     Retry(final int retryTimes, final long retryInterval, final Predicate<? super Exception> retryCondition,
             final BiPredicate<? super T, ? super Exception> retryCondition2) {
 

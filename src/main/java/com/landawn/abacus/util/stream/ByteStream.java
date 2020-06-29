@@ -269,10 +269,6 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
 
     public abstract ByteStream appendIfEmpty(final byte... a);
 
-    /**
-     *
-     * @return
-     */
     public abstract ByteList toByteList();
 
     /**
@@ -400,16 +396,8 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
 
     public abstract <E extends Exception> OptionalByte findAny(final Throwables.BytePredicate<E> predicate) throws E;
 
-    /**
-     *
-     * @return
-     */
     public abstract OptionalByte min();
 
-    /**
-     *
-     * @return
-     */
     public abstract OptionalByte max();
 
     /**

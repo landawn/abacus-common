@@ -25,7 +25,6 @@ import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * The Class Pair.
  *
  * @author Haiyang Li
  * @param <L>
@@ -33,25 +32,14 @@ import com.landawn.abacus.util.stream.Stream;
  * @since 0.8
  */
 public final class Pair<L, R> {
-    /** The left. */
     // implements Map.Entry<L, R> {
     public L left;
 
-    /** The right. */
     public R right;
 
-    /**
-     * Instantiates a new pair.
-     */
     public Pair() {
     }
 
-    /**
-     * Instantiates a new pair.
-     *
-     * @param l
-     * @param r
-     */
     Pair(final L l, final R r) {
         this.left = l;
         this.right = r;
@@ -300,18 +288,10 @@ public final class Pair<L, R> {
         return new Pair<>(this.right, this.left);
     }
 
-    /**
-     *
-     * @return
-     */
     public Pair<L, R> copy() {
         return new Pair<>(this.left, this.right);
     }
 
-    /**
-     *
-     * @return
-     */
     public Object[] toArray() {
         return new Object[] { left, right };
     }
@@ -412,10 +392,6 @@ public final class Pair<L, R> {
         return predicate.test(this) ? Optional.of(this) : Optional.<Pair<L, R>> empty();
     }
 
-    /**
-     *
-     * @return
-     */
     public Stream<Pair<L, R>> stream() {
         return Stream.of(this);
     }
@@ -428,26 +404,14 @@ public final class Pair<L, R> {
         return Optional.of(this);
     }
 
-    /**
-     *
-     * @return
-     */
     public Tuple2<L, R> toTuple() {
         return Tuple.of(left, right);
     }
 
-    /**
-     *
-     * @return
-     */
     public Map.Entry<L, R> toEntry() {
         return new AbstractMap.SimpleEntry<>(left, right);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -477,10 +441,6 @@ public final class Pair<L, R> {
         return false;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "[" + N.toString(left) + ", " + N.toString(right) + "]";

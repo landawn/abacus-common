@@ -19,47 +19,26 @@ import java.util.Map;
 import com.landawn.abacus.condition.ConditionFactory.CF;
 
 /**
- * The Class On.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class On extends Cell {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -2882073517302039100L;
 
-    /**
-     * Instantiates a new on.
-     */
     // For Kryo
     On() {
     }
 
-    /**
-     * Instantiates a new on.
-     *
-     * @param condition
-     */
     public On(Condition condition) {
         super(Operator.ON, condition);
     }
 
-    /**
-     * Instantiates a new on.
-     *
-     * @param propName
-     * @param anoPropName
-     */
     public On(String propName, String anoPropName) {
         this(createOnCondition(propName, anoPropName));
     }
 
-    /**
-     * Instantiates a new on.
-     *
-     * @param propNamePair
-     */
     public On(Map<String, String> propNamePair) {
         this(createOnCondition(propNamePair));
     }

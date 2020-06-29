@@ -24,7 +24,6 @@ import com.landawn.abacus.util.function.Function;
  */
 public enum NamingPolicy {
 
-    /** The lower camel case. */
     LOWER_CAMEL_CASE(new Function<String, String>() {
         @Override
         public String apply(String str) {
@@ -32,7 +31,6 @@ public enum NamingPolicy {
         }
     }),
 
-    /** The lower case with underscore. */
     LOWER_CASE_WITH_UNDERSCORE(new Function<String, String>() {
         @Override
         public String apply(String str) {
@@ -40,7 +38,6 @@ public enum NamingPolicy {
         }
     }),
 
-    /** The upper case with underscore. */
     UPPER_CASE_WITH_UNDERSCORE(new Function<String, String>() {
         @Override
         public String apply(String str) {
@@ -48,14 +45,8 @@ public enum NamingPolicy {
         }
     });
 
-    /** The converter. */
     private final Function<String, String> converter;
 
-    /**
-     * Instantiates a new naming policy.
-     *
-     * @param converter
-     */
     NamingPolicy(Function<String, String> converter) {
         this.converter = converter;
     }

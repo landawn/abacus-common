@@ -22,32 +22,17 @@ import com.landawn.abacus.util.function.LongConsumer;
  */
 public class LongSummaryStatistics implements LongConsumer, IntConsumer {
 
-    /** The count. */
     private long count;
 
-    /** The sum. */
     private long sum;
 
-    /** The min. */
     private long min = Long.MAX_VALUE;
 
-    /** The max. */
     private long max = Long.MIN_VALUE;
 
-    /**
-     * Instantiates a new long summary statistics.
-     */
     public LongSummaryStatistics() {
     }
 
-    /**
-     * Instantiates a new long summary statistics.
-     *
-     * @param count
-     * @param sum
-     * @param min
-     * @param max
-     */
     public LongSummaryStatistics(long count, long sum, long min, long max) {
         this.count = count;
         this.sum = sum;
@@ -132,18 +117,10 @@ public class LongSummaryStatistics implements LongConsumer, IntConsumer {
         return getCount() > 0 ? (double) getSum() / getCount() : 0.0d;
     }
 
-    /**
-     *
-     * @return
-     */
     public final long sum() {
         return sum;
     }
 
-    /**
-     *
-     * @return
-     */
     public final OptionalDouble average() {
         if (count == 0) {
             return OptionalDouble.empty();
@@ -152,10 +129,6 @@ public class LongSummaryStatistics implements LongConsumer, IntConsumer {
         return OptionalDouble.of(getAverage());
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return String.format("{min=%d, max=%d, count=%d, sum=%d, average=%f}", getMin(), getMax(), getCount(), getSum(), getAverage());

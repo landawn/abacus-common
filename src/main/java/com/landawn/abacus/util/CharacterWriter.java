@@ -19,48 +19,28 @@ import java.io.OutputStream;
 import java.io.Writer;
 
 /**
- * The Class CharacterWriter.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public abstract class CharacterWriter extends BufferedWriter {
 
-    /** The replacements for chars. */
     protected final char[][] replacementsForChars;
 
-    /** The length of replacements for chars. */
     protected final int lengthOfReplacementsForChars;
 
-    /**
-     * Instantiates a new character writer.
-     *
-     * @param replacementsForChars
-     */
     CharacterWriter(char[][] replacementsForChars) {
         super();
         this.replacementsForChars = replacementsForChars;
         this.lengthOfReplacementsForChars = replacementsForChars.length - 1;
     }
 
-    /**
-     * Instantiates a new character writer.
-     *
-     * @param os
-     * @param replacementsForChars
-     */
     CharacterWriter(OutputStream os, char[][] replacementsForChars) {
         super(os);
         this.replacementsForChars = replacementsForChars;
         this.lengthOfReplacementsForChars = replacementsForChars.length - 1;
     }
 
-    /**
-     * Instantiates a new character writer.
-     *
-     * @param writer
-     * @param replacementsForChars
-     */
     CharacterWriter(Writer writer, char[][] replacementsForChars) {
         super(writer);
         this.replacementsForChars = replacementsForChars;

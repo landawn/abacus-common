@@ -65,7 +65,6 @@ import com.landawn.abacus.util.WD;
 import com.landawn.abacus.util.u.Optional;
 
 /**
- * The Class ParserUtil.
  *
  * @author Haiyang Li
  * @since 0.8
@@ -73,34 +72,25 @@ import com.landawn.abacus.util.u.Optional;
 @Internal
 public final class ParserUtil {
 
-    /** The Constant logger. */
     static final Logger logger = LoggerFactory.getLogger(ParserUtil.class);
 
-    /** The Constant PROP_INFO_MASK. */
     private static final PropInfo PROP_INFO_MASK = new PropInfo("PROP_INFO_MASK");
 
-    /** The Constant PROP_NAME_SEPARATOR. */
     private static final char PROP_NAME_SEPARATOR = '.';
 
-    /** The Constant GET. */
     // ...
     private static final String GET = "get".intern();
 
-    /** The Constant SET. */
     private static final String SET = "set".intern();
 
-    /** The Constant IS. */
     private static final String IS = "is".intern();
 
-    /** The Constant HAS. */
     private static final String HAS = "has".intern();
 
-    /** The Constant POOL_SIZE. */
     private static final int POOL_SIZE = 1024;
 
     private static final int defaultNameIndex = NamingPolicy.LOWER_CAMEL_CASE.ordinal();
 
-    /** The Constant entityInfoPool. */
     // ...
     private static final Map<Class<?>, EntityInfo> entityInfoPool = new ObjectPool<>(POOL_SIZE);
 

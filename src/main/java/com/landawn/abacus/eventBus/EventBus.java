@@ -85,13 +85,10 @@ import com.landawn.abacus.util.ThreadMode;
  */
 public class EventBus {
 
-    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(EventBus.class);
 
-    /** The Constant classMetaSubMap. */
     private static final Map<Class<?>, List<SubIdentifier>> classMetaSubMap = new ConcurrentHashMap<>();
 
-    /** The Constant DEFAULT_EXECUTOR. */
     private static final Executor DEFAULT_EXECUTOR;
 
     static {
@@ -126,55 +123,32 @@ public class EventBus {
         });
     }
 
-    /** The registered sub map. */
     private final Map<Object, List<SubIdentifier>> registeredSubMap = new LinkedHashMap<>();
 
-    /** The registered event id sub map. */
     private final Map<String, Set<SubIdentifier>> registeredEventIdSubMap = new HashMap<>();
 
-    /** The sticky event map. */
     private final Map<Object, String> stickyEventMap = new IdentityHashMap<>();
 
-    /** The identifier. */
     private final String identifier;
 
-    /** The executor. */
     private final Executor executor;
 
-    /** The list of event id sub map. */
     private final Map<String, List<SubIdentifier>> listOfEventIdSubMap = new ConcurrentHashMap<>();
 
-    /** The list of sub event subs. */
     private List<List<SubIdentifier>> listOfSubEventSubs = null;
 
-    /** The map of sticky event. */
     private Map<Object, String> mapOfStickyEvent = null;
 
-    /** The Constant INSTANCE. */
     private static final EventBus INSTANCE = new EventBus("default");
 
-    /**
-     * Instantiates a new event bus.
-     */
     public EventBus() {
         this(N.guid());
     }
 
-    /**
-     * Instantiates a new event bus.
-     *
-     * @param identifier
-     */
     public EventBus(final String identifier) {
         this(identifier, DEFAULT_EXECUTOR);
     }
 
-    /**
-     * Instantiates a new event bus.
-     *
-     * @param identifier
-     * @param executor
-     */
     public EventBus(final String identifier, final Executor executor) {
         this.identifier = identifier;
         this.executor = executor == null ? DEFAULT_EXECUTOR : executor;
@@ -210,10 +184,6 @@ public class EventBus {
         return INSTANCE;
     }
 
-    /**
-     *
-     * @return
-     */
     public String identifier() {
         return identifier;
     }

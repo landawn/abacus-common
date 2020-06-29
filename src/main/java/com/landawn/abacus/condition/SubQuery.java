@@ -29,14 +29,12 @@ import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.WD;
 
 /**
- * The Class SubQuery.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class SubQuery extends AbstractCondition {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -2791944344613082244L;
 
     // For Kryo
@@ -45,10 +43,8 @@ public class SubQuery extends AbstractCondition {
     // For Kryo
     final Class<?> entityClass;
 
-    /** The prop names. */
     private Collection<String> propNames;
 
-    /** The sql. */
     // For Kryo
     final String sql;
 
@@ -57,9 +53,6 @@ public class SubQuery extends AbstractCondition {
      */
     private Condition condition;
 
-    /**
-     * Instantiates a new sub query.
-     */
     // For Kryo
     SubQuery() {
         entityName = null;
@@ -67,12 +60,6 @@ public class SubQuery extends AbstractCondition {
         sql = null;
     }
 
-    /**
-     * Instantiates a new sub query.
-     *
-     * @param entityName
-     * @param sql
-     */
     public SubQuery(String entityName, String sql) {
         super(Operator.EMPTY);
         this.entityName = entityName;
@@ -238,10 +225,6 @@ public class SubQuery extends AbstractCondition {
         }
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         int h = 17;

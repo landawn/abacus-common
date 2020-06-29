@@ -55,20 +55,16 @@ import com.landawn.abacus.parser.XMLSerializationConfig.XSC;
 import com.landawn.abacus.type.Type;
 
 /**
- * The Class PropertiesUtil.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public final class PropertiesUtil {
 
-    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(PropertiesUtil.class);
 
-    /** The Constant TYPE. */
     private static final String TYPE = "type";
 
-    /** The Constant xsc. */
     private static final XMLSerializationConfig xsc = XSC.create()
             .setTagByPropertyName(true)
             .setIgnoreTypeInfo(true)
@@ -76,7 +72,6 @@ public final class PropertiesUtil {
             .setExclusion(Exclusion.NONE)
             .setIgnoredPropNames((Map<Class<?>, Collection<String>>) null);
 
-    /** The Constant scheduledExecutor. */
     private static final ScheduledExecutorService scheduledExecutor;
     static {
         final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
@@ -84,7 +79,6 @@ public final class PropertiesUtil {
         scheduledExecutor = MoreExecutors.getExitingScheduledExecutorService(executor);
     }
 
-    /** The Constant registeredAutoRefreshProperties. */
     private static final Map<Resource, Properties<?, ?>> registeredAutoRefreshProperties = new ConcurrentHashMap<>(256);
 
     static {
@@ -149,9 +143,6 @@ public final class PropertiesUtil {
         scheduledExecutor.scheduleWithFixedDelay(refreshTask, 1000, 1000, TimeUnit.MICROSECONDS);
     }
 
-    /**
-     * Instantiates a new properties util.
-     */
     private PropertiesUtil() {
         // singleton.
     }

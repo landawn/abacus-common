@@ -19,38 +19,23 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * The Class And.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class And extends Junction {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -1986732707073108410L;
 
-    /**
-     * Instantiates a new and.
-     */
     // For Kryo
     And() {
     }
 
-    /**
-     * Instantiates a new and.
-     *
-     * @param conditions
-     */
     @SafeVarargs
     public And(Condition... conditions) {
         super(Operator.AND, conditions);
     }
 
-    /**
-     * Instantiates a new and.
-     *
-     * @param conditions
-     */
     public And(Collection<? extends Condition> conditions) {
         super(Operator.AND, conditions);
     }

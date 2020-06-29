@@ -22,7 +22,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
- * The Class ImmutableSortedSet.
  *
  * @author Haiyang Li
  * @param <E>
@@ -30,18 +29,11 @@ import java.util.TreeSet;
  */
 public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<E> {
 
-    /** The Constant EMPTY. */
     @SuppressWarnings("rawtypes")
     private static final ImmutableSortedSet EMPTY = new ImmutableSortedSet(N.emptySortedSet());
 
-    /** The sorted set. */
     private final SortedSet<E> sortedSet;
 
-    /**
-     * Instantiates a new immutable sorted set.
-     *
-     * @param sortedSet
-     */
     ImmutableSortedSet(SortedSet<? extends E> sortedSet) {
         super(sortedSet);
         this.sortedSet = (SortedSet<E>) sortedSet;
@@ -127,10 +119,6 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
         throw new UnsupportedOperationException();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Comparator<? super E> comparator() {
         return sortedSet.comparator();
@@ -167,19 +155,11 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
         return of(sortedSet.tailSet(fromElement));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public E first() {
         return sortedSet.first();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public E last() {
         return sortedSet.last();

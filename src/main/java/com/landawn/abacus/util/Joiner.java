@@ -25,93 +25,52 @@ import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * The Class Joiner.
  *
  * @author haiyangl
  * @since 1.3
  */
 public class Joiner implements Closeable {
 
-    /** The Constant DEFAULT_DELIMITER. */
     public static final String DEFAULT_DELIMITER = N.ELEMENT_SEPARATOR;
 
-    /** The Constant DEFAULT_KEY_VALUE_DELIMITER. */
     public static final String DEFAULT_KEY_VALUE_DELIMITER = "=";
 
-    /** The prefix. */
     private final String prefix;
 
-    /** The delimiter. */
     private final String delimiter;
 
-    /** The key value delimiter. */
     private final String keyValueDelimiter;
 
-    /** The suffix. */
     private final String suffix;
 
-    /** The is empty delimiter. */
     private final boolean isEmptyDelimiter;
 
-    /** The is empty key value delimiter. */
     private final boolean isEmptyKeyValueDelimiter;
 
-    /** The trim. */
     private boolean trimBeforeAppend = false;
 
-    /** The skip null. */
     private boolean skipNulls = false;
 
-    /** The use cached buffer. */
     private boolean useCachedBuffer = false;
 
-    /** The null text. */
     private String nullText = N.NULL_STRING;
 
-    /** The buffer. */
     private StringBuilder buffer;
 
-    /** The empty value. */
     private String emptyValue;
 
-    /**
-     * Instantiates a new joiner.
-     *
-     * @param delimiter
-     */
     Joiner(CharSequence delimiter) {
         this(delimiter, DEFAULT_KEY_VALUE_DELIMITER);
     }
 
-    /**
-     * Instantiates a new joiner.
-     *
-     * @param delimiter
-     * @param keyValueDelimiter
-     */
     Joiner(final CharSequence delimiter, CharSequence keyValueDelimiter) {
         this(delimiter, keyValueDelimiter, "", "");
     }
 
-    /**
-     * Instantiates a new joiner.
-     *
-     * @param delimiter
-     * @param prefix
-     * @param suffix
-     */
     Joiner(CharSequence delimiter, CharSequence prefix, CharSequence suffix) {
         this(delimiter, DEFAULT_KEY_VALUE_DELIMITER, prefix, suffix);
     }
 
-    /**
-     * Instantiates a new joiner.
-     *
-     * @param delimiter
-     * @param keyValueDelimiter
-     * @param prefix
-     * @param suffix
-     */
     Joiner(CharSequence delimiter, CharSequence keyValueDelimiter, CharSequence prefix, CharSequence suffix) {
         N.checkArgNotNull(prefix, "The prefix must not be null");
         N.checkArgNotNull(delimiter, "The delimiter must not be null");
@@ -128,10 +87,6 @@ public class Joiner implements Closeable {
         this.isEmptyKeyValueDelimiter = N.isNullOrEmpty(keyValueDelimiter);
     }
 
-    /**
-     *
-     * @return
-     */
     public static Joiner defauLt() {
         return with(DEFAULT_DELIMITER, DEFAULT_KEY_VALUE_DELIMITER);
     }
@@ -1587,10 +1542,6 @@ public class Joiner implements Closeable {
         return this;
     }
 
-    /**
-     *
-     * @return
-     */
     private StringBuilder prepareBuilder() {
         if (buffer != null) {
             if (isEmptyDelimiter == false) {
@@ -1611,10 +1562,6 @@ public class Joiner implements Closeable {
         return obj == null ? nullText : (trimBeforeAppend ? N.toString(obj).trim() : N.toString(obj));
     }
 
-    /**
-     *
-     * @return
-     */
     public int length() {
         // Remember that we never actually append the suffix unless we return
         // the full (present) value or some sub-string or length of it, so that

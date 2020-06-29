@@ -34,7 +34,6 @@ import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeType;
 
 /**
- * The Class CodeGenerator.
  *
  * @author Haiyang Li
  * @since 0.8
@@ -45,7 +44,6 @@ public final class CodeGenerator {
      */
     public static final Class<?> _N = _N.class;
 
-    /** The Constant POSTFIX_OF_JAVA_FILE. */
     private static final String POSTFIX_OF_JAVA_FILE = ".java";
 
     /**
@@ -67,7 +65,6 @@ public final class CodeGenerator {
         USUAL_TYPES.add(HBaseColumn.class.getCanonicalName());
     }
 
-    /** The java type prop name. */
     private static Map<String, String> JAVA_TYPE_PROP_NAME = new HashMap<>();
 
     static {
@@ -1156,7 +1153,6 @@ public final class CodeGenerator {
         LAST
     }
 
-    /** The Constant _N_STRING. */
     static final String _N_STRING = "/*\r\n" + " * Licensed to the Apache Software Foundation (ASF) under one or more\r\n"
             + " * contributor license agreements.  See the NOTICE file distributed with\r\n"
             + " * this work for additional information regarding copyright ownership.\r\n"

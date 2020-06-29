@@ -21,32 +21,20 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
 
 /**
- * The Class Cell.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class Cell extends AbstractCondition {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 8889063891169154425L;
 
-    /** The condition. */
     private Condition condition;
 
-    /**
-     * Instantiates a new cell.
-     */
     // For Kryo
     Cell() {
     }
 
-    /**
-     * Instantiates a new cell.
-     *
-     * @param operator
-     * @param condition
-     */
     public Cell(Operator operator, Condition condition) {
         super(operator);
         this.condition = condition;
@@ -120,10 +108,6 @@ public class Cell extends AbstractCondition {
         return getOperator().toString() + ((condition == null) ? N.EMPTY_STRING : WD._SPACE + condition.toString(namingPolicy));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         int h = 17;

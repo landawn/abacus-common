@@ -21,14 +21,12 @@ import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * The Class BooleanIterator.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
-    /** The Constant EMPTY. */
     public static final BooleanIterator EMPTY = new BooleanIterator() {
         @Override
         public boolean hasNext() {
@@ -41,10 +39,6 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
         }
     };
 
-    /**
-     *
-     * @return
-     */
     public static BooleanIterator empty() {
         return EMPTY;
     }
@@ -255,18 +249,10 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      */
     public abstract boolean nextBoolean();
 
-    /**
-     *
-     * @return
-     */
     public boolean[] toArray() {
         return toList().trimToSize().array();
     }
 
-    /**
-     *
-     * @return
-     */
     public BooleanList toList() {
         final BooleanList list = new BooleanList();
 
@@ -277,10 +263,6 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
         return list;
     }
 
-    /**
-     *
-     * @return
-     */
     public Stream<Boolean> stream() {
         return Stream.of(this);
     }

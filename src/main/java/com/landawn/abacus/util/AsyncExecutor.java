@@ -33,52 +33,32 @@ import com.landawn.abacus.util.function.BiPredicate;
 import com.landawn.abacus.util.function.Predicate;
 
 /**
- * The Class AsyncExecutor.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class AsyncExecutor {
 
-    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(AsyncExecutor.class);
 
-    /** The Constant DEFAULT_CORE_POOL_SIZE. */
     private static final int DEFAULT_CORE_POOL_SIZE = Math.max(8, IOUtil.CPU_CORES);
 
-    /** The Constant DEFAULT_MAX_THREAD_POOL_SIZE. */
     private static final int DEFAULT_MAX_THREAD_POOL_SIZE = Math.max(16, IOUtil.CPU_CORES);
 
-    /** The core thread pool size. */
     private final int coreThreadPoolSize;
 
-    /** The max thread pool size. */
     private final int maxThreadPoolSize;
 
-    /** The keep alive time. */
     private final long keepAliveTime;
 
-    /** The unit. */
     private final TimeUnit unit;
 
-    /** The executor. */
     private volatile Executor executor;
 
-    /**
-     * Instantiates a new async executor.
-     */
     public AsyncExecutor() {
         this(DEFAULT_CORE_POOL_SIZE, DEFAULT_MAX_THREAD_POOL_SIZE, 180L, TimeUnit.SECONDS);
     }
 
-    /**
-     * Instantiates a new async executor.
-     *
-     * @param coreThreadPoolSize
-     * @param maxThreadPoolSize
-     * @param keepAliveTime
-     * @param unit
-     */
     public AsyncExecutor(int coreThreadPoolSize, int maxThreadPoolSize, long keepAliveTime, TimeUnit unit) {
         N.checkArgNotNegative(coreThreadPoolSize, "coreThreadPoolSize");
         N.checkArgNotNegative(maxThreadPoolSize, "maxThreadPoolSize");
@@ -114,11 +94,6 @@ public class AsyncExecutor {
         });
     }
 
-    /**
-     * Instantiates a new async executor.
-     *
-     * @param executor
-     */
     public AsyncExecutor(final Executor executor) {
         this(DEFAULT_CORE_POOL_SIZE, DEFAULT_MAX_THREAD_POOL_SIZE, 180L, TimeUnit.SECONDS);
 

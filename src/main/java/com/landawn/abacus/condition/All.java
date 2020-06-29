@@ -15,28 +15,18 @@
 package com.landawn.abacus.condition;
 
 /**
- * The Class All.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class All extends Cell {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 4700077320537775838L;
 
-    /**
-     * Instantiates a new all.
-     */
     // For Kryo
     All() {
     }
 
-    /**
-     * Instantiates a new all.
-     *
-     * @param condition
-     */
     public All(SubQuery condition) {
         super(Operator.ALL, condition);
     }

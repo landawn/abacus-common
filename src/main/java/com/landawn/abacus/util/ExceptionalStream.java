@@ -81,12 +81,10 @@ import com.landawn.abacus.util.stream.Stream;
 @SequentialOnly
 public class ExceptionalStream<T, E extends Exception> implements Closeable {
 
-    /** The Constant logger. */
     static final Logger logger = LoggerFactory.getLogger(ExceptionalStream.class);
 
     static final Random RAND = new SecureRandom();
 
-    /** The Constant KK. */
     static final Throwables.Function<Map.Entry<Keyed<Object, Object>, Object>, Object, Exception> KK = new Throwables.Function<Map.Entry<Keyed<Object, Object>, Object>, Object, Exception>() {
         @Override
         public Object apply(Map.Entry<Keyed<Object, Object>, Object> t) throws Exception {
@@ -94,48 +92,24 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
         }
     };
 
-    /** The elements. */
     private final ExceptionalIterator<T, E> elements;
 
-    /** The sorted. */
     private final boolean sorted;
 
-    /** The comparator. */
     private final Comparator<? super T> comparator;
 
-    /** The close handlers. */
     private final Deque<Throwables.Runnable<? extends E>> closeHandlers;
 
-    /** The is closed. */
     private boolean isClosed = false;
 
-    /**
-     * Instantiates a new exceptional stream.
-     *
-     * @param iter
-     */
     ExceptionalStream(final ExceptionalIterator<T, E> iter) {
         this(iter, false, null, null);
     }
 
-    /**
-     * Instantiates a new exceptional stream.
-     *
-     * @param iter
-     * @param closeHandlers
-     */
     ExceptionalStream(final ExceptionalIterator<T, E> iter, final Deque<Throwables.Runnable<? extends E>> closeHandlers) {
         this(iter, false, null, closeHandlers);
     }
 
-    /**
-     * Instantiates a new exceptional stream.
-     *
-     * @param iter
-     * @param sorted
-     * @param comparator
-     * @param closeHandlers
-     */
     ExceptionalStream(final ExceptionalIterator<T, E> iter, final boolean sorted, final Comparator<? super T> comparator,
             final Deque<Throwables.Runnable<? extends E>> closeHandlers) {
         this.elements = iter;
@@ -3524,10 +3498,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
         }, sorted, comparator, closeHandlers);
     }
 
-    /**
-     *
-     * @return
-     */
     @IntermediateOp
     public ExceptionalStream<T, E> skipNull() {
         return filter(Fnn.notNull());
@@ -3733,20 +3703,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
         }, false, null);
     }
 
-    /**
-     *
-     * @return
-     */
     @IntermediateOp
     @TerminalOpTriggered
     public ExceptionalStream<T, E> sorted() {
         return sorted(Comparators.NATURAL_ORDER);
     }
 
-    /**
-     *
-     * @return
-     */
     @IntermediateOp
     @TerminalOpTriggered
     public ExceptionalStream<T, E> reverseSorted() {
@@ -3898,10 +3860,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
         });
     }
 
-    /**
-     *
-     * @return
-     */
     @Beta
     @IntermediateOp
     public ExceptionalStream<Indexed<T>, E> indexed() {
@@ -6787,10 +6745,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
         N.println(join(", ", "[", "]"));
     }
 
-    /**
-     *
-     * @return
-     */
     @IntermediateOp
     public Stream<T> unchecked() {
         assertNotClosed();

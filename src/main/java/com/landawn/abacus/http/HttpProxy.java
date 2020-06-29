@@ -83,26 +83,19 @@ import com.landawn.abacus.util.function.Predicate;
  */
 public final class HttpProxy {
 
-    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(HttpProxy.class);
 
-    /** The Constant DEFAULT_MAX_CONNECTION. */
     private static final int DEFAULT_MAX_CONNECTION = AbstractHttpClient.DEFAULT_MAX_CONNECTION;
 
-    /** The Constant DEFAULT_CONNECTION_TIMEOUT. */
     private static final int DEFAULT_CONNECTION_TIMEOUT = AbstractHttpClient.DEFAULT_CONNECTION_TIMEOUT;
 
-    /** The Constant DEFAULT_READ_TIMEOUT. */
     private static final int DEFAULT_READ_TIMEOUT = AbstractHttpClient.DEFAULT_READ_TIMEOUT;
 
-    /** The Constant PARAM. */
     // Upper and lower characters, digits, underscores, and hyphens, starting with a character.
     private static final String PARAM = "[a-zA-Z][a-zA-Z0-9_-]*";
 
-    /** The Constant PARAM_NAME_REGEX. */
     private static final Pattern PARAM_NAME_REGEX = Pattern.compile(PARAM);
 
-    /** The Constant PARAM_URL_REGEX. */
     private static final Pattern PARAM_URL_REGEX = Pattern.compile("\\{(" + PARAM + ")\\}");
 
     /**

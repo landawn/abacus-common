@@ -21,17 +21,10 @@ import java.util.RandomAccess;
 
 import com.landawn.abacus.util.u.OptionalInt;
 
-/**
- * The Class Index.
- */
 public final class Index {
 
-    /** The Constant NOT_FOUND. */
     private static final OptionalInt NOT_FOUND = OptionalInt.empty();
 
-    /**
-     * Instantiates a new index.
-     */
     private Index() {
         // singleton.
     }

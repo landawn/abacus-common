@@ -24,7 +24,6 @@ import java.util.ListIterator;
 import java.util.function.UnaryOperator;
 
 /**
- * The Class ImmutableList.
  *
  * @author Haiyang Li
  * @param <E>
@@ -32,18 +31,11 @@ import java.util.function.UnaryOperator;
  */
 public final class ImmutableList<E> extends ImmutableCollection<E> implements List<E> {
 
-    /** The Constant EMPTY. */
     @SuppressWarnings("rawtypes")
     private static final ImmutableList EMPTY = new ImmutableList(Collections.EMPTY_LIST);
 
-    /** The list. */
     private final List<E> list;
 
-    /**
-     * Instantiates a new immutable list.
-     *
-     * @param list
-     */
     ImmutableList(List<? extends E> list) {
         super(Collections.unmodifiableList(list));
         this.list = (List<E>) coll;
@@ -182,10 +174,6 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
         return list.lastIndexOf(o);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public ListIterator<E> listIterator() {
         return list.listIterator();

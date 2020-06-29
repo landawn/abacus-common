@@ -15,28 +15,18 @@
 package com.landawn.abacus.condition;
 
 /**
- * The Class UnionAll.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class UnionAll extends Clause {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -4544041837079207168L;
 
-    /**
-     * Instantiates a new union all.
-     */
     // For Kryo
     UnionAll() {
     }
 
-    /**
-     * Instantiates a new union all.
-     *
-     * @param condition
-     */
     public UnionAll(SubQuery condition) {
         super(Operator.UNION_ALL, condition);
     }

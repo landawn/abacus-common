@@ -15,19 +15,14 @@
 package com.landawn.abacus.condition;
 
 /**
- * The Class Not.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class Not extends Cell {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 1694705766379057370L;
 
-    /**
-     * Instantiates a new not.
-     */
     // For Kryo
     Not() {
     }

@@ -48,43 +48,29 @@ import com.landawn.abacus.exception.UncheckedIOException;
  */
 public final class SQLMapper {
 
-    /** The Constant SQL_MAPPER. */
     public static final String SQL_MAPPER = "sqlMapper";
 
-    /** The Constant SQL. */
     public static final String SQL = "sql";
 
-    /** The Constant ID. */
     public static final String ID = "id";
 
-    /** The Constant BATCH_SIZE. */
     public static final String BATCH_SIZE = "batchSize";
 
-    /** The Constant FETCH_SIZE. */
     public static final String FETCH_SIZE = "fetchSize";
 
-    /** The Constant RESULT_SET_TYPE. */
     public static final String RESULT_SET_TYPE = "resultSetType";
 
-    /** The Constant RESULT_SET_TYPE_MAP. */
     public static final ImmutableMap<String, Integer> RESULT_SET_TYPE_MAP = ImmutableMap.of("FORWARD_ONLY", ResultSet.TYPE_FORWARD_ONLY, "SCROLL_INSENSITIVE",
             ResultSet.TYPE_SCROLL_INSENSITIVE, "SCROLL_SENSITIVE", ResultSet.TYPE_SCROLL_SENSITIVE);
 
-    /** The Constant TIMEOUT. */
     public static final String TIMEOUT = "timeout";
 
-    /** The Constant MAX_ID_LENGTH. */
     public static final int MAX_ID_LENGTH = 64;
 
-    /** The named SQL map. */
     private final Map<String, ParsedSql> sqlMapper = new LinkedHashMap<>();
 
-    /** The attrs map. */
     private final Map<String, ImmutableMap<String, String>> attrsMap = new HashMap<>();
 
-    /**
-     * Instantiates a new SQL mapper.
-     */
     public SQLMapper() {
     }
 
@@ -136,10 +122,6 @@ public final class SQLMapper {
         return sqlMapper;
     }
 
-    /**
-     *
-     * @return
-     */
     public Set<String> keySet() {
         return sqlMapper.keySet();
     }
@@ -270,10 +252,6 @@ public final class SQLMapper {
         }
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return sqlMapper.hashCode();
@@ -289,10 +267,6 @@ public final class SQLMapper {
         return this == obj || (obj instanceof SQLMapper && N.equals(((SQLMapper) obj).sqlMapper, sqlMapper));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return sqlMapper.toString();

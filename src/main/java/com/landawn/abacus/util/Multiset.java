@@ -58,7 +58,6 @@ import com.landawn.abacus.util.stream.Stream;
  */
 public final class Multiset<T> implements Iterable<T> {
 
-    /** The Constant cmpByCount. */
     private static final Comparator<Map.Entry<?, MutableInt>> cmpByCount = new Comparator<Map.Entry<?, MutableInt>>() {
         @Override
         public int compare(Entry<?, MutableInt> a, Entry<?, MutableInt> b) {
@@ -66,66 +65,36 @@ public final class Multiset<T> implements Iterable<T> {
         }
     };
 
-    /** The map supplier. */
     final Supplier<Map<T, MutableInt>> mapSupplier;
 
-    /** The value map. */
     final Map<T, MutableInt> valueMap;
 
-    /**
-     * Instantiates a new multiset.
-     */
     public Multiset() {
         this(HashMap.class);
     }
 
-    /**
-     * Instantiates a new multiset.
-     *
-     * @param initialCapacity
-     */
     public Multiset(int initialCapacity) {
         this.mapSupplier = Suppliers.ofMap();
         this.valueMap = new HashMap<>(initialCapacity);
     }
 
-    /**
-     * Instantiates a new multiset.
-     *
-     * @param c
-     */
     public Multiset(final Collection<? extends T> c) {
         this();
 
         addAll(c);
     }
 
-    /**
-     * Instantiates a new multiset.
-     *
-     * @param valueMapType
-     */
     @SuppressWarnings("rawtypes")
     public Multiset(final Class<? extends Map> valueMapType) {
         this(Maps.mapType2Supplier(valueMapType));
     }
 
-    /**
-     * Instantiates a new multiset.
-     *
-     * @param mapSupplier
-     */
     @SuppressWarnings("rawtypes")
     public Multiset(final Supplier<? extends Map<T, ?>> mapSupplier) {
         this.mapSupplier = (Supplier) mapSupplier;
         this.valueMap = this.mapSupplier.get();
     }
 
-    /**
-     * Instantiates a new multiset.
-     *
-     * @param valueMap The valueMap and this Multiset share the same data; any changes to one will appear in the other.
-     */
     @Internal
     Multiset(final Map<T, MutableInt> valueMap) {
         this.mapSupplier = Maps.mapType2Supplier(valueMap.getClass());
@@ -352,10 +321,6 @@ public final class Multiset<T> implements Iterable<T> {
         return get(e);
     }
 
-    /**
-     *
-     * @return
-     */
     public Optional<Pair<T, Integer>> minOccurrences() {
         if (size() == 0) {
             return Optional.empty();
@@ -378,10 +343,6 @@ public final class Multiset<T> implements Iterable<T> {
         return Optional.of(Pair.of(minCountElement, minCount));
     }
 
-    /**
-     *
-     * @return
-     */
     public Optional<Pair<T, Integer>> maxOccurrences() {
         if (size() == 0) {
             return Optional.empty();
@@ -1244,10 +1205,6 @@ public final class Multiset<T> implements Iterable<T> {
         return N.isNullOrEmpty(others) ? false : removeAll(others, Integer.MAX_VALUE);
     }
 
-    /**
-     *
-     * @return
-     */
     public Multiset<T> copy() {
         final Multiset<T> copy = new Multiset<>(mapSupplier);
 
@@ -1256,18 +1213,10 @@ public final class Multiset<T> implements Iterable<T> {
         return copy;
     }
 
-    /**
-     *
-     * @return
-     */
     public ImmutableSet<T> elements() {
         return ImmutableSet.of(valueMap.keySet());
     }
 
-    /**
-     *
-     * @return
-     */
     public int size() {
         return valueMap.size();
     }
@@ -1288,10 +1237,6 @@ public final class Multiset<T> implements Iterable<T> {
         valueMap.clear();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Iterator<T> iterator() {
         return valueMap.keySet().iterator();
@@ -1301,10 +1246,6 @@ public final class Multiset<T> implements Iterable<T> {
     //        return valueMap.entrySet();
     //    }
 
-    /**
-     *
-     * @return
-     */
     public Object[] toArray() {
         return valueMap.keySet().toArray();
     }
@@ -1319,10 +1260,6 @@ public final class Multiset<T> implements Iterable<T> {
         return valueMap.keySet().toArray(a);
     }
 
-    /**
-     *
-     * @return
-     */
     public Map<T, Integer> toMap() {
         final Map<T, Integer> result = Maps.newOrderingMap(valueMap);
 
@@ -1702,18 +1639,10 @@ public final class Multiset<T> implements Iterable<T> {
         return newValue;
     }
 
-    /**
-     *
-     * @return
-     */
     public Stream<T> stream() {
         return Stream.of(valueMap.keySet());
     }
 
-    /**
-     *
-     * @return
-     */
     public Stream<T> flatStream() {
         final Iterator<Map.Entry<T, MutableInt>> entryIter = valueMap.entrySet().iterator();
 
@@ -1752,7 +1681,6 @@ public final class Multiset<T> implements Iterable<T> {
         return Stream.of(iter);
     }
 
-    /** The Constant TO_INT. */
     private static final Function<MutableInt, Integer> TO_INT = new Function<MutableInt, Integer>() {
         @Override
         public Integer apply(MutableInt t) {
@@ -1760,10 +1688,6 @@ public final class Multiset<T> implements Iterable<T> {
         }
     };
 
-    /**
-     *
-     * @return
-     */
     public EntryStream<T, Integer> entryStream() {
         return EntryStream.of(valueMap).mapValue(TO_INT);
     }
@@ -1814,10 +1738,6 @@ public final class Multiset<T> implements Iterable<T> {
         return If.is(size() > 0).then(this, action);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return valueMap.hashCode();
@@ -1833,10 +1753,6 @@ public final class Multiset<T> implements Iterable<T> {
         return obj == this || (obj instanceof Multiset && valueMap.equals(((Multiset<T>) obj).valueMap));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return valueMap.toString();

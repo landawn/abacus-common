@@ -26,68 +26,40 @@ import com.landawn.abacus.util.function.Consumer;
  */
 public class DynamicSQLBuilder {
 
-    /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(DynamicSQLBuilder.class);
 
-    /** The select. */
     private Select select = new Select(Objectory.createStringBuilder());
 
-    /** The from. */
     private From from = new From(Objectory.createStringBuilder());
 
-    /** The where. */
     private Where where;
 
-    /** The group by. */
     private GroupBy groupBy;
 
-    /** The having. */
     private Having having;
 
-    /** The order by. */
     private OrderBy orderBy;
 
-    /** The limit cond. */
     private String limitCond;
 
-    /** The more parts. */
     private StringBuilder moreParts = null;
 
-    /**
-     * Instantiates a new dynamic SQL builder.
-     */
     private DynamicSQLBuilder() {
 
     }
 
-    /**
-     *
-     * @return
-     */
     public static DynamicSQLBuilder create() {
         return new DynamicSQLBuilder();
     }
 
-    /**
-     *
-     * @return
-     */
     public Select select() {
         return select;
     }
 
-    /**
-     *
-     * @return
-     */
     public From from() {
         return from;
     }
 
-    /**
-     *
-     * @return
-     */
     public Where where() {
         if (where == null) {
             where = new Where(Objectory.createStringBuilder());
@@ -96,10 +68,6 @@ public class DynamicSQLBuilder {
         return where;
     }
 
-    /**
-     *
-     * @return
-     */
     public GroupBy groupBy() {
         if (groupBy == null) {
             groupBy = new GroupBy(Objectory.createStringBuilder());
@@ -108,10 +76,6 @@ public class DynamicSQLBuilder {
         return groupBy;
     }
 
-    /**
-     *
-     * @return
-     */
     public Having having() {
         if (having == null) {
             having = new Having(Objectory.createStringBuilder());
@@ -120,10 +84,6 @@ public class DynamicSQLBuilder {
         return having;
     }
 
-    /**
-     *
-     * @return
-     */
     public OrderBy orderBy() {
         if (orderBy == null) {
             orderBy = new OrderBy(Objectory.createStringBuilder());
@@ -280,10 +240,6 @@ public class DynamicSQLBuilder {
         return this;
     }
 
-    /**
-     *
-     * @return
-     */
     public String build() {
         select.sb.append(" ").append(from.sb);
 

@@ -17,14 +17,12 @@ package com.landawn.abacus.exception;
 import java.io.IOException;
 
 /**
- * The Class UncheckedIOException.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class UncheckedIOException extends UncheckedException {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -8702336402043331418L;
 
     /**

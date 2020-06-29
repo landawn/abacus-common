@@ -22,18 +22,5 @@ package com.landawn.abacus.util;
  */
 public enum WeekDay {
 
-    /** The sunday. */
-    SUNDAY,
-    /** The monday. */
-    MONDAY,
-    /** The tuesday. */
-    TUESDAY,
-    /** The wednesday. */
-    WEDNESDAY,
-    /** The thursday. */
-    THURSDAY,
-    /** The friday. */
-    FRIDAY,
-    /** The saturday. */
-    SATURDAY;
+    SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY;
 }

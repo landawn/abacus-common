@@ -15,13 +15,9 @@ package com.landawn.abacus.util;
 
 import com.landawn.abacus.annotation.Internal;
 
-/**
- * The Class Internals.
- */
 @Internal
 final class Internals {
 
-    /** The Constant POOL_SIZE. */
     static final int POOL_SIZE;
 
     static {
@@ -30,9 +26,6 @@ final class Internals {
         POOL_SIZE = Math.max(1000, Math.min(1000 * multi, 8192));
     }
 
-    /**
-     * Instantiates a new internals.
-     */
     private Internals() {
         // singleton.
     }

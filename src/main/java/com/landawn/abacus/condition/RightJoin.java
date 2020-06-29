@@ -17,48 +17,26 @@ package com.landawn.abacus.condition;
 import java.util.Collection;
 
 /**
- * The Class RightJoin.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class RightJoin extends Join {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 8066983231406226947L;
 
-    /**
-     * Instantiates a new right join.
-     */
     // For Kryo
     RightJoin() {
     }
 
-    /**
-     * Instantiates a new right join.
-     *
-     * @param joinEntity
-     */
     public RightJoin(String joinEntity) {
         super(Operator.RIGHT_JOIN, joinEntity);
     }
 
-    /**
-     * Instantiates a new right join.
-     *
-     * @param joinEntity
-     * @param condition
-     */
     public RightJoin(String joinEntity, Condition condition) {
         super(Operator.RIGHT_JOIN, joinEntity, condition);
     }
 
-    /**
-     * Instantiates a new right join.
-     *
-     * @param joinEntities
-     * @param condition
-     */
     public RightJoin(Collection<String> joinEntities, Condition condition) {
         super(Operator.RIGHT_JOIN, joinEntities, condition);
     }

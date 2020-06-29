@@ -17,7 +17,6 @@ package com.landawn.abacus.util;
 import com.landawn.abacus.util.u.Optional;
 
 /**
- * The Class IntPair.
  *
  * @author Haiyang Li
  * @since 1.2
@@ -27,19 +26,10 @@ public final class IntPair {
     public final int _1;
     public final int _2;
 
-    /**
-     * Instantiates a new int pair.
-     */
     IntPair() {
         this(0, 0);
     }
 
-    /**
-     * Instantiates a new int pair.
-     *
-     * @param _1 the 1
-     * @param _2 the 2
-     */
     IntPair(int _1, int _2) {
         this._1 = _1;
         this._2 = _2;
@@ -55,42 +45,22 @@ public final class IntPair {
         return new IntPair(_1, _2);
     }
 
-    /**
-     *
-     * @return
-     */
     public int min() {
         return N.min(_1, _2);
     }
 
-    /**
-     *
-     * @return
-     */
     public int max() {
         return N.max(_1, _2);
     }
 
-    /**
-     *
-     * @return
-     */
     public int sum() {
         return _1 + _2;
     }
 
-    /**
-     *
-     * @return
-     */
     public double average() {
         return ((double) sum()) / 2;
     }
 
-    /**
-     *
-     * @return
-     */
     public IntPair reverse() {
         return new IntPair(_2, _1);
     }
@@ -139,10 +109,6 @@ public final class IntPair {
         return predicate.test(_1, _2) ? Optional.of(this) : Optional.<IntPair> empty();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return 31 * _1 + this._2;
@@ -165,10 +131,6 @@ public final class IntPair {
         }
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "[" + this._1 + ", " + this._2 + "]";

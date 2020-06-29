@@ -31,16 +31,12 @@ import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 
 /**
- * The Class JSONUtil.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public final class JSONUtil {
 
-    /**
-     * Instantiates a new JSON util.
-     */
     private JSONUtil() {
         // singleton.
     }

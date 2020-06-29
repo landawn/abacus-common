@@ -39,28 +39,21 @@ import com.landawn.abacus.annotation.NullSafe;
 import com.landawn.abacus.util.u.Holder;
 
 /**
- * The Class Array.
  *
  * @author Haiyang Li
  * @see java.lang.reflect.Array
  * @since 0.8
  */
 public final class Array {
-    /** The cpu cores. */
     static volatile int CPU_CORES = Runtime.getRuntime().availableProcessors();
 
     static final Executor parallelSortExecutor = new ThreadPoolExecutor(Math.min(8, CPU_CORES), CPU_CORES, 180L, TimeUnit.SECONDS,
             new LinkedBlockingQueue<Runnable>());
 
-    /** The Constant MIN_ARRAY_SORT_GRAN. */
     static final int MIN_ARRAY_SORT_GRAN = 8192;
 
-    /** The Constant BINARYSEARCH_THRESHOLD. */
     static final int BINARYSEARCH_THRESHOLD = 64;
 
-    /**
-     * Instantiates a new array.
-     */
     private Array() {
     }
 

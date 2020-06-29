@@ -22,14 +22,12 @@ import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.DoubleStream;
 
 /**
- * The Class DoubleIterator.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public abstract class DoubleIterator extends ImmutableIterator<Double> {
 
-    /** The Constant EMPTY. */
     public static final DoubleIterator EMPTY = new DoubleIterator() {
         @Override
         public boolean hasNext() {
@@ -42,10 +40,6 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         }
     };
 
-    /**
-     *
-     * @return
-     */
     public static DoubleIterator empty() {
         return EMPTY;
     }
@@ -250,24 +244,12 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         return nextDouble();
     }
 
-    /**
-     *
-     * @return
-     */
     public abstract double nextDouble();
 
-    /**
-     *
-     * @return
-     */
     public double[] toArray() {
         return toList().trimToSize().array();
     }
 
-    /**
-     *
-     * @return
-     */
     public DoubleList toList() {
         final DoubleList list = new DoubleList();
 
@@ -278,10 +260,6 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         return list;
     }
 
-    /**
-     *
-     * @return
-     */
     public DoubleStream stream() {
         return DoubleStream.of(this);
     }

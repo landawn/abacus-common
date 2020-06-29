@@ -21,7 +21,6 @@ import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.ToIntFunction;
 
 /**
- * The Class Wrapper.
  *
  * @author Haiyang Li
  * @param <T>
@@ -29,7 +28,6 @@ import com.landawn.abacus.util.function.ToIntFunction;
  */
 public final class Wrapper<T> {
 
-    /** The Constant arrayHashFunction. */
     static final ToIntFunction<Object> arrayHashFunction = new ToIntFunction<Object>() {
         @Override
         public int applyAsInt(Object value) {
@@ -37,7 +35,6 @@ public final class Wrapper<T> {
         }
     };
 
-    /** The Constant arrayEqualsFunction. */
     static final BiPredicate<Object, Object> arrayEqualsFunction = new BiPredicate<Object, Object>() {
         @Override
         public boolean test(Object t, Object u) {
@@ -45,40 +42,20 @@ public final class Wrapper<T> {
         }
     };
 
-    /** The value. */
     private final T value;
 
-    /** The hash function. */
     private final ToIntFunction<? super T> hashFunction;
 
-    /** The equals function. */
     private final BiPredicate<? super T, ? super T> equalsFunction;
 
-    /** The to string function. */
     private final Function<? super T, String> toStringFunction;
 
-    /** The hash code. */
     private int hashCode;
 
-    /**
-     * Instantiates a new wrapper.
-     *
-     * @param value
-     * @param hashFunction
-     * @param equalsFunction
-     */
     private Wrapper(T value, ToIntFunction<? super T> hashFunction, BiPredicate<? super T, ? super T> equalsFunction) {
         this(value, hashFunction, equalsFunction, null);
     }
 
-    /**
-     * Instantiates a new wrapper.
-     *
-     * @param value
-     * @param hashFunction
-     * @param equalsFunction
-     * @param toStringFunction
-     */
     private Wrapper(T value, ToIntFunction<? super T> hashFunction, BiPredicate<? super T, ? super T> equalsFunction,
             Function<? super T, String> toStringFunction) {
         this.value = value;
@@ -132,10 +109,6 @@ public final class Wrapper<T> {
         return new Wrapper<T>(value, hashFunction, equalsFunction, toStringFunction);
     }
 
-    /**
-     *
-     * @return
-     */
     public T value() {
         return value;
     }
@@ -148,10 +121,6 @@ public final class Wrapper<T> {
     //        return a;
     //    }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         if (hashCode == 0) {
@@ -171,10 +140,6 @@ public final class Wrapper<T> {
         return (obj == this) || (obj instanceof Wrapper && equalsFunction.test(((Wrapper<T>) obj).value, value));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         if (toStringFunction == null) {

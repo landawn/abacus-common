@@ -23,27 +23,20 @@ import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.WD;
 
 /**
- * The Class Limit.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class Limit extends AbstractCondition {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -8582266239631072254L;
 
-    /** The count. */
     private int count;
 
-    /** The offset. */
     private int offset;
 
     private String expr;
 
-    /**
-     * Instantiates a new limit.
-     */
     // For Kryo
     Limit() {
     }
@@ -57,12 +50,6 @@ public class Limit extends AbstractCondition {
         this(0, count);
     }
 
-    /**
-     * Instantiates a new limit.
-     *
-     * @param offset
-     * @param count
-     */
     public Limit(final int offset, final int count) {
         super(Operator.LIMIT);
         this.count = count;
@@ -136,10 +123,6 @@ public class Limit extends AbstractCondition {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Not not() throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
@@ -159,10 +142,6 @@ public class Limit extends AbstractCondition {
         }
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         if (N.notNullOrEmpty(expr)) {

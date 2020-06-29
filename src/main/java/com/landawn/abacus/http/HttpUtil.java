@@ -57,7 +57,6 @@ import com.landawn.abacus.util.StringUtil;
 import com.landawn.abacus.util.WD;
 
 /**
- * The Class HTTP.
  *
  * @author Haiyang Li
  * @since 0.8
@@ -68,37 +67,26 @@ public final class HttpUtil {
 
     public static final ContentFormat DEFAULT_CONTENT_FORMAT = ContentFormat.JSON;
 
-    /** The Constant JSON. */
     static final String JSON = "json";
 
-    /** The Constant XML. */
     static final String XML = "xml";
 
-    /** The Constant GZIP. */
     static final String GZIP = "gzip";
 
-    /** The Constant SNAPPY. */
     static final String SNAPPY = "snappy";
 
-    /** The Constant LZ4. */
     static final String LZ4 = "lz4";
 
-    /** The Constant KRYO. */
     static final String KRYO = "kryo";
 
-    /** The Constant URL_ENCODED. */
     static final String URL_ENCODED = "urlencoded";
 
-    /** The Constant jsonParser. */
     static final JSONParser jsonParser = ParserFactory.createJSONParser();
 
-    /** The Constant xmlParser. */
     static final XMLParser xmlParser = ParserFactory.isXMLAvailable() ? ParserFactory.createXMLParser() : null;
 
-    /** The Constant kryoParser. */
     static final KryoParser kryoParser = ParserFactory.isKryoAvailable() ? ParserFactory.createKryoParser() : null;
 
-    /** The Constant contentFormat2Parser. */
     private static final Map<ContentFormat, Parser<?, ?>> contentFormat2Parser = new EnumMap<>(ContentFormat.class);
 
     static {
@@ -120,7 +108,6 @@ public final class HttpUtil {
         contentFormat2Parser.put(ContentFormat.GZIP, jsonParser);
     }
 
-    /** The Constant contentFormat2Type. */
     private static final Map<ContentFormat, String> contentFormat2Type = new EnumMap<>(ContentFormat.class);
 
     static {
@@ -136,7 +123,6 @@ public final class HttpUtil {
         contentFormat2Type.put(ContentFormat.KRYO, HttpHeaders.Values.APPLICATION_KRYO);
     }
 
-    /** The Constant contentFormat2Encoding. */
     private static final Map<ContentFormat, String> contentFormat2Encoding = new EnumMap<>(ContentFormat.class);
 
     static {
@@ -152,7 +138,6 @@ public final class HttpUtil {
         contentFormat2Encoding.put(ContentFormat.KRYO, KRYO);
     }
 
-    /** The Constant contentTypeEncoding2Format. */
     private static final Map<String, Map<String, ContentFormat>> contentTypeEncoding2Format = new ObjectPool<>(64);
 
     static {

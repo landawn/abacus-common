@@ -30,14 +30,8 @@ import com.landawn.abacus.util.function.BiConsumer;
  */
 abstract class AbstractCompositeHashFunction extends AbstractStreamingHashFunction {
 
-    /** The functions. */
     final HashFunction[] functions;
 
-    /**
-     * Instantiates a new abstract composite hash function.
-     *
-     * @param functions
-     */
     AbstractCompositeHashFunction(HashFunction... functions) {
         for (HashFunction function : functions) {
             N.checkArgNotNull(function);
@@ -56,10 +50,6 @@ abstract class AbstractCompositeHashFunction extends AbstractStreamingHashFuncti
     // this could be cleaner if it passed HashCode[], but that would create yet another array...
     /* protected */ abstract HashCode makeHash(Hasher[] hashers);
 
-    /**
-     *
-     * @return
-     */
     @Override
     public Hasher newHasher() {
         final Hasher[] hashers = new Hasher[functions.length];

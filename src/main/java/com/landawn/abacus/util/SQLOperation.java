@@ -94,19 +94,12 @@ public enum SQLOperation {
      */
     UNKNOWN("UNKNOWN");
 
-    /** The name. */
     private String name;
 
-    /**
-     * Instantiates a new SQL operation.
-     *
-     * @param name
-     */
     SQLOperation(String name) {
         this.name = name;
     }
 
-    /** The Constant operationMap. */
     private static final Map<String, SQLOperation> operationMap = new HashMap<>();
 
     static {
@@ -136,10 +129,6 @@ public enum SQLOperation {
         return name;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return name;

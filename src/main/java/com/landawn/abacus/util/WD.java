@@ -27,14 +27,10 @@ import com.landawn.abacus.annotation.Internal;
 @Internal
 public final class WD {
 
-    /**
-     * Instantiates a new wd.
-     */
     private WD() {
         // singleton
     }
 
-    /** The Constant CHAR_0. */
     // ...
     public static final char CHAR_0 = (char) 0;
 

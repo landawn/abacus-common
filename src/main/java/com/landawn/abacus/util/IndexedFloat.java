@@ -15,22 +15,14 @@
 package com.landawn.abacus.util;
 
 /**
- * The Class IndexedFloat.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public final class IndexedFloat extends AbstractIndexed {
 
-    /** The value. */
     private final float value;
 
-    /**
-     * Instantiates a new indexed float.
-     *
-     * @param index
-     * @param value
-     */
     IndexedFloat(long index, float value) {
         super(index);
         this.value = value;
@@ -105,18 +97,10 @@ public final class IndexedFloat extends AbstractIndexed {
         };
     }
 
-    /**
-     *
-     * @return
-     */
     public float value() {
         return value;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return (int) index + (int) (value * 31);
@@ -132,10 +116,6 @@ public final class IndexedFloat extends AbstractIndexed {
         return obj instanceof IndexedFloat && ((IndexedFloat) obj).index == index && N.equals(((IndexedFloat) obj).value, value);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "[" + index + "]=" + value;

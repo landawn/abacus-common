@@ -32,19 +32,14 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 /**
- * The Class EmailUtil.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public final class EmailUtil {
 
-    /** The Constant MAIL_SMTP_HOST. */
     private static final String MAIL_SMTP_HOST = "mail.smtp.host";
 
-    /**
-     * Instantiates a new email util.
-     */
     private EmailUtil() {
         // singleton.
     }

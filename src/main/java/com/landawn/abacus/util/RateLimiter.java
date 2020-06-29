@@ -180,14 +180,9 @@ public abstract class RateLimiter {
      */
     private final SleepingStopwatch stopwatch;
 
-    /** The mutex do not use directly. */
     // Can't be initialized in the constructor because mocks don't call the constructor.
     private volatile Object mutexDoNotUseDirectly;
 
-    /**
-     *
-     * @return
-     */
     private Object mutex() {
         Object mutex = mutexDoNotUseDirectly;
         if (mutex == null) {
@@ -201,11 +196,6 @@ public abstract class RateLimiter {
         return mutex;
     }
 
-    /**
-     * Instantiates a new rate limiter.
-     *
-     * @param stopwatch
-     */
     RateLimiter(SleepingStopwatch stopwatch) {
         this.stopwatch = N.checkArgNotNull(stopwatch);
     }
@@ -418,10 +408,6 @@ public abstract class RateLimiter {
      */
     abstract long reserveEarliestAvailable(int permits, long nowMicros);
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return String.format(Locale.ROOT, "RateLimiter[stableRate=%3.1fqps]", getRate());

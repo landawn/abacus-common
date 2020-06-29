@@ -18,29 +18,18 @@ package com.landawn.abacus.util;
  */
 public final class Duration implements Comparable<Duration> {
 
-    /** The Constant ZERO. */
     public static final Duration ZERO = new Duration(0);
 
-    /** The Constant MILLIS_PER_SECOND. */
     private static final long MILLIS_PER_SECOND = 1000L;
 
-    /** The Constant MILLIS_PER_MINUTE. */
     private static final long MILLIS_PER_MINUTE = MILLIS_PER_SECOND * 60;
 
-    /** The Constant MILLIS_PER_HOUR. */
     private static final long MILLIS_PER_HOUR = MILLIS_PER_MINUTE * 60;
 
-    /** The Constant MILLIS_PER_DAY. */
     private static final long MILLIS_PER_DAY = MILLIS_PER_HOUR * 24;
 
-    /** The milliseconds. */
     private final long milliseconds;
 
-    /**
-     * Instantiates a new duration.
-     *
-     * @param milliseconds
-     */
     Duration(long milliseconds) {
         this.milliseconds = milliseconds;
     }
@@ -267,58 +256,30 @@ public final class Duration implements Comparable<Duration> {
         return create(milliseconds / divisor);
     }
 
-    /**
-     *
-     * @return
-     */
     public Duration negated() {
         return multipliedBy(-1);
     }
 
-    /**
-     *
-     * @return
-     */
     public Duration abs() {
         return isNegative() ? negated() : this;
     }
 
-    /**
-     *
-     * @return
-     */
     public long toDays() {
         return milliseconds / MILLIS_PER_DAY;
     }
 
-    /**
-     *
-     * @return
-     */
     public long toHours() {
         return milliseconds / MILLIS_PER_HOUR;
     }
 
-    /**
-     *
-     * @return
-     */
     public long toMinutes() {
         return milliseconds / MILLIS_PER_MINUTE;
     }
 
-    /**
-     *
-     * @return
-     */
     public long toSeconds() {
         return milliseconds / MILLIS_PER_SECOND;
     }
 
-    /**
-     *
-     * @return
-     */
     public long toMillis() {
         return milliseconds;
     }
@@ -347,19 +308,11 @@ public final class Duration implements Comparable<Duration> {
         return obj instanceof Duration && ((Duration) obj).milliseconds == this.milliseconds;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return ((int) (milliseconds ^ (milliseconds >>> 32)));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         if (this == ZERO) {

@@ -15,22 +15,14 @@
 package com.landawn.abacus.util;
 
 /**
- * The Class IndexedLong.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public final class IndexedLong extends AbstractIndexed {
 
-    /** The value. */
     private final long value;
 
-    /**
-     * Instantiates a new indexed long.
-     *
-     * @param index
-     * @param value
-     */
     IndexedLong(long index, long value) {
         super(index);
         this.value = value;
@@ -105,18 +97,10 @@ public final class IndexedLong extends AbstractIndexed {
         };
     }
 
-    /**
-     *
-     * @return
-     */
     public long value() {
         return value;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return (int) index + (int) (value * 31);
@@ -132,10 +116,6 @@ public final class IndexedLong extends AbstractIndexed {
         return obj instanceof IndexedLong && ((IndexedLong) obj).index == index && N.equals(((IndexedLong) obj).value, value);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "[" + index + "]=" + value;

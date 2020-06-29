@@ -28,7 +28,6 @@ import com.landawn.abacus.util.function.IndexedConsumer;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
- * The Class BiIterator.
  *
  * @author Haiyang Li
  * @param <A>
@@ -37,7 +36,6 @@ import com.landawn.abacus.util.stream.Stream;
  */
 public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
-    /** The Constant EMPTY. */
     @SuppressWarnings("rawtypes")
     private static final BiIterator EMPTY = new BiIterator() {
         @Override

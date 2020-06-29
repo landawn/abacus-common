@@ -57,7 +57,6 @@ import com.landawn.abacus.util.function.Predicate;
  */
 public final class BloomFilter<T> implements Predicate<T>, Serializable {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 8191335744261522602L;
 
     /**
@@ -277,10 +276,6 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
         return false;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return Arrays.hashCode(N.asArray(numHashFunctions, funnel, strategy, bits));
@@ -463,10 +458,6 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
         return (long) (-n * Math.log(p) / (Math.log(2) * Math.log(2)));
     }
 
-    /**
-     *
-     * @return
-     */
     private Object writeReplace() {
         return new SerialForm<T>(this);
     }

@@ -42,20 +42,12 @@ import com.landawn.abacus.type.TypeFactory;
  */
 public abstract class TypeReference<T> {
 
-    /** The type. */
     protected final Type<T> type;
 
-    /**
-     * Instantiates a new type reference.
-     */
     protected TypeReference() {
         type = TypeFactory.getType(((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0]);
     }
 
-    /**
-     *
-     * @return
-     */
     public Type<T> type() {
         return type;
     }

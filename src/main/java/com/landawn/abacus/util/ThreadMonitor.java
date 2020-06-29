@@ -40,10 +40,8 @@ package com.landawn.abacus.util;
  */
 final class ThreadMonitor implements Runnable {
 
-    /** The thread. */
     private final Thread thread;
 
-    /** The timeout. */
     private final long timeout;
 
     /**

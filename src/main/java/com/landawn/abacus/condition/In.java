@@ -24,37 +24,24 @@ import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.WD;
 
 /**
- * The Class In.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class In extends AbstractCondition {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 6765878262342593960L;
 
-    /** The prop name. */
     // For Kryo
     final String propName;
 
-    /** The values. */
     private List<?> values;
 
-    /**
-     * Instantiates a new in.
-     */
     // For Kryo
     In() {
         propName = null;
     }
 
-    /**
-     * Instantiates a new in.
-     *
-     * @param propName
-     * @param values
-     */
     public In(String propName, Collection<?> values) {
         super(Operator.IN);
 
@@ -144,10 +131,6 @@ public class In extends AbstractCondition {
         }
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         int h = 17;

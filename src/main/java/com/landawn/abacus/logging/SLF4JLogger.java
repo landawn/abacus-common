@@ -23,27 +23,18 @@ import org.slf4j.spi.LocationAwareLogger;
 import com.landawn.abacus.util.function.Supplier;
 
 /**
- * The Class SLF4JLogger.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 class SLF4JLogger extends AbstractLogger {
 
-    /** The Constant FQCN. */
     private static final String FQCN = SLF4JLogger.class.getName();
 
-    /** The logger impl. */
     private final org.slf4j.Logger loggerImpl;
 
-    /** The location aware logger. */
     private final LocationAwareLogger locationAwareLogger;
 
-    /**
-     * Instantiates a new SLF 4 J logger.
-     *
-     * @param name
-     */
     public SLF4JLogger(String name) {
         super(name);
         if (org.slf4j.LoggerFactory.getILoggerFactory() instanceof NOPLoggerFactory) {

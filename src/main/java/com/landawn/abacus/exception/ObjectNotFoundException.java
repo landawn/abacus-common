@@ -15,7 +15,6 @@
 package com.landawn.abacus.exception;
 
 /**
- * The Class ObjectNotFoundException.
  *
  * @author Haiyang Li
  * @since 1.3.29

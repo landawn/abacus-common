@@ -22,35 +22,14 @@ package com.landawn.abacus.util;
  */
 public enum AccountStatus {
 
-    /** The default. */
-    DEFAULT(0),
-    /** The active. */
-    ACTIVE(1),
-    /** The suspended. */
-    SUSPENDED(2),
-    /** The retired. */
-    RETIRED(3),
-    /** The closed. */
-    CLOSED(4),
-    /** The deleted. */
-    DELETED(5);
+    DEFAULT(0), ACTIVE(1), SUSPENDED(2), RETIRED(3), CLOSED(4), DELETED(5);
 
-    /** The int value. */
     private int intValue;
 
-    /**
-     * Instantiates a new account status.
-     *
-     * @param intValue
-     */
     AccountStatus(int intValue) {
         this.intValue = intValue;
     }
 
-    /**
-     *
-     * @return
-     */
     public int intValue() {
         return intValue;
     }

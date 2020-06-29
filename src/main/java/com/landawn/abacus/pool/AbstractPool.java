@@ -27,26 +27,20 @@ import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.MoreExecutors;
 
 /**
- * The Class AbstractPool.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public abstract class AbstractPool implements Pool {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -7780250223658416202L;
 
-    /** The Constant logger. */
     static final Logger logger = LoggerFactory.getLogger(AbstractPool.class);
 
-    /** The Constant DEFAULT_EVICT_DELAY. */
     static final long DEFAULT_EVICT_DELAY = 3000;
 
-    /** The Constant DEFAULT_BALANCE_FACTOR. */
     static final float DEFAULT_BALANCE_FACTOR = 0.2f;
 
-    /** The Constant scheduledExecutor. */
     static final ScheduledExecutorService scheduledExecutor;
     static {
         final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(64);
@@ -56,51 +50,30 @@ public abstract class AbstractPool implements Pool {
         scheduledExecutor = MoreExecutors.getExitingScheduledExecutorService(executor);
     }
 
-    /** The put count. */
     final AtomicLong putCount = new AtomicLong();
 
-    /** The hit count. */
     final AtomicLong hitCount = new AtomicLong();
 
-    /** The miss count. */
     final AtomicLong missCount = new AtomicLong();
 
-    /** The eviction count. */
     final AtomicLong evictionCount = new AtomicLong();
 
-    /** The lock. */
     final ReentrantLock lock = new ReentrantLock();
 
-    /** The not empty. */
     final Condition notEmpty = lock.newCondition();
 
-    /** The not full. */
     final Condition notFull = lock.newCondition();
 
-    /** The capacity. */
     final int capacity;
 
-    /** The eviction policy. */
     final EvictionPolicy evictionPolicy;
 
-    /** The auto balance. */
     final boolean autoBalance;
 
-    /** The balance factor. */
     final float balanceFactor;
 
-    /** The is closed. */
     boolean isClosed = false;
 
-    /**
-     * Instantiates a new abstract pool.
-     *
-     * @param capacity
-     * @param evictDelay
-     * @param evictionPolicy
-     * @param autoBalance
-     * @param balanceFactor
-     */
     protected AbstractPool(int capacity, long evictDelay, EvictionPolicy evictionPolicy, boolean autoBalance, float balanceFactor) {
         if (capacity < 0 || evictDelay < 0 || balanceFactor < 0) {
             throw new IllegalArgumentException(
@@ -154,37 +127,21 @@ public abstract class AbstractPool implements Pool {
         return capacity;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public long putCount() {
         return putCount.get();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public long hitCount() {
         return hitCount.get();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public long missCount() {
         return missCount.get();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public long evictionCount() {
         return evictionCount.get();

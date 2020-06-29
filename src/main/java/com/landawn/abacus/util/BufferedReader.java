@@ -27,56 +27,32 @@ import java.io.Reader;
  */
 public final class BufferedReader extends Reader {
 
-    /** The cbuf. */
     protected char[] _cbuf;
 
-    /** The n chars. */
     protected int nChars = 0;
 
-    /** The next char. */
     protected int nextChar = 0;
 
-    /** The skip LF. */
     protected boolean skipLF = false;
 
-    /** The str. */
     protected String str;
 
-    /** The str value. */
     protected char[] strValue;
 
-    /** The str length. */
     protected int strLength;
 
-    /** The in. */
     protected Reader in;
 
-    /** The is closed. */
     protected boolean isClosed;
 
-    /**
-     * Instantiates a new buffered reader.
-     *
-     * @param st
-     */
     BufferedReader(String st) {
         reinit(st);
     }
 
-    /**
-     * Instantiates a new buffered reader.
-     *
-     * @param is
-     */
     BufferedReader(InputStream is) {
         this(new InputStreamReader(is, Charsets.UTF_8));
     }
 
-    /**
-     * Instantiates a new buffered reader.
-     *
-     * @param reader
-     */
     BufferedReader(Reader reader) {
         reinit(reader);
     }

@@ -15,22 +15,14 @@
 package com.landawn.abacus.util;
 
 /**
- * The Class IndexedChar.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public final class IndexedChar extends AbstractIndexed {
 
-    /** The value. */
     private final char value;
 
-    /**
-     * Instantiates a new indexed char.
-     *
-     * @param index
-     * @param value
-     */
     IndexedChar(long index, char value) {
         super(index);
         this.value = value;
@@ -105,18 +97,10 @@ public final class IndexedChar extends AbstractIndexed {
         };
     }
 
-    /**
-     *
-     * @return
-     */
     public char value() {
         return value;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return (int) index + value * 31;
@@ -132,10 +116,6 @@ public final class IndexedChar extends AbstractIndexed {
         return obj instanceof IndexedChar && ((IndexedChar) obj).index == index && N.equals(((IndexedChar) obj).value, value);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "[" + index + "]=" + value;

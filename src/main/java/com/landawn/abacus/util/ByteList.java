@@ -40,37 +40,24 @@ import com.landawn.abacus.util.stream.ByteStream;
 import com.landawn.abacus.util.stream.Collector;
 
 /**
- * The Class ByteList.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 6361439693114081075L;
 
-    /** The Constant RAND. */
     static final Random RAND = new SecureRandom();
 
-    /** The element data. */
     private byte[] elementData = N.EMPTY_BYTE_ARRAY;
 
-    /** The size. */
     private int size = 0;
 
-    /**
-     * Instantiates a new byte list.
-     */
     public ByteList() {
         super();
     }
 
-    /**
-     * Instantiates a new byte list.
-     *
-     * @param initialCapacity
-     */
     public ByteList(int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_BYTE_ARRAY : new byte[initialCapacity];
     }
@@ -84,12 +71,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         this(a, a.length);
     }
 
-    /**
-     * Instantiates a new byte list.
-     *
-     * @param a
-     * @param size
-     */
     public ByteList(byte[] a, int size) {
         N.checkFromIndexSize(0, size, a.length);
 
@@ -1097,10 +1078,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return N.INDEX_NOT_FOUND;
     }
 
-    /**
-     *
-     * @return
-     */
     public OptionalByte min() {
         return size() == 0 ? OptionalByte.empty() : OptionalByte.of(N.min(elementData, 0, size));
     }
@@ -1117,10 +1094,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return fromIndex == toIndex ? OptionalByte.empty() : OptionalByte.of(N.min(elementData, fromIndex, toIndex));
     }
 
-    /**
-     *
-     * @return
-     */
     public OptionalByte median() {
         return size() == 0 ? OptionalByte.empty() : OptionalByte.of(N.median(elementData, 0, size));
     }
@@ -1137,10 +1110,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return fromIndex == toIndex ? OptionalByte.empty() : OptionalByte.of(N.median(elementData, fromIndex, toIndex));
     }
 
-    /**
-     *
-     * @return
-     */
     public OptionalByte max() {
         return size() == 0 ? OptionalByte.empty() : OptionalByte.of(N.max(elementData, 0, size));
     }
@@ -1180,10 +1149,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return toIndex - fromIndex < k ? OptionalByte.empty() : OptionalByte.of(N.kthLargest(elementData, fromIndex, toIndex, k));
     }
 
-    /**
-     *
-     * @return
-     */
     public int sum() {
         return sum(0, size());
     }
@@ -1200,10 +1165,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return N.sum(elementData, fromIndex, toIndex);
     }
 
-    /**
-     *
-     * @return
-     */
     public OptionalDouble average() {
         return average(0, size());
     }
@@ -1288,18 +1249,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         }
     }
 
-    /**
-     *
-     * @return
-     */
     public OptionalByte first() {
         return size() == 0 ? OptionalByte.empty() : OptionalByte.of(elementData[0]);
     }
 
-    /**
-     *
-     * @return
-     */
     public OptionalByte last() {
         return size() == 0 ? OptionalByte.empty() : OptionalByte.of(elementData[size() - 1]);
     }
@@ -1851,10 +1804,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         set(i, set(j, elementData[i]));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public ByteList copy() {
         return new ByteList(N.copyOfRange(elementData, 0, size));
@@ -2004,19 +1953,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return size == 0;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int size() {
         return size;
     }
 
-    /**
-     *
-     * @return
-     */
     public List<Byte> boxed() {
         return boxed(0, size);
     }
@@ -2039,10 +1980,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return res;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public byte[] toArray() {
         return N.copyOfRange(elementData, 0, size);
@@ -2252,10 +2189,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return result;
     }
 
-    /**
-     *
-     * @return
-     */
     public ByteIterator iterator() {
         if (isEmpty()) {
             return ByteIterator.EMPTY;
@@ -2264,10 +2197,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return ByteIterator.of(elementData, 0, size);
     }
 
-    /**
-     *
-     * @return
-     */
     public ByteStream stream() {
         return ByteStream.of(elementData, 0, size());
     }
@@ -2334,10 +2263,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return If.is(size > 0).then(this, action);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return N.hashCode(elementData, 0, size);
@@ -2363,10 +2288,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return false;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return size == 0 ? "[]" : N.toString(elementData, 0, size);

@@ -15,28 +15,18 @@
 package com.landawn.abacus.condition;
 
 /**
- * The Class IsNotNaN.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class IsNotNaN extends IsNot {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 1706854695031659636L;
 
-    /**
-     * Instantiates a new checks if is not na N.
-     */
     // For Kryo
     IsNotNaN() {
     }
 
-    /**
-     * Instantiates a new checks if is not na N.
-     *
-     * @param propName
-     */
     public IsNotNaN(String propName) {
         super(propName, IsNaN.NAN);
     }

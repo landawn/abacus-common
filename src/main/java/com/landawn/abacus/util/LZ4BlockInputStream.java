@@ -18,22 +18,14 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * The Class LZ4BlockInputStream.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public final class LZ4BlockInputStream extends InputStream {
 
-    /** The in. */
     private final net.jpountz.lz4.LZ4BlockInputStream in;
 
-    /**
-     * Instantiates a new LZ 4 block input stream.
-     *
-     * @param is
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
     public LZ4BlockInputStream(InputStream is) throws IOException {
         in = new net.jpountz.lz4.LZ4BlockInputStream(is);
     }

@@ -15,29 +15,18 @@
 package com.landawn.abacus.condition;
 
 /**
- * The Class Is.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class Is extends Binary {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 2648545747191949385L;
 
-    /**
-     * Instantiates a new checks if is.
-     */
     // For Kryo
     Is() {
     }
 
-    /**
-     * Instantiates a new checks if is.
-     *
-     * @param propName
-     * @param propValue
-     */
     public Is(String propName, Object propValue) {
         super(propName, Operator.IS, propValue);
     }

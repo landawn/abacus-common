@@ -32,7 +32,6 @@ import java.security.NoSuchAlgorithmException;
  */
 public final class DigestUtil {
 
-    /** The Constant STREAM_BUFFER_LENGTH. */
     private static final int STREAM_BUFFER_LENGTH = 1024;
 
     /**

@@ -41,14 +41,10 @@ import java.util.List;
  */
 public abstract class Matth {
 
-    /**
-     * Instantiates a new matth.
-     */
     private Matth() {
         // utility class.
     }
 
-    /** The Constant ONE_BITS. */
     private static final long ONE_BITS = doubleToRawLongBits(1.0);
 
     /** The biggest half power of two that can fit in an unsigned int. */
@@ -57,34 +53,26 @@ public abstract class Matth {
     /**  The biggest half power of two that fits into an unsigned long. */
     static final long MAX_POWER_OF_SQRT2_UNSIGNED = 0xB504F333F9DE6484L;
 
-    /** The Constant MAX_SIGNED_POWER_OF_TWO. */
     static final long MAX_SIGNED_POWER_OF_TWO = 1L << (Long.SIZE - 2);
 
-    /** The Constant FLOOR_SQRT_MAX_LONG. */
     static final long FLOOR_SQRT_MAX_LONG = 3037000499L;
 
-    /** The Constant FLOOR_SQRT_MAX_INT. */
     static final int FLOOR_SQRT_MAX_INT = 46340;
 
     // The mask for the significand, according to the {@link
-    /** The Constant SIGNIFICAND_MASK. */
     // Double#doubleToRawLongBits(double)} spec.
     static final long SIGNIFICAND_MASK = 0x000fffffffffffffL;
 
-    /** The Constant SIGNIFICAND_BITS. */
     static final int SIGNIFICAND_BITS = 52;
 
     // The mask for the exponent, according to the {@link
-    /** The Constant EXPONENT_MASK. */
     // Double#doubleToRawLongBits(double)} spec.
     static final long EXPONENT_MASK = 0x7ff0000000000000L;
 
     // The mask for the sign, according to the {@link
-    /** The Constant SIGN_MASK. */
     // Double#doubleToRawLongBits(double)} spec.
     static final long SIGN_MASK = 0x8000000000000000L;
 
-    /** The Constant EXPONENT_BIAS. */
     static final int EXPONENT_BIAS = 1023;
 
     /**
@@ -92,57 +80,44 @@ public abstract class Matth {
      */
     static final long IMPLICIT_BIT = SIGNIFICAND_MASK + 1;
 
-    /** The Constant MIN_INT_AS_DOUBLE. */
     private static final double MIN_INT_AS_DOUBLE = -0x1p31;
 
-    /** The Constant MAX_INT_AS_DOUBLE. */
     private static final double MAX_INT_AS_DOUBLE = 0x1p31 - 1.0;
 
-    /** The Constant MIN_LONG_AS_DOUBLE. */
     private static final double MIN_LONG_AS_DOUBLE = -0x1p63;
 
-    /** The Constant MAX_LONG_AS_DOUBLE_PLUS_ONE. */
     /*
      * We cannot store Long.MAX_VALUE as a double without losing precision. Instead, we store
      * Long.MAX_VALUE + 1 == -Long.MIN_VALUE, and then offset all comparisons by 1.
      */
     private static final double MAX_LONG_AS_DOUBLE_PLUS_ONE = 0x1p63;
 
-    /** The Constant int_maxLog10ForLeadingZeros. */
     // maxLog10ForLeadingZeros[i] == floor(log10(2^(Long.SIZE - i)))
     static final byte[] int_maxLog10ForLeadingZeros = { 9, 9, 9, 8, 8, 8, 7, 7, 7, 6, 6, 6, 6, 5, 5, 5, 4, 4, 4, 3, 3, 3, 3, 2, 2, 2, 1, 1, 1, 0, 0, 0, 0 };
 
-    /** The Constant int_powersOf10. */
     static final int[] int_powersOf10 = { 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000 };
 
-    /** The Constant int_factorials. */
     private static final int[] int_factorials = { 1, 1, 1 * 2, 1 * 2 * 3, 1 * 2 * 3 * 4, 1 * 2 * 3 * 4 * 5, 1 * 2 * 3 * 4 * 5 * 6, 1 * 2 * 3 * 4 * 5 * 6 * 7,
             1 * 2 * 3 * 4 * 5 * 6 * 7 * 8, 1 * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9, 1 * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10,
             1 * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11, 1 * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11 * 12 };
 
-    /** The int biggest binomials. */
     // binomial(biggestBinomials[k], k) fits in an int, but not binomial(biggestBinomials[k]+1,k).
     static int[] int_biggestBinomials = { Integer.MAX_VALUE, Integer.MAX_VALUE, 65536, 2345, 477, 193, 110, 75, 58, 49, 43, 39, 37, 35, 34, 34, 33 };
 
-    /** The Constant int_halfPowersOf10. */
     // halfPowersOf10[i] = largest int less than 10^(i + 0.5)
     static final int[] int_halfPowersOf10 = { 3, 31, 316, 3162, 31622, 316227, 3162277, 31622776, 316227766, Integer.MAX_VALUE };
 
-    /** The Constant maxLog10ForLeadingZeros. */
     // maxLog10ForLeadingZeros[i] == floor(log10(2^(Long.SIZE - i))) 
     static final byte[] maxLog10ForLeadingZeros = { 19, 18, 18, 18, 18, 17, 17, 17, 16, 16, 16, 15, 15, 15, 15, 14, 14, 14, 13, 13, 13, 12, 12, 12, 12, 11, 11,
             11, 10, 10, 10, 9, 9, 9, 9, 8, 8, 8, 7, 7, 7, 6, 6, 6, 6, 5, 5, 5, 4, 4, 4, 3, 3, 3, 3, 2, 2, 2, 1, 1, 1, 0, 0, 0 };
 
-    /** The Constant powersOf10. */
     static final long[] powersOf10 = { 1L, 10L, 100L, 1000L, 10000L, 100000L, 1000000L, 10000000L, 100000000L, 1000000000L, 10000000000L, 100000000000L,
             1000000000000L, 10000000000000L, 100000000000000L, 1000000000000000L, 10000000000000000L, 100000000000000000L, 1000000000000000000L };
 
-    /** The Constant halfPowersOf10. */
     // halfPowersOf10[i] = largest long less than 10^(i + 0.5)  
     static final long[] halfPowersOf10 = { 3L, 31L, 316L, 3162L, 31622L, 316227L, 3162277L, 31622776L, 316227766L, 3162277660L, 31622776601L, 316227766016L,
             3162277660168L, 31622776601683L, 316227766016837L, 3162277660168379L, 31622776601683793L, 316227766016837933L, 3162277660168379331L };
 
-    /** The Constant long_factorials. */
     static final long[] long_factorials = { 1L, 1L, 1L * 2, 1L * 2 * 3, 1L * 2 * 3 * 4, 1L * 2 * 3 * 4 * 5, 1L * 2 * 3 * 4 * 5 * 6, 1L * 2 * 3 * 4 * 5 * 6 * 7,
             1L * 2 * 3 * 4 * 5 * 6 * 7 * 8, 1L * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9, 1L * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10,
             1L * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11, 1L * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11 * 12,
@@ -153,14 +128,12 @@ public abstract class Matth {
             1L * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11 * 12 * 13 * 14 * 15 * 16 * 17 * 18 * 19,
             1L * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11 * 12 * 13 * 14 * 15 * 16 * 17 * 18 * 19 * 20 };
 
-    /** The Constant biggestBinomials. */
     /*
      * binomial(biggestBinomials[k], k) fits in a long, but not binomial(biggestBinomials[k] + 1, k).
      */
     static final int[] biggestBinomials = { Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, 3810779, 121977, 16175, 4337, 1733, 887, 534, 361, 265,
             206, 169, 143, 125, 111, 101, 94, 88, 83, 79, 76, 74, 72, 70, 69, 68, 67, 67, 66, 66, 66, 66 };
 
-    /** The Constant biggestSimpleBinomials. */
     /*
      * binomial(biggestSimpleBinomials[k], k) doesn't need to use the slower GCD-based impl, but
      * binomial(biggestSimpleBinomials[k] + 1, k) does.
@@ -168,7 +141,6 @@ public abstract class Matth {
     static final int[] biggestSimpleBinomials = { Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, 2642246, 86251, 11724, 3218, 1313, 684, 419, 287,
             214, 169, 139, 119, 105, 95, 87, 81, 76, 73, 70, 68, 66, 64, 63, 62, 62, 61, 61, 61 };
 
-    /** The Constant SIEVE_30. */
     /*
      * This bitmask is used as an optimization for cheaply testing for divisiblity by 2, 3, or 5.
      * Each bit is set to 1 for all remainders that indicate divisibility by 2, 3, or 5, so
@@ -176,7 +148,6 @@ public abstract class Matth {
      */
     private static final int SIEVE_30 = ~((1 << 1) | (1 << 7) | (1 << 11) | (1 << 13) | (1 << 17) | (1 << 19) | (1 << 23) | (1 << 29));
 
-    /** The Constant millerRabinBaseSets. */
     /*
      * If n <= millerRabinBases[i][0], then testing n against bases millerRabinBases[i][1..] suffices
      * to prove its primality. Values from miller-rabin.appspot.com.
@@ -696,7 +667,6 @@ public abstract class Matth {
         return Math.log10(x);
     }
 
-    /** The Constant SQRT2_PRECOMPUTE_THRESHOLD. */
     /*
      * The maximum number of bits in a square root for which we'll precompute an explicit half power
      * of two. This can be any value, but higher values incur more class load time and linearly
@@ -704,7 +674,6 @@ public abstract class Matth {
      */
     static final int SQRT2_PRECOMPUTE_THRESHOLD = 256;
 
-    /** The Constant SQRT2_PRECOMPUTED_BITS. */
     static final BigInteger SQRT2_PRECOMPUTED_BITS = new BigInteger("16a09e667f3bcc908b2fb1366ea957d3e3adec17512775099da2f590b0667322a", 16);
 
     /**
@@ -794,10 +763,8 @@ public abstract class Matth {
         return x.bitLength() <= Long.SIZE - 1;
     }
 
-    /** The Constant LN_10. */
     private static final double LN_10 = Math.log(10);
 
-    /** The Constant LN_2. */
     private static final double LN_2 = Math.log(2);
 
     /**
@@ -2590,10 +2557,8 @@ public abstract class Matth {
         return (x < 0) ? result.negate() : result;
     }
 
-    /** The Constant MAX_FACTORIAL. */
     static final int MAX_FACTORIAL = 170;
 
-    /** The Constant everySixteenthFactorial. */
     static final double[] everySixteenthFactorial = { 0x1.0p0, 0x1.30777758p44, 0x1.956ad0aae33a4p117, 0x1.ee69a78d72cb6p202, 0x1.fe478ee34844ap295,
             0x1.c619094edabffp394, 0x1.3638dd7bd6347p498, 0x1.7cac197cfe503p605, 0x1.1e5dfc140e1e5p716, 0x1.8ce85fadb707ep829, 0x1.95d5f3d928edep945 };
 

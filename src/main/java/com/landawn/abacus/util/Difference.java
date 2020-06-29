@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
- * The Class Difference.
  *
  * @author Haiyang Li
  * @param <L>
@@ -32,22 +31,12 @@ import java.util.Map.Entry;
  */
 public class Difference<L, R> {
 
-    /** The common. */
     final L common;
 
-    /** The left only. */
     final L leftOnly;
 
-    /** The right only. */
     final R rightOnly;
 
-    /**
-     * Instantiates a new difference.
-     *
-     * @param common
-     * @param leftOnly
-     * @param rightOnly
-     */
     Difference(L common, L leftOnly, R rightOnly) {
         this.common = common;
         this.leftOnly = leftOnly;
@@ -588,10 +577,6 @@ public class Difference<L, R> {
         return new Difference<>(common, leftOnly, rightOnly);
     }
 
-    /**
-     *
-     * @return
-     */
     public L inCommon() {
         return common;
     }
@@ -624,10 +609,6 @@ public class Difference<L, R> {
                 || (leftOnly instanceof Collection && (((Collection) leftOnly).isEmpty() && ((Collection) rightOnly).isEmpty()));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return "{inCommon=" + common + ", onLeftOnly=" + leftOnly + ", onRightOnly=" + rightOnly + "}";

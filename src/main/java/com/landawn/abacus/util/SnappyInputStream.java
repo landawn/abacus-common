@@ -18,22 +18,14 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * The Class SnappyInputStream.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public final class SnappyInputStream extends InputStream {
 
-    /** The in. */
     private final org.xerial.snappy.SnappyInputStream in;
 
-    /**
-     * Instantiates a new snappy input stream.
-     *
-     * @param is
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
     public SnappyInputStream(InputStream is) throws IOException {
         in = new org.xerial.snappy.SnappyInputStream(is);
     }

@@ -79,16 +79,12 @@ import java.util.concurrent.TimeUnit;
  */
 public final class Stopwatch {
 
-    /** The ticker. */
     private final Ticker ticker;
 
-    /** The is running. */
     private boolean isRunning;
 
-    /** The elapsed nanos. */
     private long elapsedNanos;
 
-    /** The start tick. */
     private long startTick;
 
     /**
@@ -133,18 +129,10 @@ public final class Stopwatch {
         return new Stopwatch(ticker).start();
     }
 
-    /**
-     * Instantiates a new stopwatch.
-     */
     Stopwatch() {
         this.ticker = Ticker.systemTicker();
     }
 
-    /**
-     * Instantiates a new stopwatch.
-     *
-     * @param ticker
-     */
     Stopwatch(Ticker ticker) {
         this.ticker = N.checkArgNotNull(ticker, "ticker");
     }
@@ -198,10 +186,6 @@ public final class Stopwatch {
         return this;
     }
 
-    /**
-     *
-     * @return
-     */
     private long elapsedNanos() {
         return isRunning ? ticker.read() - startTick + elapsedNanos : elapsedNanos;
     }
@@ -225,10 +209,6 @@ public final class Stopwatch {
         return desiredUnit.convert(elapsedNanos(), NANOSECONDS);
     }
 
-    /**
-     *
-     * @return
-     */
     public Duration elapsed() {
         return Duration.ofNanos(elapsedNanos());
     }

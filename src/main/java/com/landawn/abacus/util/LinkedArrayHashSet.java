@@ -28,9 +28,6 @@ import java.util.LinkedHashSet;
  */
 public final class LinkedArrayHashSet<E> extends ArrayHashSet<E> {
 
-    /**
-     * Instantiates a new linked array hash set.
-     */
     public LinkedArrayHashSet() {
         super(LinkedHashSet.class);
     }

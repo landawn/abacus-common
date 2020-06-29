@@ -29,9 +29,5 @@ import java.lang.annotation.Target;
 @WebService.HttpMethod(WebService.HttpMethod.PUT)
 public @interface PUT {
 
-    /**
-     *
-     * @return
-     */
     String value() default "";
 }

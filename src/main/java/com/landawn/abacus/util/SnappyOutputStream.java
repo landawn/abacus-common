@@ -18,33 +18,18 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * The Class SnappyOutputStream.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public final class SnappyOutputStream extends OutputStream {
 
-    /** The out. */
     private final org.xerial.snappy.SnappyOutputStream out;
 
-    /**
-     * Instantiates a new snappy output stream.
-     *
-     * @param os
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
     public SnappyOutputStream(OutputStream os) throws IOException {
         this.out = new org.xerial.snappy.SnappyOutputStream(os);
     }
 
-    /**
-     * Instantiates a new snappy output stream.
-     *
-     * @param os
-     * @param bufferSizes
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
     public SnappyOutputStream(OutputStream os, int bufferSizes) throws IOException {
         this.out = new org.xerial.snappy.SnappyOutputStream(os, bufferSizes);
     }

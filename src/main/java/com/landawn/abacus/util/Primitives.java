@@ -18,12 +18,8 @@ package com.landawn.abacus.util;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
 
-/**
- * The Class Primitives.
- */
 public final class Primitives {
 
-    /** The Constant PRIMITIVE_2_WRAPPER. */
     // ...
     static final BiMap<Class<?>, Class<?>> PRIMITIVE_2_WRAPPER = new BiMap<>();
 
@@ -47,9 +43,6 @@ public final class Primitives {
         PRIMITIVE_2_WRAPPER.put(double[].class, Double[].class);
     }
 
-    /**
-     * Instantiates a new primitives.
-     */
     private Primitives() {
         // utility class.
     }

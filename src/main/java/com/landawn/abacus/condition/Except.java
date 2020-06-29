@@ -15,28 +15,18 @@
 package com.landawn.abacus.condition;
 
 /**
- * The Class Except.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class Except extends Clause {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 5640147014734662525L;
 
-    /**
-     * Instantiates a new except.
-     */
     // For Kryo
     Except() {
     }
 
-    /**
-     * Instantiates a new except.
-     *
-     * @param condition
-     */
     public Except(SubQuery condition) {
         super(Operator.EXCEPT, condition);
     }

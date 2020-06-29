@@ -15,7 +15,6 @@
 package com.landawn.abacus.util;
 
 /**
- * The Class Synchronized.
  *
  * @author Haiyang Li
  * @param <T>
@@ -23,14 +22,8 @@ package com.landawn.abacus.util;
  */
 public final class Synchronized<T> {
 
-    /** The mutex. */
     private final T mutex;
 
-    /**
-     * Instantiates a new synchronized.
-     *
-     * @param mutex
-     */
     Synchronized(final T mutex) {
         N.checkArgNotNull(mutex);
 

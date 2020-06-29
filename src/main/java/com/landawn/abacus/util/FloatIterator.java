@@ -22,14 +22,12 @@ import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.FloatStream;
 
 /**
- * The Class FloatIterator.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public abstract class FloatIterator extends ImmutableIterator<Float> {
 
-    /** The Constant EMPTY. */
     public static final FloatIterator EMPTY = new FloatIterator() {
         @Override
         public boolean hasNext() {
@@ -42,10 +40,6 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
         }
     };
 
-    /**
-     *
-     * @return
-     */
     public static FloatIterator empty() {
         return EMPTY;
     }
@@ -250,24 +244,12 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
         return nextFloat();
     }
 
-    /**
-     *
-     * @return
-     */
     public abstract float nextFloat();
 
-    /**
-     *
-     * @return
-     */
     public float[] toArray() {
         return toList().trimToSize().array();
     }
 
-    /**
-     *
-     * @return
-     */
     public FloatList toList() {
         final FloatList list = new FloatList();
 
@@ -278,10 +260,6 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
         return list;
     }
 
-    /**
-     *
-     * @return
-     */
     public FloatStream stream() {
         return FloatStream.of(this);
     }

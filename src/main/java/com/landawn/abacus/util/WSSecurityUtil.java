@@ -34,10 +34,8 @@ import java.security.SecureRandom;
  */
 public final class WSSecurityUtil {
 
-    /** The Constant RNG_ALGORITHM. */
     private static final String RNG_ALGORITHM = "SHA1PRNG";
 
-    /** The Constant HASH_ALGORITHM. */
     private static final String HASH_ALGORITHM = "SHA-1";
 
     /**
@@ -49,9 +47,6 @@ public final class WSSecurityUtil {
     /** A cached MessageDigest object. */
     private static MessageDigest digest = null;
 
-    /**
-     * Instantiates a new WS security util.
-     */
     private WSSecurityUtil() {
         // Complete
     }

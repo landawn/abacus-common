@@ -22,14 +22,12 @@ import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.CharStream;
 
 /**
- * The Class CharIterator.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public abstract class CharIterator extends ImmutableIterator<Character> {
 
-    /** The Constant EMPTY. */
     public static final CharIterator EMPTY = new CharIterator() {
         @Override
         public boolean hasNext() {
@@ -42,10 +40,6 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
         }
     };
 
-    /**
-     *
-     * @return
-     */
     public static CharIterator empty() {
         return EMPTY;
     }
@@ -250,24 +244,12 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
         return nextChar();
     }
 
-    /**
-     *
-     * @return
-     */
     public abstract char nextChar();
 
-    /**
-     *
-     * @return
-     */
     public char[] toArray() {
         return toList().trimToSize().array();
     }
 
-    /**
-     *
-     * @return
-     */
     public CharList toList() {
         final CharList list = new CharList();
 
@@ -278,10 +260,6 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
         return list;
     }
 
-    /**
-     *
-     * @return
-     */
     public CharStream stream() {
         return CharStream.of(this);
     }

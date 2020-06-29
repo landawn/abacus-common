@@ -22,27 +22,14 @@ package com.landawn.abacus.util;
  */
 public enum YesNo {
 
-    /** The no. */
-    NO(0),
-    /** The yes. */
-    YES(1);
+    NO(0), YES(1);
 
-    /** The int value. */
     private int intValue;
 
-    /**
-     * Instantiates a new yes no.
-     *
-     * @param intValue
-     */
     YesNo(int intValue) {
         this.intValue = intValue;
     }
 
-    /**
-     *
-     * @return
-     */
     public int intValue() {
         return intValue;
     }

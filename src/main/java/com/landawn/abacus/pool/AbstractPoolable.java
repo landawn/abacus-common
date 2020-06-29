@@ -15,30 +15,18 @@
 package com.landawn.abacus.pool;
 
 /**
- * The Class AbstractPoolable.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public abstract class AbstractPoolable implements Poolable {
 
-    /** The activity print. */
     final ActivityPrint activityPrint;
 
-    /**
-     * Instantiates a new abstract poolable.
-     *
-     * @param liveTime
-     * @param maxIdleTime
-     */
     protected AbstractPoolable(long liveTime, long maxIdleTime) {
         activityPrint = new ActivityPrint(liveTime, maxIdleTime);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public ActivityPrint activityPrint() {
         return activityPrint;

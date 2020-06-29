@@ -21,29 +21,15 @@ import com.landawn.abacus.util.function.FloatConsumer;
  */
 public class FloatSummaryStatistics implements FloatConsumer {
 
-    /** The summation. */
     private final KahanSummation summation = new KahanSummation();
 
-    /** The min. */
     private float min = Float.POSITIVE_INFINITY;
 
-    /** The max. */
     private float max = Float.NEGATIVE_INFINITY;
 
-    /**
-     * Instantiates a new float summary statistics.
-     */
     public FloatSummaryStatistics() {
     }
 
-    /**
-     * Instantiates a new float summary statistics.
-     *
-     * @param count
-     * @param sum
-     * @param min
-     * @param max
-     */
     public FloatSummaryStatistics(long count, double sum, float min, float max) {
         summation.combine(count, sum);
 
@@ -119,26 +105,14 @@ public class FloatSummaryStatistics implements FloatConsumer {
         return summation.average().orElse(0d);
     }
 
-    /**
-     *
-     * @return
-     */
     public final float sum() {
         return (float) summation.sum();
     }
 
-    /**
-     *
-     * @return
-     */
     public final OptionalDouble average() {
         return summation.average();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return String.format("{min=%d, max=%d, count=%d, sum=%d, average=%f}", getMin(), getMax(), getCount(), getSum(), getAverage());

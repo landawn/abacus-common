@@ -22,35 +22,14 @@ package com.landawn.abacus.util;
  */
 public enum MediaType {
 
-    /** The binary. */
-    BINARY(0),
-    /** The audio. */
-    AUDIO(1),
-    /** The video. */
-    VIDEO(2),
-    /** The image. */
-    IMAGE(3),
-    /** The text. */
-    TEXT(4),
-    /** The record. */
-    RECORD(5);
+    BINARY(0), AUDIO(1), VIDEO(2), IMAGE(3), TEXT(4), RECORD(5);
 
-    /** The int value. */
     private int intValue;
 
-    /**
-     * Instantiates a new media type.
-     *
-     * @param intValue
-     */
     MediaType(int intValue) {
         this.intValue = intValue;
     }
 
-    /**
-     *
-     * @return
-     */
     public int intValue() {
         return intValue;
     }

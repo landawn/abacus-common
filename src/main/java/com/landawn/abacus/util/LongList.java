@@ -41,37 +41,24 @@ import com.landawn.abacus.util.stream.Collector;
 import com.landawn.abacus.util.stream.LongStream;
 
 /**
- * The Class LongList.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -7764836427712181163L;
 
-    /** The Constant RAND. */
     static final Random RAND = new SecureRandom();
 
-    /** The element data. */
     private long[] elementData = N.EMPTY_LONG_ARRAY;
 
-    /** The size. */
     private int size = 0;
 
-    /**
-     * Instantiates a new long list.
-     */
     public LongList() {
         super();
     }
 
-    /**
-     * Instantiates a new long list.
-     *
-     * @param initialCapacity
-     */
     public LongList(int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_LONG_ARRAY : new long[initialCapacity];
     }
@@ -85,12 +72,6 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         this(a, a.length);
     }
 
-    /**
-     * Instantiates a new long list.
-     *
-     * @param a
-     * @param size
-     */
     public LongList(long[] a, int size) {
         N.checkFromIndexSize(0, size, a.length);
 
@@ -1095,10 +1076,6 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return N.INDEX_NOT_FOUND;
     }
 
-    /**
-     *
-     * @return
-     */
     public OptionalLong min() {
         return size() == 0 ? OptionalLong.empty() : OptionalLong.of(N.min(elementData, 0, size));
     }
@@ -1115,10 +1092,6 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return fromIndex == toIndex ? OptionalLong.empty() : OptionalLong.of(N.min(elementData, fromIndex, toIndex));
     }
 
-    /**
-     *
-     * @return
-     */
     public OptionalLong median() {
         return size() == 0 ? OptionalLong.empty() : OptionalLong.of(N.median(elementData, 0, size));
     }
@@ -1135,10 +1108,6 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return fromIndex == toIndex ? OptionalLong.empty() : OptionalLong.of(N.median(elementData, fromIndex, toIndex));
     }
 
-    /**
-     *
-     * @return
-     */
     public OptionalLong max() {
         return size() == 0 ? OptionalLong.empty() : OptionalLong.of(N.max(elementData, 0, size));
     }
@@ -1178,10 +1147,6 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return toIndex - fromIndex < k ? OptionalLong.empty() : OptionalLong.of(N.kthLargest(elementData, fromIndex, toIndex, k));
     }
 
-    /**
-     *
-     * @return
-     */
     public long sum() {
         return sum(0, size());
     }
@@ -1198,10 +1163,6 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return N.sum(elementData, fromIndex, toIndex);
     }
 
-    /**
-     *
-     * @return
-     */
     public OptionalDouble average() {
         return average(0, size());
     }
@@ -1286,18 +1247,10 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         }
     }
 
-    /**
-     *
-     * @return
-     */
     public OptionalLong first() {
         return size() == 0 ? OptionalLong.empty() : OptionalLong.of(elementData[0]);
     }
 
-    /**
-     *
-     * @return
-     */
     public OptionalLong last() {
         return size() == 0 ? OptionalLong.empty() : OptionalLong.of(elementData[size() - 1]);
     }
@@ -1895,10 +1848,6 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         set(i, set(j, elementData[i]));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public LongList copy() {
         return new LongList(N.copyOfRange(elementData, 0, size));
@@ -2048,19 +1997,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return size == 0;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int size() {
         return size;
     }
 
-    /**
-     *
-     * @return
-     */
     public List<Long> boxed() {
         return boxed(0, size);
     }
@@ -2083,10 +2024,6 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return res;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public long[] toArray() {
         return N.copyOfRange(elementData, 0, size);
@@ -2311,10 +2248,6 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return result;
     }
 
-    /**
-     *
-     * @return
-     */
     public LongIterator iterator() {
         if (isEmpty()) {
             return LongIterator.EMPTY;
@@ -2323,10 +2256,6 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return LongIterator.of(elementData, 0, size);
     }
 
-    /**
-     *
-     * @return
-     */
     public LongStream stream() {
         return LongStream.of(elementData, 0, size());
     }
@@ -2393,10 +2322,6 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return If.is(size > 0).then(this, action);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return N.hashCode(elementData, 0, size);
@@ -2422,10 +2347,6 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return false;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return size == 0 ? "[]" : N.toString(elementData, 0, size);

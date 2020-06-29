@@ -21,29 +21,15 @@ import com.landawn.abacus.util.function.DoubleConsumer;
  */
 public class DoubleSummaryStatistics implements DoubleConsumer {
 
-    /** The summation. */
     private final KahanSummation summation = new KahanSummation();
 
-    /** The min. */
     private double min = Double.POSITIVE_INFINITY;
 
-    /** The max. */
     private double max = Double.NEGATIVE_INFINITY;
 
-    /**
-     * Instantiates a new double summary statistics.
-     */
     public DoubleSummaryStatistics() {
     }
 
-    /**
-     * Instantiates a new double summary statistics.
-     *
-     * @param count
-     * @param sum
-     * @param min
-     * @param max
-     */
     public DoubleSummaryStatistics(long count, double sum, double min, double max) {
         summation.combine(count, sum);
 
@@ -130,26 +116,14 @@ public class DoubleSummaryStatistics implements DoubleConsumer {
         return summation.average().orElse(0d);
     }
 
-    /**
-     *
-     * @return
-     */
     public final double sum() {
         return summation.sum();
     }
 
-    /**
-     *
-     * @return
-     */
     public final OptionalDouble average() {
         return summation.average();
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return String.format("{min=%d, max=%d, count=%d, sum=%d, average=%f}", getMin(), getMax(), getCount(), getSum(), getAverage());

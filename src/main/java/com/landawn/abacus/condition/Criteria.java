@@ -37,10 +37,8 @@ import com.landawn.abacus.util.WD;
  */
 public class Criteria extends AbstractCondition {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 7534336752211519239L;
 
-    /** The Constant aggregationOperators. */
     private static final Set<Operator> aggregationOperators = N.newHashSet();
 
     static {
@@ -51,15 +49,10 @@ public class Criteria extends AbstractCondition {
         aggregationOperators.add(Operator.MINUS);
     }
 
-    /** The distinct. */
     private boolean distinct = false;
 
-    /** The condition list. */
     private List<Condition> conditionList;
 
-    /**
-     * Instantiates a new criteria.
-     */
     public Criteria() {
         super(Operator.EMPTY);
         conditionList = new ArrayList<>();
@@ -722,10 +715,6 @@ public class Criteria extends AbstractCondition {
         return distinct + join + where + groupBy + having + aggregate + orderBy + limit + forUpdate;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         int h = isDistinct() ? 17 : 31;

@@ -21,67 +21,35 @@ import com.landawn.abacus.condition.ConditionFactory.CF;
 import com.landawn.abacus.util.SortDirection;
 
 /**
- * The Class GroupBy.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class GroupBy extends Clause {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -8805648115111124665L;
 
-    /**
-     * Instantiates a new group by.
-     */
     // For Kryo
     GroupBy() {
     }
 
-    /**
-     * Instantiates a new group by.
-     *
-     * @param condition
-     */
     public GroupBy(Condition condition) {
         super(Operator.GROUP_BY, condition);
     }
 
-    /**
-     * Instantiates a new group by.
-     *
-     * @param propNames
-     */
     @SafeVarargs
     public GroupBy(String... propNames) {
         this(CF.expr(OrderBy.createCondition(propNames)));
     }
 
-    /**
-     * Instantiates a new group by.
-     *
-     * @param propName
-     * @param direction
-     */
     public GroupBy(String propName, SortDirection direction) {
         this(CF.expr(OrderBy.createCondition(propName, direction)));
     }
 
-    /**
-     * Instantiates a new group by.
-     *
-     * @param propNames
-     * @param direction
-     */
     public GroupBy(Collection<String> propNames, SortDirection direction) {
         this(CF.expr(OrderBy.createCondition(propNames, direction)));
     }
 
-    /**
-     * Instantiates a new group by.
-     *
-     * @param orders
-     */
     public GroupBy(Map<String, SortDirection> orders) {
         this(OrderBy.createCondition(orders));
     }

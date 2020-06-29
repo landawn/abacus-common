@@ -21,9 +21,6 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-/**
- * The Interface Column.
- */
 @Documented
 @Target(value = { FIELD })
 @Retention(RUNTIME)
@@ -37,9 +34,5 @@ public @interface Column {
     @Deprecated
     String value() default "";
 
-    /**
-     *
-     * @return
-     */
     String name() default "";
 }

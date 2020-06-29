@@ -17,7 +17,6 @@ package com.landawn.abacus.pool;
 import java.io.Serializable;
 
 /**
- * The Interface Pool.
  *
  * @author Haiyang Li
  * @since 0.8
@@ -41,10 +40,6 @@ public interface Pool extends Serializable {
      */
     int getCapacity();
 
-    /**
-     *
-     * @return
-     */
     int size();
 
     /**
@@ -76,22 +71,10 @@ public interface Pool extends Serializable {
      */
     boolean isClosed();
 
-    /**
-     *
-     * @return
-     */
     long putCount();
 
-    /**
-     *
-     * @return
-     */
     long hitCount();
 
-    /**
-     *
-     * @return
-     */
     long missCount();
 
     /**

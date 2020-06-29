@@ -150,11 +150,9 @@ abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, 
         };
     }
 
-    /** The Constant NULL_MIN_COMPARATOR. */
     @SuppressWarnings("rawtypes")
     static final Comparator NULL_MIN_COMPARATOR = Comparators.nullsFirst();
 
-    /** The Constant NULL_MAX_COMPARATOR. */
     @SuppressWarnings("rawtypes")
     static final Comparator NULL_MAX_COMPARATOR = Comparators.nullsLast();
 

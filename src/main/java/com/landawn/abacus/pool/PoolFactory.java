@@ -22,9 +22,6 @@ package com.landawn.abacus.pool;
  */
 public abstract class PoolFactory {
 
-    /**
-     * Instantiates a new pool factory.
-     */
     private PoolFactory() {
         // singleton
     }

@@ -98,7 +98,6 @@ public enum Percentage {
     /** The  99 9999. */
     _99_9999("99.9999%", 0.999999);
 
-    /** The Constant valuePool. */
     private static final Map<Integer, Percentage> valuePool = new HashMap<>();
 
     static {
@@ -107,21 +106,12 @@ public enum Percentage {
         }
     }
 
-    /** The Constant rangePool. */
     private static final Map<String, ImmutableSet<Percentage>> rangePool = new ConcurrentHashMap<>();
 
-    /** The str. */
     private final String str;
 
-    /** The val. */
     private final double val;
 
-    /**
-     * Instantiates a new percentage.
-     *
-     * @param str
-     * @param val
-     */
     Percentage(String str, double val) {
         this.str = str;
         this.val = val;
@@ -252,18 +242,10 @@ public enum Percentage {
         return (int) (p.val * 1_000_000);
     }
 
-    /**
-     *
-     * @return
-     */
     public double doubleValue() {
         return val;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return str;

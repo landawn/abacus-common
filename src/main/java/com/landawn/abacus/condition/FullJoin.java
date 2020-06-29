@@ -17,48 +17,26 @@ package com.landawn.abacus.condition;
 import java.util.Collection;
 
 /**
- * The Class FullJoin.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public class FullJoin extends Join {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 685295398958634480L;
 
-    /**
-     * Instantiates a new full join.
-     */
     // For Kryo
     FullJoin() {
     }
 
-    /**
-     * Instantiates a new full join.
-     *
-     * @param joinEntity
-     */
     public FullJoin(String joinEntity) {
         super(Operator.FULL_JOIN, joinEntity);
     }
 
-    /**
-     * Instantiates a new full join.
-     *
-     * @param joinEntity
-     * @param condition
-     */
     public FullJoin(String joinEntity, Condition condition) {
         super(Operator.FULL_JOIN, joinEntity, condition);
     }
 
-    /**
-     * Instantiates a new full join.
-     *
-     * @param joinEntities
-     * @param condition
-     */
     public FullJoin(Collection<String> joinEntities, Condition condition) {
         super(Operator.FULL_JOIN, joinEntities, condition);
     }

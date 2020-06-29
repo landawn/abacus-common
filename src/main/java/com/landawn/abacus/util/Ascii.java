@@ -34,9 +34,6 @@ package com.landawn.abacus.util;
  */
 public final class Ascii {
 
-    /**
-     * Instantiates a new ascii.
-     */
     private Ascii() {
     }
 

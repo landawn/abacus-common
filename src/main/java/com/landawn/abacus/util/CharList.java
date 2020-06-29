@@ -40,37 +40,24 @@ import com.landawn.abacus.util.stream.CharStream;
 import com.landawn.abacus.util.stream.Collector;
 
 /**
- * The Class CharList.
  *
  * @author Haiyang Li
  * @since 0.8
  */
 public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
-    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 7293826835233022514L;
 
-    /** The Constant RAND. */
     static final Random RAND = new SecureRandom();
 
-    /** The element data. */
     private char[] elementData = N.EMPTY_CHAR_ARRAY;
 
-    /** The size. */
     private int size = 0;
 
-    /**
-     * Instantiates a new char list.
-     */
     public CharList() {
         super();
     }
 
-    /**
-     * Instantiates a new char list.
-     *
-     * @param initialCapacity
-     */
     public CharList(int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_CHAR_ARRAY : new char[initialCapacity];
     }
@@ -84,12 +71,6 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         this(a, a.length);
     }
 
-    /**
-     * Instantiates a new char list.
-     *
-     * @param a
-     * @param size
-     */
     public CharList(char[] a, int size) {
         N.checkFromIndexSize(0, size, a.length);
 
@@ -1140,10 +1121,6 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return N.INDEX_NOT_FOUND;
     }
 
-    /**
-     *
-     * @return
-     */
     public OptionalChar min() {
         return size() == 0 ? OptionalChar.empty() : OptionalChar.of(N.min(elementData, 0, size));
     }
@@ -1160,10 +1137,6 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return fromIndex == toIndex ? OptionalChar.empty() : OptionalChar.of(N.min(elementData, fromIndex, toIndex));
     }
 
-    /**
-     *
-     * @return
-     */
     public OptionalChar median() {
         return size() == 0 ? OptionalChar.empty() : OptionalChar.of(N.median(elementData, 0, size));
     }
@@ -1180,10 +1153,6 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return fromIndex == toIndex ? OptionalChar.empty() : OptionalChar.of(N.median(elementData, fromIndex, toIndex));
     }
 
-    /**
-     *
-     * @return
-     */
     public OptionalChar max() {
         return size() == 0 ? OptionalChar.empty() : OptionalChar.of(N.max(elementData, 0, size));
     }
@@ -1223,10 +1192,6 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return toIndex - fromIndex < k ? OptionalChar.empty() : OptionalChar.of(N.kthLargest(elementData, fromIndex, toIndex, k));
     }
 
-    /**
-     *
-     * @return
-     */
     public int sum() {
         return sum(0, size());
     }
@@ -1243,10 +1208,6 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return N.sum(elementData, fromIndex, toIndex);
     }
 
-    /**
-     *
-     * @return
-     */
     public OptionalDouble average() {
         return average(0, size());
     }
@@ -1331,18 +1292,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         }
     }
 
-    /**
-     *
-     * @return
-     */
     public OptionalChar first() {
         return size() == 0 ? OptionalChar.empty() : OptionalChar.of(elementData[0]);
     }
 
-    /**
-     *
-     * @return
-     */
     public OptionalChar last() {
         return size() == 0 ? OptionalChar.empty() : OptionalChar.of(elementData[size() - 1]);
     }
@@ -1894,10 +1847,6 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         set(i, set(j, elementData[i]));
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public CharList copy() {
         return new CharList(N.copyOfRange(elementData, 0, size));
@@ -2047,19 +1996,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return size == 0;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int size() {
         return size;
     }
 
-    /**
-     *
-     * @return
-     */
     public List<Character> boxed() {
         return boxed(0, size);
     }
@@ -2082,10 +2023,6 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return res;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public char[] toArray() {
         return N.copyOfRange(elementData, 0, size);
@@ -2295,10 +2232,6 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return result;
     }
 
-    /**
-     *
-     * @return
-     */
     public CharIterator iterator() {
         if (isEmpty()) {
             return CharIterator.EMPTY;
@@ -2307,10 +2240,6 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return CharIterator.of(elementData, 0, size);
     }
 
-    /**
-     *
-     * @return
-     */
     public CharStream stream() {
         return CharStream.of(elementData, 0, size());
     }
@@ -2377,10 +2306,6 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return If.is(size > 0).then(this, action);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return N.hashCode(elementData, 0, size);
@@ -2406,10 +2331,6 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return false;
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public String toString() {
         return size == 0 ? "[]" : N.toString(elementData, 0, size);

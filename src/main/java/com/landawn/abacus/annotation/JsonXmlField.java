@@ -22,41 +22,18 @@ import java.text.DecimalFormat;
 
 import com.landawn.abacus.annotation.Type.EnumBy;
 
-/**
- * The Interface JsonXmlField.
- */
 @Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JsonXmlField {
 
-    /**
-     *
-     * @return
-     */
     String name() default "";
 
-    /**
-     *
-     * @return
-     */
     String type() default "";
 
-    /**
-     *
-     * @return
-     */
     EnumBy enumerated() default EnumBy.NAME;
 
-    /**
-     *
-     * @return
-     */
     String dateFormat() default "";
 
-    /**
-     *
-     * @return
-     */
     String timeZone() default "";
 
     /**

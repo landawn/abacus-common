@@ -21,7 +21,6 @@ import java.util.Set;
 import java.util.SortedSet;
 
 /**
- * The Class ImmutableSet.
  *
  * @author Haiyang Li
  * @param <E>
@@ -29,15 +28,9 @@ import java.util.SortedSet;
  */
 public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
 
-    /** The Constant EMPTY. */
     @SuppressWarnings("rawtypes")
     private static final ImmutableSet EMPTY = new ImmutableSet(Collections.EMPTY_SET);
 
-    /**
-     * Instantiates a new immutable set.
-     *
-     * @param set
-     */
     ImmutableSet(Set<? extends E> set) {
         super(Collections.unmodifiableSet(set));
     }

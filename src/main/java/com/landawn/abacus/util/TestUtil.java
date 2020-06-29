@@ -25,14 +25,8 @@ import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 
-/**
- * The Class TestUtil.
- */
 public final class TestUtil {
 
-    /**
-     * Instantiates a new test util.
-     */
     private TestUtil() {
         // singleton
     }

@@ -102,10 +102,8 @@ public final class N extends CommonUtil {
 
     private static final int CPU_CORES = Runtime.getRuntime().availableProcessors();
 
-    /** The Constant asyncExecutor. */
     static final AsyncExecutor asyncExecutor = new AsyncExecutor(Math.max(8, CPU_CORES), Math.max(256, CPU_CORES), 180L, TimeUnit.SECONDS);
 
-    /** The Constant SCHEDULED_EXECUTOR. */
     static final ScheduledExecutorService SCHEDULED_EXECUTOR;
 
     static {
