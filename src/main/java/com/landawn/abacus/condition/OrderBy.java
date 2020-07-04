@@ -18,6 +18,7 @@ import static com.landawn.abacus.util.WD.COMMA_SPACE;
 import static com.landawn.abacus.util.WD.SPACE;
 
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.landawn.abacus.condition.ConditionFactory.CF;
@@ -37,24 +38,36 @@ public class OrderBy extends Clause {
     OrderBy() {
     }
 
-    public OrderBy(Condition condition) {
+    public OrderBy(final Condition condition) {
         super(Operator.ORDER_BY, condition);
     }
 
     @SafeVarargs
-    public OrderBy(String... propNames) {
+    public OrderBy(final String... propNames) {
         this(CF.expr(createCondition(propNames)));
     }
 
-    public OrderBy(String propName, SortDirection direction) {
+    public OrderBy(final String propName, final SortDirection direction) {
         this(CF.expr(createCondition(propName, direction)));
     }
 
-    public OrderBy(Collection<String> propNames, SortDirection direction) {
+    public OrderBy(final Collection<String> propNames, final SortDirection direction) {
         this(CF.expr(createCondition(propNames, direction)));
     }
 
-    public OrderBy(Map<String, SortDirection> orders) {
+    /**
+     * 
+     * @param orders should be a {@code LinkedHashMap}
+     */
+    public OrderBy(final Map<String, SortDirection> orders) {
+        this(createCondition(orders));
+    }
+
+    /**
+     * 
+     * @param orders
+     */
+    public OrderBy(final LinkedHashMap<String, SortDirection> orders) {
         this(createCondition(orders));
     }
 

@@ -17,6 +17,7 @@ package com.landawn.abacus.condition;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -935,16 +936,6 @@ public class ConditionFactory {
 
     /**
      *
-     * @param propName
-     * @param direction
-     * @return
-     */
-    public static GroupBy groupBy(final String propName, final SortDirection direction) {
-        return new GroupBy(propName, direction);
-    }
-
-    /**
-     *
      * @param propNames
      * @return
      */
@@ -964,10 +955,56 @@ public class ConditionFactory {
 
     /**
      *
-     * @param orders
+     * @param propName
+     * @param direction
+     * @return
+     */
+    public static GroupBy groupBy(final String propName, final SortDirection direction) {
+        return new GroupBy(propName, direction);
+    }
+
+    /**
+     * 
+     * @param propNameA
+     * @param directionA
+     * @param propNameB
+     * @param directionB
+     * @return
+     */
+    public static GroupBy groupBy(final String propNameA, final SortDirection directionA, final String propNameB, final SortDirection directionB) {
+        return groupBy(N.<String, SortDirection> asLinkedHashMap(propNameA, directionA, propNameB, directionB));
+    }
+
+    /**
+     * 
+     * @param propNameA
+     * @param directionA
+     * @param propNameB
+     * @param directionB
+     * @param propNameC
+     * @param directionC
+     * @return
+     */
+    public static GroupBy groupBy(final String propNameA, final SortDirection directionA, final String propNameB, final SortDirection directionB,
+            final String propNameC, final SortDirection directionC) {
+        return groupBy(N.<String, SortDirection> asLinkedHashMap(propNameA, directionA, propNameB, directionB, propNameC, directionC));
+    }
+
+    /**
+     *
+     * @param orders should be a {@code LinkedHashMap}
      * @return
      */
     public static GroupBy groupBy(final Map<String, SortDirection> orders) {
+        return new GroupBy(orders);
+    }
+
+    /**
+     * 
+     * @param orders
+     * @return
+     */
+    public static GroupBy groupBy(final LinkedHashMap<String, SortDirection> orders) {
         return new GroupBy(orders);
     }
 
@@ -1010,12 +1047,22 @@ public class ConditionFactory {
 
     /**
      *
-     * @param propName
-     * @param direction
+     * @param propNames
      * @return
      */
-    public static OrderBy orderBy(final String propName, final SortDirection direction) {
-        return new OrderBy(propName, direction);
+    @SafeVarargs
+    public static OrderBy orderByAsc(final String... propNames) {
+        return new OrderBy(Array.asList(propNames), SortDirection.ASC);
+    }
+
+    /**
+     *
+     * @param propNames
+     * @return
+     */
+    @SafeVarargs
+    public static OrderBy orderByDesc(final String... propNames) {
+        return new OrderBy(Array.asList(propNames), SortDirection.DESC);
     }
 
     /**
@@ -1039,10 +1086,56 @@ public class ConditionFactory {
 
     /**
      *
-     * @param orders
+     * @param propName
+     * @param direction
+     * @return
+     */
+    public static OrderBy orderBy(final String propName, final SortDirection direction) {
+        return new OrderBy(propName, direction);
+    }
+
+    /**
+     * 
+     * @param propNameA
+     * @param directionA
+     * @param propNameB
+     * @param directionB
+     * @return
+     */
+    public static OrderBy orderBy(final String propNameA, final SortDirection directionA, final String propNameB, final SortDirection directionB) {
+        return orderBy(N.<String, SortDirection> asLinkedHashMap(propNameA, directionA, propNameB, directionB));
+    }
+
+    /**
+     * 
+     * @param propNameA
+     * @param directionA
+     * @param propNameB
+     * @param directionB
+     * @param propNameC
+     * @param directionC
+     * @return
+     */
+    public static OrderBy orderBy(final String propNameA, final SortDirection directionA, final String propNameB, final SortDirection directionB,
+            final String propNameC, final SortDirection directionC) {
+        return orderBy(N.<String, SortDirection> asLinkedHashMap(propNameA, directionA, propNameB, directionB, propNameC, directionC));
+    }
+
+    /**
+     *
+     * @param orders should be a {@code LinkedHashMap}
      * @return
      */
     public static OrderBy orderBy(final Map<String, SortDirection> orders) {
+        return new OrderBy(orders);
+    }
+
+    /**
+     *
+     * @param orders
+     * @return
+     */
+    public static OrderBy orderBy(final LinkedHashMap<String, SortDirection> orders) {
         return new OrderBy(orders);
     }
 

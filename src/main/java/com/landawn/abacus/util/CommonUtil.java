@@ -438,11 +438,8 @@ class CommonUtil {
 
     private static final int MIN_SIZE_FOR_COPY_ALL = 9;
 
-    /**
-     * Constructor for.
-     */
     CommonUtil() {
-        // no instance();
+        // Utility class.
     }
 
     /**
@@ -4244,7 +4241,7 @@ class CommonUtil {
      * @param v1
      * @return
      */
-    public static <K, V, k extends K, v extends V> Map<K, V> asMap(final k k1, final v v1) {
+    public static <K, V> Map<K, V> asMap(final K k1, final V v1) {
         final Map<K, V> map = new HashMap<>(1);
         map.put(k1, v1);
         return map;
@@ -4262,7 +4259,7 @@ class CommonUtil {
      * @param v2
      * @return
      */
-    public static <K, V, k extends K, v extends V> Map<K, V> asMap(final k k1, final v v1, final k k2, final v v2) {
+    public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2) {
         final Map<K, V> map = new HashMap<>(2);
         map.put(k1, v1);
         map.put(k2, v2);
@@ -4283,7 +4280,7 @@ class CommonUtil {
      * @param v3
      * @return
      */
-    public static <K, V, k extends K, v extends V> Map<K, V> asMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3) {
+    public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
         final Map<K, V> map = new HashMap<>(3);
         map.put(k1, v1);
         map.put(k2, v2);
@@ -4307,8 +4304,7 @@ class CommonUtil {
      * @param v4
      * @return
      */
-    public static <K, V, k extends K, v extends V> Map<K, V> asMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
-            final v v4) {
+    public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4) {
         final Map<K, V> map = new HashMap<>(4);
         map.put(k1, v1);
         map.put(k2, v2);
@@ -4335,8 +4331,8 @@ class CommonUtil {
      * @param v5
      * @return
      */
-    public static <K, V, k extends K, v extends V> Map<K, V> asMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
-            final v v4, final k k5, final v v5) {
+    public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
+            final V v5) {
         final Map<K, V> map = new HashMap<>(5);
         map.put(k1, v1);
         map.put(k2, v2);
@@ -4366,8 +4362,8 @@ class CommonUtil {
      * @param v6
      * @return
      */
-    public static <K, V, k extends K, v extends V> Map<K, V> asMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
-            final v v4, final k k5, final v v5, final k k6, final v v6) {
+    public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
+            final K k6, final V v6) {
         final Map<K, V> map = new HashMap<>(6);
         map.put(k1, v1);
         map.put(k2, v2);
@@ -4400,8 +4396,8 @@ class CommonUtil {
      * @param v7
      * @return
      */
-    public static <K, V, k extends K, v extends V> Map<K, V> asMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
-            final v v4, final k k5, final v v5, final k k6, final v v6, final k k7, final v v7) {
+    public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
+            final K k6, final V v6, final K k7, final V v7) {
         final Map<K, V> map = new HashMap<>(7);
         map.put(k1, v1);
         map.put(k2, v2);
@@ -4419,7 +4415,9 @@ class CommonUtil {
      * @param <V> the value type
      * @param a
      * @return
+     * @deprecated
      */
+    @Deprecated
     @SafeVarargs
     @NullSafe
     public static <K, V> Map<K, V> asMap(final Object... a) {
@@ -4441,7 +4439,7 @@ class CommonUtil {
      * @param v1
      * @return
      */
-    public static <K, V, k extends K, v extends V> Map<K, V> asLinkedHashMap(final k k1, final v v1) {
+    public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1) {
         final Map<K, V> map = new LinkedHashMap<>(1);
         map.put(k1, v1);
         return map;
@@ -4460,7 +4458,7 @@ class CommonUtil {
      * @param v2
      * @return
      */
-    public static <K, V, k extends K, v extends V> Map<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2) {
+    public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2) {
         final Map<K, V> map = new LinkedHashMap<>(2);
         map.put(k1, v1);
         map.put(k2, v2);
@@ -4482,7 +4480,7 @@ class CommonUtil {
      * @param v3
      * @return
      */
-    public static <K, V, k extends K, v extends V> Map<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3) {
+    public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
         final Map<K, V> map = new LinkedHashMap<>(3);
         map.put(k1, v1);
         map.put(k2, v2);
@@ -4507,8 +4505,7 @@ class CommonUtil {
      * @param v4
      * @return
      */
-    public static <K, V, k extends K, v extends V> Map<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
-            final v v4) {
+    public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4) {
         final Map<K, V> map = new LinkedHashMap<>(4);
         map.put(k1, v1);
         map.put(k2, v2);
@@ -4536,8 +4533,8 @@ class CommonUtil {
      * @param v5
      * @return
      */
-    public static <K, V, k extends K, v extends V> Map<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
-            final v v4, final k k5, final v v5) {
+    public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
+            final V v5) {
         final Map<K, V> map = new LinkedHashMap<>(5);
         map.put(k1, v1);
         map.put(k2, v2);
@@ -4568,8 +4565,8 @@ class CommonUtil {
      * @param v6
      * @return
      */
-    public static <K, V, k extends K, v extends V> Map<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
-            final v v4, final k k5, final v v5, final k k6, final v v6) {
+    public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
+            final V v5, final K k6, final V v6) {
         final Map<K, V> map = new LinkedHashMap<>(6);
         map.put(k1, v1);
         map.put(k2, v2);
@@ -4603,8 +4600,8 @@ class CommonUtil {
      * @param v7
      * @return
      */
-    public static <K, V, k extends K, v extends V> Map<K, V> asLinkedHashMap(final k k1, final v v1, final k k2, final v v2, final k k3, final v v3, final k k4,
-            final v v4, final k k5, final v v5, final k k6, final v v6, final k k7, final v v7) {
+    public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
+            final V v5, final K k6, final V v6, final K k7, final V v7) {
         final Map<K, V> map = new LinkedHashMap<>(7);
         map.put(k1, v1);
         map.put(k2, v2);
@@ -4623,7 +4620,9 @@ class CommonUtil {
      * @param <V> the value type
      * @param a
      * @return
+     * @deprecated
      */
+    @Deprecated
     @SafeVarargs
     public static <K, V> Map<K, V> asLinkedHashMap(final Object... a) {
         if (CommonUtil.isNullOrEmpty(a)) {
@@ -4686,7 +4685,9 @@ class CommonUtil {
      * @param a pairs of property name and value or a Java Entity Object what
      *            allows access to properties using getter and setter methods.
      * @return
+     * @deprecated
      */
+    @Deprecated
     @SafeVarargs
     public static Map<String, Object> asProps(final Object... a) {
         if (CommonUtil.isNullOrEmpty(a)) {

@@ -4074,6 +4074,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
     /**
      * 
      * @param <K>
+     * @param b
+     * @param keyMapper
+     * @return
+     */
+    public <K> ExceptionalStream<Pair<T, T>, E> innerJoin(final Collection<? extends T> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper) {
+        return innerJoin(b, keyMapper, Fnn.<T, T, E> pair());
+    }
+
+    /**
+     * 
+     * @param <K>
      * @param <R>
      * @param b
      * @param keyMapper
@@ -4232,6 +4244,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
             return t.value();
         }
     };
+
+    /**
+     * 
+     * @param <K>
+     * @param b
+     * @param keyMapper
+     * @return
+     */
+    public <K> ExceptionalStream<Pair<T, T>, E> fullJoin(final Collection<? extends T> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper) {
+        return fullJoin(b, keyMapper, Fnn.<T, T, E> pair());
+    }
 
     /**
      * 
@@ -4414,6 +4438,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
     /**
      * 
      * @param <K>
+     * @param b
+     * @param keyMapper
+     * @return
+     */
+    public <K> ExceptionalStream<Pair<T, T>, E> leftJoin(final Collection<? extends T> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper) {
+        return leftJoin(b, keyMapper, Fnn.<T, T, E> pair());
+    }
+
+    /**
+     * 
+     * @param <K>
      * @param <R>
      * @param b
      * @param keyMapper
@@ -4563,6 +4599,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
                 return func.apply((T) null, u);
             }
         }));
+    }
+
+    /**
+     * 
+     * @param <K>
+     * @param b
+     * @param keyMapper
+     * @return
+     */
+    public <K> ExceptionalStream<Pair<T, T>, E> rightJoin(final Collection<? extends T> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper) {
+        return rightJoin(b, keyMapper, Fnn.<T, T, E> pair());
     }
 
     /**
@@ -4748,6 +4796,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
         };
 
         return map(mapper);
+    }
+
+    /**
+     * 
+     * @param <K>
+     * @param b
+     * @param keyMapper
+     * @return
+     */
+    public <K> ExceptionalStream<Pair<T, List<T>>, E> groupJoin(final Collection<? extends T> b,
+            final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper) {
+        return groupJoin(b, keyMapper, Fnn.<T, List<T>, E> pair());
     }
 
     /**

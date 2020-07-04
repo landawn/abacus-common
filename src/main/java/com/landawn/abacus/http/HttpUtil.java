@@ -872,6 +872,7 @@ public final class HttpUtil {
         return result == null || result == ContentFormat.NONE ? defaultContentFormat : result;
     }
 
+    @SuppressWarnings("deprecation")
     public static Map<String, String> getHttpHeaders(final Annotation[] annotations) {
         if (N.isNullOrEmpty(annotations)) {
             return null;

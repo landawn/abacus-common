@@ -206,6 +206,15 @@ public final class SQLMapper {
         sqlMapper.remove(id);
     }
 
+    public SQLMapper copy() {
+        final SQLMapper copy = new SQLMapper();
+
+        copy.sqlMapper.putAll(this.sqlMapper);
+        copy.attrsMap.putAll(this.attrsMap);
+
+        return copy;
+    }
+
     /**
      *
      * @param file
@@ -250,6 +259,10 @@ public final class SQLMapper {
         } finally {
             IOUtil.close(os);
         }
+    }
+
+    public boolean isEmpty() {
+        return sqlMapper.isEmpty();
     }
 
     @Override

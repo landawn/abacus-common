@@ -187,6 +187,7 @@ public final class HttpProxy {
 
         N.checkArgNotNull(finalBaseUrl, "baseUrl");
 
+        @SuppressWarnings("deprecation")
         InvocationHandler h = new InvocationHandler() {
             private final Logger _logger = LoggerFactory.getLogger(interfaceClass);
 

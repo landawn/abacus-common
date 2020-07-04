@@ -58,7 +58,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param v1
      * @return
      */
-    public static <K extends Comparable<? super K>, V, k extends K, v extends V> ImmutableNavigableMap<K, V> of(final k k1, final v v1) {
+    public static <K extends Comparable<? super K>, V, k extends K, v extends V> ImmutableNavigableMap<K, V> of(final K k1, final V v1) {
         final NavigableMap<K, V> map = N.newTreeMap();
 
         map.put(k1, v1);
@@ -78,8 +78,8 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param v2
      * @return
      */
-    public static <K extends Comparable<? super K>, V, k extends K, v extends V> ImmutableNavigableMap<K, V> of(final k k1, final v v1, final k k2,
-            final v v2) {
+    public static <K extends Comparable<? super K>, V, k extends K, v extends V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2,
+            final V v2) {
         final NavigableMap<K, V> map = N.newTreeMap();
 
         map.put(k1, v1);
@@ -102,8 +102,8 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param v3
      * @return
      */
-    public static <K extends Comparable<? super K>, V, k extends K, v extends V> ImmutableNavigableMap<K, V> of(final k k1, final v v1, final k k2, final v v2,
-            final k k3, final v v3) {
+    public static <K extends Comparable<? super K>, V, k extends K, v extends V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2,
+            final K k3, final V v3) {
         final NavigableMap<K, V> map = N.newTreeMap();
 
         map.put(k1, v1);
@@ -129,8 +129,8 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param v4
      * @return
      */
-    public static <K extends Comparable<? super K>, V, k extends K, v extends V> ImmutableNavigableMap<K, V> of(final k k1, final v v1, final k k2, final v v2,
-            final k k3, final v v3, final k k4, final v v4) {
+    public static <K extends Comparable<? super K>, V, k extends K, v extends V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2,
+            final K k3, final V v3, final K k4, final V v4) {
         final NavigableMap<K, V> map = N.newTreeMap();
 
         map.put(k1, v1);
@@ -159,8 +159,8 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param v5
      * @return
      */
-    public static <K extends Comparable<? super K>, V, k extends K, v extends V> ImmutableNavigableMap<K, V> of(final k k1, final v v1, final k k2, final v v2,
-            final k k3, final v v3, final k k4, final v v4, final k k5, final v v5) {
+    public static <K extends Comparable<? super K>, V, k extends K, v extends V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2,
+            final K k3, final V v3, final K k4, final V v4, final K k5, final V v5) {
         final NavigableMap<K, V> map = N.newTreeMap();
 
         map.put(k1, v1);
@@ -192,8 +192,8 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param v6
      * @return
      */
-    public static <K extends Comparable<? super K>, V, k extends K, v extends V> ImmutableNavigableMap<K, V> of(final k k1, final v v1, final k k2, final v v2,
-            final k k3, final v v3, final k k4, final v v4, final k k5, final v v5, final k k6, final v v6) {
+    public static <K extends Comparable<? super K>, V, k extends K, v extends V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2,
+            final K k3, final V v3, final K k4, final V v4, final K k5, final V v5, final K k6, final V v6) {
         final NavigableMap<K, V> map = N.newTreeMap();
 
         map.put(k1, v1);
@@ -228,8 +228,8 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param v7
      * @return
      */
-    public static <K extends Comparable<? super K>, V, k extends K, v extends V> ImmutableNavigableMap<K, V> of(final k k1, final v v1, final k k2, final v v2,
-            final k k3, final v v3, final k k4, final v v4, final k k5, final v v5, final k k6, final v v6, final k k7, final v v7) {
+    public static <K extends Comparable<? super K>, V, k extends K, v extends V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2,
+            final K k3, final V v3, final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7) {
         final NavigableMap<K, V> map = N.newTreeMap();
 
         map.put(k1, v1);

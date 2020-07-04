@@ -2565,15 +2565,11 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U> Stream<Pair<T, U>> crossJoin(final Collection<? extends U> b) {
-        assertNotClosed();
-
         return crossJoin(b, Fn.<T, U> pair());
     }
 
     @Override
     public <U, R> Stream<R> crossJoin(final Collection<? extends U> b, final BiFunction<? super T, ? super U, R> func) {
-        assertNotClosed();
-
         return flatMap(t -> Stream.of(b).map(u -> func.apply(t, u)));
     }
 
@@ -2604,9 +2600,12 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <U, K> Stream<Pair<T, U>> innerJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper) {
-        assertNotClosed();
-
         return innerJoin(b, leftKeyMapper, rightKeyMapper, Fn.<T, U> pair());
+    }
+
+    @Override
+    public <K> Stream<Pair<T, T>> innerJoin(final Collection<? extends T> b, final Function<? super T, ? extends K> keyMapper) {
+        return innerJoin(b, keyMapper, Fn.<T, T> pair());
     }
 
     @Override
@@ -2644,8 +2643,6 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <K, R> Stream<R> innerJoin(Collection<? extends T> b, Function<? super T, ? extends K> keyMapper, BiFunction<? super T, ? super T, R> func) {
-        assertNotClosed();
-
         return innerJoin(b, keyMapper, keyMapper, func);
     }
 
@@ -2710,9 +2707,12 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <U, K> Stream<Pair<T, U>> fullJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper) {
-        assertNotClosed();
-
         return fullJoin(b, leftKeyMapper, rightKeyMapper, Fn.<T, U> pair());
+    }
+
+    @Override
+    public <K> Stream<Pair<T, T>> fullJoin(final Collection<? extends T> b, final Function<? super T, ? extends K> keyMapper) {
+        return fullJoin(b, keyMapper, Fn.<T, T> pair());
     }
 
     @Override
@@ -2773,8 +2773,6 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <K, R> Stream<R> fullJoin(Collection<? extends T> b, Function<? super T, ? extends K> keyMapper, BiFunction<? super T, ? super T, R> func) {
-        assertNotClosed();
-
         return fullJoin(b, keyMapper, keyMapper, func);
     }
 
@@ -2886,9 +2884,12 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <U, K> Stream<Pair<T, U>> leftJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper) {
-        assertNotClosed();
-
         return leftJoin(b, leftKeyMapper, rightKeyMapper, Fn.<T, U> pair());
+    }
+
+    @Override
+    public <K> Stream<Pair<T, T>> leftJoin(final Collection<? extends T> b, final Function<? super T, ? extends K> keyMapper) {
+        return leftJoin(b, keyMapper, Fn.<T, T> pair());
     }
 
     @Override
@@ -2928,8 +2929,6 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <K, R> Stream<R> leftJoin(Collection<? extends T> b, Function<? super T, ? extends K> keyMapper, BiFunction<? super T, ? super T, R> func) {
-        assertNotClosed();
-
         return leftJoin(b, keyMapper, keyMapper, func);
     }
 
@@ -2996,9 +2995,12 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <U, K> Stream<Pair<T, U>> rightJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper) {
-        assertNotClosed();
-
         return rightJoin(b, leftKeyMapper, rightKeyMapper, Fn.<T, U> pair());
+    }
+
+    @Override
+    public <K> Stream<Pair<T, T>> rightJoin(final Collection<? extends T> b, final Function<? super T, ? extends K> keyMapper) {
+        return rightJoin(b, keyMapper, Fn.<T, T> pair());
     }
 
     @Override
@@ -3057,8 +3059,6 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <K, R> Stream<R> rightJoin(Collection<? extends T> b, Function<? super T, ? extends K> keyMapper, BiFunction<? super T, ? super T, R> func) {
-        assertNotClosed();
-
         return rightJoin(b, keyMapper, keyMapper, func);
     }
 
@@ -3168,9 +3168,12 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <U, K> Stream<Pair<T, List<U>>> groupJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper) {
-        assertNotClosed();
-
         return groupJoin(b, leftKeyMapper, rightKeyMapper, Fn.<T, List<U>> pair());
+    }
+
+    @Override
+    public <K> Stream<Pair<T, List<T>>> groupJoin(final Collection<? extends T> b, final Function<? super T, ? extends K> keyMapper) {
+        return groupJoin(b, keyMapper, Fn.<T, List<T>> pair());
     }
 
     @Override
@@ -3229,8 +3232,6 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <K, R> Stream<R> groupJoin(Collection<? extends T> b, Function<? super T, ? extends K> keyMapper, BiFunction<? super T, ? super List<T>, R> func) {
-        assertNotClosed();
-
         return groupJoin(b, keyMapper, keyMapper, func);
     }
 
@@ -3291,8 +3292,6 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <U, K> Stream<Pair<T, U>> groupJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final BinaryOperator<U> mergeFunction) {
-        assertNotClosed();
-
         return groupJoin(b, leftKeyMapper, rightKeyMapper, mergeFunction, Fn.<T, U> pair());
     }
 
@@ -3419,8 +3418,6 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <U, K, A, D> Stream<Pair<T, D>> groupJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyMapper,
             final Function<? super U, ? extends K> rightKeyMapper, final Collector<? super U, A, D> downstream) {
-        assertNotClosed();
-
         return groupJoin(b, leftKeyMapper, rightKeyMapper, downstream, Fn.<T, D> pair());
     }
 
@@ -3548,8 +3545,6 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <E extends Exception> Optional<T> findAny(final Throwables.Predicate<? super T, E> predicate) throws E {
-        assertNotClosed();
-
         return findFirst(predicate);
     }
 
@@ -3810,15 +3805,11 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> skipNull() {
-        assertNotClosed();
-
         return filter(Fn.notNull());
     }
 
     @Override
     public Stream<List<T>> slidingToList(int windowSize) {
-        assertNotClosed();
-
         return slidingToList(windowSize, 1);
     }
 
@@ -4090,15 +4081,11 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public Stream<T> sorted() {
-        assertNotClosed();
-
         return sorted(NATURAL_COMPARATOR);
     }
 
     @Override
     public Stream<T> reverseSorted() {
-        assertNotClosed();
-
         return sorted(REVERSED_COMPARATOR);
     }
 

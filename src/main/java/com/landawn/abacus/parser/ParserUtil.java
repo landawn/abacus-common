@@ -401,73 +401,55 @@ public final class ParserUtil {
         }
     }
 
-    /**
-     * The Class EntityInfo.
-     */
     public static class EntityInfo implements JSONReader.SymbolReader {
 
-        /** The name. */
-        final String name;
-
-        /** The cls. */
         public final Class<Object> cls;
 
-        /** The type. */
+        public final String simpleClassName;
+
+        public final String canonicalClassName;
+
+        final String name;
+
         public final Type<Object> type;
 
-        /** The prop info list. */
         public final ImmutableList<PropInfo> propInfoList;
 
         public final ImmutableMap<Class<? extends Annotation>, Annotation> annotations;
 
         final NamingPolicy jsonXmlNamingPolicy;
 
-        /** The type name. */
         final String typeName;
 
-        /** The json info. */
         final JsonNameTag[] jsonNameTags;
 
-        /** The xml info. */
         final XmlNameTag[] xmlNameTags;
 
-        /** The prop infos. */
         final PropInfo[] propInfos;
 
-        /** The jsonXmlSerializablePropInfos. */
         final PropInfo[] jsonXmlSerializablePropInfos;
 
-        /** The non transient seri prop infos. */
         final PropInfo[] nonTransientSeriPropInfos;
 
-        /** The transient seri prop infos. */
         final PropInfo[] transientSeriPropInfos;
 
-        /** The transient seri prop name set. */
         final Set<String> transientSeriPropNameSet = N.newHashSet();
 
-        /** The prop info map. */
         private final Map<String, PropInfo> propInfoMap;
 
-        /** The prop info queue map. */
         private final Map<String, List<PropInfo>> propInfoQueueMap;
 
-        /** The prop info array. */
         private final PropInfo[] propInfoArray;
 
-        /** The hash prop info map. */
         private final Map<Integer, PropInfo> hashPropInfoMap;
 
         public final Optional<String> tableName;
 
-        /**
-         * Instantiates a new entity info.
-         *
-         * @param cls
-         */
         @SuppressWarnings("deprecation")
         public EntityInfo(Class<?> cls) {
-            name = ClassUtil.formalizePropName(cls.getSimpleName());
+            simpleClassName = ClassUtil.getSimpleClassName(cls);
+            canonicalClassName = ClassUtil.getCanonicalClassName(cls);
+            name = ClassUtil.formalizePropName(simpleClassName);
             this.cls = (Class<Object>) cls;
             type = N.typeOf(cls);
             typeName = type.name();
@@ -958,50 +940,34 @@ public final class ParserUtil {
             return this == obj || (obj instanceof EntityInfo && N.equals(((EntityInfo) obj).cls, cls));
         }
 
-        /**
-         *
-         * @return
-         */
         @Override
         public String toString() {
             return ClassUtil.getCanonicalClassName(cls);
         }
     }
 
-    /**
-     * The Class PropInfo.
-     */
     public static class PropInfo {
 
-        /** The Constant NULL_CHAR_ARRAY. */
         static final char[] NULL_CHAR_ARRAY = "null".toCharArray();
 
         public final Class<Object> declaringClass;
 
-        /** The name. */
         public final String name;
 
-        /** The clazz. */
         public final Class<Object> clazz;
 
-        /** The type. */
         public final Type<Object> type;
 
-        /** The field. */
         public final Field field;
 
-        /** The get method. */
         public final Method getMethod;
 
-        /** The set method. */
         public final Method setMethod;
 
         public final ImmutableMap<Class<? extends Annotation>, Annotation> annotations;
 
-        /** The json xml type. */
         public final Type<Object> jsonXmlType;
 
-        /** The db type. */
         public final Type<Object> dbType;
 
         final JsonNameTag[] jsonNameTags;
@@ -1010,13 +976,10 @@ public final class ParserUtil {
 
         final boolean isFieldAccessible;
 
-        /** The is dirty mark. */
         final boolean isDirtyMark;
 
-        /** The date format. */
         final String dateFormat;
 
-        /** The time zone. */
         final TimeZone timeZone;
 
         final ZoneId zoneId;
@@ -1027,13 +990,10 @@ public final class ParserUtil {
 
         final JodaDateTimeFormatterHolder jodaDTFH;
 
-        /** The is long date format. */
         final boolean isLongDateFormat;
 
-        /** The number format. */
         final NumberFormat numberFormat;
 
-        /** The has format. */
         final boolean hasFormat;
 
         public final boolean isTransient;
@@ -1042,11 +1002,6 @@ public final class ParserUtil {
 
         public final Optional<String> columnName;
 
-        /**
-         * Instantiates a new prop info.
-         *
-         * @param propName
-         */
         PropInfo(String propName) {
             this.declaringClass = null;
             this.name = propName;
@@ -1812,24 +1767,15 @@ public final class ParserUtil {
         }
     }
 
-    /**
-     * The Class ASMPropInfo.
-     */
     static class ASMPropInfo extends PropInfo {
-
-        /** The method access. */
         final com.esotericsoftware.reflectasm.MethodAccess methodAccess;
 
-        /** The get method access index. */
         final int getMethodAccessIndex;
 
-        /** The set method access index. */
         final int setMethodAccessIndex;
 
-        /** The field access. */
         final com.esotericsoftware.reflectasm.FieldAccess fieldAccess;
 
-        /** The field access index. */
         final int fieldAccessIndex;
 
         public ASMPropInfo(final String name, final Field field, final Method getMethod, final JsonXmlConfig jsonXmlConfig,

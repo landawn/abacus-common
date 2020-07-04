@@ -15,6 +15,7 @@
 package com.landawn.abacus.condition;
 
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.landawn.abacus.condition.ConditionFactory.CF;
@@ -38,19 +39,27 @@ public class GroupBy extends Clause {
     }
 
     @SafeVarargs
-    public GroupBy(String... propNames) {
+    public GroupBy(final String... propNames) {
         this(CF.expr(OrderBy.createCondition(propNames)));
     }
 
-    public GroupBy(String propName, SortDirection direction) {
+    public GroupBy(final String propName, final SortDirection direction) {
         this(CF.expr(OrderBy.createCondition(propName, direction)));
     }
 
-    public GroupBy(Collection<String> propNames, SortDirection direction) {
+    public GroupBy(final Collection<String> propNames, final SortDirection direction) {
         this(CF.expr(OrderBy.createCondition(propNames, direction)));
     }
 
-    public GroupBy(Map<String, SortDirection> orders) {
+    /**
+     * 
+     * @param orders should be a {@code LinkedHashMap}
+     */
+    public GroupBy(final Map<String, SortDirection> orders) {
+        this(OrderBy.createCondition(orders));
+    }
+
+    public GroupBy(final LinkedHashMap<String, SortDirection> orders) {
         this(OrderBy.createCondition(orders));
     }
 }
