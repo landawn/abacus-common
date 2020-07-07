@@ -47,6 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.landawn.abacus.DataSet;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.IntermediateOp;
+import com.landawn.abacus.annotation.LazyEvaluation;
 import com.landawn.abacus.annotation.ParallelSupported;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.annotation.TerminalOp;
@@ -145,6 +146,7 @@ import com.landawn.abacus.util.stream.ObjIteratorEx.QueuedIterator;
  * @see LongStream
  * @see DoubleStream
  */
+@LazyEvaluation
 public abstract class Stream<T>
         extends StreamBase<T, Object[], Predicate<? super T>, Consumer<? super T>, List<T>, Optional<T>, Indexed<T>, ObjIterator<T>, Stream<T>> {
 
@@ -5220,60 +5222,69 @@ public abstract class Stream<T>
         final int threadNum = Math.min(c.size(), readThreadNum);
         final List<ContinuableFuture<Void>> futureList = new ArrayList<>(threadNum);
         final AtomicInteger threadCounter = new AtomicInteger(threadNum);
+        boolean noException = false;
 
-        for (int i = 0; i < threadNum; i++) {
-            futureList.add(DEFAULT_ASYNC_EXECUTOR.execute(new Throwables.Runnable<RuntimeException>() {
-                @Override
-                public void run() {
-                    try {
-                        while (onGoing.value()) {
-                            Stream<? extends T> s = null;
-                            Iterator<? extends T> iter = null;
+        try {
+            for (int i = 0; i < threadNum; i++) {
+                futureList.add(DEFAULT_ASYNC_EXECUTOR.execute(new Throwables.Runnable<RuntimeException>() {
+                    @Override
+                    public void run() {
+                        try {
+                            while (onGoing.value()) {
+                                Stream<? extends T> s = null;
+                                Iterator<? extends T> iter = null;
 
-                            synchronized (iterators) {
-                                if (iterators.hasNext()) {
-                                    s = iterators.next();
-                                    iter = s.iteratorEx();
-                                } else {
-                                    break;
-                                }
-                            }
-
-                            T next = null;
-
-                            while (onGoing.value() && iter.hasNext()) {
-                                next = iter.next();
-
-                                if (next == null) {
-                                    next = (T) NONE;
-                                } else if (disposableChecked.isFalse()) {
-                                    disposableChecked.setTrue();
-
-                                    if (next instanceof NoCachingNoUpdating) {
-                                        throw new RuntimeException("Can't run NoCachingNoUpdating Objects in parallel Stream or Queue");
+                                synchronized (iterators) {
+                                    if (iterators.hasNext()) {
+                                        s = iterators.next();
+                                        iter = s.iteratorEx();
+                                    } else {
+                                        break;
                                     }
                                 }
 
-                                if (queue.offer(next) == false) {
-                                    while (onGoing.value()) {
-                                        if (queue.offer(next, 100, TimeUnit.MILLISECONDS)) {
-                                            break;
+                                T next = null;
+
+                                while (onGoing.value() && iter.hasNext()) {
+                                    next = iter.next();
+
+                                    if (next == null) {
+                                        next = (T) NONE;
+                                    } else if (disposableChecked.isFalse()) {
+                                        disposableChecked.setTrue();
+
+                                        if (next instanceof NoCachingNoUpdating) {
+                                            throw new RuntimeException("Can't run NoCachingNoUpdating Objects in parallel Stream or Queue");
+                                        }
+                                    }
+
+                                    if (queue.offer(next) == false) {
+                                        while (onGoing.value()) {
+                                            if (queue.offer(next, MAX_WAIT_TIME_FOR_QUEUE_OFFER, TimeUnit.MILLISECONDS)) {
+                                                break;
+                                            }
                                         }
                                     }
                                 }
-                            }
 
-                            if (s != null) {
-                                s.close();
+                                if (s != null) {
+                                    s.close();
+                                }
                             }
+                        } catch (Exception e) {
+                            setError(eHolder, e, onGoing);
+                        } finally {
+                            threadCounter.decrementAndGet();
                         }
-                    } catch (Exception e) {
-                        setError(eHolder, e, onGoing);
-                    } finally {
-                        threadCounter.decrementAndGet();
                     }
-                }
-            }));
+                }));
+            }
+
+            noException = true;
+        } finally {
+            if (noException == false) {
+                onGoing.setFalse();
+            }
         }
 
         return of(new QueuedIterator<T>(queueSize) {
@@ -5284,7 +5295,7 @@ public abstract class Stream<T>
                 try {
                     if (next == null && (next = queue.poll()) == null) {
                         while (onGoing.value() && (threadCounter.get() > 0 || queue.size() > 0)) { // (queue.size() > 0 || counter.get() > 0) is wrong. has to check counter first
-                            if ((next = queue.poll(1, TimeUnit.MILLISECONDS)) != null) {
+                            if ((next = queue.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS)) != null) {
                                 break;
                             }
                         }
@@ -5396,54 +5407,63 @@ public abstract class Stream<T>
         final int threadNum = Math.min(c.size(), readThreadNum);
         final List<ContinuableFuture<Void>> futureList = new ArrayList<>(threadNum);
         final AtomicInteger threadCounter = new AtomicInteger(threadNum);
+        boolean noException = false;
 
-        for (int i = 0; i < threadNum; i++) {
-            futureList.add(DEFAULT_ASYNC_EXECUTOR.execute(new Throwables.Runnable<RuntimeException>() {
-                @Override
-                public void run() {
-                    try {
-                        while (onGoing.value()) {
-                            Iterator<? extends T> iter = null;
+        try {
+            for (int i = 0; i < threadNum; i++) {
+                futureList.add(DEFAULT_ASYNC_EXECUTOR.execute(new Throwables.Runnable<RuntimeException>() {
+                    @Override
+                    public void run() {
+                        try {
+                            while (onGoing.value()) {
+                                Iterator<? extends T> iter = null;
 
-                            synchronized (iterators) {
-                                if (iterators.hasNext()) {
-                                    iter = iterators.next();
-                                } else {
-                                    break;
-                                }
-                            }
-
-                            T next = null;
-
-                            while (onGoing.value() && iter.hasNext()) {
-                                next = iter.next();
-
-                                if (next == null) {
-                                    next = (T) NONE;
-                                } else if (disposableChecked.isFalse()) {
-                                    disposableChecked.setTrue();
-
-                                    if (next instanceof NoCachingNoUpdating) {
-                                        throw new RuntimeException("Can't run NoCachingNoUpdating Objects in parallel Stream or Queue");
+                                synchronized (iterators) {
+                                    if (iterators.hasNext()) {
+                                        iter = iterators.next();
+                                    } else {
+                                        break;
                                     }
                                 }
 
-                                if (queue.offer(next) == false) {
-                                    while (onGoing.value()) {
-                                        if (queue.offer(next, 100, TimeUnit.MILLISECONDS)) {
-                                            break;
+                                T next = null;
+
+                                while (onGoing.value() && iter.hasNext()) {
+                                    next = iter.next();
+
+                                    if (next == null) {
+                                        next = (T) NONE;
+                                    } else if (disposableChecked.isFalse()) {
+                                        disposableChecked.setTrue();
+
+                                        if (next instanceof NoCachingNoUpdating) {
+                                            throw new RuntimeException("Can't run NoCachingNoUpdating Objects in parallel Stream or Queue");
+                                        }
+                                    }
+
+                                    if (queue.offer(next) == false) {
+                                        while (onGoing.value()) {
+                                            if (queue.offer(next, MAX_WAIT_TIME_FOR_QUEUE_OFFER, TimeUnit.MILLISECONDS)) {
+                                                break;
+                                            }
                                         }
                                     }
                                 }
                             }
+                        } catch (Exception e) {
+                            setError(eHolder, e, onGoing);
+                        } finally {
+                            threadCounter.decrementAndGet();
                         }
-                    } catch (Exception e) {
-                        setError(eHolder, e, onGoing);
-                    } finally {
-                        threadCounter.decrementAndGet();
                     }
-                }
-            }));
+                }));
+            }
+
+            noException = true;
+        } finally {
+            if (noException == false) {
+                onGoing.setFalse();
+            }
         }
 
         return of(new QueuedIterator<T>(queueSize) {
@@ -5454,7 +5474,7 @@ public abstract class Stream<T>
                 try {
                     if (next == null && (next = queue.poll()) == null) {
                         while (onGoing.value() && (threadCounter.get() > 0 || queue.size() > 0)) { // (queue.size() > 0 || counter.get() > 0) is wrong. has to check counter first
-                            if ((next = queue.poll(1, TimeUnit.MILLISECONDS)) != null) {
+                            if ((next = queue.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS)) != null) {
                                 break;
                             }
                         }
@@ -8486,8 +8506,17 @@ public abstract class Stream<T>
         final BlockingQueue<B> queueB = new ArrayBlockingQueue<>(queueSize);
         final Holder<Throwable> eHolder = new Holder<>();
         final MutableBoolean onGoing = MutableBoolean.of(true);
+        boolean noException = false;
 
-        readToQueue(a, b, DEFAULT_ASYNC_EXECUTOR, threadCounterA, threadCounterB, queueA, queueB, eHolder, onGoing);
+        try {
+            readToQueue(a, b, DEFAULT_ASYNC_EXECUTOR, threadCounterA, threadCounterB, queueA, queueB, eHolder, onGoing);
+
+            noException = true;
+        } finally {
+            if (noException == false) {
+                onGoing.setFalse();
+            }
+        }
 
         return of(new QueuedIterator<R>(queueSize) {
             A nextA = null;
@@ -8498,7 +8527,7 @@ public abstract class Stream<T>
                 if (nextA == null || nextB == null) {
                     try {
                         while (nextA == null && onGoing.value() && (threadCounterA.get() > 0 || queueA.size() > 0)) { // (threadCounterA.get() > 0 || queueA.size() > 0) is wrong. has to check counter first
-                            nextA = queueA.poll(1, TimeUnit.MILLISECONDS);
+                            nextA = queueA.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
                         }
 
                         if (nextA == null) {
@@ -8508,7 +8537,7 @@ public abstract class Stream<T>
                         }
 
                         while (nextB == null && onGoing.value() && (threadCounterB.get() > 0 || queueB.size() > 0)) { // (threadCounterB.get() > 0 || queueB.size() > 0) is wrong. has to check counter first
-                            nextB = queueB.poll(1, TimeUnit.MILLISECONDS);
+                            nextB = queueB.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
                         }
 
                         if (nextB == null) {
@@ -8581,8 +8610,17 @@ public abstract class Stream<T>
         final BlockingQueue<C> queueC = new ArrayBlockingQueue<>(queueSize);
         final Holder<Throwable> eHolder = new Holder<>();
         final MutableBoolean onGoing = MutableBoolean.of(true);
+        boolean noException = false;
 
-        readToQueue(a, b, c, DEFAULT_ASYNC_EXECUTOR, threadCounterA, threadCounterB, threadCounterC, queueA, queueB, queueC, eHolder, onGoing);
+        try {
+            readToQueue(a, b, c, DEFAULT_ASYNC_EXECUTOR, threadCounterA, threadCounterB, threadCounterC, queueA, queueB, queueC, eHolder, onGoing);
+
+            noException = true;
+        } finally {
+            if (noException == false) {
+                onGoing.setFalse();
+            }
+        }
 
         return of(new QueuedIterator<R>(queueSize) {
             A nextA = null;
@@ -8594,7 +8632,7 @@ public abstract class Stream<T>
                 if (nextA == null || nextB == null || nextC == null) {
                     try {
                         while (nextA == null && onGoing.value() && (threadCounterA.get() > 0 || queueA.size() > 0)) { // (threadCounterA.get() > 0 || queueA.size() > 0) is wrong. has to check counter first
-                            nextA = queueA.poll(1, TimeUnit.MILLISECONDS);
+                            nextA = queueA.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
                         }
 
                         if (nextA == null) {
@@ -8604,7 +8642,7 @@ public abstract class Stream<T>
                         }
 
                         while (nextB == null && onGoing.value() && (threadCounterB.get() > 0 || queueB.size() > 0)) { // (threadCounterB.get() > 0 || queueB.size() > 0) is wrong. has to check counter first
-                            nextB = queueB.poll(1, TimeUnit.MILLISECONDS);
+                            nextB = queueB.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
                         }
 
                         if (nextB == null) {
@@ -8614,7 +8652,7 @@ public abstract class Stream<T>
                         }
 
                         while (nextC == null && onGoing.value() && (threadCounterC.get() > 0 || queueC.size() > 0)) { // (threadCounterC.get() > 0 || queueC.size() > 0) is wrong. has to check counter first
-                            nextC = queueC.poll(1, TimeUnit.MILLISECONDS);
+                            nextC = queueC.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
                         }
 
                         if (nextC == null) {
@@ -8792,8 +8830,17 @@ public abstract class Stream<T>
         final BlockingQueue<Object>[] queues = new ArrayBlockingQueue[len];
         final Holder<Throwable> eHolder = new Holder<>();
         final MutableBoolean onGoing = MutableBoolean.of(true);
+        boolean noException = false;
 
-        readToQueue(c, queueSize, DEFAULT_ASYNC_EXECUTOR, counters, queues, eHolder, onGoing);
+        try {
+            readToQueue(c, queueSize, DEFAULT_ASYNC_EXECUTOR, counters, queues, eHolder, onGoing);
+
+            noException = true;
+        } finally {
+            if (noException == false) {
+                onGoing.setFalse();
+            }
+        }
 
         return of(new QueuedIterator<R>(queueSize) {
             Object[] next = null;
@@ -8806,7 +8853,7 @@ public abstract class Stream<T>
                     for (int i = 0; i < len; i++) {
                         try {
                             while (next[i] == null && onGoing.value() && (counters[i].get() > 0 || queues[i].size() > 0)) { // (counters[i].get() > 0 || queues[i].size() > 0) is wrong. has to check counter first
-                                next[i] = queues[i].poll(1, TimeUnit.MILLISECONDS);
+                                next[i] = queues[i].poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
                             }
 
                             if (next[i] == null) {
@@ -9024,8 +9071,17 @@ public abstract class Stream<T>
         final BlockingQueue<B> queueB = new ArrayBlockingQueue<>(queueSize);
         final Holder<Throwable> eHolder = new Holder<>();
         final MutableBoolean onGoing = MutableBoolean.of(true);
+        boolean noException = false;
 
-        readToQueue(a, b, DEFAULT_ASYNC_EXECUTOR, threadCounterA, threadCounterB, queueA, queueB, eHolder, onGoing);
+        try {
+            readToQueue(a, b, DEFAULT_ASYNC_EXECUTOR, threadCounterA, threadCounterB, queueA, queueB, eHolder, onGoing);
+
+            noException = true;
+        } finally {
+            if (noException == false) {
+                onGoing.setFalse();
+            }
+        }
 
         return of(new QueuedIterator<R>(queueSize) {
             A nextA = null;
@@ -9036,11 +9092,11 @@ public abstract class Stream<T>
                 if (nextA == null && nextB == null) {
                     try {
                         while (nextA == null && onGoing.value() && (threadCounterA.get() > 0 || queueA.size() > 0)) { // (threadCounterA.get() > 0 || queueA.size() > 0) is wrong. has to check counter first
-                            nextA = queueA.poll(1, TimeUnit.MILLISECONDS);
+                            nextA = queueA.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
                         }
 
                         while (nextB == null && onGoing.value() && (threadCounterB.get() > 0 || queueB.size() > 0)) { // (threadCounterB.get() > 0 || queueB.size() > 0) is wrong. has to check counter first
-                            nextB = queueB.poll(1, TimeUnit.MILLISECONDS);
+                            nextB = queueB.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
                         }
                     } catch (Exception e) {
                         setError(eHolder, e, onGoing);
@@ -9129,8 +9185,17 @@ public abstract class Stream<T>
         final BlockingQueue<C> queueC = new ArrayBlockingQueue<>(queueSize);
         final Holder<Throwable> eHolder = new Holder<>();
         final MutableBoolean onGoing = MutableBoolean.of(true);
+        boolean noException = false;
 
-        readToQueue(a, b, c, DEFAULT_ASYNC_EXECUTOR, threadCounterA, threadCounterB, threadCounterC, queueA, queueB, queueC, eHolder, onGoing);
+        try {
+            readToQueue(a, b, c, DEFAULT_ASYNC_EXECUTOR, threadCounterA, threadCounterB, threadCounterC, queueA, queueB, queueC, eHolder, onGoing);
+
+            noException = true;
+        } finally {
+            if (noException == false) {
+                onGoing.setFalse();
+            }
+        }
 
         return of(new QueuedIterator<R>(queueSize) {
             A nextA = null;
@@ -9142,15 +9207,15 @@ public abstract class Stream<T>
                 if (nextA == null && nextB == null && nextC == null) {
                     try {
                         while (nextA == null && onGoing.value() && (threadCounterA.get() > 0 || queueA.size() > 0)) { // (threadCounterA.get() > 0 || queueA.size() > 0) is wrong. has to check counter first
-                            nextA = queueA.poll(1, TimeUnit.MILLISECONDS);
+                            nextA = queueA.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
                         }
 
                         while (nextB == null && onGoing.value() && (threadCounterB.get() > 0 || queueB.size() > 0)) { // (threadCounterB.get() > 0 || queueB.size() > 0) is wrong. has to check counter first
-                            nextB = queueB.poll(1, TimeUnit.MILLISECONDS);
+                            nextB = queueB.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
                         }
 
                         while (nextC == null && onGoing.value() && (threadCounterC.get() > 0 || queueC.size() > 0)) { // (threadCounterC.get() > 0 || queueC.size() > 0) is wrong. has to check counter first
-                            nextC = queueC.poll(1, TimeUnit.MILLISECONDS);
+                            nextC = queueC.poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
                         }
                     } catch (Exception e) {
                         setError(eHolder, e, onGoing);
@@ -9368,8 +9433,17 @@ public abstract class Stream<T>
         final MutableBoolean onGoing = MutableBoolean.of(true);
         final AtomicInteger[] counters = new AtomicInteger[len];
         final BlockingQueue<Object>[] queues = new ArrayBlockingQueue[len];
+        boolean noException = false;
 
-        readToQueue(c, queueSize, DEFAULT_ASYNC_EXECUTOR, counters, queues, eHolder, onGoing);
+        try {
+            readToQueue(c, queueSize, DEFAULT_ASYNC_EXECUTOR, counters, queues, eHolder, onGoing);
+
+            noException = true;
+        } finally {
+            if (noException == false) {
+                onGoing.setFalse();
+            }
+        }
 
         return of(new QueuedIterator<R>(queueSize) {
             Object[] next = null;
@@ -9382,7 +9456,7 @@ public abstract class Stream<T>
                     for (int i = 0; i < len; i++) {
                         try {
                             while (next[i] == null && onGoing.value() && (counters[i].get() > 0 || queues[i].size() > 0)) { // (counters[i].get() > 0 || queues[i].size() > 0) is wrong. has to check counter first
-                                next[i] = queues[i].poll(1, TimeUnit.MILLISECONDS);
+                                next[i] = queues[i].poll(MAX_WAIT_TIME_FOR_QUEUE_POLL, TimeUnit.MILLISECONDS);
                             }
                         } catch (Exception e) {
                             setError(eHolder, e, onGoing);
@@ -9977,7 +10051,7 @@ public abstract class Stream<T>
                             nextA = (A) NONE;
                         }
 
-                        while (onGoing.value() && queueA.offer(nextA, 100, TimeUnit.MILLISECONDS) == false) {
+                        while (onGoing.value() && queueA.offer(nextA, MAX_WAIT_TIME_FOR_QUEUE_OFFER, TimeUnit.MILLISECONDS) == false) {
                             // continue
                         }
                     }
@@ -10002,7 +10076,7 @@ public abstract class Stream<T>
                             nextB = (B) NONE;
                         }
 
-                        while (onGoing.value() && queueB.offer(nextB, 100, TimeUnit.MILLISECONDS) == false) {
+                        while (onGoing.value() && queueB.offer(nextB, MAX_WAIT_TIME_FOR_QUEUE_OFFER, TimeUnit.MILLISECONDS) == false) {
                             // continue
                         }
                     }
@@ -10032,7 +10106,7 @@ public abstract class Stream<T>
                             nextA = (A) NONE;
                         }
 
-                        while (onGoing.value() && queueA.offer(nextA, 100, TimeUnit.MILLISECONDS) == false) {
+                        while (onGoing.value() && queueA.offer(nextA, MAX_WAIT_TIME_FOR_QUEUE_OFFER, TimeUnit.MILLISECONDS) == false) {
                             // continue
                         }
                     }
@@ -10057,7 +10131,7 @@ public abstract class Stream<T>
                             nextB = (B) NONE;
                         }
 
-                        while (onGoing.value() && queueB.offer(nextB, 100, TimeUnit.MILLISECONDS) == false) {
+                        while (onGoing.value() && queueB.offer(nextB, MAX_WAIT_TIME_FOR_QUEUE_OFFER, TimeUnit.MILLISECONDS) == false) {
                             // continue
                         }
                     }
@@ -10082,7 +10156,7 @@ public abstract class Stream<T>
                             nextC = (C) NONE;
                         }
 
-                        while (onGoing.value() && queueC.offer(nextC, 100, TimeUnit.MILLISECONDS) == false) {
+                        while (onGoing.value() && queueC.offer(nextC, MAX_WAIT_TIME_FOR_QUEUE_OFFER, TimeUnit.MILLISECONDS) == false) {
                             // continue
                         }
                     }
@@ -10120,7 +10194,7 @@ public abstract class Stream<T>
                                 next = NONE;
                             }
 
-                            while (onGoing.value() && queue.offer(next, 100, TimeUnit.MILLISECONDS) == false) {
+                            while (onGoing.value() && queue.offer(next, MAX_WAIT_TIME_FOR_QUEUE_OFFER, TimeUnit.MILLISECONDS) == false) {
                                 // continue
                             }
                         }

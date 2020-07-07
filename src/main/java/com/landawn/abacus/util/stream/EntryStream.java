@@ -29,6 +29,7 @@ import java.util.concurrent.Executor;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.IntermediateOp;
+import com.landawn.abacus.annotation.LazyEvaluation;
 import com.landawn.abacus.annotation.ParallelSupported;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.annotation.TerminalOpTriggered;
@@ -71,6 +72,7 @@ import com.landawn.abacus.util.stream.BaseStream.Splitor;
  * @see BaseStream
  * @see Stream
  */
+@LazyEvaluation
 public final class EntryStream<K, V> implements Closeable {
 
     private static final Function<Map<Object, Object>, Stream<Map.Entry<Object, Object>>> mapper_func = new Function<Map<Object, Object>, Stream<Map.Entry<Object, Object>>>() {

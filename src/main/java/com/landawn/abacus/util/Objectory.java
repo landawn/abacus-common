@@ -568,7 +568,8 @@ public final class Objectory {
      */
     private static void logCreated(String methodName) {
         if (logger.isWarnEnabled() && (created.incrementAndGet() % 100) == 0) {
-            logger.warn("The " + created.get() + "th cachable object is created by " + methodName, new RuntimeException("No error. Only to print stack trace"));
+            logger.warn("The " + created.get() + "th cachable object is created by " + methodName,
+                    new RuntimeException("No error. It's only for debug to print stack trace:"));
         }
     }
 

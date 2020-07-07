@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.IntermediateOp;
+import com.landawn.abacus.annotation.LazyEvaluation;
 import com.landawn.abacus.annotation.ParallelSupported;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.annotation.TerminalOp;
@@ -81,6 +82,7 @@ import com.landawn.abacus.util.function.ToLongFunction;
  * @see BaseStream
  * @see Stream
  */
+@LazyEvaluation
 public abstract class LongStream extends StreamBase<Long, long[], LongPredicate, LongConsumer, LongList, OptionalLong, IndexedLong, LongIterator, LongStream> {
 
     static final Random RAND = new SecureRandom();

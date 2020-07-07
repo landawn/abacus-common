@@ -28,6 +28,7 @@ import java.util.Random;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.IntermediateOp;
+import com.landawn.abacus.annotation.LazyEvaluation;
 import com.landawn.abacus.annotation.ParallelSupported;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.annotation.TerminalOp;
@@ -78,6 +79,7 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * @see BaseStream
  * @see Stream
  */
+@LazyEvaluation
 public abstract class FloatStream
         extends StreamBase<Float, float[], FloatPredicate, FloatConsumer, FloatList, OptionalFloat, IndexedFloat, FloatIterator, FloatStream> {
 

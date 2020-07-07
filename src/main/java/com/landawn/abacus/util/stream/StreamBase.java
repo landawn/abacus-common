@@ -35,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.IntermediateOp;
+import com.landawn.abacus.annotation.LazyEvaluation;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.annotation.TerminalOp;
 import com.landawn.abacus.logging.Logger;
@@ -88,6 +89,7 @@ import com.landawn.abacus.util.function.Function;
 /**
  *
  */
+@LazyEvaluation
 abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, A, P, C, PL, OT, IT, ITER, S>>
         implements BaseStream<T, A, P, C, PL, OT, IT, ITER, S> {
     static final Logger logger = LoggerFactory.getLogger(StreamBase.class);
@@ -100,6 +102,9 @@ abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, 
             // do nothing.
         }
     };
+
+    static final int MAX_WAIT_TIME_FOR_QUEUE_OFFER = 10;
+    static final int MAX_WAIT_TIME_FOR_QUEUE_POLL = 2;
 
     static final int MAX_THREAD_POOL_SIZE = 8192;
     // static final int MAX_THREAD_POOL_SIZE = Integer.MAX_VALUE;

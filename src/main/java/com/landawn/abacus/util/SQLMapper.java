@@ -67,7 +67,7 @@ public final class SQLMapper {
 
     public static final int MAX_ID_LENGTH = 64;
 
-    private final Map<String, ParsedSql> sqlMapper = new LinkedHashMap<>();
+    private final Map<String, ParsedSql> sqlMap = new LinkedHashMap<>();
 
     private final Map<String, ImmutableMap<String, String>> attrsMap = new HashMap<>();
 
@@ -123,7 +123,7 @@ public final class SQLMapper {
     }
 
     public Set<String> keySet() {
-        return sqlMapper.keySet();
+        return sqlMap.keySet();
     }
 
     /**
@@ -136,7 +136,7 @@ public final class SQLMapper {
             return null;
         }
 
-        return sqlMapper.get(id);
+        return sqlMap.get(id);
     }
 
     /**
@@ -162,7 +162,7 @@ public final class SQLMapper {
     public ParsedSql add(String id, ParsedSql sql) {
         checkId(id);
 
-        return sqlMapper.put(id, sql);
+        return sqlMap.put(id, sql);
     }
 
     /**
@@ -174,7 +174,7 @@ public final class SQLMapper {
     public void add(String id, String sql, Map<String, String> attrs) {
         checkId(id);
 
-        sqlMapper.put(id, ParsedSql.parse(sql));
+        sqlMap.put(id, ParsedSql.parse(sql));
         attrsMap.put(id, ImmutableMap.copyOf(attrs));
     }
 
@@ -189,8 +189,8 @@ public final class SQLMapper {
             throw new IllegalArgumentException("Id: " + id + " is too long. The maximum length for id is: " + MAX_ID_LENGTH);
         }
 
-        if (sqlMapper.containsKey(id)) {
-            throw new IllegalArgumentException(id + " already exists with sql: " + sqlMapper.get(id));
+        if (sqlMap.containsKey(id)) {
+            throw new IllegalArgumentException(id + " already exists with sql: " + sqlMap.get(id));
         }
     }
 
@@ -203,13 +203,13 @@ public final class SQLMapper {
             return;
         }
 
-        sqlMapper.remove(id);
+        sqlMap.remove(id);
     }
 
     public SQLMapper copy() {
         final SQLMapper copy = new SQLMapper();
 
-        copy.sqlMapper.putAll(this.sqlMapper);
+        copy.sqlMap.putAll(this.sqlMap);
         copy.attrsMap.putAll(this.attrsMap);
 
         return copy;
@@ -226,7 +226,7 @@ public final class SQLMapper {
             Document doc = XMLUtil.createDOMParser(true, true).newDocument();
             Element sqlMapperNode = doc.createElement(SQLMapper.SQL_MAPPER);
 
-            for (String id : sqlMapper.keySet()) {
+            for (String id : sqlMap.keySet()) {
                 Element sqlNode = doc.createElement(SQL);
                 sqlNode.setAttribute(ID, id);
 
@@ -238,7 +238,7 @@ public final class SQLMapper {
                     }
                 }
 
-                Text sqlText = doc.createTextNode(sqlMapper.get(id).sql());
+                Text sqlText = doc.createTextNode(sqlMap.get(id).sql());
                 sqlNode.appendChild(sqlText);
                 sqlMapperNode.appendChild(sqlNode);
             }
@@ -262,12 +262,12 @@ public final class SQLMapper {
     }
 
     public boolean isEmpty() {
-        return sqlMapper.isEmpty();
+        return sqlMap.isEmpty();
     }
 
     @Override
     public int hashCode() {
-        return sqlMapper.hashCode();
+        return sqlMap.hashCode();
     }
 
     /**
@@ -277,11 +277,11 @@ public final class SQLMapper {
      */
     @Override
     public boolean equals(Object obj) {
-        return this == obj || (obj instanceof SQLMapper && N.equals(((SQLMapper) obj).sqlMapper, sqlMapper));
+        return this == obj || (obj instanceof SQLMapper && N.equals(((SQLMapper) obj).sqlMap, sqlMap));
     }
 
     @Override
     public String toString() {
-        return sqlMapper.toString();
+        return sqlMap.toString();
     }
 }

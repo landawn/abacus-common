@@ -42,6 +42,7 @@ import java.util.concurrent.Executor;
 import com.landawn.abacus.DataSet;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.IntermediateOp;
+import com.landawn.abacus.annotation.LazyEvaluation;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.annotation.TerminalOp;
 import com.landawn.abacus.annotation.TerminalOpTriggered;
@@ -78,6 +79,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @see BaseStream
  * @see Stream
  */
+@LazyEvaluation
 @SequentialOnly
 public class ExceptionalStream<T, E extends Exception> implements Closeable {
 
