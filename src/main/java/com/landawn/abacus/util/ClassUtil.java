@@ -2934,8 +2934,8 @@ public final class ClassUtil {
         ImmutableMap<String, String> result = column2PropNameNameMapPool.get(entityClass);
 
         if (result == null) {
-            final Map<String, String> map = new HashMap<>();
             final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
+            final Map<String, String> map = new HashMap<>(entityInfo.propInfoList.size() * 3);
 
             for (PropInfo propInfo : entityInfo.propInfoList) {
                 if (propInfo.columnName.isPresent()) {
@@ -3070,8 +3070,8 @@ public final class ClassUtil {
             }
         }
 
-        Map<String, String> propColumnNameMap = new HashMap<>();
         final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
+        Map<String, String> propColumnNameMap = new HashMap<>(entityInfo.propInfoList.size() * 2);
 
         for (PropInfo propInfo : entityInfo.propInfoList) {
             if (propInfo.columnName.isPresent()) {

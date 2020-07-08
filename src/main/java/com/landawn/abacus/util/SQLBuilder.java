@@ -24,6 +24,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -93,6 +94,8 @@ import com.landawn.abacus.util.u.Optional;
  */
 @SuppressWarnings("deprecation")
 public abstract class SQLBuilder {
+
+    // TODO performance goal: 80% cases (or maybe sql.length < 1024?) can be composed in 0.1 millisecond. 0.01 millisecond will be fantastic if possible.
 
     private static final Logger logger = LoggerFactory.getLogger(SQLBuilder.class);
 
@@ -791,6 +794,47 @@ public abstract class SQLBuilder {
         return result;
     }
 
+    static final Map<Class<?>, Map<NamingPolicy, ImmutableMap<String, String>>> entityTablePropColumnNameMap = new ObjectPool<>(N.POOL_SIZE);
+
+    /**
+     * 
+     * @param entityClass
+     * @param namingPolicy
+     * @return
+     * @deprecated for internal use only.
+     */
+    @Deprecated
+    @Beta
+    public static ImmutableMap<String, String> getProp2ColumnNameMap(final Class<?> entityClass, final NamingPolicy namingPolicy) {
+        Map<NamingPolicy, ImmutableMap<String, String>> namingPropColumnNameMap = entityTablePropColumnNameMap.get(entityClass);
+        ImmutableMap<String, String> result = null;
+
+        if (namingPropColumnNameMap == null || (result = namingPropColumnNameMap.get(namingPolicy)) == null) {
+            final ImmutableMap<String, String> prop2ColumnNameMap = ClassUtil.getProp2ColumnNameMap(entityClass, namingPolicy);
+            final Map<String, String> newProp2ColumnNameMap = new HashMap<>(prop2ColumnNameMap.size() * 2);
+            newProp2ColumnNameMap.putAll(prop2ColumnNameMap);
+
+            for (Map.Entry<String, String> entry : prop2ColumnNameMap.entrySet()) {
+                if (!newProp2ColumnNameMap.containsKey(entry.getValue())) {
+                    newProp2ColumnNameMap.put(entry.getValue(), entry.getValue());
+                }
+            }
+
+            result = ImmutableMap.of(newProp2ColumnNameMap);
+
+            if (namingPropColumnNameMap == null) {
+                namingPropColumnNameMap = new EnumMap<>(NamingPolicy.class);
+                // TODO not necessary?
+                // namingPropColumnNameMap = Collections.synchronizedMap(namingPropColumnNameMap)
+                entityTablePropColumnNameMap.put(entityClass, namingPropColumnNameMap);
+            }
+
+            namingPropColumnNameMap.put(namingPolicy, result);
+        }
+
+        return result;
+    }
+
     /**
      *
      * @param tableName
@@ -918,7 +962,7 @@ public abstract class SQLBuilder {
     public SQLBuilder into(final Class<?> entityClass) {
         if (this.entityClass == null) {
             this.entityClass = entityClass;
-            this.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(this.entityClass, this.namingPolicy);
+            this.propColumnNameMap = getProp2ColumnNameMap(this.entityClass, this.namingPolicy);
         }
 
         return into(getTableName(entityClass, namingPolicy));
@@ -1004,7 +1048,7 @@ public abstract class SQLBuilder {
     public SQLBuilder from(final Class<?> entityClass) {
         if (this.entityClass == null) {
             this.entityClass = entityClass;
-            this.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(this.entityClass, this.namingPolicy);
+            this.propColumnNameMap = getProp2ColumnNameMap(this.entityClass, this.namingPolicy);
         }
 
         return from(getTableName(entityClass, namingPolicy));
@@ -1020,7 +1064,7 @@ public abstract class SQLBuilder {
 
         if (this.entityClass == null) {
             this.entityClass = entityClass;
-            this.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(this.entityClass, this.namingPolicy);
+            this.propColumnNameMap = getProp2ColumnNameMap(this.entityClass, this.namingPolicy);
         }
 
         if (N.isNullOrEmpty(alias)) {
@@ -1033,7 +1077,7 @@ public abstract class SQLBuilder {
     private SQLBuilder from(final Class<?> entityClass, final Collection<String> tableNames) {
         if (this.entityClass == null) {
             this.entityClass = entityClass;
-            this.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(this.entityClass, this.namingPolicy);
+            this.propColumnNameMap = getProp2ColumnNameMap(this.entityClass, this.namingPolicy);
         }
 
         return from(tableNames);
@@ -1157,7 +1201,7 @@ public abstract class SQLBuilder {
 
             for (Tuple4<Class<?>, String, String, Set<String>> tp : multiSelects) {
                 if (N.notNullOrEmpty(tp._2)) {
-                    aliasPropColumnNameMap.put(tp._2, ClassUtil.getProp2ColumnNameMap(tp._1, namingPolicy));
+                    aliasPropColumnNameMap.put(tp._2, getProp2ColumnNameMap(tp._1, namingPolicy));
                 }
             }
 
@@ -1168,7 +1212,7 @@ public abstract class SQLBuilder {
                 this.alias = tp._2;
                 final String classAlias = tp._3;
                 final boolean withClassAlias = N.notNullOrEmpty(classAlias);
-                final Map<String, String> eachPropColumnNameMap = ClassUtil.getProp2ColumnNameMap(tp._1, namingPolicy);
+                final Map<String, String> eachPropColumnNameMap = getProp2ColumnNameMap(tp._1, namingPolicy);
 
                 for (String propName : getSelectPropNames(tp._1, false, tp._4)) {
                     if (i++ > 0) {
@@ -1502,7 +1546,7 @@ public abstract class SQLBuilder {
     public SQLBuilder on(final String expr) {
         sb.append(_SPACE_ON_SPACE);
 
-        appendStringExpr(expr);
+        appendStringExpr(expr, false);
 
         return this;
     }
@@ -1543,7 +1587,7 @@ public abstract class SQLBuilder {
 
         sb.append(_SPACE_WHERE_SPACE);
 
-        appendStringExpr(expr);
+        appendStringExpr(expr, false);
 
         return this;
     }
@@ -1673,7 +1717,7 @@ public abstract class SQLBuilder {
     public SQLBuilder having(final String expr) {
         sb.append(_SPACE_HAVING_SPACE);
 
-        appendStringExpr(expr);
+        appendStringExpr(expr, false);
 
         return this;
     }
@@ -2499,7 +2543,7 @@ public abstract class SQLBuilder {
         } else {
             final Class<?> entityClass = entity.getClass();
             this.entityClass = entityClass;
-            this.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(this.entityClass, this.namingPolicy);
+            this.propColumnNameMap = getProp2ColumnNameMap(this.entityClass, this.namingPolicy);
             final Collection<String> propNames = getUpdatePropNames(entityClass, excludedPropNames);
             final Set<String> dirtyPropNames = DirtyMarkerUtil.isDirtyMarker(entityClass) ? DirtyMarkerUtil.dirtyPropNames((DirtyMarker) entity) : null;
             final boolean isEmptyDirtyPropNames = N.isNullOrEmpty(dirtyPropNames);
@@ -2523,7 +2567,7 @@ public abstract class SQLBuilder {
      */
     public SQLBuilder set(Class<?> entityClass) {
         this.entityClass = entityClass;
-        this.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(this.entityClass, this.namingPolicy);
+        this.propColumnNameMap = getProp2ColumnNameMap(this.entityClass, this.namingPolicy);
 
         return set(entityClass, null);
     }
@@ -2536,7 +2580,7 @@ public abstract class SQLBuilder {
      */
     public SQLBuilder set(Class<?> entityClass, final Set<String> excludedPropNames) {
         this.entityClass = entityClass;
-        this.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(this.entityClass, this.namingPolicy);
+        this.propColumnNameMap = getProp2ColumnNameMap(this.entityClass, this.namingPolicy);
 
         return set(getUpdatePropNames(entityClass, excludedPropNames));
     }
@@ -3052,18 +3096,40 @@ public abstract class SQLBuilder {
             //    }
 
             // ==== version 3
-            appendStringExpr(((Expression) cond).getLiteral());
+            appendStringExpr(((Expression) cond).getLiteral(), false);
         } else {
             throw new IllegalArgumentException("Unsupported condtion: " + cond.toString());
         }
     }
 
-    /**
-     * Append string expr.
-     *
-     * @param expr
-     */
-    private void appendStringExpr(final String expr) {
+    private void appendStringExpr(final String expr, final boolean isFromAppendColumn) {
+        // TODO performance improvement.
+
+        if (expr.length() < 16) {
+            boolean allChars = true;
+            char ch = 0;
+
+            for (int i = 0, len = expr.length(); i < len; i++) {
+                ch = expr.charAt(i);
+
+                // https://www.sciencebuddies.org/science-fair-projects/references/ascii-table
+                if (ch < 'A' || (ch > 'Z' && ch < '_') || ch > 'z') {
+                    allChars = false;
+                    break;
+                }
+            }
+
+            if (allChars) {
+                if (isFromAppendColumn) {
+                    sb.append(formalizeColumnName(expr, namingPolicy));
+                } else {
+                    sb.append(formalizeColumnName(propColumnNameMap, expr));
+                }
+
+                return;
+            }
+        }
+
         final List<String> words = SQLParser.parse(expr);
 
         String word = null;
@@ -3147,7 +3213,7 @@ public abstract class SQLBuilder {
         }
 
         if (N.notNullOrEmpty(propAlias)) {
-            appendStringExpr(propName);
+            appendStringExpr(propName, true);
 
             if (isForSelect) {
                 sb.append(_SPACE_AS_SPACE);
@@ -3172,7 +3238,7 @@ public abstract class SQLBuilder {
                     appendColumnName(propColumnNameMap, propName.substring(0, index).trim(), propName.substring(index + 4).trim(), withClassAlias, classAlias,
                             isForSelect);
                 } else {
-                    appendStringExpr(propName);
+                    appendStringExpr(propName, true);
 
                     if (propName.charAt(propName.length() - 1) != '*') {
                         sb.append(_SPACE_AS_SPACE);
@@ -3187,7 +3253,7 @@ public abstract class SQLBuilder {
                     }
                 }
             } else {
-                appendStringExpr(propName);
+                appendStringExpr(propName, true);
             }
         }
     }
@@ -3388,7 +3454,7 @@ public abstract class SQLBuilder {
             final SQLBuilder instance = createInstance();
 
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.op = OperationType.QUERY;
             instance.append(cond);
 
@@ -3467,7 +3533,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.ADD;
             instance.entityClass = entity.getClass();
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
 
             parseInsertEntity(instance, entity, excludedPropNames);
 
@@ -3494,7 +3560,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.ADD;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.columnNames = getInsertPropNames(entityClass, excludedPropNames);
 
             return instance;
@@ -3534,7 +3600,7 @@ public abstract class SQLBuilder {
 
             if (first.isPresent()) {
                 instance.entityClass = first.get().getClass();
-                instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+                instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             }
 
             instance.propsList = toInsertPropsList(propsList);
@@ -3576,7 +3642,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.UPDATE;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.tableName = getTableName(entityClass, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
             instance.columnNames = getUpdatePropNames(entityClass, excludedPropNames);
 
@@ -3607,7 +3673,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.DELETE;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.tableName = getTableName(entityClass, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
 
             return instance;
@@ -3718,7 +3784,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.QUERY;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.columnNames = getSelectPropNames(entityClass, includeSubEntityProperties, excludedPropNames);
 
             return instance;
@@ -3836,7 +3902,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.QUERY;
             instance.entityClass = multiSelects.get(0)._1;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.multiSelects = multiSelects;
 
             return instance;
@@ -3930,7 +3996,7 @@ public abstract class SQLBuilder {
             final SQLBuilder instance = createInstance();
 
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.op = OperationType.QUERY;
             instance.append(cond);
 
@@ -4009,7 +4075,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.ADD;
             instance.entityClass = entity.getClass();
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
 
             parseInsertEntity(instance, entity, excludedPropNames);
 
@@ -4036,7 +4102,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.ADD;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.columnNames = getInsertPropNames(entityClass, excludedPropNames);
 
             return instance;
@@ -4076,7 +4142,7 @@ public abstract class SQLBuilder {
 
             if (first.isPresent()) {
                 instance.entityClass = first.get().getClass();
-                instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+                instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             }
 
             instance.propsList = toInsertPropsList(propsList);
@@ -4118,7 +4184,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.UPDATE;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.tableName = getTableName(entityClass, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE);
             instance.columnNames = getUpdatePropNames(entityClass, excludedPropNames);
 
@@ -4149,7 +4215,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.DELETE;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.tableName = getTableName(entityClass, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE);
 
             return instance;
@@ -4260,7 +4326,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.QUERY;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.columnNames = getSelectPropNames(entityClass, includeSubEntityProperties, excludedPropNames);
 
             return instance;
@@ -4378,7 +4444,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.QUERY;
             instance.entityClass = multiSelects.get(0)._1;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.multiSelects = multiSelects;
 
             return instance;
@@ -4472,7 +4538,7 @@ public abstract class SQLBuilder {
             final SQLBuilder instance = createInstance();
 
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.op = OperationType.QUERY;
             instance.append(cond);
 
@@ -4551,7 +4617,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.ADD;
             instance.entityClass = entity.getClass();
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
 
             parseInsertEntity(instance, entity, excludedPropNames);
 
@@ -4578,7 +4644,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.ADD;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.columnNames = getInsertPropNames(entityClass, excludedPropNames);
 
             return instance;
@@ -4618,7 +4684,7 @@ public abstract class SQLBuilder {
 
             if (first.isPresent()) {
                 instance.entityClass = first.get().getClass();
-                instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+                instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             }
 
             instance.propsList = toInsertPropsList(propsList);
@@ -4660,7 +4726,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.UPDATE;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.tableName = getTableName(entityClass, NamingPolicy.LOWER_CAMEL_CASE);
             instance.columnNames = getUpdatePropNames(entityClass, excludedPropNames);
 
@@ -4691,7 +4757,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.DELETE;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.tableName = getTableName(entityClass, NamingPolicy.LOWER_CAMEL_CASE);
 
             return instance;
@@ -4802,7 +4868,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.QUERY;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.columnNames = getSelectPropNames(entityClass, includeSubEntityProperties, excludedPropNames);
 
             return instance;
@@ -4920,7 +4986,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.QUERY;
             instance.entityClass = multiSelects.get(0)._1;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.multiSelects = multiSelects;
 
             return instance;
@@ -5011,7 +5077,7 @@ public abstract class SQLBuilder {
             final SQLBuilder instance = createInstance();
 
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.op = OperationType.QUERY;
             instance.append(cond);
 
@@ -5090,7 +5156,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.ADD;
             instance.entityClass = entity.getClass();
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
 
             parseInsertEntity(instance, entity, excludedPropNames);
 
@@ -5117,7 +5183,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.ADD;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.columnNames = getInsertPropNames(entityClass, excludedPropNames);
 
             return instance;
@@ -5157,7 +5223,7 @@ public abstract class SQLBuilder {
 
             if (first.isPresent()) {
                 instance.entityClass = first.get().getClass();
-                instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+                instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             }
 
             instance.propsList = toInsertPropsList(propsList);
@@ -5199,7 +5265,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.UPDATE;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.tableName = getTableName(entityClass, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
             instance.columnNames = getUpdatePropNames(entityClass, excludedPropNames);
 
@@ -5230,7 +5296,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.DELETE;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.tableName = getTableName(entityClass, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
 
             return instance;
@@ -5341,7 +5407,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.QUERY;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.columnNames = getSelectPropNames(entityClass, includeSubEntityProperties, excludedPropNames);
 
             return instance;
@@ -5459,7 +5525,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.QUERY;
             instance.entityClass = multiSelects.get(0)._1;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.multiSelects = multiSelects;
 
             return instance;
@@ -5550,7 +5616,7 @@ public abstract class SQLBuilder {
             final SQLBuilder instance = createInstance();
 
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.op = OperationType.QUERY;
             instance.append(cond);
 
@@ -5629,7 +5695,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.ADD;
             instance.entityClass = entity.getClass();
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
 
             parseInsertEntity(instance, entity, excludedPropNames);
 
@@ -5656,7 +5722,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.ADD;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.columnNames = getInsertPropNames(entityClass, excludedPropNames);
 
             return instance;
@@ -5696,7 +5762,7 @@ public abstract class SQLBuilder {
 
             if (first.isPresent()) {
                 instance.entityClass = first.get().getClass();
-                instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+                instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             }
 
             instance.propsList = toInsertPropsList(propsList);
@@ -5738,7 +5804,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.UPDATE;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.tableName = getTableName(entityClass, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE);
             instance.columnNames = getUpdatePropNames(entityClass, excludedPropNames);
 
@@ -5769,7 +5835,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.DELETE;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.tableName = getTableName(entityClass, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE);
 
             return instance;
@@ -5880,7 +5946,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.QUERY;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.columnNames = getSelectPropNames(entityClass, includeSubEntityProperties, excludedPropNames);
 
             return instance;
@@ -5998,7 +6064,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.QUERY;
             instance.entityClass = multiSelects.get(0)._1;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.multiSelects = multiSelects;
 
             return instance;
@@ -6089,7 +6155,7 @@ public abstract class SQLBuilder {
             final SQLBuilder instance = createInstance();
 
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.op = OperationType.QUERY;
             instance.append(cond);
 
@@ -6168,7 +6234,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.ADD;
             instance.entityClass = entity.getClass();
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
 
             parseInsertEntity(instance, entity, excludedPropNames);
 
@@ -6195,7 +6261,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.ADD;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.columnNames = getInsertPropNames(entityClass, excludedPropNames);
 
             return instance;
@@ -6235,7 +6301,7 @@ public abstract class SQLBuilder {
 
             if (first.isPresent()) {
                 instance.entityClass = first.get().getClass();
-                instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+                instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             }
 
             instance.propsList = toInsertPropsList(propsList);
@@ -6277,7 +6343,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.UPDATE;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.tableName = getTableName(entityClass, NamingPolicy.LOWER_CAMEL_CASE);
             instance.columnNames = getUpdatePropNames(entityClass, excludedPropNames);
 
@@ -6308,7 +6374,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.DELETE;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.tableName = getTableName(entityClass, NamingPolicy.LOWER_CAMEL_CASE);
 
             return instance;
@@ -6419,7 +6485,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.QUERY;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.columnNames = getSelectPropNames(entityClass, includeSubEntityProperties, excludedPropNames);
 
             return instance;
@@ -6537,7 +6603,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.QUERY;
             instance.entityClass = multiSelects.get(0)._1;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.multiSelects = multiSelects;
 
             return instance;
@@ -6628,7 +6694,7 @@ public abstract class SQLBuilder {
             final SQLBuilder instance = createInstance();
 
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.op = OperationType.QUERY;
             instance.append(cond);
 
@@ -6707,7 +6773,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.ADD;
             instance.entityClass = entity.getClass();
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
 
             parseInsertEntity(instance, entity, excludedPropNames);
 
@@ -6734,7 +6800,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.ADD;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.columnNames = getInsertPropNames(entityClass, excludedPropNames);
 
             return instance;
@@ -6774,7 +6840,7 @@ public abstract class SQLBuilder {
 
             if (first.isPresent()) {
                 instance.entityClass = first.get().getClass();
-                instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+                instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             }
 
             instance.propsList = toInsertPropsList(propsList);
@@ -6816,7 +6882,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.UPDATE;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.tableName = getTableName(entityClass, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
             instance.columnNames = getUpdatePropNames(entityClass, excludedPropNames);
 
@@ -6847,7 +6913,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.DELETE;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.tableName = getTableName(entityClass, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
 
             return instance;
@@ -6958,7 +7024,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.QUERY;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.columnNames = getSelectPropNames(entityClass, includeSubEntityProperties, excludedPropNames);
 
             return instance;
@@ -7076,7 +7142,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.QUERY;
             instance.entityClass = multiSelects.get(0)._1;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.multiSelects = multiSelects;
 
             return instance;
@@ -7167,7 +7233,7 @@ public abstract class SQLBuilder {
             final SQLBuilder instance = createInstance();
 
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.op = OperationType.QUERY;
             instance.append(cond);
 
@@ -7246,7 +7312,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.ADD;
             instance.entityClass = entity.getClass();
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
 
             parseInsertEntity(instance, entity, excludedPropNames);
 
@@ -7273,7 +7339,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.ADD;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.columnNames = getInsertPropNames(entityClass, excludedPropNames);
 
             return instance;
@@ -7313,7 +7379,7 @@ public abstract class SQLBuilder {
 
             if (first.isPresent()) {
                 instance.entityClass = first.get().getClass();
-                instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+                instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             }
 
             instance.propsList = toInsertPropsList(propsList);
@@ -7355,7 +7421,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.UPDATE;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.tableName = getTableName(entityClass, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE);
             instance.columnNames = getUpdatePropNames(entityClass, excludedPropNames);
 
@@ -7386,7 +7452,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.DELETE;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.tableName = getTableName(entityClass, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE);
 
             return instance;
@@ -7497,7 +7563,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.QUERY;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.columnNames = getSelectPropNames(entityClass, includeSubEntityProperties, excludedPropNames);
 
             return instance;
@@ -7615,7 +7681,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.QUERY;
             instance.entityClass = multiSelects.get(0)._1;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.multiSelects = multiSelects;
 
             return instance;
@@ -7706,7 +7772,7 @@ public abstract class SQLBuilder {
             final SQLBuilder instance = createInstance();
 
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.op = OperationType.QUERY;
             instance.append(cond);
 
@@ -7785,7 +7851,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.ADD;
             instance.entityClass = entity.getClass();
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
 
             parseInsertEntity(instance, entity, excludedPropNames);
 
@@ -7812,7 +7878,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.ADD;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.columnNames = getInsertPropNames(entityClass, excludedPropNames);
 
             return instance;
@@ -7852,7 +7918,7 @@ public abstract class SQLBuilder {
 
             if (first.isPresent()) {
                 instance.entityClass = first.get().getClass();
-                instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+                instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             }
 
             instance.propsList = toInsertPropsList(propsList);
@@ -7894,7 +7960,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.UPDATE;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.tableName = getTableName(entityClass, NamingPolicy.LOWER_CAMEL_CASE);
             instance.columnNames = getUpdatePropNames(entityClass, excludedPropNames);
 
@@ -7925,7 +7991,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.DELETE;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.tableName = getTableName(entityClass, NamingPolicy.LOWER_CAMEL_CASE);
 
             return instance;
@@ -8036,7 +8102,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.QUERY;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.columnNames = getSelectPropNames(entityClass, includeSubEntityProperties, excludedPropNames);
 
             return instance;
@@ -8154,7 +8220,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.QUERY;
             instance.entityClass = multiSelects.get(0)._1;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.multiSelects = multiSelects;
 
             return instance;
@@ -8246,7 +8312,7 @@ public abstract class SQLBuilder {
             final SQLBuilder instance = createInstance();
 
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.op = OperationType.QUERY;
             instance.append(cond);
 
@@ -8325,7 +8391,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.ADD;
             instance.entityClass = entity.getClass();
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
 
             parseInsertEntity(instance, entity, excludedPropNames);
 
@@ -8352,7 +8418,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.ADD;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.columnNames = getInsertPropNames(entityClass, excludedPropNames);
 
             return instance;
@@ -8392,7 +8458,7 @@ public abstract class SQLBuilder {
 
             if (first.isPresent()) {
                 instance.entityClass = first.get().getClass();
-                instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+                instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             }
 
             instance.propsList = toInsertPropsList(propsList);
@@ -8434,7 +8500,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.UPDATE;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.tableName = getTableName(entityClass, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
             instance.columnNames = getUpdatePropNames(entityClass, excludedPropNames);
 
@@ -8465,7 +8531,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.DELETE;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.tableName = getTableName(entityClass, NamingPolicy.LOWER_CASE_WITH_UNDERSCORE);
 
             return instance;
@@ -8576,7 +8642,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.QUERY;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.columnNames = getSelectPropNames(entityClass, includeSubEntityProperties, excludedPropNames);
 
             return instance;
@@ -8694,7 +8760,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.QUERY;
             instance.entityClass = multiSelects.get(0)._1;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.multiSelects = multiSelects;
 
             return instance;
@@ -8786,7 +8852,7 @@ public abstract class SQLBuilder {
             final SQLBuilder instance = createInstance();
 
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.op = OperationType.QUERY;
             instance.append(cond);
 
@@ -8865,7 +8931,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.ADD;
             instance.entityClass = entity.getClass();
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
 
             parseInsertEntity(instance, entity, excludedPropNames);
 
@@ -8892,7 +8958,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.ADD;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.columnNames = getInsertPropNames(entityClass, excludedPropNames);
 
             return instance;
@@ -8932,7 +8998,7 @@ public abstract class SQLBuilder {
 
             if (first.isPresent()) {
                 instance.entityClass = first.get().getClass();
-                instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+                instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             }
 
             instance.propsList = toInsertPropsList(propsList);
@@ -8974,7 +9040,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.UPDATE;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.tableName = getTableName(entityClass, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE);
             instance.columnNames = getUpdatePropNames(entityClass, excludedPropNames);
 
@@ -9005,7 +9071,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.DELETE;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.tableName = getTableName(entityClass, NamingPolicy.UPPER_CASE_WITH_UNDERSCORE);
 
             return instance;
@@ -9116,7 +9182,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.QUERY;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.columnNames = getSelectPropNames(entityClass, includeSubEntityProperties, excludedPropNames);
 
             return instance;
@@ -9234,7 +9300,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.QUERY;
             instance.entityClass = multiSelects.get(0)._1;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.multiSelects = multiSelects;
 
             return instance;
@@ -9326,7 +9392,7 @@ public abstract class SQLBuilder {
             final SQLBuilder instance = createInstance();
 
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.op = OperationType.QUERY;
             instance.append(cond);
 
@@ -9405,7 +9471,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.ADD;
             instance.entityClass = entity.getClass();
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
 
             parseInsertEntity(instance, entity, excludedPropNames);
 
@@ -9432,7 +9498,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.ADD;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.columnNames = getInsertPropNames(entityClass, excludedPropNames);
 
             return instance;
@@ -9472,7 +9538,7 @@ public abstract class SQLBuilder {
 
             if (first.isPresent()) {
                 instance.entityClass = first.get().getClass();
-                instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+                instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             }
 
             instance.propsList = toInsertPropsList(propsList);
@@ -9514,7 +9580,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.UPDATE;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.tableName = getTableName(entityClass, NamingPolicy.LOWER_CAMEL_CASE);
             instance.columnNames = getUpdatePropNames(entityClass, excludedPropNames);
 
@@ -9545,7 +9611,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.DELETE;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.tableName = getTableName(entityClass, NamingPolicy.LOWER_CAMEL_CASE);
 
             return instance;
@@ -9656,7 +9722,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.QUERY;
             instance.entityClass = entityClass;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.columnNames = getSelectPropNames(entityClass, includeSubEntityProperties, excludedPropNames);
 
             return instance;
@@ -9774,7 +9840,7 @@ public abstract class SQLBuilder {
 
             instance.op = OperationType.QUERY;
             instance.entityClass = multiSelects.get(0)._1;
-            instance.propColumnNameMap = ClassUtil.getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             instance.multiSelects = multiSelects;
 
             return instance;
