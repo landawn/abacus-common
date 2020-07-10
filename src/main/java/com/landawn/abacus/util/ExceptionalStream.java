@@ -146,6 +146,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
      * @param <T>
      * @param <E>
      * @param e
+     * @param exceptionType
+     * @return
+     */
+    public static <T, E extends Exception> ExceptionalStream<T, E> just(final T e, final Class<E> exceptionType) {
+        return of(e);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param e
      * @return
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> ofNullable(final T e) {
