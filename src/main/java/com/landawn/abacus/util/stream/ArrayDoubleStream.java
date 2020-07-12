@@ -498,31 +498,29 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             private int cursor = fromIndex;
             private DoubleIterator cur = null;
             private DoubleStream s = null;
-            private Runnable closeHandle = null;
+            private Deque<Runnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || cur.hasNext() == false) && cursor < toIndex) {
-                    if (closeHandle != null) {
-                        final Runnable tmp = closeHandle;
-                        closeHandle = null;
-                        tmp.run();
+                while (cur == null || cur.hasNext() == false) {
+                    if (cursor < toIndex) {
+                        if (closeHandle != null) {
+                            final Deque<Runnable> tmp = closeHandle;
+                            closeHandle = null;
+                            Stream.close(tmp);
+                        }
+
+                        s = mapper.apply(elements[cursor++]);
+
+                        if (N.notNullOrEmpty(s.closeHandlers)) {
+                            closeHandle = s.closeHandlers; 
+                        }
+
+                        cur = s.iteratorEx();
+                    } else {
+                        cur = null;
+                        break;
                     }
-
-                    s = mapper.apply(elements[cursor++]);
-
-                    if (N.notNullOrEmpty(s.closeHandlers)) {
-                        final Deque<Runnable> tmp = s.closeHandlers;
-
-                        closeHandle = new Runnable() {
-                            @Override
-                            public void run() {
-                                Stream.close(tmp);
-                            }
-                        };
-                    }
-
-                    cur = s.iteratorEx();
                 }
 
                 return cur != null && cur.hasNext();
@@ -540,9 +538,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             @Override
             public void close() {
                 if (closeHandle != null) {
-                    final Runnable tmp = closeHandle;
-                    closeHandle = null;
-                    tmp.run();
+                    Stream.close(closeHandle);
                 }
             }
         };
@@ -567,31 +563,29 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             private int cursor = fromIndex;
             private IntIterator cur = null;
             private IntStream s = null;
-            private Runnable closeHandle = null;
+            private Deque<Runnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || cur.hasNext() == false) && cursor < toIndex) {
-                    if (closeHandle != null) {
-                        final Runnable tmp = closeHandle;
-                        closeHandle = null;
-                        tmp.run();
+                while (cur == null || cur.hasNext() == false) {
+                    if (cursor < toIndex) {
+                        if (closeHandle != null) {
+                            final Deque<Runnable> tmp = closeHandle;
+                            closeHandle = null;
+                            Stream.close(tmp);
+                        }
+
+                        s = mapper.apply(elements[cursor++]);
+
+                        if (N.notNullOrEmpty(s.closeHandlers)) {
+                            closeHandle = s.closeHandlers; 
+                        }
+
+                        cur = s.iteratorEx();
+                    } else {
+                        cur = null;
+                        break;
                     }
-
-                    s = mapper.apply(elements[cursor++]);
-
-                    if (N.notNullOrEmpty(s.closeHandlers)) {
-                        final Deque<Runnable> tmp = s.closeHandlers;
-
-                        closeHandle = new Runnable() {
-                            @Override
-                            public void run() {
-                                Stream.close(tmp);
-                            }
-                        };
-                    }
-
-                    cur = s.iteratorEx();
                 }
 
                 return cur != null && cur.hasNext();
@@ -609,9 +603,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             @Override
             public void close() {
                 if (closeHandle != null) {
-                    final Runnable tmp = closeHandle;
-                    closeHandle = null;
-                    tmp.run();
+                    Stream.close(closeHandle);
                 }
             }
         };
@@ -636,31 +628,29 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             private int cursor = fromIndex;
             private LongIterator cur = null;
             private LongStream s = null;
-            private Runnable closeHandle = null;
+            private Deque<Runnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || cur.hasNext() == false) && cursor < toIndex) {
-                    if (closeHandle != null) {
-                        final Runnable tmp = closeHandle;
-                        closeHandle = null;
-                        tmp.run();
+                while (cur == null || cur.hasNext() == false) {
+                    if (cursor < toIndex) {
+                        if (closeHandle != null) {
+                            final Deque<Runnable> tmp = closeHandle;
+                            closeHandle = null;
+                            Stream.close(tmp);
+                        }
+
+                        s = mapper.apply(elements[cursor++]);
+
+                        if (N.notNullOrEmpty(s.closeHandlers)) {
+                            closeHandle = s.closeHandlers; 
+                        }
+
+                        cur = s.iteratorEx();
+                    } else {
+                        cur = null;
+                        break;
                     }
-
-                    s = mapper.apply(elements[cursor++]);
-
-                    if (N.notNullOrEmpty(s.closeHandlers)) {
-                        final Deque<Runnable> tmp = s.closeHandlers;
-
-                        closeHandle = new Runnable() {
-                            @Override
-                            public void run() {
-                                Stream.close(tmp);
-                            }
-                        };
-                    }
-
-                    cur = s.iteratorEx();
                 }
 
                 return cur != null && cur.hasNext();
@@ -678,9 +668,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             @Override
             public void close() {
                 if (closeHandle != null) {
-                    final Runnable tmp = closeHandle;
-                    closeHandle = null;
-                    tmp.run();
+                    Stream.close(closeHandle);
                 }
             }
         };
@@ -705,31 +693,29 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             private int cursor = fromIndex;
             private FloatIterator cur = null;
             private FloatStream s = null;
-            private Runnable closeHandle = null;
+            private Deque<Runnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || cur.hasNext() == false) && cursor < toIndex) {
-                    if (closeHandle != null) {
-                        final Runnable tmp = closeHandle;
-                        closeHandle = null;
-                        tmp.run();
+                while (cur == null || cur.hasNext() == false) {
+                    if (cursor < toIndex) {
+                        if (closeHandle != null) {
+                            final Deque<Runnable> tmp = closeHandle;
+                            closeHandle = null;
+                            Stream.close(tmp);
+                        }
+
+                        s = mapper.apply(elements[cursor++]);
+
+                        if (N.notNullOrEmpty(s.closeHandlers)) {
+                            closeHandle = s.closeHandlers; 
+                        }
+
+                        cur = s.iteratorEx();
+                    } else {
+                        cur = null;
+                        break;
                     }
-
-                    s = mapper.apply(elements[cursor++]);
-
-                    if (N.notNullOrEmpty(s.closeHandlers)) {
-                        final Deque<Runnable> tmp = s.closeHandlers;
-
-                        closeHandle = new Runnable() {
-                            @Override
-                            public void run() {
-                                Stream.close(tmp);
-                            }
-                        };
-                    }
-
-                    cur = s.iteratorEx();
                 }
 
                 return cur != null && cur.hasNext();
@@ -747,9 +733,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             @Override
             public void close() {
                 if (closeHandle != null) {
-                    final Runnable tmp = closeHandle;
-                    closeHandle = null;
-                    tmp.run();
+                    Stream.close(closeHandle);
                 }
             }
         };
@@ -774,31 +758,29 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             private int cursor = fromIndex;
             private Iterator<T> cur = null;
             private Stream<T> s = null;
-            private Runnable closeHandle = null;
+            private Deque<Runnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || cur.hasNext() == false) && cursor < toIndex) {
-                    if (closeHandle != null) {
-                        final Runnable tmp = closeHandle;
-                        closeHandle = null;
-                        tmp.run();
+                while (cur == null || cur.hasNext() == false) {
+                    if (cursor < toIndex) {
+                        if (closeHandle != null) {
+                            final Deque<Runnable> tmp = closeHandle;
+                            closeHandle = null;
+                            Stream.close(tmp);
+                        }
+
+                        s = mapper.apply(elements[cursor++]);
+
+                        if (N.notNullOrEmpty(s.closeHandlers)) {
+                            closeHandle = s.closeHandlers; 
+                        }
+
+                        cur = s.iteratorEx();
+                    } else {
+                        cur = null;
+                        break;
                     }
-
-                    s = mapper.apply(elements[cursor++]);
-
-                    if (N.notNullOrEmpty(s.closeHandlers)) {
-                        final Deque<Runnable> tmp = s.closeHandlers;
-
-                        closeHandle = new Runnable() {
-                            @Override
-                            public void run() {
-                                Stream.close(tmp);
-                            }
-                        };
-                    }
-
-                    cur = s.iteratorEx();
                 }
 
                 return cur != null && cur.hasNext();
@@ -816,9 +798,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             @Override
             public void close() {
                 if (closeHandle != null) {
-                    final Runnable tmp = closeHandle;
-                    closeHandle = null;
-                    tmp.run();
+                    Stream.close(closeHandle);
                 }
             }
         };

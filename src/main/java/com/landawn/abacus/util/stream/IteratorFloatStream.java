@@ -374,31 +374,29 @@ class IteratorFloatStream extends AbstractFloatStream {
         final FloatIteratorEx iter = new FloatIteratorEx() {
             private FloatIterator cur = null;
             private FloatStream s = null;
-            private Runnable closeHandle = null;
+            private Deque<Runnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || cur.hasNext() == false) && elements.hasNext()) {
-                    if (closeHandle != null) {
-                        final Runnable tmp = closeHandle;
-                        closeHandle = null;
-                        tmp.run();
+                while (cur == null || cur.hasNext() == false) {
+                    if (elements.hasNext()) {
+                        if (closeHandle != null) {
+                            final Deque<Runnable> tmp = closeHandle;
+                            closeHandle = null;
+                            Stream.close(tmp);
+                        }
+
+                        s = mapper.apply(elements.nextFloat());
+
+                        if (N.notNullOrEmpty(s.closeHandlers)) {
+                            closeHandle = s.closeHandlers; 
+                        }
+
+                        cur = s.iteratorEx();
+                    } else {
+                        cur = null;
+                        break;
                     }
-
-                    s = mapper.apply(elements.nextFloat());
-
-                    if (N.notNullOrEmpty(s.closeHandlers)) {
-                        final Deque<Runnable> tmp = s.closeHandlers;
-
-                        closeHandle = new Runnable() {
-                            @Override
-                            public void run() {
-                                Stream.close(tmp);
-                            }
-                        };
-                    }
-
-                    cur = s.iteratorEx();
                 }
 
                 return cur != null && cur.hasNext();
@@ -416,9 +414,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             @Override
             public void close() {
                 if (closeHandle != null) {
-                    final Runnable tmp = closeHandle;
-                    closeHandle = null;
-                    tmp.run();
+                    Stream.close(closeHandle);
                 }
             }
         };
@@ -442,31 +438,29 @@ class IteratorFloatStream extends AbstractFloatStream {
         final IntIteratorEx iter = new IntIteratorEx() {
             private IntIterator cur = null;
             private IntStream s = null;
-            private Runnable closeHandle = null;
+            private Deque<Runnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || cur.hasNext() == false) && elements.hasNext()) {
-                    if (closeHandle != null) {
-                        final Runnable tmp = closeHandle;
-                        closeHandle = null;
-                        tmp.run();
+                while (cur == null || cur.hasNext() == false) {
+                    if (elements.hasNext()) {
+                        if (closeHandle != null) {
+                            final Deque<Runnable> tmp = closeHandle;
+                            closeHandle = null;
+                            Stream.close(tmp);
+                        }
+
+                        s = mapper.apply(elements.nextFloat());
+
+                        if (N.notNullOrEmpty(s.closeHandlers)) {
+                            closeHandle = s.closeHandlers; 
+                        }
+
+                        cur = s.iteratorEx();
+                    } else {
+                        cur = null;
+                        break;
                     }
-
-                    s = mapper.apply(elements.nextFloat());
-
-                    if (N.notNullOrEmpty(s.closeHandlers)) {
-                        final Deque<Runnable> tmp = s.closeHandlers;
-
-                        closeHandle = new Runnable() {
-                            @Override
-                            public void run() {
-                                Stream.close(tmp);
-                            }
-                        };
-                    }
-
-                    cur = s.iteratorEx();
                 }
 
                 return cur != null && cur.hasNext();
@@ -484,9 +478,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             @Override
             public void close() {
                 if (closeHandle != null) {
-                    final Runnable tmp = closeHandle;
-                    closeHandle = null;
-                    tmp.run();
+                    Stream.close(closeHandle);
                 }
             }
         };
@@ -510,31 +502,29 @@ class IteratorFloatStream extends AbstractFloatStream {
         final LongIteratorEx iter = new LongIteratorEx() {
             private LongIterator cur = null;
             private LongStream s = null;
-            private Runnable closeHandle = null;
+            private Deque<Runnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || cur.hasNext() == false) && elements.hasNext()) {
-                    if (closeHandle != null) {
-                        final Runnable tmp = closeHandle;
-                        closeHandle = null;
-                        tmp.run();
+                while (cur == null || cur.hasNext() == false) {
+                    if (elements.hasNext()) {
+                        if (closeHandle != null) {
+                            final Deque<Runnable> tmp = closeHandle;
+                            closeHandle = null;
+                            Stream.close(tmp);
+                        }
+
+                        s = mapper.apply(elements.nextFloat());
+
+                        if (N.notNullOrEmpty(s.closeHandlers)) {
+                            closeHandle = s.closeHandlers; 
+                        }
+
+                        cur = s.iteratorEx();
+                    } else {
+                        cur = null;
+                        break;
                     }
-
-                    s = mapper.apply(elements.nextFloat());
-
-                    if (N.notNullOrEmpty(s.closeHandlers)) {
-                        final Deque<Runnable> tmp = s.closeHandlers;
-
-                        closeHandle = new Runnable() {
-                            @Override
-                            public void run() {
-                                Stream.close(tmp);
-                            }
-                        };
-                    }
-
-                    cur = s.iteratorEx();
                 }
 
                 return cur != null && cur.hasNext();
@@ -552,9 +542,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             @Override
             public void close() {
                 if (closeHandle != null) {
-                    final Runnable tmp = closeHandle;
-                    closeHandle = null;
-                    tmp.run();
+                    Stream.close(closeHandle);
                 }
             }
         };
@@ -578,31 +566,29 @@ class IteratorFloatStream extends AbstractFloatStream {
         final DoubleIteratorEx iter = new DoubleIteratorEx() {
             private DoubleIterator cur = null;
             private DoubleStream s = null;
-            private Runnable closeHandle = null;
+            private Deque<Runnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || cur.hasNext() == false) && elements.hasNext()) {
-                    if (closeHandle != null) {
-                        final Runnable tmp = closeHandle;
-                        closeHandle = null;
-                        tmp.run();
+                while (cur == null || cur.hasNext() == false) {
+                    if (elements.hasNext()) {
+                        if (closeHandle != null) {
+                            final Deque<Runnable> tmp = closeHandle;
+                            closeHandle = null;
+                            Stream.close(tmp);
+                        }
+
+                        s = mapper.apply(elements.nextFloat());
+
+                        if (N.notNullOrEmpty(s.closeHandlers)) {
+                            closeHandle = s.closeHandlers; 
+                        }
+
+                        cur = s.iteratorEx();
+                    } else {
+                        cur = null;
+                        break;
                     }
-
-                    s = mapper.apply(elements.nextFloat());
-
-                    if (N.notNullOrEmpty(s.closeHandlers)) {
-                        final Deque<Runnable> tmp = s.closeHandlers;
-
-                        closeHandle = new Runnable() {
-                            @Override
-                            public void run() {
-                                Stream.close(tmp);
-                            }
-                        };
-                    }
-
-                    cur = s.iteratorEx();
                 }
 
                 return cur != null && cur.hasNext();
@@ -620,9 +606,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             @Override
             public void close() {
                 if (closeHandle != null) {
-                    final Runnable tmp = closeHandle;
-                    closeHandle = null;
-                    tmp.run();
+                    Stream.close(closeHandle);
                 }
             }
         };
@@ -646,31 +630,29 @@ class IteratorFloatStream extends AbstractFloatStream {
         final ObjIteratorEx<T> iter = new ObjIteratorEx<T>() {
             private Iterator<? extends T> cur = null;
             private Stream<? extends T> s = null;
-            private Runnable closeHandle = null;
+            private Deque<Runnable> closeHandle = null;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || cur.hasNext() == false) && elements.hasNext()) {
-                    if (closeHandle != null) {
-                        final Runnable tmp = closeHandle;
-                        closeHandle = null;
-                        tmp.run();
+                while (cur == null || cur.hasNext() == false) {
+                    if (elements.hasNext()) {
+                        if (closeHandle != null) {
+                            final Deque<Runnable> tmp = closeHandle;
+                            closeHandle = null;
+                            Stream.close(tmp);
+                        }
+
+                        s = mapper.apply(elements.nextFloat());
+
+                        if (N.notNullOrEmpty(s.closeHandlers)) {
+                            closeHandle = s.closeHandlers; 
+                        }
+
+                        cur = s.iteratorEx();
+                    } else {
+                        cur = null;
+                        break;
                     }
-
-                    s = mapper.apply(elements.nextFloat());
-
-                    if (N.notNullOrEmpty(s.closeHandlers)) {
-                        final Deque<Runnable> tmp = s.closeHandlers;
-
-                        closeHandle = new Runnable() {
-                            @Override
-                            public void run() {
-                                Stream.close(tmp);
-                            }
-                        };
-                    }
-
-                    cur = s.iteratorEx();
                 }
 
                 return cur != null && cur.hasNext();
@@ -688,9 +670,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             @Override
             public void close() {
                 if (closeHandle != null) {
-                    final Runnable tmp = closeHandle;
-                    closeHandle = null;
-                    tmp.run();
+                    Stream.close(closeHandle);
                 }
             }
         };

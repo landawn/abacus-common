@@ -951,7 +951,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 private T next = null;
                 private Iterator<? extends R> cur = null;
                 private Stream<? extends R> s = null;
-                private Runnable closeHandle = null;
+                private Deque<Runnable> closeHandle = null;
 
                 @Override
                 public boolean hasNext() {
@@ -961,27 +961,21 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                                 next = elements.next();
                             } else {
                                 next = (T) NONE;
+                                cur = null;
                                 break;
                             }
                         }
 
                         if (closeHandle != null) {
-                            final Runnable tmp = closeHandle;
+                            final Deque<Runnable> tmp = closeHandle;
                             closeHandle = null;
-                            tmp.run();
+                            Stream.close(tmp);
                         }
 
                         s = mapper.apply(next);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            final Deque<Runnable> tmp = s.closeHandlers;
-
-                            closeHandle = new Runnable() {
-                                @Override
-                                public void run() {
-                                    Stream.close(tmp);
-                                }
-                            };
+                            closeHandle = s.closeHandlers; 
                         }
 
                         cur = s.iteratorEx();
@@ -1002,9 +996,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 @Override
                 public void close() {
                     if (closeHandle != null) {
-                        final Runnable tmp = closeHandle;
-                        closeHandle = null;
-                        tmp.run();
+                        Stream.close(closeHandle);
                     }
                 }
             });
@@ -1013,12 +1005,10 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
-
             @Override
             public void run() {
                 Stream.close(iters);
             }
-
         });
 
         return new ParallelIteratorStream<>(Stream.parallelConcatt(iters, iters.size()), false, null, maxThreadNum, splitor, asyncExecutor, newCloseHandlers);
@@ -1048,6 +1038,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                                 next = elements.next();
                             } else {
                                 next = (T) NONE;
+                                cur = null;
                                 break;
                             }
                         }
@@ -1088,7 +1079,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 private T next = null;
                 private CharIterator cur = null;
                 private CharStream s = null;
-                private Runnable closeHandle = null;
+                private Deque<Runnable> closeHandle = null;
 
                 @Override
                 public boolean hasNext() {
@@ -1098,27 +1089,21 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                                 next = elements.next();
                             } else {
                                 next = (T) NONE;
+                                cur = null;
                                 break;
                             }
                         }
 
                         if (closeHandle != null) {
-                            final Runnable tmp = closeHandle;
+                            final Deque<Runnable> tmp = closeHandle;
                             closeHandle = null;
-                            tmp.run();
+                            Stream.close(tmp);
                         }
 
                         s = mapper.apply(next);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            final Deque<Runnable> tmp = s.closeHandlers;
-
-                            closeHandle = new Runnable() {
-                                @Override
-                                public void run() {
-                                    Stream.close(tmp);
-                                }
-                            };
+                            closeHandle = s.closeHandlers; 
                         }
 
                         cur = s.iteratorEx();
@@ -1139,9 +1124,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 @Override
                 public void close() {
                     if (closeHandle != null) {
-                        final Runnable tmp = closeHandle;
-                        closeHandle = null;
-                        tmp.run();
+                        Stream.close(closeHandle);
                     }
                 }
             });
@@ -1150,12 +1133,10 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
-
             @Override
             public void run() {
                 Stream.close(iters);
             }
-
         });
 
         return new ParallelIteratorCharStream(Stream.parallelConcatt(iters, iters.size()), false, maxThreadNum, splitor, asyncExecutor, newCloseHandlers);
@@ -1176,7 +1157,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 private T next = null;
                 private ByteIterator cur = null;
                 private ByteStream s = null;
-                private Runnable closeHandle = null;
+                private Deque<Runnable> closeHandle = null;
 
                 @Override
                 public boolean hasNext() {
@@ -1186,27 +1167,21 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                                 next = elements.next();
                             } else {
                                 next = (T) NONE;
+                                cur = null;
                                 break;
                             }
                         }
 
                         if (closeHandle != null) {
-                            final Runnable tmp = closeHandle;
+                            final Deque<Runnable> tmp = closeHandle;
                             closeHandle = null;
-                            tmp.run();
+                            Stream.close(tmp);
                         }
 
                         s = mapper.apply(next);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            final Deque<Runnable> tmp = s.closeHandlers;
-
-                            closeHandle = new Runnable() {
-                                @Override
-                                public void run() {
-                                    Stream.close(tmp);
-                                }
-                            };
+                            closeHandle = s.closeHandlers; 
                         }
 
                         cur = s.iteratorEx();
@@ -1227,9 +1202,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 @Override
                 public void close() {
                     if (closeHandle != null) {
-                        final Runnable tmp = closeHandle;
-                        closeHandle = null;
-                        tmp.run();
+                        Stream.close(closeHandle);
                     }
                 }
             });
@@ -1238,12 +1211,10 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
-
             @Override
             public void run() {
                 Stream.close(iters);
             }
-
         });
 
         return new ParallelIteratorByteStream(Stream.parallelConcatt(iters, iters.size()), false, maxThreadNum, splitor, asyncExecutor, newCloseHandlers);
@@ -1264,7 +1235,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 private T next = null;
                 private ShortIterator cur = null;
                 private ShortStream s = null;
-                private Runnable closeHandle = null;
+                private Deque<Runnable> closeHandle = null;
 
                 @Override
                 public boolean hasNext() {
@@ -1274,27 +1245,21 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                                 next = elements.next();
                             } else {
                                 next = (T) NONE;
+                                cur = null;
                                 break;
                             }
                         }
 
                         if (closeHandle != null) {
-                            final Runnable tmp = closeHandle;
+                            final Deque<Runnable> tmp = closeHandle;
                             closeHandle = null;
-                            tmp.run();
+                            Stream.close(tmp);
                         }
 
                         s = mapper.apply(next);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            final Deque<Runnable> tmp = s.closeHandlers;
-
-                            closeHandle = new Runnable() {
-                                @Override
-                                public void run() {
-                                    Stream.close(tmp);
-                                }
-                            };
+                            closeHandle = s.closeHandlers; 
                         }
 
                         cur = s.iteratorEx();
@@ -1315,9 +1280,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 @Override
                 public void close() {
                     if (closeHandle != null) {
-                        final Runnable tmp = closeHandle;
-                        closeHandle = null;
-                        tmp.run();
+                        Stream.close(closeHandle);
                     }
                 }
             });
@@ -1326,12 +1289,10 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
-
             @Override
             public void run() {
                 Stream.close(iters);
             }
-
         });
 
         return new ParallelIteratorShortStream(Stream.parallelConcatt(iters, iters.size()), false, maxThreadNum, splitor, asyncExecutor, newCloseHandlers);
@@ -1352,7 +1313,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 private T next = null;
                 private IntIterator cur = null;
                 private IntStream s = null;
-                private Runnable closeHandle = null;
+                private Deque<Runnable> closeHandle = null;
 
                 @Override
                 public boolean hasNext() {
@@ -1362,27 +1323,21 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                                 next = elements.next();
                             } else {
                                 next = (T) NONE;
+                                cur = null;
                                 break;
                             }
                         }
 
                         if (closeHandle != null) {
-                            final Runnable tmp = closeHandle;
+                            final Deque<Runnable> tmp = closeHandle;
                             closeHandle = null;
-                            tmp.run();
+                            Stream.close(tmp);
                         }
 
                         s = mapper.apply(next);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            final Deque<Runnable> tmp = s.closeHandlers;
-
-                            closeHandle = new Runnable() {
-                                @Override
-                                public void run() {
-                                    Stream.close(tmp);
-                                }
-                            };
+                            closeHandle = s.closeHandlers; 
                         }
 
                         cur = s.iteratorEx();
@@ -1403,9 +1358,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 @Override
                 public void close() {
                     if (closeHandle != null) {
-                        final Runnable tmp = closeHandle;
-                        closeHandle = null;
-                        tmp.run();
+                        Stream.close(closeHandle);
                     }
                 }
             });
@@ -1414,12 +1367,10 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
-
             @Override
             public void run() {
                 Stream.close(iters);
             }
-
         });
 
         return new ParallelIteratorIntStream(Stream.parallelConcatt(iters, iters.size()), false, maxThreadNum, splitor, asyncExecutor, newCloseHandlers);
@@ -1440,7 +1391,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 private T next = null;
                 private LongIterator cur = null;
                 private LongStream s = null;
-                private Runnable closeHandle = null;
+                private Deque<Runnable> closeHandle = null;
 
                 @Override
                 public boolean hasNext() {
@@ -1450,27 +1401,21 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                                 next = elements.next();
                             } else {
                                 next = (T) NONE;
+                                cur = null;
                                 break;
                             }
                         }
 
                         if (closeHandle != null) {
-                            final Runnable tmp = closeHandle;
+                            final Deque<Runnable> tmp = closeHandle;
                             closeHandle = null;
-                            tmp.run();
+                            Stream.close(tmp);
                         }
 
                         s = mapper.apply(next);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            final Deque<Runnable> tmp = s.closeHandlers;
-
-                            closeHandle = new Runnable() {
-                                @Override
-                                public void run() {
-                                    Stream.close(tmp);
-                                }
-                            };
+                            closeHandle = s.closeHandlers; 
                         }
 
                         cur = s.iteratorEx();
@@ -1491,9 +1436,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 @Override
                 public void close() {
                     if (closeHandle != null) {
-                        final Runnable tmp = closeHandle;
-                        closeHandle = null;
-                        tmp.run();
+                        Stream.close(closeHandle);
                     }
                 }
             });
@@ -1502,12 +1445,10 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
-
             @Override
             public void run() {
                 Stream.close(iters);
             }
-
         });
 
         return new ParallelIteratorLongStream(Stream.parallelConcatt(iters, iters.size()), false, maxThreadNum, splitor, asyncExecutor, newCloseHandlers);
@@ -1528,7 +1469,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 private T next = null;
                 private FloatIterator cur = null;
                 private FloatStream s = null;
-                private Runnable closeHandle = null;
+                private Deque<Runnable> closeHandle = null;
 
                 @Override
                 public boolean hasNext() {
@@ -1538,27 +1479,21 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                                 next = elements.next();
                             } else {
                                 next = (T) NONE;
+                                cur = null;
                                 break;
                             }
                         }
 
                         if (closeHandle != null) {
-                            final Runnable tmp = closeHandle;
+                            final Deque<Runnable> tmp = closeHandle;
                             closeHandle = null;
-                            tmp.run();
+                            Stream.close(tmp);
                         }
 
                         s = mapper.apply(next);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            final Deque<Runnable> tmp = s.closeHandlers;
-
-                            closeHandle = new Runnable() {
-                                @Override
-                                public void run() {
-                                    Stream.close(tmp);
-                                }
-                            };
+                            closeHandle = s.closeHandlers; 
                         }
 
                         cur = s.iteratorEx();
@@ -1579,9 +1514,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 @Override
                 public void close() {
                     if (closeHandle != null) {
-                        final Runnable tmp = closeHandle;
-                        closeHandle = null;
-                        tmp.run();
+                        Stream.close(closeHandle);
                     }
                 }
             });
@@ -1590,12 +1523,10 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
-
             @Override
             public void run() {
                 Stream.close(iters);
             }
-
         });
 
         return new ParallelIteratorFloatStream(Stream.parallelConcatt(iters, iters.size()), false, maxThreadNum, splitor, asyncExecutor, newCloseHandlers);
@@ -1616,7 +1547,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 private T next = null;
                 private DoubleIterator cur = null;
                 private DoubleStream s = null;
-                private Runnable closeHandle = null;
+                private Deque<Runnable> closeHandle = null;
 
                 @Override
                 public boolean hasNext() {
@@ -1626,27 +1557,21 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                                 next = elements.next();
                             } else {
                                 next = (T) NONE;
+                                cur = null;
                                 break;
                             }
                         }
 
                         if (closeHandle != null) {
-                            final Runnable tmp = closeHandle;
+                            final Deque<Runnable> tmp = closeHandle;
                             closeHandle = null;
-                            tmp.run();
+                            Stream.close(tmp);
                         }
 
                         s = mapper.apply(next);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            final Deque<Runnable> tmp = s.closeHandlers;
-
-                            closeHandle = new Runnable() {
-                                @Override
-                                public void run() {
-                                    Stream.close(tmp);
-                                }
-                            };
+                            closeHandle = s.closeHandlers; 
                         }
 
                         cur = s.iteratorEx();
@@ -1667,9 +1592,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 @Override
                 public void close() {
                     if (closeHandle != null) {
-                        final Runnable tmp = closeHandle;
-                        closeHandle = null;
-                        tmp.run();
+                        Stream.close(closeHandle);
                     }
                 }
             });
@@ -1678,12 +1601,10 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         final Deque<Runnable> newCloseHandlers = N.isNullOrEmpty(closeHandlers) ? new LocalArrayDeque<>(1) : new LocalArrayDeque<>(closeHandlers);
 
         newCloseHandlers.add(new Runnable() {
-
             @Override
             public void run() {
                 Stream.close(iters);
             }
-
         });
 
         return new ParallelIteratorDoubleStream(Stream.parallelConcatt(iters, iters.size()), false, maxThreadNum, splitor, asyncExecutor, newCloseHandlers);

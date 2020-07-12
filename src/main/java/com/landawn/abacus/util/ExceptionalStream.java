@@ -1771,29 +1771,29 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
         final ExceptionalIterator<R, E> iter = new ExceptionalIterator<R, E>() {
             private ExceptionalIterator<? extends R, ? extends E> cur = null;
             private ExceptionalStream<? extends R, ? extends E> s = null;
-            private Throwables.Runnable<E> closeHandle = null;
+            private Deque<? extends Throwables.Runnable<? extends E>> closeHandle = null;
 
             @Override
             public boolean hasNext() throws E {
-                while ((cur == null || cur.hasNext() == false) && elements.hasNext()) {
-                    if (closeHandle != null) {
-                        final Throwables.Runnable<E> tmp = closeHandle;
-                        closeHandle = null;
-                        tmp.run();
+                while (cur == null || cur.hasNext() == false) {
+                    if (elements.hasNext()) {
+                        if (closeHandle != null) {
+                            final Deque<? extends Throwables.Runnable<? extends E>> tmp = closeHandle;
+                            closeHandle = null;
+                            ExceptionalStream.close(tmp);
+                        }
+
+                        s = mapper.apply(elements.next());
+
+                        if (N.notNullOrEmpty(s.closeHandlers)) {
+                            closeHandle = s.closeHandlers;
+                        }
+
+                        cur = s.elements;
+                    } else {
+                        cur = null;
+                        break;
                     }
-
-                    s = mapper.apply(elements.next());
-
-                    if (N.notNullOrEmpty(s.closeHandlers)) {
-                        closeHandle = new Throwables.Runnable<E>() {
-                            @Override
-                            public void run() throws E {
-                                s.close();
-                            }
-                        };
-                    }
-
-                    cur = s.elements;
                 }
 
                 return cur != null && cur.hasNext();
@@ -1811,9 +1811,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
             @Override
             public void close() throws E {
                 if (closeHandle != null) {
-                    final Throwables.Runnable<E> tmp = closeHandle;
-                    closeHandle = null;
-                    tmp.run();
+                    ExceptionalStream.close(closeHandle);
                 }
             }
         };
@@ -7134,6 +7132,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
 
         isClosed = true;
 
+        close(closeHandlers);
+    }
+
+    static <E extends Exception> void close(final Deque<? extends Throwables.Runnable<? extends E>> closeHandlers) {
         Throwable ex = null;
 
         for (Throwables.Runnable<? extends E> closeHandler : closeHandlers) {
@@ -7143,12 +7145,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
                 if (ex == null) {
                     ex = e;
                 } else {
-                    if (ex instanceof RuntimeException && !(e instanceof RuntimeException)) {
-                        e.addSuppressed(ex);
-                        ex = e;
-                    } else {
-                        ex.addSuppressed(e);
-                    }
+                    ex.addSuppressed(e);
                 }
             }
         }
