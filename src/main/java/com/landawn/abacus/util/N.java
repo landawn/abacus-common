@@ -35,6 +35,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.RandomAccess;
@@ -64,9 +65,12 @@ import com.landawn.abacus.util.u.OptionalFloat;
 import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.function.BiPredicate;
+import com.landawn.abacus.util.function.IntBiFunction;
 import com.landawn.abacus.util.function.IntFunction;
 import com.landawn.abacus.util.function.Predicate;
 import com.landawn.abacus.util.function.Supplier;
+import com.landawn.abacus.util.stream.ObjIteratorEx;
+import com.landawn.abacus.util.stream.Stream;
 
 /**
  * <p>
@@ -1115,6 +1119,161 @@ public final class N extends CommonUtil {
         }
 
         return res;
+    }
+
+    /**
+     * <pre>
+     * <code>
+     * final int[] a = Array.rangeClosed(1, 7);
+     * splitByCount(5, 7, true, (fromIndex, toIndex) ->  N.copyOfRange(a, fromIndex, toIndex)).forEach(Fn.println()); // [[1], [2], [3], [4, 5], [6, 7]]
+     * splitByCount(5, 7, false, (fromIndex, toIndex) ->  N.copyOfRange(a, fromIndex, toIndex)).forEach(Fn.println()); // [[1, 2], [3, 4], [5], [6], [7]]
+     * </code>
+     * </pre>
+     *
+     * @param <T> the generic type
+     * @param maxCount max count of chunk want to split {@code totalSize} into.
+     * @param totalSize the total size
+     * @param smallerFirst the smaller first
+     * @param func the func
+     * @return the stream
+     */
+    public static <T> Stream<T> splitByCount(final int maxCount, final int totalSize, final boolean smallerFirst, final IntBiFunction<T> func) {
+        if (smallerFirst) {
+            return splitByCountSmallerFirst(maxCount, totalSize, func);
+        } else {
+            return splitByCountSmallerLast(maxCount, totalSize, func);
+        }
+    }
+
+    /**
+     * <pre>
+     * <code>
+     * final int[] a = Array.rangeClosed(1, 7);
+     * splitByCountSmallerFirst(5, 7, (fromIndex, toIndex) ->  N.copyOfRange(a, fromIndex, toIndex)).forEach(Fn.println()); // [[1], [2], [3], [4, 5], [6, 7]]
+     * splitByCountSmallerLast(5, 7, (fromIndex, toIndex) ->  N.copyOfRange(a, fromIndex, toIndex)).forEach(Fn.println()); // [[1, 2], [3, 4], [5], [6], [7]]
+     * </code>
+     * </pre>
+     *
+     * @param <T> the generic type
+     * @param maxCount the max count
+     * @param totalSize the total size
+     * @param func the func
+     * @return the stream
+     */
+    static <T> Stream<T> splitByCountSmallerFirst(final int maxCount, final int totalSize, final IntBiFunction<T> func) {
+        N.checkArgPositive(maxCount, "maxCount");
+        N.checkArgNotNegative(totalSize, "totalSize");
+        N.checkArgNotNull(func, "func");
+
+        if (totalSize == 0) {
+            return Stream.empty();
+        }
+
+        final Iterator<T> iter = new ObjIteratorEx<T>() {
+            private final int smallerSize = Math.max(totalSize / maxCount, 1);
+            private final int biggerSize = totalSize % maxCount == 0 ? totalSize / maxCount : totalSize / maxCount + 1;
+            private int count = totalSize >= maxCount ? maxCount : totalSize;
+            private int biggerCount = totalSize % maxCount;
+            private int cursor = 0;
+
+            @Override
+            public boolean hasNext() {
+                return cursor < totalSize;
+            }
+
+            @Override
+            public T next() {
+                if (cursor >= totalSize) {
+                    throw new NoSuchElementException();
+                }
+
+                return func.apply(cursor, cursor = (count-- > biggerCount ? cursor + smallerSize : cursor + biggerSize));
+            }
+
+            @Override
+            public void skip(long n) {
+                N.checkArgNotNegative(n, "n");
+
+                if (n > 0) {
+                    while (n-- > 0 && cursor < totalSize) {
+                        cursor = count-- > biggerCount ? cursor + smallerSize : cursor + biggerSize;
+                    }
+                }
+            }
+
+            @Override
+            public long count() {
+                return count;
+            }
+        };
+
+        return Stream.of(iter);
+    }
+
+    /**
+     * <pre>
+     * <code>
+     * final int[] a = Array.rangeClosed(1, 7);
+     * splitByCountSmallerFirst(5, 7, (fromIndex, toIndex) ->  N.copyOfRange(a, fromIndex, toIndex)).forEach(Fn.println()); // [[1], [2], [3], [4, 5], [6, 7]]
+     * splitByCountSmallerLast(5, 7, (fromIndex, toIndex) ->  N.copyOfRange(a, fromIndex, toIndex)).forEach(Fn.println()); // [[1, 2], [3, 4], [5], [6], [7]]
+     * </code>
+     * </pre>
+     *
+     * @param <T> the generic type
+     * @param maxCount the max count
+     * @param totalSize the total size
+     * @param func the func
+     * @return the stream
+     */
+    static <T> Stream<T> splitByCountSmallerLast(final int maxCount, final int totalSize, final IntBiFunction<T> func) {
+        N.checkArgPositive(maxCount, "maxCount");
+        N.checkArgNotNegative(totalSize, "totalSize");
+        N.checkArgNotNull(func, "func");
+
+        if (totalSize == 0) {
+            return Stream.empty();
+        }
+
+        final Iterator<T> iter = new ObjIteratorEx<T>() {
+            private final int smallerSize = Math.max(totalSize / maxCount, 1);
+            private final int biggerSize = totalSize % maxCount == 0 ? totalSize / maxCount : totalSize / maxCount + 1;
+            private int count = totalSize >= maxCount ? maxCount : totalSize;
+            private int smallerCount = count - totalSize % maxCount;
+            private int cursor = 0;
+
+            @Override
+            public boolean hasNext() {
+                return cursor < totalSize;
+            }
+
+            @Override
+            public T next() {
+                if (cursor >= totalSize) {
+                    throw new NoSuchElementException();
+                }
+
+                return func.apply(cursor, cursor = (count-- > smallerCount ? cursor + biggerSize : cursor + smallerSize));
+            }
+
+            @Override
+            public void skip(long n) {
+                N.checkArgNotNegative(n, "n");
+
+                if (n > 0) {
+                    while (n-- > 0 && cursor < totalSize) {
+                        cursor = count-- > smallerCount ? cursor + biggerSize : cursor + smallerSize;
+                    }
+                }
+            }
+
+            @Override
+            public long count() {
+                return count;
+            }
+
+        };
+
+        return Stream.of(iter);
     }
 
     /**
@@ -20310,8 +20469,8 @@ public final class N extends CommonUtil {
      */
     @SuppressWarnings("unchecked")
     public static <T> Nullable<T> castIfAssignable(final Object val, final Class<T> targetType) {
-        if (Primitives.isPrimitiveType(targetType)) {
-            return val != null && Primitives.wrap(targetType).isAssignableFrom(val.getClass()) ? Nullable.of((T) val) : Nullable.<T> empty();
+        if (N.isPrimitiveType(targetType)) {
+            return val != null && N.wrap(targetType).isAssignableFrom(val.getClass()) ? Nullable.of((T) val) : Nullable.<T> empty();
         }
 
         return val == null || targetType.isAssignableFrom(val.getClass()) ? Nullable.of((T) val) : Nullable.<T> empty();
@@ -21247,4 +21406,143 @@ public final class N extends CommonUtil {
     public static Optional<Number> createNumber(final String str) {
         return StringUtil.createNumber(str);
     }
+
+    // ...
+    static final BiMap<Class<?>, Class<?>> PRIMITIVE_2_WRAPPER = new BiMap<>();
+
+    static {
+        PRIMITIVE_2_WRAPPER.put(boolean.class, Boolean.class);
+        PRIMITIVE_2_WRAPPER.put(char.class, Character.class);
+        PRIMITIVE_2_WRAPPER.put(byte.class, Byte.class);
+        PRIMITIVE_2_WRAPPER.put(short.class, Short.class);
+        PRIMITIVE_2_WRAPPER.put(int.class, Integer.class);
+        PRIMITIVE_2_WRAPPER.put(long.class, Long.class);
+        PRIMITIVE_2_WRAPPER.put(float.class, Float.class);
+        PRIMITIVE_2_WRAPPER.put(double.class, Double.class);
+
+        PRIMITIVE_2_WRAPPER.put(boolean[].class, Boolean[].class);
+        PRIMITIVE_2_WRAPPER.put(char[].class, Character[].class);
+        PRIMITIVE_2_WRAPPER.put(byte[].class, Byte[].class);
+        PRIMITIVE_2_WRAPPER.put(short[].class, Short[].class);
+        PRIMITIVE_2_WRAPPER.put(int[].class, Integer[].class);
+        PRIMITIVE_2_WRAPPER.put(long[].class, Long[].class);
+        PRIMITIVE_2_WRAPPER.put(float[].class, Float[].class);
+        PRIMITIVE_2_WRAPPER.put(double[].class, Double[].class);
+    }
+
+    /**
+     * Checks if is primitive type.
+     *
+     * @param cls
+     * @return true, if is primitive type
+     */
+    public static boolean isPrimitiveType(final Class<?> cls) {
+        N.checkArgNotNull(cls, "cls");
+
+        return N.typeOf(cls).isPrimitiveType();
+    }
+
+    /**
+     * Checks if is wrapper type.
+     *
+     * @param cls
+     * @return true, if is wrapper type
+     */
+    public static boolean isWrapperType(final Class<?> cls) {
+        N.checkArgNotNull(cls, "cls");
+
+        return N.typeOf(cls).isPrimitiveWrapper();
+    }
+
+    /**
+     * Checks if is primitive array type.
+     *
+     * @param cls
+     * @return true, if is primitive array type
+     */
+    public static boolean isPrimitiveArrayType(final Class<?> cls) {
+        N.checkArgNotNull(cls, "cls");
+
+        return N.typeOf(cls).isPrimitiveArray();
+    }
+
+    /**
+     * Returns the corresponding wrapper type of {@code type} if it is a primitive type; otherwise
+     * returns {@code type} itself. Idempotent.
+     * 
+     * <pre>
+     *     wrap(int.class) == Integer.class
+     *     wrap(Integer.class) == Integer.class
+     *     wrap(String.class) == String.class
+     * </pre>
+     *
+     * @param cls
+     * @return
+     */
+    public static Class<?> wrap(final Class<?> cls) {
+        N.checkArgNotNull(cls, "cls");
+
+        final Class<?> wrapped = PRIMITIVE_2_WRAPPER.get(cls);
+
+        return wrapped == null ? cls : wrapped;
+    }
+
+    /**
+     * Returns the corresponding primitive type of {@code type} if it is a wrapper type; otherwise
+     * returns {@code type} itself. Idempotent.
+     * 
+     * <pre>
+     *     unwrap(Integer.class) == int.class
+     *     unwrap(int.class) == int.class
+     *     unwrap(String.class) == String.class
+     * </pre>
+     *
+     * @param cls
+     * @return
+     */
+    public static Class<?> unwrap(final Class<?> cls) {
+        N.checkArgNotNull(cls, "cls");
+
+        Class<?> unwrapped = PRIMITIVE_2_WRAPPER.getByValue(cls);
+
+        return unwrapped == null ? cls : unwrapped;
+    }
+
+    /**
+     * Inverts the element from {@code fromIndex} to {@code toIndex}: set it to {@code true} if it's {@code false}, or set it to {@code false} if it's {@code true}.
+     *
+     * @param a
+     */
+    public static void invert(final boolean[] a) {
+        if (N.isNullOrEmpty(a)) {
+            return;
+        }
+
+        invert(a, 0, a.length);
+    }
+
+    /**
+     * Inverts the element from {@code fromIndex} to {@code toIndex}: set it to {@code true} if it's {@code false}, or set it to {@code false} if it's {@code true}.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     */
+    public static void invert(final boolean[] a, final int fromIndex, final int toIndex) {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (fromIndex == toIndex) {
+            return;
+        }
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            a[i] = !a[i];
+        }
+    }
+
+    //    static final class Rt extends Iterables {
+    //        private Rt() {
+    //            // singleton
+    //        }
+    //    }
 }

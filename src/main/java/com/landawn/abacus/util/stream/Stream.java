@@ -71,6 +71,7 @@ import com.landawn.abacus.util.ImmutableMap;
 import com.landawn.abacus.util.Indexed;
 import com.landawn.abacus.util.IntIterator;
 import com.landawn.abacus.util.IntList;
+import com.landawn.abacus.util.Joiner;
 import com.landawn.abacus.util.Keyed;
 import com.landawn.abacus.util.LineIterator;
 import com.landawn.abacus.util.ListMultimap;
@@ -2184,6 +2185,10 @@ public abstract class Stream<T>
     @SequentialOnly
     @TerminalOp
     public abstract DataSet toDataSet(final List<String> columnNames);
+    
+    @SequentialOnly
+    @TerminalOp
+    public abstract String join(final Joiner joiner);
 
     @ParallelSupported
     public abstract T reduce(T identity, BinaryOperator<T> accumulator);
@@ -5335,7 +5340,9 @@ public abstract class Stream<T>
      *
      * @param c
      * @return
+     * @deprecated to be removed.
      */
+    @Deprecated
     public static <T> Stream<T> parallelConcat(final List<? extends Collection<? extends T>> c) {
         return parallelConcat(c, DEFAULT_READING_THREAD_NUM);
     }
@@ -5345,7 +5352,9 @@ public abstract class Stream<T>
      * @param c
      * @param readThreadNum
      * @return
+     * @deprecated to be removed.
      */
+    @Deprecated
     public static <T> Stream<T> parallelConcat(final List<? extends Collection<? extends T>> c, final int readThreadNum) {
         return parallelConcat(c, readThreadNum, calculateQueueSize(c.size()));
     }
@@ -5358,7 +5367,9 @@ public abstract class Stream<T>
      * @param readThreadNum - count of threads used to read elements from iterator to queue. Default value is min(8, c.size())
      * @param queueSize Default value is N.min(128, c.size() * 16)
      * @return
+     * @deprecated to be removed.
      */
+    @Deprecated
     public static <T> Stream<T> parallelConcat(final List<? extends Collection<? extends T>> c, final int readThreadNum, final int queueSize) {
         if (N.isNullOrEmpty(c)) {
             return Stream.empty();
@@ -8479,6 +8490,9 @@ public abstract class Stream<T>
     //    }
 
     /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
      *
      * @param a
      * @param b
@@ -8491,6 +8505,9 @@ public abstract class Stream<T>
     }
 
     /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
      *
      * @param a
      * @param b
@@ -8586,12 +8603,30 @@ public abstract class Stream<T>
         });
     }
 
+    /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param a
+     * @param b
+     * @param c
+     * @param zipFunction
+     * @return
+     */
     public static <A, B, C, R> Stream<R> parallelZip(final Iterator<? extends A> a, final Iterator<? extends B> b, final Iterator<? extends C> c,
             final TriFunction<? super A, ? super B, ? super C, R> zipFunction) {
         return parallelZip(a, b, c, zipFunction, DEFAULT_QUEUE_SIZE_PER_ITERATOR);
     }
 
     /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
      *
      * @param a
      * @param b
@@ -8703,6 +8738,9 @@ public abstract class Stream<T>
     }
 
     /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
      *
      * @param a
      * @param b
@@ -8714,6 +8752,9 @@ public abstract class Stream<T>
     }
 
     /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
      *
      * @param a
      * @param b
@@ -8726,12 +8767,30 @@ public abstract class Stream<T>
         return parallelZip(a.iteratorEx(), b.iteratorEx(), zipFunction, queueSize).onClose(newCloseHandler(Array.asList(a, b)));
     }
 
+    /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param a
+     * @param b
+     * @param c
+     * @param zipFunction
+     * @return
+     */
     public static <A, B, C, R> Stream<R> parallelZip(final Stream<A> a, final Stream<B> b, final Stream<C> c,
             final TriFunction<? super A, ? super B, ? super C, R> zipFunction) {
         return parallelZip(a, b, c, zipFunction, DEFAULT_QUEUE_SIZE_PER_ITERATOR);
     }
 
     /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
      *
      * @param a
      * @param b
@@ -8745,10 +8804,37 @@ public abstract class Stream<T>
         return parallelZip(a.iteratorEx(), b.iteratorEx(), c.iteratorEx(), zipFunction, queueSize).onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
+    /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
+     *
+     * @param <T>
+     * @param <R>
+     * @param c
+     * @param zipFunction
+     * @return
+     * @deprecated to be removed.
+     */
+    @Deprecated
     public static <T, R> Stream<R> parallelZip(final List<? extends Collection<? extends T>> c, final Function<? super List<? extends T>, R> zipFunction) {
         return parallelZip(c, zipFunction, DEFAULT_QUEUE_SIZE_PER_ITERATOR);
     }
 
+    /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
+     *
+     * @param <T>
+     * @param <R>
+     * @param c
+     * @param zipFunction
+     * @param queueSize
+     * @return
+     * @deprecated to be removed.
+     */
+    @Deprecated
     public static <T, R> Stream<R> parallelZip(final List<? extends Collection<? extends T>> c, final Function<? super List<? extends T>, R> zipFunction,
             final int queueSize) {
         if (N.isNullOrEmpty(c)) {
@@ -8766,6 +8852,9 @@ public abstract class Stream<T>
     }
 
     /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
      *
      * @param c
      * @param zipFunction
@@ -8776,6 +8865,9 @@ public abstract class Stream<T>
     }
 
     /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
      *
      * @param a
      * @param b
@@ -8801,6 +8893,9 @@ public abstract class Stream<T>
     }
 
     /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
      *
      * @param c
      * @param zipFunction
@@ -8811,6 +8906,9 @@ public abstract class Stream<T>
     }
 
     /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
      *
      * @param a
      * @param b
@@ -9040,6 +9138,9 @@ public abstract class Stream<T>
     //    }
 
     /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
      *
      * @param a
      * @param b
@@ -9054,6 +9155,9 @@ public abstract class Stream<T>
     }
 
     /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
      *
      * @param a
      * @param b
@@ -9147,6 +9251,9 @@ public abstract class Stream<T>
     }
 
     /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
      *
      * @param a
      * @param b
@@ -9163,6 +9270,9 @@ public abstract class Stream<T>
     }
 
     /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
      *
      * @param a
      * @param b
@@ -9269,6 +9379,9 @@ public abstract class Stream<T>
     }
 
     /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
      *
      * @param a
      * @param b
@@ -9283,6 +9396,9 @@ public abstract class Stream<T>
     }
 
     /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
      *
      * @param a
      * @param b
@@ -9298,6 +9414,9 @@ public abstract class Stream<T>
     }
 
     /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
      *
      * @param a
      * @param b
@@ -9314,6 +9433,9 @@ public abstract class Stream<T>
     }
 
     /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
      *
      * @param a
      * @param b
@@ -9331,11 +9453,40 @@ public abstract class Stream<T>
                 .onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
+    /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
+     *
+     * @param <T>
+     * @param <R>
+     * @param c
+     * @param valuesForNone
+     * @param zipFunction
+     * @return
+     * @deprecated to be removed.
+     */
+    @Deprecated
     public static <T, R> Stream<R> parallelZip(final List<? extends Collection<? extends T>> c, final List<? extends T> valuesForNone,
             Function<? super List<? extends T>, R> zipFunction) {
         return parallelZip(c, valuesForNone, zipFunction, DEFAULT_QUEUE_SIZE_PER_ITERATOR);
     }
 
+    /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
+     *
+     * @param <T>
+     * @param <R>
+     * @param c
+     * @param valuesForNone
+     * @param zipFunction
+     * @param queueSize
+     * @return
+     * @deprecated to be removed.
+     */
+    @Deprecated
     public static <T, R> Stream<R> parallelZip(final List<? extends Collection<? extends T>> c, final List<? extends T> valuesForNone,
             Function<? super List<? extends T>, R> zipFunction, final int queueSize) {
         if (N.isNullOrEmpty(c)) {
@@ -9358,6 +9509,9 @@ public abstract class Stream<T>
     }
 
     /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
      *
      * @param c
      * @param valuesForNone
@@ -9370,6 +9524,9 @@ public abstract class Stream<T>
     }
 
     /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
      *
      * @param c
      * @param valuesForNone
@@ -9399,6 +9556,9 @@ public abstract class Stream<T>
     }
 
     /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
      *
      * @param c
      * @param valuesForNone
@@ -9411,6 +9571,9 @@ public abstract class Stream<T>
     }
 
     /**
+     * A new thread will be started for each {@code Iterator/Collection/Stream} to read the elements to queue for the {@code zipFunction}.
+     * But the {@code zipFunction} will be executed in a single thread, not multiple threads.
+     * To parallelize the {@code zipFunction}, call {@code Stream.parallelZip(..., Pair::of/Triple::of/Fn.identity()).parallel().map(zipFunction)... }
      *
      * @param c
      * @param valuesForNone
@@ -9614,7 +9777,7 @@ public abstract class Stream<T>
      * @return
      */
     public static <T> Stream<T> merge(final T[] a, final T[] b, final T[] c, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
-        return merge(merge(a, b, nextSelector).iteratorEx(), Stream.of(c).iteratorEx(), nextSelector);
+        return merge(merge(a, b, nextSelector).iteratorEx(), N.iterate(c), nextSelector);
     }
 
     /**
@@ -9819,11 +9982,34 @@ public abstract class Stream<T>
         return result;
     }
 
+    /**
+     * All the elements from each input {@code Collection/Iterator/Stream} will be merged into two queues by multiple threads. 
+     * Then these two new queues will be merged into one {@code Iterator/Stream} by one thread.
+     * So it's not totally lazy evaluation and may cause out of memory error if there are too many elements merged into the new queues.
+     * Consider using {@code merge}, which is totally lazy evaluation.
+     * 
+     * @param <T>
+     * @param c
+     * @param nextSelector
+     * @return
+     */
     public static <T> Stream<T> parallelMerge(final List<? extends Collection<? extends T>> c,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
         return parallelMerge(c, nextSelector, DEFAULT_MAX_THREAD_NUM);
     }
 
+    /**
+     * All the elements from each input {@code Collection/Iterator/Stream} will be merged into two queues by multiple threads. 
+     * Then these two new queues will be merged into one {@code Iterator/Stream} by one thread.
+     * So it's not totally lazy evaluation and may cause out of memory error if there are too many elements merged into the new queues.
+     * Consider using {@code merge}, which is totally lazy evaluation.
+     * 
+     * @param <T>
+     * @param c
+     * @param nextSelector
+     * @param maxThreadNum
+     * @return
+     */
     public static <T> Stream<T> parallelMerge(final List<? extends Collection<? extends T>> c, final BiFunction<? super T, ? super T, MergeResult> nextSelector,
             final int maxThreadNum) {
         N.checkArgNotNull(nextSelector);
@@ -9852,6 +10038,10 @@ public abstract class Stream<T>
     }
 
     /**
+     * All the elements from each input {@code Collection/Iterator/Stream} will be merged into two queues by multiple threads. 
+     * Then these two new queues will be merged into one {@code Iterator/Stream} by one thread.
+     * So it's not totally lazy evaluation and may cause out of memory error if there are too many elements merged into the new queues.
+     * Consider using {@code merge}, which is totally lazy evaluation.
      *
      * @param c
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
@@ -9863,6 +10053,10 @@ public abstract class Stream<T>
     }
 
     /**
+     * All the elements from each input {@code Collection/Iterator/Stream} will be merged into two queues by multiple threads. 
+     * Then these two new queues will be merged into one {@code Iterator/Stream} by one thread.
+     * So it's not totally lazy evaluation and may cause out of memory error if there are too many elements merged into the new queues.
+     * Consider using {@code merge}, which is totally lazy evaluation.
      *
      * @param c
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
@@ -9943,6 +10137,10 @@ public abstract class Stream<T>
     }
 
     /**
+     * All the elements from each input {@code Collection/Iterator/Stream} will be merged into two queues by multiple threads. 
+     * Then these two new queues will be merged into one {@code Iterator/Stream} by one thread.
+     * So it's not totally lazy evaluation and may cause out of memory error if there are too many elements merged into the new queues.
+     * Consider using {@code merge}, which is totally lazy evaluation.
      *
      * @param c
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
@@ -9954,6 +10152,10 @@ public abstract class Stream<T>
     }
 
     /**
+     * All the elements from each input {@code Collection/Iterator/Stream} will be merged into two queues by multiple threads. 
+     * Then these two new queues will be merged into one {@code Iterator/Stream} by one thread.
+     * So it's not totally lazy evaluation and may cause out of memory error if there are too many elements merged into the new queues.
+     * Consider using {@code merge}, which is totally lazy evaluation.
      *
      * @param c
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.

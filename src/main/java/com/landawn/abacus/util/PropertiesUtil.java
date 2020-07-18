@@ -715,8 +715,8 @@ public final class PropertiesUtil {
                             if (ignoreTypeInfo) {
                                 bw.write("<" + elementPropName + ">");
                             } else {
-                                if (Primitives.isWrapperType(type.clazz())) {
-                                    bw.write("<" + elementPropName + " type=\"" + ClassUtil.getSimpleClassName(Primitives.unwrap(type.clazz())) + "\">");
+                                if (N.isWrapperType(type.clazz())) {
+                                    bw.write("<" + elementPropName + " type=\"" + ClassUtil.getSimpleClassName(N.unwrap(type.clazz())) + "\">");
                                 } else {
                                     bw.write("<" + elementPropName + " type=\"" + type.declaringName() + "\">");
                                 }
@@ -738,8 +738,8 @@ public final class PropertiesUtil {
                     if (ignoreTypeInfo) {
                         bw.write("<" + propName + ">");
                     } else {
-                        if (Primitives.isWrapperType(type.clazz())) {
-                            bw.write("<" + propName + " type=\"" + ClassUtil.getSimpleClassName(Primitives.unwrap(type.clazz())) + "\">");
+                        if (N.isWrapperType(type.clazz())) {
+                            bw.write("<" + propName + " type=\"" + ClassUtil.getSimpleClassName(N.unwrap(type.clazz())) + "\">");
                         } else {
                             bw.write("<" + propName + " type=\"" + type.declaringName() + "\">");
                         }
@@ -926,8 +926,7 @@ public final class PropertiesUtil {
 
                 if (duplicatedPropNameSet.contains(propName)) {
                     String listPropName = propName + "List";
-                    String elementTypeName = N.typeOf(typeName).isPrimitiveType() ? ClassUtil.getSimpleClassName(Primitives.wrap(N.typeOf(typeName).clazz()))
-                            : typeName;
+                    String elementTypeName = N.typeOf(typeName).isPrimitiveType() ? ClassUtil.getSimpleClassName(N.wrap(N.typeOf(typeName).clazz())) : typeName;
 
                     writer.write(spaces + "    " + (isPublicField ? "public " : "private ") + "List<" + elementTypeName + "> " + listPropName
                             + " = Collections.synchronizedList(new ArrayList<" + elementTypeName + ">());" + IOUtil.LINE_SEPARATOR);
@@ -1056,8 +1055,8 @@ public final class PropertiesUtil {
                 type = N.typeOf(attr);
                 if (type != null) {
                     Class<?> typeClass = type.clazz();
-                    if (typeClass.getCanonicalName().startsWith("java.lang") || Primitives.isPrimitiveType(typeClass)
-                            || (typeClass.isArray() && Primitives.isPrimitiveType(typeClass.getComponentType()))) {
+                    if (typeClass.getCanonicalName().startsWith("java.lang") || N.isPrimitiveType(typeClass)
+                            || (typeClass.isArray() && N.isPrimitiveType(typeClass.getComponentType()))) {
                         // ignore
                     } else {
                         result.add(type.clazz().getCanonicalName());
@@ -1085,7 +1084,7 @@ public final class PropertiesUtil {
      */
     private static void writeMethod(Writer writer, String spaces, String propName, String typeName, Set<String> duplicatedPropNameSet) throws IOException {
         String listPropName = propName + "List";
-        String elementTypeName = N.typeOf(typeName).isPrimitiveType() ? ClassUtil.getSimpleClassName(Primitives.wrap(N.typeOf(typeName).clazz())) : typeName;
+        String elementTypeName = N.typeOf(typeName).isPrimitiveType() ? ClassUtil.getSimpleClassName(N.wrap(N.typeOf(typeName).clazz())) : typeName;
 
         writer.write(spaces + "public " + typeName + " get" + StringUtil.capitalize(propName) + "() {" + IOUtil.LINE_SEPARATOR);
         writer.write(spaces + "    " + "return " + propName + ";" + IOUtil.LINE_SEPARATOR);

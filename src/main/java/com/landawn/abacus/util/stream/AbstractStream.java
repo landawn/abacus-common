@@ -4568,6 +4568,25 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
+    public String join(final Joiner joiner) {
+        assertNotClosed();
+
+        checkArgNotNull(joiner, "joiner");
+
+        try {
+            final IteratorEx<T> iter = this.iteratorEx();
+
+            while (iter.hasNext()) {
+                joiner.append(iter.next());
+            }
+
+            return joiner.toString();
+        } finally {
+            close();
+        }
+    }
+
+    @Override
     public boolean hasDuplicates() {
         assertNotClosed();
 

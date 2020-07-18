@@ -2144,7 +2144,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     }
 
     /**
-     *
+     * All the elements from each input {@code Collection/Iterator/Stream} will be merged into two queues by multiple threads. 
+     * Then these two new queues will be merged into one {@code Iterator/Stream} by one thread.
+     * So it's not totally lazy evaluation and may cause out of memory error if there are too many elements merged into the new queues.
+     * Consider using {@code merge}, which is totally lazy evaluation.
+     * 
      * @param c
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
@@ -2154,7 +2158,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     }
 
     /**
-     *
+     * All the elements from each input {@code Collection/Iterator/Stream} will be merged into two queues by multiple threads. 
+     * Then these two new queues will be merged into one {@code Iterator/Stream} by one thread.
+     * So it's not totally lazy evaluation and may cause out of memory error if there are too many elements merged into the new queues.
+     * Consider using {@code merge}, which is totally lazy evaluation.
+     * 
      * @param c
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @param maxThreadNum

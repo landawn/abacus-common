@@ -37,7 +37,6 @@ import com.landawn.abacus.util.AndroidUtil;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Primitives;
 import com.landawn.abacus.util.ThreadMode;
 
 /**
@@ -841,7 +840,7 @@ public class EventBus {
             final Subscribe subscribe = method.getAnnotation(Subscribe.class);
             this.obj = null;
             this.method = method;
-            this.parameterType = Primitives.isPrimitiveType(method.getParameterTypes()[0]) ? Primitives.wrap(method.getParameterTypes()[0])
+            this.parameterType = N.isPrimitiveType(method.getParameterTypes()[0]) ? N.wrap(method.getParameterTypes()[0])
                     : method.getParameterTypes()[0];
             this.eventId = subscribe == null || N.isNullOrEmpty(subscribe.eventId()) ? null : subscribe.eventId();
             this.threadMode = subscribe == null ? ThreadMode.DEFAULT : subscribe.threadMode();

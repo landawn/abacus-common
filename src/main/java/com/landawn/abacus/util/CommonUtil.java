@@ -71,7 +71,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import com.landawn.abacus.DataSet;
 import com.landawn.abacus.DirtyMarker;
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Immutable;
+import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.NullSafe;
 import com.landawn.abacus.core.DirtyMarkerUtil;
 import com.landawn.abacus.core.MapEntity;
@@ -6417,7 +6419,7 @@ class CommonUtil {
                 for (PropInfo propInfo : srcEntityInfo.propInfoList) {
                     propValue = srcEntityInfo.getPropValue(sourceEntity, propInfo.name);
 
-                    if (Primitives.notNullOrDefault(propValue)) {
+                    if (notNullOrDefault(propValue)) {
                         targetEntityInfo.setPropValue(targetEntity, propInfo.name, propValue, ignoreUnknownProperty);
                     }
                 }
@@ -6517,7 +6519,7 @@ class CommonUtil {
                 if (ignorePropNames == null || ignorePropNames.contains(propInfo.name) == false) {
                     propValue = propInfo.getPropValue(sourceEntity);
 
-                    if (Primitives.notNullOrDefault(propValue)) {
+                    if (notNullOrDefault(propValue)) {
                         targetEntityInfo.setPropValue(targetEntity, propInfo.name, propValue, ignoreUnknownProperty);
                     }
                 }
@@ -8625,6 +8627,18 @@ class CommonUtil {
     //    }
 
     /**
+     * Checks if is null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
+     *
+     * @param s
+     * @return true, if is null or default
+     */
+    @Internal
+    @Beta
+    static boolean isNullOrDefault(final Object value) {
+        return (value == null) || N.equals(value, N.defaultValueOf(value.getClass()));
+    }
+
+    /**
      * Not null or empty.
      *
      * @param s
@@ -8804,6 +8818,19 @@ class CommonUtil {
     // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
     public static boolean notNullOrEmptyOrBlank(final CharSequence s) {
         return !CommonUtil.isNullOrEmptyOrBlank(s);
+    }
+
+    /**
+     * Checks if it's not null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
+     *
+     *
+     * @param s
+     * @return true, if it's not null or default
+     */
+    @Internal
+    @Beta
+    static boolean notNullOrDefault(final Object value) {
+        return (value != null) && !N.equals(value, N.defaultValueOf(value.getClass()));
     }
 
     /**
