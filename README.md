@@ -137,8 +137,6 @@ and [More](https://www.javadoc.io/static/com.landawn/abacus-util/1.21.6/com/land
 [MemcachedLock](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/MemcachedLock_view.html).
 
 * More:
-[Primitives](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/Primitives_view.html),
-[CodeGenerator](https://htmlpreview.github.io/?https://github.com/landa.wn/abacus-util/master/docs/CodeGenerator_view.html), 
 [Charsets](https://static.javadoc.io/com.landawn/abacus-util/1.21.6/com/landawn/abacus/util/Charsets.html),
 [Ascii](https://static.javadoc.io/com.landawn/abacus-util/1.21.6/com/landawn/abacus/util/Ascii.html),
 [CalendarUnit](https://static.javadoc.io/com.landawn/abacus-util/1.21.6/com/landawn/abacus/util/CalendarUnit.html),
