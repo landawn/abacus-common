@@ -1224,6 +1224,30 @@ public interface DataSet {
     /**
      *
      * @param <T>
+     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param columnFilter
+     * @param columnConverter
+     * @return
+     */
+    <T, E extends Exception, E2 extends Exception> List<T> toList(Class<? extends T> rowClass, Throwables.Predicate<? super String, E> columnFilter,
+            Throwables.Function<? super String, String, E2> columnConverter) throws E, E2;
+
+    /**
+     *
+     * @param <T>
+     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param columnFilter
+     * @param columnConverter
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @return
+     */
+    <T, E extends Exception, E2 extends Exception> List<T> toList(Class<? extends T> rowClass, Throwables.Predicate<? super String, E> columnFilter,
+            Throwables.Function<? super String, String, E2> columnConverter, int fromRowIndex, int toRowIndex) throws E, E2;
+
+    /**
+     *
+     * @param <T>
      * @param rowSupplier it can be Object[]/List/Set/Map/Entity
      * @return
      */

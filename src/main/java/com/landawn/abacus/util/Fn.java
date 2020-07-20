@@ -11522,6 +11522,26 @@ public final class Fn extends Comparators {
 
         /**
          *
+         * @param <T>
+         * @param <E>
+         * @return
+         */
+        public static <T, E extends Exception> Throwables.Predicate<T, E> alwaysTrue() {
+            return Fn.ALWAYS_TRUE;
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param <E>
+         * @return
+         */
+        public static <T, E extends Exception> Throwables.Predicate<T, E> alwaysFalse() {
+            return Fn.ALWAYS_FALSE;
+        }
+
+        /**
+         *
          * @param <K>
          * @param <V>
          * @param <E>

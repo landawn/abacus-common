@@ -36,6 +36,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
@@ -69,6 +70,7 @@ import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Comparators;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.Fn;
+import com.landawn.abacus.util.Fn.Fnn;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.ImmutableList;
 import com.landawn.abacus.util.Indexed;
@@ -2661,9 +2663,10 @@ public class RowDataSet implements DataSet, Cloneable {
     public <T> List<T> toList(final Class<? extends T> rowClass, final Collection<String> columnNames, final int fromRowIndex, final int toRowIndex) {
         checkRowIndex(fromRowIndex, toRowIndex);
 
-        final List<Object> rowList = new ArrayList<>(toRowIndex - fromRowIndex);
         final int[] columnIndexes = checkColumnName(columnNames);
         final int columnCount = columnIndexes.length;
+
+        final List<Object> rowList = new ArrayList<>(toRowIndex - fromRowIndex);
 
         if (fromRowIndex == toRowIndex) {
             return (List<T>) rowList;
@@ -2740,6 +2743,124 @@ public class RowDataSet implements DataSet, Cloneable {
             for (int columnIndex : columnIndexes) {
                 column = _columnList.get(columnIndex);
                 propName = _columnNameList.get(columnIndex);
+                propInfo = entityInfo.getPropInfo(propName);
+
+                if (propInfo == null) {
+                    for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
+                        if (entityInfo.setPropValue(rowList.get(rowIndex - fromRowIndex), propName, column.get(rowIndex), ignoreUnknownProperty) == false) {
+                            break;
+                        }
+                    }
+                } else {
+                    for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
+                        propInfo.setPropValue(rowList.get(rowIndex - fromRowIndex), column.get(rowIndex));
+                    }
+                }
+            }
+
+            if ((rowList.size() > 0) && rowList.get(0) instanceof DirtyMarker) {
+                for (Object e : rowList) {
+                    DirtyMarkerUtil.markDirty((DirtyMarker) e, false);
+                }
+            }
+        } else {
+            throw new IllegalArgumentException(
+                    "Unsupported row type: " + ClassUtil.getCanonicalClassName(rowClass) + ". Only Array, List/Set, Map and entity class are supported");
+        }
+
+        return (List<T>) rowList;
+    }
+
+    @Override
+    public <T, E extends Exception, E2 extends Exception> List<T> toList(final Class<? extends T> rowClass,
+            final Throwables.Predicate<? super String, E> columnNameFilter, final Throwables.Function<? super String, String, E2> columnNameConverter)
+            throws E, E2 {
+        return toList(rowClass, columnNameFilter, columnNameConverter, 0, size());
+    }
+
+    @Override
+    public <T, E extends Exception, E2 extends Exception> List<T> toList(final Class<? extends T> rowClass,
+            final Throwables.Predicate<? super String, E> columnNameFilter, final Throwables.Function<? super String, String, E2> columnNameConverter,
+            final int fromRowIndex, final int toRowIndex) throws E, E2 {
+        checkRowIndex(fromRowIndex, toRowIndex);
+
+        if ((columnNameFilter == null || Objects.equals(columnNameFilter, Fnn.alwaysTrue()))
+                && (columnNameConverter == null && Objects.equals(columnNameConverter, Fnn.identity()))) {
+            return toList(rowClass, this._columnNameList, fromRowIndex, toRowIndex);
+        }
+
+        final List<Object> rowList = new ArrayList<>(toRowIndex - fromRowIndex);
+
+        if (fromRowIndex == toRowIndex) {
+            return (List<T>) rowList;
+        }
+
+        final Type<?> rowType = N.typeOf(rowClass);
+
+        if (rowType.isObjectArray() || rowType.isList() || rowType.isSet()
+                || (columnNameConverter == null && Objects.equals(columnNameConverter, Fnn.identity()))) {
+            return toList(rowClass, columnNameFilter == null ? this._columnNameList : N.filter(this._columnNameList, columnNameFilter), fromRowIndex,
+                    toRowIndex);
+        }
+
+        @SuppressWarnings("rawtypes")
+        final Throwables.Predicate<? super String, E> columnNameFilterToBeUsed = columnNameFilter == null ? (Throwables.Predicate) Fnn.alwaysTrue()
+                : columnNameFilter;
+        @SuppressWarnings("rawtypes")
+        final Throwables.Function<? super String, String, E2> columnNameConverterToBeUsed = columnNameConverter == null ? (Throwables.Function) Fnn.identity()
+                : columnNameConverter;
+
+        final List<Integer> columnIndexList = new ArrayList<>();
+
+        for (int i = 0, len = this._columnNameList.size(); i < len; i++) {
+            if (columnNameFilterToBeUsed.test(_columnNameList.get(i))) {
+                columnIndexList.add(i);
+            }
+        }
+
+        final int columnCount = columnIndexList.size();
+        final int[] columnIndexes = new int[columnCount];
+        final String[] newColumnNames = new String[columnCount];
+
+        for (int i = 0; i < columnCount; i++) {
+            columnIndexes[i] = columnIndexList.get(i);
+            newColumnNames[i] = columnNameConverterToBeUsed.apply(_columnNameList.get(columnIndexes[i]));
+        }
+
+        if (rowType.isMap()) {
+            final boolean isAbstractRowClass = Modifier.isAbstract(rowClass.getModifiers());
+            final Constructor<?> intConstructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowClass, int.class);
+            final Constructor<?> constructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowClass);
+
+            Map<String, Object> row = null;
+
+            for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
+                row = (Map<String, Object>) (isAbstractRowClass ? new HashMap<>(N.initHashCapacity(columnCount))
+                        : (intConstructor == null ? ClassUtil.invokeConstructor(constructor)
+                                : ClassUtil.invokeConstructor(intConstructor, N.initHashCapacity(columnCount))));
+
+                for (int i = 0; i < columnCount; i++) {
+                    row.put(newColumnNames[i], _columnList.get(columnIndexes[i]).get(rowIndex));
+                }
+
+                rowList.add(row);
+            }
+        } else if (rowType.isEntity()) {
+            for (int rowNum = fromRowIndex; rowNum < toRowIndex; rowNum++) {
+                rowList.add(N.newInstance(rowClass));
+            }
+
+            final boolean ignoreUnknownProperty = false;
+            final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
+            int columnIndex = -1;
+            String propName = null;
+            List<Object> column = null;
+            PropInfo propInfo = null;
+
+            for (int i = 0; i < columnCount; i++) {
+                columnIndex = columnIndexes[i];
+                propName = newColumnNames[i];
+                column = _columnList.get(columnIndex);
                 propInfo = entityInfo.getPropInfo(propName);
 
                 if (propInfo == null) {
