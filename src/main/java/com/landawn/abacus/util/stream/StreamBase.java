@@ -104,7 +104,7 @@ abstract class StreamBase<T, A, P, C, PL, OT, IT, ITER, S extends StreamBase<T, 
     };
 
     static final int MAX_WAIT_TIME_FOR_QUEUE_OFFER = 10;
-    static final int MAX_WAIT_TIME_FOR_QUEUE_POLL = 2;
+    static final int MAX_WAIT_TIME_FOR_QUEUE_POLL = 3;
 
     static final int MAX_THREAD_POOL_SIZE = 8192;
     // static final int MAX_THREAD_POOL_SIZE = Integer.MAX_VALUE;

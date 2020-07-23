@@ -192,13 +192,12 @@ public class BufferedWriter extends Writer {
      * @param str
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    @SuppressWarnings("deprecation")
     @Override
     public void write(String str) throws IOException {
         if (str == null) {
             write(N.NULL_CHAR_ARRAY);
         } else {
-            write(InternalUtil.getCharsForReadOnly(str));
+            write(str, 0, str.length());
         }
     }
 
@@ -209,13 +208,38 @@ public class BufferedWriter extends Writer {
      * @param len
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    @SuppressWarnings("deprecation")
     @Override
     public void write(String str, int off, int len) throws IOException {
         if (str == null) {
             write(N.NULL_CHAR_ARRAY, off, len);
         } else {
-            write(InternalUtil.getCharsForReadOnly(str), off, len);
+            // write(InternalUtil.getCharsForReadOnly(str), off, len);
+
+            len = Math.min(str.length() - off, len);
+
+            if (value == null) {
+                if (len > (Objectory.BUFFER_SIZE - nextChar)) {
+                    if (nextChar > 0) {
+                        flushBuffer();
+                    }
+
+                    out.write(str, off, len);
+                } else {
+                    if (this._cbuf == null) {
+                        this._cbuf = Objectory.createCharArrayBuffer();
+                    }
+
+                    str.getChars(off, off + len, this._cbuf, nextChar);
+                    nextChar += len;
+                }
+            } else {
+                if (len > (value.length - count)) {
+                    expandCapacity(count + len);
+                }
+
+                str.getChars(off, off + len, value, count);
+                count += len;
+            }
         }
     }
 
@@ -467,11 +491,10 @@ public class BufferedWriter extends Writer {
             newCapacity = Integer.MAX_VALUE;
         }
 
-        value = Arrays.copyOf(value, newCapacity);
-
         char[] tmp = Arrays.copyOf(value, newCapacity);
 
         Objectory.recycle(value);
+
         value = tmp;
     }
 }

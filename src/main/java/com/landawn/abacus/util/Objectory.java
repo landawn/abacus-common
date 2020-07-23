@@ -51,7 +51,7 @@ public final class Objectory {
 
     static final int POOLABLE_SIZE = 8192;
 
-    static final int BUFFER_SIZE = Math.max(IOUtil.MAX_MEMORY_IN_MB * 1024, 8192);
+    static final int BUFFER_SIZE = Math.max(IOUtil.MAX_MEMORY_IN_MB, 8192);
 
     private static final int POOLABLE_ARRAY_LENGTH = 128;
 

@@ -193,6 +193,21 @@ public abstract class Stream<T>
     @IntermediateOp
     public abstract <R> Stream<R> map(Function<? super T, ? extends R> mapper);
 
+    @ParallelSupported
+    @IntermediateOp
+    public <U> Stream<Pair<T, U>> pairWith(final Function<? super T, ? extends U> extractor) {
+        assertNotClosed();
+
+        final Function<T, Pair<T, U>> mapper = new Function<T, Pair<T, U>>() {
+            @Override
+            public Pair<T, U> apply(T t) {
+                return Pair.of(t, extractor.apply(t));
+            }
+        };
+
+        return map(mapper);
+    }
+
     //    public abstract <R> Stream<R> biMap(BiFunction<? super T, ? super T, ? extends R> mapper);
     //
     //    /**
@@ -2185,7 +2200,7 @@ public abstract class Stream<T>
     @SequentialOnly
     @TerminalOp
     public abstract DataSet toDataSet(final List<String> columnNames);
-    
+
     @SequentialOnly
     @TerminalOp
     public abstract String join(final Joiner joiner);
