@@ -26,6 +26,9 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.nio.charset.Charset;
 import java.security.SecureRandom;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.SQLException;
 import java.util.AbstractMap;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -78,6 +81,7 @@ import com.landawn.abacus.annotation.NullSafe;
 import com.landawn.abacus.core.DirtyMarkerUtil;
 import com.landawn.abacus.core.MapEntity;
 import com.landawn.abacus.core.RowDataSet;
+import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
@@ -96,7 +100,7 @@ import com.landawn.abacus.util.function.ToDoubleFunction;
 import com.landawn.abacus.util.function.ToFloatFunction;
 import com.landawn.abacus.util.function.ToIntFunction;
 import com.landawn.abacus.util.function.ToLongFunction;
-
+ 
 /**
  * <p>
  * Note: This class includes codes copied from Apache Commons Lang, Google Guava and other open source projects under the Apache License 2.0.
@@ -5759,15 +5763,13 @@ class CommonUtil {
             return (T) ((Boolean) (((Number) obj).longValue() > 0));
         }
 
-        if (targetType.isEntity() && srcPropType.isEntity()) {
+        if (targetType.isEntity()) {
             if (srcPropType.isEntity()) {
                 return copy(targetType.clazz(), obj);
             } else if (srcPropType.isMap()) {
                 return Maps.map2Entity(targetType.clazz(), (Map<String, Object>) obj);
             }
-        }
-
-        if (targetType.isMap()) {
+        } else if (targetType.isMap()) {
             if (srcPropType.isEntity() && targetType.getParameterTypes()[0].clazz().isAssignableFrom(String.class)
                     && Object.class.equals(targetType.getParameterTypes()[1].clazz())) {
                 try {
@@ -5822,6 +5824,48 @@ class CommonUtil {
             return (T) (Integer.valueOf(((Character) obj).charValue()));
         } else if ((targetType.clazz().equals(char.class) || targetType.clazz().equals(Character.class)) && srcPropType.clazz().equals(Integer.class)) {
             return (T) (Character.valueOf((char) ((Integer) obj).intValue()));
+        } else if (targetType.clazz().equals(byte[].class) && srcPropType.clazz().equals(Blob.class)) {
+            final Blob blob = (Blob) obj;
+
+            try {
+                return (T) blob.getBytes(1, (int) blob.length());
+            } catch (SQLException e) {
+                throw new UncheckedSQLException(e);
+            } finally {
+                try {
+                    blob.free();
+                } catch (SQLException e) {
+                    throw new UncheckedSQLException(e);
+                }
+            }
+        } else if (targetType.clazz().equals(char[].class) && srcPropType.clazz().equals(Clob.class)) {
+            final Clob clob = (Clob) obj;
+
+            try {
+                return (T) clob.getSubString(1, (int) clob.length()).toCharArray();
+            } catch (SQLException e) {
+                throw new UncheckedSQLException(e);
+            } finally {
+                try {
+                    clob.free();
+                } catch (SQLException e) {
+                    throw new UncheckedSQLException(e);
+                }
+            }
+        } else if (targetType.clazz().equals(String.class) && srcPropType.clazz().equals(Clob.class)) {
+            final Clob clob = (Clob) obj;
+
+            try {
+                return (T) clob.getSubString(1, (int) clob.length());
+            } catch (SQLException e) {
+                throw new UncheckedSQLException(e);
+            } finally {
+                try {
+                    clob.free();
+                } catch (SQLException e) {
+                    throw new UncheckedSQLException(e);
+                }
+            }
         }
 
         return targetType.valueOf(obj);

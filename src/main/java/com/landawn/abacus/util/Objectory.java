@@ -47,11 +47,13 @@ public final class Objectory {
 
     private static AtomicInteger created = new AtomicInteger();
 
+    static final int KB = 1024;
+
     static final int POOL_SIZE = 1024;
 
     static final int POOLABLE_SIZE = 8192;
 
-    static final int BUFFER_SIZE = Math.max(IOUtil.MAX_MEMORY_IN_MB, 8192);
+    static final int BUFFER_SIZE = Math.min(Math.max(IOUtil.MAX_MEMORY_IN_MB, KB * 8), 64 * KB);
 
     private static final int POOLABLE_ARRAY_LENGTH = 128;
 
