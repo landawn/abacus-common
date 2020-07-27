@@ -486,27 +486,28 @@ public abstract class StringUtil {
         final int delimiterLen = delimiter.length();
         final int prefixLen = prefix.length();
         final int suffixLen = suffix.length();
-        final int len = strLen + delimiterLen;
+        final int pieceLen = strLen + delimiterLen;
 
-        if ((Integer.MAX_VALUE - prefixLen - suffixLen) / len < n) {
-            throw new ArrayIndexOutOfBoundsException("Required array size too large: " + 1L * len * n);
+        if ((Integer.MAX_VALUE - prefixLen - suffixLen) / pieceLen < n) {
+            throw new ArrayIndexOutOfBoundsException("Required array size too large: " + 1L * pieceLen * n);
         }
 
-        final int size = len * n - delimiterLen + prefixLen + suffixLen;
+        final int size = pieceLen * n - delimiterLen + prefixLen + suffixLen;
         final char[] cbuf = new char[size];
 
         prefix.getChars(0, prefixLen, cbuf, 0);
         str.getChars(0, strLen, cbuf, prefixLen);
         delimiter.getChars(0, delimiterLen, cbuf, strLen + prefixLen);
 
-        int cnt = 0;
+        int filledLen = pieceLen;
+        int lenToFill = size - (prefixLen + suffixLen);
 
-        for (cnt = len; cnt < size - cnt; cnt <<= 1) {
-            N.copy(cbuf, prefixLen, cbuf, cnt + prefixLen, cnt);
+        for (; filledLen <= lenToFill - filledLen; filledLen <<= 1) {
+            N.copy(cbuf, prefixLen, cbuf, filledLen + prefixLen, filledLen);
         }
 
-        if (cnt < size - (prefixLen + suffixLen)) {
-            N.copy(cbuf, prefixLen, cbuf, cnt + prefixLen, size - cnt - prefixLen - suffixLen);
+        if (filledLen < lenToFill) {
+            N.copy(cbuf, prefixLen, cbuf, filledLen + prefixLen, size - filledLen - prefixLen - suffixLen);
         }
 
         suffix.getChars(0, suffixLen, cbuf, size - suffixLen);
