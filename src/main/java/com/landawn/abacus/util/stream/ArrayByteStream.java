@@ -417,7 +417,7 @@ class ArrayByteStream extends AbstractByteStream {
                         s = mapper.apply(elements[cursor++]);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -482,7 +482,7 @@ class ArrayByteStream extends AbstractByteStream {
                         s = mapper.apply(elements[cursor++]);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -547,7 +547,7 @@ class ArrayByteStream extends AbstractByteStream {
                         s = mapper.apply(elements[cursor++]);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -851,6 +851,48 @@ class ArrayByteStream extends AbstractByteStream {
                 }
             }
         }, false, null);
+    }
+
+    @Override
+    public ByteStream distinct() {
+        assertNotClosed();
+
+        if (sorted) {
+            return newStream(new ByteIteratorEx() {
+                private int prev = -1;
+                private int cur = 0;
+
+                @Override
+                public boolean hasNext() {
+                    if (cur > 0 && cur < toIndex && elements[cur] == elements[prev]) {
+                        while (++cur < toIndex && elements[cur] == elements[prev]) {
+                            // do nothing
+                        }
+                    }
+
+                    return cur < toIndex;
+                }
+
+                @Override
+                public byte nextByte() {
+                    if (hasNext() == false) {
+                        throw new NoSuchElementException();
+                    }
+
+                    prev = cur;
+                    return elements[cur++];
+                }
+            }, sorted);
+        } else {
+            final Set<Object> set = N.newHashSet();
+
+            return newStream(this.sequential().filter(new BytePredicate() {
+                @Override
+                public boolean test(byte value) {
+                    return set.add(value);
+                }
+            }).iteratorEx(), sorted);
+        }
     }
 
     @Override

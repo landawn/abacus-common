@@ -394,7 +394,7 @@ class IteratorLongStream extends AbstractLongStream {
                         s = mapper.apply(elements.nextLong());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -458,7 +458,7 @@ class IteratorLongStream extends AbstractLongStream {
                         s = mapper.apply(elements.nextLong());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -522,7 +522,7 @@ class IteratorLongStream extends AbstractLongStream {
                         s = mapper.apply(elements.nextLong());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -586,7 +586,7 @@ class IteratorLongStream extends AbstractLongStream {
                         s = mapper.apply(elements.nextLong());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -650,7 +650,7 @@ class IteratorLongStream extends AbstractLongStream {
                         s = mapper.apply(elements.nextLong());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();

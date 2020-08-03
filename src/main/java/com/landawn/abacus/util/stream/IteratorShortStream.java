@@ -328,7 +328,7 @@ class IteratorShortStream extends AbstractShortStream {
                         s = mapper.apply(elements.nextShort());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -392,7 +392,7 @@ class IteratorShortStream extends AbstractShortStream {
                         s = mapper.apply(elements.nextShort());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -456,7 +456,7 @@ class IteratorShortStream extends AbstractShortStream {
                         s = mapper.apply(elements.nextShort());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();

@@ -17,8 +17,8 @@ package com.landawn.abacus.condition;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.landawn.abacus.util.WD;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.WD;
 
 /**
  * The Enum Operator.
@@ -107,6 +107,10 @@ public enum Operator {
      * Field IN.
      */
     IN(WD.IN),
+    /**
+     * Field NOT_IN.
+     */
+    NOT_IN(WD.NOT_IN),
     /**
      * Field ANY.
      */

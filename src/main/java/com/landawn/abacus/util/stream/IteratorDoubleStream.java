@@ -393,7 +393,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                         s = mapper.apply(elements.nextDouble());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -457,7 +457,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                         s = mapper.apply(elements.nextDouble());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -521,7 +521,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                         s = mapper.apply(elements.nextDouble());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -585,7 +585,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                         s = mapper.apply(elements.nextDouble());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -649,7 +649,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                         s = mapper.apply(elements.nextDouble());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();

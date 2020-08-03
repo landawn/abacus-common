@@ -1125,7 +1125,7 @@ class ArrayStream<T> extends AbstractStream<T> {
                         s = mapper.apply(elements[cursor++]);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -1220,7 +1220,7 @@ class ArrayStream<T> extends AbstractStream<T> {
                         s = mapper.apply(elements[cursor++]);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -1285,7 +1285,7 @@ class ArrayStream<T> extends AbstractStream<T> {
                         s = mapper.apply(elements[cursor++]);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -1350,7 +1350,7 @@ class ArrayStream<T> extends AbstractStream<T> {
                         s = mapper.apply(elements[cursor++]);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -1415,7 +1415,7 @@ class ArrayStream<T> extends AbstractStream<T> {
                         s = mapper.apply(elements[cursor++]);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -1480,7 +1480,7 @@ class ArrayStream<T> extends AbstractStream<T> {
                         s = mapper.apply(elements[cursor++]);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -1545,7 +1545,7 @@ class ArrayStream<T> extends AbstractStream<T> {
                         s = mapper.apply(elements[cursor++]);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -1610,7 +1610,7 @@ class ArrayStream<T> extends AbstractStream<T> {
                         s = mapper.apply(elements[cursor++]);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -2335,6 +2335,48 @@ class ArrayStream<T> extends AbstractStream<T> {
                 }
             }
         }, false, null);
+    }
+
+    @Override
+    public Stream<T> distinct() {
+        assertNotClosed();
+
+        if (sorted) {
+            return newStream(new ObjIteratorEx<T>() {
+                private int prev = -1;
+                private int cur = 0;
+
+                @Override
+                public boolean hasNext() {
+                    if (cur > 0 && cur < toIndex && N.equals(elements[cur], elements[prev])) {
+                        while (++cur < toIndex && N.equals(elements[cur], elements[prev])) {
+                            // do nothing
+                        }
+                    }
+
+                    return cur < toIndex;
+                }
+
+                @Override
+                public T next() {
+                    if (hasNext() == false) {
+                        throw new NoSuchElementException();
+                    }
+
+                    prev = cur;
+                    return elements[cur++];
+                }
+            }, sorted, cmp);
+        } else {
+            final Set<Object> set = N.newHashSet();
+
+            return newStream(this.sequential().filter(new Predicate<T>() {
+                @Override
+                public boolean test(T value) {
+                    return set.add(hashKey(value));
+                }
+            }).iteratorEx(), sorted, cmp);
+        }
     }
 
     @Override

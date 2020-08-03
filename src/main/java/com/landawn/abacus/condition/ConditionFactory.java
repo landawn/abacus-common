@@ -1481,6 +1481,66 @@ public class ConditionFactory {
 
     /**
      *
+     * @param propName
+     * @param values
+     * @return
+     */
+    public static NotIn notIn(final String propName, final int[] values) {
+        return notIn(propName, Array.box(values));
+    }
+
+    /**
+     *
+     * @param propName
+     * @param values
+     * @return
+     */
+    public static NotIn notIn(final String propName, final long[] values) {
+        return notIn(propName, Array.box(values));
+    }
+
+    /**
+     *
+     * @param propName
+     * @param values
+     * @return
+     */
+    public static NotIn notIn(final String propName, final double[] values) {
+        return notIn(propName, Array.box(values));
+    }
+
+    /**
+     *
+     * @param propName
+     * @param values
+     * @return
+     */
+    public static NotIn notIn(final String propName, final Object[] values) {
+        return notIn(propName, Arrays.asList(values));
+    }
+
+    /**
+     *
+     * @param propName
+     * @param values
+     * @return
+     */
+    public static NotIn notIn(final String propName, final Collection<?> values) {
+        return new NotIn(propName, values);
+    }
+
+    /**
+     *
+     * @param propName
+     * @param subQuery
+     * @return
+     */
+    public static NotInSubQuery notIn(final String propName, final SubQuery subQuery) {
+        return new NotInSubQuery(propName, subQuery);
+    }
+
+    /**
+     *
      * @param condition
      * @return
      */

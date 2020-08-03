@@ -513,7 +513,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
                         s = mapper.apply(elements[cursor++]);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -578,7 +578,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
                         s = mapper.apply(elements[cursor++]);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -643,7 +643,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
                         s = mapper.apply(elements[cursor++]);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -708,7 +708,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
                         s = mapper.apply(elements[cursor++]);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -773,7 +773,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
                         s = mapper.apply(elements[cursor++]);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -1163,6 +1163,48 @@ class ArrayDoubleStream extends AbstractDoubleStream {
                 }
             }
         }, false);
+    }
+
+    @Override
+    public DoubleStream distinct() {
+        assertNotClosed();
+
+        if (sorted) {
+            return newStream(new DoubleIteratorEx() {
+                private int prev = -1;
+                private int cur = 0;
+
+                @Override
+                public boolean hasNext() {
+                    if (cur > 0 && cur < toIndex && N.equals(elements[cur], elements[prev])) {
+                        while (++cur < toIndex && N.equals(elements[cur], elements[prev])) {
+                            // do nothing
+                        }
+                    }
+
+                    return cur < toIndex;
+                }
+
+                @Override
+                public double nextDouble() {
+                    if (hasNext() == false) {
+                        throw new NoSuchElementException();
+                    }
+
+                    prev = cur;
+                    return elements[cur++];
+                }
+            }, sorted);
+        } else {
+            final Set<Object> set = N.newHashSet();
+
+            return newStream(this.sequential().filter(new DoublePredicate() {
+                @Override
+                public boolean test(double value) {
+                    return set.add(value);
+                }
+            }).iteratorEx(), sorted);
+        }
     }
 
     @Override

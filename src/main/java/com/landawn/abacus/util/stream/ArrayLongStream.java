@@ -514,7 +514,7 @@ class ArrayLongStream extends AbstractLongStream {
                         s = mapper.apply(elements[cursor++]);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -579,7 +579,7 @@ class ArrayLongStream extends AbstractLongStream {
                         s = mapper.apply(elements[cursor++]);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -644,7 +644,7 @@ class ArrayLongStream extends AbstractLongStream {
                         s = mapper.apply(elements[cursor++]);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -709,7 +709,7 @@ class ArrayLongStream extends AbstractLongStream {
                         s = mapper.apply(elements[cursor++]);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -774,7 +774,7 @@ class ArrayLongStream extends AbstractLongStream {
                         s = mapper.apply(elements[cursor++]);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -1164,6 +1164,48 @@ class ArrayLongStream extends AbstractLongStream {
                 }
             }
         }, false);
+    }
+
+    @Override
+    public LongStream distinct() {
+        assertNotClosed();
+
+        if (sorted) {
+            return newStream(new LongIteratorEx() {
+                private int prev = -1;
+                private int cur = 0;
+
+                @Override
+                public boolean hasNext() {
+                    if (cur > 0 && cur < toIndex && elements[cur] == elements[prev]) {
+                        while (++cur < toIndex && elements[cur] == elements[prev]) {
+                            // do nothing
+                        }
+                    }
+
+                    return cur < toIndex;
+                }
+
+                @Override
+                public long nextLong() {
+                    if (hasNext() == false) {
+                        throw new NoSuchElementException();
+                    }
+
+                    prev = cur;
+                    return elements[cur++];
+                }
+            }, sorted);
+        } else {
+            final Set<Object> set = N.newHashSet();
+
+            return newStream(this.sequential().filter(new LongPredicate() {
+                @Override
+                public boolean test(long value) {
+                    return set.add(value);
+                }
+            }).iteratorEx(), sorted);
+        }
     }
 
     @Override

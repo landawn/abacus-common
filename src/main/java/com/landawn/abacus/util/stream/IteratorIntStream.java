@@ -487,7 +487,7 @@ class IteratorIntStream extends AbstractIntStream {
                         s = mapper.apply(elements.nextInt());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -551,7 +551,7 @@ class IteratorIntStream extends AbstractIntStream {
                         s = mapper.apply(elements.nextInt());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -615,7 +615,7 @@ class IteratorIntStream extends AbstractIntStream {
                         s = mapper.apply(elements.nextInt());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -679,7 +679,7 @@ class IteratorIntStream extends AbstractIntStream {
                         s = mapper.apply(elements.nextInt());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -743,7 +743,7 @@ class IteratorIntStream extends AbstractIntStream {
                         s = mapper.apply(elements.nextInt());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -807,7 +807,7 @@ class IteratorIntStream extends AbstractIntStream {
                         s = mapper.apply(elements.nextInt());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -871,7 +871,7 @@ class IteratorIntStream extends AbstractIntStream {
                         s = mapper.apply(elements.nextInt());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -935,7 +935,7 @@ class IteratorIntStream extends AbstractIntStream {
                         s = mapper.apply(elements.nextInt());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();

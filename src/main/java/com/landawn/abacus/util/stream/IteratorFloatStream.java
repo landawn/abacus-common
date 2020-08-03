@@ -389,7 +389,7 @@ class IteratorFloatStream extends AbstractFloatStream {
                         s = mapper.apply(elements.nextFloat());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -453,7 +453,7 @@ class IteratorFloatStream extends AbstractFloatStream {
                         s = mapper.apply(elements.nextFloat());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -517,7 +517,7 @@ class IteratorFloatStream extends AbstractFloatStream {
                         s = mapper.apply(elements.nextFloat());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -581,7 +581,7 @@ class IteratorFloatStream extends AbstractFloatStream {
                         s = mapper.apply(elements.nextFloat());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -645,7 +645,7 @@ class IteratorFloatStream extends AbstractFloatStream {
                         s = mapper.apply(elements.nextFloat());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();

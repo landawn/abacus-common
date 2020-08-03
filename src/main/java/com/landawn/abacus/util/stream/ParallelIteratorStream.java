@@ -975,7 +975,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                         s = mapper.apply(next);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -1103,7 +1103,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                         s = mapper.apply(next);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -1181,7 +1181,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                         s = mapper.apply(next);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -1259,7 +1259,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                         s = mapper.apply(next);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -1337,7 +1337,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                         s = mapper.apply(next);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -1415,7 +1415,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                         s = mapper.apply(next);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -1493,7 +1493,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                         s = mapper.apply(next);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -1571,7 +1571,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                         s = mapper.apply(next);
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();

@@ -4221,15 +4221,8 @@ abstract class AbstractStream<T> extends Stream<T> {
         //        }
         //    };
 
-        final Predicate<T> predicate = isParallel() ? new Predicate<T>() {
-            private final ConcurrentHashMap<Object, Object> map = new ConcurrentHashMap<>();
-
-            @Override
-            public boolean test(T value) {
-                return map.put(hashKey(keyMapper.apply(value)), StreamBase.NONE) == null;
-            }
-        } : new Predicate<T>() {
-            private final Set<Object> set = N.newHashSet();
+        final Predicate<T> predicate = new Predicate<T>() {
+            private final Set<Object> set = isParallel() ? ConcurrentHashMap.newKeySet() : N.newHashSet();
 
             @Override
             public boolean test(T value) {

@@ -323,7 +323,7 @@ class IteratorCharStream extends AbstractCharStream {
                         s = mapper.apply(elements.nextChar());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -387,7 +387,7 @@ class IteratorCharStream extends AbstractCharStream {
                         s = mapper.apply(elements.nextChar());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -451,7 +451,7 @@ class IteratorCharStream extends AbstractCharStream {
                         s = mapper.apply(elements.nextChar());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();

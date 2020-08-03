@@ -894,7 +894,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                         s = mapper.apply(elements.next());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -987,7 +987,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                         s = mapper.apply(elements.next());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -1051,7 +1051,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                         s = mapper.apply(elements.next());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -1115,7 +1115,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                         s = mapper.apply(elements.next());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -1179,7 +1179,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                         s = mapper.apply(elements.next());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -1243,7 +1243,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                         s = mapper.apply(elements.next());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -1307,7 +1307,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                         s = mapper.apply(elements.next());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();
@@ -1371,7 +1371,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                         s = mapper.apply(elements.next());
 
                         if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers; 
+                            closeHandle = s.closeHandlers;
                         }
 
                         cur = s.iteratorEx();

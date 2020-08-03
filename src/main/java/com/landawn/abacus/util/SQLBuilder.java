@@ -55,6 +55,8 @@ import com.landawn.abacus.condition.InSubQuery;
 import com.landawn.abacus.condition.Join;
 import com.landawn.abacus.condition.Junction;
 import com.landawn.abacus.condition.Limit;
+import com.landawn.abacus.condition.NotIn;
+import com.landawn.abacus.condition.NotInSubQuery;
 import com.landawn.abacus.condition.SubQuery;
 import com.landawn.abacus.condition.Where;
 import com.landawn.abacus.core.DirtyMarkerUtil;
@@ -2963,6 +2965,43 @@ public abstract class SQLBuilder {
             sb.append(WD.SPACE_PARENTHESES_L);
 
             appendCondition(inSubQuery.getSubQuery());
+
+            sb.append(WD._PARENTHESES_R);
+        } else if (cond instanceof NotIn) {
+            final NotIn notIn = (NotIn) cond;
+            final String propName = notIn.getPropName();
+            final List<Object> parameters = notIn.getParameters();
+
+            appendColumnName(propName);
+
+            sb.append(_SPACE);
+            sb.append(notIn.getOperator().toString());
+            sb.append(WD.SPACE_PARENTHESES_L);
+
+            for (int i = 0, len = parameters.size(); i < len; i++) {
+                if (i > 0) {
+                    sb.append(WD.COMMA_SPACE);
+                }
+
+                if (sqlPolicy == SQLPolicy.NAMED_SQL || sqlPolicy == SQLPolicy.IBATIS_SQL) {
+                    setParameter(propName + (i + 1), parameters.get(i));
+                } else {
+                    setParameter(propName, parameters.get(i));
+                }
+            }
+
+            sb.append(WD._PARENTHESES_R);
+        } else if (cond instanceof NotInSubQuery) {
+            final NotInSubQuery notInSubQuery = (NotInSubQuery) cond;
+            final String propName = notInSubQuery.getPropName();
+
+            appendColumnName(propName);
+
+            sb.append(_SPACE);
+            sb.append(notInSubQuery.getOperator().toString());
+            sb.append(WD.SPACE_PARENTHESES_L);
+
+            appendCondition(notInSubQuery.getSubQuery());
 
             sb.append(WD._PARENTHESES_R);
         } else if (cond instanceof Where || cond instanceof Having) {
