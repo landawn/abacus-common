@@ -507,8 +507,8 @@ public final class ParserUtil {
 
                 if (isJsonXmlSerializable(propInfo.field, jsonXmlConfig) == false) {
                     if (propInfo.jsonXmlAccess != JsonXmlField.Access.AUTO) {
-                        throw new IllegalArgumentException("JsonXmlField.Access can't be: " + propInfo.jsonXmlAccess + " for non-serializable field: "
-                                + propInfo.name + " in class: " + cls);
+                        throw new IllegalArgumentException(
+                                "JsonXmlField.Access can't be: " + propInfo.jsonXmlAccess + " for non-serializable field: " + propInfo.field);
                     }
 
                     // skip
@@ -518,7 +518,7 @@ public final class ParserUtil {
                     if (propInfo.isTransient) {
                         if (propInfo.jsonXmlAccess != JsonXmlField.Access.AUTO) {
                             throw new IllegalArgumentException(
-                                    "JsonXmlField.Access can't be: " + propInfo.jsonXmlAccess + " for transient field: " + propInfo.name + " in class: " + cls);
+                                    "JsonXmlField.Access can't be: " + propInfo.jsonXmlAccess + " for transient field: " + propInfo.field);
                         }
 
                         transientSeriPropNameSet.add(propName);
@@ -1108,8 +1108,7 @@ public final class ParserUtil {
 
             this.hasFormat = N.notNullOrEmpty(dateFormat) || numberFormat != null;
 
-            this.jsonXmlAccess = field.isAnnotationPresent(JsonXmlField.class) ? field.getAnnotationsByType(JsonXmlField.class)[0].access()
-                    : JsonXmlField.Access.AUTO;
+            this.jsonXmlAccess = field.isAnnotationPresent(JsonXmlField.class) ? field.getAnnotation(JsonXmlField.class).access() : JsonXmlField.Access.AUTO;
 
             String tmpColumnName = null;
             boolean tmpIsMarkedToColumn = false;

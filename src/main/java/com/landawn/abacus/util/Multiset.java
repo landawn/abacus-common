@@ -1318,7 +1318,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @return
      */
     public Map<T, Integer> toMapSortedByKey(final Comparator<? super T> cmp) {
-        return toMapSortedBy(Comparators.comparingByKey(cmp));
+        return toMapSortedBy(Comparators.<T, MutableInt> comparingByKey(cmp));
     }
 
     /**
