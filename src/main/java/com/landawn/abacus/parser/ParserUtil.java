@@ -1108,7 +1108,8 @@ public final class ParserUtil {
 
             this.hasFormat = N.notNullOrEmpty(dateFormat) || numberFormat != null;
 
-            this.jsonXmlAccess = field.isAnnotationPresent(JsonXmlField.class) ? field.getAnnotation(JsonXmlField.class).access() : JsonXmlField.Access.AUTO;
+            this.jsonXmlAccess = field != null && field.isAnnotationPresent(JsonXmlField.class) ? field.getAnnotation(JsonXmlField.class).access()
+                    : JsonXmlField.Access.AUTO;
 
             String tmpColumnName = null;
             boolean tmpIsMarkedToColumn = false;
