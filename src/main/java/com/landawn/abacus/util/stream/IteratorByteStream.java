@@ -761,6 +761,61 @@ class IteratorByteStream extends AbstractByteStream {
     }
 
     @Override
+    public ByteStream distinct() {
+        assertNotClosed();
+
+        if (sorted) {
+            return newStream(new ByteIteratorEx() {
+                private boolean hasNext = false;
+                private byte prev = 0;
+                private byte next = 0;
+                private boolean isFirst = true;
+
+                @Override
+                public boolean hasNext() {
+                    if (hasNext == false) {
+                        while (elements.hasNext()) {
+                            next = elements.nextByte();
+
+                            if (isFirst) {
+                                isFirst = false;
+                                hasNext = true;
+                                break;
+                            } else if (next != prev) {
+                                hasNext = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    return hasNext;
+                }
+
+                @Override
+                public byte nextByte() {
+                    if (hasNext == false && hasNext() == false) {
+                        throw new NoSuchElementException();
+                    }
+
+                    hasNext = false;
+                    prev = next;
+
+                    return next;
+                }
+            }, sorted);
+        } else {
+            final Set<Object> set = N.newHashSet();
+
+            return newStream(this.sequential().filter(new BytePredicate() {
+                @Override
+                public boolean test(byte value) {
+                    return set.add(value);
+                }
+            }).iteratorEx(), sorted);
+        }
+    }
+
+    @Override
     public ByteStream peek(final ByteConsumer action) {
         assertNotClosed();
 

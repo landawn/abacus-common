@@ -884,6 +884,61 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
+    public ShortStream distinct() {
+        assertNotClosed();
+
+        if (sorted) {
+            return newStream(new ShortIteratorEx() {
+                private boolean hasNext = false;
+                private short prev = 0;
+                private short next = 0;
+                private boolean isFirst = true;
+
+                @Override
+                public boolean hasNext() {
+                    if (hasNext == false) {
+                        while (elements.hasNext()) {
+                            next = elements.nextShort();
+
+                            if (isFirst) {
+                                isFirst = false;
+                                hasNext = true;
+                                break;
+                            } else if (next != prev) {
+                                hasNext = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    return hasNext;
+                }
+
+                @Override
+                public short nextShort() {
+                    if (hasNext == false && hasNext() == false) {
+                        throw new NoSuchElementException();
+                    }
+
+                    hasNext = false;
+                    prev = next;
+
+                    return next;
+                }
+            }, sorted);
+        } else {
+            final Set<Object> set = N.newHashSet();
+
+            return newStream(this.sequential().filter(new ShortPredicate() {
+                @Override
+                public boolean test(short value) {
+                    return set.add(value);
+                }
+            }).iteratorEx(), sorted);
+        }
+    }
+
+    @Override
     public ShortStream peek(final ShortConsumer action) {
         assertNotClosed();
 

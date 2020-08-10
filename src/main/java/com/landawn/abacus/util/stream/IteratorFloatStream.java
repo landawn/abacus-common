@@ -1073,6 +1073,61 @@ class IteratorFloatStream extends AbstractFloatStream {
     }
 
     @Override
+    public FloatStream distinct() {
+        assertNotClosed();
+
+        if (sorted) {
+            return newStream(new FloatIteratorEx() {
+                private boolean hasNext = false;
+                private float prev = 0;
+                private float next = 0;
+                private boolean isFirst = true;
+
+                @Override
+                public boolean hasNext() {
+                    if (hasNext == false) {
+                        while (elements.hasNext()) {
+                            next = elements.nextFloat();
+
+                            if (isFirst) {
+                                isFirst = false;
+                                hasNext = true;
+                                break;
+                            } else if (!N.equals(next, prev)) {
+                                hasNext = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    return hasNext;
+                }
+
+                @Override
+                public float nextFloat() {
+                    if (hasNext == false && hasNext() == false) {
+                        throw new NoSuchElementException();
+                    }
+
+                    hasNext = false;
+                    prev = next;
+
+                    return next;
+                }
+            }, sorted);
+        } else {
+            final Set<Object> set = N.newHashSet();
+
+            return newStream(this.sequential().filter(new FloatPredicate() {
+                @Override
+                public boolean test(float value) {
+                    return set.add(value);
+                }
+            }).iteratorEx(), sorted);
+        }
+    }
+
+    @Override
     public FloatStream peek(final FloatConsumer action) {
         assertNotClosed();
 

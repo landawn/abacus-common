@@ -2209,6 +2209,61 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
+    public Stream<T> distinct() {
+        assertNotClosed();
+
+        if (sorted) {
+            return newStream(new ObjIteratorEx<T>() {
+                private boolean hasNext = false;
+                private T prev = null;
+                private T next = null;
+                private boolean isFirst = true;
+
+                @Override
+                public boolean hasNext() {
+                    if (hasNext == false) {
+                        while (elements.hasNext()) {
+                            next = elements.next();
+
+                            if (isFirst) {
+                                isFirst = false;
+                                hasNext = true;
+                                break;
+                            } else if (!N.equals(next, prev)) {
+                                hasNext = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    return hasNext;
+                }
+
+                @Override
+                public T next() {
+                    if (hasNext == false && hasNext() == false) {
+                        throw new NoSuchElementException();
+                    }
+
+                    hasNext = false;
+                    prev = next;
+
+                    return next;
+                }
+            }, sorted, cmp);
+        } else {
+            final Set<Object> set = N.newHashSet();
+
+            return newStream(this.sequential().filter(new Predicate<T>() {
+                @Override
+                public boolean test(T value) {
+                    return set.add(hashKey(value));
+                }
+            }).iteratorEx(), sorted, cmp);
+        }
+    }
+
+    @Override
     public Stream<T> peek(final Consumer<? super T> action) {
         assertNotClosed();
 

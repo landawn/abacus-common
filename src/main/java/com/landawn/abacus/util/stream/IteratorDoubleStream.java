@@ -1077,6 +1077,61 @@ class IteratorDoubleStream extends AbstractDoubleStream {
     }
 
     @Override
+    public DoubleStream distinct() {
+        assertNotClosed();
+
+        if (sorted) {
+            return newStream(new DoubleIteratorEx() {
+                private boolean hasNext = false;
+                private double prev = 0;
+                private double next = 0;
+                private boolean isFirst = true;
+
+                @Override
+                public boolean hasNext() {
+                    if (hasNext == false) {
+                        while (elements.hasNext()) {
+                            next = elements.nextDouble();
+
+                            if (isFirst) {
+                                isFirst = false;
+                                hasNext = true;
+                                break;
+                            } else if (!N.equals(next, prev)) {
+                                hasNext = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    return hasNext;
+                }
+
+                @Override
+                public double nextDouble() {
+                    if (hasNext == false && hasNext() == false) {
+                        throw new NoSuchElementException();
+                    }
+
+                    hasNext = false;
+                    prev = next;
+
+                    return next;
+                }
+            }, sorted);
+        } else {
+            final Set<Object> set = N.newHashSet();
+
+            return newStream(this.sequential().filter(new DoublePredicate() {
+                @Override
+                public boolean test(double value) {
+                    return set.add(value);
+                }
+            }).iteratorEx(), sorted);
+        }
+    }
+
+    @Override
     public DoubleStream peek(final DoubleConsumer action) {
         assertNotClosed();
 

@@ -179,7 +179,7 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
          * @return
          */
         @Override
-        public HashCode makeHash() {
+        protected HashCode makeHash() {
             // End with a byte encoding the positive integer b mod 256.
             finalM ^= b << 56;
             processM(finalM);

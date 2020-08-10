@@ -1078,6 +1078,61 @@ class IteratorLongStream extends AbstractLongStream {
     }
 
     @Override
+    public LongStream distinct() {
+        assertNotClosed();
+
+        if (sorted) {
+            return newStream(new LongIteratorEx() {
+                private boolean hasNext = false;
+                private long prev = 0;
+                private long next = 0;
+                private boolean isFirst = true;
+
+                @Override
+                public boolean hasNext() {
+                    if (hasNext == false) {
+                        while (elements.hasNext()) {
+                            next = elements.nextLong();
+
+                            if (isFirst) {
+                                isFirst = false;
+                                hasNext = true;
+                                break;
+                            } else if (next != prev) {
+                                hasNext = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    return hasNext;
+                }
+
+                @Override
+                public long nextLong() {
+                    if (hasNext == false && hasNext() == false) {
+                        throw new NoSuchElementException();
+                    }
+
+                    hasNext = false;
+                    prev = next;
+
+                    return next;
+                }
+            }, sorted);
+        } else {
+            final Set<Object> set = N.newHashSet();
+
+            return newStream(this.sequential().filter(new LongPredicate() {
+                @Override
+                public boolean test(long value) {
+                    return set.add(value);
+                }
+            }).iteratorEx(), sorted);
+        }
+    }
+
+    @Override
     public LongStream peek(final LongConsumer action) {
         assertNotClosed();
 

@@ -62,4 +62,19 @@ public @interface JsonXmlField {
     //     */
     //    @Deprecated
     //    int ordinal() default -1;
+
+    Access access() default Access.AUTO;
+
+    /**
+     * Copied from Jackson: https://github.com/FasterXML/jackson-annotations under Apache License 2.0. 
+     */
+    public static enum Access {
+        AUTO,
+
+        READ_ONLY,
+
+        WRITE_ONLY,
+
+        READ_WRITE;
+    }
 }

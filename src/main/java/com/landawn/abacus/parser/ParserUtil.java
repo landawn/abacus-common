@@ -40,6 +40,7 @@ import com.landawn.abacus.annotation.Column;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.JsonXmlConfig;
 import com.landawn.abacus.annotation.JsonXmlField;
+import com.landawn.abacus.annotation.JsonXmlField.Access;
 import com.landawn.abacus.annotation.Table;
 import com.landawn.abacus.annotation.Transient;
 import com.landawn.abacus.annotation.Type.EnumBy;
@@ -505,11 +506,21 @@ public final class ParserUtil {
                 }
 
                 if (isJsonXmlSerializable(propInfo.field, jsonXmlConfig) == false) {
+                    if (propInfo.jsonXmlAccess != JsonXmlField.Access.AUTO) {
+                        throw new IllegalArgumentException("JsonXmlField.Access can't be: " + propInfo.jsonXmlAccess + " for non-serializable field: "
+                                + propInfo.name + " in class: " + cls);
+                    }
+
                     // skip
                 } else {
                     seriPropInfoList.add(propInfo);
 
                     if (propInfo.isTransient) {
+                        if (propInfo.jsonXmlAccess != JsonXmlField.Access.AUTO) {
+                            throw new IllegalArgumentException(
+                                    "JsonXmlField.Access can't be: " + propInfo.jsonXmlAccess + " for transient field: " + propInfo.name + " in class: " + cls);
+                        }
+
                         transientSeriPropNameSet.add(propName);
 
                         transientSeriPropInfoList.add(propInfo);
@@ -998,6 +1009,8 @@ public final class ParserUtil {
 
         public final boolean isTransient;
 
+        public final Access jsonXmlAccess;
+
         public final boolean isMarkedToColumn;
 
         public final Optional<String> columnName;
@@ -1029,6 +1042,8 @@ public final class ParserUtil {
             hasFormat = false;
 
             isTransient = false;
+            jsonXmlAccess = JsonXmlField.Access.AUTO;
+
             isMarkedToColumn = false;
             columnName = Optional.<String> empty();
         }
@@ -1092,6 +1107,9 @@ public final class ParserUtil {
             this.numberFormat = N.isNullOrEmpty(numberFormatStr) ? null : new DecimalFormat(numberFormatStr);
 
             this.hasFormat = N.notNullOrEmpty(dateFormat) || numberFormat != null;
+
+            this.jsonXmlAccess = field.isAnnotationPresent(JsonXmlField.class) ? field.getAnnotationsByType(JsonXmlField.class)[0].access()
+                    : JsonXmlField.Access.AUTO;
 
             String tmpColumnName = null;
             boolean tmpIsMarkedToColumn = false;

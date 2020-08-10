@@ -1363,6 +1363,61 @@ class IteratorIntStream extends AbstractIntStream {
     }
 
     @Override
+    public IntStream distinct() {
+        assertNotClosed();
+
+        if (sorted) {
+            return newStream(new IntIteratorEx() {
+                private boolean hasNext = false;
+                private int prev = 0;
+                private int next = 0;
+                private boolean isFirst = true;
+
+                @Override
+                public boolean hasNext() {
+                    if (hasNext == false) {
+                        while (elements.hasNext()) {
+                            next = elements.nextInt();
+
+                            if (isFirst) {
+                                isFirst = false;
+                                hasNext = true;
+                                break;
+                            } else if (next != prev) {
+                                hasNext = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    return hasNext;
+                }
+
+                @Override
+                public int nextInt() {
+                    if (hasNext == false && hasNext() == false) {
+                        throw new NoSuchElementException();
+                    }
+
+                    hasNext = false;
+                    prev = next;
+
+                    return next;
+                }
+            }, sorted);
+        } else {
+            final Set<Object> set = N.newHashSet();
+
+            return newStream(this.sequential().filter(new IntPredicate() {
+                @Override
+                public boolean test(int value) {
+                    return set.add(value);
+                }
+            }).iteratorEx(), sorted);
+        }
+    }
+
+    @Override
     public IntStream peek(final IntConsumer action) {
         assertNotClosed();
 

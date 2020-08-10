@@ -1318,12 +1318,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @return
      */
     public Map<T, Integer> toMapSortedByKey(final Comparator<? super T> cmp) {
-        return toMapSortedBy(new Comparator<Map.Entry<T, MutableInt>>() {
-            @Override
-            public int compare(Entry<T, MutableInt> o1, Entry<T, MutableInt> o2) {
-                return cmp.compare(o1.getKey(), o2.getKey());
-            }
-        });
+        return toMapSortedBy(Comparators.comparingByKey(cmp));
     }
 
     /**
