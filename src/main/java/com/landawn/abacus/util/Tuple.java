@@ -28,6 +28,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @author Haiyang Li
  * @since 0.8
  */
+@com.landawn.abacus.annotation.Immutable
 public abstract class Tuple<TP> implements Immutable {
 
     private static final Tuple0 EMPTY = new Tuple0();

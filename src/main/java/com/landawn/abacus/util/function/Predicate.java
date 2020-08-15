@@ -38,4 +38,8 @@ public interface Predicate<T> extends java.util.function.Predicate<T>, Throwable
         N.checkArgNotNull(other);
         return (t) -> test(t) && other.test(t);
     }
+
+    default <E extends Throwable> Throwables.Predicate<T, E> toThrowable() {
+        return (Throwables.Predicate<T, E>) this;
+    }
 }

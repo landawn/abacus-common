@@ -37,4 +37,8 @@ public interface Consumer<T> extends java.util.function.Consumer<T>, Throwables.
             after.accept(t);
         };
     }
+
+    default <E extends Throwable> Throwables.Consumer<T, E> toThrowable() {
+        return (Throwables.Consumer<T, E>) this;
+    }
 }

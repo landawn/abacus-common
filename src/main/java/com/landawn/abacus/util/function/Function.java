@@ -41,4 +41,8 @@ public interface Function<T, R> extends java.util.function.Function<T, R>, Throw
         N.checkArgNotNull(after);
         return (T t) -> after.apply(apply(t));
     }
+
+    default <E extends Throwable> Throwables.Function<T, R, E> toThrowable() {
+        return (Throwables.Function<T, R, E>) this;
+    }
 }

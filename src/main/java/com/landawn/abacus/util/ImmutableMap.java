@@ -33,6 +33,7 @@ import java.util.function.Function;
  * @param <V> the value type
  * @since 0.8
  */
+@com.landawn.abacus.annotation.Immutable
 public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
 
     @SuppressWarnings("rawtypes")

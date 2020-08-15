@@ -61,6 +61,7 @@ import com.landawn.abacus.util.function.Supplier;
  * @see LongStream
  * @see DoubleStream
  */
+@com.landawn.abacus.annotation.Immutable
 @LazyEvaluation
 public interface BaseStream<T, A, P, C, PL, OT, IT, ITER, S extends BaseStream<T, A, P, C, PL, OT, IT, ITER, S>> extends Closeable, Immutable {
 

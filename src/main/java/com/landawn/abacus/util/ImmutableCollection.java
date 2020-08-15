@@ -28,6 +28,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @param <E>
  * @since 0.8
  */
+@com.landawn.abacus.annotation.Immutable
 public class ImmutableCollection<E> extends AbstractCollection<E> implements Immutable {
 
     final Collection<E> coll;

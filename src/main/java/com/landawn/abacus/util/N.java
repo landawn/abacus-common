@@ -12170,6 +12170,7 @@ public final class N extends CommonUtil {
         }
 
         long len = (endExclusive * 1L - startInclusive) / step + ((endExclusive * 1L - startInclusive) % step == 0 ? 0 : 1);
+
         while (len-- > 0) {
             action.run();
         }

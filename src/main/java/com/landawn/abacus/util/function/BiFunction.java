@@ -33,4 +33,8 @@ public interface BiFunction<T, U, R> extends java.util.function.BiFunction<T, U,
         N.checkArgNotNull(after);
         return (T t, U u) -> after.apply(apply(t, u));
     }
+
+    default <E extends Throwable> Throwables.BiFunction<T, U, R, E> toThrowable() {
+        return (Throwables.BiFunction<T, U, R, E>) this;
+    }
 }

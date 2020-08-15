@@ -71,10 +71,19 @@ public @interface JsonXmlField {
     public static enum Access {
         AUTO,
 
+        /**
+         * deserialize
+         */
         READ_ONLY,
 
+        /**
+         * serialize
+         */
         WRITE_ONLY,
 
+        /**
+         * deserialize/serialize
+         */
         READ_WRITE;
     }
 }

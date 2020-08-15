@@ -34,4 +34,8 @@ public interface BiConsumer<T, U> extends java.util.function.BiConsumer<T, U>, T
             after.accept(l, r);
         };
     }
+
+    default <E extends Throwable> Throwables.BiConsumer<T, U, E> toThrowable() {
+        return (Throwables.BiConsumer<T, U, E>) this;
+    }
 }

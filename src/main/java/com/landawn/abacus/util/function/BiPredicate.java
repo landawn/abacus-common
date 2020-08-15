@@ -44,4 +44,8 @@ public interface BiPredicate<T, U> extends java.util.function.BiPredicate<T, U>,
         N.checkArgNotNull(other);
         return (T t, U u) -> test(t, u) || other.test(t, u);
     }
+
+    default <E extends Throwable> Throwables.BiPredicate<T, U, E> toThrowable() {
+        return (Throwables.BiPredicate<T, U, E>) this;
+    }
 }

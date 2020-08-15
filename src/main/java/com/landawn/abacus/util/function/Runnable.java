@@ -26,4 +26,8 @@ public interface Runnable extends java.lang.Runnable, Throwables.Runnable<Runtim
 
     @Override
     void run();
+
+    default <E extends Throwable> Throwables.Runnable<E> toThrowable() {
+        return (Throwables.Runnable<E>) this;
+    }
 }
