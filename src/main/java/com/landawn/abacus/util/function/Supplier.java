@@ -26,4 +26,8 @@ public interface Supplier<T> extends java.util.function.Supplier<T>, Throwables.
 
     @Override
     T get();
+
+    default <E extends Throwable> Throwables.Supplier<T, E> toThrowable() {
+        return (Throwables.Supplier<T, E>) this;
+    }
 }

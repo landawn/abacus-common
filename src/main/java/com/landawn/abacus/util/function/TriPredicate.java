@@ -42,4 +42,8 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
 
         return (a, b, c) -> test(a, b, c) || other.test(a, b, c);
     }
+
+    default <E extends Throwable> Throwables.TriPredicate<A, B, C, E> toThrowable() {
+        return (Throwables.TriPredicate<A, B, C, E>) this;
+    }
 }

@@ -36,4 +36,8 @@ public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, Ru
             after.accept(a, b, c);
         };
     }
+
+    default <E extends Throwable> Throwables.TriConsumer<A, B, C, E> toThrowable() {
+        return (Throwables.TriConsumer<A, B, C, E>) this;
+    }
 }

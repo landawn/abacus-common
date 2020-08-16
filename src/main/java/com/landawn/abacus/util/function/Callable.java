@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -26,4 +27,12 @@ public interface Callable<R> extends java.util.concurrent.Callable<R>, Throwable
 
     @Override
     R call();
+
+    default Runnable toRunnable() {
+        return Fn.c2r(this);
+    }
+
+    default <E extends Throwable> Throwables.Callable<R, E> toThrowable() {
+        return (Throwables.Callable<R, E>) this;
+    }
 }

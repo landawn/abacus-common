@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -26,6 +27,10 @@ public interface Runnable extends java.lang.Runnable, Throwables.Runnable<Runtim
 
     @Override
     void run();
+
+    default Callable<Void> toCallable() {
+        return Fn.r2c(this);
+    }
 
     default <E extends Throwable> Throwables.Runnable<E> toThrowable() {
         return (Throwables.Runnable<E>) this;

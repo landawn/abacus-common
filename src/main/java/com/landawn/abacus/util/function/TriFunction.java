@@ -33,4 +33,8 @@ public interface TriFunction<A, B, C, R> extends Throwables.TriFunction<A, B, C,
 
         return (a, b, c) -> after.apply(apply(a, b, c));
     }
+
+    default <E extends Throwable> Throwables.TriFunction<A, B, C, R, E> toThrowable() {
+        return (Throwables.TriFunction<A, B, C, R, E>) this;
+    }
 }

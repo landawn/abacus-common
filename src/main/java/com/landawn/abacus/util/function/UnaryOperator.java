@@ -30,4 +30,8 @@ public interface UnaryOperator<T> extends Function<T, T>, java.util.function.Una
     static <T> UnaryOperator<T> identity() {
         return UnaryOperators.identity();
     }
+
+    default <E extends Throwable> Throwables.UnaryOperator<T, E> toThrowable() {
+        return (Throwables.UnaryOperator<T, E>) this;
+    }
 }
