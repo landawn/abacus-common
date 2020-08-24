@@ -40,7 +40,7 @@ import com.landawn.abacus.annotation.Column;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.JsonXmlConfig;
 import com.landawn.abacus.annotation.JsonXmlField;
-import com.landawn.abacus.annotation.JsonXmlField.Access;
+import com.landawn.abacus.annotation.JsonXmlField.Expose;
 import com.landawn.abacus.annotation.Table;
 import com.landawn.abacus.annotation.Transient;
 import com.landawn.abacus.annotation.Type.EnumBy;
@@ -332,6 +332,38 @@ public final class ParserUtil {
         return result;
     }
 
+    static String[] getAlias(final Field field) {
+        String[] alias = null;
+
+        if (field != null) {
+            if (field.isAnnotationPresent(JsonXmlField.class) && N.notNullOrEmpty(field.getAnnotation(JsonXmlField.class).name())) {
+                alias = field.getAnnotation(JsonXmlField.class).alias();
+            } else {
+                try {
+                    if (field.isAnnotationPresent(com.alibaba.fastjson.annotation.JSONField.class)
+                            && N.notNullOrEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name())) {
+                        alias = field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).alternateNames();
+                    }
+                } catch (Throwable e) {
+                    // ignore
+                }
+
+                if (N.isNullOrEmpty(alias)) {
+                    try {
+                        if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonAlias.class)
+                                && N.notNullOrEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonAlias.class).value())) {
+                            alias = field.getAnnotation(com.fasterxml.jackson.annotation.JsonAlias.class).value();
+                        }
+                    } catch (Throwable e) {
+                        // ignore
+                    }
+                }
+            }
+        }
+
+        return alias;
+    }
+
     private static String convertName(final String name, final NamingPolicy namingPolicy) {
         return namingPolicy == null || namingPolicy == NamingPolicy.LOWER_CAMEL_CASE ? name : namingPolicy.convert(name);
     }
@@ -505,10 +537,23 @@ public final class ParserUtil {
                     propInfoMap.put(propInfo.columnName.get(), propInfo);
                 }
 
+                final String[] alias = getAlias(propInfo.field);
+
+                if (N.notNullOrEmpty(alias)) {
+                    for (String str : alias) {
+                        if (propInfoMap.containsKey(str)) {
+                            throw new IllegalArgumentException("Can't set alias: " + str + " for property/field: " + propInfo.field + " because " + str
+                                    + " is a property/field name in class: " + cls);
+                        }
+
+                        propInfoMap.put(str, propInfo);
+                    }
+                }
+
                 if (isJsonXmlSerializable(propInfo.field, jsonXmlConfig) == false) {
-                    if (propInfo.jsonXmlAccess != JsonXmlField.Access.AUTO) {
+                    if (propInfo.jsonXmlExpose != JsonXmlField.Expose.DEFAULT) {
                         throw new IllegalArgumentException(
-                                "JsonXmlField.Access can't be: " + propInfo.jsonXmlAccess + " for non-serializable field: " + propInfo.field);
+                                "JsonXmlField.Expose can't be: " + propInfo.jsonXmlExpose + " for non-serializable field: " + propInfo.field);
                     }
 
                     // skip
@@ -516,9 +561,9 @@ public final class ParserUtil {
                     seriPropInfoList.add(propInfo);
 
                     if (propInfo.isTransient) {
-                        if (propInfo.jsonXmlAccess != JsonXmlField.Access.AUTO) {
+                        if (propInfo.jsonXmlExpose != JsonXmlField.Expose.DEFAULT) {
                             throw new IllegalArgumentException(
-                                    "JsonXmlField.Access can't be: " + propInfo.jsonXmlAccess + " for transient field: " + propInfo.field);
+                                    "JsonXmlField.Expose can't be: " + propInfo.jsonXmlExpose + " for transient field: " + propInfo.field);
                         }
 
                         transientSeriPropNameSet.add(propName);
@@ -1009,12 +1054,13 @@ public final class ParserUtil {
 
         public final boolean isTransient;
 
-        public final Access jsonXmlAccess;
+        public final Expose jsonXmlExpose;
 
         public final boolean isMarkedToColumn;
 
         public final Optional<String> columnName;
 
+        @SuppressWarnings("deprecation")
         PropInfo(String propName) {
             this.declaringClass = null;
             this.name = propName;
@@ -1042,7 +1088,7 @@ public final class ParserUtil {
             hasFormat = false;
 
             isTransient = false;
-            jsonXmlAccess = JsonXmlField.Access.AUTO;
+            jsonXmlExpose = JsonXmlField.Expose.DEFAULT;
 
             isMarkedToColumn = false;
             columnName = Optional.<String> empty();
@@ -1108,8 +1154,8 @@ public final class ParserUtil {
 
             this.hasFormat = N.notNullOrEmpty(dateFormat) || numberFormat != null;
 
-            this.jsonXmlAccess = field != null && field.isAnnotationPresent(JsonXmlField.class) ? field.getAnnotation(JsonXmlField.class).access()
-                    : JsonXmlField.Access.AUTO;
+            this.jsonXmlExpose = field != null && field.isAnnotationPresent(JsonXmlField.class) ? field.getAnnotation(JsonXmlField.class).expose()
+                    : JsonXmlField.Expose.DEFAULT;
 
             String tmpColumnName = null;
             boolean tmpIsMarkedToColumn = false;

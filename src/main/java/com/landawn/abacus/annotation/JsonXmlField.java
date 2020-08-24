@@ -28,6 +28,8 @@ public @interface JsonXmlField {
 
     String name() default "";
 
+    String[] alias() default {};
+
     String type() default "";
 
     EnumBy enumerated() default EnumBy.NAME;
@@ -63,27 +65,16 @@ public @interface JsonXmlField {
     //    @Deprecated
     //    int ordinal() default -1;
 
-    Access access() default Access.AUTO;
+    Expose expose() default Expose.DEFAULT;
 
-    /**
-     * Copied from Jackson: https://github.com/FasterXML/jackson-annotations under Apache License 2.0. 
-     */
-    public static enum Access {
-        AUTO,
-
+    public static enum Expose {
         /**
-         * deserialize
+         * @deprecated don't need to set it. It's {@code DEFAULT} by default.
          */
-        READ_ONLY,
+        DEFAULT,
 
-        /**
-         * serialize
-         */
-        WRITE_ONLY,
+        SERIALIZE_ONLY,
 
-        /**
-         * deserialize/serialize
-         */
-        READ_WRITE;
+        DESERIALIZE_ONLY;
     }
 }

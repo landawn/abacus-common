@@ -100,7 +100,7 @@ import com.landawn.abacus.util.function.ToDoubleFunction;
 import com.landawn.abacus.util.function.ToFloatFunction;
 import com.landawn.abacus.util.function.ToIntFunction;
 import com.landawn.abacus.util.function.ToLongFunction;
- 
+
 /**
  * <p>
  * Note: This class includes codes copied from Apache Commons Lang, Google Guava and other open source projects under the Apache License 2.0.
@@ -2217,6 +2217,19 @@ class CommonUtil {
         }
 
         return new RowDataSet(columnNameList, columnList);
+    }
+
+    public static <T> DataSet newDataSet(Collection<String> columnNames, final Object[][] rowList) {
+        if (CommonUtil.isNullOrEmpty(columnNames) && CommonUtil.isNullOrEmpty(rowList)) {
+            // throw new IllegalArgumentException("Column name list and row list can not be both null or empty");
+            return CommonUtil.newEmptyDataSet();
+        } else if (CommonUtil.isNullOrEmpty(rowList)) {
+            return CommonUtil.newEmptyDataSet(columnNames);
+        }
+
+        N.checkArgument(N.size(columnNames) == N.len(rowList[0]), "length of 'columnNames' is not equals to length of 'rowList[0]'");
+
+        return newDataSet(columnNames, N.asList(rowList));
     }
 
     /**
