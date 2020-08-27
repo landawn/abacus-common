@@ -154,6 +154,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
     }
 
     /**
+     * Returns an empty {@code Stream} if the specified {@code t} is null.
      *
      * @param <T>
      * @param <E>
@@ -597,6 +598,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
      * @param supplier
      * @return
      */
+    @Beta
     public static <T, E extends Exception> ExceptionalStream<T, E> of(final Throwables.Supplier<Collection<? extends T>, ? extends E> supplier) {
         N.checkArgNotNull(supplier, "supplier");
 
@@ -1540,6 +1542,30 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
     /**
      *
      * @param predicate
+     * @param actionOnDroppedItem
+     * @return
+     */
+    @IntermediateOp
+    public ExceptionalStream<T, E> filter(final Throwables.Predicate<? super T, ? extends E> predicate,
+            final Throwables.Consumer<? super T, ? extends E> actionOnDroppedItem) {
+        assertNotClosed();
+
+        return filter(new Throwables.Predicate<T, E>() {
+            @Override
+            public boolean test(T value) throws E {
+                if (!predicate.test(value)) {
+                    actionOnDroppedItem.accept(value);
+                    return false;
+                }
+
+                return true;
+            }
+        });
+    }
+
+    /**
+     *
+     * @param predicate
      * @return
      */
     @IntermediateOp
@@ -1628,6 +1654,30 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
             }
 
         }, sorted, comparator, closeHandlers);
+    }
+
+    /**
+     *
+     * @param predicate
+     * @param actionOnDroppedItem
+     * @return
+     */
+    @IntermediateOp
+    public ExceptionalStream<T, E> dropWhile(final Throwables.Predicate<? super T, ? extends E> predicate,
+            final Throwables.Consumer<? super T, ? extends E> actionOnDroppedItem) {
+        assertNotClosed();
+
+        return filter(new Throwables.Predicate<T, E>() {
+            @Override
+            public boolean test(T value) throws E {
+                if (!predicate.test(value)) {
+                    actionOnDroppedItem.accept(value);
+                    return false;
+                }
+
+                return true;
+            }
+        });
     }
 
     /**

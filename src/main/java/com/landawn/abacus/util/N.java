@@ -3103,6 +3103,57 @@ public final class N extends CommonUtil {
         return result;
     }
 
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param operator
+     * @throws E the e
+     */
+    public static <T, E extends Exception> void replaceAlll(final T[] a, final Throwables.UnaryOperator<T, E> operator) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return;
+        }
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            a[i] = operator.apply(a[i]);
+        }
+    }
+
+    /**
+     * 
+     * @param <T>
+     * @param <E>
+     * @param list
+     * @param operator
+     * @return
+     * @throws E
+     */
+    public static <T, E extends Exception> int replaceAll(final List<T> list, final Throwables.UnaryOperator<T, E> operator) throws E {
+        if (isNullOrEmpty(list)) {
+            return 0;
+        }
+
+        int result = 0;
+
+        final int size = list.size();
+
+        if (size < REPLACEALL_THRESHOLD || list instanceof RandomAccess) {
+            for (int i = 0; i < size; i++) {
+                list.set(i, operator.apply(list.get(i)));
+            }
+        } else {
+            final ListIterator<T> itr = list.listIterator();
+
+            for (int i = 0; i < size; i++) {
+                itr.set(operator.apply(itr.next()));
+            }
+        }
+
+        return result;
+    }
+
     public static <E extends Exception> int replaceIf(final boolean[] a, final Throwables.BooleanPredicate<E> predicate, final boolean newValue) throws E {
         if (N.isNullOrEmpty(a)) {
             return 0;
@@ -13197,11 +13248,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> BooleanList filter(final boolean[] a, final Throwables.BooleanPredicate<E> filter) throws E {
+    public static <E extends Exception> boolean[] filter(final boolean[] a, final Throwables.BooleanPredicate<E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
-            return new BooleanList();
+            return N.EMPTY_BOOLEAN_ARRAY;
         }
 
         return filter(a, 0, a.length, filter);
@@ -13216,11 +13267,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> BooleanList filter(final boolean[] a, final Throwables.BooleanPredicate<E> filter, final int max) throws E {
+    public static <E extends Exception> boolean[] filter(final boolean[] a, final Throwables.BooleanPredicate<E> filter, final int max) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
-            return new BooleanList();
+            return N.EMPTY_BOOLEAN_ARRAY;
         }
 
         return filter(a, 0, a.length, filter, max);
@@ -13236,8 +13287,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> BooleanList filter(final boolean[] a, final int fromIndex, final int toIndex,
-            final Throwables.BooleanPredicate<E> filter) throws E {
+    public static <E extends Exception> boolean[] filter(final boolean[] a, final int fromIndex, final int toIndex, final Throwables.BooleanPredicate<E> filter)
+            throws E {
         return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
     }
 
@@ -13254,13 +13305,13 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> BooleanList filter(final boolean[] a, final int fromIndex, final int toIndex,
-            final Throwables.BooleanPredicate<E> filter, final int max) throws E {
+    public static <E extends Exception> boolean[] filter(final boolean[] a, final int fromIndex, final int toIndex, final Throwables.BooleanPredicate<E> filter,
+            final int max) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
-            return new BooleanList();
+            return N.EMPTY_BOOLEAN_ARRAY;
         }
 
         final BooleanList result = new BooleanList(min(9, max, (toIndex - fromIndex)));
@@ -13272,7 +13323,7 @@ public final class N extends CommonUtil {
             }
         }
 
-        return result;
+        return result.trimToSize().array();
     }
 
     /**
@@ -13283,11 +13334,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> CharList filter(final char[] a, final Throwables.CharPredicate<E> filter) throws E {
+    public static <E extends Exception> char[] filter(final char[] a, final Throwables.CharPredicate<E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
-            return new CharList();
+            return N.EMPTY_CHAR_ARRAY;
         }
 
         return filter(a, 0, a.length, filter);
@@ -13302,11 +13353,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> CharList filter(final char[] a, final Throwables.CharPredicate<E> filter, final int max) throws E {
+    public static <E extends Exception> char[] filter(final char[] a, final Throwables.CharPredicate<E> filter, final int max) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
-            return new CharList();
+            return N.EMPTY_CHAR_ARRAY;
         }
 
         return filter(a, 0, a.length, filter, max);
@@ -13322,7 +13373,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> CharList filter(final char[] a, final int fromIndex, final int toIndex, final Throwables.CharPredicate<E> filter)
+    public static <E extends Exception> char[] filter(final char[] a, final int fromIndex, final int toIndex, final Throwables.CharPredicate<E> filter)
             throws E {
         return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
     }
@@ -13340,13 +13391,13 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> CharList filter(final char[] a, final int fromIndex, final int toIndex, final Throwables.CharPredicate<E> filter,
+    public static <E extends Exception> char[] filter(final char[] a, final int fromIndex, final int toIndex, final Throwables.CharPredicate<E> filter,
             final int max) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
-            return new CharList();
+            return N.EMPTY_CHAR_ARRAY;
         }
 
         final CharList result = new CharList(min(9, max, (toIndex - fromIndex)));
@@ -13358,7 +13409,7 @@ public final class N extends CommonUtil {
             }
         }
 
-        return result;
+        return result.trimToSize().array();
     }
 
     /**
@@ -13369,11 +13420,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> ByteList filter(final byte[] a, final Throwables.BytePredicate<E> filter) throws E {
+    public static <E extends Exception> byte[] filter(final byte[] a, final Throwables.BytePredicate<E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
-            return new ByteList();
+            return N.EMPTY_BYTE_ARRAY;
         }
 
         return filter(a, 0, a.length, filter);
@@ -13388,11 +13439,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> ByteList filter(final byte[] a, final Throwables.BytePredicate<E> filter, final int max) throws E {
+    public static <E extends Exception> byte[] filter(final byte[] a, final Throwables.BytePredicate<E> filter, final int max) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
-            return new ByteList();
+            return N.EMPTY_BYTE_ARRAY;
         }
 
         return filter(a, 0, a.length, filter, max);
@@ -13408,7 +13459,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> ByteList filter(final byte[] a, final int fromIndex, final int toIndex, final Throwables.BytePredicate<E> filter)
+    public static <E extends Exception> byte[] filter(final byte[] a, final int fromIndex, final int toIndex, final Throwables.BytePredicate<E> filter)
             throws E {
         return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
     }
@@ -13426,13 +13477,13 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> ByteList filter(final byte[] a, final int fromIndex, final int toIndex, final Throwables.BytePredicate<E> filter,
+    public static <E extends Exception> byte[] filter(final byte[] a, final int fromIndex, final int toIndex, final Throwables.BytePredicate<E> filter,
             final int max) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
-            return new ByteList();
+            return N.EMPTY_BYTE_ARRAY;
         }
 
         final ByteList result = new ByteList(min(9, max, (toIndex - fromIndex)));
@@ -13444,7 +13495,7 @@ public final class N extends CommonUtil {
             }
         }
 
-        return result;
+        return result.trimToSize().array();
     }
 
     /**
@@ -13455,11 +13506,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> ShortList filter(final short[] a, final Throwables.ShortPredicate<E> filter) throws E {
+    public static <E extends Exception> short[] filter(final short[] a, final Throwables.ShortPredicate<E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
-            return new ShortList();
+            return N.EMPTY_SHORT_ARRAY;
         }
 
         return filter(a, 0, a.length, filter);
@@ -13474,11 +13525,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> ShortList filter(final short[] a, final Throwables.ShortPredicate<E> filter, final int max) throws E {
+    public static <E extends Exception> short[] filter(final short[] a, final Throwables.ShortPredicate<E> filter, final int max) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
-            return new ShortList();
+            return N.EMPTY_SHORT_ARRAY;
         }
 
         return filter(a, 0, a.length, filter, max);
@@ -13494,7 +13545,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> ShortList filter(final short[] a, final int fromIndex, final int toIndex, final Throwables.ShortPredicate<E> filter)
+    public static <E extends Exception> short[] filter(final short[] a, final int fromIndex, final int toIndex, final Throwables.ShortPredicate<E> filter)
             throws E {
         return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
     }
@@ -13512,13 +13563,13 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> ShortList filter(final short[] a, final int fromIndex, final int toIndex, final Throwables.ShortPredicate<E> filter,
+    public static <E extends Exception> short[] filter(final short[] a, final int fromIndex, final int toIndex, final Throwables.ShortPredicate<E> filter,
             final int max) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
-            return new ShortList();
+            return N.EMPTY_SHORT_ARRAY;
         }
 
         final ShortList result = new ShortList(min(9, max, (toIndex - fromIndex)));
@@ -13530,7 +13581,7 @@ public final class N extends CommonUtil {
             }
         }
 
-        return result;
+        return result.trimToSize().array();
     }
 
     /**
@@ -13541,11 +13592,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> IntList filter(final int[] a, final Throwables.IntPredicate<E> filter) throws E {
+    public static <E extends Exception> int[] filter(final int[] a, final Throwables.IntPredicate<E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
-            return new IntList();
+            return N.EMPTY_INT_ARRAY;
         }
 
         return filter(a, 0, a.length, filter);
@@ -13560,11 +13611,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> IntList filter(final int[] a, final Throwables.IntPredicate<E> filter, final int max) throws E {
+    public static <E extends Exception> int[] filter(final int[] a, final Throwables.IntPredicate<E> filter, final int max) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
-            return new IntList();
+            return N.EMPTY_INT_ARRAY;
         }
 
         return filter(a, 0, a.length, filter, max);
@@ -13580,8 +13631,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> IntList filter(final int[] a, final int fromIndex, final int toIndex, final Throwables.IntPredicate<E> filter)
-            throws E {
+    public static <E extends Exception> int[] filter(final int[] a, final int fromIndex, final int toIndex, final Throwables.IntPredicate<E> filter) throws E {
         return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
     }
 
@@ -13598,13 +13648,13 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> IntList filter(final int[] a, final int fromIndex, final int toIndex, final Throwables.IntPredicate<E> filter,
+    public static <E extends Exception> int[] filter(final int[] a, final int fromIndex, final int toIndex, final Throwables.IntPredicate<E> filter,
             final int max) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
-            return new IntList();
+            return N.EMPTY_INT_ARRAY;
         }
 
         final IntList result = new IntList(min(9, max, (toIndex - fromIndex)));
@@ -13616,7 +13666,7 @@ public final class N extends CommonUtil {
             }
         }
 
-        return result;
+        return result.trimToSize().array();
     }
 
     /**
@@ -13627,11 +13677,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> LongList filter(final long[] a, final Throwables.LongPredicate<E> filter) throws E {
+    public static <E extends Exception> long[] filter(final long[] a, final Throwables.LongPredicate<E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
-            return new LongList();
+            return N.EMPTY_LONG_ARRAY;
         }
 
         return filter(a, 0, a.length, filter);
@@ -13646,11 +13696,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> LongList filter(final long[] a, final Throwables.LongPredicate<E> filter, final int max) throws E {
+    public static <E extends Exception> long[] filter(final long[] a, final Throwables.LongPredicate<E> filter, final int max) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
-            return new LongList();
+            return N.EMPTY_LONG_ARRAY;
         }
 
         return filter(a, 0, a.length, filter, max);
@@ -13666,7 +13716,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> LongList filter(final long[] a, final int fromIndex, final int toIndex, final Throwables.LongPredicate<E> filter)
+    public static <E extends Exception> long[] filter(final long[] a, final int fromIndex, final int toIndex, final Throwables.LongPredicate<E> filter)
             throws E {
         return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
     }
@@ -13684,13 +13734,13 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> LongList filter(final long[] a, final int fromIndex, final int toIndex, final Throwables.LongPredicate<E> filter,
+    public static <E extends Exception> long[] filter(final long[] a, final int fromIndex, final int toIndex, final Throwables.LongPredicate<E> filter,
             final int max) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
-            return new LongList();
+            return N.EMPTY_LONG_ARRAY;
         }
 
         final LongList result = new LongList(min(9, max, (toIndex - fromIndex)));
@@ -13702,7 +13752,7 @@ public final class N extends CommonUtil {
             }
         }
 
-        return result;
+        return result.trimToSize().array();
     }
 
     /**
@@ -13713,11 +13763,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> FloatList filter(final float[] a, final Throwables.FloatPredicate<E> filter) throws E {
+    public static <E extends Exception> float[] filter(final float[] a, final Throwables.FloatPredicate<E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
-            return new FloatList();
+            return N.EMPTY_FLOAT_ARRAY;
         }
 
         return filter(a, 0, a.length, filter);
@@ -13732,11 +13782,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> FloatList filter(final float[] a, final Throwables.FloatPredicate<E> filter, final int max) throws E {
+    public static <E extends Exception> float[] filter(final float[] a, final Throwables.FloatPredicate<E> filter, final int max) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
-            return new FloatList();
+            return N.EMPTY_FLOAT_ARRAY;
         }
 
         return filter(a, 0, a.length, filter, max);
@@ -13752,7 +13802,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> FloatList filter(final float[] a, final int fromIndex, final int toIndex, final Throwables.FloatPredicate<E> filter)
+    public static <E extends Exception> float[] filter(final float[] a, final int fromIndex, final int toIndex, final Throwables.FloatPredicate<E> filter)
             throws E {
         return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
     }
@@ -13770,13 +13820,13 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> FloatList filter(final float[] a, final int fromIndex, final int toIndex, final Throwables.FloatPredicate<E> filter,
+    public static <E extends Exception> float[] filter(final float[] a, final int fromIndex, final int toIndex, final Throwables.FloatPredicate<E> filter,
             final int max) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
-            return new FloatList();
+            return N.EMPTY_FLOAT_ARRAY;
         }
 
         final FloatList result = new FloatList(min(9, max, (toIndex - fromIndex)));
@@ -13788,7 +13838,7 @@ public final class N extends CommonUtil {
             }
         }
 
-        return result;
+        return result.trimToSize().array();
     }
 
     /**
@@ -13799,11 +13849,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> DoubleList filter(final double[] a, final Throwables.DoublePredicate<E> filter) throws E {
+    public static <E extends Exception> double[] filter(final double[] a, final Throwables.DoublePredicate<E> filter) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
-            return new DoubleList();
+            return N.EMPTY_DOUBLE_ARRAY;
         }
 
         return filter(a, 0, a.length, filter);
@@ -13818,11 +13868,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> DoubleList filter(final double[] a, final Throwables.DoublePredicate<E> filter, final int max) throws E {
+    public static <E extends Exception> double[] filter(final double[] a, final Throwables.DoublePredicate<E> filter, final int max) throws E {
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
-            return new DoubleList();
+            return N.EMPTY_DOUBLE_ARRAY;
         }
 
         return filter(a, 0, a.length, filter, max);
@@ -13838,7 +13888,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> DoubleList filter(final double[] a, final int fromIndex, final int toIndex, final Throwables.DoublePredicate<E> filter)
+    public static <E extends Exception> double[] filter(final double[] a, final int fromIndex, final int toIndex, final Throwables.DoublePredicate<E> filter)
             throws E {
         return filter(a, fromIndex, toIndex, filter, Integer.MAX_VALUE);
     }
@@ -13856,13 +13906,13 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <E extends Exception> DoubleList filter(final double[] a, final int fromIndex, final int toIndex, final Throwables.DoublePredicate<E> filter,
+    public static <E extends Exception> double[] filter(final double[] a, final int fromIndex, final int toIndex, final Throwables.DoublePredicate<E> filter,
             final int max) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(filter);
 
         if (isNullOrEmpty(a)) {
-            return new DoubleList();
+            return N.EMPTY_DOUBLE_ARRAY;
         }
 
         final DoubleList result = new DoubleList(min(9, max, (toIndex - fromIndex)));
@@ -13874,7 +13924,7 @@ public final class N extends CommonUtil {
             }
         }
 
-        return result;
+        return result.trimToSize().array();
     }
 
     /**
@@ -14324,11 +14374,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> BooleanList mapToBoolean(final T[] a, final Throwables.ToBooleanFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> boolean[] mapToBoolean(final T[] a, final Throwables.ToBooleanFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
-            return new BooleanList();
+            return N.EMPTY_BOOLEAN_ARRAY;
         }
 
         return mapToBoolean(a, 0, a.length, func);
@@ -14347,19 +14397,19 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> BooleanList mapToBoolean(final T[] a, final int fromIndex, final int toIndex,
+    public static <T, E extends Exception> boolean[] mapToBoolean(final T[] a, final int fromIndex, final int toIndex,
             final Throwables.ToBooleanFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
-            return new BooleanList();
+            return N.EMPTY_BOOLEAN_ARRAY;
         }
 
-        final BooleanList result = new BooleanList(toIndex - fromIndex);
+        final boolean[] result = new boolean[toIndex - fromIndex];
 
         for (int i = fromIndex; i < toIndex; i++) {
-            result.add(func.applyAsBoolean(a[i]));
+            result[i - fromIndex] = func.applyAsBoolean(a[i]);
         }
 
         return result;
@@ -14375,12 +14425,12 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> BooleanList mapToBoolean(final Collection<? extends T> c, final Throwables.ToBooleanFunction<? super T, E> func)
+    public static <T, E extends Exception> boolean[] mapToBoolean(final Collection<? extends T> c, final Throwables.ToBooleanFunction<? super T, E> func)
             throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
-            return new BooleanList();
+            return N.EMPTY_BOOLEAN_ARRAY;
         }
 
         return mapToBoolean(c, 0, c.size(), func);
@@ -14399,22 +14449,22 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> BooleanList mapToBoolean(final Collection<? extends T> c, final int fromIndex, final int toIndex,
+    public static <T, E extends Exception> boolean[] mapToBoolean(final Collection<? extends T> c, final int fromIndex, final int toIndex,
             final Throwables.ToBooleanFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) {
-            return new BooleanList();
+            return N.EMPTY_BOOLEAN_ARRAY;
         }
 
-        final BooleanList result = new BooleanList(toIndex - fromIndex);
+        final boolean[] result = new boolean[toIndex - fromIndex];
 
         if (c instanceof List && c instanceof RandomAccess) {
             final List<T> list = (List<T>) c;
 
             for (int i = fromIndex; i < toIndex; i++) {
-                result.add(func.applyAsBoolean(list.get(i)));
+                result[i - fromIndex] = func.applyAsBoolean(list.get(i));
             }
         } else {
             int idx = 0;
@@ -14424,7 +14474,7 @@ public final class N extends CommonUtil {
                     continue;
                 }
 
-                result.add(func.applyAsBoolean(e));
+                result[idx - fromIndex] = func.applyAsBoolean(e);
 
                 if (idx >= toIndex) {
                     break;
@@ -14445,11 +14495,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> CharList mapToChar(final T[] a, final Throwables.ToCharFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> char[] mapToChar(final T[] a, final Throwables.ToCharFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
-            return new CharList();
+            return N.EMPTY_CHAR_ARRAY;
         }
 
         return mapToChar(a, 0, a.length, func);
@@ -14468,19 +14518,19 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> CharList mapToChar(final T[] a, final int fromIndex, final int toIndex,
+    public static <T, E extends Exception> char[] mapToChar(final T[] a, final int fromIndex, final int toIndex,
             final Throwables.ToCharFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
-            return new CharList();
+            return N.EMPTY_CHAR_ARRAY;
         }
 
-        final CharList result = new CharList(toIndex - fromIndex);
+        final char[] result = new char[toIndex - fromIndex];
 
         for (int i = fromIndex; i < toIndex; i++) {
-            result.add(func.applyAsChar(a[i]));
+            result[i - fromIndex] = func.applyAsChar(a[i]);
         }
 
         return result;
@@ -14496,11 +14546,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> CharList mapToChar(final Collection<? extends T> c, final Throwables.ToCharFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> char[] mapToChar(final Collection<? extends T> c, final Throwables.ToCharFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
-            return new CharList();
+            return N.EMPTY_CHAR_ARRAY;
         }
 
         return mapToChar(c, 0, c.size(), func);
@@ -14519,22 +14569,22 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> CharList mapToChar(final Collection<? extends T> c, final int fromIndex, final int toIndex,
+    public static <T, E extends Exception> char[] mapToChar(final Collection<? extends T> c, final int fromIndex, final int toIndex,
             final Throwables.ToCharFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) {
-            return new CharList();
+            return N.EMPTY_CHAR_ARRAY;
         }
 
-        final CharList result = new CharList(toIndex - fromIndex);
+        final char[] result = new char[toIndex - fromIndex];
 
         if (c instanceof List && c instanceof RandomAccess) {
             final List<T> list = (List<T>) c;
 
             for (int i = fromIndex; i < toIndex; i++) {
-                result.add(func.applyAsChar(list.get(i)));
+                result[i - fromIndex] = func.applyAsChar(list.get(i));
             }
         } else {
             int idx = 0;
@@ -14544,7 +14594,7 @@ public final class N extends CommonUtil {
                     continue;
                 }
 
-                result.add(func.applyAsChar(e));
+                result[idx - fromIndex] = func.applyAsChar(e);
 
                 if (idx >= toIndex) {
                     break;
@@ -14565,11 +14615,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> ByteList mapToByte(final T[] a, final Throwables.ToByteFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> byte[] mapToByte(final T[] a, final Throwables.ToByteFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
-            return new ByteList();
+            return N.EMPTY_BYTE_ARRAY;
         }
 
         return mapToByte(a, 0, a.length, func);
@@ -14588,19 +14638,19 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> ByteList mapToByte(final T[] a, final int fromIndex, final int toIndex,
+    public static <T, E extends Exception> byte[] mapToByte(final T[] a, final int fromIndex, final int toIndex,
             final Throwables.ToByteFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
-            return new ByteList();
+            return N.EMPTY_BYTE_ARRAY;
         }
 
-        final ByteList result = new ByteList(toIndex - fromIndex);
+        final byte[] result = new byte[toIndex - fromIndex];
 
         for (int i = fromIndex; i < toIndex; i++) {
-            result.add(func.applyAsByte(a[i]));
+            result[i - fromIndex] = func.applyAsByte(a[i]);
         }
 
         return result;
@@ -14616,11 +14666,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> ByteList mapToByte(final Collection<? extends T> c, final Throwables.ToByteFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> byte[] mapToByte(final Collection<? extends T> c, final Throwables.ToByteFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
-            return new ByteList();
+            return N.EMPTY_BYTE_ARRAY;
         }
 
         return mapToByte(c, 0, c.size(), func);
@@ -14639,22 +14689,22 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> ByteList mapToByte(final Collection<? extends T> c, final int fromIndex, final int toIndex,
+    public static <T, E extends Exception> byte[] mapToByte(final Collection<? extends T> c, final int fromIndex, final int toIndex,
             final Throwables.ToByteFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) {
-            return new ByteList();
+            return N.EMPTY_BYTE_ARRAY;
         }
 
-        final ByteList result = new ByteList(toIndex - fromIndex);
+        final byte[] result = new byte[toIndex - fromIndex];
 
         if (c instanceof List && c instanceof RandomAccess) {
             final List<T> list = (List<T>) c;
 
             for (int i = fromIndex; i < toIndex; i++) {
-                result.add(func.applyAsByte(list.get(i)));
+                result[i - fromIndex] = func.applyAsByte(list.get(i));
             }
         } else {
             int idx = 0;
@@ -14664,7 +14714,7 @@ public final class N extends CommonUtil {
                     continue;
                 }
 
-                result.add(func.applyAsByte(e));
+                result[idx - fromIndex] = func.applyAsByte(e);
 
                 if (idx >= toIndex) {
                     break;
@@ -14685,11 +14735,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> ShortList mapToShort(final T[] a, final Throwables.ToShortFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> short[] mapToShort(final T[] a, final Throwables.ToShortFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
-            return new ShortList();
+            return N.EMPTY_SHORT_ARRAY;
         }
 
         return mapToShort(a, 0, a.length, func);
@@ -14708,19 +14758,19 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> ShortList mapToShort(final T[] a, final int fromIndex, final int toIndex,
+    public static <T, E extends Exception> short[] mapToShort(final T[] a, final int fromIndex, final int toIndex,
             final Throwables.ToShortFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
-            return new ShortList();
+            return N.EMPTY_SHORT_ARRAY;
         }
 
-        final ShortList result = new ShortList(toIndex - fromIndex);
+        final short[] result = new short[toIndex - fromIndex];
 
         for (int i = fromIndex; i < toIndex; i++) {
-            result.add(func.applyAsShort(a[i]));
+            result[i - fromIndex] = func.applyAsShort(a[i]);
         }
 
         return result;
@@ -14736,11 +14786,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> ShortList mapToShort(final Collection<? extends T> c, final Throwables.ToShortFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> short[] mapToShort(final Collection<? extends T> c, final Throwables.ToShortFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
-            return new ShortList();
+            return N.EMPTY_SHORT_ARRAY;
         }
 
         return mapToShort(c, 0, c.size(), func);
@@ -14759,22 +14809,22 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> ShortList mapToShort(final Collection<? extends T> c, final int fromIndex, final int toIndex,
+    public static <T, E extends Exception> short[] mapToShort(final Collection<? extends T> c, final int fromIndex, final int toIndex,
             final Throwables.ToShortFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) {
-            return new ShortList();
+            return N.EMPTY_SHORT_ARRAY;
         }
 
-        final ShortList result = new ShortList(toIndex - fromIndex);
+        final short[] result = new short[toIndex - fromIndex];
 
         if (c instanceof List && c instanceof RandomAccess) {
             final List<T> list = (List<T>) c;
 
             for (int i = fromIndex; i < toIndex; i++) {
-                result.add(func.applyAsShort(list.get(i)));
+                result[i - fromIndex] = func.applyAsShort(list.get(i));
             }
         } else {
             int idx = 0;
@@ -14784,7 +14834,7 @@ public final class N extends CommonUtil {
                     continue;
                 }
 
-                result.add(func.applyAsShort(e));
+                result[idx - fromIndex] = func.applyAsShort(e);
 
                 if (idx >= toIndex) {
                     break;
@@ -21031,6 +21081,147 @@ public final class N extends CommonUtil {
         for (int i = 0; i < maxLen; i++) {
             result.add(zipFunction.apply(i < lenA ? iterA.next() : valueForNoneA, i < lenB ? iterB.next() : valueForNoneB,
                     i < lenC ? iterC.next() : valueForNoneC));
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <A>
+     * @param <B>
+     * @param <R>
+     * @param <E>
+     * @param targetElementType
+     * @param a
+     * @param b
+     * @param zipFunction
+     * @return
+     * @throws E the e
+     */
+    public static <A, B, R, E extends Exception> R[] zip(final Class<R> targetElementType, final A[] a, final B[] b,
+            final Throwables.BiFunction<? super A, ? super B, R, E> zipFunction) throws E {
+        final int lenA = N.len(a);
+        final int lenB = N.len(b);
+        final int minLen = N.min(lenA, lenB);
+
+        final R[] result = N.newArray(targetElementType, minLen);
+
+        for (int i = 0; i < minLen; i++) {
+            result[i] = zipFunction.apply(a[i], b[i]);
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <A>
+     * @param <B>
+     * @param <R>
+     * @param <E>
+     * @param targetElementType
+     * @param a
+     * @param b
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param zipFunction
+     * @return
+     * @throws E the e
+     */
+    public static <A, B, R, E extends Exception> R[] zip(final Class<R> targetElementType, final A[] a, final B[] b, final A valueForNoneA,
+            final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, R, E> zipFunction) throws E {
+        final int lenA = N.len(a);
+        final int lenB = N.len(b);
+        final int minLen = N.min(lenA, lenB);
+        final int maxLen = N.max(lenA, lenB);
+
+        final R[] result = N.newArray(targetElementType, maxLen);
+
+        for (int i = 0; i < minLen; i++) {
+            result[i] = zipFunction.apply(a[i], b[i]);
+        }
+
+        if (lenA < maxLen) {
+            for (int i = lenA; i < maxLen; i++) {
+                result[i] = zipFunction.apply(valueForNoneA, b[i]);
+            }
+        } else if (lenB < maxLen) {
+            for (int i = lenB; i < maxLen; i++) {
+                result[i] = zipFunction.apply(a[i], valueForNoneB);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param <E>
+     * @param targetElementType
+     * @param a
+     * @param b
+     * @param c
+     * @param zipFunction
+     * @return
+     * @throws E the e
+     */
+    public static <A, B, C, R, E extends Exception> R[] zip(final Class<R> targetElementType, final A[] a, final B[] b, final C[] c,
+            final Throwables.TriFunction<? super A, ? super B, ? super C, R, E> zipFunction) throws E {
+        final int lenA = N.len(a);
+        final int lenB = N.len(b);
+        final int lenC = N.len(c);
+        final int minLen = N.min(lenA, lenB, lenC);
+
+        final R[] result = N.newArray(targetElementType, minLen);
+
+        for (int i = 0; i < minLen; i++) {
+            result[i] = zipFunction.apply(a[i], b[i], c[i]);
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param <R>
+     * @param <E>
+     * @param targetElementType
+     * @param a
+     * @param b
+     * @param c
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param valueForNoneC
+     * @param zipFunction
+     * @return
+     * @throws E the e
+     */
+    public static <A, B, C, R, E extends Exception> R[] zip(final Class<R> targetElementType, final A[] a, final B[] b, final C[] c, final A valueForNoneA,
+            final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, R, E> zipFunction) throws E {
+        final int lenA = N.len(a);
+        final int lenB = N.len(b);
+        final int lenC = N.len(c);
+        final int minLen = N.min(lenA, lenB, lenC);
+        final int maxLen = N.max(lenA, lenB, lenC);
+
+        final R[] result = N.newArray(targetElementType, maxLen);
+
+        for (int i = 0; i < minLen; i++) {
+            result[i] = zipFunction.apply(a[i], b[i], c[i]);
+        }
+
+        if (minLen < maxLen) {
+            for (int i = minLen; i < maxLen; i++) {
+                result[i] = zipFunction.apply(i < lenA ? a[i] : valueForNoneA, i < lenB ? b[i] : valueForNoneB, i < lenC ? c[i] : valueForNoneC);
+            }
         }
 
         return result;

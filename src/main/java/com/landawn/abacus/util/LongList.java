@@ -1479,7 +1479,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     public <E extends Exception> LongList filter(final int fromIndex, final int toIndex, Throwables.LongPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
-        return N.filter(elementData, fromIndex, toIndex, filter);
+        return LongList.of(N.filter(elementData, fromIndex, toIndex, filter));
     }
 
     /**
@@ -1507,7 +1507,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     public <E extends Exception> LongList filter(final int fromIndex, final int toIndex, Throwables.LongPredicate<E> filter, final int max) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
-        return N.filter(elementData, fromIndex, toIndex, filter, max);
+        return LongList.of(N.filter(elementData, fromIndex, toIndex, filter, max));
     }
 
     /**

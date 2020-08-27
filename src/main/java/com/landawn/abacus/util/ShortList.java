@@ -1480,7 +1480,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     public <E extends Exception> ShortList filter(final int fromIndex, final int toIndex, Throwables.ShortPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
-        return N.filter(elementData, fromIndex, toIndex, filter);
+        return ShortList.of(N.filter(elementData, fromIndex, toIndex, filter));
     }
 
     /**
@@ -1508,7 +1508,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     public <E extends Exception> ShortList filter(final int fromIndex, final int toIndex, Throwables.ShortPredicate<E> filter, final int max) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
-        return N.filter(elementData, fromIndex, toIndex, filter, max);
+        return ShortList.of(N.filter(elementData, fromIndex, toIndex, filter, max));
     }
 
     /**

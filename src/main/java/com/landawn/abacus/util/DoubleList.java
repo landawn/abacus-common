@@ -1436,7 +1436,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     public <E extends Exception> DoubleList filter(final int fromIndex, final int toIndex, Throwables.DoublePredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
-        return N.filter(elementData, fromIndex, toIndex, filter);
+        return DoubleList.of(N.filter(elementData, fromIndex, toIndex, filter));
     }
 
     /**
@@ -1464,7 +1464,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     public <E extends Exception> DoubleList filter(final int fromIndex, final int toIndex, Throwables.DoublePredicate<E> filter, final int max) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
-        return N.filter(elementData, fromIndex, toIndex, filter, max);
+        return DoubleList.of(N.filter(elementData, fromIndex, toIndex, filter, max));
     }
 
     /**

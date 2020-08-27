@@ -1524,7 +1524,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     public <E extends Exception> CharList filter(final int fromIndex, final int toIndex, Throwables.CharPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
-        return N.filter(elementData, fromIndex, toIndex, filter);
+        return CharList.of(N.filter(elementData, fromIndex, toIndex, filter));
     }
 
     /**
@@ -1552,7 +1552,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     public <E extends Exception> CharList filter(final int fromIndex, final int toIndex, Throwables.CharPredicate<E> filter, final int max) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
-        return N.filter(elementData, fromIndex, toIndex, filter, max);
+        return CharList.of(N.filter(elementData, fromIndex, toIndex, filter, max));
     }
 
     /**

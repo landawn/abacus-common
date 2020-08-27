@@ -1481,7 +1481,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     public <E extends Exception> ByteList filter(final int fromIndex, final int toIndex, Throwables.BytePredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
-        return N.filter(elementData, fromIndex, toIndex, filter);
+        return ByteList.of(N.filter(elementData, fromIndex, toIndex, filter));
     }
 
     /**
@@ -1509,7 +1509,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     public <E extends Exception> ByteList filter(final int fromIndex, final int toIndex, Throwables.BytePredicate<E> filter, final int max) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
-        return N.filter(elementData, fromIndex, toIndex, filter, max);
+        return ByteList.of(N.filter(elementData, fromIndex, toIndex, filter, max));
     }
 
     /**

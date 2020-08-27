@@ -1553,7 +1553,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     public <E extends Exception> IntList filter(final int fromIndex, final int toIndex, Throwables.IntPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
-        return N.filter(elementData, fromIndex, toIndex, filter);
+        return IntList.of(N.filter(elementData, fromIndex, toIndex, filter));
     }
 
     /**
@@ -1581,7 +1581,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     public <E extends Exception> IntList filter(final int fromIndex, final int toIndex, Throwables.IntPredicate<E> filter, final int max) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
-        return N.filter(elementData, fromIndex, toIndex, filter, max);
+        return IntList.of(N.filter(elementData, fromIndex, toIndex, filter, max));
     }
 
     /**

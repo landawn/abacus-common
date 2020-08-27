@@ -1438,7 +1438,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     public <E extends Exception> FloatList filter(final int fromIndex, final int toIndex, Throwables.FloatPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
-        return N.filter(elementData, fromIndex, toIndex, filter);
+        return FloatList.of(N.filter(elementData, fromIndex, toIndex, filter));
     }
 
     /**
@@ -1466,7 +1466,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     public <E extends Exception> FloatList filter(final int fromIndex, final int toIndex, Throwables.FloatPredicate<E> filter, final int max) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
-        return N.filter(elementData, fromIndex, toIndex, filter, max);
+        return FloatList.of(N.filter(elementData, fromIndex, toIndex, filter, max));
     }
 
     /**

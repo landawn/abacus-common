@@ -1332,7 +1332,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     public <E extends Exception> BooleanList filter(final int fromIndex, final int toIndex, Throwables.BooleanPredicate<E> filter) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
-        return N.filter(elementData, fromIndex, toIndex, filter);
+        return BooleanList.of(N.filter(elementData, fromIndex, toIndex, filter));
     }
 
     /**
@@ -1360,7 +1360,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     public <E extends Exception> BooleanList filter(final int fromIndex, final int toIndex, Throwables.BooleanPredicate<E> filter, final int max) throws E {
         checkFromToIndex(fromIndex, toIndex);
 
-        return N.filter(elementData, fromIndex, toIndex, filter, max);
+        return BooleanList.of(N.filter(elementData, fromIndex, toIndex, filter, max));
     }
 
     /**
