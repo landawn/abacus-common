@@ -3111,7 +3111,7 @@ public final class N extends CommonUtil {
      * @param operator
      * @throws E the e
      */
-    public static <T, E extends Exception> void replaceAlll(final T[] a, final Throwables.UnaryOperator<T, E> operator) throws E {
+    public static <T, E extends Exception> void replaceAll(final T[] a, final Throwables.UnaryOperator<T, E> operator) throws E {
         if (N.isNullOrEmpty(a)) {
             return;
         }
