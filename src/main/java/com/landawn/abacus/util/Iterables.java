@@ -1408,156 +1408,6 @@ public class Iterables {
     }
 
     /**
-     * For each pair.
-     *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param action the action
-     * @throws E the e
-     */
-    public static <T, E extends Exception> void forEachPair(final Collection<? extends T> c, final Throwables.BiConsumer<? super T, ? super T, E> action)
-            throws E {
-        forEachPair(c, action, 1);
-    }
-
-    /**
-     * For each pair.
-     *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param action the action
-     * @param increment the increment
-     * @throws E the e
-     */
-    public static <T, E extends Exception> void forEachPair(final Collection<? extends T> c, final Throwables.BiConsumer<? super T, ? super T, E> action,
-            final int increment) throws E {
-        N.checkArgNotNull(action);
-        final int windowSize = 2;
-        N.checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
-
-        if (N.isNullOrEmpty(c)) {
-            return;
-        }
-
-        final Iterator<? extends T> iter = c.iterator();
-        Iterators.forEachPair(iter, action, increment);
-    }
-
-    /**
-     * For each pair.
-     *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param action the action
-     * @throws E the e
-     */
-    public static <T, E extends Exception> void forEachPair(final T[] a, final Throwables.BiConsumer<? super T, ? super T, E> action) throws E {
-        forEachPair(a, action, 1);
-    }
-
-    /**
-     * For each pair.
-     *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param action the action
-     * @param increment the increment
-     * @throws E the e
-     */
-    public static <T, E extends Exception> void forEachPair(final T[] a, final Throwables.BiConsumer<? super T, ? super T, E> action, final int increment)
-            throws E {
-        N.checkArgNotNull(action);
-        final int windowSize = 2;
-        N.checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
-
-        if (N.isNullOrEmpty(a)) {
-            return;
-        }
-
-        final Iterator<? extends T> iter = ObjIterator.of(a);
-        Iterators.forEachPair(iter, action, increment);
-    }
-
-    /**
-     * For each triple.
-     *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param action the action
-     * @throws E the e
-     */
-    public static <T, E extends Exception> void forEachTriple(final Collection<? extends T> c,
-            final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action) throws E {
-        forEachTriple(c, action, 1);
-    }
-
-    /**
-     * For each triple.
-     *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param action the action
-     * @param increment the increment
-     * @throws E the e
-     */
-    public static <T, E extends Exception> void forEachTriple(final Collection<? extends T> c,
-            final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action, final int increment) throws E {
-        N.checkArgNotNull(action);
-        final int windowSize = 3;
-        N.checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
-
-        if (N.isNullOrEmpty(c)) {
-            return;
-        }
-
-        final Iterator<? extends T> iter = c.iterator();
-        Iterators.forEachTriple(iter, action, increment);
-    }
-
-    /**
-     * For each triple.
-     *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param action the action
-     * @throws E the e
-     */
-    public static <T, E extends Exception> void forEachTriple(final T[] a, final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action) throws E {
-        forEachTriple(a, action, 1);
-    }
-
-    /**
-     * For each triple.
-     *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param action the action
-     * @param increment the increment
-     * @throws E the e
-     */
-    public static <T, E extends Exception> void forEachTriple(final T[] a, final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action,
-            final int increment) throws E {
-        N.checkArgNotNull(action);
-        final int windowSize = 3;
-        N.checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
-
-        if (N.isNullOrEmpty(a)) {
-            return;
-        }
-
-        final Iterator<? extends T> iter = ObjIterator.of(a);
-        Iterators.forEachTriple(iter, action, increment);
-    }
-
-    /**
      * Take while.
      *
      * @param <T> the generic type
@@ -1818,6 +1668,156 @@ public class Iterables {
         }
 
         return result;
+    }
+
+    /**
+     * For each pair.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param c the c
+     * @param action the action
+     * @throws E the e
+     */
+    public static <T, E extends Exception> void forEachPair(final Collection<? extends T> c, final Throwables.BiConsumer<? super T, ? super T, E> action)
+            throws E {
+        forEachPair(c, action, 1);
+    }
+
+    /**
+     * For each pair.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param c the c
+     * @param action the action
+     * @param increment the increment
+     * @throws E the e
+     */
+    public static <T, E extends Exception> void forEachPair(final Collection<? extends T> c, final Throwables.BiConsumer<? super T, ? super T, E> action,
+            final int increment) throws E {
+        N.checkArgNotNull(action);
+        final int windowSize = 2;
+        N.checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
+
+        if (N.isNullOrEmpty(c)) {
+            return;
+        }
+
+        final Iterator<? extends T> iter = c.iterator();
+        Iterators.forEachPair(iter, action, increment);
+    }
+
+    /**
+     * For each pair.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param a the a
+     * @param action the action
+     * @throws E the e
+     */
+    public static <T, E extends Exception> void forEachPair(final T[] a, final Throwables.BiConsumer<? super T, ? super T, E> action) throws E {
+        forEachPair(a, action, 1);
+    }
+
+    /**
+     * For each pair.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param a the a
+     * @param action the action
+     * @param increment the increment
+     * @throws E the e
+     */
+    public static <T, E extends Exception> void forEachPair(final T[] a, final Throwables.BiConsumer<? super T, ? super T, E> action, final int increment)
+            throws E {
+        N.checkArgNotNull(action);
+        final int windowSize = 2;
+        N.checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
+
+        if (N.isNullOrEmpty(a)) {
+            return;
+        }
+
+        final Iterator<? extends T> iter = ObjIterator.of(a);
+        Iterators.forEachPair(iter, action, increment);
+    }
+
+    /**
+     * For each triple.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param c the c
+     * @param action the action
+     * @throws E the e
+     */
+    public static <T, E extends Exception> void forEachTriple(final Collection<? extends T> c,
+            final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action) throws E {
+        forEachTriple(c, action, 1);
+    }
+
+    /**
+     * For each triple.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param c the c
+     * @param action the action
+     * @param increment the increment
+     * @throws E the e
+     */
+    public static <T, E extends Exception> void forEachTriple(final Collection<? extends T> c,
+            final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action, final int increment) throws E {
+        N.checkArgNotNull(action);
+        final int windowSize = 3;
+        N.checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
+
+        if (N.isNullOrEmpty(c)) {
+            return;
+        }
+
+        final Iterator<? extends T> iter = c.iterator();
+        Iterators.forEachTriple(iter, action, increment);
+    }
+
+    /**
+     * For each triple.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param a the a
+     * @param action the action
+     * @throws E the e
+     */
+    public static <T, E extends Exception> void forEachTriple(final T[] a, final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action) throws E {
+        forEachTriple(a, action, 1);
+    }
+
+    /**
+     * For each triple.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param a the a
+     * @param action the action
+     * @param increment the increment
+     * @throws E the e
+     */
+    public static <T, E extends Exception> void forEachTriple(final T[] a, final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action,
+            final int increment) throws E {
+        N.checkArgNotNull(action);
+        final int windowSize = 3;
+        N.checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
+
+        if (N.isNullOrEmpty(a)) {
+            return;
+        }
+
+        final Iterator<? extends T> iter = ObjIterator.of(a);
+        Iterators.forEachTriple(iter, action, increment);
     }
 
     //    /**
@@ -2252,6 +2252,339 @@ public class Iterables {
     //
     //        return result;
     //    }
+
+    /**
+     * Parses the.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param iter the iter
+     * @param elementParser the element parser
+     * @throws E the e
+     */
+    public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final Throwables.Consumer<? super T, E> elementParser) throws E {
+        forEach(iter, elementParser, Fn.emptyAction());
+    }
+
+    /**
+     * Parses the.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param iter the iter
+     * @param elementParser the element parser
+     * @param onComplete the on complete
+     * @throws E the e
+     * @throws E2 the e2
+     */
+    public static <T, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iter,
+            final Throwables.Consumer<? super T, E> elementParser, final Throwables.Runnable<E2> onComplete) throws E, E2 {
+        forEach(iter, 0, Long.MAX_VALUE, elementParser, onComplete);
+    }
+
+    /**
+     * Parses the.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param iter the iter
+     * @param offset the offset
+     * @param count the count
+     * @param elementParser the element parser
+     * @throws E the e
+     */
+    public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final long offset, final long count,
+            final Throwables.Consumer<? super T, E> elementParser) throws E {
+        forEach(iter, offset, count, elementParser, Fn.emptyAction());
+    }
+
+    /**
+     * Parses the.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param iter the iter
+     * @param offset the offset
+     * @param count the count
+     * @param elementParser the element parser
+     * @param onComplete the on complete
+     * @throws E the e
+     * @throws E2 the e2
+     */
+    public static <T, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iter, final long offset, final long count,
+            final Throwables.Consumer<? super T, E> elementParser, final Throwables.Runnable<E2> onComplete) throws E, E2 {
+        forEach(iter, offset, count, 0, 0, elementParser, onComplete);
+    }
+
+    /**
+     * Parses the.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param iter the iter
+     * @param offset the offset
+     * @param count the count
+     * @param processThreadNum the process thread num
+     * @param queueSize the queue size
+     * @param elementParser the element parser
+     * @throws E the e
+     */
+    public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, long offset, long count, final int processThreadNum,
+            final int queueSize, final Throwables.Consumer<? super T, E> elementParser) throws E {
+        forEach(iter, offset, count, processThreadNum, queueSize, elementParser, Fn.emptyAction());
+    }
+
+    /**
+     * Parse the elements in the specified iterators one by one.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param iter the iter
+     * @param offset the offset
+     * @param count the count
+     * @param processThreadNum new threads started to parse/process the lines/records
+     * @param queueSize size of queue to save the processing records/lines loaded from source data. Default size is 1024.
+     * @param elementParser the element parser
+     * @param onComplete the on complete
+     * @throws E the e
+     * @throws E2 the e2
+     */
+    public static <T, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iter, long offset, long count,
+            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementParser, final Throwables.Runnable<E2> onComplete)
+            throws E, E2 {
+        forEach(Array.asList(iter), offset, count, 0, processThreadNum, queueSize, elementParser, onComplete);
+    }
+
+    /**
+     * Parses the.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param iterators the iterators
+     * @param elementParser the element parser
+     * @throws E the e
+     */
+    public static <T, E extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators,
+            final Throwables.Consumer<? super T, E> elementParser) throws E {
+        forEach(iterators, elementParser, Fn.emptyAction());
+    }
+
+    /**
+     * Parses the.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param iterators the iterators
+     * @param elementParser the element parser
+     * @param onComplete the on complete
+     * @throws E the e
+     * @throws E2 the e2
+     */
+    public static <T, E extends Exception, E2 extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators,
+            final Throwables.Consumer<? super T, E> elementParser, final Throwables.Runnable<E2> onComplete) throws E, E2 {
+        forEach(iterators, 0, Long.MAX_VALUE, elementParser, onComplete);
+    }
+
+    /**
+     * Parses the.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param iterators the iterators
+     * @param offset the offset
+     * @param count the count
+     * @param elementParser the element parser
+     * @throws E the e
+     */
+    public static <T, E extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final long offset, final long count,
+            final Throwables.Consumer<? super T, E> elementParser) throws E {
+        forEach(iterators, offset, count, elementParser, Fn.emptyAction());
+    }
+
+    /**
+     * Parses the.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param iterators the iterators
+     * @param offset the offset
+     * @param count the count
+     * @param elementParser the element parser
+     * @param onComplete the on complete
+     * @throws E the e
+     * @throws E2 the e2
+     */
+    public static <T, E extends Exception, E2 extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final long offset,
+            final long count, final Throwables.Consumer<? super T, E> elementParser, final Throwables.Runnable<E2> onComplete) throws E, E2 {
+        forEach(iterators, offset, count, 0, 0, 0, elementParser, onComplete);
+    }
+
+    /**
+     * Parses the.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param iterators the iterators
+     * @param readThreadNum the read thread num
+     * @param processThreadNum the process thread num
+     * @param queueSize the queue size
+     * @param elementParser the element parser
+     * @throws E the e
+     */
+    public static <T, E extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final int readThreadNum,
+            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementParser) throws E {
+        forEach(iterators, readThreadNum, processThreadNum, queueSize, elementParser, Fn.emptyAction());
+    }
+
+    /**
+     * Parses the.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param iterators the iterators
+     * @param readThreadNum the read thread num
+     * @param processThreadNum the process thread num
+     * @param queueSize the queue size
+     * @param elementParser the element parser
+     * @param onComplete the on complete
+     * @throws E the e
+     */
+    public static <T, E extends Exception, E2 extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators,
+            final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementParser,
+            final Throwables.Runnable<E2> onComplete) throws E {
+        forEach(iterators, 0, Long.MAX_VALUE, readThreadNum, processThreadNum, queueSize, elementParser);
+    }
+
+    /**
+     * Parses the.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param iterators the iterators
+     * @param offset the offset
+     * @param count the count
+     * @param readThreadNum the read thread num
+     * @param processThreadNum the process thread num
+     * @param queueSize the queue size
+     * @param elementParser the element parser
+     * @throws E the e
+     */
+    public static <T, E extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final long offset, final long count,
+            final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementParser) throws E {
+        forEach(iterators, offset, count, readThreadNum, processThreadNum, queueSize, elementParser, Fn.emptyAction());
+    }
+
+    /**
+     * Parse the elements in the specified iterators one by one.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param iterators the iterators
+     * @param offset the offset
+     * @param count the count
+     * @param readThreadNum new threads started to parse/process the lines/records
+     * @param processThreadNum new threads started to parse/process the lines/records
+     * @param queueSize size of queue to save the processing records/lines loaded from source data. Default size is 1024.
+     * @param elementParser the element parser
+     * @param onComplete the on complete
+     * @throws E the e
+     * @throws E2 the e2
+     */
+    public static <T, E extends Exception, E2 extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final long offset,
+            final long count, final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementParser,
+            final Throwables.Runnable<E2> onComplete) throws E, E2 {
+        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can not be negative", offset, count);
+
+        if (N.isNullOrEmpty(iterators)) {
+            return;
+        }
+
+        if (logger.isInfoEnabled()) {
+            logger.info("### Start to parse");
+        }
+
+        try (final Stream<T> stream = ((readThreadNum > 0 || queueSize > 0)
+                ? Stream.parallelConcatt(iterators, (readThreadNum == 0 ? 1 : readThreadNum), (queueSize == 0 ? 1024 : queueSize))
+                : Stream.concatt(iterators))) {
+
+            final Iterator<? extends T> iteratorII = stream.skip(offset).limit(count).iterator();
+
+            if (processThreadNum == 0) {
+                while (iteratorII.hasNext()) {
+                    elementParser.accept(iteratorII.next());
+                }
+
+                if (onComplete != null) {
+                    onComplete.run();
+                }
+            } else {
+                final AtomicInteger activeThreadNum = new AtomicInteger();
+                final ExecutorService executorService = Executors.newFixedThreadPool(processThreadNum);
+                final Holder<Throwable> errorHolder = new Holder<>();
+
+                for (int i = 0; i < processThreadNum; i++) {
+                    activeThreadNum.incrementAndGet();
+
+                    executorService.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            T element = null;
+                            try {
+                                while (errorHolder.value() == null) {
+                                    synchronized (iteratorII) {
+                                        if (iteratorII.hasNext()) {
+                                            element = iteratorII.next();
+                                        } else {
+                                            break;
+                                        }
+                                    }
+
+                                    elementParser.accept(element);
+                                }
+                            } catch (Exception e) {
+                                synchronized (errorHolder) {
+                                    if (errorHolder.value() == null) {
+                                        errorHolder.setValue(e);
+                                    } else {
+                                        errorHolder.value().addSuppressed(e);
+                                    }
+                                }
+                            } finally {
+                                activeThreadNum.decrementAndGet();
+                            }
+                        }
+                    });
+                }
+
+                while (activeThreadNum.get() > 0) {
+                    N.sleep(1);
+                }
+
+                if (errorHolder.value() == null && onComplete != null) {
+                    try {
+                        onComplete.run();
+                    } catch (Exception e) {
+                        errorHolder.setValue(e);
+                    }
+                }
+
+                if (errorHolder.value() != null) {
+                    throw N.toRuntimeException(errorHolder.value());
+                }
+            }
+        } finally {
+            if (logger.isInfoEnabled()) {
+                logger.info("### End to parse");
+            }
+        }
+    }
 
     /**
      * Rollup.
@@ -3125,339 +3458,6 @@ public class Iterables {
          */
         private int getAxisIndexForProductIndex(int index, int axis) {
             return (index / axesSizeProduct[axis + 1]) % axes[axis].length;
-        }
-    }
-
-    /**
-     * Parses the.
-     *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param iter the iter
-     * @param elementParser the element parser
-     * @throws E the e
-     */
-    public static <T, E extends Exception> void parse(final Iterator<? extends T> iter, final Throwables.Consumer<? super T, E> elementParser) throws E {
-        parse(iter, elementParser, Fn.emptyAction());
-    }
-
-    /**
-     * Parses the.
-     *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param iter the iter
-     * @param elementParser the element parser
-     * @param onComplete the on complete
-     * @throws E the e
-     * @throws E2 the e2
-     */
-    public static <T, E extends Exception, E2 extends Exception> void parse(final Iterator<? extends T> iter,
-            final Throwables.Consumer<? super T, E> elementParser, final Throwables.Runnable<E2> onComplete) throws E, E2 {
-        parse(iter, 0, Long.MAX_VALUE, elementParser, onComplete);
-    }
-
-    /**
-     * Parses the.
-     *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param iter the iter
-     * @param offset the offset
-     * @param count the count
-     * @param elementParser the element parser
-     * @throws E the e
-     */
-    public static <T, E extends Exception> void parse(final Iterator<? extends T> iter, final long offset, final long count,
-            final Throwables.Consumer<? super T, E> elementParser) throws E {
-        parse(iter, offset, count, elementParser, Fn.emptyAction());
-    }
-
-    /**
-     * Parses the.
-     *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param iter the iter
-     * @param offset the offset
-     * @param count the count
-     * @param elementParser the element parser
-     * @param onComplete the on complete
-     * @throws E the e
-     * @throws E2 the e2
-     */
-    public static <T, E extends Exception, E2 extends Exception> void parse(final Iterator<? extends T> iter, final long offset, final long count,
-            final Throwables.Consumer<? super T, E> elementParser, final Throwables.Runnable<E2> onComplete) throws E, E2 {
-        parse(iter, offset, count, 0, 0, elementParser, onComplete);
-    }
-
-    /**
-     * Parses the.
-     *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param iter the iter
-     * @param offset the offset
-     * @param count the count
-     * @param processThreadNum the process thread num
-     * @param queueSize the queue size
-     * @param elementParser the element parser
-     * @throws E the e
-     */
-    public static <T, E extends Exception> void parse(final Iterator<? extends T> iter, long offset, long count, final int processThreadNum,
-            final int queueSize, final Throwables.Consumer<? super T, E> elementParser) throws E {
-        parse(iter, offset, count, processThreadNum, queueSize, elementParser, Fn.emptyAction());
-    }
-
-    /**
-     * Parse the elements in the specified iterators one by one.
-     *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param iter the iter
-     * @param offset the offset
-     * @param count the count
-     * @param processThreadNum new threads started to parse/process the lines/records
-     * @param queueSize size of queue to save the processing records/lines loaded from source data. Default size is 1024.
-     * @param elementParser the element parser
-     * @param onComplete the on complete
-     * @throws E the e
-     * @throws E2 the e2
-     */
-    public static <T, E extends Exception, E2 extends Exception> void parse(final Iterator<? extends T> iter, long offset, long count,
-            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementParser, final Throwables.Runnable<E2> onComplete)
-            throws E, E2 {
-        parse(Array.asList(iter), offset, count, 0, processThreadNum, queueSize, elementParser, onComplete);
-    }
-
-    /**
-     * Parses the.
-     *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param iterators the iterators
-     * @param elementParser the element parser
-     * @throws E the e
-     */
-    public static <T, E extends Exception> void parse(final Collection<? extends Iterator<? extends T>> iterators,
-            final Throwables.Consumer<? super T, E> elementParser) throws E {
-        parse(iterators, elementParser, Fn.emptyAction());
-    }
-
-    /**
-     * Parses the.
-     *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param iterators the iterators
-     * @param elementParser the element parser
-     * @param onComplete the on complete
-     * @throws E the e
-     * @throws E2 the e2
-     */
-    public static <T, E extends Exception, E2 extends Exception> void parse(final Collection<? extends Iterator<? extends T>> iterators,
-            final Throwables.Consumer<? super T, E> elementParser, final Throwables.Runnable<E2> onComplete) throws E, E2 {
-        parse(iterators, 0, Long.MAX_VALUE, elementParser, onComplete);
-    }
-
-    /**
-     * Parses the.
-     *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param iterators the iterators
-     * @param offset the offset
-     * @param count the count
-     * @param elementParser the element parser
-     * @throws E the e
-     */
-    public static <T, E extends Exception> void parse(final Collection<? extends Iterator<? extends T>> iterators, final long offset, final long count,
-            final Throwables.Consumer<? super T, E> elementParser) throws E {
-        parse(iterators, offset, count, elementParser, Fn.emptyAction());
-    }
-
-    /**
-     * Parses the.
-     *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param iterators the iterators
-     * @param offset the offset
-     * @param count the count
-     * @param elementParser the element parser
-     * @param onComplete the on complete
-     * @throws E the e
-     * @throws E2 the e2
-     */
-    public static <T, E extends Exception, E2 extends Exception> void parse(final Collection<? extends Iterator<? extends T>> iterators, final long offset,
-            final long count, final Throwables.Consumer<? super T, E> elementParser, final Throwables.Runnable<E2> onComplete) throws E, E2 {
-        parse(iterators, offset, count, 0, 0, 0, elementParser, onComplete);
-    }
-
-    /**
-     * Parses the.
-     *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param iterators the iterators
-     * @param readThreadNum the read thread num
-     * @param processThreadNum the process thread num
-     * @param queueSize the queue size
-     * @param elementParser the element parser
-     * @throws E the e
-     */
-    public static <T, E extends Exception> void parse(final Collection<? extends Iterator<? extends T>> iterators, final int readThreadNum,
-            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementParser) throws E {
-        parse(iterators, readThreadNum, processThreadNum, queueSize, elementParser, Fn.emptyAction());
-    }
-
-    /**
-     * Parses the.
-     *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param iterators the iterators
-     * @param readThreadNum the read thread num
-     * @param processThreadNum the process thread num
-     * @param queueSize the queue size
-     * @param elementParser the element parser
-     * @param onComplete the on complete
-     * @throws E the e
-     */
-    public static <T, E extends Exception, E2 extends Exception> void parse(final Collection<? extends Iterator<? extends T>> iterators,
-            final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementParser,
-            final Throwables.Runnable<E2> onComplete) throws E {
-        parse(iterators, 0, Long.MAX_VALUE, readThreadNum, processThreadNum, queueSize, elementParser);
-    }
-
-    /**
-     * Parses the.
-     *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param iterators the iterators
-     * @param offset the offset
-     * @param count the count
-     * @param readThreadNum the read thread num
-     * @param processThreadNum the process thread num
-     * @param queueSize the queue size
-     * @param elementParser the element parser
-     * @throws E the e
-     */
-    public static <T, E extends Exception> void parse(final Collection<? extends Iterator<? extends T>> iterators, final long offset, final long count,
-            final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementParser) throws E {
-        parse(iterators, offset, count, readThreadNum, processThreadNum, queueSize, elementParser, Fn.emptyAction());
-    }
-
-    /**
-     * Parse the elements in the specified iterators one by one.
-     *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param iterators the iterators
-     * @param offset the offset
-     * @param count the count
-     * @param readThreadNum new threads started to parse/process the lines/records
-     * @param processThreadNum new threads started to parse/process the lines/records
-     * @param queueSize size of queue to save the processing records/lines loaded from source data. Default size is 1024.
-     * @param elementParser the element parser
-     * @param onComplete the on complete
-     * @throws E the e
-     * @throws E2 the e2
-     */
-    public static <T, E extends Exception, E2 extends Exception> void parse(final Collection<? extends Iterator<? extends T>> iterators, final long offset,
-            final long count, final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementParser,
-            final Throwables.Runnable<E2> onComplete) throws E, E2 {
-        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can not be negative", offset, count);
-
-        if (N.isNullOrEmpty(iterators)) {
-            return;
-        }
-
-        if (logger.isInfoEnabled()) {
-            logger.info("### Start to parse");
-        }
-
-        try (final Stream<T> stream = ((readThreadNum > 0 || queueSize > 0)
-                ? Stream.parallelConcatt(iterators, (readThreadNum == 0 ? 1 : readThreadNum), (queueSize == 0 ? 1024 : queueSize))
-                : Stream.concatt(iterators))) {
-
-            final Iterator<? extends T> iteratorII = stream.skip(offset).limit(count).iterator();
-
-            if (processThreadNum == 0) {
-                while (iteratorII.hasNext()) {
-                    elementParser.accept(iteratorII.next());
-                }
-
-                if (onComplete != null) {
-                    onComplete.run();
-                }
-            } else {
-                final AtomicInteger activeThreadNum = new AtomicInteger();
-                final ExecutorService executorService = Executors.newFixedThreadPool(processThreadNum);
-                final Holder<Throwable> errorHolder = new Holder<>();
-
-                for (int i = 0; i < processThreadNum; i++) {
-                    activeThreadNum.incrementAndGet();
-
-                    executorService.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            T element = null;
-                            try {
-                                while (errorHolder.value() == null) {
-                                    synchronized (iteratorII) {
-                                        if (iteratorII.hasNext()) {
-                                            element = iteratorII.next();
-                                        } else {
-                                            break;
-                                        }
-                                    }
-
-                                    elementParser.accept(element);
-                                }
-                            } catch (Exception e) {
-                                synchronized (errorHolder) {
-                                    if (errorHolder.value() == null) {
-                                        errorHolder.setValue(e);
-                                    } else {
-                                        errorHolder.value().addSuppressed(e);
-                                    }
-                                }
-                            } finally {
-                                activeThreadNum.decrementAndGet();
-                            }
-                        }
-                    });
-                }
-
-                while (activeThreadNum.get() > 0) {
-                    N.sleep(1);
-                }
-
-                if (errorHolder.value() == null && onComplete != null) {
-                    try {
-                        onComplete.run();
-                    } catch (Exception e) {
-                        errorHolder.setValue(e);
-                    }
-                }
-
-                if (errorHolder.value() != null) {
-                    throw N.toRuntimeException(errorHolder.value());
-                }
-            }
-        } finally {
-            if (logger.isInfoEnabled()) {
-                logger.info("### End to parse");
-            }
         }
     }
 

@@ -1,3 +1,8 @@
+### 1.22.2
+
+* Improvements and bug fix.
+
+
 ### 1.22.1
 
 * Improvements and bug fix.

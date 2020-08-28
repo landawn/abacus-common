@@ -5810,7 +5810,7 @@ public final class IOUtil {
                 iterators.add(new LineIterator(reader));
             }
 
-            Iterables.parse(iterators, lineOffset, count, 0, processThreadNum, queueSize, lineParser, onComplete);
+            Iterables.forEach(iterators, lineOffset, count, 0, processThreadNum, queueSize, lineParser, onComplete);
         } finally {
             for (Reader reader : readers) {
                 closeQuietly(reader);
@@ -5991,7 +5991,7 @@ public final class IOUtil {
                 iterators.add(new LineIterator(reader));
             }
 
-            Iterables.parse(iterators, lineOffset, count, readThreadNum, processThreadNum, queueSize, lineParser, onComplete);
+            Iterables.forEach(iterators, lineOffset, count, readThreadNum, processThreadNum, queueSize, lineParser, onComplete);
         } finally {
             for (Reader reader : readers) {
                 closeQuietly(reader);
@@ -6202,7 +6202,7 @@ public final class IOUtil {
     public static <E extends Exception, E2 extends Exception> void parse(final Reader reader, final long lineOffset, final long count,
             final int processThreadNum, final int queueSize, final Throwables.Consumer<String, E> lineParser, final Throwables.Runnable<E2> onComplete)
             throws UncheckedIOException, E, E2 {
-        Iterables.parse(new LineIterator(reader), lineOffset, count, processThreadNum, queueSize, lineParser, onComplete);
+        Iterables.forEach(new LineIterator(reader), lineOffset, count, processThreadNum, queueSize, lineParser, onComplete);
     }
 
     /**

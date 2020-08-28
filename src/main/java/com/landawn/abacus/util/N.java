@@ -13314,16 +13314,22 @@ public final class N extends CommonUtil {
             return N.EMPTY_BOOLEAN_ARRAY;
         }
 
-        final BooleanList result = new BooleanList(min(9, max, (toIndex - fromIndex)));
+        boolean[] result = new boolean[(toIndex - fromIndex) / 2];
+        int len = result.length;
+        int count = 0;
 
         for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
             if (filter.test(a[i])) {
-                result.add(a[i]);
-                cnt++;
+                if (count == len) {
+                    result = N.copyOf(result, toIndex - fromIndex);
+                    len = result.length;
+                }
+
+                result[count++] = a[i];
             }
         }
 
-        return result.trimToSize().array();
+        return result.length == count ? result : N.copyOfRange(result, 0, count);
     }
 
     /**
@@ -13400,16 +13406,22 @@ public final class N extends CommonUtil {
             return N.EMPTY_CHAR_ARRAY;
         }
 
-        final CharList result = new CharList(min(9, max, (toIndex - fromIndex)));
+        char[] result = new char[(toIndex - fromIndex) / 2];
+        int len = result.length;
+        int count = 0;
 
         for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
             if (filter.test(a[i])) {
-                result.add(a[i]);
-                cnt++;
+                if (count == len) {
+                    result = N.copyOf(result, toIndex - fromIndex);
+                    len = result.length;
+                }
+
+                result[count++] = a[i];
             }
         }
 
-        return result.trimToSize().array();
+        return result.length == count ? result : N.copyOfRange(result, 0, count);
     }
 
     /**
@@ -13486,16 +13498,22 @@ public final class N extends CommonUtil {
             return N.EMPTY_BYTE_ARRAY;
         }
 
-        final ByteList result = new ByteList(min(9, max, (toIndex - fromIndex)));
+        byte[] result = new byte[(toIndex - fromIndex) / 2];
+        int len = result.length;
+        int count = 0;
 
         for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
             if (filter.test(a[i])) {
-                result.add(a[i]);
-                cnt++;
+                if (count == len) {
+                    result = N.copyOf(result, toIndex - fromIndex);
+                    len = result.length;
+                }
+
+                result[count++] = a[i];
             }
         }
 
-        return result.trimToSize().array();
+        return result.length == count ? result : N.copyOfRange(result, 0, count);
     }
 
     /**
@@ -13572,16 +13590,22 @@ public final class N extends CommonUtil {
             return N.EMPTY_SHORT_ARRAY;
         }
 
-        final ShortList result = new ShortList(min(9, max, (toIndex - fromIndex)));
+        short[] result = new short[(toIndex - fromIndex) / 2];
+        int len = result.length;
+        int count = 0;
 
         for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
             if (filter.test(a[i])) {
-                result.add(a[i]);
-                cnt++;
+                if (count == len) {
+                    result = N.copyOf(result, toIndex - fromIndex);
+                    len = result.length;
+                }
+
+                result[count++] = a[i];
             }
         }
 
-        return result.trimToSize().array();
+        return result.length == count ? result : N.copyOfRange(result, 0, count);
     }
 
     /**
@@ -13657,16 +13681,22 @@ public final class N extends CommonUtil {
             return N.EMPTY_INT_ARRAY;
         }
 
-        final IntList result = new IntList(min(9, max, (toIndex - fromIndex)));
+        int[] result = new int[(toIndex - fromIndex) / 2];
+        int len = result.length;
+        int count = 0;
 
         for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
             if (filter.test(a[i])) {
-                result.add(a[i]);
-                cnt++;
+                if (count == len) {
+                    result = N.copyOf(result, toIndex - fromIndex);
+                    len = result.length;
+                }
+
+                result[count++] = a[i];
             }
         }
 
-        return result.trimToSize().array();
+        return result.length == count ? result : N.copyOfRange(result, 0, count);
     }
 
     /**
@@ -13743,16 +13773,22 @@ public final class N extends CommonUtil {
             return N.EMPTY_LONG_ARRAY;
         }
 
-        final LongList result = new LongList(min(9, max, (toIndex - fromIndex)));
+        long[] result = new long[(toIndex - fromIndex) / 2];
+        int len = result.length;
+        int count = 0;
 
         for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
             if (filter.test(a[i])) {
-                result.add(a[i]);
-                cnt++;
+                if (count == len) {
+                    result = N.copyOf(result, toIndex - fromIndex);
+                    len = result.length;
+                }
+
+                result[count++] = a[i];
             }
         }
 
-        return result.trimToSize().array();
+        return result.length == count ? result : N.copyOfRange(result, 0, count);
     }
 
     /**
@@ -13829,16 +13865,22 @@ public final class N extends CommonUtil {
             return N.EMPTY_FLOAT_ARRAY;
         }
 
-        final FloatList result = new FloatList(min(9, max, (toIndex - fromIndex)));
+        float[] result = new float[(toIndex - fromIndex) / 2];
+        int len = result.length;
+        int count = 0;
 
         for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
             if (filter.test(a[i])) {
-                result.add(a[i]);
-                cnt++;
+                if (count == len) {
+                    result = N.copyOf(result, toIndex - fromIndex);
+                    len = result.length;
+                }
+
+                result[count++] = a[i];
             }
         }
 
-        return result.trimToSize().array();
+        return result.length == count ? result : N.copyOfRange(result, 0, count);
     }
 
     /**
@@ -13915,16 +13957,22 @@ public final class N extends CommonUtil {
             return N.EMPTY_DOUBLE_ARRAY;
         }
 
-        final DoubleList result = new DoubleList(min(9, max, (toIndex - fromIndex)));
+        double[] result = new double[(toIndex - fromIndex) / 2];
+        int len = result.length;
+        int count = 0;
 
         for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
             if (filter.test(a[i])) {
-                result.add(a[i]);
-                cnt++;
+                if (count == len) {
+                    result = N.copyOf(result, toIndex - fromIndex);
+                    len = result.length;
+                }
+
+                result[count++] = a[i];
             }
         }
 
-        return result.trimToSize().array();
+        return result.length == count ? result : N.copyOfRange(result, 0, count);
     }
 
     /**
@@ -14855,11 +14903,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> IntList mapToInt(final T[] a, final Throwables.ToIntFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> int[] mapToInt(final T[] a, final Throwables.ToIntFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
-            return new IntList();
+            return N.EMPTY_INT_ARRAY;
         }
 
         return mapToInt(a, 0, a.length, func);
@@ -14878,19 +14926,19 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> IntList mapToInt(final T[] a, final int fromIndex, final int toIndex,
+    public static <T, E extends Exception> int[] mapToInt(final T[] a, final int fromIndex, final int toIndex,
             final Throwables.ToIntFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
-            return new IntList();
+            return N.EMPTY_INT_ARRAY;
         }
 
-        final IntList result = new IntList(toIndex - fromIndex);
+        final int[] result = new int[toIndex - fromIndex];
 
         for (int i = fromIndex; i < toIndex; i++) {
-            result.add(func.applyAsInt(a[i]));
+            result[i - fromIndex] = func.applyAsInt(a[i]);
         }
 
         return result;
@@ -14906,11 +14954,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> IntList mapToInt(final Collection<? extends T> c, final Throwables.ToIntFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> int[] mapToInt(final Collection<? extends T> c, final Throwables.ToIntFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
-            return new IntList();
+            return N.EMPTY_INT_ARRAY;
         }
 
         return mapToInt(c, 0, c.size(), func);
@@ -14929,22 +14977,22 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> IntList mapToInt(final Collection<? extends T> c, final int fromIndex, final int toIndex,
+    public static <T, E extends Exception> int[] mapToInt(final Collection<? extends T> c, final int fromIndex, final int toIndex,
             final Throwables.ToIntFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) {
-            return new IntList();
+            return N.EMPTY_INT_ARRAY;
         }
 
-        final IntList result = new IntList(toIndex - fromIndex);
+        final int[] result = new int[toIndex - fromIndex];
 
         if (c instanceof List && c instanceof RandomAccess) {
             final List<T> list = (List<T>) c;
 
             for (int i = fromIndex; i < toIndex; i++) {
-                result.add(func.applyAsInt(list.get(i)));
+                result[i - fromIndex] = func.applyAsInt(list.get(i));
             }
         } else {
             int idx = 0;
@@ -14954,7 +15002,7 @@ public final class N extends CommonUtil {
                     continue;
                 }
 
-                result.add(func.applyAsInt(e));
+                result[idx - fromIndex] = func.applyAsInt(e);
 
                 if (idx >= toIndex) {
                     break;
@@ -14975,11 +15023,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> LongList mapToLong(final T[] a, final Throwables.ToLongFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> long[] mapToLong(final T[] a, final Throwables.ToLongFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
-            return new LongList();
+            return N.EMPTY_LONG_ARRAY;
         }
 
         return mapToLong(a, 0, a.length, func);
@@ -14998,19 +15046,19 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> LongList mapToLong(final T[] a, final int fromIndex, final int toIndex,
+    public static <T, E extends Exception> long[] mapToLong(final T[] a, final int fromIndex, final int toIndex,
             final Throwables.ToLongFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
-            return new LongList();
+            return N.EMPTY_LONG_ARRAY;
         }
 
-        final LongList result = new LongList(toIndex - fromIndex);
+        final long[] result = new long[toIndex - fromIndex];
 
         for (int i = fromIndex; i < toIndex; i++) {
-            result.add(func.applyAsLong(a[i]));
+            result[i - fromIndex] = func.applyAsLong(a[i]);
         }
 
         return result;
@@ -15026,11 +15074,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> LongList mapToLong(final Collection<? extends T> c, final Throwables.ToLongFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> long[] mapToLong(final Collection<? extends T> c, final Throwables.ToLongFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
-            return new LongList();
+            return N.EMPTY_LONG_ARRAY;
         }
 
         return mapToLong(c, 0, c.size(), func);
@@ -15049,22 +15097,22 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> LongList mapToLong(final Collection<? extends T> c, final int fromIndex, final int toIndex,
+    public static <T, E extends Exception> long[] mapToLong(final Collection<? extends T> c, final int fromIndex, final int toIndex,
             final Throwables.ToLongFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) {
-            return new LongList();
+            return N.EMPTY_LONG_ARRAY;
         }
 
-        final LongList result = new LongList(toIndex - fromIndex);
+        final long[] result = new long[toIndex - fromIndex];
 
         if (c instanceof List && c instanceof RandomAccess) {
             final List<T> list = (List<T>) c;
 
             for (int i = fromIndex; i < toIndex; i++) {
-                result.add(func.applyAsLong(list.get(i)));
+                result[i - fromIndex] = func.applyAsLong(list.get(i));
             }
         } else {
             int idx = 0;
@@ -15074,7 +15122,7 @@ public final class N extends CommonUtil {
                     continue;
                 }
 
-                result.add(func.applyAsLong(e));
+                result[idx - fromIndex] = func.applyAsLong(e);
 
                 if (idx >= toIndex) {
                     break;
@@ -15095,11 +15143,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> FloatList mapToFloat(final T[] a, final Throwables.ToFloatFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> float[] mapToFloat(final T[] a, final Throwables.ToFloatFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
-            return new FloatList();
+            return N.EMPTY_FLOAT_ARRAY;
         }
 
         return mapToFloat(a, 0, a.length, func);
@@ -15118,19 +15166,19 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> FloatList mapToFloat(final T[] a, final int fromIndex, final int toIndex,
+    public static <T, E extends Exception> float[] mapToFloat(final T[] a, final int fromIndex, final int toIndex,
             final Throwables.ToFloatFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
-            return new FloatList();
+            return N.EMPTY_FLOAT_ARRAY;
         }
 
-        final FloatList result = new FloatList(toIndex - fromIndex);
+        final float[] result = new float[toIndex - fromIndex];
 
         for (int i = fromIndex; i < toIndex; i++) {
-            result.add(func.applyAsFloat(a[i]));
+            result[i - fromIndex] = func.applyAsFloat(a[i]);
         }
 
         return result;
@@ -15146,11 +15194,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> FloatList mapToFloat(final Collection<? extends T> c, final Throwables.ToFloatFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> float[] mapToFloat(final Collection<? extends T> c, final Throwables.ToFloatFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
-            return new FloatList();
+            return N.EMPTY_FLOAT_ARRAY;
         }
 
         return mapToFloat(c, 0, c.size(), func);
@@ -15169,22 +15217,22 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> FloatList mapToFloat(final Collection<? extends T> c, final int fromIndex, final int toIndex,
+    public static <T, E extends Exception> float[] mapToFloat(final Collection<? extends T> c, final int fromIndex, final int toIndex,
             final Throwables.ToFloatFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) {
-            return new FloatList();
+            return N.EMPTY_FLOAT_ARRAY;
         }
 
-        final FloatList result = new FloatList(toIndex - fromIndex);
+        final float[] result = new float[toIndex - fromIndex];
 
         if (c instanceof List && c instanceof RandomAccess) {
             final List<T> list = (List<T>) c;
 
             for (int i = fromIndex; i < toIndex; i++) {
-                result.add(func.applyAsFloat(list.get(i)));
+                result[i - fromIndex] = func.applyAsFloat(list.get(i));
             }
         } else {
             int idx = 0;
@@ -15194,7 +15242,7 @@ public final class N extends CommonUtil {
                     continue;
                 }
 
-                result.add(func.applyAsFloat(e));
+                result[idx - fromIndex] = func.applyAsFloat(e);
 
                 if (idx >= toIndex) {
                     break;
@@ -15215,11 +15263,11 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> DoubleList mapToDouble(final T[] a, final Throwables.ToDoubleFunction<? super T, E> func) throws E {
+    public static <T, E extends Exception> double[] mapToDouble(final T[] a, final Throwables.ToDoubleFunction<? super T, E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
-            return new DoubleList();
+            return N.EMPTY_DOUBLE_ARRAY;
         }
 
         return mapToDouble(a, 0, a.length, func);
@@ -15238,19 +15286,19 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> DoubleList mapToDouble(final T[] a, final int fromIndex, final int toIndex,
+    public static <T, E extends Exception> double[] mapToDouble(final T[] a, final int fromIndex, final int toIndex,
             final Throwables.ToDoubleFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
-            return new DoubleList();
+            return N.EMPTY_DOUBLE_ARRAY;
         }
 
-        final DoubleList result = new DoubleList(toIndex - fromIndex);
+        final double[] result = new double[toIndex - fromIndex];
 
         for (int i = fromIndex; i < toIndex; i++) {
-            result.add(func.applyAsDouble(a[i]));
+            result[i - fromIndex] = func.applyAsDouble(a[i]);
         }
 
         return result;
@@ -15266,12 +15314,12 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> DoubleList mapToDouble(final Collection<? extends T> c, final Throwables.ToDoubleFunction<? super T, E> func)
+    public static <T, E extends Exception> double[] mapToDouble(final Collection<? extends T> c, final Throwables.ToDoubleFunction<? super T, E> func)
             throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
-            return new DoubleList();
+            return N.EMPTY_DOUBLE_ARRAY;
         }
 
         return mapToDouble(c, 0, c.size(), func);
@@ -15290,22 +15338,22 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, E extends Exception> DoubleList mapToDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex,
+    public static <T, E extends Exception> double[] mapToDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex,
             final Throwables.ToDoubleFunction<? super T, E> func) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) {
-            return new DoubleList();
+            return N.EMPTY_DOUBLE_ARRAY;
         }
 
-        final DoubleList result = new DoubleList(toIndex - fromIndex);
+        final double[] result = new double[toIndex - fromIndex];
 
         if (c instanceof List && c instanceof RandomAccess) {
             final List<T> list = (List<T>) c;
 
             for (int i = fromIndex; i < toIndex; i++) {
-                result.add(func.applyAsDouble(list.get(i)));
+                result[i - fromIndex] = func.applyAsDouble(list.get(i));
             }
         } else {
             int idx = 0;
@@ -15315,7 +15363,7 @@ public final class N extends CommonUtil {
                     continue;
                 }
 
-                result.add(func.applyAsDouble(e));
+                result[idx - fromIndex] = func.applyAsDouble(e);
 
                 if (idx >= toIndex) {
                     break;
