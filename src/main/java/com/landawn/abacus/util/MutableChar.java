@@ -24,7 +24,10 @@ package com.landawn.abacus.util;
  * 
  * A mutable <code>char</code> wrapper.
  * <p>
- * Note that as MutableChar does not extend Char, it is not treated by String.format as a Char parameter. 
+ * Note that as MutableChar does not extend Char, it is not treated by String.format as a Char parameter.
+ * 
+ * <p>
+ * {@code MutableChar} is NOT thread-safe.
  *
  * @version $Id: MutableChar.java 1669791 2015-03-28 15:22:59Z britter $
  * @see Char

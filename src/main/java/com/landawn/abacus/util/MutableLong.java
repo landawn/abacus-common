@@ -25,6 +25,9 @@ package com.landawn.abacus.util;
  * A mutable <code>long</code> wrapper.
  * <p>
  * Note that as MutableLong does not extend Long, it is not treated by String.format as a Long parameter. 
+ * 
+ * <p>
+ * {@code MutableLong} is NOT thread-safe.
  *
  * @version $Id: MutableLong.java 1669791 2015-03-28 15:22:59Z britter $
  * @see Long

@@ -25,6 +25,9 @@ package com.landawn.abacus.util;
  * A mutable <code>int</code> wrapper.
  * <p>
  * Note that as MutableInt does not extend Integer, it is not treated by String.format as an Integer parameter. 
+ * 
+ * <p>
+ * {@code MutableInt} is NOT thread-safe.
  *
  * @version $Id: MutableInt.java 1669791 2015-03-28 15:22:59Z britter $
  * @see Integer

@@ -25,6 +25,9 @@ package com.landawn.abacus.util;
  * A mutable <code>float</code> wrapper.
  * <p>
  * Note that as MutableFloat does not extend Float, it is not treated by String.format as a Float parameter. 
+ * 
+ * <p>
+ * {@code MutableFloat} is NOT thread-safe.
  *
  * @version $Id: MutableFloat.java 1669791 2015-03-28 15:22:59Z britter $
  * @see Float

@@ -325,6 +325,15 @@ public class ConditionFactory {
         }
     }
 
+    public static And eqAnd(final String propName1, final Object propValue1, final String propName2, final Object propValue2) {
+        return eq(propName1, propValue1).and(eq(propName2, propValue2));
+    }
+
+    public static And eqAnd(final String propName1, final Object propValue1, final String propName2, final Object propValue2, final String propName3,
+            final Object propValue3) {
+        return and(eq(propName1, propValue1), eq(propName2, propValue2), eq(propName3, propValue3));
+    }
+
     /**
      * Eq and or.
      *
@@ -374,15 +383,6 @@ public class ConditionFactory {
         }
 
         return or(conds);
-    }
-
-    public static And eqAnd(final String propName1, final Object propValue1, final String propName2, final Object propValue2) {
-        return eq(propName1, propValue1).and(eq(propName2, propValue2));
-    }
-
-    public static And eqAnd(final String propName1, final Object propValue1, final String propName2, final Object propValue2, final String propName3,
-            final Object propValue3) {
-        return and(eq(propName1, propValue1), eq(propName2, propValue2), eq(propName3, propValue3));
     }
 
     public static And gtAndLt(final String propName, final Object minValue, final Object maxValue) {
@@ -1461,14 +1461,12 @@ public class ConditionFactory {
         return new In(propName, values);
     }
 
-    /**
-     *
-     * @param propName
-     * @param subQuery
-     * @return
-     */
     public static InSubQuery in(final String propName, final SubQuery subQuery) {
         return new InSubQuery(propName, subQuery);
+    }
+
+    public static InSubQuery in(final Collection<String> propNames, final SubQuery subQuery) {
+        return new InSubQuery(propNames, subQuery);
     }
 
     //    public static Condition in(final String propName, final SubQuery condition) {
@@ -1537,6 +1535,10 @@ public class ConditionFactory {
      */
     public static NotInSubQuery notIn(final String propName, final SubQuery subQuery) {
         return new NotInSubQuery(propName, subQuery);
+    }
+
+    public static NotInSubQuery notIn(final Collection<String> propNames, final SubQuery subQuery) {
+        return new NotInSubQuery(propNames, subQuery);
     }
 
     /**

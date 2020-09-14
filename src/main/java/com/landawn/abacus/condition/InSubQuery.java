@@ -14,10 +14,13 @@
 
 package com.landawn.abacus.condition;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
+import com.landawn.abacus.util.StringUtil;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.WD;
 
 /**
@@ -31,11 +34,15 @@ public class InSubQuery extends AbstractCondition {
     // For Kryo
     final String propName;
 
+    // For Kryo
+    final Collection<String> propNames;
+
     private SubQuery subQuery;
 
     // For Kryo
     InSubQuery() {
         propName = null;
+        propNames = null;
     }
 
     public InSubQuery(String propName, SubQuery subQuery) {
@@ -45,59 +52,47 @@ public class InSubQuery extends AbstractCondition {
 
         this.propName = propName;
         this.subQuery = subQuery;
+        this.propNames = null;
     }
 
-    /**
-     * Gets the prop name.
-     *
-     * @return
-     */
+    public InSubQuery(Collection<String> propNames, SubQuery subQuery) {
+        super(Operator.IN);
+
+        N.checkArgNotNullOrEmpty(propNames, "propNames");
+        N.checkArgNotNull(subQuery, "'subQuery' can't be null or empty");
+
+        this.propNames = propNames;
+        this.subQuery = subQuery;
+        this.propName = null;
+    }
+
     public String getPropName() {
         return propName;
     }
 
-    /**
-     * Gets the subQuery.
-     *
-     * @return
-     */
+    public Collection<String> getPropNames() {
+        return propNames;
+    }
+
     @SuppressWarnings("unchecked")
     public SubQuery getSubQuery() {
         return subQuery;
     }
 
-    /**
-     * Sets the subQuery.
-     *
-     * @param subQuery the new subQuery
-     */
     public void setSubQuery(SubQuery subQuery) {
         this.subQuery = subQuery;
     }
 
-    /**
-     * Gets the parameters.
-     *
-     * @return
-     */
     @Override
     public List<Object> getParameters() {
         return subQuery.getParameters();
     }
 
-    /**
-     * Clear parameters.
-     */
     @Override
     public void clearParameters() {
         subQuery.clearParameters();
     }
 
-    /**
-     *
-     * @param <T>
-     * @return
-     */
     @SuppressWarnings("unchecked")
     @Override
     public <T extends Condition> T copy() {
@@ -108,25 +103,10 @@ public class InSubQuery extends AbstractCondition {
         return (T) copy;
     }
 
-    /**
-     *
-     * @param namingPolicy
-     * @return
-     */
-    @Override
-    public String toString(NamingPolicy namingPolicy) {
-        if (namingPolicy == NamingPolicy.LOWER_CAMEL_CASE) {
-            return propName + WD._SPACE + getOperator().toString() + WD.SPACE_PARENTHESES_L + subQuery.toString(namingPolicy) + WD.PARENTHESES_R;
-        } else {
-            return namingPolicy.convert(propName) + WD._SPACE + getOperator().toString() + WD.SPACE_PARENTHESES_L + subQuery.toString(namingPolicy)
-                    + WD.PARENTHESES_R;
-        }
-    }
-
     @Override
     public int hashCode() {
         int h = 17;
-        h = (h * 31) + propName.hashCode();
+        h = (h * 31) + (N.notNullOrEmpty(propName) ? N.hashCode(propName) : N.hashCode(propNames));
         h = (h * 31) + operator.hashCode();
         h = (h * 31) + ((subQuery == null) ? 0 : subQuery.hashCode());
 
@@ -147,9 +127,37 @@ public class InSubQuery extends AbstractCondition {
         if (obj instanceof InSubQuery) {
             InSubQuery other = (InSubQuery) obj;
 
-            return N.equals(propName, other.propName) && N.equals(operator, other.operator) && N.equals(subQuery, other.subQuery);
+            return N.equals(propName, other.propName) && N.equals(propNames, other.propNames) && N.equals(operator, other.operator)
+                    && N.equals(subQuery, other.subQuery);
         }
 
         return false;
+    }
+
+    @Override
+    public String toString(final NamingPolicy namingPolicy) {
+        if (N.notNullOrEmpty(propName)) {
+            if (namingPolicy == NamingPolicy.LOWER_CAMEL_CASE) {
+                return propName + WD._SPACE + getOperator().toString() + WD.SPACE_PARENTHESES_L + subQuery.toString(namingPolicy) + WD.PARENTHESES_R;
+            } else {
+                return namingPolicy.convert(propName) + WD._SPACE + getOperator().toString() + WD.SPACE_PARENTHESES_L + subQuery.toString(namingPolicy)
+                        + WD.PARENTHESES_R;
+            }
+        } else {
+            if (namingPolicy == NamingPolicy.LOWER_CAMEL_CASE) {
+                return "(" + StringUtil.join(propNames, ", ") + ") " + getOperator().toString() + WD.SPACE_PARENTHESES_L + subQuery.toString(namingPolicy)
+                        + WD.PARENTHESES_R;
+            } else {
+                final Throwables.Function<String, String, RuntimeException> func = new Throwables.Function<String, String, RuntimeException>() {
+                    @Override
+                    public String apply(String t) throws RuntimeException {
+                        return namingPolicy.convert(t);
+                    }
+                };
+
+                return "(" + StringUtil.join(N.map(propNames, func), ", ") + ") " + getOperator().toString() + WD.SPACE_PARENTHESES_L
+                        + subQuery.toString(namingPolicy) + WD.PARENTHESES_R;
+            }
+        }
     }
 }

@@ -27,7 +27,10 @@ import java.io.Serializable;
  * 
  * A mutable <code>boolean</code> wrapper.
  * <p>
- * Note that as MutableBoolean does not extend Boolean, it is not treated by String.format as a Boolean parameter. 
+ * Note that as MutableBoolean does not extend Boolean, it is not treated by String.format as a Boolean parameter.
+ * 
+ * <p>
+ * {@code MutableBoolean} is NOT thread-safe.
  *
  * @version $Id: MutableBoolean.java 1669791 2015-03-28 15:22:59Z britter $
  * @see Boolean

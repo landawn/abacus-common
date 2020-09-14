@@ -25,6 +25,9 @@ package com.landawn.abacus.util;
  * A mutable <code>short</code> wrapper.
  * <p>
  * Note that as MutableShort does not extend Short, it is not treated by String.format as a Short parameter. 
+ * 
+ * <p>
+ * {@code MutableShort} is NOT thread-safe.
  *
  * @version $Id: MutableShort.java 1669791 2015-03-28 15:22:59Z britter $
  * @see Short

@@ -25,6 +25,9 @@ package com.landawn.abacus.util;
  * A mutable <code>double</code> wrapper.
  * <p>
  * Note that as MutableDouble does not extend Double, it is not treated by String.format as a Double parameter. 
+ * 
+ * <p>
+ * {@code MutableDouble} is NOT thread-safe.
  *
  * @version $Id: MutableDouble.java 1669791 2015-03-28 15:22:59Z britter $
  * @see Double

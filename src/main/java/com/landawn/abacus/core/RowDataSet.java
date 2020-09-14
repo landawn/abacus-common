@@ -10346,8 +10346,8 @@ public class RowDataSet implements DataSet, Cloneable {
      * @return
      */
     @Override
-    public List<DataSet> splitt(final int chunkSize) {
-        return splitt(_columnNameList, chunkSize);
+    public List<DataSet> splitToList(final int chunkSize) {
+        return splitToList(_columnNameList, chunkSize);
     }
 
     /**
@@ -10357,7 +10357,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @return
      */
     @Override
-    public List<DataSet> splitt(final Collection<String> columnNames, final int chunkSize) {
+    public List<DataSet> splitToList(final Collection<String> columnNames, final int chunkSize) {
         N.checkArgPositive(chunkSize, "chunkSize");
 
         final List<DataSet> res = new ArrayList<>();
@@ -10367,6 +10367,31 @@ public class RowDataSet implements DataSet, Cloneable {
         }
 
         return res;
+    }
+
+    /**
+     * 
+     * @param chunkSize
+     * @return
+     * @deprecated replaced by {@link #splitToList(int)}
+     */
+    @Deprecated
+    @Override
+    public List<DataSet> splitt(int chunkSize) {
+        return splitToList(chunkSize);
+    }
+
+    /**
+     * 
+     * @param columnNames
+     * @param chunkSize
+     * @return
+     * @deprecated replaced by {@link #splitToList(Collection, int)}
+     */
+    @Deprecated
+    @Override
+    public List<DataSet> splitt(Collection<String> columnNames, int chunkSize) {
+        return splitToList(columnNames, chunkSize);
     }
 
     //    @Override

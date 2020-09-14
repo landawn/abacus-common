@@ -3103,14 +3103,86 @@ public final class N extends CommonUtil {
         return result;
     }
 
-    /**
-     *
-     * @param <T>
-     * @param <E>
-     * @param a
-     * @param operator
-     * @throws E the e
-     */
+    public static <T, E extends Exception> void replaceAll(final boolean[] a, final Throwables.BooleanUnaryOperator<E> operator) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return;
+        }
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            a[i] = operator.applyAsBoolean(a[i]);
+        }
+    }
+
+    public static <T, E extends Exception> void replaceAll(final char[] a, final Throwables.CharUnaryOperator<E> operator) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return;
+        }
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            a[i] = operator.applyAsChar(a[i]);
+        }
+    }
+
+    public static <T, E extends Exception> void replaceAll(final byte[] a, final Throwables.ByteUnaryOperator<E> operator) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return;
+        }
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            a[i] = operator.applyAsByte(a[i]);
+        }
+    }
+
+    public static <T, E extends Exception> void replaceAll(final short[] a, final Throwables.ShortUnaryOperator<E> operator) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return;
+        }
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            a[i] = operator.applyAsShort(a[i]);
+        }
+    }
+
+    public static <T, E extends Exception> void replaceAll(final int[] a, final Throwables.IntUnaryOperator<E> operator) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return;
+        }
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            a[i] = operator.applyAsInt(a[i]);
+        }
+    }
+
+    public static <T, E extends Exception> void replaceAll(final long[] a, final Throwables.LongUnaryOperator<E> operator) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return;
+        }
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            a[i] = operator.applyAsLong(a[i]);
+        }
+    }
+
+    public static <T, E extends Exception> void replaceAll(final float[] a, final Throwables.FloatUnaryOperator<E> operator) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return;
+        }
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            a[i] = operator.applyAsFloat(a[i]);
+        }
+    }
+
+    public static <T, E extends Exception> void replaceAll(final double[] a, final Throwables.DoubleUnaryOperator<E> operator) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return;
+        }
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            a[i] = operator.applyAsDouble(a[i]);
+        }
+    }
+
     public static <T, E extends Exception> void replaceAll(final T[] a, final Throwables.UnaryOperator<T, E> operator) throws E {
         if (N.isNullOrEmpty(a)) {
             return;
@@ -3121,15 +3193,6 @@ public final class N extends CommonUtil {
         }
     }
 
-    /**
-     * 
-     * @param <T>
-     * @param <E>
-     * @param list
-     * @param operator
-     * @return
-     * @throws E
-     */
     public static <T, E extends Exception> int replaceAll(final List<T> list, final Throwables.UnaryOperator<T, E> operator) throws E {
         if (isNullOrEmpty(list)) {
             return 0;
@@ -19056,20 +19119,6 @@ public final class N extends CommonUtil {
      *
      * @param <T> the generic type
      * @param <E> the element type
-     * @param c the c
-     * @param filter the filter
-     * @return true, if successful
-     * @throws E the e
-     */
-    @SuppressWarnings("deprecation")
-    public static <T, E extends Exception> boolean allMatch(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
-        return Iterables.allMatch(c, filter);
-    }
-
-    /**
-     *
-     * @param <T> the generic type
-     * @param <E> the element type
      * @param a the a
      * @param filter the filter
      * @return true, if successful
@@ -19090,8 +19139,8 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     @SuppressWarnings("deprecation")
-    public static <T, E extends Exception> boolean anyMatch(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
-        return Iterables.anyMatch(c, filter);
+    public static <T, E extends Exception> boolean allMatch(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
+        return Iterables.allMatch(c, filter);
     }
 
     /**
@@ -19118,8 +19167,8 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     @SuppressWarnings("deprecation")
-    public static <T, E extends Exception> boolean noneMatch(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
-        return Iterables.noneMatch(c, filter);
+    public static <T, E extends Exception> boolean anyMatch(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
+        return Iterables.anyMatch(c, filter);
     }
 
     /**
@@ -19141,16 +19190,13 @@ public final class N extends CommonUtil {
      * @param <T> the generic type
      * @param <E> the element type
      * @param c the c
-     * @param atLeast the at least
-     * @param atMost the at most
      * @param filter the filter
      * @return true, if successful
      * @throws E the e
      */
     @SuppressWarnings("deprecation")
-    public static <T, E extends Exception> boolean nMatch(final Collection<? extends T> c, final int atLeast, final int atMost,
-            final Throwables.Predicate<? super T, E> filter) throws E {
-        return Iterables.nMatch(c, atLeast, atMost, filter);
+    public static <T, E extends Exception> boolean noneMatch(final Collection<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
+        return Iterables.noneMatch(c, filter);
     }
 
     /**
@@ -19168,6 +19214,23 @@ public final class N extends CommonUtil {
     public static <T, E extends Exception> boolean nMatch(final T[] a, final int atLeast, final int atMost, final Throwables.Predicate<? super T, E> filter)
             throws E {
         return Iterables.nMatch(a, atLeast, atMost, filter);
+    }
+
+    /**
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param c the c
+     * @param atLeast the at least
+     * @param atMost the at most
+     * @param filter the filter
+     * @return true, if successful
+     * @throws E the e
+     */
+    @SuppressWarnings("deprecation")
+    public static <T, E extends Exception> boolean nMatch(final Collection<? extends T> c, final int atLeast, final int atMost,
+            final Throwables.Predicate<? super T, E> filter) throws E {
+        return Iterables.nMatch(c, atLeast, atMost, filter);
     }
 
     /**

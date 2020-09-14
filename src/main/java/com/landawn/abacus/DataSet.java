@@ -3491,7 +3491,7 @@ public interface DataSet {
      * @param chunkSize
      * @return
      */
-    List<DataSet> splitt(int chunkSize);
+    List<DataSet> splitToList(int chunkSize);
 
     /**
      * Returns consecutive sub lists of this DataSet, each of the same chunkSize (the list may be smaller), or an empty List if this DataSet is empty.
@@ -3500,6 +3500,27 @@ public interface DataSet {
      * @param chunkSize
      * @return
      */
+    List<DataSet> splitToList(Collection<String> columnNames, int chunkSize);
+
+    /**
+     * Returns consecutive sub lists of this DataSet, each of the same chunkSize (the list may be smaller), or an empty List if this DataSet is empty.
+     *
+     * @param chunkSize
+     * @return
+     * @deprecated replaced by {@link #splitToList(int)}
+     */
+    @Deprecated
+    List<DataSet> splitt(int chunkSize);
+
+    /**
+     * Returns consecutive sub lists of this DataSet, each of the same chunkSize (the list may be smaller), or an empty List if this DataSet is empty.
+     *
+     * @param columnNames
+     * @param chunkSize
+     * @return
+     * @deprecated replaced by {@link #splitToList(Collection, int)}
+     */
+    @Deprecated
     List<DataSet> splitt(Collection<String> columnNames, int chunkSize);
 
     /**

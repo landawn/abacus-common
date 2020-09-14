@@ -7313,7 +7313,7 @@ public abstract class StringUtil {
      * @deprecated replaced by {@link N#createInteger(String)}
      */
     @Deprecated
-    public static OptionalInt createInteger(final String str) {
+    static OptionalInt createInteger(final String str) {
         if (N.isNullOrEmpty(str)) {
             return OptionalInt.empty();
         }
@@ -7341,7 +7341,7 @@ public abstract class StringUtil {
      * @deprecated replaced by {@link N#createLong(String)}
      */
     @Deprecated
-    public static OptionalLong createLong(final String str) {
+    static OptionalLong createLong(final String str) {
         if (N.isNullOrEmpty(str)) {
             return OptionalLong.empty();
         }
@@ -7368,7 +7368,7 @@ public abstract class StringUtil {
      * @deprecated replaced by {@link N#createFloat(String)}
      */
     @Deprecated
-    public static OptionalFloat createFloat(final String str) {
+    static OptionalFloat createFloat(final String str) {
         if (N.isNullOrEmpty(str)) {
             return OptionalFloat.empty();
         }
@@ -7396,7 +7396,7 @@ public abstract class StringUtil {
      * @deprecated replaced by {@link N#createDouble(String)}
      */
     @Deprecated
-    public static OptionalDouble createDouble(final String str) {
+    static OptionalDouble createDouble(final String str) {
         if (N.isNullOrEmpty(str)) {
             return OptionalDouble.empty();
         }
@@ -7423,7 +7423,7 @@ public abstract class StringUtil {
      * @deprecated replaced by {@link N#createBigInteger(String)}
      */
     @Deprecated
-    public static Optional<BigInteger> createBigInteger(final String str) {
+    static Optional<BigInteger> createBigInteger(final String str) {
         if (N.isNullOrEmptyOrBlank(str)) {
             return Optional.empty();
         }
@@ -7468,7 +7468,7 @@ public abstract class StringUtil {
      * @deprecated replaced by {@link N#createBigDecimal(String)}
      */
     @Deprecated
-    public static Optional<BigDecimal> createBigDecimal(final String str) {
+    static Optional<BigDecimal> createBigDecimal(final String str) {
         if (N.isNullOrEmptyOrBlank(str) || str.trim().startsWith("--")) {
             return Optional.empty();
         }
@@ -7560,7 +7560,7 @@ public abstract class StringUtil {
      */
     @Deprecated
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static Optional<Number> createNumber(final String str) {
+    static Optional<Number> createNumber(final String str) {
         if (N.isNullOrEmptyOrBlank(str)) {
             return Optional.empty();
         }

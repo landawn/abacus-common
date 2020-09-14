@@ -2958,10 +2958,27 @@ public abstract class SQLBuilder {
             final InSubQuery inSubQuery = (InSubQuery) cond;
             final String propName = inSubQuery.getPropName();
 
-            appendColumnName(propName);
+            if (N.notNullOrEmpty(propName)) {
+                appendColumnName(propName);
+            } else {
+                sb.append(WD._PARENTHESES_L);
+
+                int idx = 0;
+
+                for (String e : inSubQuery.getPropNames()) {
+                    if (idx++ > 0) {
+                        sb.append(_COMMA_SPACE);
+                    }
+
+                    appendColumnName(e);
+                }
+
+                sb.append(WD._PARENTHESES_R);
+            }
 
             sb.append(_SPACE);
             sb.append(inSubQuery.getOperator().toString());
+
             sb.append(WD.SPACE_PARENTHESES_L);
 
             appendCondition(inSubQuery.getSubQuery());

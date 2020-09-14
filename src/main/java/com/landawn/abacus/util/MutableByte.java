@@ -25,6 +25,9 @@ package com.landawn.abacus.util;
  * A mutable <code>byte</code> wrapper.
  * <p>
  * Note that as MutableByte does not extend Byte, it is not treated by String.format as a Byte parameter. 
+ * 
+ * <p>
+ * {@code MutableByte} is NOT thread-safe.
  *
  * @version $Id: MutableByte.java 1669791 2015-03-28 15:22:59Z britter $
  * @see Byte
