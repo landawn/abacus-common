@@ -199,12 +199,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
 
     /**
      *
-     * @param from
-     * @param to
+     * @param fromIndex
+     * @param toIndex
      * @param step
      * @return
      */
-    public abstract L copy(final int from, final int to, final int step);
+    public abstract L copy(final int fromIndex, final int toIndex, final int step);
 
     /**
      * Returns consecutive sub lists of this list, each of the same size (the final list may be smaller),

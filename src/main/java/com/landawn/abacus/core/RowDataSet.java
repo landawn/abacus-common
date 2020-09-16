@@ -10362,7 +10362,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
         final List<DataSet> res = new ArrayList<>();
 
-        for (int i = 0, totalSize = size(); i < totalSize; i += chunkSize) {
+        for (int i = 0, totalSize = size(); i < totalSize; i = i <= totalSize - chunkSize ? i + chunkSize : totalSize) {
             res.add(copy(columnNames, i, i <= totalSize - chunkSize ? i + chunkSize : totalSize));
         }
 

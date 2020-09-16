@@ -20,16 +20,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Set;
 
-import com.landawn.abacus.exception.DuplicatedResultException;
 import com.landawn.abacus.util.u.Nullable;
-import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.function.BiConsumer;
 import com.landawn.abacus.util.function.BiFunction;
 import com.landawn.abacus.util.function.BiPredicate;
@@ -52,221 +48,27 @@ public final class Iterators {
 
     /**
      *
-     * @param iter
-     * @param objToFind
-     * @return true, if successful
-     */
-    public static boolean contains(final Iterator<?> iter, final Object objToFind) {
-        if (iter == null) {
-            return false;
-        }
-
-        while (iter.hasNext()) {
-            if (N.equals(iter.next(), objToFind)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     *
-     * @param iter
-     * @param objToFind
-     * @return true, if successful
-     */
-    public static boolean containsAny(final Iterator<?> iter, final Set<?> objsToFind) {
-        if (iter == null || N.isNullOrEmpty(objsToFind)) {
-            return false;
-        }
-
-        while (iter.hasNext()) {
-            if (objsToFind.contains(iter.next())) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     *
-     * @param iter
-     * @param objToFind
-     * @return true, if successful
-     */
-    public static boolean containsAll(final Iterator<?> iter, final Collection<?> objsToFind) {
-        if (N.isNullOrEmpty(objsToFind)) {
-            return true;
-        } else if (iter == null) {
-            return false;
-        }
-
-        final Set<?> set = new HashSet<>(objsToFind);
-
-        while (iter.hasNext()) {
-            if (set.remove(iter.next())) {
-                if (set.size() == 0) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     *
-     * @param iter
-     * @param objToFind
-     * @return
-     */
-    public static long indexOf(final Iterator<?> iter, final Object objToFind) {
-        if (iter == null) {
-            return N.INDEX_NOT_FOUND;
-        }
-
-        long index = 0;
-
-        while (iter.hasNext()) {
-            if (N.equals(iter.next(), objToFind)) {
-                return index;
-            }
-
-            index++;
-        }
-
-        return N.INDEX_NOT_FOUND;
-    }
-
-    /**
-     *
-     * @param iter
-     * @param objToFind
-     * @return
-     */
-    public static long occurrencesOf(final Iterator<?> iter, final Object objToFind) {
-        if (iter == null) {
-            return 0;
-        }
-
-        long occurrences = 0;
-
-        while (iter.hasNext()) {
-            if (N.equals(iter.next(), objToFind)) {
-                occurrences++;
-            }
-        }
-
-        return occurrences;
-    }
-
-    /**
-     *
-     * @param iter
-     * @return
-     */
-    public static long count(final Iterator<?> iter) {
-        if (iter == null) {
-            return 0;
-        }
-
-        long res = 0;
-
-        while (iter.hasNext()) {
-            iter.next();
-            res++;
-        }
-
-        return res;
-    }
-
-    /**
-     *
      * @param <T>
      * @param iter
-     * @param filter
+     * @param index
      * @return
      */
-    public static <T> long count(final Iterator<T> iter, final Predicate<? super T> filter) {
-        N.checkArgNotNull(filter);
+    public static <T> Nullable<T> get(final Iterator<? extends T> iter, int index) {
+        N.checkArgNotNegative(index, "index");
 
         if (iter == null) {
-            return 0;
+            return Nullable.empty();
         }
 
-        long res = 0;
-
         while (iter.hasNext()) {
-            if (filter.test(iter.next())) {
-                res++;
+            if (index-- == 0) {
+                return Nullable.<T> of(iter.next());
+            } else {
+                iter.next();
             }
         }
 
-        return res;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param iter
-     * @return
-     */
-    public static <T> List<T> toList(final Iterator<? extends T> iter) {
-        if (iter == null) {
-            return new ArrayList<>();
-        }
-
-        final List<T> result = new ArrayList<>();
-
-        while (iter.hasNext()) {
-            result.add(iter.next());
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param iter
-     * @return
-     */
-    public static <T> Set<T> toSet(final Iterator<? extends T> iter) {
-        if (iter == null) {
-            return N.newHashSet();
-        }
-
-        final Set<T> result = N.newHashSet();
-
-        while (iter.hasNext()) {
-            result.add(iter.next());
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <C>
-     * @param iter
-     * @param collectionFactory
-     * @return
-     */
-    public static <T, C extends Collection<T>> C toCollection(final Iterator<? extends T> iter, final Supplier<? extends C> collectionFactory) {
-        final C c = collectionFactory.get();
-
-        if (iter == null) {
-            return c;
-        }
-
-        while (iter.hasNext()) {
-            c.add(iter.next());
-        }
-
-        return c;
+        return Nullable.empty();
     }
 
     /**
@@ -376,7 +178,7 @@ public final class Iterators {
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEach(final Iterator<T> iter, final Throwables.Consumer<? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final Throwables.Consumer<? super T, E> action) throws E {
         N.checkArgNotNull(action);
 
         if (iter == null) {
@@ -396,7 +198,8 @@ public final class Iterators {
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachIndexed(final Iterator<T> iter, final Throwables.IndexedConsumer<? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEachIndexed(final Iterator<? extends T> iter, final Throwables.IndexedConsumer<? super T, E> action)
+            throws E {
         N.checkArgNotNull(action);
 
         if (iter == null) {
@@ -422,7 +225,7 @@ public final class Iterators {
      * @throws E the e
      * @throws E2 the e2
      */
-    public static <T, U, E extends Exception, E2 extends Exception> void forEach(final Iterator<T> iter,
+    public static <T, U, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iter,
             final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
             throws E, E2 {
         N.checkArgNotNull(flatMapper);
@@ -463,7 +266,7 @@ public final class Iterators {
      * @throws E2 the e2
      * @throws E3 the e3
      */
-    public static <T, T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEach(final Iterator<T> iter,
+    public static <T, T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEach(final Iterator<? extends T> iter,
             final Throwables.Function<? super T, ? extends Collection<T2>, E> flatMapper,
             final Throwables.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
             final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
@@ -623,7 +426,7 @@ public final class Iterators {
      * @throws E the e
      * @throws E2 the e2
      */
-    public static <T, U, E extends Exception, E2 extends Exception> void forEachNonNull(final Iterator<T> iter,
+    public static <T, U, E extends Exception, E2 extends Exception> void forEachNonNull(final Iterator<? extends T> iter,
             final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
             throws E, E2 {
         N.checkArgNotNull(flatMapper);
@@ -669,7 +472,7 @@ public final class Iterators {
      * @throws E2 the e2
      * @throws E3 the e3
      */
-    public static <T, T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEachNonNull(final Iterator<T> iter,
+    public static <T, T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEachNonNull(final Iterator<? extends T> iter,
             final Throwables.Function<? super T, ? extends Collection<T2>, E> flatMapper,
             final Throwables.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
             final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
@@ -717,7 +520,8 @@ public final class Iterators {
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachPair(final Iterator<T> iter, final Throwables.BiConsumer<? super T, ? super T, E> action) throws E {
+    public static <T, E extends Exception> void forEachPair(final Iterator<? extends T> iter, final Throwables.BiConsumer<? super T, ? super T, E> action)
+            throws E {
         forEachPair(iter, action, 1);
     }
 
@@ -731,7 +535,7 @@ public final class Iterators {
      * @param increment
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachPair(final Iterator<T> iter, final Throwables.BiConsumer<? super T, ? super T, E> action,
+    public static <T, E extends Exception> void forEachPair(final Iterator<? extends T> iter, final Throwables.BiConsumer<? super T, ? super T, E> action,
             final int increment) throws E {
         N.checkArgNotNull(action);
         final int windowSize = 2;
@@ -776,8 +580,8 @@ public final class Iterators {
      * @param action
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachTriple(final Iterator<T> iter, final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action)
-            throws E {
+    public static <T, E extends Exception> void forEachTriple(final Iterator<? extends T> iter,
+            final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action) throws E {
         forEachTriple(iter, action, 1);
     }
 
@@ -791,8 +595,8 @@ public final class Iterators {
      * @param increment
      * @throws E the e
      */
-    public static <T, E extends Exception> void forEachTriple(final Iterator<T> iter, final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action,
-            final int increment) throws E {
+    public static <T, E extends Exception> void forEachTriple(final Iterator<? extends T> iter,
+            final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action, final int increment) throws E {
         N.checkArgNotNull(action);
         final int windowSize = 3;
         N.checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
@@ -872,7 +676,7 @@ public final class Iterators {
      * @param n
      * @return
      */
-    public static <T> ObjIterator<T> repeatEach(final Collection<T> c, final int n) {
+    public static <T> ObjIterator<T> repeatEach(final Collection<? extends T> c, final int n) {
         N.checkArgument(n >= 0, "'n' can't be negative: %s", n);
 
         if (n == 0 || N.isNullOrEmpty(c)) {
@@ -880,7 +684,7 @@ public final class Iterators {
         }
 
         return new ObjIterator<T>() {
-            private Iterator<T> iter = c.iterator();
+            private Iterator<? extends T> iter = c.iterator();
             private T next = null;
             private int cnt = 0;
 
@@ -914,7 +718,7 @@ public final class Iterators {
      * @param n
      * @return
      */
-    public static <T> ObjIterator<T> repeatAll(final Collection<T> c, final int n) {
+    public static <T> ObjIterator<T> repeatAll(final Collection<? extends T> c, final int n) {
         N.checkArgument(n >= 0, "'n' can't be negative: %s", n);
 
         if (n == 0 || N.isNullOrEmpty(c)) {
@@ -922,7 +726,7 @@ public final class Iterators {
         }
 
         return new ObjIterator<T>() {
-            private Iterator<T> iter = null;
+            private Iterator<? extends T> iter = null;
             private int cnt = n;
 
             @Override
@@ -954,7 +758,7 @@ public final class Iterators {
      * @param size
      * @return
      */
-    public static <T> ObjIterator<T> repeatEachToSize(final Collection<T> c, final int size) {
+    public static <T> ObjIterator<T> repeatEachToSize(final Collection<? extends T> c, final int size) {
         N.checkArgument(size >= 0, "'size' can't be negative: %s", size);
         N.checkArgument(size == 0 || N.notNullOrEmpty(c), "Collection can't be empty or null when size > 0");
 
@@ -966,7 +770,7 @@ public final class Iterators {
             private final int n = size / c.size();
             private int mod = size % c.size();
 
-            private Iterator<T> iter = null;
+            private Iterator<? extends T> iter = null;
             private T next = null;
             private int cnt = mod-- > 0 ? n + 1 : n;
 
@@ -1004,7 +808,7 @@ public final class Iterators {
      * @param size
      * @return
      */
-    public static <T> ObjIterator<T> repeatAllToSize(final Collection<T> c, final int size) {
+    public static <T> ObjIterator<T> repeatAllToSize(final Collection<? extends T> c, final int size) {
         N.checkArgument(size >= 0, "'size' can't be negative: %s", size);
         N.checkArgument(size == 0 || N.notNullOrEmpty(c), "Collection can't be empty or null when size > 0");
 
@@ -1013,7 +817,7 @@ public final class Iterators {
         }
 
         return new ObjIterator<T>() {
-            private Iterator<T> iter = null;
+            private Iterator<? extends T> iter = null;
             private int cnt = size;
 
             @Override
@@ -1589,7 +1393,7 @@ public final class Iterators {
             return ObjIterator.empty();
         }
 
-        final List<Iterator<T>> list = new ArrayList<>(a.length);
+        final List<Iterator<? extends T>> list = new ArrayList<>(a.length);
 
         for (T[] e : a) {
             if (N.notNullOrEmpty(e)) {
@@ -1874,8 +1678,8 @@ public final class Iterators {
      */
     public static <T> ObjIterator<T> merge(final Collection<? extends T> a, final Collection<? extends T> b,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
-        final Iterator<T> iterA = N.isNullOrEmpty(a) ? ObjIterator.<T> empty() : (Iterator<T>) a.iterator();
-        final Iterator<T> iterB = N.isNullOrEmpty(b) ? ObjIterator.<T> empty() : (Iterator<T>) b.iterator();
+        final Iterator<? extends T> iterA = N.isNullOrEmpty(a) ? ObjIterator.<T> empty() : (Iterator<? extends T>) a.iterator();
+        final Iterator<? extends T> iterB = N.isNullOrEmpty(b) ? ObjIterator.<T> empty() : (Iterator<? extends T>) b.iterator();
 
         return merge(iterA, iterB, nextSelector);
 
@@ -2201,147 +2005,6 @@ public final class Iterators {
     }
 
     /**
-     *
-     * @param <T>
-     * @param iter
-     * @param chunkSize the desired size of each sub sequence (the last may be smaller).
-     * @return
-     */
-    public static <T> ObjIterator<List<T>> split(final Iterator<? extends T> iter, final int chunkSize) {
-        N.checkArgument(chunkSize > 0, "'chunkSize' must be greater than 0, can't be: %s", chunkSize);
-
-        if (iter == null) {
-            return ObjIterator.empty();
-        }
-
-        return new ObjIterator<List<T>>() {
-            private final Iterator<? extends T> iterator = iter;
-
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
-
-            @Override
-            public List<T> next() {
-                if (hasNext() == false) {
-                    throw new NoSuchElementException();
-                }
-
-                final List<T> next = new ArrayList<>(chunkSize);
-
-                for (int i = 0; i < chunkSize && iterator.hasNext(); i++) {
-                    next.add(iterator.next());
-                }
-
-                return next;
-            }
-        };
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param iter
-     * @param index
-     * @return
-     */
-    public static <T> Nullable<T> get(final Iterator<T> iter, int index) {
-        N.checkArgNotNegative(index, "index");
-
-        if (iter == null) {
-            return Nullable.empty();
-        }
-
-        while (iter.hasNext()) {
-            if (index-- == 0) {
-                return Nullable.of(iter.next());
-            } else {
-                iter.next();
-            }
-        }
-
-        return Nullable.empty();
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param iter
-     * @return
-     */
-    public static <T> Nullable<T> first(final Iterator<T> iter) {
-        return iter != null && iter.hasNext() ? Nullable.of(iter.next()) : Nullable.<T> empty();
-    }
-
-    /**
-     * First non null.
-     *
-     * @param <T>
-     * @param iter
-     * @return
-     */
-    public static <T> Optional<T> firstNonNull(final Iterator<T> iter) {
-        if (iter == null) {
-            return Optional.empty();
-        }
-
-        T e = null;
-
-        while (iter.hasNext()) {
-            if ((e = iter.next()) != null) {
-                return Optional.of(e);
-            }
-        }
-
-        return Optional.empty();
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param iter
-     * @return
-     */
-    public static <T> Nullable<T> last(final Iterator<T> iter) {
-        if (iter == null || iter.hasNext() == false) {
-            return Nullable.empty();
-        }
-
-        T e = null;
-
-        while (iter.hasNext()) {
-            e = iter.next();
-        }
-
-        return Nullable.of(e);
-    }
-
-    /**
-     * Last non null.
-     *
-     * @param <T>
-     * @param iter
-     * @return
-     */
-    public static <T> Optional<T> lastNonNull(final Iterator<T> iter) {
-        if (iter == null) {
-            return Optional.empty();
-        }
-
-        T e = null;
-        T lastNonNull = null;
-
-        while (iter.hasNext()) {
-            if ((e = iter.next()) != null) {
-                lastNonNull = e;
-            }
-        }
-
-        return Optional.ofNullable(lastNonNull);
-    }
-
-    /**
      * Note: copied from Google Guava under Apache license v2
      * <br />
      * Calls {@code next()} on {@code iterator}, either {@code numberToAdvance} times
@@ -2374,11 +2037,11 @@ public final class Iterators {
      * @param n
      * @return
      */
-    public static <T> ObjIterator<T> skip(final Iterator<T> iter, final long n) {
+    public static <T> ObjIterator<T> skip(final Iterator<? extends T> iter, final long n) {
         N.checkArgNotNegative(n, "n");
 
         if (iter == null || n == 0) {
-            return ObjIterator.of(iter);
+            return ObjIterator.empty();
         }
 
         return new ObjIterator<T>() {
@@ -2422,7 +2085,7 @@ public final class Iterators {
      * @param count
      * @return
      */
-    public static <T> ObjIterator<T> limit(final Iterator<T> iter, final long count) {
+    public static <T> ObjIterator<T> limit(final Iterator<? extends T> iter, final long count) {
         N.checkArgNotNegative(count, "count");
 
         if (iter == null || count == 0) {
@@ -2462,7 +2125,7 @@ public final class Iterators {
      * @param count
      * @return
      */
-    public static <T> ObjIterator<T> skipAndLimit(final Iterator<T> iter, final long offset, final long count) {
+    public static <T> ObjIterator<T> skipAndLimit(final Iterator<? extends T> iter, final long offset, final long count) {
         N.checkArgNotNegative(count, "offset");
         N.checkArgNotNegative(count, "count");
 
@@ -2506,39 +2169,19 @@ public final class Iterators {
     }
 
     /**
-     * 
-     * @param <T>
-     * @param iter
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     */
-    public static <T> ObjIterator<T> slice(final Iterator<T> iter, final long fromIndex, final long toIndex) {
-        if (fromIndex < 0 || fromIndex > toIndex) {
-            throw new IndexOutOfBoundsException("Index range [" + fromIndex + ", " + toIndex + "] is out-of-bounds");
-        }
-
-        if (iter == null || fromIndex == toIndex) {
-            return ObjIterator.empty();
-        }
-
-        return skipAndLimit(iter, fromIndex, toIndex - fromIndex);
-    }
-
-    /**
      * Returns a new {@code ObjIterator} with {@code null} elements removed.
      *
      * @param <T>
      * @param iter
      * @return
      */
-    public static <T> ObjIterator<T> skipNull(final Iterator<T> iter) {
+    public static <T> ObjIterator<T> skipNull(final Iterator<? extends T> iter) {
         if (iter == null) {
             return ObjIterator.empty();
         }
 
         return new ObjIterator<T>() {
-            private final Iterator<T> iterator = iter;
+            private final Iterator<? extends T> iterator = iter;
             private T next;
 
             @Override
@@ -2574,35 +2217,13 @@ public final class Iterators {
     }
 
     /**
-     * Gets the only element.
-     *
-     * @param <T>
-     * @param iter
-     * @return throws DuplicatedResultException if there are more than one elements in the specified {@code iter}.
-     * @throws DuplicatedResultException the duplicated result exception
-     */
-    public static <T> Nullable<T> getOnlyElement(final Iterator<? extends T> iter) throws DuplicatedResultException {
-        if (iter == null) {
-            return Nullable.empty();
-        }
-
-        final T first = iter.next();
-
-        if (iter.hasNext()) {
-            throw new DuplicatedResultException("Expected at most one element but was: [" + StringUtil.concat(first, ", ", iter.next(), "...]"));
-        }
-
-        return Nullable.of(first);
-    }
-
-    /**
      *
      * @param <T>
      * @param iter
      * @param filter
      * @return
      */
-    public static <T> ObjIterator<T> filter(final Iterator<T> iter, final Predicate<? super T> filter) {
+    public static <T> ObjIterator<T> filter(final Iterator<? extends T> iter, final Predicate<? super T> filter) {
         N.checkArgNotNull(filter, "filter");
 
         if (iter == null) {
@@ -2651,7 +2272,7 @@ public final class Iterators {
      * @param mapper
      * @return
      */
-    public static <T, U> ObjIterator<U> map(final Iterator<T> iter, final Function<? super T, U> mapper) {
+    public static <T, U> ObjIterator<U> map(final Iterator<? extends T> iter, final Function<? super T, U> mapper) {
         N.checkArgNotNull(mapper, "mapper");
 
         if (iter == null) {
@@ -2679,7 +2300,7 @@ public final class Iterators {
      * @param mapper
      * @return
      */
-    public static <T, U> ObjIterator<U> flatMap(final Iterator<T> iter, final Function<? super T, ? extends Collection<? extends U>> mapper) {
+    public static <T, U> ObjIterator<U> flatMap(final Iterator<? extends T> iter, final Function<? super T, ? extends Collection<? extends U>> mapper) {
         N.checkArgNotNull(mapper, "mapper");
 
         if (iter == null) {

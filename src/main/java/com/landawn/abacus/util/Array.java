@@ -454,10 +454,45 @@ public final class Array {
     /**
      * Returns the input array.
      *
-     * @param <T>
      * @param a
      * @return
      */
+    @SafeVarargs
+    public static <T extends java.util.Date> T[] of(final T... a) {
+        return a;
+    }
+
+    /**
+     * Returns the input array.
+     *
+     * @param a
+     * @return
+     */
+    @SafeVarargs
+    public static <T extends java.util.Calendar> T[] of(final T... a) {
+        return a;
+    }
+
+    /**
+     * Returns the input array.
+     *
+     * @param a
+     * @return
+     */
+    @SafeVarargs
+    public static <T extends java.time.temporal.Temporal> T[] of(final T... a) {
+        return a;
+    }
+
+    /**
+     * Returns the input array.
+     *
+     * @param <T>
+     * @param a
+     * @return
+     * @deprecated please use {@code N.asArray(Object...)}.
+     */
+    @Deprecated
     @SafeVarargs
     public static <T> T[] oF(final T... a) {
         return a;

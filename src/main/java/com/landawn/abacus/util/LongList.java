@@ -1868,17 +1868,17 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      *
-     * @param from
-     * @param to
+     * @param fromIndex
+     * @param toIndex
      * @param step
      * @return
      * @see N#copyOfRange(int[], int, int, int)
      */
     @Override
-    public LongList copy(final int from, final int to, final int step) {
-        checkFromToIndex(from < to ? from : (to == -1 ? 0 : to), from < to ? to : from);
+    public LongList copy(final int fromIndex, final int toIndex, final int step) {
+        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex);
 
-        return new LongList(N.copyOfRange(elementData, from, to, step));
+        return new LongList(N.copyOfRange(elementData, fromIndex, toIndex, step));
     }
 
     /**

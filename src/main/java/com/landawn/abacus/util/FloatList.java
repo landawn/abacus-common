@@ -1827,17 +1827,17 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
     /**
      *
-     * @param from
-     * @param to
+     * @param fromIndex
+     * @param toIndex
      * @param step
      * @return
      * @see N#copyOfRange(int[], int, int, int)
      */
     @Override
-    public FloatList copy(final int from, final int to, final int step) {
-        checkFromToIndex(from < to ? from : (to == -1 ? 0 : to), from < to ? to : from);
+    public FloatList copy(final int fromIndex, final int toIndex, final int step) {
+        checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex);
 
-        return new FloatList(N.copyOfRange(elementData, from, to, step));
+        return new FloatList(N.copyOfRange(elementData, fromIndex, toIndex, step));
     }
 
     /**

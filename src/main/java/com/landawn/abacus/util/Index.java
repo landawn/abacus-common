@@ -16,6 +16,8 @@
 
 package com.landawn.abacus.util;
 
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.RandomAccess;
 
@@ -220,23 +222,44 @@ public final class Index {
 
     /**
      *
-     * @param list
+     * @param c
      * @param objToFind
      * @return
      */
-    public static OptionalInt of(final List<?> list, final Object objToFind) {
-        return toOptionalInt(N.indexOf(list, objToFind));
+    public static OptionalInt of(final Collection<?> c, final Object objToFind) {
+        return toOptionalInt(N.indexOf(c, objToFind));
     }
 
     /**
      *
-     * @param list
+     * @param c
      * @param startIndex
      * @param objToFind
      * @return
      */
-    public static OptionalInt of(final List<?> list, final int startIndex, final Object objToFind) {
-        return toOptionalInt(N.indexOf(list, startIndex, objToFind));
+    public static OptionalInt of(final Collection<?> c, final int startIndex, final Object objToFind) {
+        return toOptionalInt(N.indexOf(c, startIndex, objToFind));
+    }
+
+    /**
+     * 
+     * @param iter
+     * @param objToFind
+     * @return
+     */
+    public static OptionalInt indexOf(final Iterator<?> iter, final Object objToFind) {
+        return toOptionalInt(N.indexOf(iter, objToFind));
+    }
+
+    /**
+     * 
+     * @param iter
+     * @param startIndex
+     * @param objToFind
+     * @return
+     */
+    public static OptionalInt indexOf(final Iterator<?> iter, final int startIndex, final Object objToFind) {
+        return toOptionalInt(N.indexOf(iter, startIndex, objToFind));
     }
 
     /**

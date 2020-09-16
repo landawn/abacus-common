@@ -406,14 +406,14 @@ public final class ParserUtil {
         return result;
     }
 
-    static int hashCode(char[] a, int from, int to) {
-        return N.hashCode(a, from, to);
+    static int hashCode(char[] a, int fromIndex, int toIndex) {
+        return N.hashCode(a, fromIndex, toIndex);
     }
 
-    // private int hashCode(String str, int from, int to) {
+    // private int hashCode(String str, int fromIndex, int toIndex) {
     // int result = 1;
     //
-    // for (int i = from; i < to; i++) {
+    // for (int i = fromIndex; i < toIndex; i++) {
     // result = 31 * result + str.charAt(i);
     // }
     //
@@ -851,13 +851,13 @@ public final class ParserUtil {
          * Read prop info.
          *
          * @param cbuf
-         * @param from
-         * @param to
+         * @param fromIndex
+         * @param toIndex
          * @return
          */
         @Override
-        public PropInfo readPropInfo(final char[] cbuf, int from, int to) {
-            int len = to - from;
+        public PropInfo readPropInfo(final char[] cbuf, int fromIndex, int toIndex) {
+            int len = toIndex - fromIndex;
 
             if (len == 0) {
                 return null;
@@ -870,7 +870,7 @@ public final class ParserUtil {
             }
 
             if (propInfo == null) {
-                propInfo = hashPropInfoMap.get(ParserUtil.hashCode(cbuf, from, to));
+                propInfo = hashPropInfoMap.get(ParserUtil.hashCode(cbuf, fromIndex, toIndex));
             }
 
             if (propInfo != null) {
@@ -891,7 +891,7 @@ public final class ParserUtil {
 
                 if (tmp.length == len) {
                     for (int i = 0; i < len; i++) {
-                        if (cbuf[i + from] == tmp[i]) {
+                        if (cbuf[i + fromIndex] == tmp[i]) {
                             // continue;
                         } else {
                             return null;
@@ -904,12 +904,12 @@ public final class ParserUtil {
         }
 
         // @Override
-        // public PropInfo readPropInfo(String str, int from, int to) {
+        // public PropInfo readPropInfo(String str, int fromIndex, int toIndex) {
         // if (N.isCharsOfStringReadable()) {
-        // return readPropInfo(StrUtil.getCharsForReadOnly(str), from, to);
+        // return readPropInfo(StrUtil.getCharsForReadOnly(str), fromIndex, toIndex);
         // }
         //
-        // int len = to - from;
+        // int len = toIndex - fromIndex;
         //
         // if (len == 0) {
         // return null;

@@ -2250,15 +2250,15 @@ public abstract class DateUtil {
      * Parses the int.
      *
      * @param str
-     * @param from
-     * @param to
+     * @param fromIndex
+     * @param toIndex
      * @return
      */
-    private static int parseInt(final String str, int from, final int to) {
+    private static int parseInt(final String str, int fromIndex, final int toIndex) {
         int result = 0;
 
-        while (from < to) {
-            result = (result * 10) + (str.charAt(from++) - 48);
+        while (fromIndex < toIndex) {
+            result = (result * 10) + (str.charAt(fromIndex++) - 48);
         }
 
         return result;
