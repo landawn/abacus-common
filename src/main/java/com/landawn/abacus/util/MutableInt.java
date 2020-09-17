@@ -146,7 +146,9 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * @param predicate the first parameter is the current value, the second parameter is the new value.
      * @return true, if successful
      * @throws E the e
+     * @deprecated
      */
+    @Deprecated
     public <E extends Exception> boolean setIf(int newValue, Throwables.IntBiPredicate<E> predicate) throws E {
         if (predicate.test(this.value, newValue)) {
             this.value = newValue;

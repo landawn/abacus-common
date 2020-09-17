@@ -409,21 +409,7 @@ public class Iterables {
      * @return the optional int
      */
     public static OptionalInt indexOf(final Collection<?> c, final Object objToFind) {
-        if (N.isNullOrEmpty(c)) {
-            return OptionalInt.empty();
-        }
-
-        int idx = 0;
-
-        for (Object e : c) {
-            if (N.equals(e, objToFind)) {
-                return OptionalInt.of(idx);
-            }
-
-            idx++;
-        }
-
-        return OptionalInt.empty();
+        return Index.of(c, objToFind);
     }
 
     /**
@@ -434,17 +420,7 @@ public class Iterables {
      * @return the optional int
      */
     public static OptionalInt indexOf(final Object[] a, final Object objToFind) {
-        if (N.isNullOrEmpty(a)) {
-            return OptionalInt.empty();
-        }
-
-        for (int i = 0, len = a.length; i < len; i++) {
-            if (N.equals(a[i], objToFind)) {
-                return OptionalInt.of(i);
-            }
-        }
-
-        return OptionalInt.empty();
+        return Index.of(a, objToFind);
     }
 
     /**
@@ -455,53 +431,7 @@ public class Iterables {
      * @return the optional int
      */
     public static OptionalInt lastIndexOf(final Collection<?> c, final Object objToFind) {
-        if (N.isNullOrEmpty(c)) {
-            return OptionalInt.empty();
-        }
-
-        final int size = c.size();
-
-        if (c instanceof List) {
-            final List<Object> list = (List<Object>) c;
-
-            if (c instanceof RandomAccess) {
-                for (int i = size - 1; i >= 0; i--) {
-                    if (N.equals(list.get(i), objToFind)) {
-                        return OptionalInt.of(i);
-                    }
-                }
-            } else {
-                final ListIterator<Object> iter = list.listIterator(list.size());
-
-                for (int i = size - 1; iter.hasPrevious(); i--) {
-                    if (N.equals(iter.previous(), objToFind)) {
-                        return OptionalInt.of(i);
-                    }
-                }
-            }
-
-            return OptionalInt.empty();
-        } else if (c instanceof Deque) {
-            final Iterator<Object> iter = ((Deque<Object>) c).descendingIterator();
-
-            for (int i = size - 1; iter.hasNext(); i--) {
-                if (N.equals(iter.next(), objToFind)) {
-                    return OptionalInt.of(i);
-                }
-            }
-
-            return OptionalInt.empty();
-        } else {
-            final Object[] a = c.toArray();
-
-            for (int i = a.length - 1; i >= 0; i--) {
-                if (N.equals(a[i], objToFind)) {
-                    return OptionalInt.of(i);
-                }
-            }
-
-            return OptionalInt.empty();
-        }
+        return Index.last(c, objToFind);
     }
 
     /**
@@ -512,17 +442,7 @@ public class Iterables {
      * @return the optional int
      */
     public static OptionalInt lastIndexOf(final Object[] a, final Object objToFind) {
-        if (N.isNullOrEmpty(a)) {
-            return OptionalInt.empty();
-        }
-
-        for (int i = a.length - 1; i >= 0; i--) {
-            if (N.equals(a[i], objToFind)) {
-                return OptionalInt.of(i);
-            }
-        }
-
-        return OptionalInt.empty();
+        return Index.last(a, objToFind);
     }
 
     /**

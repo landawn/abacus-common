@@ -2583,6 +2583,24 @@ public class u {
         }
 
         /**
+         * Map to float.
+         *
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws E the e
+         */
+        public <E extends Exception> OptionalFloat mapToFloat(final Throwables.ToFloatFunction<Integer, E> mapper) throws E {
+            N.checkArgNotNull(mapper, "mapper");
+
+            if (isPresent) {
+                return OptionalFloat.of(mapper.applyAsFloat(value));
+            } else {
+                return OptionalFloat.empty();
+            }
+        }
+
+        /**
          * Map to double.
          *
          * @param <E>
@@ -3514,6 +3532,24 @@ public class u {
                 return OptionalFloat.of(mapper.applyAsFloat(value));
             } else {
                 return empty();
+            }
+        }
+
+        /**
+         * Map to int.
+         *
+         * @param <E>
+         * @param mapper
+         * @return
+         * @throws E the e
+         */
+        public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Float, E> mapper) throws E {
+            N.checkArgNotNull(mapper, "mapper");
+
+            if (isPresent) {
+                return OptionalInt.of(mapper.applyAsInt(value));
+            } else {
+                return OptionalInt.empty();
             }
         }
 
@@ -5513,7 +5549,9 @@ public class u {
          * @param predicate the first parameter is the current value, the second parameter is the new value.
          * @return true, if successful
          * @throws E the e
+         * @deprecated
          */
+        @Deprecated
         public <E extends Exception> boolean setIf(final T newValue, final Throwables.BiPredicate<? super T, ? super T, E> predicate) throws E {
             if (predicate.test(value, newValue)) {
                 this.value = newValue;

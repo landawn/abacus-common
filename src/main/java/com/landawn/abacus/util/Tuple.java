@@ -425,6 +425,10 @@ public abstract class Tuple<TP> implements Immutable {
         return new Tuple3<>(tp._1._1, tp._1._2, tp._2);
     }
 
+    public static <T1, T2, T3, T4, T5> Tuple5<T1, T2, T3, T4, T5> flatten(Tuple3<Tuple3<T1, T2, T3>, T4, T5> tp) {
+        return new Tuple5<>(tp._1._1, tp._1._2, tp._1._3, tp._2, tp._3);
+    }
+
     //    public static <T1, T2, T3, T4> Tuple4<T1, T2, T3, T4> flatt(Tuple2<Tuple2<Tuple2<T1, T2>, T3>, T4> tp) {
     //        return new Tuple4<>(tp._1._1._1, tp._1._1._2, tp._1._2, tp._2);
     //    }

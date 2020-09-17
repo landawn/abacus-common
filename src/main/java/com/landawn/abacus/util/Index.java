@@ -247,7 +247,7 @@ public final class Index {
      * @param objToFind
      * @return
      */
-    public static OptionalInt indexOf(final Iterator<?> iter, final Object objToFind) {
+    public static OptionalInt of(final Iterator<?> iter, final Object objToFind) {
         return toOptionalInt(N.indexOf(iter, objToFind));
     }
 
@@ -258,7 +258,7 @@ public final class Index {
      * @param objToFind
      * @return
      */
-    public static OptionalInt indexOf(final Iterator<?> iter, final int startIndex, final Object objToFind) {
+    public static OptionalInt of(final Iterator<?> iter, final int startIndex, final Object objToFind) {
         return toOptionalInt(N.indexOf(iter, startIndex, objToFind));
     }
 
@@ -930,23 +930,23 @@ public final class Index {
 
     /**
      *
-     * @param list
+     * @param c
      * @param objToFind
      * @return
      */
-    public static OptionalInt last(final List<?> list, final Object objToFind) {
-        return toOptionalInt(N.lastIndexOf(list, objToFind));
+    public static OptionalInt last(final Collection<?> c, final Object objToFind) {
+        return toOptionalInt(N.lastIndexOf(c, objToFind));
     }
 
     /**
      *
-     * @param list
+     * @param c
      * @param startIndexFromBack
      * @param objToFind
      * @return
      */
-    public static OptionalInt last(final List<?> list, final int startIndexFromBack, final Object objToFind) {
-        return toOptionalInt(N.lastIndexOf(list, startIndexFromBack, objToFind));
+    public static OptionalInt last(final Collection<?> c, final int startIndexFromBack, final Object objToFind) {
+        return toOptionalInt(N.lastIndexOf(c, startIndexFromBack, objToFind));
     }
 
     /**
