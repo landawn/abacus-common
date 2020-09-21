@@ -10,6 +10,7 @@ import java.util.Map;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.annotation.Stateful;
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.function.Consumer;
 import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.IntFunction;
@@ -33,6 +34,7 @@ public interface NoCachingNoUpdating {
     @Beta
     @SequentialOnly
     @Stateful
+    @SuppressFBWarnings("CN_IDIOM_NO_SUPER_CALL")
     public static class DisposableArray<T> implements NoCachingNoUpdating, Cloneable {
 
         /** The a. */

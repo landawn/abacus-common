@@ -570,21 +570,21 @@ public final class Fn extends Comparators {
 
     private static final Predicate<File> IS_FILE = new Predicate<File>() {
         @Override
-        public boolean test(File value) {
-            return value.isFile();
+        public boolean test(File file) {
+            return file != null && file.isFile();
         }
     };
 
     private static final Predicate<File> IS_DIRECTORY = new Predicate<File>() {
         @Override
-        public boolean test(File value) {
-            return value.isDirectory();
+        public boolean test(File file) {
+            return file != null && file.isDirectory();
         }
     };
 
     protected Fn() {
         super();
-        // for extention.
+        // for extension.
     }
 
     /**

@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,34 +68,6 @@ public final class Maps {
         }
 
         final Map<K, T> result = new HashMap<>(N.initHashCapacity(c.size()));
-
-        for (T e : c) {
-            result.put(keyMapper.apply(e), e);
-        }
-
-        return result;
-    }
-
-    /**
-     * New linked hash map.
-     *
-     * @param <T>
-     * @param <K> the key type
-     * @param <E>
-     * @param c
-     * @param keyMapper
-     * @return
-     * @throws E the e
-     */
-    public static <T, K, E extends Exception> Map<K, T> newLinkedHashMap(Collection<? extends T> c,
-            final Throwables.Function<? super T, ? extends K, E> keyMapper) throws E {
-        N.checkArgNotNull(keyMapper);
-
-        if (N.isNullOrEmpty(c)) {
-            return new LinkedHashMap<>();
-        }
-
-        final Map<K, T> result = new LinkedHashMap<>(N.initHashCapacity(c.size()));
 
         for (T e : c) {
             result.put(keyMapper.apply(e), e);
@@ -164,6 +137,106 @@ public final class Maps {
         final M result = mapSupplier.apply(c.size());
 
         for (T e : c) {
+            result.put(keyMapper.apply(e), valueExtractor.apply(e));
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <K> the key type
+     * @param <E>
+     * @param iter
+     * @param keyMapper
+     * @return
+     * @throws E the e
+     */
+    public static <T, K, E extends Exception> Map<K, T> newMap(final Iterator<? extends T> iter, final Throwables.Function<? super T, K, E> keyMapper)
+            throws E {
+        N.checkArgNotNull(keyMapper);
+
+        if (iter == null) {
+            return new HashMap<>();
+        }
+
+        final Map<K, T> result = new HashMap<>();
+        T e = null;
+
+        while (iter.hasNext()) {
+            e = iter.next();
+            result.put(keyMapper.apply(e), e);
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <E>
+     * @param <E2>
+     * @param iter
+     * @param keyMapper
+     * @param valueExtractor
+     * @return
+     * @throws E the e
+     * @throws E2 the e2
+     */
+    public static <T, K, V, E extends Exception, E2 extends Exception> Map<K, V> newMap(final Iterator<? extends T> iter,
+            final Throwables.Function<? super T, K, E> keyMapper, final Throwables.Function<? super T, ? extends V, E2> valueExtractor) throws E, E2 {
+        N.checkArgNotNull(keyMapper);
+        N.checkArgNotNull(valueExtractor);
+
+        if (iter == null) {
+            return new HashMap<>();
+        }
+
+        final Map<K, V> result = new HashMap<>();
+        T e = null;
+
+        while (iter.hasNext()) {
+            e = iter.next();
+            result.put(keyMapper.apply(e), valueExtractor.apply(e));
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param iter
+     * @param keyMapper
+     * @param valueExtractor
+     * @param mapSupplier
+     * @return
+     * @throws E the e
+     * @throws E2 the e2
+     */
+    public static <T, K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M newMap(final Iterator<? extends T> iter,
+            final Throwables.Function<? super T, K, E> keyMapper, final Throwables.Function<? super T, ? extends V, E2> valueExtractor,
+            final Supplier<? extends M> mapSupplier) throws E, E2 {
+        N.checkArgNotNull(keyMapper);
+        N.checkArgNotNull(valueExtractor);
+
+        if (iter == null) {
+            return mapSupplier.get();
+        }
+
+        final M result = mapSupplier.get();
+        T e = null;
+
+        while (iter.hasNext()) {
+            e = iter.next();
             result.put(keyMapper.apply(e), valueExtractor.apply(e));
         }
 
@@ -278,6 +351,43 @@ public final class Maps {
     @Deprecated
     public static <K, V> ImmutableEntry<K, V> newImmutableEntry(final K key, final V value) {
         return N.newImmutableEntry(key, value);
+    }
+
+    public static <K, V> Map<K, V> zip(final Collection<? extends K> keys, final Collection<? extends V> values) {
+        if (N.isNullOrEmpty(keys) || N.isNullOrEmpty(values)) {
+            return new HashMap<>();
+        }
+
+        final Iterator<? extends K> keyIter = keys.iterator();
+        final Iterator<? extends V> valueIter = values.iterator();
+
+        final int minLen = N.min(keys.size(), values.size());
+        final Map<K, V> result = new HashMap<>(minLen);
+
+        for (int i = 0; i < minLen; i++) {
+            result.put(keyIter.next(), valueIter.next());
+        }
+
+        return result;
+    }
+
+    public static <K, V, M extends Map<K, V>> Map<K, V> zip(final Collection<? extends K> keys, final Collection<? extends V> values,
+            final IntFunction<? extends M> mapSupplier) {
+        if (N.isNullOrEmpty(keys) || N.isNullOrEmpty(values)) {
+            return new HashMap<>();
+        }
+
+        final Iterator<? extends K> keyIter = keys.iterator();
+        final Iterator<? extends V> valueIter = values.iterator();
+
+        final int minLen = N.min(keys.size(), values.size());
+        final Map<K, V> result = mapSupplier.apply(minLen);
+
+        for (int i = 0; i < minLen; i++) {
+            result.put(keyIter.next(), valueIter.next());
+        }
+
+        return result;
     }
 
     /**

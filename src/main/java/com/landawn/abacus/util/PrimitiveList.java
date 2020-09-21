@@ -452,71 +452,43 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      */
     public abstract <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super L, E> action) throws E;
 
-    /**
-     * Println.
-     */
     public void println() {
         N.println(toString());
     }
 
-    /**
-     * Check from to index.
-     *
-     * @param fromIndex
-     * @param toIndex
-     */
     protected void checkFromToIndex(final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, size());
     }
 
-    /**
-     * Creates the list supplier.
-     *
-     * @param <T>
-     * @return
-     */
+    protected int calNewCapacity(final int minCapacity, final int curLen) {
+        int newCapacity = (int) (curLen * 1.75);
+
+        if (newCapacity < 0 || newCapacity > MAX_ARRAY_SIZE) {
+            newCapacity = MAX_ARRAY_SIZE;
+        }
+
+        if (newCapacity < minCapacity) {
+            newCapacity = minCapacity;
+        }
+        return newCapacity;
+    }
+
     protected <T> IntFunction<List<T>> createListSupplier() {
         return Factory.ofList();
     }
 
-    /**
-     * Creates the set supplier.
-     *
-     * @param <T>
-     * @return
-     */
     protected <T> IntFunction<Set<T>> createSetSupplier() {
         return Factory.ofSet();
     }
 
-    /**
-     * Creates the map supplier.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @return
-     */
     protected <K, V> IntFunction<Map<K, V>> createMapSupplier() {
         return Factory.ofMap();
     }
 
-    /**
-     * Creates the multiset supplier.
-     *
-     * @param <T>
-     * @return
-     */
     protected <T> IntFunction<Multiset<T>> createMultisetSupplier() {
         return Factory.ofMultiset();
     }
 
-    /**
-     * Need to set.
-     *
-     * @param lenA
-     * @param lenB
-     * @return true, if successful
-     */
     protected boolean needToSet(int lenA, int lenB) {
         return Math.min(lenA, lenB) > 3 && Math.max(lenA, lenB) > 9;
     }

@@ -2360,15 +2360,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         if (N.isNullOrEmpty(elementData)) {
             elementData = new long[Math.max(DEFAULT_CAPACITY, minCapacity)];
         } else if (minCapacity - elementData.length > 0) {
-            int newCapacity = (int) (elementData.length * 1.75);
-
-            if (newCapacity < 0 || newCapacity > MAX_ARRAY_SIZE) {
-                newCapacity = MAX_ARRAY_SIZE;
-            }
-
-            if (newCapacity < minCapacity) {
-                newCapacity = minCapacity;
-            }
+            int newCapacity = calNewCapacity(minCapacity, elementData.length);
 
             elementData = Arrays.copyOf(elementData, newCapacity);
         }

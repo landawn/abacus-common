@@ -22,6 +22,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Arrays;
 
+import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.hash.BloomFilterStrategies.BitArray;
 import com.landawn.abacus.hash.Util.SignedBytes;
 import com.landawn.abacus.hash.Util.UnsignedBytes;
@@ -55,6 +56,7 @@ import com.landawn.abacus.util.function.Predicate;
  * @param <T> the type of instances that the {@code BloomFilter} accepts
  * @since 11.0
  */
+@SuppressFBWarnings("SE_BAD_FIELD")
 public final class BloomFilter<T> implements Predicate<T>, Serializable {
 
     private static final long serialVersionUID = 8191335744261522602L;

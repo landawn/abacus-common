@@ -5772,7 +5772,7 @@ public class u {
         }
 
         /**
-         * Stream if not null.
+         * Returns a {@code Stream} with the {@code value} if {@code value} is not null, otherwise an empty {@code Stream} is returned.
          *
          * @return
          */
