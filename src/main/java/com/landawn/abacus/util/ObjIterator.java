@@ -335,12 +335,6 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
         return toArray(N.EMPTY_OBJECT_ARRAY);
     }
 
-    /**
-     *
-     * @param <A>
-     * @param a
-     * @return
-     */
     public <A> A[] toArray(A[] a) {
         return toList().toArray(a);
     }

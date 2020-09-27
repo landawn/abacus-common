@@ -30,6 +30,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import com.landawn.abacus.DataSet;
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.core.RowDataSet;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.KryoParser;
@@ -76,6 +77,9 @@ public final class Sheet<R, C, E> implements Cloneable {
     }
 
     public Sheet(Collection<R> rowKeySet, Collection<C> columnKeySet) {
+        N.checkArgument(!N.anyNull(rowKeySet), "Row key can't be null");
+        N.checkArgument(!N.anyNull(columnKeySet), "Column key can't be null");
+
         this._rowKeySet = N.newLinkedHashSet(rowKeySet);
         this._columnKeySet = N.newLinkedHashSet(columnKeySet);
     }
@@ -305,6 +309,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param point
      * @return
      */
+    @Beta
     public E get(IntPair point) {
         return get(point._1, point._2);
     }
@@ -360,6 +365,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param value
      * @return
      */
+    @Beta
     public E put(IntPair point, E value) {
         return put(point._1, point._2, value);
     }
@@ -437,6 +443,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param point
      * @return
      */
+    @Beta
     public E remove(IntPair point) {
         return remove(point._1, point._2);
     }
@@ -1528,6 +1535,29 @@ public final class Sheet<R, C, E> implements Cloneable {
             for (List<E> column : _columnList) {
                 N.fill(column, 0, column.size(), null);
             }
+        }
+    }
+
+    /**
+     * Returns the count of non-null values.
+     * 
+     * @return
+     */
+    public int size() {
+        if (_initialized) {
+            long count = 0;
+
+            for (List<E> col : _columnList) {
+                for (E e : col) {
+                    if (e != null) {
+                        count++;
+                    }
+                }
+            }
+
+            return N.toIntExact(count);
+        } else {
+            return 0;
         }
     }
 

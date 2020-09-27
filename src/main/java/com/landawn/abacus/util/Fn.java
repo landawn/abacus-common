@@ -11843,6 +11843,16 @@ public final class Fn extends Comparators {
         }
 
         /**
+         * Not null or empty.
+         *
+         * @param <T>
+         * @return
+         */
+        public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> notNullOrEmpty() {
+            return (Throwables.Predicate<T, E>) Fn.NOT_NULL_OR_EMPTY;
+        }
+
+        /**
          *
          * @param <T>
          * @param predicate
@@ -13006,6 +13016,72 @@ public final class Fn extends Comparators {
          */
         public static <T, E extends Exception> Throwables.BinaryOperator<T, E> replacingMerger() {
             return BinaryOperators.REPLACING_MERGER;
+        }
+
+        public static <K, V, E extends Exception> Throwables.Predicate<Map.Entry<K, V>, E> testByKey(final Throwables.Predicate<? super K, E> predicate) {
+            N.checkArgNotNull(predicate);
+
+            return new Throwables.Predicate<Map.Entry<K, V>, E>() {
+                @Override
+                public boolean test(Entry<K, V> entry) throws E {
+                    return predicate.test(entry.getKey());
+                }
+            };
+        }
+
+        public static <K, V, E extends Exception> Throwables.Predicate<Map.Entry<K, V>, E> testByValue(final Throwables.Predicate<? super V, E> predicate) {
+            N.checkArgNotNull(predicate);
+
+            return new Throwables.Predicate<Map.Entry<K, V>, E>() {
+                @Override
+                public boolean test(Entry<K, V> entry) throws E {
+                    return predicate.test(entry.getValue());
+                }
+            };
+        }
+
+        public static <K, V, E extends Exception> Throwables.Consumer<Map.Entry<K, V>, E> acceptByKey(final Throwables.Consumer<? super K, E> consumer) {
+            N.checkArgNotNull(consumer);
+
+            return new Throwables.Consumer<Map.Entry<K, V>, E>() {
+                @Override
+                public void accept(Entry<K, V> entry) throws E {
+                    consumer.accept(entry.getKey());
+                }
+            };
+        }
+
+        public static <K, V, E extends Exception> Throwables.Consumer<Map.Entry<K, V>, E> acceptByValue(final Throwables.Consumer<? super V, E> consumer) {
+            N.checkArgNotNull(consumer);
+
+            return new Throwables.Consumer<Map.Entry<K, V>, E>() {
+                @Override
+                public void accept(Entry<K, V> entry) throws E {
+                    consumer.accept(entry.getValue());
+                }
+            };
+        }
+
+        public static <K, V, R, E extends Exception> Throwables.Function<Map.Entry<K, V>, R, E> applyByKey(final Throwables.Function<? super K, R, E> func) {
+            N.checkArgNotNull(func);
+
+            return new Throwables.Function<Map.Entry<K, V>, R, E>() {
+                @Override
+                public R apply(Entry<K, V> entry) throws E {
+                    return func.apply(entry.getKey());
+                }
+            };
+        }
+
+        public static <K, V, R, E extends Exception> Throwables.Function<Map.Entry<K, V>, R, E> applyByValue(final Throwables.Function<? super V, R, E> func) {
+            N.checkArgNotNull(func);
+
+            return new Throwables.Function<Map.Entry<K, V>, R, E>() {
+                @Override
+                public R apply(Entry<K, V> entry) throws E {
+                    return func.apply(entry.getValue());
+                }
+            };
         }
     }
 }

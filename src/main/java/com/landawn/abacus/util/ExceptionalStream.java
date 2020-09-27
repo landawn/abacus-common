@@ -286,7 +286,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
             return empty();
         }
 
-        return newStream(ExceptionalIterator.wrap(iter));
+        return newStream(ExceptionalIterator.<T, E> wrap(iter));
     }
 
     /**
@@ -589,6 +589,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
         });
     }
 
+    public static <T, E extends Exception> ExceptionalStream<T, E> of(final Optional<T> op) {
+        return op == null || !op.isPresent() ? ExceptionalStream.<T, E> empty() : ExceptionalStream.<T, E> of(op.get());
+    }
+
+    public static <T, E extends Exception> ExceptionalStream<T, E> of(final java.util.Optional<T> op) {
+        return op == null || !op.isPresent() ? ExceptionalStream.<T, E> empty() : ExceptionalStream.<T, E> of(op.get());
+    }
+
     /**
      * Lazy evaluation.
      * <br />
@@ -643,12 +651,28 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
         return of(map.keySet());
     }
 
+    public static <K, V, E extends Exception> ExceptionalStream<K, E> ofKeys(final Map<K, V> map, final Throwables.Predicate<? super V, E> valueFilter) {
+        if (map == null || map.size() == 0) {
+            return empty();
+        }
+
+        return ExceptionalStream.<K, V, E> of(map).filter(Fnn.<K, V, E> testByValue(valueFilter)).map(Fnn.<K, V, E> key());
+    }
+
     public static <V, E extends Exception> ExceptionalStream<V, E> ofValues(final Map<?, V> map) {
         if (N.isNullOrEmpty(map)) {
             return empty();
         }
 
         return of(map.values());
+    }
+
+    public static <K, V, E extends Exception> ExceptionalStream<V, E> ofValues(final Map<K, V> map, final Throwables.Predicate<? super K, E> keyFilter) {
+        if (map == null || map.size() == 0) {
+            return empty();
+        }
+
+        return ExceptionalStream.<K, V, E> of(map).filter(Fnn.<K, V, E> testByKey(keyFilter)).map(Fnn.<K, V, E> value());
     }
 
     /**
@@ -1495,6 +1519,205 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
         }
 
         return newCloseHandlers;
+    }
+
+    /**
+     *
+     * @param a
+     * @param b
+     * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
+     * @return
+     */
+    public static <T, E extends Exception> ExceptionalStream<T, E> merge(final T[] a, final T[] b,
+            final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
+        if (N.isNullOrEmpty(a)) {
+            return of(b);
+        } else if (N.isNullOrEmpty(b)) {
+            return of(a);
+        }
+
+        return newStream(new ExceptionalIterator<T, E>() {
+            private final int lenA = a.length;
+            private final int lenB = b.length;
+            private int cursorA = 0;
+            private int cursorB = 0;
+
+            @Override
+            public boolean hasNext() {
+                return cursorA < lenA || cursorB < lenB;
+            }
+
+            @Override
+            public T next() throws E {
+                if (cursorA < lenA) {
+                    if (cursorB < lenB) {
+                        if (nextSelector.apply(a[cursorA], b[cursorB]) == MergeResult.TAKE_FIRST) {
+                            return a[cursorA++];
+                        } else {
+                            return b[cursorB++];
+                        }
+                    } else {
+                        return a[cursorA++];
+                    }
+                } else if (cursorB < lenB) {
+                    return b[cursorB++];
+                } else {
+                    throw new NoSuchElementException();
+                }
+            }
+        });
+    }
+
+    /**
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
+     * @return
+     */
+    public static <T, E extends Exception> ExceptionalStream<T, E> merge(final T[] a, final T[] b, final T[] c,
+            final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
+        return merge(merge(a, b, nextSelector).iterator(), ExceptionalIterator.<T, E> wrap(N.iterate(c)), nextSelector);
+    }
+
+    /**
+     *
+     * @param a
+     * @param b
+     * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
+     * @return
+     */
+    public static <T, E extends Exception> ExceptionalStream<T, E> merge(final Collection<? extends T> a, final Collection<? extends T> b,
+            final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
+        return merge(N.iterate(a), N.iterate(b), nextSelector);
+    }
+
+    /**
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
+     * @return
+     */
+    public static <T, E extends Exception> ExceptionalStream<T, E> merge(final Collection<? extends T> a, final Collection<? extends T> b,
+            final Collection<? extends T> c, final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
+        return merge(N.iterate(a), N.iterate(b), N.iterate(c), nextSelector);
+    }
+
+    /**
+     *
+     * @param a
+     * @param b
+     * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
+     * @return
+     */
+    public static <T, E extends Exception> ExceptionalStream<T, E> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
+            final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
+        return merge(ExceptionalIterator.<T, E> wrap(a), ExceptionalIterator.<T, E> wrap(b), nextSelector);
+    }
+
+    /**
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
+     * @return
+     */
+    public static <T, E extends Exception> ExceptionalStream<T, E> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
+            final Iterator<? extends T> c, final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
+        return merge(merge(a, b, nextSelector).iterator(), ExceptionalIterator.<T, E> wrap(c), nextSelector);
+    }
+
+    /**
+     *
+     * @param a
+     * @param b
+     * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
+     * @return
+     */
+    public static <T, E extends Exception> ExceptionalStream<T, E> merge(final ExceptionalStream<? extends T, E> a, final ExceptionalStream<? extends T, E> b,
+            final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
+        return merge(a.iterator(), b.iterator(), nextSelector).onClose(new Throwables.Runnable<E>() {
+            @Override
+            public void run() throws E {
+                try {
+                    a.close();
+                } finally {
+                    b.close();
+                    ;
+                }
+            }
+        });
+    }
+
+    public static <T, E extends Exception> ExceptionalStream<T, E> merge(final ExceptionalStream<? extends T, E> a, final ExceptionalStream<? extends T, E> b,
+            final ExceptionalStream<? extends T, E> c, final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
+        return merge(merge(a, b, nextSelector), c, nextSelector);
+    }
+
+    static <T, E extends Exception> ExceptionalStream<T, E> merge(final ExceptionalIterator<? extends T, E> a, final ExceptionalIterator<? extends T, E> b,
+            final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
+        return newStream(new ExceptionalIterator<T, E>() {
+            private T nextA = null;
+            private T nextB = null;
+            private boolean hasNextA = false;
+            private boolean hasNextB = false;
+
+            @Override
+            public boolean hasNext() throws E {
+                return hasNextA || hasNextB || a.hasNext() || b.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                if (hasNextA) {
+                    if (b.hasNext()) {
+                        if (nextSelector.apply(nextA, (nextB = b.next())) == MergeResult.TAKE_FIRST) {
+                            hasNextA = false;
+                            hasNextB = true;
+                            return nextA;
+                        } else {
+                            return nextB;
+                        }
+                    } else {
+                        hasNextA = false;
+                        return nextA;
+                    }
+                } else if (hasNextB) {
+                    if (a.hasNext()) {
+                        if (nextSelector.apply((nextA = a.next()), nextB) == MergeResult.TAKE_FIRST) {
+                            return nextA;
+                        } else {
+                            hasNextA = true;
+                            hasNextB = false;
+                            return nextB;
+                        }
+                    } else {
+                        hasNextB = false;
+                        return nextB;
+                    }
+                } else if (a.hasNext()) {
+                    if (b.hasNext()) {
+                        if (nextSelector.apply((nextA = a.next()), (nextB = b.next())) == MergeResult.TAKE_FIRST) {
+                            hasNextB = true;
+                            return nextA;
+                        } else {
+                            hasNextA = true;
+                            return nextB;
+                        }
+                    } else {
+                        return a.next();
+                    }
+                } else if (b.hasNext()) {
+                    return b.next();
+                } else {
+                    throw new NoSuchElementException();
+                }
+            }
+        });
     }
 
     /**
@@ -7733,6 +7956,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
             return ExceptionalStream.<RuntimeException> of(a);
         }
 
+        public static <T> ExceptionalStream<T, RuntimeException> of(final Optional<T> op) {
+            return ExceptionalStream.<T, RuntimeException> of(op);
+        }
+
+        public static <T> ExceptionalStream<T, RuntimeException> of(final java.util.Optional<T> op) {
+            return ExceptionalStream.<T, RuntimeException> of(op);
+        }
+
         public static <T> ExceptionalStream<T, RuntimeException> of(final Throwables.Supplier<Collection<? extends T>, RuntimeException> supplier) {
             return ExceptionalStream.<T, RuntimeException> of(supplier);
         }
@@ -7746,8 +7977,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
             return ExceptionalStream.<K, RuntimeException> ofKeys(map);
         }
 
+        public static <K, V> ExceptionalStream<K, RuntimeException> ofKeys(final Map<K, V> map,
+                final Throwables.Predicate<? super V, RuntimeException> valueFilter) {
+            return ExceptionalStream.<K, V, RuntimeException> ofKeys(map, valueFilter);
+        }
+
         public static <V> ExceptionalStream<V, RuntimeException> ofValues(final Map<?, V> map) {
             return ExceptionalStream.<V, RuntimeException> ofValues(map);
+        }
+
+        public static <K, V> ExceptionalStream<V, RuntimeException> ofValues(final Map<K, V> map,
+                final Throwables.Predicate<? super K, RuntimeException> keyFilter) {
+            return ExceptionalStream.<K, V, RuntimeException> ofValues(map, keyFilter);
         }
 
         public static <T> ExceptionalStream<T, RuntimeException> iterate(final Throwables.BooleanSupplier<? extends RuntimeException> hasNext,

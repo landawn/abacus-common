@@ -42,13 +42,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
     }
 
     public Set<T> toSet() {
-        final Set<T> set = N.newHashSet();
-
-        while (hasNext()) {
-            set.add(next());
-        }
-
-        return set;
+        return toCollection(Suppliers.<T> ofSet());
     }
 
     /**

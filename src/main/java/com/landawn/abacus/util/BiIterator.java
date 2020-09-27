@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018, Haiyang Li.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,9 +17,11 @@ package com.landawn.abacus.util;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.function.BiConsumer;
 import com.landawn.abacus.util.function.BiFunction;
 import com.landawn.abacus.util.function.BooleanSupplier;
@@ -510,7 +512,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * It's preferred to call <code>forEachRemaining(Try.BiConsumer)</code> to avoid the create the unnecessary <code>Pair</code> Objects.
      *
      * @param action
-     * @deprecated 
+     * @deprecated
      */
     @Override
     @Deprecated
@@ -536,5 +538,17 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
         N.checkArgNotNull(mapper);
 
         return Stream.of(map(mapper));
+    }
+
+    public Pair<A, B>[] toArray() {
+        return toArray(new Pair[0]);
+    }
+
+    public <T> T[] toArray(final T[] a) {
+        return toList().toArray(a);
+    }
+
+    public List<Pair<A, B>> toList() {
+        return toCollection(Suppliers.<Pair<A, B>> ofList());
     }
 }

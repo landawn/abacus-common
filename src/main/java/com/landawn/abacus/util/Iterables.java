@@ -54,7 +54,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @author Haiyang Li
  * @since 1.2.7
  */
-public class Iterables {
+public final class Iterables {
 
     private static final Logger logger = LoggerFactory.getLogger(Iterables.class);
 

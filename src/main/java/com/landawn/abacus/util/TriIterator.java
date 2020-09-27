@@ -17,8 +17,10 @@ package com.landawn.abacus.util;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 
+import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.function.BiConsumer;
 import com.landawn.abacus.util.function.BooleanSupplier;
 import com.landawn.abacus.util.function.Consumer;
@@ -490,5 +492,17 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
         N.checkArgNotNull(mapper);
 
         return Stream.of(map(mapper));
+    }
+
+    public Triple<A, B, C>[] toArray() {
+        return toArray(new Triple[0]);
+    }
+
+    public <T> T[] toArray(final T[] a) {
+        return toList().toArray(a);
+    }
+
+    public List<Triple<A, B, C>> toList() {
+        return toCollection(Suppliers.ofList());
     }
 }
