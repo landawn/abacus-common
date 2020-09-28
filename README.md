@@ -24,6 +24,7 @@ A general programming library in Java. It's easy to learn and simple to use with
 [Multiset](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/Multiset_view.html), 
 [Multimap](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/Multimap_view.html), 
 [DataSet](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/DataSet_view.html), 
+[Sheet](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/Sheet_view.html), 
 [BiMap](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/BiMap_view.html), 
 [ImmutableList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/ImmutableList_view.html), 
 [ImmutableSet](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/ImmutableSet_view.html), 
