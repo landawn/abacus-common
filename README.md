@@ -124,6 +124,7 @@ more [Collectors](https://htmlpreview.github.io/?https://github.com/landawn/abac
 
 * Http:
 [HttpClient](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/HttpClient_view.html), 
+[HttpRequest](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/HttpRequest_view.html), 
 [OkHttpRequest](https://htmlpreview.github.io/?https://github.com/landawn/abacus-util/master/docs/OkHttpRequest_view.html), 
 and [More](https://www.javadoc.io/static/com.landawn/abacus-util/2.0.3/com/landawn/abacus/http/package-summary.html) ...
 
