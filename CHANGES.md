@@ -1,3 +1,8 @@
+### 2.1.0
+
+* A new release.
+
+
 ### 2.0.3
 
 * Improvements and bug fix.

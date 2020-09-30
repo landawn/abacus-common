@@ -308,6 +308,8 @@ public final class HttpSettings implements Cloneable {
     }
 
     /**
+     * Set http header specified by {@code name/value}.
+     * If this {@code HttpSettings} already has any headers with that name, they are all replaced.
      *
      * @param name
      * @param value
@@ -320,6 +322,8 @@ public final class HttpSettings implements Cloneable {
     }
 
     /**
+     * Set http headers specified by {@code name1/value1}, {@code name2/value2}.
+     * If this {@code HttpSettings} already has any headers with that name, they are all replaced.
      *
      * @param name1
      * @param value1
@@ -335,6 +339,8 @@ public final class HttpSettings implements Cloneable {
     }
 
     /**
+     * Set http headers specified by {@code name1/value1}, {@code name2/value2}, {@code name3/value3}.
+     * If this {@code HttpSettings} already has any headers with that name, they are all replaced.
      *
      * @param name1
      * @param value1
@@ -353,6 +359,8 @@ public final class HttpSettings implements Cloneable {
     }
 
     /**
+     * Set http headers specified by the key/value entities from {@code Map}.
+     * If this {@code HttpSettings} already has any headers with that name, they are all replaced.
      *
      * @param headers
      * @return
@@ -364,14 +372,15 @@ public final class HttpSettings implements Cloneable {
     }
 
     /**
+     * Removes all headers on this {@code HttpSettings} and adds {@code headers}.
      *
      * @param headers
      * @return
      */
     public HttpSettings headers(HttpHeaders headers) {
-        if (headers == null) {
-            this.headers = headers;
-        } else {
+        headers().clear();
+
+        if (headers != null) {
             headers().setAll(headers.map);
         }
 

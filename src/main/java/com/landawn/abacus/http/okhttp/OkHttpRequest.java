@@ -69,7 +69,7 @@ import okhttp3.internal.Util;
  *
  * @since 1.3
  */
-public class OkHttpRequest {
+public final class OkHttpRequest {
     private static final Logger logger = LoggerFactory.getLogger(OkHttpRequest.class);
 
     private static final MediaType APPLICATION_JSON_MEDIA_TYPE = MediaType.get("application/json");
@@ -202,14 +202,24 @@ public class OkHttpRequest {
     }
 
     /**
-     * Sets the header named {@code name} to {@code value}. If this request already has any headers
-     * with that name, they are all replaced.
+     * Sets the header named {@code name} to {@code value}. 
+     * If this request already has any headers with that name, they are all replaced.
      */
     public OkHttpRequest header(String name, String value) {
         builder.header(name, value);
         return this;
     }
 
+    /**
+     * Set http headers specified by {@code name1/value1}, {@code name2/value2}.
+     * If this request already has any headers with that name, they are all replaced.
+     * 
+     * @param name1
+     * @param value1
+     * @param name2
+     * @param value2
+     * @return
+     */
     public OkHttpRequest headers(String name1, String value1, String name2, String value2) {
         builder.header(name1, value1);
         builder.header(name2, value2);
@@ -217,6 +227,18 @@ public class OkHttpRequest {
         return this;
     }
 
+    /**
+     * Set http headers specified by {@code name1/value1}, {@code name2/value2}, {@code name3/value3}.
+     * If this request already has any headers with that name, they are all replaced.
+     * 
+     * @param name1
+     * @param value1
+     * @param name2
+     * @param value2
+     * @param name3
+     * @param value3
+     * @return
+     */
     public OkHttpRequest headers(String name1, String value1, String name2, String value2, String name3, String value3) {
         builder.header(name1, value1);
         builder.header(name2, value2);
@@ -225,6 +247,13 @@ public class OkHttpRequest {
         return this;
     }
 
+    /**
+     * Set http headers specified by the key/value entities from {@code Map}.
+     * If this request already has any headers with that name, they are all replaced.
+     * 
+     * @param headers
+     * @return
+     */
     public OkHttpRequest headers(final Map<String, ?> headers) {
         if (N.notNullOrEmpty(headers)) {
             for (Map.Entry<String, ?> entry : headers.entrySet()) {

@@ -31,6 +31,8 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -41,8 +43,10 @@ import com.landawn.abacus.http.HttpHeaders.Names;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.type.Type;
+import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.BufferedReader;
 import com.landawn.abacus.util.BufferedWriter;
+import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
@@ -56,7 +60,7 @@ import com.landawn.abacus.util.URLEncodedUtil;
  * @author Haiyang Li
  * @since 0.8
  */
-public final class HttpClient extends AbstractHttpClient {
+public final class HttpClient {
 
     static final Logger logger = LoggerFactory.getLogger(HttpClient.class);
 
@@ -70,6 +74,27 @@ public final class HttpClient extends AbstractHttpClient {
             System.setProperty("http.maxConnections", String.valueOf(maxConnections));
         }
     }
+
+    // ...
+    public static final int DEFAULT_MAX_CONNECTION = 16;
+
+    /** Unit is milliseconds. */
+    public static final int DEFAULT_CONNECTION_TIMEOUT = 8000;
+
+    public static final int DEFAULT_READ_TIMEOUT = 16000;
+
+    // ...
+    protected final String _url;
+
+    protected final int _maxConnection;
+
+    protected final long _connectionTimeout;
+
+    protected final long _readTimeout;
+
+    protected final HttpSettings _settings;
+
+    protected final AsyncExecutor _asyncExecutor;
 
     protected final URL _netURL;
 
@@ -93,7 +118,22 @@ public final class HttpClient extends AbstractHttpClient {
 
     protected HttpClient(String url, int maxConnection, long connectionTimeout, long readTimeout, HttpSettings settings,
             final AtomicInteger sharedActiveConnectionCounter) {
-        super(url, maxConnection, connectionTimeout, readTimeout, settings);
+        if (N.isNullOrEmpty(url)) {
+            throw new IllegalArgumentException("url can't be null or empty");
+        }
+
+        if ((maxConnection < 0) || (connectionTimeout < 0) || (readTimeout < 0)) {
+            throw new IllegalArgumentException(
+                    "maxConnection, connectionTimeout or readTimeout can't be less than 0: " + maxConnection + ", " + connectionTimeout + ", " + readTimeout);
+        }
+
+        this._url = url;
+        this._maxConnection = (maxConnection == 0) ? DEFAULT_MAX_CONNECTION : maxConnection;
+        this._connectionTimeout = (connectionTimeout == 0) ? DEFAULT_CONNECTION_TIMEOUT : connectionTimeout;
+        this._readTimeout = (readTimeout == 0) ? DEFAULT_READ_TIMEOUT : readTimeout;
+        this._settings = settings == null ? HttpSettings.create() : settings;
+
+        _asyncExecutor = new AsyncExecutor(Math.min(8, this._maxConnection), this._maxConnection, 300L, TimeUnit.SECONDS);
 
         try {
             this._netURL = new URL(url);
@@ -176,6 +216,639 @@ public final class HttpClient extends AbstractHttpClient {
         return new HttpClient(url, maxConnection, connectionTimeout, readTimeout, settings, sharedActiveConnectionCounter);
     }
 
+    public String url() {
+        return _url;
+    }
+
+    /**
+     *
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public String get() throws UncheckedIOException {
+        return get(String.class);
+    }
+
+    /**
+     *
+     * @param settings
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public String get(final HttpSettings settings) throws UncheckedIOException {
+        return get(String.class, settings);
+    }
+
+    /**
+     *
+     * @param queryParameters
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public String get(final Object queryParameters) throws UncheckedIOException {
+        return get(String.class, queryParameters);
+    }
+
+    /**
+     *
+     * @param queryParameters
+     * @param settings
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public String get(final Object queryParameters, final HttpSettings settings) throws UncheckedIOException {
+        return get(String.class, queryParameters, settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public <T> T get(final Class<T> resultClass) throws UncheckedIOException {
+        return get(resultClass, null, _settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param settings
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public <T> T get(final Class<T> resultClass, final HttpSettings settings) throws UncheckedIOException {
+        return get(resultClass, null, settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param queryParameters
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public <T> T get(final Class<T> resultClass, final Object queryParameters) throws UncheckedIOException {
+        return get(resultClass, queryParameters, _settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param queryParameters
+     * @param settings
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public <T> T get(final Class<T> resultClass, final Object queryParameters, final HttpSettings settings) throws UncheckedIOException {
+        return execute(resultClass, HttpMethod.GET, queryParameters, settings);
+    }
+
+    public ContinuableFuture<String> asyncGet() {
+        return asyncGet(String.class);
+    }
+
+    /**
+     *
+     * @param settings
+     * @return
+     */
+    public ContinuableFuture<String> asyncGet(final HttpSettings settings) {
+        return asyncGet(String.class, settings);
+    }
+
+    /**
+     *
+     * @param queryParameters
+     * @return
+     */
+    public ContinuableFuture<String> asyncGet(final Object queryParameters) {
+        return asyncGet(String.class, queryParameters);
+    }
+
+    /**
+     *
+     * @param queryParameters
+     * @param settings
+     * @return
+     */
+    public ContinuableFuture<String> asyncGet(final Object queryParameters, final HttpSettings settings) {
+        return asyncGet(String.class, queryParameters, settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @return
+     */
+    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass) {
+        return asyncGet(resultClass, null, _settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param settings
+     * @return
+     */
+    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final HttpSettings settings) {
+        return asyncGet(resultClass, null, settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param queryParameters
+     * @return
+     */
+    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Object queryParameters) {
+        return asyncGet(resultClass, queryParameters, _settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param queryParameters
+     * @param settings
+     * @return
+     */
+    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Object queryParameters, final HttpSettings settings) {
+        return asyncExecute(resultClass, HttpMethod.GET, queryParameters, settings);
+    }
+
+    /**
+     *
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public String delete() throws UncheckedIOException {
+        return delete(String.class);
+    }
+
+    /**
+     *
+     * @param settings
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public String delete(final HttpSettings settings) throws UncheckedIOException {
+        return delete(String.class, settings);
+    }
+
+    /**
+     *
+     * @param queryParameters
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public String delete(final Object queryParameters) throws UncheckedIOException {
+        return delete(String.class, queryParameters);
+    }
+
+    /**
+     *
+     * @param queryParameters
+     * @param settings
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public String delete(final Object queryParameters, final HttpSettings settings) throws UncheckedIOException {
+        return delete(String.class, queryParameters, settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public <T> T delete(final Class<T> resultClass) throws UncheckedIOException {
+        return delete(resultClass, null, _settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param settings
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public <T> T delete(final Class<T> resultClass, final HttpSettings settings) throws UncheckedIOException {
+        return delete(resultClass, null, settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param queryParameters
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public <T> T delete(final Class<T> resultClass, final Object queryParameters) throws UncheckedIOException {
+        return delete(resultClass, queryParameters, _settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param queryParameters
+     * @param settings
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public <T> T delete(final Class<T> resultClass, final Object queryParameters, final HttpSettings settings) throws UncheckedIOException {
+        return execute(resultClass, HttpMethod.DELETE, queryParameters, settings);
+    }
+
+    public ContinuableFuture<String> asyncDelete() {
+        return asyncDelete(String.class);
+    }
+
+    /**
+     *
+     * @param settings
+     * @return
+     */
+    public ContinuableFuture<String> asyncDelete(final HttpSettings settings) {
+        return asyncDelete(String.class, settings);
+    }
+
+    /**
+     *
+     * @param queryParameters
+     * @return
+     */
+    public ContinuableFuture<String> asyncDelete(final Object queryParameters) {
+        return asyncDelete(String.class, queryParameters);
+    }
+
+    /**
+     *
+     * @param queryParameters
+     * @param settings
+     * @return
+     */
+    public ContinuableFuture<String> asyncDelete(final Object queryParameters, final HttpSettings settings) {
+        return asyncDelete(String.class, queryParameters, settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @return
+     */
+    public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass) {
+        return asyncDelete(resultClass, null, _settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param settings
+     * @return
+     */
+    public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final HttpSettings settings) {
+        return asyncDelete(resultClass, null, settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param queryParameters
+     * @return
+     */
+    public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final Object queryParameters) {
+        return asyncDelete(resultClass, queryParameters, _settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param queryParameters
+     * @param settings
+     * @return
+     */
+    public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final Object queryParameters, final HttpSettings settings) {
+        return asyncExecute(resultClass, HttpMethod.DELETE, queryParameters, settings);
+    }
+
+    /**
+     *
+     * @param request
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public String post(final Object request) throws UncheckedIOException {
+        return post(String.class, request);
+    }
+
+    /**
+     *
+     * @param request
+     * @param settings
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public String post(final Object request, final HttpSettings settings) throws UncheckedIOException {
+        return post(String.class, request, settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param request
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public <T> T post(final Class<T> resultClass, final Object request) throws UncheckedIOException {
+        return post(resultClass, request, _settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param request
+     * @param settings
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public <T> T post(final Class<T> resultClass, final Object request, final HttpSettings settings) throws UncheckedIOException {
+        return execute(resultClass, HttpMethod.POST, request, settings);
+    }
+
+    /**
+     *
+     * @param request
+     * @return
+     */
+    public ContinuableFuture<String> asyncPost(final Object request) {
+        return asyncPost(String.class, request);
+    }
+
+    /**
+     *
+     * @param request
+     * @param settings
+     * @return
+     */
+    public ContinuableFuture<String> asyncPost(final Object request, final HttpSettings settings) {
+        return asyncPost(String.class, request, settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param request
+     * @return
+     */
+    public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Object request) {
+        return asyncPost(resultClass, request, _settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param request
+     * @param settings
+     * @return
+     */
+    public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Object request, final HttpSettings settings) {
+        return asyncExecute(resultClass, HttpMethod.POST, request, settings);
+    }
+
+    /**
+     *
+     * @param request
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public String put(final Object request) throws UncheckedIOException {
+        return put(String.class, request);
+    }
+
+    /**
+     *
+     * @param request
+     * @param settings
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public String put(final Object request, final HttpSettings settings) throws UncheckedIOException {
+        return put(String.class, request, settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param request
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public <T> T put(final Class<T> resultClass, final Object request) throws UncheckedIOException {
+        return put(resultClass, request, _settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param request
+     * @param settings
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public <T> T put(final Class<T> resultClass, final Object request, final HttpSettings settings) throws UncheckedIOException {
+        return execute(resultClass, HttpMethod.PUT, request, settings);
+    }
+
+    /**
+     *
+     * @param request
+     * @return
+     */
+    public ContinuableFuture<String> asyncPut(final Object request) {
+        return asyncPut(String.class, request);
+    }
+
+    /**
+     *
+     * @param request
+     * @param settings
+     * @return
+     */
+    public ContinuableFuture<String> asyncPut(final Object request, final HttpSettings settings) {
+        return asyncPut(String.class, request, settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param request
+     * @return
+     */
+    public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass, final Object request) {
+        return asyncPut(resultClass, request, _settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param request
+     * @param settings
+     * @return
+     */
+    public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass, final Object request, final HttpSettings settings) {
+        return asyncExecute(resultClass, HttpMethod.PUT, request, settings);
+    }
+
+    // TODO HTTP METHOD PATCH is not supported by HttpURLConnection.
+    //    /**
+    //     *
+    //     * @param request
+    //     * @return
+    //     * @throws UncheckedIOException the unchecked IO exception
+    //     */
+    //    public String patch(final Object request) throws UncheckedIOException {
+    //        return patch(String.class, request);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param request
+    //     * @param settings
+    //     * @return
+    //     * @throws UncheckedIOException the unchecked IO exception
+    //     */
+    //    public String patch(final Object request, final HttpSettings settings) throws UncheckedIOException {
+    //        return patch(String.class, request, settings);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param resultClass
+    //     * @param request
+    //     * @return
+    //     * @throws UncheckedIOException the unchecked IO exception
+    //     */
+    //    public <T> T patch(final Class<T> resultClass, final Object request) throws UncheckedIOException {
+    //        return patch(resultClass, request, _settings);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param resultClass
+    //     * @param request
+    //     * @param settings
+    //     * @return
+    //     * @throws UncheckedIOException the unchecked IO exception
+    //     */
+    //    public <T> T patch(final Class<T> resultClass, final Object request, final HttpSettings settings) throws UncheckedIOException {
+    //        return execute(resultClass, HttpMethod.PATCH, request, settings);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param request
+    //     * @return
+    //     */
+    //    public ContinuableFuture<String> asyncPatch(final Object request) {
+    //        return asyncPatch(String.class, request);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param request
+    //     * @param settings
+    //     * @return
+    //     */
+    //    public ContinuableFuture<String> asyncPatch(final Object request, final HttpSettings settings) {
+    //        return asyncPatch(String.class, request, settings);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param resultClass
+    //     * @param request
+    //     * @return
+    //     */
+    //    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Object request) {
+    //        return asyncPatch(resultClass, request, _settings);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param resultClass
+    //     * @param request
+    //     * @param settings
+    //     * @return
+    //     */
+    //    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Object request, final HttpSettings settings) {
+    //        return asyncExecute(resultClass, HttpMethod.PATCH, request, settings);
+    //    }
+
+    /**
+     *
+     * @param httpMethod
+     * @param request
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public String execute(final HttpMethod httpMethod, final Object request) throws UncheckedIOException {
+        return execute(String.class, httpMethod, request);
+    }
+
+    /**
+     *
+     * @param httpMethod
+     * @param request
+     * @param settings
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public String execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings) throws UncheckedIOException {
+        return execute(String.class, httpMethod, request, settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param httpMethod
+     * @param request
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public <T> T execute(final Class<T> resultClass, final HttpMethod httpMethod, final Object request) throws UncheckedIOException {
+        return execute(resultClass, httpMethod, request, _settings);
+    }
+
     /**
      *
      * @param <T>
@@ -186,7 +859,6 @@ public final class HttpClient extends AbstractHttpClient {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    @Override
     public <T> T execute(final Class<T> resultClass, final HttpMethod httpMethod, final Object request, final HttpSettings settings)
             throws UncheckedIOException {
         return execute(resultClass, null, null, httpMethod, request, settings);
@@ -200,7 +872,6 @@ public final class HttpClient extends AbstractHttpClient {
      * @param settings
      * @throws UncheckedIOException the unchecked IO exception
      */
-    @Override
     public void execute(final File output, final HttpMethod httpMethod, final Object request, final HttpSettings settings) throws UncheckedIOException {
         OutputStream os = null;
 
@@ -222,7 +893,6 @@ public final class HttpClient extends AbstractHttpClient {
      * @param settings
      * @throws UncheckedIOException the unchecked IO exception
      */
-    @Override
     public void execute(final OutputStream output, final HttpMethod httpMethod, final Object request, final HttpSettings settings) throws UncheckedIOException {
         execute(null, output, null, httpMethod, request, settings);
     }
@@ -235,7 +905,6 @@ public final class HttpClient extends AbstractHttpClient {
      * @param settings
      * @throws UncheckedIOException the unchecked IO exception
      */
-    @Override
     public void execute(final Writer output, final HttpMethod httpMethod, final Object request, final HttpSettings settings) throws UncheckedIOException {
         execute(null, null, output, httpMethod, request, settings);
     }
@@ -372,6 +1041,76 @@ public final class HttpClient extends AbstractHttpClient {
         } finally {
             close(os, is, connection);
         }
+    }
+
+    /**
+     * Checks if is one way request.
+     *
+     * @param settings
+     * @return true, if is one way request
+     */
+    protected boolean isOneWayRequest(HttpSettings settings) {
+        return _settings.isOneWayRequest() || ((settings != null) && settings.isOneWayRequest());
+    }
+
+    /**
+     * Gets the content format.
+     *
+     * @param settings
+     * @return
+     */
+    protected ContentFormat getContentFormat(HttpSettings settings) {
+        ContentFormat contentFormat = null;
+
+        if (settings != null) {
+            contentFormat = settings.getContentFormat();
+        }
+
+        if (contentFormat == null || contentFormat == ContentFormat.NONE) {
+            contentFormat = _settings.getContentFormat();
+        }
+
+        return contentFormat;
+    }
+
+    /**
+     * Gets the content type.
+     *
+     * @param settings
+     * @return
+     */
+    protected String getContentType(HttpSettings settings) {
+        String contentType = null;
+
+        if (settings != null) {
+            contentType = settings.getContentType();
+        }
+
+        if (N.isNullOrEmpty(contentType)) {
+            contentType = _settings.getContentType();
+        }
+
+        return contentType;
+    }
+
+    /**
+     * Gets the content encoding.
+     *
+     * @param settings
+     * @return
+     */
+    protected String getContentEncoding(HttpSettings settings) {
+        String contentEncoding = null;
+
+        if (settings != null) {
+            contentEncoding = settings.getContentEncoding();
+        }
+
+        if (N.isNullOrEmpty(contentEncoding)) {
+            contentEncoding = _settings.getContentEncoding();
+        }
+
+        return contentEncoding;
     }
 
     /**
@@ -538,5 +1277,128 @@ public final class HttpClient extends AbstractHttpClient {
         }
 
         // connection.disconnect();
+    }
+
+    /**
+     *
+     * @param httpMethod
+     * @param request
+     * @return
+     */
+    public ContinuableFuture<String> asyncExecute(final HttpMethod httpMethod, final Object request) {
+        return asyncExecute(String.class, httpMethod, request);
+    }
+
+    /**
+     *
+     * @param httpMethod
+     * @param request
+     * @param settings
+     * @return
+     */
+    public ContinuableFuture<String> asyncExecute(final HttpMethod httpMethod, final Object request, final HttpSettings settings) {
+        return asyncExecute(String.class, httpMethod, request, settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param httpMethod
+     * @param request
+     * @return
+     */
+    public <T> ContinuableFuture<T> asyncExecute(final Class<T> resultClass, final HttpMethod httpMethod, final Object request) {
+        return asyncExecute(resultClass, httpMethod, request, _settings);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @param httpMethod
+     * @param request
+     * @param settings
+     * @return
+     */
+    public <T> ContinuableFuture<T> asyncExecute(final Class<T> resultClass, final HttpMethod httpMethod, final Object request, final HttpSettings settings) {
+        final Callable<T> cmd = new Callable<T>() {
+            @Override
+            public T call() throws Exception {
+                return execute(resultClass, httpMethod, request, settings);
+            }
+        };
+
+        return _asyncExecutor.execute(cmd);
+    }
+
+    /**
+     *
+     * @param output
+     * @param httpMethod
+     * @param request
+     * @param settings
+     * @return
+     */
+    public ContinuableFuture<Void> asyncExecute(final File output, final HttpMethod httpMethod, final Object request, final HttpSettings settings) {
+        final Callable<Void> cmd = new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                execute(output, httpMethod, request, settings);
+
+                return null;
+            }
+        };
+
+        return _asyncExecutor.execute(cmd);
+    }
+
+    /**
+     *
+     * @param output
+     * @param httpMethod
+     * @param request
+     * @param settings
+     * @return
+     */
+    public ContinuableFuture<Void> asyncExecute(final OutputStream output, final HttpMethod httpMethod, final Object request, final HttpSettings settings) {
+        final Callable<Void> cmd = new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                execute(output, httpMethod, request, settings);
+
+                return null;
+            }
+        };
+
+        return _asyncExecutor.execute(cmd);
+    }
+
+    /**
+     *
+     * @param output
+     * @param httpMethod
+     * @param request
+     * @param settings
+     * @return
+     */
+    public ContinuableFuture<Void> asyncExecute(final Writer output, final HttpMethod httpMethod, final Object request, final HttpSettings settings) {
+        final Callable<Void> cmd = new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                execute(output, httpMethod, request, settings);
+
+                return null;
+            }
+        };
+
+        return _asyncExecutor.execute(cmd);
+    }
+
+    /**
+     * Close.
+     */
+    public void close() {
+        // do nothing.
     }
 }

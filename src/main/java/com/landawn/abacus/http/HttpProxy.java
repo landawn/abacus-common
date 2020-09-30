@@ -85,11 +85,11 @@ public final class HttpProxy {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpProxy.class);
 
-    private static final int DEFAULT_MAX_CONNECTION = AbstractHttpClient.DEFAULT_MAX_CONNECTION;
+    private static final int DEFAULT_MAX_CONNECTION = HttpClient.DEFAULT_MAX_CONNECTION;
 
-    private static final int DEFAULT_CONNECTION_TIMEOUT = AbstractHttpClient.DEFAULT_CONNECTION_TIMEOUT;
+    private static final int DEFAULT_CONNECTION_TIMEOUT = HttpClient.DEFAULT_CONNECTION_TIMEOUT;
 
-    private static final int DEFAULT_READ_TIMEOUT = AbstractHttpClient.DEFAULT_READ_TIMEOUT;
+    private static final int DEFAULT_READ_TIMEOUT = HttpClient.DEFAULT_READ_TIMEOUT;
 
     // Upper and lower characters, digits, underscores, and hyphens, starting with a character.
     private static final String PARAM = "[a-zA-Z][a-zA-Z0-9_-]*";
