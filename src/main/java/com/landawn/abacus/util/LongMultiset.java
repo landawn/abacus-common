@@ -1288,6 +1288,42 @@ public final class LongMultiset<T> implements Iterable<T> {
         return valueMap.keySet().iterator();
     }
 
+    public Iterator<T> flatIterator() {
+        final Iterator<Map.Entry<T, MutableLong>> entryIter = valueMap.entrySet().iterator();
+
+        return new ObjIterator<T>() {
+            private Map.Entry<T, MutableLong> entry = null;
+            private T element = null;
+            private long count = 0;
+            private long cnt = 0;
+
+            @Override
+            public boolean hasNext() {
+                if (cnt >= count) {
+                    while (cnt >= count && entryIter.hasNext()) {
+                        entry = entryIter.next();
+                        element = entry.getKey();
+                        count = entry.getValue().value();
+                        cnt = 0;
+                    }
+                }
+
+                return cnt < count;
+            }
+
+            @Override
+            public T next() {
+                if (hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                cnt++;
+
+                return element;
+            }
+        };
+    }
+
     //    public Set<Map.Entry<E, MutableLong>> entrySet() {
     //        return valueMap.entrySet();
     //    }
@@ -1690,41 +1726,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     public Stream<T> flatStream() {
-        final Iterator<Map.Entry<T, MutableLong>> entryIter = valueMap.entrySet().iterator();
-
-        final Iterator<T> iter = new ObjIterator<T>() {
-            private Map.Entry<T, MutableLong> entry = null;
-            private T element = null;
-            private long count = 0;
-            private long cnt = 0;
-
-            @Override
-            public boolean hasNext() {
-                if (cnt >= count) {
-                    while (cnt >= count && entryIter.hasNext()) {
-                        entry = entryIter.next();
-                        element = entry.getKey();
-                        count = entry.getValue().value();
-                        cnt = 0;
-                    }
-                }
-
-                return cnt < count;
-            }
-
-            @Override
-            public T next() {
-                if (hasNext() == false) {
-                    throw new NoSuchElementException();
-                }
-
-                cnt++;
-
-                return element;
-            }
-        };
-
-        return Stream.of(iter);
+        return Stream.of(flatIterator());
     }
 
     private static final Function<MutableLong, Long> TO_LONG = new Function<MutableLong, Long>() {
