@@ -511,29 +511,29 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      *
      * @param e
-     * @param occurrences
+     * @param occurrencesToAdd
      * @return true if the specified occurrences is bigger than 0.
      * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Long.MAX_VALUE.
      */
-    public boolean add(final T e, final long occurrences) throws IllegalArgumentException {
-        checkOccurrences(occurrences);
+    public boolean add(final T e, final long occurrencesToAdd) throws IllegalArgumentException {
+        checkOccurrences(occurrencesToAdd);
 
         MutableLong count = valueMap.get(e);
 
-        if (count != null && occurrences > (Long.MAX_VALUE - count.value())) {
+        if (count != null && occurrencesToAdd > (Long.MAX_VALUE - count.value())) {
             throw new IllegalArgumentException("The total count is out of the bound of long");
         }
 
         if (count == null) {
-            if (occurrences > 0) {
-                count = MutableLong.of(occurrences);
+            if (occurrencesToAdd > 0) {
+                count = MutableLong.of(occurrencesToAdd);
                 valueMap.put(e, count);
             }
         } else {
-            count.add(occurrences);
+            count.add(occurrencesToAdd);
         }
 
-        return occurrences > 0;
+        return occurrencesToAdd > 0;
     }
 
     /**
@@ -551,17 +551,17 @@ public final class LongMultiset<T> implements Iterable<T> {
      * Adds the if absent.
      *
      * @param e
-     * @param occurrences
+     * @param occurrencesToAdd
      * @return true if the specified element is absent and occurrences is bigger than 0.
      * @throws IllegalArgumentException the illegal argument exception
      */
-    public boolean addIfAbsent(final T e, final long occurrences) throws IllegalArgumentException {
-        checkOccurrences(occurrences);
+    public boolean addIfAbsent(final T e, final long occurrencesToAdd) throws IllegalArgumentException {
+        checkOccurrences(occurrencesToAdd);
 
         MutableLong count = valueMap.get(e);
 
-        if (count == null && occurrences > 0) {
-            count = MutableLong.of(occurrences);
+        if (count == null && occurrencesToAdd > 0) {
+            count = MutableLong.of(occurrencesToAdd);
             valueMap.put(e, count);
 
             return true;
@@ -584,25 +584,25 @@ public final class LongMultiset<T> implements Iterable<T> {
      * Adds the and get.
      *
      * @param e
-     * @param occurrences
+     * @param occurrencesToAdd
      * @return
      */
-    public long addAndGet(final T e, final long occurrences) {
-        checkOccurrences(occurrences);
+    public long addAndGet(final T e, final long occurrencesToAdd) {
+        checkOccurrences(occurrencesToAdd);
 
         MutableLong count = valueMap.get(e);
 
-        if (count != null && occurrences > (Long.MAX_VALUE - count.value())) {
+        if (count != null && occurrencesToAdd > (Long.MAX_VALUE - count.value())) {
             throw new IllegalArgumentException("The total count is out of the bound of long");
         }
 
         if (count == null) {
-            if (occurrences > 0) {
-                count = MutableLong.of(occurrences);
+            if (occurrencesToAdd > 0) {
+                count = MutableLong.of(occurrencesToAdd);
                 valueMap.put(e, count);
             }
         } else {
-            count.add(occurrences);
+            count.add(occurrencesToAdd);
         }
 
         return count == null ? 0 : count.value();
@@ -622,27 +622,27 @@ public final class LongMultiset<T> implements Iterable<T> {
      * Gets the and add.
      *
      * @param e
-     * @param occurrences
+     * @param occurrencesToAdd
      * @return
      */
-    public long getAndAdd(final T e, final long occurrences) {
-        checkOccurrences(occurrences);
+    public long getAndAdd(final T e, final long occurrencesToAdd) {
+        checkOccurrences(occurrencesToAdd);
 
         MutableLong count = valueMap.get(e);
 
-        if (count != null && occurrences > (Long.MAX_VALUE - count.value())) {
+        if (count != null && occurrencesToAdd > (Long.MAX_VALUE - count.value())) {
             throw new IllegalArgumentException("The total count is out of the bound of long");
         }
 
         final long result = count == null ? 0 : count.value();
 
         if (count == null) {
-            if (occurrences > 0) {
-                count = MutableLong.of(occurrences);
+            if (occurrencesToAdd > 0) {
+                count = MutableLong.of(occurrencesToAdd);
                 valueMap.put(e, count);
             }
         } else {
-            count.add(occurrences);
+            count.add(occurrencesToAdd);
         }
 
         return result;
@@ -667,22 +667,22 @@ public final class LongMultiset<T> implements Iterable<T> {
      * Adds the all.
      *
      * @param c
-     * @param occurrences
+     * @param occurrencesToAdd
      * @return true, if successful
      * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Long.MAX_VALUE.
      */
-    public boolean addAll(final Collection<? extends T> c, final long occurrences) throws IllegalArgumentException {
-        checkOccurrences(occurrences);
+    public boolean addAll(final Collection<? extends T> c, final long occurrencesToAdd) throws IllegalArgumentException {
+        checkOccurrences(occurrencesToAdd);
 
-        if (N.isNullOrEmpty(c) || occurrences == 0) {
+        if (N.isNullOrEmpty(c) || occurrencesToAdd == 0) {
             return false;
         }
 
         for (T e : c) {
-            add(e, occurrences);
+            add(e, occurrencesToAdd);
         }
 
-        return occurrences > 0;
+        return occurrencesToAdd > 0;
     }
 
     /**
@@ -767,24 +767,24 @@ public final class LongMultiset<T> implements Iterable<T> {
      * The element will be removed from this <code>Multiset</code> if the occurrences equals to or less than 0 after the operation.
      *
      * @param e
-     * @param occurrences
+     * @param occurrencesToRemove
      * @return true, if successful
      */
-    public boolean remove(final Object e, final long occurrences) {
-        checkOccurrences(occurrences);
+    public boolean remove(final Object e, final long occurrencesToRemove) {
+        checkOccurrences(occurrencesToRemove);
 
         final MutableLong count = valueMap.get(e);
 
         if (count == null) {
             return false;
         } else {
-            count.subtract(occurrences);
+            count.subtract(occurrencesToRemove);
 
             if (count.value() <= 0) {
                 valueMap.remove(e);
             }
 
-            return occurrences > 0;
+            return occurrencesToRemove > 0;
         }
     }
 
@@ -802,18 +802,18 @@ public final class LongMultiset<T> implements Iterable<T> {
      * Removes the and get.
      *
      * @param e
-     * @param occurrences
+     * @param occurrencesToRemove
      * @return
      */
-    public long removeAndGet(final Object e, final long occurrences) {
-        checkOccurrences(occurrences);
+    public long removeAndGet(final Object e, final long occurrencesToRemove) {
+        checkOccurrences(occurrencesToRemove);
 
         final MutableLong count = valueMap.get(e);
 
         if (count == null) {
             return 0;
         } else {
-            count.subtract(occurrences);
+            count.subtract(occurrencesToRemove);
 
             if (count.value() <= 0) {
                 valueMap.remove(e);
@@ -837,17 +837,17 @@ public final class LongMultiset<T> implements Iterable<T> {
      * Gets the and remove.
      *
      * @param e
-     * @param occurrences
+     * @param occurrencesToRemove
      * @return
      */
-    public long getAndRemove(final Object e, final long occurrences) {
-        checkOccurrences(occurrences);
+    public long getAndRemove(final Object e, final long occurrencesToRemove) {
+        checkOccurrences(occurrencesToRemove);
 
         final MutableLong count = valueMap.get(e);
         final long result = count == null ? 0 : count.value();
 
         if (count != null) {
-            count.subtract(occurrences);
+            count.subtract(occurrencesToRemove);
 
             if (count.value() <= 0) {
                 valueMap.remove(e);
@@ -1029,13 +1029,15 @@ public final class LongMultiset<T> implements Iterable<T> {
      * The elements will be removed from this set if the occurrences equals to or less than 0 after the operation.
      *
      * @param c
-     * @param occurrences the occurrences to remove if the element is in the specified collection <code>c</code>.
+     * @param occurrencesToRemove the occurrences to remove if the element is in the specified collection <code>c</code>.
+     * @deprecated
      * @return <tt>true</tt> if this set changed as a result of the call
      */
-    public boolean removeAll(final Collection<?> c, final long occurrences) {
-        checkOccurrences(occurrences);
+    @Deprecated
+    public boolean removeAll(final Collection<?> c, final long occurrencesToRemove) {
+        checkOccurrences(occurrencesToRemove);
 
-        if (N.isNullOrEmpty(c) || occurrences == 0) {
+        if (N.isNullOrEmpty(c) || occurrencesToRemove == 0) {
             return false;
         }
 
@@ -1043,9 +1045,9 @@ public final class LongMultiset<T> implements Iterable<T> {
 
         for (Object e : c) {
             if (result == false) {
-                result = remove(e, occurrences);
+                result = remove(e, occurrencesToRemove);
             } else {
-                remove(e, occurrences);
+                remove(e, occurrencesToRemove);
             }
         }
 
@@ -1107,7 +1109,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean replaceIf(Throwables.Predicate<? super T, E> predicate, final int newOccurrences) throws E {
+    public <E extends Exception> boolean replaceIf(Throwables.Predicate<? super T, E> predicate, final long newOccurrences) throws E {
         checkOccurrences(newOccurrences);
 
         boolean modified = false;
@@ -1150,7 +1152,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @return true, if successful
      * @throws E the e
      */
-    public <E extends Exception> boolean replaceIf(Throwables.BiPredicate<? super T, ? super Long, E> predicate, final int newOccurrences) throws E {
+    public <E extends Exception> boolean replaceIf(Throwables.BiPredicate<? super T, ? super Long, E> predicate, final long newOccurrences) throws E {
         checkOccurrences(newOccurrences);
 
         boolean modified = false;
