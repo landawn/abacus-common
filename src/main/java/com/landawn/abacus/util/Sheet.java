@@ -1582,11 +1582,15 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @throws X the x
      */
     public <X extends Exception> void forEachH(Throwables.TriConsumer<R, C, E, X> action) throws X {
-        for (R rowKey : _rowKeySet) {
-            for (C columnKey : _columnKeySet) {
-                if (_initialized) {
+        if (_initialized) {
+            for (R rowKey : _rowKeySet) {
+                for (C columnKey : _columnKeySet) {
                     action.accept(rowKey, columnKey, get(rowKey, columnKey));
-                } else {
+                }
+            }
+        } else {
+            for (R rowKey : _rowKeySet) {
+                for (C columnKey : _columnKeySet) {
                     action.accept(rowKey, columnKey, null);
                 }
             }
@@ -1601,14 +1605,64 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @throws X the x
      */
     public <X extends Exception> void forEachV(Throwables.TriConsumer<R, C, E, X> action) throws X {
-        for (C columnKey : _columnKeySet) {
-            for (R rowKey : _rowKeySet) {
-                if (_initialized) {
+        if (_initialized) {
+            for (C columnKey : _columnKeySet) {
+                for (R rowKey : _rowKeySet) {
                     action.accept(rowKey, columnKey, get(rowKey, columnKey));
-                } else {
+                }
+            }
+        } else {
+            for (C columnKey : _columnKeySet) {
+                for (R rowKey : _rowKeySet) {
                     action.accept(rowKey, columnKey, null);
                 }
             }
+        }
+    }
+
+    /**
+     * For each H.
+     *
+     * @param <X>
+     * @param action
+     * @throws X the x
+     */
+    public <X extends Exception> void forEachNonNullH(Throwables.TriConsumer<R, C, E, X> action) throws X {
+        if (_initialized) {
+            E value = null;
+
+            for (R rowKey : _rowKeySet) {
+                for (C columnKey : _columnKeySet) {
+                    if ((value = get(rowKey, columnKey)) != null) {
+                        action.accept(rowKey, columnKey, value);
+                    }
+                }
+            }
+        } else {
+            // ...
+        }
+    }
+
+    /**
+     * For each V.
+     *
+     * @param <X>
+     * @param action
+     * @throws X the x
+     */
+    public <X extends Exception> void forEachNonNullV(Throwables.TriConsumer<R, C, E, X> action) throws X {
+        if (_initialized) {
+            E value = null;
+
+            for (C columnKey : _columnKeySet) {
+                for (R rowKey : _rowKeySet) {
+                    if ((value = get(rowKey, columnKey)) != null) {
+                        action.accept(rowKey, columnKey, value);
+                    }
+                }
+            }
+        } else {
+            // ...
         }
     }
 
