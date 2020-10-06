@@ -1151,7 +1151,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
      * @param b
      * @return
      */
-    public static <A, B, E extends Exception, T> ExceptionalStream<T, E> zip(final A[] a, final B[] b,
+    public static <A, B, T, E extends Exception> ExceptionalStream<T, E> zip(final A[] a, final B[] b,
             final Throwables.BiFunction<? super A, ? super B, T, ? extends E> zipFunction) {
         return zip(ObjIterator.of(a), ObjIterator.of(b), zipFunction);
     }
@@ -1164,7 +1164,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
      * @param b
      * @return
      */
-    public static <A, B, C, E extends Exception, T> ExceptionalStream<T, E> zip(final A[] a, final B[] b, final C[] c,
+    public static <A, B, C, T, E extends Exception> ExceptionalStream<T, E> zip(final A[] a, final B[] b, final C[] c,
             final Throwables.TriFunction<? super A, ? super B, ? super C, T, ? extends E> zipFunction) {
         return zip(ObjIterator.of(a), ObjIterator.of(b), ObjIterator.of(c), zipFunction);
     }
@@ -1177,7 +1177,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
      * @param b
      * @return
      */
-    public static <A, B, E extends Exception, T> ExceptionalStream<T, E> zip(final Collection<? extends A> a, final Collection<? extends B> b,
+    public static <A, B, T, E extends Exception> ExceptionalStream<T, E> zip(final Collection<? extends A> a, final Collection<? extends B> b,
             final Throwables.BiFunction<? super A, ? super B, T, ? extends E> zipFunction) {
         return zip(N.iterate(a), N.iterate(b), zipFunction);
     }
@@ -1190,7 +1190,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
      * @param b
      * @return
      */
-    public static <A, B, C, E extends Exception, T> ExceptionalStream<T, E> zip(final Collection<? extends A> a, final Collection<? extends B> b,
+    public static <A, B, C, T, E extends Exception> ExceptionalStream<T, E> zip(final Collection<? extends A> a, final Collection<? extends B> b,
             final Collection<? extends C> c, final Throwables.TriFunction<? super A, ? super B, ? super C, T, ? extends E> zipFunction) {
         return zip(N.iterate(a), N.iterate(b), N.iterate(c), zipFunction);
     }
@@ -1203,7 +1203,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
      * @param b
      * @return
      */
-    public static <A, B, E extends Exception, T> ExceptionalStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
+    public static <A, B, T, E extends Exception> ExceptionalStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
             final Throwables.BiFunction<? super A, ? super B, T, ? extends E> zipFunction) {
         return newStream(new ExceptionalIterator<T, E>() {
             @Override
@@ -1226,7 +1226,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
      * @param b
      * @return
      */
-    public static <A, B, C, E extends Exception, T> ExceptionalStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
+    public static <A, B, C, T, E extends Exception> ExceptionalStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
             final Iterator<? extends C> c, final Throwables.TriFunction<? super A, ? super B, ? super C, T, ? extends E> zipFunction) {
         return newStream(new ExceptionalIterator<T, E>() {
             @Override
@@ -1249,7 +1249,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
      * @param b
      * @return
      */
-    public static <A, B, E extends Exception, T> ExceptionalStream<T, E> zip(final ExceptionalStream<? extends A, E> a,
+    public static <A, B, T, E extends Exception> ExceptionalStream<T, E> zip(final ExceptionalStream<? extends A, E> a,
             final ExceptionalStream<? extends B, E> b, final Throwables.BiFunction<? super A, ? super B, T, ? extends E> zipFunction) {
         return newStream(new ExceptionalIterator<T, E>() {
             private final ExceptionalIterator<? extends A, E> iterA = a.elements;
@@ -1276,7 +1276,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
      * @param c
      * @return
      */
-    public static <A, B, C, E extends Exception, T> ExceptionalStream<T, E> zip(final ExceptionalStream<? extends A, E> a,
+    public static <A, B, C, T, E extends Exception> ExceptionalStream<T, E> zip(final ExceptionalStream<? extends A, E> a,
             final ExceptionalStream<? extends B, E> b, final ExceptionalStream<? extends C, E> c,
             final Throwables.TriFunction<? super A, ? super B, ? super C, T, ? extends E> zipFunction) {
         return newStream(new ExceptionalIterator<T, E>() {
@@ -1307,7 +1307,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
      * @param zipFunction
      * @return
      */
-    public static <A, B, E extends Exception, T> ExceptionalStream<T, E> zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
+    public static <A, B, T, E extends Exception> ExceptionalStream<T, E> zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
             final Throwables.BiFunction<? super A, ? super B, T, ? extends E> zipFunction) {
         return zip(ObjIterator.of(a), ObjIterator.of(b), valueForNoneA, valueForNoneB, zipFunction);
     }
@@ -1325,7 +1325,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
      * @param zipFunction
      * @return
      */
-    public static <A, B, C, E extends Exception, T> ExceptionalStream<T, E> zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA,
+    public static <A, B, C, T, E extends Exception> ExceptionalStream<T, E> zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA,
             final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, T, ? extends E> zipFunction) {
         return zip(ObjIterator.of(a), ObjIterator.of(b), ObjIterator.of(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     }
@@ -1341,7 +1341,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
      * @param zipFunction
      * @return
      */
-    public static <A, B, E extends Exception, T> ExceptionalStream<T, E> zip(final Collection<? extends A> a, final Collection<? extends B> b,
+    public static <A, B, T, E extends Exception> ExceptionalStream<T, E> zip(final Collection<? extends A> a, final Collection<? extends B> b,
             final A valueForNoneA, final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, T, ? extends E> zipFunction) {
         return zip(N.iterate(a), N.iterate(b), valueForNoneA, valueForNoneB, zipFunction);
     }
@@ -1359,7 +1359,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
      * @param zipFunction
      * @return
      */
-    public static <A, B, C, E extends Exception, T> ExceptionalStream<T, E> zip(final Collection<? extends A> a, final Collection<? extends B> b,
+    public static <A, B, C, T, E extends Exception> ExceptionalStream<T, E> zip(final Collection<? extends A> a, final Collection<? extends B> b,
             final Collection<? extends C> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
             final Throwables.TriFunction<? super A, ? super B, ? super C, T, ? extends E> zipFunction) {
         return zip(N.iterate(a), N.iterate(b), N.iterate(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
@@ -1376,7 +1376,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
      * @param zipFunction
      * @return
      */
-    public static <A, B, E extends Exception, T> ExceptionalStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
+    public static <A, B, T, E extends Exception> ExceptionalStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
             final A valueForNoneA, final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, T, ? extends E> zipFunction) {
         return newStream(new ExceptionalIterator<T, E>() {
             @Override
@@ -1408,7 +1408,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
      * @param zipFunction
      * @return
      */
-    public static <A, B, C, E extends Exception, T> ExceptionalStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
+    public static <A, B, C, T, E extends Exception> ExceptionalStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
             final Iterator<? extends C> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
             final Throwables.TriFunction<? super A, ? super B, ? super C, T, ? extends E> zipFunction) {
         return newStream(new ExceptionalIterator<T, E>() {
@@ -1437,7 +1437,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
      * @param b
      * @return
      */
-    public static <A, B, E extends Exception, T> ExceptionalStream<T, E> zip(final ExceptionalStream<? extends A, E> a,
+    public static <A, B, T, E extends Exception> ExceptionalStream<T, E> zip(final ExceptionalStream<? extends A, E> a,
             final ExceptionalStream<? extends B, E> b, final A valueForNoneA, final B valueForNoneB,
             final Throwables.BiFunction<? super A, ? super B, T, ? extends E> zipFunction) {
         return newStream(new ExceptionalIterator<T, E>() {
@@ -1469,7 +1469,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
      * @param c
      * @return
      */
-    public static <A, B, C, E extends Exception, T> ExceptionalStream<T, E> zip(final ExceptionalStream<? extends A, E> a,
+    public static <A, B, C, T, E extends Exception> ExceptionalStream<T, E> zip(final ExceptionalStream<? extends A, E> a,
             final ExceptionalStream<? extends B, E> b, final ExceptionalStream<? extends C, E> c, final A valueForNoneA, final B valueForNoneB,
             final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, T, ? extends E> zipFunction) {
         return newStream(new ExceptionalIterator<T, E>() {
@@ -7900,11 +7900,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
     /**
      * Mostly it's for android.
      * 
+     * @see {@code ExceptionalStream<T, RuntimeException>}
+     * 
      * @deprecated Mostly it's for android.
      */
     @Deprecated
-    public static final class StreamR {
-        private StreamR() {
+    public static final class Seq {
+        private Seq() {
             // singleton for utility class.
         }
 
@@ -8017,5 +8019,108 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
         public static <T> ExceptionalStream<T, RuntimeException> repeat(final T element, final long n) {
             return ExceptionalStream.<T, RuntimeException> repeat(element, n);
         }
+
+        @SafeVarargs
+        public static <T> ExceptionalStream<T, RuntimeException> concat(final T[]... a) {
+            return ExceptionalStream.<T, RuntimeException> concat(a);
+        }
+
+        @SafeVarargs
+        public static <T> ExceptionalStream<T, RuntimeException> concat(final Collection<? extends T>... a) {
+            return ExceptionalStream.<T, RuntimeException> concat(a);
+        }
+
+        public static <A, B, T> ExceptionalStream<T, RuntimeException> zip(final A[] a, final B[] b,
+                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
+            return ExceptionalStream.<A, B, T, RuntimeException> zip(a, b, zipFunction);
+        }
+
+        public static <A, B, C, T> ExceptionalStream<T, RuntimeException> zip(final A[] a, final B[] b, final C[] c,
+                final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
+            return ExceptionalStream.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
+        }
+
+        public static <A, B, T> ExceptionalStream<T, RuntimeException> zip(final Collection<? extends A> a, final Collection<? extends B> b,
+                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
+            return ExceptionalStream.<A, B, T, RuntimeException> zip(a, b, zipFunction);
+        }
+
+        public static <A, B, C, T> ExceptionalStream<T, RuntimeException> zip(final Collection<? extends A> a, final Collection<? extends B> b,
+                final Collection<? extends C> c, final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
+            return ExceptionalStream.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
+        }
+
+        public static <A, B, T> ExceptionalStream<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
+                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
+            return ExceptionalStream.<A, B, T, RuntimeException> zip(a, b, zipFunction);
+        }
+
+        public static <A, B, C, T> ExceptionalStream<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
+                final Iterator<? extends C> c, final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
+            return ExceptionalStream.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
+        }
+
+        public static <A, B, T> ExceptionalStream<T, RuntimeException> zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
+                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
+            return ExceptionalStream.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
+        }
+
+        public static <A, B, C, T> ExceptionalStream<T, RuntimeException> zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA,
+                final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
+            return ExceptionalStream.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
+        }
+
+        public static <A, B, T> ExceptionalStream<T, RuntimeException> zip(final Collection<? extends A> a, final Collection<? extends B> b,
+                final A valueForNoneA, final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
+            return ExceptionalStream.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
+        }
+
+        public static <A, B, C, T> ExceptionalStream<T, RuntimeException> zip(final Collection<? extends A> a, final Collection<? extends B> b,
+                final Collection<? extends C> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
+                final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
+            return ExceptionalStream.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
+        }
+
+        public static <A, B, T> ExceptionalStream<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b, final A valueForNoneA,
+                final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
+            return ExceptionalStream.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
+        }
+
+        public static <A, B, C, T> ExceptionalStream<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
+                final Iterator<? extends C> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
+                final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
+            return ExceptionalStream.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
+        }
+
+        public static <T> ExceptionalStream<T, RuntimeException> merge(final T[] a, final T[] b,
+                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
+            return ExceptionalStream.<T, RuntimeException> merge(a, b, nextSelector);
+        }
+
+        public static <T> ExceptionalStream<T, RuntimeException> merge(final T[] a, final T[] b, final T[] c,
+                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
+            return ExceptionalStream.<T, RuntimeException> merge(a, b, c, nextSelector);
+        }
+
+        public static <T> ExceptionalStream<T, RuntimeException> merge(final Collection<? extends T> a, final Collection<? extends T> b,
+                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
+            return ExceptionalStream.<T, RuntimeException> merge(a, b, nextSelector);
+        }
+
+        public static <T> ExceptionalStream<T, RuntimeException> merge(final Collection<? extends T> a, final Collection<? extends T> b,
+                final Collection<? extends T> c, final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
+            return ExceptionalStream.<T, RuntimeException> merge(a, b, c, nextSelector);
+        }
+
+        public static <T> ExceptionalStream<T, RuntimeException> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
+                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
+            return ExceptionalStream.<T, RuntimeException> merge(a, b, nextSelector);
+        }
+
+        public static <T> ExceptionalStream<T, RuntimeException> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
+                final Iterator<? extends T> c, final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
+            return ExceptionalStream.<T, RuntimeException> merge(a, b, c, nextSelector);
+        }
+
     }
 }
