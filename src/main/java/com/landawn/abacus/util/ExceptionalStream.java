@@ -7905,7 +7905,23 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
      * @deprecated Mostly it's for android.
      */
     @Deprecated
-    public static final class Seq {
+    @Beta
+    public static final class StreamR extends Seq {
+        private StreamR() {
+            // singleton for utility class.
+        }
+    }
+
+    /**
+     * Mostly it's for android.
+     * 
+     * @see {@code ExceptionalStream<T, RuntimeException>}
+     * 
+     * @deprecated Mostly it's for android.
+     */
+    @Deprecated
+    @Beta
+    static class Seq {
         private Seq() {
             // singleton for utility class.
         }
