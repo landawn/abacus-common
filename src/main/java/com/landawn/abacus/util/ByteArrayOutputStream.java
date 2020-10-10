@@ -73,6 +73,16 @@ public final class ByteArrayOutputStream extends OutputStream {
 
     /**
      *
+     * @param b
+     */
+    public void write(byte b) {
+        ensureCapacity(count + 1);
+        buf[count] = b;
+        count += 1;
+    }
+
+    /**
+     *
      * @param out
      * @throws IOException Signals that an I/O exception has occurred.
      */

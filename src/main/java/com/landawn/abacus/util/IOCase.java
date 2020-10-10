@@ -19,6 +19,8 @@ package com.landawn.abacus.util;
 import java.io.Serializable;
 
 /**
+ * Note: it's copied from Apache Commons IO developed at The Apache Software Foundation (http://www.apache.org/), or under the Apache License 2.0.
+ *
  * Enumeration of IO case sensitivity.
  * <p>
  * Different filing systems have different rules for case-sensitivity.

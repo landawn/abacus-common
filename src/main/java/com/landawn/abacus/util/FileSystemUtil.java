@@ -30,6 +30,8 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 
 /**
+ * Note: it's copied from Apache Commons IO developed at The Apache Software Foundation (http://www.apache.org/), or under the Apache License 2.0.
+ *
  * General File System utilities.
  * <p>
  * This class provides static utility methods for general file system

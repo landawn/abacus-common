@@ -13,6 +13,7 @@
  */
 package com.landawn.abacus.util;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.function.IntConsumer;
 
@@ -107,10 +108,14 @@ public class IntSummaryStatistics implements IntConsumer {
         return getCount() > 0 ? (double) getSum() / getCount() : 0.0d;
     }
 
+    @Deprecated
+    @Beta
     public final int sum() {
         return N.toIntExact(sum);
     }
 
+    @Deprecated
+    @Beta
     public final OptionalDouble average() {
         if (count == 0) {
             return OptionalDouble.empty();

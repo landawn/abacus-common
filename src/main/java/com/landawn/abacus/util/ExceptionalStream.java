@@ -7108,7 +7108,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
                 }
             });
         }
-
     }
 
     //    public <E2 extends Exception> ExceptionalStream<T, E2> __(final Class<E2> targetExceptionType) {

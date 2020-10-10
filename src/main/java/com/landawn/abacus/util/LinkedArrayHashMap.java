@@ -18,6 +18,8 @@ package com.landawn.abacus.util;
 
 import java.util.LinkedHashMap;
 
+import com.landawn.abacus.annotation.Beta;
+
 /**
  * It's designed to supported primitive/object array key.
  * The elements in the array must not be modified after the array is put into the map as key.
@@ -27,6 +29,7 @@ import java.util.LinkedHashMap;
  * @param <V> the value type
  * @since 0.8
  */
+@Beta
 public final class LinkedArrayHashMap<K, V> extends ArrayHashMap<K, V> {
 
     public LinkedArrayHashMap() {

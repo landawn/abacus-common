@@ -18,6 +18,8 @@ package com.landawn.abacus.util;
 
 import java.util.LinkedHashSet;
 
+import com.landawn.abacus.annotation.Beta;
+
 /**
  * It's designed to supported primitive/object array.
  * The elements in the array must not be modified after the array is added into the set.
@@ -26,6 +28,7 @@ import java.util.LinkedHashSet;
  * @param <E>
  * @since 0.8
  */
+@Beta
 public final class LinkedArrayHashSet<E> extends ArrayHashSet<E> {
 
     public LinkedArrayHashSet() {
