@@ -29,7 +29,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @param <R>
  * @since 0.8
  */
-public final class Triple<L, M, R> {
+public final class Triple<L, M, R> implements Mutable {
 
     public L left;
 

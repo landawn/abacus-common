@@ -20,7 +20,8 @@ package com.landawn.abacus.util;
  * @param <T>
  * @since 0.9
  */
-public class Timed<T> {
+@com.landawn.abacus.annotation.Immutable
+public final class Timed<T> implements Immutable {
 
     private final long timeInMillis;
 

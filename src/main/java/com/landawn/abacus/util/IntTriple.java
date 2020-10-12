@@ -24,48 +24,51 @@ import com.landawn.abacus.util.u.Optional;
  */
 @Beta
 @com.landawn.abacus.annotation.Immutable
-public final class IntPair implements Immutable {
+public final class IntTriple implements Immutable {
 
     public final int _1;
     public final int _2;
+    public final int _3;
 
-    IntPair() {
-        this(0, 0);
+    IntTriple() {
+        this(0, 0, 0);
     }
 
-    IntPair(int _1, int _2) {
+    IntTriple(int _1, int _2, int _3) {
         this._1 = _1;
         this._2 = _2;
+        this._3 = _3;
     }
 
     /**
      *
      * @param _1 the 1
      * @param _2 the 2
+     * @param _3 the 3
      * @return
      */
-    public static IntPair of(int _1, int _2) {
-        return new IntPair(_1, _2);
+    public static IntTriple of(int _1, int _2, int _3) {
+        return new IntTriple(_1, _2, _3);
     }
 
     public int min() {
-        return N.min(_1, _2);
+        return N.min(_1, _2, _3);
     }
 
     public int max() {
-        return N.max(_1, _2);
+        return N.max(_1, _2, _3);
     }
 
     public int sum() {
-        return _1 + _2;
+        return _1 + _2 + _3;
     }
 
     public double average() {
         return ((double) sum()) / 2;
     }
 
-    public IntPair reverse() {
-        return new IntPair(_2, _1);
+    public IntTriple reverse() {
+        return new IntTriple(_3, _2, _1);
     }
 
     /**
@@ -77,6 +80,7 @@ public final class IntPair implements Immutable {
     public <E extends Exception> void forEach(Throwables.IntConsumer<E> comsumer) throws E {
         comsumer.accept(this._1);
         comsumer.accept(this._2);
+        comsumer.accept(this._3);
     }
 
     /**
@@ -85,8 +89,8 @@ public final class IntPair implements Immutable {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void accept(Throwables.IntBiConsumer<E> action) throws E {
-        action.accept(_1, _2);
+    public <E extends Exception> void accept(Throwables.IntTriConsumer<E> action) throws E {
+        action.accept(_1, _2, _3);
     }
 
     /**
@@ -97,8 +101,8 @@ public final class IntPair implements Immutable {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> U map(Throwables.IntBiFunction<U, E> mapper) throws E {
-        return mapper.apply(_1, _2);
+    public <U, E extends Exception> U map(Throwables.IntTriFunction<U, E> mapper) throws E {
+        return mapper.apply(_1, _2, _3);
     }
 
     /**
@@ -108,13 +112,13 @@ public final class IntPair implements Immutable {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> Optional<IntPair> filter(final Throwables.IntBiPredicate<E> predicate) throws E {
-        return predicate.test(_1, _2) ? Optional.of(this) : Optional.<IntPair> empty();
+    public <E extends Exception> Optional<IntTriple> filter(final Throwables.IntTriPredicate<E> predicate) throws E {
+        return predicate.test(_1, _2, _3) ? Optional.of(this) : Optional.<IntTriple> empty();
     }
 
     @Override
     public int hashCode() {
-        return 31 * _1 + this._2;
+        return 31 * (31 * _1 + this._2) + this._3;
     }
 
     /**
@@ -126,16 +130,16 @@ public final class IntPair implements Immutable {
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
-        } else if (!(obj instanceof IntPair)) {
+        } else if (!(obj instanceof IntTriple)) {
             return false;
         } else {
-            IntPair other = (IntPair) obj;
-            return this._1 == other._1 && this._2 == other._2;
+            IntTriple other = (IntTriple) obj;
+            return this._1 == other._1 && this._2 == other._2 && this._3 == other._3;
         }
     }
 
     @Override
     public String toString() {
-        return "[" + this._1 + ", " + this._2 + "]";
+        return "[" + this._1 + ", " + this._2 + ", " + this._3 + "]";
     }
 }

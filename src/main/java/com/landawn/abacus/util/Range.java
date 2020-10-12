@@ -39,7 +39,8 @@ import com.landawn.abacus.util.u.Optional;
  * @param <T>
  * @since 3.0
  */
-public final class Range<T extends Comparable<? super T>> implements Serializable {
+@com.landawn.abacus.annotation.Immutable
+public final class Range<T extends Comparable<? super T>> implements Serializable, Immutable {
 
     private static final long serialVersionUID = 545606166758706779L;
 

@@ -933,7 +933,7 @@ public final class HttpClient {
         OutputStream os = null;
 
         try {
-            if (request != null && (httpMethod.equals(HttpMethod.POST) || httpMethod.equals(HttpMethod.PUT))) {
+            if (request != null && (requireBody(httpMethod))) {
                 os = HttpUtil.getOutputStream(connection, requestContentFormat, getContentType(settings), getContentEncoding(settings));
 
                 Type<Object> type = N.typeOf(request.getClass());
@@ -1120,7 +1120,11 @@ public final class HttpClient {
      * @throws UncheckedIOException the unchecked IO exception
      */
     HttpURLConnection openConnection(HttpMethod httpMethod) throws UncheckedIOException {
-        return openConnection(httpMethod, HttpMethod.POST.equals(httpMethod) || HttpMethod.PUT.equals(httpMethod));
+        return openConnection(httpMethod, requireBody(httpMethod));
+    }
+
+    private boolean requireBody(HttpMethod httpMethod) {
+        return HttpMethod.POST.equals(httpMethod) || HttpMethod.PUT.equals(httpMethod) || HttpMethod.PATCH.equals(httpMethod);
     }
 
     /**
@@ -1142,7 +1146,7 @@ public final class HttpClient {
      * @throws UncheckedIOException the unchecked IO exception
      */
     HttpURLConnection openConnection(HttpMethod httpMethod, HttpSettings settings) throws UncheckedIOException {
-        return openConnection(httpMethod, HttpMethod.POST.equals(httpMethod) || HttpMethod.PUT.equals(httpMethod), settings);
+        return openConnection(httpMethod, requireBody(httpMethod), settings);
     }
 
     /**

@@ -43,7 +43,8 @@ public class u {
      *
      * @param <T>
      */
-    public static final class Optional<T> {
+    @com.landawn.abacus.annotation.Immutable
+    public static final class Optional<T> implements Immutable {
 
         /** Presents {@code Boolean.TRUE}. */
         public static final Optional<Boolean> TRUE = new Optional<>(Boolean.TRUE);
@@ -612,7 +613,8 @@ public class u {
     /**
      * The Class OptionalBoolean.
      */
-    public static final class OptionalBoolean implements Comparable<OptionalBoolean> {
+    @com.landawn.abacus.annotation.Immutable
+    public static final class OptionalBoolean implements Comparable<OptionalBoolean>, Immutable {
 
         /** Presents {@code true}. */
         public static final OptionalBoolean TRUE = new OptionalBoolean(Boolean.TRUE);
@@ -1052,7 +1054,8 @@ public class u {
     /**
      * The Class OptionalChar.
      */
-    public static final class OptionalChar implements Comparable<OptionalChar> {
+    @com.landawn.abacus.annotation.Immutable
+    public static final class OptionalChar implements Comparable<OptionalChar>, Immutable {
 
         /** The Constant EMPTY. */
         private static final OptionalChar EMPTY = new OptionalChar();
@@ -1495,7 +1498,8 @@ public class u {
     /**
      * The Class OptionalByte.
      */
-    public static final class OptionalByte implements Comparable<OptionalByte> {
+    @com.landawn.abacus.annotation.Immutable
+    public static final class OptionalByte implements Comparable<OptionalByte>, Immutable {
 
         /** The Constant EMPTY. */
         private static final OptionalByte EMPTY = new OptionalByte();
@@ -1944,7 +1948,8 @@ public class u {
     /**
      * The Class OptionalShort.
      */
-    public static final class OptionalShort implements Comparable<OptionalShort> {
+    @com.landawn.abacus.annotation.Immutable
+    public static final class OptionalShort implements Comparable<OptionalShort>, Immutable {
 
         /** The Constant EMPTY. */
         private static final OptionalShort EMPTY = new OptionalShort();
@@ -2384,7 +2389,8 @@ public class u {
     /**
      * The Class OptionalInt.
      */
-    public static final class OptionalInt implements Comparable<OptionalInt> {
+    @com.landawn.abacus.annotation.Immutable
+    public static final class OptionalInt implements Comparable<OptionalInt>, Immutable {
 
         /** The Constant EMPTY. */
         private static final OptionalInt EMPTY = new OptionalInt();
@@ -2900,7 +2906,8 @@ public class u {
     /**
      * The Class OptionalLong.
      */
-    public static final class OptionalLong implements Comparable<OptionalLong> {
+    @com.landawn.abacus.annotation.Immutable
+    public static final class OptionalLong implements Comparable<OptionalLong>, Immutable {
 
         /** The Constant EMPTY. */
         private static final OptionalLong EMPTY = new OptionalLong();
@@ -3383,7 +3390,8 @@ public class u {
     /**
      * The Class OptionalFloat.
      */
-    public static final class OptionalFloat implements Comparable<OptionalFloat> {
+    @com.landawn.abacus.annotation.Immutable
+    public static final class OptionalFloat implements Comparable<OptionalFloat>, Immutable {
 
         /** The Constant EMPTY. */
         private static final OptionalFloat EMPTY = new OptionalFloat();
@@ -3841,7 +3849,8 @@ public class u {
     /**
      * The Class OptionalDouble.
      */
-    public static final class OptionalDouble implements Comparable<OptionalDouble> {
+    @com.landawn.abacus.annotation.Immutable
+    public static final class OptionalDouble implements Comparable<OptionalDouble>, Immutable {
 
         /** The Constant EMPTY. */
         private static final OptionalDouble EMPTY = new OptionalDouble();
@@ -4326,7 +4335,8 @@ public class u {
      *
      * @param <T>
      */
-    public static final class Nullable<T> {
+    @com.landawn.abacus.annotation.Immutable
+    public static final class Nullable<T> implements Immutable {
 
         /** Presents {@code Boolean.TRUE}. */
         public static final Nullable<Boolean> TRUE = new Nullable<>(Boolean.TRUE);
@@ -5353,7 +5363,7 @@ public class u {
      *
      * @param <T>
      */
-    public static final class Holder<T> extends Reference<T, Holder<T>> {
+    public static final class Holder<T> extends Reference<T, Holder<T>> implements Mutable {
 
         /**
          * Instantiates a new holder.
@@ -5387,7 +5397,7 @@ public class u {
      *
      * @param <T>
      */
-    public static final class R<T> extends Reference<T, R<T>> {
+    public static final class R<T> extends Reference<T, R<T>> implements Mutable {
 
         /**
          * Instantiates a new r.
@@ -5422,7 +5432,7 @@ public class u {
      * @param <T>
      * @param <H>
      */
-    static abstract class Reference<T, H extends Reference<T, H>> {
+    static abstract class Reference<T, H extends Reference<T, H>> implements Mutable {
 
         /** The value. */
         private T value;

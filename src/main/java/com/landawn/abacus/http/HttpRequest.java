@@ -640,7 +640,7 @@ public final class HttpRequest {
                 return httpClient.asyncDelete(resultClass, request, settings);
 
             default:
-                throw new RuntimeException("Unsupported HTTP method: " + httpMethod);
+                return httpClient.asyncExecute(resultClass, httpMethod, request, settings);
         }
     }
 

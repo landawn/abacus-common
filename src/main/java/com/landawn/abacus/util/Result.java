@@ -26,7 +26,8 @@ import com.landawn.abacus.util.function.Supplier;
  * @param <T>
  * @param <E>
  */
-public final class Result<T, E extends Throwable> {
+@com.landawn.abacus.annotation.Immutable
+public final class Result<T, E extends Throwable> implements Immutable {
 
     private final T value;
 

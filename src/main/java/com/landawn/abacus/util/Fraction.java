@@ -40,7 +40,8 @@ import java.math.BigInteger;
  * @version $Id: Fraction.java 1583482 2014-03-31 22:54:57Z niallp $
  * @since 2.0
  */
-public final class Fraction extends Number implements Comparable<Fraction> {
+@com.landawn.abacus.annotation.Immutable
+public final class Fraction extends Number implements Comparable<Fraction>, Immutable {
 
     /**
      * Required for serialization support. Lang version 2.0.

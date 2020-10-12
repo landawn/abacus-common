@@ -81,7 +81,8 @@ import com.landawn.abacus.util.stream.Stream;
  */
 @LazyEvaluation
 @SequentialOnly
-public class ExceptionalStream<T, E extends Exception> implements Closeable {
+@com.landawn.abacus.annotation.Immutable
+public class ExceptionalStream<T, E extends Exception> implements Closeable, Immutable {
 
     static final Logger logger = LoggerFactory.getLogger(ExceptionalStream.class);
 
@@ -7657,7 +7658,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable {
      * @param <T>
      * @param <E>
      */
-    static abstract class ExceptionalIterator<T, E extends Exception> {
+    @com.landawn.abacus.annotation.Immutable
+    static abstract class ExceptionalIterator<T, E extends Exception> implements Immutable {
 
         /** The Constant EMPTY. */
         @SuppressWarnings("rawtypes")

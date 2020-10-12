@@ -31,7 +31,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @param <R>
  * @since 0.8
  */
-public final class Pair<L, R> {
+public final class Pair<L, R> implements Mutable {
     // implements Map.Entry<L, R> {
     public L left;
 

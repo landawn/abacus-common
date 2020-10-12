@@ -26,7 +26,8 @@ import com.landawn.abacus.util.function.ToIntFunction;
  * @param <T>
  * @since 0.8
  */
-public final class Wrapper<T> {
+@com.landawn.abacus.annotation.Immutable
+public final class Wrapper<T> implements Immutable {
 
     static final ToIntFunction<Object> arrayHashFunction = new ToIntFunction<Object>() {
         @Override

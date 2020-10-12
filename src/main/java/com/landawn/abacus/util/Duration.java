@@ -16,7 +16,8 @@ package com.landawn.abacus.util;
 /** 
  *
  */
-public final class Duration implements Comparable<Duration> {
+@com.landawn.abacus.annotation.Immutable
+public final class Duration implements Comparable<Duration>, Immutable {
 
     public static final Duration ZERO = new Duration(0);
 

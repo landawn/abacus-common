@@ -42,7 +42,8 @@ import com.landawn.abacus.util.function.Predicate;
  * @param <T>
  * @since 0.9
  */
-public abstract class Observer<T> {
+@com.landawn.abacus.annotation.Immutable
+public abstract class Observer<T> implements Immutable {
 
     private static final Object COMPLETE_FLAG = new Object();
 
