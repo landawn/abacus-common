@@ -95,6 +95,10 @@ public final class ParserUtil {
     // ...
     private static final Map<Class<?>, EntityInfo> entityInfoPool = new ObjectPool<>(POOL_SIZE);
 
+    private ParserUtil() {
+        // Singleton.
+    }
+
     static boolean isJsonXmlSerializable(final Field field, final JsonXmlConfig jsonXmlConfig) {
         if (field == null) {
             return true;

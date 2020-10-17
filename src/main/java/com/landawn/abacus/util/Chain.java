@@ -424,7 +424,7 @@ public final class Chain {
     /**
      * The Class ComparisonChain.
      */
-    public static class ComparisonChain {
+    public static final class ComparisonChain {
 
         /** The result. */
         private int result = 0;
@@ -657,7 +657,7 @@ public final class Chain {
     /**
      * The Class EquivalenceChain.
      */
-    public static class EquivalenceChain {
+    public static final class EquivalenceChain {
 
         /** The result. */
         private boolean result = true;
@@ -854,7 +854,7 @@ public final class Chain {
     /**
      * The Class HashCodeChain.
      */
-    public static class HashCodeChain {
+    public static final class HashCodeChain {
 
         /** The result. */
         private int result = 0;

@@ -28,13 +28,17 @@ package com.landawn.abacus.util;
  * @version $Id: Hex.java 1619948 2014-08-22 22:53:55Z ggregory $
  * @since 1.1
  */
-public class Hex {
+public final class Hex {
 
     /** Used to build output as Hex. */
     private static final char[] DIGITS_LOWER = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
     /** Used to build output as Hex. */
     private static final char[] DIGITS_UPPER = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+
+    private Hex() {
+        // Singleton for utility class
+    }
 
     /**
      * Converts an array of bytes into an array of characters representing the hexadecimal values of each byte in order.

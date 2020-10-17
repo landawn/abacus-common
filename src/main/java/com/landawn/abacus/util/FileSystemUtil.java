@@ -100,7 +100,7 @@ final class FileSystemUtil {
     /**
      * Instances should NOT be constructed in standard programming.
      */
-    public FileSystemUtil() {
+    private FileSystemUtil() {
         super();
     }
 

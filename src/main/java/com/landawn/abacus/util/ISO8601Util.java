@@ -43,6 +43,10 @@ public final class ISO8601Util {
      */
     private static final TimeZone TIMEZONE_Z = TimeZone.getTimeZone("UTC");
 
+    private ISO8601Util() {
+        // singleton
+    }
+
     /*
     /**********************************************************
     /* Formatting
@@ -190,8 +194,9 @@ public final class ISO8601Util {
                     char c = date.charAt(offset);
                     if (c != 'Z' && c != '+' && c != '-') {
                         seconds = parseInt(date, offset, offset += 2);
-                        if (seconds > 59 && seconds < 63)
+                        if (seconds > 59 && seconds < 63) {
                             seconds = 59; // truncate up to 3 leap seconds
+                        }
                         // milliseconds can be optional in the format
                         if (checkOffset(date, offset, '.')) {
                             offset += 1;
@@ -343,8 +348,9 @@ public final class ISO8601Util {
     private static int indexOfNonDigit(String string, int offset) {
         for (int i = offset; i < string.length(); i++) {
             char c = string.charAt(i);
-            if (c < '0' || c > '9')
+            if (c < '0' || c > '9') {
                 return i;
+            }
         }
         return string.length();
     }

@@ -177,6 +177,10 @@ public final class HttpUtil {
         contentEncoding2Format.put(N.EMPTY_STRING, ContentFormat.NONE);
     }
 
+    private HttpUtil() {
+        // Singleton for utility class.
+    }
+
     private static String readValue(Object value) {
         if (value != null) {
             if (value instanceof Collection) {

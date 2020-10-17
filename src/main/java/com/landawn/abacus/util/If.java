@@ -412,23 +412,23 @@ public final class If {
         return is(N.notNullOrEmptyOrBlank(s));
     }
 
-    //    public <E extends Exception> void thenRun(final Throwables.Runnable<E> cmd) throws E {
+    //    public <E extends Throwable> void thenRun(final Throwables.Runnable<E> cmd) throws E {
     //        if (b) {
     //            cmd.run();
     //        }
     //    }
     //
-    //    public <T, E extends Exception> void thenRun(final T init, final Try.Consumer<? super T, E> action) throws E {
+    //    public <T, E extends Throwable> void thenRun(final T init, final Try.Consumer<? super T, E> action) throws E {
     //        if (b) {
     //            action.accept(init);
     //        }
     //    }
     //
-    //    public <T, E extends Exception> Nullable<T> thenCall(final Try.Callable<? extends T, E> callable) throws E {
+    //    public <T, E extends Throwable> Nullable<T> thenCall(final Try.Callable<? extends T, E> callable) throws E {
     //        return b ? Nullable.of(callable.call()) : Nullable.<T> empty();
     //    }
     //
-    //    public <T, R, E extends Exception> Nullable<R> thenCall(final T init, final Try.Function<? super T, R, E> func) throws E {
+    //    public <T, R, E extends Throwable> Nullable<R> thenCall(final T init, final Try.Function<? super T, R, E> func) throws E {
     //        return b ? Nullable.of(func.apply(init)) : Nullable.<R> empty();
     //    }
 
@@ -448,7 +448,7 @@ public final class If {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> OrElse then(final Throwables.Runnable<E> cmd) throws E {
+    public <E extends Throwable> OrElse then(final Throwables.Runnable<E> cmd) throws E {
         N.checkArgNotNull(cmd);
 
         if (b) {
@@ -467,7 +467,7 @@ public final class If {
      * @return
      * @throws E the e
      */
-    public <U, E extends Exception> OrElse then(final U init, final Throwables.Consumer<? super U, E> action) throws E {
+    public <U, E extends Throwable> OrElse then(final U init, final Throwables.Consumer<? super U, E> action) throws E {
         N.checkArgNotNull(action);
 
         if (b) {
@@ -484,7 +484,7 @@ public final class If {
      * @return
      * @throws E the e
      */
-    public <E extends Exception> OrElse thenThrow(final Supplier<? extends E> exceptionSupplier) throws E {
+    public <E extends Throwable> OrElse thenThrow(final Supplier<? extends E> exceptionSupplier) throws E {
         N.checkArgNotNull(exceptionSupplier);
 
         if (b) {
@@ -494,11 +494,11 @@ public final class If {
         return OrElse.of(b);
     }
 
-    //    public <T, E extends Exception> Nullable<T> then(final Try.Callable<T, E> callable) throws E {
+    //    public <T, E extends Throwable> Nullable<T> then(final Try.Callable<T, E> callable) throws E {
     //        return b ? Nullable.of(callable.call()) : Nullable.<T> empty();
     //    }
     //
-    //    public <T, R, E extends Exception> Nullable<R> then(final T init, final Try.Function<? super T, R, E> func) throws E {
+    //    public <T, R, E extends Throwable> Nullable<R> then(final T init, final Try.Function<? super T, R, E> func) throws E {
     //        return b ? Nullable.of(func.apply(init)) : Nullable.<R> empty();
     //    }
 
@@ -550,7 +550,7 @@ public final class If {
          * @param cmd
          * @throws E the e
          */
-        public <E extends Exception> void orElse(final Throwables.Runnable<E> cmd) throws E {
+        public <E extends Throwable> void orElse(final Throwables.Runnable<E> cmd) throws E {
             N.checkArgNotNull(cmd);
 
             if (!b) {
@@ -566,7 +566,7 @@ public final class If {
          * @param action
          * @throws E the e
          */
-        public <U, E extends Exception> void orElse(final U init, final Throwables.Consumer<? super U, E> action) throws E {
+        public <U, E extends Throwable> void orElse(final U init, final Throwables.Consumer<? super U, E> action) throws E {
             N.checkArgNotNull(action);
 
             if (!b) {
@@ -581,7 +581,7 @@ public final class If {
          * @param exceptionSupplier
          * @throws E the e
          */
-        public <E extends Exception> void orElseThrow(final Supplier<? extends E> exceptionSupplier) throws E {
+        public <E extends Throwable> void orElseThrow(final Supplier<? extends E> exceptionSupplier) throws E {
             N.checkArgNotNull(exceptionSupplier);
 
             if (!b) {
@@ -770,21 +770,21 @@ public final class If {
     //            return is(N.notNullOrEmptyOrBlank(s));
     //        }
     //
-    //        public <T, E extends Exception> Nullable<T> thenGet(Try.Supplier<T, E> supplier) throws E {
+    //        public <T, E extends Throwable> Nullable<T> thenGet(Try.Supplier<T, E> supplier) throws E {
     //            return b ? Nullable.of(supplier.get()) : Nullable.<T> empty();
     //        }
     //
-    //        public <T, U, E extends Exception> Nullable<T> thenApply(final U init, final Try.Function<? super U, T, E> func) throws E {
+    //        public <T, U, E extends Throwable> Nullable<T> thenApply(final U init, final Try.Function<? super U, T, E> func) throws E {
     //            return b ? Nullable.of(func.apply(init)) : Nullable.<T> empty();
     //        }
     //
-    //        public <T, E extends Exception> Or<T> then(final Try.Callable<T, E> callable) throws E {
+    //        public <T, E extends Throwable> Or<T> then(final Try.Callable<T, E> callable) throws E {
     //            N.checkArgNotNull(callable);
     //
     //            return b ? new TrueOr<>(callable.call()) : FALSE_OR;
     //        }
     //
-    //        public <T, U, E extends Exception> Or<T> then(final U init, final Try.Function<? super U, T, E> func) throws E {
+    //        public <T, U, E extends Throwable> Or<T> then(final U init, final Try.Function<? super U, T, E> func) throws E {
     //            N.checkArgNotNull(func);
     //
     //            return b ? new TrueOr<>(func.apply(init)) : FALSE_OR;
@@ -794,11 +794,11 @@ public final class If {
     //            Or() {
     //            }
     //
-    //            public abstract <E extends Exception> T orElse(final Try.Callable<T, E> callable) throws E;
+    //            public abstract <E extends Throwable> T orElse(final Try.Callable<T, E> callable) throws E;
     //
-    //            public abstract <U, E extends Exception> T orElse(final U init, final Try.Function<? super U, T, E> func) throws E;
+    //            public abstract <U, E extends Throwable> T orElse(final U init, final Try.Function<? super U, T, E> func) throws E;
     //
-    //            public abstract <E extends Exception> T orElseThrow(final Supplier<? extends E> exceptionSupplier) throws E;
+    //            public abstract <E extends Throwable> T orElseThrow(final Supplier<? extends E> exceptionSupplier) throws E;
     //        }
     //
     //        static final class TrueOr<T> extends Or<T> {
@@ -809,21 +809,21 @@ public final class If {
     //            }
     //
     //            @Override
-    //            public <E extends Exception> T orElse(final Try.Callable<T, E> callable) throws E {
+    //            public <E extends Throwable> T orElse(final Try.Callable<T, E> callable) throws E {
     //                N.checkArgNotNull(callable);
     //
     //                return result;
     //            }
     //
     //            @Override
-    //            public <U, E extends Exception> T orElse(final U init, final Try.Function<? super U, T, E> func) throws E {
+    //            public <U, E extends Throwable> T orElse(final U init, final Try.Function<? super U, T, E> func) throws E {
     //                N.checkArgNotNull(func);
     //
     //                return result;
     //            }
     //
     //            @Override
-    //            public <E extends Exception> T orElseThrow(final Supplier<? extends E> exceptionSupplier) throws E {
+    //            public <E extends Throwable> T orElseThrow(final Supplier<? extends E> exceptionSupplier) throws E {
     //                N.checkArgNotNull(exceptionSupplier);
     //
     //                return result;
@@ -835,17 +835,17 @@ public final class If {
     //            }
     //
     //            @Override
-    //            public <E extends Exception> T orElse(final Try.Callable<T, E> callable) throws E {
+    //            public <E extends Throwable> T orElse(final Try.Callable<T, E> callable) throws E {
     //                return callable.call();
     //            }
     //
     //            @Override
-    //            public <U, E extends Exception> T orElse(final U init, final Try.Function<? super U, T, E> func) throws E {
+    //            public <U, E extends Throwable> T orElse(final U init, final Try.Function<? super U, T, E> func) throws E {
     //                return func.apply(init);
     //            }
     //
     //            @Override
-    //            public <E extends Exception> T orElseThrow(final Supplier<? extends E> exceptionSupplier) throws E {
+    //            public <E extends Throwable> T orElseThrow(final Supplier<? extends E> exceptionSupplier) throws E {
     //                throw exceptionSupplier.get();
     //            }
     //        }

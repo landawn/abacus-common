@@ -30,9 +30,11 @@ import java.util.Comparator;
 import java.util.Deque;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
@@ -99,7 +101,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     private final boolean sorted;
 
-    private final Comparator<? super T> comparator;
+    private final Comparator<? super T> cmp;
 
     private final Deque<Throwables.Runnable<? extends E>> closeHandlers;
 
@@ -117,7 +119,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             final Deque<Throwables.Runnable<? extends E>> closeHandlers) {
         this.elements = iter;
         this.sorted = sorted;
-        this.comparator = comparator;
+        this.cmp = comparator;
         this.closeHandlers = closeHandlers;
     }
 
@@ -1760,7 +1762,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                 return next;
             }
-        }, sorted, comparator, closeHandlers);
+        }, sorted, cmp, closeHandlers);
     }
 
     /**
@@ -1826,7 +1828,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                 return next;
             }
-        }, sorted, comparator, closeHandlers);
+        }, sorted, cmp, closeHandlers);
     }
 
     /**
@@ -1877,7 +1879,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 return next;
             }
 
-        }, sorted, comparator, closeHandlers);
+        }, sorted, cmp, closeHandlers);
     }
 
     /**
@@ -3273,7 +3275,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 action.accept(next);
                 return next;
             }
-        }, sorted, comparator, closeHandlers);
+        }, sorted, cmp, closeHandlers);
     }
 
     /**
@@ -3781,7 +3783,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                 return elements.next();
             }
-        }, sorted, comparator, closeHandlers);
+        }, sorted, cmp, closeHandlers);
     }
 
     @IntermediateOp
@@ -3818,7 +3820,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 return elements.next();
             }
 
-        }, sorted, comparator, closeHandlers);
+        }, sorted, cmp, closeHandlers);
     }
 
     //    /**
@@ -3836,6 +3838,213 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //
     //        return from == 0 ? limit(to) : skip(from).limit(to - from);
     //    }
+
+    @IntermediateOp
+    public ExceptionalStream<T, E> top(int n) {
+        assertNotClosed();
+
+        return top(n, Comparators.NATURAL_ORDER);
+    }
+
+    @IntermediateOp
+    public ExceptionalStream<T, E> top(final int n, final Comparator<? super T> comparator) {
+        assertNotClosed();
+
+        checkArgPositive(n, "n");
+
+        return newStream(new ExceptionalIterator<T, E>() {
+            private boolean initialized = false;
+            private T[] aar = null;
+            private int cursor = 0;
+            private int to;
+
+            @Override
+            public boolean hasNext() throws E {
+                if (initialized == false) {
+                    init();
+                }
+
+                return cursor < to;
+            }
+
+            @Override
+            public T next() throws E {
+                if (initialized == false) {
+                    init();
+                }
+
+                if (cursor >= to) {
+                    throw new NoSuchElementException();
+                }
+
+                return aar[cursor++];
+            }
+
+            @Override
+            public long count() throws E {
+                if (initialized == false) {
+                    init();
+                }
+
+                return to - cursor;
+            }
+
+            @Override
+            public void skip(long n) throws E {
+                if (initialized == false) {
+                    init();
+                }
+
+                cursor = n < to - cursor ? cursor + (int) n : to;
+            }
+
+            //    @Override
+            //    public <A> A[] toArray(A[] b) throws E {
+            //        if (initialized == false) {
+            //            init();
+            //        }
+            //
+            //        b = b.length >= to - cursor ? b : (A[]) N.newArray(b.getClass().getComponentType(), to - cursor);
+            //
+            //        N.copy(aar, cursor, b, 0, to - cursor);
+            //
+            //        return b;
+            //    }
+
+            private void init() throws E {
+                if (initialized == false) {
+                    initialized = true;
+                    if (sorted && isSameComparator(comparator, cmp)) {
+                        final LinkedList<T> queue = new LinkedList<>();
+
+                        while (elements.hasNext()) {
+                            if (queue.size() >= n) {
+                                queue.poll();
+                            }
+
+                            queue.offer(elements.next());
+                        }
+
+                        aar = (T[]) queue.toArray();
+                    } else {
+                        final Queue<T> heap = new PriorityQueue<>(n, comparator);
+
+                        T next = null;
+                        while (elements.hasNext()) {
+                            next = elements.next();
+
+                            if (heap.size() >= n) {
+                                if (comparator.compare(next, heap.peek()) > 0) {
+                                    heap.poll();
+                                    heap.offer(next);
+                                }
+                            } else {
+                                heap.offer(next);
+                            }
+                        }
+
+                        aar = (T[]) heap.toArray();
+                    }
+
+                    to = aar.length;
+                }
+            }
+        }, false, null, closeHandlers);
+    }
+
+    @IntermediateOp
+    public ExceptionalStream<T, E> last(final int n) {
+        assertNotClosed();
+
+        checkArgNotNegative(n, "n");
+
+        if (n == 0) {
+            return limit(0);
+        }
+
+        return newStream(new ExceptionalIterator<T, E>() {
+            private Iterator<T> iter;
+            private boolean initialized = false;
+
+            @Override
+            public boolean hasNext() throws E {
+                if (initialized == false) {
+                    init();
+                }
+
+                return iter.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                if (initialized == false) {
+                    init();
+                }
+
+                return iter.next();
+            }
+
+            private void init() throws E {
+                if (initialized == false) {
+                    initialized = true;
+
+                    final Deque<T> deque = new ArrayDeque<>(Math.min(1024, n));
+
+                    try {
+                        while (elements.hasNext()) {
+                            if (deque.size() >= n) {
+                                deque.pollFirst();
+                            }
+
+                            deque.offerLast(elements.next());
+                        }
+                    } finally {
+                        ExceptionalStream.this.close();
+                    }
+
+                    iter = deque.iterator();
+                }
+            }
+        }, sorted, cmp, closeHandlers);
+    }
+
+    @IntermediateOp
+    public ExceptionalStream<T, E> skipLast(final int n) {
+        assertNotClosed();
+
+        if (n <= 0) {
+            return newStream(elements, sorted, cmp, closeHandlers);
+        }
+
+        return newStream(new ExceptionalIterator<T, E>() {
+            private Deque<T> deque = null;
+
+            @Override
+            public boolean hasNext() throws E {
+                if (deque == null) {
+                    deque = new ArrayDeque<>(Math.min(1024, n));
+
+                    while (deque.size() < n && elements.hasNext()) {
+                        deque.offerLast(elements.next());
+                    }
+                }
+
+                return elements.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                if (hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                deque.offerLast(elements.next());
+
+                return deque.pollFirst();
+            }
+
+        }, sorted, cmp, closeHandlers);
+    }
 
     @IntermediateOp
     @TerminalOpTriggered
@@ -4013,7 +4222,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         final Comparator<? super T> cmp = comparator == null ? Comparators.NATURAL_ORDER : comparator;
 
-        if (sorted && cmp == this.comparator) {
+        if (sorted && cmp == this.cmp) {
             return newStream(elements, sorted, comparator, closeHandlers);
         }
 
@@ -6040,6 +6249,88 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    @TerminalOp
+    public boolean hasDuplicates() throws E {
+        assertNotClosed();
+
+        try {
+            final Set<T> set = N.newHashSet();
+
+            while (elements.hasNext()) {
+                if (set.add(elements.next()) == false) {
+                    return true;
+                }
+            }
+
+            return false;
+        } finally {
+            close();
+        }
+    }
+
+    @TerminalOp
+    public Optional<T> kthLargest(int k, Comparator<? super T> comparator) throws E {
+        assertNotClosed();
+
+        checkArgPositive(k, "k");
+
+        try {
+            if (elements.hasNext() == false) {
+                return Optional.empty();
+            } else if (sorted && isSameComparator(comparator, this.cmp)) {
+                final LinkedList<T> queue = new LinkedList<>();
+
+                while (elements.hasNext()) {
+                    if (queue.size() >= k) {
+                        queue.poll();
+                    }
+
+                    queue.offer(elements.next());
+                }
+
+                return queue.size() < k ? (Optional<T>) Optional.empty() : Optional.of(queue.peek());
+            }
+
+            comparator = comparator == null ? Comparators.NATURAL_ORDER : comparator;
+            final Queue<T> queue = new PriorityQueue<>(k, comparator);
+            T e = null;
+
+            while (elements.hasNext()) {
+                e = elements.next();
+
+                if (queue.size() < k) {
+                    queue.offer(e);
+                } else {
+                    if (comparator.compare(e, queue.peek()) > 0) {
+                        queue.poll();
+                        queue.offer(e);
+                    }
+                }
+            }
+
+            return queue.size() < k ? (Optional<T>) Optional.empty() : Optional.of(queue.peek());
+        } finally {
+            close();
+        }
+    }
+
+    @TerminalOp
+    public Optional<Map<Percentage, T>> percentiles(Comparator<? super T> comparator) throws E {
+        assertNotClosed();
+
+        try {
+            final Object[] a = sorted(comparator).toArray();
+
+            if (N.isNullOrEmpty(a)) {
+                return Optional.empty();
+            }
+
+            return Optional.of((Map<Percentage, T>) N.percentiles(a));
+        } finally {
+            close();
+        }
+    }
+
     /**
      *
      * @return
@@ -6218,6 +6509,28 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         } finally {
             close();
         }
+    }
+
+    @TerminalOp
+    public <R, E2 extends Exception> R toListAndThen(Throwables.Function<? super List<T>, R, E> func) throws E, E2 {
+        assertNotClosed();
+
+        return func.apply(toList());
+    }
+
+    @TerminalOp
+    public <R, E2 extends Exception> R toSetAndThen(Throwables.Function<? super Set<T>, R, E> func) throws E, E2 {
+        assertNotClosed();
+
+        return func.apply(toSet());
+    }
+
+    @TerminalOp
+    public <R, CC extends Collection<T>, E2 extends Exception> R toCollectionAndThen(Supplier<? extends CC> supplier,
+            Throwables.Function<? super CC, R, E> func) throws E, E2 {
+        assertNotClosed();
+
+        return func.apply(toCollection(supplier));
     }
 
     /**

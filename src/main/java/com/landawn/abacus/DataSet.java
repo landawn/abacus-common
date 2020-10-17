@@ -24,6 +24,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.util.BiIterator;
 import com.landawn.abacus.util.ImmutableList;
@@ -3854,6 +3855,7 @@ public interface DataSet {
      */
     int size();
 
+    @Beta
     Properties<String, Object> properties();
 
     Stream<String> columnNames();

@@ -18,7 +18,6 @@ package com.landawn.abacus.util;
 
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.function.Function;
-import com.landawn.abacus.util.function.Supplier;
 
 /**
  *
@@ -74,7 +73,7 @@ public final class Result<T, E extends Throwable> implements Immutable {
      * @param actionOnFailure
      * @throws E2 the e2
      */
-    public <E2 extends Exception> void ifFailure(final Throwables.Consumer<? super E, E2> actionOnFailure) throws E2 {
+    public <E2 extends Throwable> void ifFailure(final Throwables.Consumer<? super E, E2> actionOnFailure) throws E2 {
         ifFailureOrElse(actionOnFailure, Fn.doNothing());
     }
 
@@ -88,7 +87,7 @@ public final class Result<T, E extends Throwable> implements Immutable {
      * @throws E2 the e2
      * @throws E3 the e3
      */
-    public <E2 extends Exception, E3 extends Exception> void ifFailureOrElse(final Throwables.Consumer<? super E, E2> actionOnFailure,
+    public <E2 extends Throwable, E3 extends Throwable> void ifFailureOrElse(final Throwables.Consumer<? super E, E2> actionOnFailure,
             final Throwables.Consumer<? super T, E3> actionOnSuccess) throws E2, E3 {
         N.checkArgNotNull(actionOnFailure, "actionOnFailure");
         N.checkArgNotNull(actionOnSuccess, "actionOnSuccess");
@@ -106,7 +105,7 @@ public final class Result<T, E extends Throwable> implements Immutable {
      * @param actionOnSuccess
      * @throws E2 the e2
      */
-    public <E2 extends Exception> void ifSuccess(final Throwables.Consumer<? super T, E2> actionOnSuccess) throws E2 {
+    public <E2 extends Throwable> void ifSuccess(final Throwables.Consumer<? super T, E2> actionOnSuccess) throws E2 {
         ifSuccessOrElse(actionOnSuccess, Fn.doNothing());
     }
 
@@ -120,7 +119,7 @@ public final class Result<T, E extends Throwable> implements Immutable {
      * @throws E2 the e2
      * @throws E3 the e3
      */
-    public <E2 extends Exception, E3 extends Exception> void ifSuccessOrElse(final Throwables.Consumer<? super T, E2> actionOnSuccess,
+    public <E2 extends Throwable, E3 extends Throwable> void ifSuccessOrElse(final Throwables.Consumer<? super T, E2> actionOnSuccess,
             final Throwables.Consumer<? super E, E3> actionOnFailure) throws E2, E3 {
         N.checkArgNotNull(actionOnSuccess, "actionOnSuccess");
         N.checkArgNotNull(actionOnFailure, "actionOnFailure");
@@ -136,8 +135,32 @@ public final class Result<T, E extends Throwable> implements Immutable {
      *
      * @param defaultValueIfErrorOccurred
      * @return
+     * @deprecated replaced with {@link #orElseIfFailure(Object)}
      */
+    @Deprecated
     public T orElse(final T defaultValueIfErrorOccurred) {
+        return orElseIfFailure(defaultValueIfErrorOccurred);
+    }
+
+    /**
+     * 
+     * @param <E2>
+     * @param otherIfErrorOccurred
+     * @return
+     * @throws E2
+     * @deprecated replaced with {@link #orElseGetIfFailure(com.landawn.abacus.util.Throwables.Supplier)}
+     */
+    @Deprecated
+    public <E2 extends Throwable> T orElseGet(final Throwables.Supplier<? extends T, E2> otherIfErrorOccurred) throws E2 {
+        return orElseGetIfFailure(otherIfErrorOccurred);
+    }
+
+    /**
+     *
+     * @param defaultValueIfErrorOccurred
+     * @return
+     */
+    public T orElseIfFailure(final T defaultValueIfErrorOccurred) {
         if (exception == null) {
             return value;
         } else {
@@ -146,18 +169,19 @@ public final class Result<T, E extends Throwable> implements Immutable {
     }
 
     /**
-     * Or else get.
-     *
-     * @param valueSupplierIfErrorOccurred
+     * 
+     * @param <E2>
+     * @param otherIfErrorOccurred
      * @return
+     * @throws E2
      */
-    public T orElseGet(final Supplier<T> valueSupplierIfErrorOccurred) {
-        N.checkArgNotNull(valueSupplierIfErrorOccurred, "valueSupplierIfErrorOccurred");
+    public <E2 extends Throwable> T orElseGetIfFailure(final Throwables.Supplier<? extends T, E2> otherIfErrorOccurred) throws E2 {
+        N.checkArgNotNull(otherIfErrorOccurred, "otherIfErrorOccurred");
 
         if (exception == null) {
             return value;
         } else {
-            return valueSupplierIfErrorOccurred.get();
+            return otherIfErrorOccurred.get();
         }
     }
 
@@ -176,12 +200,13 @@ public final class Result<T, E extends Throwable> implements Immutable {
     }
 
     /**
-     * Or else throw.
-     *
+     * 
+     * @param <E2>
+     * @param exception
      * @return
-     * @throws E the e
+     * @throws E2
      */
-    public T orElseThrow(E exception) throws E {
+    public <E2 extends Throwable> T orElseThrow(final E2 exception) throws E2 {
         if (exception == null) {
             return value;
         } else {
@@ -247,7 +272,17 @@ public final class Result<T, E extends Throwable> implements Immutable {
     @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(final Object obj) {
-        return this == obj || (obj instanceof Result && (N.equals(((Result) obj).value, value) && N.equals(((Result) obj).exception, exception)));
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj instanceof Result) {
+            final Result other = (Result) obj;
+
+            return N.equals(other.value, value) && N.equals(other.exception, exception);
+        }
+
+        return false;
     }
 
     @Override

@@ -34,6 +34,10 @@ public final class DigestUtil {
 
     private static final int STREAM_BUFFER_LENGTH = 1024;
 
+    private DigestUtil() {
+        // Singleton for utility class
+    }
+
     /**
      * Read through an InputStream and returns the digest for the data.
      *

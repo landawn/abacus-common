@@ -349,7 +349,7 @@ public class ContinuableFuture<T> implements Future<T> {
      */
     public <U, E extends Exception> U getThenApply(final Throwables.BiFunction<? super T, ? super Exception, U, E> action) throws E {
         final Result<T, Exception> result = gett();
-        return action.apply(result.orElse(null), result.getExceptionIfPresent());
+        return action.apply(result.orElseIfFailure(null), result.getExceptionIfPresent());
     }
 
     /**
@@ -366,7 +366,7 @@ public class ContinuableFuture<T> implements Future<T> {
     public <U, E extends Exception> U getThenApply(final long timeout, final TimeUnit unit,
             final Throwables.BiFunction<? super T, ? super Exception, U, E> action) throws E {
         final Result<T, Exception> result = gett(timeout, unit);
-        return action.apply(result.orElse(null), result.getExceptionIfPresent());
+        return action.apply(result.orElseIfFailure(null), result.getExceptionIfPresent());
     }
 
     /**
@@ -411,7 +411,7 @@ public class ContinuableFuture<T> implements Future<T> {
      */
     public <E extends Exception> void getThenAccept(final Throwables.BiConsumer<? super T, ? super Exception, E> action) throws E {
         final Result<T, Exception> result = gett();
-        action.accept(result.orElse(null), result.getExceptionIfPresent());
+        action.accept(result.orElseIfFailure(null), result.getExceptionIfPresent());
     }
 
     /**
@@ -427,7 +427,7 @@ public class ContinuableFuture<T> implements Future<T> {
     public <E extends Exception> void getThenAccept(final long timeout, final TimeUnit unit,
             final Throwables.BiConsumer<? super T, ? super Exception, E> action) throws E {
         final Result<T, Exception> result = gett(timeout, unit);
-        action.accept(result.orElse(null), result.getExceptionIfPresent());
+        action.accept(result.orElseIfFailure(null), result.getExceptionIfPresent());
     }
 
     //    public void complete() throws InterruptedException, ExecutionException {
@@ -725,7 +725,7 @@ public class ContinuableFuture<T> implements Future<T> {
             @Override
             public Void call() throws Exception {
                 final Result<T, Exception> result = gett();
-                action.accept(result.orElse(null), result.getExceptionIfPresent());
+                action.accept(result.orElseIfFailure(null), result.getExceptionIfPresent());
                 return null;
             }
         });
@@ -776,7 +776,7 @@ public class ContinuableFuture<T> implements Future<T> {
             @Override
             public R call() throws Exception {
                 final Result<T, Exception> result = gett();
-                return action.apply(result.orElse(null), result.getExceptionIfPresent());
+                return action.apply(result.orElseIfFailure(null), result.getExceptionIfPresent());
             }
         });
     }
@@ -838,7 +838,8 @@ public class ContinuableFuture<T> implements Future<T> {
                 final Result<T, Exception> result = gett();
                 final Result<U, Exception> result2 = other.gett();
 
-                action.accept(Tuple.of(result.orElse(null), result.getExceptionIfPresent(), result2.orElse(null), result2.getExceptionIfPresent()));
+                action.accept(
+                        Tuple.of(result.orElseIfFailure(null), result.getExceptionIfPresent(), result2.orElseIfFailure(null), result2.getExceptionIfPresent()));
                 return null;
             }
         }, other);
@@ -861,7 +862,7 @@ public class ContinuableFuture<T> implements Future<T> {
                 final Result<T, Exception> result = gett();
                 final Result<U, Exception> result2 = other.gett();
 
-                action.accept(result.orElse(null), result.getExceptionIfPresent(), result2.orElse(null), result2.getExceptionIfPresent());
+                action.accept(result.orElseIfFailure(null), result.getExceptionIfPresent(), result2.orElseIfFailure(null), result2.getExceptionIfPresent());
                 return null;
             }
         }, other);
@@ -925,7 +926,8 @@ public class ContinuableFuture<T> implements Future<T> {
                 final Result<T, Exception> result = gett();
                 final Result<U, Exception> result2 = other.gett();
 
-                return action.apply(Tuple.of(result.orElse(null), result.getExceptionIfPresent(), result2.orElse(null), result2.getExceptionIfPresent()));
+                return action.apply(
+                        Tuple.of(result.orElseIfFailure(null), result.getExceptionIfPresent(), result2.orElseIfFailure(null), result2.getExceptionIfPresent()));
             }
         }, other);
     }
@@ -948,7 +950,8 @@ public class ContinuableFuture<T> implements Future<T> {
                 final Result<T, Exception> result = gett();
                 final Result<U, Exception> result2 = other.gett();
 
-                return action.apply(result.orElse(null), result.getExceptionIfPresent(), result2.orElse(null), result2.getExceptionIfPresent());
+                return action.apply(result.orElseIfFailure(null), result.getExceptionIfPresent(), result2.orElseIfFailure(null),
+                        result2.getExceptionIfPresent());
             }
         }, other);
     }
@@ -1009,7 +1012,7 @@ public class ContinuableFuture<T> implements Future<T> {
             public Void call() throws Exception {
                 final Result<T, Exception> result = Futures.anyOf(Array.asList(ContinuableFuture.this, other)).gett();
 
-                action.accept(result.orElse(null), result.getExceptionIfPresent());
+                action.accept(result.orElseIfFailure(null), result.getExceptionIfPresent());
                 return null;
             }
         }, other);
@@ -1072,7 +1075,7 @@ public class ContinuableFuture<T> implements Future<T> {
             public R call() throws Exception {
                 final Result<T, Exception> result = Futures.anyOf(Array.asList(ContinuableFuture.this, other)).gett();
 
-                return action.apply(result.orElse(null), result.getExceptionIfPresent());
+                return action.apply(result.orElseIfFailure(null), result.getExceptionIfPresent());
             }
         }, other);
     }

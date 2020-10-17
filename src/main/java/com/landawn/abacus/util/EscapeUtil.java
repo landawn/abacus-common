@@ -35,7 +35,7 @@ import java.util.Set;
  * <p>#ThreadSafe#</p>
  * @since 2.0
  */
-public class EscapeUtil {
+public final class EscapeUtil {
     /**
      * {@code \u000a} linefeed LF ('\n').
      * 

@@ -29,7 +29,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @author haiyangl
  * @since 1.3
  */
-public class Joiner implements Closeable {
+public final class Joiner implements Closeable {
 
     public static final String DEFAULT_DELIMITER = N.ELEMENT_SEPARATOR;
 

@@ -29,7 +29,8 @@ import java.util.Map.Entry;
  * @param <R>
  * @since 0.8
  */
-public class Difference<L, R> {
+@com.landawn.abacus.annotation.Immutable
+public class Difference<L, R> implements Immutable {
 
     final L common;
 
@@ -621,7 +622,8 @@ public class Difference<L, R> {
      * @param <R>
      * @param <D>
      */
-    public static final class MapDifference<L, R, D> extends Difference<L, R> {
+    @com.landawn.abacus.annotation.Immutable
+    public static final class MapDifference<L, R, D> extends Difference<L, R> implements Immutable {
 
         /** The diff values. */
         private final D diffValues;

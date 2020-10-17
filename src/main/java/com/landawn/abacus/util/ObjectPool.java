@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
 
 /**
@@ -33,6 +34,7 @@ import com.landawn.abacus.annotation.Internal;
  * @since 0.8
  */
 @Internal
+@Beta
 public final class ObjectPool<K, V> extends AbstractMap<K, V> {
 
     final int capacity;

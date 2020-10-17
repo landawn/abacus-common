@@ -21,7 +21,8 @@ package com.landawn.abacus.util;
  * @param <K> the key type
  * @param <T>
  */
-public class Keyed<K, T> {
+@com.landawn.abacus.annotation.Immutable
+public final class Keyed<K, T> implements Immutable {
 
     private final K key;
 

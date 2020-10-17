@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
@@ -41,6 +42,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  * @since 0.8
  */
 @Internal
+@Beta
 public final class Objectory {
 
     private static final Logger logger = LoggerFactory.getLogger(Objectory.class);

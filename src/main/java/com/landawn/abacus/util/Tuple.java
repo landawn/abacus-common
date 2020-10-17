@@ -18,8 +18,10 @@ package com.landawn.abacus.util;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Stream;
 
@@ -298,6 +300,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @param entry
      * @return
      */
+    @Beta
     public static <K, V> Tuple2<K, V> from(final Map.Entry<K, V> entry) {
         return new Tuple2<>(entry.getKey(), entry.getValue());
     }
@@ -308,6 +311,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @param a
      * @return
      */
+    @Beta
     public static <TP extends Tuple<TP>> TP from(final Object[] a) {
         final int len = a == null ? 0 : a.length;
 
@@ -367,6 +371,7 @@ public abstract class Tuple<TP> implements Immutable {
      * @param c
      * @return
      */
+    @Beta
     public static <TP extends Tuple<TP>> TP from(final Collection<?> c) {
         final int len = c == null ? 0 : c.size();
         final Iterator<?> iter = c == null ? null : c.iterator();
@@ -421,10 +426,58 @@ public abstract class Tuple<TP> implements Immutable {
         return (TP) result;
     }
 
+    @Beta
+    public static <T> List<T> toList(Tuple1<? extends T> tp) {
+        return N.asList(tp._1);
+    }
+
+    @Beta
+    public static <T> List<T> toList(Tuple2<? extends T, ? extends T> tp) {
+        return N.asList(tp._1, tp._2);
+    }
+
+    @Beta
+    public static <T> List<T> toList(Tuple3<? extends T, ? extends T, ? extends T> tp) {
+        return N.asList(tp._1, tp._2, tp._3);
+    }
+
+    @Beta
+    public static <T> List<T> toList(Tuple4<? extends T, ? extends T, ? extends T, ? extends T> tp) {
+        return N.asList(tp._1, tp._2, tp._3, tp._4);
+    }
+
+    @Beta
+    public static <T> List<T> toList(Tuple5<? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
+        return N.asList(tp._1, tp._2, tp._3, tp._4, tp._5);
+    }
+
+    @Beta
+    public static <T> List<T> toList(Tuple6<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
+        return N.asList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6);
+    }
+
+    @Beta
+    public static <T> List<T> toList(Tuple7<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
+        return N.asList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6, tp._7);
+    }
+
+    @Beta
+    public static <T> List<T> toList(Tuple8<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
+        return N.asList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6, tp._7, tp._8);
+    }
+
+    @Beta
+    public static <T> List<T> toList(
+            Tuple9<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
+        return N.asList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6, tp._7, tp._8, tp._9);
+    }
+
+    @Beta
     public static <T1, T2, T3> Tuple3<T1, T2, T3> flatten(Tuple2<Tuple2<T1, T2>, T3> tp) {
         return new Tuple3<>(tp._1._1, tp._1._2, tp._2);
     }
 
+    @Beta
     public static <T1, T2, T3, T4, T5> Tuple5<T1, T2, T3, T4, T5> flatten(Tuple3<Tuple3<T1, T2, T3>, T4, T5> tp) {
         return new Tuple5<>(tp._1._1, tp._1._2, tp._1._3, tp._2, tp._3);
     }
@@ -438,6 +491,7 @@ public abstract class Tuple<TP> implements Immutable {
      *
      * @param <T1>
      */
+    @Beta
     static final class Tuple0 extends Tuple<Tuple0> {
         @Override
         public int arity() {
@@ -578,6 +632,15 @@ public abstract class Tuple<TP> implements Immutable {
 
             objConsumer.accept(_1);
         }
+
+        //    /**
+        //     * 
+        //     * @return
+        //     */
+        //    @Beta
+        //    public Nullable<T1> toNullable() {
+        //        return Nullable.of(_1);
+        //    }
 
         /**
          *

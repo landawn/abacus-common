@@ -15,7 +15,6 @@
 package com.landawn.abacus.util;
 
 import java.util.Iterator;
-import java.util.concurrent.Callable;
 
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
@@ -58,10 +57,8 @@ public final class Retry<T> {
      * @return
      */
     public static Retry<Void> of(final int retryTimes, final long retryInterval, final Predicate<? super Exception> retryCondition) {
-        if (retryTimes < 0 || retryInterval < 0) {
-            throw new IllegalArgumentException("'retryTimes' and 'retryInterval' can't be negative");
-        }
-
+        N.checkArgNotNegative(retryTimes, "retryTimes");
+        N.checkArgNotNegative(retryInterval, "retryInterval");
         N.checkArgNotNull(retryCondition);
 
         return new Retry<Void>(retryTimes, retryInterval, retryCondition, null);
@@ -76,10 +73,8 @@ public final class Retry<T> {
      * @return
      */
     public static <R> Retry<R> of(final int retryTimes, final long retryInterval, final BiPredicate<? super R, ? super Exception> retryCondition) {
-        if (retryTimes < 0 || retryInterval < 0) {
-            throw new IllegalArgumentException("'retryTimes' and 'retryInterval' can't be negative");
-        }
-
+        N.checkArgNotNegative(retryTimes, "retryTimes");
+        N.checkArgNotNegative(retryInterval, "retryInterval");
         N.checkArgNotNull(retryCondition);
 
         return new Retry<R>(retryTimes, retryInterval, null, retryCondition);
@@ -91,31 +86,40 @@ public final class Retry<T> {
      * @throws Exception the exception
      */
     public void run(final Throwables.Runnable<? extends Exception> cmd) throws Exception {
-        try {
-            cmd.run();
-        } catch (Exception e) {
-            logger.error("AutoRetry", e);
+        if (retryTimes > 0) {
+            try {
+                cmd.run();
+            } catch (Exception e) {
+                logger.error("Failed to run", e);
 
-            int retriedTimes = 0;
-            Exception throwable = e;
+                int retriedTimes = 0;
+                Exception ex = e;
 
-            while (retriedTimes++ < retryTimes
-                    && ((retryCondition != null && retryCondition.test(throwable)) || (retryCondition2 != null && retryCondition2.test(null, throwable)))) {
-                try {
-                    if (retryInterval > 0) {
-                        N.sleep(retryInterval);
+                while (retriedTimes < retryTimes
+                        && ((retryCondition != null && retryCondition.test(ex)) || (retryCondition2 != null && retryCondition2.test(null, ex)))) {
+
+                    retriedTimes++;
+
+                    try {
+                        if (retryInterval > 0) {
+                            N.sleepUninterruptibly(retryInterval);
+                        }
+
+                        logger.info("Start " + retriedTimes + " retry");
+
+                        cmd.run();
+                        return;
+                    } catch (Exception e2) {
+                        logger.error("Retried: " + retriedTimes, e2);
+
+                        ex = e2;
                     }
-
-                    cmd.run();
-                    return;
-                } catch (Exception e2) {
-                    logger.error("AutoRetry", e2);
-
-                    throwable = e2;
                 }
-            }
 
-            throw throwable;
+                throw ex;
+            }
+        } else {
+            cmd.run();
         }
     }
 
@@ -125,175 +129,370 @@ public final class Retry<T> {
      * @return
      * @throws Exception the exception
      */
-    public T call(final Callable<T> callable) throws Exception {
-        T result = null;
-        int retriedTimes = 0;
+    public T call(final java.util.concurrent.Callable<T> callable) throws Exception {
+        if (retryTimes > 0) {
+            T result = null;
+            int retriedTimes = 0;
 
-        try {
-            result = callable.call();
-
-            while (retriedTimes++ < retryTimes && (retryCondition2 != null && retryCondition2.test(result, null))) {
-                if (retryInterval > 0) {
-                    N.sleep(retryInterval);
-                }
-
+            try {
                 result = callable.call();
 
-                if (retryCondition2 == null || retryCondition2.test(result, null) == false) {
-                    return result;
-                }
-            }
-        } catch (Exception e) {
-            logger.error("AutoRetry", e);
+                while (retriedTimes < retryTimes && (retryCondition2 != null && retryCondition2.test(result, null))) {
 
-            Exception throwable = e;
+                    retriedTimes++;
 
-            while (retriedTimes++ < retryTimes
-                    && ((retryCondition != null && retryCondition.test(throwable)) || (retryCondition2 != null && retryCondition2.test(null, throwable)))) {
-                try {
                     if (retryInterval > 0) {
-                        N.sleep(retryInterval);
+                        N.sleepUninterruptibly(retryInterval);
                     }
+
+                    logger.info("Start " + retriedTimes + " retry");
 
                     result = callable.call();
 
                     if (retryCondition2 == null || retryCondition2.test(result, null) == false) {
                         return result;
                     }
-                } catch (Exception e2) {
-                    logger.error("AutoRetry", e2);
-
-                    throwable = e2;
                 }
+            } catch (Exception e) {
+                logger.error("Failed to call", e);
+
+                Exception ex = e;
+
+                while (retriedTimes < retryTimes
+                        && ((retryCondition != null && retryCondition.test(ex)) || (retryCondition2 != null && retryCondition2.test(null, ex)))) {
+
+                    retriedTimes++;
+
+                    try {
+                        if (retryInterval > 0) {
+                            N.sleepUninterruptibly(retryInterval);
+                        }
+
+                        logger.info("Start " + retriedTimes + " retry");
+
+                        result = callable.call();
+
+                        if (retryCondition2 == null || retryCondition2.test(result, null) == false) {
+                            return result;
+                        }
+                    } catch (Exception e2) {
+                        logger.error("Retried: " + retriedTimes, e2);
+
+                        ex = e2;
+                    }
+                }
+
+                throw ex;
             }
 
-            throw throwable;
-        }
+            if (retryTimes > 0 && (retryCondition2 != null && retryCondition2.test(result, null))) {
+                throw new RuntimeException("Still failed after retried " + retryTimes + " times for result: " + N.toString(result));
+            }
 
-        if (retryTimes > 0 && (retryCondition2 != null && retryCondition2.test(result, null))) {
-            throw new RuntimeException("Still failed after retried " + retryTimes + " times for result: " + N.toString(result));
+            return result;
+        } else {
+            return callable.call();
         }
-
-        return result;
     }
 
-    /**
-     *
-     * @param <E>
-     * @param iter
-     * @return
-     * @deprecated replaced by {@code Retry#iterate(Iterator, int)}.
-     */
-    @Deprecated
-    public <E> Iterator<E> iterate(final Iterator<E> iter) {
-        return iterate(iter, Integer.MAX_VALUE);
-    }
+    public static final class RetryR<T> {
 
-    /**
-     *
-     * @param <E>
-     * @param iter
-     * @param totalRetryTimes
-     * @return
-     */
-    public <E> Iterator<E> iterate(final Iterator<E> iter, final int totalRetryTimes) {
-        N.checkArgPositive(totalRetryTimes, "totalRetryTimes");
+        private static final Logger logger = LoggerFactory.getLogger(RetryR.class);
 
-        return new Iterator<E>() {
-            private int totalRetriedTimes = 0;
+        private final int retryTimes;
 
-            @Override
-            public boolean hasNext() {
+        private final long retryInterval;
+
+        private final Predicate<? super RuntimeException> retryCondition;
+
+        /** The retry condition 2. */
+        private final BiPredicate<? super T, ? super RuntimeException> retryCondition2;
+
+        RetryR(final int retryTimes, final long retryInterval, final Predicate<? super RuntimeException> retryCondition,
+                final BiPredicate<? super T, ? super RuntimeException> retryCondition2) {
+
+            this.retryTimes = retryTimes;
+            this.retryInterval = retryInterval;
+            this.retryCondition = retryCondition;
+            this.retryCondition2 = retryCondition2;
+        }
+
+        /**
+         *
+         * @param retryTimes
+         * @param retryInterval
+         * @param retryCondition
+         * @return
+         */
+        public static RetryR<Void> of(final int retryTimes, final long retryInterval, final Predicate<? super RuntimeException> retryCondition) {
+            N.checkArgNotNegative(retryTimes, "retryTimes");
+            N.checkArgNotNegative(retryInterval, "retryInterval");
+            N.checkArgNotNull(retryCondition);
+
+            return new RetryR<Void>(retryTimes, retryInterval, retryCondition, null);
+        }
+
+        /**
+         *
+         * @param <R>
+         * @param retryTimes
+         * @param retryInterval
+         * @param retryCondition
+         * @return
+         */
+        public static <R> RetryR<R> of(final int retryTimes, final long retryInterval, final BiPredicate<? super R, ? super RuntimeException> retryCondition) {
+            N.checkArgNotNegative(retryTimes, "retryTimes");
+            N.checkArgNotNegative(retryInterval, "retryInterval");
+            N.checkArgNotNull(retryCondition);
+
+            return new RetryR<R>(retryTimes, retryInterval, null, retryCondition);
+        }
+
+        /**
+         *
+         * @param cmd
+         * @throws Exception the exception
+         */
+        public void run(final Runnable cmd) {
+            if (retryTimes > 0) {
                 try {
-                    return iter.hasNext();
+                    cmd.run();
                 } catch (RuntimeException e) {
-                    logger.error("hasNext", e);
+                    logger.error("Failed to run", e);
 
                     int retriedTimes = 0;
-                    RuntimeException throwable = e;
+                    RuntimeException ex = e;
 
-                    while (totalRetriedTimes < totalRetryTimes && retriedTimes++ < retryTimes && ((retryCondition != null && retryCondition.test(throwable))
-                            || (retryCondition2 != null && retryCondition2.test(null, throwable)))) {
-                        totalRetriedTimes++;
+                    while (retriedTimes < retryTimes
+                            && ((retryCondition != null && retryCondition.test(ex)) || (retryCondition2 != null && retryCondition2.test(null, ex)))) {
+
+                        retriedTimes++;
 
                         try {
                             if (retryInterval > 0) {
-                                N.sleep(retryInterval);
+                                N.sleepUninterruptibly(retryInterval);
                             }
 
-                            return iter.hasNext();
-                        } catch (RuntimeException e2) {
-                            logger.error("hasNext", e2);
+                            logger.info("Start " + retriedTimes + " retry");
 
-                            throwable = e2;
+                            cmd.run();
+                            return;
+                        } catch (RuntimeException e2) {
+                            logger.error("Retried: " + retriedTimes, e2);
+
+                            ex = e2;
                         }
                     }
 
-                    throw throwable;
+                    throw ex;
                 }
+            } else {
+                cmd.run();
             }
+        }
 
-            @Override
-            public E next() {
+        /**
+         *
+         * @param callable
+         * @return
+         * @throws RuntimeException the exception
+         */
+        public T call(final Throwables.Callable<T, RuntimeException> callable) {
+            if (retryTimes > 0) {
+                T result = null;
+                int retriedTimes = 0;
+
                 try {
-                    return iter.next();
+                    result = callable.call();
+
+                    while (retriedTimes < retryTimes && (retryCondition2 != null && retryCondition2.test(result, null))) {
+
+                        retriedTimes++;
+
+                        if (retryInterval > 0) {
+                            N.sleepUninterruptibly(retryInterval);
+                        }
+
+                        logger.info("Start " + retriedTimes + " retry");
+
+                        result = callable.call();
+
+                        if (retryCondition2 == null || retryCondition2.test(result, null) == false) {
+                            return result;
+                        }
+                    }
                 } catch (RuntimeException e) {
-                    logger.error("next", e);
+                    logger.error("Failed to call", e);
 
-                    int retriedTimes = 0;
-                    RuntimeException throwable = e;
+                    RuntimeException ex = e;
 
-                    while (totalRetriedTimes < totalRetryTimes && retriedTimes++ < retryTimes && ((retryCondition != null && retryCondition.test(throwable))
-                            || (retryCondition2 != null && retryCondition2.test(null, throwable)))) {
-                        totalRetriedTimes++;
+                    while (retriedTimes < retryTimes
+                            && ((retryCondition != null && retryCondition.test(ex)) || (retryCondition2 != null && retryCondition2.test(null, ex)))) {
+
+                        retriedTimes++;
 
                         try {
                             if (retryInterval > 0) {
-                                N.sleep(retryInterval);
+                                N.sleepUninterruptibly(retryInterval);
                             }
 
-                            return iter.next();
-                        } catch (RuntimeException e2) {
-                            logger.error("next", e2);
+                            logger.info("Start " + retriedTimes + " retry");
 
-                            throwable = e2;
+                            result = callable.call();
+
+                            if (retryCondition2 == null || retryCondition2.test(result, null) == false) {
+                                return result;
+                            }
+                        } catch (RuntimeException e2) {
+                            logger.error("Retried: " + retriedTimes, e2);
+
+                            ex = e2;
                         }
                     }
 
-                    throw throwable;
+                    throw ex;
                 }
+
+                if (retryTimes > 0 && (retryCondition2 != null && retryCondition2.test(result, null))) {
+                    throw new RuntimeException("Still failed after retried " + retryTimes + " times for result: " + N.toString(result));
+                }
+
+                return result;
+            } else {
+                return callable.call();
             }
+        }
 
-            @Override
-            public void remove() {
-                try {
-                    iter.remove();
-                } catch (RuntimeException e) {
-                    logger.error("remove", e);
+        /**
+         *
+         * @param <E>
+         * @param iter
+         * @return
+         * @deprecated replaced by {@code RetryR#iterate(Iterator, int)}.
+         */
+        @Deprecated
+        public <E> Iterator<E> iterate(final Iterator<E> iter) {
+            return iterate(iter, Integer.MAX_VALUE);
+        }
 
-                    int retriedTimes = 0;
-                    RuntimeException throwable = e;
+        /**
+         *
+         * @param <E>
+         * @param iter
+         * @param totalRetryTimes
+         * @return
+         */
+        public <E> Iterator<E> iterate(final Iterator<E> iter, final int totalRetryTimes) {
+            N.checkArgPositive(totalRetryTimes, "totalRetryTimes");
 
-                    while (totalRetriedTimes < totalRetryTimes && retriedTimes++ < retryTimes && ((retryCondition != null && retryCondition.test(throwable))
-                            || (retryCondition2 != null && retryCondition2.test(null, throwable)))) {
-                        totalRetriedTimes++;
+            return new Iterator<E>() {
+                private int totalRetriedTimes = 0;
 
-                        try {
-                            if (retryInterval > 0) {
-                                N.sleep(retryInterval);
+                @Override
+                public boolean hasNext() {
+                    try {
+                        return iter.hasNext();
+                    } catch (RuntimeException e) {
+                        logger.error("Failed to hasNext()", e);
+
+                        int retriedTimes = 0;
+                        RuntimeException ex = e;
+
+                        while (totalRetriedTimes < totalRetryTimes && retriedTimes < retryTimes
+                                && ((retryCondition != null && retryCondition.test(ex)) || (retryCondition2 != null && retryCondition2.test(null, ex)))) {
+
+                            totalRetriedTimes++;
+                            retriedTimes++;
+
+                            try {
+                                if (retryInterval > 0) {
+                                    N.sleepUninterruptibly(retryInterval);
+                                }
+
+                                logger.info("Start " + retriedTimes + " retry in hasNext()");
+
+                                return iter.hasNext();
+                            } catch (RuntimeException e2) {
+                                logger.error("Retried: " + retriedTimes + " in hasNext()", e2);
+
+                                ex = e2;
                             }
-
-                            iter.remove();
-                        } catch (RuntimeException e2) {
-                            logger.error("remove", e2);
-
-                            throwable = e2;
                         }
-                    }
 
-                    throw throwable;
+                        throw ex;
+                    }
                 }
-            }
-        };
+
+                @Override
+                public E next() {
+                    try {
+                        return iter.next();
+                    } catch (RuntimeException e) {
+                        logger.error("Failed to next()", e);
+
+                        int retriedTimes = 0;
+                        RuntimeException ex = e;
+
+                        while (totalRetriedTimes < totalRetryTimes && retriedTimes < retryTimes
+                                && ((retryCondition != null && retryCondition.test(ex)) || (retryCondition2 != null && retryCondition2.test(null, ex)))) {
+
+                            totalRetriedTimes++;
+                            retriedTimes++;
+
+                            try {
+                                if (retryInterval > 0) {
+                                    N.sleepUninterruptibly(retryInterval);
+                                }
+
+                                logger.info("Start " + retriedTimes + " retry in next()");
+
+                                return iter.next();
+                            } catch (RuntimeException e2) {
+                                logger.error("Retried: " + retriedTimes + " in next()", e2);
+
+                                ex = e2;
+                            }
+                        }
+
+                        throw ex;
+                    }
+                }
+
+                @Override
+                public void remove() {
+                    try {
+                        iter.remove();
+                    } catch (RuntimeException e) {
+                        logger.error("Failed to remove()", e);
+
+                        int retriedTimes = 0;
+                        RuntimeException ex = e;
+
+                        while (totalRetriedTimes < totalRetryTimes && retriedTimes < retryTimes
+                                && ((retryCondition != null && retryCondition.test(ex)) || (retryCondition2 != null && retryCondition2.test(null, ex)))) {
+
+                            totalRetriedTimes++;
+                            retriedTimes++;
+
+                            try {
+                                if (retryInterval > 0) {
+                                    N.sleepUninterruptibly(retryInterval);
+                                }
+
+                                logger.info("Start " + retriedTimes + " retry in remove()");
+
+                                iter.remove();
+                            } catch (RuntimeException e2) {
+                                logger.error("Retried: " + retriedTimes + " in remove()", e2);
+
+                                ex = e2;
+                            }
+                        }
+
+                        throw ex;
+                    }
+                }
+            };
+        }
     }
 }

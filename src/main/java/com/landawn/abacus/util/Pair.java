@@ -412,6 +412,10 @@ public final class Pair<L, R> implements Mutable {
         return new AbstractMap.SimpleEntry<>(left, right);
     }
 
+    public ImmutableEntry<L, R> toImmutableEntry() {
+        return ImmutableEntry.of(left, right);
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
