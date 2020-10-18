@@ -71,7 +71,7 @@ public enum MergeResult {
     }
 
     /**
-     * Returns a stateful {@code BiFunction}. Don't cache or reuse it.
+     * Returns a stateful {@code BiFunction}. Don't save or cache for reuse or use it in parallel stream.
      *
      * @param <T>
      * @return

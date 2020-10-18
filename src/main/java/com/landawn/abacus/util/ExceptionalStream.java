@@ -6378,6 +6378,68 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * @param position in current stream(not upstream or origin source). It starts from 0.
+     * @return
+     * @throws E the e
+     */
+    @TerminalOp
+    @Beta
+    public Optional<T> elementAt(final long position) throws E {
+        assertNotClosed();
+
+        checkArgNotNegative(position, "position");
+
+        if (position == 0) {
+            return first();
+        } else {
+            return skip(position).first();
+        }
+    }
+
+    /**
+     *
+     * @return
+     * @throws DuplicatedResultException if there are more than one elements.
+     * @throws E the e
+     */
+    @TerminalOp
+    public Optional<T> onlyOne() throws DuplicatedResultException, E {
+        assertNotClosed();
+
+        try {
+            Optional<T> result = Optional.empty();
+
+            if (elements.hasNext()) {
+                result = Optional.of(elements.next());
+
+                if (elements.hasNext()) {
+                    throw new DuplicatedResultException("There are at least two elements: " + Strings.concat(result.get(), ", ", elements.next()));
+                }
+            }
+
+            return result;
+        } finally {
+            close();
+        }
+    }
+
+    /**
+     *
+     * @return
+     * @throws E the e
+     */
+    @TerminalOp
+    public long count() throws E {
+        assertNotClosed();
+
+        try {
+            return elements.count();
+        } finally {
+            close();
+        }
+    }
+
+    /**
      *
      * @return
      * @throws E the e
@@ -6929,49 +6991,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @TerminalOp
     public DataSet toDataSet(List<String> columnNames) throws E {
         return N.newDataSet(columnNames, toList());
-    }
-
-    /**
-     *
-     * @return
-     * @throws E the e
-     */
-    @TerminalOp
-    public long count() throws E {
-        assertNotClosed();
-
-        try {
-            return elements.count();
-        } finally {
-            close();
-        }
-    }
-
-    /**
-     *
-     * @return
-     * @throws DuplicatedResultException if there are more than one elements.
-     * @throws E the e
-     */
-    @TerminalOp
-    public Optional<T> onlyOne() throws DuplicatedResultException, E {
-        assertNotClosed();
-
-        try {
-            Optional<T> result = Optional.empty();
-
-            if (elements.hasNext()) {
-                result = Optional.of(elements.next());
-
-                if (elements.hasNext()) {
-                    throw new DuplicatedResultException("There are at least two elements: " + Strings.concat(result.get(), ", ", elements.next()));
-                }
-            }
-
-            return result;
-        } finally {
-            close();
-        }
     }
 
     /**

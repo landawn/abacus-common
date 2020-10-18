@@ -73,6 +73,7 @@ import com.landawn.abacus.util.function.ByteBinaryOperator;
 import com.landawn.abacus.util.function.ByteConsumer;
 import com.landawn.abacus.util.function.ByteFunction;
 import com.landawn.abacus.util.function.BytePredicate;
+import com.landawn.abacus.util.function.Callable;
 import com.landawn.abacus.util.function.CharBiFunction;
 import com.landawn.abacus.util.function.CharBiPredicate;
 import com.landawn.abacus.util.function.CharBinaryOperator;
@@ -114,6 +115,7 @@ import com.landawn.abacus.util.function.LongPredicate;
 import com.landawn.abacus.util.function.LongSupplier;
 import com.landawn.abacus.util.function.Predicate;
 import com.landawn.abacus.util.function.QuadFunction;
+import com.landawn.abacus.util.function.Runnable;
 import com.landawn.abacus.util.function.ShortBiFunction;
 import com.landawn.abacus.util.function.ShortBiPredicate;
 import com.landawn.abacus.util.function.ShortBinaryOperator;
@@ -179,7 +181,7 @@ public final class Fn extends Comparators {
     @SuppressWarnings("rawtypes")
     public static final Supplier<LinkedHashMap<String, Object>> SUPPLIER_OF_LINKED_HASH_MAP = (Supplier) Suppliers.LINKED_HASH_MAP;
 
-    private static final com.landawn.abacus.util.function.Runnable EMPTY_ACTION = new com.landawn.abacus.util.function.Runnable() {
+    private static final Runnable EMPTY_ACTION = new Runnable() {
         @Override
         public void run() {
         }
@@ -319,6 +321,13 @@ public final class Fn extends Comparators {
         @Override
         public String apply(String t) {
             return StringUtil.toUpperCaseWithUnderscore(t);
+        }
+    };
+
+    private static final Function<Throwable, RuntimeException> TO_RUNTIME_EXCEPTION = new Function<Throwable, RuntimeException>() {
+        @Override
+        public RuntimeException apply(Throwable e) {
+            return N.toRuntimeException(e);
         }
     };
 
@@ -611,7 +620,7 @@ public final class Fn extends Comparators {
     }
 
     /**
-     *
+     * 
      * @param <T>
      * @param <R>
      * @param func
@@ -731,8 +740,8 @@ public final class Fn extends Comparators {
      * @param closeable
      * @return
      */
-    public static com.landawn.abacus.util.function.Runnable close(final AutoCloseable closeable) {
-        return new com.landawn.abacus.util.function.Runnable() {
+    public static Runnable close(final AutoCloseable closeable) {
+        return new Runnable() {
             private volatile boolean isClosed = false;
 
             @Override
@@ -753,8 +762,8 @@ public final class Fn extends Comparators {
      * @return
      */
     @SafeVarargs
-    public static com.landawn.abacus.util.function.Runnable closeAll(final AutoCloseable... a) {
-        return new com.landawn.abacus.util.function.Runnable() {
+    public static Runnable closeAll(final AutoCloseable... a) {
+        return new Runnable() {
             private volatile boolean isClosed = false;
 
             @Override
@@ -774,8 +783,8 @@ public final class Fn extends Comparators {
      * @param c
      * @return
      */
-    public static com.landawn.abacus.util.function.Runnable closeAll(final Collection<? extends AutoCloseable> c) {
-        return new com.landawn.abacus.util.function.Runnable() {
+    public static Runnable closeAll(final Collection<? extends AutoCloseable> c) {
+        return new Runnable() {
             private volatile boolean isClosed = false;
 
             @Override
@@ -795,8 +804,8 @@ public final class Fn extends Comparators {
      * @param closeable
      * @return
      */
-    public static com.landawn.abacus.util.function.Runnable closeQuietly(final AutoCloseable closeable) {
-        return new com.landawn.abacus.util.function.Runnable() {
+    public static Runnable closeQuietly(final AutoCloseable closeable) {
+        return new Runnable() {
             private volatile boolean isClosed = false;
 
             @Override
@@ -818,8 +827,8 @@ public final class Fn extends Comparators {
      * @return
      */
     @SafeVarargs
-    public static com.landawn.abacus.util.function.Runnable closeAllQuietly(final AutoCloseable... a) {
-        return new com.landawn.abacus.util.function.Runnable() {
+    public static Runnable closeAllQuietly(final AutoCloseable... a) {
+        return new Runnable() {
             private volatile boolean isClosed = false;
 
             @Override
@@ -840,8 +849,8 @@ public final class Fn extends Comparators {
      * @param c
      * @return
      */
-    public static com.landawn.abacus.util.function.Runnable closeAllQuietly(final Collection<? extends AutoCloseable> c) {
-        return new com.landawn.abacus.util.function.Runnable() {
+    public static Runnable closeAllQuietly(final Collection<? extends AutoCloseable> c) {
+        return new Runnable() {
             private volatile boolean isClosed = false;
 
             @Override
@@ -856,7 +865,7 @@ public final class Fn extends Comparators {
         };
     }
 
-    public static com.landawn.abacus.util.function.Runnable emptyAction() {
+    public static Runnable emptyAction() {
         return EMPTY_ACTION;
     }
 
@@ -897,6 +906,10 @@ public final class Fn extends Comparators {
                 throw excpetionSupplier.get();
             }
         };
+    }
+
+    public static Function<Throwable, RuntimeException> toRuntimeException() {
+        return TO_RUNTIME_EXCEPTION;
     }
 
     /**
@@ -3219,7 +3232,7 @@ public final class Fn extends Comparators {
     }
 
     /**
-     * Returns a stateful <code>Predicate</code>. Don't save it.
+     * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
      *
      * @param <T>
      * @param limit
@@ -3242,7 +3255,7 @@ public final class Fn extends Comparators {
     }
 
     /**
-     * Returns a stateful <code>Predicate</code>. Don't save it.
+     * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
      *
      * @param <T>
      * @param <U>
@@ -3266,7 +3279,7 @@ public final class Fn extends Comparators {
     }
 
     /**
-     * Returns a stateful <code>Predicate</code>. Don't save it.
+     * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
      *
      * @param <T>
      * @param predicate
@@ -3289,7 +3302,7 @@ public final class Fn extends Comparators {
     }
 
     /**
-     * Returns a stateful <code>Predicate</code>. Don't save it.
+     * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
      *
      * @param <T>
      * @param <U>
@@ -3313,7 +3326,7 @@ public final class Fn extends Comparators {
     }
 
     /**
-     * Returns a stateful <code>Predicate</code>. Don't save it.
+     * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
      *
      * @param <T>
      * @param timeInMillis
@@ -3348,7 +3361,7 @@ public final class Fn extends Comparators {
     }
 
     /**
-     * Returns a stateful <code>Predicate</code>. Don't save it.
+     * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
      *
      * @param <T>
      * @param duration
@@ -3363,7 +3376,7 @@ public final class Fn extends Comparators {
     }
 
     /**
-     * Returns a stateful <code>Predicate</code>. Don't save it or use it in parallel stream.
+     * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
      *
      * @param <T>
      * @return
@@ -3383,7 +3396,7 @@ public final class Fn extends Comparators {
     }
 
     /**
-     * Returns a stateful <code>Predicate</code>. Don't save it or use it in parallel stream.
+     * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
      *
      * @param <T>
      * @param predicate
@@ -4788,8 +4801,8 @@ public final class Fn extends Comparators {
         };
     }
 
-    public static <E extends Exception> com.landawn.abacus.util.function.Runnable rr(final Throwables.Runnable<E> runnbale) {
-        return new com.landawn.abacus.util.function.Runnable() {
+    public static <E extends Exception> Runnable rr(final Throwables.Runnable<E> runnbale) {
+        return new Runnable() {
             @Override
             public void run() {
                 try {
@@ -4801,8 +4814,8 @@ public final class Fn extends Comparators {
         };
     }
 
-    public static <R, E extends Exception> com.landawn.abacus.util.function.Callable<R> cc(final Throwables.Callable<R, E> callable) {
-        return new com.landawn.abacus.util.function.Callable<R>() {
+    public static <R, E extends Exception> Callable<R> cc(final Throwables.Callable<R, E> callable) {
+        return new Callable<R>() {
             @Override
             public R call() {
                 try {
@@ -4819,10 +4832,10 @@ public final class Fn extends Comparators {
      * @param runnable
      * @return
      */
-    public static com.landawn.abacus.util.function.Callable<Void> r2c(final com.landawn.abacus.util.function.Runnable runnable) {
+    public static Callable<Void> r2c(final Runnable runnable) {
         N.checkArgNotNull(runnable);
 
-        return new com.landawn.abacus.util.function.Callable<Void>() {
+        return new Callable<Void>() {
             @Override
             public Void call() {
                 runnable.run();
@@ -4837,10 +4850,10 @@ public final class Fn extends Comparators {
      * @param result
      * @return
      */
-    public static <T> com.landawn.abacus.util.function.Callable<T> r2c(final com.landawn.abacus.util.function.Runnable runnable, final T result) {
+    public static <T> Callable<T> r2c(final Runnable runnable, final T result) {
         N.checkArgNotNull(runnable);
 
-        return new com.landawn.abacus.util.function.Callable<T>() {
+        return new Callable<T>() {
             @Override
             public T call() {
                 runnable.run();
@@ -4855,10 +4868,10 @@ public final class Fn extends Comparators {
      * @param callable
      * @return
      */
-    public static <R> com.landawn.abacus.util.function.Runnable c2r(final com.landawn.abacus.util.function.Callable<R> callable) {
+    public static <R> Runnable c2r(final Callable<R> callable) {
         N.checkArgNotNull(callable);
 
-        return new com.landawn.abacus.util.function.Runnable() {
+        return new Runnable() {
             @Override
             public void run() {
                 callable.call();
@@ -4868,25 +4881,52 @@ public final class Fn extends Comparators {
 
     /**
      *
-     * @param <R>
-     * @param callable
+     * @param runnable
      * @return
      */
-    public static <R> com.landawn.abacus.util.function.Callable<R> callable(final com.landawn.abacus.util.function.Callable<R> callable) {
+    public static Runnable r(final Runnable runnable) {
+        N.checkArgNotNull(runnable);
+
+        return runnable;
+    }
+
+    /**
+    *
+    * @param <R>
+    * @param callable
+    * @return
+    */
+    public static <R> Callable<R> c(final Callable<R> callable) {
         N.checkArgNotNull(callable);
 
         return callable;
     }
 
     /**
-     *
-     * @param runnable
-     * @return
-     */
-    public static com.landawn.abacus.util.function.Runnable runnable(final com.landawn.abacus.util.function.Runnable runnable) {
+    *
+    * @param runnable
+    * @return 
+    * @deprecated replaced by {@link #r(Runnable)}
+    */
+    @Deprecated
+    public static Runnable runnable(final Runnable runnable) {
         N.checkArgNotNull(runnable);
 
         return runnable;
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param callable
+     * @return
+     * @deprecated replaced by {@link #c(Callable)}
+     */
+    @Deprecated
+    public static <R> Callable<R> callable(final Callable<R> callable) {
+        N.checkArgNotNull(callable);
+
+        return callable;
     }
 
     /**
@@ -5178,7 +5218,7 @@ public final class Fn extends Comparators {
                     }
                 };
 
-                return Stream.of(iter).onClose(new Runnable() {
+                return Stream.of(iter).onClose(new java.lang.Runnable() {
                     @Override
                     public void run() {
                         s.close();
@@ -5356,7 +5396,7 @@ public final class Fn extends Comparators {
                     }
                 };
 
-                return Stream.of(iter).onClose(new Runnable() {
+                return Stream.of(iter).onClose(new java.lang.Runnable() {
                     @Override
                     public void run() {
                         s.close();
@@ -5496,7 +5536,7 @@ public final class Fn extends Comparators {
                     }
                 };
 
-                return Stream.of(iter).onClose(new Runnable() {
+                return Stream.of(iter).onClose(new java.lang.Runnable() {
                     @Override
                     public void run() {
                         s.close();
@@ -5612,7 +5652,7 @@ public final class Fn extends Comparators {
                     }
                 };
 
-                return Stream.of(iter).onClose(new Runnable() {
+                return Stream.of(iter).onClose(new java.lang.Runnable() {
                     @Override
                     public void run() {
                         s.close();
@@ -5650,7 +5690,7 @@ public final class Fn extends Comparators {
     }
 
     /**
-     * Returns a stateful {@code BiFunction}. Don't cache or reuse it.
+     * Returns a stateful {@code BiFunction}. Don't save or cache for reuse or use it in parallel stream.
      *
      * @param <T>
      * @return
@@ -7563,7 +7603,7 @@ public final class Fn extends Comparators {
         }
 
         /**
-         * Returns a stateful <code>Predicate</code>. Don't save it or use it in parallel stream.
+         * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
          *
          * @param <T>
          * @param predicate
@@ -7586,7 +7626,7 @@ public final class Fn extends Comparators {
         }
 
         /**
-         * Returns a stateful <code>Predicate</code>. Don't save it or use it in parallel stream.
+         * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
          *
          * @param <T>
          * @return
@@ -7606,7 +7646,7 @@ public final class Fn extends Comparators {
         }
 
         /**
-         * Returns a stateful <code>Predicate</code>. Don't save it or use it in parallel stream.
+         * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
          *
          * @param <T>
          * @param mapper
@@ -7627,7 +7667,7 @@ public final class Fn extends Comparators {
         }
 
         /**
-         * Returns a stateful <code>Predicate</code>. Don't save it.
+         * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
          *
          * @param <T>
          * @return
@@ -7646,7 +7686,7 @@ public final class Fn extends Comparators {
         }
 
         /**
-         * Returns a stateful <code>Predicate</code>. Don't save it.
+         * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
          *
          * @param <T>
          * @param mapper
@@ -7666,7 +7706,7 @@ public final class Fn extends Comparators {
         }
 
         /**
-         * Returns a stateful <code>Predicate</code>. Don't save it or use it in parallel stream.
+         * Returns a stateful <code>Predicate</code>. Don't save or cache for reuse or use it in parallel stream.
          * Remove the continuous repeat elements.
          *
          * @param <T>
@@ -7735,7 +7775,7 @@ public final class Fn extends Comparators {
          */
         @Deprecated
         @Beta
-        public static <T> Predicate<T> invertedByDuration(final long periodInMillis, final MutableBoolean cancellationFlag, final Runnable update) {
+        public static <T> Predicate<T> invertedByDuration(final long periodInMillis, final MutableBoolean cancellationFlag, final java.lang.Runnable update) {
             final MutableBoolean switcher = MutableBoolean.of(true);
 
             final TimerTask task = new TimerTask() {
@@ -7810,7 +7850,7 @@ public final class Fn extends Comparators {
         @Deprecated
         @Beta
         public static <T> Predicate<T> invertedByDuration(final long delayInMillis, final long periodInMillis, final MutableBoolean cancellationFlag,
-                final Runnable update) {
+                final java.lang.Runnable update) {
             final MutableBoolean switcher = MutableBoolean.of(true);
 
             final TimerTask task = new TimerTask() {
@@ -7941,7 +7981,7 @@ public final class Fn extends Comparators {
         }
 
         /**
-         * Returns a stateful <code>BiPredicate</code>. Don't save it or use it in parallel stream.
+         * Returns a stateful <code>BiPredicate</code>. Don't save or cache for reuse or use it in parallel stream.
          *
          *
          * @param <T>
@@ -8033,7 +8073,7 @@ public final class Fn extends Comparators {
         }
 
         /**
-         * Returns a stateful <code>BiPredicate</code>. Don't save it or use it in parallel stream.
+         * Returns a stateful <code>BiPredicate</code>. Don't save or cache for reuse or use it in parallel stream.
          *
          * @param <T>
          * @param action
@@ -8295,7 +8335,7 @@ public final class Fn extends Comparators {
         }
 
         /**
-         * Returns a stateful <code>BiPredicate</code>. Don't save it or use it in parallel stream.
+         * Returns a stateful <code>BiPredicate</code>. Don't save or cache for reuse or use it in parallel stream.
          *
          *
          * @param <U>
@@ -8346,7 +8386,7 @@ public final class Fn extends Comparators {
         }
 
         /**
-         * Returns a stateful <code>Function</code>. Don't save it or use it in parallel stream.
+         * Returns a stateful <code>Function</code>. Don't save or cache for reuse or use it in parallel stream.
          *
          *
          * @param <T>
@@ -8637,7 +8677,7 @@ public final class Fn extends Comparators {
         }
 
         /**
-         * Returns a stateful <code>BiPredicate</code>. Don't save it or use it in parallel stream.
+         * Returns a stateful <code>BiPredicate</code>. Don't save or cache for reuse or use it in parallel stream.
          *
          * @param <U>
          * @param <T>
@@ -9862,7 +9902,7 @@ public final class Fn extends Comparators {
         }
 
         /**
-         * Returns a stateful <code>CharBiFunction</code>. Don't save it or use it in parallel stream.
+         * Returns a stateful <code>CharBiFunction</code>. Don't save or cache for reuse or use it in parallel stream.
          *
          * @return
          * @deprecated
@@ -10137,7 +10177,7 @@ public final class Fn extends Comparators {
         }
 
         /**
-         * Returns a stateful <code>ByteBiFunction</code>. Don't save it or use it in parallel stream.
+         * Returns a stateful <code>ByteBiFunction</code>. Don't save or cache for reuse or use it in parallel stream.
          *
          * @return
          * @deprecated
@@ -10412,7 +10452,7 @@ public final class Fn extends Comparators {
         }
 
         /**
-         * Returns a stateful <code>ShortBiFunction</code>. Don't save it or use it in parallel stream.
+         * Returns a stateful <code>ShortBiFunction</code>. Don't save or cache for reuse or use it in parallel stream.
          *
          * @return
          * @deprecated
@@ -10687,7 +10727,7 @@ public final class Fn extends Comparators {
         }
 
         /**
-         * Returns a stateful <code>IntBiFunction</code>. Don't save it or use it in parallel stream.
+         * Returns a stateful <code>IntBiFunction</code>. Don't save or cache for reuse or use it in parallel stream.
          *
          * @return
          * @deprecated
@@ -10962,7 +11002,7 @@ public final class Fn extends Comparators {
         }
 
         /**
-         * Returns a stateful <code>LongBiFunction</code>. Don't save it or use it in parallel stream.
+         * Returns a stateful <code>LongBiFunction</code>. Don't save or cache for reuse or use it in parallel stream.
          *
          * @return
          * @deprecated
@@ -11237,7 +11277,7 @@ public final class Fn extends Comparators {
         }
 
         /**
-         * Returns a stateful <code>FloatBiFunction</code>. Don't save it or use it in parallel stream.
+         * Returns a stateful <code>FloatBiFunction</code>. Don't save or cache for reuse or use it in parallel stream.
          *
          * @return
          * @deprecated
@@ -11512,7 +11552,7 @@ public final class Fn extends Comparators {
         }
 
         /**
-         * Returns a stateful <code>DoubleBiFunction</code>. Don't save it or use it in parallel stream.
+         * Returns a stateful <code>DoubleBiFunction</code>. Don't save or cache for reuse or use it in parallel stream.
          *
          * @return
          * @deprecated
@@ -11560,10 +11600,6 @@ public final class Fn extends Comparators {
      *
      */
     public static final class Fnn {
-
-        /**
-         * Instantiates a new fn.
-         */
         private Fnn() {
             // Singleton for utility class
         }
@@ -11579,163 +11615,71 @@ public final class Fn extends Comparators {
             return Throwables.LazyInitializer.of(supplier);
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <E>
-         * @return
-         */
         public static <T, E extends Exception> Throwables.Function<T, T, E> identity() {
             return Fn.IDENTITY;
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <E>
-         * @return
-         */
         public static <T, E extends Exception> Throwables.Predicate<T, E> alwaysTrue() {
             return Fn.ALWAYS_TRUE;
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <E>
-         * @return
-         */
         public static <T, E extends Exception> Throwables.Predicate<T, E> alwaysFalse() {
             return Fn.ALWAYS_FALSE;
         }
 
-        /**
-         *
-         * @param <K>
-         * @param <V>
-         * @param <E>
-         * @return
-         */
         @SuppressWarnings("rawtypes")
         public static <K, V, E extends Exception> Throwables.Function<Map.Entry<K, V>, K, E> key() {
             return (Throwables.Function) Fn.KEY;
         }
 
-        /**
-         *
-         * @param <K>
-         * @param <V>
-         * @param <E>
-         * @return
-         */
         @SuppressWarnings("rawtypes")
         public static <K, V, E extends Exception> Throwables.Function<Map.Entry<K, V>, V, E> value() {
             return (Throwables.Function) Fn.VALUE;
         }
 
-        /**
-         *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @return
-         */
         @SuppressWarnings("rawtypes")
         public static <K, V, E extends Exception> Throwables.Function<Entry<K, V>, Entry<V, K>, E> inverse() {
             return (Throwables.Function) Fn.INVERSE;
         }
 
-        /**
-         *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @return
-         */
         @SuppressWarnings("rawtypes")
         public static <K, V, E extends Exception> Throwables.BiFunction<K, V, Map.Entry<K, V>, E> entry() {
             return (Throwables.BiFunction) Fn.ENTRY;
         }
 
-        /**
-         *
-         * @param <L>
-         * @param <R>
-         * @return
-         */
         @SuppressWarnings("rawtypes")
         public static <L, R, E extends Exception> Throwables.BiFunction<L, R, Pair<L, R>, E> pair() {
             return (Throwables.BiFunction) Fn.PAIR;
         }
 
-        /**
-         *
-         * @param <L>
-         * @param <M>
-         * @param <R>
-         * @return
-         */
         @SuppressWarnings("rawtypes")
         public static <L, M, R, E extends Exception> Throwables.TriFunction<L, M, R, Triple<L, M, R>, E> triple() {
             return (Throwables.TriFunction) Fn.TRIPLE;
         }
 
-        /**
-         *
-         * @param <T>
-         * @return
-         */
         @SuppressWarnings("rawtypes")
         public static <T, E extends Exception> Throwables.Function<T, Tuple1<T>, E> tuple1() {
             return (Throwables.Function) Fn.TUPLE_1;
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <U>
-         * @return
-         */
         @SuppressWarnings("rawtypes")
         public static <T, U, E extends Exception> Throwables.BiFunction<T, U, Tuple2<T, U>, E> tuple2() {
             return (Throwables.BiFunction) Fn.TUPLE_2;
         }
 
-        /**
-         *
-         * @param <A>
-         * @param <B>
-         * @param <C>
-         * @return
-         */
         @SuppressWarnings("rawtypes")
         public static <A, B, C, E extends Exception> Throwables.TriFunction<A, B, C, Tuple3<A, B, C>, E> tuple3() {
             return (Throwables.TriFunction) Fn.TUPLE_3;
         }
 
-        /**
-         *
-         * @param <E>
-         * @return
-         */
         public static <E extends Exception> Throwables.Runnable<E> emptyAction() {
             return (Throwables.Runnable<E>) Fn.EMPTY_ACTION;
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <E>
-         * @return
-         */
         public static <T, E extends Exception> Throwables.Consumer<T, E> doNothing() {
             return Fn.DO_NOTHING;
         }
 
-        /**
-         *
-         * @param <T>
-         * @param errorMessage
-         * @return
-         */
         public static <T> Throwables.Consumer<T, RuntimeException> throwRuntimeException(final String errorMessage) {
             return new Throwables.Consumer<T, RuntimeException>() {
                 @Override
@@ -11745,12 +11689,6 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <T>
-         * @param errorMessage
-         * @return
-         */
         public static <T> Throwables.Consumer<T, IOException> throwIOException(final String errorMessage) {
             return new Throwables.Consumer<T, IOException>() {
                 @Override
@@ -11760,12 +11698,6 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <T>
-         * @param errorMessage
-         * @return
-         */
         public static <T> Throwables.Consumer<T, Exception> throwException(final String errorMessage) {
             return new Throwables.Consumer<T, Exception>() {
                 @Override
@@ -11775,13 +11707,6 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <E>
-         * @param excpetionSupplier
-         * @return
-         */
         public static <T, E extends Exception> Throwables.Consumer<T, E> throwException(final Supplier<? extends E> excpetionSupplier) {
             return new Throwables.Consumer<T, E>() {
                 @Override
@@ -11791,13 +11716,6 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <E>
-         * @param millis
-         * @return
-         */
         public static <T, E extends Exception> Throwables.Consumer<T, E> sleep(final long millis) {
             return new Throwables.Consumer<T, E>() {
                 @Override
@@ -11807,13 +11725,6 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <E>
-         * @param millis
-         * @return
-         */
         public static <T, E extends Exception> Throwables.Consumer<T, E> sleepUninterruptibly(final long millis) {
             return new Throwables.Consumer<T, E>() {
                 @Override
@@ -11868,34 +11779,14 @@ public final class Fn extends Comparators {
             return (Throwables.Consumer<T, Exception>) CLOSE;
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <E>
-         * @return
-         */
         public static <T extends AutoCloseable, E extends Exception> Throwables.Consumer<T, E> closeQuietly() {
             return (Throwables.Consumer<T, E>) Fn.CLOSE_QUIETLY;
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <E>
-         * @return
-         */
         public static <T, E extends Exception> Throwables.Consumer<T, E> println() {
             return Fn.PRINTLN;
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <U>
-         * @param <E>
-         * @param separator
-         * @return
-         */
         public static <T, U, E extends Exception> Throwables.BiConsumer<T, U, E> println(final String separator) {
             return cc(Fn.<T, U> println(separator));
         }
@@ -11909,32 +11800,23 @@ public final class Fn extends Comparators {
             return (Throwables.Predicate<T, E>) Fn.NOT_NULL_OR_EMPTY;
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <E>
-         * @return
-         */
+        @Beta
+        public static <T, E extends Exception> Throwables.Predicate<T, E> isNull() {
+            return Fn.IS_NULL;
+        }
+
+        public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> isNullOrEmpty() {
+            return (Throwables.Predicate<T, E>) Fn.IS_NULL_OR_EMPTY;
+        }
+
         public static <T, E extends Exception> Throwables.BinaryOperator<T, E> throwingMerger() {
             return BinaryOperators.THROWING_MERGER;
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <E>
-         * @return
-         */
         public static <T, E extends Exception> Throwables.BinaryOperator<T, E> ignoringMerger() {
             return BinaryOperators.IGNORING_MERGER;
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <E>
-         * @return
-         */
         public static <T, E extends Exception> Throwables.BinaryOperator<T, E> replacingMerger() {
             return BinaryOperators.REPLACING_MERGER;
         }
@@ -12005,12 +11887,6 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <T>
-         * @param predicate
-         * @return
-         */
         public static <T, E extends Throwable> Throwables.Predicate<T, E> not(final Throwables.Predicate<T, E> predicate) {
             N.checkArgNotNull(predicate);
 
@@ -12022,13 +11898,6 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <U>
-         * @param biPredicate
-         * @return
-         */
         public static <T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> not(final Throwables.BiPredicate<T, U, E> biPredicate) {
             N.checkArgNotNull(biPredicate);
 
@@ -12040,14 +11909,6 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <A>
-         * @param <B>
-         * @param <C>
-         * @param triPredicate
-         * @return
-         */
         public static <A, B, C, E extends Throwable> Throwables.TriPredicate<A, B, C, E> not(final Throwables.TriPredicate<A, B, C, E> triPredicate) {
             N.checkArgNotNull(triPredicate);
 
@@ -12059,27 +11920,56 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <E>
-         * @param predicate
-         * @return
-         */
+        @Beta
+        public static <T, E extends Throwable> Throwables.Supplier<T, E> from(final java.util.function.Supplier<T> supplier) {
+            return () -> supplier.get();
+        }
+
+        @Beta
+        public static <T, E extends Throwable> Throwables.Predicate<T, E> from(final java.util.function.Predicate<T> predicate) {
+            return t -> predicate.test(t);
+        }
+
+        @Beta
+        public static <T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> from(final java.util.function.BiPredicate<T, U> predicate) {
+            return (t, u) -> predicate.test(t, u);
+        }
+
+        @Beta
+        public static <T, E extends Throwable> Throwables.Consumer<T, E> from(final java.util.function.Consumer<T> consumer) {
+            return t -> consumer.accept(t);
+        }
+
+        @Beta
+        public static <T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> from(final java.util.function.BiConsumer<T, U> consumer) {
+            return (t, u) -> consumer.accept(t, u);
+        }
+
+        @Beta
+        public static <T, R, E extends Throwable> Throwables.Function<T, R, E> from(final java.util.function.Function<T, R> function) {
+            return t -> function.apply(t);
+        }
+
+        @Beta
+        public static <T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> from(final java.util.function.BiFunction<T, U, R> function) {
+            return (t, u) -> function.apply(t, u);
+        }
+
+        @Beta
+        public static <T, E extends Throwable> Throwables.UnaryOperator<T, E> from(final java.util.function.UnaryOperator<T> op) {
+            return t -> op.apply(t);
+        }
+
+        @Beta
+        public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> from(final java.util.function.BinaryOperator<T> op) {
+            return (t1, t2) -> op.apply(t1, t2);
+        }
+
         @Beta
         public static <T, E extends Throwable> Throwables.Predicate<T, E> p(final Throwables.Predicate<T, E> predicate) {
             return predicate;
         }
 
-        /**
-         *
-         * @param <A>
-         * @param <T>
-         * @param <E>
-         * @param a
-         * @param biPredicate
-         * @return
-         */
         @Beta
         public static <A, T, E extends Throwable> Throwables.Predicate<T, E> p(final A a, final Throwables.BiPredicate<A, T, E> biPredicate) {
             N.checkArgNotNull(biPredicate);
@@ -12092,17 +11982,6 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <A>
-         * @param <B>
-         * @param <T>
-         * @param <E>
-         * @param a
-         * @param b
-         * @param triPredicate
-         * @return
-         */
         @Beta
         public static <A, B, T, E extends Throwable> Throwables.Predicate<T, E> p(final A a, final B b,
                 final Throwables.TriPredicate<A, B, T, E> triPredicate) {
@@ -12116,29 +11995,11 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <U>
-         * @param <E>
-         * @param biPredicate
-         * @return
-         */
         @Beta
         public static <T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> p(final Throwables.BiPredicate<T, U, E> biPredicate) {
             return biPredicate;
         }
 
-        /**
-         *
-         * @param <A>
-         * @param <T>
-         * @param <U>
-         * @param <E>
-         * @param a
-         * @param triPredicate
-         * @return
-         */
         @Beta
         public static <A, T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> p(final A a, final Throwables.TriPredicate<A, T, U, E> triPredicate) {
             N.checkArgNotNull(triPredicate);
@@ -12151,41 +12012,16 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <A>
-         * @param <B>
-         * @param <C>
-         * @param <E>
-         * @param triPredicate
-         * @return
-         */
         @Beta
         public static <A, B, C, E extends Throwable> Throwables.TriPredicate<A, B, C, E> p(final Throwables.TriPredicate<A, B, C, E> triPredicate) {
             return triPredicate;
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <E>
-         * @param predicate
-         * @return
-         */
         @Beta
         public static <T, E extends Throwable> Throwables.Consumer<T, E> c(final Throwables.Consumer<T, E> predicate) {
             return predicate;
         }
 
-        /**
-         *
-         * @param <A>
-         * @param <T>
-         * @param <E>
-         * @param a
-         * @param biConsumer
-         * @return
-         */
         @Beta
         public static <A, T, E extends Throwable> Throwables.Consumer<T, E> c(final A a, final Throwables.BiConsumer<A, T, E> biConsumer) {
             N.checkArgNotNull(biConsumer);
@@ -12198,17 +12034,6 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <A>
-         * @param <B>
-         * @param <T>
-         * @param <E>
-         * @param a
-         * @param b
-         * @param triConsumer
-         * @return
-         */
         @Beta
         public static <A, B, T, E extends Throwable> Throwables.Consumer<T, E> c(final A a, final B b, final Throwables.TriConsumer<A, B, T, E> triConsumer) {
             N.checkArgNotNull(triConsumer);
@@ -12221,29 +12046,11 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <U>
-         * @param <E>
-         * @param biConsumer
-         * @return
-         */
         @Beta
         public static <T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> c(final Throwables.BiConsumer<T, U, E> biConsumer) {
             return biConsumer;
         }
 
-        /**
-         *
-         * @param <A>
-         * @param <T>
-         * @param <U>
-         * @param <E>
-         * @param a
-         * @param triConsumer
-         * @return
-         */
         @Beta
         public static <A, T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> c(final A a, final Throwables.TriConsumer<A, T, U, E> triConsumer) {
             N.checkArgNotNull(triConsumer);
@@ -12256,43 +12063,16 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <A>
-         * @param <B>
-         * @param <C>
-         * @param <E>
-         * @param triConsumer
-         * @return
-         */
         @Beta
         public static <A, B, C, E extends Throwable> Throwables.TriConsumer<A, B, C, E> c(final Throwables.TriConsumer<A, B, C, E> triConsumer) {
             return triConsumer;
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <R>
-         * @param <E>
-         * @param predicate
-         * @return
-         */
         @Beta
         public static <T, R, E extends Throwable> Throwables.Function<T, R, E> f(final Throwables.Function<T, R, E> predicate) {
             return predicate;
         }
 
-        /**
-         *
-         * @param <A>
-         * @param <T>
-         * @param <R>
-         * @param <E>
-         * @param a
-         * @param biFunction
-         * @return
-         */
         @Beta
         public static <A, T, R, E extends Throwable> Throwables.Function<T, R, E> f(final A a, final Throwables.BiFunction<A, T, R, E> biFunction) {
             N.checkArgNotNull(biFunction);
@@ -12305,18 +12085,6 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <A>
-         * @param <B>
-         * @param <T>
-         * @param <R>
-         * @param <E>
-         * @param a
-         * @param b
-         * @param triFunction
-         * @return
-         */
         @Beta
         public static <A, B, T, R, E extends Throwable> Throwables.Function<T, R, E> f(final A a, final B b,
                 final Throwables.TriFunction<A, B, T, R, E> triFunction) {
@@ -12330,31 +12098,11 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <U>
-         * @param <R>
-         * @param <E>
-         * @param biFunction
-         * @return
-         */
         @Beta
         public static <T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> f(final Throwables.BiFunction<T, U, R, E> biFunction) {
             return biFunction;
         }
 
-        /**
-         *
-         * @param <A>
-         * @param <T>
-         * @param <U>
-         * @param <R>
-         * @param <E>
-         * @param a
-         * @param triFunction
-         * @return
-         */
         @Beta
         public static <A, T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> f(final A a,
                 final Throwables.TriFunction<A, T, U, R, E> triFunction) {
@@ -12368,28 +12116,11 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <A>
-         * @param <B>
-         * @param <C>
-         * @param <R>
-         * @param <E>
-         * @param triFunction
-         * @return
-         */
         @Beta
         public static <A, B, C, R, E extends Throwable> Throwables.TriFunction<A, B, C, R, E> f(final Throwables.TriFunction<A, B, C, R, E> triFunction) {
             return triFunction;
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <E>
-         * @param predicate
-         * @return
-         */
         @Beta
         public static <T, E extends Throwable> Throwables.Predicate<T, E> pp(final Predicate<T> predicate) {
             N.checkArgNotNull(predicate);
@@ -12397,15 +12128,6 @@ public final class Fn extends Comparators {
             return (Throwables.Predicate<T, E>) predicate;
         }
 
-        /**
-         *
-         * @param <A>
-         * @param <T>
-         * @param <E>
-         * @param a
-         * @param biPredicate
-         * @return
-         */
         @Beta
         public static <A, T, E extends Throwable> Throwables.Predicate<T, E> pp(final A a, final BiPredicate<A, T> biPredicate) {
             N.checkArgNotNull(biPredicate);
@@ -12418,17 +12140,6 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <A>
-         * @param <B>
-         * @param <T>
-         * @param <E>
-         * @param a
-         * @param b
-         * @param triPredicate
-         * @return
-         */
         @Beta
         public static <A, B, T, E extends Throwable> Throwables.Predicate<T, E> pp(final A a, final B b, final TriPredicate<A, B, T> triPredicate) {
             N.checkArgNotNull(triPredicate);
@@ -12441,14 +12152,6 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <U>
-         * @param <E>
-         * @param biPredicate
-         * @return
-         */
         @Beta
         public static <T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> pp(final BiPredicate<T, U> biPredicate) {
             N.checkArgNotNull(biPredicate);
@@ -12456,16 +12159,6 @@ public final class Fn extends Comparators {
             return (Throwables.BiPredicate<T, U, E>) biPredicate;
         }
 
-        /**
-         *
-         * @param <A>
-         * @param <T>
-         * @param <U>
-         * @param <E>
-         * @param a
-         * @param triPredicate
-         * @return
-         */
         @Beta
         public static <A, T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> pp(final A a, final TriPredicate<A, T, U> triPredicate) {
             N.checkArgNotNull(triPredicate);
@@ -12478,15 +12171,6 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <A>
-         * @param <B>
-         * @param <C>
-         * @param <E>
-         * @param triPredicate
-         * @return
-         */
         @Beta
         public static <A, B, C, E extends Throwable> Throwables.TriPredicate<A, B, C, E> pp(final TriPredicate<A, B, C> triPredicate) {
             N.checkArgNotNull(triPredicate);
@@ -12494,13 +12178,6 @@ public final class Fn extends Comparators {
             return (Throwables.TriPredicate<A, B, C, E>) triPredicate;
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <E>
-         * @param consumer
-         * @return
-         */
         @Beta
         public static <T, E extends Throwable> Throwables.Consumer<T, E> cc(final Consumer<T> consumer) {
             N.checkArgNotNull(consumer);
@@ -12508,15 +12185,6 @@ public final class Fn extends Comparators {
             return (Throwables.Consumer<T, E>) consumer;
         }
 
-        /**
-         *
-         * @param <A>
-         * @param <T>
-         * @param <E>
-         * @param a
-         * @param biConsumer
-         * @return
-         */
         @Beta
         public static <A, T, E extends Throwable> Throwables.Consumer<T, E> cc(final A a, final BiConsumer<A, T> biConsumer) {
             N.checkArgNotNull(biConsumer);
@@ -12529,17 +12197,6 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <A>
-         * @param <B>
-         * @param <T>
-         * @param <E>
-         * @param a
-         * @param b
-         * @param triConsumer
-         * @return
-         */
         @Beta
         public static <A, B, T, E extends Throwable> Throwables.Consumer<T, E> cc(final A a, final B b, final TriConsumer<A, B, T> triConsumer) {
             N.checkArgNotNull(triConsumer);
@@ -12552,14 +12209,6 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <U>
-         * @param <E>
-         * @param biConsumer
-         * @return
-         */
         @Beta
         public static <T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> cc(final BiConsumer<T, U> biConsumer) {
             N.checkArgNotNull(biConsumer);
@@ -12567,16 +12216,6 @@ public final class Fn extends Comparators {
             return (Throwables.BiConsumer<T, U, E>) biConsumer;
         }
 
-        /**
-         *
-         * @param <A>
-         * @param <T>
-         * @param <U>
-         * @param <E>
-         * @param a
-         * @param triConsumer
-         * @return
-         */
         @Beta
         public static <A, T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> cc(final A a, final TriConsumer<A, T, U> triConsumer) {
             N.checkArgNotNull(triConsumer);
@@ -12589,15 +12228,6 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <A>
-         * @param <B>
-         * @param <C>
-         * @param <E>
-         * @param triConsumer
-         * @return
-         */
         @Beta
         public static <A, B, C, E extends Throwable> Throwables.TriConsumer<A, B, C, E> cc(final TriConsumer<A, B, C> triConsumer) {
             N.checkArgNotNull(triConsumer);
@@ -12605,14 +12235,6 @@ public final class Fn extends Comparators {
             return (Throwables.TriConsumer<A, B, C, E>) triConsumer;
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <R>
-         * @param <E>
-         * @param function
-         * @return
-         */
         @Beta
         public static <T, R, E extends Throwable> Throwables.Function<T, R, E> ff(final Function<T, R> function) {
             N.checkArgNotNull(function);
@@ -12620,16 +12242,6 @@ public final class Fn extends Comparators {
             return (Throwables.Function<T, R, E>) function;
         }
 
-        /**
-         *
-         * @param <A>
-         * @param <T>
-         * @param <R>
-         * @param <E>
-         * @param a
-         * @param biFunction
-         * @return
-         */
         @Beta
         public static <A, T, R, E extends Throwable> Throwables.Function<T, R, E> ff(final A a, final BiFunction<A, T, R> biFunction) {
             N.checkArgNotNull(biFunction);
@@ -12642,18 +12254,6 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <A>
-         * @param <B>
-         * @param <T>
-         * @param <R>
-         * @param <E>
-         * @param a
-         * @param b
-         * @param triFunction
-         * @return
-         */
         @Beta
         public static <A, B, T, R, E extends Throwable> Throwables.Function<T, R, E> ff(final A a, final B b, final TriFunction<A, B, T, R> triFunction) {
             N.checkArgNotNull(triFunction);
@@ -12666,15 +12266,6 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <T>
-         * @param <U>
-         * @param <R>
-         * @param <E>
-         * @param biFunction
-         * @return
-         */
         @Beta
         public static <T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> ff(final BiFunction<T, U, R> biFunction) {
             N.checkArgNotNull(biFunction);
@@ -12682,17 +12273,6 @@ public final class Fn extends Comparators {
             return (Throwables.BiFunction<T, U, R, E>) biFunction;
         }
 
-        /**
-         *
-         * @param <A>
-         * @param <T>
-         * @param <U>
-         * @param <R>
-         * @param <E>
-         * @param a
-         * @param triFunction
-         * @return
-         */
         @Beta
         public static <A, T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> ff(final A a, final TriFunction<A, T, U, R> triFunction) {
             N.checkArgNotNull(triFunction);
@@ -12705,16 +12285,6 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <A>
-         * @param <B>
-         * @param <C>
-         * @param <R>
-         * @param <E>
-         * @param triFunction
-         * @return
-         */
         @Beta
         public static <A, B, C, R, E extends Throwable> Throwables.TriFunction<A, B, C, R, E> ff(final TriFunction<A, B, C, R> triFunction) {
             N.checkArgNotNull(triFunction);
@@ -13053,12 +12623,6 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <E>
-         * @param runnable
-         * @return
-         */
         public static <E extends Throwable> Throwables.Callable<Void, E> r2c(final Throwables.Runnable<E> runnable) {
             N.checkArgNotNull(runnable);
 
@@ -13071,13 +12635,6 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <E>
-         * @param runnable
-         * @param result
-         * @return
-         */
         public static <T, E extends Throwable> Throwables.Callable<T, E> r2c(final Throwables.Runnable<E> runnable, final T result) {
             N.checkArgNotNull(runnable);
 
@@ -13090,13 +12647,6 @@ public final class Fn extends Comparators {
             };
         }
 
-        /**
-         *
-         * @param <R>
-         * @param <E>
-         * @param callable
-         * @return
-         */
         public static <R, E extends Throwable> Throwables.Runnable<E> c2r(final Throwables.Callable<R, E> callable) {
             N.checkArgNotNull(callable);
 
@@ -13108,20 +12658,49 @@ public final class Fn extends Comparators {
             };
         }
 
-        public static <E extends Throwable> Throwables.Runnable<E> rr(final com.landawn.abacus.util.function.Runnable runnable) {
+        public static <E extends Throwable> Throwables.Runnable<E> rr(final Runnable runnable) {
             return (Throwables.Runnable<E>) runnable;
         }
 
-        public static <R, E extends Throwable> Throwables.Callable<R, E> cc(final com.landawn.abacus.util.function.Callable<R> callable) {
+        public static <R, E extends Throwable> Throwables.Callable<R, E> cc(final Callable<R> callable) {
             return (Throwables.Callable<R, E>) callable;
         }
 
+        public static <E extends Throwable> Throwables.Runnable<E> r(final Throwables.Runnable<E> runnable) {
+            N.checkArgNotNull(runnable);
+
+            return runnable;
+        }
+
+        public static <R, E extends Throwable> Throwables.Callable<R, E> c(final Throwables.Callable<R, E> callable) {
+            N.checkArgNotNull(callable);
+
+            return callable;
+        }
+
+        /**
+         * 
+         * @param <E>
+         * @param runnable
+         * @return
+         * @deprecated replaced by {@link #r(com.landawn.abacus.util.Throwables.Runnable)}
+         */
+        @Deprecated
         public static <E extends Throwable> Throwables.Runnable<E> runnable(final Throwables.Runnable<E> runnable) {
             N.checkArgNotNull(runnable);
 
             return runnable;
         }
 
+        /**
+         * 
+         * @param <R>
+         * @param <E>
+         * @param callable
+         * @return
+         * @deprecated replaced by {@link #c(com.landawn.abacus.util.Throwables.Callable)}
+         */
+        @Deprecated
         public static <R, E extends Throwable> Throwables.Callable<R, E> callable(final Throwables.Callable<R, E> callable) {
             N.checkArgNotNull(callable);
 

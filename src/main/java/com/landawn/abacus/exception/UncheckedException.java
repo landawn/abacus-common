@@ -44,20 +44,20 @@ public class UncheckedException extends RuntimeException {
     /**
      * Constructor for UncheckedIOException.
      *
-     * @param message
      * @param cause
      */
-    public UncheckedException(String message, Throwable cause) {
-        super(message, cause);
+    public UncheckedException(Throwable cause) {
+        super(cause);
     }
 
     /**
      * Constructor for UncheckedIOException.
      *
+     * @param message
      * @param cause
      */
-    public UncheckedException(Throwable cause) {
-        super(cause);
+    public UncheckedException(String message, Throwable cause) {
+        super(message, cause);
     }
 
     /**

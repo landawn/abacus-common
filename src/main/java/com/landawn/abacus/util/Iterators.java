@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import com.landawn.abacus.util.u.Nullable;
@@ -854,6 +855,29 @@ public final class Iterators {
         for (Collection<? extends T> e : a) {
             if (N.notNullOrEmpty(e)) {
                 list.add(e.iterator());
+            }
+        }
+
+        return concat(list);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @return
+     */
+    @SafeVarargs
+    public static <K, V> ObjIterator<Map.Entry<K, V>> concat(final Map<? extends K, ? extends V>... a) {
+        if (N.isNullOrEmpty(a)) {
+            return ObjIterator.empty();
+        }
+
+        final List<Iterator<Map.Entry<K, V>>> list = new ArrayList<>(a.length);
+
+        for (Map<? extends K, ? extends V> e : a) {
+            if (N.notNullOrEmpty(e)) {
+                list.add(((Map<K, V>) e).entrySet().iterator());
             }
         }
 

@@ -156,27 +156,27 @@ public class AsyncExecutor {
 
     /**
      *
-     * @param <T>
+     * @param <R>
      * @param command
      * @return
      */
-    public <T> ContinuableFuture<T> execute(final Callable<T> command) {
+    public <R> ContinuableFuture<R> execute(final Callable<R> command) {
         return execute(new FutureTask<>(command));
     }
 
     /**
      *
-     * @param <T>
+     * @param <R>
      * @param commands
      * @return
      */
     @SafeVarargs
-    public final <T> List<ContinuableFuture<T>> execute(final Callable<T>... commands) {
+    public final <R> List<ContinuableFuture<R>> execute(final Callable<R>... commands) {
         if (N.isNullOrEmpty(commands)) {
             return new ArrayList<>();
         }
 
-        final List<ContinuableFuture<T>> results = new ArrayList<>(commands.length);
+        final List<ContinuableFuture<R>> results = new ArrayList<>(commands.length);
 
         for (int i = 0, len = commands.length; i < len; i++) {
             results.add(execute(commands[i]));
@@ -187,18 +187,18 @@ public class AsyncExecutor {
 
     /**
      *
-     * @param <T>
+     * @param <R>
      * @param commands
      * @return
      */
-    public <T> List<ContinuableFuture<T>> execute(final Collection<? extends Callable<T>> commands) {
+    public <R> List<ContinuableFuture<R>> execute(final Collection<? extends Callable<R>> commands) {
         if (N.isNullOrEmpty(commands)) {
             return new ArrayList<>();
         }
 
-        final List<ContinuableFuture<T>> results = new ArrayList<>(commands.size());
+        final List<ContinuableFuture<R>> results = new ArrayList<>(commands.size());
 
-        for (Callable<T> cmd : commands) {
+        for (Callable<R> cmd : commands) {
             results.add(execute(cmd));
         }
 
@@ -226,19 +226,19 @@ public class AsyncExecutor {
 
     /**
      *
-     * @param <T>
+     * @param <R>
      * @param action
      * @param retryTimes
      * @param retryInterval
      * @param retryCondition
      * @return
      */
-    public <T> ContinuableFuture<T> execute(final Callable<T> action, final int retryTimes, final long retryInterval,
-            final BiPredicate<? super T, ? super Exception> retryCondition) {
-        return execute(new Callable<T>() {
+    public <R> ContinuableFuture<R> execute(final Callable<R> action, final int retryTimes, final long retryInterval,
+            final BiPredicate<? super R, ? super Exception> retryCondition) {
+        return execute(new Callable<R>() {
             @Override
-            public T call() throws Exception {
-                final Retry<T> retry = Retry.of(retryTimes, retryInterval, retryCondition);
+            public R call() throws Exception {
+                final Retry<R> retry = Retry.of(retryTimes, retryInterval, retryCondition);
                 return retry.call(action);
             }
         });
@@ -246,11 +246,11 @@ public class AsyncExecutor {
 
     /**
      *
-     * @param <T>
+     * @param <R>
      * @param futureTask
      * @return
      */
-    <T> ContinuableFuture<T> execute(final FutureTask<T> futureTask) {
+    <R> ContinuableFuture<R> execute(final FutureTask<R> futureTask) {
         final Executor executor = getExecutor();
 
         executor.execute(futureTask);

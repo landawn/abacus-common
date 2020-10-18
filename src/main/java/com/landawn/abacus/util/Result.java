@@ -18,6 +18,7 @@ package com.landawn.abacus.util;
 
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.function.Function;
+import com.landawn.abacus.util.function.Supplier;
 
 /**
  *
@@ -200,6 +201,24 @@ public final class Result<T, E extends Throwable> implements Immutable {
     }
 
     /**
+     * Or else throw.
+     *
+     * @param <E2>
+     * @param exceptionSupplierIfErrorOccurred
+     * @return
+     * @throws E2 the e2
+     */
+    public <E2 extends Throwable> T orElseThrow(final Function<? super E, E2> exceptionSupplierIfErrorOccurred) throws E2 {
+        N.checkArgNotNull(exceptionSupplierIfErrorOccurred, "exceptionSupplierIfErrorOccurred");
+
+        if (exception == null) {
+            return value;
+        } else {
+            throw exceptionSupplierIfErrorOccurred.apply(exception);
+        }
+    }
+
+    /**
      * 
      * @param <E2>
      * @param exception
@@ -215,20 +234,17 @@ public final class Result<T, E extends Throwable> implements Immutable {
     }
 
     /**
-     * Or else throw.
-     *
+     * 
      * @param <E2>
-     * @param exceptionSupplierIfErrorOccurred
+     * @param exceptionSupplier
      * @return
-     * @throws E2 the e2
+     * @throws E2
      */
-    public <E2 extends Throwable> T orElseThrow(final Function<? super E, E2> exceptionSupplierIfErrorOccurred) throws E2 {
-        N.checkArgNotNull(exceptionSupplierIfErrorOccurred, "exceptionSupplierIfErrorOccurred");
-
+    public <E2 extends Throwable> T orElseThrow(final Supplier<? extends E2> exceptionSupplier) throws E2 {
         if (exception == null) {
             return value;
         } else {
-            throw exceptionSupplierIfErrorOccurred.apply(exception);
+            throw exceptionSupplier.get();
         }
     }
 
