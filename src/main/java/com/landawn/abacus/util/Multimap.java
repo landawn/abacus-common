@@ -77,7 +77,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      * @param initialCapacity
      */
     Multimap(int initialCapacity) {
-        this(new HashMap<K, V>(initialCapacity), (Supplier<V>) Suppliers.ofList());
+        this(N.<K, V> newHashMap(initialCapacity), (Supplier<V>) Suppliers.ofList());
     }
 
     @SuppressWarnings("rawtypes")

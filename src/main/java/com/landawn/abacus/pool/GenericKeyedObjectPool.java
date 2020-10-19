@@ -454,7 +454,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 }
             }
 
-            final Map<K, E> removingObjects = new HashMap<>(N.initHashCapacity(heap.size()));
+            final Map<K, E> removingObjects = N.newHashMap(heap.size());
 
             for (Map.Entry<K, E> entry : heap) {
                 pool.remove(entry.getKey());

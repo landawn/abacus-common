@@ -75,11 +75,11 @@ public final class Multiset<T> implements Iterable<T> {
 
     public Multiset(int initialCapacity) {
         this.mapSupplier = Suppliers.ofMap();
-        this.valueMap = new HashMap<>(initialCapacity);
+        this.valueMap = N.newHashMap(initialCapacity);
     }
 
     public Multiset(final Collection<? extends T> c) {
-        this();
+        this((c == null || c instanceof Set) ? N.size(c) : N.size(c) / 2);
 
         addAll(c);
     }
@@ -113,7 +113,7 @@ public final class Multiset<T> implements Iterable<T> {
             return new Multiset<>();
         }
 
-        final Multiset<T> multiset = new Multiset<>(new HashMap<T, MutableInt>(N.initHashCapacity(a.length)));
+        final Multiset<T> multiset = new Multiset<>(N.<T, MutableInt> newHashMap(a.length));
 
         for (T e : a) {
             multiset.add(e);
@@ -1373,7 +1373,7 @@ public final class Multiset<T> implements Iterable<T> {
         final Map.Entry<T, MutableInt>[] entries = valueMap.entrySet().toArray(new Map.Entry[size()]);
         Arrays.sort(entries, cmp);
 
-        final Map<T, Integer> sortedValues = new LinkedHashMap<>(N.initHashCapacity(size()));
+        final Map<T, Integer> sortedValues = N.newLinkedHashMap(size());
 
         for (Map.Entry<T, MutableInt> entry : entries) {
             sortedValues.put(entry.getKey(), entry.getValue().value());

@@ -67,7 +67,7 @@ public final class Maps {
             return new HashMap<>();
         }
 
-        final Map<K, T> result = new HashMap<>(N.initHashCapacity(c.size()));
+        final Map<K, T> result = N.newHashMap(c.size());
 
         for (T e : c) {
             result.put(keyMapper.apply(e), e);
@@ -99,7 +99,7 @@ public final class Maps {
             return new HashMap<>();
         }
 
-        final Map<K, V> result = new HashMap<>(N.initHashCapacity(c.size()));
+        final Map<K, V> result = N.newHashMap(c.size());
 
         for (T e : c) {
             result.put(keyMapper.apply(e), valueExtractor.apply(e));
@@ -270,20 +270,20 @@ public final class Maps {
         Map res = null;
 
         if (HashMap.class.equals(m.getClass())) {
-            res = new HashMap<>(N.initHashCapacity(size));
+            res = N.newHashMap(size);
         } else if (m instanceof SortedMap) {
             res = new TreeMap<>(((SortedMap) m).comparator());
         } else if (m instanceof IdentityHashMap) {
-            res = new IdentityHashMap<>(N.initHashCapacity(size));
+            res = N.newIdentityHashMap(size);
         } else if (m instanceof LinkedHashMap) {
-            res = new LinkedHashMap<>(N.initHashCapacity(size));
+            res = N.newLinkedHashMap(size);
         } else if (m instanceof ImmutableMap) {
-            res = new LinkedHashMap<>(N.initHashCapacity(size));
+            res = N.newLinkedHashMap(size);
         } else {
             try {
                 res = N.newInstance(m.getClass());
             } catch (Exception e) {
-                res = new LinkedHashMap<>(N.initHashCapacity(size));
+                res = N.newLinkedHashMap(size);
             }
         }
 
@@ -305,20 +305,20 @@ public final class Maps {
         Map res = null;
 
         if (HashMap.class.equals(m.getClass())) {
-            res = new HashMap<>(N.initHashCapacity(m.size()));
+            res = N.newHashMap(m.size());
         } else if (m instanceof SortedMap) {
-            res = new LinkedHashMap<>(N.initHashCapacity(m.size()));
+            res = N.newLinkedHashMap(m.size());
         } else if (m instanceof IdentityHashMap) {
-            res = new IdentityHashMap<>(N.initHashCapacity(m.size()));
+            res = N.newIdentityHashMap(m.size());
         } else if (m instanceof LinkedHashMap) {
-            res = new LinkedHashMap<>(N.initHashCapacity(m.size()));
+            res = N.newLinkedHashMap(m.size());
         } else if (m instanceof ImmutableMap) {
-            res = new LinkedHashMap<>(N.initHashCapacity(m.size()));
+            res = N.newLinkedHashMap(m.size());
         } else {
             try {
                 res = N.newInstance(m.getClass());
             } catch (Exception e) {
-                res = new LinkedHashMap<>(N.initHashCapacity(m.size()));
+                res = N.newLinkedHashMap(m.size());
             }
         }
 
@@ -362,7 +362,7 @@ public final class Maps {
         final Iterator<? extends V> valueIter = values.iterator();
 
         final int minLen = N.min(keys.size(), values.size());
-        final Map<K, V> result = new HashMap<>(minLen);
+        final Map<K, V> result = N.newHashMap(minLen);
 
         for (int i = 0; i < minLen; i++) {
             result.put(keyIter.next(), valueIter.next());
@@ -1508,8 +1508,8 @@ public final class Maps {
     public static Map<String, Object> entity2Map(final Object entity, final boolean ignoreNullProperty, final Collection<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy) {
         final int initCapacity = (entity instanceof DirtyMarker ? DirtyMarkerUtil.signedPropNames((DirtyMarker) entity).size()
-                : N.initHashCapacity(ClassUtil.getPropNameList(entity.getClass()).size()));
-        final Map<String, Object> resultMap = new LinkedHashMap<>(initCapacity);
+                : ClassUtil.getPropNameList(entity.getClass()).size());
+        final Map<String, Object> resultMap = N.newLinkedHashMap(initCapacity);
 
         entity2Map(resultMap, entity, ignoreNullProperty, ignoredPropNames, keyNamingPolicy);
 
@@ -1777,8 +1777,8 @@ public final class Maps {
     public static Map<String, Object> deepEntity2Map(final Object entity, final boolean ignoreNullProperty, final Collection<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy) {
         final int initCapacity = entity instanceof DirtyMarker ? DirtyMarkerUtil.signedPropNames((DirtyMarker) entity).size()
-                : N.initHashCapacity(ClassUtil.getPropNameList(entity.getClass()).size());
-        final Map<String, Object> resultMap = new LinkedHashMap<>(initCapacity);
+                : ClassUtil.getPropNameList(entity.getClass()).size();
+        final Map<String, Object> resultMap = N.newLinkedHashMap(initCapacity);
 
         deepEntity2Map(resultMap, entity, ignoreNullProperty, ignoredPropNames, keyNamingPolicy);
 
@@ -2065,8 +2065,8 @@ public final class Maps {
     public static Map<String, Object> entity2FlatMap(final Object entity, final boolean ignoreNullProperty, final Collection<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy) {
         final int initCapacity = entity instanceof DirtyMarker ? DirtyMarkerUtil.signedPropNames((DirtyMarker) entity).size()
-                : N.initHashCapacity(ClassUtil.getPropNameList(entity.getClass()).size());
-        final Map<String, Object> resultMap = new LinkedHashMap<>(initCapacity);
+                : ClassUtil.getPropNameList(entity.getClass()).size();
+        final Map<String, Object> resultMap = N.newLinkedHashMap(initCapacity);
 
         entity2FlatMap(resultMap, entity, ignoreNullProperty, ignoredPropNames, keyNamingPolicy);
 
@@ -2183,7 +2183,7 @@ public final class Maps {
 
                 return resultMap;
             } else {
-                final Set<String> tmp = N.newHashSet(N.initHashCapacity(signedPropNames.size()));
+                final Set<String> tmp = N.newHashSet(signedPropNames.size());
 
                 for (String propName : signedPropNames) {
                     tmp.add(ClassUtil.getPropNameByMethod(ClassUtil.getPropGetMethod(entityClass, propName)));

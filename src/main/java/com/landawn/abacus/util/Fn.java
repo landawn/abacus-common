@@ -5907,7 +5907,7 @@ public final class Fn extends Comparators {
         private static final IntFunction<? super Set> SET_FACTORY = new IntFunction<Set>() {
             @Override
             public Set apply(int len) {
-                return N.newHashSet(N.initHashCapacity(len));
+                return N.newHashSet(len);
             }
         };
 
@@ -5916,7 +5916,7 @@ public final class Fn extends Comparators {
         private static final IntFunction<? super Set> LINKED_HASH_SET_FACTORY = new IntFunction<Set>() {
             @Override
             public Set apply(int len) {
-                return N.newLinkedHashSet(N.initHashCapacity(len));
+                return N.newLinkedHashSet(len);
             }
         };
 
@@ -5988,7 +5988,7 @@ public final class Fn extends Comparators {
         private static final IntFunction<? super Map> MAP_FACTORY = new IntFunction<Map>() {
             @Override
             public Map apply(int len) {
-                return N.newHashMap(N.initHashCapacity(len));
+                return N.newHashMap(len);
             }
         };
 
@@ -5997,7 +5997,7 @@ public final class Fn extends Comparators {
         private static final IntFunction<? super Map> LINKED_HASH_MAP_FACTORY = new IntFunction<Map>() {
             @Override
             public Map apply(int len) {
-                return N.newLinkedHashMap(N.initHashCapacity(len));
+                return N.newLinkedHashMap(len);
             }
         };
 
@@ -6006,7 +6006,7 @@ public final class Fn extends Comparators {
         private static final IntFunction<? super IdentityHashMap> IDENTITY_HASH_MAP_FACTORY = new IntFunction<IdentityHashMap>() {
             @Override
             public IdentityHashMap apply(int len) {
-                return new IdentityHashMap<>(N.initHashCapacity(len));
+                return N.newIdentityHashMap(len);
             }
         };
 
@@ -6015,7 +6015,7 @@ public final class Fn extends Comparators {
         private static final IntFunction<? super TreeMap> TREE_MAP_FACTORY = new IntFunction<TreeMap>() {
             @Override
             public TreeMap apply(int len) {
-                return new TreeMap<>();
+                return N.newTreeMap();
             }
         };
 
@@ -6024,7 +6024,7 @@ public final class Fn extends Comparators {
         private static final IntFunction<? super ConcurrentHashMap> CONCURRENT_HASH_MAP_FACTORY = new IntFunction<ConcurrentHashMap>() {
             @Override
             public ConcurrentHashMap apply(int len) {
-                return new ConcurrentHashMap(N.initHashCapacity(len));
+                return N.newConcurrentHashMap(len);
             }
         };
 
@@ -6033,7 +6033,7 @@ public final class Fn extends Comparators {
         private static final IntFunction<? super BiMap> BI_MAP_FACTORY = new IntFunction<BiMap>() {
             @Override
             public BiMap apply(int len) {
-                return new BiMap(N.initHashCapacity(len));
+                return N.newBiMap(len);
             }
         };
 
@@ -6042,7 +6042,7 @@ public final class Fn extends Comparators {
         private static final IntFunction<? super Multiset> MULTISET_FACTORY = new IntFunction<Multiset>() {
             @Override
             public Multiset apply(int len) {
-                return new Multiset(N.initHashCapacity(len));
+                return N.newMultiset(len);
             }
         };
 
@@ -6051,7 +6051,7 @@ public final class Fn extends Comparators {
         private static final IntFunction<? super LongMultiset> LONG_MULTISET_FACTORY = new IntFunction<LongMultiset>() {
             @Override
             public LongMultiset apply(int len) {
-                return new LongMultiset(N.initHashCapacity(len));
+                return N.newLongMultiset(len);
             }
         };
 
@@ -6060,7 +6060,7 @@ public final class Fn extends Comparators {
         private static final IntFunction<? super ListMultimap> LIST_MULTIMAP_FACTORY = new IntFunction<ListMultimap>() {
             @Override
             public ListMultimap apply(int len) {
-                return new ListMultimap(N.initHashCapacity(len));
+                return N.newLinkedListMultimap(len);
             }
         };
 
@@ -6069,7 +6069,7 @@ public final class Fn extends Comparators {
         private static final IntFunction<? super SetMultimap> SET_MULTIMAP_FACTORY = new IntFunction<SetMultimap>() {
             @Override
             public SetMultimap apply(int len) {
-                return new SetMultimap(N.initHashCapacity(len));
+                return N.newSetMultimap(len);
             }
         };
 

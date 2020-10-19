@@ -513,7 +513,7 @@ public final class ParserUtil {
             PropInfo propInfo = null;
             int i = 0;
 
-            final Multiset<Integer> multiSet = new Multiset<>(propNameList.size() + 16);
+            final Multiset<Integer> multiSet = N.newMultiset(propNameList.size() + 16);
             int maxLength = 0;
             Field field = null;
             Method getMethod = null;

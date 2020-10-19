@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -252,7 +251,7 @@ public abstract class SQLBuilder {
 
     static final String SPACE_AS_SPACE = WD.SPACE + WD.AS + WD.SPACE;
 
-    private static final Set<String> sqlKeyWords = new HashSet<>(1024);
+    private static final Set<String> sqlKeyWords = N.newHashSet(1024);
 
     static {
         final Field[] fields = WD.class.getDeclaredFields();
@@ -283,7 +282,7 @@ public abstract class SQLBuilder {
 
     private static final Map<Class<?>, Set<String>[]> defaultPropNamesPool = new ObjectPool<>(N.POOL_SIZE);
 
-    private static final Map<NamingPolicy, Map<Class<?>, String>> fullSelectPartsPool = new HashMap<>(NamingPolicy.values().length);
+    private static final Map<NamingPolicy, Map<Class<?>, String>> fullSelectPartsPool = N.newHashMap(NamingPolicy.values().length);
 
     static {
         for (NamingPolicy np : NamingPolicy.values()) {
@@ -740,7 +739,7 @@ public abstract class SQLBuilder {
      */
     @Beta
     static Map<String, Expression> named(final String... propNames) {
-        final Map<String, Expression> m = new LinkedHashMap<>(N.initHashCapacity(propNames.length));
+        final Map<String, Expression> m = N.newLinkedHashMap(propNames.length);
 
         for (String propName : propNames) {
             m.put(propName, CF.QME);
@@ -756,7 +755,7 @@ public abstract class SQLBuilder {
      */
     @Beta
     static Map<String, Expression> named(final Collection<String> propNames) {
-        final Map<String, Expression> m = new LinkedHashMap<>(N.initHashCapacity(propNames.size()));
+        final Map<String, Expression> m = N.newLinkedHashMap(propNames.size());
 
         for (String propName : propNames) {
             m.put(propName, CF.QME);
@@ -816,7 +815,7 @@ public abstract class SQLBuilder {
 
         if (namingPropColumnNameMap == null || (result = namingPropColumnNameMap.get(namingPolicy)) == null) {
             final ImmutableMap<String, String> prop2ColumnNameMap = ClassUtil.getProp2ColumnNameMap(entityClass, namingPolicy);
-            final Map<String, Tuple2<String, Boolean>> newProp2ColumnNameMap = new HashMap<>(prop2ColumnNameMap.size() * 2);
+            final Map<String, Tuple2<String, Boolean>> newProp2ColumnNameMap = N.newHashMap(prop2ColumnNameMap.size() * 2);
 
             for (Map.Entry<String, String> entry : prop2ColumnNameMap.entrySet()) {
                 newProp2ColumnNameMap.put(entry.getKey(), Tuple.of(entry.getValue(), entry.getKey().indexOf('.') < 0));
@@ -1203,7 +1202,7 @@ public abstract class SQLBuilder {
                 appendColumnName(propColumnNameMap, entry.getKey(), entry.getValue(), false, null, isForSelect);
             }
         } else if (N.notNullOrEmpty(multiSelects)) {
-            aliasPropColumnNameMap = new HashMap<>(multiSelects.size());
+            aliasPropColumnNameMap = N.newHashMap(multiSelects.size());
 
             for (Tuple4<Class<?>, String, String, Set<String>> tp : multiSelects) {
                 if (N.notNullOrEmpty(tp._2)) {
@@ -2556,7 +2555,7 @@ public abstract class SQLBuilder {
             final Collection<String> propNames = getUpdatePropNames(entityClass, excludedPropNames);
             final Set<String> dirtyPropNames = DirtyMarkerUtil.isDirtyMarker(entityClass) ? DirtyMarkerUtil.dirtyPropNames((DirtyMarker) entity) : null;
             final boolean isEmptyDirtyPropNames = N.isNullOrEmpty(dirtyPropNames);
-            final Map<String, Object> props = N.newHashMap(N.initHashCapacity(N.isNullOrEmpty(dirtyPropNames) ? propNames.size() : dirtyPropNames.size()));
+            final Map<String, Object> props = N.newHashMap(N.isNullOrEmpty(dirtyPropNames) ? propNames.size() : dirtyPropNames.size());
             final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
 
             for (String propName : propNames) {
@@ -3424,7 +3423,7 @@ public abstract class SQLBuilder {
             }
         } else {
             final Collection<String> propNames = getInsertPropNames(entity, excludedPropNames);
-            final Map<String, Object> map = N.newHashMap(N.initHashCapacity(propNames.size()));
+            final Map<String, Object> map = N.newHashMap(propNames.size());
             final EntityInfo entityInfo = ParserUtil.getEntityInfo(entity.getClass());
 
             for (String propName : propNames) {
@@ -3446,7 +3445,7 @@ public abstract class SQLBuilder {
             final List<Map<String, Object>> newPropsList = new ArrayList<>(propsList.size());
 
             for (Object entity : propsList) {
-                final Map<String, Object> props = N.newHashMap(N.initHashCapacity(propNames.size()));
+                final Map<String, Object> props = N.newHashMap(propNames.size());
                 final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
 
                 for (String propName : propNames) {

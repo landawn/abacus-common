@@ -2935,7 +2935,7 @@ public final class ClassUtil {
 
         if (result == null) {
             final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
-            final Map<String, String> map = new HashMap<>(entityInfo.propInfoList.size() * 3);
+            final Map<String, String> map = N.newHashMap(entityInfo.propInfoList.size() * 3);
 
             for (PropInfo propInfo : entityInfo.propInfoList) {
                 if (propInfo.columnName.isPresent()) {
@@ -3071,7 +3071,7 @@ public final class ClassUtil {
         }
 
         final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
-        Map<String, String> propColumnNameMap = new HashMap<>(entityInfo.propInfoList.size() * 2);
+        Map<String, String> propColumnNameMap = N.newHashMap(entityInfo.propInfoList.size() * 2);
 
         for (PropInfo propInfo : entityInfo.propInfoList) {
             if (propInfo.columnName.isPresent()) {

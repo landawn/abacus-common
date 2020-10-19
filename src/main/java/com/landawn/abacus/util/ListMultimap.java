@@ -41,7 +41,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
     }
 
     ListMultimap(int initialCapacity) {
-        this(new HashMap<K, List<E>>(initialCapacity), ArrayList.class);
+        this(N.<K, List<E>> newHashMap(initialCapacity), ArrayList.class);
     }
 
     @SuppressWarnings("rawtypes")
@@ -292,7 +292,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
             final Throwables.Function<? super T, ? extends K, X> keyMapper) throws X {
         N.checkArgNotNull(keyMapper);
 
-        final ListMultimap<K, T> multimap = N.newListMultimap(N.initHashCapacity(N.size(c)));
+        final ListMultimap<K, T> multimap = N.newListMultimap(N.size(c));
 
         if (N.notNullOrEmpty(c)) {
             for (T e : c) {
@@ -322,7 +322,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(valueExtractor);
 
-        final ListMultimap<K, E> multimap = N.newListMultimap(N.initHashCapacity(N.size(c)));
+        final ListMultimap<K, E> multimap = N.newListMultimap(N.size(c));
 
         if (N.notNullOrEmpty(c)) {
             for (T e : c) {

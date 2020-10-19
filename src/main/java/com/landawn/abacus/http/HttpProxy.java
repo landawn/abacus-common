@@ -27,7 +27,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -220,7 +219,7 @@ public final class HttpProxy {
                     declaredMethods.addAll(Arrays.asList(superClass.getDeclaredMethods()));
                 }
 
-                final Set<String> declaredMethodNames = new HashSet<>(declaredMethods.size());
+                final Set<String> declaredMethodNames = N.newHashSet(declaredMethods.size());
 
                 for (Method method : declaredMethods) {
                     declaredMethodNames.add(method.getName());
@@ -237,7 +236,7 @@ public final class HttpProxy {
                 }
 
                 // set operation configuration.
-                final Map<String, OperationConfig> newOperationConfigs = new HashMap<>(N.initHashCapacity(declaredMethods.size()));
+                final Map<String, OperationConfig> newOperationConfigs = N.newHashMap(declaredMethods.size());
 
                 if (config != null && N.notNullOrEmpty(config.operationConfigs)) {
                     for (Map.Entry<String, OperationConfig> entry : config.operationConfigs.entrySet()) {
@@ -363,12 +362,12 @@ public final class HttpProxy {
                     {
                         operationConfig.paramTypes = new Type[parameterCount];
                         operationConfig.fieldParams = new Field[parameterCount];
-                        operationConfig.fieldNameSet = new HashSet<>(parameterCount);
+                        operationConfig.fieldNameSet = N.newHashSet(parameterCount);
                         operationConfig.pathParams = new Tuple2[parameterCount];
-                        operationConfig.pathParamNameSet = new HashSet<>(parameterCount);
+                        operationConfig.pathParamNameSet = N.newHashSet(parameterCount);
                         operationConfig.queryParams = new String[parameterCount];
-                        operationConfig.queryParamNameSet = new HashSet<>(parameterCount);
-                        operationConfig.pathAndQueryParamNameSet = new HashSet<>(parameterCount);
+                        operationConfig.queryParamNameSet = N.newHashSet(parameterCount);
+                        operationConfig.pathAndQueryParamNameSet = N.newHashSet(parameterCount);
                         operationConfig.paramNameTypeMap = new HashMap<>();
 
                         final Annotation[][] parameterAnnotationArrays = method.getParameterAnnotations();
@@ -584,7 +583,7 @@ public final class HttpProxy {
             }
 
             private final AtomicInteger sharedActiveConnectionCounter = new AtomicInteger(0);
-            private final Map<Method, HttpClient> _httpClientPool = new HashMap<>(N.initHashCapacity(_config.operationConfigs.size()));
+            private final Map<Method, HttpClient> _httpClientPool = N.newHashMap(_config.operationConfigs.size());
             private final Executor _asyncExecutor;
 
             {
@@ -805,7 +804,7 @@ public final class HttpProxy {
                         }
 
                         if (N.notNullOrEmpty(operationConfig.queryParamNameSet)) {
-                            Map<String, Object> queryParams = new HashMap<>(operationConfig.queryParamNameSet.size());
+                            Map<String, Object> queryParams = N.newHashMap(operationConfig.queryParamNameSet.size());
                             Tuple2<Integer, Type<Object>> tp = null;
 
                             for (String qureyParamName : operationConfig.queryParamNameSet) {
@@ -823,7 +822,7 @@ public final class HttpProxy {
                         Objectory.recycle(sb);
                     }
                 } else if (N.notNullOrEmpty(operationConfig.queryParamNameSet)) {
-                    final Map<String, Object> queryParams = new HashMap<>(operationConfig.queryParamNameSet.size());
+                    final Map<String, Object> queryParams = N.newHashMap(operationConfig.queryParamNameSet.size());
                     Tuple2<Integer, Type<Object>> tp = null;
 
                     for (String qureyParamName : operationConfig.queryParamNameSet) {
@@ -837,7 +836,7 @@ public final class HttpProxy {
                 Object requestParameter = null;
 
                 if (N.notNullOrEmpty(operationConfig.fieldNameSet)) {
-                    final Map<String, Object> queryParams = new HashMap<>(operationConfig.fieldNameSet.size());
+                    final Map<String, Object> queryParams = N.newHashMap(operationConfig.fieldNameSet.size());
                     Tuple2<Integer, Type<Object>> tp = null;
 
                     for (String fieldName : operationConfig.fieldNameSet) {

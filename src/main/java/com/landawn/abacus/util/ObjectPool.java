@@ -227,7 +227,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         Set<K> tmp = keySet;
 
         if (tmp == null) {
-            tmp = N.newHashSet(N.initHashCapacity(size));
+            tmp = N.newHashSet(size);
 
             for (int i = 0, len = table.length; i < len; i++) {
                 for (Entry<K, V> entry = table[i]; entry != null; entry = entry.next) {
@@ -250,7 +250,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         Collection<V> tmp = values;
 
         if (tmp == null) {
-            tmp = N.newHashSet(size < ((int) (Integer.MAX_VALUE / 1.25) - 1) ? (int) (size * 1.25) + 1 : Integer.MAX_VALUE /*N.initHashCapacity(size)*/);
+            tmp = N.newHashSet(size);
 
             V value = null;
 
@@ -277,7 +277,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         Set<java.util.Map.Entry<K, V>> tmp = entrySet;
 
         if (tmp == null) {
-            tmp = N.newHashSet(N.initHashCapacity(size));
+            tmp = N.newHashSet(size);
 
             for (int i = 0, len = table.length; i < len; i++) {
                 for (Entry<K, V> entry = table[i]; entry != null; entry = entry.next) {

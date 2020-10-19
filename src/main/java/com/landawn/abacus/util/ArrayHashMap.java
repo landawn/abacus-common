@@ -75,7 +75,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         if (N.isNullOrEmpty(m)) {
             map = new HashMap<>();
         } else {
-            map = new HashMap<>(N.initHashCapacity(m.size()));
+            map = N.newHashMap(m.size());
         }
 
         putAll(m);

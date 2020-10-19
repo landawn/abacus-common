@@ -75,11 +75,11 @@ public final class LongMultiset<T> implements Iterable<T> {
 
     public LongMultiset(int initialCapacity) {
         this.mapSupplier = Suppliers.ofMap();
-        this.valueMap = new HashMap<>(initialCapacity);
+        this.valueMap = N.newHashMap(initialCapacity);
     }
 
     public LongMultiset(final Collection<? extends T> c) {
-        this();
+        this((c == null || c instanceof Set) ? N.size(c) : N.size(c) / 2);
 
         addAll(c);
     }
@@ -113,7 +113,7 @@ public final class LongMultiset<T> implements Iterable<T> {
             return new LongMultiset<>();
         }
 
-        final LongMultiset<T> multiset = new LongMultiset<>(new HashMap<T, MutableLong>(N.initHashCapacity(a.length)));
+        final LongMultiset<T> multiset = new LongMultiset<>(N.<T, MutableLong> newHashMap(a.length));
 
         for (T e : a) {
             multiset.add(e);
@@ -1422,7 +1422,7 @@ public final class LongMultiset<T> implements Iterable<T> {
         final Map.Entry<T, MutableLong>[] entries = valueMap.entrySet().toArray(new Map.Entry[size()]);
         Arrays.sort(entries, cmp);
 
-        final Map<T, Long> sortedValues = new LinkedHashMap<>(N.initHashCapacity(size()));
+        final Map<T, Long> sortedValues = N.newLinkedHashMap(size());
 
         for (Map.Entry<T, MutableLong> entry : entries) {
             sortedValues.put(entry.getKey(), entry.getValue().value());

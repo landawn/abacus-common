@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -807,7 +806,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      */
     public Map<C, E> row(Object rowKey) {
         final int columnLength = columnLength();
-        Map<C, E> rowMap = new LinkedHashMap<>(N.initHashCapacity(columnLength));
+        Map<C, E> rowMap = N.newLinkedHashMap(columnLength);
 
         if (_initialized) {
             final int rowIndex = getRowIndex(rowKey);
@@ -828,7 +827,7 @@ public final class Sheet<R, C, E> implements Cloneable {
     }
 
     public Map<R, Map<C, E>> rowMap() {
-        final Map<R, Map<C, E>> result = new LinkedHashMap<>(N.initHashCapacity(this.rowKeySet().size()));
+        final Map<R, Map<C, E>> result = N.newLinkedHashMap(this.rowKeySet().size());
 
         for (R rowKey : this.rowKeySet()) {
             result.put(rowKey, row(rowKey));
@@ -1124,7 +1123,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      */
     public Map<R, E> column(Object columnKey) {
         final int rowLength = rowLength();
-        final Map<R, E> columnMap = new LinkedHashMap<>(N.initHashCapacity(rowLength));
+        final Map<R, E> columnMap = N.newLinkedHashMap(rowLength);
 
         if (_initialized) {
             final int columnIndex = getColumnIndex(columnKey);
@@ -1146,7 +1145,7 @@ public final class Sheet<R, C, E> implements Cloneable {
     }
 
     public Map<C, Map<R, E>> columnMap() {
-        final Map<C, Map<R, E>> result = new LinkedHashMap<>(N.initHashCapacity(this.columnKeySet().size()));
+        final Map<C, Map<R, E>> result = N.newLinkedHashMap(this.columnKeySet().size());
 
         for (C columnKey : this.columnKeySet()) {
             result.put(columnKey, column(columnKey));
@@ -2898,14 +2897,14 @@ public final class Sheet<R, C, E> implements Cloneable {
     private void initIndexMap() {
         if (_rowKeyIndexMap == null || _columnKeyIndexMap == null) {
             final int rowLength = rowLength();
-            _rowKeyIndexMap = new BiMap<>(N.initHashCapacity(rowLength));
+            _rowKeyIndexMap = N.newBiMap(rowLength);
             int index = 0;
             for (R rowKey : _rowKeySet) {
                 _rowKeyIndexMap.put(rowKey, index++);
             }
 
             final int columnLength = columnLength();
-            _columnKeyIndexMap = new BiMap<>(N.initHashCapacity(columnLength));
+            _columnKeyIndexMap = N.newBiMap(columnLength);
             index = 0;
             for (C columnKey : _columnKeySet) {
                 _columnKeyIndexMap.put(columnKey, index++);

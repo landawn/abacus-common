@@ -51,7 +51,7 @@ public class ArrayHashSet<E> implements Set<E> {
         if (N.isNullOrEmpty(coll)) {
             set = N.newHashSet();
         } else {
-            set = N.newHashSet(N.initHashCapacity(coll.size()));
+            set = N.newHashSet(coll.size());
         }
 
         addAll(coll);

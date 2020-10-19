@@ -34,11 +34,11 @@ public class IdentityHashSet<T> extends AbstractSet<T> {
     }
 
     public IdentityHashSet(int initialCapacity) {
-        map = new IdentityHashMap<>(initialCapacity);
+        map = N.newIdentityHashMap(initialCapacity);
     }
 
     public IdentityHashSet(Collection<? extends T> c) {
-        map = new IdentityHashMap<>(N.size(c));
+        map = N.newIdentityHashMap(N.size(c));
 
         addAll(c);
     }
