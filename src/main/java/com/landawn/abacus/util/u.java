@@ -1060,8 +1060,20 @@ public class u {
         /** The Constant EMPTY. */
         private static final OptionalChar EMPTY = new OptionalChar();
 
-        /** The Constant CHAR_0. */
-        private static final OptionalChar CHAR_0 = new OptionalChar(N.CHAR_0);
+        /** The Constant MIN_CACHED_VALUE. */
+        private static final char MIN_CACHED_VALUE = 0;
+
+        /** The Constant MAX_CACHED_VALUE. */
+        private static final char MAX_CACHED_VALUE = 128;
+
+        /** The Constant cached. */
+        private static final OptionalChar[] cached = new OptionalChar[MAX_CACHED_VALUE - MIN_CACHED_VALUE + 1];
+
+        static {
+            for (int i = 0; i < cached.length; i++) {
+                cached[i] = new OptionalChar((char) (i + MIN_CACHED_VALUE));
+            }
+        }
 
         /** The value. */
         private final char value;
@@ -1101,7 +1113,7 @@ public class u {
          * @return
          */
         public static OptionalChar of(char value) {
-            return value == N.CHAR_0 ? CHAR_0 : new OptionalChar(value);
+            return value >= MIN_CACHED_VALUE && value <= MAX_CACHED_VALUE ? cached[value - MIN_CACHED_VALUE] : new OptionalChar(value);
         }
 
         /**
@@ -1504,12 +1516,18 @@ public class u {
         /** The Constant EMPTY. */
         private static final OptionalByte EMPTY = new OptionalByte();
 
-        /** The Constant POOL. */
-        private static final OptionalByte[] POOL = new OptionalByte[256];
+        /** The Constant MIN_CACHED_VALUE. */
+        private static final byte MIN_CACHED_VALUE = Byte.MIN_VALUE;
+
+        /** The Constant MAX_CACHED_VALUE. */
+        private static final byte MAX_CACHED_VALUE = Byte.MAX_VALUE;
+
+        /** The Constant cached. */
+        private static final OptionalByte[] cached = new OptionalByte[MAX_CACHED_VALUE - MIN_CACHED_VALUE + 1];
 
         static {
-            for (int i = 0; i < 256; i++) {
-                POOL[i] = new OptionalByte((byte) (i - 128));
+            for (int i = 0; i < cached.length; i++) {
+                cached[i] = new OptionalByte((byte) (i + MIN_CACHED_VALUE));
             }
         }
 
@@ -1551,7 +1569,7 @@ public class u {
          * @return
          */
         public static OptionalByte of(byte value) {
-            return POOL[value - Byte.MIN_VALUE];
+            return cached[value - MIN_CACHED_VALUE];
         }
 
         /**
@@ -1954,6 +1972,21 @@ public class u {
         /** The Constant EMPTY. */
         private static final OptionalShort EMPTY = new OptionalShort();
 
+        /** The Constant MIN_CACHED_VALUE. */
+        private static final short MIN_CACHED_VALUE = -256;
+
+        /** The Constant MAX_CACHED_VALUE. */
+        private static final short MAX_CACHED_VALUE = 256;
+
+        /** The Constant cached. */
+        private static final OptionalShort[] cached = new OptionalShort[MAX_CACHED_VALUE - MIN_CACHED_VALUE + 1];
+
+        static {
+            for (int i = 0; i < cached.length; i++) {
+                cached[i] = new OptionalShort((short) (i + MIN_CACHED_VALUE));
+            }
+        }
+
         /** The value. */
         private final short value;
 
@@ -1992,7 +2025,7 @@ public class u {
          * @return
          */
         public static OptionalShort of(short value) {
-            return new OptionalShort(value);
+            return value >= MIN_CACHED_VALUE && value <= MAX_CACHED_VALUE ? cached[value - MIN_CACHED_VALUE] : new OptionalShort(value);
         }
 
         /**
@@ -2399,14 +2432,14 @@ public class u {
         private static final int MIN_CACHED_VALUE = -128;
 
         /** The Constant MAX_CACHED_VALUE. */
-        private static final int MAX_CACHED_VALUE = 1025;
+        private static final int MAX_CACHED_VALUE = 1024;
 
-        /** The Constant POOL. */
-        private static final OptionalInt[] POOL = new OptionalInt[MAX_CACHED_VALUE - MIN_CACHED_VALUE];
+        /** The Constant cached. */
+        private static final OptionalInt[] cached = new OptionalInt[MAX_CACHED_VALUE - MIN_CACHED_VALUE + 1];
 
         static {
-            for (int i = 0, to = MAX_CACHED_VALUE - MIN_CACHED_VALUE; i < to; i++) {
-                POOL[i] = new OptionalInt(i + MIN_CACHED_VALUE);
+            for (int i = 0; i < cached.length; i++) {
+                cached[i] = new OptionalInt(i + MIN_CACHED_VALUE);
             }
         }
 
@@ -2448,7 +2481,7 @@ public class u {
          * @return
          */
         public static OptionalInt of(int value) {
-            return value >= MIN_CACHED_VALUE && value < MAX_CACHED_VALUE ? POOL[value - MIN_CACHED_VALUE] : new OptionalInt(value);
+            return value >= MIN_CACHED_VALUE && value <= MAX_CACHED_VALUE ? cached[value - MIN_CACHED_VALUE] : new OptionalInt(value);
         }
 
         /**
@@ -2912,6 +2945,21 @@ public class u {
         /** The Constant EMPTY. */
         private static final OptionalLong EMPTY = new OptionalLong();
 
+        /** The Constant MIN_CACHED_VALUE. */
+        private static final long MIN_CACHED_VALUE = -128;
+
+        /** The Constant MAX_CACHED_VALUE. */
+        private static final long MAX_CACHED_VALUE = 1024;
+
+        /** The Constant cached. */
+        private static final OptionalLong[] cached = new OptionalLong[(int) (MAX_CACHED_VALUE - MIN_CACHED_VALUE + 1)];
+
+        static {
+            for (int i = 0; i < cached.length; i++) {
+                cached[i] = new OptionalLong(i + MIN_CACHED_VALUE);
+            }
+        }
+
         /** The value. */
         private final long value;
 
@@ -2950,7 +2998,7 @@ public class u {
          * @return
          */
         public static OptionalLong of(long value) {
-            return new OptionalLong(value);
+            return value >= MIN_CACHED_VALUE && value <= MAX_CACHED_VALUE ? cached[(int) (value - MIN_CACHED_VALUE)] : new OptionalLong(value);
         }
 
         /**
