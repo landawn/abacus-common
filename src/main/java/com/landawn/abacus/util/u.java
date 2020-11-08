@@ -1973,7 +1973,7 @@ public class u {
         private static final OptionalShort EMPTY = new OptionalShort();
 
         /** The Constant MIN_CACHED_VALUE. */
-        private static final short MIN_CACHED_VALUE = -256;
+        private static final short MIN_CACHED_VALUE = -128;
 
         /** The Constant MAX_CACHED_VALUE. */
         private static final short MAX_CACHED_VALUE = 256;
@@ -2429,7 +2429,7 @@ public class u {
         private static final OptionalInt EMPTY = new OptionalInt();
 
         /** The Constant MIN_CACHED_VALUE. */
-        private static final int MIN_CACHED_VALUE = -128;
+        private static final int MIN_CACHED_VALUE = -256;
 
         /** The Constant MAX_CACHED_VALUE. */
         private static final int MAX_CACHED_VALUE = 1024;
@@ -2946,7 +2946,7 @@ public class u {
         private static final OptionalLong EMPTY = new OptionalLong();
 
         /** The Constant MIN_CACHED_VALUE. */
-        private static final long MIN_CACHED_VALUE = -128;
+        private static final long MIN_CACHED_VALUE = -256;
 
         /** The Constant MAX_CACHED_VALUE. */
         private static final long MAX_CACHED_VALUE = 1024;
