@@ -4981,7 +4981,7 @@ public abstract class StringUtil {
      * @return
      */
     public static Optional<String> substring(String str, int inclusiveBeginIndex, int exclusiveEndIndex) {
-        return Optional.ofNullable(StringUtils.substring(str, inclusiveBeginIndex, exclusiveEndIndex));
+        return Optional.ofNullable(MoreStringUtil.substring(str, inclusiveBeginIndex, exclusiveEndIndex));
     }
 
     /**
@@ -4994,7 +4994,7 @@ public abstract class StringUtil {
      * @see #substring(String, int, int)
      */
     public static Optional<String> substring(String str, int inclusiveBeginIndex) {
-        return Optional.ofNullable(StringUtils.substring(str, inclusiveBeginIndex));
+        return Optional.ofNullable(MoreStringUtil.substring(str, inclusiveBeginIndex));
     }
 
     /**
@@ -5007,7 +5007,7 @@ public abstract class StringUtil {
      * @see #substring(String, int)
      */
     public static Optional<String> substring(String str, char delimiterOfInclusiveBeginIndex) {
-        return Optional.ofNullable(StringUtils.substring(str, delimiterOfInclusiveBeginIndex));
+        return Optional.ofNullable(MoreStringUtil.substring(str, delimiterOfInclusiveBeginIndex));
     }
 
     /**
@@ -5020,7 +5020,7 @@ public abstract class StringUtil {
      * @see #substring(String, int)
      */
     public static Optional<String> substring(String str, String delimiterOfInclusiveBeginIndex) {
-        return Optional.ofNullable(StringUtils.substring(str, delimiterOfInclusiveBeginIndex));
+        return Optional.ofNullable(MoreStringUtil.substring(str, delimiterOfInclusiveBeginIndex));
     }
 
     /**
@@ -5032,7 +5032,7 @@ public abstract class StringUtil {
      * @see #substring(String, int, int)
      */
     public static Optional<String> substring(String str, int inclusiveBeginIndex, char delimiterOfExclusiveEndIndex) {
-        return Optional.ofNullable(StringUtils.substring(str, inclusiveBeginIndex, delimiterOfExclusiveEndIndex));
+        return Optional.ofNullable(MoreStringUtil.substring(str, inclusiveBeginIndex, delimiterOfExclusiveEndIndex));
     }
 
     /**
@@ -5044,7 +5044,7 @@ public abstract class StringUtil {
      * @see #substring(String, int, int)
      */
     public static Optional<String> substring(String str, int inclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
-        return Optional.ofNullable(StringUtils.substring(str, inclusiveBeginIndex, delimiterOfExclusiveEndIndex));
+        return Optional.ofNullable(MoreStringUtil.substring(str, inclusiveBeginIndex, delimiterOfExclusiveEndIndex));
     }
 
     /**
@@ -5056,7 +5056,7 @@ public abstract class StringUtil {
      * @see #substring(String, int, int)
      */
     public static Optional<String> substring(String str, int inclusiveBeginIndex, IntUnaryOperator funcOfExclusiveEndIndex) {
-        return Optional.ofNullable(StringUtils.substring(str, inclusiveBeginIndex, funcOfExclusiveEndIndex));
+        return Optional.ofNullable(MoreStringUtil.substring(str, inclusiveBeginIndex, funcOfExclusiveEndIndex));
     }
 
     /**
@@ -5068,7 +5068,7 @@ public abstract class StringUtil {
      * @see #substring(String, int, int)
      */
     public static Optional<String> substring(String str, char delimiterOfInclusiveBeginIndex, int exclusiveEndIndex) {
-        return Optional.ofNullable(StringUtils.substring(str, delimiterOfInclusiveBeginIndex, exclusiveEndIndex));
+        return Optional.ofNullable(MoreStringUtil.substring(str, delimiterOfInclusiveBeginIndex, exclusiveEndIndex));
     }
 
     /**
@@ -5080,7 +5080,7 @@ public abstract class StringUtil {
      * @see #substring(String, int, int)
      */
     public static Optional<String> substring(String str, String delimiterOfInclusiveBeginIndex, int exclusiveEndIndex) {
-        return Optional.ofNullable(StringUtils.substring(str, delimiterOfInclusiveBeginIndex, exclusiveEndIndex));
+        return Optional.ofNullable(MoreStringUtil.substring(str, delimiterOfInclusiveBeginIndex, exclusiveEndIndex));
     }
 
     /**
@@ -5092,7 +5092,7 @@ public abstract class StringUtil {
      * @see #substring(String, int, int)
      */
     public static Optional<String> substring(String str, IntUnaryOperator funcOfInclusiveBeginIndex, int exclusiveEndIndex) {
-        return Optional.ofNullable(StringUtils.substring(str, funcOfInclusiveBeginIndex, exclusiveEndIndex));
+        return Optional.ofNullable(MoreStringUtil.substring(str, funcOfInclusiveBeginIndex, exclusiveEndIndex));
     }
 
     /**
@@ -5105,7 +5105,7 @@ public abstract class StringUtil {
      * @return
      */
     public static Optional<String> substringBetween(String str, int exclusiveBeginIndex, int exclusiveEndIndex) {
-        return Optional.ofNullable(StringUtils.substringBetween(str, exclusiveBeginIndex, exclusiveEndIndex));
+        return Optional.ofNullable(MoreStringUtil.substringBetween(str, exclusiveBeginIndex, exclusiveEndIndex));
     }
 
     /**
@@ -5117,7 +5117,7 @@ public abstract class StringUtil {
      * @see #substringBetween(String, int, int)
      */
     public static Optional<String> substringBetween(String str, int exclusiveBeginIndex, char delimiterOfExclusiveEndIndex) {
-        return Optional.ofNullable(StringUtils.substringBetween(str, exclusiveBeginIndex, delimiterOfExclusiveEndIndex));
+        return Optional.ofNullable(MoreStringUtil.substringBetween(str, exclusiveBeginIndex, delimiterOfExclusiveEndIndex));
     }
 
     /**
@@ -5129,7 +5129,7 @@ public abstract class StringUtil {
      * @see #substringBetween(String, int, int)
      */
     public static Optional<String> substringBetween(String str, int exclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
-        return Optional.ofNullable(StringUtils.substringBetween(str, exclusiveBeginIndex, delimiterOfExclusiveEndIndex));
+        return Optional.ofNullable(MoreStringUtil.substringBetween(str, exclusiveBeginIndex, delimiterOfExclusiveEndIndex));
     }
 
     /**
@@ -5141,7 +5141,7 @@ public abstract class StringUtil {
      * @see #substringBetween(String, int, int)
      */
     public static Optional<String> substringBetween(String str, int exclusiveBeginIndex, IntUnaryOperator funcOfExclusiveEndIndex) {
-        return Optional.ofNullable(StringUtils.substringBetween(str, exclusiveBeginIndex, funcOfExclusiveEndIndex));
+        return Optional.ofNullable(MoreStringUtil.substringBetween(str, exclusiveBeginIndex, funcOfExclusiveEndIndex));
     }
 
     /**
@@ -5153,7 +5153,7 @@ public abstract class StringUtil {
      * @see #substringBetween(String, int, int)
      */
     public static Optional<String> substringBetween(String str, char delimiterOfExclusiveBeginIndex, int exclusiveEndIndex) {
-        return Optional.ofNullable(StringUtils.substringBetween(str, delimiterOfExclusiveBeginIndex, exclusiveEndIndex));
+        return Optional.ofNullable(MoreStringUtil.substringBetween(str, delimiterOfExclusiveBeginIndex, exclusiveEndIndex));
     }
 
     /**
@@ -5165,7 +5165,7 @@ public abstract class StringUtil {
      * @see #substringBetween(String, int, int)
      */
     public static Optional<String> substringBetween(String str, String delimiterOfExclusiveBeginIndex, int exclusiveEndIndex) {
-        return Optional.ofNullable(StringUtils.substringBetween(str, delimiterOfExclusiveBeginIndex, exclusiveEndIndex));
+        return Optional.ofNullable(MoreStringUtil.substringBetween(str, delimiterOfExclusiveBeginIndex, exclusiveEndIndex));
     }
 
     /**
@@ -5177,7 +5177,42 @@ public abstract class StringUtil {
      * @see #substringBetween(String, int, int)
      */
     public static Optional<String> substringBetween(String str, IntUnaryOperator funcOfExclusiveBeginIndex, int exclusiveEndIndex) {
-        return Optional.ofNullable(StringUtils.substringBetween(str, funcOfExclusiveBeginIndex, exclusiveEndIndex));
+        return Optional.ofNullable(MoreStringUtil.substringBetween(str, funcOfExclusiveBeginIndex, exclusiveEndIndex));
+    }
+
+    /**
+     *
+     * @param str
+     * @param delimiterOfExclusiveBeginIndex
+     * @param delimiterOfExclusiveBeginIndex
+     * @return
+     * @see #substringBetween(String, int, int)
+     */
+    public static Optional<String> substringBetween(String str, char delimiterOfExclusiveBeginIndex, char delimiterOfExclusiveEndIndex) {
+        return Optional.ofNullable(MoreStringUtil.substringBetween(str, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex));
+    }
+
+    /**
+     *
+     * @param str
+     * @param delimiterOfExclusiveBeginIndex
+     * @param delimiterOfExclusiveBeginIndex
+     * @return
+     * @see #substringBetween(String, int, int)
+     */
+    public static Optional<String> substringBetween(String str, String delimiterOfExclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
+        return Optional.ofNullable(MoreStringUtil.substringBetween(str, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex));
+    }
+
+    /**
+     * Returns the substring after first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
+     * 
+     * @param str
+     * @param delimiterOfExclusiveBeginIndex
+     * @return
+     */
+    public static Optional<String> substringAfter(String str, String delimiterOfExclusiveBeginIndex) {
+        return Optional.ofNullable(MoreStringUtil.substringAfter(str, delimiterOfExclusiveBeginIndex));
     }
 
     /**
@@ -5187,8 +5222,8 @@ public abstract class StringUtil {
      * @param delimiterOfExclusiveBeginIndex
      * @return
      */
-    public static Optional<String> substringAfter(String str, String delimiterOfExclusiveBeginIndex) {
-        return Optional.ofNullable(StringUtils.substringAfterLast(str, delimiterOfExclusiveBeginIndex));
+    public static Optional<String> substringAfterLast(String str, String delimiterOfExclusiveBeginIndex) {
+        return Optional.ofNullable(MoreStringUtil.substringAfterLast(str, delimiterOfExclusiveBeginIndex));
     }
 
     /**
@@ -5199,7 +5234,18 @@ public abstract class StringUtil {
      * @return
      */
     public static Optional<String> substringBefore(String str, String delimiterOfExclusiveEndIndex) {
-        return Optional.ofNullable(StringUtils.substringBeforeFirst(str, delimiterOfExclusiveEndIndex));
+        return Optional.ofNullable(MoreStringUtil.substringBefore(str, delimiterOfExclusiveEndIndex));
+    }
+
+    /**
+     * Returns the substring last first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
+     * 
+     * @param str
+     * @param delimiterOfExclusiveEndIndex
+     * @return
+     */
+    public static Optional<String> substringBeforeLast(String str, String delimiterOfExclusiveEndIndex) {
+        return Optional.ofNullable(MoreStringUtil.substringBeforeLast(str, delimiterOfExclusiveEndIndex));
     }
 
     /**
@@ -7963,8 +8009,8 @@ public abstract class StringUtil {
         }
     }
 
-    public static final class StringUtils {
-        private StringUtils() {
+    public static final class MoreStringUtil {
+        private MoreStringUtil() {
             // Singleton.
         }
 
@@ -8029,7 +8075,7 @@ public abstract class StringUtil {
          * @see #substring(String, int)
          */
         public static String substring(String str, String delimiterOfInclusiveBeginIndex) {
-            if (str == null) {
+            if (str == null || delimiterOfInclusiveBeginIndex == null) {
                 return null;
             }
 
@@ -8061,11 +8107,15 @@ public abstract class StringUtil {
          * @see #substring(String, int, int)
          */
         public static String substring(String str, int inclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
-            if (str == null || inclusiveBeginIndex < 0) {
+            if (str == null || inclusiveBeginIndex < 0 || delimiterOfExclusiveEndIndex == null) {
                 return null;
             }
 
-            return substring(str, inclusiveBeginIndex, str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1));
+            if (delimiterOfExclusiveEndIndex.length() == 0) {
+                return str.substring(inclusiveBeginIndex, inclusiveBeginIndex);
+            } else {
+                return substring(str, inclusiveBeginIndex, str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1));
+            }
         }
 
         /**
@@ -8109,11 +8159,17 @@ public abstract class StringUtil {
          * @see #substring(String, int, int)
          */
         public static String substring(String str, String delimiterOfInclusiveBeginIndex, int exclusiveEndIndex) {
-            if (str == null || str.length() == 0 || exclusiveEndIndex <= 0) {
+            if (str == null || delimiterOfInclusiveBeginIndex == null || exclusiveEndIndex < 0) {
                 return null;
             }
 
-            return substring(str, str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1), exclusiveEndIndex);
+            if (delimiterOfInclusiveBeginIndex.length() == 0) {
+                return str.substring(exclusiveEndIndex, exclusiveEndIndex);
+            } else if (exclusiveEndIndex == 0) {
+                return null;
+            } else {
+                return substring(str, str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1), exclusiveEndIndex);
+            }
         }
 
         /**
@@ -8125,7 +8181,7 @@ public abstract class StringUtil {
          * @see #substring(String, int, int)
          */
         public static String substring(String str, IntUnaryOperator funcOfInclusiveBeginIndex, int exclusiveEndIndex) {
-            if (str == null || str.length() == 0 || exclusiveEndIndex <= 0) {
+            if (str == null || str.length() == 0 || exclusiveEndIndex < 0) {
                 return null;
             }
 
@@ -8174,7 +8230,7 @@ public abstract class StringUtil {
          * @see #substringBetween(String, int, int)
          */
         public static String substringBetween(String str, int exclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
-            if (str == null || str.length() == 0 || exclusiveBeginIndex < 0) {
+            if (str == null || str.length() == 0 || exclusiveBeginIndex < 0 || delimiterOfExclusiveEndIndex == null) {
                 return null;
             }
 
@@ -8222,7 +8278,7 @@ public abstract class StringUtil {
          * @see #substringBetween(String, int, int)
          */
         public static String substringBetween(String str, String delimiterOfExclusiveBeginIndex, int exclusiveEndIndex) {
-            if (str == null || str.length() == 0 || exclusiveEndIndex <= 0) {
+            if (str == null || str.length() == 0 || delimiterOfExclusiveBeginIndex == null || exclusiveEndIndex <= 0) {
                 return null;
             }
 
@@ -8249,6 +8305,83 @@ public abstract class StringUtil {
         }
 
         /**
+         *
+         * @param str
+         * @param delimiterOfExclusiveBeginIndex
+         * @param delimiterOfExclusiveBeginIndex
+         * @return
+         * @see #substringBetween(String, int, int)
+         */
+        public static String substringBetween(String str, char delimiterOfExclusiveBeginIndex, char delimiterOfExclusiveEndIndex) {
+            if (str == null || str.length() == 0) {
+                return null;
+            }
+
+            final int start = str.indexOf(delimiterOfExclusiveBeginIndex);
+
+            if (start < 0) {
+                return null;
+            }
+
+            final int end = str.indexOf(delimiterOfExclusiveEndIndex, start + 1);
+
+            if (end < 0) {
+                return null;
+            }
+
+            return substringBetween(str, start, end);
+        }
+
+        /**
+         *
+         * @param str
+         * @param delimiterOfExclusiveBeginIndex
+         * @param delimiterOfExclusiveBeginIndex
+         * @return
+         * @see #substringBetween(String, int, int)
+         */
+        public static String substringBetween(String str, String delimiterOfExclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
+            if (str == null || str.length() == 0 || delimiterOfExclusiveBeginIndex == null || delimiterOfExclusiveEndIndex == null) {
+                return null;
+            }
+
+            final int start = str.indexOf(delimiterOfExclusiveBeginIndex);
+
+            if (start < 0) {
+                return null;
+            }
+
+            final int end = str.indexOf(delimiterOfExclusiveEndIndex, start + delimiterOfExclusiveBeginIndex.length());
+
+            if (end < 0) {
+                return null;
+            }
+
+            return str.substring(start + delimiterOfExclusiveBeginIndex.length(), end);
+        }
+
+        /**
+         * Returns the substring after first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
+         * 
+         * @param str
+         * @param delimiterOfExclusiveBeginIndex
+         * @return
+         */
+        public static String substringAfter(String str, String delimiterOfExclusiveBeginIndex) {
+            if (str == null || delimiterOfExclusiveBeginIndex == null) {
+                return null;
+            }
+
+            int index = str.indexOf(delimiterOfExclusiveBeginIndex);
+
+            if (index < 0) {
+                return null;
+            }
+
+            return str.substring(index + delimiterOfExclusiveBeginIndex.length());
+        }
+
+        /**
          * Returns the substring after last {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
          * 
          * @param str
@@ -8256,7 +8389,7 @@ public abstract class StringUtil {
          * @return
          */
         public static String substringAfterLast(String str, String delimiterOfExclusiveBeginIndex) {
-            if (str == null) {
+            if (str == null || delimiterOfExclusiveBeginIndex == null) {
                 return null;
             }
 
@@ -8276,12 +8409,33 @@ public abstract class StringUtil {
          * @param delimiterOfExclusiveEndIndex
          * @return
          */
-        public static String substringBeforeFirst(String str, String delimiterOfExclusiveEndIndex) {
-            if (str == null) {
+        public static String substringBefore(String str, String delimiterOfExclusiveEndIndex) {
+            if (str == null || delimiterOfExclusiveEndIndex == null) {
                 return null;
             }
 
             int index = str.indexOf(delimiterOfExclusiveEndIndex);
+
+            if (index < 0) {
+                return null;
+            }
+
+            return str.substring(0, index);
+        }
+
+        /**
+         * Returns the substring before last {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
+         * 
+         * @param str
+         * @param delimiterOfExclusiveEndIndex
+         * @return
+         */
+        public static String substringBeforeLast(String str, String delimiterOfExclusiveEndIndex) {
+            if (str == null || delimiterOfExclusiveEndIndex == null) {
+                return null;
+            }
+
+            int index = str.lastIndexOf(delimiterOfExclusiveEndIndex);
 
             if (index < 0) {
                 return null;

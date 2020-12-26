@@ -1,3 +1,9 @@
+### 2.1.7
+
+* Add `MoreStringUtil`
+* Improvements and bug fix.
+
+
 ### 2.1.6
 
 * Improvements and bug fix.
