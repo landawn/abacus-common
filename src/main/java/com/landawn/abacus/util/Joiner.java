@@ -16,6 +16,7 @@ package com.landawn.abacus.util;
 
 import java.io.Closeable;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 
 import com.landawn.abacus.parser.ParserUtil;
@@ -1130,6 +1131,53 @@ public final class Joiner implements Closeable {
 
             if (i >= toIndex) {
                 break;
+            }
+        }
+
+        return this;
+    }
+
+    public Joiner appendAll(final Iterable<?> iter) {
+        if (iter != null) {
+            StringBuilder sb = null;
+
+            for (Object e : iter) {
+                if (e != null || skipNulls == false) {
+                    if (sb == null) {
+                        sb = prepareBuilder().append(toString(e));
+                    } else {
+                        if (isEmptyDelimiter) {
+                            sb.append(toString(e));
+                        } else {
+                            sb.append(delimiter).append(toString(e));
+                        }
+                    }
+                }
+            }
+        }
+
+        return this;
+    }
+
+    public Joiner appendAll(final Iterator<?> iter) {
+        if (iter != null) {
+            StringBuilder sb = null;
+            Object e = null;
+
+            while (iter.hasNext()) {
+                e = iter.next();
+
+                if (e != null || skipNulls == false) {
+                    if (sb == null) {
+                        sb = prepareBuilder().append(toString(e));
+                    } else {
+                        if (isEmptyDelimiter) {
+                            sb.append(toString(e));
+                        } else {
+                            sb.append(delimiter).append(toString(e));
+                        }
+                    }
+                }
             }
         }
 

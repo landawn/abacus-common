@@ -101,55 +101,234 @@ public abstract class StringUtil {
     }
 
     // Abbreviating
-    // -----------------------------------------------------------------------
+    //-----------------------------------------------------------------------
     /**
-     * <p>
-     * Abbreviates a String using ellipses. This will turn
-     * "Now is the time for all good men" into "Now is the time for..."
-     * </p>
+     * <p>Abbreviates a String using ellipses. This will turn
+     * "Now is the time for all good men" into "Now is the time for..."</p>
      *
-     * <p>
-     * Specifically:
-     * </p>
+     * <p>Specifically:</p>
      * <ul>
-     * <li>If {@code str} is less than or equals to {@code maxWidth} characters
-     * long, return it.</li>
-     * <li>Else abbreviate it to {@code (substring(str, 0, max-3) + "...")}.</li>
-     * <li>If {@code maxWidth} is less than {@code 4}, throw an
-     * {@code IllegalArgumentException}.</li>
-     * <li>In no case will it return a String of length greater than
-     * {@code maxWidth}.</li>
+     *   <li>If the number of characters in {@code str} is less than or equal to
+     *       {@code maxWidth}, return {@code str}.</li>
+     *   <li>Else abbreviate it to {@code (substring(str, 0, max-3) + "...")}.</li>
+     *   <li>If {@code maxWidth} is less than {@code 4}, throw an
+     *       {@code IllegalArgumentException}.</li>
+     *   <li>In no case will it return a String of length greater than
+     *       {@code maxWidth}.</li>
      * </ul>
      *
      * <pre>
-     * N.abbreviate(null, *)      = null
-     * N.abbreviate("", 4)        = ""
-     * N.abbreviate("abcdefg", 6) = "abc..."
-     * N.abbreviate("abcdefg", 7) = "abcdefg"
-     * N.abbreviate("abcdefg", 8) = "abcdefg"
-     * N.abbreviate("abcdefg", 4) = "a..."
-     * N.abbreviate("abcdefg", 3) = IllegalArgumentException
+     * StringUtils.abbreviate(null, *)      = null
+     * StringUtils.abbreviate("", 4)        = ""
+     * StringUtils.abbreviate("abcdefg", 6) = "abc..."
+     * StringUtils.abbreviate("abcdefg", 7) = "abcdefg"
+     * StringUtils.abbreviate("abcdefg", 8) = "abcdefg"
+     * StringUtils.abbreviate("abcdefg", 4) = "a..."
+     * StringUtils.abbreviate("abcdefg", 3) = IllegalArgumentException
      * </pre>
      *
-     * @param str
-     *            the String to check, may be null
-     * @param maxWidth
-     *            maximum length of result String, must be at least 4
-     * @return abbreviated String, {@code ""} if null or "" String input
-     * @throws IllegalArgumentException
-     *             if the width is too small
+     * @param str  the String to check, may be null
+     * @param maxWidth  maximum length of result String, must be at least 4
+     * @return abbreviated String, {@code null} if null String input
+     * @throws IllegalArgumentException if the width is too small
      * @since 2.0
      */
     public static String abbreviate(final String str, final int maxWidth) {
-        if (maxWidth < 4) {
-            throw new IllegalArgumentException("Minimum abbreviation width is 4");
+        return abbreviate(str, "...", 0, maxWidth);
+    }
+
+    /**
+     * <p>Abbreviates a String using ellipses. This will turn
+     * "Now is the time for all good men" into "...is the time for..."</p>
+     *
+     * <p>Works like {@code abbreviate(String, int)}, but allows you to specify
+     * a "left edge" offset.  Note that this left edge is not necessarily going to
+     * be the leftmost character in the result, or the first character following the
+     * ellipses, but it will appear somewhere in the result.
+     *
+     * <p>In no case will it return a String of length greater than
+     * {@code maxWidth}.</p>
+     *
+     * <pre>
+     * StringUtils.abbreviate(null, *, *)                = null
+     * StringUtils.abbreviate("", 0, 4)                  = ""
+     * StringUtils.abbreviate("abcdefghijklmno", -1, 10) = "abcdefg..."
+     * StringUtils.abbreviate("abcdefghijklmno", 0, 10)  = "abcdefg..."
+     * StringUtils.abbreviate("abcdefghijklmno", 1, 10)  = "abcdefg..."
+     * StringUtils.abbreviate("abcdefghijklmno", 4, 10)  = "abcdefg..."
+     * StringUtils.abbreviate("abcdefghijklmno", 5, 10)  = "...fghi..."
+     * StringUtils.abbreviate("abcdefghijklmno", 6, 10)  = "...ghij..."
+     * StringUtils.abbreviate("abcdefghijklmno", 8, 10)  = "...ijklmno"
+     * StringUtils.abbreviate("abcdefghijklmno", 10, 10) = "...ijklmno"
+     * StringUtils.abbreviate("abcdefghijklmno", 12, 10) = "...ijklmno"
+     * StringUtils.abbreviate("abcdefghij", 0, 3)        = IllegalArgumentException
+     * StringUtils.abbreviate("abcdefghij", 5, 6)        = IllegalArgumentException
+     * </pre>
+     *
+     * @param str  the String to check, may be null
+     * @param offset  left edge of source String
+     * @param maxWidth  maximum length of result String, must be at least 4
+     * @return abbreviated String, {@code null} if null String input
+     * @throws IllegalArgumentException if the width is too small
+     * @since 2.0
+     */
+    public static String abbreviate(final String str, final int offset, final int maxWidth) {
+        return abbreviate(str, "...", offset, maxWidth);
+    }
+
+    /**
+     * <p>Abbreviates a String using another given String as replacement marker. This will turn
+     * "Now is the time for all good men" into "Now is the time for..." if "..." was defined
+     * as the replacement marker.</p>
+     *
+     * <p>Specifically:</p>
+     * <ul>
+     *   <li>If the number of characters in {@code str} is less than or equal to
+     *       {@code maxWidth}, return {@code str}.</li>
+     *   <li>Else abbreviate it to {@code (substring(str, 0, max-abbrevMarker.length) + abbrevMarker)}.</li>
+     *   <li>If {@code maxWidth} is less than {@code abbrevMarker.length + 1}, throw an
+     *       {@code IllegalArgumentException}.</li>
+     *   <li>In no case will it return a String of length greater than
+     *       {@code maxWidth}.</li>
+     * </ul>
+     *
+     * <pre>
+     * StringUtils.abbreviate(null, "...", *)      = null
+     * StringUtils.abbreviate("abcdefg", null, *)  = "abcdefg"
+     * StringUtils.abbreviate("", "...", 4)        = ""
+     * StringUtils.abbreviate("abcdefg", ".", 5)   = "abcd."
+     * StringUtils.abbreviate("abcdefg", ".", 7)   = "abcdefg"
+     * StringUtils.abbreviate("abcdefg", ".", 8)   = "abcdefg"
+     * StringUtils.abbreviate("abcdefg", "..", 4)  = "ab.."
+     * StringUtils.abbreviate("abcdefg", "..", 3)  = "a.."
+     * StringUtils.abbreviate("abcdefg", "..", 2)  = IllegalArgumentException
+     * StringUtils.abbreviate("abcdefg", "...", 3) = IllegalArgumentException
+     * </pre>
+     *
+     * @param str  the String to check, may be null
+     * @param abbrevMarker  the String used as replacement marker
+     * @param maxWidth  maximum length of result String, must be at least {@code abbrevMarker.length + 1}
+     * @return abbreviated String, {@code null} if null String input
+     * @throws IllegalArgumentException if the width is too small
+     * @since 3.6
+     */
+    public static String abbreviate(final String str, final String abbrevMarker, final int maxWidth) {
+        return abbreviate(str, abbrevMarker, 0, maxWidth);
+    }
+
+    /**
+     * <p>Abbreviates a String using a given replacement marker. This will turn
+     * "Now is the time for all good men" into "...is the time for..." if "..." was defined
+     * as the replacement marker.</p>
+     *
+     * <p>Works like {@code abbreviate(String, String, int)}, but allows you to specify
+     * a "left edge" offset.  Note that this left edge is not necessarily going to
+     * be the leftmost character in the result, or the first character following the
+     * replacement marker, but it will appear somewhere in the result.
+     *
+     * <p>In no case will it return a String of length greater than {@code maxWidth}.</p>
+     *
+     * <pre>
+     * StringUtils.abbreviate(null, null, *, *)                 = null
+     * StringUtils.abbreviate("abcdefghijklmno", null, *, *)    = "abcdefghijklmno"
+     * StringUtils.abbreviate("", "...", 0, 4)                  = ""
+     * StringUtils.abbreviate("abcdefghijklmno", "---", -1, 10) = "abcdefg---"
+     * StringUtils.abbreviate("abcdefghijklmno", ",", 0, 10)    = "abcdefghi,"
+     * StringUtils.abbreviate("abcdefghijklmno", ",", 1, 10)    = "abcdefghi,"
+     * StringUtils.abbreviate("abcdefghijklmno", ",", 2, 10)    = "abcdefghi,"
+     * StringUtils.abbreviate("abcdefghijklmno", "::", 4, 10)   = "::efghij::"
+     * StringUtils.abbreviate("abcdefghijklmno", "...", 6, 10)  = "...ghij..."
+     * StringUtils.abbreviate("abcdefghijklmno", "*", 9, 10)    = "*ghijklmno"
+     * StringUtils.abbreviate("abcdefghijklmno", "'", 10, 10)   = "'ghijklmno"
+     * StringUtils.abbreviate("abcdefghijklmno", "!", 12, 10)   = "!ghijklmno"
+     * StringUtils.abbreviate("abcdefghij", "abra", 0, 4)       = IllegalArgumentException
+     * StringUtils.abbreviate("abcdefghij", "...", 5, 6)        = IllegalArgumentException
+     * </pre>
+     *
+     * @param str  the String to check, may be null
+     * @param abbrevMarker  the String used as replacement marker
+     * @param offset  left edge of source String
+     * @param maxWidth  maximum length of result String, must be at least 4
+     * @return abbreviated String, {@code null} if null String input
+     * @throws IllegalArgumentException if the width is too small
+     * @since 3.6
+     */
+    public static String abbreviate(final String str, final String abbrevMarker, int offset, final int maxWidth) {
+        final int abbrevMarkerLength = N.len(abbrevMarker);
+        final int minAbbrevWidth = abbrevMarkerLength + 1;
+        final int minAbbrevWidthOffset = abbrevMarkerLength + abbrevMarkerLength + 1;
+
+        if (maxWidth < minAbbrevWidth) {
+            throw new IllegalArgumentException(String.format("Minimum abbreviation width is %d", minAbbrevWidth));
         }
 
-        if (N.isNullOrEmpty(str)) {
+        if (N.notNullOrEmpty(str) && N.EMPTY_STRING.equals(abbrevMarker) && maxWidth > 0) {
+            return MoreStringUtil.substring(str, 0, maxWidth);
+        } else if (N.anyNullOrEmpty(str, abbrevMarker)) {
             return str;
         }
 
-        return str.length() <= maxWidth ? str : str.substring(0, maxWidth - 3) + "...";
+        if (str.length() <= maxWidth) {
+            return str;
+        }
+
+        if (offset > str.length()) {
+            offset = str.length();
+        }
+        if (str.length() - offset < maxWidth - abbrevMarkerLength) {
+            offset = str.length() - (maxWidth - abbrevMarkerLength);
+        }
+        if (offset <= abbrevMarkerLength + 1) {
+            return str.substring(0, maxWidth - abbrevMarkerLength) + abbrevMarker;
+        }
+        if (maxWidth < minAbbrevWidthOffset) {
+            throw new IllegalArgumentException(String.format("Minimum abbreviation width with offset is %d", minAbbrevWidthOffset));
+        }
+        if (offset + maxWidth - abbrevMarkerLength < str.length()) {
+            return abbrevMarker + abbreviate(str.substring(offset), abbrevMarker, maxWidth - abbrevMarkerLength);
+        }
+        return abbrevMarker + str.substring(str.length() - (maxWidth - abbrevMarkerLength));
+    }
+
+    /**
+     * <p>Abbreviates a String to the length passed, replacing the middle characters with the supplied
+     * replacement String.</p>
+     *
+     * <p>This abbreviation only occurs if the following criteria is met:</p>
+     * <ul>
+     * <li>Neither the String for abbreviation nor the replacement String are null or empty </li>
+     * <li>The length to truncate to is less than the length of the supplied String</li>
+     * <li>The length to truncate to is greater than 0</li>
+     * <li>The abbreviated String will have enough room for the length supplied replacement String
+     * and the first and last characters of the supplied String for abbreviation</li>
+     * </ul>
+     * <p>Otherwise, the returned String will be the same as the supplied String for abbreviation.
+     * </p>
+     *
+     * <pre>
+     * StringUtils.abbreviateMiddle(null, null, 0)      = null
+     * StringUtils.abbreviateMiddle("abc", null, 0)      = "abc"
+     * StringUtils.abbreviateMiddle("abc", ".", 0)      = "abc"
+     * StringUtils.abbreviateMiddle("abc", ".", 3)      = "abc"
+     * StringUtils.abbreviateMiddle("abcdef", ".", 4)     = "ab.f"
+     * </pre>
+     *
+     * @param str  the String to abbreviate, may be null
+     * @param middle the String to replace the middle characters with, may be null
+     * @param length the length to abbreviate {@code str} to.
+     * @return the abbreviated String if the above criteria is met, or the original String supplied for abbreviation.
+     * @since 2.5
+     */
+    public static String abbreviateMiddle(final String str, final String middle, final int length) {
+        if (N.anyNullOrEmpty(str, middle) || length >= str.length() || length < middle.length() + 2) {
+            return str;
+        }
+
+        final int targetSting = length - middle.length();
+        final int startOffset = targetSting / 2 + targetSting % 2;
+        final int endOffset = str.length() - targetSting / 2;
+
+        return str.substring(0, startOffset) + middle + str.substring(endOffset);
     }
 
     /**
@@ -1056,7 +1235,7 @@ public abstract class StringUtil {
      * N.replaceAll("any", null, *)    = "any"
      * N.replaceAll("any", *, null)    = "any"
      * N.replaceAll("any", "", *)      = "any"
-     * N.replaceAll("aba", "a", null)  = "aba"
+     * N.replaceAll("aba", "a", null)  = "b"
      * N.replaceAll("aba", "a", "")    = "b"
      * N.replaceAll("aba", "a", "z")   = "zbz"
      * </pre>
@@ -1086,6 +1265,45 @@ public abstract class StringUtil {
     }
 
     /**
+     * <p>Replaces a String with another String inside a larger String, once.</p>
+     *
+     * <p>A {@code null} reference passed to this method is a no-op.</p>
+     *
+     * <pre>
+     * StringUtils.replaceOnce(null, *, *)        = null
+     * StringUtils.replaceOnce("", *, *)          = ""
+     * StringUtils.replaceOnce("any", null, *)    = "any"
+     * StringUtils.replaceOnce("any", *, null)    = "any"
+     * StringUtils.replaceOnce("any", "", *)      = "any"
+     * StringUtils.replaceOnce("aba", "a", null)  = "ba"
+     * StringUtils.replaceOnce("aba", "a", "")    = "ba"
+     * StringUtils.replaceOnce("aba", "a", "z")   = "zba"
+     * </pre>
+     *
+     * @see #replace(String text, String searchString, String replacement, int max)
+     * @param text  text to search and replace in, may be null
+     * @param searchString  the String to search for, may be null
+     * @param replacement  the String to replace with, may be null
+     * @return the text with any replacements processed,
+     *  {@code null} if null String input
+     */
+    public static String replaceOnce(final String str, final String target, final String replacement) {
+        return replaceOnce(str, 0, target, replacement);
+    }
+
+    /**
+     *
+     * @param str
+     * @param fromIndex
+     * @param target
+     * @param replacement
+     * @return
+     */
+    public static String replaceOnce(final String str, final int fromIndex, final String target, final String replacement) {
+        return replace(str, fromIndex, target, replacement, 1);
+    }
+
+    /**
      * <p>
      * Replaces a String with another String inside a larger String, for the
      * first {@code max} values of the search String.
@@ -1101,7 +1319,7 @@ public abstract class StringUtil {
      * replace("any", null, *, *)     = "any"
      * replace("any", "", *, *)       = "any"
      * replace("any", *, *, 0)        = "any"
-     * replace("abaa", 0, "a", null, -1) = "abaa"
+     * replace("abaa", 0, "a", null, -1) = "b"
      * replace("abaa", 0, "a", "", -1)   = "b"
      * replace("abaa", 0, "a", "z", 0)   = "abaa"
      * replace("abaa", 0, "a", "z", 1)   = "zbaa"
@@ -1148,6 +1366,31 @@ public abstract class StringUtil {
     }
 
     /**
+     * Replace once ignore case.
+     *
+     * @param str
+     * @param target
+     * @param replacement
+     * @return
+     */
+    public static String replaceOnceIgnoreCase(final String str, final String target, final String replacement) {
+        return replaceOnceIgnoreCase(str, 0, target, replacement);
+    }
+
+    /**
+     * Replace once ignore case.
+     *
+     * @param str
+     * @param fromIndex
+     * @param target
+     * @param replacement
+     * @return
+     */
+    public static String replaceOnceIgnoreCase(final String str, final int fromIndex, final String target, final String replacement) {
+        return replaceIgnoreCase(str, fromIndex, target, replacement, 1);
+    }
+
+    /**
      * Replace ignore case.
      *
      * @param str
@@ -1171,9 +1414,15 @@ public abstract class StringUtil {
      * @param ignoreCase
      * @return
      */
-    private static String replace(final String str, final int fromIndex, final String target, final String replacement, int max, boolean ignoreCase) {
+    private static String replace(final String str, final int fromIndex, final String target, String replacement, int max, boolean ignoreCase) {
+
+        // TODO
+        //    if (replacement == null) {
+        //        throw new IllegalArgumentException("Replacement can't be null");
+        //    }
+
         if (replacement == null) {
-            throw new IllegalArgumentException("Replacement can't be null");
+            replacement = "";
         }
 
         if (N.isNullOrEmpty(str) || N.isNullOrEmpty(target) || max == 0) {
@@ -2547,8 +2796,6 @@ public abstract class StringUtil {
      * @return
      */
     public static String wrapIfMissing(final String str, final String prefixSuffix) {
-        N.checkArgNotNull(prefixSuffix);
-
         return wrapIfMissing(str, prefixSuffix, prefixSuffix);
     }
 
@@ -2592,8 +2839,6 @@ public abstract class StringUtil {
      * @return
      */
     public static String wrap(final String str, final String prefixSuffix) {
-        N.checkArgNotNull(prefixSuffix);
-
         return wrap(str, prefixSuffix, prefixSuffix);
     }
 
@@ -2632,8 +2877,6 @@ public abstract class StringUtil {
      * @return
      */
     public static String unwrap(final String str, final String prefixSuffix) {
-        N.checkArgNotNull(prefixSuffix);
-
         return unwrap(str, prefixSuffix, prefixSuffix);
     }
 
@@ -4364,6 +4607,36 @@ public abstract class StringUtil {
     /**
      *
      * @param str
+     * @param substr
+     * @param delimiter
+     * @return true, if successful
+     */
+    public static boolean contains(final String str, final String substr, final String delimiter) {
+        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substr)) {
+            return false;
+        }
+
+        return indexOf(str, substr, delimiter) != N.INDEX_NOT_FOUND;
+    }
+
+    /**
+     * Contains ignore case.
+     *
+     * @param str
+     * @param substr
+     * @return true, if successful
+     */
+    public static boolean containsIgnoreCase(final String str, final String substr) {
+        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substr)) {
+            return false;
+        }
+
+        return indexOfIgnoreCase(str, substr) != N.INDEX_NOT_FOUND;
+    }
+
+    /**
+     *
+     * @param str
      * @param chs
      * @return true, if successful
      */
@@ -4434,36 +4707,6 @@ public abstract class StringUtil {
     /**
      *
      * @param str
-     * @param substr
-     * @param delimiter
-     * @return true, if successful
-     */
-    public static boolean contains(final String str, final String substr, final String delimiter) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substr)) {
-            return false;
-        }
-
-        return indexOf(str, substr, delimiter) != N.INDEX_NOT_FOUND;
-    }
-
-    /**
-     * Contains ignore case.
-     *
-     * @param str
-     * @param substr
-     * @return true, if successful
-     */
-    public static boolean containsIgnoreCase(final String str, final String substr) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substr)) {
-            return false;
-        }
-
-        return indexOfIgnoreCase(str, substr) != N.INDEX_NOT_FOUND;
-    }
-
-    /**
-     *
-     * @param str
      * @return true, if successful
      */
     // From org.springframework.util.StringUtils, under Apache License 2.0
@@ -4512,7 +4755,7 @@ public abstract class StringUtil {
      * @return true, if successful
      */
     private static boolean startsWith(final String str, final String prefix, final boolean ignoreCase) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(prefix) || prefix.length() > str.length()) {
+        if (str == null || prefix == null || prefix.length() > str.length()) {
             return false;
         }
 
@@ -4528,7 +4771,7 @@ public abstract class StringUtil {
      */
     @SafeVarargs
     public static boolean startsWithAny(final String str, final String... substrs) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substrs)) {
+        if (str == null || N.isNullOrEmpty(substrs)) {
             return false;
         }
 
@@ -4571,7 +4814,7 @@ public abstract class StringUtil {
      * @return true, if successful
      */
     private static boolean endsWith(final String str, final String suffix, final boolean ignoreCase) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(suffix) || suffix.length() > str.length()) {
+        if (str == null || suffix == null || suffix.length() > str.length()) {
             return false;
         }
 
@@ -4589,7 +4832,7 @@ public abstract class StringUtil {
      */
     @SafeVarargs
     public static boolean endsWithAny(final String str, final String... substrs) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substrs)) {
+        if (str == null || N.isNullOrEmpty(substrs)) {
             return false;
         }
 
@@ -4610,6 +4853,50 @@ public abstract class StringUtil {
      */
     public static boolean equals(final String a, final String b) {
         return (a == null) ? b == null : (b == null ? false : a.length() == b.length() && a.equals(b));
+    }
+
+    /**
+     * Equals with any.
+     *
+     * @param str
+     * @param searchStrings
+     * @return true, if successful
+     */
+    @SafeVarargs
+    public static boolean equalsAny(final String str, final String... searchStrings) {
+        if (N.isNullOrEmpty(searchStrings)) {
+            return false;
+        }
+
+        for (final String searchString : searchStrings) {
+            if (equals(str, searchString)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Equals with any.
+     *
+     * @param str
+     * @param searchStrings
+     * @return true, if successful
+     */
+    @SafeVarargs
+    public static boolean equalsAnyIgnoreCase(final String str, final String... searchStrings) {
+        if (N.isNullOrEmpty(searchStrings)) {
+            return false;
+        }
+
+        for (final String searchString : searchStrings) {
+            if (equalsIgnoreCase(str, searchString)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -8181,7 +8468,7 @@ public abstract class StringUtil {
          * @see #substring(String, int, int)
          */
         public static String substring(String str, IntUnaryOperator funcOfInclusiveBeginIndex, int exclusiveEndIndex) {
-            if (str == null || str.length() == 0 || exclusiveEndIndex < 0) {
+            if (str == null || exclusiveEndIndex < 0) {
                 return null;
             }
 
@@ -8230,7 +8517,8 @@ public abstract class StringUtil {
          * @see #substringBetween(String, int, int)
          */
         public static String substringBetween(String str, int exclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
-            if (str == null || str.length() == 0 || exclusiveBeginIndex < 0 || delimiterOfExclusiveEndIndex == null) {
+            if (str == null || str.length() == 0 || exclusiveBeginIndex < 0 || delimiterOfExclusiveEndIndex == null
+                    || delimiterOfExclusiveEndIndex.length() == 0) {
                 return null;
             }
 
@@ -8278,7 +8566,8 @@ public abstract class StringUtil {
          * @see #substringBetween(String, int, int)
          */
         public static String substringBetween(String str, String delimiterOfExclusiveBeginIndex, int exclusiveEndIndex) {
-            if (str == null || str.length() == 0 || delimiterOfExclusiveBeginIndex == null || exclusiveEndIndex <= 0) {
+            if (str == null || str.length() == 0 || delimiterOfExclusiveBeginIndex == null || delimiterOfExclusiveBeginIndex.length() == 0
+                    || exclusiveEndIndex <= 0) {
                 return null;
             }
 
@@ -8341,7 +8630,8 @@ public abstract class StringUtil {
          * @see #substringBetween(String, int, int)
          */
         public static String substringBetween(String str, String delimiterOfExclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
-            if (str == null || str.length() == 0 || delimiterOfExclusiveBeginIndex == null || delimiterOfExclusiveEndIndex == null) {
+            if (str == null || str.length() == 0 || delimiterOfExclusiveBeginIndex == null || delimiterOfExclusiveBeginIndex.length() == 0
+                    || delimiterOfExclusiveEndIndex == null || delimiterOfExclusiveEndIndex.length() == 0) {
                 return null;
             }
 
@@ -8357,7 +8647,7 @@ public abstract class StringUtil {
                 return null;
             }
 
-            return str.substring(start + delimiterOfExclusiveBeginIndex.length(), end);
+            return substringBetween(str, start + delimiterOfExclusiveBeginIndex.length() - 1, end);
         }
 
         /**

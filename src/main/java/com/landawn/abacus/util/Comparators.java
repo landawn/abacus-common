@@ -101,8 +101,8 @@ public abstract class Comparators {
      * @param <T>
      * @return
      */
-    @SuppressWarnings("unchecked")
-    public static <T> Comparator<T> naturalOrder() {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static <T extends Comparable> Comparator<T> naturalOrder() {
         return NATURAL_ORDER;
     }
 
@@ -111,7 +111,8 @@ public abstract class Comparators {
      * @param <T>
      * @return
      */
-    public static <T> Comparator<T> reversedOrder() {
+    @SuppressWarnings("rawtypes")
+    public static <T extends Comparable> Comparator<T> reversedOrder() {
         return REVERSED_ORDER;
     }
 
@@ -136,7 +137,8 @@ public abstract class Comparators {
      * @param <T>
      * @return
      */
-    public static <T> Comparator<T> nullsFirst() {
+    @SuppressWarnings("rawtypes")
+    public static <T extends Comparable> Comparator<T> nullsFirst() {
         return NULL_FIRST_COMPARATOR;
     }
 
@@ -164,7 +166,8 @@ public abstract class Comparators {
      * @param <T>
      * @return
      */
-    public static <T> Comparator<T> nullsLast() {
+    @SuppressWarnings("rawtypes")
+    public static <T extends Comparable> Comparator<T> nullsLast() {
         return NULL_LAST_COMPARATOR;
     }
 
