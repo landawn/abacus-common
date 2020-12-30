@@ -32,6 +32,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 import java.util.RandomAccess;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -329,86 +330,6 @@ public abstract class StringUtil {
         final int endOffset = str.length() - targetSting / 2;
 
         return str.substring(0, startOffset) + middle + str.substring(endOffset);
-    }
-
-    /**
-     *
-     * @param str
-     * @return
-     */
-    public static String reverse(final String str) {
-        if (N.isNullOrEmpty(str)) {
-            return str;
-        }
-
-        final StringBuilder sb = Objectory.createStringBuilder();
-
-        try {
-            sb.append(str);
-
-            return sb.reverse().toString();
-        } finally {
-            Objectory.recycle(sb);
-        }
-    }
-
-    /**
-     * <p>
-     * Reverses a String that is delimited by a specific character.
-     * </p>
-     *
-     * <p>
-     * The Strings between the delimiters are not reversed. Thus
-     * java.lang.String becomes String.lang.java (if the delimiter is
-     * {@code '.'}).
-     * </p>
-     *
-     * <pre>
-     * N.reverseDelimited(null, *)      = null
-     * N.reverseDelimited("", *)        = ""
-     * N.reverseDelimited("a.b.c", 'x') = "a.b.c"
-     * N.reverseDelimited("a.b.c", ".") = "c.b.a"
-     * </pre>
-     *
-     * @param str
-     *            the String to reverse, may be null
-     * @param delimiter
-     *            the delimiter character to use
-     * @return
-     * @since 2.0
-     */
-    public static String reverseDelimited(final String str, final char delimiter) {
-        if (N.isNullOrEmpty(str)) {
-            return str;
-        }
-
-        // could implement manually, but simple way is to reuse other,
-        // probably slower, methods.
-        final String[] strs = split(str, delimiter);
-
-        N.reverse(strs);
-
-        return join(strs, delimiter);
-    }
-
-    /**
-     *
-     * @param str
-     * @param delimiter
-     * @return
-     */
-    public static String reverseDelimited(final String str, final String delimiter) {
-        if (N.isNullOrEmpty(str)) {
-            return str;
-        }
-
-        // could implement manually, but simple way is to reuse other,
-        // probably slower, methods.
-        final String[] strs = split(str, delimiter);
-
-        N.reverse(strs);
-
-        return Joiner.with(delimiter).reuseCachedBuffer().appendAll(strs).toString();
     }
 
     /**
@@ -8274,6 +8195,86 @@ public abstract class StringUtil {
     }
 
     /**
+     *
+     * @param str
+     * @return
+     */
+    public static String reverse(final String str) {
+        if (N.len(str) <= 1) {
+            return str;
+        }
+
+        final StringBuilder sb = Objectory.createStringBuilder();
+
+        try {
+            sb.append(str);
+
+            return sb.reverse().toString();
+        } finally {
+            Objectory.recycle(sb);
+        }
+    }
+
+    /**
+     * <p>
+     * Reverses a String that is delimited by a specific character.
+     * </p>
+     *
+     * <p>
+     * The Strings between the delimiters are not reversed. Thus
+     * java.lang.String becomes String.lang.java (if the delimiter is
+     * {@code '.'}).
+     * </p>
+     *
+     * <pre>
+     * N.reverseDelimited(null, *)      = null
+     * N.reverseDelimited("", *)        = ""
+     * N.reverseDelimited("a.b.c", 'x') = "a.b.c"
+     * N.reverseDelimited("a.b.c", ".") = "c.b.a"
+     * </pre>
+     *
+     * @param str
+     *            the String to reverse, may be null
+     * @param delimiter
+     *            the delimiter character to use
+     * @return
+     * @since 2.0
+     */
+    public static String reverseDelimited(final String str, final char delimiter) {
+        if (N.len(str) <= 1) {
+            return str;
+        }
+
+        // could implement manually, but simple way is to reuse other,
+        // probably slower, methods.
+        final String[] strs = split(str, delimiter);
+
+        N.reverse(strs);
+
+        return join(strs, delimiter);
+    }
+
+    /**
+     *
+     * @param str
+     * @param delimiter
+     * @return
+     */
+    public static String reverseDelimited(final String str, final String delimiter) {
+        if (N.len(str) <= 1) {
+            return str;
+        }
+
+        // could implement manually, but simple way is to reuse other,
+        // probably slower, methods.
+        final String[] strs = split(str, delimiter);
+
+        N.reverse(strs);
+
+        return Joiner.with(delimiter).reuseCachedBuffer().appendAll(strs).toString();
+    }
+
+    /**
      * Returns a new sorted String if the specified {@code str} is not null or empty, otherwise the specified {@code str} is returned.
      *
      * @param str
@@ -8281,13 +8282,137 @@ public abstract class StringUtil {
      */
     @SuppressWarnings("deprecation")
     public static String sort(String str) {
-        if (N.isNullOrEmpty(str)) {
+        if (N.len(str) <= 1) {
             return str;
         }
 
         final char[] chs = str.toCharArray();
         Array.sort(chs);
         return InternalUtil.newString(chs, true);
+    }
+
+    // Rotating (circular shift)
+    //-----------------------------------------------------------------------
+    /**
+     * <p>Rotate (circular shift) a String of {@code shift} characters.</p>
+     * <ul>
+     *  <li>If {@code shift > 0}, right circular shift (ex : ABCDEF =&gt; FABCDE)</li>
+     *  <li>If {@code shift < 0}, left circular shift (ex : ABCDEF =&gt; BCDEFA)</li>
+     * </ul>
+     *
+     * <pre>
+     * StringUtils.rotate(null, *)        = null
+     * StringUtils.rotate("", *)          = ""
+     * StringUtils.rotate("abcdefg", 0)   = "abcdefg"
+     * StringUtils.rotate("abcdefg", 2)   = "fgabcde"
+     * StringUtils.rotate("abcdefg", -2)  = "cdefgab"
+     * StringUtils.rotate("abcdefg", 7)   = "abcdefg"
+     * StringUtils.rotate("abcdefg", -7)  = "abcdefg"
+     * StringUtils.rotate("abcdefg", 9)   = "fgabcde"
+     * StringUtils.rotate("abcdefg", -9)  = "cdefgab"
+     * </pre>
+     *
+     * @param str  the String to rotate, may be null
+     * @param shift  number of time to shift (positive : right shift, negative : left shift)
+     * @return the rotated String,
+     *          or the original String if {@code shift == 0},
+     *          or {@code null} if null String input
+     * @since 3.5
+     */
+    public static String rotate(final String str, final int shift) {
+        final int strLen = N.len(str);
+
+        if (strLen <= 1 || shift == 0 || shift % strLen == 0) {
+            return str;
+        }
+
+        int offset = -(shift % strLen);
+
+        if (offset < 0) {
+            offset = str.length() + offset;
+        }
+
+        if (offset < 0) {
+            offset = 0;
+        }
+
+        return MoreStringUtil.substring(str, offset) + MoreStringUtil.substring(str, 0, offset);
+    }
+
+    public static String shuffle(final String str) {
+        return shuffle(str, N.RAND);
+    }
+
+    public static String shuffle(final String str, final Random rnd) {
+        final int strLen = N.len(str);
+
+        if (strLen <= 1) {
+            return str;
+        }
+
+        final char[] chars = str.toCharArray();
+
+        N.shuffle(chars, rnd);
+
+        return String.valueOf(chars);
+    }
+
+    // Overlay
+    //-----------------------------------------------------------------------
+    /**
+     * <p>Overlays part of a String with another String.</p>
+     *
+     * <pre>
+     * StringUtils.overlay(null, "abc", 0, 0)          = "abc"
+     * StringUtils.overlay("", "abc", 0, 0)          = "abc"
+     * StringUtils.overlay("abcdef", null, 2, 4)     = "abef"
+     * StringUtils.overlay("abcdef", "", 2, 4)       = "abef" 
+     * StringUtils.overlay("abcdef", "zzzz", 2, 4)   = "abzzzzef" 
+     * </pre>
+     *
+     * @param str  the String to do overlaying in, may be null
+     * @param overlay  the String to overlay, may be null
+     * @param start  the position to start overlaying at
+     * @param end  the position to stop overlaying before
+     * @return overlayed String, {@code ""} if null String input
+     * @since 2.0
+     */
+    public static String overlay(String str, String overlay, int start, int end) {
+        N.checkFromToIndex(start, end, N.len(str));
+
+        if (overlay == null) {
+            overlay = N.EMPTY_STRING;
+        }
+
+        if (N.isNullOrEmpty(str)) {
+            return overlay;
+        }
+
+        //        final int len = str.length();
+        //
+        //        if (start < 0) {
+        //            start = 0;
+        //        }
+        //
+        //        if (start > len) {
+        //            start = len;
+        //        }
+        //
+        //        if (end < 0) {
+        //            end = 0;
+        //        }
+        //
+        //        if (end > len) {
+        //            end = len;
+        //        }
+        //
+        //        if (start > end) {
+        //            final int temp = start;
+        //            start = end;
+        //            end = temp;
+        //        }
+
+        return str.substring(0, start) + overlay + str.substring(end);
     }
 
     public static final class Strings extends StringUtil {
