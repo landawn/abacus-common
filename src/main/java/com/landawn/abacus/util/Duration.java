@@ -54,7 +54,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @return
      */
     public static Duration ofDays(long days) {
-        return create(Matth.multiplyExact(days, MILLIS_PER_DAY));
+        return create(Numbers.multiplyExact(days, MILLIS_PER_DAY));
     }
 
     /**
@@ -63,7 +63,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @return
      */
     public static Duration ofHours(long hours) {
-        return create(Matth.multiplyExact(hours, MILLIS_PER_HOUR));
+        return create(Numbers.multiplyExact(hours, MILLIS_PER_HOUR));
     }
 
     /**
@@ -72,7 +72,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @return
      */
     public static Duration ofMinutes(long minutes) {
-        return create(Matth.multiplyExact(minutes, MILLIS_PER_MINUTE));
+        return create(Numbers.multiplyExact(minutes, MILLIS_PER_MINUTE));
     }
 
     /**
@@ -81,7 +81,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @return
      */
     public static Duration ofSeconds(long seconds) {
-        return create(Matth.multiplyExact(seconds, MILLIS_PER_SECOND));
+        return create(Numbers.multiplyExact(seconds, MILLIS_PER_SECOND));
     }
 
     /**
@@ -126,7 +126,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @return
      */
     public Duration plusDays(long daysToAdd) {
-        return plusMillis(Matth.multiplyExact(daysToAdd, MILLIS_PER_DAY));
+        return plusMillis(Numbers.multiplyExact(daysToAdd, MILLIS_PER_DAY));
     }
 
     /**
@@ -135,7 +135,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @return
      */
     public Duration plusHours(long hoursToAdd) {
-        return plusMillis(Matth.multiplyExact(hoursToAdd, MILLIS_PER_HOUR));
+        return plusMillis(Numbers.multiplyExact(hoursToAdd, MILLIS_PER_HOUR));
     }
 
     /**
@@ -144,7 +144,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @return
      */
     public Duration plusMinutes(long minutesToAdd) {
-        return plusMillis(Matth.multiplyExact(minutesToAdd, MILLIS_PER_MINUTE));
+        return plusMillis(Numbers.multiplyExact(minutesToAdd, MILLIS_PER_MINUTE));
     }
 
     /**
@@ -153,7 +153,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @return
      */
     public Duration plusSeconds(long secondsToAdd) {
-        return plusMillis(Matth.multiplyExact(secondsToAdd, MILLIS_PER_SECOND));
+        return plusMillis(Numbers.multiplyExact(secondsToAdd, MILLIS_PER_SECOND));
     }
 
     /**
@@ -166,7 +166,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
             return this;
         }
 
-        return create(Matth.addExact(milliseconds, millisToAdd));
+        return create(Numbers.addExact(milliseconds, millisToAdd));
     }
 
     /**
@@ -184,7 +184,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @return
      */
     public Duration minusDays(long daysToSubtract) {
-        return minusMillis(Matth.multiplyExact(daysToSubtract, MILLIS_PER_DAY));
+        return minusMillis(Numbers.multiplyExact(daysToSubtract, MILLIS_PER_DAY));
     }
 
     /**
@@ -193,7 +193,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @return
      */
     public Duration minusHours(long hoursToSubtract) {
-        return minusMillis(Matth.multiplyExact(hoursToSubtract, MILLIS_PER_HOUR));
+        return minusMillis(Numbers.multiplyExact(hoursToSubtract, MILLIS_PER_HOUR));
     }
 
     /**
@@ -202,7 +202,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @return
      */
     public Duration minusMinutes(long minutesToSubtract) {
-        return minusMillis(Matth.multiplyExact(minutesToSubtract, MILLIS_PER_MINUTE));
+        return minusMillis(Numbers.multiplyExact(minutesToSubtract, MILLIS_PER_MINUTE));
     }
 
     /**
@@ -211,7 +211,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @return
      */
     public Duration minusSeconds(long secondsToSubtract) {
-        return minusMillis(Matth.multiplyExact(secondsToSubtract, MILLIS_PER_SECOND));
+        return minusMillis(Numbers.multiplyExact(secondsToSubtract, MILLIS_PER_SECOND));
     }
 
     /**
@@ -224,7 +224,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
             return this;
         }
 
-        return create(Matth.subtractExact(milliseconds, millisToSubtract));
+        return create(Numbers.subtractExact(milliseconds, millisToSubtract));
     }
 
     /**
@@ -239,7 +239,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
             return this;
         }
 
-        return create(Matth.multiplyExact(milliseconds, multiplicand));
+        return create(Numbers.multiplyExact(milliseconds, multiplicand));
     }
 
     /**

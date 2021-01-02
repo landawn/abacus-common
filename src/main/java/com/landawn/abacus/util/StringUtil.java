@@ -180,15 +180,15 @@ public abstract class StringUtil {
      * <p>Checks if all of the CharSequences are empty ("") or null.</p>
      *
      * <pre>
-     * StringUtils.isAllEmpty(null)             = true
-     * StringUtils.isAllEmpty(null, "")         = true
-     * StringUtils.isAllEmpty(new String[] {})  = true
-     * StringUtils.isAllEmpty(null, "foo")      = false
-     * StringUtils.isAllEmpty("", "bar")        = false
-     * StringUtils.isAllEmpty("bob", "")        = false
-     * StringUtils.isAllEmpty("  bob  ", null)  = false
-     * StringUtils.isAllEmpty(" ", "bar")       = false
-     * StringUtils.isAllEmpty("foo", "bar")     = false
+     * StringUtil.isAllEmpty(null)             = true
+     * StringUtil.isAllEmpty(null, "")         = true
+     * StringUtil.isAllEmpty(new String[] {})  = true
+     * StringUtil.isAllEmpty(null, "foo")      = false
+     * StringUtil.isAllEmpty("", "bar")        = false
+     * StringUtil.isAllEmpty("bob", "")        = false
+     * StringUtil.isAllEmpty("  bob  ", null)  = false
+     * StringUtil.isAllEmpty(" ", "bar")       = false
+     * StringUtil.isAllEmpty("foo", "bar")     = false
      * </pre>
      *
      * @param css  the CharSequences to check, may be null or empty
@@ -215,15 +215,15 @@ public abstract class StringUtil {
      * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
      *
      * <pre>
-     * StringUtils.isAllBlank(null)             = true
-     * StringUtils.isAllBlank(null, "foo")      = false
-     * StringUtils.isAllBlank(null, null)       = true
-     * StringUtils.isAllBlank("", "bar")        = false
-     * StringUtils.isAllBlank("bob", "")        = false
-     * StringUtils.isAllBlank("  bob  ", null)  = false
-     * StringUtils.isAllBlank(" ", "bar")       = false
-     * StringUtils.isAllBlank("foo", "bar")     = false
-     * StringUtils.isAllBlank(new String[] {})  = true
+     * StringUtil.isAllBlank(null)             = true
+     * StringUtil.isAllBlank(null, "foo")      = false
+     * StringUtil.isAllBlank(null, null)       = true
+     * StringUtil.isAllBlank("", "bar")        = false
+     * StringUtil.isAllBlank("bob", "")        = false
+     * StringUtil.isAllBlank("  bob  ", null)  = false
+     * StringUtil.isAllBlank(" ", "bar")       = false
+     * StringUtil.isAllBlank("foo", "bar")     = false
+     * StringUtil.isAllBlank(new String[] {})  = true
      * </pre>
      *
      * @param css  the CharSequences to check, may be null or empty
@@ -247,16 +247,16 @@ public abstract class StringUtil {
      * <p>Checks if any of the CharSequences are empty ("") or null.</p>
      *
      * <pre>
-     * StringUtils.isAnyEmpty((String) null)    = true
-     * StringUtils.isAnyEmpty((String[]) null)  = false
-     * StringUtils.isAnyEmpty(null, "foo")      = true
-     * StringUtils.isAnyEmpty("", "bar")        = true
-     * StringUtils.isAnyEmpty("bob", "")        = true
-     * StringUtils.isAnyEmpty("  bob  ", null)  = true
-     * StringUtils.isAnyEmpty(" ", "bar")       = false
-     * StringUtils.isAnyEmpty("foo", "bar")     = false
-     * StringUtils.isAnyEmpty(new String[]{})   = false
-     * StringUtils.isAnyEmpty(new String[]{""}) = true
+     * StringUtil.isAnyEmpty((String) null)    = true
+     * StringUtil.isAnyEmpty((String[]) null)  = false
+     * StringUtil.isAnyEmpty(null, "foo")      = true
+     * StringUtil.isAnyEmpty("", "bar")        = true
+     * StringUtil.isAnyEmpty("bob", "")        = true
+     * StringUtil.isAnyEmpty("  bob  ", null)  = true
+     * StringUtil.isAnyEmpty(" ", "bar")       = false
+     * StringUtil.isAnyEmpty("foo", "bar")     = false
+     * StringUtil.isAnyEmpty(new String[]{})   = false
+     * StringUtil.isAnyEmpty(new String[]{""}) = true
      * </pre>
      *
      * @param css  the CharSequences to check, may be null or empty
@@ -283,17 +283,17 @@ public abstract class StringUtil {
      * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
      *
      * <pre>
-     * StringUtils.isAnyBlank((String) null)    = true
-     * StringUtils.isAnyBlank((String[]) null)  = false
-     * StringUtils.isAnyBlank(null, "foo")      = true
-     * StringUtils.isAnyBlank(null, null)       = true
-     * StringUtils.isAnyBlank("", "bar")        = true
-     * StringUtils.isAnyBlank("bob", "")        = true
-     * StringUtils.isAnyBlank("  bob  ", null)  = true
-     * StringUtils.isAnyBlank(" ", "bar")       = true
-     * StringUtils.isAnyBlank(new String[] {})  = false
-     * StringUtils.isAnyBlank(new String[]{""}) = true
-     * StringUtils.isAnyBlank("foo", "bar")     = false
+     * StringUtil.isAnyBlank((String) null)    = true
+     * StringUtil.isAnyBlank((String[]) null)  = false
+     * StringUtil.isAnyBlank(null, "foo")      = true
+     * StringUtil.isAnyBlank(null, null)       = true
+     * StringUtil.isAnyBlank("", "bar")        = true
+     * StringUtil.isAnyBlank("bob", "")        = true
+     * StringUtil.isAnyBlank("  bob  ", null)  = true
+     * StringUtil.isAnyBlank(" ", "bar")       = true
+     * StringUtil.isAnyBlank(new String[] {})  = false
+     * StringUtil.isAnyBlank(new String[]{""}) = true
+     * StringUtil.isAnyBlank("foo", "bar")     = false
      * </pre>
      *
      * @param css  the CharSequences to check, may be null or empty
@@ -359,14 +359,14 @@ public abstract class StringUtil {
      * or empty then {@code null} is returned.</p>
      *
      * <pre>
-     * StringUtils.firstNonEmpty(null, null, null)   = null
-     * StringUtils.firstNonEmpty(null, null, "")     = null
-     * StringUtils.firstNonEmpty(null, "", " ")      = " "
-     * StringUtils.firstNonEmpty("abc")              = "abc"
-     * StringUtils.firstNonEmpty(null, "xyz")        = "xyz"
-     * StringUtils.firstNonEmpty("", "xyz")          = "xyz"
-     * StringUtils.firstNonEmpty(null, "xyz", "abc") = "xyz"
-     * StringUtils.firstNonEmpty()                   = null
+     * StringUtil.firstNonEmpty(null, null, null)   = null
+     * StringUtil.firstNonEmpty(null, null, "")     = null
+     * StringUtil.firstNonEmpty(null, "", " ")      = " "
+     * StringUtil.firstNonEmpty("abc")              = "abc"
+     * StringUtil.firstNonEmpty(null, "xyz")        = "xyz"
+     * StringUtil.firstNonEmpty("", "xyz")          = "xyz"
+     * StringUtil.firstNonEmpty(null, "xyz", "abc") = "xyz"
+     * StringUtil.firstNonEmpty()                   = null
      * </pre>
      *
      * @param <T> the specific kind of CharSequence
@@ -405,18 +405,18 @@ public abstract class StringUtil {
      * </ul>
      *
      * <pre>
-     * StringUtils.abbreviate(null, *)      = null
-     * StringUtils.abbreviate("", 4)        = ""
-     * StringUtils.abbreviate("abcdefg", 6) = "abc..."
-     * StringUtils.abbreviate("abcdefg", 7) = "abcdefg"
-     * StringUtils.abbreviate("abcdefg", 8) = "abcdefg"
-     * StringUtils.abbreviate("abcdefg", 4) = "a..."
-     * StringUtils.abbreviate("abcdefg", 3) = IllegalArgumentException
+     * StringUtil.abbreviate(null, 4)        = null
+     * StringUtil.abbreviate("", 4)        = ""
+     * StringUtil.abbreviate("abcdefg", 6) = "abc..."
+     * StringUtil.abbreviate("abcdefg", 7) = "abcdefg"
+     * StringUtil.abbreviate("abcdefg", 8) = "abcdefg"
+     * StringUtil.abbreviate("abcdefg", 4) = "a..."
+     * StringUtil.abbreviate("abcdefg", 3) = IllegalArgumentException
      * </pre>
      *
      * @param str  the String to check, may be null
      * @param maxWidth  maximum length of result String, must be at least 4
-     * @return abbreviated String, {@code null} if null String input
+     * @return abbreviated String
      * @throws IllegalArgumentException if the width is too small
      * @since 2.0
      */
@@ -437,19 +437,19 @@ public abstract class StringUtil {
      * {@code maxWidth}.</p>
      *
      * <pre>
-     * StringUtils.abbreviate(null, *, *)                = null
-     * StringUtils.abbreviate("", 0, 4)                  = ""
-     * StringUtils.abbreviate("abcdefghijklmno", -1, 10) = "abcdefg..."
-     * StringUtils.abbreviate("abcdefghijklmno", 0, 10)  = "abcdefg..."
-     * StringUtils.abbreviate("abcdefghijklmno", 1, 10)  = "abcdefg..."
-     * StringUtils.abbreviate("abcdefghijklmno", 4, 10)  = "abcdefg..."
-     * StringUtils.abbreviate("abcdefghijklmno", 5, 10)  = "...fghi..."
-     * StringUtils.abbreviate("abcdefghijklmno", 6, 10)  = "...ghij..."
-     * StringUtils.abbreviate("abcdefghijklmno", 8, 10)  = "...ijklmno"
-     * StringUtils.abbreviate("abcdefghijklmno", 10, 10) = "...ijklmno"
-     * StringUtils.abbreviate("abcdefghijklmno", 12, 10) = "...ijklmno"
-     * StringUtils.abbreviate("abcdefghij", 0, 3)        = IllegalArgumentException
-     * StringUtils.abbreviate("abcdefghij", 5, 6)        = IllegalArgumentException
+     * StringUtil.abbreviate(null, 0, 4)                  = null
+     * StringUtil.abbreviate("", 0, 4)                  = ""
+     * StringUtil.abbreviate("abcdefghijklmno", -1, 10) = "abcdefg..."
+     * StringUtil.abbreviate("abcdefghijklmno", 0, 10)  = "abcdefg..."
+     * StringUtil.abbreviate("abcdefghijklmno", 1, 10)  = "abcdefg..."
+     * StringUtil.abbreviate("abcdefghijklmno", 4, 10)  = "abcdefg..."
+     * StringUtil.abbreviate("abcdefghijklmno", 5, 10)  = "...fghi..."
+     * StringUtil.abbreviate("abcdefghijklmno", 6, 10)  = "...ghij..."
+     * StringUtil.abbreviate("abcdefghijklmno", 8, 10)  = "...ijklmno"
+     * StringUtil.abbreviate("abcdefghijklmno", 10, 10) = "...ijklmno"
+     * StringUtil.abbreviate("abcdefghijklmno", 12, 10) = "...ijklmno"
+     * StringUtil.abbreviate("abcdefghij", 0, 3)        = IllegalArgumentException
+     * StringUtil.abbreviate("abcdefghij", 5, 6)        = IllegalArgumentException
      * </pre>
      *
      * @param str  the String to check, may be null
@@ -458,8 +458,10 @@ public abstract class StringUtil {
      * @return abbreviated String, {@code null} if null String input
      * @throws IllegalArgumentException if the width is too small
      * @since 2.0
+     * @deprecated
      */
-    public static String abbreviate(final String str, final int offset, final int maxWidth) {
+    @Deprecated
+    static String abbreviate(final String str, final int offset, final int maxWidth) {
         return abbreviate(str, "...", offset, maxWidth);
     }
 
@@ -480,22 +482,22 @@ public abstract class StringUtil {
      * </ul>
      *
      * <pre>
-     * StringUtils.abbreviate(null, "...", *)      = null
-     * StringUtils.abbreviate("abcdefg", null, *)  = "abcdefg"
-     * StringUtils.abbreviate("", "...", 4)        = ""
-     * StringUtils.abbreviate("abcdefg", ".", 5)   = "abcd."
-     * StringUtils.abbreviate("abcdefg", ".", 7)   = "abcdefg"
-     * StringUtils.abbreviate("abcdefg", ".", 8)   = "abcdefg"
-     * StringUtils.abbreviate("abcdefg", "..", 4)  = "ab.."
-     * StringUtils.abbreviate("abcdefg", "..", 3)  = "a.."
-     * StringUtils.abbreviate("abcdefg", "..", 2)  = IllegalArgumentException
-     * StringUtils.abbreviate("abcdefg", "...", 3) = IllegalArgumentException
+     * StringUtil.abbreviate(null, "...", 4)        = null
+     * StringUtil.abbreviate("", "...", 4)        = ""
+     * StringUtil.abbreviate("abcdefg", null, *)  = "abcdefg"
+     * StringUtil.abbreviate("abcdefg", ".", 5)   = "abcd."
+     * StringUtil.abbreviate("abcdefg", ".", 7)   = "abcdefg"
+     * StringUtil.abbreviate("abcdefg", ".", 8)   = "abcdefg"
+     * StringUtil.abbreviate("abcdefg", "..", 4)  = "ab.."
+     * StringUtil.abbreviate("abcdefg", "..", 3)  = "a.."
+     * StringUtil.abbreviate("abcdefg", "..", 2)  = IllegalArgumentException
+     * StringUtil.abbreviate("abcdefg", "...", 3) = IllegalArgumentException
      * </pre>
      *
      * @param str  the String to check, may be null
      * @param abbrevMarker  the String used as replacement marker
      * @param maxWidth  maximum length of result String, must be at least {@code abbrevMarker.length + 1}
-     * @return abbreviated String, {@code null} if null String input
+     * @return abbreviated String
      * @throws IllegalArgumentException if the width is too small
      * @since 3.6
      */
@@ -516,31 +518,33 @@ public abstract class StringUtil {
      * <p>In no case will it return a String of length greater than {@code maxWidth}.</p>
      *
      * <pre>
-     * StringUtils.abbreviate(null, null, *, *)                 = null
-     * StringUtils.abbreviate("abcdefghijklmno", null, *, *)    = "abcdefghijklmno"
-     * StringUtils.abbreviate("", "...", 0, 4)                  = ""
-     * StringUtils.abbreviate("abcdefghijklmno", "---", -1, 10) = "abcdefg---"
-     * StringUtils.abbreviate("abcdefghijklmno", ",", 0, 10)    = "abcdefghi,"
-     * StringUtils.abbreviate("abcdefghijklmno", ",", 1, 10)    = "abcdefghi,"
-     * StringUtils.abbreviate("abcdefghijklmno", ",", 2, 10)    = "abcdefghi,"
-     * StringUtils.abbreviate("abcdefghijklmno", "::", 4, 10)   = "::efghij::"
-     * StringUtils.abbreviate("abcdefghijklmno", "...", 6, 10)  = "...ghij..."
-     * StringUtils.abbreviate("abcdefghijklmno", "*", 9, 10)    = "*ghijklmno"
-     * StringUtils.abbreviate("abcdefghijklmno", "'", 10, 10)   = "'ghijklmno"
-     * StringUtils.abbreviate("abcdefghijklmno", "!", 12, 10)   = "!ghijklmno"
-     * StringUtils.abbreviate("abcdefghij", "abra", 0, 4)       = IllegalArgumentException
-     * StringUtils.abbreviate("abcdefghij", "...", 5, 6)        = IllegalArgumentException
+     * StringUtil.abbreviate(null, "...", 0, 4)                  = null
+     * StringUtil.abbreviate("", "...", 0, 4)                  = ""
+     * StringUtil.abbreviate("abcdefghijklmno", null, *, *)    = "abcdefghijklmno"
+     * StringUtil.abbreviate("abcdefghijklmno", "---", -1, 10) = "abcdefg---"
+     * StringUtil.abbreviate("abcdefghijklmno", ",", 0, 10)    = "abcdefghi,"
+     * StringUtil.abbreviate("abcdefghijklmno", ",", 1, 10)    = "abcdefghi,"
+     * StringUtil.abbreviate("abcdefghijklmno", ",", 2, 10)    = "abcdefghi,"
+     * StringUtil.abbreviate("abcdefghijklmno", "::", 4, 10)   = "::efghij::"
+     * StringUtil.abbreviate("abcdefghijklmno", "...", 6, 10)  = "...ghij..."
+     * StringUtil.abbreviate("abcdefghijklmno", "*", 9, 10)    = "*ghijklmno"
+     * StringUtil.abbreviate("abcdefghijklmno", "'", 10, 10)   = "'ghijklmno"
+     * StringUtil.abbreviate("abcdefghijklmno", "!", 12, 10)   = "!ghijklmno"
+     * StringUtil.abbreviate("abcdefghij", "abra", 0, 4)       = IllegalArgumentException
+     * StringUtil.abbreviate("abcdefghij", "...", 5, 6)        = IllegalArgumentException
      * </pre>
      *
      * @param str  the String to check, may be null
      * @param abbrevMarker  the String used as replacement marker
      * @param offset  left edge of source String
      * @param maxWidth  maximum length of result String, must be at least 4
-     * @return abbreviated String, {@code null} if null String input
+     * @return abbreviated String
      * @throws IllegalArgumentException if the width is too small
      * @since 3.6
+     * @deprecated
      */
-    public static String abbreviate(final String str, final String abbrevMarker, int offset, final int maxWidth) {
+    @Deprecated
+    static String abbreviate(final String str, final String abbrevMarker, int offset, final int maxWidth) {
         final int abbrevMarkerLength = N.len(abbrevMarker);
         final int minAbbrevWidth = abbrevMarkerLength + 1;
         final int minAbbrevWidthOffset = abbrevMarkerLength + abbrevMarkerLength + 1;
@@ -562,18 +566,23 @@ public abstract class StringUtil {
         if (offset > str.length()) {
             offset = str.length();
         }
+
         if (str.length() - offset < maxWidth - abbrevMarkerLength) {
             offset = str.length() - (maxWidth - abbrevMarkerLength);
         }
+
         if (offset <= abbrevMarkerLength + 1) {
             return str.substring(0, maxWidth - abbrevMarkerLength) + abbrevMarker;
         }
+
         if (maxWidth < minAbbrevWidthOffset) {
             throw new IllegalArgumentException(String.format("Minimum abbreviation width with offset is %d", minAbbrevWidthOffset));
         }
+
         if (offset + maxWidth - abbrevMarkerLength < str.length()) {
             return abbrevMarker + abbreviate(str.substring(offset), abbrevMarker, maxWidth - abbrevMarkerLength);
         }
+
         return abbrevMarker + str.substring(str.length() - (maxWidth - abbrevMarkerLength));
     }
 
@@ -593,11 +602,11 @@ public abstract class StringUtil {
      * </p>
      *
      * <pre>
-     * StringUtils.abbreviateMiddle(null, null, 0)      = null
-     * StringUtils.abbreviateMiddle("abc", null, 0)      = "abc"
-     * StringUtils.abbreviateMiddle("abc", ".", 0)      = "abc"
-     * StringUtils.abbreviateMiddle("abc", ".", 3)      = "abc"
-     * StringUtils.abbreviateMiddle("abcdef", ".", 4)     = "ab.f"
+     * StringUtil.abbreviateMiddle(null, null, 0)      = null
+     * StringUtil.abbreviateMiddle("abc", null, 0)      = "abc"
+     * StringUtil.abbreviateMiddle("abc", ".", 0)      = "abc"
+     * StringUtil.abbreviateMiddle("abc", ".", 3)      = "abc"
+     * StringUtil.abbreviateMiddle("abcdef", ".", 4)     = "ab.f"
      * </pre>
      *
      * @param str  the String to abbreviate, may be null
@@ -625,21 +634,20 @@ public abstract class StringUtil {
      * using the space character (' ').</p>
      *
      * <p>If the size is less than the String length, the original String is returned.
-     * A {@code null} String returns {@code null}.
      *
      * <p>Equivalent to {@code center(str, size, " ")}.</p>
      *
      * <pre>
-     * StringUtils.center(null, *)   = null
-     * StringUtils.center("", 4)     = "    " 
-     * StringUtils.center("ab", 4)   = " ab "
-     * StringUtils.center("abcd", 2) = "abcd"
-     * StringUtils.center("a", 4)    = " a  "
+     * StringUtil.center(null, 4)     = "    " 
+     * StringUtil.center("", 4)     = "    " 
+     * StringUtil.center("ab", 4)   = " ab "
+     * StringUtil.center("abcd", 2) = "abcd"
+     * StringUtil.center("a", 4)    = " a  "
      * </pre>
      *
      * @param str  the String to center, may be null
      * @param size  the int size of new String
-     * @return centered String, {@code null} if null String input
+     * @return centered String
      */
     public static String center(final String str, final int size) {
         return center(str, size, ' ');
@@ -650,27 +658,30 @@ public abstract class StringUtil {
      * Uses a supplied character as the value to pad the String with.</p>
      *
      * <p>If the size is less than the String length, the String is returned.
-     * A {@code null} String returns {@code null}. 
      *
      * <pre>
-     * StringUtils.center(null, *, *)     = null
-     * StringUtils.center("", 4, ' ')     = "    " 
-     * StringUtils.center("ab", 4, ' ')   = " ab "
-     * StringUtils.center("abcd", 2, ' ') = "abcd"
-     * StringUtils.center("a", 4, ' ')    = " a  "
-     * StringUtils.center("a", 4, 'y')    = "yayy"
+     * StringUtil.center(null, 4, ' ')     = "    " 
+     * StringUtil.center("", 4, ' ')     = "    " 
+     * StringUtil.center("ab", 4, ' ')   = " ab "
+     * StringUtil.center("abcd", 2, ' ') = "abcd"
+     * StringUtil.center("a", 4, ' ')    = " a  "
+     * StringUtil.center("a", 4, 'y')    = "yayy"
      * </pre>
      *
      * @param str  the String to center, may be null
      * @param size  the int size of new String.
      * @param padChar  the character to pad the new String with
-     * @return centered String, {@code null} if null String input
+     * @return centered String
      * @since 2.0
      */
     public static String center(String str, final int size, final char padChar) {
         N.checkArgNotNegative(size, "size");
 
-        if (str == null || str.length() >= size) {
+        if (str == null) {
+            str = N.EMPTY_STRING;
+        }
+
+        if (str.length() >= size) {
             return str;
         }
 
@@ -687,28 +698,31 @@ public abstract class StringUtil {
      * Uses a supplied String as the value to pad the String with.</p>
      *
      * <p>If the size is less than the String length, the String is returned.
-     * A {@code null} String returns {@code null}. 
      *
      * <pre>
-     * StringUtils.center(null, *, *)     = null
-     * StringUtils.center("", 4, " ")     = "    " 
-     * StringUtils.center("ab", 4, " ")   = " ab "
-     * StringUtils.center("abcd", 2, " ") = "abcd"
-     * StringUtils.center("a", 4, " ")    = " a  "
-     * StringUtils.center("a", 4, "yz")   = "yzayz" 
-     * StringUtils.center("abc", 7, "")   = "  abc  "
+     * StringUtil.center(null, 4, " ")     = "    " 
+     * StringUtil.center("", 4, " ")     = "    " 
+     * StringUtil.center("ab", 4, " ")   = " ab "
+     * StringUtil.center("abcd", 2, " ") = "abcd"
+     * StringUtil.center("a", 4, " ")    = " a  "
+     * StringUtil.center("a", 4, "yz")   = "yzayz" 
+     * StringUtil.center("abc", 7, "")   = "  abc  "
      * </pre>
      *
      * @param str  the String to center, may be null
      * @param minLength  the minimum size of new String.
      * @param padStr  the String to pad the new String with, must not be null or empty
-     * @return centered String, {@code null} if null String input 
+     * @return centered String
      */
     public static String center(String str, final int minLength, String padStr) {
         N.checkArgNotNegative(minLength, "minLength");
         // N.checkArgNotNullOrEmpty(padStr, "padStr");
 
-        if (str == null || str.length() >= minLength) {
+        if (str == null) {
+            str = N.EMPTY_STRING;
+        }
+
+        if (str.length() >= minLength) {
             return str;
         }
 
@@ -746,7 +760,9 @@ public abstract class StringUtil {
     public static String padStart(String str, final int minLength, final char padChar) {
         if (str == null) {
             str = N.EMPTY_STRING;
-        } else if (str.length() >= minLength) {
+        }
+
+        if (str.length() >= minLength) {
             return str;
         }
 
@@ -770,7 +786,9 @@ public abstract class StringUtil {
     public static String padStart(String str, final int minLength, final String padStr) {
         if (str == null) {
             str = N.EMPTY_STRING;
-        } else if (str.length() >= minLength) {
+        }
+
+        if (str.length() >= minLength) {
             return str;
         }
 
@@ -825,7 +843,9 @@ public abstract class StringUtil {
     public static String padEnd(String str, final int minLength, final char padChar) {
         if (str == null) {
             str = N.EMPTY_STRING;
-        } else if (str.length() >= minLength) {
+        }
+
+        if (str.length() >= minLength) {
             return str;
         }
 
@@ -847,7 +867,9 @@ public abstract class StringUtil {
     public static String padEnd(String str, final int minLength, final String padStr) {
         if (str == null) {
             str = N.EMPTY_STRING;
-        } else if (str.length() >= minLength) {
+        }
+
+        if (str.length() >= minLength) {
             return str;
         }
 
@@ -1030,9 +1052,9 @@ public abstract class StringUtil {
      * </p>
      *
      * <pre>
-     * StrUtil.toLowerCase(null)  = null
-     * StrUtil.toLowerCase("")    = ""
-     * StrUtil.toLowerCase("aBc") = "abc"
+     * StringUtil.toLowerCase(null)  = null
+     * StringUtil.toLowerCase("")    = ""
+     * StringUtil.toLowerCase("aBc") = "abc"
      * </pre>
      *
      * <p>
@@ -1066,9 +1088,9 @@ public abstract class StringUtil {
      * </p>
      *
      * <pre>
-     * StrUtil.toLowerCase(null, Locale.ENGLISH)  = null
-     * StrUtil.toLowerCase("", Locale.ENGLISH)    = ""
-     * StrUtil.toLowerCase("aBc", Locale.ENGLISH) = "abc"
+     * StringUtil.toLowerCase(null, Locale.ENGLISH)  = null
+     * StringUtil.toLowerCase("", Locale.ENGLISH)    = ""
+     * StringUtil.toLowerCase("aBc", Locale.ENGLISH) = "abc"
      * </pre>
      *
      * @param str
@@ -1584,14 +1606,14 @@ public abstract class StringUtil {
      * <p>A {@code null} reference passed to this method is a no-op.</p>
      *
      * <pre>
-     * StringUtils.replaceOnce(null, *, *)        = null
-     * StringUtils.replaceOnce("", *, *)          = ""
-     * StringUtils.replaceOnce("any", null, *)    = "any"
-     * StringUtils.replaceOnce("any", *, null)    = "any"
-     * StringUtils.replaceOnce("any", "", *)      = "any"
-     * StringUtils.replaceOnce("aba", "a", null)  = "ba"
-     * StringUtils.replaceOnce("aba", "a", "")    = "ba"
-     * StringUtils.replaceOnce("aba", "a", "z")   = "zba"
+     * StringUtil.replaceOnce(null, *, *)        = null
+     * StringUtil.replaceOnce("", *, *)          = ""
+     * StringUtil.replaceOnce("any", null, *)    = "any"
+     * StringUtil.replaceOnce("any", *, null)    = "any"
+     * StringUtil.replaceOnce("any", "", *)      = "any"
+     * StringUtil.replaceOnce("aba", "a", null)  = "ba"
+     * StringUtil.replaceOnce("aba", "a", "")    = "ba"
+     * StringUtil.replaceOnce("aba", "a", "z")   = "zba"
      * </pre>
      *
      * @see #replace(String text, String searchString, String replacement, int max)
@@ -2304,11 +2326,11 @@ public abstract class StringUtil {
      * </p>
      *
      * <pre>
-     * StrUtil.trim(null)          = null
-     * StrUtil.trim("")            = ""
-     * StrUtil.trim("     ")       = ""
-     * StrUtil.trim("abc")         = "abc"
-     * StrUtil.trim("    abc    ") = "abc"
+     * StringUtil.trim(null)          = null
+     * StringUtil.trim("")            = ""
+     * StringUtil.trim("     ")       = ""
+     * StringUtil.trim("abc")         = "abc"
+     * StringUtil.trim("    abc    ") = "abc"
      * </pre>
      *
      * @param str
@@ -2952,17 +2974,17 @@ public abstract class StringUtil {
      * </p>
      *
      * <pre>
-     * StrUtil.chop(null)          = null
-     * StrUtil.chop("")            = ""
-     * StrUtil.chop("abc \r")      = "abc "
-     * StrUtil.chop("abc\n")       = "abc"
-     * StrUtil.chop("abc\r\n")     = "abc"
-     * StrUtil.chop("abc")         = "ab"
-     * StrUtil.chop("abc\nabc")    = "abc\nab"
-     * StrUtil.chop("a")           = ""
-     * StrUtil.chop("\r")          = ""
-     * StrUtil.chop("\n")          = ""
-     * StrUtil.chop("\r\n")        = ""
+     * StringUtil.chop(null)          = null
+     * StringUtil.chop("")            = ""
+     * StringUtil.chop("abc \r")      = "abc "
+     * StringUtil.chop("abc\n")       = "abc"
+     * StringUtil.chop("abc\r\n")     = "abc"
+     * StringUtil.chop("abc")         = "ab"
+     * StringUtil.chop("abc\nabc")    = "abc\nab"
+     * StringUtil.chop("a")           = ""
+     * StringUtil.chop("\r")          = ""
+     * StringUtil.chop("\n")          = ""
+     * StringUtil.chop("\r\n")        = ""
      * </pre>
      *
      * @param str
@@ -8849,15 +8871,15 @@ public abstract class StringUtil {
      * </ul>
      *
      * <pre>
-     * StringUtils.rotate(null, *)        = null
-     * StringUtils.rotate("", *)          = ""
-     * StringUtils.rotate("abcdefg", 0)   = "abcdefg"
-     * StringUtils.rotate("abcdefg", 2)   = "fgabcde"
-     * StringUtils.rotate("abcdefg", -2)  = "cdefgab"
-     * StringUtils.rotate("abcdefg", 7)   = "abcdefg"
-     * StringUtils.rotate("abcdefg", -7)  = "abcdefg"
-     * StringUtils.rotate("abcdefg", 9)   = "fgabcde"
-     * StringUtils.rotate("abcdefg", -9)  = "cdefgab"
+     * StringUtil.rotate(null, *)        = null
+     * StringUtil.rotate("", *)          = ""
+     * StringUtil.rotate("abcdefg", 0)   = "abcdefg"
+     * StringUtil.rotate("abcdefg", 2)   = "fgabcde"
+     * StringUtil.rotate("abcdefg", -2)  = "cdefgab"
+     * StringUtil.rotate("abcdefg", 7)   = "abcdefg"
+     * StringUtil.rotate("abcdefg", -7)  = "abcdefg"
+     * StringUtil.rotate("abcdefg", 9)   = "fgabcde"
+     * StringUtil.rotate("abcdefg", -9)  = "cdefgab"
      * </pre>
      *
      * @param str  the String to rotate, may be null
@@ -8911,11 +8933,11 @@ public abstract class StringUtil {
      * <p>Overlays part of a String with another String.</p>
      *
      * <pre>
-     * StringUtils.overlay(null, "abc", 0, 0)          = "abc"
-     * StringUtils.overlay("", "abc", 0, 0)          = "abc"
-     * StringUtils.overlay("abcdef", null, 2, 4)     = "abef"
-     * StringUtils.overlay("abcdef", "", 2, 4)       = "abef" 
-     * StringUtils.overlay("abcdef", "zzzz", 2, 4)   = "abzzzzef" 
+     * StringUtil.overlay(null, "abc", 0, 0)          = "abc"
+     * StringUtil.overlay("", "abc", 0, 0)          = "abc"
+     * StringUtil.overlay("abcdef", null, 2, 4)     = "abef"
+     * StringUtil.overlay("abcdef", "", 2, 4)       = "abef" 
+     * StringUtil.overlay("abcdef", "zzzz", 2, 4)   = "abzzzzef" 
      * </pre>
      *
      * @param str  the String to do overlaying in, may be null

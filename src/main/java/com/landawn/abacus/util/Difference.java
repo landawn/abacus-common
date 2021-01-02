@@ -655,12 +655,12 @@ public class Difference<L, R> implements Immutable {
          * @return
          */
         @SuppressWarnings("unlikely-arg-type")
-        public static <K1, V1, K2, V2, L extends Map<K1, V1>, R extends Map<K2, V2>, D extends Map<?, Pair<V1, V2>>> MapDifference<L, R, D> of(
+        public static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> of(
                 final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2) {
-            final L common = (L) new LinkedHashMap<>();
-            final L leftOnly = (L) new LinkedHashMap<>();
-            final R rightOnly = (R) new LinkedHashMap<>();
-            final Map<Object, Pair<V1, V2>> diff = new LinkedHashMap<>();
+            final Map<K1, V1> common = new LinkedHashMap<>();
+            final Map<K1, V1> leftOnly = new LinkedHashMap<>();
+            final Map<K2, V2> rightOnly = new LinkedHashMap<>();
+            final Map<CK, Pair<V1, V2>> diff = new LinkedHashMap<>();
 
             if (N.isNullOrEmpty(map1)) {
                 if (N.isNullOrEmpty(map2)) {
@@ -703,7 +703,7 @@ public class Difference<L, R> implements Immutable {
                 }
             }
 
-            return new MapDifference<L, R, D>(common, leftOnly, rightOnly, (D) diff);
+            return new MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>>(common, leftOnly, rightOnly, diff);
         }
 
         /**

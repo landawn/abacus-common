@@ -39,9 +39,9 @@ import java.util.List;
  *  The purpose of copying the code is to re-organize the APIs.
  *
  */
-public abstract class Matth {
+public final class Numbers {
 
-    private Matth() {
+    private Numbers() {
         // utility class.
     }
 
@@ -3306,16 +3306,10 @@ public abstract class Matth {
         }
     }
 
-    /**
-     * The Class Mathh.
-     */
-    public static abstract class Mathh extends Matth {
-
-        /**
-         * Instantiates a new mathh.
-         */
-        private Mathh() {
-            // utility class.
-        }
-    }
+    //    public static abstract class Matth extends Numbers {
+    //
+    //        private Matth() {
+    //            // utility class.
+    //        }
+    //    }
 }

@@ -2025,7 +2025,7 @@ public final class Iterables {
          */
         @Override
         public int size() {
-            return Matth.factorial(inputList.size());
+            return Numbers.factorial(inputList.size());
         }
 
         /**
@@ -2180,7 +2180,7 @@ public final class Iterables {
 
                 if (comparison < 0) {
                     // We move to the next non-repeated element.
-                    permutations *= Matth.binomial(n, r);
+                    permutations *= Numbers.binomial(n, r);
                     r = 0;
                     if (!isPositiveInt(permutations)) {
                         return Integer.MAX_VALUE;
@@ -2191,7 +2191,7 @@ public final class Iterables {
                 r++;
             }
 
-            permutations *= Matth.binomial(n, r);
+            permutations *= Numbers.binomial(n, r);
 
             if (!isPositiveInt(permutations)) {
                 return Integer.MAX_VALUE;
@@ -2242,7 +2242,7 @@ public final class Iterables {
 
             try {
                 for (int i = axes.length - 1; i >= 0; i--) {
-                    axesSizeProduct[i] = Matth.multiplyExact(axesSizeProduct[i + 1], axes[i].length);
+                    axesSizeProduct[i] = Numbers.multiplyExact(axesSizeProduct[i + 1], axes[i].length);
                 }
             } catch (ArithmeticException e) {
                 throw new IllegalArgumentException("Cartesian product too large; must have size at most Integer.MAX_VALUE");

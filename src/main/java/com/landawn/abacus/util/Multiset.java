@@ -433,7 +433,7 @@ public final class Multiset<T> implements Iterable<T> {
         long sum = 0;
 
         for (MutableInt count : valueMap.values()) {
-            sum = Matth.addExact(sum, count.value());
+            sum = Numbers.addExact(sum, count.value());
         }
 
         return sum;
