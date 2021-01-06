@@ -6355,6 +6355,8 @@ public abstract class StringUtil {
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
             return N.EMPTY_STRING;
+        } else if (toIndex - fromIndex == 1) {
+            return N.toString(a[fromIndex]);
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -6464,6 +6466,8 @@ public abstract class StringUtil {
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
             return N.EMPTY_STRING;
+        } else if (toIndex - fromIndex == 1) {
+            return N.toString(a[fromIndex]);
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -6573,6 +6577,8 @@ public abstract class StringUtil {
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
             return N.EMPTY_STRING;
+        } else if (toIndex - fromIndex == 1) {
+            return N.toString(a[fromIndex]);
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -6682,6 +6688,8 @@ public abstract class StringUtil {
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
             return N.EMPTY_STRING;
+        } else if (toIndex - fromIndex == 1) {
+            return N.toString(a[fromIndex]);
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -6791,6 +6799,8 @@ public abstract class StringUtil {
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
             return N.EMPTY_STRING;
+        } else if (toIndex - fromIndex == 1) {
+            return N.toString(a[fromIndex]);
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -6900,6 +6910,8 @@ public abstract class StringUtil {
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
             return N.EMPTY_STRING;
+        } else if (toIndex - fromIndex == 1) {
+            return N.toString(a[fromIndex]);
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -7009,6 +7021,8 @@ public abstract class StringUtil {
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
             return N.EMPTY_STRING;
+        } else if (toIndex - fromIndex == 1) {
+            return N.toString(a[fromIndex]);
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -7118,6 +7132,8 @@ public abstract class StringUtil {
 
         if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
             return N.EMPTY_STRING;
+        } else if (toIndex - fromIndex == 1) {
+            return N.toString(a[fromIndex]);
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
