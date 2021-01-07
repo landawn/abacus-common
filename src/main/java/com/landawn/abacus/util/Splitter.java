@@ -619,6 +619,25 @@ public final class Splitter {
     /**
      * Split to array.
      *
+     * @param output
+     * @param source
+     * @return
+     */
+    public String[] splitToArray(final String[] output, final CharSequence source) {
+        N.checkArgNotNullOrEmpty(output, "output");
+
+        final ObjIterator<String> iter = iterate(source);
+
+        for (int i = 0, len = output.length; i < len && iter.hasNext(); i++) {
+            output[i] = iter.next();
+        }
+
+        return output;
+    }
+
+    /**
+     * Split to array.
+     *
      * @param source
      * @return
      */

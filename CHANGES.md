@@ -1,3 +1,9 @@
+### 2.1.9
+
+* Add `CSVParser` and `CSVUtil`.
+* Improvements and bug fix.
+
+
 ### 2.1.8
 
 * Improvements and bug fix.
