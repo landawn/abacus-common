@@ -942,7 +942,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * IntList a = IntList.of(0, 1, 2, 2, 3);
      * IntList b = IntList.of(2, 5, 1);
-     * IntList c = a.intersection(b); // The elements c in a will be: [1, 2].
+     * IntList c = a.intersection(b); // The elements c in a will be: [1, 2]. 
+     * 
+     * IntList a = IntList.of(0, 1, 2, 2, 3);
+     * IntList b = IntList.of(2, 5, 1, 2);
+     * IntList c = a.intersection(b); // The elements c in a will be: [1, 2, 2].
      * </pre>
      *
      * @param b

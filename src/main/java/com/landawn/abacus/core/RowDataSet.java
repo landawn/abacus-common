@@ -201,6 +201,7 @@ public class RowDataSet implements DataSet, Cloneable {
     public RowDataSet(final List<String> columnNameList, final List<List<Object>> columnList, final Properties<String, Object> properties) {
         N.checkArgNotNull(columnNameList);
         N.checkArgNotNull(columnList);
+
         N.checkArgument(N.hasDuplicates(columnNameList) == false, "Dupliated column names: {}", columnNameList);
         N.checkArgument(columnNameList.size() == columnList.size(), "the size of column name list: {} is different from the size of column list: {}",
                 columnNameList.size(), columnList.size());
@@ -4091,6 +4092,12 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public void toJSON(final Writer out, final Collection<String> columnNames, final int fromRowIndex, final int toRowIndex) throws UncheckedIOException {
         checkRowIndex(fromRowIndex, toRowIndex);
+
+        if (N.isNullOrEmpty(columnNames)) {
+            IOUtil.write(out, "[]");
+            return;
+        }
+
         final int[] columnIndexes = checkColumnName(columnNames);
         final int columnCount = columnIndexes.length;
 
@@ -4464,7 +4471,15 @@ public class RowDataSet implements DataSet, Cloneable {
     public void toXML(final Writer out, final String rowElementName, final Collection<String> columnNames, final int fromRowIndex, final int toRowIndex)
             throws UncheckedIOException {
         checkRowIndex(fromRowIndex, toRowIndex);
+
+        if (N.isNullOrEmpty(columnNames)) {
+            IOUtil.write(out, XMLConstants.DATA_SET_ELE_START);
+            IOUtil.write(out, XMLConstants.DATA_SET_ELE_END);
+            return;
+        }
+
         final int[] columnIndexes = checkColumnName(columnNames);
+
         final int columnCount = columnIndexes.length;
 
         final char[] rowElementNameHead = ("<" + rowElementName + ">").toCharArray();
@@ -4753,6 +4768,10 @@ public class RowDataSet implements DataSet, Cloneable {
     public void toCSV(final Writer out, final Collection<String> columnNames, final int fromRowIndex, final int toRowIndex, final boolean writeTitle,
             final boolean quoted) throws UncheckedIOException {
         checkRowIndex(fromRowIndex, toRowIndex);
+
+        if (N.isNullOrEmpty(columnNames)) {
+            return;
+        }
 
         final int[] columnIndexes = checkColumnName(columnNames);
         final int columnCount = columnIndexes.length;
@@ -9901,6 +9920,101 @@ public class RowDataSet implements DataSet, Cloneable {
      * @return
      */
     @Override
+    public DataSet intersect(final DataSet other) {
+        final List<String> commonColumnNameList = new ArrayList<>(this._columnNameList);
+        commonColumnNameList.retainAll(other.columnNameList());
+
+        if (N.isNullOrEmpty(commonColumnNameList)) {
+            throw new IllegalArgumentException("These two DataSets don't have common column names: " + this._columnNameList + ", " + other.columnNameList());
+        }
+
+        final int newColumnCount = this.columnNameList().size();
+        final List<String> newColumnNameList = new ArrayList<>(this._columnNameList);
+        final List<List<Object>> newColumnList = new ArrayList<>(newColumnCount);
+
+        for (int i = 0; i < newColumnCount; i++) {
+            newColumnList.add(new ArrayList<>());
+        }
+
+        final int size = size();
+
+        if (size == 0) {
+            return new RowDataSet(newColumnNameList, newColumnList);
+        }
+
+        final int commonColumnCount = commonColumnNameList.size();
+
+        if (commonColumnCount == 1) {
+            final int columnIndex = this.getColumnIndex(commonColumnNameList.get(0));
+            final int otherColumnIndex = other.getColumnIndex(commonColumnNameList.get(0));
+
+            final List<Object> column = _columnList.get(columnIndex);
+            final Set<Object> rowSet = N.newHashSet();
+
+            for (Object e : other.getColumn(otherColumnIndex)) {
+                rowSet.add(getHashKey(e));
+            }
+
+            for (int rowIndex = 0; rowIndex < size; rowIndex++) {
+                if (rowSet.remove(getHashKey(column.get(rowIndex)))) {
+                    for (int i = 0; i < newColumnCount; i++) {
+                        newColumnList.get(i).add(_columnList.get(i).get(rowIndex));
+                    }
+                }
+            }
+        } else {
+            final int[] columnIndexes = this.getColumnIndexes(commonColumnNameList);
+            final int[] otherColumnIndexes = other.getColumnIndexes(commonColumnNameList);
+
+            final Set<Object[]> rowSet = new ArrayHashSet<>();
+            Object[] row = null;
+
+            for (int otherRowIndex = 0, otherSize = other.size(); otherRowIndex < otherSize; otherRowIndex++) {
+                row = row == null ? new Object[commonColumnCount] : row;
+
+                for (int i = 0; i < commonColumnCount; i++) {
+                    row[i] = other.get(otherRowIndex, otherColumnIndexes[i]);
+                }
+
+                if (rowSet.add(row)) {
+                    row = null;
+                }
+            }
+
+            row = new Object[commonColumnCount];
+
+            for (int rowIndex = 0; rowIndex < size; rowIndex++) {
+                for (int i = 0; i < commonColumnCount; i++) {
+                    row[i] = _columnList.get(columnIndexes[i]).get(rowIndex);
+                }
+
+                if (rowSet.remove(row)) {
+                    for (int i = 0; i < newColumnCount; i++) {
+                        newColumnList.get(i).add(_columnList.get(i).get(rowIndex));
+                    }
+                }
+            }
+        }
+
+        return new RowDataSet(newColumnNameList, newColumnList);
+    }
+
+    /**
+     *
+     * @param other
+     * @return
+     */
+    @Override
+    public DataSet intersectAll(final DataSet other) {
+        return remove2(other, true);
+    }
+
+    /**
+     *
+     * @param other
+     * @return
+     */
+    @Override
     public DataSet intersection(final DataSet other) {
         return remove(other, true);
     }
@@ -10020,16 +10134,6 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public DataSet symmetricDifference(DataSet dataSet) {
         return this.difference(dataSet).merge(dataSet.difference(this));
-    }
-
-    /**
-     *
-     * @param other
-     * @return
-     */
-    @Override
-    public DataSet intersectAll(final DataSet other) {
-        return remove2(other, true);
     }
 
     /**

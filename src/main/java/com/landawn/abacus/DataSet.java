@@ -3366,6 +3366,15 @@ public interface DataSet {
 
     /**
      * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns.
+     * This operation removes duplicate rows from the final result set.
+     *
+     * @param other
+     * @return 
+     */
+    DataSet intersect(DataSet other);
+
+    /**
+     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns.
      * This operation doesn't remove duplicate rows from the final result set.
      *
      * @param other
@@ -3373,6 +3382,16 @@ public interface DataSet {
      * @see java.util.Collection#retainAll(Collection)
      */
     DataSet intersectAll(DataSet other);
+
+    /**
+     * Returns a new {@code DataSet} with all rows from this DataSet and which also appear in the specified {@code other} in common columns by occurrences.
+     * This operation only cares the occurrences of rows in both {@code DataSet}. it doesn't remove duplicate.
+     *
+     * @param dataSet
+     * @return a new DataSet
+     * @see com.landawn.abacus.util.IntList#intersection(com.landawn.abacus.util.IntList)
+     */
+    DataSet intersection(DataSet dataSet);
 
     /**
      * Returns a new {@code DataSet} with all rows from this DataSet and which not appear in the specified {@code other} in common columns.
@@ -3399,15 +3418,6 @@ public interface DataSet {
      * @see com.landawn.abacus.util.IntList#symmetricDifference(com.landawn.abacus.util.IntList)
      */
     DataSet symmetricDifference(DataSet dataSet);
-
-    /**
-     * Returns a new <code>DataSet</code>.
-     *
-     * @param dataSet
-     * @return a new DataSet
-     * @see com.landawn.abacus.util.IntList#intersection(com.landawn.abacus.util.IntList)
-     */
-    DataSet intersection(DataSet dataSet);
 
     /**
      * Returns a new <code>DataSet</code> by appending the specified <code>from</code> <code>DataSet</code> into this <code>DataSet</code>.
