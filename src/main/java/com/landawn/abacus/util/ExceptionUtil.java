@@ -183,5 +183,33 @@ public final class ExceptionUtil {
         return type.isInstance(chain);
     }
 
+    public static String getErrorMessage(final Throwable e) {
+        return getErrorMessage(e, false);
+    }
+
+    public static String getErrorMessage(final Throwable e, final boolean withExceptionClassName) {
+        String msg = e.getMessage();
+
+        if (N.isNullOrEmpty(msg) && e.getCause() != null) {
+            Throwable cause = e.getCause();
+
+            do {
+                msg = cause.getMessage();
+
+                if (N.notNullOrEmpty(msg)) {
+                    break;
+                }
+            } while ((cause = e.getCause()) != null);
+        }
+
+        if (N.isNullOrEmpty(msg)) {
+            return e.getClass().getCanonicalName();
+        } else if (withExceptionClassName) {
+            return withExceptionClassName + ": " + msg;
+        } else {
+            return msg;
+        }
+    }
+
     // --------------------------------------------------------------------------------------------->
 }

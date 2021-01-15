@@ -3080,6 +3080,26 @@ public final class Fn extends Comparators {
         };
     }
 
+    private static Function<Map<Object, Collection<Object>>, List<Map<Object, Object>>> FLAT_TO_MAP_FUNC = new Function<Map<Object, Collection<Object>>, List<Map<Object, Object>>>() {
+        @Override
+        public List<Map<Object, Object>> apply(Map<Object, Collection<Object>> map) {
+            return Maps.flatToMap(map);
+        }
+    };
+
+    /** 
+     * {a=[1, 2, 3], b=[4, 5, 6], c=[7, 8]} -> [{a=1, b=4, c=7}, {a=2, b=5, c=8}, {a=3, b=6}]
+     *
+     * @param <K> the key type
+     * @param <V> the value type 
+     * @return
+     * @see Maps#flatToMap(Map)
+     */
+    @SuppressWarnings("rawtypes")
+    public static <K, V> Function<? super Map<K, ? extends Collection<? extends V>>, List<Map<K, V>>> flatToMap() {
+        return (Function) FLAT_TO_MAP_FUNC;
+    }
+
     private static Function<String, Byte> PARSE_BYTE_FUNC = new Function<String, Byte>() {
         @Override
         public Byte apply(String t) {

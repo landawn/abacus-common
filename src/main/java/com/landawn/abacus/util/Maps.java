@@ -1287,6 +1287,50 @@ public final class Maps {
     }
 
     /**
+     * {a=[1, 2, 3], b=[4, 5, 6], c=[7, 8]} -> [{a=1, b=4, c=7}, {a=2, b=5, c=8}, {a=3, b=6}]
+     * 
+     * @param <K>
+     * @param <V>
+     * @param map
+     * @return
+     */
+    public static <K, V> List<Map<K, V>> flatToMap(final Map<K, ? extends Collection<? extends V>> map) {
+        if (map == null) {
+            return new ArrayList<>();
+        }
+
+        int maxValueSize = 0;
+
+        for (Collection<? extends V> v : map.values()) {
+            maxValueSize = N.max(maxValueSize, N.size(v));
+        }
+
+        final List<Map<K, V>> result = new ArrayList<>(maxValueSize);
+
+        for (int i = 0; i < maxValueSize; i++) {
+            result.add(newOrderingMap(map));
+        }
+
+        K key = null;
+        Iterator<? extends V> iter = null;
+
+        for (Map.Entry<K, ? extends Collection<? extends V>> entry : map.entrySet()) {
+            if (N.isNullOrEmpty(entry.getValue())) {
+                continue;
+            }
+
+            key = entry.getKey();
+            iter = entry.getValue().iterator();
+
+            for (int i = 0; iter.hasNext(); i++) {
+                result.get(i).put(key, iter.next());
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Map 2 entity.
      *
      * @param <T>

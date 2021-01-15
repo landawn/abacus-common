@@ -10580,8 +10580,14 @@ public class RowDataSet implements DataSet, Cloneable {
             final List<String> newColumnNames = new ArrayList<>(columnNames);
             final List<List<Object>> newColumnList = new ArrayList<>(newColumnNames.size());
 
-            for (int columnIndex : columnIndexes) {
-                newColumnList.add(_columnList.get(columnIndex).subList(fromRowIndex, toRowIndex));
+            if (fromRowIndex > 0 || toRowIndex < size()) {
+                for (int columnIndex : columnIndexes) {
+                    newColumnList.add(_columnList.get(columnIndex).subList(fromRowIndex, toRowIndex));
+                }
+            } else {
+                for (int columnIndex : columnIndexes) {
+                    newColumnList.add(_columnList.get(columnIndex));
+                }
             }
 
             ds = new RowDataSet(newColumnNames, newColumnList, _properties);
