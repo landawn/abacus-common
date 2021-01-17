@@ -616,12 +616,12 @@ public abstract class Configuration {
             final String[] strs = Splitter.with(N.BACKSLASH_ASTERISK).splitToArray(value);
 
             for (String str : strs) {
-                result *= N.parseLong(str.trim());
+                result *= Numbers.toLong(str.trim());
             }
 
             timeInMilliSeconds = result;
         } else {
-            timeInMilliSeconds = N.parseLong(value);
+            timeInMilliSeconds = Numbers.toLong(value);
         }
 
         return timeInMilliSeconds * multiple;

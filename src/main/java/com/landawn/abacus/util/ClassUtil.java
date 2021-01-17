@@ -3123,4 +3123,119 @@ public final class ClassUtil {
 
         return result;
     }
+
+    /**
+     * Gets an {@link Iterator} that can iterate over a class hierarchy in ascending (subclass to superclass) order,
+     * excluding interfaces.
+     *
+     * @param type the type to get the class hierarchy from
+     * @return Iterator an Iterator over the class hierarchy of the given class
+     * @since 3.2
+     */
+    public static ObjIterator<Class<?>> hierarchy(final Class<?> type) {
+        return hierarchy(type, false);
+    }
+
+    /**
+     * Gets an {@link Iterator} that can iterate over a class hierarchy in ascending (subclass to superclass) order.
+     *
+     * @param type the type to get the class hierarchy from
+     * @param includeInterface switch indicating whether to include or exclude interfaces
+     * @return Iterator an Iterator over the class hierarchy of the given class
+     * @since 3.2
+     */
+    public static ObjIterator<Class<?>> hierarchy(final Class<?> type, final boolean includeInterface) {
+        final ObjIterator<Class<?>> superClassesIter = new ObjIterator<Class<?>>() {
+            private final u.Holder<Class<?>> next = new u.Holder<>(type);
+
+            @Override
+            public boolean hasNext() {
+                return next.value() != null;
+            }
+
+            @Override
+            public Class<?> next() {
+                final Class<?> result = next.value();
+                next.setValue(result.getSuperclass());
+                return result;
+            }
+        };
+
+        if (includeInterface == false) {
+            return superClassesIter;
+        }
+
+        return new ObjIterator<Class<?>>() {
+            private final Set<Class<?>> seenInterfaces = new HashSet<>();
+            private Iterator<Class<?>> interfacesIter = N.emptyIterator();
+
+            @Override
+            public boolean hasNext() {
+                return interfacesIter.hasNext() || superClassesIter.hasNext();
+            }
+
+            @Override
+            public Class<?> next() {
+                if (interfacesIter.hasNext()) {
+                    final Class<?> nextInterface = interfacesIter.next();
+                    seenInterfaces.add(nextInterface);
+                    return nextInterface;
+                }
+
+                final Class<?> nextSuperclass = superClassesIter.next();
+                final Set<Class<?>> currentInterfaces = new LinkedHashSet<>();
+
+                walkInterfaces(currentInterfaces, nextSuperclass);
+
+                interfacesIter = currentInterfaces.iterator();
+
+                return nextSuperclass;
+            }
+
+            private void walkInterfaces(final Set<Class<?>> addTo, final Class<?> c) {
+                for (final Class<?> iface : c.getInterfaces()) {
+                    if (!seenInterfaces.contains(iface)) {
+                        addTo.add(iface);
+                    }
+
+                    walkInterfaces(addTo, iface);
+                }
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        };
+    }
+
+    /**
+     * <p>Returns the number of inheritance hops between two classes.</p>
+     *
+     * @param child the child class, may be {@code null}
+     * @param parent the parent class, may be {@code null}
+     * @return the number of generations between the child and parent; 0 if the same class;
+     * -1 if the classes are not related as child and parent (includes where either class is null)
+     * @since 3.2
+     */
+    public static int distanceOfInheritance(final Class<?> child, final Class<?> parent) {
+        if (child == null || parent == null) {
+            return -1;
+        }
+
+        if (child.equals(parent)) {
+            return 0;
+        }
+
+        final Class<?> cParent = child.getSuperclass();
+        int d = parent.equals(cParent) ? 1 : 0;
+
+        if (d == 1) {
+            return d;
+        }
+
+        d += distanceOfInheritance(cParent, parent);
+
+        return d > 0 ? d + 1 : -1;
+    }
 }

@@ -276,7 +276,7 @@ public final class ParsedSql {
 
             for (int i = 0; i < countOfParameter; i++) {
                 try {
-                    if (N.parseInt(couchbaseNamedParameterList.get(i)) != i + 1) {
+                    if (Numbers.toInt(couchbaseNamedParameterList.get(i)) != i + 1) {
                         isNamedParametersByNum = false;
                         break;
                     }

@@ -59,6 +59,7 @@ import com.landawn.abacus.util.ImmutableMap;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
+import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.ObjectPool;
 import com.landawn.abacus.util.Splitter;
 import com.landawn.abacus.util.StringUtil;
@@ -1252,7 +1253,7 @@ public final class ParserUtil {
                 @Override
                 public java.util.Date read(PropInfo propInfo, String strValue) {
                     if (propInfo.isLongDateFormat) {
-                        return new java.util.Date(N.parseLong(strValue));
+                        return new java.util.Date(Numbers.toLong(strValue));
                     } else {
                         return DateUtil.parseJUDate(strValue, propInfo.dateFormat, propInfo.timeZone);
                     }
@@ -1273,7 +1274,7 @@ public final class ParserUtil {
                 public java.util.Calendar read(PropInfo propInfo, String strValue) {
                     if (propInfo.isLongDateFormat) {
                         final Calendar calendar = Calendar.getInstance();
-                        calendar.setTimeInMillis(N.parseLong(strValue));
+                        calendar.setTimeInMillis(Numbers.toLong(strValue));
                         calendar.setTimeZone(propInfo.timeZone);
                         return calendar;
                     } else {
@@ -1296,7 +1297,7 @@ public final class ParserUtil {
                 @Override
                 public java.sql.Timestamp read(PropInfo propInfo, String strValue) {
                     if (propInfo.isLongDateFormat) {
-                        return new java.sql.Timestamp(N.parseLong(strValue));
+                        return new java.sql.Timestamp(Numbers.toLong(strValue));
                     } else {
                         return DateUtil.parseTimestamp(strValue, propInfo.dateFormat, propInfo.timeZone);
                     }
@@ -1316,7 +1317,7 @@ public final class ParserUtil {
                 @Override
                 public java.sql.Date read(PropInfo propInfo, String strValue) {
                     if (propInfo.isLongDateFormat) {
-                        return new java.sql.Date(N.parseLong(strValue));
+                        return new java.sql.Date(Numbers.toLong(strValue));
                     } else {
                         return DateUtil.parseDate(strValue, propInfo.dateFormat, propInfo.timeZone);
                     }
@@ -1336,7 +1337,7 @@ public final class ParserUtil {
                 @Override
                 public java.sql.Time read(PropInfo propInfo, String strValue) {
                     if (propInfo.isLongDateFormat) {
-                        return new java.sql.Time(N.parseLong(strValue));
+                        return new java.sql.Time(Numbers.toLong(strValue));
                     } else {
                         return DateUtil.parseTime(strValue, propInfo.dateFormat, propInfo.timeZone);
                     }
@@ -1356,7 +1357,7 @@ public final class ParserUtil {
                 @Override
                 public java.time.LocalDateTime read(PropInfo propInfo, String strValue) {
                     if (propInfo.isLongDateFormat) {
-                        return new java.sql.Timestamp(N.parseLong(strValue)).toLocalDateTime();
+                        return new java.sql.Timestamp(Numbers.toLong(strValue)).toLocalDateTime();
                     } else {
                         return java.time.LocalDateTime.parse(strValue, propInfo.dateTimeFormatter);
                     }
@@ -1420,7 +1421,7 @@ public final class ParserUtil {
                 @Override
                 public java.time.ZonedDateTime read(PropInfo propInfo, String strValue) {
                     if (propInfo.isLongDateFormat) {
-                        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(N.parseLong(strValue)), propInfo.zoneId);
+                        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(strValue)), propInfo.zoneId);
                     } else {
                         return ZonedDateTime.parse(strValue, propInfo.dateTimeFormatter);
                     }
@@ -1442,7 +1443,7 @@ public final class ParserUtil {
                         @Override
                         public org.joda.time.DateTime read(PropInfo propInfo, String strValue) {
                             if (propInfo.isLongDateFormat) {
-                                final org.joda.time.DateTime dt = new org.joda.time.DateTime(N.parseLong(strValue));
+                                final org.joda.time.DateTime dt = new org.joda.time.DateTime(Numbers.toLong(strValue));
                                 return dt.getZone().equals(propInfo.jodaDTFH.dtz) ? dt : dt.withZone(propInfo.jodaDTFH.dtz);
                             } else {
                                 return propInfo.jodaDTFH.dtf.parseDateTime(strValue);
@@ -1463,7 +1464,7 @@ public final class ParserUtil {
                         @Override
                         public org.joda.time.MutableDateTime read(PropInfo propInfo, String strValue) {
                             if (propInfo.isLongDateFormat) {
-                                final org.joda.time.MutableDateTime dt = new org.joda.time.MutableDateTime(N.parseLong(strValue));
+                                final org.joda.time.MutableDateTime dt = new org.joda.time.MutableDateTime(Numbers.toLong(strValue));
 
                                 if (!propInfo.jodaDTFH.dtz.equals(dt.getZone())) {
                                     dt.setZone(propInfo.jodaDTFH.dtz);

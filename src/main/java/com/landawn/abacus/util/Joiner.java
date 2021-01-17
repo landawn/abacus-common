@@ -18,6 +18,7 @@ import java.io.Closeable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.EntityInfo;
@@ -1485,8 +1486,68 @@ public final class Joiner implements Closeable {
      * @param entity entity class with getter/setter methods.
      * @return
      */
-    @SuppressWarnings("rawtypes")
     public Joiner appendEntries(final Object entity) {
+        return appendEntries(entity, null);
+    }
+
+    /**
+     *
+     * @param entity entity class with getter/setter methods.
+     * @param propNamesToAppend
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public Joiner appendEntries(final Object entity, final Collection<String> propNamesToAppend) {
+        if (entity == null) {
+            return this;
+        } else if (entity instanceof Map) {
+            return appendEntries((Map) entity);
+        }
+
+        final Class<?> cls = entity.getClass();
+
+        N.checkArgument(ClassUtil.isEntity(cls), "'entity' must be entity class with getter/setter methods");
+
+        final Collection<String> selectPropNames = propNamesToAppend == null ? ClassUtil.getPropNameList(cls) : propNamesToAppend;
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
+        StringBuilder sb = null;
+        Object propValue = null;
+
+        for (String propName : selectPropNames) {
+            propValue = entityInfo.getPropValue(entity, propName);
+
+            if (propValue != null || skipNulls == false) {
+                if (sb == null) {
+                    sb = prepareBuilder().append(propName).append(keyValueDelimiter).append(toString(propValue));
+                } else {
+                    if (isEmptyDelimiter) {
+                        sb.append(propName);
+                    } else {
+                        sb.append(delimiter).append(propName);
+                    }
+
+                    if (isEmptyKeyValueDelimiter) {
+                        sb.append(toString(propValue));
+                    } else {
+                        sb.append(keyValueDelimiter).append(toString(propValue));
+                    }
+                }
+            }
+        }
+
+        return this;
+    }
+
+    /**
+     *
+     * @param entity entity class with getter/setter methods.
+     * @param propNamesToAppend
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public Joiner appendEntriesExclusively(final Object entity, final Set<String> propNamesToExeclude) {
+        N.checkArgNotNull(propNamesToExeclude, "propNamesToExeclude");
+
         if (entity == null) {
             return this;
         } else if (entity instanceof Map) {
@@ -1502,6 +1563,10 @@ public final class Joiner implements Closeable {
         Object propValue = null;
 
         for (String propName : ClassUtil.getPropNameList(cls)) {
+            if (propNamesToExeclude.contains(propName)) {
+                continue;
+            }
+
             propValue = entityInfo.getPropValue(entity, propName);
 
             if (propValue != null || skipNulls == false) {
@@ -1571,6 +1636,8 @@ public final class Joiner implements Closeable {
      * then elements from the other {@code StringJoiner} are concatenated with
      * that delimiter and the result is appended to this {@code StringJoiner}
      * as a single element.
+     * 
+     * <p>Remember to close {@code other} Joiner if {@code reuseCachedBuffer} is set to {@code} true.
      *
      * @param other The {@code StringJoiner} whose contents should be merged
      *              into this one
@@ -1579,6 +1646,7 @@ public final class Joiner implements Closeable {
      */
     public Joiner merge(Joiner other) {
         N.checkArgNotNull(other);
+
         if (other.buffer != null) {
             final int length = other.buffer.length();
             // lock the length so that we can seize the data to be appended
@@ -1587,6 +1655,7 @@ public final class Joiner implements Closeable {
             StringBuilder builder = prepareBuilder();
             builder.append(other.buffer, other.prefix.length(), length);
         }
+
         return this;
     }
 

@@ -34,12 +34,57 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.landawn.abacus.util.u.Optional;
+import com.landawn.abacus.util.u.OptionalDouble;
+import com.landawn.abacus.util.u.OptionalFloat;
+import com.landawn.abacus.util.u.OptionalInt;
+import com.landawn.abacus.util.u.OptionalLong;
+
 /**
- *  Note: A lot of codes in this classed are copied from Google Guava and Apache Commons Math under under the Apache License, Version 2.0.
+ *  Note: A lot of codes in this classed are copied from Google Guava, Apache Commons Math and Apache Commons Lang under under the Apache License, Version 2.0.
  *  The purpose of copying the code is to re-organize the APIs.
  *
  */
 public final class Numbers {
+
+    /** Reusable Byte constant for zero. */
+    public static final Byte BYTE_ZERO = Byte.valueOf((byte) 0);
+    /** Reusable Byte constant for one. */
+    public static final Byte BYTE_ONE = Byte.valueOf((byte) 1);
+    /** Reusable Byte constant for minus one. */
+    public static final Byte BYTE_MINUS_ONE = Byte.valueOf((byte) -1);
+    /** Reusable Short constant for zero. */
+    public static final Short SHORT_ZERO = Short.valueOf((short) 0);
+    /** Reusable Short constant for one. */
+    public static final Short SHORT_ONE = Short.valueOf((short) 1);
+    /** Reusable Short constant for minus one. */
+    public static final Short SHORT_MINUS_ONE = Short.valueOf((short) -1);
+    /** Reusable Integer constant for zero. */
+    public static final Integer INTEGER_ZERO = Integer.valueOf(0);
+    /** Reusable Integer constant for one. */
+    public static final Integer INTEGER_ONE = Integer.valueOf(1);
+    /** Reusable Integer constant for two */
+    public static final Integer INTEGER_TWO = Integer.valueOf(2);
+    /** Reusable Integer constant for minus one. */
+    public static final Integer INTEGER_MINUS_ONE = Integer.valueOf(-1);
+    /** Reusable Long constant for zero. */
+    public static final Long LONG_ZERO = Long.valueOf(0L);
+    /** Reusable Long constant for one. */
+    public static final Long LONG_ONE = Long.valueOf(1L);
+    /** Reusable Long constant for minus one. */
+    public static final Long LONG_MINUS_ONE = Long.valueOf(-1L);
+    /** Reusable Float constant for zero. */
+    public static final Float FLOAT_ZERO = Float.valueOf(0.0f);
+    /** Reusable Float constant for one. */
+    public static final Float FLOAT_ONE = Float.valueOf(1.0f);
+    /** Reusable Float constant for minus one. */
+    public static final Float FLOAT_MINUS_ONE = Float.valueOf(-1.0f);
+    /** Reusable Double constant for zero. */
+    public static final Double DOUBLE_ZERO = Double.valueOf(0.0d);
+    /** Reusable Double constant for one. */
+    public static final Double DOUBLE_ONE = Double.valueOf(1.0d);
+    /** Reusable Double constant for minus one. */
+    public static final Double DOUBLE_MINUS_ONE = Double.valueOf(-1.0d);
 
     private Numbers() {
         // utility class.
@@ -195,6 +240,951 @@ public final class Numbers {
     static final double F_1_2 = 1d / 2d;
     /** Constant: {@value}. */
     static final double F_1_4 = 1d / 4d;
+
+    /**
+     * 
+     * @param str
+     * @return {@code 0} if the specified {@code str} is null or empty.
+     * @throws NumberFormatException If the string is not a parsable {@code byte}. 
+     * @see #isParsable(String)
+     */
+    public static byte toByte(final String str) throws NumberFormatException {
+        return toByte(str, (byte) 0);
+    }
+
+    /**
+     * 
+     * @param str
+     * @param defaultValue
+     * @return {@code defaultValue} if the specified {@code str} is null or empty.
+     * @throws NumberFormatException If the string is not a parsable {@code byte}. 
+     * @see #isParsable(String)
+     */
+    public static byte toByte(final String str, final byte defaultValue) throws NumberFormatException {
+        if (N.isNullOrEmpty(str)) {
+            return defaultValue;
+        }
+
+        if (str.length() < 5) {
+            Integer result = CommonUtil.stringIntCache.get(str);
+            if (result != null) {
+                if (result.intValue() < Byte.MIN_VALUE || result.intValue() > Byte.MAX_VALUE) {
+                    throw new NumberFormatException("Value out of range. Value:\"" + str + "\" Radix: 10");
+                }
+
+                return result.byteValue();
+            }
+        }
+
+        return Byte.parseByte(str);
+    }
+
+    /**
+     * 
+     * @param str 
+     * @return {@code 0} if the specified {@code str} is null or empty.
+     * @throws NumberFormatException If the string is not a parsable {@code short}. 
+     * @see #isParsable(String)
+     */
+    public static short toShort(final String str) throws NumberFormatException {
+        return toShort(str, (short) 0);
+    }
+
+    /**
+     * 
+     * @param str
+     * @param defaultValue
+     * @return {@code defaultValue} if the specified {@code str} is null or empty.
+     * @throws NumberFormatException If the string is not a parsable {@code short}. 
+     * @see #isParsable(String)
+     */
+    public static short toShort(final String str, final short defaultValue) throws NumberFormatException {
+        if (N.isNullOrEmpty(str)) {
+            return defaultValue;
+        }
+
+        if (str.length() < 5) {
+            Integer result = CommonUtil.stringIntCache.get(str);
+            if (result != null) {
+                return result.shortValue();
+            }
+        }
+
+        return Short.parseShort(str);
+    }
+
+    /**
+     * 
+     * @param str
+     * @return {@code 0} if the specified {@code str} is null or empty.
+     * @throws NumberFormatException If the string is not a parsable {@code int}. 
+     * @see #isParsable(String)
+     */
+    public static int toInt(final String str) throws NumberFormatException {
+        return toInt(str, 0);
+    }
+
+    /**
+     * 
+     * @param str
+     * @param defaultValue
+     * @return {@code defaultValue} if the specified {@code str} is null or empty.
+     * @throws NumberFormatException If the string is not a parsable {@code int}. 
+     * @see #isParsable(String)
+     */
+    public static int toInt(final String str, final int defaultValue) throws NumberFormatException {
+        if (N.isNullOrEmpty(str)) {
+            return defaultValue;
+        }
+
+        if (str.length() < 5) {
+            Integer result = CommonUtil.stringIntCache.get(str);
+            if (result != null) {
+                return result.intValue();
+            }
+        }
+
+        return Integer.decode(str);
+    }
+
+    /**
+     * 
+     * @param str
+     * @return {@code 0} if the specified {@code str} is null or empty.
+     * @throws NumberFormatException If the string is not a parsable {@code long}. 
+     * @see #isParsable(String)
+     */
+    public static long toLong(final String str) throws NumberFormatException {
+        return toLong(str, 0L);
+    }
+
+    /**
+     * 
+     * @param str
+     * @param defaultValue
+     * @return {@code defaultValue} if the specified {@code str} is null or empty.
+     * @throws NumberFormatException If the string is not a parsable {@code long}. 
+     * @see #isParsable(String)
+     */
+    public static long toLong(final String str, final long defaultValue) throws NumberFormatException {
+        if (N.isNullOrEmpty(str)) {
+            return 0;
+        }
+
+        if (str.length() < 5) {
+            Integer result = CommonUtil.stringIntCache.get(str);
+            if (result != null) {
+                return result.intValue();
+            }
+        }
+
+        return Long.decode(str);
+    }
+
+    /**
+     * 
+     * @param str
+     * @return {@code 0} if the specified {@code str} is null or empty.
+     * @throws NumberFormatException If the string is not a parsable {@code float}. 
+     * @see #isParsable(String)
+     */
+    public static float toFloat(final String str) throws NumberFormatException {
+        return toFloat(str, 0.0f);
+    }
+
+    /**
+     * 
+     * @param str
+     * @param defaultValue 
+     * @return {@code defaultValue} if the specified {@code str} is null or empty.
+     * @throws NumberFormatException If the string is not a parsable {@code float}. 
+     * @see #isParsable(String)
+     */
+    public static float toFloat(final String str, final float defaultValue) throws NumberFormatException {
+        if (N.isNullOrEmpty(str)) {
+            return defaultValue;
+        }
+
+        return Float.parseFloat(str);
+    }
+
+    /**
+     * 
+     * @param str 
+     * @return {@code 0.0d} if the specified {@code str} is null or empty.
+     * @throws NumberFormatException If the string is not a parsable {@code double}. 
+     * @see #isParsable(String)
+     */
+    public static double toDouble(final String str) throws NumberFormatException {
+        return toDouble(str, 0.0d);
+    }
+
+    /**
+     * 
+     * @param str
+     * @param defaultValue
+     * @return {@code defaultValue} if the specified {@code str} is null or empty.
+     * @throws NumberFormatException If the string is not a parsable {@code double}. 
+     * @see #isParsable(String)
+     */
+    public static double toDouble(final String str, final double defaultValue) throws NumberFormatException {
+        if (N.isNullOrEmpty(str)) {
+            return defaultValue;
+        }
+
+        return Double.parseDouble(str);
+
+    }
+
+    /**
+     * <p>Convert a {@code BigDecimal} to a {@code double}.</p>
+     *
+     * <p>If the {@code BigDecimal} {@code value} is
+     * {@code null}, then the specified default value is returned.</p>
+     *
+     * <pre>
+     *   NumberUtils.toDouble(null)                     = 0.0d
+     *   NumberUtils.toDouble(BigDecimal.valudOf(8.5d)) = 8.5d
+     * </pre>
+     *
+     * @param value the {@code BigDecimal} to convert, may be {@code null}.
+     * @return the double represented by the {@code BigDecimal} or
+     *  {@code 0.0d} if the {@code BigDecimal} is {@code null}.
+     * @since 3.8
+     */
+    public static double toDouble(final BigDecimal value) {
+        return toDouble(value, 0.0d);
+    }
+
+    /**
+     * <p>Convert a {@code BigDecimal} to a {@code double}.</p>
+     *
+     * <p>If the {@code BigDecimal} {@code value} is
+     * {@code null}, then the specified default value is returned.</p>
+     *
+     * <pre>
+     *   NumberUtils.toDouble(null, 1.1d)                     = 1.1d
+     *   NumberUtils.toDouble(BigDecimal.valudOf(8.5d), 1.1d) = 8.5d
+     * </pre>
+     *
+     * @param value the {@code BigDecimal} to convert, may be {@code null}.
+     * @param defaultValue the default value
+     * @return the double represented by the {@code BigDecimal} or the
+     *  defaultValue if the {@code BigDecimal} is {@code null}.
+     * @since 3.8
+     */
+    public static double toDouble(final BigDecimal value, final double defaultValue) {
+        return value == null ? defaultValue : value.doubleValue();
+    }
+
+    /**
+     * <p>
+     * Convert a <code>String</code> to a <code>Integer</code>, handling hex
+     * (0xhhhh) and octal (0dddd) notations. N.B. a leading zero means octal;
+     * spaces are not trimmed.
+     * </p>
+     *
+     * <p>
+     * Returns an empty {@code OptionalInt} if the string is {@code null} or can't be parsed as {@code Integer}.
+     * </p>
+     *
+     * @param str a <code>String</code> to convert, may be null
+     * @return 
+     * @see #isCreatable(String)
+     */
+    public static OptionalInt createInteger(final String str) {
+        if (N.isNullOrEmpty(str)) {
+            return OptionalInt.empty();
+        }
+
+        try {
+            return OptionalInt.of(Integer.decode(str));
+        } catch (NumberFormatException e) {
+            return OptionalInt.empty();
+        }
+    }
+
+    /**
+     * <p>
+     * Convert a <code>String</code> to a <code>Long</code>; since 3.1 it
+     * handles hex (0Xhhhh) and octal (0ddd) notations. N.B. a leading zero
+     * means octal; spaces are not trimmed.
+     * </p>
+     *
+     * <p>
+     * Returns an empty {@code OptionalLong} if the string is {@code null} or can't be parsed as {@code Long}.
+     * </p>
+     *
+     * @param str a <code>String</code> to convert, may be null
+     * @return 
+     * @see #isCreatable(String)
+     */
+    public static OptionalLong createLong(final String str) {
+        if (N.isNullOrEmpty(str)) {
+            return OptionalLong.empty();
+        }
+
+        try {
+            return OptionalLong.of(Long.decode(str));
+        } catch (NumberFormatException e) {
+            return OptionalLong.empty();
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    /**
+     * <p>
+     * Convert a <code>String</code> to a <code>Float</code>.
+     * </p>
+     *
+     * <p>
+     * Returns an empty {@code OptionalFloat} if the string is {@code null} or can't be parsed as {@code Float}.
+     * </p>
+     *
+     * @param str a <code>String</code> to convert, may be null
+     * @return 
+     * @see #isCreatable(String)
+     */
+    public static OptionalFloat createFloat(final String str) {
+        if (N.isNullOrEmpty(str)) {
+            return OptionalFloat.empty();
+        }
+
+        try {
+            return OptionalFloat.of(Float.parseFloat(str));
+        } catch (NumberFormatException e) {
+            return OptionalFloat.empty();
+        }
+    }
+
+    /**
+     * <p>
+     * Convert a <code>String</code> to a <code>Double</code>.
+     * </p>
+     *
+     * <p>
+     * <p>
+     * Returns an empty {@code OptionalDouble} if the string is {@code null} or can't be parsed as {@code Double}.
+     * </p>
+     * </p>
+     *
+     * @param str a <code>String</code> to convert, may be null
+     * @return 
+     * @see #isCreatable(String)
+     */
+    public static OptionalDouble createDouble(final String str) {
+        if (N.isNullOrEmpty(str)) {
+            return OptionalDouble.empty();
+        }
+
+        try {
+            return OptionalDouble.of(Double.parseDouble(str));
+        } catch (NumberFormatException e) {
+            return OptionalDouble.empty();
+        }
+    }
+
+    /**
+     * <p>
+     * Convert a <code>String</code> to a <code>BigInteger</code>; since 3.2 it
+     * handles hex (0x or #) and octal (0) notations.
+     * </p>
+     *
+     * <p>
+     * Returns an empty {@code Optional} if the string is {@code null} or can't be parsed as {@code BigInteger}.
+     * </p>
+     *
+     * @param str a <code>String</code> to convert, may be null
+     * @return 
+     * @see #isCreatable(String)
+     */
+    public static Optional<BigInteger> createBigInteger(final String str) {
+        if (N.isNullOrEmptyOrBlank(str)) {
+            return Optional.empty();
+        }
+
+        int pos = 0; // offset within string
+        int radix = 10;
+        boolean negate = false; // need to negate later?
+        if (str.startsWith("-")) {
+            negate = true;
+            pos = 1;
+        }
+        if (str.startsWith("0x", pos) || str.startsWith("0X", pos)) { // hex
+            radix = 16;
+            pos += 2;
+        } else if (str.startsWith("#", pos)) { // alternative hex (allowed by Long/Integer)
+            radix = 16;
+            pos++;
+        } else if (str.startsWith("0", pos) && str.length() > pos + 1) { // octal; so long as there are additional digits
+            radix = 8;
+            pos++;
+        } // default is to treat as decimal
+
+        try {
+            final BigInteger value = new BigInteger(str.substring(pos), radix);
+            return Optional.of(negate ? value.negate() : value);
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * <p>
+     * Convert a <code>String</code> to a <code>BigDecimal</code>.
+     * </p>
+     *
+     * <p>
+     * Returns an empty {@code Optional} if the string is {@code null} or can't be parsed as {@code BigDecimal}.
+     * </p>
+     *
+     * @param str a <code>String</code> to convert, may be null
+     * @return 
+     * @see #isCreatable(String)
+     */
+    public static Optional<BigDecimal> createBigDecimal(final String str) {
+        if (N.isNullOrEmptyOrBlank(str) || str.trim().startsWith("--")) {
+            return Optional.empty();
+        }
+
+        try {
+            return Optional.of(new BigDecimal(str));
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
+    }
+
+    static boolean[] alphanumerics = new boolean[128];
+
+    static {
+        alphanumerics['0'] = true;
+        alphanumerics['1'] = true;
+        alphanumerics['2'] = true;
+        alphanumerics['3'] = true;
+        alphanumerics['4'] = true;
+        alphanumerics['5'] = true;
+        alphanumerics['6'] = true;
+        alphanumerics['7'] = true;
+        alphanumerics['8'] = true;
+        alphanumerics['9'] = true;
+
+        alphanumerics['+'] = true;
+        alphanumerics['-'] = true;
+        alphanumerics['.'] = true;
+        alphanumerics['#'] = true;
+
+        alphanumerics['x'] = true;
+        alphanumerics['X'] = true;
+
+        alphanumerics['e'] = true;
+        alphanumerics['E'] = true;
+
+        alphanumerics['a'] = true;
+        alphanumerics['b'] = true;
+        alphanumerics['c'] = true;
+        alphanumerics['d'] = true;
+        alphanumerics['e'] = true;
+        alphanumerics['f'] = true;
+
+        alphanumerics['l'] = true;
+        alphanumerics['L'] = true;
+        alphanumerics['f'] = true;
+        alphanumerics['F'] = true;
+        alphanumerics['d'] = true;
+        alphanumerics['D'] = true;
+    }
+
+    /**
+     * <p>
+     * Turns a string value into a java.lang.Number.
+     * </p>
+     *
+     * <p>
+     * If the string starts with {@code 0x} or {@code -0x} (lower or upper case)
+     * or {@code #} or {@code -#}, it will be interpreted as a hexadecimal
+     * Integer - or Long, if the number of digits after the prefix is more than
+     * 8 - or BigInteger if there are more than 16 digits.
+     * </p>
+     * <p>
+     * Then, the value is examined for a type qualifier on the end, i.e. one of
+     * <code>'f','F','d','D','l','L'</code>. If it is found, it starts trying to
+     * create successively larger types from the type specified until one is
+     * found that can represent the value.
+     * </p>
+     *
+     * <p>
+     * If a type specifier is not found, it will check for a decimal point and
+     * then try successively larger types from <code>Integer</code> to
+     * <code>BigInteger</code> and from <code>double</code> to
+     * <code>BigDecimal</code>.
+     * </p>
+     *
+     * <p>
+     * Integral values with a leading {@code 0} will be interpreted as octal;
+     * the returned number will be Integer, Long or BigDecimal as appropriate.
+     * </p>
+     *
+     * <p>
+     * Returns an empty {@code Optional} if the string is {@code null} or can't be parsed as {@code Number}.
+     * </p>
+     *
+     * @param str a String containing a number, may be null
+     * @return 
+     * @see #isCreatable(String)
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static Optional<Number> createNumber(final String str) {
+        if (N.isNullOrEmptyOrBlank(str)) {
+            return Optional.empty();
+        }
+
+        char ch = 0;
+
+        if (!(((ch = str.charAt(0)) < 128 && alphanumerics[ch]) && ((ch = str.charAt(str.length() - 1)) < 128 && alphanumerics[ch])
+                && ((ch = str.charAt(str.length() / 2)) < 128 && alphanumerics[ch]))) {
+            return Optional.empty();
+        }
+
+        // Need to deal with all possible hex prefixes here
+        final String[] hex_prefixes = { "0x", "0X", "-0x", "-0X", "#", "-#" };
+        int pfxLen = 0;
+        for (final String pfx : hex_prefixes) {
+            if (str.startsWith(pfx)) {
+                pfxLen += pfx.length();
+                break;
+            }
+        }
+
+        if (pfxLen > 0) { // we have a hex number
+            char firstSigDigit = 0; // strip leading zeroes
+
+            for (int i = pfxLen; i < str.length(); i++) {
+                firstSigDigit = str.charAt(i);
+                if (firstSigDigit == '0') { // count leading zeroes
+                    pfxLen++;
+                } else {
+                    break;
+                }
+            }
+
+            final int hexDigits = str.length() - pfxLen;
+
+            if (hexDigits > 16 || hexDigits == 16 && firstSigDigit > '7') { // too many for Long
+                return (Optional) createBigInteger(str);
+            } else if (hexDigits > 8 || hexDigits == 8 && firstSigDigit > '7') { // too many for an int
+                return (Optional) createLong(str).boxed();
+            } else {
+                return (Optional) createInteger(str).boxed();
+            }
+        }
+
+        final char lastChar = str.charAt(str.length() - 1);
+        String mant;
+        String dec;
+        String exp;
+        final int decPos = str.indexOf('.');
+        final int expPos = str.indexOf('e') + str.indexOf('E') + 1; // assumes both not present
+        // if both e and E are present, this is caught by the checks on expPos (which prevent IOOBE)
+        // and the parsing which will detect if e or E appear in a number due to using the wrong offset
+
+        Optional<? extends Number> op = null;
+
+        if (decPos > -1) { // there is a decimal point
+            if (expPos > -1) { // there is an exponent
+                if (expPos < decPos || expPos > str.length()) { // prevents double exponent causing IOOBE
+                    return Optional.empty();
+                }
+                dec = str.substring(decPos + 1, expPos);
+            } else {
+                dec = str.substring(decPos + 1);
+            }
+
+            mant = getMantissa(str, decPos);
+        } else {
+            if (expPos > -1) {
+                if (expPos > str.length()) { // prevents double exponent causing IOOBE
+                    return Optional.empty();
+                }
+                mant = getMantissa(str, expPos);
+            } else {
+                mant = getMantissa(str);
+            }
+
+            dec = null;
+        }
+
+        if (!Character.isDigit(lastChar) && lastChar != '.') {
+            if (expPos > -1 && expPos < str.length() - 1) {
+                exp = str.substring(expPos + 1, str.length() - 1);
+            } else {
+                exp = null;
+            }
+
+            //Requesting a specific type..
+            final String numeric = str.substring(0, str.length() - 1);
+            final boolean allZeros = isAllZeros(mant) && isAllZeros(exp);
+            switch (lastChar) {
+                case 'l':
+                case 'L':
+                    if (dec == null && exp == null
+                            && (numeric.charAt(0) == '-' && StringUtil.isNumeric(numeric.substring(1)) || StringUtil.isNumeric(numeric))) {
+
+                        op = createLong(numeric).boxed();
+
+                        if (op.isPresent()) {
+                            return (Optional) op;
+                        } else {
+                            return (Optional) createBigInteger(numeric);
+                        }
+                    }
+
+                    return Optional.empty();
+
+                case 'f':
+                case 'F':
+                    try {
+                        final Float f = Float.valueOf(str);
+
+                        if (!(f.isInfinite() || f.floatValue() == 0.0F && !allZeros)) {
+                            //If it's too big for a float or the float value = 0 and the string
+                            //has non-zeros in it, then float does not have the precision we want
+                            return (Optional) Optional.of(f);
+                        }
+
+                    } catch (final NumberFormatException nfe) { // NOPMD
+                        // ignore the bad number
+                    }
+                    //$FALL-THROUGH$
+                case 'd':
+                case 'D':
+                    try {
+                        final Double d = Double.valueOf(str);
+
+                        if (!(d.isInfinite() || d.floatValue() == 0.0D && !allZeros)) {
+                            return (Optional) Optional.of(d);
+                        }
+                    } catch (final NumberFormatException nfe) { // NOPMD
+                        // ignore the bad number
+                    }
+
+                    return (Optional) createBigDecimal(numeric);
+
+                //$FALL-THROUGH$
+                default:
+                    return Optional.empty();
+            }
+        }
+
+        //User doesn't have a preference on the return type, so let's start
+        //small and go from there...
+        if (expPos > -1 && expPos < str.length() - 1) {
+            exp = str.substring(expPos + 1, str.length());
+        } else {
+            exp = null;
+        }
+
+        if (dec == null && exp == null) { // no decimal point and no exponent
+            //Must be an Integer, Long, Biginteger
+            op = createInteger(str).boxed();
+
+            if (op.isPresent()) {
+                return (Optional) op;
+            } else {
+                op = createLong(str).boxed();
+
+                if (op.isPresent()) {
+                    return (Optional) op;
+                } else {
+                    return (Optional) createBigInteger(str);
+                }
+            }
+        }
+
+        //Must be a Float, Double, BigDecimal
+        final boolean allZeros = isAllZeros(mant) && isAllZeros(exp);
+
+        try {
+            final Float f = Float.valueOf(str);
+            final Double d = Double.valueOf(str);
+
+            if (!f.isInfinite() && !(f.floatValue() == 0.0F && !allZeros) && f.toString().equals(d.toString())) {
+                return (Optional) Optional.of(f);
+            }
+
+            if (!d.isInfinite() && !(d.doubleValue() == 0.0D && !allZeros)) {
+                final Optional<BigDecimal> b = createBigDecimal(str);
+
+                if (b.isPresent() && b.get().compareTo(BigDecimal.valueOf(d.doubleValue())) == 0) {
+                    return (Optional) Optional.of(d);
+                } else {
+                    return (Optional) b;
+                }
+            }
+        } catch (final NumberFormatException nfe) { // NOPMD
+            // ignore the bad number
+        }
+
+        return (Optional) createBigDecimal(str);
+    }
+
+    /**
+     * <p>Utility method for {@link Numbers#createNumber(java.lang.String)}.</p>
+     *
+     * <p>Returns mantissa of the given number.</p>
+     *
+     * @param str the string representation of the number
+     * @return mantissa of the given number
+     */
+    static String getMantissa(final String str) {
+        return getMantissa(str, str.length());
+    }
+
+    /**
+     * <p>Utility method for {@link Numbers#createNumber(java.lang.String)}.</p>
+     *
+     * <p>Returns mantissa of the given number.</p>
+     *
+     * @param str the string representation of the number
+     * @param stopPos the position of the exponent or decimal point
+     * @return mantissa of the given number
+     */
+    static String getMantissa(final String str, final int stopPos) {
+        final char firstChar = str.charAt(0);
+        final boolean hasSign = firstChar == '-' || firstChar == '+';
+
+        return hasSign ? str.substring(1, stopPos) : str.substring(0, stopPos);
+    }
+
+    /**
+     * Checks if is all zeros.
+     *
+     * @param str
+     * @return true, if is all zeros
+     */
+    static boolean isAllZeros(final String str) {
+        if (str == null) {
+            return true;
+        }
+
+        for (int i = str.length() - 1; i >= 0; i--) {
+            if (str.charAt(i) != '0') {
+                return false;
+            }
+        }
+
+        return str.length() > 0;
+    }
+
+    /**
+     * <p>Checks whether the String a valid Java number.</p>
+     *
+     * <p>Valid numbers include hexadecimal marked with the {@code 0x} or
+     * {@code 0X} qualifier, octal numbers, scientific notation and
+     * numbers marked with a type qualifier (e.g. 123L).</p>
+     *
+     * <p>Non-hexadecimal strings beginning with a leading zero are
+     * treated as octal values. Thus the string {@code 09} will return
+     * {@code false}, since {@code 9} is not a valid octal value.
+     * However, numbers beginning with {@code 0.} are treated as decimal.</p>
+     *
+     * <p>{@code null} and empty/blank {@code String} will return
+     * {@code false}.</p>
+     *
+     * <p>Note, {@link #createNumber(String)} should return a number for every
+     * input resulting in {@code true}.</p>
+     *
+     * @param str  the {@code String} to check
+     * @return {@code true} if the string is a correctly formatted number
+     * @since 3.5
+     */
+    public static boolean isCreatable(final String str) {
+        if (StringUtil.isEmpty(str)) {
+            return false;
+        }
+
+        final char[] chars = str.toCharArray();
+        int sz = chars.length;
+        boolean hasExp = false;
+        boolean hasDecPoint = false;
+        boolean allowSigns = false;
+        boolean foundDigit = false;
+        // deal with any possible sign up front
+        final int start = chars[0] == '-' || chars[0] == '+' ? 1 : 0;
+
+        if (sz > start + 1 && chars[start] == '0' && !StringUtil.contains(str, '.')) { // leading 0, skip if is a decimal number
+            if (chars[start + 1] == 'x' || chars[start + 1] == 'X') { // leading 0x/0X
+                int i = start + 2;
+                if (i == sz) {
+                    return false; // str == "0x"
+                }
+                // checking hex (it can't be anything else)
+                for (; i < chars.length; i++) {
+                    if ((chars[i] < '0' || chars[i] > '9') && (chars[i] < 'a' || chars[i] > 'f') && (chars[i] < 'A' || chars[i] > 'F')) {
+                        return false;
+                    }
+                }
+                return true;
+            } else if (Character.isDigit(chars[start + 1])) {
+                // leading 0, but not hex, must be octal
+                int i = start + 1;
+                for (; i < chars.length; i++) {
+                    if (chars[i] < '0' || chars[i] > '7') {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+
+        sz--; // don't want to loop to the last char, check it afterwords
+              // for type qualifiers
+        int i = start;
+        // loop to the next to last char or to the last char if we need another digit to
+        // make a valid number (e.g. chars[0..5] = "1234E")
+        while (i < sz || i < sz + 1 && allowSigns && !foundDigit) {
+            if (chars[i] >= '0' && chars[i] <= '9') {
+                foundDigit = true;
+                allowSigns = false;
+
+            } else if (chars[i] == '.') {
+                if (hasDecPoint || hasExp) {
+                    // two decimal points or dec in exponent
+                    return false;
+                }
+                hasDecPoint = true;
+            } else if (chars[i] == 'e' || chars[i] == 'E') {
+                // we've already taken care of hex.
+                if (hasExp) {
+                    // two E's
+                    return false;
+                }
+                if (!foundDigit) {
+                    return false;
+                }
+                hasExp = true;
+                allowSigns = true;
+            } else if (chars[i] == '+' || chars[i] == '-') {
+                if (!allowSigns) {
+                    return false;
+                }
+                allowSigns = false;
+                foundDigit = false; // we need a digit after the E
+            } else {
+                return false;
+            }
+            i++;
+        }
+
+        if (i < chars.length) {
+            if (chars[i] >= '0' && chars[i] <= '9') {
+                // no type qualifier, OK
+                return true;
+            }
+
+            if (chars[i] == 'e' || chars[i] == 'E') {
+                // can't have an E at the last byte
+                return false;
+            }
+
+            if (chars[i] == '.') {
+                if (hasDecPoint || hasExp) {
+                    // two decimal points or dec in exponent
+                    return false;
+                }
+                // single trailing decimal point after non-exponent is ok
+                return foundDigit;
+            }
+
+            if (!allowSigns && (chars[i] == 'd' || chars[i] == 'D' || chars[i] == 'f' || chars[i] == 'F')) {
+                return foundDigit;
+            }
+
+            if (chars[i] == 'l' || chars[i] == 'L') {
+                // not allowing L with an exponent or decimal point
+                return foundDigit && !hasExp && !hasDecPoint;
+            }
+
+            // last character is illegal
+            return false;
+        }
+        // allowSigns is true iff the val ends in 'E'
+        // found digit it to make sure weird stuff like '.' and '1E-' doesn't pass
+        return !allowSigns && foundDigit;
+    }
+
+    /**
+     * <p>Checks whether the given String is a parsable number.</p>
+     *
+     * <p>Parsable numbers include those Strings understood by {@link Integer#parseInt(String)},
+     * {@link Long#parseLong(String)}, {@link Float#parseFloat(String)} or
+     * {@link Double#parseDouble(String)}. This method can be used instead of catching {@link NumberFormatException}
+     * when calling one of those methods.</p>
+     *
+     * <p>Hexadecimal and scientific notations are <strong>not</strong> considered parsable.
+     * See {@link #isCreatable(String)} on those cases.</p>
+     *
+     * <p>{@code Null} and empty String will return {@code false}.</p>
+     *
+     * @param str the String to check.
+     * @return {@code true} if the string is a parsable number.
+     * @since 3.4
+     */
+    public static boolean isParsable(final String str) {
+        if (StringUtil.isEmpty(str)) {
+            return false;
+        }
+
+        if (str.charAt(str.length() - 1) == '.') {
+            return false;
+        }
+
+        if (str.charAt(0) == '-') {
+            if (str.length() == 1) {
+                return false;
+            }
+
+            return withDecimalsParsing(str, 1);
+        }
+
+        return withDecimalsParsing(str, 0);
+    }
+
+    //-----------------------------------------------------------------------
+    /**
+     * <p>Checks whether the {@code String} contains only
+     * digit characters.</p>
+     *
+     * <p>{@code Null} and empty String will return
+     * {@code false}.</p>
+     *
+     * @param str  the {@code String} to check
+     * @return {@code true} if str contains only Unicode numeric
+     */
+    public static boolean isDigits(final String str) {
+        return StringUtil.isNumeric(str);
+    }
+
+    private static boolean withDecimalsParsing(final String str, final int beginIdx) {
+        int decimalPoints = 0;
+
+        for (int i = beginIdx; i < str.length(); i++) {
+            final boolean isDecimalPoint = str.charAt(i) == '.';
+
+            if (isDecimalPoint) {
+                decimalPoints++;
+            }
+
+            if (decimalPoints > 1) {
+                return false;
+            }
+
+            if (!isDecimalPoint && !Character.isDigit(str.charAt(i))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     //    /**
     //     * Primality test: tells if the argument is a (provable) prime or not. 
@@ -3306,9 +4296,9 @@ public final class Numbers {
         }
     }
 
-    //    public static abstract class Matth extends Numbers {
+    //    public static abstract class NumberUtil extends Numbers {
     //
-    //        private Matth() {
+    //        private NumberUtil() {
     //            // utility class.
     //        }
     //    }

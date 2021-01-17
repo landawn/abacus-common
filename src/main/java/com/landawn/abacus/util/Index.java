@@ -16,6 +16,7 @@
 
 package com.landawn.abacus.util;
 
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -197,6 +198,31 @@ public final class Index {
      */
     public static OptionalInt of(final double[] a, final int startIndex, final double objToFind) {
         return toOptionalInt(N.indexOf(a, startIndex, objToFind));
+    }
+
+    /**
+     * 
+     * @param a
+     * @param valueToFind
+     * @param tolerance
+     * @return
+     * @see N#indexOf(double[], double, double)
+     */
+    public static OptionalInt of(final double[] a, final double valueToFind, final double tolerance) {
+        return of(a, 0, valueToFind, tolerance);
+    }
+
+    /**
+     * 
+     * @param a
+     * @param startIndex
+     * @param valueToFind
+     * @param tolerance
+     * @return
+     * @see N#indexOf(double[], int, double, double)
+     */
+    public static OptionalInt of(final double[] a, int startIndex, final double valueToFind, final double tolerance) {
+        return toOptionalInt(N.indexOf(a, startIndex, valueToFind, tolerance));
     }
 
     /**
@@ -908,6 +934,31 @@ public final class Index {
     }
 
     /**
+     * 
+     * @param a
+     * @param valueToFind
+     * @param tolerance
+     * @return
+     * @see N#lastIndexOf(double[], double, double)
+     */
+    public static OptionalInt last(final double[] a, final double valueToFind, final double tolerance) {
+        return last(a, 0, valueToFind, tolerance);
+    }
+
+    /**
+     * 
+     * @param a
+     * @param startIndexFromBack
+     * @param valueToFind
+     * @param tolerance
+     * @return
+     * @see N#lastIndexOf(double[], int, double, double)
+     */
+    public static OptionalInt last(final double[] a, int startIndexFromBack, final double valueToFind, final double tolerance) {
+        return toOptionalInt(N.lastIndexOf(a, startIndexFromBack, valueToFind, tolerance));
+    }
+
+    /**
      *
      * @param a
      * @param objToFind
@@ -1424,6 +1475,541 @@ public final class Index {
             return lastOfSubArray(sourceList.subList(0, N.min(startIndexFromBack, N.size(sourceList) - 1) + 1).toArray(), startIndexFromBack,
                     targetSubArray.subList(beginIndexOfTargetSubList, beginIndexOfTargetSubList + size).toArray(), 0, size);
         }
+    }
+
+    /**
+     * Finds the indices of the given value in the array.
+     *
+     * <p>This method returns an empty BitSet for a {@code null} input array.</p>
+     *
+     * @param a  the a to search through for the object, may be {@code null}
+     * @param valueToFind  the value to find
+     * @return a BitSet of all the the indices of the value within the a,
+     *  an empty BitSet if not found or {@code null} a input
+     * @since 3.10
+     */
+    public static BitSet allOf(final boolean[] a, final boolean valueToFind) {
+        return allOf(a, 0, valueToFind);
+    }
+
+    /**
+     * Finds the indices of the given value in the a starting at the given index.
+     *
+     * <p>This method returns an empty BitSet for a {@code null} input array.</p>
+     *
+     * <p>A negative startIndex is treated as zero. A startIndex larger than the a
+     * length will return an empty BitSet ({@code -1}).</p>
+     *
+     * @param a  the a to search through for the object, may be {@code null}
+     * @param startIndex  the index to start searching at
+     * @param valueToFind  the value to find
+     * @return a BitSet of all the indices of the value within the a,
+     *  an empty BitSet if not found or {@code null}
+     *  a input
+     * @since 3.10
+     */
+    public static BitSet allOf(final boolean[] a, int startIndex, final boolean valueToFind) {
+        final BitSet bitSet = new BitSet();
+        final int len = N.len(a);
+
+        if (len == 0 || startIndex >= len) {
+            return bitSet;
+        }
+
+        for (int i = N.max(startIndex, 0); i < len; i++) {
+            if (a[i] == valueToFind) {
+                bitSet.set(i);
+            }
+        }
+
+        return bitSet;
+    }
+
+    /**
+     * Finds the indices of the given value in the array.
+     *
+     * <p>This method returns an empty BitSet for a {@code null} input array.</p>
+     *
+     * @param a  the a to search through for the object, may be {@code null}
+     * @param valueToFind  the value to find
+     * @return a BitSet of all the indices of the value within the a,
+     *  an empty BitSet if not found or {@code null} a input
+     * @since 3.10
+     */
+    public static BitSet allOf(final byte[] a, final byte valueToFind) {
+        return allOf(a, 0, valueToFind);
+    }
+
+    /**
+     * Finds the indices of the given value in the a starting at the given index.
+     *
+     * <p>This method returns an empty BitSet for a {@code null} input array.</p>
+     *
+     * <p>A negative startIndex is treated as zero. A startIndex larger than the a
+     * length will return an empty BitSet.</p>
+     *
+     * @param a  the a to search through for the object, may be {@code null}
+     * @param startIndex  the index to start searching at
+     * @param valueToFind  the value to find
+     * @return a BitSet of all the indices of the value within the a,
+     *  an empty BitSet if not found or {@code null} a input
+     * @since 3.10
+     */
+    public static BitSet allOf(final byte[] a, int startIndex, final byte valueToFind) {
+        final BitSet bitSet = new BitSet();
+        final int len = N.len(a);
+
+        if (len == 0 || startIndex >= len) {
+            return bitSet;
+        }
+
+        for (int i = N.max(startIndex, 0); i < len; i++) {
+            if (a[i] == valueToFind) {
+                bitSet.set(i);
+            }
+        }
+
+        return bitSet;
+    }
+
+    /**
+     * Finds the indices of the given value in the array.
+     *
+     * <p>This method returns an empty BitSet for a {@code null} input array.</p>
+     *
+     * @param a  the a to search through for the object, may be {@code null}
+     * @param valueToFind  the value to find
+     * @return a BitSet of all the indices of the value within the a,
+     *  an empty BitSet if not found or {@code null} a input
+     * @since 3.10
+     */
+    public static BitSet allOf(final char[] a, final char valueToFind) {
+        return allOf(a, 0, valueToFind);
+    }
+
+    /**
+     * Finds the indices of the given value in the a starting at the given index.
+     *
+     * <p>This method returns an empty BitSet for a {@code null} input array.</p>
+     *
+     * <p>A negative startIndex is treated as zero. A startIndex larger than the a
+     * length will return an empty BitSet.</p>
+     *
+     * @param a  the a to search through for the object, may be {@code null}
+     * @param startIndex  the index to start searching at
+     * @param valueToFind  the value to find
+     * @return a BitSet of all the indices of the value within the a,
+     *  an empty BitSet if not found or {@code null} a input
+     * @since 3.10
+     */
+    public static BitSet allOf(final char[] a, int startIndex, final char valueToFind) {
+        final BitSet bitSet = new BitSet();
+        final int len = N.len(a);
+
+        if (len == 0 || startIndex >= len) {
+            return bitSet;
+        }
+
+        for (int i = N.max(startIndex, 0); i < len; i++) {
+            if (a[i] == valueToFind) {
+                bitSet.set(i);
+            }
+        }
+
+        return bitSet;
+    }
+
+    /**
+     * Finds the indices of the given value in the array.
+     *
+     * <p>This method returns an empty BitSet for a {@code null} input array.</p>
+     *
+     * @param a  the a to search through for the object, may be {@code null}
+     * @param valueToFind  the value to find
+     * @return a BitSet of all the indices of the value within the a,
+     *  an empty BitSet if not found or {@code null} a input
+     * @since 3.10
+     */
+    public static BitSet allOf(final short[] a, final short valueToFind) {
+        return allOf(a, 0, valueToFind);
+    }
+
+    /**
+     * Finds the indices of the given value in the a starting at the given index.
+     *
+     * <p>This method returns an empty BitSet for a {@code null} input array.</p>
+     *
+     * <p>A negative startIndex is treated as zero. A startIndex larger than the a
+     * length will return an empty BitSet.</p>
+     *
+     * @param a  the a to search through for the object, may be {@code null}
+     * @param startIndex  the index to start searching at
+     * @param valueToFind  the value to find
+     * @return a BitSet of all the indices of the value within the a,
+     *  an empty BitSet if not found or {@code null} a input
+     * @since 3.10
+     */
+    public static BitSet allOf(final short[] a, int startIndex, final short valueToFind) {
+        final BitSet bitSet = new BitSet();
+        final int len = N.len(a);
+
+        if (len == 0 || startIndex >= len) {
+            return bitSet;
+        }
+
+        for (int i = N.max(startIndex, 0); i < len; i++) {
+            if (a[i] == valueToFind) {
+                bitSet.set(i);
+            }
+        }
+
+        return bitSet;
+    }
+
+    /**
+     * Finds the indices of the given value in the array.
+     *
+     * <p>This method returns an empty BitSet for a {@code null} input array.</p>
+     *
+     * @param a  the a to search through for the object, may be {@code null}
+     * @param valueToFind  the value to find
+     * @return a BitSet of all the indices of the value within the a,
+     *  an empty BitSet if not found or {@code null} a input
+     * @since 3.10
+     */
+    public static BitSet allOf(final int[] a, final int valueToFind) {
+        return allOf(a, 0, valueToFind);
+    }
+
+    /**
+     * Finds the indices of the given value in the a starting at the given index.
+     *
+     * <p>This method returns an empty BitSet for a {@code null} input array.</p>
+     *
+     * <p>A negative startIndex is treated as zero. A startIndex larger than the a
+     * length will return an empty BitSet.</p>
+     *
+     * @param a  the a to search through for the object, may be {@code null}
+     * @param startIndex  the index to start searching at
+     * @param valueToFind  the value to find
+     * @return a BitSet of all the indices of the value within the a,
+     *  an empty BitSet if not found or {@code null} a input
+     * @since 3.10
+     */
+    public static BitSet allOf(final int[] a, int startIndex, final int valueToFind) {
+        final BitSet bitSet = new BitSet();
+        final int len = N.len(a);
+
+        if (len == 0 || startIndex >= len) {
+            return bitSet;
+        }
+
+        for (int i = N.max(startIndex, 0); i < len; i++) {
+            if (a[i] == valueToFind) {
+                bitSet.set(i);
+            }
+        }
+
+        return bitSet;
+    }
+
+    /**
+     * Finds the indices of the given value in the array.
+     *
+     * <p>This method returns an empty BitSet for a {@code null} input array.</p>
+     *
+     * @param a  the a to search through for the object, may be {@code null}
+     * @param valueToFind  the value to find
+     * @return a BitSet of all the indices of the value within the a,
+     *  an empty BitSet if not found or {@code null} a input
+     * @since 3.10
+     */
+    public static BitSet allOf(final long[] a, final long valueToFind) {
+        return allOf(a, 0, valueToFind);
+    }
+
+    /**
+     * Finds the indices of the given value in the a starting at the given index.
+     *
+     * <p>This method returns an empty BitSet for a {@code null} input array.</p>
+     *
+     * <p>A negative startIndex is treated as zero. A startIndex larger than the a
+     * length will return an empty BitSet.</p>
+     *
+     * @param a  the a to search through for the object, may be {@code null}
+     * @param startIndex  the index to start searching at
+     * @param valueToFind  the value to find
+     * @return a BitSet of all the indices of the value within the a,
+     *  an empty BitSet if not found or {@code null} a input
+     * @since 3.10
+     */
+    public static BitSet allOf(final long[] a, int startIndex, final long valueToFind) {
+        final BitSet bitSet = new BitSet();
+        final int len = N.len(a);
+
+        if (len == 0 || startIndex >= len) {
+            return bitSet;
+        }
+
+        for (int i = N.max(startIndex, 0); i < len; i++) {
+            if (a[i] == valueToFind) {
+                bitSet.set(i);
+            }
+        }
+
+        return bitSet;
+    }
+
+    /**
+     * Finds the indices of the given value in the array.
+     *
+     * <p>This method returns an empty BitSet for a {@code null} input array.</p>
+     *
+     * @param a  the a to search through for the object, may be {@code null}
+     * @param valueToFind  the value to find
+     * @return a BitSet of all the indices of the value within the a,
+     *  an empty BitSet if not found or {@code null} a input
+     * @since 3.10
+     */
+    public static BitSet allOf(final float[] a, final float valueToFind) {
+        return allOf(a, 0, valueToFind);
+    }
+
+    /**
+     * Finds the indices of the given value in the a starting at the given index.
+     *
+     * <p>This method returns an empty BitSet for a {@code null} input array.</p>
+     *
+     * <p>A negative startIndex is treated as zero. A startIndex larger than the a
+     * length will return empty BitSet.</p>
+     *
+     * @param a  the a to search through for the object, may be {@code null}
+     * @param startIndex  the index to start searching at
+     * @param valueToFind  the value to find
+     * @return a BitSet of all the indices of the value within the a,
+     *  an empty BitSet if not found or {@code null} a input
+     * @since 3.10
+     */
+    public static BitSet allOf(final float[] a, int startIndex, final float valueToFind) {
+        final BitSet bitSet = new BitSet();
+        final int len = N.len(a);
+
+        if (len == 0 || startIndex >= len) {
+            return bitSet;
+        }
+
+        for (int i = N.max(startIndex, 0); i < len; i++) {
+            if (Float.compare(a[i], valueToFind) == 0) {
+                bitSet.set(i);
+            }
+        }
+
+        return bitSet;
+    }
+
+    /**
+     * Finds the indices of the given value in the array.
+     *
+     * <p>This method returns empty BitSet for a {@code null} input array.</p>
+     *
+     * @param a  the a to search through for the object, may be {@code null}
+     * @param valueToFind  the value to find
+     * @return a BitSet of all the indices of the value within the a,
+     *  an empty BitSet if not found or {@code null} a input
+     * @since 3.10
+     */
+    public static BitSet allOf(final double[] a, final double valueToFind) {
+        return allOf(a, 0, valueToFind);
+    }
+
+    /**
+     * Finds the indices of the given value in the a starting at the given index.
+     *
+     * <p>This method returns an empty BitSet for a {@code null} input array.</p>
+     *
+     * <p>A negative startIndex is treated as zero. A startIndex larger than the a
+     * length will return an empty BitSet.</p>
+     *
+     * @param a  the a to search through for the object, may be {@code null}
+     * @param startIndex  the index to start searching at
+     * @param valueToFind  the value to find
+     * @return a BitSet of the indices of the value within the a,
+     *  an empty BitSet if not found or {@code null} a input
+     * @since 3.10
+     */
+    public static BitSet allOf(final double[] a, int startIndex, final double valueToFind) {
+        final BitSet bitSet = new BitSet();
+        final int len = N.len(a);
+
+        if (len == 0 || startIndex >= len) {
+            return bitSet;
+        }
+
+        for (int i = N.max(startIndex, 0); i < len; i++) {
+            if (Double.compare(a[i], valueToFind) == 0) {
+                bitSet.set(i);
+            }
+        }
+
+        return bitSet;
+    }
+
+    /**
+     * Finds the indices of the given value within a given tolerance in the array.
+     *
+     * <p>
+     * This method will return all the indices of the value which fall between the region
+     * defined by valueToFind - tolerance and valueToFind + tolerance, each time between the nearest integers.
+     * </p>
+     *
+     * <p>This method returns an empty BitSet for a {@code null} input array.</p>
+     *
+     * @param a  the a to search through for the object, may be {@code null}
+     * @param valueToFind  the value to find
+     * @param tolerance tolerance of the search
+     * @return a BitSet of all the indices of the value within the a,
+     *  an empty BitSet if not found or {@code null} a input
+     * @since 3.10
+     */
+    public static BitSet allOf(final double[] a, final double valueToFind, final double tolerance) {
+        return allOf(a, 0, valueToFind, tolerance);
+    }
+
+    /**
+     * Finds the indices of the given value in the a starting at the given index.
+     *
+     * <p>
+     * This method will return the indices of the values which fall between the region
+     * defined by valueToFind - tolerance and valueToFind + tolerance, between the nearest integers.
+     * </p>
+     *
+     * <p>This method returns an empty BitSet for a {@code null} input array.</p>
+     *
+     * <p>A negative startIndex is treated as zero. A startIndex larger than the a
+     * length will return an empty BitSet.</p>
+     *
+     * @param a  the a to search through for the object, may be {@code null}
+     * @param startIndex  the index to start searching at
+     * @param valueToFind  the value to find
+     * @param tolerance tolerance of the search
+     * @return a BitSet of the indices of the value within the a,
+     *  an empty BitSet if not found or {@code null} a input
+     * @since 3.10
+     */
+    public static BitSet allOf(final double[] a, int startIndex, final double valueToFind, final double tolerance) {
+        final BitSet bitSet = new BitSet();
+        final int len = N.len(a);
+
+        if (len == 0 || startIndex >= len) {
+            return bitSet;
+        }
+
+        final double min = valueToFind - tolerance;
+        final double max = valueToFind + tolerance;
+
+        for (int i = N.max(startIndex, 0); i < len; i++) {
+            if (a[i] >= min && a[i] <= max) {
+                bitSet.set(i);
+            }
+        }
+
+        return bitSet;
+    }
+
+    /**
+     * Finds the indices of the given object in the array.
+     *
+     * <p>This method returns an empty BitSet for a {@code null} input array.</p>
+     *
+     * @param a  the a to search through for the object, may be {@code null}
+     * @param objToFind  the object to find, may be {@code null}
+     * @return a BitSet of all the indices of the object within the a,
+     *  an empty BitSet if not found or {@code null} a input
+     * @since 3.10
+     */
+    public static BitSet allOf(final Object[] a, final Object objToFind) {
+        return allOf(a, 0, objToFind);
+    }
+
+    /**
+     * Finds the indices of the given object in the a starting at the given index.
+     *
+     * <p>This method returns an empty BitSet for a {@code null} input array.</p>
+     *
+     * <p>A negative startIndex is treated as zero. A startIndex larger than the a
+     * length will return an empty BitSet.</p>
+     *
+     * @param a  the a to search through for the object, may be {@code null}
+     * @param startIndex  the index to start searching at
+     * @param objToFind  the object to find, may be {@code null}
+     * @return a BitSet of all the indices of the object within the a starting at the index,
+     *  an empty BitSet if not found or {@code null} a input
+     * @since 3.10
+     */
+    public static BitSet allOf(final Object[] a, int startIndex, final Object objToFind) {
+        final BitSet bitSet = new BitSet();
+        final int len = N.len(a);
+
+        if (len == 0 || startIndex >= len) {
+            return bitSet;
+        }
+
+        for (int i = N.max(startIndex, 0); i < len; i++) {
+            if (N.equals(a[i], objToFind)) {
+                bitSet.set(i);
+            }
+        }
+
+        return bitSet;
+    }
+
+    /**
+     * Finds the indices of the given object in the array.
+     *
+     * <p>This method returns an empty BitSet for a {@code null} input array.</p>
+     *
+     * @param a  the a to search through for the object, may be {@code null}
+     * @param objToFind  the object to find, may be {@code null}
+     * @return a BitSet of all the indices of the object within the a,
+     *  an empty BitSet if not found or {@code null} a input
+     * @since 3.10
+     */
+    public static BitSet allOf(final Collection<?> c, final Object objToFind) {
+        return allOf(c, 0, objToFind);
+    }
+
+    /**
+     * Finds the indices of the given object in the a starting at the given index.
+     *
+     * <p>This method returns an empty BitSet for a {@code null} input array.</p>
+     *
+     * <p>A negative startIndex is treated as zero. A startIndex larger than the a
+     * length will return an empty BitSet.</p>
+     *
+     * @param a  the a to search through for the object, may be {@code null}
+     * @param startIndex  the index to start searching at
+     * @param objToFind  the object to find, may be {@code null}
+     * @return a BitSet of all the indices of the object within the a starting at the index,
+     *  an empty BitSet if not found or {@code null} a input
+     * @since 3.10
+     */
+    public static BitSet allOf(final Collection<?> c, int startIndex, final Object objToFind) {
+        final BitSet bitSet = new BitSet();
+        final int size = N.size(c);
+
+        if (size == 0 || startIndex >= size) {
+            return bitSet;
+        }
+
+        final Iterator<?> iter = c.iterator();
+
+        for (int i = N.max(startIndex, 0); iter.hasNext(); i++) {
+            if (N.equals(iter.next(), objToFind)) {
+                bitSet.set(i);
+            }
+        }
+
+        return bitSet;
     }
 
     /**

@@ -3103,7 +3103,7 @@ public final class Fn extends Comparators {
     private static Function<String, Byte> PARSE_BYTE_FUNC = new Function<String, Byte>() {
         @Override
         public Byte apply(String t) {
-            return N.parseByte(t);
+            return Numbers.toByte(t);
         }
     };
 
@@ -3119,7 +3119,7 @@ public final class Fn extends Comparators {
     private static Function<String, Short> PARSE_SHORT_FUNC = new Function<String, Short>() {
         @Override
         public Short apply(String t) {
-            return N.parseShort(t);
+            return Numbers.toShort(t);
         }
     };
 
@@ -3135,7 +3135,7 @@ public final class Fn extends Comparators {
     private static Function<String, Integer> PARSE_INT_FUNC = new Function<String, Integer>() {
         @Override
         public Integer apply(String t) {
-            return N.parseInt(t);
+            return Numbers.toInt(t);
         }
     };
 
@@ -3151,7 +3151,7 @@ public final class Fn extends Comparators {
     private static Function<String, Long> PARSE_LONG_FUNC = new Function<String, Long>() {
         @Override
         public Long apply(String t) {
-            return N.parseLong(t);
+            return Numbers.toLong(t);
         }
     };
 
@@ -3167,7 +3167,7 @@ public final class Fn extends Comparators {
     private static Function<String, Float> PARSE_FLOAT_FUNC = new Function<String, Float>() {
         @Override
         public Float apply(String t) {
-            return N.parseFloat(t);
+            return Numbers.toFloat(t);
         }
     };
 
@@ -3183,7 +3183,7 @@ public final class Fn extends Comparators {
     private static Function<String, Double> PARSE_DOUBLE_FUNC = new Function<String, Double>() {
         @Override
         public Double apply(String t) {
-            return N.parseDouble(t);
+            return Numbers.toDouble(t);
         }
     };
 
@@ -3199,7 +3199,7 @@ public final class Fn extends Comparators {
     private static Function<String, Number> CREATE_NUMBER_FUNC = new Function<String, Number>() {
         @Override
         public Number apply(final String t) {
-            return N.isNullOrEmpty(t) ? null : N.createNumber(t).orElseThrow(new Supplier<NumberFormatException>() {
+            return N.isNullOrEmpty(t) ? null : Numbers.createNumber(t).orElseThrow(new Supplier<NumberFormatException>() {
                 @Override
                 public NumberFormatException get() {
                     return new NumberFormatException("Invalid number: " + t);
@@ -3212,7 +3212,7 @@ public final class Fn extends Comparators {
      * Creates the number.
      *
      * @return
-     * @see StringUtil#createNumber(String)
+     * @see Numbers#createNumber(String)
      */
     public static Function<String, Number> createNumber() {
         return CREATE_NUMBER_FUNC;

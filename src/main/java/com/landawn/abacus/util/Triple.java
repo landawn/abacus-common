@@ -60,6 +60,13 @@ public final class Triple<L, M, R> implements Mutable {
         return new Triple<>(l, m, r);
     }
 
+    private static final Triple<?, ?, ?>[] EMPTY_ARRAY = new Triple[0];
+
+    @SuppressWarnings("unchecked")
+    public static <L, M, R> Triple<L, M, R>[] emptyArray() {
+        return (Triple<L, M, R>[]) EMPTY_ARRAY;
+    }
+
     /**
      * Gets the left.
      *
