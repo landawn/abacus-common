@@ -16,7 +16,6 @@ package com.landawn.abacus.util;
 
 import java.util.AbstractCollection;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.function.Predicate;
 
 import com.landawn.abacus.annotation.Beta;
@@ -156,8 +155,8 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     }
 
     @Override
-    public Iterator<E> iterator() {
-        return coll.iterator();
+    public ObjIterator<E> iterator() {
+        return ObjIterator.of(coll.iterator());
     }
 
     @Override

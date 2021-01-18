@@ -39,9 +39,11 @@ import com.landawn.abacus.util.function.IntFunction;
 import com.landawn.abacus.util.function.Supplier;
 
 /**
- *
- * @author Haiyang Li
- * @since 1.3
+ * <p>
+ * Note: This class includes codes copied from Apache Commons Lang, Google Guava and other open source projects under the Apache License 2.0.
+ * The methods copied from other libraries/frameworks/projects may be modified in this class.
+ * </p>
+ * 
  */
 public final class Maps {
 

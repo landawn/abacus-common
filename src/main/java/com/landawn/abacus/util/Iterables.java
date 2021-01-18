@@ -22,20 +22,25 @@ import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.NoSuchElementException;
 import java.util.RandomAccess;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
+import com.landawn.abacus.util.Range.BoundType;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.OptionalByte;
@@ -49,10 +54,15 @@ import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
+ * <p>
+ * Note: This class includes codes copied from Apache Commons Lang, Google Guava and other open source projects under the Apache License 2.0.
+ * The methods copied from other libraries/frameworks/projects may be modified in this class.
+ * </p>
+ * 
+ * <p>
  * The methods in this class should only read the input {@code Collections/Arrays}, not modify any of them.
- *
- * @author Haiyang Li
- * @since 1.2.7
+ * </p>
+ *  
  */
 public final class Iterables {
 
@@ -1452,31 +1462,438 @@ public final class Iterables {
         }
     }
 
-    /**
-     * Rollup.
-     *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the list
-     */
-    public static <T> List<List<T>> rollup(final Collection<? extends T> c) {
-        final List<List<T>> res = new ArrayList<>();
-        res.add(new ArrayList<T>());
-
-        if (N.notNullOrEmpty(c)) {
-            for (T e : c) {
-                final List<T> prev = res.get(res.size() - 1);
-                List<T> cur = new ArrayList<>(prev.size() + 1);
-                cur.addAll(prev);
-                cur.add(e);
-                res.add(cur);
-            }
+    public static abstract class SetView<E> extends ImmutableSet<E> {
+        SetView(final Set<? extends E> set) {
+            super(set);
         }
 
-        return res;
+        public <S extends Set<? super E>> S copyInto(S set) {
+            set.addAll(this);
+            return set;
+        }
     }
 
     /**
+     * Returns an unmodifiable <b>view</b> of the union of two sets. The returned set contains all
+     * elements that are contained in either backing set. Iterating over the returned set iterates
+     * first over all the elements of {@code set1}, then over each element of {@code set2}, in order,
+     * that is not contained in {@code set1}.
+     *
+     * <p>Results are undefined if {@code set1} and {@code set2} are sets based on different
+     * equivalence relations (as {@link HashSet}, {@link TreeSet}, and the {@link Map#keySet} of an
+     * {@code IdentityHashMap} all are).
+     */
+    public static <E> SetView<E> union(final Set<? extends E> set1, final Set<? extends E> set2) {
+        // N.checkArgNotNull(set1, "set1");
+        // N.checkArgNotNull(set2, "set2");
+
+        Set<? extends E> tmp = null;
+
+        if (set1 == null) {
+            tmp = set2 == null ? N.<E> emptySet() : set2;
+        } else if (set2 == null) {
+            tmp = set1;
+        } else {
+            tmp = new AbstractSet<E>() {
+                @Override
+                public ObjIterator<E> iterator() {
+                    return new ObjIterator<E>() {
+                        private final Iterator<? extends E> iter1 = set1.iterator();
+                        private final Iterator<? extends E> iter2 = set2.iterator();
+                        private final E NONE = (E) N.NULL_MASK;
+                        private E next = NONE;
+                        private E tmp = null;
+
+                        @Override
+                        public boolean hasNext() {
+                            if (iter1.hasNext() || next != NONE) {
+                                return true;
+                            }
+
+                            while (iter2.hasNext()) {
+                                next = iter2.next();
+
+                                if (!set1.contains(next)) {
+                                    return true;
+                                }
+                            }
+
+                            next = NONE;
+
+                            return false;
+                        }
+
+                        @Override
+                        public E next() {
+                            if (hasNext() == false) {
+                                throw new NoSuchElementException();
+                            }
+
+                            if (iter1.hasNext()) {
+                                return iter1.next();
+                            } else {
+                                tmp = next;
+                                next = NONE;
+                                return tmp;
+                            }
+                        }
+                    };
+                }
+
+                @Override
+                public boolean contains(Object object) {
+                    return set1.contains(object) || set2.contains(object);
+                }
+
+                @Override
+                public int size() {
+                    int size = set1.size();
+
+                    for (E e : set2) {
+                        if (!set1.contains(e)) {
+                            size++;
+                        }
+                    }
+
+                    return size;
+                }
+
+                @Override
+                public boolean isEmpty() {
+                    return set1.isEmpty() && set2.isEmpty();
+                }
+            };
+        }
+
+        return new SetView<E>(tmp) {
+            @Override
+            public <S extends Set<? super E>> S copyInto(S set) {
+                set.addAll(set1);
+                set.addAll(set2);
+                return set;
+            }
+        };
+    }
+
+    /**
+     * Returns an unmodifiable <b>view</b> of the intersection of two sets. The returned set contains
+     * all elements that are contained by both backing sets. The iteration order of the returned set
+     * matches that of {@code set1}.
+     *
+     * <p>Results are undefined if {@code set1} and {@code set2} are sets based on different
+     * equivalence relations (as {@code HashSet}, {@code TreeSet}, and the keySet of an {@code
+     * IdentityHashMap} all are).
+     *
+     * <p><b>Note:</b> The returned view performs slightly better when {@code set1} is the smaller of
+     * the two sets. If you have reason to believe one of your sets will generally be smaller than the
+     * other, pass it first. Unfortunately, since this method sets the generic type of the returned
+     * set based on the type of the first set passed, this could in rare cases force you to make a
+     * cast, for example:
+     *
+     * <pre>{@code
+     * Set<Object> aFewBadObjects = ...
+     * Set<String> manyBadStrings = ...
+     *
+     * // impossible for a non-String to be in the intersection
+     * SuppressWarnings("unchecked")
+     * Set<String> badStrings = (Set) Sets.intersection(
+     *     aFewBadObjects, manyBadStrings);
+     * }</pre>
+     *
+     * <p>This is unfortunate, but should come up only very rarely.
+     */
+    public static <E> SetView<E> intersection(final Set<E> set1, final Set<?> set2) {
+        // N.checkArgNotNull(set1, "set1");
+        // N.checkArgNotNull(set2, "set2");
+
+        Set<E> tmp = null;
+
+        if (set1 == null || set2 == null) {
+            tmp = N.<E> emptySet();
+        } else {
+            tmp = new AbstractSet<E>() {
+                @Override
+                public ObjIterator<E> iterator() {
+                    return new ObjIterator<E>() {
+                        private final Iterator<E> iter1 = set1.iterator();
+                        private final E NONE = (E) N.NULL_MASK;
+                        private E next = NONE;
+                        private E tmp = null;
+
+                        @Override
+                        public boolean hasNext() {
+                            if (next != NONE) {
+                                return true;
+                            }
+
+                            while (iter1.hasNext()) {
+                                next = iter1.next();
+
+                                if (set2.contains(next)) {
+                                    return true;
+                                }
+                            }
+
+                            next = NONE;
+
+                            return false;
+                        }
+
+                        @Override
+                        public E next() {
+                            if (hasNext() == false) {
+                                throw new NoSuchElementException();
+                            }
+
+                            tmp = next;
+                            next = NONE;
+                            return tmp;
+                        }
+                    };
+                }
+
+                @Override
+                public boolean contains(Object object) {
+                    return set1.contains(object) && set2.contains(object);
+                }
+
+                @Override
+                public boolean containsAll(Collection<?> collection) {
+                    return set1.containsAll(collection) && set2.containsAll(collection);
+                }
+
+                @Override
+                public int size() {
+                    int size = 0;
+
+                    for (E e : set1) {
+                        if (set2.contains(e)) {
+                            size++;
+                        }
+                    }
+
+                    return size;
+                }
+
+                @Override
+                public boolean isEmpty() {
+                    return Collections.disjoint(set1, set2);
+                }
+            };
+        }
+
+        return new SetView<E>(tmp) {
+        };
+    }
+
+    /**
+     * Returns an unmodifiable <b>view</b> of the difference of two sets. The returned set contains
+     * all elements that are contained by {@code set1} and not contained by {@code set2}. {@code set2}
+     * may also contain elements not present in {@code set1}; these are simply ignored. The iteration
+     * order of the returned set matches that of {@code set1}.
+     *
+     * <p>Results are undefined if {@code set1} and {@code set2} are sets based on different
+     * equivalence relations (as {@code HashSet}, {@code TreeSet}, and the keySet of an {@code
+     * IdentityHashMap} all are).
+     */
+    public static <E> SetView<E> difference(final Set<E> set1, final Set<?> set2) {
+        // N.checkArgNotNull(set1, "set1");
+        // N.checkArgNotNull(set2, "set2");
+
+        Set<E> tmp = null;
+
+        if (set2 == null) {
+            tmp = set1 == null ? N.<E> emptySet() : set1;
+        } else {
+            tmp = new AbstractSet<E>() {
+                @Override
+                public ObjIterator<E> iterator() {
+                    return new ObjIterator<E>() {
+                        private final Iterator<E> iter1 = set1.iterator();
+                        private final E NONE = (E) N.NULL_MASK;
+                        private E next = NONE;
+                        private E tmp = null;
+
+                        @Override
+                        public boolean hasNext() {
+                            if (next != NONE) {
+                                return true;
+                            }
+
+                            while (iter1.hasNext()) {
+                                next = iter1.next();
+
+                                if (!set2.contains(next)) {
+                                    return true;
+                                }
+                            }
+
+                            next = NONE;
+
+                            return false;
+                        }
+
+                        @Override
+                        public E next() {
+                            if (hasNext() == false) {
+                                throw new NoSuchElementException();
+                            }
+
+                            tmp = next;
+                            next = NONE;
+                            return tmp;
+                        }
+                    };
+                }
+
+                @Override
+                public boolean contains(Object object) {
+                    return set1.contains(object) && !set2.contains(object);
+                }
+
+                @Override
+                public int size() {
+                    int size = 0;
+
+                    for (E e : set1) {
+                        if (!set2.contains(e)) {
+                            size++;
+                        }
+                    }
+
+                    return size;
+                }
+
+                @Override
+                public boolean isEmpty() {
+                    return set2.containsAll(set1);
+                }
+            };
+        }
+
+        return new SetView<E>(tmp) {
+        };
+    }
+
+    /**
+     * Returns an unmodifiable <b>view</b> of the symmetric difference of two sets. The returned set
+     * contains all elements that are contained in either {@code set1} or {@code set2} but not in
+     * both. The iteration order of the returned set is undefined.
+     *
+     * <p>Results are undefined if {@code set1} and {@code set2} are sets based on different
+     * equivalence relations (as {@code HashSet}, {@code TreeSet}, and the keySet of an {@code
+     * IdentityHashMap} all are).
+     *
+     * @since 3.0
+     */
+    public static <E> SetView<E> symmetricDifference(final Set<? extends E> set1, final Set<? extends E> set2) {
+        // N.checkArgNotNull(set1, "set1");
+        // N.checkArgNotNull(set2, "set2");
+
+        Set<? extends E> tmp = null;
+
+        if (set1 == null) {
+            tmp = set2 == null ? N.<E> emptySet() : set2;
+        } else if (set2 == null) {
+            tmp = set1;
+        } else {
+            tmp = new AbstractSet<E>() {
+                @Override
+                public ObjIterator<E> iterator() {
+                    return new ObjIterator<E>() {
+                        private final Iterator<? extends E> iter1 = set1.iterator();
+                        private final Iterator<? extends E> iter2 = set2.iterator();
+                        private final E NONE = (E) N.NULL_MASK;
+                        private E next = NONE;
+                        private E tmp = null;
+
+                        @Override
+                        public boolean hasNext() {
+                            if (next != NONE) {
+                                return true;
+                            }
+
+                            while (iter1.hasNext()) {
+                                next = iter1.next();
+
+                                if (!set2.contains(next)) {
+                                    return true;
+                                }
+                            }
+
+                            while (iter2.hasNext()) {
+                                next = iter2.next();
+
+                                if (!set1.contains(next)) {
+                                    return true;
+                                }
+                            }
+
+                            next = NONE;
+
+                            return false;
+                        }
+
+                        @Override
+                        public E next() {
+                            if (hasNext() == false) {
+                                throw new NoSuchElementException();
+                            }
+
+                            tmp = next;
+                            next = NONE;
+                            return tmp;
+                        }
+                    };
+                }
+
+                @Override
+                public boolean contains(Object object) {
+                    return set1.contains(object) ^ set2.contains(object);
+                }
+
+                @Override
+                public int size() {
+                    int size = 0;
+
+                    for (E e : set1) {
+                        if (!set2.contains(e)) {
+                            size++;
+                        }
+                    }
+
+                    for (E e : set2) {
+                        if (!set1.contains(e)) {
+                            size++;
+                        }
+                    }
+
+                    return size;
+                }
+
+                @Override
+                public boolean isEmpty() {
+                    return set1.equals(set2);
+                }
+            };
+        }
+
+        return new SetView<E>(tmp) {
+        };
+    }
+
+    public static <K extends Comparable<? super K>> NavigableSet<K> subSet(NavigableSet<K> set, Range<K> range) {
+        if (set.comparator() != null && set.comparator() != Comparators.naturalOrder()) {
+            N.checkArgument(set.comparator().compare(range.lowerEndpoint(), range.upperEndpoint()) <= 0,
+                    "set is using a custom comparator which is inconsistent with the natural ordering.");
+        }
+
+        return set.subSet(range.lowerEndpoint(), range.boundType() == BoundType.CLOSED_OPEN || range.boundType() == BoundType.CLOSED_CLOSED,
+                range.upperEndpoint(), range.boundType() == BoundType.OPEN_CLOSED || range.boundType() == BoundType.CLOSED_CLOSED);
+    }
+
+    /**
+     * 
      * Note: copy from Google Guava under Apache License v2.
      * <br />
      *
@@ -1510,6 +1927,30 @@ public final class Iterables {
      */
     public static <E> Set<Set<E>> powerSet(Set<E> set) {
         return new PowerSet<>(set);
+    }
+
+    /**
+     * Rollup.
+     *
+     * @param <T> the generic type
+     * @param c the c
+     * @return the list
+     */
+    public static <T> List<List<T>> rollup(final Collection<? extends T> c) {
+        final List<List<T>> res = new ArrayList<>();
+        res.add(new ArrayList<T>());
+
+        if (N.notNullOrEmpty(c)) {
+            for (T e : c) {
+                final List<T> prev = res.get(res.size() - 1);
+                List<T> cur = new ArrayList<>(prev.size() + 1);
+                cur.addAll(prev);
+                cur.add(e);
+                res.add(cur);
+            }
+        }
+
+        return res;
     }
 
     /**
@@ -2426,40 +2867,22 @@ public final class Iterables {
          * @return the iterator
          */
         @Override
-        public Iterator<T> iterator() {
-            final Iterator<T> iter = coll == null ? ObjIterator.<T> empty() : coll.iterator();
-
-            if (fromIndex > 0) {
-                int offset = 0;
-
-                while (offset++ < fromIndex) {
-                    iter.next();
-                }
+        public ObjIterator<T> iterator() {
+            if (coll == null || fromIndex == toIndex) {
+                return ObjIterator.<T> empty();
             }
 
-            return new Iterator<T>() {
-                private int cursor = fromIndex;
+            final Iterator<T> iter = coll.iterator();
 
-                @Override
-                public boolean hasNext() {
-                    return cursor < toIndex;
-                }
-
-                @Override
-                public T next() {
-                    if (cursor >= toIndex) {
-                        throw new NoSuchElementException();
-                    }
-
-                    cursor++;
-                    return iter.next();
-                }
-
-                @Override
-                public void remove() {
-                    throw new UnsupportedOperationException();
-                }
-            };
+            if (fromIndex == 0 && toIndex == coll.size()) {
+                return ObjIterator.of(iter);
+            } else if (fromIndex == 0) {
+                return Iterators.limit(iter, toIndex - fromIndex);
+            } else if (toIndex == coll.size()) {
+                return Iterators.skip(iter, fromIndex);
+            } else {
+                return Iterators.skipAndLimit(iter, fromIndex, toIndex - fromIndex);
+            }
         }
 
         /**

@@ -1,3 +1,8 @@
+### 2.1.11
+
+* Improvements and bug fix.
+
+
 ### 2.1.10
 
 * Improvements and bug fix.

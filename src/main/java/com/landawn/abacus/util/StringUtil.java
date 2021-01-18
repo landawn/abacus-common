@@ -5562,6 +5562,66 @@ public abstract class StringUtil {
         return index >= 0 && index <= (str.length() - 2) && Character.isHighSurrogate(str.charAt(index)) && Character.isLowSurrogate(str.charAt(index + 1));
     }
 
+    /** 
+     * 
+     * @param a
+     * @param b
+     * @return an empty String {@code ""} is {@code a} or {@code b} is empty or {@code null}.
+     */
+    public static String longestCommonSubstring(final String a, final String b) {
+        if (N.isNullOrEmpty(a) || N.isNullOrEmpty(b)) {
+            return N.EMPTY_STRING;
+        }
+
+        final int lenA = N.len(a);
+        final int lenB = N.len(b);
+
+        final int[] dp = new int[lenB + 1];
+        int endIndex = 0;
+        int maxLen = 0;
+
+        if (lenA > 16 || lenB > 16) {
+            final char[] chsA = a.toCharArray();
+            final char[] chsB = b.toCharArray();
+
+            for (int i = 1; i <= lenA; i++) {
+                for (int j = lenB; j > 0; j--) {
+                    if (chsA[i - 1] == chsB[j - 1]) {
+                        dp[j] = 1 + dp[j - 1];
+
+                        if (dp[j] > maxLen) {
+                            maxLen = dp[j];
+                            endIndex = i;
+                        }
+                    } else {
+                        dp[j] = 0;
+                    }
+                }
+            }
+        } else {
+            for (int i = 1; i <= lenA; i++) {
+                for (int j = lenB; j > 0; j--) {
+                    if (a.charAt(i - 1) == b.charAt(j - 1)) {
+                        dp[j] = 1 + dp[j - 1];
+
+                        if (dp[j] > maxLen) {
+                            maxLen = dp[j];
+                            endIndex = i;
+                        }
+                    } else {
+                        dp[j] = 0;
+                    }
+                }
+            }
+        }
+
+        if (maxLen == 0) {
+            return N.EMPTY_STRING;
+        }
+
+        return a.substring(endIndex - maxLen, endIndex);
+    }
+
     /**
      *
      * @param str

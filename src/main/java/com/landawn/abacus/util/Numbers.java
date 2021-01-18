@@ -247,6 +247,8 @@ public final class Numbers {
      * @return {@code 0} if the specified {@code str} is null or empty.
      * @throws NumberFormatException If the string is not a parsable {@code byte}. 
      * @see #isParsable(String)
+     * @see Byte#parseByte(String)
+     * @see Byte#decode(String)
      */
     public static byte toByte(final String str) throws NumberFormatException {
         return toByte(str, (byte) 0);
@@ -259,6 +261,8 @@ public final class Numbers {
      * @return {@code defaultValue} if the specified {@code str} is null or empty.
      * @throws NumberFormatException If the string is not a parsable {@code byte}. 
      * @see #isParsable(String)
+     * @see Byte#parseByte(String)
+     * @see Byte#decode(String)
      */
     public static byte toByte(final String str, final byte defaultValue) throws NumberFormatException {
         if (N.isNullOrEmpty(str)) {
@@ -266,7 +270,8 @@ public final class Numbers {
         }
 
         if (str.length() < 5) {
-            Integer result = CommonUtil.stringIntCache.get(str);
+            final Integer result = CommonUtil.stringIntCache.get(str);
+
             if (result != null) {
                 if (result.intValue() < Byte.MIN_VALUE || result.intValue() > Byte.MAX_VALUE) {
                     throw new NumberFormatException("Value out of range. Value:\"" + str + "\" Radix: 10");
@@ -285,6 +290,8 @@ public final class Numbers {
      * @return {@code 0} if the specified {@code str} is null or empty.
      * @throws NumberFormatException If the string is not a parsable {@code short}. 
      * @see #isParsable(String)
+     * @see Short#parseShort(String)
+     * @see Short#decode(String)
      */
     public static short toShort(final String str) throws NumberFormatException {
         return toShort(str, (short) 0);
@@ -297,6 +304,8 @@ public final class Numbers {
      * @return {@code defaultValue} if the specified {@code str} is null or empty.
      * @throws NumberFormatException If the string is not a parsable {@code short}. 
      * @see #isParsable(String)
+     * @see Short#parseShort(String)
+     * @see Short#decode(String)
      */
     public static short toShort(final String str, final short defaultValue) throws NumberFormatException {
         if (N.isNullOrEmpty(str)) {
@@ -304,7 +313,8 @@ public final class Numbers {
         }
 
         if (str.length() < 5) {
-            Integer result = CommonUtil.stringIntCache.get(str);
+            final Integer result = CommonUtil.stringIntCache.get(str);
+
             if (result != null) {
                 return result.shortValue();
             }
@@ -319,6 +329,8 @@ public final class Numbers {
      * @return {@code 0} if the specified {@code str} is null or empty.
      * @throws NumberFormatException If the string is not a parsable {@code int}. 
      * @see #isParsable(String)
+     * @see Integer#parseInt(String)
+     * @see Integer#decode(String)
      */
     public static int toInt(final String str) throws NumberFormatException {
         return toInt(str, 0);
@@ -331,6 +343,8 @@ public final class Numbers {
      * @return {@code defaultValue} if the specified {@code str} is null or empty.
      * @throws NumberFormatException If the string is not a parsable {@code int}. 
      * @see #isParsable(String)
+     * @see Integer#parseInt(String)
+     * @see Integer#decode(String)
      */
     public static int toInt(final String str, final int defaultValue) throws NumberFormatException {
         if (N.isNullOrEmpty(str)) {
@@ -338,13 +352,14 @@ public final class Numbers {
         }
 
         if (str.length() < 5) {
-            Integer result = CommonUtil.stringIntCache.get(str);
+            final Integer result = CommonUtil.stringIntCache.get(str);
+
             if (result != null) {
                 return result.intValue();
             }
         }
 
-        return Integer.decode(str);
+        return Integer.parseInt(str);
     }
 
     /**
@@ -353,6 +368,8 @@ public final class Numbers {
      * @return {@code 0} if the specified {@code str} is null or empty.
      * @throws NumberFormatException If the string is not a parsable {@code long}. 
      * @see #isParsable(String)
+     * @see Long#parseLong(String)
+     * @see Long#decode(String)
      */
     public static long toLong(final String str) throws NumberFormatException {
         return toLong(str, 0L);
@@ -365,6 +382,8 @@ public final class Numbers {
      * @return {@code defaultValue} if the specified {@code str} is null or empty.
      * @throws NumberFormatException If the string is not a parsable {@code long}. 
      * @see #isParsable(String)
+     * @see Long#parseLong(String)
+     * @see Long#decode(String)
      */
     public static long toLong(final String str, final long defaultValue) throws NumberFormatException {
         if (N.isNullOrEmpty(str)) {
@@ -378,7 +397,7 @@ public final class Numbers {
             }
         }
 
-        return Long.decode(str);
+        return Long.parseLong(str);
     }
 
     /**
@@ -387,6 +406,7 @@ public final class Numbers {
      * @return {@code 0} if the specified {@code str} is null or empty.
      * @throws NumberFormatException If the string is not a parsable {@code float}. 
      * @see #isParsable(String)
+     * @see Float#parseFloat(String) 
      */
     public static float toFloat(final String str) throws NumberFormatException {
         return toFloat(str, 0.0f);
@@ -399,6 +419,7 @@ public final class Numbers {
      * @return {@code defaultValue} if the specified {@code str} is null or empty.
      * @throws NumberFormatException If the string is not a parsable {@code float}. 
      * @see #isParsable(String)
+     * @see Float#parseFloat(String)
      */
     public static float toFloat(final String str, final float defaultValue) throws NumberFormatException {
         if (N.isNullOrEmpty(str)) {
@@ -414,6 +435,7 @@ public final class Numbers {
      * @return {@code 0.0d} if the specified {@code str} is null or empty.
      * @throws NumberFormatException If the string is not a parsable {@code double}. 
      * @see #isParsable(String)
+     * @see Double#parseDouble(String)
      */
     public static double toDouble(final String str) throws NumberFormatException {
         return toDouble(str, 0.0d);
@@ -426,6 +448,7 @@ public final class Numbers {
      * @return {@code defaultValue} if the specified {@code str} is null or empty.
      * @throws NumberFormatException If the string is not a parsable {@code double}. 
      * @see #isParsable(String)
+     * @see Double#parseDouble(String)
      */
     public static double toDouble(final String str, final double defaultValue) throws NumberFormatException {
         if (N.isNullOrEmpty(str)) {
@@ -433,7 +456,6 @@ public final class Numbers {
         }
 
         return Double.parseDouble(str);
-
     }
 
     /**

@@ -16,10 +16,14 @@
 
 package com.landawn.abacus.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 public final class Enumerations {
 
@@ -161,5 +165,51 @@ public final class Enumerations {
                 return cur.nextElement();
             }
         };
+    }
+
+    public static <T> ObjIterator<T> toIterator(final Enumeration<? extends T> e) {
+        if (e == null) {
+            return ObjIterator.empty();
+        }
+
+        return new ObjIterator<T>() {
+            @Override
+            public boolean hasNext() {
+                return e.hasMoreElements();
+            }
+
+            @Override
+            public T next() {
+                return e.nextElement();
+            }
+        };
+    }
+
+    public static <T> List<T> toList(final Enumeration<? extends T> e) {
+        if (e == null) {
+            return new ArrayList<T>();
+        }
+
+        final List<T> result = new ArrayList<>();
+
+        while (e.hasMoreElements()) {
+            result.add(e.nextElement());
+        }
+
+        return result;
+    }
+
+    public static <T> Set<T> toSet(final Enumeration<? extends T> e) {
+        if (e == null) {
+            return new HashSet<T>();
+        }
+
+        final Set<T> result = new HashSet<>();
+
+        while (e.hasMoreElements()) {
+            result.add(e.nextElement());
+        }
+
+        return result;
     }
 }
