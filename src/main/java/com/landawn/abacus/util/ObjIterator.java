@@ -151,7 +151,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @param iter
      * @return
      */
-    public static <T> ObjIterator<T> of(final Iterator<T> iter) {
+    public static <T> ObjIterator<T> of(final Iterator<? extends T> iter) {
         if (iter == null) {
             return empty();
         } else if (iter instanceof ObjIterator) {
@@ -177,7 +177,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @param iterable
      * @return
      */
-    public static <T> ObjIterator<T> of(final Collection<T> iterable) {
+    public static <T> ObjIterator<T> of(final Collection<? extends T> iterable) {
         return iterable == null ? ObjIterator.<T> empty() : of(iterable.iterator());
     }
 
@@ -187,7 +187,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @param iterable
      * @return
      */
-    public static <T> ObjIterator<T> of(final Iterable<T> iterable) {
+    public static <T> ObjIterator<T> of(final Iterable<? extends T> iterable) {
         return iterable == null ? ObjIterator.<T> empty() : of(iterable.iterator());
     }
 
@@ -287,7 +287,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @param supplier
      * @return
      */
-    public static <T> ObjIterator<T> generate(final Supplier<T> supplier) {
+    public static <T> ObjIterator<T> generate(final Supplier<? extends T> supplier) {
         N.checkArgNotNull(supplier);
 
         return new ObjIterator<T>() {
@@ -310,7 +310,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @param supplier
      * @return
      */
-    public static <T> ObjIterator<T> generate(final BooleanSupplier hasNext, final Supplier<T> supplier) {
+    public static <T> ObjIterator<T> generate(final BooleanSupplier hasNext, final Supplier<? extends T> supplier) {
         N.checkArgNotNull(hasNext);
         N.checkArgNotNull(supplier);
 

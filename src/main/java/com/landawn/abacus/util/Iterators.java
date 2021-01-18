@@ -19,6 +19,7 @@ package com.landawn.abacus.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -1212,6 +1213,110 @@ public final class Iterators {
                 }
             }
         };
+    }
+
+    public static <T> ObjIterator<T> merge(final List<? extends Collection<? extends T>> c, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
+        N.checkArgNotNull(nextSelector);
+
+        if (N.isNullOrEmpty(c)) {
+            return ObjIterator.<T> empty();
+        } else if (c.size() == 1) {
+            return ObjIterator.<T> of(c.iterator().next());
+        } else if (c.size() == 2) {
+            final Iterator<? extends Collection<? extends T>> iter = c.iterator();
+            return merge(iter.next(), iter.next(), nextSelector);
+        }
+
+        final List<Iterator<? extends T>> iterList = new ArrayList<>(c.size());
+
+        for (Collection<? extends T> e : c) {
+            iterList.add(N.iterate(e));
+        }
+
+        return merge(iterList, nextSelector);
+    }
+
+    /**
+     *
+     * @param c
+     * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
+     * @return
+     */
+    public static <T> ObjIterator<T> merge(final Collection<? extends Iterator<? extends T>> c,
+            final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
+        N.checkArgNotNull(nextSelector);
+
+        if (N.isNullOrEmpty(c)) {
+            return ObjIterator.<T> empty();
+        } else if (c.size() == 1) {
+            return ObjIterator.<T> of(c.iterator().next());
+        } else if (c.size() == 2) {
+            final Iterator<? extends Iterator<? extends T>> iter = c.iterator();
+            return merge(iter.next(), iter.next(), nextSelector);
+        }
+
+        final Iterator<? extends Iterator<? extends T>> iter = c.iterator();
+        ObjIterator<T> result = merge(iter.next(), iter.next(), nextSelector);
+
+        while (iter.hasNext()) {
+            result = merge(result, iter.next(), nextSelector);
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a should be in non-descending order as this method does not sort its input.
+     * @param b should be in non-descending order as this method does not sort its input. 
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public static <T extends Comparable> ObjIterator<T> mergeSorted(final Collection<? extends T> a, final Collection<? extends T> b) {
+        return mergeSorted(a, b, Comparators.<T> naturalOrder());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a should be in non-descending order as this method does not sort its input.
+     * @param b should be in non-descending order as this method does not sort its input.
+     * @param cmp
+     * @return
+     */
+    public static <T> ObjIterator<T> mergeSorted(final Collection<? extends T> a, final Collection<? extends T> b, final Comparator<? super T> cmp) {
+        final Iterator<? extends T> iterA = N.isNullOrEmpty(a) ? ObjIterator.<T> empty() : (Iterator<? extends T>) a.iterator();
+        final Iterator<? extends T> iterB = N.isNullOrEmpty(b) ? ObjIterator.<T> empty() : (Iterator<? extends T>) b.iterator();
+
+        return mergeSorted(iterA, iterB, cmp);
+
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a should be in non-descending order as this method does not sort its input.
+     * @param b should be in non-descending order as this method does not sort its input. 
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public static <T extends Comparable> ObjIterator<T> mergeSorted(final Iterator<? extends T> a, final Iterator<? extends T> b) {
+        return mergeSorted(a, b, Comparators.<T> naturalOrder());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a should be in non-descending order as this method does not sort its input.
+     * @param b should be in non-descending order as this method does not sort its input.
+     * @param cmp
+     * @return
+     */
+    public static <T> ObjIterator<T> mergeSorted(final Iterator<? extends T> a, final Iterator<? extends T> b, final Comparator<? super T> cmp) {
+        N.checkArgNotNull(cmp);
+
+        return merge(a, b, MergeResult.minFirst(cmp));
     }
 
     /**

@@ -70,6 +70,54 @@ public enum MergeResult {
         return cmp.compare(a, b) >= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
     }
 
+    @SuppressWarnings("rawtypes")
+    private static final BiFunction<Comparable, Comparable, MergeResult> MIN_FIRST_BF = new BiFunction<Comparable, Comparable, MergeResult>() {
+        @Override
+        public MergeResult apply(Comparable a, Comparable b) {
+            return N.compare(a, b) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
+        }
+    };
+
+    @SuppressWarnings("rawtypes")
+    public static <T extends Comparable> BiFunction<T, T, MergeResult> minFirst() {
+        return (BiFunction) MIN_FIRST_BF;
+    }
+
+    public static <T> BiFunction<T, T, MergeResult> minFirst(final Comparator<? super T> cmp) {
+        N.checkArgNotNull(cmp, "cmp");
+
+        return new BiFunction<T, T, MergeResult>() {
+            @Override
+            public MergeResult apply(T a, T b) {
+                return cmp.compare(a, b) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
+            }
+        };
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static final BiFunction<Comparable, Comparable, MergeResult> MAX_FIRST_BF = new BiFunction<Comparable, Comparable, MergeResult>() {
+        @Override
+        public MergeResult apply(Comparable a, Comparable b) {
+            return N.compare(a, b) >= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
+        }
+    };
+
+    @SuppressWarnings("rawtypes")
+    public static <T extends Comparable> BiFunction<T, T, MergeResult> maxFirst() {
+        return (BiFunction) MAX_FIRST_BF;
+    }
+
+    public static <T> BiFunction<T, T, MergeResult> maxFirst(final Comparator<? super T> cmp) {
+        N.checkArgNotNull(cmp, "cmp");
+
+        return new BiFunction<T, T, MergeResult>() {
+            @Override
+            public MergeResult apply(T a, T b) {
+                return cmp.compare(a, b) >= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
+            }
+        };
+    }
+
     /**
      * Returns a stateful {@code BiFunction}. Don't save or cache for reuse or use it in parallel stream.
      *

@@ -19,6 +19,7 @@ package com.landawn.abacus.util;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.Map;
 
 import com.landawn.abacus.util.function.Function;
@@ -85,7 +86,7 @@ public abstract class Comparators {
     };
 
     @SuppressWarnings("rawtypes")
-    static final Comparator<Map> COMPARING_BY_SIZEE = new Comparator<Map>() {
+    static final Comparator<Map> COMPARING_BY_MAP_SIZE = new Comparator<Map>() {
         @Override
         public int compare(Map a, Map b) {
             return (a == null ? 0 : a.size()) - (b == null ? 0 : b.size());
@@ -95,6 +96,188 @@ public abstract class Comparators {
     Comparators() {
         // Singleton
     }
+
+    public static final Comparator<boolean[]> BOOLEAN_ARRAY_COMPARATOR = new Comparator<boolean[]>() {
+        @Override
+        public int compare(final boolean[] a, final boolean[] b) {
+            final int lenA = N.len(a);
+            final int lenB = N.len(b);
+
+            for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
+                if (a[i] != b[i]) {
+                    return a[i] ? 1 : -1;
+                }
+            }
+
+            return N.compare(lenA, lenB);
+        }
+    };
+
+    public static final Comparator<char[]> CHAR_ARRAY_COMPARATOR = new Comparator<char[]>() {
+        @Override
+        public int compare(final char[] a, final char[] b) {
+            final int lenA = N.len(a);
+            final int lenB = N.len(b);
+
+            for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
+                if (a[i] != b[i]) {
+                    return a[i] > b[i] ? 1 : -1;
+                }
+            }
+
+            return N.compare(lenA, lenB);
+        }
+    };
+
+    public static final Comparator<byte[]> BYTE_ARRAY_COMPARATOR = new Comparator<byte[]>() {
+        @Override
+        public int compare(final byte[] a, final byte[] b) {
+            final int lenA = N.len(a);
+            final int lenB = N.len(b);
+
+            for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
+                if (a[i] != b[i]) {
+                    return a[i] > b[i] ? 1 : -1;
+                }
+            }
+
+            return N.compare(lenA, lenB);
+        }
+    };
+
+    public static final Comparator<short[]> SHORT_ARRAY_COMPARATOR = new Comparator<short[]>() {
+        @Override
+        public int compare(final short[] a, final short[] b) {
+            final int lenA = N.len(a);
+            final int lenB = N.len(b);
+
+            for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
+                if (a[i] != b[i]) {
+                    return a[i] > b[i] ? 1 : -1;
+                }
+            }
+
+            return N.compare(lenA, lenB);
+        }
+    };
+
+    public static final Comparator<int[]> INT_ARRAY_COMPARATOR = new Comparator<int[]>() {
+        @Override
+        public int compare(final int[] a, final int[] b) {
+            final int lenA = N.len(a);
+            final int lenB = N.len(b);
+
+            for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
+                if (a[i] != b[i]) {
+                    return a[i] > b[i] ? 1 : -1;
+                }
+            }
+
+            return N.compare(lenA, lenB);
+        }
+    };
+
+    public static final Comparator<long[]> LONG_ARRAY_COMPARATOR = new Comparator<long[]>() {
+        @Override
+        public int compare(final long[] a, final long[] b) {
+            final int lenA = N.len(a);
+            final int lenB = N.len(b);
+
+            for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
+                if (a[i] != b[i]) {
+                    return a[i] > b[i] ? 1 : -1;
+                }
+            }
+
+            return N.compare(lenA, lenB);
+        }
+    };
+
+    public static final Comparator<float[]> FLOAT_ARRAY_COMPARATOR = new Comparator<float[]>() {
+        @Override
+        public int compare(final float[] a, final float[] b) {
+            final int lenA = N.len(a);
+            final int lenB = N.len(b);
+            int result = 0;
+
+            for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
+                result = Float.compare(a[i], b[i]);
+
+                if (result != 0) {
+                    return result;
+                }
+            }
+
+            return N.compare(lenA, lenB);
+        }
+    };
+
+    public static final Comparator<double[]> DOUBLE_ARRAY_COMPARATOR = new Comparator<double[]>() {
+        @Override
+        public int compare(final double[] a, final double[] b) {
+            final int lenA = N.len(a);
+            final int lenB = N.len(b);
+            int result = 0;
+
+            for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
+                result = Double.compare(a[i], b[i]);
+
+                if (result != 0) {
+                    return result;
+                }
+            }
+
+            return N.compare(lenA, lenB);
+        }
+    };
+
+    public static final Comparator<Object[]> OBJECT_ARRAY_COMPARATOR = new Comparator<Object[]>() {
+        @Override
+        public int compare(final Object[] a, final Object[] b) {
+            final int lenA = N.len(a);
+            final int lenB = N.len(b);
+            int result = 0;
+
+            for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
+                result = NATURAL_ORDER.compare(a[i], b[i]);
+
+                if (result != 0) {
+                    return result;
+                }
+            }
+
+            return N.compare(lenA, lenB);
+        }
+    };
+
+    @SuppressWarnings("rawtypes")
+    public static final Comparator<Collection> COLLECTION_COMPARATOR = new Comparator<Collection>() {
+        @Override
+        public int compare(final Collection a, final Collection b) {
+            if (N.isNullOrEmpty(a)) {
+                return N.isNullOrEmpty(b) ? 0 : -1;
+            } else if (N.isNullOrEmpty(b)) {
+                return 1;
+            }
+
+            final Iterator<Object> iterA = a.iterator();
+            final Iterator<Object> iterB = b.iterator();
+
+            final int lenA = N.size(a);
+            final int lenB = N.size(b);
+            int result = 0;
+
+            for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
+                result = NATURAL_ORDER.compare(iterA.next(), iterB.next());
+
+                if (result != 0) {
+                    return result;
+                }
+            }
+
+            return N.compare(lenA, lenB);
+        }
+    };
 
     /**
      *
@@ -580,8 +763,63 @@ public abstract class Comparators {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    static <T extends Map> Comparator<T> comparingBySizee() {
-        return (Comparator<T>) COMPARING_BY_SIZEE;
+    public static <T extends Map> Comparator<T> comparingByMapSize() {
+        return (Comparator<T>) COMPARING_BY_MAP_SIZE;
+    }
+
+    public static <T> Comparator<T[]> comparingArray(final Comparator<T> cmp) {
+        N.checkArgNotNull(cmp);
+
+        return new Comparator<T[]>() {
+            @Override
+            public int compare(final T[] a, final T[] b) {
+                final int lenA = N.len(a);
+                final int lenB = N.len(b);
+                int result = 0;
+
+                for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
+                    result = cmp.compare(a[i], b[i]);
+
+                    if (result != 0) {
+                        return result;
+                    }
+                }
+
+                return N.compare(lenA, lenB);
+            }
+        };
+    }
+
+    public static <T, C extends Collection<T>> Comparator<C> comparingCollection(final Comparator<T> cmp) {
+        N.checkArgNotNull(cmp);
+
+        return new Comparator<C>() {
+            @Override
+            public int compare(final C a, final C b) {
+                if (N.isNullOrEmpty(a)) {
+                    return N.isNullOrEmpty(b) ? 0 : -1;
+                } else if (N.isNullOrEmpty(b)) {
+                    return 1;
+                }
+
+                final Iterator<T> iterA = a.iterator();
+                final Iterator<T> iterB = b.iterator();
+
+                final int lenA = N.size(a);
+                final int lenB = N.size(b);
+                int result = 0;
+
+                for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
+                    result = cmp.compare(iterA.next(), iterB.next());
+
+                    if (result != 0) {
+                        return result;
+                    }
+                }
+
+                return N.compare(lenA, lenB);
+            }
+        };
     }
 
 }

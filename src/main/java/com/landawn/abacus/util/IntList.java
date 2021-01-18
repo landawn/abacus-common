@@ -984,7 +984,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Returns a new list with all the elements in <code>b</code> removed by occurrences.
+     * Returns the elements from {@code a}, but exclude the elements in {@code b} by occurrences.
      *
      * <pre>
      * IntList a = IntList.of(0, 1, 2, 2, 3);

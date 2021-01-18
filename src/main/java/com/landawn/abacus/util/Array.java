@@ -4166,17 +4166,17 @@ public final class Array {
      * {@link Arrays#binarySearch(boolean[], boolean)}.
      *
      * @param a
-     * @param key
+     * @param valueToFind
      * @return
      */
-    static int binarySearch(final boolean[] a, final boolean key) {
+    static int binarySearch(final boolean[] a, final boolean valueToFind) {
         if (N.isNullOrEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        if (a[0] == key) {
+        if (a[0] == valueToFind) {
             return 0;
-        } else if (a[a.length - 1] != key) {
+        } else if (a[a.length - 1] != valueToFind) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -4184,7 +4184,7 @@ public final class Array {
         while (left < right) {
             int mid = left + (right - left) / 2;
 
-            if (a[mid] == key) {
+            if (a[mid] == valueToFind) {
                 right = mid;
             } else {
                 left = mid + 1;
@@ -4197,15 +4197,15 @@ public final class Array {
      * {@link Arrays#binarySearch(char[], char)}.
      *
      * @param a
-     * @param key
+     * @param valueToFind
      * @return
      */
-    static int binarySearch(final char[] a, final char key) {
+    static int binarySearch(final char[] a, final char valueToFind) {
         if (N.isNullOrEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return Arrays.binarySearch(a, key);
+        return Arrays.binarySearch(a, valueToFind);
     }
 
     /**
@@ -4214,30 +4214,30 @@ public final class Array {
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @param key
+     * @param valueToFind
      * @return
      */
-    static int binarySearch(final char[] a, final int fromIndex, final int toIndex, final char key) {
+    static int binarySearch(final char[] a, final int fromIndex, final int toIndex, final char valueToFind) {
         if (N.isNullOrEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return Arrays.binarySearch(a, fromIndex, toIndex, key);
+        return Arrays.binarySearch(a, fromIndex, toIndex, valueToFind);
     }
 
     /**
      * {@link Arrays#binarySearch(byte[], byte)}.
      *
      * @param a
-     * @param key
+     * @param valueToFind
      * @return
      */
-    static int binarySearch(final byte[] a, final byte key) {
+    static int binarySearch(final byte[] a, final byte valueToFind) {
         if (N.isNullOrEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return Arrays.binarySearch(a, key);
+        return Arrays.binarySearch(a, valueToFind);
     }
 
     /**
@@ -4246,30 +4246,30 @@ public final class Array {
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @param key
+     * @param valueToFind
      * @return
      */
-    static int binarySearch(final byte[] a, final int fromIndex, final int toIndex, final byte key) {
+    static int binarySearch(final byte[] a, final int fromIndex, final int toIndex, final byte valueToFind) {
         if (N.isNullOrEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return Arrays.binarySearch(a, fromIndex, toIndex, key);
+        return Arrays.binarySearch(a, fromIndex, toIndex, valueToFind);
     }
 
     /**
      * {@link Arrays#binarySearch(short[], short)}.
      *
      * @param a
-     * @param key
+     * @param valueToFind
      * @return
      */
-    static int binarySearch(final short[] a, final short key) {
+    static int binarySearch(final short[] a, final short valueToFind) {
         if (N.isNullOrEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return Arrays.binarySearch(a, key);
+        return Arrays.binarySearch(a, valueToFind);
     }
 
     /**
@@ -4278,30 +4278,30 @@ public final class Array {
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @param key
+     * @param valueToFind
      * @return
      */
-    static int binarySearch(final short[] a, final int fromIndex, final int toIndex, final short key) {
+    static int binarySearch(final short[] a, final int fromIndex, final int toIndex, final short valueToFind) {
         if (N.isNullOrEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return Arrays.binarySearch(a, fromIndex, toIndex, key);
+        return Arrays.binarySearch(a, fromIndex, toIndex, valueToFind);
     }
 
     /**
      * {@link Arrays#binarySearch(int[], int)}.
      *
      * @param a
-     * @param key
+     * @param valueToFind
      * @return
      */
-    static int binarySearch(final int[] a, final int key) {
+    static int binarySearch(final int[] a, final int valueToFind) {
         if (N.isNullOrEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return Arrays.binarySearch(a, key);
+        return Arrays.binarySearch(a, valueToFind);
     }
 
     /**
@@ -4310,30 +4310,30 @@ public final class Array {
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @param key
+     * @param valueToFind
      * @return
      */
-    static int binarySearch(final int[] a, final int fromIndex, final int toIndex, final int key) {
+    static int binarySearch(final int[] a, final int fromIndex, final int toIndex, final int valueToFind) {
         if (N.isNullOrEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return Arrays.binarySearch(a, fromIndex, toIndex, key);
+        return Arrays.binarySearch(a, fromIndex, toIndex, valueToFind);
     }
 
     /**
      * {@link Arrays#binarySearch(long[], long)}.
      *
      * @param a
-     * @param key
+     * @param valueToFind
      * @return
      */
-    static int binarySearch(final long[] a, final long key) {
+    static int binarySearch(final long[] a, final long valueToFind) {
         if (N.isNullOrEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return Arrays.binarySearch(a, key);
+        return Arrays.binarySearch(a, valueToFind);
     }
 
     /**
@@ -4342,30 +4342,30 @@ public final class Array {
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @param key
+     * @param valueToFind
      * @return
      */
-    static int binarySearch(final long[] a, final int fromIndex, final int toIndex, final long key) {
+    static int binarySearch(final long[] a, final int fromIndex, final int toIndex, final long valueToFind) {
         if (N.isNullOrEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return Arrays.binarySearch(a, fromIndex, toIndex, key);
+        return Arrays.binarySearch(a, fromIndex, toIndex, valueToFind);
     }
 
     /**
      * {@link Arrays#binarySearch(float[], float)}.
      *
      * @param a
-     * @param key
+     * @param valueToFind
      * @return
      */
-    static int binarySearch(final float[] a, final float key) {
+    static int binarySearch(final float[] a, final float valueToFind) {
         if (N.isNullOrEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return Arrays.binarySearch(a, key);
+        return Arrays.binarySearch(a, valueToFind);
     }
 
     /**
@@ -4374,30 +4374,30 @@ public final class Array {
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @param key
+     * @param valueToFind
      * @return
      */
-    static int binarySearch(final float[] a, final int fromIndex, final int toIndex, final float key) {
+    static int binarySearch(final float[] a, final int fromIndex, final int toIndex, final float valueToFind) {
         if (N.isNullOrEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return Arrays.binarySearch(a, fromIndex, toIndex, key);
+        return Arrays.binarySearch(a, fromIndex, toIndex, valueToFind);
     }
 
     /**
      * {@link Arrays#binarySearch(double[], double)}.
      *
      * @param a
-     * @param key
+     * @param valueToFind
      * @return
      */
-    static int binarySearch(final double[] a, final double key) {
+    static int binarySearch(final double[] a, final double valueToFind) {
         if (N.isNullOrEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return Arrays.binarySearch(a, key);
+        return Arrays.binarySearch(a, valueToFind);
     }
 
     /**
@@ -4406,30 +4406,30 @@ public final class Array {
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @param key
+     * @param valueToFind
      * @return
      */
-    static int binarySearch(final double[] a, final int fromIndex, final int toIndex, final double key) {
+    static int binarySearch(final double[] a, final int fromIndex, final int toIndex, final double valueToFind) {
         if (N.isNullOrEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return Arrays.binarySearch(a, fromIndex, toIndex, key);
+        return Arrays.binarySearch(a, fromIndex, toIndex, valueToFind);
     }
 
     /**
      * {@link Arrays#binarySearch(Object[], Object)}.
      *
      * @param a
-     * @param key
+     * @param valueToFind
      * @return
      */
-    static int binarySearch(final Object[] a, final Object key) {
+    static int binarySearch(final Object[] a, final Object valueToFind) {
         if (N.isNullOrEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return Arrays.binarySearch(a, key);
+        return Arrays.binarySearch(a, valueToFind);
     }
 
     /**
@@ -4438,15 +4438,15 @@ public final class Array {
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @param key
+     * @param valueToFind
      * @return
      */
-    static int binarySearch(final Object[] a, final int fromIndex, final int toIndex, final Object key) {
+    static int binarySearch(final Object[] a, final int fromIndex, final int toIndex, final Object valueToFind) {
         if (N.isNullOrEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return Arrays.binarySearch(a, fromIndex, toIndex, key);
+        return Arrays.binarySearch(a, fromIndex, toIndex, valueToFind);
     }
 
     /**
@@ -4454,16 +4454,16 @@ public final class Array {
      *
      * @param <T>
      * @param a
-     * @param key
+     * @param valueToFind
      * @param cmp
      * @return
      */
-    static <T> int binarySearch(final T[] a, final T key, final Comparator<? super T> cmp) {
+    static <T> int binarySearch(final T[] a, final T valueToFind, final Comparator<? super T> cmp) {
         if (N.isNullOrEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return Arrays.binarySearch(a, key, cmp == null ? Comparators.NATURAL_ORDER : cmp);
+        return Arrays.binarySearch(a, valueToFind, cmp == null ? Comparators.NATURAL_ORDER : cmp);
     }
 
     /**
@@ -4473,16 +4473,16 @@ public final class Array {
      * @param a
      * @param fromIndex
      * @param toIndex
-     * @param key
+     * @param valueToFind
      * @param cmp
      * @return
      */
-    static <T> int binarySearch(final T[] a, final int fromIndex, final int toIndex, final T key, final Comparator<? super T> cmp) {
+    static <T> int binarySearch(final T[] a, final int fromIndex, final int toIndex, final T valueToFind, final Comparator<? super T> cmp) {
         if (N.isNullOrEmpty(a)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return Arrays.binarySearch(a, key, cmp == null ? Comparators.NATURAL_ORDER : cmp);
+        return Arrays.binarySearch(a, valueToFind, cmp == null ? Comparators.NATURAL_ORDER : cmp);
     }
 
     /**
@@ -4490,15 +4490,15 @@ public final class Array {
      *
      * @param <T>
      * @param list
-     * @param key
+     * @param valueToFind
      * @return
      */
-    static <T extends Comparable<? super T>> int binarySearch(final List<? extends T> list, final T key) {
+    static <T extends Comparable<? super T>> int binarySearch(final List<? extends T> list, final T valueToFind) {
         if (N.isNullOrEmpty(list)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return binarySearch(list, 0, list.size(), key);
+        return binarySearch(list, 0, list.size(), valueToFind);
     }
 
     /**
@@ -4507,31 +4507,31 @@ public final class Array {
      * @param list
      * @param fromIndex
      * @param toIndex
-     * @param key
+     * @param valueToFind
      * @return
      */
-    static <T extends Comparable<? super T>> int binarySearch(final List<? extends T> list, final int fromIndex, final int toIndex, final T key) {
+    static <T extends Comparable<? super T>> int binarySearch(final List<? extends T> list, final int fromIndex, final int toIndex, final T valueToFind) {
         if (N.isNullOrEmpty(list)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return binarySearch(list, fromIndex, toIndex, key, Comparators.NATURAL_ORDER);
+        return binarySearch(list, fromIndex, toIndex, valueToFind, Comparators.NATURAL_ORDER);
     }
 
     /**
      *
      * @param <T>
      * @param list
-     * @param key
+     * @param valueToFind
      * @param cmp
      * @return
      */
-    static <T> int binarySearch(final List<? extends T> list, final T key, final Comparator<? super T> cmp) {
+    static <T> int binarySearch(final List<? extends T> list, final T valueToFind, final Comparator<? super T> cmp) {
         if (N.isNullOrEmpty(list)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        return binarySearch(list, 0, list.size(), key, cmp);
+        return binarySearch(list, 0, list.size(), valueToFind, cmp);
     }
 
     /**
@@ -4540,12 +4540,12 @@ public final class Array {
      * @param c
      * @param fromIndex
      * @param toIndex
-     * @param key
+     * @param valueToFind
      * @param cmp
      * @return
      * @see Collections#binarySearch(List, Object, Comparator)
      */
-    static <T> int binarySearch(final List<? extends T> c, final int fromIndex, final int toIndex, final T key, final Comparator<? super T> cmp) {
+    static <T> int binarySearch(final List<? extends T> c, final int fromIndex, final int toIndex, final T valueToFind, final Comparator<? super T> cmp) {
         if (N.isNullOrEmpty(c)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -4554,13 +4554,13 @@ public final class Array {
         final T[] a = (T[]) InternalUtil.getInternalArray(c);
 
         if (a != null) {
-            return binarySearch(a, fromIndex, toIndex, key, cmp == null ? Comparators.NATURAL_ORDER : cmp);
+            return binarySearch(a, fromIndex, toIndex, valueToFind, cmp == null ? Comparators.NATURAL_ORDER : cmp);
         }
 
         if (c instanceof RandomAccess || c.size() < BINARYSEARCH_THRESHOLD) {
-            return indexedBinarySearch(c, fromIndex, toIndex, key, cmp == null ? Comparators.NATURAL_ORDER : cmp);
+            return indexedBinarySearch(c, fromIndex, toIndex, valueToFind, cmp == null ? Comparators.NATURAL_ORDER : cmp);
         } else {
-            return iteratorBinarySearch(c, fromIndex, toIndex, key, cmp == null ? Comparators.NATURAL_ORDER : cmp);
+            return iteratorBinarySearch(c, fromIndex, toIndex, valueToFind, cmp == null ? Comparators.NATURAL_ORDER : cmp);
         }
     }
 
@@ -4571,11 +4571,11 @@ public final class Array {
      * @param l
      * @param fromIndex
      * @param toIndex
-     * @param key
+     * @param valueToFind
      * @param cmp
      * @return
      */
-    private static <T> int indexedBinarySearch(final List<? extends T> l, final int fromIndex, final int toIndex, final T key,
+    private static <T> int indexedBinarySearch(final List<? extends T> l, final int fromIndex, final int toIndex, final T valueToFind,
             final Comparator<? super T> cmp) {
         int low = fromIndex;
         int high = toIndex - 1;
@@ -4584,18 +4584,18 @@ public final class Array {
             int mid = (low + high) >>> 1;
             T midVal = l.get(mid);
 
-            int res = cmp.compare(midVal, key);
+            int res = cmp.compare(midVal, valueToFind);
 
             if (res < 0) {
                 low = mid + 1;
             } else if (res > 0) {
                 high = mid - 1;
             } else {
-                return mid; // key found
+                return mid; // valueToFind found
             }
         }
 
-        return N.INDEX_NOT_FOUND; // key not found
+        return N.INDEX_NOT_FOUND; // valueToFind not found
     }
 
     /**
@@ -4605,11 +4605,11 @@ public final class Array {
      * @param l
      * @param fromIndex
      * @param toIndex
-     * @param key
+     * @param valueToFind
      * @param cmp
      * @return
      */
-    private static <T> int iteratorBinarySearch(final List<? extends T> l, final int fromIndex, final int toIndex, final T key,
+    private static <T> int iteratorBinarySearch(final List<? extends T> l, final int fromIndex, final int toIndex, final T valueToFind,
             final Comparator<? super T> cmp) {
         int low = fromIndex;
         int high = toIndex - 1;
@@ -4620,18 +4620,18 @@ public final class Array {
             int mid = (low + high) >>> 1;
             T midVal = get(iterator, mid);
 
-            int res = cmp.compare(midVal, key);
+            int res = cmp.compare(midVal, valueToFind);
 
             if (res < 0) {
                 low = mid + 1;
             } else if (res > 0) {
                 high = mid - 1;
             } else {
-                return mid; // key found
+                return mid; // valueToFind found
             }
         }
 
-        return N.INDEX_NOT_FOUND; // key not found
+        return N.INDEX_NOT_FOUND; // valueToFind not found
     }
 
     /**
