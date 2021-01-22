@@ -1,3 +1,8 @@
+### 2.2.0
+
+* Rename to abacus-common
+
+
 ### 2.1.12
 
 * Improvements and bug fix.
