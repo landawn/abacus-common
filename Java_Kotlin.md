@@ -9,7 +9,7 @@ List<String> list = people.stream().map(Person::getName).collect(Collectors.toLi
 // Kotlin:
 val list = people.map { it.name }  // toList() not needed
 
-// Java by Abacus-Util
+// Java by abacus-common
 List<String> list = Seq.of(people).map(Person::getName);
 // Or:
 List<String> list = Stream.of(people).map(Person::getName).toList();
@@ -33,7 +33,7 @@ val phrase = persons
         .map { it.name }
         .joinToString(" and ", "In Germany ", " are of legal age.")
 
-// Java by Abacus-Util
+// Java by abacus-common
 String phrase = Stream.of(persons)
         .filter(p -> p.age >= 18)
         .map(p -> p.name)
@@ -54,7 +54,7 @@ val count = items.filter { it.startsWith('t') }.size
 // but better to not filter, but count with a predicate
 val count = items.count { it.startsWith('t') }
 
-// Java by Abacus-Util
+// Java by abacus-common
 int count = Seq.of(items).count(item -> item.startsWith("t"));
 // Or:
 int count = Seq.of(items).count(Fn.startsWith("t"));
@@ -99,7 +99,7 @@ val map5 = persons.groupBy { it.age }.mapValues { it.value.map { it.name } }
 val map6 = persons.groupBy { it.age }.mapValues { it.value.joinToString(";") { it.name } }
 // output: {18=Max, 23=Peter;Pamela, 12=David}
 
-// Java by Abacus-Util
+// Java by abacus-common
 Map<Integer, String> map = Stream.of(persons).toMap(p -> p.age, p -> p.name, Fn.replacingMerger());
 // {18=Max, 23=Pamela, 12=David} 
 
@@ -124,7 +124,7 @@ Map<Department, Integer> totalByDept
 // Kotlin:
 val totalByDept = employees.groupBy { it.dept }.mapValues { it.value.sumBy { it.salary }}
 
-// Java by Abacus-Util
+// Java by abacus-common
 Map<Department, Integer> totalByDept = Stream.of(employees).toMap(Employee::getDepartment, Fn.summingInt(Employee::getSalary));
 
 ```
@@ -138,7 +138,7 @@ String joined = things.stream()
 // Kotlin:
 val joined = things.joinToString() // ", " is used as separator, by default
 
-// Java by Abacus-Util
+// Java by abacus-common
 String joined = Stream.of(things).join(", ");
 // Or:
 String joined = Joiner.defauLt().join(things);
@@ -155,7 +155,7 @@ Arrays.asList("a1", "a2", "a3")
 // Kotlin:
 listOf("a1", "a2", "a3").firstOrNull()?.apply(::println)
 
-// Java by Abacus-Util
+// Java by abacus-common
 Stream.of("a1", "a2", "a3").first().ifPresent(Fn.println());
 ```
 
@@ -172,7 +172,7 @@ Map<Person.Sex, List<String>> namesByGender =
 // Kotlin:
 val namesByGender = roster.groupBy { it.gender }.mapValues { it.value.map { it.name } } 
 
-// Java by Abacus-Util
+// Java by abacus-common
 Map<Person.Sex, List<String>> namesByGender = Stream.of(roster).groupTo(Person::getGender, Person::getName);
 ```
 

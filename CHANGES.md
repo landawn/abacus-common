@@ -223,7 +223,7 @@
 ### 1.20.31
 
 * Move `CSVUtil` to `abacus-jdbc`.
-* Move `ExceptionalStream.rows(...)` to `JdbcUtil.stream(...)` in `abacus-util`.
+* Move `ExceptionalStream.rows(...)` to `JdbcUtil.stream(...)` in `abacus-common`.
 * Improvements and bug fix.
 
 
@@ -1540,7 +1540,7 @@
 
 * Refactoring: change `DataSet.join/leftJoin/RightJoin/fullJoin(...Class<? extends Collection> collClass)` to `DataSet.join/leftJoin/RightJoin/fullJoin(...IntFunction<? extends Collection> collSupplier)`.
 
-* Stop releasing `abacus-util-all` and `abacus-util-all-jdk7`.
+* Stop releasing `abacus-common-all` and `abacus-common-all-jdk7`.
 
 * Improvements and bug fix.
 
@@ -1901,4 +1901,4 @@
 
 
 ### Prior 1.1.0
-* Refer to: [CHANGES.txt](https://github.com/landawn/abacus-util/blob/master/CHANGES.txt)
+* Refer to: [CHANGES.txt](https://github.com/landawn/abacus-common/blob/master/CHANGES.txt)

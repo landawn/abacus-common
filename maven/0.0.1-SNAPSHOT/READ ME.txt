@@ -5,10 +5,10 @@
 2, copy settings-security.xml and settings.xml to folder: C:\Users\haiyangl\.m2\ 
 
 3, Deploy and Release:
-	mvn clean deploy -f abacus-util-0.0.1-SNAPSHOT.pom
-	mvn clean deploy -f abacus-util-all-0.0.1-SNAPSHOT.pom
-	mvn clean deploy -f abacus-util-se-0.0.1-SNAPSHOT.pom
-	mvn clean deploy -f abacus-util-all-jdk7-0.0.1-SNAPSHOT.pom
+	mvn clean deploy -f abacus-common-0.0.1-SNAPSHOT.pom
+	mvn clean deploy -f abacus-common-all-0.0.1-SNAPSHOT.pom
+	mvn clean deploy -f abacus-common-se-0.0.1-SNAPSHOT.pom
+	mvn clean deploy -f abacus-common-all-jdk7-0.0.1-SNAPSHOT.pom
 	
 ######## Method 2 ############################################
 
@@ -22,18 +22,18 @@
 
 5, public repository: https://oss.sonatype.org/content/groups/public/com/landawn
 	
-======================abacus-util=======================================
-mvn gpg:sign-and-deploy-file -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ -DrepositoryId=ossrh -DpomFile=abacus-util-0.0.1-SNAPSHOT.pom -Dfile=abacus-util-0.0.1-SNAPSHOT.jar
-mvn gpg:sign-and-deploy-file -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ -DrepositoryId=ossrh -DpomFile=abacus-util-0.0.1-SNAPSHOT.pom -Dfile=abacus-util-0.0.1-SNAPSHOT-javadoc.jar
-mvn gpg:sign-and-deploy-file -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ -DrepositoryId=ossrh -DpomFile=abacus-util-0.0.1-SNAPSHOT.pom -Dfile=abacus-util-0.0.1-SNAPSHOT-sources.jar
+======================abacus-common=======================================
+mvn gpg:sign-and-deploy-file -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ -DrepositoryId=ossrh -DpomFile=abacus-common-0.0.1-SNAPSHOT.pom -Dfile=abacus-common-0.0.1-SNAPSHOT.jar
+mvn gpg:sign-and-deploy-file -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ -DrepositoryId=ossrh -DpomFile=abacus-common-0.0.1-SNAPSHOT.pom -Dfile=abacus-common-0.0.1-SNAPSHOT-javadoc.jar
+mvn gpg:sign-and-deploy-file -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ -DrepositoryId=ossrh -DpomFile=abacus-common-0.0.1-SNAPSHOT.pom -Dfile=abacus-common-0.0.1-SNAPSHOT-sources.jar
 
-jar -cvf abacus-util-0.0.1-SNAPSHOT-bundle.jar abacus-util-0.0.1-SNAPSHOT.pom abacus-util-0.0.1-SNAPSHOT.pom.asc abacus-util-0.0.1-SNAPSHOT.jar abacus-util-0.0.1-SNAPSHOT.jar.asc abacus-util-0.0.1-SNAPSHOT-javadoc.jar abacus-util-0.0.1-SNAPSHOT-javadoc.jar.asc abacus-util-0.0.1-SNAPSHOT-sources.jar abacus-util-0.0.1-SNAPSHOT-sources.jar.asc
+jar -cvf abacus-common-0.0.1-SNAPSHOT-bundle.jar abacus-common-0.0.1-SNAPSHOT.pom abacus-common-0.0.1-SNAPSHOT.pom.asc abacus-common-0.0.1-SNAPSHOT.jar abacus-common-0.0.1-SNAPSHOT.jar.asc abacus-common-0.0.1-SNAPSHOT-javadoc.jar abacus-common-0.0.1-SNAPSHOT-javadoc.jar.asc abacus-common-0.0.1-SNAPSHOT-sources.jar abacus-common-0.0.1-SNAPSHOT-sources.jar.asc
 
 
-=======================abacus-util-se======================================
-mvn gpg:sign-and-deploy-file -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ -DrepositoryId=ossrh -DpomFile=abacus-util-se-0.0.1-SNAPSHOT.pom -Dfile=abacus-util-se-0.0.1-SNAPSHOT.jar
-mvn gpg:sign-and-deploy-file -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ -DrepositoryId=ossrh -DpomFile=abacus-util-se-0.0.1-SNAPSHOT.pom -Dfile=abacus-util-se-0.0.1-SNAPSHOT-javadoc.jar
-mvn gpg:sign-and-deploy-file -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ -DrepositoryId=ossrh -DpomFile=abacus-util-se-0.0.1-SNAPSHOT.pom -Dfile=abacus-util-se-0.0.1-SNAPSHOT-sources.jar
+=======================abacus-common-se======================================
+mvn gpg:sign-and-deploy-file -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ -DrepositoryId=ossrh -DpomFile=abacus-common-se-0.0.1-SNAPSHOT.pom -Dfile=abacus-common-se-0.0.1-SNAPSHOT.jar
+mvn gpg:sign-and-deploy-file -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ -DrepositoryId=ossrh -DpomFile=abacus-common-se-0.0.1-SNAPSHOT.pom -Dfile=abacus-common-se-0.0.1-SNAPSHOT-javadoc.jar
+mvn gpg:sign-and-deploy-file -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ -DrepositoryId=ossrh -DpomFile=abacus-common-se-0.0.1-SNAPSHOT.pom -Dfile=abacus-common-se-0.0.1-SNAPSHOT-sources.jar
 
-jar -cvf abacus-util-se-0.0.1-SNAPSHOT-bundle.jar abacus-util-se-0.0.1-SNAPSHOT.pom abacus-util-se-0.0.1-SNAPSHOT.pom.asc abacus-util-se-0.0.1-SNAPSHOT.jar abacus-util-se-0.0.1-SNAPSHOT.jar.asc abacus-util-se-0.0.1-SNAPSHOT-javadoc.jar abacus-util-se-0.0.1-SNAPSHOT-javadoc.jar.asc abacus-util-se-0.0.1-SNAPSHOT-sources.jar abacus-util-se-0.0.1-SNAPSHOT-sources.jar.asc
+jar -cvf abacus-common-se-0.0.1-SNAPSHOT-bundle.jar abacus-common-se-0.0.1-SNAPSHOT.pom abacus-common-se-0.0.1-SNAPSHOT.pom.asc abacus-common-se-0.0.1-SNAPSHOT.jar abacus-common-se-0.0.1-SNAPSHOT.jar.asc abacus-common-se-0.0.1-SNAPSHOT-javadoc.jar abacus-common-se-0.0.1-SNAPSHOT-javadoc.jar.asc abacus-common-se-0.0.1-SNAPSHOT-sources.jar abacus-common-se-0.0.1-SNAPSHOT-sources.jar.asc
 

@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>
 
 
-<title>abacus-util</title>
+<title>abacus-common</title>
 
 <script type="text/javascript" src="./css/ga.js"></script>
 <script type="text/javascript">
@@ -32,7 +32,7 @@
 <body>
 	<div id="site">
 		<h1>
-			<a href="./index.html">abacus-util</a> <span id="navigation"> <a href="./docs.html">Docs</a> | <a href="./download.html">Download</a>
+			<a href="./index.html">abacus-common</a> <span id="navigation"> <a href="./docs.html">Docs</a> | <a href="./download.html">Download</a>
 				| <a href="./api-docs/index.html">Javadoc</a> | <a href="./faq.html">FAQ</a> | <a href="./community.html">Community</a>
 			</span>
 		</h1>
@@ -46,19 +46,19 @@
 			<p>
 				<a href="./SQLExecutor_view.html">SQLExecutor</a> is a general sql/jdbc utility class. 
 				Insert/batchInsert/update/batchUpdate/delete/query and parameterized SQL with "?" or named parameters are supported very well.
-				As one of the core functions provided by abacus-util. SQLExecutor is simple, fast and easy to use with the concise APIs.
+				As one of the core functions provided by abacus-common. SQLExecutor is simple, fast and easy to use with the concise APIs.
 				Here is the CRUD(create/read/update/delete) sample, comparing to the implementations by Jdbc, Spring JdbcTemplate, myBatis(iBatis), Hibernate and JPA:				
 			</p>
 			
 			
-			<li><b>CURD by SQLExecutor provided by abacus-util:</b> (See <a href="./jdbc-csv-util.html">JdbcUtil</a> about how to create DataSource for SQLExecutor)</li>
+			<li><b>CURD by SQLExecutor provided by abacus-common:</b> (See <a href="./jdbc-csv-util.html">JdbcUtil</a> about how to create DataSource for SQLExecutor)</li>
 <!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #AA22FF">@Test</span>
 <span style="color: #008000; font-weight: bold">public</span> <span style="color: #B00040">void</span> <span style="color: #0000FF">test_crudBySQLExecutor</span><span style="color: #666666">()</span> <span style="color: #666666">{</span>
     Account account <span style="color: #666666">=</span> createAccount<span style="color: #666666">();</span>
 
     <span style="color: #408080; font-style: italic">// create</span>
     String sql_insert <span style="color: #666666">=</span> NE<span style="color: #666666">.</span><span style="color: #7D9029">insert</span><span style="color: #666666">(</span>GUI<span style="color: #666666">,</span> FIRST_NAME<span style="color: #666666">,</span> LAST_NAME<span style="color: #666666">,</span> LAST_UPDATE_TIME<span style="color: #666666">,</span> CREATE_TIME<span style="color: #666666">).</span><span style="color: #7D9029">into</span><span style="color: #666666">(</span>Account<span style="color: #666666">.</span><span style="color: #7D9029">class</span><span style="color: #666666">).</span><span style="color: #7D9029">sql</span><span style="color: #666666">();</span>
-    sqlExecutor<span style="color: #666666">.</span><span style="color: #7D9029">insert</span><span style="color: #666666">(</span>sql_insert<span style="color: #666666">,</span> account<span style="color: #666666">);</span> <span style="color: #408080; font-style: italic">// About how to initialize a SQLExecutor instance, refer to SQLExecutorTest.java in Helloabacus-util.</span>
+    sqlExecutor<span style="color: #666666">.</span><span style="color: #7D9029">insert</span><span style="color: #666666">(</span>sql_insert<span style="color: #666666">,</span> account<span style="color: #666666">);</span> <span style="color: #408080; font-style: italic">// About how to initialize a SQLExecutor instance, refer to SQLExecutorTest.java in Helloabacus-common.</span>
 
     <span style="color: #408080; font-style: italic">// read</span>
     String sql_selectByGUI <span style="color: #666666">=</span> NE<span style="color: #666666">.</span><span style="color: #7D9029">selectFrom</span><span style="color: #666666">(</span>Account<span style="color: #666666">.</span><span style="color: #7D9029">class</span><span style="color: #666666">,</span> N<span style="color: #666666">.</span><span style="color: #7D9029">asSet</span><span style="color: #666666">(</span>DEVICES<span style="color: #666666">)).</span><span style="color: #7D9029">where</span><span style="color: #666666">(</span>L<span style="color: #666666">.</span><span style="color: #7D9029">eq</span><span style="color: #666666">(</span>GUI<span style="color: #666666">,</span> L<span style="color: #666666">.</span><span style="color: #7D9029">QME</span><span style="color: #666666">)).</span><span style="color: #7D9029">sql</span><span style="color: #666666">();</span>

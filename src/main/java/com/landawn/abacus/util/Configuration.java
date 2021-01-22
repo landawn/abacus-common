@@ -465,7 +465,7 @@ public abstract class Configuration {
         final String path = dir.getAbsolutePath().replace('\\', '/');
 
         // if the class/library is loaded from local maven repository.
-        if (path.indexOf("/.m2/repository/com/landawn/abacus-util/") > 0 || path.indexOf("/.m2/repository/com/landawn/abacus-util-se/") > 0) {
+        if (path.indexOf("/.m2/repository/com/landawn/abacus-common/") > 0 || path.indexOf("/.m2/repository/com/landawn/abacus-common-se/") > 0) {
             return new File(IOUtil.CURRENT_PATH);
         }
 

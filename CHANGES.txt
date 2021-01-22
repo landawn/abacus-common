@@ -1,4 +1,4 @@
-﻿
+
 ﻿========Changes in 1.1.2 =========================================================================
 
 1, Improvements and bug fix.
@@ -1390,7 +1390,7 @@
 4, Change the default queue size for methods: parallelConcat(...)/parallelZip(...) in Stream. 
 
 5, Remove map(...)/flatmap(...)/reduce(...)/groupBy(...) from N/ExList/IntList/DoubleList/... 
-   to keep the code consistent and simple, both for abacus-util and the applications written by abacus-util.
+   to keep the code consistent and simple, both for abacus-common and the applications written by abacus-common.
    Stream APIs will the only interfaces to provide these advanced features: map/flatmap/reduce/groupBy.
    We may add it back to N/ExList/IntList/... later if it's really useful/necessary.
 
@@ -1529,7 +1529,7 @@
 
 7, rename com.landawn.abacus.util.Handle to com.landawn.abacus.util.Holder.
 
-8, Exclude classes under package com.landawn.abacus.android from abacus-util-.*.jar files
+8, Exclude classes under package com.landawn.abacus.android from abacus-common-.*.jar files
 
 9, Bug fix and improvements.
 

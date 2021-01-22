@@ -9,7 +9,7 @@ Map<String, Choice> result = choices.stream()
 Map<String, List<Choice>> result = choices.stream()
                                           .collect(Collectors.groupingBy(Choice::getName));
 ```
-* By Abacus-Util
+* By abacus-common
 ```java
 Map<String, Choice> result = Stream.of(choices).toMap(Choice::getName, Fn.identity());
 
@@ -31,7 +31,7 @@ List<Pair<String, String>> result =
        .collect(Collectors.toList());
 ```
 
-* By Abacus-Util
+* By abacus-common
 ```java
 List<Pair<String, String>> result = Stream.of(map)
         .flatMap(e -> Stream.of(e.getValue()).map(v -> Pair.of(e.getKey(), v))).toList();
@@ -47,7 +47,7 @@ targetLongList = sourceLongList.stream()
                                .collect(Collectors.toList());
 ```
 
-* By Abacus-Util
+* By abacus-common
 ```java
 targetLongList = Stream.of(sourceLongList).filter(l -> l > 100).toList();
 ```
@@ -60,7 +60,7 @@ targetLongList = Stream.of(sourceLongList).filter(l -> l > 100).toList();
 ???
 ```
 
-* By Abacus-Util
+* By abacus-common
 ```java
 stream.parallel(threadNum);
 ```
@@ -77,7 +77,7 @@ IntStream.range(0, names.length)
          .collect(Collectors.toList());
 ```
 
-* By Abacus-Util
+* By abacus-common
 ```java
 String[] names = {"Sam", "Pamela", "Dave", "Pascal", "Erik"};
 IntStream.range(0, names.length)
@@ -103,7 +103,7 @@ Stream.of("java.lang.Object", "java.lang.Integer", "java.lang.String")
               .collect(Collectors.toList());
 ```
 
-* By Abacus-Util
+* By abacus-common
 ```java
 Stream.of("java.lang.Object", "java.lang.Integer", "java.lang.String")
               .map(Fn.ff(className -> Class.forName(className)))
@@ -122,7 +122,7 @@ Optional<Other> result =
           .findFirst();
 ```
 
-* By Abacus-Util
+* By abacus-common
 ```java
 Optional<Other> result =
     things.stream()
@@ -143,7 +143,7 @@ IntStream
     .forEach(System.out::println);
 ```
 
-* By Abacus-Util
+* By abacus-common
 ```java
 IntStream
     .iterate(1, n -> n + 1)
@@ -165,7 +165,7 @@ Map<Integer, Boolean> answerMap = answerList.stream()
           .collect(Collectors.toMap(Answer::getId, Answer::getAnswer)); // throw NullPointerException
 ```
 
-* By Abacus-Util
+* By abacus-common
 ```java
 // Works well.
 Map<Integer, Boolean> answerMap = answerList.stream().toMap(Answer::getId, Answer::getAnswer);
@@ -184,7 +184,7 @@ Stream stream = Stream.concat(
                                   .filter(x -> x!=2);
 ```
 
-* By Abacus-Util
+* By abacus-common
 ```java
 stream1.append(stream2).append(element);
 ```
@@ -203,7 +203,7 @@ Map<String, Integer> y =
         ));
 ```
 
-* By Abacus-Util
+* By abacus-common
 ```java
 Map<String, Integer> y = Stream.of(x).toMap(e -> e.getKey(), e -> Integer.parseInt(e.getValue()));
 ```
@@ -216,10 +216,10 @@ Map<String, Integer> y = Stream.of(x).toMap(e -> e.getKey(), e -> Integer.parseI
 ???
 ```
 
-* By Abacus-Util
+* By abacus-common
 
 Yes, with the most beautiful design: 
-[Pair](https://static.javadoc.io/com.landawn/abacus-util-all/1.0.6/com/landawn/abacus/util/Pair.html), [Triple](https://static.javadoc.io/com.landawn/abacus-util-all/1.0.6/com/landawn/abacus/util/Triple.html), [Tuple](https://static.javadoc.io/com.landawn/abacus-util-all/1.0.6/com/landawn/abacus/util/Tuple.html)
+[Pair](https://static.javadoc.io/com.landawn/abacus-common-all/1.0.6/com/landawn/abacus/util/Pair.html), [Triple](https://static.javadoc.io/com.landawn/abacus-common-all/1.0.6/com/landawn/abacus/util/Triple.html), [Tuple](https://static.javadoc.io/com.landawn/abacus-common-all/1.0.6/com/landawn/abacus/util/Tuple.html)
 
 
 ---
@@ -250,7 +250,7 @@ public static <T> Collector<T, ?, T> singletonCollector() {
 }
 ```
 
-* By Abacus-Util
+* By abacus-common
 ```java
 users.stream().filter(user -> user.getId() == 1).onlyOne();
 ```
@@ -263,7 +263,7 @@ users.stream().filter(user -> user.getId() == 1).onlyOne();
 // Answers are included in the above link.
 ```
 
-* By Abacus-Util
+* By abacus-common
 
 [Kotlin vs Java 8 on Collection](./Java_Kotlin.md)
 
@@ -276,7 +276,7 @@ users.stream().filter(user -> user.getId() == 1).onlyOne();
 ???
 ```
 
-* By Abacus-Util
+* By abacus-common
 ```java
 String[] a = {"a", "b", "c"};
 String[] b = {"1", "2", "3"};
@@ -300,7 +300,7 @@ Map<String, String> phoneBook =
           ));
 ```
 
-* By Abacus-Util
+* By abacus-common
 ```java
 Map<String, String> phoneBook = people.stream().toMap(Person::getName, Person::getAddress, Fn.ignoringMerger()); // Fn.replacingMerger()
 ```
@@ -314,7 +314,7 @@ Stream.of(objects).filter(c -> c instanceof Client)
     .map(c -> ((Client) c).getID()).forEach(System.out::println);
 ```
 
-* By Abacus-Util
+* By abacus-common
 ```java
 Stream.of(objects).select(Client.class).forEach(Fn.println);
 ```
@@ -335,7 +335,7 @@ private void safeFoo(final A a) {
 }
 ```
 
-* By Abacus-Util
+* By abacus-common
 ```java
 stream.forEach(a -> Try.run(() -> a.foo()));
 ```
@@ -348,7 +348,7 @@ stream.forEach(a -> Try.run(() -> a.foo()));
 ???
 ```
 
-* By Abacus-Util
+* By abacus-common
 ```java
 stream.reversed()...
 IntStream.of(1, 5, 3).reverseSorted()...
@@ -366,7 +366,7 @@ IntStream.range(1, arrayList.size())
 // There is no general solution Stream created from iterator/collection..
 ```
 
-* By Abacus-Util
+* By abacus-common
 ```java
 // For any stream created from iterator/Collection/Array/List...
 stream().slidingMap(Pair::of).forEach(Fn.println());
@@ -380,7 +380,7 @@ stream().slidingMap(Pair::of).forEach(Fn.println());
 T last = stream.reduce((a, b) -> b).orElse(null);
 ```
 
-* By Abacus-Util
+* By abacus-common
 ```java
 T last = stream.last().orElse(null);
 ```
@@ -393,7 +393,7 @@ T last = stream.last().orElse(null);
 ???
 ```
 
-* By Abacus-Util
+* By abacus-common
 ```java
 stream.split(batchSize)...
 ```
@@ -421,7 +421,7 @@ Map<String, Integer> mx = Stream.of(m1, m2)
     );
 ```
 
-* By Abacus-Util
+* By abacus-common
 ```java
 Stream.of(m1).append(m2.entrySet()).toMap(Fn.key(), Fn.value(), Integer::max);
 ```
@@ -438,7 +438,7 @@ return IntStream.range(0, list.size())
     .collect(Collectors.toList());
 ```
 
-* By Abacus-Util
+* By abacus-common
 ```java
 Stream.of(list).step(3).toList();
 ```
@@ -455,7 +455,7 @@ Set<Integer> duplicates = Arrays.stream(numbers)
         .collect(Collectors.toSet());
 ```
 
-* By Abacus-Util
+* By abacus-common
 ```java
 Stream.of(numbers).groupByToEntry(Fn.identity(), Fn.counting()).filterByValue(occur -> occur > 1).keys().toList();
 // Or:
@@ -492,7 +492,7 @@ Collection<DataSet> convert(List<MultiDataPoint> multiDataPoints) {
 }
 ```
 
-* By Abacus-Util
+* By abacus-common
 ```java
 Stream.of(multiDataPoints)
     .flatMap(mdp -> Stream.of(mdp.keyToData).map(e -> Pair.of(e.getKey(), new DataPoint(mdp.timestamp, e.getValue()))))
@@ -513,7 +513,7 @@ String result = "Hello world."
   .toString();
 ```
 
-* By Abacus-Util
+* By abacus-common
 ```java
 CharStream.of(result).map(c -> c == ' ' ? ' ': '*').println();
 ```
@@ -526,7 +526,7 @@ CharStream.of(result).map(c -> c == ' ' ? ' ': '*').println();
 ???
 ```
 
-* By Abacus-Util
+* By abacus-common
 ```java
 Stream.of(resultSet)...
 // Or:
@@ -548,7 +548,7 @@ IntStream.of(one).forEach(i ->
 System.out.println(list);
 ```
 
-* By Abacus-Util
+* By abacus-common
 ```java
 Stream.of(1, 2, 3).cartesianProduct(Arrays.asList(3, 4)).forEach(Fn.println());
 ```

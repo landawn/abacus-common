@@ -4,17 +4,17 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.landawn</groupId>
-	<artifactId>abacus-util-se</artifactId>
+	<artifactId>abacus-common-se</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
-	<name>abacus-util-se</name>
+	<name>abacus-common-se</name>
 	<description>A general programming library in Java/Android. It's easy to learn and simple to use with concise and powerful APIs.</description>
-	<url>https://github.com/landawn/abacus-util</url>
+	<url>https://github.com/landawn/abacus-common</url>
 
 	<licenses>
 		<license>
 			<name>The Apache License, Version 2.0</name>
-			<url>https://github.com/landawn/abacus-util/blob/master/LICENSE.txt</url>
+			<url>https://github.com/landawn/abacus-common/blob/master/LICENSE.txt</url>
 		</license>
 	</licenses>
 
@@ -26,9 +26,9 @@
 	</developers>
 
 	<scm>
-		<connection>scm:git:https://github.com/landawn/abacus-util.git</connection>
-		<developerConnection>scm:git:https://github.com/landawn/abacus-util.git</developerConnection>
-		<url>https://github.com/landawn/abacus-util</url>
+		<connection>scm:git:https://github.com/landawn/abacus-common.git</connection>
+		<developerConnection>scm:git:https://github.com/landawn/abacus-common.git</developerConnection>
+		<url>https://github.com/landawn/abacus-common</url>
 	</scm>
 
 	<distributionManagement>

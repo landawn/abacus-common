@@ -38,7 +38,7 @@ public class Maven {
                 .forEach(file -> IOUtil.deleteIfExists(file));
 
         StreamEx.listFiles(new File("./target/"))
-                .filter(f -> f.getName().startsWith("abacus-util") && f.getName().endsWith(".jar"))
+                .filter(f -> f.getName().startsWith("abacus-common") && f.getName().endsWith(".jar"))
                 .peek(f -> N.println(f.getName()))
                 .forEach(f -> IOUtil.copy(f, targetDir));
 
