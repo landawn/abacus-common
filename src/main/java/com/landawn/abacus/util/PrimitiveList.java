@@ -54,76 +54,28 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      */
     public abstract A array();
 
-    /**
-     * Adds the all.
-     *
-     * @param a
-     * @return true, if successful
-     */
     public abstract boolean addAll(A a);
 
-    /**
-     * Adds the all.
-     *
-     * @param index
-     * @param a
-     * @return true, if successful
-     */
     public abstract boolean addAll(int index, A a);
 
-    /**
-     * Removes the all.
-     *
-     * @param a
-     * @return true, if successful
-     */
     public abstract boolean removeAll(A a);
 
-    /**
-     *
-     * @param indices
-     */
     public abstract void deleteAll(int... indices);
 
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     */
     public abstract void deleteRange(int fromIndex, int toIndex);
 
-    // public abstract boolean containsAll(L l);
+    public abstract boolean containsAll(L l);
 
-    /**
-     *
-     * @param a
-     * @return true, if successful
-     */
     public abstract boolean containsAll(A a);
 
-    // public abstract boolean containsAny(L l);
+    public abstract boolean containsAny(L l);
 
-    /**
-     *
-     * @param a
-     * @return true, if successful
-     */
     public abstract boolean containsAny(A a);
 
-    // public abstract boolean disjoint(L l);
+    public abstract boolean disjoint(L l);
 
-    /**
-     *
-     * @param a
-     * @return true, if successful
-     */
     public abstract boolean disjoint(A a);
 
-    /**
-     * Checks for duplicates.
-     *
-     * @return true, if successful
-     */
     public abstract boolean hasDuplicates();
 
     /**
@@ -138,49 +90,22 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      *
      * @param fromIndex
      * @param toIndex
-     * @return
+     * @return a new List with distinct elements
      */
     public abstract L distinct(final int fromIndex, final int toIndex);
 
-    /**
-     * Sort.
-     */
     public abstract void sort();
 
-    /**
-     * Reverse.
-     */
     public abstract void reverse();
 
-    /**
-     *
-     * @param fromIndex
-     * @param toIndex
-     */
     public abstract void reverse(final int fromIndex, final int toIndex);
 
-    /**
-     *
-     * @param distance
-     */
     public abstract void rotate(int distance);
 
-    /**
-     * Shuffle.
-     */
     public abstract void shuffle();
 
-    /**
-     *
-     * @param rnd
-     */
     public abstract void shuffle(final Random rnd);
 
-    /**
-     *
-     * @param i
-     * @param j
-     */
     public abstract void swap(int i, int j);
 
     /**

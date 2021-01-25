@@ -652,7 +652,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * Adds the all.
      *
      * @param c
-     * @return true, if successful
+     * @return
      * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Long.MAX_VALUE.
      */
     public boolean addAll(final Collection<? extends T> c) throws IllegalArgumentException {
@@ -668,7 +668,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      *
      * @param c
      * @param occurrencesToAdd
-     * @return true, if successful
+     * @return
      * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Long.MAX_VALUE.
      */
     public boolean addAll(final Collection<? extends T> c, final long occurrencesToAdd) throws IllegalArgumentException {
@@ -689,7 +689,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * Adds the all.
      *
      * @param m
-     * @return true, if successful
+     * @return
      * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Long.MAX_VALUE.
      */
     public boolean addAll(final Map<? extends T, Long> m) throws IllegalArgumentException {
@@ -718,7 +718,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * Adds the all.
      *
      * @param multiset
-     * @return true, if successful
+     * @return
      * @throws IllegalArgumentException if the occurrences of element is less than 0.
      */
     public boolean addAll(final LongMultiset<? extends T> multiset) throws IllegalArgumentException {
@@ -736,7 +736,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      *
      * @param o
-     * @return true, if successful
+     * @return
      */
     public boolean contains(final Object o) {
         return valueMap.containsKey(o);
@@ -745,7 +745,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      *
      * @param c
-     * @return true, if successful
+     * @return
      */
     public boolean containsAll(final Collection<?> c) {
         return valueMap.keySet().containsAll(c);
@@ -756,7 +756,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * The element will be removed from this <code>Multiset</code> if the occurrences equals to or less than 0 after the operation.
      *
      * @param e
-     * @return true, if successful
+     * @return
      */
     public boolean remove(final Object e) {
         return remove(e, 1);
@@ -768,7 +768,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      *
      * @param e
      * @param occurrencesToRemove
-     * @return true, if successful
+     * @return
      */
     public boolean remove(final Object e, final long occurrencesToRemove) {
         checkOccurrences(occurrencesToRemove);
@@ -874,7 +874,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      *
      * @param <E>
      * @param predicate
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean removeAllOccurrencesIf(Throwables.Predicate<? super T, E> predicate) throws E {
@@ -904,7 +904,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      *
      * @param <E>
      * @param predicate
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean removeAllOccurrencesIf(Throwables.BiPredicate<? super T, ? super Long, E> predicate) throws E {
@@ -935,7 +935,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @param <E>
      * @param occurrences
      * @param predicate
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean removeIf(final long occurrences, Throwables.Predicate<? super T, E> predicate) throws E {
@@ -968,7 +968,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @param <E>
      * @param occurrences
      * @param predicate
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean removeIf(final long occurrences, Throwables.BiPredicate<? super T, ? super Long, E> predicate) throws E {
@@ -1058,7 +1058,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * Removes the all.
      *
      * @param m
-     * @return true, if successful
+     * @return
      */
     public boolean removeAll(final Map<?, Long> m) {
         if (N.isNullOrEmpty(m)) {
@@ -1086,7 +1086,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * Removes the all.
      *
      * @param multiset
-     * @return true, if successful
+     * @return
      * @throws IllegalArgumentException the illegal argument exception
      */
     public boolean removeAll(final LongMultiset<?> multiset) throws IllegalArgumentException {
@@ -1106,7 +1106,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @param <E>
      * @param predicate
      * @param newOccurrences
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean replaceIf(Throwables.Predicate<? super T, E> predicate, final long newOccurrences) throws E {
@@ -1149,7 +1149,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @param <E>
      * @param predicate
      * @param newOccurrences
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean replaceIf(Throwables.BiPredicate<? super T, ? super Long, E> predicate, final long newOccurrences) throws E {
@@ -1794,7 +1794,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean equals(final Object obj) {

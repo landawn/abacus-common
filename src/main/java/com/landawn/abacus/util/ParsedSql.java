@@ -320,7 +320,7 @@ public final class ParsedSql {
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean equals(Object obj) {

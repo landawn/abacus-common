@@ -46,7 +46,7 @@ public class IdentityHashSet<T> extends AbstractSet<T> {
     /**
      *
      * @param e
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean add(T e) {
@@ -56,7 +56,7 @@ public class IdentityHashSet<T> extends AbstractSet<T> {
     /**
      *
      * @param o
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean remove(Object o) {
@@ -66,7 +66,7 @@ public class IdentityHashSet<T> extends AbstractSet<T> {
     /**
      *
      * @param c
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean containsAll(Collection<?> c) {
@@ -81,7 +81,7 @@ public class IdentityHashSet<T> extends AbstractSet<T> {
      * Adds the all.
      *
      * @param c
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean addAll(Collection<? extends T> c) {
@@ -102,7 +102,7 @@ public class IdentityHashSet<T> extends AbstractSet<T> {
      * Removes the all.
      *
      * @param c
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean removeAll(Collection<?> c) {
@@ -122,7 +122,7 @@ public class IdentityHashSet<T> extends AbstractSet<T> {
     /**
      *
      * @param c
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean retainAll(Collection<?> c) {
@@ -153,7 +153,7 @@ public class IdentityHashSet<T> extends AbstractSet<T> {
     /**
      *
      * @param o
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean contains(Object o) {

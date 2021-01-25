@@ -570,7 +570,7 @@ public class u {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean equals(Object obj) {
@@ -681,7 +681,7 @@ public class u {
 
         /**
          *
-         * @return true, if successful
+         * @return
          * @throws NoSuchElementException the no such element exception
          */
         public boolean get() throws NoSuchElementException {
@@ -835,7 +835,7 @@ public class u {
 
         /**
          *
-         * @return true, if successful
+         * @return
          */
         public boolean orFalse() {
             return isPresent ? value : false;
@@ -847,7 +847,7 @@ public class u {
 
         /**
          *
-         * @return true, if successful
+         * @return
          */
         public boolean orTrue() {
             return isPresent ? value : true;
@@ -860,7 +860,7 @@ public class u {
         /**
          * Or else throw.
          *
-         * @return true, if successful
+         * @return
          * @throws NoSuchElementException the no such element exception
          */
         public boolean orElseThrow() throws NoSuchElementException {
@@ -874,7 +874,7 @@ public class u {
         /**
          *
          * @param other
-         * @return true, if successful
+         * @return
          */
         public boolean orElse(boolean other) {
             return isPresent ? value : other;
@@ -885,7 +885,7 @@ public class u {
          *
          * @param <E>
          * @param other
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         public <E extends Exception> boolean orElseGet(final Throwables.BooleanSupplier<E> other) throws E {
@@ -903,7 +903,7 @@ public class u {
          *
          * @param <X>
          * @param exceptionSupplier
-         * @return true, if successful
+         * @return
          * @throws X the x
          */
         public <X extends Throwable> boolean orElseThrow(final Supplier<? extends X> exceptionSupplier) throws X {
@@ -1011,7 +1011,7 @@ public class u {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean equals(Object obj) {
@@ -1467,7 +1467,7 @@ public class u {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean equals(Object obj) {
@@ -1923,7 +1923,7 @@ public class u {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean equals(Object obj) {
@@ -2379,7 +2379,7 @@ public class u {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean equals(Object obj) {
@@ -2896,7 +2896,7 @@ public class u {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean equals(Object obj) {
@@ -3395,7 +3395,7 @@ public class u {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean equals(Object obj) {
@@ -3854,7 +3854,7 @@ public class u {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean equals(Object obj) {
@@ -4338,7 +4338,7 @@ public class u {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean equals(Object obj) {
@@ -5366,7 +5366,7 @@ public class u {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean equals(Object obj) {
@@ -5586,7 +5586,7 @@ public class u {
          * @param <E>
          * @param newValue
          * @param predicate - test the current value.
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         public <E extends Exception> boolean setIf(final T newValue, final Throwables.Predicate<? super T, E> predicate) throws E {
@@ -5605,7 +5605,7 @@ public class u {
          * @param <E>
          * @param newValue
          * @param predicate the first parameter is the current value, the second parameter is the new value.
-         * @return true, if successful
+         * @return
          * @throws E the e
          * @deprecated
          */
@@ -5872,7 +5872,7 @@ public class u {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return
          */
         @SuppressWarnings("rawtypes")
         @Override

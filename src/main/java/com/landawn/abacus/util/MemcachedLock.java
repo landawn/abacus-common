@@ -41,7 +41,7 @@ public final class MemcachedLock<K, V> {
      *
      * @param target
      * @param liveTime
-     * @return true, if successful
+     * @return
      */
     public boolean lock(K target, long liveTime) {
         return lock(target, (V) N.EMPTY_BYTE_ARRAY, liveTime);
@@ -52,7 +52,7 @@ public final class MemcachedLock<K, V> {
      * @param target
      * @param value
      * @param liveTime unit is milliseconds
-     * @return true, if successful
+     * @return
      */
     public boolean lock(K target, V value, long liveTime) {
         String key = toKey(target);
@@ -88,7 +88,7 @@ public final class MemcachedLock<K, V> {
     /**
      *
      * @param target
-     * @return true, if successful
+     * @return
      */
     public boolean unlock(K target) {
         try {

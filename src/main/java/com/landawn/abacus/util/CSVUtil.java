@@ -84,19 +84,23 @@ public final class CSVUtil {
         }
     };
 
-    static final Function<String, String[]> defaultCsvHeadereParser = new Function<String, String[]>() {
+    static final Function<String, String[]> CSV_HEADER_PARSER_IN_JSON = new Function<String, String[]>() {
         @Override
         public String[] apply(String line) {
             return jsonParser.readString(String[].class, line, jdc);
         }
     };
 
-    static final BiConsumer<String[], String> defaultCsvLineParser = new BiConsumer<String[], String>() {
+    static final BiConsumer<String[], String> CSV_LINE_PARSER_IN_JSON = new BiConsumer<String[], String>() {
         @Override
         public void accept(String[] output, String line) {
             jsonParser.readString(output, line, jdc);
         }
     };
+
+    static final Function<String, String[]> defaultCsvHeadereParser = CSV_HEADER_PARSER_IN_JSON;
+
+    static final BiConsumer<String[], String> defaultCsvLineParser = CSV_LINE_PARSER_IN_JSON;
 
     static final ThreadLocal<Function<String, String[]>> csvHeaderParser_TL = new ThreadLocal<>();
     static final ThreadLocal<BiConsumer<String[], String>> csvLineParser_TL = new ThreadLocal<>();

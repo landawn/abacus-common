@@ -125,7 +125,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * @param <E>
      * @param newValue
      * @param predicate - test the current value.
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean setIf(int newValue, Throwables.IntPredicate<E> predicate) throws E {
@@ -144,7 +144,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * @param <E>
      * @param newValue
      * @param predicate the first parameter is the current value, the second parameter is the new value.
-     * @return true, if successful
+     * @return
      * @throws E the e
      * @deprecated
      */

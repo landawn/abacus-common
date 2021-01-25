@@ -298,7 +298,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean equals(Object obj) {

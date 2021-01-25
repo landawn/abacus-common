@@ -107,7 +107,7 @@ public final class SnappyInputStream extends InputStream {
 
     /**
      *
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean markSupported() {

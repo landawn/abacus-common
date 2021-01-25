@@ -120,7 +120,7 @@ public final class IntPair implements Immutable {
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean equals(Object obj) {

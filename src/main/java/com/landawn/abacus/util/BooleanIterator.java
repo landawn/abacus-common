@@ -245,7 +245,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
     /**
      *
-     * @return true, if successful
+     * @return
      */
     public abstract boolean nextBoolean();
 

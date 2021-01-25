@@ -227,7 +227,7 @@ public interface NoCachingNoUpdating {
         /**
          *
          * @param index
-         * @return true, if successful
+         * @return
          */
         public boolean get(final int index) {
             return a[index];

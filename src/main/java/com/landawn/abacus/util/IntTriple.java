@@ -124,7 +124,7 @@ public final class IntTriple implements Immutable {
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean equals(Object obj) {

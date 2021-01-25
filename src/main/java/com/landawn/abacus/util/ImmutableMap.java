@@ -311,7 +311,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      *
      * @param key
      * @param value
-     * @return true, if successful
+     * @return
      * @deprecated throws {@code UnsupportedOperationException}
      * @throws UnsupportedOperationException
      */
@@ -326,7 +326,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * @param key
      * @param oldValue
      * @param newValue
-     * @return true, if successful
+     * @return
      * @deprecated throws {@code UnsupportedOperationException}
      * @throws UnsupportedOperationException
      */
@@ -433,7 +433,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     /**
      *
      * @param key
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean containsKey(Object key) {
@@ -443,7 +443,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
     /**
      *
      * @param value
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean containsValue(Object value) {

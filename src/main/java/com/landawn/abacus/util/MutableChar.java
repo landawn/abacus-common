@@ -117,7 +117,7 @@ public final class MutableChar implements Comparable<MutableChar>, Mutable {
      * @param <E>
      * @param newValue
      * @param predicate - test the current value.
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean setIf(char newValue, Throwables.CharPredicate<E> predicate) throws E {
@@ -136,7 +136,7 @@ public final class MutableChar implements Comparable<MutableChar>, Mutable {
      * @param <E>
      * @param newValue
      * @param predicate the first parameter is the current value, the second parameter is the new value.
-     * @return true, if successful
+     * @return
      * @throws E the e
      * @deprecated
      */

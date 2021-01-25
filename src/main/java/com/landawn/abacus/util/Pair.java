@@ -176,7 +176,7 @@ public final class Pair<L, R> implements Mutable {
      * @param newLeft
      * @param predicate - the first parameter is current pair, the second
      *        parameter is the <code>newLeft</code>
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean setLeftIf(final L newLeft, Throwables.BiPredicate<? super Pair<L, R>, ? super L, E> predicate) throws E {
@@ -197,7 +197,7 @@ public final class Pair<L, R> implements Mutable {
      * @param newRight
      * @param predicate - the first parameter is current pair, the second
      *        parameter is the <code>newRight</code>
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean setRightIf(final R newRight, Throwables.BiPredicate<? super Pair<L, R>, ? super R, E> predicate) throws E {
@@ -219,7 +219,7 @@ public final class Pair<L, R> implements Mutable {
      * @param newRight
      * @param predicate - the first parameter is current pair, the second
      *        parameter is the <code>newLeft</code>, the third parameter is the <code>newRight</code>.
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean setIf(final L newLeft, final R newRight,
@@ -435,7 +435,7 @@ public final class Pair<L, R> implements Mutable {
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean equals(final Object obj) {

@@ -283,7 +283,7 @@ public final class Result<T, E extends Throwable> implements Immutable {
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return
      */
     @SuppressWarnings("rawtypes")
     @Override

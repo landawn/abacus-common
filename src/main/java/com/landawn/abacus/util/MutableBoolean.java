@@ -75,7 +75,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
 
     /**
      *
-     * @return true, if successful
+     * @return
      */
     public boolean value() {
         return value;
@@ -118,7 +118,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * Sets the and get.
      *
      * @param value
-     * @return true, if successful
+     * @return
      */
     public boolean setAndGet(final boolean value) {
         this.value = value;
@@ -139,7 +139,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
     /**
      * Invert and get.
      *
-     * @return true, if successful
+     * @return
      */
     public boolean invertAndGet() {
         value = !value;
@@ -153,7 +153,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * @param <E>
      * @param newValue
      * @param predicate - test the current value.
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean setIf(boolean newValue, Throwables.BooleanPredicate<E> predicate) throws E {
@@ -172,7 +172,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * @param <E>
      * @param newValue
      * @param predicate the first parameter is the current value, the second parameter is the new value.
-     * @return true, if successful
+     * @return
      * @throws E the e
      * @deprecated
      */

@@ -195,7 +195,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
     /**
      *
      * @param c
-     * @return true, if successful
+     * @return
      */
     public boolean containsAll(Collection<? extends T> c) {
         if (N.isNullOrEmpty(c)) {
@@ -577,7 +577,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
         /**
          *
          * @param value
-         * @return true, if successful
+         * @return
          */
         public abstract boolean includes(T value);
 
@@ -606,7 +606,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
         /**
          *
          * @param value
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean includes(T value) {
@@ -689,7 +689,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
         /**
          *
          * @param value
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean includes(T value) {
@@ -710,7 +710,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean equals(final Object obj) {

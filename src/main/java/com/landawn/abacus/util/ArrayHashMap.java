@@ -130,7 +130,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
     /**
      *
      * @param key
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean containsKey(Object key) {
@@ -140,7 +140,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
     /**
      *
      * @param value
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean containsValue(Object value) {
@@ -193,7 +193,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean equals(Object obj) {
@@ -228,7 +228,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          *
          * @param e
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean add(java.util.Map.Entry<K, V> e) {
@@ -239,7 +239,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
          * Adds the all.
          *
          * @param c
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean addAll(Collection<? extends java.util.Map.Entry<K, V>> c) {
@@ -249,7 +249,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          *
          * @param o
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean remove(Object o) {
@@ -259,7 +259,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          *
          * @param c
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean containsAll(Collection<?> c) {
@@ -270,7 +270,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
          * Removes the all.
          *
          * @param c
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean removeAll(Collection<?> c) {
@@ -280,7 +280,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          *
          * @param c
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean retainAll(Collection<?> c) {
@@ -290,7 +290,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          *
          * @param o
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean contains(Object o) {
@@ -397,7 +397,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean equals(Object obj) {
@@ -437,7 +437,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          * Checks for next.
          *
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean hasNext() {
@@ -525,7 +525,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean equals(Object obj) {

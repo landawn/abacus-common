@@ -35,6 +35,7 @@ import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.function.BiFunction;
+import com.landawn.abacus.util.function.BinaryOperator;
 import com.landawn.abacus.util.function.IntFunction;
 import com.landawn.abacus.util.function.Supplier;
 
@@ -392,6 +393,25 @@ public final class Maps {
         return result;
     }
 
+    public static <K, V, M extends Map<K, V>> Map<K, V> zip(final Collection<? extends K> keys, final Collection<? extends V> values,
+            final BinaryOperator<V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
+        if (N.isNullOrEmpty(keys) || N.isNullOrEmpty(values)) {
+            return new HashMap<>();
+        }
+
+        final Iterator<? extends K> keyIter = keys.iterator();
+        final Iterator<? extends V> valueIter = values.iterator();
+
+        final int minLen = N.min(keys.size(), values.size());
+        final Map<K, V> result = mapSupplier.apply(minLen);
+
+        for (int i = 0; i < minLen; i++) {
+            result.merge(keyIter.next(), valueIter.next(), mergeFunction);
+        }
+
+        return result;
+    }
+
     /**
      *
      * @param <K> the key type
@@ -637,7 +657,7 @@ public final class Maps {
      *
      * @param map
      * @param entry
-     * @return true, if successful
+     * @return
      */
     public static boolean contains(final Map<?, ?> map, final Map.Entry<?, ?> entry) {
         return contains(map, entry.getKey(), entry.getValue());
@@ -648,7 +668,7 @@ public final class Maps {
      * @param map
      * @param key
      * @param value
-     * @return true, if successful
+     * @return
      */
     public static boolean contains(final Map<?, ?> map, final Object key, final Object value) {
         if (N.isNullOrEmpty(map)) {
@@ -825,7 +845,7 @@ public final class Maps {
      * @param <V> the value type
      * @param map
      * @param entry
-     * @return true, if successful
+     * @return
      */
     public static <K, V> boolean remove(final Map<K, V> map, Map.Entry<?, ?> entry) {
         return remove(map, entry.getKey(), entry.getValue());
@@ -838,7 +858,7 @@ public final class Maps {
      * @param map
      * @param key
      * @param value
-     * @return true, if successful
+     * @return
      */
     public static <K, V> boolean remove(final Map<K, V> map, final Object key, final Object value) {
         if (N.isNullOrEmpty(map)) {
@@ -1012,7 +1032,7 @@ public final class Maps {
      * @param key
      * @param oldValue
      * @param newValue
-     * @return true, if successful
+     * @return
      */
     public static <K, V> boolean replace(final Map<K, V> map, final K key, final V oldValue, final V newValue) {
         if (N.isNullOrEmpty(map)) {
@@ -1333,7 +1353,205 @@ public final class Maps {
     }
 
     /**
-     * Map 2 entity.
+     *
+     * @param map
+     * @return
+     */
+    public static Map<String, Object> flatten(Map<String, Object> map) {
+        return flatten(map, Suppliers.<String, Object> ofMap());
+    }
+
+    /**
+     *
+     * @param <M>
+     * @param map
+     * @param mapSupplier
+     * @return
+     */
+    public static <M extends Map<String, Object>> M flatten(Map<String, Object> map, Supplier<? extends M> mapSupplier) {
+        return flatten(map, ".", mapSupplier);
+    }
+
+    /**
+     *
+     * @param <M>
+     * @param map
+     * @param delimiter
+     * @param mapSupplier
+     * @return
+     */
+    public static <M extends Map<String, Object>> M flatten(Map<String, Object> map, String delimiter, Supplier<? extends M> mapSupplier) {
+        final M result = mapSupplier.get();
+
+        flatten(map, null, delimiter, result);
+
+        return result;
+    }
+
+    /**
+     *
+     * @param map
+     * @param prefix
+     * @param delimiter
+     * @param output
+     */
+    private static void flatten(Map<String, Object> map, String prefix, String delimiter, Map<String, Object> output) {
+        if (N.isNullOrEmpty(map)) {
+            return;
+        }
+
+        if (N.isNullOrEmpty(prefix)) {
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                if (entry.getValue() instanceof Map) {
+                    flatten((Map<String, Object>) entry.getValue(), entry.getKey(), delimiter, output);
+                } else {
+                    output.put(entry.getKey(), entry.getValue());
+                }
+            }
+        } else {
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                if (entry.getValue() instanceof Map) {
+                    flatten((Map<String, Object>) entry.getValue(), prefix + delimiter + entry.getKey(), delimiter, output);
+                } else {
+                    output.put(prefix + delimiter + entry.getKey(), entry.getValue());
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     * @param map
+     * @return
+     */
+    public static Map<String, Object> unflatten(Map<String, Object> map) {
+        return unflatten(map, Suppliers.<String, Object> ofMap());
+    }
+
+    /**
+     *
+     * @param <M>
+     * @param map
+     * @param mapSupplier
+     * @return
+     */
+    public static <M extends Map<String, Object>> M unflatten(Map<String, Object> map, Supplier<? extends M> mapSupplier) {
+        return unflatten(map, ".", mapSupplier);
+    }
+
+    /**
+     *
+     * @param <M>
+     * @param map
+     * @param delimiter
+     * @param mapSupplier
+     * @return
+     */
+    public static <M extends Map<String, Object>> M unflatten(Map<String, Object> map, String delimiter, Supplier<? extends M> mapSupplier) {
+        final M result = mapSupplier.get();
+        final Splitter keySplitter = Splitter.with(delimiter);
+
+        if (N.notNullOrEmpty(map)) {
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                if (entry.getKey().indexOf(delimiter) >= 0) {
+                    final String[] keys = keySplitter.splitToArray(entry.getKey());
+                    Map<String, Object> lastMap = result;
+
+                    for (int i = 0, to = keys.length - 1; i < to; i++) {
+                        Map<String, Object> tmp = (Map<String, Object>) lastMap.get(keys[i]);
+
+                        if (tmp == null) {
+                            tmp = mapSupplier.get();
+                            lastMap.put(keys[i], tmp);
+                        }
+
+                        lastMap = tmp;
+                    }
+
+                    lastMap.put(keys[keys.length - 1], entry.getValue());
+                } else {
+                    result.put(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Map type 2 supplier.
+     *
+     * @param mapType
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    static Supplier mapType2Supplier(final Class<? extends Map> mapType) {
+        if (HashMap.class.equals(mapType)) {
+            return Suppliers.ofMap();
+        } else if (SortedMap.class.isAssignableFrom(mapType)) {
+            return Suppliers.ofTreeMap();
+        } else if (IdentityHashMap.class.isAssignableFrom(mapType)) {
+            return Suppliers.ofIdentityHashMap();
+        } else if (LinkedHashMap.class.isAssignableFrom(mapType)) {
+            return Suppliers.ofLinkedHashMap();
+        } else if (ImmutableMap.class.isAssignableFrom(mapType)) {
+            return Suppliers.ofLinkedHashMap();
+        } else {
+            return new Supplier<Map>() {
+                @Override
+                public Map get() {
+                    try {
+                        return N.newInstance(mapType);
+                    } catch (Exception e) {
+                        return new LinkedHashMap<>();
+                    }
+                }
+            };
+        }
+    }
+
+    /**
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param map
+     * @param function
+     */
+    static <K, V> void replaceAll(Map<K, V> map, BiFunction<? super K, ? super V, ? extends V> function) {
+        N.checkArgNotNull(function);
+
+        try {
+            for (Map.Entry<K, V> entry : map.entrySet()) {
+                entry.setValue(function.apply(entry.getKey(), entry.getValue()));
+            }
+        } catch (IllegalStateException ise) {
+            throw new ConcurrentModificationException(ise);
+        }
+    }
+
+    /**
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <E>
+     * @param map
+     * @param key
+     * @param value
+     * @param remappingFunction
+     * @throws E the e
+     */
+    static <K, V, E extends Exception> void merge(Map<K, V> map, K key, V value, Throwables.BinaryOperator<V, E> remappingFunction) throws E {
+        final V oldValue = map.get(key);
+
+        if (oldValue == null && map.containsKey(key) == false) {
+            map.put(key, value);
+        } else {
+            map.put(key, remappingFunction.apply(oldValue, value));
+        }
+    }
+
+    /**
+     * Map to entity.
      *
      * @param <T>
      * @param targetClass
@@ -1345,7 +1563,7 @@ public final class Maps {
     }
 
     /**
-     * Map 2 entity.
+     * Map to entity.
      *
      * @param <T>
      * @param targetClass
@@ -1391,7 +1609,7 @@ public final class Maps {
     }
 
     /**
-     * Map 2 entity.
+     * Map to entity.
      *
      * @param <T>
      * @param targetClass
@@ -1431,7 +1649,7 @@ public final class Maps {
     }
 
     /**
-     * Map 2 entity.
+     * Map to entity.
      *
      * @param <T>
      * @param targetClass
@@ -1443,7 +1661,7 @@ public final class Maps {
     }
 
     /**
-     * Map 2 entity.
+     * Map to entity.
      *
      * @param <T>
      * @param targetClass
@@ -1466,7 +1684,7 @@ public final class Maps {
     }
 
     /**
-     * Map 2 entity.
+     * Map to entity.
      *
      * @param <T>
      * @param targetClass
@@ -1487,19 +1705,7 @@ public final class Maps {
     }
 
     /**
-     * Check entity class.
-     *
-     * @param <T>
-     * @param cls
-     */
-    private static <T> void checkEntityClass(final Class<T> cls) {
-        if (!ClassUtil.isEntity(cls)) {
-            throw new IllegalArgumentException("No property getter/setter method is found in the specified class: " + ClassUtil.getCanonicalClassName(cls));
-        }
-    }
-
-    /**
-     * Entity 2 map.
+     * Entity to map.
      *
      * @param entity
      * @return
@@ -1509,7 +1715,7 @@ public final class Maps {
     }
 
     /**
-     * Entity 2 map.
+     * Entity to map.
      *
      * @param entity
      * @param ignoreNullProperty
@@ -1520,7 +1726,7 @@ public final class Maps {
     }
 
     /**
-     * Entity 2 map.
+     * Entity to map.
      *
      * @param entity
      * @param ignoredPropNames
@@ -1531,7 +1737,7 @@ public final class Maps {
     }
 
     /**
-     * Entity 2 map.
+     * Entity to map.
      *
      * @param entity
      * @param ignoreNullProperty
@@ -1543,7 +1749,7 @@ public final class Maps {
     }
 
     /**
-     * Entity 2 map.
+     * Entity to map.
      *
      * @param entity
      * @param ignoreNullProperty
@@ -1563,7 +1769,7 @@ public final class Maps {
     }
 
     /**
-     * Entity 2 map.
+     * Entity to map.
      *
      * @param <M>
      * @param entity
@@ -1575,7 +1781,7 @@ public final class Maps {
     }
 
     /**
-     * Entity 2 map.
+     * Entity to map.
      *
      * @param <M>
      * @param resultMap
@@ -1587,7 +1793,7 @@ public final class Maps {
     }
 
     /**
-     * Entity 2 map.
+     * Entity to map.
      *
      * @param <M>
      * @param resultMap
@@ -1600,7 +1806,7 @@ public final class Maps {
     }
 
     /**
-     * Entity 2 map.
+     * Entity to map.
      *
      * @param <M>
      * @param resultMap
@@ -1613,7 +1819,7 @@ public final class Maps {
     }
 
     /**
-     * Entity 2 map.
+     * Entity to map.
      *
      * @param <M>
      * @param resultMap
@@ -1628,7 +1834,7 @@ public final class Maps {
     }
 
     /**
-     * Entity 2 map.
+     * Entity to map.
      *
      * @param <M>
      * @param resultMap
@@ -1703,7 +1909,7 @@ public final class Maps {
     }
 
     /**
-     * Entity 2 map.
+     * Entity to map.
      *
      * @param entityList
      * @return
@@ -1713,7 +1919,7 @@ public final class Maps {
     }
 
     /**
-     * Entity 2 map.
+     * Entity to map.
      *
      * @param entityList
      * @param ignoreNullProperty
@@ -1724,7 +1930,7 @@ public final class Maps {
     }
 
     /**
-     * Entity 2 map.
+     * Entity to map.
      *
      * @param entityList
      * @param ignoredPropNames
@@ -1735,7 +1941,7 @@ public final class Maps {
     }
 
     /**
-     * Entity 2 map.
+     * Entity to map.
      *
      * @param entityList
      * @param ignoreNullProperty
@@ -1748,7 +1954,7 @@ public final class Maps {
     }
 
     /**
-     * Entity 2 map.
+     * Entity to map.
      *
      * @param entityList
      * @param ignoreNullProperty
@@ -1768,7 +1974,7 @@ public final class Maps {
     }
 
     /**
-     * Deep entity 2 map.
+     * Deep entity to map.
      *
      * @param entity
      * @return
@@ -1778,7 +1984,7 @@ public final class Maps {
     }
 
     /**
-     * Deep entity 2 map.
+     * Deep entity to map.
      *
      * @param entity
      * @param ignoreNullProperty
@@ -1789,7 +1995,7 @@ public final class Maps {
     }
 
     /**
-     * Deep entity 2 map.
+     * Deep entity to map.
      *
      * @param entity
      * @param ignoredPropNames
@@ -1800,7 +2006,7 @@ public final class Maps {
     }
 
     /**
-     * Deep entity 2 map.
+     * Deep entity to map.
      *
      * @param entity
      * @param ignoreNullProperty
@@ -1812,7 +2018,7 @@ public final class Maps {
     }
 
     /**
-     * Deep entity 2 map.
+     * Deep entity to map.
      *
      * @param entity
      * @param ignoreNullProperty
@@ -1832,7 +2038,7 @@ public final class Maps {
     }
 
     /**
-     * Deep entity 2 map.
+     * Deep entity to map.
      *
      * @param <M>
      * @param entity
@@ -1844,7 +2050,7 @@ public final class Maps {
     }
 
     /**
-     * Deep entity 2 map.
+     * Deep entity to map.
      *
      * @param <M>
      * @param resultMap
@@ -1856,7 +2062,7 @@ public final class Maps {
     }
 
     /**
-     * Deep entity 2 map.
+     * Deep entity to map.
      *
      * @param <M>
      * @param resultMap
@@ -1869,7 +2075,7 @@ public final class Maps {
     }
 
     /**
-     * Deep entity 2 map.
+     * Deep entity to map.
      *
      * @param <M>
      * @param resultMap
@@ -1882,7 +2088,7 @@ public final class Maps {
     }
 
     /**
-     * Deep entity 2 map.
+     * Deep entity to map.
      *
      * @param <M>
      * @param resultMap
@@ -1897,7 +2103,7 @@ public final class Maps {
     }
 
     /**
-     * Deep entity 2 map.
+     * Deep entity to map.
      *
      * @param <M>
      * @param resultMap
@@ -1988,7 +2194,7 @@ public final class Maps {
     }
 
     /**
-     * Deep entity 2 map.
+     * Deep entity to map.
      *
      * @param entityList
      * @return
@@ -1998,7 +2204,7 @@ public final class Maps {
     }
 
     /**
-     * Deep entity 2 map.
+     * Deep entity to map.
      *
      * @param entityList
      * @param ignoreNullProperty
@@ -2009,7 +2215,7 @@ public final class Maps {
     }
 
     /**
-     * Deep entity 2 map.
+     * Deep entity to map.
      *
      * @param entityList
      * @param ignoredPropNames
@@ -2023,7 +2229,7 @@ public final class Maps {
     }
 
     /**
-     * Deep entity 2 map.
+     * Deep entity to map.
      *
      * @param entityList
      * @param ignoreNullProperty
@@ -2036,7 +2242,7 @@ public final class Maps {
     }
 
     /**
-     * Deep entity 2 map.
+     * Deep entity to map.
      *
      * @param entityList
      * @param ignoreNullProperty
@@ -2352,200 +2558,14 @@ public final class Maps {
     }
 
     /**
+     * Check entity class.
      *
-     * @param map
-     * @return
+     * @param <T>
+     * @param cls
      */
-    public static Map<String, Object> flatten(Map<String, Object> map) {
-        return flatten(map, Suppliers.<String, Object> ofMap());
-    }
-
-    /**
-     *
-     * @param <M>
-     * @param map
-     * @param mapSupplier
-     * @return
-     */
-    public static <M extends Map<String, Object>> M flatten(Map<String, Object> map, Supplier<? extends M> mapSupplier) {
-        return flatten(map, ".", mapSupplier);
-    }
-
-    /**
-     *
-     * @param <M>
-     * @param map
-     * @param delimiter
-     * @param mapSupplier
-     * @return
-     */
-    public static <M extends Map<String, Object>> M flatten(Map<String, Object> map, String delimiter, Supplier<? extends M> mapSupplier) {
-        final M result = mapSupplier.get();
-
-        flatten(map, null, delimiter, result);
-
-        return result;
-    }
-
-    /**
-     *
-     * @param map
-     * @param prefix
-     * @param delimiter
-     * @param output
-     */
-    private static void flatten(Map<String, Object> map, String prefix, String delimiter, Map<String, Object> output) {
-        if (N.isNullOrEmpty(map)) {
-            return;
-        }
-
-        if (N.isNullOrEmpty(prefix)) {
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
-                if (entry.getValue() instanceof Map) {
-                    flatten((Map<String, Object>) entry.getValue(), entry.getKey(), delimiter, output);
-                } else {
-                    output.put(entry.getKey(), entry.getValue());
-                }
-            }
-        } else {
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
-                if (entry.getValue() instanceof Map) {
-                    flatten((Map<String, Object>) entry.getValue(), prefix + delimiter + entry.getKey(), delimiter, output);
-                } else {
-                    output.put(prefix + delimiter + entry.getKey(), entry.getValue());
-                }
-            }
-        }
-    }
-
-    /**
-     *
-     * @param map
-     * @return
-     */
-    public static Map<String, Object> unflatten(Map<String, Object> map) {
-        return unflatten(map, Suppliers.<String, Object> ofMap());
-    }
-
-    /**
-     *
-     * @param <M>
-     * @param map
-     * @param mapSupplier
-     * @return
-     */
-    public static <M extends Map<String, Object>> M unflatten(Map<String, Object> map, Supplier<? extends M> mapSupplier) {
-        return unflatten(map, ".", mapSupplier);
-    }
-
-    /**
-     *
-     * @param <M>
-     * @param map
-     * @param delimiter
-     * @param mapSupplier
-     * @return
-     */
-    public static <M extends Map<String, Object>> M unflatten(Map<String, Object> map, String delimiter, Supplier<? extends M> mapSupplier) {
-        final M result = mapSupplier.get();
-        final Splitter keySplitter = Splitter.with(delimiter);
-
-        if (N.notNullOrEmpty(map)) {
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
-                if (entry.getKey().indexOf(delimiter) >= 0) {
-                    final String[] keys = keySplitter.splitToArray(entry.getKey());
-                    Map<String, Object> lastMap = result;
-
-                    for (int i = 0, to = keys.length - 1; i < to; i++) {
-                        Map<String, Object> tmp = (Map<String, Object>) lastMap.get(keys[i]);
-
-                        if (tmp == null) {
-                            tmp = mapSupplier.get();
-                            lastMap.put(keys[i], tmp);
-                        }
-
-                        lastMap = tmp;
-                    }
-
-                    lastMap.put(keys[keys.length - 1], entry.getValue());
-                } else {
-                    result.put(entry.getKey(), entry.getValue());
-                }
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Map type 2 supplier.
-     *
-     * @param mapType
-     * @return
-     */
-    @SuppressWarnings("rawtypes")
-    static Supplier mapType2Supplier(final Class<? extends Map> mapType) {
-        if (HashMap.class.equals(mapType)) {
-            return Suppliers.ofMap();
-        } else if (SortedMap.class.isAssignableFrom(mapType)) {
-            return Suppliers.ofTreeMap();
-        } else if (IdentityHashMap.class.isAssignableFrom(mapType)) {
-            return Suppliers.ofIdentityHashMap();
-        } else if (LinkedHashMap.class.isAssignableFrom(mapType)) {
-            return Suppliers.ofLinkedHashMap();
-        } else if (ImmutableMap.class.isAssignableFrom(mapType)) {
-            return Suppliers.ofLinkedHashMap();
-        } else {
-            return new Supplier<Map>() {
-                @Override
-                public Map get() {
-                    try {
-                        return N.newInstance(mapType);
-                    } catch (Exception e) {
-                        return new LinkedHashMap<>();
-                    }
-                }
-            };
-        }
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @param function
-     */
-    static <K, V> void replaceAll(Map<K, V> map, BiFunction<? super K, ? super V, ? extends V> function) {
-        N.checkArgNotNull(function);
-
-        try {
-            for (Map.Entry<K, V> entry : map.entrySet()) {
-                entry.setValue(function.apply(entry.getKey(), entry.getValue()));
-            }
-        } catch (IllegalStateException ise) {
-            throw new ConcurrentModificationException(ise);
-        }
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <E>
-     * @param map
-     * @param key
-     * @param value
-     * @param remappingFunction
-     * @throws E the e
-     */
-    static <K, V, E extends Exception> void merge(Map<K, V> map, K key, V value, Throwables.BinaryOperator<V, E> remappingFunction) throws E {
-        final V oldValue = map.get(key);
-
-        if (oldValue == null && map.containsKey(key) == false) {
-            map.put(key, value);
-        } else {
-            map.put(key, remappingFunction.apply(oldValue, value));
+    private static <T> void checkEntityClass(final Class<T> cls) {
+        if (!ClassUtil.isEntity(cls)) {
+            throw new IllegalArgumentException("No property getter/setter method is found in the specified class: " + ClassUtil.getCanonicalClassName(cls));
         }
     }
 }

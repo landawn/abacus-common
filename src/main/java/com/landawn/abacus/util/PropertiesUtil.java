@@ -1163,7 +1163,7 @@ public final class PropertiesUtil {
      * Checks for duplicated prop name.
      *
      * @param node
-     * @return true, if successful
+     * @return
      */
     private static boolean hasDuplicatedPropName(Node node) {
         NodeList childNodes = node.getChildNodes();
@@ -1452,7 +1452,7 @@ public final class PropertiesUtil {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean equals(Object obj) {
@@ -1582,7 +1582,7 @@ public final class PropertiesUtil {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean equals(Object obj) {

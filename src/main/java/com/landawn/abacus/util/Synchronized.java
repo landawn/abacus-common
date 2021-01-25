@@ -84,7 +84,7 @@ public final class Synchronized<T> {
      * @param <E>
      * @param mutex to locked on.
      * @param predicate
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public static <T, E extends Throwable> boolean test(final T mutex, final Throwables.Predicate<? super T, E> predicate) throws E {
@@ -104,7 +104,7 @@ public final class Synchronized<T> {
      * @param mutex to locked on.
      * @param u
      * @param predicate
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public static <T, U, E extends Throwable> boolean test(final T mutex, final U u, final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
@@ -226,7 +226,7 @@ public final class Synchronized<T> {
      *
      * @param <E>
      * @param predicate
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Throwable> boolean test(final Throwables.Predicate<? super T, E> predicate) throws E {

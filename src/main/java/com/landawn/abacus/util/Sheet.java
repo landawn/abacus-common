@@ -451,7 +451,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      *
      * @param rowKey
      * @param columnKey
-     * @return true, if successful
+     * @return
      */
     public boolean contains(Object rowKey, Object columnKey) {
         return get(rowKey, columnKey) != null;
@@ -460,7 +460,7 @@ public final class Sheet<R, C, E> implements Cloneable {
     /**
      *
      * @param value
-     * @return true, if successful
+     * @return
      */
     public boolean containsValue(Object value) {
         //        if (value == null) {
@@ -793,7 +793,7 @@ public final class Sheet<R, C, E> implements Cloneable {
     /**
      *
      * @param rowKey
-     * @return true, if successful
+     * @return
      */
     public boolean containsRow(Object rowKey) {
         return _rowKeySet.contains(rowKey);
@@ -1110,7 +1110,7 @@ public final class Sheet<R, C, E> implements Cloneable {
     /**
      *
      * @param columnKey
-     * @return true, if successful
+     * @return
      */
     public boolean containsColumn(Object columnKey) {
         return _columnKeySet.contains(columnKey);
@@ -1518,7 +1518,7 @@ public final class Sheet<R, C, E> implements Cloneable {
 
     /**
      *
-     * @return true, if successful
+     * @return
      */
     public boolean frozen() {
         return _isFrozen;
@@ -2812,7 +2812,7 @@ public final class Sheet<R, C, E> implements Cloneable {
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean equals(Object obj) {
@@ -3079,7 +3079,7 @@ public final class Sheet<R, C, E> implements Cloneable {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean equals(Object obj) {

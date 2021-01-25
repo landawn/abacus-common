@@ -176,7 +176,7 @@ public class Properties<K, V> implements Map<K, V> {
      *
      * @param key
      * @param value
-     * @return true, if successful
+     * @return
      */
     public boolean remove(Object key, Object value) {
         final Object curValue = get(key);
@@ -213,7 +213,7 @@ public class Properties<K, V> implements Map<K, V> {
      * @param key
      * @param oldValue
      * @param newValue
-     * @return true, if successful
+     * @return
      */
     public boolean replace(K key, V oldValue, V newValue) {
         Object curValue = get(key);
@@ -227,7 +227,7 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      *
      * @param key
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean containsKey(Object key) {
@@ -237,7 +237,7 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      *
      * @param value
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean containsValue(Object value) {
@@ -298,7 +298,7 @@ public class Properties<K, V> implements Map<K, V> {
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean equals(Object obj) {

@@ -61,7 +61,7 @@ public final class Keyed<K, T> implements Immutable {
     /**
      *
      * @param val
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean equals(Object val) {

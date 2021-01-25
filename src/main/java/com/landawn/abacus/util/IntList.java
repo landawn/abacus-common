@@ -22,21 +22,15 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.Throwables.Function;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalInt;
-import com.landawn.abacus.util.function.BiConsumer;
-import com.landawn.abacus.util.function.BiFunction;
 import com.landawn.abacus.util.function.IntFunction;
-import com.landawn.abacus.util.function.Supplier;
-import com.landawn.abacus.util.stream.Collector;
 import com.landawn.abacus.util.stream.IntStream;
 
 /**
@@ -382,7 +376,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Adds the all.
      *
      * @param c
-     * @return true, if successful
+     * @return
      */
     public boolean addAll(IntList c) {
         if (N.isNullOrEmpty(c)) {
@@ -405,7 +399,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * @param index
      * @param c
-     * @return true, if successful
+     * @return
      */
     public boolean addAll(int index, IntList c) {
         rangeCheckForAdd(index);
@@ -435,7 +429,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Adds the all.
      *
      * @param a
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean addAll(int[] a) {
@@ -447,7 +441,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * @param index
      * @param a
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean addAll(int index, int[] a) {
@@ -547,7 +541,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Removes the all.
      *
      * @param c
-     * @return true, if successful
+     * @return
      */
     public boolean removeAll(IntList c) {
         if (N.isNullOrEmpty(c)) {
@@ -561,7 +555,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * Removes the all.
      *
      * @param a
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean removeAll(int[] a) {
@@ -577,7 +571,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * @param <E>
      * @param p
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean removeIf(Throwables.IntPredicate<E> p) throws E {
@@ -603,7 +597,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      *
      * @param c
-     * @return true, if successful
+     * @return
      */
     public boolean retainAll(IntList c) {
         if (N.isNullOrEmpty(c)) {
@@ -618,7 +612,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      *
      * @param a
-     * @return true, if successful
+     * @return
      */
     public boolean retainAll(int[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -761,7 +755,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param <E>
      * @param predicate
      * @param newValue
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean replaceIf(Throwables.IntPredicate<E> predicate, int newValue) throws E {
@@ -801,7 +795,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      *
      * @param e
-     * @return true, if successful
+     * @return
      */
     public boolean contains(int e) {
         return indexOf(e) >= 0;
@@ -810,8 +804,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      *
      * @param c
-     * @return true, if successful
+     * @return
      */
+    @Override
     public boolean containsAll(IntList c) {
         if (N.isNullOrEmpty(c)) {
             return true;
@@ -845,7 +840,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      *
      * @param a
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean containsAll(int[] a) {
@@ -861,8 +856,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      *
      * @param c
-     * @return true, if successful
+     * @return
      */
+    @Override
     public boolean containsAny(IntList c) {
         if (this.isEmpty() || N.isNullOrEmpty(c)) {
             return false;
@@ -874,7 +870,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      *
      * @param a
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean containsAny(int[] a) {
@@ -888,8 +884,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      *
      * @param c
-     * @return true, if successful
+     * @return
      */
+    @Override
     public boolean disjoint(final IntList c) {
         if (isEmpty() || N.isNullOrEmpty(c)) {
             return true;
@@ -921,7 +918,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      *
      * @param b
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean disjoint(final int[] b) {
@@ -1408,7 +1405,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * @param <E>
      * @param filter
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean allMatch(Throwables.IntPredicate<E> filter) throws E {
@@ -1421,7 +1418,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param fromIndex
      * @param toIndex
      * @param filter
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean allMatch(final int fromIndex, final int toIndex, Throwables.IntPredicate<E> filter) throws E {
@@ -1443,7 +1440,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * @param <E>
      * @param filter
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean anyMatch(Throwables.IntPredicate<E> filter) throws E {
@@ -1456,7 +1453,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param fromIndex
      * @param toIndex
      * @param filter
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean anyMatch(final int fromIndex, final int toIndex, Throwables.IntPredicate<E> filter) throws E {
@@ -1478,7 +1475,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * @param <E>
      * @param filter
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean noneMatch(Throwables.IntPredicate<E> filter) throws E {
@@ -1491,7 +1488,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param fromIndex
      * @param toIndex
      * @param filter
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean noneMatch(final int fromIndex, final int toIndex, Throwables.IntPredicate<E> filter) throws E {
@@ -1732,16 +1729,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Checks for duplicates.
-     *
-     * @return true, if successful
-     */
-    @Override
-    public boolean hasDuplicates() {
-        return N.hasDuplicates(elementData, 0, size, false);
-    }
-
-    /**
      *
      * @param fromIndex
      * @param toIndex
@@ -1756,6 +1743,16 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         } else {
             return of(N.copyOfRange(elementData, fromIndex, toIndex));
         }
+    }
+
+    /**
+     * Checks for duplicates.
+     *
+     * @return
+     */
+    @Override
+    public boolean hasDuplicates() {
+        return N.hasDuplicates(elementData, 0, size, false);
     }
 
     /**
@@ -2193,154 +2190,6 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         return multiset;
     }
 
-    /**
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <E>
-     * @param <E2>
-     * @param keyMapper
-     * @param valueMapper
-     * @return
-     * @throws E the e
-     * @throws E2 the e2
-     */
-    public <K, V, E extends Exception, E2 extends Exception> Map<K, V> toMap(Throwables.IntFunction<? extends K, E> keyMapper,
-            Throwables.IntFunction<? extends V, E2> valueMapper) throws E, E2 {
-        return toMap(keyMapper, valueMapper, Factory.<K, V> ofMap());
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <M>
-     * @param <E>
-     * @param <E2>
-     * @param keyMapper
-     * @param valueMapper
-     * @param mapFactory
-     * @return
-     * @throws E the e
-     * @throws E2 the e2
-     */
-    public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(Throwables.IntFunction<? extends K, E> keyMapper,
-            Throwables.IntFunction<? extends V, E2> valueMapper, IntFunction<? extends M> mapFactory) throws E, E2 {
-        final Throwables.BinaryOperator<V, RuntimeException> mergeFunction = Fn.throwingMerger();
-
-        return toMap(keyMapper, valueMapper, mergeFunction, mapFactory);
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <E>
-     * @param <E2>
-     * @param <E3>
-     * @param keyMapper
-     * @param valueMapper
-     * @param mergeFunction
-     * @return
-     * @throws E the e
-     * @throws E2 the e2
-     * @throws E3 the e3
-     */
-    public <K, V, E extends Exception, E2 extends Exception, E3 extends Exception> Map<K, V> toMap(Throwables.IntFunction<? extends K, E> keyMapper,
-            Throwables.IntFunction<? extends V, E2> valueMapper, Throwables.BinaryOperator<V, E3> mergeFunction) throws E, E2, E3 {
-        return toMap(keyMapper, valueMapper, mergeFunction, Factory.<K, V> ofMap());
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <M>
-     * @param <E>
-     * @param <E2>
-     * @param <E3>
-     * @param keyMapper
-     * @param valueMapper
-     * @param mergeFunction
-     * @param mapFactory
-     * @return
-     * @throws E the e
-     * @throws E2 the e2
-     * @throws E3 the e3
-     */
-    public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception, E3 extends Exception> M toMap(
-            Throwables.IntFunction<? extends K, E> keyMapper, Throwables.IntFunction<? extends V, E2> valueMapper,
-            Throwables.BinaryOperator<V, E3> mergeFunction, IntFunction<? extends M> mapFactory) throws E, E2, E3 {
-        final M result = mapFactory.apply(size);
-
-        for (int i = 0; i < size; i++) {
-            Maps.merge(result, keyMapper.apply(elementData[i]), valueMapper.apply(elementData[i]), mergeFunction);
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <A>
-     * @param <D>
-     * @param <E>
-     * @param keyMapper
-     * @param downstream
-     * @return
-     * @throws E the e
-     */
-    public <K, A, D, E extends Exception> Map<K, D> toMap(Throwables.IntFunction<? extends K, E> keyMapper, Collector<Integer, A, D> downstream) throws E {
-        return toMap(keyMapper, downstream, Factory.<K, D> ofMap());
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <A>
-     * @param <D>
-     * @param <M>
-     * @param <E>
-     * @param keyMapper
-     * @param downstream
-     * @param mapFactory
-     * @return
-     * @throws E the e
-     */
-    public <K, A, D, M extends Map<K, D>, E extends Exception> M toMap(final Throwables.IntFunction<? extends K, E> keyMapper,
-            final Collector<Integer, A, D> downstream, final IntFunction<? extends M> mapFactory) throws E {
-        final M result = mapFactory.apply(size);
-        final Supplier<A> downstreamSupplier = downstream.supplier();
-        final BiConsumer<A, Integer> downstreamAccumulator = downstream.accumulator();
-        final Map<K, A> intermediate = (Map<K, A>) result;
-        K key = null;
-        A v = null;
-
-        for (int i = 0; i < size; i++) {
-            key = N.checkArgNotNull(keyMapper.apply(elementData[i]), "element cannot be mapped to a null key");
-
-            if ((v = intermediate.get(key)) == null) {
-                if ((v = downstreamSupplier.get()) != null) {
-                    intermediate.put(key, v);
-                }
-            }
-
-            downstreamAccumulator.accept(v, elementData[i]);
-        }
-
-        final BiFunction<? super K, ? super A, ? extends A> function = new BiFunction<K, A, A>() {
-            @Override
-            public A apply(K k, A v) {
-                return (A) downstream.finisher().apply(v);
-            }
-        };
-
-        Maps.replaceAll(intermediate, function);
-
-        return result;
-    }
-
     public IntIterator iterator() {
         if (isEmpty()) {
             return IntIterator.EMPTY;
@@ -2423,7 +2272,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean equals(Object obj) {

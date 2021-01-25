@@ -4372,6 +4372,68 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      *
+     * @param b
+     * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
+     * @return
+     */
+    @SequentialOnly
+    @IntermediateOp
+    public ExceptionalStream<T, E> mergeWith(final Collection<? extends T> b, final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
+        assertNotClosed();
+
+        return mergeWith(ExceptionalStream.of(b), nextSelector);
+    }
+
+    /**
+     *
+     * @param b
+     * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
+     * @return
+     */
+    @SequentialOnly
+    @IntermediateOp
+    public ExceptionalStream<T, E> mergeWith(final ExceptionalStream<? extends T, E> b,
+            final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
+        assertNotClosed();
+
+        return ExceptionalStream.merge(this, b, nextSelector);
+    }
+
+    /**
+     *
+     * @param <T2>
+     * @param <R>
+     * @param b
+     * @param zipFunction
+     * @return
+     */
+    @IntermediateOp
+    public <T2, R> ExceptionalStream<R, E> zipWith(final Collection<T2> b, final Throwables.BiFunction<? super T, ? super T2, R, ? extends E> zipFunction) {
+        assertNotClosed();
+
+        return zip(this, ExceptionalStream.of(b), zipFunction);
+    }
+
+    /**
+     *
+     * @param <T2>
+     * @param <R>
+     * @param b
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param zipFunction
+     * @return
+     */
+    @IntermediateOp
+    public <T2, R> ExceptionalStream<R, E> zipWith(final Collection<T2> b, final T valueForNoneA, final T2 valueForNoneB,
+            final Throwables.BiFunction<? super T, ? super T2, R, ? extends E> zipFunction) {
+        assertNotClosed();
+
+        return zip(this, ExceptionalStream.of(b), valueForNoneA, valueForNoneB, zipFunction);
+    }
+
+    /**
+     *
      * @param <T2>
      * @param <R>
      * @param b
@@ -6034,7 +6096,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      *
      * @param predicate
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     @TerminalOp
@@ -6057,7 +6119,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      *
      * @param predicate
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     @TerminalOp
@@ -6080,7 +6142,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      *
      * @param predicate
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     @TerminalOp
@@ -8173,7 +8235,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         /**
          * Checks for next.
          *
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         public abstract boolean hasNext() throws E;

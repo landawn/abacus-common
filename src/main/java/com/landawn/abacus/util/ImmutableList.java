@@ -205,7 +205,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      *
      * @param index
      * @param newElements
-     * @return true, if successful
+     * @return
      * @deprecated throws {@code UnsupportedOperationException}
      * @throws UnsupportedOperationException
      */

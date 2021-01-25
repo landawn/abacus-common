@@ -42,13 +42,13 @@ public abstract class Tuple<TP> implements Immutable {
 
     /**
      *
-     * @return true, if successful
+     * @return
      */
     public abstract boolean anyNull();
 
     /**
      *
-     * @return true, if successful
+     * @return
      */
     public abstract boolean allNull();
 
@@ -573,7 +573,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          *
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean anyNull() {
@@ -582,7 +582,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          *
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean allNull() {
@@ -657,7 +657,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean equals(Object obj) {
@@ -728,7 +728,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          *
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean anyNull() {
@@ -737,7 +737,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          *
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean allNull() {
@@ -863,7 +863,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean equals(Object obj) {
@@ -940,7 +940,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          *
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean anyNull() {
@@ -949,7 +949,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          *
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean allNull() {
@@ -1071,7 +1071,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean equals(Object obj) {
@@ -1154,7 +1154,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          *
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean anyNull() {
@@ -1163,7 +1163,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          *
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean allNull() {
@@ -1246,7 +1246,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean equals(Object obj) {
@@ -1335,7 +1335,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          *
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean anyNull() {
@@ -1344,7 +1344,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          *
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean allNull() {
@@ -1430,7 +1430,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean equals(Object obj) {
@@ -1526,7 +1526,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          *
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean anyNull() {
@@ -1535,7 +1535,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          *
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean allNull() {
@@ -1625,7 +1625,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean equals(Object obj) {
@@ -1728,7 +1728,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          *
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean anyNull() {
@@ -1737,7 +1737,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          *
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean allNull() {
@@ -1830,7 +1830,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean equals(Object obj) {
@@ -1943,7 +1943,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          *
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean anyNull() {
@@ -1952,7 +1952,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          *
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean allNull() {
@@ -2048,7 +2048,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean equals(Object obj) {
@@ -2168,7 +2168,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          *
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean anyNull() {
@@ -2177,7 +2177,7 @@ public abstract class Tuple<TP> implements Immutable {
 
         /**
          *
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean allNull() {
@@ -2276,7 +2276,7 @@ public abstract class Tuple<TP> implements Immutable {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean equals(Object obj) {

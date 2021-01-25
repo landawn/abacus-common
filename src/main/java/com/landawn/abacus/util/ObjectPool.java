@@ -184,7 +184,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
     /**
      *
      * @param key
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean containsKey(Object key) {
@@ -203,7 +203,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
     /**
      *
      * @param value
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean containsValue(Object value) {
@@ -409,7 +409,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         /**
          *
          * @param obj
-         * @return true, if successful
+         * @return
          */
         @Override
         public final boolean equals(Object obj) {

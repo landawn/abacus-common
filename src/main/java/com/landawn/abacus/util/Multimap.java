@@ -404,7 +404,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      *
      * @param key
      * @param e
-     * @return true, if successful
+     * @return
      */
     public boolean put(final K key, final E e) {
         V val = valueMap.get(key);
@@ -423,7 +423,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      *
      * @param key
      * @param e
-     * @return true, if successful
+     * @return
      */
     public boolean putIfAbsent(final K key, final E e) {
         V val = valueMap.get(key);
@@ -444,7 +444,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      *
      * @param key
      * @param e
-     * @return true, if successful
+     * @return
      */
     public boolean putIfKeyAbsent(final K key, final E e) {
         V val = valueMap.get(key);
@@ -463,7 +463,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      *
      * @param key
      * @param c
-     * @return true, if successful
+     * @return
      */
     public boolean putAll(final K key, final Collection<? extends E> c) {
         if (N.isNullOrEmpty(c)) {
@@ -487,7 +487,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      *
      * @param key
      * @param c
-     * @return true, if successful
+     * @return
      */
     public boolean putAllIfKeyAbsent(final K key, final Collection<? extends E> c) {
         if (N.isNullOrEmpty(c)) {
@@ -509,7 +509,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      *
      * @param m
-     * @return true, if successful
+     * @return
      */
     public boolean putAll(final Map<? extends K, ? extends E> m) {
         if (N.isNullOrEmpty(m)) {
@@ -538,7 +538,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      *
      * @param m
-     * @return true, if successful
+     * @return
      */
     public boolean putAll(final Multimap<? extends K, ? extends E, ? extends Collection<? extends E>> m) {
         if (N.isNullOrEmpty(m)) {
@@ -572,7 +572,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      *
      * @param key
      * @param e
-     * @return true, if successful
+     * @return
      */
     public boolean remove(final Object key, final Object e) {
         V val = valueMap.get(key);
@@ -603,7 +603,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      *
      * @param key
      * @param c
-     * @return true, if successful
+     * @return
      */
     public boolean removeAll(final Object key, final Collection<?> c) {
         if (N.isNullOrEmpty(c)) {
@@ -633,7 +633,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      * </pre>
      *
      * @param m
-     * @return true, if successful
+     * @return
      */
     public boolean removeAll(final Map<?, ? extends Collection<?>> m) {
         if (N.isNullOrEmpty(m)) {
@@ -668,7 +668,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      * Removes the all.
      *
      * @param m
-     * @return true, if successful
+     * @return
      */
     public boolean removeAll(final Multimap<?, ?, ?> m) {
         if (N.isNullOrEmpty(m)) {
@@ -1260,7 +1260,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      *
      * @param key
      * @param e
-     * @return true, if successful
+     * @return
      */
     public boolean contains(final Object key, final Object e) {
         final V val = valueMap.get(key);
@@ -1271,7 +1271,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      *
      * @param key
-     * @return true, if successful
+     * @return
      */
     public boolean containsKey(final Object key) {
         return valueMap.containsKey(key);
@@ -1280,7 +1280,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      *
      * @param e
-     * @return true, if successful
+     * @return
      */
     public boolean containsValue(final Object e) {
         Collection<V> values = values();
@@ -1298,7 +1298,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      *
      * @param key
      * @param c
-     * @return true, if successful
+     * @return
      */
     public boolean containsAll(final Object key, final Collection<?> c) {
         final V val = valueMap.get(key);
@@ -1853,7 +1853,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return
      */
     @SuppressWarnings("unchecked")
     @Override

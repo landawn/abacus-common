@@ -273,7 +273,7 @@ public final class SQLMapper {
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean equals(Object obj) {

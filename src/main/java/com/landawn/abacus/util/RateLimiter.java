@@ -370,7 +370,7 @@ public abstract class RateLimiter {
      *
      * @param nowMicros
      * @param timeoutMicros
-     * @return true, if successful
+     * @return
      */
     private boolean canAcquire(long nowMicros, long timeoutMicros) {
         return queryEarliestAvailable(nowMicros) - timeoutMicros <= nowMicros;

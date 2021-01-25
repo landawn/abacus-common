@@ -71,6 +71,30 @@ public final class Chain {
     }
 
     /**
+     * {@code null} is smaller.
+     * 
+     * @param <T>
+     * @param left
+     * @param right
+     * @return 
+     */
+    public static <T extends Comparable<? super T>> ComparisonChain compareNullLess(T left, T right) {
+        return new ComparisonChain().compareNullLess(left, right);
+    }
+
+    /**
+     * {@code null} is bigger.
+     * 
+     * @param <T>
+     * @param left
+     * @param right
+     * @return
+     */
+    public static <T extends Comparable<? super T>> ComparisonChain compareNullBigger(T left, T right) {
+        return new ComparisonChain().compareNullBigger(left, right);
+    }
+
+    /**
      * Compares two {@code boolean} values, considering {@code false} to be less
      * than {@code true}, <i>if</i> the result of this comparison chain has not
      * already been determined.
@@ -493,6 +517,38 @@ public final class Chain {
         }
 
         /**
+         * {@code null} is smaller.
+         * 
+         * @param <T>
+         * @param left
+         * @param right
+         * @return 
+         */
+        public <T extends Comparable<? super T>> ComparisonChain compareNullLess(T left, T right) {
+            if (result == 0) {
+                result = left == null ? (right == null ? 0 : -1) : (right == null ? 1 : left.compareTo(right));
+            }
+
+            return this;
+        }
+
+        /**
+         * {@code null} is bigger.
+         * 
+         * @param <T>
+         * @param left
+         * @param right
+         * @return
+         */
+        public <T extends Comparable<? super T>> ComparisonChain compareNullBigger(T left, T right) {
+            if (result == 0) {
+                result = left == null ? (right == null ? 0 : 1) : (right == null ? -1 : left.compareTo(right));
+            }
+
+            return this;
+        }
+
+        /**
          * Compares two {@code boolean} values, considering {@code false} to be less
          * than {@code true}, <i>if</i> the result of this comparison chain has not
          * already been determined.
@@ -844,7 +900,7 @@ public final class Chain {
 
         /**
          *
-         * @return true, if successful
+         * @return
          */
         public boolean result() {
             return result;

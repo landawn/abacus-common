@@ -42,7 +42,7 @@ import com.landawn.abacus.util.function.TriFunction;
 public final class Iterators {
 
     private Iterators() {
-        // singleton.
+        // Utility class.
     }
 
     /**

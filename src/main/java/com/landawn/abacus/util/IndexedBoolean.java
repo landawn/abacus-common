@@ -99,7 +99,7 @@ public final class IndexedBoolean extends AbstractIndexed {
 
     /**
      *
-     * @return true, if successful
+     * @return
      */
     public boolean value() {
         return value;
@@ -113,7 +113,7 @@ public final class IndexedBoolean extends AbstractIndexed {
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean equals(Object obj) {

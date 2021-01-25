@@ -349,7 +349,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean equals(Object obj) {

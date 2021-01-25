@@ -608,7 +608,7 @@ public final class Multiset<T> implements Iterable<T> {
      * Adds the all.
      *
      * @param c
-     * @return true, if successful
+     * @return
      * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Integer.MAX_VALUE.
      */
     public boolean addAll(final Collection<? extends T> c) throws IllegalArgumentException {
@@ -624,7 +624,7 @@ public final class Multiset<T> implements Iterable<T> {
      *
      * @param c
      * @param occurrencesToAdd
-     * @return true, if successful
+     * @return
      * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Integer.MAX_VALUE.
      */
     public boolean addAll(final Collection<? extends T> c, final int occurrencesToAdd) throws IllegalArgumentException {
@@ -645,7 +645,7 @@ public final class Multiset<T> implements Iterable<T> {
      * Adds the all.
      *
      * @param m
-     * @return true, if successful
+     * @return
      * @throws IllegalArgumentException if the occurrences of element after this operation is bigger than Integer.MAX_VALUE.
      */
     public boolean addAll(final Map<? extends T, Integer> m) throws IllegalArgumentException {
@@ -674,7 +674,7 @@ public final class Multiset<T> implements Iterable<T> {
      * Adds the all.
      *
      * @param multiset
-     * @return true, if successful
+     * @return
      * @throws IllegalArgumentException if the occurrences of element is less than 0.
      */
     public boolean addAll(final Multiset<? extends T> multiset) throws IllegalArgumentException {
@@ -692,7 +692,7 @@ public final class Multiset<T> implements Iterable<T> {
     /**
      *
      * @param o
-     * @return true, if successful
+     * @return
      */
     public boolean contains(final Object o) {
         return valueMap.containsKey(o);
@@ -701,7 +701,7 @@ public final class Multiset<T> implements Iterable<T> {
     /**
      *
      * @param c
-     * @return true, if successful
+     * @return
      */
     public boolean containsAll(final Collection<?> c) {
         return valueMap.keySet().containsAll(c);
@@ -712,7 +712,7 @@ public final class Multiset<T> implements Iterable<T> {
      * The element will be removed from this <code>Multiset</code> if the occurrences equals to or less than 0 after the operation.
      *
      * @param e
-     * @return true, if successful
+     * @return
      */
     public boolean remove(final Object e) {
         return remove(e, 1);
@@ -724,7 +724,7 @@ public final class Multiset<T> implements Iterable<T> {
      *
      * @param e
      * @param occurrencesToRemove
-     * @return true, if successful
+     * @return
      */
     public boolean remove(final Object e, final int occurrencesToRemove) {
         checkOccurrences(occurrencesToRemove);
@@ -830,7 +830,7 @@ public final class Multiset<T> implements Iterable<T> {
      *
      * @param <E>
      * @param predicate
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean removeAllOccurrencesIf(Throwables.Predicate<? super T, E> predicate) throws E {
@@ -860,7 +860,7 @@ public final class Multiset<T> implements Iterable<T> {
      *
      * @param <E>
      * @param predicate
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean removeAllOccurrencesIf(Throwables.BiPredicate<? super T, ? super Integer, E> predicate) throws E {
@@ -891,7 +891,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @param <E>
      * @param occurrencesToRemove
      * @param predicate
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean removeIf(final int occurrencesToRemove, Throwables.Predicate<? super T, E> predicate) throws E {
@@ -924,7 +924,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @param <E>
      * @param occurrencesToRemove
      * @param predicate
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean removeIf(final int occurrencesToRemove, Throwables.BiPredicate<? super T, ? super Integer, E> predicate) throws E {
@@ -1014,7 +1014,7 @@ public final class Multiset<T> implements Iterable<T> {
      * Removes the all.
      *
      * @param m
-     * @return true, if successful
+     * @return
      */
     public boolean removeAll(final Map<?, Integer> m) {
         if (N.isNullOrEmpty(m)) {
@@ -1042,7 +1042,7 @@ public final class Multiset<T> implements Iterable<T> {
      * Removes the all.
      *
      * @param multiset
-     * @return true, if successful
+     * @return
      * @throws IllegalArgumentException the illegal argument exception
      */
     public boolean removeAll(final Multiset<?> multiset) throws IllegalArgumentException {
@@ -1062,7 +1062,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @param <E>
      * @param predicate
      * @param newOccurrences
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean replaceIf(Throwables.Predicate<? super T, E> predicate, final int newOccurrences) throws E {
@@ -1105,7 +1105,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @param <E>
      * @param predicate
      * @param newOccurrences
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean replaceIf(Throwables.BiPredicate<? super T, ? super Integer, E> predicate, final int newOccurrences) throws E {
@@ -1745,7 +1745,7 @@ public final class Multiset<T> implements Iterable<T> {
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean equals(final Object obj) {

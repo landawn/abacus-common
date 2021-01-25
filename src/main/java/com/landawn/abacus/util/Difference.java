@@ -602,7 +602,7 @@ public class Difference<L, R> implements Immutable {
 
     /**
      *
-     * @return true, if successful
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public boolean areEqual() {
@@ -732,7 +732,7 @@ public class Difference<L, R> implements Immutable {
 
         /**
          *
-         * @return true, if successful
+         * @return
          */
         @Override
         @SuppressWarnings("rawtypes")

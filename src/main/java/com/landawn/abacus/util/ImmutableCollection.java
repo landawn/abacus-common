@@ -55,7 +55,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     /**
      *
      * @param e
-     * @return true, if successful
+     * @return
      * @deprecated throws {@code UnsupportedOperationException}
      * @throws UnsupportedOperationException
      */
@@ -69,7 +69,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * Adds the all.
      *
      * @param newElements
-     * @return true, if successful
+     * @return
      * @deprecated throws {@code UnsupportedOperationException}
      * @throws UnsupportedOperationException
      */
@@ -82,7 +82,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     /**
      *
      * @param object
-     * @return true, if successful
+     * @return
      * @deprecated throws {@code UnsupportedOperationException}
      * @throws UnsupportedOperationException
      */
@@ -96,7 +96,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * Removes the if.
      *
      * @param filter
-     * @return true, if successful
+     * @return
      * @deprecated throws {@code UnsupportedOperationException}
      * @throws UnsupportedOperationException
      */
@@ -110,7 +110,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * Removes the all.
      *
      * @param oldElements
-     * @return true, if successful
+     * @return
      * @deprecated throws {@code UnsupportedOperationException}
      * @throws UnsupportedOperationException
      */
@@ -123,7 +123,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     /**
      *
      * @param elementsToKeep
-     * @return true, if successful
+     * @return
      * @deprecated throws {@code UnsupportedOperationException}
      * @throws UnsupportedOperationException
      */
@@ -147,7 +147,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     /**
      *
      * @param o
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean contains(Object o) {
@@ -194,7 +194,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean equals(Object obj) {

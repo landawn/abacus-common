@@ -22,22 +22,16 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.Throwables.Function;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalFloat;
 import com.landawn.abacus.util.u.OptionalInt;
-import com.landawn.abacus.util.function.BiConsumer;
-import com.landawn.abacus.util.function.BiFunction;
 import com.landawn.abacus.util.function.IntFunction;
-import com.landawn.abacus.util.function.Supplier;
-import com.landawn.abacus.util.stream.Collector;
 import com.landawn.abacus.util.stream.FloatStream;
 
 /**
@@ -291,7 +285,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * Adds the all.
      *
      * @param c
-     * @return true, if successful
+     * @return
      */
     public boolean addAll(FloatList c) {
         if (N.isNullOrEmpty(c)) {
@@ -314,7 +308,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      *
      * @param index
      * @param c
-     * @return true, if successful
+     * @return
      */
     public boolean addAll(int index, FloatList c) {
         rangeCheckForAdd(index);
@@ -344,7 +338,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * Adds the all.
      *
      * @param a
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean addAll(float[] a) {
@@ -356,7 +350,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      *
      * @param index
      * @param a
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean addAll(int index, float[] a) {
@@ -456,7 +450,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * Removes the all.
      *
      * @param c
-     * @return true, if successful
+     * @return
      */
     public boolean removeAll(FloatList c) {
         if (N.isNullOrEmpty(c)) {
@@ -470,7 +464,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * Removes the all.
      *
      * @param a
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean removeAll(float[] a) {
@@ -486,7 +480,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      *
      * @param <E>
      * @param p
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean removeIf(Throwables.FloatPredicate<E> p) throws E {
@@ -512,7 +506,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      *
      * @param c
-     * @return true, if successful
+     * @return
      */
     public boolean retainAll(FloatList c) {
         if (N.isNullOrEmpty(c)) {
@@ -527,7 +521,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      *
      * @param a
-     * @return true, if successful
+     * @return
      */
     public boolean retainAll(float[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -671,7 +665,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @param <E>
      * @param predicate
      * @param newValue
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean replaceIf(Throwables.FloatPredicate<E> predicate, float newValue) throws E {
@@ -711,7 +705,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      *
      * @param e
-     * @return true, if successful
+     * @return
      */
     public boolean contains(float e) {
         return indexOf(e) >= 0;
@@ -720,7 +714,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      *
      * @param c
-     * @return true, if successful
+     * @return
      */
     public boolean containsAll(FloatList c) {
         if (N.isNullOrEmpty(c)) {
@@ -755,7 +749,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      *
      * @param a
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean containsAll(float[] a) {
@@ -771,7 +765,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      *
      * @param c
-     * @return true, if successful
+     * @return
      */
     public boolean containsAny(FloatList c) {
         if (this.isEmpty() || N.isNullOrEmpty(c)) {
@@ -784,7 +778,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      *
      * @param a
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean containsAny(float[] a) {
@@ -798,7 +792,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      *
      * @param c
-     * @return true, if successful
+     * @return
      */
     public boolean disjoint(final FloatList c) {
         if (isEmpty() || N.isNullOrEmpty(c)) {
@@ -831,7 +825,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      *
      * @param b
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean disjoint(final float[] b) {
@@ -1289,7 +1283,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      *
      * @param <E>
      * @param filter
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean allMatch(Throwables.FloatPredicate<E> filter) throws E {
@@ -1302,7 +1296,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @param fromIndex
      * @param toIndex
      * @param filter
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean allMatch(final int fromIndex, final int toIndex, Throwables.FloatPredicate<E> filter) throws E {
@@ -1324,7 +1318,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      *
      * @param <E>
      * @param filter
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean anyMatch(Throwables.FloatPredicate<E> filter) throws E {
@@ -1337,7 +1331,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @param fromIndex
      * @param toIndex
      * @param filter
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean anyMatch(final int fromIndex, final int toIndex, Throwables.FloatPredicate<E> filter) throws E {
@@ -1359,7 +1353,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      *
      * @param <E>
      * @param filter
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean noneMatch(Throwables.FloatPredicate<E> filter) throws E {
@@ -1372,7 +1366,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @param fromIndex
      * @param toIndex
      * @param filter
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public <E extends Exception> boolean noneMatch(final int fromIndex, final int toIndex, Throwables.FloatPredicate<E> filter) throws E {
@@ -1613,16 +1607,6 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * Checks for duplicates.
-     *
-     * @return true, if successful
-     */
-    @Override
-    public boolean hasDuplicates() {
-        return N.hasDuplicates(elementData, 0, size, false);
-    }
-
-    /**
      *
      * @param fromIndex
      * @param toIndex
@@ -1637,6 +1621,16 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
         } else {
             return of(N.copyOfRange(elementData, fromIndex, toIndex));
         }
+    }
+
+    /**
+     * Checks for duplicates.
+     *
+     * @return
+     */
+    @Override
+    public boolean hasDuplicates() {
+        return N.hasDuplicates(elementData, 0, size, false);
     }
 
     /**
@@ -2044,154 +2038,6 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
         return multiset;
     }
 
-    /**
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <E>
-     * @param <E2>
-     * @param keyMapper
-     * @param valueMapper
-     * @return
-     * @throws E the e
-     * @throws E2 the e2
-     */
-    public <K, V, E extends Exception, E2 extends Exception> Map<K, V> toMap(Throwables.FloatFunction<? extends K, E> keyMapper,
-            Throwables.FloatFunction<? extends V, E2> valueMapper) throws E, E2 {
-        return toMap(keyMapper, valueMapper, Factory.<K, V> ofMap());
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <M>
-     * @param <E>
-     * @param <E2>
-     * @param keyMapper
-     * @param valueMapper
-     * @param mapFactory
-     * @return
-     * @throws E the e
-     * @throws E2 the e2
-     */
-    public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(Throwables.FloatFunction<? extends K, E> keyMapper,
-            Throwables.FloatFunction<? extends V, E2> valueMapper, IntFunction<? extends M> mapFactory) throws E, E2 {
-        final Throwables.BinaryOperator<V, RuntimeException> mergeFunction = Fn.throwingMerger();
-
-        return toMap(keyMapper, valueMapper, mergeFunction, mapFactory);
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <E>
-     * @param <E2>
-     * @param <E3>
-     * @param keyMapper
-     * @param valueMapper
-     * @param mergeFunction
-     * @return
-     * @throws E the e
-     * @throws E2 the e2
-     * @throws E3 the e3
-     */
-    public <K, V, E extends Exception, E2 extends Exception, E3 extends Exception> Map<K, V> toMap(Throwables.FloatFunction<? extends K, E> keyMapper,
-            Throwables.FloatFunction<? extends V, E2> valueMapper, Throwables.BinaryOperator<V, E3> mergeFunction) throws E, E2, E3 {
-        return toMap(keyMapper, valueMapper, mergeFunction, Factory.<K, V> ofMap());
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <M>
-     * @param <E>
-     * @param <E2>
-     * @param <E3>
-     * @param keyMapper
-     * @param valueMapper
-     * @param mergeFunction
-     * @param mapFactory
-     * @return
-     * @throws E the e
-     * @throws E2 the e2
-     * @throws E3 the e3
-     */
-    public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception, E3 extends Exception> M toMap(
-            Throwables.FloatFunction<? extends K, E> keyMapper, Throwables.FloatFunction<? extends V, E2> valueMapper,
-            Throwables.BinaryOperator<V, E3> mergeFunction, IntFunction<? extends M> mapFactory) throws E, E2, E3 {
-        final M result = mapFactory.apply(size);
-
-        for (int i = 0; i < size; i++) {
-            Maps.merge(result, keyMapper.apply(elementData[i]), valueMapper.apply(elementData[i]), mergeFunction);
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <A>
-     * @param <D>
-     * @param <E>
-     * @param keyMapper
-     * @param downstream
-     * @return
-     * @throws E the e
-     */
-    public <K, A, D, E extends Exception> Map<K, D> toMap(Throwables.FloatFunction<? extends K, E> keyMapper, Collector<Float, A, D> downstream) throws E {
-        return toMap(keyMapper, downstream, Factory.<K, D> ofMap());
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <A>
-     * @param <D>
-     * @param <M>
-     * @param <E>
-     * @param keyMapper
-     * @param downstream
-     * @param mapFactory
-     * @return
-     * @throws E the e
-     */
-    public <K, A, D, M extends Map<K, D>, E extends Exception> M toMap(final Throwables.FloatFunction<? extends K, E> keyMapper,
-            final Collector<Float, A, D> downstream, final IntFunction<? extends M> mapFactory) throws E {
-        final M result = mapFactory.apply(size);
-        final Supplier<A> downstreamSupplier = downstream.supplier();
-        final BiConsumer<A, Float> downstreamAccumulator = downstream.accumulator();
-        final Map<K, A> intermediate = (Map<K, A>) result;
-        K key = null;
-        A v = null;
-
-        for (int i = 0; i < size; i++) {
-            key = N.checkArgNotNull(keyMapper.apply(elementData[i]), "element cannot be mapped to a null key");
-
-            if ((v = intermediate.get(key)) == null) {
-                if ((v = downstreamSupplier.get()) != null) {
-                    intermediate.put(key, v);
-                }
-            }
-
-            downstreamAccumulator.accept(v, elementData[i]);
-        }
-
-        final BiFunction<? super K, ? super A, ? extends A> function = new BiFunction<K, A, A>() {
-            @Override
-            public A apply(K k, A v) {
-                return (A) downstream.finisher().apply(v);
-            }
-        };
-
-        Maps.replaceAll(intermediate, function);
-
-        return result;
-    }
-
     public FloatIterator iterator() {
         if (isEmpty()) {
             return FloatIterator.EMPTY;
@@ -2274,7 +2120,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean equals(Object obj) {

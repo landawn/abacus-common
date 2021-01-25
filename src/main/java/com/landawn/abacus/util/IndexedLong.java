@@ -109,7 +109,7 @@ public final class IndexedLong extends AbstractIndexed {
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean equals(Object obj) {

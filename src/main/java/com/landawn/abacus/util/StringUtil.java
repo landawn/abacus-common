@@ -123,7 +123,7 @@ public abstract class StringUtil {
     }
 
     private StringUtil() {
-        // Singleton. Utility class.
+        // Utility class.
     }
 
     /**
@@ -4930,7 +4930,7 @@ public abstract class StringUtil {
      *
      * @param str
      * @param targetChar
-     * @return true, if successful
+     * @return
      */
     public static boolean contains(final String str, final int targetChar) {
         if (N.isNullOrEmpty(str)) {
@@ -4944,7 +4944,7 @@ public abstract class StringUtil {
      *
      * @param str
      * @param substr
-     * @return true, if successful
+     * @return
      */
     public static boolean contains(final String str, final String substr) {
         if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substr)) {
@@ -4959,7 +4959,7 @@ public abstract class StringUtil {
      * @param str
      * @param substr
      * @param delimiter
-     * @return true, if successful
+     * @return
      */
     public static boolean contains(final String str, final String substr, final String delimiter) {
         if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substr)) {
@@ -4974,7 +4974,7 @@ public abstract class StringUtil {
      *
      * @param str
      * @param substr
-     * @return true, if successful
+     * @return
      */
     public static boolean containsIgnoreCase(final String str, final String substr) {
         if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substr)) {
@@ -4988,7 +4988,7 @@ public abstract class StringUtil {
      *
      * @param str
      * @param chs
-     * @return true, if successful
+     * @return
      */
     @SafeVarargs
     public static boolean containsAny(final String str, final char... chs) {
@@ -5003,7 +5003,7 @@ public abstract class StringUtil {
      *
      * @param str
      * @param chs
-     * @return true, if successful
+     * @return
      */
     @SafeVarargs
     public static boolean containsOnly(final String str, final char... chs) {
@@ -5018,7 +5018,7 @@ public abstract class StringUtil {
      *
      * @param str
      * @param chs
-     * @return true, if successful
+     * @return
      */
     @SafeVarargs
     public static boolean containsNone(final String str, final char... chs) {
@@ -5057,7 +5057,7 @@ public abstract class StringUtil {
     /**
      *
      * @param str
-     * @return true, if successful
+     * @return
      */
     // From org.springframework.util.StringUtils, under Apache License 2.0
     public static boolean containsWhitespace(final String str) {
@@ -5080,7 +5080,7 @@ public abstract class StringUtil {
      *
      * @param str
      * @param prefix
-     * @return true, if successful
+     * @return
      */
     public static boolean startsWith(final String str, final String prefix) {
         return startsWith(str, prefix, false);
@@ -5091,7 +5091,7 @@ public abstract class StringUtil {
      *
      * @param str
      * @param prefix
-     * @return true, if successful
+     * @return
      */
     public static boolean startsWithIgnoreCase(final String str, final String prefix) {
         return startsWith(str, prefix, true);
@@ -5102,7 +5102,7 @@ public abstract class StringUtil {
      * @param str
      * @param prefix
      * @param ignoreCase
-     * @return true, if successful
+     * @return
      */
     private static boolean startsWith(final String str, final String prefix, final boolean ignoreCase) {
         if (str == null || prefix == null || prefix.length() > str.length()) {
@@ -5117,7 +5117,7 @@ public abstract class StringUtil {
      *
      * @param str
      * @param substrs
-     * @return true, if successful
+     * @return
      */
     @SafeVarargs
     public static boolean startsWithAny(final String str, final String... substrs) {
@@ -5139,7 +5139,7 @@ public abstract class StringUtil {
      *
      * @param str
      * @param suffix
-     * @return true, if successful
+     * @return
      */
     public static boolean endsWith(final String str, final String suffix) {
         return endsWith(str, suffix, false);
@@ -5150,7 +5150,7 @@ public abstract class StringUtil {
      *
      * @param str
      * @param suffix
-     * @return true, if successful
+     * @return
      */
     public static boolean endsWithIgnoreCase(final String str, final String suffix) {
         return endsWith(str, suffix, true);
@@ -5161,7 +5161,7 @@ public abstract class StringUtil {
      * @param str
      * @param suffix
      * @param ignoreCase
-     * @return true, if successful
+     * @return
      */
     private static boolean endsWith(final String str, final String suffix, final boolean ignoreCase) {
         if (str == null || suffix == null || suffix.length() > str.length()) {
@@ -5178,7 +5178,7 @@ public abstract class StringUtil {
      *
      * @param str
      * @param substrs
-     * @return true, if successful
+     * @return
      */
     @SafeVarargs
     public static boolean endsWithAny(final String str, final String... substrs) {
@@ -5199,7 +5199,7 @@ public abstract class StringUtil {
      *
      * @param a
      * @param b
-     * @return true, if successful
+     * @return
      */
     public static boolean equals(final String a, final String b) {
         return (a == null) ? b == null : (b == null ? false : a.length() == b.length() && a.equals(b));
@@ -5210,7 +5210,7 @@ public abstract class StringUtil {
      *
      * @param str
      * @param searchStrings
-     * @return true, if successful
+     * @return
      */
     @SafeVarargs
     public static boolean equalsAny(final String str, final String... searchStrings) {
@@ -5232,7 +5232,7 @@ public abstract class StringUtil {
      *
      * @param str
      * @param searchStrings
-     * @return true, if successful
+     * @return
      */
     @SafeVarargs
     public static boolean equalsAnyIgnoreCase(final String str, final String... searchStrings) {
@@ -5254,7 +5254,7 @@ public abstract class StringUtil {
      *
      * @param a
      * @param b
-     * @return true, if successful
+     * @return
      */
     public static boolean equalsIgnoreCase(final String a, final String b) {
         return (a == null) ? b == null : (b == null ? false : a.equalsIgnoreCase(b));
@@ -5556,7 +5556,7 @@ public abstract class StringUtil {
      *
      * @param str
      * @param index
-     * @return true, if successful
+     * @return
      */
     static boolean validSurrogatePairAt(final String str, final int index) {
         return index >= 0 && index <= (str.length() - 2) && Character.isHighSurrogate(str.charAt(index)) && Character.isLowSurrogate(str.charAt(index + 1));
@@ -8573,13 +8573,13 @@ public abstract class StringUtil {
 
     public static final class Strings extends StringUtil {
         private Strings() {
-            // Singleton.
+            // Utility class.
         }
     }
 
     public static final class MoreStringUtil {
         private MoreStringUtil() {
-            // Singleton.
+            // Utility class.
         }
 
         /**

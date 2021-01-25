@@ -117,7 +117,7 @@ public final class Indexed<T> extends AbstractIndexed {
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean equals(Object obj) {

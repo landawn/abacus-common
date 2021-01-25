@@ -350,7 +350,7 @@ public final class BufferedReader extends Reader {
 
     /**
      *
-     * @return true, if successful
+     * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override

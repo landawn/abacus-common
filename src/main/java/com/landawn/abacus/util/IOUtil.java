@@ -4715,7 +4715,7 @@ public final class IOUtil {
     /**
      *
      * @param dir
-     * @return true, if successful
+     * @return
      */
     public static boolean deleteFiles(final File dir) {
         return deleteFiles(dir, BiPredicates.alwaysTrue());
@@ -4727,7 +4727,7 @@ public final class IOUtil {
      * @param <E>
      * @param dir
      * @param filter
-     * @return true, if successful
+     * @return
      * @throws E the e
      */
     public static <E extends Exception> boolean deleteFiles(final File dir, Throwables.BiPredicate<? super File, ? super File, E> filter) throws E {

@@ -354,7 +354,7 @@ public final class Throwables {
         /**
          *
          * @param t
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(T t) throws E;
@@ -373,7 +373,7 @@ public final class Throwables {
          *
          * @param t
          * @param u
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(T t, U u) throws E;
@@ -394,7 +394,7 @@ public final class Throwables {
          * @param a
          * @param b
          * @param c
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(A a, B b, C c) throws E;
@@ -417,7 +417,7 @@ public final class Throwables {
          * @param b
          * @param c
          * @param d
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(A a, B b, C c, D d) throws E;
@@ -671,7 +671,7 @@ public final class Throwables {
          *
          * @param idx
          * @param e
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(int idx, T e) throws E;
@@ -691,7 +691,7 @@ public final class Throwables {
          * @param u
          * @param idx
          * @param e
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(U u, int idx, T e) throws E;
@@ -835,7 +835,7 @@ public final class Throwables {
         /**
          *
          * @param value
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(boolean value) throws E;
@@ -883,7 +883,7 @@ public final class Throwables {
         /**
          *
          * @param value
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(char value) throws E;
@@ -931,7 +931,7 @@ public final class Throwables {
         /**
          *
          * @param value
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(byte value) throws E;
@@ -979,7 +979,7 @@ public final class Throwables {
         /**
          *
          * @param value
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(short value) throws E;
@@ -1027,7 +1027,7 @@ public final class Throwables {
         /**
          *
          * @param value
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(int value) throws E;
@@ -1075,7 +1075,7 @@ public final class Throwables {
         /**
          *
          * @param value
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(long value) throws E;
@@ -1123,7 +1123,7 @@ public final class Throwables {
         /**
          *
          * @param value
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(float value) throws E;
@@ -1171,7 +1171,7 @@ public final class Throwables {
         /**
          *
          * @param value
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(double value) throws E;
@@ -1221,7 +1221,7 @@ public final class Throwables {
          * Apply as boolean.
          *
          * @param t
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean applyAsBoolean(T t) throws E;
@@ -1391,7 +1391,7 @@ public final class Throwables {
          * Apply as boolean.
          *
          * @param operand
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean applyAsBoolean(boolean operand) throws E;
@@ -1528,7 +1528,7 @@ public final class Throwables {
          *
          * @param left
          * @param right
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean applyAsBoolean(boolean left, boolean right) throws E;
@@ -1673,7 +1673,7 @@ public final class Throwables {
          * @param a
          * @param b
          * @param c
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean applyAsBoolean(boolean a, boolean b, boolean c) throws E;
@@ -1823,7 +1823,7 @@ public final class Throwables {
          *
          * @param t
          * @param u
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(boolean t, boolean u) throws E;
@@ -1840,7 +1840,7 @@ public final class Throwables {
          *
          * @param t
          * @param u
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(char t, char u) throws E;
@@ -1857,7 +1857,7 @@ public final class Throwables {
          *
          * @param t
          * @param u
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(byte t, byte u) throws E;
@@ -1874,7 +1874,7 @@ public final class Throwables {
          *
          * @param t
          * @param u
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(short t, short u) throws E;
@@ -1891,7 +1891,7 @@ public final class Throwables {
          *
          * @param t
          * @param u
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(int t, int u) throws E;
@@ -1908,7 +1908,7 @@ public final class Throwables {
          *
          * @param t
          * @param u
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(long t, long u) throws E;
@@ -1925,7 +1925,7 @@ public final class Throwables {
          *
          * @param t
          * @param u
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(float t, float u) throws E;
@@ -1942,7 +1942,7 @@ public final class Throwables {
          *
          * @param t
          * @param u
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(double t, double u) throws E;
@@ -2232,7 +2232,7 @@ public final class Throwables {
          * @param a
          * @param b
          * @param c
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(boolean a, boolean b, boolean c) throws E;
@@ -2250,7 +2250,7 @@ public final class Throwables {
          * @param a
          * @param b
          * @param c
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(char a, char b, char c) throws E;
@@ -2268,7 +2268,7 @@ public final class Throwables {
          * @param a
          * @param b
          * @param c
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(byte a, byte b, byte c) throws E;
@@ -2286,7 +2286,7 @@ public final class Throwables {
          * @param a
          * @param b
          * @param c
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(short a, short b, short c) throws E;
@@ -2304,7 +2304,7 @@ public final class Throwables {
          * @param a
          * @param b
          * @param c
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(int a, int b, int c) throws E;
@@ -2322,7 +2322,7 @@ public final class Throwables {
          * @param a
          * @param b
          * @param c
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(long a, long b, long c) throws E;
@@ -2340,7 +2340,7 @@ public final class Throwables {
          * @param a
          * @param b
          * @param c
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(float a, float b, float c) throws E;
@@ -2358,7 +2358,7 @@ public final class Throwables {
          * @param a
          * @param b
          * @param c
-         * @return true, if successful
+         * @return
          * @throws E the e
          */
         boolean test(double a, double b, double c) throws E;

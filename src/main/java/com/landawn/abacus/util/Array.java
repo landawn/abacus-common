@@ -55,6 +55,7 @@ public final class Array {
     static final int BINARYSEARCH_THRESHOLD = 64;
 
     private Array() {
+        // Utility class.
     }
 
     /**

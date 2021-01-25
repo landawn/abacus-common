@@ -1769,7 +1769,7 @@ public final class Numbers {
      * Fits in long.
      *
      * @param x
-     * @return true, if successful
+     * @return
      */
     static boolean fitsInLong(BigInteger x) {
         return x.bitLength() <= Long.SIZE - 1;
@@ -3598,7 +3598,7 @@ public final class Numbers {
      * @param a
      * @param b
      * @param tolerance
-     * @return true, if successful
+     * @return
      * @throws IllegalArgumentException if {@code tolerance} is {@code < 0} or NaN
      * @since 13.0
      */
@@ -3853,7 +3853,7 @@ public final class Numbers {
      * Fits in int.
      *
      * @param x
-     * @return true, if successful
+     * @return
      */
     static boolean fitsInInt(long x) {
         return (int) x == x;
@@ -4239,7 +4239,7 @@ public final class Numbers {
          *
          * @param base
          * @param n
-         * @return true, if successful
+         * @return
          */
         static boolean test(long base, long n) {
             // Since base will be considered % n, it's okay if base > FLOOR_SQRT_MAX_LONG,
@@ -4290,7 +4290,7 @@ public final class Numbers {
          *
          * @param base
          * @param n
-         * @return true, if successful
+         * @return
          */
         private boolean testWitness(long base, long n) {
             int r = Long.numberOfTrailingZeros(n - 1);

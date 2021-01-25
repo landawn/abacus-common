@@ -452,7 +452,7 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      *
      * @param key
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean containsKey(Object key) {
@@ -462,7 +462,7 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      *
      * @param value
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean containsValue(Object value) {
@@ -604,7 +604,7 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return
      */
     @SuppressWarnings("unchecked")
     @Override

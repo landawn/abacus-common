@@ -64,7 +64,7 @@ public class ArrayHashSet<E> implements Set<E> {
     /**
      *
      * @param e
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean add(E e) {
@@ -75,7 +75,7 @@ public class ArrayHashSet<E> implements Set<E> {
      * Adds the all.
      *
      * @param c
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean addAll(Collection<? extends E> c) {
@@ -95,7 +95,7 @@ public class ArrayHashSet<E> implements Set<E> {
     /**
      *
      * @param o
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean remove(Object o) {
@@ -106,7 +106,7 @@ public class ArrayHashSet<E> implements Set<E> {
      * Removes the all.
      *
      * @param c
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean removeAll(Collection<?> c) {
@@ -126,7 +126,7 @@ public class ArrayHashSet<E> implements Set<E> {
     /**
      *
      * @param c
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean retainAll(Collection<?> c) {
@@ -152,7 +152,7 @@ public class ArrayHashSet<E> implements Set<E> {
     /**
      *
      * @param o
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean contains(Object o) {
@@ -162,7 +162,7 @@ public class ArrayHashSet<E> implements Set<E> {
     /**
      *
      * @param c
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean containsAll(Collection<?> c) {
@@ -257,7 +257,7 @@ public class ArrayHashSet<E> implements Set<E> {
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean equals(Object obj) {
@@ -291,7 +291,7 @@ public class ArrayHashSet<E> implements Set<E> {
         /**
          * Checks for next.
          *
-         * @return true, if successful
+         * @return
          */
         @Override
         public boolean hasNext() {

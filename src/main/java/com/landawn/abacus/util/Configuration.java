@@ -732,7 +732,7 @@ public abstract class Configuration {
     /**
      *
      * @param obj
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean equals(Object obj) {

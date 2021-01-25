@@ -171,7 +171,7 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      *
      * @param mayInterruptIfRunning
-     * @return true, if successful
+     * @return
      */
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
@@ -192,7 +192,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * Cancel this future and all the previous stage future recursively.
      *
      * @param mayInterruptIfRunning
-     * @return true, if successful
+     * @return
      */
     public boolean cancelAll(boolean mayInterruptIfRunning) {
         boolean res = true;
