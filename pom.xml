@@ -8,7 +8,7 @@
 	<packaging>jar</packaging>
 
 	<name>abacus-common</name>
-	<url>http://maven.apache.org</url>
+	<url>https://github.com/landawn/abacus-common</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
