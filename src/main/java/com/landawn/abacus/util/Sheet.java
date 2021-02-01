@@ -1722,7 +1722,7 @@ public final class Sheet<R, C, E> implements Cloneable {
             }
 
             @Override
-            public void skip(long n) {
+            public void advance(long n) {
                 N.checkArgNotNegative(n, "n");
 
                 cursor = n < toIndex - cursor ? cursor + n : toIndex;
@@ -1793,7 +1793,7 @@ public final class Sheet<R, C, E> implements Cloneable {
             }
 
             @Override
-            public void skip(long n) {
+            public void advance(long n) {
                 N.checkArgNotNegative(n, "n");
 
                 cursor = n < toIndex - cursor ? cursor + n : toIndex;
@@ -1866,7 +1866,7 @@ public final class Sheet<R, C, E> implements Cloneable {
                     }
 
                     @Override
-                    public void skip(long n) {
+                    public void advance(long n) {
                         N.checkArgNotNegative(n, "n");
 
                         columnIndex = n < columnLength - columnIndex ? columnIndex + (int) n : columnLength;
@@ -1880,7 +1880,7 @@ public final class Sheet<R, C, E> implements Cloneable {
             }
 
             @Override
-            public void skip(long n) {
+            public void advance(long n) {
                 N.checkArgNotNegative(n, "n");
 
                 rowIndex = n < toRowIndex - rowIndex ? rowIndex + (int) n : toRowIndex;
@@ -1954,7 +1954,7 @@ public final class Sheet<R, C, E> implements Cloneable {
             }
 
             @Override
-            public void skip(long n) {
+            public void advance(long n) {
                 N.checkArgNotNegative(n, "n");
 
                 columnIndex = n < toColumnIndex - columnIndex ? columnIndex + (int) n : toColumnIndex;
@@ -2153,7 +2153,7 @@ public final class Sheet<R, C, E> implements Cloneable {
             }
 
             @Override
-            public void skip(long n) {
+            public void advance(long n) {
                 N.checkArgNotNegative(n, "n");
 
                 cursor = n < toIndex - cursor ? cursor + n : toIndex;
@@ -2221,7 +2221,7 @@ public final class Sheet<R, C, E> implements Cloneable {
             }
 
             @Override
-            public void skip(long n) {
+            public void advance(long n) {
                 N.checkArgNotNegative(n, "n");
 
                 cursor = n < toIndex - cursor ? cursor + n : toIndex;
@@ -2295,7 +2295,7 @@ public final class Sheet<R, C, E> implements Cloneable {
                     }
 
                     @Override
-                    public void skip(long n) {
+                    public void advance(long n) {
                         N.checkArgNotNegative(n, "n");
 
                         cursor2 = n < toIndex2 - cursor2 ? cursor2 + (int) n : toIndex2;
@@ -2309,7 +2309,7 @@ public final class Sheet<R, C, E> implements Cloneable {
             }
 
             @Override
-            public void skip(long n) {
+            public void advance(long n) {
                 N.checkArgNotNegative(n, "n");
 
                 cursor = n < toIndex - cursor ? cursor + (int) n : toIndex;
@@ -2367,7 +2367,7 @@ public final class Sheet<R, C, E> implements Cloneable {
             }
 
             @Override
-            public void skip(long n) {
+            public void advance(long n) {
                 N.checkArgNotNegative(n, "n");
 
                 cursor = n < toIndex - cursor ? cursor + (int) n : toIndex;

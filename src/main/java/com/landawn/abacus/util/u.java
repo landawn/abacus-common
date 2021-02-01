@@ -5411,7 +5411,7 @@ public class u {
      *
      * @param <T>
      */
-    public static final class Holder<T> extends Reference<T, Holder<T>> implements Mutable {
+    public static final class Holder<T> extends Reference<T, Holder<T>> {
 
         /**
          * Instantiates a new holder.
@@ -5445,7 +5445,7 @@ public class u {
      *
      * @param <T>
      */
-    public static final class R<T> extends Reference<T, R<T>> implements Mutable {
+    public static final class R<T> extends Reference<T, R<T>> {
 
         /**
          * Instantiates a new r.

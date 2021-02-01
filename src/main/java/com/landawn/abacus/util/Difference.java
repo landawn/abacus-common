@@ -623,7 +623,7 @@ public class Difference<L, R> implements Immutable {
      * @param <D>
      */
     @com.landawn.abacus.annotation.Immutable
-    public static final class MapDifference<L, R, D> extends Difference<L, R> implements Immutable {
+    public static final class MapDifference<L, R, D> extends Difference<L, R> {
 
         /** The diff values. */
         private final D diffValues;
@@ -703,7 +703,7 @@ public class Difference<L, R> implements Immutable {
                 }
             }
 
-            return new MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>>(common, leftOnly, rightOnly, diff);
+            return new MapDifference<>(common, leftOnly, rightOnly, diff);
         }
 
         /**

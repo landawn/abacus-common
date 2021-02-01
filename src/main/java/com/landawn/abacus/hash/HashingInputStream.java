@@ -98,6 +98,7 @@ public final class HashingInputStream extends FilterInputStream {
      *
      * @param readlimit
      */
+    @SuppressWarnings("sync-override")
     @Override
     public void mark(int readlimit) {
     }
@@ -107,6 +108,7 @@ public final class HashingInputStream extends FilterInputStream {
      *
      * @throws IOException this operation is not supported
      */
+    @SuppressWarnings("sync-override")
     @Override
     public void reset() throws IOException {
         throw new IOException("reset not supported");

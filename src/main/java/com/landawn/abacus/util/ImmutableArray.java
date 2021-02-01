@@ -27,11 +27,11 @@ public final class ImmutableArray<T> implements Immutable {
     }
 
     public static <T> ImmutableArray<T> of(final T[] elements) {
-        return new ImmutableArray<T>(elements);
+        return new ImmutableArray<>(elements);
     }
 
     public static <T> ImmutableArray<T> copyOf(final T[] elements) {
-        return new ImmutableArray<T>(elements == null ? null : elements.clone());
+        return new ImmutableArray<>(elements == null ? null : elements.clone());
     }
 
     public T get(int index) {

@@ -713,6 +713,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param c
      * @return
      */
+    @Override
     public boolean containsAll(BooleanList c) {
         if (N.isNullOrEmpty(c)) {
             return true;
@@ -764,6 +765,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param c
      * @return
      */
+    @Override
     public boolean containsAny(BooleanList c) {
         if (this.isEmpty() || N.isNullOrEmpty(c)) {
             return false;
@@ -791,6 +793,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param c
      * @return
      */
+    @Override
     public boolean disjoint(final BooleanList c) {
         if (isEmpty() || N.isNullOrEmpty(c)) {
             return true;

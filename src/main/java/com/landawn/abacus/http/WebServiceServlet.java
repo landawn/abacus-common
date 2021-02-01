@@ -895,6 +895,7 @@ public class WebServiceServlet extends AbstractHttpServlet {
      * @param request
      * @param response
      */
+    @SuppressWarnings("unused")
     protected void preExecute(final HttpServletRequest request, final HttpServletResponse response) {
 
     }
@@ -908,6 +909,7 @@ public class WebServiceServlet extends AbstractHttpServlet {
      * @param contentFormat
      * @throws IOException Signals that an I/O exception has occurred.
      */
+    @SuppressWarnings("unused")
     protected void postExecute(final HttpServletResponse response, final Object result, final Method method, final Object parameter,
             final ContentFormat contentFormat) throws IOException {
 

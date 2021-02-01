@@ -228,7 +228,7 @@ class JDKLogger extends AbstractLogger {
      * @param callerFQCN
      * @param record The record to update
      */
-    final private void fillCallerData(String callerFQCN, LogRecord record) {
+    private static void fillCallerData(String callerFQCN, LogRecord record) {
         StackTraceElement[] steArray = new Throwable().getStackTrace();
 
         int selfIndex = -1;

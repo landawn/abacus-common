@@ -146,7 +146,7 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
      * @since 12.0
      */
     public BloomFilter<T> copy() {
-        return new BloomFilter<T>(bits.copy(), numHashFunctions, funnel, strategy);
+        return new BloomFilter<>(bits.copy(), numHashFunctions, funnel, strategy);
     }
 
     /**
@@ -361,7 +361,7 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
         long numBits = optimalNumOfBits(expectedInsertions, fpp);
         int numHashFunctions = optimalNumOfHashFunctions(expectedInsertions, numBits);
         try {
-            return new BloomFilter<T>(new BitArray(numBits), numHashFunctions, funnel, strategy);
+            return new BloomFilter<>(new BitArray(numBits), numHashFunctions, funnel, strategy);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Could not create BloomFilter of " + numBits + " bits", e);
         }
@@ -461,7 +461,7 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
     }
 
     private Object writeReplace() {
-        return new SerialForm<T>(this);
+        return new SerialForm<>(this);
     }
 
     /**
@@ -567,7 +567,7 @@ public final class BloomFilter<T> implements Predicate<T>, Serializable {
             for (int i = 0; i < data.length; i++) {
                 data[i] = din.readLong();
             }
-            return new BloomFilter<T>(new BitArray(data), numHashFunctions, funnel, strategy);
+            return new BloomFilter<>(new BitArray(data), numHashFunctions, funnel, strategy);
         } catch (RuntimeException e) {
             String message = "Unable to deserialize BloomFilter from InputStream." + " strategyOrdinal: " + strategyOrdinal + " numHashFunctions: "
                     + numHashFunctions + " dataLength: " + dataLength;

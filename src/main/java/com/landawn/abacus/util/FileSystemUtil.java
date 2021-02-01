@@ -420,7 +420,7 @@ final class FileSystemUtil {
         // however, its still not perfect as the JDK support is so poor
         // (see commons-exec or Ant for a better multi-threaded multi-os solution)
 
-        final List<String> lines = new ArrayList<String>(20);
+        final List<String> lines = new ArrayList<>(20);
         Process proc = null;
         InputStream in = null;
         OutputStream out = null;

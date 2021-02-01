@@ -123,7 +123,7 @@ public final class SQLParser {
         seperators.add("|*=");
     }
 
-    private static final Map<String, String[]> compositeWords = new ObjectPool<String, String[]>(64);
+    private static final Map<String, String[]> compositeWords = new ObjectPool<>(64);
 
     static {
         compositeWords.put(WD.LEFT_JOIN, new String[] { "LEFT", "JOIN" });

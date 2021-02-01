@@ -34,7 +34,7 @@ public final class MemcachedLock<K, V> {
     private final SpyMemcached<V> mc;
 
     public MemcachedLock(String serverUrl) {
-        mc = new SpyMemcached<V>(serverUrl);
+        mc = new SpyMemcached<>(serverUrl);
     }
 
     /**

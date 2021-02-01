@@ -693,7 +693,7 @@ public final class Maps {
             return new LinkedHashMap<>();
         }
 
-        final Map<K, V> result = map instanceof IdentityHashMap ? new IdentityHashMap<K, V>() : new LinkedHashMap<K, V>();
+        final Map<K, V> result = map instanceof IdentityHashMap ? new IdentityHashMap<>() : new LinkedHashMap<>();
         Object val = null;
 
         for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -720,8 +720,7 @@ public final class Maps {
             return new LinkedHashMap<>();
         }
 
-        final Map<K, Pair<V, Nullable<V>>> result = map instanceof IdentityHashMap ? new IdentityHashMap<K, Pair<V, Nullable<V>>>()
-                : new LinkedHashMap<K, Pair<V, Nullable<V>>>();
+        final Map<K, Pair<V, Nullable<V>>> result = map instanceof IdentityHashMap ? new IdentityHashMap<>() : new LinkedHashMap<>();
 
         if (N.isNullOrEmpty(map2)) {
             for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -756,8 +755,7 @@ public final class Maps {
         final boolean isIdentityHashMap = (N.notNullOrEmpty(map) && map instanceof IdentityHashMap)
                 || (N.notNullOrEmpty(map2) && map2 instanceof IdentityHashMap);
 
-        final Map<K, Pair<Nullable<V>, Nullable<V>>> result = isIdentityHashMap ? new IdentityHashMap<K, Pair<Nullable<V>, Nullable<V>>>()
-                : new LinkedHashMap<K, Pair<Nullable<V>, Nullable<V>>>();
+        final Map<K, Pair<Nullable<V>, Nullable<V>>> result = isIdentityHashMap ? new IdentityHashMap<>() : new LinkedHashMap<>();
 
         if (N.notNullOrEmpty(map)) {
             if (N.isNullOrEmpty(map2)) {
@@ -1110,6 +1108,18 @@ public final class Maps {
                 // this usually means the entry is no longer in the map.
                 throw new ConcurrentModificationException(ise);
             }
+        }
+    }
+
+    public static <K, V, E extends Exception> void forEach(final Map<K, V> map, final Throwables.Consumer<? super Map.Entry<K, V>, E> action) throws E {
+        N.checkArgNotNull(action);
+
+        if (N.isNullOrEmpty(map)) {
+            return;
+        }
+
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            action.accept(entry);
         }
     }
 
@@ -1569,12 +1579,12 @@ public final class Maps {
      * @param targetClass
      * @param m
      * @param ignoreNullProperty
-     * @param ignoreUnknownProperty
+     * @param ignoreUnmatchedProperty
      * @return
      */
     @SuppressWarnings("unchecked")
     public static <T> T map2Entity(final Class<T> targetClass, final Map<String, Object> m, final boolean ignoreNullProperty,
-            final boolean ignoreUnknownProperty) {
+            final boolean ignoreUnmatchedProperty) {
         checkEntityClass(targetClass);
 
         final T entity = N.newInstance(targetClass);
@@ -1595,10 +1605,10 @@ public final class Maps {
             propInfo = entityInfo.getPropInfo(propName);
 
             if (propInfo == null) {
-                entityInfo.setPropValue(entity, propName, propValue, ignoreUnknownProperty);
+                entityInfo.setPropValue(entity, propName, propValue, ignoreUnmatchedProperty);
             } else {
                 if (propValue != null && N.typeOf(propValue.getClass()).isMap() && propInfo.type.isEntity()) {
-                    propInfo.setPropValue(entity, map2Entity(propInfo.clazz, (Map<String, Object>) propValue, ignoreNullProperty, ignoreUnknownProperty));
+                    propInfo.setPropValue(entity, map2Entity(propInfo.clazz, (Map<String, Object>) propValue, ignoreNullProperty, ignoreUnmatchedProperty));
                 } else {
                     propInfo.setPropValue(entity, propValue);
                 }
@@ -1667,17 +1677,17 @@ public final class Maps {
      * @param targetClass
      * @param mList
      * @param igoreNullProperty
-     * @param ignoreUnknownProperty
+     * @param ignoreUnmatchedProperty
      * @return
      */
     public static <T> List<T> map2Entity(final Class<T> targetClass, final Collection<Map<String, Object>> mList, final boolean igoreNullProperty,
-            final boolean ignoreUnknownProperty) {
+            final boolean ignoreUnmatchedProperty) {
         checkEntityClass(targetClass);
 
         final List<T> entityList = new ArrayList<>(mList.size());
 
         for (Map<String, Object> m : mList) {
-            entityList.add(map2Entity(targetClass, m, igoreNullProperty, ignoreUnknownProperty));
+            entityList.add(map2Entity(targetClass, m, igoreNullProperty, ignoreUnmatchedProperty));
         }
 
         return entityList;

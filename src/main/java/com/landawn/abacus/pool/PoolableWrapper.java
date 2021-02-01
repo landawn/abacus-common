@@ -48,7 +48,7 @@ public final class PoolableWrapper<T> extends AbstractPoolable {
      * @return
      */
     public static <T> PoolableWrapper<T> of(T srcObject) {
-        return new PoolableWrapper<T>(srcObject);
+        return new PoolableWrapper<>(srcObject);
     }
 
     /**
@@ -61,7 +61,7 @@ public final class PoolableWrapper<T> extends AbstractPoolable {
      * @return
      */
     public static <T> PoolableWrapper<T> of(T srcObject, long liveTime, long maxIdleTime) {
-        return new PoolableWrapper<T>(srcObject, liveTime, maxIdleTime);
+        return new PoolableWrapper<>(srcObject, liveTime, maxIdleTime);
     }
 
     /**

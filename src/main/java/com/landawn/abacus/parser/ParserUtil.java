@@ -227,7 +227,7 @@ public final class ParserUtil {
         return EnumBy.NAME;
     }
 
-    static boolean isJsonRawValue(final Field field, final JsonXmlConfig jsonXmlConfig) {
+    static boolean isJsonRawValue(final Field field) {
         boolean isJsonRawValue = false;
 
         if (field != null && field.isAnnotationPresent(JsonXmlField.class)) {
@@ -638,12 +638,10 @@ public final class ParserUtil {
             PropInfo propInfo = propInfoMap.get(propName);
 
             if (propInfo == null) {
-                if (propInfo == null) {
-                    Method method = ClassUtil.getPropGetMethod(cls, propName);
+                Method method = ClassUtil.getPropGetMethod(cls, propName);
 
-                    if (method != null) {
-                        propInfo = propInfoMap.get(ClassUtil.getPropNameByMethod(method));
-                    }
+                if (method != null) {
+                    propInfo = propInfoMap.get(ClassUtil.getPropNameByMethod(method));
                 }
 
                 if (propInfo == null) {
@@ -729,17 +727,17 @@ public final class ParserUtil {
          * @param obj
          * @param propName
          * @param propValue
-         * @param ignoreUnknownProperty
+         * @param ignoreUnmatchedProperty
          */
         @SuppressWarnings("rawtypes")
-        public boolean setPropValue(final Object obj, final String propName, final Object propValue, final boolean ignoreUnknownProperty) {
+        public boolean setPropValue(final Object obj, final String propName, final Object propValue, final boolean ignoreUnmatchedProperty) {
             PropInfo propInfo = getPropInfo(propName);
 
             if (propInfo == null) {
                 final List<PropInfo> propInfoQueue = getPropInfoQueue(propName);
 
                 if (propInfoQueue.size() == 0) {
-                    if (!ignoreUnknownProperty) {
+                    if (!ignoreUnmatchedProperty) {
                         throw new RuntimeException("No property method found with property name: " + propName + " in class: " + cls.getCanonicalName());
                     } else {
                         return false;
@@ -1134,7 +1132,7 @@ public final class ParserUtil {
             this.timeZone = N.isNullOrEmpty(timeZoneStr) ? TimeZone.getDefault() : TimeZone.getTimeZone(timeZoneStr);
             this.zoneId = timeZone.toZoneId();
             this.dateTimeFormatter = N.isNullOrEmpty(dateFormat) ? null : DateTimeFormatter.ofPattern(dateFormat).withZone(zoneId);
-            this.isJsonRawValue = isJsonRawValue(field, jsonXmlConfig);
+            this.isJsonRawValue = isJsonRawValue(field);
 
             JodaDateTimeFormatterHolder tmpJodaDTFH = null;
 
@@ -1604,6 +1602,7 @@ public final class ParserUtil {
             return annotations;
         }
 
+        @SuppressWarnings("unused")
         private String getAnnoType(final Field field, final Method getMethod, final Method setMethod, final Class<?> propClass,
                 final JsonXmlConfig jsonXmlConfig) {
             final com.landawn.abacus.annotation.Type typeAnno = getAnnotation(com.landawn.abacus.annotation.Type.class);
@@ -1633,6 +1632,7 @@ public final class ParserUtil {
             return null;
         }
 
+        @SuppressWarnings("unused")
         private String getJsonXmlAnnoType(final Field field, final Method getMethod, final Method setMethod, final Class<?> propClass,
                 final JsonXmlConfig jsonXmlConfig) {
             final JsonXmlField jsonXmlFieldAnno = getAnnotation(JsonXmlField.class);
@@ -1671,6 +1671,7 @@ public final class ParserUtil {
          * @param propClass
          * @return
          */
+        @SuppressWarnings("unused")
         private String getDBAnnoType(final Field field, final Method getMethod, final Method setMethod, final Class<?> propClass) {
             final com.landawn.abacus.annotation.Type typeAnno = getAnnotation(com.landawn.abacus.annotation.Type.class);
 
@@ -1752,6 +1753,7 @@ public final class ParserUtil {
          * @param entityClass
          * @return
          */
+        @SuppressWarnings("unused")
         private <T> Type<T> getType(final String annoType, final Field field, final Method getMethod, final Method setMethod, final Class<?> propClass,
                 final Class<?> entityClass) {
             if (N.isNullOrEmpty(annoType)) {

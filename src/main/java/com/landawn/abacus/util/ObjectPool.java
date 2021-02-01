@@ -106,7 +106,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
                 }
             }
 
-            Entry<K, V> entry = new Entry<K, V>(hash, key, value, table[i]);
+            Entry<K, V> entry = new Entry<>(hash, key, value, table[i]);
             table[i] = entry;
 
             keySet = null;

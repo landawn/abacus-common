@@ -1361,7 +1361,7 @@ public final class EscapeUtil {
          */
         @SafeVarargs
         public LookupTranslator(final CharSequence[]... lookup) {
-            lookupMap = new HashMap<String, String>();
+            lookupMap = new HashMap<>();
             prefixSet = N.newHashSet();
             int _shortest = Integer.MAX_VALUE;
             int _longest = 0;

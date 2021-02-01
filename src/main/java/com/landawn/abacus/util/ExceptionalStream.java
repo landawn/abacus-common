@@ -152,7 +152,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param exceptionType
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> just(final T e, final Class<E> exceptionType) {
+    public static <T, E extends Exception> ExceptionalStream<T, E> just(final T e, @SuppressWarnings("unused") final Class<E> exceptionType) {
         return of(e);
     }
 
@@ -209,7 +209,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
 
             @Override
-            public void skip(long n) throws E {
+            public void advance(long n) throws E {
                 N.checkArgNotNegative(n, "n");
 
                 if (n > len - position) {
@@ -262,7 +262,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 }
 
                 @Override
-                public void skip(long n) throws E {
+                public void advance(long n) throws E {
                     N.checkArgNotNegative(n, "n");
 
                     if (n > len - position) {
@@ -359,13 +359,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
 
             @Override
-            public void skip(long n) throws E {
+            public void advance(long n) throws E {
                 N.checkArgNotNegative(n, "n");
 
                 if (iter == null) {
                     s = s.skip(n);
                 } else {
-                    super.skip(n);
+                    super.advance(n);
                 }
             }
 
@@ -407,7 +407,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param exceptionType
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> of(final Collection<? extends T> c, final Class<E> exceptionType) {
+    public static <T, E extends Exception> ExceptionalStream<T, E> of(final Collection<? extends T> c,
+            @SuppressWarnings("unused") final Class<E> exceptionType) {
         return of(c);
     }
 
@@ -419,7 +420,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param exceptionType
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> of(final Iterator<? extends T> iter, final Class<E> exceptionType) {
+    public static <T, E extends Exception> ExceptionalStream<T, E> of(final Iterator<? extends T> iter,
+            @SuppressWarnings("unused") final Class<E> exceptionType) {
         return of(iter);
     }
 
@@ -431,7 +433,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param exceptionType
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> of(final Iterable<? extends T> iterable, final Class<E> exceptionType) {
+    public static <T, E extends Exception> ExceptionalStream<T, E> of(final Iterable<? extends T> iterable,
+            @SuppressWarnings("unused") final Class<E> exceptionType) {
         return of(iterable);
     }
 
@@ -444,7 +447,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param exceptionType
      * @return
      */
-    public static <K, V, E extends Exception> ExceptionalStream<Map.Entry<K, V>, E> of(final Map<K, V> m, final Class<E> exceptionType) {
+    public static <K, V, E extends Exception> ExceptionalStream<Map.Entry<K, V>, E> of(final Map<K, V> m,
+            @SuppressWarnings("unused") final Class<E> exceptionType) {
         return of(m);
     }
 
@@ -456,7 +460,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param exceptionType
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> of(final Stream<? extends T> stream, final Class<E> exceptionType) {
+    public static <T, E extends Exception> ExceptionalStream<T, E> of(final Stream<? extends T> stream,
+            @SuppressWarnings("unused") final Class<E> exceptionType) {
         return of(stream);
     }
 
@@ -492,7 +497,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
 
             @Override
-            public void skip(long n) throws E {
+            public void advance(long n) throws E {
                 N.checkArgNotNegative(n, "n");
 
                 if (n > len - position) {
@@ -536,7 +541,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
 
             @Override
-            public void skip(long n) throws E {
+            public void advance(long n) throws E {
                 N.checkArgNotNegative(n, "n");
 
                 if (n > len - position) {
@@ -580,7 +585,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
 
             @Override
-            public void skip(long n) throws E {
+            public void advance(long n) throws E {
                 N.checkArgNotNegative(n, "n");
 
                 if (n > len - position) {
@@ -1650,7 +1655,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     a.close();
                 } finally {
                     b.close();
-                    ;
                 }
             }
         });
@@ -3106,12 +3110,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
 
             @Override
-            public void skip(long n) throws E {
+            public void advance(long n) throws E {
                 if (iter == null) {
                     init();
                 }
 
-                iter.skip(n);
+                iter.advance(n);
             }
 
             @Override
@@ -3170,12 +3174,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
 
             @Override
-            public void skip(long n) throws E {
+            public void advance(long n) throws E {
                 if (iter == null) {
                     init();
                 }
 
-                iter.skip(n);
+                iter.advance(n);
             }
 
             @Override
@@ -3206,7 +3210,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         });
     }
 
-    void close(Holder<? extends ExceptionalStream<T, E>> holder) throws E {
+    void close(Holder<? extends ExceptionalStream<T, E>> holder) {
         if (holder.value() != null) {
             holder.value().close();
         }
@@ -3363,10 +3367,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
 
             @Override
-            public void skip(long n) throws E {
+            public void advance(long n) throws E {
                 checkArgNotNegative(n, "n");
 
-                elements.skip(n > Long.MAX_VALUE / chunkSize ? Long.MAX_VALUE : n * chunkSize);
+                elements.advance(n > Long.MAX_VALUE / chunkSize ? Long.MAX_VALUE : n * chunkSize);
             }
         }, closeHandlers);
     }
@@ -3418,10 +3422,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
 
             @Override
-            public void skip(long n) throws E {
+            public void advance(long n) throws E {
                 checkArgNotNegative(n, "n");
 
-                elements.skip(n > Long.MAX_VALUE / chunkSize ? Long.MAX_VALUE : n * chunkSize);
+                elements.advance(n > Long.MAX_VALUE / chunkSize ? Long.MAX_VALUE : n * chunkSize);
             }
         }, closeHandlers);
     }
@@ -3563,7 +3567,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
 
             @Override
-            public void skip(long n) throws E {
+            public void advance(long n) throws E {
                 checkArgNotNegative(n, "n");
 
                 if (n == 0) {
@@ -3571,11 +3575,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 }
 
                 if (increment >= windowSize) {
-                    elements.skip(n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
+                    elements.advance(n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
                 } else {
                     if (N.isNullOrEmpty(queue)) {
                         final long m = ((n - 1) > Long.MAX_VALUE / increment ? Long.MAX_VALUE : (n - 1) * increment);
-                        elements.skip(m);
+                        elements.advance(m);
                     } else {
                         final long m = (n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
                         final int prevSize = increment >= windowSize ? 0 : (queue == null ? 0 : queue.size());
@@ -3589,7 +3593,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                                 queue.clear();
                             }
 
-                            elements.skip(m - prevSize);
+                            elements.advance(m - prevSize);
                         }
                     }
 
@@ -3706,7 +3710,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
 
             @Override
-            public void skip(long n) throws E {
+            public void advance(long n) throws E {
                 checkArgNotNegative(n, "n");
 
                 if (n == 0) {
@@ -3714,11 +3718,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 }
 
                 if (increment >= windowSize) {
-                    elements.skip(n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
+                    elements.advance(n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
                 } else {
                     if (N.isNullOrEmpty(queue)) {
                         final long m = ((n - 1) > Long.MAX_VALUE / increment ? Long.MAX_VALUE : (n - 1) * increment);
-                        elements.skip(m);
+                        elements.advance(m);
                     } else {
                         final long m = (n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
                         final int prevSize = increment >= windowSize ? 0 : (queue == null ? 0 : queue.size());
@@ -3732,7 +3736,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                                 queue.clear();
                             }
 
-                            elements.skip(m - prevSize);
+                            elements.advance(m - prevSize);
                         }
                     }
 
@@ -3768,7 +3772,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             public boolean hasNext() throws E {
                 if (skipped == false) {
                     skipped = true;
-                    skip(n);
+                    advance(n);
                 }
 
                 return elements.hasNext();
@@ -3778,7 +3782,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             public T next() throws E {
                 if (skipped == false) {
                     skipped = true;
-                    skip(n);
+                    advance(n);
                 }
 
                 return elements.next();
@@ -3890,7 +3894,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
 
             @Override
-            public void skip(long n) throws E {
+            public void advance(long n) throws E {
                 if (initialized == false) {
                     init();
                 }
@@ -4088,7 +4092,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
 
             @Override
-            public void skip(long n) throws E {
+            public void advance(long n) throws E {
                 if (initialized == false) {
                     init();
                 }
@@ -4150,7 +4154,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
 
             @Override
-            public void skip(long n) throws E {
+            public void advance(long n) throws E {
                 if (initialized == false) {
                     init();
                 }
@@ -4304,7 +4308,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
 
             @Override
-            public void skip(long n) throws E {
+            public void advance(long n) throws E {
                 checkArgNotNegative(n, "n");
 
                 if (initialized == false) {
@@ -6636,22 +6640,21 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     @TerminalOp
-    public <R, E2 extends Exception> R toListAndThen(Throwables.Function<? super List<T>, R, E> func) throws E, E2 {
+    public <R> R toListAndThen(Throwables.Function<? super List<T>, R, E> func) throws E {
         assertNotClosed();
 
         return func.apply(toList());
     }
 
     @TerminalOp
-    public <R, E2 extends Exception> R toSetAndThen(Throwables.Function<? super Set<T>, R, E> func) throws E, E2 {
+    public <R> R toSetAndThen(Throwables.Function<? super Set<T>, R, E> func) throws E {
         assertNotClosed();
 
         return func.apply(toSet());
     }
 
     @TerminalOp
-    public <R, CC extends Collection<T>, E2 extends Exception> R toCollectionAndThen(Supplier<? extends CC> supplier,
-            Throwables.Function<? super CC, R, E> func) throws E, E2 {
+    public <R, CC extends Collection<T>> R toCollectionAndThen(Supplier<? extends CC> supplier, Throwables.Function<? super CC, R, E> func) throws E {
         assertNotClosed();
 
         return func.apply(toCollection(supplier));
@@ -7966,11 +7969,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
 
             @Override
-            public void skip(long n) {
+            public void advance(long n) {
                 N.checkArgNotNegative(n, "n");
 
                 try {
-                    elements.skip(n);
+                    elements.advance(n);
                 } catch (Exception e) {
                     throw N.toRuntimeException(e);
                 }
@@ -8121,14 +8124,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 }
 
                 @Override
-                public void skip(long n) throws E {
+                public void advance(long n) throws E {
                     N.checkArgNotNegative(n, "n");
 
                     if (isInitialized == false) {
                         init();
                     }
 
-                    iter.skip(n);
+                    iter.advance(n);
                 }
 
                 @Override
@@ -8207,7 +8210,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 }
 
                 @Override
-                public void skip(long n) throws E {
+                public void advance(long n) throws E {
                     N.checkArgNotNegative(n, "n");
 
                     if (isInitialized == false) {
@@ -8252,7 +8255,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
          * @param n
          * @throws E the e
          */
-        public void skip(long n) throws E {
+        public void advance(long n) throws E {
             N.checkArgNotNegative(n, "n");
 
             while (n-- > 0 && hasNext()) {

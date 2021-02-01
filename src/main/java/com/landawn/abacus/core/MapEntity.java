@@ -37,7 +37,7 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
 
     private static final long serialVersionUID = -6595007303962724540L;
 
-    private final Map<String, Object> values = new HashMap<String, Object>();
+    private final Map<String, Object> values = new HashMap<>();
 
     // For Kryo
     MapEntity() {

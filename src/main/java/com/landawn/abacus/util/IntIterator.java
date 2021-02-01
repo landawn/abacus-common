@@ -265,20 +265,6 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     *
-     * @param <E>
-     * @param action
-     * @throws E the e
-     */
-    public <E extends Exception> void foreachRemaining(Throwables.IntConsumer<E> action) throws E {
-        N.checkArgNotNull(action);
-
-        while (hasNext()) {
-            action.accept(nextInt());
-        }
-    }
-
-    /**
      * For each remaining.
      *
      * @param action
@@ -295,7 +281,21 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void forEachIndexed(Throwables.IndexedIntConsumer<E> action) throws E {
+    public <E extends Exception> void foreachRemaining(Throwables.IntConsumer<E> action) throws E {
+        N.checkArgNotNull(action);
+
+        while (hasNext()) {
+            action.accept(nextInt());
+        }
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param action
+     * @throws E the e
+     */
+    public <E extends Exception> void foreachIndexed(Throwables.IndexedIntConsumer<E> action) throws E {
         N.checkArgNotNull(action);
 
         int idx = 0;

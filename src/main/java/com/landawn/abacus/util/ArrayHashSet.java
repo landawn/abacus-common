@@ -181,7 +181,7 @@ public class ArrayHashSet<E> implements Set<E> {
 
     @Override
     public Iterator<E> iterator() {
-        return new Itr<E>(set.iterator());
+        return new Itr<>(set.iterator());
     }
 
     @Override

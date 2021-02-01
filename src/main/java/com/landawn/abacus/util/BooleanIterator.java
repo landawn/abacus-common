@@ -268,20 +268,6 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     }
 
     /**
-     *
-     * @param <E>
-     * @param action
-     * @throws E the e
-     */
-    public <E extends Exception> void foreachRemaining(Throwables.BooleanConsumer<E> action) throws E {
-        N.checkArgNotNull(action);
-
-        while (hasNext()) {
-            action.accept(nextBoolean());
-        }
-    }
-
-    /**
      * For each remaining.
      *
      * @param action
@@ -298,7 +284,21 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void forEachIndexed(Throwables.IndexedBooleanConsumer<E> action) throws E {
+    public <E extends Exception> void foreachRemaining(Throwables.BooleanConsumer<E> action) throws E {
+        N.checkArgNotNull(action);
+
+        while (hasNext()) {
+            action.accept(nextBoolean());
+        }
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param action
+     * @throws E the e
+     */
+    public <E extends Exception> void foreachIndexed(Throwables.IndexedBooleanConsumer<E> action) throws E {
         N.checkArgNotNull(action);
 
         int idx = 0;

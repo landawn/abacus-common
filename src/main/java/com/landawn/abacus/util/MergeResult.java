@@ -29,7 +29,7 @@ import com.landawn.abacus.util.function.BiFunction;
 public enum MergeResult {
     TAKE_FIRST, TAKE_SECOND;
 
-    /*, THIRD, FOURTH, FIFTH, SIXTH, SEVENTH*/;
+    /*, THIRD, FOURTH, FIFTH, SIXTH, SEVENTH*/
 
     public static <T extends Comparable<? super T>> MergeResult minFirst(final T a, final T b) {
         return N.compare(a, b) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;

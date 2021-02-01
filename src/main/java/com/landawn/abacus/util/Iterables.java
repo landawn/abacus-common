@@ -58,9 +58,13 @@ import com.landawn.abacus.util.stream.Stream;
  * Note: This class includes codes copied from Apache Commons Lang, Google Guava and other open source projects under the Apache License 2.0.
  * The methods copied from other libraries/frameworks/projects may be modified in this class.
  * </p>
+ *  
+ * <p>
+ * This is a utility class for iterable data structures, including {@code Collection/Array/Iterator}.
+ * </p>
  * 
  * <p>
- * The methods in this class should only read the input {@code Collections/Arrays}, not modify any of them.
+ * The methods in this class should only read the input {@code Collection/Array/Iterator} parameters, not modify them.
  * </p>
  *  
  */
@@ -142,329 +146,180 @@ public final class Iterables {
         return a == null || a.length == 0 ? OptionalDouble.empty() : OptionalDouble.of(N.max(a));
     }
 
-    /**
-     * Min.
-     *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the nullable
-     */
-    public static <T extends Comparable<? super T>> Nullable<T> min(final Collection<? extends T> c) {
-        return N.isNullOrEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.min(c));
-    }
-
-    /**
-     * Min.
-     *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the nullable
-     */
     public static <T extends Comparable<? super T>> Nullable<T> min(final T[] a) {
         return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.min(a));
     }
 
-    /**
-     * Min.
-     *
-     * @param <T> the generic type
-     * @param c the c
-     * @param cmp the cmp
-     * @return the nullable
-     */
-    public static <T> Nullable<T> min(final Collection<? extends T> c, final Comparator<? super T> cmp) {
-        return N.isNullOrEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.min(c, cmp));
-    }
-
-    /**
-     * Min.
-     *
-     * @param <T> the generic type
-     * @param a the a
-     * @param cmp the cmp
-     * @return the nullable
-     */
     public static <T> Nullable<T> min(final T[] a, final Comparator<? super T> cmp) {
         return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.min(a, cmp));
     }
 
-    /**
-     * Min by.
-     *
-     * @param <T> the generic type
-     * @param c the c
-     * @param keyMapper the key mapper
-     * @return the nullable
-     */
-    @SuppressWarnings("rawtypes")
-    public static <T> Nullable<T> minBy(final Collection<? extends T> c, final Function<? super T, ? extends Comparable> keyMapper) {
-        return min(c, Fn.comparingBy(keyMapper));
+    public static <T extends Comparable<? super T>> Nullable<T> min(final Collection<? extends T> c) {
+        return N.isNullOrEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.min(c));
     }
 
-    /**
-     * Min by.
-     *
-     * @param <T> the generic type
-     * @param a the a
-     * @param keyMapper the key mapper
-     * @return the nullable
-     */
+    public static <T> Nullable<T> min(final Collection<? extends T> c, final Comparator<? super T> cmp) {
+        return N.isNullOrEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.min(c, cmp));
+    }
+
+    public static <T extends Comparable<? super T>> Nullable<T> min(final Iterator<? extends T> iter) {
+        return min(iter, N.NULL_MAX_COMPARATOR);
+    }
+
+    public static <T> Nullable<T> min(final Iterator<? extends T> iter, Comparator<? super T> cmp) {
+        cmp = cmp == null ? N.NULL_MAX_COMPARATOR : cmp;
+
+        if (iter == null || iter.hasNext() == false) {
+            return Nullable.<T> empty();
+        }
+
+        T candidate = null;
+        T next = null;
+
+        do {
+            next = iter.next();
+
+            if (next == null && cmp == N.NULL_MIN_COMPARATOR) {
+                return Nullable.of(next);
+            } else if (cmp.compare(next, candidate) < 0) {
+                candidate = next;
+            }
+        } while (iter.hasNext());
+
+        return Nullable.of(candidate);
+    }
+
     @SuppressWarnings("rawtypes")
     public static <T> Nullable<T> minBy(final T[] a, final Function<? super T, ? extends Comparable> keyMapper) {
         return min(a, Fn.comparingBy(keyMapper));
     }
 
-    /**
-     * Max.
-     *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the nullable
-     */
-    public static <T extends Comparable<? super T>> Nullable<T> max(final Collection<? extends T> c) {
-        return N.isNullOrEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.max(c));
+    @SuppressWarnings("rawtypes")
+    public static <T> Nullable<T> minBy(final Collection<? extends T> c, final Function<? super T, ? extends Comparable> keyMapper) {
+        return min(c, Fn.comparingBy(keyMapper));
     }
 
-    /**
-     * Max.
-     *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the nullable
-     */
+    @SuppressWarnings("rawtypes")
+    public static <T> Nullable<T> minBy(final Iterator<? extends T> iter, final Function<? super T, ? extends Comparable> keyMapper) {
+        return min(iter, Fn.comparingBy(keyMapper));
+    }
+
     public static <T extends Comparable<? super T>> Nullable<T> max(final T[] a) {
         return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.max(a));
     }
 
-    /**
-     * Max.
-     *
-     * @param <T> the generic type
-     * @param c the c
-     * @param cmp the cmp
-     * @return the nullable
-     */
-    public static <T> Nullable<T> max(final Collection<? extends T> c, final Comparator<? super T> cmp) {
-        return N.isNullOrEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.max(c, cmp));
-    }
-
-    /**
-     * Max.
-     *
-     * @param <T> the generic type
-     * @param a the a
-     * @param cmp the cmp
-     * @return the nullable
-     */
     public static <T> Nullable<T> max(final T[] a, final Comparator<? super T> cmp) {
         return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.max(a, cmp));
     }
 
-    /**
-     * Max by.
-     *
-     * @param <T> the generic type
-     * @param c the c
-     * @param keyMapper the key mapper
-     * @return the nullable
-     */
-    @SuppressWarnings("rawtypes")
-    public static <T> Nullable<T> maxBy(final Collection<? extends T> c, final Function<? super T, ? extends Comparable> keyMapper) {
-        return max(c, Fn.comparingBy(keyMapper));
+    public static <T extends Comparable<? super T>> Nullable<T> max(final Collection<? extends T> c) {
+        return N.isNullOrEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.max(c));
     }
 
-    /**
-     * Max by.
-     *
-     * @param <T> the generic type
-     * @param a the a
-     * @param keyMapper the key mapper
-     * @return the nullable
-     */
+    public static <T> Nullable<T> max(final Collection<? extends T> c, final Comparator<? super T> cmp) {
+        return N.isNullOrEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.max(c, cmp));
+    }
+
+    public static <T extends Comparable<? super T>> Nullable<T> max(final Iterator<? extends T> iter) {
+        return max(iter, N.NULL_MIN_COMPARATOR);
+    }
+
+    public static <T> Nullable<T> max(final Iterator<? extends T> iter, Comparator<? super T> cmp) {
+        cmp = cmp == null ? N.NULL_MIN_COMPARATOR : cmp;
+
+        if (iter == null || iter.hasNext() == false) {
+            return Nullable.<T> empty();
+        }
+
+        T candidate = null;
+        T next = null;
+
+        do {
+            next = iter.next();
+
+            if (next == null && cmp == N.NULL_MAX_COMPARATOR) {
+                return Nullable.of(next);
+            } else if (cmp.compare(next, candidate) > 0) {
+                candidate = next;
+            }
+        } while (iter.hasNext());
+
+        return Nullable.of(candidate);
+    }
+
     @SuppressWarnings("rawtypes")
     public static <T> Nullable<T> maxBy(final T[] a, final Function<? super T, ? extends Comparable> keyMapper) {
         return max(a, Fn.comparingBy(keyMapper));
     }
 
-    /**
-     * Median.
-     *
-     * @param <T> the generic type
-     * @param c the c
-     * @return the nullable
-     */
-    public static <T extends Comparable<? super T>> Nullable<T> median(final Collection<? extends T> c) {
-        return N.isNullOrEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.median(c));
+    @SuppressWarnings("rawtypes")
+    public static <T> Nullable<T> maxBy(final Collection<? extends T> c, final Function<? super T, ? extends Comparable> keyMapper) {
+        return max(c, Fn.comparingBy(keyMapper));
     }
 
-    /**
-     * Median.
-     *
-     * @param <T> the generic type
-     * @param a the a
-     * @return the nullable
-     */
+    @SuppressWarnings("rawtypes")
+    public static <T> Nullable<T> maxBy(final Iterator<? extends T> iter, final Function<? super T, ? extends Comparable> keyMapper) {
+        return max(iter, Fn.comparingBy(keyMapper));
+    }
+
     public static <T extends Comparable<? super T>> Nullable<T> median(final T[] a) {
         return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.median(a));
     }
 
-    /**
-     * Median.
-     *
-     * @param <T> the generic type
-     * @param c the c
-     * @param cmp the cmp
-     * @return the nullable
-     */
-    public static <T> Nullable<T> median(final Collection<? extends T> c, final Comparator<? super T> cmp) {
-        return N.isNullOrEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.median(c, cmp));
+    public static <T extends Comparable<? super T>> Nullable<T> median(final Collection<? extends T> c) {
+        return N.isNullOrEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.median(c));
     }
 
-    /**
-     * Median.
-     *
-     * @param <T> the generic type
-     * @param a the a
-     * @param cmp the cmp
-     * @return the nullable
-     */
     public static <T> Nullable<T> median(final T[] a, final Comparator<? super T> cmp) {
         return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.median(a, cmp));
     }
 
-    /**
-     * Median by.
-     *
-     * @param <T> the generic type
-     * @param c the c
-     * @param keyMapper the key mapper
-     * @return the nullable
-     */
-    @SuppressWarnings("rawtypes")
-    public static <T> Nullable<T> medianBy(final Collection<? extends T> c, final Function<? super T, ? extends Comparable> keyMapper) {
-        return median(c, Fn.comparingBy(keyMapper));
+    public static <T> Nullable<T> median(final Collection<? extends T> c, final Comparator<? super T> cmp) {
+        return N.isNullOrEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.median(c, cmp));
     }
 
-    /**
-     * Median by.
-     *
-     * @param <T> the generic type
-     * @param a the a
-     * @param keyMapper the key mapper
-     * @return the nullable
-     */
     @SuppressWarnings("rawtypes")
     public static <T> Nullable<T> medianBy(final T[] a, final Function<? super T, ? extends Comparable> keyMapper) {
         return median(a, Fn.comparingBy(keyMapper));
     }
 
-    /**
-     * Kth largest.
-     *
-     * @param <T> the generic type
-     * @param c the c
-     * @param k the k
-     * @return the nullable
-     */
+    @SuppressWarnings("rawtypes")
+    public static <T> Nullable<T> medianBy(final Collection<? extends T> c, final Function<? super T, ? extends Comparable> keyMapper) {
+        return median(c, Fn.comparingBy(keyMapper));
+    }
+
     public static <T extends Comparable<? super T>> Nullable<T> kthLargest(final Collection<? extends T> c, final int k) {
         return N.isNullOrEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.kthLargest(c, k));
     }
 
-    /**
-     * Kth largest.
-     *
-     * @param <T> the generic type
-     * @param a the a
-     * @param k the k
-     * @return the nullable
-     */
     public static <T extends Comparable<? super T>> Nullable<T> kthLargest(final T[] a, final int k) {
         return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.kthLargest(a, k));
     }
 
-    /**
-     * Kth largest.
-     *
-     * @param <T> the generic type
-     * @param c the c
-     * @param k the k
-     * @param cmp the cmp
-     * @return the nullable
-     */
     public static <T> Nullable<T> kthLargest(final Collection<? extends T> c, final int k, final Comparator<? super T> cmp) {
         return N.isNullOrEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.kthLargest(c, k, cmp));
     }
 
-    /**
-     * Kth largest.
-     *
-     * @param <T> the generic type
-     * @param a the a
-     * @param k the k
-     * @param cmp the cmp
-     * @return the nullable
-     */
     public static <T> Nullable<T> kthLargest(final T[] a, final int k, final Comparator<? super T> cmp) {
         return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.kthLargest(a, k, cmp));
     }
 
-    /**
-     * Index of.
-     *
-     * @param c the c
-     * @param objToFind the obj to find
-     * @return the optional int
-     */
     public static OptionalInt indexOf(final Collection<?> c, final Object objToFind) {
         return Index.of(c, objToFind);
     }
 
-    /**
-     * Index of.
-     *
-     * @param a the a
-     * @param objToFind the obj to find
-     * @return the optional int
-     */
     public static OptionalInt indexOf(final Object[] a, final Object objToFind) {
         return Index.of(a, objToFind);
     }
 
-    /**
-     * Last index of.
-     *
-     * @param c the c
-     * @param objToFind the obj to find
-     * @return the optional int
-     */
     public static OptionalInt lastIndexOf(final Collection<?> c, final Object objToFind) {
         return Index.last(c, objToFind);
     }
 
-    /**
-     * Last index of.
-     *
-     * @param a the a
-     * @param objToFind the obj to find
-     * @return the optional int
-     */
     public static OptionalInt lastIndexOf(final Object[] a, final Object objToFind) {
         return Index.last(a, objToFind);
     }
 
-    /**
-     * Find first or last index.
-     *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param c the c
-     * @param predicateForFirst the predicate for first
-     * @param predicateForLast the predicate for last
-     * @return the optional int
-     * @throws E the e
-     * @throws E2 the e2
-     */
     public static <T, E extends Exception, E2 extends Exception> OptionalInt findFirstOrLastIndex(final Collection<? extends T> c,
             final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
         if (N.isNullOrEmpty(c)) {
@@ -1333,8 +1188,8 @@ public final class Iterables {
      */
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators,
             final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementParser,
-            final Throwables.Runnable<E2> onComplete) throws E {
-        forEach(iterators, 0, Long.MAX_VALUE, readThreadNum, processThreadNum, queueSize, elementParser);
+            final Throwables.Runnable<E2> onComplete) throws E, E2 {
+        forEach(iterators, 0, Long.MAX_VALUE, readThreadNum, processThreadNum, queueSize, elementParser, onComplete);
     }
 
     /**

@@ -64,7 +64,7 @@ final class ReflectASM<T> {
      * @return
      */
     public static <T> ReflectASM<T> on(Class<T> cls) {
-        return new ReflectASM<T>(cls, null);
+        return new ReflectASM<>(cls, null);
     }
 
     /**
@@ -74,11 +74,11 @@ final class ReflectASM<T> {
      * @return
      */
     public static <T> ReflectASM<T> on(T target) {
-        return new ReflectASM<T>((Class<T>) target.getClass(), target);
+        return new ReflectASM<>((Class<T>) target.getClass(), target);
     }
 
     public ReflectASM<T> _new() {
-        return new ReflectASM<T>(cls, getConstructorAccess(cls).newInstance());
+        return new ReflectASM<>(cls, getConstructorAccess(cls).newInstance());
     }
 
     /**
@@ -88,7 +88,7 @@ final class ReflectASM<T> {
      * @return
      */
     public <V> V get(String fieldName) {
-        final FieldAccess fieldAccess = getFieldAccess(fieldName);
+        final FieldAccess fieldAccess = getFieldAccess();
 
         return (V) fieldAccess.get(target, fieldName);
     }
@@ -100,7 +100,7 @@ final class ReflectASM<T> {
      * @return
      */
     public ReflectASM<T> set(String fieldName, Object value) {
-        final FieldAccess fieldAccess = getFieldAccess(fieldName);
+        final FieldAccess fieldAccess = getFieldAccess();
 
         fieldAccess.set(target, fieldName, value);
 
@@ -136,11 +136,10 @@ final class ReflectASM<T> {
 
     /**
      * Gets the field access.
-     *
-     * @param fieldName
+     * 
      * @return
      */
-    private FieldAccess getFieldAccess(String fieldName) {
+    private FieldAccess getFieldAccess() {
         FieldAccess fieldAccess = clsFieldPool.get(cls);
 
         if (fieldAccess == null) {

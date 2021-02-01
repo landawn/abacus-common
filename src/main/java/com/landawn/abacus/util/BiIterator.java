@@ -172,7 +172,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
         N.checkArgNotNull(output);
 
         return new BiIterator<A, B>() {
-            private final Pair<A, B> tmp = new Pair<A, B>();
+            private final Pair<A, B> tmp = new Pair<>();
 
             @Override
             public boolean hasNext() {
@@ -241,7 +241,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
         return new BiIterator<A, B>() {
             private final MutableInt cursor = MutableInt.of(fromIndex);
-            private final Pair<A, B> tmp = new Pair<A, B>();
+            private final Pair<A, B> tmp = new Pair<>();
 
             @Override
             public boolean hasNext() {

@@ -133,14 +133,20 @@ public final class InternalUtil {
         return CommonUtil.asList(a);
     }
 
-    static final Field strValueField;
-
     static volatile boolean isStringCharsGettable = true;
+    static volatile boolean isStringCharsCreatable = true;
 
+    static final Field strValueField;
     static final Constructor<String> sharedStringConstructor;
 
     static {
         Field tmp = null;
+
+        try {
+            tmp = String.class.getDeclaredField("value");
+        } catch (Throwable e) {
+            // ignore.
+        }
 
         strValueField = ((tmp != null) && tmp.getName().equals("value") && tmp.getType().equals(char[].class)) ? tmp : null;
 
@@ -195,14 +201,15 @@ public final class InternalUtil {
      * @return
      */
     static String newString(final char[] a, final boolean share) {
-        if (share && sharedStringConstructor != null) {
+        if (isStringCharsCreatable && share && sharedStringConstructor != null) {
             try {
                 return sharedStringConstructor.newInstance(a, true);
             } catch (Throwable e) {
-                throw N.toRuntimeException(e);
+                // ignore
+                isStringCharsCreatable = false;
             }
-        } else {
-            return String.valueOf(a);
         }
+
+        return String.valueOf(a);
     }
 }

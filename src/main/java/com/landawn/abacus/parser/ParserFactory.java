@@ -20,6 +20,7 @@ package com.landawn.abacus.parser;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings("unused")
 public final class ParserFactory {
 
     // Check for Android.

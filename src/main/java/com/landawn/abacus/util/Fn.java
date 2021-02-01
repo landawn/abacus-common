@@ -1182,7 +1182,7 @@ public final class Fn extends Comparators {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <K, T> Function<Wrapper<T>, T> unwrap() {
+    public static <T> Function<Wrapper<T>, T> unwrap() {
         return (Function) UNWRAP;
     }
 
@@ -7451,7 +7451,7 @@ public final class Fn extends Comparators {
             return new Supplier<LongMultiset<T>>() {
                 @Override
                 public LongMultiset<T> get() {
-                    return new LongMultiset<T>(valueMapType);
+                    return new LongMultiset<>(valueMapType);
                 }
             };
         }
@@ -7460,7 +7460,7 @@ public final class Fn extends Comparators {
             return new Supplier<LongMultiset<T>>() {
                 @Override
                 public LongMultiset<T> get() {
-                    return new LongMultiset<T>(mapSupplier);
+                    return new LongMultiset<>(mapSupplier);
                 }
             };
         }
@@ -8041,7 +8041,7 @@ public final class Fn extends Comparators {
         };
 
         /** The Constant ALWAYS_FALSE. */
-        @SuppressWarnings("rawtypes")
+        @SuppressWarnings({ "rawtypes", "hiding" })
         private static final TriPredicate ALWAYS_FALSE = new TriPredicate() {
             @Override
             public boolean test(Object a, Object b, Object c) {
@@ -8675,7 +8675,7 @@ public final class Fn extends Comparators {
          * @param <U>
          * @return
          */
-        public static <K, V, M extends Map<K, V>, U> BiFunction<M, K, M> ofRemoveByKey() {
+        public static <K, V, M extends Map<K, V>> BiFunction<M, K, M> ofRemoveByKey() {
             return (BiFunction<M, K, M>) REMOVE_BY_KEY;
         }
 

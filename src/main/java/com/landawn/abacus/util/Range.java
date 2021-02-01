@@ -588,7 +588,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      *
      * @param <T>
      */
-    static class LowerEndpoint<T extends Comparable<? super T>> extends Endpoint<T> implements Serializable {
+    static class LowerEndpoint<T extends Comparable<? super T>> extends Endpoint<T> {
 
         /** The Constant serialVersionUID. */
         private static final long serialVersionUID = -1369183906861608859L;
@@ -671,7 +671,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      *
      * @param <T>
      */
-    static class UpperEndpoint<T extends Comparable<? super T>> extends Endpoint<T> implements Serializable {
+    static class UpperEndpoint<T extends Comparable<? super T>> extends Endpoint<T> {
 
         /** The Constant serialVersionUID. */
         private static final long serialVersionUID = 3180376045860768477L;

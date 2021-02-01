@@ -802,6 +802,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param c
      * @return
      */
+    @Override
     public boolean containsAll(CharList c) {
         if (N.isNullOrEmpty(c)) {
             return true;
@@ -853,6 +854,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param c
      * @return
      */
+    @Override
     public boolean containsAny(CharList c) {
         if (this.isEmpty() || N.isNullOrEmpty(c)) {
             return false;
@@ -880,6 +882,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param c
      * @return
      */
+    @Override
     public boolean disjoint(final CharList c) {
         if (isEmpty() || N.isNullOrEmpty(c)) {
             return true;

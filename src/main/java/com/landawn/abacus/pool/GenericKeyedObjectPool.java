@@ -73,7 +73,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
         this.maxMemorySize = maxMemorySize;
         this.memoryMeasure = memoryMeasure;
-        this.pool = new HashMap<K, E>((capacity > 1000) ? 1000 : capacity);
+        this.pool = new HashMap<>((capacity > 1000) ? 1000 : capacity);
 
         switch (this.evictionPolicy) {
             case LAST_ACCESS_TIME:
@@ -350,7 +350,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         lock.lock();
 
         try {
-            return new ArrayList<E>(pool.values());
+            return new ArrayList<>(pool.values());
         } finally {
             lock.unlock();
         }
@@ -470,6 +470,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * or it's time out.
      * 
      */
+    @SuppressWarnings("null")
     protected void evict() {
         lock.lock();
 

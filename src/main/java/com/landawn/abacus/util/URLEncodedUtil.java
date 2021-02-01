@@ -206,28 +206,27 @@ public final class URLEncodedUtil {
             return result;
         }
 
-        final Scanner scanner = new Scanner(urlQuery);
-        scanner.useDelimiter(QP_SEP_PATTERN);
+        try (final Scanner scanner = new Scanner(urlQuery)) {
+            scanner.useDelimiter(QP_SEP_PATTERN);
 
-        String name = null;
-        String value = null;
+            String name = null;
+            String value = null;
 
-        while (scanner.hasNext()) {
-            final String token = scanner.next();
-            final int i = token.indexOf(NAME_VALUE_SEPARATOR);
+            while (scanner.hasNext()) {
+                final String token = scanner.next();
+                final int i = token.indexOf(NAME_VALUE_SEPARATOR);
 
-            if (i != -1) {
-                name = decodeFormFields(token.substring(0, i).trim(), charset);
-                value = decodeFormFields(token.substring(i + 1).trim(), charset);
-            } else {
-                name = decodeFormFields(token.trim(), charset);
-                value = null;
+                if (i != -1) {
+                    name = decodeFormFields(token.substring(0, i).trim(), charset);
+                    value = decodeFormFields(token.substring(i + 1).trim(), charset);
+                } else {
+                    name = decodeFormFields(token.trim(), charset);
+                    value = null;
+                }
+
+                result.put(name, value);
             }
-
-            result.put(name, value);
         }
-
-        scanner.close();
 
         return result;
     }
@@ -258,17 +257,15 @@ public final class URLEncodedUtil {
             return result;
         }
 
-        final Scanner scanner = new Scanner(urlQuery);
-        scanner.useDelimiter(QP_SEP_PATTERN);
+        try (final Scanner scanner = new Scanner(urlQuery)) {
+            scanner.useDelimiter(QP_SEP_PATTERN);
 
-        Type<?> propType = null;
-        Object propValue = null;
-        String name = null;
-        String value = null;
+            final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
+            Type<?> propType = null;
+            Object propValue = null;
+            String name = null;
+            String value = null;
 
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
-
-        try {
             while (scanner.hasNext()) {
                 final String token = scanner.next();
                 final int i = token.indexOf(NAME_VALUE_SEPARATOR);
@@ -291,9 +288,6 @@ public final class URLEncodedUtil {
 
                 entityInfo.setPropValue(result, name, propValue);
             }
-
-        } finally {
-            scanner.close();
         }
 
         return result;

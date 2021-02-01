@@ -20,10 +20,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.function.BiConsumer;
@@ -33,11 +35,14 @@ import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.Predicate;
 import com.landawn.abacus.util.function.TriFunction;
 
-/**
- * The methods in this class should only read the input {@code Collections/Arrays}, not modify any of them.
- *
- * @author Haiyang Li
- * @since 0.9
+/** 
+ * <p>
+ * This is a utility class mostly for {@code Iterator}.
+ * </p>
+ * 
+ * <p>
+ * The methods in this class should only read the input {@code Collection/Array/Iterator} parameters, not modify them.
+ * </p>
  */
 public final class Iterators {
 
@@ -52,7 +57,7 @@ public final class Iterators {
      * @param index
      * @return
      */
-    public static <T> Nullable<T> get(final Iterator<? extends T> iter, int index) {
+    public static <T> Nullable<T> get(final Iterator<? extends T> iter, long index) {
         N.checkArgNotNegative(index, "index");
 
         if (iter == null) {
@@ -68,6 +73,50 @@ public final class Iterators {
         }
 
         return Nullable.empty();
+    }
+
+    /**
+     *
+     * @param iter
+     * @return
+     */
+    public static long count(final Iterator<?> iter) {
+        if (iter == null) {
+            return 0;
+        }
+
+        long res = 0;
+
+        while (iter.hasNext()) {
+            iter.next();
+            res++;
+        }
+
+        return res;
+    }
+
+    /**
+     *
+     * @param iter
+     * @param filter
+     * @return
+     */
+    public static <T, E extends Exception> long count(final Iterator<? extends T> iter, final Throwables.Predicate<? super T, E> filter) throws E {
+        N.checkArgNotNull(filter, "filter");
+
+        if (iter == null) {
+            return 0;
+        }
+
+        long res = 0;
+
+        while (iter.hasNext()) {
+            if (filter.test(iter.next())) {
+                res++;
+            }
+        }
+
+        return res;
     }
 
     /**
@@ -1216,6 +1265,11 @@ public final class Iterators {
     }
 
     public static <T> ObjIterator<T> merge(final List<? extends Collection<? extends T>> c, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
+        return mergge(c, nextSelector);
+    }
+
+    public static <T> ObjIterator<T> mergge(final Collection<? extends Collection<? extends T>> c,
+            final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
         N.checkArgNotNull(nextSelector);
 
         if (N.isNullOrEmpty(c)) {
@@ -1556,6 +1610,19 @@ public final class Iterators {
      *
      * @param <T>
      * @param <L>
+     * @param <R>
+     * @param c
+     * @param unzip the second parameter is an output parameter.
+     * @return
+     */
+    public static <T, L, R> BiIterator<L, R> unzip(final Collection<? extends T> c, final BiConsumer<? super T, Pair<L, R>> unzip) {
+        return BiIterator.unzip(c == null ? ObjIterator.<T> empty() : c.iterator(), unzip);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <L>
      * @param <M>
      * @param <R>
      * @param iter
@@ -1564,6 +1631,20 @@ public final class Iterators {
      */
     public static <T, L, M, R> TriIterator<L, M, R> unzipp(final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<L, M, R>> unzip) {
         return TriIterator.unzip(iter, unzip);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <L>
+     * @param <M>
+     * @param <R>
+     * @param c
+     * @param unzip the second parameter is an output parameter.
+     * @return
+     */
+    public static <T, L, M, R> TriIterator<L, M, R> unzipp(final Collection<? extends T> c, final BiConsumer<? super T, Triple<L, M, R>> unzip) {
+        return TriIterator.unzip(c == null ? ObjIterator.<T> empty() : c.iterator(), unzip);
     }
 
     /**
@@ -1738,42 +1819,87 @@ public final class Iterators {
      * @return
      */
     public static <T> ObjIterator<T> skipNull(final Iterator<? extends T> iter) {
+        return filter(iter, Fn.<T> notNull());
+    }
+
+    public static <T> ObjIterator<T> distinct(final Iterator<? extends T> iter) {
         if (iter == null) {
             return ObjIterator.empty();
         }
 
+        final Set<T> set = new HashSet<>();
+
         return new ObjIterator<T>() {
-            private final Iterator<? extends T> iterator = iter;
-            private T next;
+            private final T NONE = (T) N.NULL_MASK;
+            private T next = NONE;
+            private T tmp = null;
 
             @Override
             public boolean hasNext() {
-                if (next == null && iterator.hasNext()) {
-                    next = iterator.next();
+                if (next == NONE) {
+                    while (iter.hasNext()) {
+                        tmp = iter.next();
 
-                    if (next == null) {
-                        while (iterator.hasNext()) {
-                            next = iterator.next();
-
-                            if (next != null) {
-                                break;
-                            }
+                        if (set.add(tmp)) {
+                            next = tmp;
+                            break;
                         }
                     }
                 }
 
-                return next != null;
+                return next != NONE;
             }
 
             @Override
             public T next() {
-                if (next == null && hasNext() == false) {
+                if (hasNext() == false) {
                     throw new NoSuchElementException();
                 }
 
-                final T result = next;
-                next = null;
-                return result;
+                tmp = next;
+                next = NONE;
+                return tmp;
+            }
+        };
+    }
+
+    public static <T> ObjIterator<T> distinctBy(final Iterator<? extends T> iter, final Function<? super T, ?> keyMapper) {
+        if (iter == null) {
+            return ObjIterator.empty();
+        }
+
+        final Set<Object> set = new HashSet<>();
+
+        return new ObjIterator<T>() {
+            private final T NONE = (T) N.NULL_MASK;
+            private T next = NONE;
+            private T tmp = null;
+
+            @Override
+            public boolean hasNext() {
+                if (next == NONE) {
+                    while (iter.hasNext()) {
+                        tmp = iter.next();
+
+                        if (set.add(keyMapper.apply(tmp))) {
+                            next = tmp;
+                            break;
+                        }
+                    }
+                }
+
+                return next != NONE;
+            }
+
+            @Override
+            public T next() {
+                if (hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                tmp = next;
+                next = NONE;
+                return tmp;
             }
         };
     }
@@ -1822,6 +1948,183 @@ public final class Iterators {
                 tmp = next;
                 next = NONE;
                 return tmp;
+            }
+        };
+    }
+
+    public static <T> ObjIterator<T> takeWhile(final Iterator<? extends T> iter, final Predicate<? super T> filter) {
+        N.checkArgNotNull(filter, "filter");
+
+        if (iter == null) {
+            return ObjIterator.empty();
+        }
+
+        return new ObjIterator<T>() {
+            private final T NONE = (T) N.NULL_MASK;
+            private T next = NONE;
+            private T tmp = null;
+            private boolean hasMore = true;
+
+            @Override
+            public boolean hasNext() {
+                if (next == NONE && hasMore && iter.hasNext()) {
+                    tmp = iter.next();
+
+                    if (filter.test(tmp)) {
+                        next = tmp;
+                    } else {
+                        hasMore = false;
+                    }
+                }
+
+                return next != NONE;
+            }
+
+            @Override
+            public T next() {
+                if (hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                tmp = next;
+                next = NONE;
+                return tmp;
+            }
+        };
+    }
+
+    public static <T> ObjIterator<T> takeWhileInclusive(final Iterator<? extends T> iter, final Predicate<? super T> filter) {
+        N.checkArgNotNull(filter, "filter");
+
+        if (iter == null) {
+            return ObjIterator.empty();
+        }
+
+        return new ObjIterator<T>() {
+            private final T NONE = (T) N.NULL_MASK;
+            private T next = NONE;
+            private T tmp = null;
+            private boolean hasMore = true;
+
+            @Override
+            public boolean hasNext() {
+                if (next == NONE && hasMore && iter.hasNext()) {
+                    tmp = iter.next();
+
+                    if (filter.test(tmp)) {
+                        next = tmp;
+                    } else {
+                        next = tmp;
+                        hasMore = false;
+                    }
+                }
+
+                return next != NONE;
+            }
+
+            @Override
+            public T next() {
+                if (hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                tmp = next;
+                next = NONE;
+                return tmp;
+            }
+        };
+    }
+
+    public static <T> ObjIterator<T> dropWhile(final Iterator<? extends T> iter, final Predicate<? super T> filter) {
+        N.checkArgNotNull(filter, "filter");
+
+        if (iter == null) {
+            return ObjIterator.empty();
+        }
+
+        return new ObjIterator<T>() {
+            private final T NONE = (T) N.NULL_MASK;
+            private T next = NONE;
+            private boolean hasDropped = false;
+
+            @Override
+            public boolean hasNext() {
+                if (hasDropped == false) {
+                    while (iter.hasNext()) {
+                        next = iter.next();
+
+                        if (filter.test(next)) {
+                            next = NONE;
+                        } else {
+                            hasDropped = true;
+                            break;
+                        }
+                    }
+                }
+
+                return next != NONE || iter.hasNext();
+            }
+
+            @Override
+            public T next() {
+                if (hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                if (next != NONE) {
+                    final T tmp = next;
+                    next = NONE;
+                    return tmp;
+                } else {
+                    return iter.next();
+                }
+            }
+        };
+    }
+
+    public static <T> ObjIterator<T> skipUntil(final Iterator<? extends T> iter, final Predicate<? super T> filter) {
+        N.checkArgNotNull(filter, "filter");
+
+        if (iter == null) {
+            return ObjIterator.empty();
+        }
+
+        return new ObjIterator<T>() {
+            private final T NONE = (T) N.NULL_MASK;
+            private T next = NONE;
+            private boolean hasSkipped = false;
+
+            @Override
+            public boolean hasNext() {
+                if (hasSkipped == false) {
+                    while (iter.hasNext()) {
+                        next = iter.next();
+
+                        if (filter.test(next)) {
+                            hasSkipped = true;
+                            break;
+                        } else {
+                            next = NONE;
+                        }
+                    }
+                }
+
+                return next != NONE || iter.hasNext();
+            }
+
+            @Override
+            public T next() {
+                if (hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                if (next != NONE) {
+                    final T tmp = next;
+                    next = NONE;
+                    return tmp;
+                } else {
+                    return iter.next();
+                }
             }
         };
     }
@@ -1896,6 +2199,46 @@ public final class Iterators {
                 }
 
                 return cur.next();
+            }
+        };
+    }
+
+    public static <T, U> ObjIterator<U> flattMap(final Iterator<? extends T> iter, final Function<? super T, ? extends U[]> mapper) {
+        N.checkArgNotNull(mapper, "mapper");
+
+        if (iter == null) {
+            return ObjIterator.empty();
+        }
+
+        return new ObjIterator<U>() {
+            private U[] a = null;
+            private int len = 0;
+            private int cursor = 0;
+
+            @Override
+            public boolean hasNext() {
+                if (cursor >= len) {
+                    while (iter.hasNext()) {
+                        a = mapper.apply(iter.next());
+                        len = N.len(a);
+                        cursor = 0;
+
+                        if (len > 0) {
+                            break;
+                        }
+                    }
+                }
+
+                return cursor < len;
+            }
+
+            @Override
+            public U next() {
+                if (hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                return a[cursor++];
             }
         };
     }

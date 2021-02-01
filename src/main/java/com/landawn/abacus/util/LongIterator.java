@@ -265,20 +265,6 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     /**
-     *
-     * @param <E>
-     * @param action
-     * @throws E the e
-     */
-    public <E extends Exception> void foreachRemaining(Throwables.LongConsumer<E> action) throws E {
-        N.checkArgNotNull(action);
-
-        while (hasNext()) {
-            action.accept(nextLong());
-        }
-    }
-
-    /**
      * For each remaining.
      *
      * @param action
@@ -295,7 +281,21 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void forEachIndexed(Throwables.IndexedLongConsumer<E> action) throws E {
+    public <E extends Exception> void foreachRemaining(Throwables.LongConsumer<E> action) throws E {
+        N.checkArgNotNull(action);
+
+        while (hasNext()) {
+            action.accept(nextLong());
+        }
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param action
+     * @throws E the e
+     */
+    public <E extends Exception> void foreachIndexed(Throwables.IndexedLongConsumer<E> action) throws E {
         N.checkArgNotNull(action);
 
         int idx = 0;

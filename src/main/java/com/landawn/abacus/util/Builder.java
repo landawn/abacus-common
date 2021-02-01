@@ -214,7 +214,7 @@ public class Builder<T> {
      * @return
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
-    public static final <T> DataSetBuilder of(final DataSet val) throws IllegalArgumentException {
+    public static final DataSetBuilder of(final DataSet val) throws IllegalArgumentException {
         return new DataSetBuilder(val);
     }
 
@@ -2200,7 +2200,7 @@ public class Builder<T> {
          * @return
          * @throws E the e
          */
-        public <T, E extends Exception> DataSetBuilder updateColumns(Collection<String> columnNames, Throwables.Function<?, ?, E> func) throws E {
+        public <E extends Exception> DataSetBuilder updateColumns(Collection<String> columnNames, Throwables.Function<?, ?, E> func) throws E {
             val.updateColumns(columnNames, func);
 
             return this;

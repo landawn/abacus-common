@@ -800,7 +800,7 @@ public final class Hashing {
             final Collection<HashFunction> c = (Collection<HashFunction>) hashFunctions;
             a = c.toArray(new HashFunction[c.size()]);
         } else {
-            List<HashFunction> list = new ArrayList<HashFunction>();
+            List<HashFunction> list = new ArrayList<>();
 
             for (HashFunction hashFunction : hashFunctions) {
                 list.add(hashFunction);

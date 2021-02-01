@@ -279,7 +279,7 @@ public abstract class Configuration {
         }
 
         for (String configPath : Configuration.getCommonConfigPath()) {
-            findFileInDir(folderPrefix, simpleConfigFileName, new File(configPath), isDir, foundDir);
+            configurationFile = findFileInDir(folderPrefix, simpleConfigFileName, new File(configPath), isDir, foundDir);
 
             if (configurationFile != null && configurationFile.exists()) {
                 configFilePathPool.put(configFileName, configurationFile.getAbsolutePath());
@@ -408,7 +408,7 @@ public abstract class Configuration {
         String absolutePath = dir.getAbsolutePath().replaceAll("%20", " ");
 
         if (logger.isInfoEnabled()) {
-            logger.info("finding file [" + configFileName + "] in directory [" + ((dir == null) ? "null" : absolutePath) + "] ...");
+            logger.info("finding file [" + configFileName + "] in directory [" + absolutePath + "] ...");
         }
 
         if (SVN_NAME.equals(dir.getName()) || GIT_NAME.equals(dir.getName()) || CVS_NAME.equals(dir.getName())) {

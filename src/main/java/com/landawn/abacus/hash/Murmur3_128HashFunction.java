@@ -153,6 +153,7 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
          *
          * @param bb
          */
+        @SuppressWarnings("fallthrough")
         @Override
         protected void processRemaining(ByteBuffer bb) {
             long k1 = 0;

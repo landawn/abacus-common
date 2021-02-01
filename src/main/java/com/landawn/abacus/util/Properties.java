@@ -47,7 +47,7 @@ public class Properties<K, V> implements Map<K, V> {
      * @return
      */
     public static <K, V> Properties<K, V> from(final Map<? extends K, ? extends V> map) {
-        return new Properties<K, V>(new ConcurrentHashMap<K, V>(map));
+        return new Properties<>(new ConcurrentHashMap<K, V>(map));
     }
 
     /**
@@ -81,6 +81,7 @@ public class Properties<K, V> implements Map<K, V> {
      *            null.
      * @return
      */
+    @Override
     @SuppressWarnings("unchecked")
     public V getOrDefault(Object propName, V defaultValue) {
         V result = values.get(propName);
@@ -150,6 +151,7 @@ public class Properties<K, V> implements Map<K, V> {
      * @param value
      * @return
      */
+    @Override
     public V putIfAbsent(K key, V value) {
         V v = get(key);
 
@@ -178,6 +180,7 @@ public class Properties<K, V> implements Map<K, V> {
      * @param value
      * @return
      */
+    @Override
     public boolean remove(Object key, Object value) {
         final Object curValue = get(key);
 
@@ -198,6 +201,7 @@ public class Properties<K, V> implements Map<K, V> {
      * @param value
      * @return
      */
+    @Override
     public V replace(K key, V value) {
         V curValue;
         if (((curValue = get(key)) != null) || containsKey(key)) {
@@ -215,6 +219,7 @@ public class Properties<K, V> implements Map<K, V> {
      * @param newValue
      * @return
      */
+    @Override
     public boolean replace(K key, V oldValue, V newValue) {
         Object curValue = get(key);
         if (!Objects.equals(curValue, oldValue) || (curValue == null && !containsKey(key))) {
@@ -283,7 +288,7 @@ public class Properties<K, V> implements Map<K, V> {
     }
 
     public Properties<K, V> copy() {
-        final Properties<K, V> copy = new Properties<K, V>();
+        final Properties<K, V> copy = new Properties<>();
 
         copy.values.putAll(this.values);
 

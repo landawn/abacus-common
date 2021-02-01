@@ -131,7 +131,7 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Class<List<T>> ofList(final Class<T> eleCls) {
+    public static <T> Class<List<T>> ofList(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) List.class;
     }
 
@@ -154,7 +154,7 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Class<List<T>> ofLinkedList(final Class<T> eleCls) {
+    public static <T> Class<List<T>> ofLinkedList(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) LinkedList.class;
     }
 
@@ -168,7 +168,8 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <K, V> Class<List<Map<K, V>>> ofListOfMap(final Class<K> keyCls, final Class<V> valueCls) {
+    public static <K, V> Class<List<Map<K, V>>> ofListOfMap(@SuppressWarnings("unused") final Class<K> keyCls,
+            @SuppressWarnings("unused") final Class<V> valueCls) {
         return (Class) List.class;
     }
 
@@ -182,7 +183,8 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <K, V> Class<Set<Map<K, V>>> ofSetOfMap(final Class<K> keyCls, final Class<V> valueCls) {
+    public static <K, V> Class<Set<Map<K, V>>> ofSetOfMap(@SuppressWarnings("unused") final Class<K> keyCls,
+            @SuppressWarnings("unused") final Class<V> valueCls) {
         return (Class) Set.class;
     }
 
@@ -203,7 +205,7 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Class<Set<T>> ofSet(final Class<T> eleCls) {
+    public static <T> Class<Set<T>> ofSet(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) Set.class;
     }
 
@@ -226,7 +228,7 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Class<Set<T>> ofLinkedHashSet(final Class<T> eleCls) {
+    public static <T> Class<Set<T>> ofLinkedHashSet(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) LinkedHashSet.class;
     }
 
@@ -249,7 +251,7 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Class<SortedSet<T>> ofSortedSet(final Class<T> eleCls) {
+    public static <T> Class<SortedSet<T>> ofSortedSet(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) SortedSet.class;
     }
 
@@ -272,7 +274,7 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Class<NavigableSet<T>> ofNavigableSet(final Class<T> eleCls) {
+    public static <T> Class<NavigableSet<T>> ofNavigableSet(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) NavigableSet.class;
     }
 
@@ -295,7 +297,7 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Class<NavigableSet<T>> ofTreeSet(final Class<T> eleCls) {
+    public static <T> Class<NavigableSet<T>> ofTreeSet(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) TreeSet.class;
     }
 
@@ -316,7 +318,7 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Class<Queue<T>> ofQueue(final Class<T> eleCls) {
+    public static <T> Class<Queue<T>> ofQueue(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) Queue.class;
     }
 
@@ -337,7 +339,7 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Class<Deque<T>> ofDeque(final Class<T> eleCls) {
+    public static <T> Class<Deque<T>> ofDeque(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) Deque.class;
     }
 
@@ -360,7 +362,7 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Class<Deque<T>> ofArrayDeque(final Class<T> eleCls) {
+    public static <T> Class<Deque<T>> ofArrayDeque(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) ArrayDeque.class;
     }
 
@@ -383,7 +385,7 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Class<Queue<T>> ofConcurrentLinkedQueue(final Class<T> eleCls) {
+    public static <T> Class<Queue<T>> ofConcurrentLinkedQueue(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) ConcurrentLinkedQueue.class;
     }
 
@@ -406,7 +408,7 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Class<Queue<T>> ofPriorityQueue(final Class<T> eleCls) {
+    public static <T> Class<Queue<T>> ofPriorityQueue(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) PriorityQueue.class;
     }
 
@@ -429,7 +431,7 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Class<BlockingQueue<T>> ofLinkedBlockingQueue(final Class<T> eleCls) {
+    public static <T> Class<BlockingQueue<T>> ofLinkedBlockingQueue(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) LinkedBlockingQueue.class;
     }
 
@@ -450,7 +452,7 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Class<Collection<T>> ofCollection(final Class<T> eleCls) {
+    public static <T> Class<Collection<T>> ofCollection(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) Collection.class;
     }
 
@@ -474,7 +476,7 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <K, V> Class<Map<K, V>> ofMap(final Class<K> keyCls, final Class<V> valueCls) {
+    public static <K, V> Class<Map<K, V>> ofMap(@SuppressWarnings("unused") final Class<K> keyCls, @SuppressWarnings("unused") final Class<V> valueCls) {
         return (Class) Map.class;
     }
 
@@ -500,7 +502,8 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <K, V> Class<Map<K, V>> ofLinkedHashMap(final Class<K> keyCls, final Class<V> valueCls) {
+    public static <K, V> Class<Map<K, V>> ofLinkedHashMap(@SuppressWarnings("unused") final Class<K> keyCls,
+            @SuppressWarnings("unused") final Class<V> valueCls) {
         return (Class) LinkedHashMap.class;
     }
 
@@ -526,7 +529,8 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <K, V> Class<SortedMap<K, V>> ofSortedMap(final Class<K> keyCls, final Class<V> valueCls) {
+    public static <K, V> Class<SortedMap<K, V>> ofSortedMap(@SuppressWarnings("unused") final Class<K> keyCls,
+            @SuppressWarnings("unused") final Class<V> valueCls) {
         return (Class) SortedMap.class;
     }
 
@@ -552,7 +556,8 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <K, V> Class<NavigableMap<K, V>> ofNavigableMap(final Class<K> keyCls, final Class<V> valueCls) {
+    public static <K, V> Class<NavigableMap<K, V>> ofNavigableMap(@SuppressWarnings("unused") final Class<K> keyCls,
+            @SuppressWarnings("unused") final Class<V> valueCls) {
         return (Class) NavigableMap.class;
     }
 
@@ -578,7 +583,8 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <K, V> Class<NavigableMap<K, V>> ofTreeMap(final Class<K> keyCls, final Class<V> valueCls) {
+    public static <K, V> Class<NavigableMap<K, V>> ofTreeMap(@SuppressWarnings("unused") final Class<K> keyCls,
+            @SuppressWarnings("unused") final Class<V> valueCls) {
         return (Class) TreeMap.class;
     }
 
@@ -604,7 +610,8 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <K, V> Class<ConcurrentMap<K, V>> ofConcurrentMap(final Class<K> keyCls, final Class<V> valueCls) {
+    public static <K, V> Class<ConcurrentMap<K, V>> ofConcurrentMap(@SuppressWarnings("unused") final Class<K> keyCls,
+            @SuppressWarnings("unused") final Class<V> valueCls) {
         return (Class) ConcurrentMap.class;
     }
 
@@ -630,7 +637,8 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <K, V> Class<ConcurrentMap<K, V>> ofConcurrentHashMap(final Class<K> keyCls, final Class<V> valueCls) {
+    public static <K, V> Class<ConcurrentMap<K, V>> ofConcurrentHashMap(@SuppressWarnings("unused") final Class<K> keyCls,
+            @SuppressWarnings("unused") final Class<V> valueCls) {
         return (Class) ConcurrentHashMap.class;
     }
 
@@ -656,7 +664,7 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <K, V> Class<BiMap<K, V>> ofBiMap(final Class<K> keyCls, final Class<V> valueCls) {
+    public static <K, V> Class<BiMap<K, V>> ofBiMap(@SuppressWarnings("unused") final Class<K> keyCls, @SuppressWarnings("unused") final Class<V> valueCls) {
         return (Class) BiMap.class;
     }
 
@@ -677,7 +685,7 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Class<Multiset<T>> ofMultiset(final Class<T> eleCls) {
+    public static <T> Class<Multiset<T>> ofMultiset(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) Multiset.class;
     }
 
@@ -700,7 +708,7 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Class<LongMultiset<T>> ofLongMultiset(final Class<T> eleCls) {
+    public static <T> Class<LongMultiset<T>> ofLongMultiset(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) LongMultiset.class;
     }
 
@@ -726,7 +734,8 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <K, E> Class<ListMultimap<K, E>> ofListMultimap(final Class<K> keyCls, final Class<E> valueEleCls) {
+    public static <K, E> Class<ListMultimap<K, E>> ofListMultimap(@SuppressWarnings("unused") final Class<K> keyCls,
+            @SuppressWarnings("unused") final Class<E> valueEleCls) {
         return (Class) ListMultimap.class;
     }
 
@@ -752,7 +761,8 @@ public final class Clazz {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <K, E> Class<SetMultimap<K, E>> ofSetMultimap(final Class<K> keyCls, final Class<E> valueEleCls) {
+    public static <K, E> Class<SetMultimap<K, E>> ofSetMultimap(@SuppressWarnings("unused") final Class<K> keyCls,
+            @SuppressWarnings("unused") final Class<E> valueEleCls) {
         return (Class) SetMultimap.class;
     }
 }

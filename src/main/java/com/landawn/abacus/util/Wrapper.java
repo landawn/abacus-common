@@ -74,7 +74,7 @@ public final class Wrapper<T> implements Immutable {
      */
     public static <T> Wrapper<T> of(T array) {
         // return new Wrapper<T>(checkArray(array), arrayHashFunction, arrayEqualsFunction);
-        return new Wrapper<T>(array, arrayHashFunction, arrayEqualsFunction);
+        return new Wrapper<>(array, arrayHashFunction, arrayEqualsFunction);
     }
 
     /**
@@ -89,7 +89,7 @@ public final class Wrapper<T> implements Immutable {
         N.checkArgNotNull(hashFunction, "hashFunction");
         N.checkArgNotNull(equalsFunction, "equalsFunction");
 
-        return new Wrapper<T>(value, hashFunction, equalsFunction);
+        return new Wrapper<>(value, hashFunction, equalsFunction);
     }
 
     /**
@@ -107,7 +107,7 @@ public final class Wrapper<T> implements Immutable {
         N.checkArgNotNull(equalsFunction, "equalsFunction");
         N.checkArgNotNull(toStringFunction, "toStringFunction");
 
-        return new Wrapper<T>(value, hashFunction, equalsFunction, toStringFunction);
+        return new Wrapper<>(value, hashFunction, equalsFunction, toStringFunction);
     }
 
     public T value() {

@@ -265,20 +265,6 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     /**
-     *
-     * @param <E>
-     * @param action
-     * @throws E the e
-     */
-    public <E extends Exception> void foreachRemaining(Throwables.CharConsumer<E> action) throws E {
-        N.checkArgNotNull(action);
-
-        while (hasNext()) {
-            action.accept(nextChar());
-        }
-    }
-
-    /**
      * For each remaining.
      *
      * @param action
@@ -295,7 +281,21 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void forEachIndexed(Throwables.IndexedCharConsumer<E> action) throws E {
+    public <E extends Exception> void foreachRemaining(Throwables.CharConsumer<E> action) throws E {
+        N.checkArgNotNull(action);
+
+        while (hasNext()) {
+            action.accept(nextChar());
+        }
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param action
+     * @throws E the e
+     */
+    public <E extends Exception> void foreachIndexed(Throwables.IndexedCharConsumer<E> action) throws E {
         N.checkArgNotNull(action);
 
         int idx = 0;

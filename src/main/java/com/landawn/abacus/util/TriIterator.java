@@ -101,7 +101,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
         N.checkArgNotNull(output);
 
         return new TriIterator<A, B, C>() {
-            private final Triple<A, B, C> tmp = new Triple<A, B, C>();
+            private final Triple<A, B, C> tmp = new Triple<>();
 
             @Override
             public boolean hasNext() {
@@ -171,7 +171,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
 
         return new TriIterator<A, B, C>() {
             private final MutableInt cursor = MutableInt.of(fromIndex);
-            private final Triple<A, B, C> tmp = new Triple<A, B, C>();
+            private final Triple<A, B, C> tmp = new Triple<>();
 
             @Override
             public boolean hasNext() {

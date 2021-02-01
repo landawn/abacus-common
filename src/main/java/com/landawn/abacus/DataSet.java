@@ -714,7 +714,7 @@ public interface DataSet {
      * @param func
      * @throws E the e
      */
-    <T, E extends Exception> void updateColumn(String columnName, Throwables.Function<T, ?, E> func) throws E;
+    <E extends Exception> void updateColumn(String columnName, Throwables.Function<?, ?, E> func) throws E;
 
     /**
      * Update the values of the specified columns one by one with the specified Try.Function.
@@ -725,7 +725,7 @@ public interface DataSet {
      * @param func
      * @throws E the e
      */
-    <T, E extends Exception> void updateColumns(Collection<String> columnNames, Throwables.Function<?, ?, E> func) throws E;
+    <E extends Exception> void updateColumns(Collection<String> columnNames, Throwables.Function<?, ?, E> func) throws E;
 
     /**
      * Convert the specified column to target type.

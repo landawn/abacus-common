@@ -757,6 +757,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param c
      * @return
      */
+    @Override
     public boolean containsAll(LongList c) {
         if (N.isNullOrEmpty(c)) {
             return true;
@@ -808,6 +809,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param c
      * @return
      */
+    @Override
     public boolean containsAny(LongList c) {
         if (this.isEmpty() || N.isNullOrEmpty(c)) {
             return false;
@@ -835,6 +837,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param c
      * @return
      */
+    @Override
     public boolean disjoint(final LongList c) {
         if (isEmpty() || N.isNullOrEmpty(c)) {
             return true;

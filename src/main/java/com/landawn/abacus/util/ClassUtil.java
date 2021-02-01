@@ -2331,11 +2331,11 @@ public final class ClassUtil {
      * @param <T>
      * @param entity
      * @param propName
-     * @param ignoreUnknownProperty
+     * @param ignoreUnmatchedProperty
      * @return
-     * @throws IllegalArgumentException if the specified property can't be gotten and ignoreUnknownProperty is false.
+     * @throws IllegalArgumentException if the specified property can't be gotten and ignoreUnmatchedProperty is false.
      */
-    public static <T> T getPropValue(final Object entity, final String propName, final boolean ignoreUnknownProperty) {
+    public static <T> T getPropValue(final Object entity, final String propName, final boolean ignoreUnmatchedProperty) {
         final Class<?> cls = entity.getClass();
         final PropInfo propInfo = ParserUtil.getEntityInfo(cls).getPropInfo(propName);
 
@@ -2379,7 +2379,7 @@ public final class ClassUtil {
             }
 
             if (inlinePropGetMethodQueue.size() == 0) {
-                if (ignoreUnknownProperty) {
+                if (ignoreUnmatchedProperty) {
                     return null;
                 } else {
                     throw new IllegalArgumentException(
@@ -2420,13 +2420,13 @@ public final class ClassUtil {
      * @param entity
      * @param propName
      * @param propValue
-     * @param ignoreUnknownProperty
+     * @param ignoreUnmatchedProperty
      * @return true if the property value has been set.
-     * @throws IllegalArgumentException if the specified property can't be set and ignoreUnknownProperty is false.
+     * @throws IllegalArgumentException if the specified property can't be set and ignoreUnmatchedProperty is false.
      * @deprecated replaced by {@link EntityInfo#setPropValue(Object, String, Object, boolean)}
      */
     @Deprecated
-    public static boolean setPropValue(final Object entity, final String propName, final Object propValue, final boolean ignoreUnknownProperty) {
+    public static boolean setPropValue(final Object entity, final String propName, final Object propValue, final boolean ignoreUnmatchedProperty) {
         //    final Class<?> cls = entity.getClass();
         //    final PropInfo propInfo = ParserUtil.getEntityInfo(cls).getPropInfo(propName);
         //
@@ -2491,7 +2491,7 @@ public final class ClassUtil {
         //            }
         //
         //            if (inlinePropSetMethodQueue.size() == 0) {
-        //                if (ignoreUnknownProperty) {
+        //                if (ignoreUnmatchedProperty) {
         //                    return false;
         //                } else {
         //                    throw new IllegalArgumentException("No property method found with property name: " + propName + " in class " + cls.getCanonicalName());
@@ -2528,7 +2528,7 @@ public final class ClassUtil {
         //
         //    return true;
 
-        return ParserUtil.getEntityInfo(entity.getClass()).setPropValue(entity, propName, propValue, ignoreUnknownProperty);
+        return ParserUtil.getEntityInfo(entity.getClass()).setPropValue(entity, propName, propValue, ignoreUnmatchedProperty);
     }
 
     /**
@@ -3027,6 +3027,7 @@ public final class ClassUtil {
     static final class ClassMask {
 
         /** The Constant FIELD_MASK. */
+        @SuppressWarnings("hiding")
         static final String FIELD_MASK = "FIELD_MASK";
 
         /**

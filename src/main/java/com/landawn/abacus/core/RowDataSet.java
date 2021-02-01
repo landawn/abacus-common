@@ -1377,7 +1377,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <T, E extends Exception> void updateColumn(final String columnName, final Throwables.Function<T, ?, E> func) throws E {
+    public <E extends Exception> void updateColumn(final String columnName, final Throwables.Function<?, ?, E> func) throws E {
         checkFrozen();
 
         final Throwables.Function<Object, Object, E> func2 = (Throwables.Function<Object, Object, E>) func;
@@ -1399,7 +1399,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <T, E extends Exception> void updateColumns(final Collection<String> columnNames, final Throwables.Function<?, ?, E> func) throws E {
+    public <E extends Exception> void updateColumns(final Collection<String> columnNames, final Throwables.Function<?, ?, E> func) throws E {
         checkColumnName(columnNames);
 
         final Throwables.Function<Object, Object, E> func2 = (Throwables.Function<Object, Object, E>) func;
@@ -2272,7 +2272,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
         } else if (rowType.isEntity()) {
-            final boolean ignoreUnknownProperty = columnNames == _columnNameList;
+            final boolean ignoreUnmatchedProperty = columnNames == _columnNameList;
             final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowType.clazz());
             Object result = output;
             String propName = null;
@@ -2282,7 +2282,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 propName = _columnNameList.get(columnIndexes[i]);
                 propValue = _columnList.get(columnIndexes[i]).get(rowNum);
 
-                entityInfo.setPropValue(result, propName, propValue, ignoreUnknownProperty);
+                entityInfo.setPropValue(result, propName, propValue, ignoreUnmatchedProperty);
             }
 
             if (result instanceof DirtyMarker) {
@@ -2733,7 +2733,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 rowList.add(N.newInstance(rowClass));
             }
 
-            final boolean ignoreUnknownProperty = columnNames == _columnNameList;
+            final boolean ignoreUnmatchedProperty = columnNames == _columnNameList;
             final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
             List<Object> column = null;
             String propName = null;
@@ -2746,7 +2746,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 if (propInfo == null) {
                     for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                        if (entityInfo.setPropValue(rowList.get(rowIndex - fromRowIndex), propName, column.get(rowIndex), ignoreUnknownProperty) == false) {
+                        if (entityInfo.setPropValue(rowList.get(rowIndex - fromRowIndex), propName, column.get(rowIndex), ignoreUnmatchedProperty) == false) {
                             break;
                         }
                     }
@@ -2848,7 +2848,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 rowList.add(N.newInstance(rowClass));
             }
 
-            final boolean ignoreUnknownProperty = false;
+            final boolean ignoreUnmatchedProperty = false;
             final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
             int columnIndex = -1;
             String propName = null;
@@ -2863,7 +2863,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 if (propInfo == null) {
                     for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                        if (entityInfo.setPropValue(rowList.get(rowIndex - fromRowIndex), propName, column.get(rowIndex), ignoreUnknownProperty) == false) {
+                        if (entityInfo.setPropValue(rowList.get(rowIndex - fromRowIndex), propName, column.get(rowIndex), ignoreUnmatchedProperty) == false) {
                             break;
                         }
                     }
@@ -2994,7 +2994,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 rowList.add(rowSupplier.apply(columnCount));
             }
 
-            final boolean ignoreUnknownProperty = columnNames == _columnNameList;
+            final boolean ignoreUnmatchedProperty = columnNames == _columnNameList;
             final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
             List<Object> column = null;
             String propName = null;
@@ -3007,7 +3007,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 if (propInfo == null) {
                     for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                        if (entityInfo.setPropValue(rowList.get(rowIndex - fromRowIndex), propName, column.get(rowIndex), ignoreUnknownProperty) == false) {
+                        if (entityInfo.setPropValue(rowList.get(rowIndex - fromRowIndex), propName, column.get(rowIndex), ignoreUnmatchedProperty) == false) {
                             break;
                         }
                     }
@@ -3200,7 +3200,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 resultMap.put(_columnList.get(keyColumnIndex).get(rowIndex), value);
             }
         } else if (valueType.isEntity()) {
-            final boolean ignoreUnknownProperty = valueColumnNames == _columnNameList;
+            final boolean ignoreUnmatchedProperty = valueColumnNames == _columnNameList;
             final boolean isDirtyMarker = DirtyMarkerUtil.isDirtyMarker(rowClass);
             final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
             Object value = null;
@@ -3211,7 +3211,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 for (int columIndex : valueColumnIndexes) {
                     propName = _columnNameList.get(columIndex);
-                    entityInfo.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnknownProperty);
+                    entityInfo.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnmatchedProperty);
                 }
 
                 if (isDirtyMarker) {
@@ -3327,7 +3327,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 resultMap.put(_columnList.get(keyColumnIndex).get(rowIndex), value);
             }
         } else if (valueType.isEntity()) {
-            final boolean ignoreUnknownProperty = valueColumnNames == _columnNameList;
+            final boolean ignoreUnmatchedProperty = valueColumnNames == _columnNameList;
             final boolean isDirtyMarker = DirtyMarkerUtil.isDirtyMarker(rowClass);
             final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
             Object value = null;
@@ -3338,7 +3338,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 for (int columIndex : valueColumnIndexes) {
                     propName = _columnNameList.get(columIndex);
-                    entityInfo.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnknownProperty);
+                    entityInfo.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnmatchedProperty);
                 }
 
                 if (isDirtyMarker) {
@@ -3527,7 +3527,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 resultMap.put((K) _columnList.get(keyColumnIndex).get(rowIndex), (E) value);
             }
         } else if (elementType.isEntity()) {
-            final boolean ignoreUnknownProperty = valueColumnNames == _columnNameList;
+            final boolean ignoreUnmatchedProperty = valueColumnNames == _columnNameList;
             final boolean isDirtyMarker = DirtyMarkerUtil.isDirtyMarker(rowClass);
             final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
             Object value = null;
@@ -3538,7 +3538,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 for (int columIndex : valueColumnIndexes) {
                     propName = _columnNameList.get(columIndex);
-                    entityInfo.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnknownProperty);
+                    entityInfo.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnmatchedProperty);
                 }
 
                 if (isDirtyMarker) {
@@ -3656,7 +3656,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 resultMap.put((K) _columnList.get(keyColumnIndex).get(rowIndex), (E) value);
             }
         } else if (elementType.isEntity()) {
-            final boolean ignoreUnknownProperty = valueColumnNames == _columnNameList;
+            final boolean ignoreUnmatchedProperty = valueColumnNames == _columnNameList;
             final boolean isDirtyMarker = DirtyMarkerUtil.isDirtyMarker(rowClass);
             final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
             Object value = null;
@@ -3667,7 +3667,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 for (int columIndex : valueColumnIndexes) {
                     propName = _columnNameList.get(columIndex);
-                    entityInfo.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnknownProperty);
+                    entityInfo.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnmatchedProperty);
                 }
 
                 if (isDirtyMarker) {
@@ -3734,7 +3734,7 @@ public class RowDataSet implements DataSet, Cloneable {
         final int rowCount = size();
         final int columnCount = _columnList.size();
         final int[] idColumnIndexes = getColumnIndexes(idPropNames);
-        final boolean ignoreUnknownProperty = selectPropNames == this._columnNameList;
+        final boolean ignoreUnmatchedProperty = selectPropNames == this._columnNameList;
 
         final Object[] resultEntities = new Object[rowCount];
         final Map<Object, Object> idEntityMap = N.newLinkedHashMap(N.min(64, rowCount));
@@ -3831,7 +3831,7 @@ public class RowDataSet implements DataSet, Cloneable {
                     final int idx = propName.indexOf(PROP_NAME_SEPARATOR);
 
                     if (idx <= 0) {
-                        if (ignoreUnknownProperty) {
+                        if (ignoreUnmatchedProperty) {
                             continue;
                         } else {
                             throw new IllegalArgumentException("Property " + propName + " is not found in class: " + entityClass);
@@ -3841,7 +3841,7 @@ public class RowDataSet implements DataSet, Cloneable {
                         propInfo = entityInfo.getPropInfo(realPropName);
 
                         if (propInfo == null) {
-                            if (ignoreUnknownProperty) {
+                            if (ignoreUnmatchedProperty) {
                                 continue;
                             } else {
                                 throw new IllegalArgumentException("Property " + propName + " is not found in class: " + entityClass);
@@ -4825,7 +4825,7 @@ public class RowDataSet implements DataSet, Cloneable {
                     if (element == null) {
                         bw.write(NULL_CHAR_ARRAY);
                     } else {
-                        type = element == null ? null : N.typeOf(element.getClass());
+                        type = N.typeOf(element.getClass());
 
                         if (type.isSerializable()) {
                             type.writeCharacter(bw, element, config);
@@ -10782,7 +10782,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             @Override
-            public void skip(long n) {
+            public void advance(long n) {
                 N.checkArgNotNegative(n, "n");
 
                 ConcurrentModification();
@@ -10933,7 +10933,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             @Override
-            public void skip(long n) {
+            public void advance(long n) {
                 N.checkArgNotNegative(n, "n");
 
                 ConcurrentModification();
@@ -11055,7 +11055,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             @Override
-            public void skip(long n) {
+            public void advance(long n) {
                 N.checkArgNotNegative(n, "n");
 
                 ConcurrentModification();

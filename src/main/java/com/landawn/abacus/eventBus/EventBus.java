@@ -225,10 +225,9 @@ public class EventBus {
     /**
      * Returns all registered subscribers.
      *
-     * @param eventType
      * @return
      */
-    public List<Object> getAllSubscribers(final Class<?> eventType) {
+    public List<Object> getAllSubscribers() {
         synchronized (registeredSubMap) {
             return new ArrayList<>(registeredSubMap.keySet());
         }
@@ -933,7 +932,7 @@ public class EventBus {
             if (obj instanceof SubIdentifier) {
                 final SubIdentifier other = (SubIdentifier) obj;
 
-                return N.equals(obj, other.obj) && N.equals(method, other.method) && N.equals(parameterType, other.parameterType)
+                return N.equals(this.obj, other.obj) && N.equals(method, other.method) && N.equals(parameterType, other.parameterType)
                         && N.equals(eventId, other.eventId) && N.equals(threadMode, other.threadMode) && N.equals(strictEventType, other.strictEventType)
                         && N.equals(sticky, other.sticky) && N.equals(interval, other.interval) && N.equals(deduplicate, other.deduplicate)
                         && N.equals(isPossibleLambdaSubscriber, other.isPossibleLambdaSubscriber);

@@ -186,7 +186,7 @@ public final class OkHttpRequest {
      * you may read it in interceptors, event listeners, or callbacks.
      */
     public <T> OkHttpRequest tag(Class<? super T> type, @Nullable T tag) {
-        builder.tag(tag);
+        builder.tag(type, tag);
         return this;
     }
 

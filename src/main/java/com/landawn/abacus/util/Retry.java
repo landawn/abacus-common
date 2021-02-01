@@ -61,7 +61,7 @@ public final class Retry<T> {
         N.checkArgNotNegative(retryInterval, "retryInterval");
         N.checkArgNotNull(retryCondition);
 
-        return new Retry<Void>(retryTimes, retryInterval, retryCondition, null);
+        return new Retry<>(retryTimes, retryInterval, retryCondition, null);
     }
 
     /**
@@ -77,7 +77,7 @@ public final class Retry<T> {
         N.checkArgNotNegative(retryInterval, "retryInterval");
         N.checkArgNotNull(retryCondition);
 
-        return new Retry<R>(retryTimes, retryInterval, null, retryCondition);
+        return new Retry<>(retryTimes, retryInterval, null, retryCondition);
     }
 
     /**
@@ -197,6 +197,7 @@ public final class Retry<T> {
 
     public static final class RetryR<T> {
 
+        @SuppressWarnings("hiding")
         private static final Logger logger = LoggerFactory.getLogger(RetryR.class);
 
         private final int retryTimes;
@@ -229,7 +230,7 @@ public final class Retry<T> {
             N.checkArgNotNegative(retryInterval, "retryInterval");
             N.checkArgNotNull(retryCondition);
 
-            return new RetryR<Void>(retryTimes, retryInterval, retryCondition, null);
+            return new RetryR<>(retryTimes, retryInterval, retryCondition, null);
         }
 
         /**
@@ -245,7 +246,7 @@ public final class Retry<T> {
             N.checkArgNotNegative(retryInterval, "retryInterval");
             N.checkArgNotNull(retryCondition);
 
-            return new RetryR<R>(retryTimes, retryInterval, null, retryCondition);
+            return new RetryR<>(retryTimes, retryInterval, null, retryCondition);
         }
 
         /**

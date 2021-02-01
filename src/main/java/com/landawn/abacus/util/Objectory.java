@@ -102,7 +102,7 @@ public final class Objectory {
     public static <T> List<T> createList() {
         List<T> list = (List<T>) listPool.poll();
 
-        return (list == null) ? new ArrayList<T>() : list;
+        return (list == null) ? new ArrayList<>() : list;
     }
 
     /**

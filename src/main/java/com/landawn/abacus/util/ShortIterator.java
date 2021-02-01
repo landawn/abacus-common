@@ -265,20 +265,6 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     *
-     * @param <E>
-     * @param action
-     * @throws E the e
-     */
-    public <E extends Exception> void foreachRemaining(Throwables.ShortConsumer<E> action) throws E {
-        N.checkArgNotNull(action);
-
-        while (hasNext()) {
-            action.accept(nextShort());
-        }
-    }
-
-    /**
      * For each remaining.
      *
      * @param action
@@ -295,7 +281,21 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void forEachIndexed(Throwables.IndexedShortConsumer<E> action) throws E {
+    public <E extends Exception> void foreachRemaining(Throwables.ShortConsumer<E> action) throws E {
+        N.checkArgNotNull(action);
+
+        while (hasNext()) {
+            action.accept(nextShort());
+        }
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param action
+     * @throws E the e
+     */
+    public <E extends Exception> void foreachIndexed(Throwables.IndexedShortConsumer<E> action) throws E {
         N.checkArgNotNull(action);
 
         int idx = 0;

@@ -265,20 +265,6 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     *
-     * @param <E>
-     * @param action
-     * @throws E the e
-     */
-    public <E extends Exception> void foreachRemaining(Throwables.ByteConsumer<E> action) throws E {
-        N.checkArgNotNull(action);
-
-        while (hasNext()) {
-            action.accept(nextByte());
-        }
-    }
-
-    /**
      * For each remaining.
      *
      * @param action
@@ -295,7 +281,21 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void forEachIndexed(Throwables.IndexedByteConsumer<E> action) throws E {
+    public <E extends Exception> void foreachRemaining(Throwables.ByteConsumer<E> action) throws E {
+        N.checkArgNotNull(action);
+
+        while (hasNext()) {
+            action.accept(nextByte());
+        }
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param action
+     * @throws E the e
+     */
+    public <E extends Exception> void foreachIndexed(Throwables.IndexedByteConsumer<E> action) throws E {
         N.checkArgNotNull(action);
 
         int idx = 0;

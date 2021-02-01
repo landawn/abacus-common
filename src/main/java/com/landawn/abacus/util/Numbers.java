@@ -387,7 +387,7 @@ public final class Numbers {
      */
     public static long toLong(final String str, final long defaultValue) throws NumberFormatException {
         if (N.isNullOrEmpty(str)) {
-            return 0;
+            return defaultValue;
         }
 
         if (str.length() < 5) {
@@ -1388,6 +1388,7 @@ public final class Numbers {
      * @param mode
      * @return
      */
+    @SuppressWarnings("fallthrough")
     public static int log2(int x, RoundingMode mode) {
         checkPositive("x", x);
         switch (mode) {
@@ -1588,6 +1589,7 @@ public final class Numbers {
      * @param mode
      * @return
      */
+    @SuppressWarnings("fallthrough")
     public static int log10(int x, RoundingMode mode) {
         checkPositive("x", x);
         int logFloor = log10Floor(x);
@@ -1984,7 +1986,6 @@ public final class Numbers {
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and
      *     {@code sqrt(x)} is not an integer
      */
-    @SuppressWarnings("fallthrough")
     public static long sqrt(long x, RoundingMode mode) {
         checkNonNegative("x", x);
         if (fitsInInt(x)) {
@@ -2054,6 +2055,7 @@ public final class Numbers {
      * @param mode
      * @return
      */
+    @SuppressWarnings("fallthrough")
     public static BigInteger sqrt(BigInteger x, RoundingMode mode) {
         checkNonNegative("x", x);
         if (fitsInLong(x)) {
@@ -3351,7 +3353,7 @@ public final class Numbers {
      * @return
      */
     public static double mean(double x, double y) {
-        return checkFinite(x) + (checkFinite(x) - x) / 2;
+        return checkFinite(x) + (checkFinite(y) - x) / 2;
     }
 
     /**

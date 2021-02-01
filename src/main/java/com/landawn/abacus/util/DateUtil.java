@@ -2085,6 +2085,7 @@ public abstract class DateUtil {
      * @param format
      * @return
      */
+    @SuppressWarnings("fallthrough")
     private static String checkDateFormat(final String str, final String format) {
         if (N.isNullOrEmpty(format)) {
             int len = str.length();

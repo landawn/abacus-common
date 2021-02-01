@@ -593,10 +593,11 @@ public final class XMLUtil {
      */
     public static String xmlEncode(Object entity) {
         final ByteArrayOutputStream os = Objectory.createByteArrayOutputStream();
-        XMLEncoder xmlEncoder = new XMLEncoder(os);
-        xmlEncoder.writeObject(entity);
-        xmlEncoder.flush();
-        xmlEncoder.close();
+
+        try (XMLEncoder xmlEncoder = new XMLEncoder(os)) {
+            xmlEncoder.writeObject(entity);
+            xmlEncoder.flush();
+        }
 
         String result = os.toString();
         Objectory.recycle(os);
@@ -613,12 +614,12 @@ public final class XMLUtil {
      */
     public static <T> T xmlDecode(String xml) {
         InputStream is = new ByteArrayInputStream(xml.getBytes());
-        XMLDecoder xmlDecoder = new XMLDecoder(is);
-        @SuppressWarnings("unchecked")
-        T entity = (T) xmlDecoder.readObject();
-        xmlDecoder.close();
+        try (XMLDecoder xmlDecoder = new XMLDecoder(is)) {
+            @SuppressWarnings("unchecked")
+            T entity = (T) xmlDecoder.readObject();
 
-        return entity;
+            return entity;
+        }
     }
 
     /**
@@ -649,7 +650,7 @@ public final class XMLUtil {
      * @return
      */
     public static List<Node> getNodesByName(Node node, String nodeName) {
-        List<Node> nodes = new ArrayList<Node>();
+        List<Node> nodes = new ArrayList<>();
 
         if (node.getNodeName().equals(nodeName)) {
             nodes.add(node);

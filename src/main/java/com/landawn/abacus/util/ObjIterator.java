@@ -331,6 +331,131 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
         };
     }
 
+    //    /**
+    //     * Returns a new {@code ObjIterator}.
+    //     * 
+    //     * @param n
+    //     * @return
+    //     * @see Iterators#skip(Iterator, long)
+    //     */
+    //    public ObjIterator<T> skip(final long n) {
+    //        return Iterators.skip(this, n);
+    //    }
+    //
+    //    /**
+    //     * Returns a new {@code ObjIterator}.
+    //     * 
+    //     * @param count
+    //     * @return
+    //     * @see Iterators#limit(Iterator, long)
+    //     */
+    //    public ObjIterator<T> limit(final long count) {
+    //        return Iterators.limit(this, count);
+    //    }
+    //
+    //    /**
+    //     * Returns a new {@code ObjIterator}.
+    //     * 
+    //     * @param offset
+    //     * @param count
+    //     * @return
+    //     * @see Iterators#skipAndLimit(Iterator, long, long)
+    //     */
+    //    public ObjIterator<T> skipAndLimit(final long offset, final long count) {
+    //        return Iterators.skipAndLimit(this, offset, count);
+    //    }
+    //
+    //    /**
+    //     * Returns a new {@code ObjIterator}.
+    //     * 
+    //     * @param filter
+    //     * @return
+    //     * @see Iterators#filter(Iterator, Predicate)
+    //     */
+    //    public ObjIterator<T> filter(final Predicate<? super T> filter) {
+    //        return Iterators.filter(this, filter);
+    //    }
+    //
+    //    /**
+    //     * Returns a new {@code ObjIterator}.
+    //     * 
+    //     * @param filter
+    //     * @return
+    //     * @see Iterators#takeWhile(Iterator, Predicate)
+    //     */
+    //    public ObjIterator<T> takeWhile(final Predicate<? super T> filter) {
+    //        return Iterators.takeWhile(this, filter);
+    //    }
+    //
+    //    /**
+    //     * Returns a new {@code ObjIterator}.
+    //     * 
+    //     * @param filter
+    //     * @return
+    //     * @see Iterators#takeWhileInclusive(Iterator, Predicate)
+    //     */
+    //    public ObjIterator<T> takeWhileInclusive(final Predicate<? super T> filter) {
+    //        return Iterators.takeWhileInclusive(this, filter);
+    //    }
+    //
+    //    /**
+    //     * Returns a new {@code ObjIterator}.
+    //     * 
+    //     * @param filter
+    //     * @return
+    //     * @see Iterators#dropWhile(Iterator, Predicate)
+    //     */
+    //    public ObjIterator<T> dropWhile(final Predicate<? super T> filter) {
+    //        return Iterators.dropWhile(this, filter);
+    //    }
+    //
+    //    /**
+    //     * Returns a new {@code ObjIterator}.
+    //     * 
+    //     * @param filter
+    //     * @return
+    //     * @see Iterators#skipUntil(Iterator, Predicate)
+    //     */
+    //    public ObjIterator<T> skipUntil(final Predicate<? super T> filter) {
+    //        return Iterators.skipUntil(this, filter);
+    //    }
+    //
+    //    /**
+    //     * Returns a new {@code ObjIterator}.
+    //     * 
+    //     * @param <U>
+    //     * @param mapper
+    //     * @return
+    //     * @see Iterators#map(Iterator, Function)
+    //     */
+    //    public <U> ObjIterator<U> map(final Function<? super T, U> mapper) {
+    //        return Iterators.map(this, mapper);
+    //    }
+    //
+    //    /**
+    //     * Returns a new {@code ObjIterator}.
+    //     * 
+    //     * @param <U>
+    //     * @param mapper
+    //     * @return
+    //     * @see Iterators#flatMap(Iterator, Function)
+    //     */
+    //    public <U> ObjIterator<U> flatMap(final Function<? super T, ? extends Collection<? extends U>> mapper) {
+    //        return Iterators.flatMap(this, mapper);
+    //    }
+    //
+    //    /**
+    //     * Returns a new {@code ObjIterator}.
+    //     * 
+    //     * @param <U>
+    //     * @param mapper
+    //     * @return
+    //     * @see Iterators#flattMap(Iterator, Function)
+    //     */
+    //    public <U> ObjIterator<U> flattMap(final Function<? super T, ? extends U[]> mapper) {
+    //        return Iterators.flattMap(this, mapper);
+    //    }
+
     public Object[] toArray() {
         return toArray(N.EMPTY_OBJECT_ARRAY);
     }
@@ -373,7 +498,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void forEachIndexed(Throwables.IndexedConsumer<? super T, E> action) throws E {
+    public <E extends Exception> void foreachIndexed(Throwables.IndexedConsumer<? super T, E> action) throws E {
         N.checkArgNotNull(action);
 
         int idx = 0;

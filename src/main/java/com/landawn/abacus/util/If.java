@@ -509,11 +509,13 @@ public final class If {
         /**
          * For internal only
          */
+        @SuppressWarnings("hiding")
         public static final OrElse TRUE = new OrElse(true);
 
         /**
          * For internal only
          */
+        @SuppressWarnings("hiding")
         public static final OrElse FALSE = new OrElse(false);
 
         /** The b. */

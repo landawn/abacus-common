@@ -4927,6 +4927,34 @@ public abstract class StringUtil {
     }
 
     /**
+     * 
+     * @param str
+     * @param substr
+     * @return
+     * @see N#occurrencesOf(String, String)
+     */
+    public static int occurrencesOf(final String str, final String substr) {
+        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substr)) {
+            return 0;
+        }
+
+        int occurrences = 0;
+
+        for (int len = N.len(str), substrLen = N.len(substr), index = 0, fromIndex = 0, toIndex = len - substrLen; fromIndex <= toIndex;) {
+            index = str.indexOf(substr, fromIndex);
+
+            if (index < 0) {
+                break;
+            } else {
+                fromIndex = index + substrLen;
+                occurrences++;
+            }
+        }
+
+        return occurrences;
+    }
+
+    /**
      *
      * @param str
      * @param targetChar
@@ -6270,7 +6298,7 @@ public abstract class StringUtil {
      * @return
      */
     public static List<String> findAllSubstringsBetween(final String str, final int fromIndex, final int toIndex, final char prefix, final char postfix) {
-        final List<IntPair> points = findAllIndicesBetween(str, prefix, postfix);
+        final List<IntPair> points = findAllIndicesBetween(str, fromIndex, toIndex, prefix, postfix);
         final List<String> res = new ArrayList<>(points.size());
 
         for (IntPair p : points) {
@@ -6303,7 +6331,7 @@ public abstract class StringUtil {
      * @return
      */
     public static List<String> findAllSubstringsBetween(final String str, final int fromIndex, final int toIndex, final String prefix, final String postfix) {
-        final List<IntPair> points = findAllIndicesBetween(str, prefix, postfix);
+        final List<IntPair> points = findAllIndicesBetween(str, fromIndex, toIndex, prefix, postfix);
         final List<String> res = new ArrayList<>(points.size());
 
         for (IntPair p : points) {
@@ -8443,7 +8471,7 @@ public abstract class StringUtil {
         }
 
         final char[] chs = str.toCharArray();
-        Array.sort(chs);
+        N.sort(chs);
         return InternalUtil.newString(chs, true);
     }
 

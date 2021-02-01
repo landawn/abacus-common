@@ -1755,7 +1755,7 @@ public class ConditionFactory {
          * @return
          */
         @SafeVarargs
-        public final Criteria groupBy(String... propNames) {
+        public final static Criteria groupBy(String... propNames) {
             return CF.criteria().groupBy(propNames);
         }
 
@@ -1830,7 +1830,7 @@ public class ConditionFactory {
          * @return
          */
         @SafeVarargs
-        public final Criteria orderBy(String... propNames) {
+        public final static Criteria orderBy(String... propNames) {
             return CF.criteria().orderBy(propNames);
         }
 

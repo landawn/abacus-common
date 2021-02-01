@@ -244,6 +244,7 @@ final class Util {
          * @param mode
          * @return
          */
+        @SuppressWarnings("fallthrough")
         public static long divide(long p, long q, RoundingMode mode) {
             N.checkArgNotNull(mode);
             long div = p / q; // throws if q == 0

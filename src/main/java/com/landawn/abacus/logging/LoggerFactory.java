@@ -33,7 +33,7 @@ public final class LoggerFactory {
 
     private static final Logger jdkLogger = new JDKLogger(LoggerFactory.class.getName());
 
-    private static final Map<String, Logger> namedLoggers = new HashMap<String, Logger>();
+    private static final Map<String, Logger> namedLoggers = new HashMap<>();
 
     private static volatile int logType = 0;
 
@@ -55,6 +55,7 @@ public final class LoggerFactory {
      * @param name
      * @return
      */
+    @SuppressWarnings("fallthrough")
     public static synchronized Logger getLogger(String name) {
         Logger logger = namedLoggers.get(name);
 
@@ -118,6 +119,7 @@ public final class LoggerFactory {
                     }
 
                 case 3:
+                default:
                     if (logger == null) {
                         logger = new JDKLogger(name);
 

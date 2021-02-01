@@ -16,8 +16,6 @@
  */
 package com.landawn.abacus.util;
 
-import java.io.Serializable;
-
 /**
  * Note: it's copied from Apache Commons IO developed at The Apache Software Foundation (http://www.apache.org/), or under the Apache License 2.0.
  *
@@ -36,7 +34,7 @@ import java.io.Serializable;
  * @version $Id: IOCase.java 1483915 2013-05-17 17:02:35Z sebb $
  * @since 1.3
  */
-enum IOCase implements Serializable {
+enum IOCase {
 
     /**
      * The constant for case sensitive regardless of operating system.

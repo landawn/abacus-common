@@ -74,7 +74,7 @@ public enum CalendarUnit {
      */
     YEAR(Calendar.YEAR);
 
-    private static Map<Integer, CalendarUnit> m = new HashMap<Integer, CalendarUnit>();
+    private static Map<Integer, CalendarUnit> m = new HashMap<>();
 
     static {
         for (CalendarUnit value : CalendarUnit.values()) {

@@ -1272,7 +1272,7 @@ public final class HttpClient {
      * @param is
      * @param connection
      */
-    void close(OutputStream os, InputStream is, HttpURLConnection connection) {
+    void close(OutputStream os, InputStream is, @SuppressWarnings("unused") HttpURLConnection connection) {
         try {
             IOUtil.closeQuietly(os);
             IOUtil.closeQuietly(is);

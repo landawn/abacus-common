@@ -328,6 +328,7 @@ public abstract class SQLBuilder {
 
     private Collection<Map<String, Object>> propsList;
 
+    private boolean hasFromBeenSet = false;
     private boolean isForConditionOnly = false;
 
     SQLBuilder(final NamingPolicy namingPolicy, final SQLPolicy sqlPolicy) {
@@ -1066,7 +1067,6 @@ public abstract class SQLBuilder {
      * @return
      */
     public SQLBuilder from(final Class<?> entityClass, final String alias) {
-
         if (this.entityClass == null) {
             this.entityClass = entityClass;
             this.propColumnNameMap = getProp2ColumnNameMap(this.entityClass, this.namingPolicy);
@@ -1098,6 +1098,8 @@ public abstract class SQLBuilder {
         if (op != OperationType.QUERY) {
             throw new RuntimeException("Invalid operation: " + op);
         }
+
+        hasFromBeenSet = true;
 
         if (N.isNullOrEmpty(columnNames) && N.isNullOrEmpty(columnAliases) && N.isNullOrEmpty(multiSelects)) {
             throw new RuntimeException("Column names or props must be set first by select");
@@ -1244,6 +1246,10 @@ public abstract class SQLBuilder {
     private void addPropColumnMapForAlias(final Class<?> entityClass, final String alias) {
         if (aliasPropColumnNameMap == null) {
             aliasPropColumnNameMap = new HashMap<>();
+        }
+
+        if (N.isNullOrEmpty(propColumnNameMap) && entityClass != null && ClassUtil.isEntity(entityClass)) {
+            propColumnNameMap = getProp2ColumnNameMap(entityClass, namingPolicy);
         }
 
         aliasPropColumnNameMap.put(alias, propColumnNameMap);
@@ -2633,29 +2639,92 @@ public abstract class SQLBuilder {
      * @return
      */
     public SP pair() {
-        return new SP(sql(), parameters);
+        final String sql = sql();
+
+        return new SP(sql, parameters);
     }
 
-    /**
-     *
-     * @param <T>
-     * @param <EX>
-     * @param func
-     * @return
-     * @throws EX the ex
-     */
-    public <T, EX extends Exception> T apply(final Throwables.Function<? super SP, T, EX> func) throws EX {
+    public <T, E extends Exception> T apply(final Throwables.Function<? super SP, T, E> func) throws E {
         return func.apply(this.pair());
     }
 
-    /**
-     *
-     * @param <EX>
-     * @param consumer
-     * @throws EX the ex
-     */
-    public <EX extends Exception> void accept(final Throwables.Consumer<? super SP, EX> consumer) throws EX {
+    public <T, E extends Exception> T apply(final Throwables.BiFunction<? super String, ? super List<Object>, T, E> func) throws E {
+        final SP sp = this.pair();
+
+        return func.apply(sp.sql, sp.parameters);
+    }
+
+    public <E extends Exception> void accept(final Throwables.Consumer<? super SP, E> consumer) throws E {
         consumer.accept(this.pair());
+    }
+
+    public <E extends Exception> void accept(final Throwables.BiConsumer<? super String, ? super List<Object>, E> consumer) throws E {
+        final SP sp = this.pair();
+
+        consumer.accept(sp.sql, sp.parameters);
+    }
+
+    private static final Set<?> namedSQLBuilderClasses = N.asSet(NSC.class, NAC.class, NLC.class);
+
+    @SuppressWarnings("rawtypes")
+    public com.landawn.abacus.util.AbstractPreparedQuery toPreparedQuery(final javax.sql.DataSource ds) throws java.sql.SQLException {
+        final SP sp = this.pair();
+
+        if (namedSQLBuilderClasses.contains(this.getClass())) {
+            return com.landawn.abacus.util.JdbcUtil.prepareNamedQuery(ds, sp.sql).setParameters(sp.parameters);
+        } else {
+            return com.landawn.abacus.util.JdbcUtil.prepareQuery(ds, sp.sql).setParameters(sp.parameters);
+        }
+    }
+
+    @SuppressWarnings("rawtypes")
+    public com.landawn.abacus.util.AbstractPreparedQuery toPreparedQuery(final java.sql.Connection conn) throws java.sql.SQLException {
+        final SP sp = this.pair();
+
+        if (namedSQLBuilderClasses.contains(this.getClass())) {
+            return com.landawn.abacus.util.JdbcUtil.prepareNamedQuery(conn, sp.sql).setParameters(sp.parameters);
+        } else {
+            return com.landawn.abacus.util.JdbcUtil.prepareQuery(conn, sp.sql).setParameters(sp.parameters);
+        }
+    }
+
+    @SuppressWarnings("rawtypes")
+    public <Q extends com.landawn.abacus.util.AbstractPreparedQuery> Q toPreparedQuery(final Throwables.Function<SP, Q, java.sql.SQLException> func)
+            throws java.sql.SQLException {
+        final SP sp = this.pair();
+
+        return func.apply(sp);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public <Q extends com.landawn.abacus.util.AbstractPreparedQuery> Q toPreparedQuery(
+            final Throwables.BiFunction<? super String, ? super List<Object>, Q, java.sql.SQLException> func) throws java.sql.SQLException {
+        final SP sp = this.pair();
+
+        return func.apply(sp.sql, sp.parameters);
+    }
+
+    public com.landawn.abacus.util.NamedQuery toNamedQuery(final javax.sql.DataSource ds) throws java.sql.SQLException {
+        requiresNamedSQLBuilder();
+
+        final SP sp = this.pair();
+
+        return com.landawn.abacus.util.JdbcUtil.prepareNamedQuery(ds, sp.sql).setParameters(sp.parameters);
+    }
+
+    public com.landawn.abacus.util.NamedQuery toNamedQuery(final java.sql.Connection conn) throws java.sql.SQLException {
+        requiresNamedSQLBuilder();
+
+        final SP sp = this.pair();
+
+        return com.landawn.abacus.util.JdbcUtil.prepareNamedQuery(conn, sp.sql).setParameters(sp.parameters);
+    }
+
+    private void requiresNamedSQLBuilder() {
+        if (!namedSQLBuilderClasses.contains(this.getClass())) {
+            throw new RuntimeException(
+                    "NamedQuery must be created from named SQLBuilder: NSC/NAC/NLC. But this SQLBuilder: " + this.getClass() + " is not named SQLBuilder");
+        }
     }
 
     /**
@@ -2691,6 +2760,8 @@ public abstract class SQLBuilder {
             }
 
             sb.append(deleteFromTableChars);
+        } else if (op == OperationType.QUERY && hasFromBeenSet == false && isForConditionOnly == false) {
+            throw new RuntimeException("'from' methods has not been called for query: " + op);
         }
     }
 
@@ -3661,7 +3732,7 @@ public abstract class SQLBuilder {
             instance.op = OperationType.ADD;
             final Optional<?> first = N.firstNonNull(propsList);
 
-            if (first.isPresent()) {
+            if (first.isPresent() && ClassUtil.isEntity(first.get().getClass())) {
                 instance.entityClass = first.get().getClass();
                 instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             }
@@ -4204,7 +4275,7 @@ public abstract class SQLBuilder {
             instance.op = OperationType.ADD;
             final Optional<?> first = N.firstNonNull(propsList);
 
-            if (first.isPresent()) {
+            if (first.isPresent() && ClassUtil.isEntity(first.get().getClass())) {
                 instance.entityClass = first.get().getClass();
                 instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             }
@@ -4747,7 +4818,7 @@ public abstract class SQLBuilder {
             instance.op = OperationType.ADD;
             final Optional<?> first = N.firstNonNull(propsList);
 
-            if (first.isPresent()) {
+            if (first.isPresent() && ClassUtil.isEntity(first.get().getClass())) {
                 instance.entityClass = first.get().getClass();
                 instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             }
@@ -5287,7 +5358,7 @@ public abstract class SQLBuilder {
             instance.op = OperationType.ADD;
             final Optional<?> first = N.firstNonNull(propsList);
 
-            if (first.isPresent()) {
+            if (first.isPresent() && ClassUtil.isEntity(first.get().getClass())) {
                 instance.entityClass = first.get().getClass();
                 instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             }
@@ -5827,7 +5898,7 @@ public abstract class SQLBuilder {
             instance.op = OperationType.ADD;
             final Optional<?> first = N.firstNonNull(propsList);
 
-            if (first.isPresent()) {
+            if (first.isPresent() && ClassUtil.isEntity(first.get().getClass())) {
                 instance.entityClass = first.get().getClass();
                 instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             }
@@ -6367,7 +6438,7 @@ public abstract class SQLBuilder {
             instance.op = OperationType.ADD;
             final Optional<?> first = N.firstNonNull(propsList);
 
-            if (first.isPresent()) {
+            if (first.isPresent() && ClassUtil.isEntity(first.get().getClass())) {
                 instance.entityClass = first.get().getClass();
                 instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             }
@@ -6907,7 +6978,7 @@ public abstract class SQLBuilder {
             instance.op = OperationType.ADD;
             final Optional<?> first = N.firstNonNull(propsList);
 
-            if (first.isPresent()) {
+            if (first.isPresent() && ClassUtil.isEntity(first.get().getClass())) {
                 instance.entityClass = first.get().getClass();
                 instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             }
@@ -7447,7 +7518,7 @@ public abstract class SQLBuilder {
             instance.op = OperationType.ADD;
             final Optional<?> first = N.firstNonNull(propsList);
 
-            if (first.isPresent()) {
+            if (first.isPresent() && ClassUtil.isEntity(first.get().getClass())) {
                 instance.entityClass = first.get().getClass();
                 instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             }
@@ -7987,7 +8058,7 @@ public abstract class SQLBuilder {
             instance.op = OperationType.ADD;
             final Optional<?> first = N.firstNonNull(propsList);
 
-            if (first.isPresent()) {
+            if (first.isPresent() && ClassUtil.isEntity(first.get().getClass())) {
                 instance.entityClass = first.get().getClass();
                 instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             }
@@ -8528,7 +8599,7 @@ public abstract class SQLBuilder {
             instance.op = OperationType.ADD;
             final Optional<?> first = N.firstNonNull(propsList);
 
-            if (first.isPresent()) {
+            if (first.isPresent() && ClassUtil.isEntity(first.get().getClass())) {
                 instance.entityClass = first.get().getClass();
                 instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             }
@@ -9069,7 +9140,7 @@ public abstract class SQLBuilder {
             instance.op = OperationType.ADD;
             final Optional<?> first = N.firstNonNull(propsList);
 
-            if (first.isPresent()) {
+            if (first.isPresent() && ClassUtil.isEntity(first.get().getClass())) {
                 instance.entityClass = first.get().getClass();
                 instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             }
@@ -9610,7 +9681,7 @@ public abstract class SQLBuilder {
             instance.op = OperationType.ADD;
             final Optional<?> first = N.firstNonNull(propsList);
 
-            if (first.isPresent()) {
+            if (first.isPresent() && ClassUtil.isEntity(first.get().getClass())) {
                 instance.entityClass = first.get().getClass();
                 instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
             }

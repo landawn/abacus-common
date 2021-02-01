@@ -773,7 +773,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static char[] readChars(final File file, final long offset, final int maxLen) throws UncheckedIOException {
-        return readChars(file, 0, maxLen, Charsets.UTF_8);
+        return readChars(file, offset, maxLen, Charsets.UTF_8);
     }
 
     /**
@@ -837,7 +837,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static char[] readChars(final InputStream is, final long offset, final int maxLen) throws UncheckedIOException {
-        return readChars(is, 0, maxLen, Charsets.UTF_8);
+        return readChars(is, offset, maxLen, Charsets.UTF_8);
     }
 
     /**
@@ -4041,10 +4041,9 @@ public final class IOUtil {
      * New buffered writer.
      *
      * @param os
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @return 
      */
-    public static java.io.BufferedWriter newBufferedWriter(OutputStream os) throws UncheckedIOException {
+    public static java.io.BufferedWriter newBufferedWriter(OutputStream os) {
         return new java.io.BufferedWriter(new OutputStreamWriter(os));
     }
 
@@ -4053,10 +4052,9 @@ public final class IOUtil {
      *
      * @param os
      * @param charset
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @return 
      */
-    public static java.io.BufferedWriter newBufferedWriter(OutputStream os, Charset charset) throws UncheckedIOException {
+    public static java.io.BufferedWriter newBufferedWriter(OutputStream os, Charset charset) {
         return new java.io.BufferedWriter(new OutputStreamWriter(os, charset == null ? Charsets.UTF_8 : charset));
     }
 
@@ -4064,30 +4062,20 @@ public final class IOUtil {
      * New LZ 4 block input stream.
      *
      * @param is
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @return 
      */
-    public static LZ4BlockInputStream newLZ4BlockInputStream(final InputStream is) throws UncheckedIOException {
-        try {
-            return new LZ4BlockInputStream(is);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    public static LZ4BlockInputStream newLZ4BlockInputStream(final InputStream is) {
+        return new LZ4BlockInputStream(is);
     }
 
     /**
      * New LZ 4 block output stream.
      *
      * @param os
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @return 
      */
-    public static LZ4BlockOutputStream newLZ4BlockOutputStream(final OutputStream os) throws UncheckedIOException {
-        try {
-            return new LZ4BlockOutputStream(os);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    public static LZ4BlockOutputStream newLZ4BlockOutputStream(final OutputStream os) {
+        return new LZ4BlockOutputStream(os);
     }
 
     /**
@@ -4095,15 +4083,10 @@ public final class IOUtil {
      *
      * @param os
      * @param blockSize
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @return 
      */
-    public static LZ4BlockOutputStream newLZ4BlockOutputStream(final OutputStream os, final int blockSize) throws UncheckedIOException {
-        try {
-            return new LZ4BlockOutputStream(os, blockSize);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    public static LZ4BlockOutputStream newLZ4BlockOutputStream(final OutputStream os, final int blockSize) {
+        return new LZ4BlockOutputStream(os, blockSize);
     }
 
     /**
@@ -4125,15 +4108,10 @@ public final class IOUtil {
      * New snappy output stream.
      *
      * @param os
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @return 
      */
-    public static SnappyOutputStream newSnappyOutputStream(final OutputStream os) throws UncheckedIOException {
-        try {
-            return new SnappyOutputStream(os);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    public static SnappyOutputStream newSnappyOutputStream(final OutputStream os) {
+        return new SnappyOutputStream(os);
     }
 
     /**
@@ -4141,15 +4119,10 @@ public final class IOUtil {
      *
      * @param os
      * @param bufferSize
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
+     * @return 
      */
-    public static SnappyOutputStream newSnappyOutputStream(final OutputStream os, final int bufferSize) throws UncheckedIOException {
-        try {
-            return new SnappyOutputStream(os, bufferSize);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    public static SnappyOutputStream newSnappyOutputStream(final OutputStream os, final int bufferSize) {
+        return new SnappyOutputStream(os, bufferSize);
     }
 
     /**
@@ -5057,6 +5030,7 @@ public final class IOUtil {
      * @param destDir
      * @throws UncheckedIOException the unchecked IO exception
      */
+    @SuppressWarnings("null")
     static void splitByLine(final File file, final int numOfParts, final File destDir) throws UncheckedIOException {
         final long lineNumOfPart = estimateLineCount(file, 10000) / numOfParts;
 
@@ -6212,6 +6186,7 @@ public final class IOUtil {
      * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
+    @SuppressWarnings("resource")
     private static InputStream openFile(final Holder<ZipFile> outputZipFile, final File file) throws IOException {
         InputStream is = null;
 

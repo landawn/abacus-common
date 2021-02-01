@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import com.landawn.abacus.util.function.Supplier;
+
 public final class Enumerations {
 
     @SuppressWarnings("rawtypes")
@@ -187,7 +189,7 @@ public final class Enumerations {
 
     public static <T> List<T> toList(final Enumeration<? extends T> e) {
         if (e == null) {
-            return new ArrayList<T>();
+            return new ArrayList<>();
         }
 
         final List<T> result = new ArrayList<>();
@@ -201,7 +203,7 @@ public final class Enumerations {
 
     public static <T> Set<T> toSet(final Enumeration<? extends T> e) {
         if (e == null) {
-            return new HashSet<T>();
+            return new HashSet<>();
         }
 
         final Set<T> result = new HashSet<>();
@@ -211,5 +213,17 @@ public final class Enumerations {
         }
 
         return result;
+    }
+
+    public static <T, C extends Collection<T>> C toCollection(final Enumeration<? extends T> e, final Supplier<? extends C> supplier) {
+        final C c = supplier.get();
+
+        if (e != null) {
+            while (e.hasMoreElements()) {
+                c.add(e.nextElement());
+            }
+        }
+
+        return c;
     }
 }

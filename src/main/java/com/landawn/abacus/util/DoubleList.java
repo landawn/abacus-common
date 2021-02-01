@@ -714,6 +714,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param c
      * @return
      */
+    @Override
     public boolean containsAll(DoubleList c) {
         if (N.isNullOrEmpty(c)) {
             return true;
@@ -765,6 +766,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param c
      * @return
      */
+    @Override
     public boolean containsAny(DoubleList c) {
         if (this.isEmpty() || N.isNullOrEmpty(c)) {
             return false;
@@ -792,6 +794,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param c
      * @return
      */
+    @Override
     public boolean disjoint(final DoubleList c) {
         if (isEmpty() || N.isNullOrEmpty(c)) {
             return true;
