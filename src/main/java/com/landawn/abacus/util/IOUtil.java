@@ -2407,75 +2407,75 @@ public final class IOUtil {
 
     /**
      *
-     * @param out
+     * @param output
      * @param str
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void write(final File out, final CharSequence str) throws UncheckedIOException {
-        write(out, str, Charsets.UTF_8);
+    public static void write(final File output, final CharSequence str) throws UncheckedIOException {
+        write(output, str, Charsets.UTF_8);
     }
 
     /**
      *
-     * @param out
+     * @param output
      * @param str
      * @param charset
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void write(final File out, final CharSequence str, Charset charset) throws UncheckedIOException {
+    public static void write(final File output, final CharSequence str, Charset charset) throws UncheckedIOException {
         charset = charset == null ? Charsets.UTF_8 : charset;
 
-        write(out, chars2Bytes(toCharArray(str), charset));
+        write(output, chars2Bytes(toCharArray(str), charset));
     }
 
     /**
      *
-     * @param out
+     * @param output
      * @param str
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void write(final OutputStream out, final CharSequence str) throws UncheckedIOException {
-        write(out, str, false);
+    public static void write(final OutputStream output, final CharSequence str) throws UncheckedIOException {
+        write(output, str, false);
     }
 
     /**
      *
-     * @param out
+     * @param output
      * @param str
      * @param charset
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void write(final OutputStream out, final CharSequence str, final Charset charset) throws UncheckedIOException {
-        write(out, str, charset, false);
+    public static void write(final OutputStream output, final CharSequence str, final Charset charset) throws UncheckedIOException {
+        write(output, str, charset, false);
     }
 
     /**
      *
-     * @param out
+     * @param output
      * @param str
      * @param flush
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void write(final OutputStream out, final CharSequence str, final boolean flush) throws UncheckedIOException {
-        write(out, str, Charsets.UTF_8, flush);
+    public static void write(final OutputStream output, final CharSequence str, final boolean flush) throws UncheckedIOException {
+        write(output, str, Charsets.UTF_8, flush);
     }
 
     /**
      *
-     * @param out
+     * @param output
      * @param str
      * @param charset
      * @param flush
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void write(final OutputStream out, final CharSequence str, Charset charset, final boolean flush) throws UncheckedIOException {
+    public static void write(final OutputStream output, final CharSequence str, Charset charset, final boolean flush) throws UncheckedIOException {
         charset = charset == null ? Charsets.UTF_8 : charset;
 
         try {
-            out.write(chars2Bytes(toCharArray(str), charset));
+            output.write(chars2Bytes(toCharArray(str), charset));
 
             if (flush) {
-                out.flush();
+                output.flush();
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -2484,264 +2484,265 @@ public final class IOUtil {
 
     /**
      *
-     * @param out
+     * @param output
      * @param str
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void write(final Writer out, final CharSequence str) throws UncheckedIOException {
-        write(out, str, false);
+    public static void write(final Writer output, final CharSequence str) throws UncheckedIOException {
+        write(output, str, false);
     }
 
     /**
      *
-     * @param out
+     * @param output
      * @param str
      * @param flush
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void write(final Writer out, final CharSequence str, final boolean flush) throws UncheckedIOException {
-        write(out, toCharArray(str), flush);
+    public static void write(final Writer output, final CharSequence str, final boolean flush) throws UncheckedIOException {
+        write(output, toCharArray(str), flush);
     }
 
     /**
      *
-     * @param out
+     * @param output
      * @param chars
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void write(final File out, final char[] chars) throws UncheckedIOException {
+    public static void write(final File output, final char[] chars) throws UncheckedIOException {
         if (N.isNullOrEmpty(chars)) {
             return;
         }
 
-        write(out, chars, 0, chars.length);
+        write(output, chars, 0, chars.length);
     }
 
     /**
      *
-     * @param out
+     * @param output
      * @param chars
      * @param charset
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void write(final File out, final char[] chars, final Charset charset) throws UncheckedIOException {
+    public static void write(final File output, final char[] chars, final Charset charset) throws UncheckedIOException {
         if (N.isNullOrEmpty(chars)) {
             return;
         }
 
-        write(out, chars, 0, chars.length, charset);
+        write(output, chars, 0, chars.length, charset);
     }
 
     /**
      *
-     * @param out
+     * @param output
      * @param chars
      * @param offset
      * @param len
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void write(final File out, final char[] chars, final int offset, final int len) throws UncheckedIOException {
+    public static void write(final File output, final char[] chars, final int offset, final int len) throws UncheckedIOException {
         if (len == 0 && N.len(chars) >= offset) {
             return;
         }
 
-        write(out, chars, offset, len, Charsets.UTF_8);
+        write(output, chars, offset, len, Charsets.UTF_8);
     }
 
     /**
      *
-     * @param out
-     * @param chars
-     * @param offset
-     * @param len
-     * @param charset
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public static void write(final File out, final char[] chars, final int offset, final int len, final Charset charset) throws UncheckedIOException {
-        if (len == 0 && N.len(chars) >= offset) {
-            return;
-        }
-
-        write(out, chars2Bytes(chars, offset, len, charset));
-    }
-
-    /**
-     *
-     * @param out
-     * @param chars
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public static void write(final OutputStream out, final char[] chars) throws UncheckedIOException {
-        if (N.isNullOrEmpty(chars)) {
-            return;
-        }
-
-        write(out, chars, 0, chars.length);
-    }
-
-    /**
-     *
-     * @param out
-     * @param chars
-     * @param charset
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public static void write(final OutputStream out, final char[] chars, final Charset charset) throws UncheckedIOException {
-        if (N.isNullOrEmpty(chars)) {
-            return;
-        }
-
-        write(out, chars, 0, chars.length, charset);
-    }
-
-    /**
-     *
-     * @param out
-     * @param chars
-     * @param offset
-     * @param len
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public static void write(final OutputStream out, final char[] chars, final int offset, final int len) throws UncheckedIOException {
-        if (len == 0 && N.len(chars) >= offset) {
-            return;
-        }
-
-        write(out, chars, offset, len, Charsets.UTF_8);
-    }
-
-    /**
-     *
-     * @param out
+     * @param output
      * @param chars
      * @param offset
      * @param len
      * @param charset
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void write(final OutputStream out, final char[] chars, final int offset, final int len, final Charset charset) throws UncheckedIOException {
+    public static void write(final File output, final char[] chars, final int offset, final int len, final Charset charset) throws UncheckedIOException {
         if (len == 0 && N.len(chars) >= offset) {
             return;
         }
 
-        write(out, chars, offset, len, charset, false);
+        write(output, chars2Bytes(chars, offset, len, charset));
     }
 
     /**
      *
-     * @param out
+     * @param output
      * @param chars
-     * @param flush
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void write(final OutputStream out, final char[] chars, final boolean flush) throws UncheckedIOException {
+    public static void write(final OutputStream output, final char[] chars) throws UncheckedIOException {
         if (N.isNullOrEmpty(chars)) {
             return;
         }
 
-        write(out, chars, 0, chars.length, flush);
+        write(output, chars, 0, chars.length);
     }
 
     /**
      *
-     * @param out
+     * @param output
+     * @param chars
+     * @param charset
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public static void write(final OutputStream output, final char[] chars, final Charset charset) throws UncheckedIOException {
+        if (N.isNullOrEmpty(chars)) {
+            return;
+        }
+
+        write(output, chars, 0, chars.length, charset);
+    }
+
+    /**
+     *
+     * @param output
      * @param chars
      * @param offset
      * @param len
-     * @param flush
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void write(final OutputStream out, final char[] chars, final int offset, final int len, final boolean flush) throws UncheckedIOException {
+    public static void write(final OutputStream output, final char[] chars, final int offset, final int len) throws UncheckedIOException {
         if (len == 0 && N.len(chars) >= offset) {
             return;
         }
 
-        write(out, chars, offset, len, Charsets.UTF_8, flush);
+        write(output, chars, offset, len, Charsets.UTF_8);
     }
 
     /**
      *
-     * @param out
+     * @param output
      * @param chars
      * @param offset
      * @param len
      * @param charset
-     * @param flush
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void write(final OutputStream out, final char[] chars, final int offset, final int len, final Charset charset, final boolean flush)
+    public static void write(final OutputStream output, final char[] chars, final int offset, final int len, final Charset charset)
             throws UncheckedIOException {
         if (len == 0 && N.len(chars) >= offset) {
             return;
         }
 
-        write(out, chars2Bytes(chars, offset, len, charset), flush);
+        write(output, chars, offset, len, charset, false);
     }
 
     /**
      *
-     * @param out
+     * @param output
      * @param chars
+     * @param flush
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void write(final Writer out, final char[] chars) throws UncheckedIOException {
+    public static void write(final OutputStream output, final char[] chars, final boolean flush) throws UncheckedIOException {
         if (N.isNullOrEmpty(chars)) {
             return;
         }
 
-        write(out, chars, 0, chars.length);
+        write(output, chars, 0, chars.length, flush);
     }
 
     /**
      *
-     * @param out
+     * @param output
      * @param chars
      * @param offset
      * @param len
+     * @param flush
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void write(final Writer out, final char[] chars, final int offset, final int len) throws UncheckedIOException {
+    public static void write(final OutputStream output, final char[] chars, final int offset, final int len, final boolean flush) throws UncheckedIOException {
         if (len == 0 && N.len(chars) >= offset) {
             return;
         }
 
-        write(out, chars, offset, len, false);
+        write(output, chars, offset, len, Charsets.UTF_8, flush);
     }
 
     /**
      *
-     * @param out
+     * @param output
      * @param chars
+     * @param offset
+     * @param len
+     * @param charset
      * @param flush
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void write(final Writer out, final char[] chars, final boolean flush) throws UncheckedIOException {
+    public static void write(final OutputStream output, final char[] chars, final int offset, final int len, final Charset charset, final boolean flush)
+            throws UncheckedIOException {
+        if (len == 0 && N.len(chars) >= offset) {
+            return;
+        }
+
+        write(output, chars2Bytes(chars, offset, len, charset), flush);
+    }
+
+    /**
+     *
+     * @param output
+     * @param chars
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public static void write(final Writer output, final char[] chars) throws UncheckedIOException {
         if (N.isNullOrEmpty(chars)) {
             return;
         }
 
-        write(out, chars, 0, chars.length, flush);
+        write(output, chars, 0, chars.length);
     }
 
     /**
      *
-     * @param out
+     * @param output
+     * @param chars
+     * @param offset
+     * @param len
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public static void write(final Writer output, final char[] chars, final int offset, final int len) throws UncheckedIOException {
+        if (len == 0 && N.len(chars) >= offset) {
+            return;
+        }
+
+        write(output, chars, offset, len, false);
+    }
+
+    /**
+     *
+     * @param output
+     * @param chars
+     * @param flush
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public static void write(final Writer output, final char[] chars, final boolean flush) throws UncheckedIOException {
+        if (N.isNullOrEmpty(chars)) {
+            return;
+        }
+
+        write(output, chars, 0, chars.length, flush);
+    }
+
+    /**
+     *
+     * @param output
      * @param chars
      * @param offset
      * @param len
      * @param flush
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void write(final Writer out, final char[] chars, final int offset, final int len, final boolean flush) throws UncheckedIOException {
+    public static void write(final Writer output, final char[] chars, final int offset, final int len, final boolean flush) throws UncheckedIOException {
         if (len == 0 && N.len(chars) >= offset) {
             return;
         }
 
         try {
-            out.write(chars, offset, len);
+            output.write(chars, offset, len);
 
             if (flush) {
-                out.flush();
+                output.flush();
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -2750,27 +2751,27 @@ public final class IOUtil {
 
     /**
      *
-     * @param out
+     * @param output
      * @param bytes
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void write(final File out, final byte[] bytes) throws UncheckedIOException {
+    public static void write(final File output, final byte[] bytes) throws UncheckedIOException {
         if (N.isNullOrEmpty(bytes)) {
             return;
         }
 
-        write(out, bytes, 0, bytes.length);
+        write(output, bytes, 0, bytes.length);
     }
 
     /**
      *
-     * @param out
+     * @param output
      * @param bytes
      * @param offset
      * @param len
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void write(final File out, final byte[] bytes, final int offset, final int len) throws UncheckedIOException {
+    public static void write(final File output, final byte[] bytes, final int offset, final int len) throws UncheckedIOException {
         if (len == 0 && N.len(bytes) >= offset) {
             return;
         }
@@ -2778,11 +2779,11 @@ public final class IOUtil {
         OutputStream os = null;
 
         try {
-            if (!out.exists()) {
-                out.createNewFile();
+            if (!output.exists()) {
+                output.createNewFile();
             }
 
-            os = new FileOutputStream(out);
+            os = new FileOutputStream(output);
 
             write(os, bytes, offset, len);
 
@@ -2796,68 +2797,68 @@ public final class IOUtil {
 
     /**
      *
-     * @param out
+     * @param output
      * @param bytes
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void write(final OutputStream out, final byte[] bytes) throws UncheckedIOException {
+    public static void write(final OutputStream output, final byte[] bytes) throws UncheckedIOException {
         if (N.isNullOrEmpty(bytes)) {
             return;
         }
 
-        write(out, bytes, 0, bytes.length);
+        write(output, bytes, 0, bytes.length);
     }
 
     /**
      *
-     * @param out
+     * @param output
      * @param bytes
      * @param offset
      * @param len
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void write(final OutputStream out, final byte[] bytes, final int offset, final int len) throws UncheckedIOException {
+    public static void write(final OutputStream output, final byte[] bytes, final int offset, final int len) throws UncheckedIOException {
         if (len == 0 && N.len(bytes) >= offset) {
             return;
         }
 
-        write(out, bytes, offset, len, false);
+        write(output, bytes, offset, len, false);
     }
 
     /**
      *
-     * @param out
+     * @param output
      * @param bytes
      * @param flush
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void write(final OutputStream out, final byte[] bytes, final boolean flush) throws UncheckedIOException {
+    public static void write(final OutputStream output, final byte[] bytes, final boolean flush) throws UncheckedIOException {
         if (N.isNullOrEmpty(bytes)) {
             return;
         }
 
-        write(out, bytes, 0, bytes.length, flush);
+        write(output, bytes, 0, bytes.length, flush);
     }
 
     /**
      *
-     * @param out
+     * @param output
      * @param bytes
      * @param offset
      * @param len
      * @param flush
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void write(final OutputStream out, final byte[] bytes, final int offset, final int len, final boolean flush) throws UncheckedIOException {
+    public static void write(final OutputStream output, final byte[] bytes, final int offset, final int len, final boolean flush) throws UncheckedIOException {
         if (len == 0 && N.len(bytes) >= offset) {
             return;
         }
 
         try {
-            out.write(bytes, offset, len);
+            output.write(bytes, offset, len);
 
             if (flush) {
-                out.flush();
+                output.flush();
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -3305,27 +3306,27 @@ public final class IOUtil {
 
     /**
      *
-     * @param out
+     * @param output
      * @param bytes
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void append(final File out, final byte[] bytes) throws UncheckedIOException {
+    public static void append(final File output, final byte[] bytes) throws UncheckedIOException {
         if (N.isNullOrEmpty(bytes)) {
             return;
         }
 
-        append(out, bytes, 0, bytes.length);
+        append(output, bytes, 0, bytes.length);
     }
 
     /**
      *
-     * @param out
+     * @param output
      * @param bytes
      * @param offset
      * @param len
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void append(final File out, final byte[] bytes, final int offset, final int len) throws UncheckedIOException {
+    public static void append(final File output, final byte[] bytes, final int offset, final int len) throws UncheckedIOException {
         if (len == 0 && N.len(bytes) >= offset) {
             return;
         }
@@ -3333,11 +3334,11 @@ public final class IOUtil {
         OutputStream os = null;
 
         try {
-            if (!out.exists()) {
-                out.createNewFile();
+            if (!output.exists()) {
+                output.createNewFile();
             }
 
-            os = new FileOutputStream(out, true);
+            os = new FileOutputStream(output, true);
 
             write(os, bytes, offset, len);
 
@@ -3351,64 +3352,64 @@ public final class IOUtil {
 
     /**
      *
-     * @param out
+     * @param output
      * @param chars
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void append(final File out, final char[] chars) throws UncheckedIOException {
+    public static void append(final File output, final char[] chars) throws UncheckedIOException {
         if (N.isNullOrEmpty(chars)) {
             return;
         }
 
-        append(out, chars, 0, chars.length);
+        append(output, chars, 0, chars.length);
     }
 
     /**
      *
-     * @param out
+     * @param output
      * @param chars
      * @param charset
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void append(final File out, final char[] chars, final Charset charset) throws UncheckedIOException {
+    public static void append(final File output, final char[] chars, final Charset charset) throws UncheckedIOException {
         if (N.isNullOrEmpty(chars)) {
             return;
         }
 
-        append(out, chars, 0, chars.length, charset);
+        append(output, chars, 0, chars.length, charset);
     }
 
     /**
      *
-     * @param out
+     * @param output
      * @param chars
      * @param offset
      * @param len
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void append(final File out, final char[] chars, final int offset, final int len) throws UncheckedIOException {
+    public static void append(final File output, final char[] chars, final int offset, final int len) throws UncheckedIOException {
         if (len == 0 && N.len(chars) >= offset) {
             return;
         }
 
-        append(out, chars, offset, len, Charsets.UTF_8);
+        append(output, chars, offset, len, Charsets.UTF_8);
     }
 
     /**
      *
-     * @param out
+     * @param output
      * @param chars
      * @param offset
      * @param len
      * @param charset
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static void append(final File out, final char[] chars, final int offset, final int len, final Charset charset) throws UncheckedIOException {
+    public static void append(final File output, final char[] chars, final int offset, final int len, final Charset charset) throws UncheckedIOException {
         if (len == 0 && N.len(chars) >= offset) {
             return;
         }
 
-        append(out, chars2Bytes(chars, offset, len, charset));
+        append(output, chars2Bytes(chars, offset, len, charset));
     }
 
     /**
@@ -3798,8 +3799,8 @@ public final class IOUtil {
      * <ul>
      * <li>empty string becomes .
      * <li>. stays as .
-     * <li>fold out ./
-     * <li>fold out ../ when possible
+     * <li>fold output ./
+     * <li>fold output ../ when possible
      * <li>collapse multiple slashes
      * <li>delete trailing slashes (unless the path is just "/")
      * </ul>
@@ -4523,14 +4524,14 @@ public final class IOUtil {
     /**
      *
      * @param source
-     * @param out
+     * @param output
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      * @see Files#copy(Path, OutputStream)
      */
-    public static long copy(Path source, OutputStream out) throws UncheckedIOException {
+    public static long copy(Path source, OutputStream output) throws UncheckedIOException {
         try {
-            return Files.copy(source, out);
+            return Files.copy(source, output);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
