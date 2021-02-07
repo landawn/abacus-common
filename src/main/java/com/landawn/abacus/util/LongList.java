@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.Throwables.Function;
 import com.landawn.abacus.util.u.Optional;
@@ -250,6 +251,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * @return
      */
+    @Beta
     @Override
     public long[] array() {
         return elementData;
@@ -329,6 +331,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param c
      * @return
      */
+    @Override
     public boolean addAll(LongList c) {
         if (N.isNullOrEmpty(c)) {
             return false;
@@ -352,6 +355,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param c
      * @return
      */
+    @Override
     public boolean addAll(int index, LongList c) {
         rangeCheckForAdd(index);
 
@@ -494,6 +498,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param c
      * @return
      */
+    @Override
     public boolean removeAll(LongList c) {
         if (N.isNullOrEmpty(c)) {
             return false;
@@ -545,11 +550,49 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return true;
     }
 
+    @Override
+    public boolean removeDuplicates() {
+        if (size < 2) {
+            return false;
+        }
+
+        final boolean isSorted = isSorted();
+        int idx = 0;
+
+        if (isSorted) {
+            for (int i = 1; i < size; i++) {
+                if (elementData[i] != elementData[idx]) {
+                    elementData[++idx] = elementData[i];
+                }
+            }
+
+        } else {
+            final Set<Long> set = N.newLinkedHashSet(size);
+            set.add(elementData[0]);
+
+            for (int i = 1; i < size; i++) {
+                if (set.add(elementData[i])) {
+                    elementData[++idx] = elementData[i];
+                }
+            }
+        }
+
+        if (idx == size - 1) {
+            return false;
+        } else {
+            N.fill(elementData, idx + 1, size, 0);
+
+            size = idx + 1;
+            return true;
+        }
+    }
+
     /**
      *
      * @param c
      * @return
      */
+    @Override
     public boolean retainAll(LongList c) {
         if (N.isNullOrEmpty(c)) {
             boolean result = size() > 0;
@@ -565,6 +608,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param a
      * @return
      */
+    @Override
     public boolean retainAll(long[] a) {
         if (N.isNullOrEmpty(a)) {
             boolean result = size() > 0;
@@ -635,6 +679,10 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     @Override
     @SafeVarargs
     public final void deleteAll(int... indices) {
+        if (N.isNullOrEmpty(indices)) {
+            return;
+        }
+
         final long[] tmp = N.deleteAll(elementData, indices);
         N.copy(tmp, 0, elementData, 0, tmp.length);
         N.fill(elementData, tmp.length, size, 0);
@@ -654,15 +702,50 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
             return;
         }
 
-        final int newSize = size() - (toIndex - fromIndex);
+        final int size = size();
+        final int newSize = size - (toIndex - fromIndex);
 
-        if (toIndex < size()) {
+        if (toIndex < size) {
             System.arraycopy(elementData, toIndex, elementData, fromIndex, size - toIndex);
         }
 
-        N.fill(elementData, newSize, size(), 0);
+        N.fill(elementData, newSize, size, 0);
 
-        size = newSize;
+        this.size = newSize;
+    }
+
+    @Override
+    public void moveRange(final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        N.moveRange(elementData, fromIndex, toIndex, newPositionStartIndex);
+    }
+
+    @Override
+    public void replaceRange(final int fromIndex, final int toIndex, final long[] replacement) {
+        N.checkFromToIndex(fromIndex, toIndex, size());
+
+        if (N.isNullOrEmpty(replacement)) {
+            deleteRange(fromIndex, toIndex);
+            return;
+        }
+
+        final int size = this.size;
+        final int newSize = size - (toIndex - fromIndex) + replacement.length;
+
+        if (elementData.length < newSize) {
+            elementData = N.copyOf(elementData, newSize);
+        }
+
+        if (toIndex - fromIndex != replacement.length && toIndex != size) {
+            N.copy(elementData, toIndex, elementData, fromIndex + replacement.length, size - toIndex);
+        }
+
+        N.copy(replacement, 0, elementData, fromIndex, replacement.length);
+
+        if (newSize < size) {
+            N.fill(elementData, newSize, size, 0);
+        }
+
+        this.size = newSize;
     }
 
     /**
@@ -758,6 +841,34 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @return
      */
     @Override
+    public boolean containsAny(LongList c) {
+        if (this.isEmpty() || N.isNullOrEmpty(c)) {
+            return false;
+        }
+
+        return !disjoint(c);
+    }
+
+    /**
+     *
+     * @param a
+     * @return
+     */
+    @Override
+    public boolean containsAny(long[] a) {
+        if (this.isEmpty() || N.isNullOrEmpty(a)) {
+            return false;
+        }
+
+        return !disjoint(a);
+    }
+
+    /**
+     *
+     * @param c
+     * @return
+     */
+    @Override
     public boolean containsAll(LongList c) {
         if (N.isNullOrEmpty(c)) {
             return true;
@@ -802,34 +913,6 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         }
 
         return containsAll(of(a));
-    }
-
-    /**
-     *
-     * @param c
-     * @return
-     */
-    @Override
-    public boolean containsAny(LongList c) {
-        if (this.isEmpty() || N.isNullOrEmpty(c)) {
-            return false;
-        }
-
-        return !disjoint(c);
-    }
-
-    /**
-     *
-     * @param a
-     * @return
-     */
-    @Override
-    public boolean containsAny(long[] a) {
-        if (this.isEmpty() || N.isNullOrEmpty(a)) {
-            return false;
-        }
-
-        return !disjoint(a);
     }
 
     /**
@@ -886,6 +969,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @return
      * @see IntList#intersection(IntList)
      */
+    @Override
     public LongList intersection(final LongList b) {
         if (N.isNullOrEmpty(b)) {
             return new LongList();
@@ -909,6 +993,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param a
      * @return
      */
+    @Override
     public LongList intersection(final long[] a) {
         if (N.isNullOrEmpty(a)) {
             return new LongList();
@@ -923,6 +1008,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @return
      * @see IntList#difference(IntList)
      */
+    @Override
     public LongList difference(LongList b) {
         if (N.isNullOrEmpty(b)) {
             return of(N.copyOfRange(elementData, 0, size()));
@@ -946,6 +1032,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param a
      * @return
      */
+    @Override
     public LongList difference(final long[] a) {
         if (N.isNullOrEmpty(a)) {
             return of(N.copyOfRange(elementData, 0, size()));
@@ -960,6 +1047,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @return this.difference(b).addAll(b.difference(this))
      * @see IntList#symmetricDifference(IntList)
      */
+    @Override
     public LongList symmetricDifference(LongList b) {
         if (N.isNullOrEmpty(b)) {
             return this.copy();
@@ -994,6 +1082,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param a
      * @return
      */
+    @Override
     public LongList symmetricDifference(final long[] a) {
         if (N.isNullOrEmpty(a)) {
             return of(N.copyOfRange(elementData, 0, size()));
@@ -1721,6 +1810,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         checkFromToIndex(fromIndex, toIndex);
 
         return of(N.top(elementData, fromIndex, toIndex, n, cmp));
+    }
+
+    @Override
+    public boolean isSorted() {
+        return N.isSorted(elementData, 0, size);
     }
 
     /**

@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.Throwables.Function;
 import com.landawn.abacus.util.u.Optional;
@@ -295,6 +296,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @return
      */
+    @Beta
     @Override
     public char[] array() {
         return elementData;
@@ -374,6 +376,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param c
      * @return
      */
+    @Override
     public boolean addAll(CharList c) {
         if (N.isNullOrEmpty(c)) {
             return false;
@@ -397,6 +400,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param c
      * @return
      */
+    @Override
     public boolean addAll(int index, CharList c) {
         rangeCheckForAdd(index);
 
@@ -539,6 +543,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param c
      * @return
      */
+    @Override
     public boolean removeAll(CharList c) {
         if (N.isNullOrEmpty(c)) {
             return false;
@@ -590,11 +595,49 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return true;
     }
 
+    @Override
+    public boolean removeDuplicates() {
+        if (size < 2) {
+            return false;
+        }
+
+        final boolean isSorted = isSorted();
+        int idx = 0;
+
+        if (isSorted) {
+            for (int i = 1; i < size; i++) {
+                if (elementData[i] != elementData[idx]) {
+                    elementData[++idx] = elementData[i];
+                }
+            }
+
+        } else {
+            final Set<Character> set = N.newLinkedHashSet(size);
+            set.add(elementData[0]);
+
+            for (int i = 1; i < size; i++) {
+                if (set.add(elementData[i])) {
+                    elementData[++idx] = elementData[i];
+                }
+            }
+        }
+
+        if (idx == size - 1) {
+            return false;
+        } else {
+            N.fill(elementData, idx + 1, size, (char) 0);
+
+            size = idx + 1;
+            return true;
+        }
+    }
+
     /**
      *
      * @param c
      * @return
      */
+    @Override
     public boolean retainAll(CharList c) {
         if (N.isNullOrEmpty(c)) {
             boolean result = size() > 0;
@@ -610,6 +653,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param a
      * @return
      */
+    @Override
     public boolean retainAll(char[] a) {
         if (N.isNullOrEmpty(a)) {
             boolean result = size() > 0;
@@ -680,6 +724,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     @Override
     @SafeVarargs
     public final void deleteAll(int... indices) {
+        if (N.isNullOrEmpty(indices)) {
+            return;
+        }
+
         final char[] tmp = N.deleteAll(elementData, indices);
         N.copy(tmp, 0, elementData, 0, tmp.length);
         N.fill(elementData, tmp.length, size, (char) 0);
@@ -699,15 +747,50 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
             return;
         }
 
-        final int newSize = size() - (toIndex - fromIndex);
+        final int size = size();
+        final int newSize = size - (toIndex - fromIndex);
 
-        if (toIndex < size()) {
+        if (toIndex < size) {
             System.arraycopy(elementData, toIndex, elementData, fromIndex, size - toIndex);
         }
 
-        N.fill(elementData, newSize, size(), (char) 0);
+        N.fill(elementData, newSize, size, (char) 0);
 
-        size = newSize;
+        this.size = newSize;
+    }
+
+    @Override
+    public void moveRange(final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        N.moveRange(elementData, fromIndex, toIndex, newPositionStartIndex);
+    }
+
+    @Override
+    public void replaceRange(final int fromIndex, final int toIndex, final char[] replacement) {
+        N.checkFromToIndex(fromIndex, toIndex, size());
+
+        if (N.isNullOrEmpty(replacement)) {
+            deleteRange(fromIndex, toIndex);
+            return;
+        }
+
+        final int size = this.size;
+        final int newSize = size - (toIndex - fromIndex) + replacement.length;
+
+        if (elementData.length < newSize) {
+            elementData = N.copyOf(elementData, newSize);
+        }
+
+        if (toIndex - fromIndex != replacement.length && toIndex != size) {
+            N.copy(elementData, toIndex, elementData, fromIndex + replacement.length, size - toIndex);
+        }
+
+        N.copy(replacement, 0, elementData, fromIndex, replacement.length);
+
+        if (newSize < size) {
+            N.fill(elementData, newSize, size, (char) 0);
+        }
+
+        this.size = newSize;
     }
 
     /**
@@ -803,6 +886,34 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      */
     @Override
+    public boolean containsAny(CharList c) {
+        if (this.isEmpty() || N.isNullOrEmpty(c)) {
+            return false;
+        }
+
+        return !disjoint(c);
+    }
+
+    /**
+     *
+     * @param a
+     * @return
+     */
+    @Override
+    public boolean containsAny(char[] a) {
+        if (this.isEmpty() || N.isNullOrEmpty(a)) {
+            return false;
+        }
+
+        return !disjoint(a);
+    }
+
+    /**
+     *
+     * @param c
+     * @return
+     */
+    @Override
     public boolean containsAll(CharList c) {
         if (N.isNullOrEmpty(c)) {
             return true;
@@ -847,34 +958,6 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         }
 
         return containsAll(of(a));
-    }
-
-    /**
-     *
-     * @param c
-     * @return
-     */
-    @Override
-    public boolean containsAny(CharList c) {
-        if (this.isEmpty() || N.isNullOrEmpty(c)) {
-            return false;
-        }
-
-        return !disjoint(c);
-    }
-
-    /**
-     *
-     * @param a
-     * @return
-     */
-    @Override
-    public boolean containsAny(char[] a) {
-        if (this.isEmpty() || N.isNullOrEmpty(a)) {
-            return false;
-        }
-
-        return !disjoint(a);
     }
 
     /**
@@ -931,6 +1014,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      * @see IntList#intersection(IntList)
      */
+    @Override
     public CharList intersection(final CharList b) {
         if (N.isNullOrEmpty(b)) {
             return new CharList();
@@ -954,6 +1038,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param a
      * @return
      */
+    @Override
     public CharList intersection(final char[] a) {
         if (N.isNullOrEmpty(a)) {
             return new CharList();
@@ -968,6 +1053,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return
      * @see IntList#difference(IntList)
      */
+    @Override
     public CharList difference(CharList b) {
         if (N.isNullOrEmpty(b)) {
             return of(N.copyOfRange(elementData, 0, size()));
@@ -991,6 +1077,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param a
      * @return
      */
+    @Override
     public CharList difference(final char[] a) {
         if (N.isNullOrEmpty(a)) {
             return of(N.copyOfRange(elementData, 0, size()));
@@ -1005,6 +1092,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return this.difference(b).addAll(b.difference(this))
      * @see IntList#symmetricDifference(IntList)
      */
+    @Override
     public CharList symmetricDifference(CharList b) {
         if (N.isNullOrEmpty(b)) {
             return this.copy();
@@ -1039,6 +1127,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param a
      * @return
      */
+    @Override
     public CharList symmetricDifference(final char[] a) {
         if (N.isNullOrEmpty(a)) {
             return of(N.copyOfRange(elementData, 0, size()));
@@ -1720,6 +1809,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     @Override
     public boolean hasDuplicates() {
         return N.hasDuplicates(elementData, 0, size, false);
+    }
+
+    @Override
+    public boolean isSorted() {
+        return N.isSorted(elementData, 0, size);
     }
 
     /**

@@ -23,6 +23,7 @@ import java.util.Random;
 import java.util.RandomAccess;
 import java.util.Set;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.u.Optional;
@@ -51,32 +52,63 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * Returned the backed array.
      *
      * @return
+     * @deprecated should call {@code toArray()}
      */
+    @Deprecated
+    @Beta
     public abstract A array();
+
+    public abstract boolean addAll(L c);
+
+    public abstract boolean addAll(int index, L c);
 
     public abstract boolean addAll(A a);
 
     public abstract boolean addAll(int index, A a);
 
+    public abstract boolean removeAll(L c);
+
     public abstract boolean removeAll(A a);
+
+    public abstract boolean removeDuplicates();
+
+    public abstract boolean retainAll(L c);
+
+    public abstract boolean retainAll(A a);
 
     public abstract void deleteAll(int... indices);
 
     public abstract void deleteRange(int fromIndex, int toIndex);
 
-    public abstract boolean containsAll(L l);
+    public abstract void moveRange(int fromIndex, int toIndex, int newPositionStartIndex);
 
-    public abstract boolean containsAll(A a);
+    public abstract void replaceRange(int fromIndex, int toIndex, A replacement);
 
     public abstract boolean containsAny(L l);
 
     public abstract boolean containsAny(A a);
+
+    public abstract boolean containsAll(L l);
+
+    public abstract boolean containsAll(A a);
 
     public abstract boolean disjoint(L l);
 
     public abstract boolean disjoint(A a);
 
     public abstract boolean hasDuplicates();
+
+    public abstract L intersection(final L b);
+
+    public abstract L intersection(final A a);
+
+    public abstract L difference(final L b);
+
+    public abstract L difference(final A a);
+
+    public abstract L symmetricDifference(final L b);
+
+    public abstract L symmetricDifference(final A a);
 
     /**
      *
@@ -93,6 +125,8 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @return a new List with distinct elements
      */
     public abstract L distinct(final int fromIndex, final int toIndex);
+
+    public abstract boolean isSorted();
 
     public abstract void sort();
 

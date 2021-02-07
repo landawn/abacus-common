@@ -5733,6 +5733,41 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    @TerminalOp
+    @Beta
+    public void forEachToBreak(final Throwables.BiConsumer<? super T, MutableBoolean, E> action) throws E {
+        assertNotClosed();
+
+        final MutableBoolean flagToBreak = MutableBoolean.of(false);
+
+        final Throwables.Consumer<? super T, E> tmp = new Throwables.Consumer<T, E>() {
+            @Override
+            public void accept(T t) throws E {
+                action.accept(t, flagToBreak);
+            }
+        };
+
+        takeWhile(new Throwables.Predicate<T, E>() {
+            @Override
+            public boolean test(T value) {
+                return flagToBreak.isFalse();
+            }
+        }).forEach(tmp);
+    }
+
+    @TerminalOp
+    @Beta
+    public void forEachToBreak(final MutableBoolean flagToBreak, final Throwables.Consumer<? super T, E> action) throws E {
+        assertNotClosed();
+
+        takeWhile(new Throwables.Predicate<T, E>() {
+            @Override
+            public boolean test(T value) {
+                return flagToBreak.isFalse();
+            }
+        }).forEach(action);
+    }
+
     /**
      *
      * @param <E2>

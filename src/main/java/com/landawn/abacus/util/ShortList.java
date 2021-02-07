@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.Throwables.Function;
 import com.landawn.abacus.util.u.Optional;
@@ -251,6 +252,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @return
      */
+    @Beta
     @Override
     public short[] array() {
         return elementData;
@@ -330,6 +332,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param c
      * @return
      */
+    @Override
     public boolean addAll(ShortList c) {
         if (N.isNullOrEmpty(c)) {
             return false;
@@ -353,6 +356,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param c
      * @return
      */
+    @Override
     public boolean addAll(int index, ShortList c) {
         rangeCheckForAdd(index);
 
@@ -495,6 +499,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param c
      * @return
      */
+    @Override
     public boolean removeAll(ShortList c) {
         if (N.isNullOrEmpty(c)) {
             return false;
@@ -546,11 +551,49 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         return true;
     }
 
+    @Override
+    public boolean removeDuplicates() {
+        if (size < 2) {
+            return false;
+        }
+
+        final boolean isSorted = isSorted();
+        int idx = 0;
+
+        if (isSorted) {
+            for (int i = 1; i < size; i++) {
+                if (elementData[i] != elementData[idx]) {
+                    elementData[++idx] = elementData[i];
+                }
+            }
+
+        } else {
+            final Set<Short> set = N.newLinkedHashSet(size);
+            set.add(elementData[0]);
+
+            for (int i = 1; i < size; i++) {
+                if (set.add(elementData[i])) {
+                    elementData[++idx] = elementData[i];
+                }
+            }
+        }
+
+        if (idx == size - 1) {
+            return false;
+        } else {
+            N.fill(elementData, idx + 1, size, (short) 0);
+
+            size = idx + 1;
+            return true;
+        }
+    }
+
     /**
      *
      * @param c
      * @return
      */
+    @Override
     public boolean retainAll(ShortList c) {
         if (N.isNullOrEmpty(c)) {
             boolean result = size() > 0;
@@ -566,6 +609,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param a
      * @return
      */
+    @Override
     public boolean retainAll(short[] a) {
         if (N.isNullOrEmpty(a)) {
             boolean result = size() > 0;
@@ -636,6 +680,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     @Override
     @SafeVarargs
     public final void deleteAll(int... indices) {
+        if (N.isNullOrEmpty(indices)) {
+            return;
+        }
+
         final short[] tmp = N.deleteAll(elementData, indices);
         N.copy(tmp, 0, elementData, 0, tmp.length);
         N.fill(elementData, tmp.length, size, (short) 0);
@@ -655,15 +703,50 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
             return;
         }
 
-        final int newSize = size() - (toIndex - fromIndex);
+        final int size = size();
+        final int newSize = size - (toIndex - fromIndex);
 
-        if (toIndex < size()) {
+        if (toIndex < size) {
             System.arraycopy(elementData, toIndex, elementData, fromIndex, size - toIndex);
         }
 
-        N.fill(elementData, newSize, size(), (short) 0);
+        N.fill(elementData, newSize, size, (short) 0);
 
-        size = newSize;
+        this.size = newSize;
+    }
+
+    @Override
+    public void moveRange(final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        N.moveRange(elementData, fromIndex, toIndex, newPositionStartIndex);
+    }
+
+    @Override
+    public void replaceRange(final int fromIndex, final int toIndex, final short[] replacement) {
+        N.checkFromToIndex(fromIndex, toIndex, size());
+
+        if (N.isNullOrEmpty(replacement)) {
+            deleteRange(fromIndex, toIndex);
+            return;
+        }
+
+        final int size = this.size;
+        final int newSize = size - (toIndex - fromIndex) + replacement.length;
+
+        if (elementData.length < newSize) {
+            elementData = N.copyOf(elementData, newSize);
+        }
+
+        if (toIndex - fromIndex != replacement.length && toIndex != size) {
+            N.copy(elementData, toIndex, elementData, fromIndex + replacement.length, size - toIndex);
+        }
+
+        N.copy(replacement, 0, elementData, fromIndex, replacement.length);
+
+        if (newSize < size) {
+            N.fill(elementData, newSize, size, (short) 0);
+        }
+
+        this.size = newSize;
     }
 
     /**
@@ -759,6 +842,34 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return
      */
     @Override
+    public boolean containsAny(ShortList c) {
+        if (this.isEmpty() || N.isNullOrEmpty(c)) {
+            return false;
+        }
+
+        return !disjoint(c);
+    }
+
+    /**
+     *
+     * @param a
+     * @return
+     */
+    @Override
+    public boolean containsAny(short[] a) {
+        if (this.isEmpty() || N.isNullOrEmpty(a)) {
+            return false;
+        }
+
+        return !disjoint(a);
+    }
+
+    /**
+     *
+     * @param c
+     * @return
+     */
+    @Override
     public boolean containsAll(ShortList c) {
         if (N.isNullOrEmpty(c)) {
             return true;
@@ -841,34 +952,6 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      *
-     * @param c
-     * @return
-     */
-    @Override
-    public boolean containsAny(ShortList c) {
-        if (this.isEmpty() || N.isNullOrEmpty(c)) {
-            return false;
-        }
-
-        return !disjoint(c);
-    }
-
-    /**
-     *
-     * @param a
-     * @return
-     */
-    @Override
-    public boolean containsAny(short[] a) {
-        if (this.isEmpty() || N.isNullOrEmpty(a)) {
-            return false;
-        }
-
-        return !disjoint(a);
-    }
-
-    /**
-     *
      * @param b
      * @return
      */
@@ -887,6 +970,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return
      * @see IntList#intersection(IntList)
      */
+    @Override
     public ShortList intersection(final ShortList b) {
         if (N.isNullOrEmpty(b)) {
             return new ShortList();
@@ -910,6 +994,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param a
      * @return
      */
+    @Override
     public ShortList intersection(final short[] a) {
         if (N.isNullOrEmpty(a)) {
             return new ShortList();
@@ -924,6 +1009,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return
      * @see IntList#difference(IntList)
      */
+    @Override
     public ShortList difference(final ShortList b) {
         if (N.isNullOrEmpty(b)) {
             return of(N.copyOfRange(elementData, 0, size()));
@@ -947,6 +1033,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param a
      * @return
      */
+    @Override
     public ShortList difference(final short[] a) {
         if (N.isNullOrEmpty(a)) {
             return of(N.copyOfRange(elementData, 0, size()));
@@ -961,6 +1048,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return this.difference(b).addAll(b.difference(this))
      * @see IntList#symmetricDifference(IntList)
      */
+    @Override
     public ShortList symmetricDifference(final ShortList b) {
         if (N.isNullOrEmpty(b)) {
             return this.copy();
@@ -995,6 +1083,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param a
      * @return
      */
+    @Override
     public ShortList symmetricDifference(final short[] a) {
         if (N.isNullOrEmpty(a)) {
             return of(N.copyOfRange(elementData, 0, size()));
@@ -1722,6 +1811,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         checkFromToIndex(fromIndex, toIndex);
 
         return of(N.top(elementData, fromIndex, toIndex, n, cmp));
+    }
+
+    @Override
+    public boolean isSorted() {
+        return N.isSorted(elementData, 0, size);
     }
 
     /**
