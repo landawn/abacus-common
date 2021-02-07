@@ -420,7 +420,7 @@ public final class Maps {
      * @param key
      * @return
      */
-    public static <K, V> Nullable<V> get(final Map<K, V> map, final Object key) {
+    public static <K, V> Nullable<V> get(final Map<K, ? extends V> map, final Object key) {
         if (N.isNullOrEmpty(map)) {
             return Nullable.empty();
         }
@@ -444,7 +444,7 @@ public final class Maps {
      * @param keys
      * @return
      */
-    public static <K, V> List<V> getIfPresentForEach(final Map<K, V> map, final Collection<?> keys) {
+    public static <K, V> List<V> getIfPresentForEach(final Map<K, ? extends V> map, final Collection<?> keys) {
         if (N.isNullOrEmpty(map) || N.isNullOrEmpty(keys)) {
             return new ArrayList<>(0);
         }
@@ -464,8 +464,7 @@ public final class Maps {
     }
 
     /**
-     * Returns the value to which the specified key is mapped, or
-     * {@code defaultValue} if this map contains no mapping for the key.
+     * Returns the value to which the specified key is mapped, or {@code defaultValue} if this map contains no mapping for the key.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -474,7 +473,7 @@ public final class Maps {
      * @param defaultValue
      * @return
      */
-    public static <K, V> V getOrDefault(final Map<K, V> map, final Object key, final V defaultValue) {
+    public static <K, V> V getOrDefault(final Map<K, ? extends V> map, final Object key, final V defaultValue) {
         if (N.isNullOrEmpty(map)) {
             return defaultValue;
         }
@@ -485,6 +484,367 @@ public final class Maps {
             return val;
         } else {
             return defaultValue;
+        }
+    }
+
+    /**
+     * Returns the value to which the specified key is mapped if it's not {@code null}, 
+     * or {@code defaultForNull} if this map contains no mapping for the key or it's {@code null}.
+     * 
+     * @param <K>
+     * @param <V>
+     * @param map
+     * @param key
+     * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * @return
+     */
+    public static <K, V> V getOrDefaultIfNull(final Map<K, ? extends V> map, final Object key, final V defaultForNull) {
+        if (N.isNullOrEmpty(map)) {
+            return defaultForNull;
+        }
+
+        final V val = map.get(key);
+
+        if (val == null) {
+            return defaultForNull;
+        } else {
+            return val;
+        }
+    }
+
+    public static <K> Boolean getBoolean(final Map<? super K, ?> map, final Object key) {
+        if (N.isNullOrEmpty(map)) {
+            return null;
+        }
+
+        final Object val = map.get(key);
+
+        if (val == null) {
+            return null;
+        } else if (val instanceof Boolean) {
+            return (Boolean) val;
+        } else {
+            return N.parseBoolean(N.toString(val));
+        }
+    }
+
+    /**
+     * Returns the mapped {@code boolean} or a boolean converted from String.
+     * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * 
+     * @param <K>
+     * @param map
+     * @param key
+     * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * @return
+     */
+    public static <K> boolean getBoolean(final Map<? super K, ?> map, final Object key, final boolean defaultForNull) {
+        if (N.isNullOrEmpty(map)) {
+            return defaultForNull;
+        }
+
+        final Object val = map.get(key);
+
+        if (val == null) {
+            return defaultForNull;
+        } else if (val instanceof Boolean) {
+            return (Boolean) val;
+        } else {
+            return N.parseBoolean(N.toString(val));
+        }
+    }
+
+    public static <K> Character getChar(final Map<? super K, ?> map, final Object key) {
+        if (N.isNullOrEmpty(map)) {
+            return null;
+        }
+
+        final Object val = map.get(key);
+
+        if (val == null) {
+            return null;
+        } else if (val instanceof Character) {
+            return (Character) val;
+        } else {
+            return N.parseChar(N.toString(val));
+        }
+    }
+
+    /**
+     * Returns the mapped {@code char} or a char converted from String.
+     * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * 
+     * @param <K>
+     * @param map
+     * @param key
+     * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * @return
+     */
+    public static <K> char getChar(final Map<? super K, ?> map, final Object key, final char defaultForNull) {
+        if (N.isNullOrEmpty(map)) {
+            return defaultForNull;
+        }
+
+        final Object val = map.get(key);
+
+        if (val == null) {
+            return defaultForNull;
+        } else if (val instanceof Character) {
+            return (Character) val;
+        } else {
+            return N.parseChar(N.toString(val));
+        }
+    }
+
+    public static <K> Byte getByte(final Map<? super K, ?> map, final Object key) {
+        if (N.isNullOrEmpty(map)) {
+            return null;
+        }
+
+        final Object val = map.get(key);
+
+        if (val == null) {
+            return null;
+        } else if (val instanceof Number) {
+            return ((Number) val).byteValue();
+        } else {
+            return Numbers.toByte(N.toString(val));
+        }
+    }
+
+    /**
+     * Returns the mapped {@code byte} or a byte converted from String.
+     * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * 
+     * @param <K>
+     * @param map
+     * @param key
+     * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * @return
+     */
+    public static <K> byte getByte(final Map<? super K, ?> map, final Object key, final byte defaultForNull) {
+        if (N.isNullOrEmpty(map)) {
+            return defaultForNull;
+        }
+
+        final Object val = map.get(key);
+
+        if (val == null) {
+            return defaultForNull;
+        } else if (val instanceof Number) {
+            return ((Number) val).byteValue();
+        } else {
+            return Numbers.toByte(N.toString(val));
+        }
+    }
+
+    public static <K> Short getShort(final Map<? super K, ?> map, final Object key) {
+        if (N.isNullOrEmpty(map)) {
+            return null;
+        }
+
+        final Object val = map.get(key);
+
+        if (val == null) {
+            return null;
+        } else if (val instanceof Number) {
+            return ((Number) val).shortValue();
+        } else {
+            return Numbers.toShort(N.toString(val));
+        }
+    }
+
+    /**
+     * Returns the mapped {@code short} or a short converted from String.
+     * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * 
+     * @param <K>
+     * @param map
+     * @param key
+     * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * @return
+     */
+    public static <K> short getShort(final Map<? super K, ?> map, final Object key, final short defaultForNull) {
+        if (N.isNullOrEmpty(map)) {
+            return defaultForNull;
+        }
+
+        final Object val = map.get(key);
+
+        if (val == null) {
+            return defaultForNull;
+        } else if (val instanceof Number) {
+            return ((Number) val).shortValue();
+        } else {
+            return Numbers.toShort(N.toString(val));
+        }
+    }
+
+    public static <K> Integer getInt(final Map<? super K, ?> map, final Object key) {
+        if (N.isNullOrEmpty(map)) {
+            return null;
+        }
+
+        final Object val = map.get(key);
+
+        if (val == null) {
+            return null;
+        } else if (val instanceof Number) {
+            return ((Number) val).intValue();
+        } else {
+            return Numbers.toInt(N.toString(val));
+        }
+    }
+
+    /**
+     * Returns the mapped {@code integer} or an integer converted from String.
+     * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * 
+     * @param <K>
+     * @param map
+     * @param key
+     * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * @return
+     */
+    public static <K> int getInt(final Map<? super K, ?> map, final Object key, final int defaultForNull) {
+        if (N.isNullOrEmpty(map)) {
+            return defaultForNull;
+        }
+
+        final Object val = map.get(key);
+
+        if (val == null) {
+            return defaultForNull;
+        } else if (val instanceof Number) {
+            return ((Number) val).intValue();
+        } else {
+            return Numbers.toInt(N.toString(val));
+        }
+    }
+
+    public static <K> Long getLong(final Map<? super K, ?> map, final Object key) {
+        if (N.isNullOrEmpty(map)) {
+            return null;
+        }
+
+        final Object val = map.get(key);
+
+        if (val == null) {
+            return null;
+        } else if (val instanceof Number) {
+            return ((Number) val).longValue();
+        } else {
+            return Numbers.toLong(N.toString(val));
+        }
+    }
+
+    /**
+     * Returns the mapped {@code long} or a long converted from String.
+     * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * 
+     * @param <K>
+     * @param map
+     * @param key
+     * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * @return
+     */
+    public static <K> long getLong(final Map<? super K, ?> map, final Object key, final long defaultForNull) {
+        if (N.isNullOrEmpty(map)) {
+            return defaultForNull;
+        }
+
+        final Object val = map.get(key);
+
+        if (val == null) {
+            return defaultForNull;
+        } else if (val instanceof Number) {
+            return ((Number) val).longValue();
+        } else {
+            return Numbers.toLong(N.toString(val));
+        }
+    }
+
+    public static <K> Float getFloat(final Map<? super K, ?> map, final Object key) {
+        if (N.isNullOrEmpty(map)) {
+            return null;
+        }
+
+        final Object val = map.get(key);
+
+        if (val == null) {
+            return null;
+        } else if (val instanceof Number) {
+            return ((Number) val).floatValue();
+        } else {
+            return Numbers.toFloat(N.toString(val));
+        }
+    }
+
+    /**
+     * Returns the mapped {@code float} or a float converted from String.
+     * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * 
+     * @param <K>
+     * @param map
+     * @param key
+     * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * @return
+     */
+    public static <K> float getFloat(final Map<? super K, ?> map, final Object key, final float defaultForNull) {
+        if (N.isNullOrEmpty(map)) {
+            return defaultForNull;
+        }
+
+        final Object val = map.get(key);
+
+        if (val == null) {
+            return defaultForNull;
+        } else if (val instanceof Number) {
+            return ((Number) val).floatValue();
+        } else {
+            return Numbers.toFloat(N.toString(val));
+        }
+    }
+
+    public static <K> Double getDouble(final Map<? super K, ?> map, final Object key) {
+        if (N.isNullOrEmpty(map)) {
+            return null;
+        }
+
+        final Object val = map.get(key);
+
+        if (val == null) {
+            return null;
+        } else if (val instanceof Number) {
+            return ((Number) val).doubleValue();
+        } else {
+            return Numbers.toDouble(N.toString(val));
+        }
+    }
+
+    /**
+     * Returns the mapped {@code double} or a double converted from String.
+     * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * 
+     * @param <K>
+     * @param map
+     * @param key
+     * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * @return
+     */
+    public static <K> double getDouble(final Map<? super K, ?> map, final Object key, final double defaultForNull) {
+        if (N.isNullOrEmpty(map)) {
+            return defaultForNull;
+        }
+
+        final Object val = map.get(key);
+
+        if (val == null) {
+            return defaultForNull;
+        } else if (val instanceof Number) {
+            return ((Number) val).doubleValue();
+        } else {
+            return Numbers.toDouble(N.toString(val));
         }
     }
 
