@@ -67,6 +67,7 @@ A general programming library in Java. It's easy to learn and simple to use with
 [MutableDouble](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MutableDouble_view.html).
 
 * Primitive List: 
+[PrimitiveList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/PrimitiveList_view.html), 
 [BooleanList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/BooleanList_view.html), 
 [CharList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/CharList_view.html), 
 [ByteList](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/ByteList_view.html), 
@@ -85,7 +86,9 @@ A general programming library in Java. It's easy to learn and simple to use with
 [LongIterator](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/LongIterator_view.html), 
 [FloatIterator](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/FloatIterator_view.html), 
 [DoubleIterator](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/DoubleIterator_view.html),
-[ObjIterator](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/ObjIterator_view.html) and 
+[ObjIterator](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/ObjIterator_view.html),
+[BiIterator](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/BiIterator_view.html),
+[TriIterator](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/TriIterator_view.html) and 
 [LineIterator](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/LineIterator_view.html). 
 
 * Optional: 
