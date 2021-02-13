@@ -18,9 +18,6 @@ import java.util.AbstractCollection;
 import java.util.Collection;
 import java.util.function.Predicate;
 
-import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.util.stream.Stream;
-
 /**
  *
  * @author Haiyang Li
@@ -178,17 +175,6 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     @Override
     public <T> T[] toArray(T[] a) {
         return coll.toArray(a);
-    }
-
-    /**
-     * 
-     * @return
-     * @deprecated
-     */
-    @Deprecated
-    @Beta
-    public Stream<E> streamm() {
-        return Stream.of(coll);
     }
 
     /**

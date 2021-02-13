@@ -19,6 +19,7 @@ package com.landawn.abacus.util;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -143,7 +144,19 @@ public final class LineIterator extends ImmutableIterator<String> implements Clo
      * @throws UncheckedIOException in case of an I/O error (file closed)
      */
     public static LineIterator of(final File file, final Charset encoding) {
-        return IOUtil.iterate(file, encoding);
+        InputStream in = null;
+
+        try {
+            in = new FileInputStream(file);
+
+            return of(in, encoding);
+        } catch (final IOException ex) {
+            IOUtil.closeQuietly(in);
+            throw new UncheckedIOException(ex);
+        } catch (final RuntimeException ex) {
+            IOUtil.closeQuietly(in);
+            throw ex;
+        }
     }
 
     /**
@@ -184,8 +197,12 @@ public final class LineIterator extends ImmutableIterator<String> implements Clo
      * @throws IllegalArgumentException if the input is null
      * @throws UncheckedIOException if an I/O error occurs, such as if the encoding is invalid
      */
-    public static LineIterator of(final InputStream input, final Charset encoding) {
-        return IOUtil.iterate(input, encoding);
+    public static LineIterator of(final InputStream input, final Charset encoding) throws UncheckedIOException {
+        try {
+            return new LineIterator(IOUtil.createReader(input, encoding));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /**
@@ -285,6 +302,22 @@ public final class LineIterator extends ImmutableIterator<String> implements Clo
 
         while (hasNext()) {
             action.accept(next());
+        }
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param action
+     * @throws E the e
+     */
+    public <E extends Exception> void foreachIndexed(Throwables.IndexedConsumer<? super String, E> action) throws E {
+        N.checkArgNotNull(action);
+
+        int idx = 0;
+
+        while (hasNext()) {
+            action.accept(idx++, next());
         }
     }
 

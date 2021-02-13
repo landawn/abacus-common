@@ -1839,6 +1839,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     /**
      * Reverse sort.
      */
+    @Override
     public void reverseSort() {
         if (size > 1) {
             sort();

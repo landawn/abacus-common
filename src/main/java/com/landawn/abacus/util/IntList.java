@@ -1917,6 +1917,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      * Reverse sort.
      */
+    @Override
     public void reverseSort() {
         if (size > 1) {
             sort();

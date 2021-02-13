@@ -130,6 +130,8 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
 
     public abstract void sort();
 
+    public abstract void reverseSort();
+
     public abstract void reverse();
 
     public abstract void reverse(final int fromIndex, final int toIndex);

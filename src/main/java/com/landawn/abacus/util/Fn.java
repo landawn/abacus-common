@@ -372,6 +372,27 @@ public final class Fn extends Comparators {
         }
     };
 
+    private static final Function<String, String> STRIP = new Function<String, String>() {
+        @Override
+        public String apply(String t) {
+            return StringUtil.strip(t);
+        }
+    };
+
+    private static final Function<String, String> STRIP_TO_EMPTY = new Function<String, String>() {
+        @Override
+        public String apply(String t) {
+            return StringUtil.stripToEmpty(t);
+        }
+    };
+
+    private static final Function<String, String> STRIP_TO_NULL = new Function<String, String>() {
+        @Override
+        public String apply(String t) {
+            return StringUtil.stripToNull(t);
+        }
+    };
+
     private static final Function<String, String> NULL_TO_EMPTY = new Function<String, String>() {
         @Override
         public String apply(String t) {
@@ -1407,22 +1428,24 @@ public final class Fn extends Comparators {
         return TRIM;
     }
 
-    /**
-     * Trim to empty.
-     *
-     * @return
-     */
     public static Function<String, String> trimToEmpty() {
         return TRIM_TO_EMPTY;
     }
 
-    /**
-     * Trim to null.
-     *
-     * @return
-     */
     public static Function<String, String> trimToNull() {
         return TRIM_TO_NULL;
+    }
+
+    public static Function<String, String> strip() {
+        return STRIP;
+    }
+
+    public static Function<String, String> stripToEmpty() {
+        return STRIP_TO_EMPTY;
+    }
+
+    public static Function<String, String> stripToNull() {
+        return STRIP_TO_NULL;
     }
 
     public static Function<String, String> nullToEmpty() {

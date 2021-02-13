@@ -4095,7 +4095,12 @@ public class RowDataSet implements DataSet, Cloneable {
         checkRowIndex(fromRowIndex, toRowIndex);
 
         if (N.isNullOrEmpty(columnNames)) {
-            IOUtil.write(output, "[]");
+            try {
+                IOUtil.write(output, "[]");
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+
             return;
         }
 
@@ -4474,8 +4479,13 @@ public class RowDataSet implements DataSet, Cloneable {
         checkRowIndex(fromRowIndex, toRowIndex);
 
         if (N.isNullOrEmpty(columnNames)) {
-            IOUtil.write(output, XMLConstants.DATA_SET_ELE_START);
-            IOUtil.write(output, XMLConstants.DATA_SET_ELE_END);
+            try {
+                IOUtil.write(output, XMLConstants.DATA_SET_ELE_START);
+                IOUtil.write(output, XMLConstants.DATA_SET_ELE_END);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+
             return;
         }
 

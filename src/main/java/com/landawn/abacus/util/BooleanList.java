@@ -1649,6 +1649,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Reverse sort.
      */
+    @Override
     public void reverseSort() {
         if (size > 1) {
             sort();

@@ -40,11 +40,7 @@ public final class InternalUtil {
     // ...
     static final Field listElementDataField;
 
-    static final Field listSizeField;
-
     static volatile boolean isListElementDataFieldGettable = true;
-
-    static volatile boolean isListElementDataFieldSettable = true;
 
     static {
         Field tmp = null;
@@ -67,12 +63,6 @@ public final class InternalUtil {
             tmp = ArrayList.class.getDeclaredField("size");
         } catch (Throwable e) {
             // ignore.
-        }
-
-        listSizeField = tmp != null && tmp.getType().equals(int.class) ? tmp : null;
-
-        if (listSizeField != null) {
-            ClassUtil.setAccessibleQuietly(listSizeField, true);
         }
     }
 
@@ -114,20 +104,6 @@ public final class InternalUtil {
     static <T> List<T> createList(final T... a) {
         if (CommonUtil.isNullOrEmpty(a)) {
             return new ArrayList<>();
-        }
-
-        if (isListElementDataFieldSettable && listElementDataField != null && listSizeField != null) {
-            final List<T> list = new ArrayList<>();
-
-            try {
-                listElementDataField.set(list, a);
-                listSizeField.set(list, a.length);
-
-                return list;
-            } catch (Throwable e) {
-                // ignore;
-                isListElementDataFieldSettable = false;
-            }
         }
 
         return CommonUtil.asList(a);

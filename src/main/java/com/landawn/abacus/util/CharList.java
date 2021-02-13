@@ -1838,6 +1838,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Reverse sort.
      */
+    @Override
     public void reverseSort() {
         if (size > 1) {
             sort();

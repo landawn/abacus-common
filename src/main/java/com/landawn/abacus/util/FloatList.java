@@ -1798,6 +1798,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Reverse sort.
      */
+    @Override
     public void reverseSort() {
         if (size > 1) {
             sort();

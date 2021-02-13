@@ -1796,6 +1796,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Reverse sort.
      */
+    @Override
     public void reverseSort() {
         if (size > 1) {
             sort();

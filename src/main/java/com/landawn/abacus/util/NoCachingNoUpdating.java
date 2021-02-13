@@ -1,3 +1,17 @@
+/*
+ * Copyright (C) 2019 HaiYang Li
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package com.landawn.abacus.util;
 
 import java.util.AbstractMap;
@@ -18,8 +32,9 @@ import com.landawn.abacus.util.function.IntFunction;
 /**
  * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
  * 
+ * @since 1.3
+ * 
  * @author Haiyang Li
- *
  */
 @Beta
 @SequentialOnly

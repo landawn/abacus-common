@@ -1840,6 +1840,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Reverse sort.
      */
+    @Override
     public void reverseSort() {
         if (size > 1) {
             sort();

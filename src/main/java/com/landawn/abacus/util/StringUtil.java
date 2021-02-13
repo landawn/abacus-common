@@ -35,17 +35,18 @@ import java.util.RandomAccess;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalChar;
 import com.landawn.abacus.util.function.IntUnaryOperator;
+import com.landawn.abacus.util.function.Supplier;
 
 /**
  * <p>
  * Note: This class includes codes copied from Apache Commons Lang, Google Guava and other open source projects under the Apache License 2.0.
  * The methods copied from other libraries/frameworks/projects may be modified in this class.
  * </p>
- *
- * @author haiyangl
+ * 
  * 
  * @see {@code Joiner}, {@code Splitter}
  *
@@ -321,6 +322,21 @@ public abstract class StringUtil {
     }
 
     /**
+     * 
+     * @param <T>
+     * @param str
+     * @param getterForDefaultStr
+     * @return
+     */
+    public static <T extends CharSequence> T defaultIfEmpty(final T str, final Supplier<? extends T> getterForDefaultStr) {
+        if (isEmpty(str)) {
+            return getterForDefaultStr.get();
+        }
+
+        return str;
+    }
+
+    /**
      * Same as {@code N.defaultIfNullOrEmptyOrBlank(CharSequence, CharSequence)}.
      * 
      * @param <T>
@@ -331,6 +347,21 @@ public abstract class StringUtil {
      */
     public static <T extends CharSequence> T defaultIfBlank(final T str, final T defaultStr) {
         return isBlank(str) ? defaultStr : str;
+    }
+
+    /**
+     * 
+     * @param <T>
+     * @param str
+     * @param getterForDefaultStr
+     * @return
+     */
+    public static <T extends CharSequence> T defaultIfBlank(final T str, final Supplier<? extends T> getterForDefaultStr) {
+        if (isBlank(str)) {
+            return getterForDefaultStr.get();
+        }
+
+        return str;
     }
 
     @SafeVarargs
@@ -416,6 +447,34 @@ public abstract class StringUtil {
      */
     public static String abbreviate(final String str, final int maxWidth) {
         return abbreviate(str, "...", 0, maxWidth);
+    }
+
+    public static String nullToEmpty(String str) {
+        return str == null ? N.EMPTY_STRING : str;
+    }
+
+    public static void nullToEmpty(String[] strs) {
+        if (N.isNullOrDefault(strs)) {
+            return;
+        }
+
+        for (int i = 0, len = strs.length; i < len; i++) {
+            strs[i] = strs[i] == null ? N.EMPTY_STRING : strs[i];
+        }
+    }
+
+    public static String emptyToNull(String str) {
+        return str == null || str.length() > 0 ? str : null;
+    }
+
+    public static void emptyToNull(String[] strs) {
+        if (N.isNullOrDefault(strs)) {
+            return;
+        }
+
+        for (int i = 0, len = strs.length; i < len; i++) {
+            strs[i] = strs[i] == null || strs[i].length() > 0 ? strs[i] : null;
+        }
     }
 
     /**
@@ -1333,6 +1392,39 @@ public abstract class StringUtil {
         }
 
         return array;
+    }
+
+    /**
+     * <p>Converts a {@code CharSequence} into an array of code points.</p>
+     *
+     * <p>Valid pairs of surrogate code units will be converted into a single supplementary
+     * code point. Isolated surrogate code units (i.e. a high surrogate not followed by a low surrogate or
+     * a low surrogate not preceded by a high surrogate) will be returned as-is.</p>
+     *
+     * <pre>
+     * StringUtils.toCodePoints(null)   =  []  // empty array
+     * StringUtils.toCodePoints("")     =  []  // empty array
+     * </pre>
+     *
+     * @param str the character sequence to convert
+     * @return an empty array is the specified String {@code str} is null or empty.
+     * @since 3.6
+     */
+    public static int[] toCodePoints(final CharSequence str) {
+        if (N.isNullOrEmpty(str)) {
+            return N.EMPTY_INT_ARRAY;
+        }
+
+        final String s = str.toString();
+        final int[] result = new int[s.codePointCount(0, s.length())];
+        int index = 0;
+
+        for (int i = 0; i < result.length; i++) {
+            result[i] = s.codePointAt(index);
+            index += Character.charCount(result[i]);
+        }
+
+        return result;
     }
 
     /**
@@ -2355,23 +2447,14 @@ public abstract class StringUtil {
         return N.isNullOrEmpty(str) || (str.charAt(0) != ' ' && str.charAt(str.length() - 1) != ' ') ? str : str.trim();
     }
 
-    /**
-     *
-     * @param strs
-     * @return
-     */
-    public static String[] trim(final String[] strs) {
-        if (N.isNullOrEmpty(strs)) {
-            return strs;
+    public static void trim(final String[] strs) {
+        if (N.isNullOrDefault(strs)) {
+            return;
         }
-
-        final String[] res = new String[strs.length];
 
         for (int i = 0, len = strs.length; i < len; i++) {
-            res[i] = trim(strs[i]);
+            strs[i] = trim(strs[i]);
         }
-
-        return res;
     }
 
     /**
@@ -2406,24 +2489,14 @@ public abstract class StringUtil {
         return N.isNullOrEmpty(str) ? null : str;
     }
 
-    /**
-     * Trim to null.
-     *
-     * @param strs
-     * @return
-     */
-    public static String[] trimToNull(final String[] strs) {
-        if (N.isNullOrEmpty(strs)) {
-            return strs;
+    public static void trimToNull(final String[] strs) {
+        if (N.isNullOrDefault(strs)) {
+            return;
         }
-
-        final String[] res = new String[strs.length];
 
         for (int i = 0, len = strs.length; i < len; i++) {
-            res[i] = trimToNull(strs[i]);
+            strs[i] = trimToNull(strs[i]);
         }
-
-        return res;
     }
 
     /**
@@ -2455,24 +2528,14 @@ public abstract class StringUtil {
         return N.isNullOrEmpty(str) ? N.EMPTY_STRING : str.trim();
     }
 
-    /**
-     * Trim to empty.
-     *
-     * @param strs
-     * @return
-     */
-    public static String[] trimToEmpty(final String[] strs) {
-        if (N.isNullOrEmpty(strs)) {
-            return strs;
+    public static void trimToEmpty(final String[] strs) {
+        if (N.isNullOrDefault(strs)) {
+            return;
         }
-
-        final String[] res = new String[strs.length];
 
         for (int i = 0, len = strs.length; i < len; i++) {
-            res[i] = trimToEmpty(strs[i]);
+            strs[i] = trimToEmpty(strs[i]);
         }
-
-        return res;
     }
 
     // Stripping
@@ -2510,23 +2573,14 @@ public abstract class StringUtil {
         return strip(str, null);
     }
 
-    /**
-     *
-     * @param strs
-     * @return
-     */
-    public static String[] strip(final String[] strs) {
+    public static void strip(final String[] strs) {
         if (N.isNullOrEmpty(strs)) {
-            return strs;
+            return;
         }
-
-        final String[] res = new String[strs.length];
 
         for (int i = 0, len = strs.length; i < len; i++) {
-            res[i] = strip(strs[i]);
+            strs[i] = strip(strs[i]);
         }
-
-        return res;
     }
 
     /**
@@ -2563,24 +2617,14 @@ public abstract class StringUtil {
         return N.isNullOrEmpty(str) ? null : str;
     }
 
-    /**
-     * Strip to null.
-     *
-     * @param strs
-     * @return
-     */
-    public static String[] stripToNull(final String[] strs) {
+    public static void stripToNull(final String[] strs) {
         if (N.isNullOrEmpty(strs)) {
-            return strs;
+            return;
         }
-
-        final String[] res = new String[strs.length];
 
         for (int i = 0, len = strs.length; i < len; i++) {
-            res[i] = stripToNull(strs[i]);
+            strs[i] = stripToNull(strs[i]);
         }
-
-        return res;
     }
 
     /**
@@ -2614,24 +2658,14 @@ public abstract class StringUtil {
         return N.isNullOrEmpty(str) ? N.EMPTY_STRING : strip(str, null);
     }
 
-    /**
-     * Strip to empty.
-     *
-     * @param strs
-     * @return
-     */
-    public static String[] stripToEmpty(final String[] strs) {
+    public static void stripToEmpty(final String[] strs) {
         if (N.isNullOrEmpty(strs)) {
-            return strs;
+            return;
         }
-
-        final String[] res = new String[strs.length];
 
         for (int i = 0, len = strs.length; i < len; i++) {
-            res[i] = trimToEmpty(strs[i]);
+            strs[i] = stripToEmpty(strs[i]);
         }
-
-        return res;
     }
 
     /**
@@ -2676,24 +2710,14 @@ public abstract class StringUtil {
         return stripEnd(stripStart(str, stripChars), stripChars);
     }
 
-    /**
-     *
-     * @param strs
-     * @param stripChars
-     * @return
-     */
-    public static String[] strip(final String[] strs, final String stripChars) {
+    public static void strip(final String[] strs, final String stripChars) {
         if (N.isNullOrEmpty(strs)) {
-            return strs;
+            return;
         }
-
-        final String[] res = new String[strs.length];
 
         for (int i = 0, len = strs.length; i < len; i++) {
-            res[i] = strip(strs[i], stripChars);
+            strs[i] = strip(strs[i], stripChars);
         }
-
-        return res;
     }
 
     /**
@@ -2748,24 +2772,14 @@ public abstract class StringUtil {
         return start == 0 ? str : str.substring(start);
     }
 
-    /**
-     *
-     * @param strs
-     * @param stripChars
-     * @return
-     */
-    public static String[] stripStart(final String[] strs, final String stripChars) {
+    public static void stripStart(final String[] strs, final String stripChars) {
         if (N.isNullOrEmpty(strs)) {
-            return strs;
+            return;
         }
-
-        final String[] res = new String[strs.length];
 
         for (int i = 0, len = strs.length; i < len; i++) {
-            res[i] = stripStart(strs[i], stripChars);
+            strs[i] = stripStart(strs[i], stripChars);
         }
-
-        return res;
     }
 
     /**
@@ -2821,24 +2835,14 @@ public abstract class StringUtil {
         return end == str.length() ? str : str.substring(0, end);
     }
 
-    /**
-     *
-     * @param strs
-     * @param stripChars
-     * @return
-     */
-    public static String[] stripEnd(final String[] strs, final String stripChars) {
+    public static void stripEnd(final String[] strs, final String stripChars) {
         if (N.isNullOrEmpty(strs)) {
-            return strs;
+            return;
         }
-
-        final String[] res = new String[strs.length];
 
         for (int i = 0, len = strs.length; i < len; i++) {
-            res[i] = stripEnd(strs[i], stripChars);
+            strs[i] = stripEnd(strs[i], stripChars);
         }
-
-        return res;
     }
 
     /**
@@ -2879,23 +2883,14 @@ public abstract class StringUtil {
 
     private static final Pattern pattern_accent = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");//$NON-NLS-1$
 
-    /**
-     *
-     * @param strs
-     * @return
-     */
-    public static String[] stripAccents(final String[] strs) {
+    public static void stripAccents(final String[] strs) {
         if (N.isNullOrEmpty(strs)) {
-            return strs;
+            return;
         }
-
-        final String[] res = new String[strs.length];
 
         for (int i = 0, len = strs.length; i < len; i++) {
-            res[i] = stripAccents(strs[i]);
+            strs[i] = stripAccents(strs[i]);
         }
-
-        return res;
     }
 
     // Chomping
@@ -2957,23 +2952,14 @@ public abstract class StringUtil {
         return lastIdx == str.length() ? str : str.substring(0, lastIdx);
     }
 
-    /**
-     *
-     * @param strs
-     * @return
-     */
-    public static String[] chomp(final String[] strs) {
+    public static void chomp(final String[] strs) {
         if (N.isNullOrEmpty(strs)) {
-            return strs;
+            return;
         }
-
-        final String[] res = new String[strs.length];
 
         for (int i = 0, len = strs.length; i < len; i++) {
-            res[i] = chomp(strs[i]);
+            strs[i] = chomp(strs[i]);
         }
-
-        return res;
     }
 
     // Chopping
@@ -3025,23 +3011,14 @@ public abstract class StringUtil {
         }
     }
 
-    /**
-     *
-     * @param strs
-     * @return
-     */
-    public static String[] chop(final String[] strs) {
+    public static void chop(final String[] strs) {
         if (N.isNullOrEmpty(strs)) {
-            return strs;
+            return;
         }
-
-        final String[] res = new String[strs.length];
 
         for (int i = 0, len = strs.length; i < len; i++) {
-            res[i] = chop(strs[i]);
+            strs[i] = chop(strs[i]);
         }
-
-        return res;
     }
 
     // Delete
@@ -3081,23 +3058,14 @@ public abstract class StringUtil {
         return count == chars.length ? str : new String(cbuf, 0, count);
     }
 
-    /**
-     *
-     * @param strs
-     * @return
-     */
-    public static String[] deleteWhitespace(final String[] strs) {
+    public static void deleteWhitespace(final String[] strs) {
         if (N.isNullOrEmpty(strs)) {
-            return strs;
+            return;
         }
-
-        final String[] res = new String[strs.length];
 
         for (int i = 0, len = strs.length; i < len; i++) {
-            res[i] = deleteWhitespace(strs[i]);
+            strs[i] = deleteWhitespace(strs[i]);
         }
-
-        return res;
     }
 
     /**
@@ -3120,6 +3088,24 @@ public abstract class StringUtil {
     }
 
     /**
+     * 
+     * @param str
+     * @param suffix
+     * @return
+     */
+    public static String appendIfMissingIgnoreCase(final String str, final String suffix) {
+        N.checkArgNotNull(suffix);
+
+        if (N.isNullOrEmpty(str)) {
+            return suffix;
+        } else if (StringUtil.endsWithIgnoreCase(str, suffix)) {
+            return str;
+        } else {
+            return str + suffix;
+        }
+    }
+
+    /**
      * Prepend if missing.
      *
      * @param str
@@ -3132,6 +3118,18 @@ public abstract class StringUtil {
         if (N.isNullOrEmpty(str)) {
             return prefix;
         } else if (str.startsWith(prefix)) {
+            return str;
+        } else {
+            return prefix + str;
+        }
+    }
+
+    public static String prependIfMissingIgnoreCase(final String str, final String prefix) {
+        N.checkArgNotNull(prefix);
+
+        if (N.isNullOrEmpty(str)) {
+            return prefix;
+        } else if (StringUtil.startsWithIgnoreCase(str, prefix)) {
             return str;
         } else {
             return prefix + str;
@@ -8891,6 +8889,34 @@ public abstract class StringUtil {
          */
         public static Optional<String> substringBeforeLast(String str, String delimiterOfExclusiveEndIndex) {
             return Optional.ofNullable(StringUtil.substringBeforeLast(str, delimiterOfExclusiveEndIndex));
+        }
+
+        /**
+         * 
+         * @param strs
+         * @return
+         * @see N#copyThenApply(Object[], com.landawn.abacus.util.Throwables.Function)
+         * @see Fn#trim()
+         * @see Fn#trimToEmpty()
+         * @see Fn#trimToNull()
+         */
+        @Beta
+        public static String[] copyThenTrim(final String[] strs) {
+            return N.copyThenApply(strs, Fn.trim());
+        }
+
+        /**
+         * 
+         * @param strs
+         * @return
+         * @see N#copyThenApply(Object[], com.landawn.abacus.util.Throwables.Function)
+         * @see Fn#strip()
+         * @see Fn#stripToEmpty()
+         * @see Fn#stripToNull()
+         */
+        @Beta
+        public static String[] copyThenStrip(final String[] strs) {
+            return N.copyThenApply(strs, Fn.strip());
         }
     }
 }

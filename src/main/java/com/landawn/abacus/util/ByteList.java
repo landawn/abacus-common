@@ -1795,6 +1795,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Reverse sort.
      */
+    @Override
     public void reverseSort() {
         if (size > 1) {
             sort();
