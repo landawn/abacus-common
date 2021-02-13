@@ -31,7 +31,7 @@ public class Maven {
 
         targetDir.mkdir();
 
-        IOUtil.copy(sourceDir, targetDir);
+        IOUtil.copyFileToDirectory(sourceDir, targetDir);
 
         StreamEx.listFiles(targetDir) //
                 .filter(file -> file.getName().startsWith("settings"))
@@ -40,7 +40,7 @@ public class Maven {
         StreamEx.listFiles(new File("./target/"))
                 .filter(f -> f.getName().startsWith("abacus-common") && f.getName().endsWith(".jar"))
                 .peek(f -> N.println(f.getName()))
-                .forEach(f -> IOUtil.copy(f, targetDir));
+                .forEach(f -> IOUtil.copyFileToDirectory(f, targetDir));
 
         StreamEx.listFiles(targetDir) //
                 .forEach(file -> IOUtil.renameTo(file, file.getName().replace(sourceVersion, targetVersion)));
