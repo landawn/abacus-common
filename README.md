@@ -180,8 +180,11 @@ and [More](https://www.javadoc.io/static/com.landawn/abacus-common/2.2.7/com/lan
 // JDK 1.8 or above:
 compile 'com.landawn:abacus-common:2.2.7' 
 
-// util-se (Java 1.7) - small edition without Streams/Primitive Lists... Mostly it's for abacus-android.
+// common-se (Java 1.8 or above) - small edition without Streams/Primitive Lists....
 compile 'abacus-common-se:2.2.7'
+
+// common-se-jdk7 (Java 1.7) - small edition without Streams/Primitive Lists... Mostly it's for abacus-android.
+compile 'abacus-common-se-jdk7:2.2.7'
 ```
 
 
