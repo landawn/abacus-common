@@ -1789,7 +1789,7 @@ public final class Joiner implements Closeable {
      * Close.
      */
     @Override
-    public void close() {
+    public synchronized void close() {
         if (buffer != null && useCachedBuffer) {
             Objectory.recycle(buffer);
             buffer = null;

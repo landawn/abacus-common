@@ -46,7 +46,7 @@ final class UncloseableInputStream extends InputStream {
      * Close.
      */
     @Override
-    public void close() {
+    public synchronized void close() {
         // ignore. do nothing.
     }
 

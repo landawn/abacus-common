@@ -38,8 +38,11 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
+import java.util.stream.StreamSupport;
 
 import com.landawn.abacus.DataSet;
 import com.landawn.abacus.annotation.Beta;
@@ -403,6 +406,26 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      *
      * @param <T>
      * @param <E>
+     * @param stream
+     * @return
+     */
+    public static <T, E extends Exception> ExceptionalStream<T, E> of(final java.util.stream.Stream<? extends T> stream) {
+        if (stream == null) {
+            return empty();
+        }
+
+        return ExceptionalStream.<T, E> of(stream.iterator()).onClose(new Throwables.Runnable<E>() {
+            @Override
+            public void run() throws E {
+                stream.close();
+            }
+        });
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
      * @param c
      * @param exceptionType
      * @return
@@ -461,6 +484,19 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> of(final Stream<? extends T> stream,
+            @SuppressWarnings("unused") final Class<E> exceptionType) {
+        return of(stream);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param stream
+     * @param exceptionType
+     * @return
+     */
+    public static <T, E extends Exception> ExceptionalStream<T, E> of(final java.util.stream.Stream<? extends T> stream,
             @SuppressWarnings("unused") final Class<E> exceptionType) {
         return of(stream);
     }
@@ -7531,6 +7567,27 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             return Stream.of(newObjIteratorEx(elements));
         } else {
             return Stream.of(newObjIteratorEx(elements)).onClose(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        ExceptionalStream.this.close();
+                    } catch (Exception e) {
+                        throw N.toRuntimeException(e);
+                    }
+                }
+            });
+        }
+    }
+
+    public java.util.stream.Stream<T> toJdkStream() {
+        assertNotClosed();
+
+        final Spliterator<T> spliterator = Spliterators.spliteratorUnknownSize(newObjIteratorEx(elements), Spliterator.ORDERED);
+
+        if (N.isNullOrEmpty(closeHandlers)) {
+            return StreamSupport.stream(() -> spliterator, Spliterator.ORDERED | Spliterator.IMMUTABLE | Spliterator.NONNULL, false);
+        } else {
+            return StreamSupport.stream(() -> spliterator, Spliterator.ORDERED | Spliterator.IMMUTABLE | Spliterator.NONNULL, false).onClose(new Runnable() {
                 @Override
                 public void run() {
                     try {

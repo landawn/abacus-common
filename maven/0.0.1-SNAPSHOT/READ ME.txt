@@ -6,9 +6,8 @@
 
 3, Deploy and Release:
 	mvn clean deploy -f abacus-common-0.0.1-SNAPSHOT.pom
-	mvn clean deploy -f abacus-common-all-0.0.1-SNAPSHOT.pom
 	mvn clean deploy -f abacus-common-se-0.0.1-SNAPSHOT.pom
-	mvn clean deploy -f abacus-common-all-jdk7-0.0.1-SNAPSHOT.pom
+    mvn clean deploy -f abacus-common-se-jdk7-0.0.1-SNAPSHOT.pom
 	
 ######## Method 2 ############################################
 
@@ -36,4 +35,12 @@ mvn gpg:sign-and-deploy-file -Durl=https://oss.sonatype.org/service/local/stagin
 mvn gpg:sign-and-deploy-file -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ -DrepositoryId=ossrh -DpomFile=abacus-common-se-0.0.1-SNAPSHOT.pom -Dfile=abacus-common-se-0.0.1-SNAPSHOT-sources.jar
 
 jar -cvf abacus-common-se-0.0.1-SNAPSHOT-bundle.jar abacus-common-se-0.0.1-SNAPSHOT.pom abacus-common-se-0.0.1-SNAPSHOT.pom.asc abacus-common-se-0.0.1-SNAPSHOT.jar abacus-common-se-0.0.1-SNAPSHOT.jar.asc abacus-common-se-0.0.1-SNAPSHOT-javadoc.jar abacus-common-se-0.0.1-SNAPSHOT-javadoc.jar.asc abacus-common-se-0.0.1-SNAPSHOT-sources.jar abacus-common-se-0.0.1-SNAPSHOT-sources.jar.asc
+
+
+=======================abacus-common-se-jdk7======================================
+mvn gpg:sign-and-deploy-file -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ -DrepositoryId=ossrh -DpomFile=abacus-common-se-jdk7-0.0.1-SNAPSHOT.pom -Dfile=abacus-common-se-jdk7-0.0.1-SNAPSHOT.jar
+mvn gpg:sign-and-deploy-file -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ -DrepositoryId=ossrh -DpomFile=abacus-common-se-jdk7-0.0.1-SNAPSHOT.pom -Dfile=abacus-common-se-jdk7-0.0.1-SNAPSHOT-javadoc.jar
+mvn gpg:sign-and-deploy-file -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ -DrepositoryId=ossrh -DpomFile=abacus-common-se-jdk7-0.0.1-SNAPSHOT.pom -Dfile=abacus-common-se-jdk7-0.0.1-SNAPSHOT-sources.jar
+
+jar -cvf abacus-common-se-jdk7-0.0.1-SNAPSHOT-bundle.jar abacus-common-se-jdk7-0.0.1-SNAPSHOT.pom abacus-common-se-jdk7-0.0.1-SNAPSHOT.pom.asc abacus-common-se-jdk7-0.0.1-SNAPSHOT.jar abacus-common-se-jdk7-0.0.1-SNAPSHOT.jar.asc abacus-common-se-jdk7-0.0.1-SNAPSHOT-javadoc.jar abacus-common-se-jdk7-0.0.1-SNAPSHOT-javadoc.jar.asc abacus-common-se-jdk7-0.0.1-SNAPSHOT-sources.jar abacus-common-se-jdk7-0.0.1-SNAPSHOT-sources.jar.asc
 

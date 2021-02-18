@@ -329,7 +329,7 @@ public final class LineIterator extends ImmutableIterator<String> implements Clo
      * This method can safely be called multiple times.
      */
     @Override
-    public void close() {
+    public synchronized void close() {
         if (isClosed) {
             return;
         }

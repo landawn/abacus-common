@@ -1402,7 +1402,7 @@ public final class HttpClient {
     /**
      * Close.
      */
-    public void close() {
+    public synchronized void close() {
         // do nothing.
     }
 }
