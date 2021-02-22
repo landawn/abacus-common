@@ -52,6 +52,8 @@ public class u {
         /** Presents {@code Boolean.FALSE}. */
         public static final Optional<Boolean> FALSE = new Optional<>(Boolean.FALSE);
 
+        private static final Optional<String> EMPTY_STRING = new Optional<>(N.EMPTY_STRING);
+
         /** The Constant EMPTY. */
         private static final Optional<?> EMPTY = new Optional<>();
 
@@ -83,13 +85,33 @@ public class u {
             return (Optional<T>) EMPTY;
         }
 
+        public static Optional<String> of(final String value) {
+            N.checkArgNotNull(value);
+
+            if (value.length() == 0) {
+                return EMPTY_STRING;
+            }
+
+            return new Optional<>(value);
+        }
+
         /**
          *
          * @param <T>
          * @param value
          * @return
          */
-        public static <T> Optional<T> of(T value) {
+        public static <T> Optional<T> of(final T value) {
+            return new Optional<>(value);
+        }
+
+        public static Optional<String> ofNullable(final String value) {
+            if (value == null) {
+                return empty();
+            } else if (value.length() == 0) {
+                return EMPTY_STRING;
+            }
+
             return new Optional<>(value);
         }
 
@@ -4392,6 +4414,10 @@ public class u {
         /** Presents {@code Boolean.FALSE}. */
         public static final Nullable<Boolean> FALSE = new Nullable<>(Boolean.FALSE);
 
+        private static final Nullable<String> NULL_STRING = new Nullable<>(null);
+
+        private static final Nullable<String> EMPTY_STRING = new Nullable<>(N.EMPTY_STRING);
+
         /** The Constant EMPTY. */
         private static final Nullable<?> EMPTY = new Nullable<>();
 
@@ -4428,13 +4454,23 @@ public class u {
             return (Nullable<T>) EMPTY;
         }
 
+        public static Nullable<String> of(final String value) {
+            if (value == null) {
+                return NULL_STRING;
+            } else if (value.length() == 0) {
+                return EMPTY_STRING;
+            }
+
+            return new Nullable<>(value);
+        }
+
         /**
          *
          * @param <T>
          * @param value
          * @return
          */
-        public static <T> Nullable<T> of(T value) {
+        public static <T> Nullable<T> of(final T value) {
             return new Nullable<>(value);
         }
 

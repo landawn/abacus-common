@@ -4945,6 +4945,67 @@ public final class Fn extends Comparators {
         return callable;
     }
 
+    public static Runnable jr2r(final java.lang.Runnable runnable) {
+        N.checkArgNotNull(runnable);
+
+        if (runnable instanceof Runnable) {
+            return (Runnable) runnable;
+        }
+
+        return new Runnable() {
+            @Override
+            public void run() {
+                runnable.run();
+            }
+        };
+    }
+
+    public static Callable<Void> jr2c(final java.lang.Runnable runnable) {
+        N.checkArgNotNull(runnable);
+
+        return new Callable<Void>() {
+            @Override
+            public Void call() {
+                runnable.run();
+                return null;
+            }
+        };
+    }
+
+    public static <R> Callable<R> jc2c(final java.util.concurrent.Callable<R> callable) {
+        N.checkArgNotNull(callable);
+
+        if (callable instanceof Callable) {
+            return (Callable<R>) callable;
+        }
+
+        return new Callable<R>() {
+            @Override
+            public R call() {
+                try {
+                    return callable.call();
+                } catch (Exception e) {
+                    throw N.toRuntimeException(e);
+                }
+            }
+        };
+    }
+
+    public static Runnable jc2r(final java.util.concurrent.Callable<?> callable) {
+        N.checkArgNotNull(callable);
+
+        return new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    callable.call();
+                } catch (Exception e) {
+                    throw N.toRuntimeException(e);
+                }
+            }
+        };
+    }
+
     /**
     *
     * @param runnable
@@ -12719,6 +12780,70 @@ public final class Fn extends Comparators {
             N.checkArgNotNull(callable);
 
             return callable;
+        }
+
+        public static <E extends Throwable> Throwables.Runnable<E> jr2r(final java.lang.Runnable runnable) {
+            N.checkArgNotNull(runnable);
+
+            if (runnable instanceof Throwables.Runnable) {
+                return (Throwables.Runnable<E>) runnable;
+            }
+
+            return new Throwables.Runnable<E>() {
+                @Override
+                public void run() {
+                    runnable.run();
+                }
+            };
+        }
+
+        public static <E extends Throwable> java.lang.Runnable r2jr(final Throwables.Runnable<E> runnable) {
+            N.checkArgNotNull(runnable);
+
+            if (runnable instanceof java.lang.Runnable) {
+                return (java.lang.Runnable) runnable;
+            }
+
+            return new java.lang.Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        runnable.run();
+                    } catch (Throwable e) {
+                        throw N.toRuntimeException(e);
+                    }
+                }
+            };
+        }
+
+        public static <R> Throwables.Callable<R, Exception> jc2c(final java.util.concurrent.Callable<R> callable) {
+            N.checkArgNotNull(callable);
+
+            if (callable instanceof Throwables.Callable) {
+                return (Throwables.Callable<R, Exception>) callable;
+            }
+
+            return new Throwables.Callable<R, Exception>() {
+                @Override
+                public R call() throws Exception {
+                    return callable.call();
+                }
+            };
+        }
+
+        public static <R, E extends Exception> java.util.concurrent.Callable<R> c2jc(final Throwables.Callable<R, E> callable) {
+            N.checkArgNotNull(callable);
+
+            if (callable instanceof java.util.concurrent.Callable) {
+                return (java.util.concurrent.Callable<R>) callable;
+            }
+
+            return new java.util.concurrent.Callable<R>() {
+                @Override
+                public R call() throws Exception {
+                    return callable.call();
+                }
+            };
         }
 
         /**
