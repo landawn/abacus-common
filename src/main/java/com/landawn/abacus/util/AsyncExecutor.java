@@ -73,31 +73,28 @@ public class AsyncExecutor {
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
-                if (executor == null || !(executor instanceof ExecutorService)) {
-                    return;
-                }
-
-                final ExecutorService executorService = (ExecutorService) executor;
-
-                logger.warn("Starting to shutdown task in AsyncExecutor");
-
-                try {
-                    executorService.shutdown();
-
-                    executorService.awaitTermination(60, TimeUnit.SECONDS);
-                } catch (InterruptedException e) {
-                    logger.warn("Not all the requests/tasks executed in AsyncExecutor are completed successfully before shutdown.");
-                } finally {
-                    logger.warn("Completed to shutdown task in AsyncExecutor");
-                }
+                shutdown();
             }
         });
     }
 
     public AsyncExecutor(final Executor executor) {
-        this(DEFAULT_CORE_POOL_SIZE, DEFAULT_MAX_THREAD_POOL_SIZE, 180L, TimeUnit.SECONDS);
+        this(getCorePoolSize(executor), getMaximumPoolSize(executor), getKeepAliveTime(executor), TimeUnit.MILLISECONDS);
 
         this.executor = executor;
+    }
+
+    private static int getCorePoolSize(final Executor executor) {
+        return executor instanceof ThreadPoolExecutor ? ((ThreadPoolExecutor) executor).getCorePoolSize() : DEFAULT_CORE_POOL_SIZE;
+    }
+
+    private static int getMaximumPoolSize(final Executor executor) {
+        return executor instanceof ThreadPoolExecutor ? ((ThreadPoolExecutor) executor).getMaximumPoolSize() : DEFAULT_CORE_POOL_SIZE;
+    }
+
+    private static long getKeepAliveTime(final Executor executor) {
+        return executor instanceof ThreadPoolExecutor ? ((ThreadPoolExecutor) executor).getKeepAliveTime(TimeUnit.MILLISECONDS)
+                : TimeUnit.SECONDS.toMillis(180);
     }
 
     /**
@@ -116,10 +113,32 @@ public class AsyncExecutor {
     }
 
     /**
+     * 
+     * @param command
+     * @param onComplete
+     * @return
+     */
+    public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> command, final java.lang.Runnable onComplete) {
+        return execute(new FutureTask<>(new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                try {
+                    command.run();
+                    return null;
+                } finally {
+                    onComplete.run();
+                }
+            }
+        }));
+    }
+
+    /**
      *
      * @param commands
      * @return
+     * @deprecated
      */
+    @Deprecated
     @SafeVarargs
     public final List<ContinuableFuture<Void>> execute(final Throwables.Runnable<? extends Exception>... commands) {
         if (N.isNullOrEmpty(commands)) {
@@ -165,11 +184,33 @@ public class AsyncExecutor {
     }
 
     /**
+     * 
+     * @param <R>
+     * @param command
+     * @param onComplete
+     * @return
+     */
+    public <R> ContinuableFuture<R> execute(final Callable<R> command, final java.lang.Runnable onComplete) {
+        return execute(new FutureTask<>(new Callable<R>() {
+            @Override
+            public R call() throws Exception {
+                try {
+                    return command.call();
+                } finally {
+                    onComplete.run();
+                }
+            }
+        }));
+    }
+
+    /**
      *
      * @param <R>
      * @param commands
      * @return
+     * @deprecated
      */
+    @Deprecated
     @SafeVarargs
     public final <R> List<ContinuableFuture<R>> execute(final Callable<R>... commands) {
         if (N.isNullOrEmpty(commands)) {
@@ -276,5 +317,42 @@ public class AsyncExecutor {
         }
 
         return executor;
+    }
+
+    @Override
+    public String toString() {
+        final String activeCount = executor instanceof ThreadPoolExecutor ? "" + ((ThreadPoolExecutor) executor).getActiveCount() : "?";
+
+        return "{coreThreadPoolSize: " + coreThreadPoolSize + ", maxThreadPoolSize: " + maxThreadPoolSize + ", activeCount: " + activeCount
+                + ", keepAliveTime: " + unit.toMillis(keepAliveTime) + "ms, Executor: " + N.toString(executor) + "}";
+    }
+
+    public synchronized void shutdown() {
+        if (executor == null || !(executor instanceof ExecutorService)) {
+            return;
+        }
+
+        final ExecutorService executorService = (ExecutorService) executor;
+
+        logger.warn("Starting to shutdown task in AsyncExecutor");
+
+        try {
+            executorService.shutdown();
+
+            if (!executorService.isTerminated()) {
+                executorService.awaitTermination(60, TimeUnit.SECONDS);
+            }
+        } catch (InterruptedException e) {
+            logger.warn("Not all the requests/tasks executed in AsyncExecutor are completed successfully before shutdown.");
+        } finally {
+            executor = null;
+            logger.warn("Completed to shutdown task in AsyncExecutor");
+        }
+
+    }
+
+    @Override
+    public void finalize() {
+        shutdown();
     }
 }
