@@ -59,11 +59,9 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param <E>
      * @param action
-     * @return
-     * @deprecated
+     * @return 
      * @see N#asyncExecute(com.landawn.abacus.util.Throwables.Runnable)
      */
-    @Deprecated
     public static <E extends Exception> ContinuableFuture<Void> run(final Throwables.Runnable<E> action) {
         return run(action, N.asyncExecutor.getExecutor());
     }
@@ -94,11 +92,9 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param <T>
      * @param <E>
      * @param action
-     * @return
-     * @deprecated
+     * @return 
      * @see N#asyncExecute(Callable)
      */
-    @Deprecated
     public static <T> ContinuableFuture<T> call(final Callable<T> action) {
         return call(action, N.asyncExecutor.getExecutor());
     }

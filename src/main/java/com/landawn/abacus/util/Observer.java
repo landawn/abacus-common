@@ -69,15 +69,23 @@ public abstract class Observer<T> implements Immutable {
         if (IOUtil.IS_PLATFORM_ANDROID) {
             asyncExecutor = AndroidUtil.getThreadPoolExecutor();
         } else {
-            asyncExecutor = new ThreadPoolExecutor(Math.max(8, IOUtil.CPU_CORES), Math.max(64, IOUtil.CPU_CORES), 180L, TimeUnit.SECONDS,
+            asyncExecutor = new ThreadPoolExecutor(Math.max(64, IOUtil.CPU_CORES), Math.max(256, IOUtil.CPU_CORES), 180L, TimeUnit.SECONDS,
                     new LinkedBlockingQueue<Runnable>());
         }
     }
 
-    protected static final ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(IOUtil.IS_PLATFORM_ANDROID ? IOUtil.CPU_CORES : 32);
+    protected static final ScheduledThreadPoolExecutor schedulerForIntermediateOp = new ScheduledThreadPoolExecutor(
+            IOUtil.IS_PLATFORM_ANDROID ? Math.max(8, IOUtil.CPU_CORES) : Math.max(128, IOUtil.CPU_CORES));
 
     static {
-        scheduler.setRemoveOnCancelPolicy(true);
+        schedulerForIntermediateOp.setRemoveOnCancelPolicy(true);
+    }
+
+    protected static final ScheduledThreadPoolExecutor schedulerForObserveOp = new ScheduledThreadPoolExecutor(
+            IOUtil.IS_PLATFORM_ANDROID ? Math.max(8, IOUtil.CPU_CORES) : Math.max(256, IOUtil.CPU_CORES));
+
+    static {
+        schedulerForObserveOp.setRemoveOnCancelPolicy(true);
     }
 
     protected final Map<ScheduledFuture<?>, Long> scheduledFutures = new LinkedHashMap<>();
@@ -264,7 +272,7 @@ public abstract class Observer<T> implements Immutable {
 
             private void schedule(final long delay, final TimeUnit unit) {
                 try {
-                    scheduler.schedule(new Runnable() {
+                    schedulerForIntermediateOp.schedule(new Runnable() {
                         @Override
                         public void run() {
                             final long pastIntervalInMills = System.currentTimeMillis() - prevTimestamp;
@@ -339,7 +347,7 @@ public abstract class Observer<T> implements Immutable {
                         holder.setValue(param);
 
                         try {
-                            scheduler.schedule(new Runnable() {
+                            schedulerForIntermediateOp.schedule(new Runnable() {
                                 @Override
                                 public void run() {
                                     Object firstParam = null;
@@ -410,7 +418,7 @@ public abstract class Observer<T> implements Immutable {
                         holder.setValue(param);
 
                         try {
-                            scheduler.schedule(new Runnable() {
+                            schedulerForIntermediateOp.schedule(new Runnable() {
                                 @Override
                                 public void run() {
                                     Object lastParam = null;
@@ -704,7 +712,7 @@ public abstract class Observer<T> implements Immutable {
             private final List<T> queue = new ArrayList<>();
 
             {
-                scheduledFutures.put(scheduler.scheduleAtFixedRate(new Runnable() {
+                scheduledFutures.put(schedulerForIntermediateOp.scheduleAtFixedRate(new Runnable() {
                     @Override
                     public void run() {
                         List<T> list = null;
@@ -776,7 +784,7 @@ public abstract class Observer<T> implements Immutable {
             private final List<T> queue = new ArrayList<>();
 
             {
-                scheduledFutures.put(scheduler.scheduleAtFixedRate(new Runnable() {
+                scheduledFutures.put(schedulerForIntermediateOp.scheduleAtFixedRate(new Runnable() {
                     @Override
                     public void run() {
                         List<T> list = null;
@@ -1203,7 +1211,7 @@ public abstract class Observer<T> implements Immutable {
                 }
             });
 
-            scheduler.schedule(new Runnable() {
+            schedulerForObserveOp.schedule(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -1273,7 +1281,7 @@ public abstract class Observer<T> implements Immutable {
                 }
             });
 
-            future = scheduler.scheduleAtFixedRate(new Runnable() {
+            future = schedulerForObserveOp.scheduleAtFixedRate(new Runnable() {
                 private long val = 0;
 
                 @Override

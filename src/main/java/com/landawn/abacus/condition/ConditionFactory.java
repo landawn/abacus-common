@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.landawn.abacus.EntityId;
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.condition.Expression.Expr;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.EntityInfo;
@@ -340,6 +341,7 @@ public class ConditionFactory {
      * @param propsList
      * @return
      */
+    @Beta
     public static Or eqAndOr(final List<? extends Map<String, ?>> propsList) {
         N.checkArgNotNullOrEmpty(propsList, "propsList");
 
@@ -358,6 +360,7 @@ public class ConditionFactory {
      * @param entities
      * @return
      */
+    @Beta
     public static Or eqAndOr(final Collection<?> entities) {
         N.checkArgNotNullOrEmpty(entities, "entities");
 
@@ -371,6 +374,7 @@ public class ConditionFactory {
      * @param selectPropNames
      * @return
      */
+    @Beta
     public static Or eqAndOr(final Collection<?> entities, final Collection<String> selectPropNames) {
         N.checkArgNotNullOrEmpty(entities, "entities");
         N.checkArgNotNullOrEmpty(selectPropNames, "selectPropNames");
@@ -389,8 +393,32 @@ public class ConditionFactory {
         return gt(propName, minValue).and(lt(propName, maxValue));
     }
 
+    public static And gtAndLt(final String propName) {
+        return gt(propName).and(lt(propName));
+    }
+
     public static And geAndLt(final String propName, final Object minValue, final Object maxValue) {
         return ge(propName, minValue).and(lt(propName, maxValue));
+    }
+
+    public static And geAndLt(final String propName) {
+        return ge(propName).and(lt(propName));
+    }
+
+    public static And geAndLe(final String propName, final Object minValue, final Object maxValue) {
+        return ge(propName, minValue).and(le(propName, maxValue));
+    }
+
+    public static And geAndLe(final String propName) {
+        return ge(propName).and(le(propName));
+    }
+
+    public static And gtAndLe(final String propName, final Object minValue, final Object maxValue) {
+        return gt(propName, minValue).and(le(propName, maxValue));
+    }
+
+    public static And gtAndLe(final String propName) {
+        return gt(propName).and(le(propName));
     }
 
     /**

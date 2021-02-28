@@ -1939,6 +1939,23 @@ public final class Fn extends Comparators {
     }
 
     /**
+     * Checks if the value/element: {@code minValue < e <= maxValue}.
+     * 
+     * @param <T>
+     * @param minValue
+     * @param maxValue
+     * @return
+     */
+    public static <T extends Comparable<? super T>> Predicate<T> gtAndLe(final T minValue, final T maxValue) {
+        return new Predicate<T>() {
+            @Override
+            public boolean test(T value) {
+                return N.compare(value, minValue) > 0 && N.compare(value, maxValue) <= 0;
+            }
+        };
+    }
+
+    /**
      * Checks if the value/element: {@code minValue < e < maxValue}.
      *
      * @param <T>

@@ -703,6 +703,15 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return ExceptionalStream.<K, V, E> of(map).filter(Fnn.<K, V, E> testByValue(valueFilter)).map(Fnn.<K, V, E> key());
     }
 
+    public static <K, V, E extends Exception> ExceptionalStream<K, E> ofKeys(final Map<K, V> map,
+            final Throwables.BiPredicate<? super K, ? super V, E> filter) {
+        if (map == null || map.size() == 0) {
+            return empty();
+        }
+
+        return ExceptionalStream.<K, V, E> of(map).filter(Fn.Entries.ep(filter)).map(Fnn.<K, V, E> key());
+    }
+
     public static <V, E extends Exception> ExceptionalStream<V, E> ofValues(final Map<?, V> map) {
         if (N.isNullOrEmpty(map)) {
             return empty();
@@ -717,6 +726,15 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
 
         return ExceptionalStream.<K, V, E> of(map).filter(Fnn.<K, V, E> testByKey(keyFilter)).map(Fnn.<K, V, E> value());
+    }
+
+    public static <K, V, E extends Exception> ExceptionalStream<V, E> ofValues(final Map<K, V> map,
+            final Throwables.BiPredicate<? super K, ? super V, E> filter) {
+        if (map == null || map.size() == 0) {
+            return empty();
+        }
+
+        return ExceptionalStream.<K, V, E> of(map).filter(Fn.Entries.ep(filter)).map(Fnn.<K, V, E> value());
     }
 
     /**
@@ -7755,40 +7773,40 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      *
      *
-     * @param action a terminal operation should be called.
+     * @param terminalAction a terminal operation should be called.
      * @return
      */
     @Beta
-    public ContinuableFuture<Void> asyncRun(final Throwables.Consumer<? super ExceptionalStream<T, E>, ? extends E> action) {
+    public ContinuableFuture<Void> asyncRun(final Throwables.Consumer<? super ExceptionalStream<T, E>, ? extends E> terminalAction) {
         assertNotClosed();
 
-        checkArgNotNull(action, "action");
+        checkArgNotNull(terminalAction, "terminalAction");
 
-        return N.asyncExecute(new Throwables.Runnable<E>() {
+        return ContinuableFuture.run(new Throwables.Runnable<E>() {
             @Override
             public void run() throws E {
-                action.accept(ExceptionalStream.this);
+                terminalAction.accept(ExceptionalStream.this);
             }
         });
     }
 
     /**
      *
-     * @param action a terminal operation should be called.
+     * @param terminalAction a terminal operation should be called.
      * @param executor
      * @return
      */
     @Beta
-    public ContinuableFuture<Void> asyncRun(final Throwables.Consumer<? super ExceptionalStream<T, E>, ? extends E> action, final Executor executor) {
+    public ContinuableFuture<Void> asyncRun(final Throwables.Consumer<? super ExceptionalStream<T, E>, ? extends E> terminalAction, final Executor executor) {
         assertNotClosed();
 
-        checkArgNotNull(action, "action");
+        checkArgNotNull(terminalAction, "terminalAction");
         checkArgNotNull(executor, "executor");
 
         return ContinuableFuture.run(new Throwables.Runnable<E>() {
             @Override
             public void run() throws E {
-                action.accept(ExceptionalStream.this);
+                terminalAction.accept(ExceptionalStream.this);
             }
         }, executor);
     }
@@ -7796,19 +7814,19 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      *
      * @param <R>
-     * @param action a terminal operation should be called.
+     * @param terminalAction a terminal operation should be called.
      * @return
      */
     @Beta
-    public <R> ContinuableFuture<R> asyncCall(final Throwables.Function<? super ExceptionalStream<T, E>, R, ? extends E> action) {
+    public <R> ContinuableFuture<R> asyncCall(final Throwables.Function<? super ExceptionalStream<T, E>, R, ? extends E> terminalAction) {
         assertNotClosed();
 
-        checkArgNotNull(action, "action");
+        checkArgNotNull(terminalAction, "terminalAction");
 
-        return N.asyncExecute(new Callable<R>() {
+        return ContinuableFuture.call(new Callable<R>() {
             @Override
             public R call() throws Exception {
-                return action.apply(ExceptionalStream.this);
+                return terminalAction.apply(ExceptionalStream.this);
             }
         });
     }
@@ -7816,21 +7834,22 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      *
      * @param <R>
-     * @param action a terminal operation should be called.
+     * @param terminalAction a terminal operation should be called.
      * @param executor
      * @return
      */
     @Beta
-    public <R> ContinuableFuture<R> asyncCall(final Throwables.Function<? super ExceptionalStream<T, E>, R, ? extends E> action, final Executor executor) {
+    public <R> ContinuableFuture<R> asyncCall(final Throwables.Function<? super ExceptionalStream<T, E>, R, ? extends E> terminalAction,
+            final Executor executor) {
         assertNotClosed();
 
-        checkArgNotNull(action, "action");
+        checkArgNotNull(terminalAction, "terminalAction");
         checkArgNotNull(executor, "executor");
 
         return ContinuableFuture.call(new Callable<R>() {
             @Override
             public R call() throws Exception {
-                return action.apply(ExceptionalStream.this);
+                return terminalAction.apply(ExceptionalStream.this);
             }
         }, executor);
     }
