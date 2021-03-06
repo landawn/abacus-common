@@ -80,8 +80,8 @@ public final class OkHttpRequest {
         if (IOUtil.IS_PLATFORM_ANDROID) {
             DEFAULT_EXECUTOR = AndroidUtil.getThreadPoolExecutor();
         } else {
-            DEFAULT_EXECUTOR = new ThreadPoolExecutor(Math.max(8, IOUtil.CPU_CORES), Math.max(128, IOUtil.CPU_CORES), 180L, TimeUnit.SECONDS,
-                    new LinkedBlockingQueue<Runnable>());
+            DEFAULT_EXECUTOR = new ThreadPoolExecutor(Math.max(64, Math.min(IOUtil.CPU_CORES * 8, IOUtil.MAX_MEMORY_IN_MB / 1024) * 32),
+                    Math.max(256, (IOUtil.MAX_MEMORY_IN_MB / 1024) * 64), 180L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
         }
     }
 

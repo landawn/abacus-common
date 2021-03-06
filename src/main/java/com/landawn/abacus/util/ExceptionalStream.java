@@ -213,8 +213,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
             @Override
             public void advance(long n) throws E {
-                N.checkArgNotNegative(n, "n");
-
                 if (n > len - position) {
                     position = len;
                 } else {
@@ -266,8 +264,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                 @Override
                 public void advance(long n) throws E {
-                    N.checkArgNotNegative(n, "n");
-
                     if (n > len - position) {
                         position = len;
                     } else {
@@ -363,8 +359,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
             @Override
             public void advance(long n) throws E {
-                N.checkArgNotNegative(n, "n");
-
                 if (iter == null) {
                     s = s.skip(n);
                 } else {
@@ -534,8 +528,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
             @Override
             public void advance(long n) throws E {
-                N.checkArgNotNegative(n, "n");
-
                 if (n > len - position) {
                     position = len;
                 } else {
@@ -578,8 +570,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
             @Override
             public void advance(long n) throws E {
-                N.checkArgNotNegative(n, "n");
-
                 if (n > len - position) {
                     position = len;
                 } else {
@@ -622,8 +612,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
             @Override
             public void advance(long n) throws E {
-                N.checkArgNotNegative(n, "n");
-
                 if (n > len - position) {
                     position = len;
                 } else {
@@ -8081,8 +8069,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
             @Override
             public void advance(long n) {
-                N.checkArgNotNegative(n, "n");
-
                 try {
                     elements.advance(n);
                 } catch (Exception e) {

@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -125,6 +126,18 @@ public abstract class StringUtil {
 
     private StringUtil() {
         // Utility class.
+    }
+
+    /**
+     * Returns the string representation of the {@code char} array or null.
+     *
+     * @param value the character array.
+     * @return a String or null
+     * @see String#valueOf(char[])
+     * @since 3.9
+     */
+    public static String valueOf(final char[] value) {
+        return value == null ? null : String.valueOf(value);
     }
 
     /**
@@ -1180,7 +1193,7 @@ public abstract class StringUtil {
                 char ch = str.charAt(i);
 
                 if (Character.isUpperCase(ch)) {
-                    if (i > 0 && (!Character.isUpperCase(str.charAt(i - 1)) || (i < len - 1 && Character.isLowerCase(str.charAt(i + 1))))) {
+                    if (i > 0 && (Character.isLowerCase(str.charAt(i - 1)) || (i < len - 1 && Character.isLowerCase(str.charAt(i + 1))))) {
                         if (sb.length() > 0 && sb.charAt(sb.length() - 1) != WD._UNDERSCORE) {
                             sb.append(WD._UNDERSCORE);
                         }
@@ -1188,11 +1201,11 @@ public abstract class StringUtil {
 
                     sb.append(Character.toLowerCase(ch));
                 } else {
-                    if (i > 0 && ((isAsciiNumeric(ch) && !isAsciiNumeric(str.charAt(i - 1))) || (isAsciiNumeric(str.charAt(i - 1)) && !isAsciiNumeric(ch)))) {
-                        if (sb.length() > 0 && sb.charAt(sb.length() - 1) != WD._UNDERSCORE) {
-                            sb.append(WD._UNDERSCORE);
-                        }
-                    }
+                    //    if (i > 0 && ((isAsciiNumeric(ch) && !isAsciiNumeric(str.charAt(i - 1))) || (isAsciiNumeric(str.charAt(i - 1)) && !isAsciiNumeric(ch)))) {
+                    //        if (sb.length() > 0 && sb.charAt(sb.length() - 1) != WD._UNDERSCORE) {
+                    //            sb.append(WD._UNDERSCORE);
+                    //        }
+                    //    }
 
                     sb.append(ch);
                 }
@@ -1301,7 +1314,7 @@ public abstract class StringUtil {
                 char ch = str.charAt(i);
 
                 if (Character.isUpperCase(ch)) {
-                    if (i > 0 && (!Character.isUpperCase(str.charAt(i - 1)) || (i < len - 1 && Character.isLowerCase(str.charAt(i + 1))))) {
+                    if (i > 0 && (Character.isLowerCase(str.charAt(i - 1)) || (i < len - 1 && Character.isLowerCase(str.charAt(i + 1))))) {
                         if (sb.length() > 0 && sb.charAt(sb.length() - 1) != WD._UNDERSCORE) {
                             sb.append(WD._UNDERSCORE);
                         }
@@ -1309,11 +1322,11 @@ public abstract class StringUtil {
 
                     sb.append(ch);
                 } else {
-                    if (i > 0 && ((isAsciiNumeric(ch) && !isAsciiNumeric(str.charAt(i - 1))) || (isAsciiNumeric(str.charAt(i - 1)) && !isAsciiNumeric(ch)))) {
-                        if (sb.length() > 0 && sb.charAt(sb.length() - 1) != WD._UNDERSCORE) {
-                            sb.append(WD._UNDERSCORE);
-                        }
-                    }
+                    //    if (i > 0 && ((isAsciiNumeric(ch) && !isAsciiNumeric(str.charAt(i - 1))) || (isAsciiNumeric(str.charAt(i - 1)) && !isAsciiNumeric(ch)))) {
+                    //        if (sb.length() > 0 && sb.charAt(sb.length() - 1) != WD._UNDERSCORE) {
+                    //            sb.append(WD._UNDERSCORE);
+                    //        }
+                    //    }
 
                     sb.append(Character.toUpperCase(ch));
                 }
@@ -1402,8 +1415,8 @@ public abstract class StringUtil {
      * a low surrogate not preceded by a high surrogate) will be returned as-is.</p>
      *
      * <pre>
-     * StringUtils.toCodePoints(null)   =  []  // empty array
-     * StringUtils.toCodePoints("")     =  []  // empty array
+     * StringUtil.toCodePoints(null)   =  []  // empty array
+     * StringUtil.toCodePoints("")     =  []  // empty array
      * </pre>
      *
      * @param str the character sequence to convert
@@ -1588,8 +1601,8 @@ public abstract class StringUtil {
      * </p>
      *
      * <pre>
-     *   CharUtils.unicodeEscaped(' ') = "\u0020"
-     *   CharUtils.unicodeEscaped('A') = "\u0041"
+     *   StringUtil.unicodeEscaped(' ') = "\u0020"
+     *   StringUtil.unicodeEscaped('A') = "\u0041"
      * </pre>
      *
      * @param ch
@@ -3021,6 +3034,117 @@ public abstract class StringUtil {
         }
     }
 
+    /**
+     * <p>Truncates a String. This will turn
+     * "Now is the time for all good men" into "Now is the time for".</p>
+     *
+     * <p>Specifically:</p>
+     * <ul>
+     *   <li>If {@code str} is less than {@code maxWidth} characters
+     *       long, return it.</li>
+     *   <li>Else truncate it to {@code substring(str, 0, maxWidth)}.</li>
+     *   <li>If {@code maxWidth} is less than {@code 0}, throw an
+     *       {@code IllegalArgumentException}.</li>
+     *   <li>In no case will it return a String of length greater than
+     *       {@code maxWidth}.</li>
+     * </ul>
+     *
+     * <pre>
+     * StringUtil.truncate(null, 0)       = null
+     * StringUtil.truncate(null, 2)       = null
+     * StringUtil.truncate("", 4)         = ""
+     * StringUtil.truncate("abcdefg", 4)  = "abcd"
+     * StringUtil.truncate("abcdefg", 6)  = "abcdef"
+     * StringUtil.truncate("abcdefg", 7)  = "abcdefg"
+     * StringUtil.truncate("abcdefg", 8)  = "abcdefg"
+     * StringUtil.truncate("abcdefg", -1) = throws an IllegalArgumentException
+     * </pre>
+     *
+     * @param str  the String to truncate, may be null
+     * @param maxWidth  maximum length of result String, must be positive
+     * @return truncated String, {@code null} if null String input
+     * @throws IllegalArgumentException If {@code maxWidth} is less than {@code 0}
+     * @since 3.5
+     */
+    public static String truncate(final String str, final int maxWidth) {
+        return truncate(str, 0, maxWidth);
+    }
+
+    /**
+     * <p>Truncates a String. This will turn
+     * "Now is the time for all good men" into "is the time for all".</p>
+     *
+     * <p>Works like {@code truncate(String, int)}, but allows you to specify
+     * a "left edge" offset.
+     *
+     * <p>Specifically:</p>
+     * <ul>
+     *   <li>If {@code str} is less than {@code maxWidth} characters
+     *       long, return it.</li>
+     *   <li>Else truncate it to {@code substring(str, offset, maxWidth)}.</li>
+     *   <li>If {@code maxWidth} is less than {@code 0}, throw an
+     *       {@code IllegalArgumentException}.</li>
+     *   <li>If {@code offset} is less than {@code 0}, throw an
+     *       {@code IllegalArgumentException}.</li>
+     *   <li>In no case will it return a String of length greater than
+     *       {@code maxWidth}.</li>
+     * </ul>
+     *
+     * <pre>
+     * StringUtil.truncate(null, 0, 0) = null
+     * StringUtil.truncate(null, 2, 4) = null
+     * StringUtil.truncate("", 0, 10) = ""
+     * StringUtil.truncate("", 2, 10) = ""
+     * StringUtil.truncate("abcdefghij", 0, 3) = "abc"
+     * StringUtil.truncate("abcdefghij", 5, 6) = "fghij"
+     * StringUtil.truncate("raspberry peach", 10, 15) = "peach"
+     * StringUtil.truncate("abcdefghijklmno", 0, 10) = "abcdefghij"
+     * StringUtil.truncate("abcdefghijklmno", -1, 10) = throws an IllegalArgumentException
+     * StringUtil.truncate("abcdefghijklmno", Integer.MIN_VALUE, 10) = throws an IllegalArgumentException
+     * StringUtil.truncate("abcdefghijklmno", Integer.MIN_VALUE, Integer.MAX_VALUE) = throws an IllegalArgumentException
+     * StringUtil.truncate("abcdefghijklmno", 0, Integer.MAX_VALUE) = "abcdefghijklmno"
+     * StringUtil.truncate("abcdefghijklmno", 1, 10) = "bcdefghijk"
+     * StringUtil.truncate("abcdefghijklmno", 2, 10) = "cdefghijkl"
+     * StringUtil.truncate("abcdefghijklmno", 3, 10) = "defghijklm"
+     * StringUtil.truncate("abcdefghijklmno", 4, 10) = "efghijklmn"
+     * StringUtil.truncate("abcdefghijklmno", 5, 10) = "fghijklmno"
+     * StringUtil.truncate("abcdefghijklmno", 5, 5) = "fghij"
+     * StringUtil.truncate("abcdefghijklmno", 5, 3) = "fgh"
+     * StringUtil.truncate("abcdefghijklmno", 10, 3) = "klm"
+     * StringUtil.truncate("abcdefghijklmno", 10, Integer.MAX_VALUE) = "klmno"
+     * StringUtil.truncate("abcdefghijklmno", 13, 1) = "n"
+     * StringUtil.truncate("abcdefghijklmno", 13, Integer.MAX_VALUE) = "no"
+     * StringUtil.truncate("abcdefghijklmno", 14, 1) = "o"
+     * StringUtil.truncate("abcdefghijklmno", 14, Integer.MAX_VALUE) = "o"
+     * StringUtil.truncate("abcdefghijklmno", 15, 1) = ""
+     * StringUtil.truncate("abcdefghijklmno", 15, Integer.MAX_VALUE) = ""
+     * StringUtil.truncate("abcdefghijklmno", Integer.MAX_VALUE, Integer.MAX_VALUE) = ""
+     * StringUtil.truncate("abcdefghij", 3, -1) = throws an IllegalArgumentException
+     * StringUtil.truncate("abcdefghij", -2, 4) = throws an IllegalArgumentException
+     * </pre>
+     *
+     * @param str  the String to truncate, may be null
+     * @param offset  left edge of source String
+     * @param maxWidth  maximum length of result String, must be positive
+     * @return truncated String, {@code null} if null String input
+     * @throws IllegalArgumentException If {@code offset} or {@code maxWidth} is less than {@code 0}
+     * @since 3.5
+     */
+    public static String truncate(final String str, final int offset, final int maxWidth) {
+        N.checkArgNotNegative(offset, "offset");
+        N.checkArgNotNegative(maxWidth, "maxWidth");
+
+        if (str == null) {
+            return null;
+        } else if (str.length() <= offset || maxWidth == 0) {
+            return EMPTY;
+        } else if (str.length() - offset <= maxWidth) {
+            return offset == 0 ? str : str.substring(offset);
+        } else {
+            return str.substring(offset, offset + maxWidth);
+        }
+    }
+
     // Delete
     // -----------------------------------------------------------------------
     /**
@@ -3453,12 +3577,12 @@ public abstract class StringUtil {
      * </p>
      *
      * <pre>
-     *   CharUtils.isAscii('a')  = true
-     *   CharUtils.isAscii('A')  = true
-     *   CharUtils.isAscii('3')  = true
-     *   CharUtils.isAscii('-')  = true
-     *   CharUtils.isAscii('\n') = true
-     *   CharUtils.isAscii('&copy;') = false
+     *   StringUtil.isAscii('a')  = true
+     *   StringUtil.isAscii('A')  = true
+     *   StringUtil.isAscii('3')  = true
+     *   StringUtil.isAscii('-')  = true
+     *   StringUtil.isAscii('\n') = true
+     *   StringUtil.isAscii('&copy;') = false
      * </pre>
      *
      * @param ch
@@ -3475,12 +3599,12 @@ public abstract class StringUtil {
      * </p>
      *
      * <pre>
-     *   CharUtils.isAsciiPrintable('a')  = true
-     *   CharUtils.isAsciiPrintable('A')  = true
-     *   CharUtils.isAsciiPrintable('3')  = true
-     *   CharUtils.isAsciiPrintable('-')  = true
-     *   CharUtils.isAsciiPrintable('\n') = false
-     *   CharUtils.isAsciiPrintable('&copy;') = false
+     *   StringUtil.isAsciiPrintable('a')  = true
+     *   StringUtil.isAsciiPrintable('A')  = true
+     *   StringUtil.isAsciiPrintable('3')  = true
+     *   StringUtil.isAsciiPrintable('-')  = true
+     *   StringUtil.isAsciiPrintable('\n') = false
+     *   StringUtil.isAsciiPrintable('&copy;') = false
      * </pre>
      *
      * @param ch
@@ -3497,12 +3621,12 @@ public abstract class StringUtil {
      * </p>
      *
      * <pre>
-     *   CharUtils.isAsciiControl('a')  = false
-     *   CharUtils.isAsciiControl('A')  = false
-     *   CharUtils.isAsciiControl('3')  = false
-     *   CharUtils.isAsciiControl('-')  = false
-     *   CharUtils.isAsciiControl('\n') = true
-     *   CharUtils.isAsciiControl('&copy;') = false
+     *   StringUtil.isAsciiControl('a')  = false
+     *   StringUtil.isAsciiControl('A')  = false
+     *   StringUtil.isAsciiControl('3')  = false
+     *   StringUtil.isAsciiControl('-')  = false
+     *   StringUtil.isAsciiControl('\n') = true
+     *   StringUtil.isAsciiControl('&copy;') = false
      * </pre>
      *
      * @param ch
@@ -3519,12 +3643,12 @@ public abstract class StringUtil {
      * </p>
      *
      * <pre>
-     *   CharUtils.isAsciiAlpha('a')  = true
-     *   CharUtils.isAsciiAlpha('A')  = true
-     *   CharUtils.isAsciiAlpha('3')  = false
-     *   CharUtils.isAsciiAlpha('-')  = false
-     *   CharUtils.isAsciiAlpha('\n') = false
-     *   CharUtils.isAsciiAlpha('&copy;') = false
+     *   StringUtil.isAsciiAlpha('a')  = true
+     *   StringUtil.isAsciiAlpha('A')  = true
+     *   StringUtil.isAsciiAlpha('3')  = false
+     *   StringUtil.isAsciiAlpha('-')  = false
+     *   StringUtil.isAsciiAlpha('\n') = false
+     *   StringUtil.isAsciiAlpha('&copy;') = false
      * </pre>
      *
      * @param ch
@@ -3541,12 +3665,12 @@ public abstract class StringUtil {
      * </p>
      *
      * <pre>
-     *   CharUtils.isAsciiAlphaUpper('a')  = false
-     *   CharUtils.isAsciiAlphaUpper('A')  = true
-     *   CharUtils.isAsciiAlphaUpper('3')  = false
-     *   CharUtils.isAsciiAlphaUpper('-')  = false
-     *   CharUtils.isAsciiAlphaUpper('\n') = false
-     *   CharUtils.isAsciiAlphaUpper('&copy;') = false
+     *   StringUtil.isAsciiAlphaUpper('a')  = false
+     *   StringUtil.isAsciiAlphaUpper('A')  = true
+     *   StringUtil.isAsciiAlphaUpper('3')  = false
+     *   StringUtil.isAsciiAlphaUpper('-')  = false
+     *   StringUtil.isAsciiAlphaUpper('\n') = false
+     *   StringUtil.isAsciiAlphaUpper('&copy;') = false
      * </pre>
      *
      * @param ch
@@ -3563,12 +3687,12 @@ public abstract class StringUtil {
      * </p>
      *
      * <pre>
-     *   CharUtils.isAsciiAlphaLower('a')  = true
-     *   CharUtils.isAsciiAlphaLower('A')  = false
-     *   CharUtils.isAsciiAlphaLower('3')  = false
-     *   CharUtils.isAsciiAlphaLower('-')  = false
-     *   CharUtils.isAsciiAlphaLower('\n') = false
-     *   CharUtils.isAsciiAlphaLower('&copy;') = false
+     *   StringUtil.isAsciiAlphaLower('a')  = true
+     *   StringUtil.isAsciiAlphaLower('A')  = false
+     *   StringUtil.isAsciiAlphaLower('3')  = false
+     *   StringUtil.isAsciiAlphaLower('-')  = false
+     *   StringUtil.isAsciiAlphaLower('\n') = false
+     *   StringUtil.isAsciiAlphaLower('&copy;') = false
      * </pre>
      *
      * @param ch
@@ -3585,12 +3709,12 @@ public abstract class StringUtil {
      * </p>
      *
      * <pre>
-     *   CharUtils.isAsciiNumeric('a')  = false
-     *   CharUtils.isAsciiNumeric('A')  = false
-     *   CharUtils.isAsciiNumeric('3')  = true
-     *   CharUtils.isAsciiNumeric('-')  = false
-     *   CharUtils.isAsciiNumeric('\n') = false
-     *   CharUtils.isAsciiNumeric('&copy;') = false
+     *   StringUtil.isAsciiNumeric('a')  = false
+     *   StringUtil.isAsciiNumeric('A')  = false
+     *   StringUtil.isAsciiNumeric('3')  = true
+     *   StringUtil.isAsciiNumeric('-')  = false
+     *   StringUtil.isAsciiNumeric('\n') = false
+     *   StringUtil.isAsciiNumeric('&copy;') = false
      * </pre>
      *
      * @param ch
@@ -3607,12 +3731,12 @@ public abstract class StringUtil {
      * </p>
      *
      * <pre>
-     *   CharUtils.isAsciiAlphanumeric('a')  = true
-     *   CharUtils.isAsciiAlphanumeric('A')  = true
-     *   CharUtils.isAsciiAlphanumeric('3')  = true
-     *   CharUtils.isAsciiAlphanumeric('-')  = false
-     *   CharUtils.isAsciiAlphanumeric('\n') = false
-     *   CharUtils.isAsciiAlphanumeric('&copy;') = false
+     *   StringUtil.isAsciiAlphanumeric('a')  = true
+     *   StringUtil.isAsciiAlphanumeric('A')  = true
+     *   StringUtil.isAsciiAlphanumeric('3')  = true
+     *   StringUtil.isAsciiAlphanumeric('-')  = false
+     *   StringUtil.isAsciiAlphanumeric('\n') = false
+     *   StringUtil.isAsciiAlphanumeric('&copy;') = false
      * </pre>
      *
      * @param ch
@@ -7439,11 +7563,11 @@ public abstract class StringUtil {
 
         final StringBuilder sb = Objectory.createStringBuilder();
 
-        if (N.notNullOrEmpty(prefix)) {
-            sb.append(prefix);
-        }
-
         try {
+            if (N.notNullOrEmpty(prefix)) {
+                sb.append(prefix);
+            }
+
             if (N.isNullOrEmpty(delimiter)) {
                 for (int i = fromIndex; i < toIndex; i++) {
                     sb.append(trim ? N.toString(a[i]).trim() : N.toString(a[i]));
@@ -7617,11 +7741,11 @@ public abstract class StringUtil {
 
         final StringBuilder sb = Objectory.createStringBuilder();
 
-        if (N.notNullOrEmpty(prefix)) {
-            sb.append(prefix);
-        }
-
         try {
+            if (N.notNullOrEmpty(prefix)) {
+                sb.append(prefix);
+            }
+
             if (c instanceof List && c instanceof RandomAccess) {
                 final List<?> list = (List<?>) c;
 
@@ -7663,6 +7787,84 @@ public abstract class StringUtil {
                         if (i >= toIndex) {
                             break;
                         }
+                    }
+                }
+            }
+
+            if (N.notNullOrEmpty(suffix)) {
+                sb.append(suffix);
+            }
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
+        }
+    }
+
+    public static String join(final Iterator<?> iter) {
+        return join(iter, N.ELEMENT_SEPARATOR);
+    }
+
+    public static String join(final Iterator<?> iter, final char delimiter) {
+        if (iter == null) {
+            return N.EMPTY_STRING;
+        }
+
+        final StringBuilder sb = Objectory.createStringBuilder();
+
+        try {
+            if (iter.hasNext()) {
+                sb.append(N.toString(iter.next()));
+            }
+
+            while (iter.hasNext()) {
+                sb.append(delimiter);
+
+                sb.append(N.toString(iter.next()));
+            }
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
+        }
+    }
+
+    public static String join(final Iterator<?> iter, final String delimiter) {
+        return join(iter, delimiter, EMPTY, EMPTY, false);
+    }
+
+    public static String join(final Iterator<?> iter, final String delimiter, final String prefix, final String suffix, final boolean trim) {
+        if (iter == null) {
+            return N.EMPTY_STRING;
+        }
+
+        final StringBuilder sb = Objectory.createStringBuilder();
+
+        try {
+            if (N.notNullOrEmpty(prefix)) {
+                sb.append(prefix);
+            }
+
+            if (N.isNullOrEmpty(delimiter)) {
+                while (iter.hasNext()) {
+                    if (trim) {
+                        sb.append(N.toString(iter.next()).trim());
+                    } else {
+                        sb.append(N.toString(iter.next()));
+                    }
+                }
+            } else {
+                if (iter.hasNext()) {
+                    sb.append(N.toString(iter.next()));
+                }
+
+                while (iter.hasNext()) {
+                    sb.append(delimiter);
+
+                    if (trim) {
+                        sb.append(N.toString(iter.next()).trim());
+                    } else {
+                        sb.append(N.toString(iter.next()));
                     }
                 }
             }
@@ -7829,6 +8031,7 @@ public abstract class StringUtil {
 
         try {
             int i = 0;
+
             for (Map.Entry<?, ?> entry : m.entrySet()) {
                 if (i++ > fromIndex) {
                     sb.append(entryDelimiter);
@@ -7889,12 +8092,13 @@ public abstract class StringUtil {
 
         final StringBuilder sb = Objectory.createStringBuilder();
 
-        if (N.notNullOrEmpty(prefix)) {
-            sb.append(prefix);
-        }
-
         try {
+            if (N.notNullOrEmpty(prefix)) {
+                sb.append(prefix);
+            }
+
             int i = 0;
+
             for (Map.Entry<?, ?> entry : m.entrySet()) {
                 if (i++ > fromIndex) {
                     sb.append(entryDelimiter);

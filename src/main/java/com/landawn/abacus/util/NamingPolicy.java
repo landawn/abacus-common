@@ -45,6 +45,13 @@ public enum NamingPolicy {
         }
     });
 
+    //    NO_CHANGE(new Function<String, String>() {
+    //        @Override
+    //        public String apply(String str) {
+    //            return str;
+    //        }
+    //    });
+
     private final Function<String, String> converter;
 
     NamingPolicy(Function<String, String> converter) {

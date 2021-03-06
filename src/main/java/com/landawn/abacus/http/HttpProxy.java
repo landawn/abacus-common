@@ -595,8 +595,9 @@ public final class HttpProxy {
                     } else if (IOUtil.IS_PLATFORM_ANDROID) {
                         executor = AndroidUtil.getThreadPoolExecutor();
                     } else {
-                        final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(Math.max(8, IOUtil.CPU_CORES), Math.max(16, IOUtil.CPU_CORES),
-                                180L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+                        final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
+                                Math.max(64, Math.min(IOUtil.CPU_CORES * 8, IOUtil.MAX_MEMORY_IN_MB / 1024) * 32),
+                                Math.max(256, (IOUtil.MAX_MEMORY_IN_MB / 1024) * 64), 180L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
                         threadPoolExecutor.allowCoreThreadTimeOut(true);
 
                         executor = threadPoolExecutor;

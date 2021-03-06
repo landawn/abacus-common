@@ -66,7 +66,7 @@ public class AsyncExecutor {
         N.checkArgNotNull(unit, "unit");
 
         this.coreThreadPoolSize = coreThreadPoolSize;
-        this.maxThreadPoolSize = maxThreadPoolSize;
+        this.maxThreadPoolSize = Math.max(coreThreadPoolSize, maxThreadPoolSize);
         this.keepAliveTime = keepAliveTime;
         this.unit = unit;
 

@@ -68,7 +68,7 @@ public final class HttpClient {
         if (IOUtil.IS_PLATFORM_ANDROID) {
             // ignore
         } else {
-            final int maxConnections = IOUtil.CPU_CORES * 8;
+            final int maxConnections = IOUtil.CPU_CORES * 16;
 
             System.setProperty("http.keepAlive", "true");
             System.setProperty("http.maxConnections", String.valueOf(maxConnections));
