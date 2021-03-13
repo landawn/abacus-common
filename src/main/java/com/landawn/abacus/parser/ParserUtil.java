@@ -1702,7 +1702,7 @@ public final class ParserUtil {
                     constructor = ClassUtil.getDeclaredConstructor(typeClass, String.class);
 
                     if (constructor != null) {
-                        ClassUtil.setAccessible(constructor, true);
+                        ClassUtil.setAccessibleQuietly(constructor, true);
                         type = ClassUtil.invokeConstructor(constructor, typeName.get());
                     } else {
                         constructor = ClassUtil.getDeclaredConstructor(typeClass);
@@ -1711,7 +1711,7 @@ public final class ParserUtil {
                             throw new IllegalArgumentException("No default constructor found in type class: " + typeClass);
                         }
 
-                        ClassUtil.setAccessible(constructor, true);
+                        ClassUtil.setAccessibleQuietly(constructor, true);
                         type = ClassUtil.invokeConstructor(constructor);
                     }
                 } else {
@@ -1721,7 +1721,7 @@ public final class ParserUtil {
                         throw new IllegalArgumentException("No default constructor found in type class: " + typeClass);
                     }
 
-                    ClassUtil.setAccessible(constructor, true);
+                    ClassUtil.setAccessibleQuietly(constructor, true);
                     type = ClassUtil.invokeConstructor(constructor);
                 }
 

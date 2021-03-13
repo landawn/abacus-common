@@ -217,7 +217,7 @@ public final class TypeAttrParser {
                         "No constructor found with parameters: " + N.toString(parameterTypes) + ". in class: " + cls.getCanonicalName());
             }
 
-            ClassUtil.setAccessible(constructor, true);
+            ClassUtil.setAccessibleQuietly(constructor, true);
 
             return (T) ClassUtil.invokeConstructor(constructor, paramters);
         } else {

@@ -1671,6 +1671,47 @@ public final class Fn extends Comparators {
         };
     }
 
+    private static final Predicate<Object[]> IS_NULL_OR_EMPTY_A = new Predicate<Object[]>() {
+        @Override
+        public boolean test(Object[] value) {
+            return value == null || value.length == 0;
+        }
+    };
+
+    @Beta
+    @SuppressWarnings("rawtypes")
+    public static <T> Predicate<T[]> isNullOrEmptyA() {
+        return (Predicate) IS_NULL_OR_EMPTY_A;
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static final Predicate<Collection> IS_NULL_OR_EMPTY_C = new Predicate<Collection>() {
+        @Override
+        public boolean test(Collection value) {
+            return value == null || value.size() == 0;
+        }
+    };
+
+    @Beta
+    @SuppressWarnings("rawtypes")
+    public static <T extends Collection> Predicate<T> isNullOrEmptyC() {
+        return (Predicate<T>) IS_NULL_OR_EMPTY_C;
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static final Predicate<Map> IS_NULL_OR_EMPTY_M = new Predicate<Map>() {
+        @Override
+        public boolean test(Map value) {
+            return value == null || value.size() == 0;
+        }
+    };
+
+    @Beta
+    @SuppressWarnings("rawtypes")
+    public static <T extends Map> Predicate<T> isNullOrEmptyM() {
+        return (Predicate<T>) IS_NULL_OR_EMPTY_M;
+    }
+
     /**
      *
      * @param <T>
@@ -1744,6 +1785,47 @@ public final class Fn extends Comparators {
                 return N.notNullOrEmptyOrBlank(valueExtractor.apply(t));
             }
         };
+    }
+
+    private static final Predicate<Object[]> NOT_NULL_OR_EMPTY_A = new Predicate<Object[]>() {
+        @Override
+        public boolean test(Object[] value) {
+            return value != null && value.length > 0;
+        }
+    };
+
+    @Beta
+    @SuppressWarnings("rawtypes")
+    public static <T> Predicate<T[]> notNullOrEmptyA() {
+        return (Predicate) NOT_NULL_OR_EMPTY_A;
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static final Predicate<Collection> NOT_NULL_OR_EMPTY_C = new Predicate<Collection>() {
+        @Override
+        public boolean test(Collection value) {
+            return value != null && value.size() > 0;
+        }
+    };
+
+    @Beta
+    @SuppressWarnings("rawtypes")
+    public static <T extends Collection> Predicate<T> notNullOrEmptyC() {
+        return (Predicate<T>) NOT_NULL_OR_EMPTY_C;
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static final Predicate<Map> NOT_NULL_OR_EMPTY_M = new Predicate<Map>() {
+        @Override
+        public boolean test(Map value) {
+            return value != null && value.size() > 0;
+        }
+    };
+
+    @Beta
+    @SuppressWarnings("rawtypes")
+    public static <T extends Map> Predicate<T> notNullOrEmptyM() {
+        return (Predicate<T>) NOT_NULL_OR_EMPTY_M;
     }
 
     /**
@@ -11922,12 +12004,48 @@ public final class Fn extends Comparators {
         }
 
         @Beta
+        @SuppressWarnings("rawtypes")
+        public static <T, E extends Exception> Throwables.Predicate<T[], E> notNullOrEmptyA() {
+            return (Throwables.Predicate) Fn.NOT_NULL_OR_EMPTY_A;
+        }
+
+        @Beta
+        @SuppressWarnings("rawtypes")
+        public static <T extends Collection, E extends Exception> Throwables.Predicate<T, E> notNullOrEmptyC() {
+            return (Throwables.Predicate<T, E>) Fn.NOT_NULL_OR_EMPTY_C;
+        }
+
+        @Beta
+        @SuppressWarnings("rawtypes")
+        public static <T extends Map, E extends Exception> Throwables.Predicate<T, E> notNullOrEmptyM() {
+            return (Throwables.Predicate<T, E>) Fn.NOT_NULL_OR_EMPTY_M;
+        }
+
+        @Beta
         public static <T, E extends Exception> Throwables.Predicate<T, E> isNull() {
             return Fn.IS_NULL;
         }
 
         public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> isNullOrEmpty() {
             return (Throwables.Predicate<T, E>) Fn.IS_NULL_OR_EMPTY;
+        }
+
+        @Beta
+        @SuppressWarnings("rawtypes")
+        public static <T, E extends Exception> Throwables.Predicate<T[], E> isNullOrEmptyA() {
+            return (Throwables.Predicate) Fn.IS_NULL_OR_EMPTY_A;
+        }
+
+        @Beta
+        @SuppressWarnings("rawtypes")
+        public static <T extends Collection, E extends Exception> Throwables.Predicate<T, E> isNullOrEmptyC() {
+            return (Throwables.Predicate<T, E>) Fn.IS_NULL_OR_EMPTY_C;
+        }
+
+        @Beta
+        @SuppressWarnings("rawtypes")
+        public static <T extends Map, E extends Exception> Throwables.Predicate<T, E> isNullOrEmptyM() {
+            return (Throwables.Predicate<T, E>) Fn.IS_NULL_OR_EMPTY_M;
         }
 
         public static <T, E extends Exception> Throwables.BinaryOperator<T, E> throwingMerger() {

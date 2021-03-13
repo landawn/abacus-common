@@ -4592,6 +4592,22 @@ public final class IOUtil {
         }
     }
 
+    public static boolean mkdirIfNotExists(final File dir) {
+        if (!(dir.exists() && dir.isDirectory())) {
+            return dir.mkdir();
+        }
+
+        return false;
+    }
+
+    public static boolean mkdirsIfNotExists(final File dir) {
+        if (!(dir.exists() && dir.isDirectory())) {
+            return dir.mkdirs();
+        }
+
+        return false;
+    }
+
     /**
      * Tests if the specified {@code File} is newer than the specified {@code Date}.
      *

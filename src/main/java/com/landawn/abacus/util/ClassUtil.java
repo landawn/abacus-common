@@ -2889,8 +2889,16 @@ public final class ClassUtil {
      * @return {@code true} if no error happens, otherwise {@code false} is returned.
      */
     public static boolean setAccessibleQuietly(final AccessibleObject accessibleObject, final boolean flag) {
+        if (accessibleObject == null) {
+            return false;
+        }
+
+        if (accessibleObject.isAccessible() == flag) {
+            return true;
+        }
+
         try {
-            setAccessible(accessibleObject, flag);
+            accessibleObject.setAccessible(flag);
         } catch (Exception e) {
             logger.warn("Failed to set accessible for : " + accessibleObject + " with flag: " + flag, e);
             return false;

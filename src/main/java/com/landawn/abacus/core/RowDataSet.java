@@ -5824,6 +5824,13 @@ public class RowDataSet implements DataSet, Cloneable {
         return new RowDataSet(newColumnNameList, newColumnList);
     }
 
+    private static final com.landawn.abacus.util.function.Predicate<Collection<String>> NOT_EMPTY_FILTER = new com.landawn.abacus.util.function.Predicate<Collection<String>>() {
+        @Override
+        public boolean test(Collection<String> t) {
+            return N.notNullOrEmpty(t);
+        }
+    };
+
     /**
      *
      * @param columnNames
@@ -5831,7 +5838,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public Stream<DataSet> rollup(final Collection<String> columnNames) {
-        return Stream.of(Iterables.rollup(columnNames)).reversed().map(new Function<Collection<String>, DataSet>() {
+        return Stream.of(Iterables.rollup(columnNames)).reversed().filter(NOT_EMPTY_FILTER).map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
                 return groupBy(columnNames);
@@ -5851,7 +5858,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public <T> Stream<DataSet> rollup(final Collection<String> columnNames, final String aggregateResultColumnName, final String aggregateOnColumnName,
             final Collector<T, ?, ?> collector) {
-        return Stream.of(Iterables.rollup(columnNames)).reversed().map(new Function<Collection<String>, DataSet>() {
+        return Stream.of(Iterables.rollup(columnNames)).reversed().filter(NOT_EMPTY_FILTER).map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
                 return groupBy(columnNames, aggregateResultColumnName, aggregateOnColumnName, collector);
@@ -5872,7 +5879,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public <T, E extends Exception> Stream<DataSet> rollup(final Collection<String> columnNames, final String aggregateResultColumnName,
             final String aggregateOnColumnName, final Throwables.Function<Stream<T>, ?, E> func) {
-        return Stream.of(Iterables.rollup(columnNames)).reversed().map(new Function<Collection<String>, DataSet>() {
+        return Stream.of(Iterables.rollup(columnNames)).reversed().filter(NOT_EMPTY_FILTER).map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
                 return Try.call(new Callable<DataSet>() {
@@ -5888,7 +5895,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public Stream<DataSet> rollup(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
             Class<?> rowClass) {
-        return Stream.of(Iterables.rollup(columnNames)).reversed().map(new Function<Collection<String>, DataSet>() {
+        return Stream.of(Iterables.rollup(columnNames)).reversed().filter(NOT_EMPTY_FILTER).map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
                 return Try.call(new Callable<DataSet>() {
@@ -5930,7 +5937,7 @@ public class RowDataSet implements DataSet, Cloneable {
     public <U, E extends Exception> Stream<DataSet> rollup(final Collection<String> columnNames, final String aggregateResultColumnName,
             final Collection<String> aggregateOnColumnNames, final Throwables.Function<? super DisposableObjArray, U, E> rowMapper,
             final Collector<? super U, ?, ?> collector) {
-        return Stream.of(Iterables.rollup(columnNames)).reversed().map(new Function<Collection<String>, DataSet>() {
+        return Stream.of(Iterables.rollup(columnNames)).reversed().filter(NOT_EMPTY_FILTER).map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
                 return Try.call(new Callable<DataSet>() {
@@ -5953,7 +5960,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public <E extends Exception> Stream<DataSet> rollup(final Collection<String> columnNames,
             final Throwables.Function<? super DisposableObjArray, ?, E> keyMapper) {
-        return Stream.of(Iterables.rollup(columnNames)).reversed().map(new Function<Collection<String>, DataSet>() {
+        return Stream.of(Iterables.rollup(columnNames)).reversed().filter(NOT_EMPTY_FILTER).map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
                 return Try.call(new Callable<DataSet>() {
@@ -5981,7 +5988,7 @@ public class RowDataSet implements DataSet, Cloneable {
     public <T, E extends Exception> Stream<DataSet> rollup(final Collection<String> columnNames,
             final Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, final String aggregateResultColumnName, final String aggregateOnColumnName,
             final Collector<T, ?, ?> collector) {
-        return Stream.of(Iterables.rollup(columnNames)).reversed().map(new Function<Collection<String>, DataSet>() {
+        return Stream.of(Iterables.rollup(columnNames)).reversed().filter(NOT_EMPTY_FILTER).map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
                 return Try.call(new Callable<DataSet>() {
@@ -6010,7 +6017,7 @@ public class RowDataSet implements DataSet, Cloneable {
     public <T, E extends Exception, E2 extends Exception> Stream<DataSet> rollup(final Collection<String> columnNames,
             final Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, final String aggregateResultColumnName, final String aggregateOnColumnName,
             final Throwables.Function<Stream<T>, ?, E2> func) {
-        return Stream.of(Iterables.rollup(columnNames)).reversed().map(new Function<Collection<String>, DataSet>() {
+        return Stream.of(Iterables.rollup(columnNames)).reversed().filter(NOT_EMPTY_FILTER).map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
                 return Try.call(new Callable<DataSet>() {
@@ -6027,7 +6034,7 @@ public class RowDataSet implements DataSet, Cloneable {
     public <E extends Exception> Stream<DataSet> rollup(Collection<String> columnNames,
             com.landawn.abacus.util.Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, String aggregateResultColumnName,
             Collection<String> aggregateOnColumnNames, Class<?> rowClass) {
-        return Stream.of(Iterables.rollup(columnNames)).reversed().map(new Function<Collection<String>, DataSet>() {
+        return Stream.of(Iterables.rollup(columnNames)).reversed().filter(NOT_EMPTY_FILTER).map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
                 return Try.call(new Callable<DataSet>() {
@@ -6075,7 +6082,7 @@ public class RowDataSet implements DataSet, Cloneable {
             final Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, final String aggregateResultColumnName,
             final Collection<String> aggregateOnColumnNames, final Throwables.Function<? super DisposableObjArray, U, E2> rowMapper,
             final Collector<? super U, ?, ?> collector) {
-        return Stream.of(Iterables.rollup(columnNames)).reversed().map(new Function<Collection<String>, DataSet>() {
+        return Stream.of(Iterables.rollup(columnNames)).reversed().filter(NOT_EMPTY_FILTER).map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
                 return Try.call(new Callable<DataSet>() {
@@ -6095,7 +6102,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public Stream<DataSet> cube(final Collection<String> columnNames) {
-        return cubeSet(columnNames).map(new Function<Collection<String>, DataSet>() {
+        return cubeSet(columnNames).filter(NOT_EMPTY_FILTER).map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
                 return groupBy(columnNames);
@@ -6115,7 +6122,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public <T> Stream<DataSet> cube(final Collection<String> columnNames, final String aggregateResultColumnName, final String aggregateOnColumnName,
             final Collector<T, ?, ?> collector) {
-        return cubeSet(columnNames).map(new Function<Collection<String>, DataSet>() {
+        return cubeSet(columnNames).filter(NOT_EMPTY_FILTER).map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
                 return groupBy(columnNames, aggregateResultColumnName, aggregateOnColumnName, collector);
@@ -6136,7 +6143,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public <T, E extends Exception> Stream<DataSet> cube(final Collection<String> columnNames, final String aggregateResultColumnName,
             final String aggregateOnColumnName, final Throwables.Function<Stream<T>, ?, E> func) {
-        return cubeSet(columnNames).map(new Function<Collection<String>, DataSet>() {
+        return cubeSet(columnNames).filter(NOT_EMPTY_FILTER).map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
                 return Try.call(new Callable<DataSet>() {
@@ -6152,7 +6159,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public Stream<DataSet> cube(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
             Class<?> rowClass) {
-        return cubeSet(columnNames).map(new Function<Collection<String>, DataSet>() {
+        return cubeSet(columnNames).filter(NOT_EMPTY_FILTER).map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
                 return Try.call(new Callable<DataSet>() {
@@ -6194,7 +6201,7 @@ public class RowDataSet implements DataSet, Cloneable {
     public <U, E extends Exception> Stream<DataSet> cube(final Collection<String> columnNames, final String aggregateResultColumnName,
             final Collection<String> aggregateOnColumnNames, final Throwables.Function<? super DisposableObjArray, U, E> rowMapper,
             final Collector<? super U, ?, ?> collector) {
-        return cubeSet(columnNames).map(new Function<Collection<String>, DataSet>() {
+        return cubeSet(columnNames).filter(NOT_EMPTY_FILTER).map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
                 return Try.call(new Callable<DataSet>() {
@@ -6217,7 +6224,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public <E extends Exception> Stream<DataSet> cube(final Collection<String> columnNames,
             final Throwables.Function<? super DisposableObjArray, ?, E> keyMapper) {
-        return cubeSet(columnNames).map(new Function<Collection<String>, DataSet>() {
+        return cubeSet(columnNames).filter(NOT_EMPTY_FILTER).map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
                 return Try.call(new Callable<DataSet>() {
@@ -6245,7 +6252,7 @@ public class RowDataSet implements DataSet, Cloneable {
     public <T, E extends Exception> Stream<DataSet> cube(final Collection<String> columnNames,
             final Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, final String aggregateResultColumnName, final String aggregateOnColumnName,
             final Collector<T, ?, ?> collector) {
-        return cubeSet(columnNames).map(new Function<Collection<String>, DataSet>() {
+        return cubeSet(columnNames).filter(NOT_EMPTY_FILTER).map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
                 return Try.call(new Callable<DataSet>() {
@@ -6274,7 +6281,7 @@ public class RowDataSet implements DataSet, Cloneable {
     public <T, E extends Exception, E2 extends Exception> Stream<DataSet> cube(final Collection<String> columnNames,
             final Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, final String aggregateResultColumnName, final String aggregateOnColumnName,
             final Throwables.Function<Stream<T>, ?, E2> func) {
-        return cubeSet(columnNames).map(new Function<Collection<String>, DataSet>() {
+        return cubeSet(columnNames).filter(NOT_EMPTY_FILTER).map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
                 return Try.call(new Callable<DataSet>() {
@@ -6291,7 +6298,7 @@ public class RowDataSet implements DataSet, Cloneable {
     public <E extends Exception> Stream<DataSet> cube(Collection<String> columnNames,
             com.landawn.abacus.util.Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, String aggregateResultColumnName,
             Collection<String> aggregateOnColumnNames, Class<?> rowClass) {
-        return cubeSet(columnNames).map(new Function<Collection<String>, DataSet>() {
+        return cubeSet(columnNames).filter(NOT_EMPTY_FILTER).map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
                 return Try.call(new Callable<DataSet>() {
@@ -6339,7 +6346,7 @@ public class RowDataSet implements DataSet, Cloneable {
             final Throwables.Function<? super DisposableObjArray, ?, E> keyMapper, final String aggregateResultColumnName,
             final Collection<String> aggregateOnColumnNames, final Throwables.Function<? super DisposableObjArray, U, E2> rowMapper,
             final Collector<? super U, ?, ?> collector) {
-        return cubeSet(columnNames).map(new Function<Collection<String>, DataSet>() {
+        return cubeSet(columnNames).filter(NOT_EMPTY_FILTER).map(new Function<Collection<String>, DataSet>() {
             @Override
             public DataSet apply(final Collection<String> columnNames) {
                 return Try.call(new Callable<DataSet>() {
