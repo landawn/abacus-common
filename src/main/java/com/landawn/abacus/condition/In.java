@@ -122,7 +122,7 @@ public class In extends AbstractCondition {
      */
     @Override
     public String toString(NamingPolicy namingPolicy) {
-        if (namingPolicy == NamingPolicy.LOWER_CAMEL_CASE) {
+        if (namingPolicy == NamingPolicy.NO_CHANGE) {
             return propName + WD._SPACE + getOperator().toString()
                     + Joiner.with(WD.COMMA_SPACE, WD.SPACE_PARENTHESES_L, WD.PARENTHESES_R).reuseCachedBuffer().appendAll(values).toString();
         } else {

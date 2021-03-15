@@ -2217,7 +2217,7 @@ public final class Maps {
     public static <M extends Map<String, Object>> M entity2Map(final M resultMap, final Object entity, final boolean ignoreNullProperty,
             final Collection<String> ignoredPropNames, NamingPolicy keyNamingPolicy) {
         keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
-        final boolean isLowerCamelCase = NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy);
+        final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy) || NamingPolicy.NO_CHANGE.equals(keyNamingPolicy);
         final boolean hasIgnoredPropNames = N.notNullOrEmpty(ignoredPropNames);
         final Class<?> entityClass = entity.getClass();
         final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
@@ -2243,7 +2243,7 @@ public final class Maps {
                         continue;
                     }
 
-                    if (isLowerCamelCase) {
+                    if (isLowerCamelCaseOrNoChange) {
                         resultMap.put(propName, propValue);
                     } else {
                         resultMap.put(keyNamingPolicy.convert(propName), propValue);
@@ -2267,7 +2267,7 @@ public final class Maps {
                     continue;
                 }
 
-                if (isLowerCamelCase) {
+                if (isLowerCamelCaseOrNoChange) {
                     resultMap.put(propName, propValue);
                 } else {
                     resultMap.put(keyNamingPolicy.convert(propName), propValue);
@@ -2486,7 +2486,7 @@ public final class Maps {
     public static <M extends Map<String, Object>> M deepEntity2Map(final M resultMap, final Object entity, final boolean ignoreNullProperty,
             final Collection<String> ignoredPropNames, NamingPolicy keyNamingPolicy) {
         keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
-        final boolean isLowerCamelCase = NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy);
+        final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy) || NamingPolicy.NO_CHANGE.equals(keyNamingPolicy);
         final boolean hasIgnoredPropNames = N.notNullOrEmpty(ignoredPropNames);
         final Class<?> entityClass = entity.getClass();
         final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
@@ -2513,13 +2513,13 @@ public final class Maps {
                     }
 
                     if ((propValue == null) || !propInfo.jsonXmlType.isEntity()) {
-                        if (isLowerCamelCase) {
+                        if (isLowerCamelCaseOrNoChange) {
                             resultMap.put(propName, propValue);
                         } else {
                             resultMap.put(keyNamingPolicy.convert(propName), propValue);
                         }
                     } else {
-                        if (isLowerCamelCase) {
+                        if (isLowerCamelCaseOrNoChange) {
                             resultMap.put(propName, deepEntity2Map(propValue, ignoreNullProperty, null, keyNamingPolicy));
                         } else {
                             resultMap.put(keyNamingPolicy.convert(propName), deepEntity2Map(propValue, ignoreNullProperty, null, keyNamingPolicy));
@@ -2545,13 +2545,13 @@ public final class Maps {
                 }
 
                 if ((propValue == null) || !propInfo.jsonXmlType.isEntity()) {
-                    if (isLowerCamelCase) {
+                    if (isLowerCamelCaseOrNoChange) {
                         resultMap.put(propName, propValue);
                     } else {
                         resultMap.put(keyNamingPolicy.convert(propName), propValue);
                     }
                 } else {
-                    if (isLowerCamelCase) {
+                    if (isLowerCamelCaseOrNoChange) {
                         resultMap.put(propName, deepEntity2Map(propValue, ignoreNullProperty, null, keyNamingPolicy));
                     } else {
                         resultMap.put(keyNamingPolicy.convert(propName), deepEntity2Map(propValue, ignoreNullProperty, null, keyNamingPolicy));
@@ -2815,7 +2815,7 @@ public final class Maps {
             }
         }
 
-        final boolean isLowerCamelCase = NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy);
+        final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy) || NamingPolicy.NO_CHANGE.equals(keyNamingPolicy);
         String propName = null;
         Object propValue = null;
 
@@ -2838,13 +2838,13 @@ public final class Maps {
 
             if ((propValue == null) || !propInfo.jsonXmlType.isEntity()) {
                 if (isNullParentPropName) {
-                    if (isLowerCamelCase) {
+                    if (isLowerCamelCaseOrNoChange) {
                         resultMap.put(propName, propValue);
                     } else {
                         resultMap.put(keyNamingPolicy.convert(propName), propValue);
                     }
                 } else {
-                    if (isLowerCamelCase) {
+                    if (isLowerCamelCaseOrNoChange) {
                         resultMap.put(parentPropName + WD.PERIOD + propName, propValue);
                     } else {
                         resultMap.put(keyNamingPolicy.convert(parentPropName + WD.PERIOD + propName), propValue);

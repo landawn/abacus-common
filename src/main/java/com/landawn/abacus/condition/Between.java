@@ -173,7 +173,7 @@ public class Between extends AbstractCondition {
      */
     @Override
     public String toString(NamingPolicy namingPolicy) {
-        if (namingPolicy == NamingPolicy.LOWER_CAMEL_CASE) {
+        if (namingPolicy == NamingPolicy.NO_CHANGE) {
             return propName + WD._SPACE + getOperator().toString() + WD.SPACE_PARENTHESES_L + parameter2String(minValue, namingPolicy) + WD.COMMA_SPACE
                     + parameter2String(maxValue, namingPolicy) + WD._PARENTHESES_R;
         } else {

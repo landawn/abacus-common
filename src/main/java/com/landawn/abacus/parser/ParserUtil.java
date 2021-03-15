@@ -370,7 +370,8 @@ public final class ParserUtil {
     }
 
     private static String convertName(final String name, final NamingPolicy namingPolicy) {
-        return namingPolicy == null || namingPolicy == NamingPolicy.LOWER_CAMEL_CASE ? name : namingPolicy.convert(name);
+        return namingPolicy == null || namingPolicy == NamingPolicy.LOWER_CAMEL_CASE || namingPolicy == NamingPolicy.NO_CHANGE ? name
+                : namingPolicy.convert(name);
     }
 
     /**

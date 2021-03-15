@@ -357,11 +357,11 @@ public abstract class SQLBuilder {
             final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
 
             if (entityInfo.tableName.isPresent()) {
-                entityTableNames = Array.repeat(entityInfo.tableName.get(), 3);
+                entityTableNames = Array.repeat(entityInfo.tableName.get(), 4);
             } else {
                 final String simpleClassName = ClassUtil.getSimpleClassName(entityClass);
                 entityTableNames = new String[] { ClassUtil.toLowerCaseWithUnderscore(simpleClassName), ClassUtil.toUpperCaseWithUnderscore(simpleClassName),
-                        ClassUtil.toCamelCase(simpleClassName) };
+                        ClassUtil.toCamelCase(simpleClassName), simpleClassName };
             }
 
             classTableNameMap.put(entityClass, entityTableNames);
@@ -374,8 +374,11 @@ public abstract class SQLBuilder {
             case UPPER_CASE_WITH_UNDERSCORE:
                 return entityTableNames[1];
 
-            default:
+            case LOWER_CAMEL_CASE:
                 return entityTableNames[2];
+
+            default:
+                return entityTableNames[3];
         }
     }
 
@@ -1144,8 +1147,8 @@ public abstract class SQLBuilder {
 
                         fullSelectParts += formalizeColumnName(propColumnNameMap, columnName);
 
-                        if (namingPolicy != NamingPolicy.LOWER_CAMEL_CASE && !WD.ASTERISK.equals(columnName)) {
-                            fullSelectParts += " AS ";
+                        if ((namingPolicy != NamingPolicy.LOWER_CAMEL_CASE && namingPolicy != NamingPolicy.NO_CHANGE) && !WD.ASTERISK.equals(columnName)) {
+                            fullSelectParts += SPACE_AS_SPACE;
 
                             fullSelectParts += WD.QUOTATION_D;
                             fullSelectParts += columnName;
@@ -3298,7 +3301,7 @@ public abstract class SQLBuilder {
 
             sb.append(tp._1);
 
-            if (isForSelect) {
+            if (isForSelect && namingPolicy != NamingPolicy.NO_CHANGE) {
                 sb.append(_SPACE_AS_SPACE);
                 sb.append(WD._QUOTATION_D);
 
@@ -3326,7 +3329,7 @@ public abstract class SQLBuilder {
                         if (tp != null) {
                             sb.append(propTableAlias).append('.').append(tp._1);
 
-                            if (isForSelect) {
+                            if (isForSelect && namingPolicy != NamingPolicy.NO_CHANGE) {
                                 sb.append(_SPACE_AS_SPACE);
                                 sb.append(WD._QUOTATION_D);
 
@@ -3348,7 +3351,7 @@ public abstract class SQLBuilder {
         if (N.notNullOrEmpty(propAlias)) {
             appendStringExpr(propName, true);
 
-            if (isForSelect) {
+            if (isForSelect && namingPolicy != NamingPolicy.NO_CHANGE) {
                 sb.append(_SPACE_AS_SPACE);
                 sb.append(WD._QUOTATION_D);
 
@@ -3360,7 +3363,7 @@ public abstract class SQLBuilder {
                 sb.append(WD._QUOTATION_D);
             }
         } else {
-            if (isForSelect) {
+            if (isForSelect && namingPolicy != NamingPolicy.NO_CHANGE) {
                 int index = propName.indexOf(" AS ");
 
                 if (index < 0) {
@@ -3441,7 +3444,7 @@ public abstract class SQLBuilder {
     }
 
     static String formalizeColumnName(final String word, final NamingPolicy namingPolicy) {
-        if (sqlKeyWords.contains(word)) {
+        if (sqlKeyWords.contains(word) || namingPolicy == NamingPolicy.NO_CHANGE) {
             return word;
         } else if (namingPolicy == NamingPolicy.LOWER_CAMEL_CASE) {
             return ClassUtil.formalizePropName(word);
@@ -3548,7 +3551,7 @@ public abstract class SQLBuilder {
      * For example:
      * <pre>
      * <code>
-     * SCSB.select("firstName", "lastName").from("account").where(L.eq("id", 1)).sql();
+     * SCSB.select("firstName", "lastName").from("account").where(CF.eq("id", 1)).sql();
      * // Output: SELECT first_name AS "firstName", last_name AS "lastName" FROM account WHERE id = 1
      * </code>
      * </pre>
@@ -3558,18 +3561,10 @@ public abstract class SQLBuilder {
     @Deprecated
     public static class SCSB extends SQLBuilder {
 
-        /**
-         * Instantiates a new scsb.
-         */
         SCSB() {
             super(NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, SQLPolicy.SQL);
         }
 
-        /**
-         * Creates the instance.
-         *
-         * @return
-         */
         static SCSB createInstance() {
             return new SCSB();
         }
@@ -4091,7 +4086,7 @@ public abstract class SQLBuilder {
      * For example:
      * <pre>
      * <code>
-     * N.println(ACSB.select("firstName", "lastName").from("account").where(L.eq("id", 1)).sql());
+     * N.println(ACSB.select("firstName", "lastName").from("account").where(CF.eq("id", 1)).sql());
      * // Output: SELECT FIRST_NAME AS "firstName", LAST_NAME AS "lastName" FROM ACCOUNT WHERE ID = 1
      * </code>
      * </pre>
@@ -4101,18 +4096,10 @@ public abstract class SQLBuilder {
     @Deprecated
     public static class ACSB extends SQLBuilder {
 
-        /**
-         * Instantiates a new acsb.
-         */
         ACSB() {
             super(NamingPolicy.UPPER_CASE_WITH_UNDERSCORE, SQLPolicy.SQL);
         }
 
-        /**
-         * Creates the instance.
-         *
-         * @return
-         */
         static ACSB createInstance() {
             return new ACSB();
         }
@@ -4634,7 +4621,7 @@ public abstract class SQLBuilder {
      * For example:
      * <pre>
      * <code>
-     * N.println(LCSB.select("firstName", "lastName").from("account").where(L.eq("id", 1)).sql());
+     * N.println(LCSB.select("firstName", "lastName").from("account").where(CF.eq("id", 1)).sql());
      * // SELECT firstName, lastName FROM account WHERE id = 1
      * </code>
      * </pre>
@@ -4644,18 +4631,10 @@ public abstract class SQLBuilder {
     @Deprecated
     public static class LCSB extends SQLBuilder {
 
-        /**
-         * Instantiates a new lcsb.
-         */
         LCSB() {
             super(NamingPolicy.LOWER_CAMEL_CASE, SQLPolicy.SQL);
         }
 
-        /**
-         * Creates the instance.
-         *
-         * @return
-         */
         static LCSB createInstance() {
             return new LCSB();
         }
@@ -5172,30 +5151,554 @@ public abstract class SQLBuilder {
     }
 
     /**
+     * Parameterized('?') SQL builder with {@code NamingPolicy.NO_CHANGE} field/column naming strategy.
+     *
+     * For example:
+     * <pre>
+     * <code>
+     * N.println(PSB.select("first_Name", "last_NaMe").from("account").where(CF.eq("last_NaMe", 1)).sql());
+     * // SELECT first_Name, last_NaMe FROM account WHERE last_NaMe = ?
+     * </code>
+     * </pre>
+     */
+    public static class PSB extends SQLBuilder {
+
+        PSB() {
+            super(NamingPolicy.NO_CHANGE, SQLPolicy.PARAMETERIZED_SQL);
+        }
+
+        static PSB createInstance() {
+            return new PSB();
+        }
+
+        /**
+         * To generate {@code sql} part for the specified {@code cond} only.
+         *
+         * @param cond
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder parse(final Condition cond, final Class<?> entityClass) {
+            N.checkArgNotNull(cond, "cond");
+
+            final SQLBuilder instance = createInstance();
+
+            instance.entityClass = entityClass;
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.op = OperationType.QUERY;
+            instance.isForConditionOnly = true;
+            instance.append(cond);
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param expr
+         * @return
+         */
+        public static SQLBuilder insert(final String expr) {
+            return insert(N.asArray(expr));
+        }
+
+        /**
+         *
+         * @param columnNames
+         * @return
+         */
+        @SafeVarargs
+        public static SQLBuilder insert(final String... columnNames) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.ADD;
+            instance.columnNames = Array.asList(columnNames);
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param columnNames
+         * @return
+         */
+        public static SQLBuilder insert(final Collection<String> columnNames) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.ADD;
+            instance.columnNames = columnNames;
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param props
+         * @return
+         */
+        public static SQLBuilder insert(final Map<String, Object> props) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.ADD;
+            instance.props = props;
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param entity
+         * @return
+         */
+        public static SQLBuilder insert(final Object entity) {
+            return insert(entity, null);
+        }
+
+        /**
+         *
+         * @param entity
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder insert(final Object entity, final Set<String> excludedPropNames) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.ADD;
+            instance.entityClass = entity.getClass();
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+
+            parseInsertEntity(instance, entity, excludedPropNames);
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder insert(final Class<?> entityClass) {
+            return insert(entityClass, null);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder insert(final Class<?> entityClass, final Set<String> excludedPropNames) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.ADD;
+            instance.entityClass = entityClass;
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.columnNames = getInsertPropNames(entityClass, excludedPropNames);
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder insertInto(final Class<?> entityClass) {
+            return insertInto(entityClass, null);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder insertInto(final Class<?> entityClass, final Set<String> excludedPropNames) {
+            return insert(entityClass, excludedPropNames).into(entityClass);
+        }
+
+        /**
+         * Generate the MySQL style batch insert sql.
+         *
+         * @param propsList list of entity or properties map.
+         * @return
+         */
+        @Beta
+        public static SQLBuilder batchInsert(final Collection<?> propsList) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.ADD;
+            final Optional<?> first = N.firstNonNull(propsList);
+
+            if (first.isPresent() && ClassUtil.isEntity(first.get().getClass())) {
+                instance.entityClass = first.get().getClass();
+                instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            }
+
+            instance.propsList = toInsertPropsList(propsList);
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param tableName
+         * @return
+         */
+        public static SQLBuilder update(final String tableName) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.UPDATE;
+            instance.tableName = tableName;
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder update(final Class<?> entityClass) {
+            return update(entityClass, null);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder update(final Class<?> entityClass, final Set<String> excludedPropNames) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.UPDATE;
+            instance.entityClass = entityClass;
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.tableName = getTableName(entityClass, NamingPolicy.NO_CHANGE);
+            instance.columnNames = getUpdatePropNames(entityClass, excludedPropNames);
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param tableName
+         * @return
+         */
+        public static SQLBuilder deleteFrom(final String tableName) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.DELETE;
+            instance.tableName = tableName;
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder deleteFrom(final Class<?> entityClass) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.DELETE;
+            instance.entityClass = entityClass;
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.tableName = getTableName(entityClass, NamingPolicy.NO_CHANGE);
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param selectPart
+         * @return
+         */
+        public static SQLBuilder select(final String selectPart) {
+            N.checkArgNotNullOrEmpty(selectPart, "selectPart");
+
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.columnNames = Array.asList(selectPart);
+            return instance;
+        }
+
+        /**
+         *
+         * @param columnNames
+         * @return
+         */
+        @SafeVarargs
+        public static SQLBuilder select(final String... columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.columnNames = Array.asList(columnNames);
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param columnNames
+         * @return
+         */
+        public static SQLBuilder select(final Collection<String> columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.columnNames = columnNames;
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param columnAliases
+         * @return
+         */
+        public static SQLBuilder select(final Map<String, String> columnAliases) {
+            N.checkArgNotNullOrEmpty(columnAliases, "columnAliases");
+
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.columnAliases = columnAliases;
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder select(final Class<?> entityClass) {
+            return select(entityClass, false);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
+         */
+        public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties) {
+            return select(entityClass, includeSubEntityProperties, null);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder select(final Class<?> entityClass, final Set<String> excludedPropNames) {
+            return select(entityClass, false, excludedPropNames);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.entityClass = entityClass;
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.columnNames = getSelectPropNames(entityClass, includeSubEntityProperties, excludedPropNames);
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass) {
+            return selectFrom(entityClass, false);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param alias
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final String alias) {
+            return selectFrom(entityClass, alias, false);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties) {
+            return selectFrom(entityClass, includeSubEntityProperties, null);
+        }
+
+        /**
+         * 
+         * @param entityClass
+         * @param alias
+         * @param includeSubEntityProperties
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final String alias, final boolean includeSubEntityProperties) {
+            return selectFrom(entityClass, alias, includeSubEntityProperties, null);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final Set<String> excludedPropNames) {
+            return selectFrom(entityClass, false, excludedPropNames);
+        }
+
+        /**
+         * 
+         * @param entityClass
+         * @param alias
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final String alias, final Set<String> excludedPropNames) {
+            return selectFrom(entityClass, alias, false, excludedPropNames);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
+            return selectFrom(entityClass, null, includeSubEntityProperties, excludedPropNames);
+        }
+
+        /**
+         * 
+         * @param entityClass
+         * @param alias
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final String alias, final boolean includeSubEntityProperties,
+                final Set<String> excludedPropNames) {
+            if (includeSubEntityProperties) {
+                final List<String> selectTableNames = getSelectTableNames(entityClass, alias, excludedPropNames, NamingPolicy.NO_CHANGE);
+                return select(entityClass, includeSubEntityProperties, excludedPropNames).from(entityClass, selectTableNames);
+            } else {
+                return select(entityClass, includeSubEntityProperties, excludedPropNames).from(entityClass, alias);
+            }
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final String classAliasA, final Class<?> entityClassB,
+                final String tableAliasB, final String classAliasB) {
+            return select(entityClassA, tableAliasA, classAliasA, null, entityClassB, tableAliasB, classAliasB, null);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final String classAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final String classAliasB, final Set<String> excludedPropNamesB) {
+
+            final List<Tuple4<Class<?>, String, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, String, Set<String>> of(entityClassA, tableAliasA, classAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, String, Set<String>> of(entityClassB, tableAliasB, classAliasB, excludedPropNamesB));
+
+            return select(multiSelects);
+        }
+
+        public static SQLBuilder select(final List<Tuple4<Class<?>, String, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.entityClass = multiSelects.get(0)._1;
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.multiSelects = multiSelects;
+
+            return instance;
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final String classAliasA, final Class<?> entityClassB,
+                final String tableAliasB, final String classAliasB) {
+            return selectFrom(entityClassA, tableAliasA, classAliasA, null, entityClassB, tableAliasB, classAliasB, null);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final String classAliasA,
+                final Set<String> excludedPropNamesA, final Class<?> entityClassB, final String tableAliasB, final String classAliasB,
+                final Set<String> excludedPropNamesB) {
+
+            final List<Tuple4<Class<?>, String, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, String, Set<String>> of(entityClassA, tableAliasA, classAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, String, Set<String>> of(entityClassB, tableAliasB, classAliasB, excludedPropNamesB));
+
+            return selectFrom(multiSelects);
+        }
+
+        public static SQLBuilder selectFrom(final List<Tuple4<Class<?>, String, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final NamingPolicy namingPolicy = NamingPolicy.NO_CHANGE;
+            final StringBuilder sb = Objectory.createStringBuilder();
+            int idx = 0;
+
+            for (Tuple4<Class<?>, String, String, Set<String>> tp : multiSelects) {
+                if (idx++ > 0) {
+                    sb.append(_COMMA_SPACE);
+                }
+
+                sb.append(getTableName(tp._1, namingPolicy));
+
+                if (N.notNullOrEmpty(tp._2)) {
+                    sb.append(' ').append(tp._2);
+                }
+            }
+
+            String fromClause = sb.toString();
+
+            Objectory.recycle(sb);
+
+            return select(multiSelects).from(fromClause);
+        }
+    }
+
+    /**
      * Parameterized('?') SQL builder with snake case (lower case with underscore) field/column naming strategy.
      *
      * For example:
      * <pre>
      * <code>
-     * N.println(PSC.select("firstName", "lastName").from("account").where(L.eq("id", 1)).sql());
+     * N.println(PSC.select("firstName", "lastName").from("account").where(CF.eq("id", 1)).sql());
      * // SELECT first_name AS "firstName", last_name AS "lastName" FROM account WHERE id = ?
      * </code>
      * </pre>
      */
     public static class PSC extends SQLBuilder {
 
-        /**
-         * Instantiates a new psc.
-         */
         PSC() {
             super(NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, SQLPolicy.PARAMETERIZED_SQL);
         }
 
-        /**
-         * Creates the instance.
-         *
-         * @return
-         */
         static PSC createInstance() {
             return new PSC();
         }
@@ -5717,25 +6220,17 @@ public abstract class SQLBuilder {
      * For example:
      * <pre>
      * <code>
-     * N.println(PAC.select("firstName", "lastName").from("account").where(L.eq("id", 1)).sql());
+     * N.println(PAC.select("firstName", "lastName").from("account").where(CF.eq("id", 1)).sql());
      * // SELECT FIRST_NAME AS "firstName", LAST_NAME AS "lastName" FROM ACCOUNT WHERE ID = ?
      * </code>
      * </pre>
      */
     public static class PAC extends SQLBuilder {
 
-        /**
-         * Instantiates a new pac.
-         */
         PAC() {
             super(NamingPolicy.UPPER_CASE_WITH_UNDERSCORE, SQLPolicy.PARAMETERIZED_SQL);
         }
 
-        /**
-         * Creates the instance.
-         *
-         * @return
-         */
         static PAC createInstance() {
             return new PAC();
         }
@@ -6257,25 +6752,17 @@ public abstract class SQLBuilder {
      * For example:
      * <pre>
      * <code>
-     * N.println(PLC.select("firstName", "lastName").from("account").where(L.eq("id", 1)).sql());
+     * N.println(PLC.select("firstName", "lastName").from("account").where(CF.eq("id", 1)).sql());
      * // SELECT firstName, lastName FROM account WHERE id = ?
      * </code>
      * </pre>
      */
     public static class PLC extends SQLBuilder {
 
-        /**
-         * Instantiates a new plc.
-         */
         PLC() {
             super(NamingPolicy.LOWER_CAMEL_CASE, SQLPolicy.PARAMETERIZED_SQL);
         }
 
-        /**
-         * Creates the instance.
-         *
-         * @return
-         */
         static PLC createInstance() {
             return new PLC();
         }
@@ -6792,30 +7279,554 @@ public abstract class SQLBuilder {
     }
 
     /**
+     * Named SQL builder with {@code NamingPolicy.NO_CHANGE} field/column naming strategy.
+     *
+     * For example:
+     * <pre>
+     * <code>
+     * N.println(NSB.select("first_Name", "last_NaMe").from("account").where(CF.eq("last_NaMe", 1)).sql());
+     * // SELECT first_Name, last_NaMe FROM account WHERE last_NaMe = :last_NaMe
+     * </code>
+     * </pre>
+     */
+    public static class NSB extends SQLBuilder {
+
+        NSB() {
+            super(NamingPolicy.NO_CHANGE, SQLPolicy.NAMED_SQL);
+        }
+
+        static NSB createInstance() {
+            return new NSB();
+        }
+
+        /**
+         * To generate {@code sql} part for the specified {@code cond} only.
+         *
+         * @param cond
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder parse(final Condition cond, final Class<?> entityClass) {
+            N.checkArgNotNull(cond, "cond");
+
+            final SQLBuilder instance = createInstance();
+
+            instance.entityClass = entityClass;
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.op = OperationType.QUERY;
+            instance.isForConditionOnly = true;
+            instance.append(cond);
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param expr
+         * @return
+         */
+        public static SQLBuilder insert(final String expr) {
+            return insert(N.asArray(expr));
+        }
+
+        /**
+         *
+         * @param columnNames
+         * @return
+         */
+        @SafeVarargs
+        public static SQLBuilder insert(final String... columnNames) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.ADD;
+            instance.columnNames = Array.asList(columnNames);
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param columnNames
+         * @return
+         */
+        public static SQLBuilder insert(final Collection<String> columnNames) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.ADD;
+            instance.columnNames = columnNames;
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param props
+         * @return
+         */
+        public static SQLBuilder insert(final Map<String, Object> props) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.ADD;
+            instance.props = props;
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param entity
+         * @return
+         */
+        public static SQLBuilder insert(final Object entity) {
+            return insert(entity, null);
+        }
+
+        /**
+         *
+         * @param entity
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder insert(final Object entity, final Set<String> excludedPropNames) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.ADD;
+            instance.entityClass = entity.getClass();
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+
+            parseInsertEntity(instance, entity, excludedPropNames);
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder insert(final Class<?> entityClass) {
+            return insert(entityClass, null);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder insert(final Class<?> entityClass, final Set<String> excludedPropNames) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.ADD;
+            instance.entityClass = entityClass;
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.columnNames = getInsertPropNames(entityClass, excludedPropNames);
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder insertInto(final Class<?> entityClass) {
+            return insertInto(entityClass, null);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder insertInto(final Class<?> entityClass, final Set<String> excludedPropNames) {
+            return insert(entityClass, excludedPropNames).into(entityClass);
+        }
+
+        /**
+         * Generate the MySQL style batch insert sql.
+         *
+         * @param propsList list of entity or properties map.
+         * @return
+         */
+        @Beta
+        public static SQLBuilder batchInsert(final Collection<?> propsList) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.ADD;
+            final Optional<?> first = N.firstNonNull(propsList);
+
+            if (first.isPresent() && ClassUtil.isEntity(first.get().getClass())) {
+                instance.entityClass = first.get().getClass();
+                instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            }
+
+            instance.propsList = toInsertPropsList(propsList);
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param tableName
+         * @return
+         */
+        public static SQLBuilder update(final String tableName) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.UPDATE;
+            instance.tableName = tableName;
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder update(final Class<?> entityClass) {
+            return update(entityClass, null);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder update(final Class<?> entityClass, final Set<String> excludedPropNames) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.UPDATE;
+            instance.entityClass = entityClass;
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.tableName = getTableName(entityClass, NamingPolicy.NO_CHANGE);
+            instance.columnNames = getUpdatePropNames(entityClass, excludedPropNames);
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param tableName
+         * @return
+         */
+        public static SQLBuilder deleteFrom(final String tableName) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.DELETE;
+            instance.tableName = tableName;
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder deleteFrom(final Class<?> entityClass) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.DELETE;
+            instance.entityClass = entityClass;
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.tableName = getTableName(entityClass, NamingPolicy.NO_CHANGE);
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param selectPart
+         * @return
+         */
+        public static SQLBuilder select(final String selectPart) {
+            N.checkArgNotNullOrEmpty(selectPart, "selectPart");
+
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.columnNames = Array.asList(selectPart);
+            return instance;
+        }
+
+        /**
+         *
+         * @param columnNames
+         * @return
+         */
+        @SafeVarargs
+        public static SQLBuilder select(final String... columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.columnNames = Array.asList(columnNames);
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param columnNames
+         * @return
+         */
+        public static SQLBuilder select(final Collection<String> columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.columnNames = columnNames;
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param columnAliases
+         * @return
+         */
+        public static SQLBuilder select(final Map<String, String> columnAliases) {
+            N.checkArgNotNullOrEmpty(columnAliases, "columnAliases");
+
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.columnAliases = columnAliases;
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder select(final Class<?> entityClass) {
+            return select(entityClass, false);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
+         */
+        public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties) {
+            return select(entityClass, includeSubEntityProperties, null);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder select(final Class<?> entityClass, final Set<String> excludedPropNames) {
+            return select(entityClass, false, excludedPropNames);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.entityClass = entityClass;
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.columnNames = getSelectPropNames(entityClass, includeSubEntityProperties, excludedPropNames);
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass) {
+            return selectFrom(entityClass, false);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param alias
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final String alias) {
+            return selectFrom(entityClass, alias, false);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties) {
+            return selectFrom(entityClass, includeSubEntityProperties, null);
+        }
+
+        /**
+         * 
+         * @param entityClass
+         * @param alias
+         * @param includeSubEntityProperties
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final String alias, final boolean includeSubEntityProperties) {
+            return selectFrom(entityClass, alias, includeSubEntityProperties, null);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final Set<String> excludedPropNames) {
+            return selectFrom(entityClass, false, excludedPropNames);
+        }
+
+        /**
+         * 
+         * @param entityClass
+         * @param alias
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final String alias, final Set<String> excludedPropNames) {
+            return selectFrom(entityClass, alias, false, excludedPropNames);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
+            return selectFrom(entityClass, null, includeSubEntityProperties, excludedPropNames);
+        }
+
+        /**
+         * 
+         * @param entityClass
+         * @param alias
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final String alias, final boolean includeSubEntityProperties,
+                final Set<String> excludedPropNames) {
+            if (includeSubEntityProperties) {
+                final List<String> selectTableNames = getSelectTableNames(entityClass, alias, excludedPropNames, NamingPolicy.NO_CHANGE);
+                return select(entityClass, includeSubEntityProperties, excludedPropNames).from(entityClass, selectTableNames);
+            } else {
+                return select(entityClass, includeSubEntityProperties, excludedPropNames).from(entityClass, alias);
+            }
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final String classAliasA, final Class<?> entityClassB,
+                final String tableAliasB, final String classAliasB) {
+            return select(entityClassA, tableAliasA, classAliasA, null, entityClassB, tableAliasB, classAliasB, null);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final String classAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final String classAliasB, final Set<String> excludedPropNamesB) {
+
+            final List<Tuple4<Class<?>, String, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, String, Set<String>> of(entityClassA, tableAliasA, classAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, String, Set<String>> of(entityClassB, tableAliasB, classAliasB, excludedPropNamesB));
+
+            return select(multiSelects);
+        }
+
+        public static SQLBuilder select(final List<Tuple4<Class<?>, String, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.entityClass = multiSelects.get(0)._1;
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.multiSelects = multiSelects;
+
+            return instance;
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final String classAliasA, final Class<?> entityClassB,
+                final String tableAliasB, final String classAliasB) {
+            return selectFrom(entityClassA, tableAliasA, classAliasA, null, entityClassB, tableAliasB, classAliasB, null);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final String classAliasA,
+                final Set<String> excludedPropNamesA, final Class<?> entityClassB, final String tableAliasB, final String classAliasB,
+                final Set<String> excludedPropNamesB) {
+
+            final List<Tuple4<Class<?>, String, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, String, Set<String>> of(entityClassA, tableAliasA, classAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, String, Set<String>> of(entityClassB, tableAliasB, classAliasB, excludedPropNamesB));
+
+            return selectFrom(multiSelects);
+        }
+
+        public static SQLBuilder selectFrom(final List<Tuple4<Class<?>, String, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final NamingPolicy namingPolicy = NamingPolicy.NO_CHANGE;
+            final StringBuilder sb = Objectory.createStringBuilder();
+            int idx = 0;
+
+            for (Tuple4<Class<?>, String, String, Set<String>> tp : multiSelects) {
+                if (idx++ > 0) {
+                    sb.append(_COMMA_SPACE);
+                }
+
+                sb.append(getTableName(tp._1, namingPolicy));
+
+                if (N.notNullOrEmpty(tp._2)) {
+                    sb.append(' ').append(tp._2);
+                }
+            }
+
+            String fromClause = sb.toString();
+
+            Objectory.recycle(sb);
+
+            return select(multiSelects).from(fromClause);
+        }
+    }
+
+    /**
      * Named SQL builder with snake case (lower case with underscore) field/column naming strategy.
      *
      * For example:
      * <pre>
      * <code>
-     * N.println(NSC.select("firstName", "lastName").from("account").where(L.eq("id", 1)).sql());
+     * N.println(NSC.select("firstName", "lastName").from("account").where(CF.eq("id", 1)).sql());
      * // SELECT first_name AS "firstName", last_name AS "lastName" FROM account WHERE id = :id
      * </code>
      * </pre>
      */
     public static class NSC extends SQLBuilder {
 
-        /**
-         * Instantiates a new nsc.
-         */
         NSC() {
             super(NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, SQLPolicy.NAMED_SQL);
         }
 
-        /**
-         * Creates the instance.
-         *
-         * @return
-         */
         static NSC createInstance() {
             return new NSC();
         }
@@ -7337,25 +8348,17 @@ public abstract class SQLBuilder {
      * For example:
      * <pre>
      * <code>
-     * N.println(NAC.select("firstName", "lastName").from("account").where(L.eq("id", 1)).sql());
+     * N.println(NAC.select("firstName", "lastName").from("account").where(CF.eq("id", 1)).sql());
      * // SELECT FIRST_NAME AS "firstName", LAST_NAME AS "lastName" FROM ACCOUNT WHERE ID = :id
      * </code>
      * </pre>
      */
     public static class NAC extends SQLBuilder {
 
-        /**
-         * Instantiates a new nac.
-         */
         NAC() {
             super(NamingPolicy.UPPER_CASE_WITH_UNDERSCORE, SQLPolicy.NAMED_SQL);
         }
 
-        /**
-         * Creates the instance.
-         *
-         * @return
-         */
         static NAC createInstance() {
             return new NAC();
         }
@@ -7877,25 +8880,17 @@ public abstract class SQLBuilder {
      * For example:
      * <pre>
      * <code>
-     * N.println(NLC.select("firstName", "lastName").from("account").where(L.eq("id", 1)).sql());
+     * N.println(NLC.select("firstName", "lastName").from("account").where(CF.eq("id", 1)).sql());
      * // SELECT firstName, lastName FROM account WHERE id = :id
      * </code>
      * </pre>
      */
     public static class NLC extends SQLBuilder {
 
-        /**
-         * Instantiates a new nlc.
-         */
         NLC() {
             super(NamingPolicy.LOWER_CAMEL_CASE, SQLPolicy.NAMED_SQL);
         }
 
-        /**
-         * Creates the instance.
-         *
-         * @return
-         */
         static NLC createInstance() {
             return new NLC();
         }
@@ -8412,12 +9407,545 @@ public abstract class SQLBuilder {
     }
 
     /**
+     * Named SQL builder with {@code NamingPolicy.NO_CHANGE} field/column naming strategy.
+     *
+     * For example:
+     * <pre>
+     * <code>
+     * N.println(MSB.select("first_Name", "last_NaMe").from("account").where(CF.eq("last_NaMe", 1)).sql());
+     * // SELECT first_Name, last_NaMe FROM account WHERE last_NaMe = #{last_NaMe}
+     * </code>
+     * </pre>
+     */
+    @Deprecated
+    public static class MSB extends SQLBuilder {
+
+        MSB() {
+            super(NamingPolicy.NO_CHANGE, SQLPolicy.IBATIS_SQL);
+        }
+
+        static MSB createInstance() {
+            return new MSB();
+        }
+
+        /**
+         * To generate {@code sql} part for the specified {@code cond} only.
+         *
+         * @param cond
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder parse(final Condition cond, final Class<?> entityClass) {
+            N.checkArgNotNull(cond, "cond");
+
+            final SQLBuilder instance = createInstance();
+
+            instance.entityClass = entityClass;
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.op = OperationType.QUERY;
+            instance.isForConditionOnly = true;
+            instance.append(cond);
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param expr
+         * @return
+         */
+        public static SQLBuilder insert(final String expr) {
+            return insert(N.asArray(expr));
+        }
+
+        /**
+         *
+         * @param columnNames
+         * @return
+         */
+        @SafeVarargs
+        public static SQLBuilder insert(final String... columnNames) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.ADD;
+            instance.columnNames = Array.asList(columnNames);
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param columnNames
+         * @return
+         */
+        public static SQLBuilder insert(final Collection<String> columnNames) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.ADD;
+            instance.columnNames = columnNames;
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param props
+         * @return
+         */
+        public static SQLBuilder insert(final Map<String, Object> props) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.ADD;
+            instance.props = props;
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param entity
+         * @return
+         */
+        public static SQLBuilder insert(final Object entity) {
+            return insert(entity, null);
+        }
+
+        /**
+         *
+         * @param entity
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder insert(final Object entity, final Set<String> excludedPropNames) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.ADD;
+            instance.entityClass = entity.getClass();
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+
+            parseInsertEntity(instance, entity, excludedPropNames);
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder insert(final Class<?> entityClass) {
+            return insert(entityClass, null);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder insert(final Class<?> entityClass, final Set<String> excludedPropNames) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.ADD;
+            instance.entityClass = entityClass;
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.columnNames = getInsertPropNames(entityClass, excludedPropNames);
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder insertInto(final Class<?> entityClass) {
+            return insertInto(entityClass, null);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder insertInto(final Class<?> entityClass, final Set<String> excludedPropNames) {
+            return insert(entityClass, excludedPropNames).into(entityClass);
+        }
+
+        /**
+         * Generate the MySQL style batch insert sql.
+         *
+         * @param propsList list of entity or properties map.
+         * @return
+         */
+        @Beta
+        public static SQLBuilder batchInsert(final Collection<?> propsList) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.ADD;
+            final Optional<?> first = N.firstNonNull(propsList);
+
+            if (first.isPresent() && ClassUtil.isEntity(first.get().getClass())) {
+                instance.entityClass = first.get().getClass();
+                instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            }
+
+            instance.propsList = toInsertPropsList(propsList);
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param tableName
+         * @return
+         */
+        public static SQLBuilder update(final String tableName) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.UPDATE;
+            instance.tableName = tableName;
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder update(final Class<?> entityClass) {
+            return update(entityClass, null);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder update(final Class<?> entityClass, final Set<String> excludedPropNames) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.UPDATE;
+            instance.entityClass = entityClass;
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.tableName = getTableName(entityClass, NamingPolicy.NO_CHANGE);
+            instance.columnNames = getUpdatePropNames(entityClass, excludedPropNames);
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param tableName
+         * @return
+         */
+        public static SQLBuilder deleteFrom(final String tableName) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.DELETE;
+            instance.tableName = tableName;
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder deleteFrom(final Class<?> entityClass) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.DELETE;
+            instance.entityClass = entityClass;
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.tableName = getTableName(entityClass, NamingPolicy.NO_CHANGE);
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param selectPart
+         * @return
+         */
+        public static SQLBuilder select(final String selectPart) {
+            N.checkArgNotNullOrEmpty(selectPart, "selectPart");
+
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.columnNames = Array.asList(selectPart);
+            return instance;
+        }
+
+        /**
+         *
+         * @param columnNames
+         * @return
+         */
+        @SafeVarargs
+        public static SQLBuilder select(final String... columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.columnNames = Array.asList(columnNames);
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param columnNames
+         * @return
+         */
+        public static SQLBuilder select(final Collection<String> columnNames) {
+            N.checkArgNotNullOrEmpty(columnNames, "columnNames");
+
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.columnNames = columnNames;
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param columnAliases
+         * @return
+         */
+        public static SQLBuilder select(final Map<String, String> columnAliases) {
+            N.checkArgNotNullOrEmpty(columnAliases, "columnAliases");
+
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.columnAliases = columnAliases;
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder select(final Class<?> entityClass) {
+            return select(entityClass, false);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
+         */
+        public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties) {
+            return select(entityClass, includeSubEntityProperties, null);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder select(final Class<?> entityClass, final Set<String> excludedPropNames) {
+            return select(entityClass, false, excludedPropNames);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder select(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.entityClass = entityClass;
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.columnNames = getSelectPropNames(entityClass, includeSubEntityProperties, excludedPropNames);
+
+            return instance;
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass) {
+            return selectFrom(entityClass, false);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param alias
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final String alias) {
+            return selectFrom(entityClass, alias, false);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties) {
+            return selectFrom(entityClass, includeSubEntityProperties, null);
+        }
+
+        /**
+         * 
+         * @param entityClass
+         * @param alias
+         * @param includeSubEntityProperties
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final String alias, final boolean includeSubEntityProperties) {
+            return selectFrom(entityClass, alias, includeSubEntityProperties, null);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final Set<String> excludedPropNames) {
+            return selectFrom(entityClass, false, excludedPropNames);
+        }
+
+        /**
+         * 
+         * @param entityClass
+         * @param alias
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final String alias, final Set<String> excludedPropNames) {
+            return selectFrom(entityClass, alias, false, excludedPropNames);
+        }
+
+        /**
+         *
+         * @param entityClass
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final boolean includeSubEntityProperties, final Set<String> excludedPropNames) {
+            return selectFrom(entityClass, null, includeSubEntityProperties, excludedPropNames);
+        }
+
+        /**
+         * 
+         * @param entityClass
+         * @param alias
+         * @param includeSubEntityProperties
+         * @param excludedPropNames
+         * @return
+         */
+        public static SQLBuilder selectFrom(final Class<?> entityClass, final String alias, final boolean includeSubEntityProperties,
+                final Set<String> excludedPropNames) {
+            if (includeSubEntityProperties) {
+                final List<String> selectTableNames = getSelectTableNames(entityClass, alias, excludedPropNames, NamingPolicy.NO_CHANGE);
+                return select(entityClass, includeSubEntityProperties, excludedPropNames).from(entityClass, selectTableNames);
+            } else {
+                return select(entityClass, includeSubEntityProperties, excludedPropNames).from(entityClass, alias);
+            }
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final String classAliasA, final Class<?> entityClassB,
+                final String tableAliasB, final String classAliasB) {
+            return select(entityClassA, tableAliasA, classAliasA, null, entityClassB, tableAliasB, classAliasB, null);
+        }
+
+        public static SQLBuilder select(final Class<?> entityClassA, final String tableAliasA, final String classAliasA, final Set<String> excludedPropNamesA,
+                final Class<?> entityClassB, final String tableAliasB, final String classAliasB, final Set<String> excludedPropNamesB) {
+
+            final List<Tuple4<Class<?>, String, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, String, Set<String>> of(entityClassA, tableAliasA, classAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, String, Set<String>> of(entityClassB, tableAliasB, classAliasB, excludedPropNamesB));
+
+            return select(multiSelects);
+        }
+
+        public static SQLBuilder select(final List<Tuple4<Class<?>, String, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final SQLBuilder instance = createInstance();
+
+            instance.op = OperationType.QUERY;
+            instance.entityClass = multiSelects.get(0)._1;
+            instance.propColumnNameMap = getProp2ColumnNameMap(instance.entityClass, instance.namingPolicy);
+            instance.multiSelects = multiSelects;
+
+            return instance;
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final String classAliasA, final Class<?> entityClassB,
+                final String tableAliasB, final String classAliasB) {
+            return selectFrom(entityClassA, tableAliasA, classAliasA, null, entityClassB, tableAliasB, classAliasB, null);
+        }
+
+        public static SQLBuilder selectFrom(final Class<?> entityClassA, final String tableAliasA, final String classAliasA,
+                final Set<String> excludedPropNamesA, final Class<?> entityClassB, final String tableAliasB, final String classAliasB,
+                final Set<String> excludedPropNamesB) {
+
+            final List<Tuple4<Class<?>, String, String, Set<String>>> multiSelects = N.asList(
+                    Tuple.<Class<?>, String, String, Set<String>> of(entityClassA, tableAliasA, classAliasA, excludedPropNamesA),
+                    Tuple.<Class<?>, String, String, Set<String>> of(entityClassB, tableAliasB, classAliasB, excludedPropNamesB));
+
+            return selectFrom(multiSelects);
+        }
+
+        public static SQLBuilder selectFrom(final List<Tuple4<Class<?>, String, String, Set<String>>> multiSelects) {
+            checkMultiSelects(multiSelects);
+
+            final NamingPolicy namingPolicy = NamingPolicy.NO_CHANGE;
+            final StringBuilder sb = Objectory.createStringBuilder();
+            int idx = 0;
+
+            for (Tuple4<Class<?>, String, String, Set<String>> tp : multiSelects) {
+                if (idx++ > 0) {
+                    sb.append(_COMMA_SPACE);
+                }
+
+                sb.append(getTableName(tp._1, namingPolicy));
+
+                if (N.notNullOrEmpty(tp._2)) {
+                    sb.append(' ').append(tp._2);
+                }
+            }
+
+            String fromClause = sb.toString();
+
+            Objectory.recycle(sb);
+
+            return select(multiSelects).from(fromClause);
+        }
+    }
+
+    /**
      * MyBatis-style SQL builder with lower camel case field/column naming strategy.
      *
      * For example:
      * <pre>
      * <code>
-     * N.println(MLC.select("firstName", "lastName").from("account").where(L.eq("id", 1)).sql());
+     * N.println(MLC.select("firstName", "lastName").from("account").where(CF.eq("id", 1)).sql());
      * // SELECT first_name AS "firstName", last_name AS "lastName" FROM account WHERE id = #{id}
      * </code>
      * </pre>
@@ -8425,18 +9953,10 @@ public abstract class SQLBuilder {
     @Deprecated
     public static class MSC extends SQLBuilder {
 
-        /**
-         * Instantiates a new msc.
-         */
         MSC() {
             super(NamingPolicy.LOWER_CASE_WITH_UNDERSCORE, SQLPolicy.IBATIS_SQL);
         }
 
-        /**
-         * Creates the instance.
-         *
-         * @return
-         */
         static MSC createInstance() {
             return new MSC();
         }
@@ -8958,7 +10478,7 @@ public abstract class SQLBuilder {
      * For example:
      * <pre>
      * <code>
-     * N.println(MAC.select("firstName", "lastName").from("account").where(L.eq("id", 1)).sql());
+     * N.println(MAC.select("firstName", "lastName").from("account").where(CF.eq("id", 1)).sql());
      * // SELECT FIRST_NAME AS "firstName", LAST_NAME AS "lastName" FROM ACCOUNT WHERE ID = #{id}
      * </code>
      * </pre>
@@ -8966,18 +10486,10 @@ public abstract class SQLBuilder {
     @Deprecated
     public static class MAC extends SQLBuilder {
 
-        /**
-         * Instantiates a new mac.
-         */
         MAC() {
             super(NamingPolicy.UPPER_CASE_WITH_UNDERSCORE, SQLPolicy.IBATIS_SQL);
         }
 
-        /**
-         * Creates the instance.
-         *
-         * @return
-         */
         static MAC createInstance() {
             return new MAC();
         }
@@ -9499,7 +11011,7 @@ public abstract class SQLBuilder {
      * For example:
      * <pre>
      * <code>
-     * N.println(MLC.select("firstName", "lastName").from("account").where(L.eq("id", 1)).sql());
+     * N.println(MLC.select("firstName", "lastName").from("account").where(CF.eq("id", 1)).sql());
      * // SELECT firstName, lastName FROM account WHERE id = #{id}
      * </code>
      * </pre>
@@ -9507,18 +11019,10 @@ public abstract class SQLBuilder {
     @Deprecated
     public static class MLC extends SQLBuilder {
 
-        /**
-         * Instantiates a new mlc.
-         */
         MLC() {
             super(NamingPolicy.LOWER_CAMEL_CASE, SQLPolicy.IBATIS_SQL);
         }
 
-        /**
-         * Creates the instance.
-         *
-         * @return
-         */
         static MLC createInstance() {
             return new MLC();
         }

@@ -451,7 +451,9 @@ public final class URLEncodedUtil {
             return;
         }
 
-        final boolean isDefaultNamingPolicy = namingPolicy == null || namingPolicy == NamingPolicy.LOWER_CAMEL_CASE;
+        final boolean isNoChange = namingPolicy == null || namingPolicy == NamingPolicy.NO_CHANGE;
+        final boolean isLowerCamelCaseOrNoChange = namingPolicy == null || namingPolicy == NamingPolicy.LOWER_CAMEL_CASE
+                || namingPolicy == NamingPolicy.NO_CHANGE;
 
         if (parameters instanceof Map) {
             final Map<String, Object> map = (Map<String, Object>) parameters;
@@ -461,7 +463,7 @@ public final class URLEncodedUtil {
                     output.append(QP_SEP_A);
                 }
 
-                if (isDefaultNamingPolicy) {
+                if (isNoChange) {
                     encodeFormFields(output, entry.getKey(), charset);
                 } else {
                     encodeFormFields(output, namingPolicy.convert(entry.getKey()), charset);
@@ -486,7 +488,7 @@ public final class URLEncodedUtil {
                     output.append(QP_SEP_A);
                 }
 
-                if (isDefaultNamingPolicy) {
+                if (isLowerCamelCaseOrNoChange) {
                     encodeFormFields(output, (String) a[i], charset);
                 } else {
                     encodeFormFields(output, namingPolicy.convert((String) a[i]), charset);

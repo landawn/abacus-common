@@ -6582,6 +6582,24 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    // It won't work for findFirst/only/anyMatch...
+    //    public <R> Pair<Long, R> countAnd(final Throwables.Function<? super ExceptionalStream<T, E>, R, E> terminalAction) throws E {
+    //        checkArgNotNull(terminalAction, "terminalAction");
+    //
+    //        final MutableLong count = MutableLong.of(0);
+    //
+    //        final Throwables.Consumer<? super T, E> action = new Throwables.Consumer<T, E>() {
+    //            @Override
+    //            public void accept(T t) {
+    //                count.incrementAndGet();
+    //            }
+    //        };
+    //
+    //        final R r = terminalAction.apply(this.onEach(action));
+    //
+    //        return Pair.of(count.value(), r);
+    //    }
+
     /**
      *
      * @return

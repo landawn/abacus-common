@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.function.Function;
 
 /**
@@ -43,14 +44,15 @@ public enum NamingPolicy {
         public String apply(String str) {
             return StringUtil.toUpperCaseWithUnderscore(str);
         }
-    });
+    }),
 
-    //    NO_CHANGE(new Function<String, String>() {
-    //        @Override
-    //        public String apply(String str) {
-    //            return str;
-    //        }
-    //    });
+    @Beta
+    NO_CHANGE(new Function<String, String>() {
+        @Override
+        public String apply(String str) {
+            return str;
+        }
+    });
 
     private final Function<String, String> converter;
 

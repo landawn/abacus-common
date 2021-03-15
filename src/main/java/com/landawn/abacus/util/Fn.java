@@ -4867,38 +4867,74 @@ public final class Fn extends Comparators {
         };
     }
 
-    public static <T> Function<T, T> c2f(final Consumer<? super T> action) {
+    public static <T> Function<T, Void> c2f(final Consumer<? super T> action) {
         N.checkArgNotNull(action);
 
-        return new Function<T, T>() {
+        return new Function<T, Void>() {
             @Override
-            public T apply(T t) {
+            public Void apply(T t) {
                 action.accept(t);
-                return t;
+                return null;
             }
         };
     }
 
-    public static <T, U> BiFunction<T, U, T> c2f(final BiConsumer<? super T, ? super U> action) {
+    public static <T, R> Function<T, R> c2f(final Consumer<? super T> action, final R valueToReturn) {
         N.checkArgNotNull(action);
 
-        return new BiFunction<T, U, T>() {
+        return new Function<T, R>() {
             @Override
-            public T apply(T t, U u) {
+            public R apply(T t) {
+                action.accept(t);
+                return valueToReturn;
+            }
+        };
+    }
+
+    public static <T, U> BiFunction<T, U, Void> c2f(final BiConsumer<? super T, ? super U> action) {
+        N.checkArgNotNull(action);
+
+        return new BiFunction<T, U, Void>() {
+            @Override
+            public Void apply(T t, U u) {
                 action.accept(t, u);
-                return t;
+                return null;
             }
         };
     }
 
-    public static <A, B, C> TriFunction<A, B, C, A> c2f(final TriConsumer<? super A, ? super B, ? super C> action) {
+    public static <T, U, R> BiFunction<T, U, R> c2f(final BiConsumer<? super T, ? super U> action, final R valueToReturn) {
         N.checkArgNotNull(action);
 
-        return new TriFunction<A, B, C, A>() {
+        return new BiFunction<T, U, R>() {
             @Override
-            public A apply(A a, B b, C c) {
+            public R apply(T t, U u) {
+                action.accept(t, u);
+                return valueToReturn;
+            }
+        };
+    }
+
+    public static <A, B, C> TriFunction<A, B, C, Void> c2f(final TriConsumer<? super A, ? super B, ? super C> action) {
+        N.checkArgNotNull(action);
+
+        return new TriFunction<A, B, C, Void>() {
+            @Override
+            public Void apply(A a, B b, C c) {
                 action.accept(a, b, c);
-                return a;
+                return null;
+            }
+        };
+    }
+
+    public static <A, B, C, R> TriFunction<A, B, C, R> c2f(final TriConsumer<? super A, ? super B, ? super C> action, final R valueToReturn) {
+        N.checkArgNotNull(action);
+
+        return new TriFunction<A, B, C, R>() {
+            @Override
+            public R apply(A a, B b, C c) {
+                action.accept(a, b, c);
+                return valueToReturn;
             }
         };
     }
@@ -4989,17 +5025,17 @@ public final class Fn extends Comparators {
     /**
      *
      * @param runnable
-     * @param result
+     * @param valueToReturn
      * @return
      */
-    public static <T> Callable<T> r2c(final Runnable runnable, final T result) {
+    public static <R> Callable<R> r2c(final Runnable runnable, final R valueToReturn) {
         N.checkArgNotNull(runnable);
 
-        return new Callable<T>() {
+        return new Callable<R>() {
             @Override
-            public T call() {
+            public R call() {
                 runnable.run();
-                return result;
+                return valueToReturn;
             }
         };
     }
@@ -12790,41 +12826,82 @@ public final class Fn extends Comparators {
             };
         }
 
-        public static <T, E extends Throwable> Throwables.Function<T, T, E> c2f(final Throwables.Consumer<T, E> consumer) {
+        public static <T, E extends Throwable> Throwables.Function<T, Void, E> c2f(final Throwables.Consumer<T, E> consumer) {
             N.checkArgNotNull(consumer);
 
-            return new Throwables.Function<T, T, E>() {
+            return new Throwables.Function<T, Void, E>() {
                 @Override
-                public T apply(T t) throws E {
+                public Void apply(T t) throws E {
                     consumer.accept(t);
 
-                    return t;
+                    return null;
                 }
             };
         }
 
-        public static <T, U, E extends Throwable> Throwables.BiFunction<T, U, T, E> c2f(final Throwables.BiConsumer<T, U, E> biConsumer) {
+        public static <T, R, E extends Throwable> Throwables.Function<T, R, E> c2f(final Throwables.Consumer<T, E> consumer, final R valueToReturn) {
+            N.checkArgNotNull(consumer);
+
+            return new Throwables.Function<T, R, E>() {
+                @Override
+                public R apply(T t) throws E {
+                    consumer.accept(t);
+
+                    return valueToReturn;
+                }
+            };
+        }
+
+        public static <T, U, E extends Throwable> Throwables.BiFunction<T, U, Void, E> c2f(final Throwables.BiConsumer<T, U, E> biConsumer) {
             N.checkArgNotNull(biConsumer);
 
-            return new Throwables.BiFunction<T, U, T, E>() {
+            return new Throwables.BiFunction<T, U, Void, E>() {
                 @Override
-                public T apply(T t, U u) throws E {
+                public Void apply(T t, U u) throws E {
                     biConsumer.accept(t, u);
 
-                    return t;
+                    return null;
                 }
             };
         }
 
-        public static <A, B, C, E extends Throwable> Throwables.TriFunction<A, B, C, A, E> c2f(final Throwables.TriConsumer<A, B, C, E> triConsumer) {
+        public static <T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> c2f(final Throwables.BiConsumer<T, U, E> biConsumer,
+                final R valueToReturn) {
+            N.checkArgNotNull(biConsumer);
+
+            return new Throwables.BiFunction<T, U, R, E>() {
+                @Override
+                public R apply(T t, U u) throws E {
+                    biConsumer.accept(t, u);
+
+                    return valueToReturn;
+                }
+            };
+        }
+
+        public static <A, B, C, E extends Throwable> Throwables.TriFunction<A, B, C, Void, E> c2f(final Throwables.TriConsumer<A, B, C, E> triConsumer) {
             N.checkArgNotNull(triConsumer);
 
-            return new Throwables.TriFunction<A, B, C, A, E>() {
+            return new Throwables.TriFunction<A, B, C, Void, E>() {
                 @Override
-                public A apply(A a, B b, C c) throws E {
+                public Void apply(A a, B b, C c) throws E {
                     triConsumer.accept(a, b, c);
 
-                    return a;
+                    return null;
+                }
+            };
+        }
+
+        public static <A, B, C, R, E extends Throwable> Throwables.TriFunction<A, B, C, R, E> c2f(final Throwables.TriConsumer<A, B, C, E> triConsumer,
+                final R valueToReturn) {
+            N.checkArgNotNull(triConsumer);
+
+            return new Throwables.TriFunction<A, B, C, R, E>() {
+                @Override
+                public R apply(A a, B b, C c) throws E {
+                    triConsumer.accept(a, b, c);
+
+                    return valueToReturn;
                 }
             };
         }
@@ -12874,14 +12951,14 @@ public final class Fn extends Comparators {
             };
         }
 
-        public static <T, E extends Throwable> Throwables.Callable<T, E> r2c(final Throwables.Runnable<E> runnable, final T result) {
+        public static <R, E extends Throwable> Throwables.Callable<R, E> r2c(final Throwables.Runnable<E> runnable, final R valueToReturn) {
             N.checkArgNotNull(runnable);
 
-            return new Throwables.Callable<T, E>() {
+            return new Throwables.Callable<R, E>() {
                 @Override
-                public T call() throws E {
+                public R call() throws E {
                     runnable.run();
-                    return result;
+                    return valueToReturn;
                 }
             };
         }

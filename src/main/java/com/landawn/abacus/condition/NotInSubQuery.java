@@ -136,14 +136,14 @@ public class NotInSubQuery extends AbstractCondition {
     @Override
     public String toString(final NamingPolicy namingPolicy) {
         if (N.notNullOrEmpty(propName)) {
-            if (namingPolicy == NamingPolicy.LOWER_CAMEL_CASE) {
+            if (namingPolicy == NamingPolicy.NO_CHANGE) {
                 return propName + WD._SPACE + getOperator().toString() + WD.SPACE_PARENTHESES_L + subQuery.toString(namingPolicy) + WD.PARENTHESES_R;
             } else {
                 return namingPolicy.convert(propName) + WD._SPACE + getOperator().toString() + WD.SPACE_PARENTHESES_L + subQuery.toString(namingPolicy)
                         + WD.PARENTHESES_R;
             }
         } else {
-            if (namingPolicy == NamingPolicy.LOWER_CAMEL_CASE) {
+            if (namingPolicy == NamingPolicy.NO_CHANGE) {
                 return "(" + StringUtil.join(propNames, ", ") + ") " + getOperator().toString() + WD.SPACE_PARENTHESES_L + subQuery.toString(namingPolicy)
                         + WD.PARENTHESES_R;
             } else {

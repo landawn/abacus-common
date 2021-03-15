@@ -18,10 +18,10 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 
-import com.landawn.abacus.util.WD;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.WD;
 
 /**
  *
@@ -99,7 +99,7 @@ public abstract class AbstractCondition implements Condition, Serializable, Clon
 
     @Override
     public String toString() {
-        return toString(NamingPolicy.LOWER_CAMEL_CASE);
+        return toString(NamingPolicy.NO_CHANGE);
     }
 
     /**
