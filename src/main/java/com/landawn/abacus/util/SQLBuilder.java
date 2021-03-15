@@ -3363,7 +3363,7 @@ public abstract class SQLBuilder {
                 sb.append(WD._QUOTATION_D);
             }
         } else {
-            if (isForSelect && namingPolicy != NamingPolicy.NO_CHANGE) {
+            if (isForSelect) {
                 int index = propName.indexOf(" AS ");
 
                 if (index < 0) {
@@ -3376,7 +3376,7 @@ public abstract class SQLBuilder {
                 } else {
                     appendStringExpr(propName, true);
 
-                    if (propName.charAt(propName.length() - 1) != '*') {
+                    if (namingPolicy != NamingPolicy.NO_CHANGE && propName.charAt(propName.length() - 1) != '*') {
                         sb.append(_SPACE_AS_SPACE);
                         sb.append(WD._QUOTATION_D);
 
