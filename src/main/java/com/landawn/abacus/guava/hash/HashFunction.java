@@ -12,14 +12,16 @@
  * the License.
  */
 
-package com.landawn.abacus.hash;
+package com.landawn.abacus.guava.hash;
 
 import java.nio.charset.Charset;
 
-import com.landawn.abacus.util.function.BiConsumer;
+import com.google.common.hash.Funnel;
+import com.google.common.hash.HashCode;
+import com.google.common.primitives.Ints;
 
 /**
- * Note: It's copied from Google Guava under Apache License 2.0
+ * Note: It's copied from Google Guava under Apache License 2.0 and modified.
  * 
  * A hash function is a collision-averse pure function that maps an arbitrary block of data to a
  * number called a <i>hash code</i>.
@@ -248,7 +250,7 @@ public interface HashFunction {
      * @return
      * @since 14.0
      */
-    <T> HashCode hash(T instance, BiConsumer<? super T, ? super Hasher> funnel);
+    <T> HashCode hash(T instance, Funnel<? super T> funnel);
 
     /**
      * Returns the number of bits (a multiple of 32) that each hash code produced by this hash

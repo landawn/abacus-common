@@ -2667,7 +2667,7 @@ public abstract class SQLBuilder {
         consumer.accept(sp.sql, sp.parameters);
     }
 
-    private static final Set<?> namedSQLBuilderClasses = N.asSet(NSC.class, NAC.class, NLC.class);
+    private static final Set<?> namedSQLBuilderClasses = N.asSet(NSB.class, NSC.class, NAC.class, NLC.class);
 
     @SuppressWarnings("rawtypes")
     public com.landawn.abacus.util.AbstractPreparedQuery toPreparedQuery(final javax.sql.DataSource ds) throws java.sql.SQLException {
@@ -2726,7 +2726,7 @@ public abstract class SQLBuilder {
     private void requiresNamedSQLBuilder() {
         if (!namedSQLBuilderClasses.contains(this.getClass())) {
             throw new RuntimeException(
-                    "NamedQuery must be created from named SQLBuilder: NSC/NAC/NLC. But this SQLBuilder: " + this.getClass() + " is not named SQLBuilder");
+                    "NamedQuery must be created from named SQLBuilder: NSB/NSC/NAC/NLC. But this SQLBuilder: " + this.getClass() + " is not named SQLBuilder");
         }
     }
 
@@ -3175,6 +3175,10 @@ public abstract class SQLBuilder {
                         sb.append(MLC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).append(subCond).sql());
                     } else if (this instanceof NLC) {
                         sb.append(NLC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).append(subCond).sql());
+                    } else if (this instanceof PSB) {
+                        sb.append(PSB.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).append(subCond).sql());
+                    } else if (this instanceof NSB) {
+                        sb.append(NSB.select(subQuery.getSelectPropNames()).from(subQuery.getEntityClass()).append(subCond).sql());
                     } else {
                         throw new RuntimeException("Unsupproted subQuery condition: " + cond);
                     }
@@ -3203,6 +3207,10 @@ public abstract class SQLBuilder {
                         sb.append(MLC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).append(subCond).sql());
                     } else if (this instanceof NLC) {
                         sb.append(NLC.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).append(subCond).sql());
+                    } else if (this instanceof PSB) {
+                        sb.append(PSB.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).append(subCond).sql());
+                    } else if (this instanceof NSB) {
+                        sb.append(NSB.select(subQuery.getSelectPropNames()).from(subQuery.getEntityName()).append(subCond).sql());
                     } else {
                         throw new RuntimeException("Unsupproted subQuery condition: " + cond);
                     }

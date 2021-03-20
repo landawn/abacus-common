@@ -12,14 +12,16 @@
  * the License.
  */
 
-package com.landawn.abacus.hash;
+package com.landawn.abacus.guava.hash;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
-import com.landawn.abacus.util.function.BiConsumer;
+import com.google.common.hash.Funnel;
+import com.google.common.hash.HashCode;
 
 /**
- * Note: It's copied from Google Guava under Apache License 2.0
+ * Note: It's copied from Google Guava under Apache License 2.0 and modified.
  * 
  * Each hasher should translate all multibyte values ({@link #put(int)}, {@link #put(long)}, etc) to bytes in
  * little-endian order.
@@ -74,6 +76,13 @@ public interface Hasher {
      * @return
      */
     Hasher put(byte[] bytes, int off, int len);
+
+    /**
+     * 
+     * @param bytes
+     * @return
+     */
+    Hasher put(ByteBuffer bytes);
 
     /**
      *
@@ -182,7 +191,7 @@ public interface Hasher {
      * @param funnel
      * @return
      */
-    <T> Hasher put(T instance, BiConsumer<? super T, ? super Hasher> funnel);
+    <T> Hasher put(T instance, Funnel<? super T> funnel);
 
     /**
      * Computes a hash code based on the data that have been provided to this hasher. The result is
