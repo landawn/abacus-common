@@ -188,4 +188,31 @@ public final class InternalUtil {
 
         return String.valueOf(a);
     }
+
+    //    /**
+    //     * Checks if it's not null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
+    //     *
+    //     *
+    //     * @param s
+    //     * @return true, if it's not null or default
+    //     * @deprecated internal only
+    //     */
+    //    @Deprecated
+    //    @Internal
+    //    @Beta
+    //    static boolean notNullOrDefault(final Object value) {
+    //        return (value != null) && !equals(value, defaultValueOf(value.getClass()));
+    //    }
+
+    /**
+     * Checks if is null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
+     *
+     * @param s
+     * @return true, if is null or default
+     */
+    @Internal
+    @Beta
+    static boolean isNullOrDefault(final Object value) {
+        return (value == null) || N.equals(value, N.defaultValueOf(value.getClass()));
+    }
 }

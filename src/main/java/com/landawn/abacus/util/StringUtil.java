@@ -467,7 +467,7 @@ public abstract class StringUtil {
     }
 
     public static void nullToEmpty(String[] strs) {
-        if (N.isNullOrDefault(strs)) {
+        if (N.isNullOrEmpty(strs)) {
             return;
         }
 
@@ -481,7 +481,7 @@ public abstract class StringUtil {
     }
 
     public static void emptyToNull(String[] strs) {
-        if (N.isNullOrDefault(strs)) {
+        if (N.isNullOrEmpty(strs)) {
             return;
         }
 
@@ -2461,7 +2461,7 @@ public abstract class StringUtil {
     }
 
     public static void trim(final String[] strs) {
-        if (N.isNullOrDefault(strs)) {
+        if (N.isNullOrEmpty(strs)) {
             return;
         }
 
@@ -2503,7 +2503,7 @@ public abstract class StringUtil {
     }
 
     public static void trimToNull(final String[] strs) {
-        if (N.isNullOrDefault(strs)) {
+        if (N.isNullOrEmpty(strs)) {
             return;
         }
 
@@ -2542,7 +2542,7 @@ public abstract class StringUtil {
     }
 
     public static void trimToEmpty(final String[] strs) {
-        if (N.isNullOrDefault(strs)) {
+        if (N.isNullOrEmpty(strs)) {
             return;
         }
 

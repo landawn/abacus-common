@@ -2670,6 +2670,7 @@ public abstract class SQLBuilder {
     private static final Set<?> namedSQLBuilderClasses = N.asSet(NSB.class, NSC.class, NAC.class, NLC.class);
 
     @SuppressWarnings("rawtypes")
+    @Beta
     public com.landawn.abacus.util.AbstractPreparedQuery toPreparedQuery(final javax.sql.DataSource ds) throws java.sql.SQLException {
         final SP sp = this.pair();
 
@@ -2681,6 +2682,7 @@ public abstract class SQLBuilder {
     }
 
     @SuppressWarnings("rawtypes")
+    @Beta
     public com.landawn.abacus.util.AbstractPreparedQuery toPreparedQuery(final java.sql.Connection conn) throws java.sql.SQLException {
         final SP sp = this.pair();
 
@@ -2692,6 +2694,7 @@ public abstract class SQLBuilder {
     }
 
     @SuppressWarnings("rawtypes")
+    @Beta
     public <Q extends com.landawn.abacus.util.AbstractPreparedQuery> Q toPreparedQuery(final Throwables.Function<SP, Q, java.sql.SQLException> func)
             throws java.sql.SQLException {
         final SP sp = this.pair();
@@ -2700,6 +2703,7 @@ public abstract class SQLBuilder {
     }
 
     @SuppressWarnings("rawtypes")
+    @Beta
     public <Q extends com.landawn.abacus.util.AbstractPreparedQuery> Q toPreparedQuery(
             final Throwables.BiFunction<? super String, ? super List<Object>, Q, java.sql.SQLException> func) throws java.sql.SQLException {
         final SP sp = this.pair();
@@ -2707,6 +2711,7 @@ public abstract class SQLBuilder {
         return func.apply(sp.sql, sp.parameters);
     }
 
+    @Beta
     public com.landawn.abacus.util.NamedQuery toNamedQuery(final javax.sql.DataSource ds) throws java.sql.SQLException {
         requiresNamedSQLBuilder();
 
@@ -2715,6 +2720,7 @@ public abstract class SQLBuilder {
         return com.landawn.abacus.util.JdbcUtil.prepareNamedQuery(ds, sp.sql).setParameters(sp.parameters);
     }
 
+    @Beta
     public com.landawn.abacus.util.NamedQuery toNamedQuery(final java.sql.Connection conn) throws java.sql.SQLException {
         requiresNamedSQLBuilder();
 

@@ -7915,9 +7915,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         //        return;
         //    }
 
-        logger.info("Closing ExceptionalStream");
-
         isClosed = true;
+
+        logger.info("Closing ExceptionalStream");
 
         close(closeHandlers);
     }
