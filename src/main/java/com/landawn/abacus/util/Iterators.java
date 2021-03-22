@@ -43,6 +43,11 @@ import com.landawn.abacus.util.function.TriFunction;
  * <p>
  * The methods in this class should only read the input {@code Collection/Array/Iterator} parameters, not modify them.
  * </p>
+ * 
+ * @see com.landawn.abacus.util.N
+ * @see com.landawn.abacus.util.Iterables
+ * @see com.landawn.abacus.util.Maps
+ * @see com.landawn.abacus.util.StringUtil
  */
 public final class Iterators {
 

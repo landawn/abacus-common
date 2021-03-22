@@ -39,6 +39,11 @@ import com.landawn.abacus.util.stream.LongStream;
  *
  * @author Haiyang Li
  * @since 0.8
+ * 
+ * @see com.landawn.abacus.util.N
+ * @see com.landawn.abacus.util.Array
+ * @see com.landawn.abacus.util.Iterables
+ * @see com.landawn.abacus.util.Iterators
  */
 public final class LongList extends PrimitiveList<Long, long[], LongList> {
 

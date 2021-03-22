@@ -66,7 +66,11 @@ import com.landawn.abacus.util.stream.Stream;
  * <p>
  * The methods in this class should only read the input {@code Collection/Array/Iterator} parameters, not modify them.
  * </p>
- *  
+ * 
+ * @see com.landawn.abacus.util.N
+ * @see com.landawn.abacus.util.Iterators
+ * @see com.landawn.abacus.util.Maps
+ * @see com.landawn.abacus.util.StringUtil
  */
 public final class Iterables {
 

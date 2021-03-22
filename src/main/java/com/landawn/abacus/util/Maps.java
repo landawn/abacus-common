@@ -45,6 +45,10 @@ import com.landawn.abacus.util.function.Supplier;
  * The methods copied from other libraries/frameworks/projects may be modified in this class.
  * </p>
  * 
+ * @see com.landawn.abacus.util.N
+ * @see com.landawn.abacus.util.Iterables
+ * @see com.landawn.abacus.util.Iterators
+ * @see com.landawn.abacus.util.StringUtil
  */
 public final class Maps {
 

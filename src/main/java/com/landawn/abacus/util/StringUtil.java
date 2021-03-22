@@ -51,6 +51,11 @@ import com.landawn.abacus.util.function.Supplier;
  * 
  * @see {@code Joiner}, {@code Splitter}
  *
+ * @see com.landawn.abacus.util.N
+ * @see com.landawn.abacus.util.Array
+ * @see com.landawn.abacus.util.Iterables
+ * @see com.landawn.abacus.util.Iterators
+ * @see com.landawn.abacus.util.Maps
  */
 public abstract class StringUtil {
     // public static final String EMPTY_STRING = N.EMPTY_STRING;

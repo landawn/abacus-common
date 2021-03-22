@@ -30,6 +30,8 @@ import com.landawn.abacus.annotation.NullSafe;
  * @author Haiyang Li
  * @see java.lang.reflect.Array
  * @since 0.8
+ * 
+ * @see com.landawn.abacus.util.N
  */
 public final class Array {
     static volatile int CPU_CORES = Runtime.getRuntime().availableProcessors();
