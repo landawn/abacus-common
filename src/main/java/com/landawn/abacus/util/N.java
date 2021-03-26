@@ -23157,13 +23157,35 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * To runtime exception.
      *
      * @param e
      * @return
+     * @see ExceptionUtil#toRuntimeException(Throwable)
      */
-    public static RuntimeException toRuntimeException(Throwable e) {
+    public static RuntimeException toRuntimeException(final Throwable e) {
         return ExceptionUtil.toRuntimeException(e);
+    }
+
+    /**
+     * 
+     * @param e
+     * @param type
+     * @return
+     * @see ExceptionUtil#hasCause(Throwable, Class)
+     */
+    public static boolean hasCause(final Throwable e, final Class<? extends Throwable> type) {
+        return ExceptionUtil.hasCause(e, type);
+    }
+
+    /**
+     * Returns the specified {@code Throwable e} if there is no cause found in it ({@code e.getCause() == null}).
+     * 
+     * @param e
+     * @return
+     * @see ExceptionUtil#firstCause(Throwable)
+     */
+    public static Throwable firstCause(final Throwable e) {
+        return ExceptionUtil.firstCause(e);
     }
 
     /**

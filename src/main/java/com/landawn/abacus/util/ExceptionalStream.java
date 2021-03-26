@@ -65,8 +65,10 @@ import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.function.BiConsumer;
 import com.landawn.abacus.util.function.BinaryOperator;
+import com.landawn.abacus.util.function.Consumer;
 import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.IntFunction;
+import com.landawn.abacus.util.function.Predicate;
 import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.BaseStream;
 import com.landawn.abacus.util.stream.Collector;
@@ -927,6 +929,22 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 return element;
             }
         });
+    }
+
+    public static <E extends Exception> ExceptionalStream<Integer, E> range(final int startInclusive, final int endExclusive) {
+        return IntStream.range(startInclusive, endExclusive).boxed().<E> checked();
+    }
+
+    public static <E extends Exception> ExceptionalStream<Integer, E> range(final int startInclusive, final int endExclusive, final int by) {
+        return IntStream.range(startInclusive, endExclusive, by).boxed().<E> checked();
+    }
+
+    public static <E extends Exception> ExceptionalStream<Integer, E> rangeClosed(final int startInclusive, final int endExclusive) {
+        return IntStream.rangeClosed(startInclusive, endExclusive).boxed().<E> checked();
+    }
+
+    public static <E extends Exception> ExceptionalStream<Integer, E> rangeClosed(final int startInclusive, final int endExclusive, final int by) {
+        return IntStream.rangeClosed(startInclusive, endExclusive, by).boxed().<E> checked();
     }
 
     /**
@@ -7785,6 +7803,236 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //        action.accept(result);
     //        return result;
     //    }
+
+    /**
+     * 
+     * @param <R>
+     * @param ops
+     * @return
+     * @see Stream#sps(Function)
+     */
+    @SequentialOnly
+    @IntermediateOp
+    @Beta
+    public <R> ExceptionalStream<R, E> sps(final Function<? super Stream<T>, Stream<R>> ops) {
+        assertNotClosed();
+
+        return ops.apply(this.unchecked().parallel()).<E> checked();
+    }
+
+    /**
+     * 
+     * @param <R>
+     * @param maxThreadNum
+     * @param ops
+     * @return
+     * @see Stream#sps(int, Function)
+     */
+    @SequentialOnly
+    @IntermediateOp
+    @Beta
+    public <R> ExceptionalStream<R, E> sps(final int maxThreadNum, final Function<? super Stream<T>, Stream<R>> ops) {
+        assertNotClosed();
+
+        return ops.apply(this.unchecked().parallel(maxThreadNum)).<E> checked();
+    }
+
+    /**
+     * Temporarily switch the stream to parallel stream for operation {@code filter} and then switch back to sequence stream.
+     * 
+     * @param predicate
+     * @return
+     * @see Stream#spsFilter(Predicate)
+     */
+    @Beta
+    public ExceptionalStream<T, E> spsFilter(final Throwables.Predicate<? super T, E> predicate) {
+        final Function<Stream<T>, Stream<T>> ops = new Function<Stream<T>, Stream<T>>() {
+            @Override
+            public Stream<T> apply(Stream<T> s) throws RuntimeException {
+                return s.filter(Fn.pp(predicate));
+            }
+        };
+
+        return sps(ops);
+    }
+
+    /**
+     * Temporarily switch the stream to parallel stream for operation {@code map} and then switch back to sequence stream.
+     * 
+     * @param <R>
+     * @param mapper
+     * @return
+     * @see Stream#spsMap(Function)
+     */
+    @Beta
+    public <R> ExceptionalStream<R, E> spsMap(final Throwables.Function<? super T, ? extends R, E> mapper) {
+        final Function<Stream<T>, Stream<R>> ops = new Function<Stream<T>, Stream<R>>() {
+            @Override
+            public Stream<R> apply(Stream<T> s) throws RuntimeException {
+                return s.map(Fn.ff(mapper));
+            }
+        };
+
+        return sps(ops);
+    }
+
+    /**
+     * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
+    
+     * 
+     * @param <R>
+     * @param mapper
+     * @return
+     * @see Stream#spsFlatMap(Function)
+     */
+    @Beta
+    public <R> ExceptionalStream<R, E> spsFlatMap(final Throwables.Function<? super T, ? extends Stream<? extends R>, E> mapper) {
+        final Function<Stream<T>, Stream<R>> ops = new Function<Stream<T>, Stream<R>>() {
+            @Override
+            public Stream<R> apply(Stream<T> s) throws RuntimeException {
+                return s.flatMap(Fn.ff(mapper));
+            }
+        };
+
+        return sps(ops);
+    }
+
+    /**
+     * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
+     * 
+     * @param <R>
+     * @param mapper
+     * @return
+     * @see Stream#spsFlattMap(Function)
+     */
+    @Beta
+    public <R> ExceptionalStream<R, E> spsFlattMap(final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) {
+        final Function<Stream<T>, Stream<R>> ops = new Function<Stream<T>, Stream<R>>() {
+            @Override
+            public Stream<R> apply(Stream<T> s) throws RuntimeException {
+                return s.flattMap(Fn.ff(mapper));
+            }
+        };
+
+        return sps(ops);
+    }
+
+    /**
+     * Temporarily switch the stream to parallel stream for operation {@code onEach} and then switch back to sequence stream.
+     * 
+     * @param action
+     * @return
+     * @see Stream#onEach(Consumer)
+     */
+    @Beta
+    public ExceptionalStream<T, E> spsOnEach(final Throwables.Consumer<? super T, E> action) {
+        final Function<Stream<T>, Stream<T>> ops = new Function<Stream<T>, Stream<T>>() {
+            @Override
+            public Stream<T> apply(Stream<T> s) throws RuntimeException {
+                return s.onEach(Fn.cc(action));
+            }
+        };
+
+        return sps(ops);
+    }
+
+    /**
+     * Temporarily switch the stream to parallel stream for operation {@code filter} and then switch back to sequence stream.
+     * 
+     * @param predicate
+     * @return
+     * @see Stream#spsFilter(int, Predicate)
+     */
+    @Beta
+    public ExceptionalStream<T, E> spsFilter(final int maxThreadNum, final Throwables.Predicate<? super T, E> predicate) {
+        final Function<Stream<T>, Stream<T>> ops = new Function<Stream<T>, Stream<T>>() {
+            @Override
+            public Stream<T> apply(Stream<T> s) throws RuntimeException {
+                return s.filter(Fn.pp(predicate));
+            }
+        };
+
+        return sps(maxThreadNum, ops);
+    }
+
+    /**
+     * Temporarily switch the stream to parallel stream for operation {@code map} and then switch back to sequence stream.
+     * 
+     * @param <R>
+     * @param mapper
+     * @return
+     * @see Stream#spsMap(int, Function)
+     */
+    @Beta
+    public <R> ExceptionalStream<R, E> spsMap(final int maxThreadNum, final Throwables.Function<? super T, ? extends R, E> mapper) {
+        final Function<Stream<T>, Stream<R>> ops = new Function<Stream<T>, Stream<R>>() {
+            @Override
+            public Stream<R> apply(Stream<T> s) throws RuntimeException {
+                return s.map(Fn.ff(mapper));
+            }
+        };
+
+        return sps(maxThreadNum, ops);
+    }
+
+    /**
+     * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
+     * 
+     * @param <R>
+     * @param mapper
+     * @return
+     * @see Stream#spsFlatMap(int, Function)
+     */
+    @Beta
+    public <R> ExceptionalStream<R, E> spsFlatMap(final int maxThreadNum, final Throwables.Function<? super T, ? extends Stream<? extends R>, E> mapper) {
+        final Function<Stream<T>, Stream<R>> ops = new Function<Stream<T>, Stream<R>>() {
+            @Override
+            public Stream<R> apply(Stream<T> s) throws RuntimeException {
+                return s.flatMap(Fn.ff(mapper));
+            }
+        };
+
+        return sps(maxThreadNum, ops);
+    }
+
+    /**
+     * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
+     * 
+     * @param <R>
+     * @param mapper
+     * @return
+     * @see Stream#spsFlattMap(int, Function)
+     */
+    @Beta
+    public <R> ExceptionalStream<R, E> spsFlattMap(final int maxThreadNum, final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) {
+        final Function<Stream<T>, Stream<R>> ops = new Function<Stream<T>, Stream<R>>() {
+            @Override
+            public Stream<R> apply(Stream<T> s) throws RuntimeException {
+                return s.flattMap(Fn.ff(mapper));
+            }
+        };
+
+        return sps(maxThreadNum, ops);
+    }
+
+    /**
+     * Temporarily switch the stream to parallel stream for operation {@code onEach} and then switch back to sequence stream.
+     * 
+     * @param action
+     * @return
+     * @see Stream#onEach(int, Consumer)
+     */
+    @Beta
+    public ExceptionalStream<T, E> spsOnEach(final int maxThreadNum, final Throwables.Consumer<? super T, E> action) {
+        final Function<Stream<T>, Stream<T>> ops = new Function<Stream<T>, Stream<T>>() {
+            @Override
+            public Stream<T> apply(Stream<T> s) throws RuntimeException {
+                return s.onEach(Fn.cc(action));
+            }
+        };
+
+        return sps(maxThreadNum, ops);
+    }
 
     /**
      *

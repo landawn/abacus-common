@@ -19,7 +19,9 @@ import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -162,25 +164,39 @@ public final class ExceptionUtil {
         return sw.getBuffer().toString();
     }
 
-    /**
-     * Does the throwable's causal chain have an immediate or wrapped exception
-     * of the given type?
-     *
-     * @param chain
-     *            The root of a Throwable causal chain.
-     * @param type
-     *            The exception type to test.
-     * @return true, if chain is an instance of type or is an
-     *         UndeclaredThrowableException wrapping a cause.
-     * @since 3.5
-     * @see #wrapAndThrow(Throwable)
-     */
-    public static boolean hasCause(Throwable chain, final Class<? extends Throwable> type) {
-        if (chain instanceof UndeclaredThrowableException) {
-            chain = chain.getCause();
+    public static boolean hasCause(Throwable throwable, final Class<? extends Throwable> type) {
+        while (throwable != null && !type.isAssignableFrom(throwable.getClass())) {
+            throwable = throwable.getCause();
         }
 
-        return type.isInstance(chain);
+        return throwable != null;
+    }
+
+    public static List<Throwable> listCause(Throwable throwable) {
+        final List<Throwable> list = new ArrayList<>();
+
+        while (throwable != null && !list.contains(throwable)) {
+            list.add(throwable);
+            throwable = throwable.getCause();
+        }
+
+        return list;
+    }
+
+    /**
+     * Returns the specified {@code throwable} if there is no cause found in it ({@code throwable.getCause() == null}).
+     * 
+     * @param throwable
+     * @return
+     */
+    public static Throwable firstCause(final Throwable throwable) {
+        Throwable result = throwable;
+
+        while (result.getCause() != null) {
+            result = result.getCause();
+        }
+
+        return result;
     }
 
     public static String getErrorMessage(final Throwable e) {
