@@ -2788,6 +2788,25 @@ public final class Throwables {
         void accept(T t, double value) throws E;
     }
 
+    public static interface IntObjConsumer<T, E extends Throwable> {
+        /**
+         * 
+         * @param i 
+         * @param t
+         * @throws E
+         */
+        void accept(int i, T t) throws E;
+
+        default IntObjConsumer<T, E> andThen(final IntObjConsumer<? super T, E> after) {
+            N.checkArgNotNull(after);
+
+            return (i, t) -> {
+                accept(i, t);
+                after.accept(i, t);
+            };
+        }
+    }
+
     public static interface BiIntObjConsumer<T, E extends Throwable> {
 
         /**

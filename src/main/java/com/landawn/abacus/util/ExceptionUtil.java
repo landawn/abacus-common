@@ -29,6 +29,7 @@ import com.landawn.abacus.exception.UncheckedException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.util.function.Function;
+import com.landawn.abacus.util.function.Predicate;
 
 /**
  * Note: This class contains the methods copied from Apache Commons and Google Guava under Apache License v2.
@@ -100,6 +101,10 @@ public final class ExceptionUtil {
         }
     };
 
+    private static final String UncheckedSQLExceptionClassName = UncheckedSQLException.class.getSimpleName();
+
+    private static final String UncheckedIOExceptionClassName = UncheckedIOException.class.getSimpleName();
+
     /**
      * To runtime exception.
      *
@@ -165,11 +170,51 @@ public final class ExceptionUtil {
     }
 
     public static boolean hasCause(Throwable throwable, final Class<? extends Throwable> type) {
-        while (throwable != null && !type.isAssignableFrom(throwable.getClass())) {
+        while (throwable != null) {
+            if (type.isAssignableFrom(throwable.getClass())) {
+                return true;
+            }
+
             throwable = throwable.getCause();
         }
 
-        return throwable != null;
+        return false;
+    }
+
+    public static boolean hasCause(Throwable throwable, final Predicate<? super Throwable> predicate) {
+        while (throwable != null) {
+            if (predicate.test(throwable)) {
+                return true;
+            }
+
+            throwable = throwable.getCause();
+        }
+
+        return false;
+    }
+
+    public static boolean hasSQLCause(Throwable throwable) {
+        while (throwable != null) {
+            if (throwable instanceof SQLException || UncheckedSQLExceptionClassName.equals(throwable.getClass().getSimpleName())) {
+                return true;
+            }
+
+            throwable = throwable.getCause();
+        }
+
+        return false;
+    }
+
+    public static boolean hasIOCause(Throwable throwable) {
+        while (throwable != null) {
+            if (throwable instanceof IOException || UncheckedIOExceptionClassName.equals(throwable.getClass().getSimpleName())) {
+                return true;
+            }
+
+            throwable = throwable.getCause();
+        }
+
+        return false;
     }
 
     public static List<Throwable> listCause(Throwable throwable) {

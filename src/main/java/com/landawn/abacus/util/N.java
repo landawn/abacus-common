@@ -98,11 +98,11 @@ import com.landawn.abacus.util.stream.Stream;
  */
 public final class N extends CommonUtil {
 
+    public static final int CPU_CORES = Runtime.getRuntime().availableProcessors();
+
     private static final float LOAD_FACTOR_FOR_FLAT_MAP = 1.75f;
 
     private static final int LOAD_FACTOR_FOR_TWO_FLAT_MAP = 2;
-
-    private static final int CPU_CORES = Runtime.getRuntime().availableProcessors();
 
     static final AsyncExecutor asyncExecutor = new AsyncExecutor(Math.max(64, Math.min(IOUtil.CPU_CORES * 8, IOUtil.MAX_MEMORY_IN_MB / 1024) * 32),
             Math.max(256, (IOUtil.MAX_MEMORY_IN_MB / 1024) * 64), 180L, TimeUnit.SECONDS);
@@ -10524,6 +10524,7 @@ public final class N extends CommonUtil {
      * @param a
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     * @see Iterables#min(Comparable[])
      */
     public static <T extends Comparable<? super T>> T min(final T[] a) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
@@ -10552,6 +10553,7 @@ public final class N extends CommonUtil {
      * @param cmp 
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     * @see Iterables#min(Object[], Comparator)
      */
     public static <T> T min(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
@@ -10567,7 +10569,7 @@ public final class N extends CommonUtil {
      * @param toIndex
      * @param cmp
      * @return
-     * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}. 
      */
     public static <T> T min(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) throws IllegalArgumentException {
         if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
@@ -10596,6 +10598,7 @@ public final class N extends CommonUtil {
      * @param c 
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     * @see Iterables#min(Collection)
      */
     public static <T extends Comparable<? super T>> T min(final Collection<? extends T> c) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(c, "The spcified collection can not be null or empty");
@@ -10611,6 +10614,7 @@ public final class N extends CommonUtil {
      * @param toIndex 
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     * @see Iterables#min(Collection)
      */
     public static <T extends Comparable<? super T>> T min(final Collection<? extends T> c, final int fromIndex, final int toIndex)
             throws IllegalArgumentException {
@@ -10626,6 +10630,7 @@ public final class N extends CommonUtil {
      * @param cmp
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     * @see Iterables#min(Collection, Comparator)
      */
     public static <T> T min(final Collection<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(c, "The spcified collection can not be null or empty");
@@ -10765,9 +10770,31 @@ public final class N extends CommonUtil {
             return new ArrayList<>();
         }
 
+        return minAll(c.iterator(), cmp);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param iter
+     * @return
+     * @see Iterables#min(Iterator)
+     */
+    public static <T extends Comparable<? super T>> List<T> minAll(final Iterator<? extends T> iter) {
+        return maxAll(iter, NULL_MAX_COMPARATOR);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param iter
+     * @param cmp
+     * @return
+     * @see Iterables#min(Iterator, Comparator)
+     */
+    public static <T> List<T> minAll(final Iterator<? extends T> iter, Comparator<? super T> cmp) {
         cmp = cmp == null ? NULL_MAX_COMPARATOR : cmp;
 
-        final Iterator<T> iter = c.iterator();
         final List<T> result = new ArrayList<>();
         T candicate = iter.next();
         T next = null;
@@ -11312,6 +11339,7 @@ public final class N extends CommonUtil {
      * @param a an {@code Array} which must not be null or empty
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     * @see Iterables#max(Comparable[])
      */
     public static <T extends Comparable<? super T>> T max(final T[] a) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
@@ -11340,6 +11368,7 @@ public final class N extends CommonUtil {
      * @param cmp
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     * @see Iterables#max(Object[], Comparator)
      */
     public static <T> T max(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
@@ -11384,6 +11413,7 @@ public final class N extends CommonUtil {
      * @param c
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     * @see Iterables#max(Collection)
      */
     public static <T extends Comparable<? super T>> T max(final Collection<? extends T> c) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(c, "The spcified collection can not be null or empty");
@@ -11414,6 +11444,7 @@ public final class N extends CommonUtil {
      * @param cmp
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     * @see Iterables#max(Collection, Comparator)
      */
     public static <T> T max(final Collection<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotNullOrEmpty(c, "The spcified collection can not be null or empty");
@@ -11553,9 +11584,31 @@ public final class N extends CommonUtil {
             return new ArrayList<>();
         }
 
+        return maxAll(c.iterator(), cmp);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param iter
+     * @return
+     * @see Iterables#maxAll(Iterator)
+     */
+    public static <T extends Comparable<? super T>> List<T> maxAll(final Iterator<? extends T> iter) {
+        return maxAll(iter, NULL_MIN_COMPARATOR);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param iter
+     * @param cmp
+     * @return
+     * @see Iterables#maxAll(Iterator, Comparator)
+     */
+    public static <T> List<T> maxAll(final Iterator<? extends T> iter, Comparator<? super T> cmp) {
         cmp = cmp == null ? NULL_MIN_COMPARATOR : cmp;
 
-        final Iterator<? extends T> iter = c.iterator();
         final List<T> result = new ArrayList<>();
         T candicate = iter.next();
         T next = null;
