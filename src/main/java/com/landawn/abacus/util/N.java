@@ -370,6 +370,46 @@ public final class N extends CommonUtil {
     }
 
     /**
+     * 
+     * @param <T>
+     * @param c
+     * @return
+     */
+    public static <T> Map<T, Integer> occurrencesMap(final Collection<T> c) {
+        if (N.isNullOrEmpty(c)) {
+            return new HashMap<>();
+        }
+
+        final Map<T, Integer> map = new HashMap<>();
+
+        for (T e : c) {
+            map.merge(e, 1, (o, n) -> o + n);
+        }
+
+        return map;
+    }
+
+    /**
+     * 
+     * @param <T>
+     * @param c
+     * @return
+     */
+    public static <T> Map<T, Integer> occurrencesMap(final Iterator<T> iter) {
+        if (iter == null) {
+            return new HashMap<>();
+        }
+
+        final Map<T, Integer> map = new HashMap<>();
+
+        while (iter.hasNext()) {
+            map.merge(iter.next(), 1, (o, n) -> o + n);
+        }
+
+        return map;
+    }
+
+    /**
      *
      * @param a
      * @param valueToFind
@@ -2186,7 +2226,8 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Returns a new {@code List} with specified {@code objToExclude} excluded.
+     * Returns a new {@code List} with specified {@code objToExclude} excluded. 
+     * That's to say no more {@code objToExclude} will present in the returned {@code List}.
      *
      * @param <T>
      * @param c
@@ -2211,6 +2252,7 @@ public final class N extends CommonUtil {
 
     /**
      * Returns a new {@code Set} with specified {@code objToExclude} excluded.
+     * That's to say no more {@code objToExclude} will present in the returned {@code Set}.
      *
      * @param <T>
      * @param c
@@ -2231,6 +2273,7 @@ public final class N extends CommonUtil {
 
     /**
      * Returns a new {@code List} with specified {@code objsToExclude} excluded.
+     * That's to say no more {@code objsToExclude} will present in the returned {@code List}.
      *
      * @param c
      * @param objsToExclude
@@ -2259,6 +2302,7 @@ public final class N extends CommonUtil {
 
     /**
      * Returns a new {@code Set} with specified {@code objsToExclude} excluded.
+     * That's to say no more {@code objsToExclude} will present in the returned {@code Set}.
      *
      * @param c
      * @param objsToExclude
@@ -2286,31 +2330,31 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Returns {@code true} if <i>a</i> is a sub-collection of <i>b</i>,
-     * that is, if the cardinality of <i>e</i> in <i>a</i> is less than or
-     * equal to the cardinality of <i>e</i> in <i>b</i>, for each element <i>e</i>
-     * in <i>a</i>.
+     * Returns {@code true} if <i>subColl</i> is a sub-collection of <i>coll</i>,
+     * that is, if the cardinality of <i>e</i> in <i>subColl</i> is less than or
+     * equal to the cardinality of <i>e</i> in <i>coll</i>, for each element <i>e</i>
+     * in <i>subColl</i>.
      *
-     * @param a  the first (sub?) collection, must not be null
-     * @param b  the second (super?) collection, must not be null
-     * @return <code>true</code> if <i>a</i> is a sub-collection of <i>b</i>
+     * @param subColl  the first (sub?) collection, must not be null
+     * @param coll  the second (super?) collection, must not be null
+     * @return <code>true</code> if <i>subColl</i> is a sub-collection of <i>coll</i>
      * @see #isProperSubCollection
      * @see Collection#containsAll
      */
-    public static boolean isSubCollection(final Collection<?> a, final Collection<?> b) {
-        N.checkArgNotNull(a, "a");
-        N.checkArgNotNull(b, "b");
+    public static boolean isSubCollection(final Collection<?> subColl, final Collection<?> coll) {
+        N.checkArgNotNull(subColl, "a");
+        N.checkArgNotNull(coll, "b");
 
-        if (N.isNullOrEmpty(b)) {
+        if (N.isNullOrEmpty(coll)) {
             return true;
-        } else if (N.isNullOrEmpty(a)) {
+        } else if (N.isNullOrEmpty(subColl)) {
             return false;
         }
 
-        final Multiset<?> multisetA = Multiset.from(a);
-        final Multiset<?> multisetB = Multiset.from(b);
+        final Multiset<?> multisetA = Multiset.from(subColl);
+        final Multiset<?> multisetB = Multiset.from(coll);
 
-        for (final Object e : b) {
+        for (final Object e : subColl) {
             if (multisetA.occurrencesOf(e) > multisetB.occurrencesOf(e)) {
                 return false;
             }
@@ -2320,32 +2364,32 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Returns {@code true} if <i>a</i> is a <i>proper</i> sub-collection of <i>b</i>,
-     * that is, if the cardinality of <i>e</i> in <i>a</i> is less
-     * than or equal to the cardinality of <i>e</i> in <i>b</i>,
-     * for each element <i>e</i> in <i>a</i>, and there is at least one
-     * element <i>f</i> such that the cardinality of <i>f</i> in <i>b</i>
-     * is strictly greater than the cardinality of <i>f</i> in <i>a</i>.
+     * Returns {@code true} if <i>subColl</i> is a <i>proper</i> sub-collection of <i>coll</i>,
+     * that is, if the cardinality of <i>e</i> in <i>subColl</i> is less
+     * than or equal to the cardinality of <i>e</i> in <i>coll</i>,
+     * for each element <i>e</i> in <i>subColl</i>, and there is at least one
+     * element <i>f</i> such that the cardinality of <i>f</i> in <i>coll</i>
+     * is strictly greater than the cardinality of <i>f</i> in <i>subColl</i>.
      * <p>
      * The implementation assumes
      * </p>
      * <ul>
-     *    <li><code>a.size()</code> and <code>b.size()</code> represent the
+     *    <li><code>subColl.size()</code> and <code>coll.size()</code> represent the
      *    total cardinality of <i>a</i> and <i>b</i>, resp. </li>
-     *    <li><code>a.size() &lt; Integer.MAXVALUE</code></li>
+     *    <li><code>subColl.size() &lt; Integer.MAXVALUE</code></li>
      * </ul>
      *
-     * @param a  the first (sub?) collection, must not be null
-     * @param b  the second (super?) collection, must not be null
-     * @return <code>true</code> if <i>a</i> is a <i>proper</i> sub-collection of <i>b</i>
+     * @param subColl  the first (sub?) collection, must not be null
+     * @param coll  the second (super?) collection, must not be null
+     * @return <code>true</code> if <i>subColl</i> is a <i>proper</i> sub-collection of <i>coll</i>
      * @see #isSubCollection
      * @see Collection#containsAll
      */
-    public static boolean isProperSubCollection(final Collection<?> a, final Collection<?> b) {
-        N.checkArgNotNull(a, "a");
-        N.checkArgNotNull(b, "b");
+    public static boolean isProperSubCollection(final Collection<?> subColl, final Collection<?> coll) {
+        N.checkArgNotNull(subColl, "a");
+        N.checkArgNotNull(coll, "b");
 
-        return a.size() < b.size() && isSubCollection(a, b);
+        return subColl.size() < coll.size() && isSubCollection(subColl, coll);
     }
 
     /**
@@ -2903,10 +2947,14 @@ public final class N extends CommonUtil {
      */
     @SafeVarargs
     public static <T> T[] concat(final T[]... aa) throws IllegalArgumentException {
-        checkArgNotNull(aa, "aa");
+        // checkArgNotNull(aa, "aa");
 
-        if (aa.length == 1) {
-            return isNullOrEmpty(aa[0]) ? aa[0] : aa[0].clone();
+        if (aa == null) {
+            return null;
+        } else if (aa.length == 0) {
+            return newArray(aa.getClass().getComponentType().getComponentType(), 0);
+        } else if (aa.length == 1) {
+            return aa[0] == null ? newArray(aa.getClass().getComponentType().getComponentType(), 0) : aa[0].clone();
         }
 
         int len = 0;
@@ -3014,40 +3062,29 @@ public final class N extends CommonUtil {
         return result;
     }
 
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param a
-    //     * @param b
-    //     * @return
-    //     * @see {@code Iterators.concat(Iterator...)}
-    //     */
-    //    public static <T> List<T> concat(final Iterator<? extends T> a, final Iterator<? extends T> b) {
-    //        return Iterators.concat(a, b).toList();
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param a
-    //     * @return
-    //     * @see {@code Iterators.concat(Iterator...)}
-    //     */
-    //    @SafeVarargs
-    //    public static <T> List<T> concat(final Iterator<? extends T>... a) {
-    //        return Iterators.concat(a).toList();
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param c
-    //     * @return
-    //     * @see {@code Iterators.concat(Collection...)}
-    //     */
-    //    public static <T> List<T> concatt(final Collection<? extends Iterator<? extends T>> c) {
-    //        return Iterators.concat(c).toList();
-    //    }
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
+     * @see Iterators#concat(Iterator...)
+     */
+    public static <T> ObjIterator<T> concat(final Iterator<? extends T> a, final Iterator<? extends T> b) {
+        return Iterators.concat(a, b);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @return
+     * @see Iterators#concat(Iterator...)
+     */
+    @SafeVarargs
+    public static <T> ObjIterator<T> concat(final Iterator<? extends T>... a) {
+        return Iterators.concat(a);
+    }
 
     /**
      *
@@ -21533,20 +21570,21 @@ public final class N extends CommonUtil {
      *
      * @param iter
      * @return
+     * @throws ArithmeticException if the total {@code count} overflows an {@code int}.
      */
-    public static int count(final Iterator<?> iter) {
+    public static int count(final Iterator<?> iter) throws ArithmeticException {
         if (iter == null) {
             return 0;
         }
 
-        int res = 0;
+        long res = 0;
 
         while (iter.hasNext()) {
             iter.next();
             res++;
         }
 
-        return res;
+        return N.toIntExact(res);
     }
 
     /**
@@ -21555,15 +21593,18 @@ public final class N extends CommonUtil {
      * @param iter
      * @param filter
      * @return
+     * @throws ArithmeticException if the total matched {@code count} overflows an {@code int}.
+     * @throws E
      */
-    public static <T, E extends Exception> int count(final Iterator<? extends T> iter, final Throwables.Predicate<? super T, E> filter) throws E {
+    public static <T, E extends Exception> int count(final Iterator<? extends T> iter, final Throwables.Predicate<? super T, E> filter)
+            throws ArithmeticException, E {
         N.checkArgNotNull(filter, "filter");
 
         if (iter == null) {
             return 0;
         }
 
-        int res = 0;
+        long res = 0;
 
         while (iter.hasNext()) {
             if (filter.test(iter.next())) {
@@ -21571,7 +21612,7 @@ public final class N extends CommonUtil {
             }
         }
 
-        return res;
+        return N.toIntExact(res);
     }
 
     /**

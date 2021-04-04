@@ -1010,31 +1010,20 @@ public final class Iterables {
         return summation.average();
     }
 
-    public static OptionalInt indexOf(final Collection<?> c, final Object objToFind) {
-        return Index.of(c, objToFind);
-    }
-
     public static OptionalInt indexOf(final Object[] a, final Object objToFind) {
         return Index.of(a, objToFind);
     }
 
-    public static OptionalInt lastIndexOf(final Collection<?> c, final Object objToFind) {
-        return Index.last(c, objToFind);
+    public static OptionalInt indexOf(final Collection<?> c, final Object objToFind) {
+        return Index.of(c, objToFind);
     }
 
     public static OptionalInt lastIndexOf(final Object[] a, final Object objToFind) {
         return Index.last(a, objToFind);
     }
 
-    public static <T, E extends Exception, E2 extends Exception> OptionalInt findFirstOrLastIndex(final Collection<? extends T> c,
-            final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
-        if (N.isNullOrEmpty(c)) {
-            return OptionalInt.empty();
-        }
-
-        final OptionalInt res = N.findFirstIndex(c, predicateForFirst);
-
-        return res.isPresent() ? res : N.findLastIndex(c, predicateForLast);
+    public static OptionalInt lastIndexOf(final Collection<?> c, final Object objToFind) {
+        return Index.last(c, objToFind);
     }
 
     /**
@@ -1061,41 +1050,15 @@ public final class Iterables {
         return res.isPresent() ? res : N.findLastIndex(a, predicateForLast);
     }
 
-    /**
-     * Find first and last index.
-     *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param predicate the predicate
-     * @return the pair
-     * @throws E the e
-     */
-    public static <T, E extends Exception> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final Collection<? extends T> c,
-            final Throwables.Predicate<? super T, E> predicate) throws E {
-        return findFirstAndLastIndex(c, predicate, predicate);
-    }
-
-    /**
-     * Find first and last index.
-     *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param <E2> the generic type
-     * @param c the c
-     * @param predicateForFirst the predicate for first
-     * @param predicateForLast the predicate for last
-     * @return the pair
-     * @throws E the e
-     * @throws E2 the e2
-     */
-    public static <T, E extends Exception, E2 extends Exception> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final Collection<? extends T> c,
+    public static <T, E extends Exception, E2 extends Exception> OptionalInt findFirstOrLastIndex(final Collection<? extends T> c,
             final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
         if (N.isNullOrEmpty(c)) {
-            return Pair.of(OptionalInt.empty(), OptionalInt.empty());
+            return OptionalInt.empty();
         }
 
-        return Pair.of(N.findFirstIndex(c, predicateForFirst), N.findLastIndex(c, predicateForLast));
+        final OptionalInt res = N.findFirstIndex(c, predicateForFirst);
+
+        return res.isPresent() ? res : N.findLastIndex(c, predicateForLast);
     }
 
     /**
@@ -1136,7 +1099,22 @@ public final class Iterables {
     }
 
     /**
-     * Find first or last.
+     * Find first and last index.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param c the c
+     * @param predicate the predicate
+     * @return the pair
+     * @throws E the e
+     */
+    public static <T, E extends Exception> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final Collection<? extends T> c,
+            final Throwables.Predicate<? super T, E> predicate) throws E {
+        return findFirstAndLastIndex(c, predicate, predicate);
+    }
+
+    /**
+     * Find first and last index.
      *
      * @param <T> the generic type
      * @param <E> the element type
@@ -1144,19 +1122,17 @@ public final class Iterables {
      * @param c the c
      * @param predicateForFirst the predicate for first
      * @param predicateForLast the predicate for last
-     * @return the nullable
+     * @return the pair
      * @throws E the e
      * @throws E2 the e2
      */
-    public static <T, E extends Exception, E2 extends Exception> Nullable<T> findFirstOrLast(final Collection<? extends T> c,
+    public static <T, E extends Exception, E2 extends Exception> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final Collection<? extends T> c,
             final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
         if (N.isNullOrEmpty(c)) {
-            return Nullable.<T> empty();
+            return Pair.of(OptionalInt.empty(), OptionalInt.empty());
         }
 
-        final Nullable<T> res = N.findFirst(c, predicateForFirst);
-
-        return res.isPresent() ? res : N.findLast(c, predicateForLast);
+        return Pair.of(N.findFirstIndex(c, predicateForFirst), N.findLastIndex(c, predicateForLast));
     }
 
     /**
@@ -1184,22 +1160,7 @@ public final class Iterables {
     }
 
     /**
-     * Find first and last.
-     *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param predicate the predicate
-     * @return the pair
-     * @throws E the e
-     */
-    public static <T, E extends Exception> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final Collection<? extends T> c,
-            final Throwables.Predicate<? super T, E> predicate) throws E {
-        return findFirstAndLast(c, predicate, predicate);
-    }
-
-    /**
-     * Find first and last.
+     * Find first or last.
      *
      * @param <T> the generic type
      * @param <E> the element type
@@ -1207,17 +1168,19 @@ public final class Iterables {
      * @param c the c
      * @param predicateForFirst the predicate for first
      * @param predicateForLast the predicate for last
-     * @return the pair
+     * @return the nullable
      * @throws E the e
      * @throws E2 the e2
      */
-    public static <T, E extends Exception, E2 extends Exception> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final Collection<? extends T> c,
+    public static <T, E extends Exception, E2 extends Exception> Nullable<T> findFirstOrLast(final Collection<? extends T> c,
             final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
         if (N.isNullOrEmpty(c)) {
-            return Pair.of(Nullable.<T> empty(), Nullable.<T> empty());
+            return Nullable.<T> empty();
         }
 
-        return Pair.of(N.findFirst(c, predicateForFirst), N.findLast(c, predicateForLast));
+        final Nullable<T> res = N.findFirst(c, predicateForFirst);
+
+        return res.isPresent() ? res : N.findLast(c, predicateForLast);
     }
 
     /**
@@ -1255,6 +1218,43 @@ public final class Iterables {
         }
 
         return Pair.of(N.findFirst(a, predicateForFirst), N.findLast(a, predicateForLast));
+    }
+
+    /**
+     * Find first and last.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param c the c
+     * @param predicate the predicate
+     * @return the pair
+     * @throws E the e
+     */
+    public static <T, E extends Exception> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final Collection<? extends T> c,
+            final Throwables.Predicate<? super T, E> predicate) throws E {
+        return findFirstAndLast(c, predicate, predicate);
+    }
+
+    /**
+     * Find first and last.
+     *
+     * @param <T> the generic type
+     * @param <E> the element type
+     * @param <E2> the generic type
+     * @param c the c
+     * @param predicateForFirst the predicate for first
+     * @param predicateForLast the predicate for last
+     * @return the pair
+     * @throws E the e
+     * @throws E2 the e2
+     */
+    public static <T, E extends Exception, E2 extends Exception> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final Collection<? extends T> c,
+            final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
+        if (N.isNullOrEmpty(c)) {
+            return Pair.of(Nullable.<T> empty(), Nullable.<T> empty());
+        }
+
+        return Pair.of(N.findFirst(c, predicateForFirst), N.findLast(c, predicateForLast));
     }
 
     //    /**
