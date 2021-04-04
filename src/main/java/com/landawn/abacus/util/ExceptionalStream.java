@@ -4316,6 +4316,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
+    @TerminalOpTriggered
     @SuppressWarnings("rawtypes")
     public ExceptionalStream<T, E> sortedBy(final Function<? super T, ? extends Comparable> keyMapper) {
         assertNotClosed();
@@ -4450,7 +4451,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    @SequentialOnly
     @IntermediateOp
     public ExceptionalStream<T, E> mergeWith(final Collection<? extends T> b, final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
         assertNotClosed();
@@ -4464,7 +4464,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
      * @return
      */
-    @SequentialOnly
     @IntermediateOp
     public ExceptionalStream<T, E> mergeWith(final ExceptionalStream<? extends T, E> b,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
@@ -6305,6 +6304,66 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     @TerminalOp
+    public Optional<T> findFirst(Throwables.Predicate<? super T, E> predicate) throws E {
+        assertNotClosed();
+
+        try {
+            while (elements.hasNext()) {
+                T e = elements.next();
+
+                if (predicate.test(e)) {
+                    return Optional.of(e);
+                }
+            }
+        } finally {
+            close();
+        }
+
+        return (Optional<T>) Optional.empty();
+    }
+
+    /**
+     * Consider using: {@code stream.reversed().findFirst(predicate)} for better performance if possible.
+     * 
+     * @param <E>
+     * @param predicate
+     * @return
+     * @throws E
+     */
+    @TerminalOp
+    public Optional<T> findLast(Throwables.Predicate<? super T, E> predicate) throws E {
+        assertNotClosed();
+
+        try {
+            if (elements.hasNext() == false) {
+                return (Optional<T>) Optional.empty();
+            }
+
+            boolean hasResult = false;
+            T e = null;
+            T result = null;
+
+            while (elements.hasNext()) {
+                e = elements.next();
+
+                if (predicate.test(e)) {
+                    result = e;
+                    hasResult = true;
+                }
+            }
+
+            return hasResult ? Optional.of(result) : (Optional<T>) Optional.empty();
+        } finally {
+            close();
+        }
+    }
+
+    @TerminalOp
+    public Optional<T> findAny(Throwables.Predicate<? super T, E> predicate) throws E {
+        return findFirst(predicate);
+    }
+
+    @TerminalOp
     @SafeVarargs
     public final boolean containsAll(final T... a) throws E {
         assertNotClosed();
@@ -7631,6 +7690,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    @IntermediateOp
     public java.util.stream.Stream<T> toJdkStream() {
         assertNotClosed();
 
@@ -7811,7 +7871,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      * @see Stream#sps(Function)
      */
-    @SequentialOnly
     @IntermediateOp
     @Beta
     public <R> ExceptionalStream<R, E> sps(final Function<? super Stream<T>, Stream<R>> ops) {
@@ -7828,7 +7887,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      * @see Stream#sps(int, Function)
      */
-    @SequentialOnly
     @IntermediateOp
     @Beta
     public <R> ExceptionalStream<R, E> sps(final int maxThreadNum, final Function<? super Stream<T>, Stream<R>> ops) {
@@ -7844,6 +7902,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      * @see Stream#spsFilter(Predicate)
      */
+    @IntermediateOp
     @Beta
     public ExceptionalStream<T, E> spsFilter(final Throwables.Predicate<? super T, E> predicate) {
         final Function<Stream<T>, Stream<T>> ops = new Function<Stream<T>, Stream<T>>() {
@@ -7864,6 +7923,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      * @see Stream#spsMap(Function)
      */
+    @IntermediateOp
     @Beta
     public <R> ExceptionalStream<R, E> spsMap(final Throwables.Function<? super T, ? extends R, E> mapper) {
         final Function<Stream<T>, Stream<R>> ops = new Function<Stream<T>, Stream<R>>() {
@@ -7885,6 +7945,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      * @see Stream#spsFlatMap(Function)
      */
+    @IntermediateOp
     @Beta
     public <R> ExceptionalStream<R, E> spsFlatMap(final Throwables.Function<? super T, ? extends Stream<? extends R>, E> mapper) {
         final Function<Stream<T>, Stream<R>> ops = new Function<Stream<T>, Stream<R>>() {
@@ -7905,6 +7966,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      * @see Stream#spsFlattMap(Function)
      */
+    @IntermediateOp
     @Beta
     public <R> ExceptionalStream<R, E> spsFlattMap(final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) {
         final Function<Stream<T>, Stream<R>> ops = new Function<Stream<T>, Stream<R>>() {
@@ -7924,6 +7986,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      * @see Stream#onEach(Consumer)
      */
+    @IntermediateOp
     @Beta
     public ExceptionalStream<T, E> spsOnEach(final Throwables.Consumer<? super T, E> action) {
         final Function<Stream<T>, Stream<T>> ops = new Function<Stream<T>, Stream<T>>() {
@@ -7943,6 +8006,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      * @see Stream#spsFilter(int, Predicate)
      */
+    @IntermediateOp
     @Beta
     public ExceptionalStream<T, E> spsFilter(final int maxThreadNum, final Throwables.Predicate<? super T, E> predicate) {
         final Function<Stream<T>, Stream<T>> ops = new Function<Stream<T>, Stream<T>>() {
@@ -7963,6 +8027,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      * @see Stream#spsMap(int, Function)
      */
+    @IntermediateOp
     @Beta
     public <R> ExceptionalStream<R, E> spsMap(final int maxThreadNum, final Throwables.Function<? super T, ? extends R, E> mapper) {
         final Function<Stream<T>, Stream<R>> ops = new Function<Stream<T>, Stream<R>>() {
@@ -7983,6 +8048,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      * @see Stream#spsFlatMap(int, Function)
      */
+    @IntermediateOp
     @Beta
     public <R> ExceptionalStream<R, E> spsFlatMap(final int maxThreadNum, final Throwables.Function<? super T, ? extends Stream<? extends R>, E> mapper) {
         final Function<Stream<T>, Stream<R>> ops = new Function<Stream<T>, Stream<R>>() {
@@ -8003,6 +8069,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      * @see Stream#spsFlattMap(int, Function)
      */
+    @IntermediateOp
     @Beta
     public <R> ExceptionalStream<R, E> spsFlattMap(final int maxThreadNum, final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) {
         final Function<Stream<T>, Stream<R>> ops = new Function<Stream<T>, Stream<R>>() {
@@ -8022,6 +8089,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      * @see Stream#onEach(int, Consumer)
      */
+    @IntermediateOp
     @Beta
     public ExceptionalStream<T, E> spsOnEach(final int maxThreadNum, final Throwables.Consumer<? super T, E> action) {
         final Function<Stream<T>, Stream<T>> ops = new Function<Stream<T>, Stream<T>>() {
@@ -8040,6 +8108,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param terminalAction a terminal operation should be called.
      * @return
      */
+    @TerminalOp
     @Beta
     public ContinuableFuture<Void> asyncRun(final Throwables.Consumer<? super ExceptionalStream<T, E>, ? extends E> terminalAction) {
         assertNotClosed();
@@ -8060,6 +8129,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param executor
      * @return
      */
+    @TerminalOp
     @Beta
     public ContinuableFuture<Void> asyncRun(final Throwables.Consumer<? super ExceptionalStream<T, E>, ? extends E> terminalAction, final Executor executor) {
         assertNotClosed();
@@ -8081,6 +8151,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param terminalAction a terminal operation should be called.
      * @return
      */
+    @TerminalOp
     @Beta
     public <R> ContinuableFuture<R> asyncCall(final Throwables.Function<? super ExceptionalStream<T, E>, R, ? extends E> terminalAction) {
         assertNotClosed();
@@ -8102,6 +8173,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param executor
      * @return
      */
+    @TerminalOp
     @Beta
     public <R> ContinuableFuture<R> asyncCall(final Throwables.Function<? super ExceptionalStream<T, E>, R, ? extends E> terminalAction,
             final Executor executor) {
@@ -8668,20 +8740,20 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
-    /**
-     * Mostly it's for android.
-     * 
-     * @see {@code ExceptionalStream<T, RuntimeException>}
-     * 
-     * @deprecated Mostly it's for android.
-     */
-    @Deprecated
-    @Beta
-    public static final class StreamR extends Seq {
-        private StreamR() {
-            // singleton for utility class.
-        }
-    }
+    //    /**
+    //     * Mostly it's for android.
+    //     * 
+    //     * @see {@code ExceptionalStream<T, RuntimeException>}
+    //     * 
+    //     * @deprecated Mostly it's for android.
+    //     */
+    //    @Deprecated
+    //    @Beta
+    //    public static final class StreamR extends Seq {
+    //        private StreamR() {
+    //            // singleton for utility class.
+    //        }
+    //    }
 
     /**
      * Mostly it's for android.
@@ -8690,9 +8762,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * 
      * @deprecated Mostly it's for android.
      */
-    @Deprecated
     @Beta
-    static class Seq {
+    @Deprecated
+    public final static class Seq {
         private Seq() {
             // singleton for utility class.
         }
@@ -8771,6 +8843,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             return ExceptionalStream.<K, V, RuntimeException> ofKeys(map, valueFilter);
         }
 
+        public static <K, V> ExceptionalStream<K, RuntimeException> ofKeys(final Map<K, V> map,
+                final Throwables.BiPredicate<? super K, ? super V, RuntimeException> filter) {
+            return ExceptionalStream.ofKeys(map, filter);
+        }
+
         public static <V> ExceptionalStream<V, RuntimeException> ofValues(final Map<?, V> map) {
             return ExceptionalStream.<V, RuntimeException> ofValues(map);
         }
@@ -8778,6 +8855,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         public static <K, V> ExceptionalStream<V, RuntimeException> ofValues(final Map<K, V> map,
                 final Throwables.Predicate<? super K, RuntimeException> keyFilter) {
             return ExceptionalStream.<K, V, RuntimeException> ofValues(map, keyFilter);
+        }
+
+        public static <K, V> ExceptionalStream<V, RuntimeException> ofValues(final Map<K, V> map,
+                final Throwables.BiPredicate<? super K, ? super V, RuntimeException> filter) {
+            return ExceptionalStream.ofValues(map, filter);
         }
 
         public static <T> ExceptionalStream<T, RuntimeException> iterate(final Throwables.BooleanSupplier<? extends RuntimeException> hasNext,
@@ -8805,6 +8887,22 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         public static <T> ExceptionalStream<T, RuntimeException> repeat(final T element, final long n) {
             return ExceptionalStream.<T, RuntimeException> repeat(element, n);
+        }
+
+        public static ExceptionalStream<Integer, RuntimeException> range(final int startInclusive, final int endExclusive) {
+            return ExceptionalStream.<RuntimeException> range(startInclusive, endExclusive);
+        }
+
+        public static ExceptionalStream<Integer, RuntimeException> range(final int startInclusive, final int endExclusive, final int by) {
+            return ExceptionalStream.<RuntimeException> range(startInclusive, endExclusive, by);
+        }
+
+        public static ExceptionalStream<Integer, RuntimeException> rangeClosed(final int startInclusive, final int endExclusive) {
+            return ExceptionalStream.<RuntimeException> rangeClosed(startInclusive, endExclusive);
+        }
+
+        public static ExceptionalStream<Integer, RuntimeException> rangeClosed(final int startInclusive, final int endExclusive, final int by) {
+            return ExceptionalStream.<RuntimeException> rangeClosed(startInclusive, endExclusive, by);
         }
 
         @SafeVarargs

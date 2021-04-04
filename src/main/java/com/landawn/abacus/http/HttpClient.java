@@ -88,9 +88,9 @@ public final class HttpClient {
 
     protected final int _maxConnection;
 
-    protected final long _connectionTimeout;
+    protected final long _connectionTimeoutInMillis;
 
-    protected final long _readTimeout;
+    protected final long _readTimeoutInMillis;
 
     protected final HttpSettings _settings;
 
@@ -108,29 +108,30 @@ public final class HttpClient {
         this(url, maxConnection, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_READ_TIMEOUT);
     }
 
-    protected HttpClient(String url, int maxConnection, long connectionTimeout, long readTimeout) {
-        this(url, maxConnection, connectionTimeout, readTimeout, null);
+    protected HttpClient(String url, int maxConnection, long connectionTimeoutInMillis, long readTimeoutInMillis) {
+        this(url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, null);
     }
 
-    protected HttpClient(String url, int maxConnection, long connectionTimeout, long readTimeout, HttpSettings settings) throws UncheckedIOException {
-        this(url, maxConnection, connectionTimeout, readTimeout, settings, new AtomicInteger(0));
+    protected HttpClient(String url, int maxConnection, long connectionTimeoutInMillis, long readTimeoutInMillis, HttpSettings settings)
+            throws UncheckedIOException {
+        this(url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, settings, new AtomicInteger(0));
     }
 
-    protected HttpClient(String url, int maxConnection, long connectionTimeout, long readTimeout, HttpSettings settings,
+    protected HttpClient(String url, int maxConnection, long connectionTimeoutInMillis, long readTimeoutInMillis, HttpSettings settings,
             final AtomicInteger sharedActiveConnectionCounter) {
         if (N.isNullOrEmpty(url)) {
             throw new IllegalArgumentException("url can't be null or empty");
         }
 
-        if ((maxConnection < 0) || (connectionTimeout < 0) || (readTimeout < 0)) {
-            throw new IllegalArgumentException(
-                    "maxConnection, connectionTimeout or readTimeout can't be less than 0: " + maxConnection + ", " + connectionTimeout + ", " + readTimeout);
+        if ((maxConnection < 0) || (connectionTimeoutInMillis < 0) || (readTimeoutInMillis < 0)) {
+            throw new IllegalArgumentException("maxConnection, connectionTimeoutInMillis or readTimeoutInMillis can't be less than 0: " + maxConnection + ", "
+                    + connectionTimeoutInMillis + ", " + readTimeoutInMillis);
         }
 
         this._url = url;
         this._maxConnection = (maxConnection == 0) ? DEFAULT_MAX_CONNECTION : maxConnection;
-        this._connectionTimeout = (connectionTimeout == 0) ? DEFAULT_CONNECTION_TIMEOUT : connectionTimeout;
-        this._readTimeout = (readTimeout == 0) ? DEFAULT_READ_TIMEOUT : readTimeout;
+        this._connectionTimeoutInMillis = (connectionTimeoutInMillis == 0) ? DEFAULT_CONNECTION_TIMEOUT : connectionTimeoutInMillis;
+        this._readTimeoutInMillis = (readTimeoutInMillis == 0) ? DEFAULT_READ_TIMEOUT : readTimeoutInMillis;
         this._settings = settings == null ? HttpSettings.create() : settings;
 
         _asyncExecutor = new AsyncExecutor(Math.min(8, this._maxConnection), this._maxConnection, 300L, TimeUnit.SECONDS);
@@ -166,54 +167,54 @@ public final class HttpClient {
     /**
      *
      * @param url
-     * @param connectionTimeout
-     * @param readTimeout
+     * @param connectionTimeoutInMillis
+     * @param readTimeoutInMillis
      * @return
      */
-    public static HttpClient create(String url, long connectionTimeout, long readTimeout) {
-        return new HttpClient(url, DEFAULT_MAX_CONNECTION, connectionTimeout, readTimeout);
+    public static HttpClient create(String url, long connectionTimeoutInMillis, long readTimeoutInMillis) {
+        return new HttpClient(url, DEFAULT_MAX_CONNECTION, connectionTimeoutInMillis, readTimeoutInMillis);
     }
 
     /**
      *
      * @param url
      * @param maxConnection
-     * @param connectionTimeout
-     * @param readTimeout
+     * @param connectionTimeoutInMillis
+     * @param readTimeoutInMillis
      * @return
      */
-    public static HttpClient create(String url, int maxConnection, long connectionTimeout, long readTimeout) {
-        return new HttpClient(url, maxConnection, connectionTimeout, readTimeout);
+    public static HttpClient create(String url, int maxConnection, long connectionTimeoutInMillis, long readTimeoutInMillis) {
+        return new HttpClient(url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis);
     }
 
     /**
      *
      * @param url
      * @param maxConnection
-     * @param connectionTimeout
-     * @param readTimeout
+     * @param connectionTimeoutInMillis
+     * @param readTimeoutInMillis
      * @param settings
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static HttpClient create(String url, int maxConnection, long connectionTimeout, long readTimeout, HttpSettings settings)
+    public static HttpClient create(String url, int maxConnection, long connectionTimeoutInMillis, long readTimeoutInMillis, HttpSettings settings)
             throws UncheckedIOException {
-        return new HttpClient(url, maxConnection, connectionTimeout, readTimeout, settings);
+        return new HttpClient(url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, settings);
     }
 
     /**
      *
      * @param url
      * @param maxConnection
-     * @param connectionTimeout
-     * @param readTimeout
+     * @param connectionTimeoutInMillis
+     * @param readTimeoutInMillis
      * @param settings
      * @param sharedActiveConnectionCounter
      * @return
      */
-    public static HttpClient create(String url, int maxConnection, long connectionTimeout, long readTimeout, HttpSettings settings,
+    public static HttpClient create(String url, int maxConnection, long connectionTimeoutInMillis, long readTimeoutInMillis, HttpSettings settings,
             final AtomicInteger sharedActiveConnectionCounter) {
-        return new HttpClient(url, maxConnection, connectionTimeout, readTimeout, settings, sharedActiveConnectionCounter);
+        return new HttpClient(url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, settings, sharedActiveConnectionCounter);
     }
 
     public String url() {
@@ -1195,24 +1196,24 @@ public final class HttpClient {
                 }
             }
 
-            int connectionTimeout = _connectionTimeout > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) _connectionTimeout;
+            int connectionTimeoutInMillis = _connectionTimeoutInMillis > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) _connectionTimeoutInMillis;
 
             if (settings != null) {
-                connectionTimeout = settings.getConnectionTimeout();
+                connectionTimeoutInMillis = settings.getConnectionTimeout();
             }
 
-            if (connectionTimeout > 0) {
-                connection.setConnectTimeout(connectionTimeout);
+            if (connectionTimeoutInMillis > 0) {
+                connection.setConnectTimeout(connectionTimeoutInMillis);
             }
 
-            int readTimeout = _readTimeout > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) _readTimeout;
+            int readTimeoutInMillis = _readTimeoutInMillis > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) _readTimeoutInMillis;
 
             if (settings != null) {
-                readTimeout = settings.getReadTimeout();
+                readTimeoutInMillis = settings.getReadTimeout();
             }
 
-            if (readTimeout > 0) {
-                connection.setReadTimeout(readTimeout);
+            if (readTimeoutInMillis > 0) {
+                connection.setReadTimeout(readTimeoutInMillis);
             }
 
             if (settings != null) {

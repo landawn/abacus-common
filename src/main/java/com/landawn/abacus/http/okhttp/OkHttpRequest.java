@@ -113,7 +113,7 @@ public final class OkHttpRequest {
         });
     }
 
-    final OkHttpClient httpClient;
+    OkHttpClient httpClient;
     final Request.Builder builder = new Request.Builder();
     RequestBody body;
     Request request;
@@ -122,12 +122,22 @@ public final class OkHttpRequest {
         this.httpClient = httpClient;
     }
 
-    public static OkHttpRequest create() {
-        return new OkHttpRequest(defaultClient);
+    public static OkHttpRequest create(final String url, final OkHttpClient httpClient) {
+        final OkHttpRequest okHttpRequest = new OkHttpRequest(httpClient);
+        okHttpRequest.builder.url(url);
+        return okHttpRequest;
     }
 
-    public static OkHttpRequest create(OkHttpClient httpClient) {
-        return new OkHttpRequest(httpClient);
+    public static OkHttpRequest create(final URL url, final OkHttpClient httpClient) {
+        final OkHttpRequest okHttpRequest = new OkHttpRequest(httpClient);
+        okHttpRequest.builder.url(url);
+        return okHttpRequest;
+    }
+
+    public static OkHttpRequest create(final HttpUrl url, final OkHttpClient httpClient) {
+        final OkHttpRequest okHttpRequest = new OkHttpRequest(httpClient);
+        okHttpRequest.builder.url(url);
+        return okHttpRequest;
     }
 
     /**
@@ -136,9 +146,8 @@ public final class OkHttpRequest {
      * @throws IllegalArgumentException if {@code url} is not a valid HTTP or HTTPS URL. Avoid this
      * exception by calling {@link HttpUrl#parse}; it returns null for invalid URLs.
      */
-    public OkHttpRequest url(String url) {
-        builder.url(url);
-        return this;
+    public static OkHttpRequest url(final String url) {
+        return create(url, defaultClient);
     }
 
     /**
@@ -147,15 +156,33 @@ public final class OkHttpRequest {
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code
      * https}.
      */
-    public OkHttpRequest url(URL url) {
-        builder.url(url);
-        return this;
+    public static OkHttpRequest url(URL url) {
+        return create(url, defaultClient);
     }
 
-    public OkHttpRequest url(HttpUrl url) {
-        builder.url(url);
+    public static OkHttpRequest url(HttpUrl url) {
+        return create(url, defaultClient);
+    }
 
-        return this;
+    public static OkHttpRequest url(final String url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
+        return create(url,
+                new OkHttpClient.Builder().connectTimeout(connectionTimeoutInMillis, TimeUnit.MICROSECONDS)
+                        .readTimeout(readTimeoutInMillis, TimeUnit.MICROSECONDS)
+                        .build());
+    }
+
+    public static OkHttpRequest url(final URL url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
+        return create(url,
+                new OkHttpClient.Builder().connectTimeout(connectionTimeoutInMillis, TimeUnit.MICROSECONDS)
+                        .readTimeout(readTimeoutInMillis, TimeUnit.MICROSECONDS)
+                        .build());
+    }
+
+    public static OkHttpRequest url(final HttpUrl url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
+        return create(url,
+                new OkHttpClient.Builder().connectTimeout(connectionTimeoutInMillis, TimeUnit.MICROSECONDS)
+                        .readTimeout(readTimeoutInMillis, TimeUnit.MICROSECONDS)
+                        .build());
     }
 
     /**
@@ -203,7 +230,12 @@ public final class OkHttpRequest {
 
     /**
      * Sets the header named {@code name} to {@code value}. 
-     * If this request already has any headers with that name, they are all replaced.
+     * If this request already has any headers with that name, they are all replaced. 
+     * 
+     * @param name
+     * @param value
+     * @return
+     * @see Request.Builder#header(String, String)
      */
     public OkHttpRequest header(String name, String value) {
         builder.header(name, value);
@@ -219,6 +251,7 @@ public final class OkHttpRequest {
      * @param name2
      * @param value2
      * @return
+     * @see Request.Builder#header(String, String)
      */
     public OkHttpRequest headers(String name1, String value1, String name2, String value2) {
         builder.header(name1, value1);
@@ -238,6 +271,7 @@ public final class OkHttpRequest {
      * @param name3
      * @param value3
      * @return
+     * @see Request.Builder#header(String, String)
      */
     public OkHttpRequest headers(String name1, String value1, String name2, String value2, String name3, String value3) {
         builder.header(name1, value1);
@@ -253,6 +287,7 @@ public final class OkHttpRequest {
      * 
      * @param headers
      * @return
+     * @see Request.Builder#header(String, String)
      */
     public OkHttpRequest headers(final Map<String, ?> headers) {
         if (N.notNullOrEmpty(headers)) {
@@ -265,7 +300,11 @@ public final class OkHttpRequest {
     }
 
     /**
-     * Removes all headers on this builder and adds {@code headers}.
+     * Removes all headers on this builder and adds {@code headers}
+     * 
+     * @param headers
+     * @return
+     * @see Request.Builder#headers(Headers)
      */
     public OkHttpRequest headers(Headers headers) {
         builder.headers(headers);

@@ -63,12 +63,12 @@ public final class HttpRequest {
     /**
      *
      * @param url
-     * @param connectionTimeout
-     * @param readTimeout
+     * @param connectionTimeoutInMillis
+     * @param readTimeoutInMillis
      * @return
      */
-    public static HttpRequest url(final String url, final long connectionTimeout, final long readTimeout) {
-        return new HttpRequest(HttpClient.create(url, 1, connectionTimeout, readTimeout));
+    public static HttpRequest url(final String url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
+        return new HttpRequest(HttpClient.create(url, 1, connectionTimeoutInMillis, readTimeoutInMillis));
     }
 
     /**
@@ -86,10 +86,13 @@ public final class HttpRequest {
     }
 
     /**
+     * Set http header specified by {@code name/value}.
+     * If this {@code HttpSettings} already has any headers with that name, they are all replaced.
      *
      * @param name
      * @param value
-     * @return
+     * @return 
+     * @see HttpSettings#header(String, Object)
      */
     public HttpRequest header(String name, Object value) {
         checkSettings();
@@ -100,12 +103,15 @@ public final class HttpRequest {
     }
 
     /**
+     * Set http headers specified by {@code name1/value1}, {@code name2/value2}.
+     * If this {@code HttpSettings} already has any headers with that name, they are all replaced.
      *
      * @param name1
      * @param value1
      * @param name2
      * @param value2
      * @return
+     * @see HttpSettings#headers(String, Object, String, Object)
      */
     public HttpRequest headers(String name1, Object value1, String name2, Object value2) {
         checkSettings();
@@ -116,6 +122,8 @@ public final class HttpRequest {
     }
 
     /**
+     * Set http headers specified by {@code name1/value1}, {@code name2/value2}, {@code name3/value3}.
+     * If this {@code HttpSettings} already has any headers with that name, they are all replaced.
      *
      * @param name1
      * @param value1
@@ -124,6 +132,7 @@ public final class HttpRequest {
      * @param name3
      * @param value3
      * @return
+     * @see HttpSettings#headers(String, Object, String, Object, String, Object)
      */
     public HttpRequest headers(String name1, Object value1, String name2, Object value2, String name3, Object value3) {
         checkSettings();
@@ -134,9 +143,12 @@ public final class HttpRequest {
     }
 
     /**
+     * Set http headers specified by the key/value entities from {@code Map}.
+     * If this {@code HttpSettings} already has any headers with that name, they are all replaced.
      *
      * @param headers
      * @return
+     * @see HttpSettings#headers(Map)
      */
     public HttpRequest headers(Map<String, ?> headers) {
         checkSettings();
@@ -147,9 +159,11 @@ public final class HttpRequest {
     }
 
     /**
+     * Removes all headers on this {@code HttpSettings} and adds {@code headers}.
      *
      * @param headers
      * @return
+     * @see HttpSettings#headers(HttpHeaders)
      */
     public HttpRequest headers(HttpHeaders headers) {
         checkSettings();
