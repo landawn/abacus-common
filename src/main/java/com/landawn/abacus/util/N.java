@@ -389,7 +389,7 @@ public final class N extends CommonUtil {
      * @return
      * @see Multiset#from(Collection)
      */
-    public static <T> Map<T, Integer> occurrencesMap(final T[] a, Supplier<Map<T, Integer>> mapSupplier) {
+    public static <T> Map<T, Integer> occurrencesMap(final T[] a, final Supplier<Map<T, Integer>> mapSupplier) {
         if (N.isNullOrEmpty(a)) {
             return mapSupplier.get();
         }
@@ -422,7 +422,7 @@ public final class N extends CommonUtil {
      * @return
      * @see Multiset#from(Collection)
      */
-    public static <T> Map<T, Integer> occurrencesMap(final Collection<T> c, Supplier<Map<T, Integer>> mapSupplier) {
+    public static <T> Map<T, Integer> occurrencesMap(final Collection<T> c, final Supplier<Map<T, Integer>> mapSupplier) {
         if (N.isNullOrEmpty(c)) {
             return mapSupplier.get();
         }
@@ -455,7 +455,7 @@ public final class N extends CommonUtil {
      * @return
      * @see Multiset#from(Iterator)
      */
-    public static <T> Map<T, Integer> occurrencesMap(final Iterator<T> iter, Supplier<Map<T, Integer>> mapSupplier) {
+    public static <T> Map<T, Integer> occurrencesMap(final Iterator<T> iter, final Supplier<Map<T, Integer>> mapSupplier) {
         if (iter == null) {
             return mapSupplier.get();
         }

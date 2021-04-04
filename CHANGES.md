@@ -1,3 +1,8 @@
+### 2.2.19
+
+* Improvements and bug fix.
+
+
 ### 2.2.18
 
 * Improvements and bug fix.
