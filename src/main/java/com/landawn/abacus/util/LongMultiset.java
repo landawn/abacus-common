@@ -135,6 +135,38 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      *
      * @param <T>
+     * @param iter
+     * @return
+     */
+    public static <T> LongMultiset<T> from(final Iterator<? extends T> iter) {
+        final LongMultiset<T> result = new LongMultiset<>();
+
+        if (iter != null) {
+            T e = null;
+            MutableLong count = null;
+
+            while (iter.hasNext()) {
+                e = iter.next();
+                count = result.valueMap.get(e);
+
+                if (count == null) {
+                    result.valueMap.put(e, MutableLong.of(1));
+                } else {
+                    if (count.value() == Long.MAX_VALUE) {
+                        throw new IllegalArgumentException("The total count is out of the bound of int");
+                    }
+
+                    count.add(1);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <T>
      * @param m
      * @return
      */

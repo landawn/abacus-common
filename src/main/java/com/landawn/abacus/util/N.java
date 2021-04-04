@@ -374,6 +374,7 @@ public final class N extends CommonUtil {
      * @param <T>
      * @param c
      * @return
+     * @see Multiset#from(Collection)
      */
     public static <T> Map<T, Integer> occurrencesMap(final Collection<T> c) {
         if (N.isNullOrEmpty(c)) {
@@ -394,6 +395,7 @@ public final class N extends CommonUtil {
      * @param <T>
      * @param c
      * @return
+     * @see Multiset#from(Iterator)
      */
     public static <T> Map<T, Integer> occurrencesMap(final Iterator<T> iter) {
         if (iter == null) {

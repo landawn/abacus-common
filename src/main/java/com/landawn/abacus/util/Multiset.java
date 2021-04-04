@@ -135,6 +135,38 @@ public final class Multiset<T> implements Iterable<T> {
     /**
      *
      * @param <T>
+     * @param iter
+     * @return
+     */
+    public static <T> Multiset<T> from(final Iterator<? extends T> iter) {
+        final Multiset<T> result = new Multiset<>();
+
+        if (iter != null) {
+            T e = null;
+            MutableInt count = null;
+
+            while (iter.hasNext()) {
+                e = iter.next();
+                count = result.valueMap.get(e);
+
+                if (count == null) {
+                    result.valueMap.put(e, MutableInt.of(1));
+                } else {
+                    if (count.value() == Integer.MAX_VALUE) {
+                        throw new IllegalArgumentException("The total count is out of the bound of int");
+                    }
+
+                    count.add(1);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <T>
      * @param m
      * @return
      */
