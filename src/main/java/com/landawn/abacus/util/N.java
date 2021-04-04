@@ -58,6 +58,7 @@ import com.landawn.abacus.parser.XMLDeserializationConfig.XDC;
 import com.landawn.abacus.parser.XMLSerializationConfig;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Fn.Factory;
+import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.Tuple.Tuple4;
@@ -372,16 +373,61 @@ public final class N extends CommonUtil {
     /**
      * 
      * @param <T>
+     * @param a
+     * @return
+     * @see Multiset#from(Collection)
+     */
+    public static <T> Map<T, Integer> occurrencesMap(final T[] a) {
+        return occurrencesMap(a, Suppliers.<T, Integer> ofMap());
+    }
+
+    /**
+     * 
+     * @param <T>
+     * @param a
+     * @param mapSupplier
+     * @return
+     * @see Multiset#from(Collection)
+     */
+    public static <T> Map<T, Integer> occurrencesMap(final T[] a, Supplier<Map<T, Integer>> mapSupplier) {
+        if (N.isNullOrEmpty(a)) {
+            return mapSupplier.get();
+        }
+
+        final Map<T, Integer> map = mapSupplier.get();
+
+        for (T e : a) {
+            map.merge(e, 1, (o, n) -> o + n);
+        }
+
+        return map;
+    }
+
+    /**
+     * 
+     * @param <T>
      * @param c
      * @return
      * @see Multiset#from(Collection)
      */
     public static <T> Map<T, Integer> occurrencesMap(final Collection<T> c) {
+        return occurrencesMap(c, Suppliers.<T, Integer> ofMap());
+    }
+
+    /**
+     * 
+     * @param <T>
+     * @param c
+     * @param mapSupplier
+     * @return
+     * @see Multiset#from(Collection)
+     */
+    public static <T> Map<T, Integer> occurrencesMap(final Collection<T> c, Supplier<Map<T, Integer>> mapSupplier) {
         if (N.isNullOrEmpty(c)) {
-            return new HashMap<>();
+            return mapSupplier.get();
         }
 
-        final Map<T, Integer> map = new HashMap<>();
+        final Map<T, Integer> map = mapSupplier.get();
 
         for (T e : c) {
             map.merge(e, 1, (o, n) -> o + n);
@@ -398,11 +444,23 @@ public final class N extends CommonUtil {
      * @see Multiset#from(Iterator)
      */
     public static <T> Map<T, Integer> occurrencesMap(final Iterator<T> iter) {
+        return occurrencesMap(iter, Suppliers.<T, Integer> ofMap());
+    }
+
+    /**
+     * 
+     * @param <T>
+     * @param iter
+     * @param mapSupplier
+     * @return
+     * @see Multiset#from(Iterator)
+     */
+    public static <T> Map<T, Integer> occurrencesMap(final Iterator<T> iter, Supplier<Map<T, Integer>> mapSupplier) {
         if (iter == null) {
-            return new HashMap<>();
+            return mapSupplier.get();
         }
 
-        final Map<T, Integer> map = new HashMap<>();
+        final Map<T, Integer> map = mapSupplier.get();
 
         while (iter.hasNext()) {
             map.merge(iter.next(), 1, (o, n) -> o + n);
