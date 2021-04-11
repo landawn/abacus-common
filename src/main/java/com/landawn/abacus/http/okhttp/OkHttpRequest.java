@@ -166,22 +166,22 @@ public final class OkHttpRequest {
 
     public static OkHttpRequest url(final String url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
         return create(url,
-                new OkHttpClient.Builder().connectTimeout(connectionTimeoutInMillis, TimeUnit.MICROSECONDS)
-                        .readTimeout(readTimeoutInMillis, TimeUnit.MICROSECONDS)
+                new OkHttpClient.Builder().connectTimeout(connectionTimeoutInMillis, TimeUnit.MILLISECONDS)
+                        .readTimeout(readTimeoutInMillis, TimeUnit.MILLISECONDS)
                         .build());
     }
 
     public static OkHttpRequest url(final URL url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
         return create(url,
-                new OkHttpClient.Builder().connectTimeout(connectionTimeoutInMillis, TimeUnit.MICROSECONDS)
-                        .readTimeout(readTimeoutInMillis, TimeUnit.MICROSECONDS)
+                new OkHttpClient.Builder().connectTimeout(connectionTimeoutInMillis, TimeUnit.MILLISECONDS)
+                        .readTimeout(readTimeoutInMillis, TimeUnit.MILLISECONDS)
                         .build());
     }
 
     public static OkHttpRequest url(final HttpUrl url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
         return create(url,
-                new OkHttpClient.Builder().connectTimeout(connectionTimeoutInMillis, TimeUnit.MICROSECONDS)
-                        .readTimeout(readTimeoutInMillis, TimeUnit.MICROSECONDS)
+                new OkHttpClient.Builder().connectTimeout(connectionTimeoutInMillis, TimeUnit.MILLISECONDS)
+                        .readTimeout(readTimeoutInMillis, TimeUnit.MILLISECONDS)
                         .build());
     }
 

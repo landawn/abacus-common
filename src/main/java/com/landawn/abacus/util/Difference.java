@@ -28,9 +28,17 @@ import java.util.Map.Entry;
  * @param <L>
  * @param <R>
  * @since 0.8
+ * @see N#difference(Collection, Collection)
+ * @see N#differentSet(Collection, Collection)
+ * @see N#symmetricDifference(Collection, Collection)
+ * @see N#symmetricDifferentSet(Collection, Collection)
+ * @see N#excludeAll(Collection, Collection)
+ * @see N#excludeAllToSet(Collection, Collection)
+ * @see N#removeAll(Collection, Collection)
+ * @see N#intersection(Collection, Collection)
+ * @see N#commonSet(Collection, Collection)
  */
-@com.landawn.abacus.annotation.Immutable
-public class Difference<L, R> implements Immutable {
+public class Difference<L, R> {
 
     final L common;
 
@@ -133,6 +141,15 @@ public class Difference<L, R> implements Immutable {
      * @param a
      * @param b
      * @return
+     * @see N#difference(Collection, Collection)
+     * @see N#differentSet(Collection, Collection)
+     * @see N#symmetricDifference(Collection, Collection)
+     * @see N#symmetricDifferentSet(Collection, Collection)
+     * @see N#excludeAll(Collection, Collection)
+     * @see N#excludeAllToSet(Collection, Collection)
+     * @see N#removeAll(Collection, Collection)
+     * @see N#intersection(Collection, Collection)
+     * @see N#commonSet(Collection, Collection)
      */
     public static <T1, T2, L extends List<T1>, R extends List<T2>> Difference<L, R> of(T1[] a, T2[] b) {
         return of(Arrays.asList(a), Arrays.asList(b));
@@ -147,6 +164,15 @@ public class Difference<L, R> implements Immutable {
      * @param a
      * @param b
      * @return
+     * @see N#difference(Collection, Collection)
+     * @see N#differentSet(Collection, Collection)
+     * @see N#symmetricDifference(Collection, Collection)
+     * @see N#symmetricDifferentSet(Collection, Collection)
+     * @see N#excludeAll(Collection, Collection)
+     * @see N#excludeAllToSet(Collection, Collection)
+     * @see N#removeAll(Collection, Collection)
+     * @see N#intersection(Collection, Collection)
+     * @see N#commonSet(Collection, Collection)
      */
     public static <T1, T2, L extends List<T1>, R extends List<T2>> Difference<L, R> of(Collection<? extends T1> a, Collection<? extends T2> b) {
         List<T1> common = new ArrayList<>();
@@ -621,8 +647,17 @@ public class Difference<L, R> implements Immutable {
      * @param <L>
      * @param <R>
      * @param <D>
+     * 
+     * @see N#difference(Collection, Collection)
+     * @see N#differentSet(Collection, Collection)
+     * @see N#symmetricDifference(Collection, Collection)
+     * @see N#symmetricDifferentSet(Collection, Collection)
+     * @see N#excludeAll(Collection, Collection)
+     * @see N#excludeAllToSet(Collection, Collection)
+     * @see N#removeAll(Collection, Collection)
+     * @see N#intersection(Collection, Collection)
+     * @see N#commonSet(Collection, Collection)
      */
-    @com.landawn.abacus.annotation.Immutable
     public static final class MapDifference<L, R, D> extends Difference<L, R> {
 
         /** The diff values. */

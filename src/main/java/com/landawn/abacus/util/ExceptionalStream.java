@@ -2107,6 +2107,55 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }, closeHandlers);
     }
 
+    @IntermediateOp
+    public ExceptionalStream<T, E> mapFirst(final Throwables.Function<? super T, ? extends T, ? extends E> mapperForFirst) {
+        assertNotClosed();
+
+        return newStream(new ExceptionalIterator<T, E>() {
+            private boolean isFirst = true;
+
+            @Override
+            public boolean hasNext() throws E {
+                return elements.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                if (isFirst) {
+                    isFirst = false;
+                    return mapperForFirst.apply(elements.next());
+                } else {
+                    return elements.next();
+                }
+            }
+        }, closeHandlers);
+    }
+
+    @IntermediateOp
+    public ExceptionalStream<T, E> mapLast(final Throwables.Function<? super T, ? extends T, ? extends E> mapperForLast) {
+        assertNotClosed();
+
+        return newStream(new ExceptionalIterator<T, E>() {
+            private T next = null;
+
+            @Override
+            public boolean hasNext() throws E {
+                return elements.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                next = elements.next();
+
+                if (elements.hasNext()) {
+                    return next;
+                } else {
+                    return mapperForLast.apply(next);
+                }
+            }
+        }, closeHandlers);
+    }
+
     /**
      *
      * @param <R>
@@ -3352,6 +3401,59 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }, sorted, cmp, closeHandlers);
     }
 
+    @IntermediateOp
+    public ExceptionalStream<T, E> peekFirst(final Throwables.Consumer<? super T, ? extends E> action) {
+        assertNotClosed();
+
+        return newStream(new ExceptionalIterator<T, E>() {
+            private boolean isFirst = true;
+
+            @Override
+            public boolean hasNext() throws E {
+                return elements.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                if (isFirst) {
+                    isFirst = false;
+                    final T e = elements.next();
+                    action.accept(e);
+                    return e;
+                } else {
+                    return elements.next();
+                }
+            }
+        }, sorted, cmp, closeHandlers);
+    }
+
+    @IntermediateOp
+    public ExceptionalStream<T, E> peekLast(final Throwables.Consumer<? super T, ? extends E> action) {
+        assertNotClosed();
+
+        return newStream(new ExceptionalIterator<T, E>() {
+            private T next = null;
+
+            @Override
+            public boolean hasNext() throws E {
+                return elements.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                next = elements.next();
+
+                if (elements.hasNext()) {
+                    return next;
+                } else {
+                    final T e = elements.next();
+                    action.accept(e);
+                    return e;
+                }
+            }
+        }, sorted, cmp, closeHandlers);
+    }
+
     /**
      *
      * @param chunkSize
@@ -4173,7 +4275,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             private void init() throws E {
                 if (initialized == false) {
                     initialized = true;
-                    aar = (T[]) ExceptionalStream.this.toArray(false);
+                    aar = (T[]) ExceptionalStream.this.toArrayForIntermediateOp();
                     cursor = aar.length;
                 }
             }
@@ -4235,7 +4337,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             private void init() throws E {
                 if (initialized == false) {
                     initialized = true;
-                    aar = (T[]) ExceptionalStream.this.toArray(false);
+                    aar = (T[]) ExceptionalStream.this.toArrayForIntermediateOp();
                     len = aar.length;
 
                     if (len > 0) {
@@ -4392,7 +4494,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             private void init() throws E {
                 if (initialized == false) {
                     initialized = true;
-                    aar = (T[]) op.apply(ExceptionalStream.this.toArray(false));
+                    aar = (T[]) op.apply(ExceptionalStream.this.toArrayForIntermediateOp());
                     len = aar.length;
                 }
             }
@@ -6697,7 +6799,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return toArray(true);
     }
 
-    private Object[] toArray(final boolean closeStream) throws E {
+    Object[] toArray(final boolean closeStream) throws E {
         assertNotClosed();
 
         try {
@@ -6707,6 +6809,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 close();
             }
         }
+    }
+
+    Object[] toArrayForIntermediateOp() throws E {
+        // return toArray(false);
+
+        return toArray(true);
     }
 
     /**
@@ -8733,6 +8841,20 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    // CheckedException -> Maybe makes sense. Checked exception...
+    // But what does CheckedStream mean? Checked stream ???
+    //    public static final class CheckedStream<T, E extends Exception> extends ExceptionalStream<T, E> {
+    //
+    //        CheckedStream(ExceptionalIterator<T, E> iter, boolean sorted, Comparator<? super T> comparator, Deque<Throwables.Runnable<? extends E>> closeHandlers) {
+    //            super(iter, sorted, comparator, closeHandlers);
+    //        }
+    //    }
+
+    /** 
+     *
+     * @param <T>
+     * @param <E> 
+     */
     public static final class StreamE<T, E extends Exception> extends ExceptionalStream<T, E> {
 
         StreamE(ExceptionalIterator<T, E> iter, boolean sorted, Comparator<? super T> comparator, Deque<Throwables.Runnable<? extends E>> closeHandlers) {

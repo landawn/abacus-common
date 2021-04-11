@@ -1667,6 +1667,8 @@ public final class N extends CommonUtil {
      * @param b
      * @return
      * @see IntList#intersection(IntList)
+     * @see #commonSet(Collection, Collection)
+     * @see Collection#retainAll(Collection)
      */
     public static <T> List<T> intersection(final Collection<? extends T> a, final Collection<?> b) {
         if (isNullOrEmpty(a) || isNullOrEmpty(b)) {
@@ -1691,6 +1693,8 @@ public final class N extends CommonUtil {
      * @param <T>
      * @param c
      * @return
+     * @see #commonSet(Collection)
+     * @see Collection#retainAll(Collection)
      */
     public static <T> List<T> intersection(final Collection<? extends Collection<? extends T>> c) {
         if (isNullOrEmpty(c)) {
@@ -1881,6 +1885,11 @@ public final class N extends CommonUtil {
      * @param b
      * @return
      * @see IntList#difference(IntList)
+     * @see #differentSet(Collection, Collection)
+     * @see #excludeAll(Collection, Collection)
+     * @see #excludeAllToSet(Collection, Collection)
+     * @see #removeAll(Collection, Collection)
+     * @see Difference#of(Collection, Collection)
      */
     public static <T> List<T> difference(final T[] a, final Object[] b) {
         if (isNullOrEmpty(a)) {
@@ -1909,6 +1918,11 @@ public final class N extends CommonUtil {
      * @param b
      * @return
      * @see IntList#difference(IntList)
+     * @see #differentSet(Collection, Collection)
+     * @see #excludeAll(Collection, Collection)
+     * @see #excludeAllToSet(Collection, Collection)
+     * @see #removeAll(Collection, Collection)
+     * @see Difference#of(Collection, Collection)
      */
     public static <T> List<T> difference(final Collection<? extends T> a, final Collection<?> b) {
         if (isNullOrEmpty(a)) {
@@ -2079,6 +2093,10 @@ public final class N extends CommonUtil {
      * @param b
      * @return
      * @see IntList#symmetricDifference(IntList)
+     * @see #symmetricDifferentSet(Collection, Collection)
+     * @see #excludeAll(Collection, Collection)
+     * @see #excludeAllToSet(Collection, Collection)
+     * @see Difference#of(Collection, Collection)
      */
     public static <T> List<T> symmetricDifference(final T[] a, final T[] b) {
         if (isNullOrEmpty(a)) {
@@ -2117,6 +2135,10 @@ public final class N extends CommonUtil {
      * @param b
      * @return
      * @see IntList#symmetricDifference(IntList)
+     * @see #symmetricDifferentSet(Collection, Collection)
+     * @see #excludeAll(Collection, Collection)
+     * @see #excludeAllToSet(Collection, Collection)
+     * @see Difference#of(Collection, Collection)
      */
     public static <T> List<T> symmetricDifference(final Collection<? extends T> a, final Collection<? extends T> b) {
         if (isNullOrEmpty(a)) {
@@ -2154,6 +2176,11 @@ public final class N extends CommonUtil {
      * @param a the a
      * @param b the b
      * @return the sets the
+     * @see #difference(Collection, Collection)
+     * @see #excludeAll(Collection, Collection)
+     * @see #excludeAllToSet(Collection, Collection)
+     * @see #removeAll(Collection, Collection)
+     * @see Difference#of(Collection, Collection)
      */
     @SuppressWarnings("rawtypes")
     public static <T> Set<T> differentSet(final Collection<? extends T> a, final Collection<?> b) {
@@ -2177,6 +2204,10 @@ public final class N extends CommonUtil {
      * @param a the a
      * @param b the b
      * @return the sets the
+     * @see #symmetricDifference(Collection, Collection)
+     * @see #excludeAll(Collection, Collection)
+     * @see #excludeAllToSet(Collection, Collection)
+     * @see Difference#of(Collection, Collection)
      */
     public static <T> Set<T> symmetricDifferentSet(final Collection<? extends T> a, final Collection<? extends T> b) {
         if (N.isNullOrEmpty(a)) {
@@ -2210,6 +2241,8 @@ public final class N extends CommonUtil {
      * @param a the a
      * @param b the b
      * @return the sets the
+     * @see #intersection(Collection, Collection)
+     * @see Collection#retainAll(Collection)
      */
     public static <T> Set<T> commonSet(final Collection<? extends T> a, final Collection<?> b) {
         if (N.isNullOrEmpty(a) || N.isNullOrEmpty(b)) {
@@ -2225,6 +2258,8 @@ public final class N extends CommonUtil {
      * @param <T> the generic type
      * @param c the c
      * @return the sets the
+     * @see #intersection(Collection)
+     * @see Collection#retainAll(Collection)
      */
     public static <T> Set<T> commonSet(final Collection<? extends Collection<? extends T>> c) {
         if (N.isNullOrEmpty(c)) {
@@ -2293,6 +2328,9 @@ public final class N extends CommonUtil {
      * @param c
      * @param objToExclude
      * @return a new {@code List}
+     * @see #difference(Collection, Collection)
+     * @see #removeAll(Collection, Collection)
+     * @see Difference#of(Collection, Collection)
      */
     public static <T> List<T> exclude(final Collection<T> c, final Object objToExclude) {
         if (N.isNullOrEmpty(c)) {
@@ -2318,6 +2356,9 @@ public final class N extends CommonUtil {
      * @param c
      * @param objToExclude
      * @return a new {@code Set}
+     * @see #difference(Collection, Collection)
+     * @see #removeAll(Collection, Collection)
+     * @see Difference#of(Collection, Collection)
      */
     public static <T> Set<T> excludeToSet(final Collection<T> c, final Object objToExclude) {
         if (N.isNullOrEmpty(c)) {
@@ -2338,6 +2379,9 @@ public final class N extends CommonUtil {
      * @param c
      * @param objsToExclude
      * @return a new {@code List}
+     * @see #difference(Collection, Collection)
+     * @see #removeAll(Collection, Collection)
+     * @see Difference#of(Collection, Collection)
      */
     public static <T> List<T> excludeAll(final Collection<T> c, final Collection<?> objsToExclude) {
         if (N.isNullOrEmpty(c)) {
@@ -2367,6 +2411,9 @@ public final class N extends CommonUtil {
      * @param c
      * @param objsToExclude
      * @return a new {@code Set}
+     * @see #difference(Collection, Collection)
+     * @see #removeAll(Collection, Collection)
+     * @see Difference#of(Collection, Collection)
      */
     public static <T> Set<T> excludeAllToSet(final Collection<T> c, final Collection<?> objsToExclude) {
         if (N.isNullOrEmpty(c)) {
