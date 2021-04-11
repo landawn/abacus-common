@@ -2132,6 +2132,31 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     @IntermediateOp
+    public <R> ExceptionalStream<R, E> mapFirstOrElse(final Throwables.Function<? super T, ? extends R, E> mapperForFirst,
+            final Throwables.Function<? super T, ? extends R, E> mapperForElse) {
+        assertNotClosed();
+
+        return newStream(new ExceptionalIterator<R, E>() {
+            private boolean isFirst = true;
+
+            @Override
+            public boolean hasNext() throws E {
+                return elements.hasNext();
+            }
+
+            @Override
+            public R next() throws E {
+                if (isFirst) {
+                    isFirst = false;
+                    return mapperForFirst.apply(elements.next());
+                } else {
+                    return mapperForElse.apply(elements.next());
+                }
+            }
+        }, closeHandlers);
+    }
+
+    @IntermediateOp
     public ExceptionalStream<T, E> mapLast(final Throwables.Function<? super T, ? extends T, ? extends E> mapperForLast) {
         assertNotClosed();
 
@@ -2149,6 +2174,32 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                 if (elements.hasNext()) {
                     return next;
+                } else {
+                    return mapperForLast.apply(next);
+                }
+            }
+        }, closeHandlers);
+    }
+
+    @IntermediateOp
+    public <R> ExceptionalStream<R, E> mapLastOrElse(final Throwables.Function<? super T, ? extends R, E> mapperForLast,
+            final Throwables.Function<? super T, ? extends R, E> mapperForElse) {
+        assertNotClosed();
+
+        return newStream(new ExceptionalIterator<R, E>() {
+            private T next = null;
+
+            @Override
+            public boolean hasNext() throws E {
+                return elements.hasNext();
+            }
+
+            @Override
+            public R next() throws E {
+                next = elements.next();
+
+                if (elements.hasNext()) {
+                    return mapperForElse.apply(next);
                 } else {
                     return mapperForLast.apply(next);
                 }
