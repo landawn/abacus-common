@@ -17,11 +17,17 @@ package com.landawn.abacus.util;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Reader;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.security.SecureRandom;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2317,6 +2323,392 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }, closeHandlers);
     }
 
+    /**
+     *
+     * @param <R>
+     * @param mapper
+     * @return
+     */
+    @IntermediateOp
+    public <R> ExceptionalStream<R, E> flatMapp(final Throwables.Function<? super T, R[], ? extends E> mapper) {
+        assertNotClosed();
+
+        return newStream(new ExceptionalIterator<R, E>() {
+            private R[] cur = null;
+            private int len = 0;
+            private int idx = 0;
+
+            @Override
+            public boolean hasNext() throws E {
+                while (idx >= len) {
+                    if (elements.hasNext()) {
+                        cur = mapper.apply(elements.next());
+                        len = N.len(cur);
+                        idx = 0;
+                    } else {
+                        cur = null;
+                        break;
+                    }
+                }
+
+                return idx < len;
+            }
+
+            @Override
+            public R next() throws E {
+                if (idx >= len && hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                return cur[idx++];
+            }
+        }, closeHandlers);
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param mapper
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public ExceptionalStream<Boolean, E> flatMapToBoolean(final Throwables.Function<? super T, boolean[], ? extends E> mapper) {
+        assertNotClosed();
+
+        return newStream(new ExceptionalIterator<Boolean, E>() {
+            private boolean[] cur = null;
+            private int len = 0;
+            private int idx = 0;
+
+            @Override
+            public boolean hasNext() throws E {
+                while (idx >= len) {
+                    if (elements.hasNext()) {
+                        cur = mapper.apply(elements.next());
+                        len = N.len(cur);
+                        idx = 0;
+                    } else {
+                        cur = null;
+                        break;
+                    }
+                }
+
+                return idx < len;
+            }
+
+            @Override
+            public Boolean next() throws E {
+                if (idx >= len && hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                return cur[idx++];
+            }
+        }, closeHandlers);
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param mapper
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public ExceptionalStream<Character, E> flatMapToChar(final Throwables.Function<? super T, char[], ? extends E> mapper) {
+        assertNotClosed();
+
+        return newStream(new ExceptionalIterator<Character, E>() {
+            private char[] cur = null;
+            private int len = 0;
+            private int idx = 0;
+
+            @Override
+            public boolean hasNext() throws E {
+                while (idx >= len) {
+                    if (elements.hasNext()) {
+                        cur = mapper.apply(elements.next());
+                        len = N.len(cur);
+                        idx = 0;
+                    } else {
+                        cur = null;
+                        break;
+                    }
+                }
+
+                return idx < len;
+            }
+
+            @Override
+            public Character next() throws E {
+                if (idx >= len && hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                return cur[idx++];
+            }
+        }, closeHandlers);
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param mapper
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public ExceptionalStream<Byte, E> flatMapToByte(final Throwables.Function<? super T, byte[], ? extends E> mapper) {
+        assertNotClosed();
+
+        return newStream(new ExceptionalIterator<Byte, E>() {
+            private byte[] cur = null;
+            private int len = 0;
+            private int idx = 0;
+
+            @Override
+            public boolean hasNext() throws E {
+                while (idx >= len) {
+                    if (elements.hasNext()) {
+                        cur = mapper.apply(elements.next());
+                        len = N.len(cur);
+                        idx = 0;
+                    } else {
+                        cur = null;
+                        break;
+                    }
+                }
+
+                return idx < len;
+            }
+
+            @Override
+            public Byte next() throws E {
+                if (idx >= len && hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                return cur[idx++];
+            }
+        }, closeHandlers);
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param mapper
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public ExceptionalStream<Short, E> flatMapToShort(final Throwables.Function<? super T, short[], ? extends E> mapper) {
+        assertNotClosed();
+
+        return newStream(new ExceptionalIterator<Short, E>() {
+            private short[] cur = null;
+            private int len = 0;
+            private int idx = 0;
+
+            @Override
+            public boolean hasNext() throws E {
+                while (idx >= len) {
+                    if (elements.hasNext()) {
+                        cur = mapper.apply(elements.next());
+                        len = N.len(cur);
+                        idx = 0;
+                    } else {
+                        cur = null;
+                        break;
+                    }
+                }
+
+                return idx < len;
+            }
+
+            @Override
+            public Short next() throws E {
+                if (idx >= len && hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                return cur[idx++];
+            }
+        }, closeHandlers);
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param mapper
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public ExceptionalStream<Integer, E> flatMapToInteger(final Throwables.Function<? super T, int[], ? extends E> mapper) {
+        assertNotClosed();
+
+        return newStream(new ExceptionalIterator<Integer, E>() {
+            private int[] cur = null;
+            private int len = 0;
+            private int idx = 0;
+
+            @Override
+            public boolean hasNext() throws E {
+                while (idx >= len) {
+                    if (elements.hasNext()) {
+                        cur = mapper.apply(elements.next());
+                        len = N.len(cur);
+                        idx = 0;
+                    } else {
+                        cur = null;
+                        break;
+                    }
+                }
+
+                return idx < len;
+            }
+
+            @Override
+            public Integer next() throws E {
+                if (idx >= len && hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                return cur[idx++];
+            }
+        }, closeHandlers);
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param mapper
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public ExceptionalStream<Long, E> flatMapToLong(final Throwables.Function<? super T, long[], ? extends E> mapper) {
+        assertNotClosed();
+
+        return newStream(new ExceptionalIterator<Long, E>() {
+            private long[] cur = null;
+            private int len = 0;
+            private int idx = 0;
+
+            @Override
+            public boolean hasNext() throws E {
+                while (idx >= len) {
+                    if (elements.hasNext()) {
+                        cur = mapper.apply(elements.next());
+                        len = N.len(cur);
+                        idx = 0;
+                    } else {
+                        cur = null;
+                        break;
+                    }
+                }
+
+                return idx < len;
+            }
+
+            @Override
+            public Long next() throws E {
+                if (idx >= len && hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                return cur[idx++];
+            }
+        }, closeHandlers);
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param mapper
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public ExceptionalStream<Float, E> flatMapToFloat(final Throwables.Function<? super T, float[], ? extends E> mapper) {
+        assertNotClosed();
+
+        return newStream(new ExceptionalIterator<Float, E>() {
+            private float[] cur = null;
+            private int len = 0;
+            private int idx = 0;
+
+            @Override
+            public boolean hasNext() throws E {
+                while (idx >= len) {
+                    if (elements.hasNext()) {
+                        cur = mapper.apply(elements.next());
+                        len = N.len(cur);
+                        idx = 0;
+                    } else {
+                        cur = null;
+                        break;
+                    }
+                }
+
+                return idx < len;
+            }
+
+            @Override
+            public Float next() throws E {
+                if (idx >= len && hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                return cur[idx++];
+            }
+        }, closeHandlers);
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param mapper
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public ExceptionalStream<Double, E> flatMapToDouble(final Throwables.Function<? super T, double[], ? extends E> mapper) {
+        assertNotClosed();
+
+        return newStream(new ExceptionalIterator<Double, E>() {
+            private double[] cur = null;
+            private int len = 0;
+            private int idx = 0;
+
+            @Override
+            public boolean hasNext() throws E {
+                while (idx >= len) {
+                    if (elements.hasNext()) {
+                        cur = mapper.apply(elements.next());
+                        len = N.len(cur);
+                        idx = 0;
+                    } else {
+                        cur = null;
+                        break;
+                    }
+                }
+
+                return idx < len;
+            }
+
+            @Override
+            public Double next() throws E {
+                if (idx >= len && hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                return cur[idx++];
+            }
+        }, closeHandlers);
+    }
+
     //    /**
     //     * 
     //     * @param mapper
@@ -3174,6 +3566,108 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 return (res = accumulator.apply(res, iter.next()));
             }
         }, closeHandlers);
+    }
+
+    /**
+     * 
+     * @param c
+     * @return
+     * @see N#intersection(Collection, Collection)
+     */
+    public ExceptionalStream<T, E> intersection(final Collection<?> c) {
+        assertNotClosed();
+
+        final Multiset<?> multiset = Multiset.from(c);
+
+        return filter(new Throwables.Predicate<T, E>() {
+            @Override
+            public boolean test(T value) {
+                return multiset.getAndRemove(value) > 0;
+            }
+        });
+    }
+
+    /**
+     * 
+     * @param mapper
+     * @param c
+     * @return
+     * @see N#intersection(Collection, Collection)
+     */
+    public ExceptionalStream<T, E> intersection(final Throwables.Function<? super T, ?, E> mapper, final Collection<?> c) {
+        assertNotClosed();
+
+        final Multiset<?> multiset = Multiset.from(c);
+
+        return filter(new Throwables.Predicate<T, E>() {
+            @Override
+            public boolean test(T value) throws E {
+                return multiset.getAndRemove(mapper.apply(value)) > 0;
+            }
+        });
+    }
+
+    /**
+     * 
+     * @param c
+     * @return
+     * @see N#difference(Collection, Collection)
+     */
+    public ExceptionalStream<T, E> difference(final Collection<?> c) {
+        assertNotClosed();
+
+        final Multiset<?> multiset = Multiset.from(c);
+
+        return filter(new Throwables.Predicate<T, E>() {
+            @Override
+            public boolean test(T value) {
+                return multiset.getAndRemove(value) < 1;
+            }
+        });
+    }
+
+    /**
+     * 
+     * @param mapper
+     * @param c
+     * @return
+     * @see N#difference(Collection, Collection)
+     */
+    public ExceptionalStream<T, E> difference(final Function<? super T, ?> mapper, final Collection<?> c) {
+        assertNotClosed();
+
+        final Multiset<?> multiset = Multiset.from(c);
+
+        return filter(new Throwables.Predicate<T, E>() {
+            @Override
+            public boolean test(T value) throws E {
+                return multiset.getAndRemove(mapper.apply(value)) < 1;
+            }
+        });
+    }
+
+    /**
+     * 
+     * @param c
+     * @return
+     * @see N#symmetricDifference(Collection, Collection)
+     */
+    public ExceptionalStream<T, E> symmetricDifference(final Collection<T> c) {
+        assertNotClosed();
+
+        final Multiset<?> multiset = Multiset.from(c);
+
+        return filter(new Throwables.Predicate<T, E>() {
+            @Override
+            public boolean test(T value) {
+                return multiset.getAndRemove(value) < 1;
+            }
+        }).append(ExceptionalStream.<T, E> of(c).filter(new Throwables.Predicate<T, E>() {
+            @Override
+            public boolean test(T value) {
+                return multiset.getAndRemove(value) > 0;
+            }
+        }));
     }
 
     /**
@@ -7820,6 +8314,156 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             return joiner.toString();
         } finally {
             close();
+        }
+    }
+
+    private static final Throwables.Function<Object, String, IOException> TO_LINE_OF_STRING = new Throwables.Function<Object, String, IOException>() {
+        @Override
+        public String apply(Object t) throws IOException {
+            return N.stringOf(t);
+        }
+    };
+
+    public long persist(final File file) throws E, IOException {
+        return persist(TO_LINE_OF_STRING, file);
+    }
+
+    public long persist(final String header, final String tail, final File file) throws E, IOException {
+        return persist(TO_LINE_OF_STRING, header, tail, file);
+    }
+
+    public long persist(final Throwables.Function<? super T, String, IOException> toLine, final File file) throws E, IOException {
+        return persist(toLine, null, null, file);
+    }
+
+    public long persist(final Throwables.Function<? super T, String, IOException> toLine, final String header, final String tail, final File file)
+            throws E, IOException {
+        assertNotClosed();
+
+        final Writer writer = new FileWriter(file);
+
+        try {
+            return persist(toLine, header, tail, writer);
+        } finally {
+            IOUtil.close(writer);
+        }
+    }
+
+    public long persist(final Throwables.Function<? super T, String, IOException> toLine, final OutputStream os) throws E, IOException {
+        assertNotClosed();
+
+        final BufferedWriter bw = Objectory.createBufferedWriter(os);
+
+        try {
+            return persist(toLine, bw);
+        } finally {
+            Objectory.recycle(bw);
+        }
+    }
+
+    public long persist(Throwables.Function<? super T, String, IOException> toLine, Writer writer) throws E, IOException {
+        assertNotClosed();
+
+        return persist(toLine, null, null, writer);
+    }
+
+    public long persist(Throwables.Function<? super T, String, IOException> toLine, String header, String tail, Writer writer) throws E, IOException {
+        assertNotClosed();
+
+        try {
+            boolean isBufferedWriter = writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
+            final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);
+            final ExceptionalIterator<T, E> iter = iterator();
+            long cnt = 0;
+
+            try {
+                if (header != null) {
+                    bw.write(header);
+                    bw.write(IOUtil.LINE_SEPARATOR);
+                }
+
+                while (iter.hasNext()) {
+                    bw.write(toLine.apply(iter.next()));
+                    bw.write(IOUtil.LINE_SEPARATOR);
+                    cnt++;
+                }
+
+                if (tail != null) {
+                    bw.write(tail);
+                    bw.write(IOUtil.LINE_SEPARATOR);
+                }
+
+                bw.flush();
+            } finally {
+                if (!isBufferedWriter) {
+                    Objectory.recycle((BufferedWriter) bw);
+                }
+            }
+
+            return cnt;
+        } finally {
+            close();
+        }
+    }
+
+    public long persist(final Connection conn, final String insertSQL, final int batchSize, final int batchInterval,
+            final Throwables.BiConsumer<? super PreparedStatement, ? super T, SQLException> stmtSetter) throws E, SQLException {
+        assertNotClosed();
+
+        PreparedStatement stmt = null;
+
+        try {
+            stmt = conn.prepareStatement(insertSQL);
+
+            return persist(stmt, batchSize, batchInterval, stmtSetter);
+        } finally {
+            IOUtil.closeQuietly(stmt);
+        }
+    }
+
+    public long persist(final PreparedStatement stmt, final int batchSize, final int batchInterval,
+            final Throwables.BiConsumer<? super PreparedStatement, ? super T, SQLException> stmtSetter) throws E, SQLException {
+        assertNotClosed();
+
+        checkArgument(batchSize > 0 && batchInterval >= 0, "'batchSize'=%s must be greater than 0 and 'batchInterval'=%s can't be negative", batchSize,
+                batchInterval);
+
+        try {
+            final ExceptionalIterator<T, E> iter = iterator();
+            long cnt = 0;
+            while (iter.hasNext()) {
+                stmtSetter.accept(stmt, iter.next());
+
+                stmt.addBatch();
+
+                if ((++cnt % batchSize) == 0) {
+                    executeBatch(stmt);
+
+                    if (batchInterval > 0) {
+                        N.sleep(batchInterval);
+                    }
+                }
+            }
+
+            if ((cnt % batchSize) > 0) {
+                executeBatch(stmt);
+            }
+
+            return cnt;
+        } finally {
+            close();
+        }
+    }
+
+    private int[] executeBatch(final PreparedStatement stmt) throws SQLException {
+        try {
+            return stmt.executeBatch();
+        } finally {
+            try {
+                stmt.clearBatch();
+            } catch (SQLException e) {
+                logger.error("Failed to clear batch parameters after executeBatch", e);
+            }
         }
     }
 
