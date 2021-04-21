@@ -22,6 +22,8 @@ import com.landawn.abacus.util.NamingPolicy;
  *
  * @author Haiyang Li
  * @since 0.8
+ * @see ConditionFactory
+ * @see ConditionFactory.CF
  */
 public interface Condition {
     /**

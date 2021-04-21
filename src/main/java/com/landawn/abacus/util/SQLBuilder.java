@@ -45,6 +45,7 @@ import com.landawn.abacus.condition.Binary;
 import com.landawn.abacus.condition.Cell;
 import com.landawn.abacus.condition.Clause;
 import com.landawn.abacus.condition.Condition;
+import com.landawn.abacus.condition.ConditionFactory;
 import com.landawn.abacus.condition.ConditionFactory.CF;
 import com.landawn.abacus.condition.Criteria;
 import com.landawn.abacus.condition.Expression;
@@ -1606,6 +1607,13 @@ public abstract class SQLBuilder {
         return this;
     }
 
+    /**
+     * 
+     * @param cond
+     * @return
+     * @see ConditionFactory
+     * @see ConditionFactory.CF
+     */
     public SQLBuilder where(final Condition cond) {
         init(true);
 
@@ -1740,6 +1748,8 @@ public abstract class SQLBuilder {
      *
      * @param cond any literal written in <code>Expression</code> condition won't be formalized
      * @return
+     * @see ConditionFactory
+     * @see ConditionFactory.CF
      */
     public SQLBuilder having(final Condition cond) {
         sb.append(_SPACE_HAVING_SPACE);
@@ -1912,6 +1922,13 @@ public abstract class SQLBuilder {
         return this;
     }
 
+    /**
+     * 
+     * @param cond
+     * @return
+     * @see ConditionFactory
+     * @see ConditionFactory.CF
+     */
     public SQLBuilder append(final Condition cond) {
         init(true);
 
@@ -4659,6 +4676,8 @@ public abstract class SQLBuilder {
          * @param cond
          * @param entityClass
          * @return
+         * @see ConditionFactory
+         * @see ConditionFactory.CF
          */
         public static SQLBuilder parse(final Condition cond, final Class<?> entityClass) {
             N.checkArgNotNull(cond, "cond");

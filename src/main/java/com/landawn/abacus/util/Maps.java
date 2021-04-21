@@ -439,35 +439,6 @@ public final class Maps {
     }
 
     /**
-     * Returns a list of values of the keys which exist in the specified <code>Map</code>.
-     * If the key dosn't exist in the <code>Map</code>, No value will be added into the returned list.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @param keys
-     * @return
-     */
-    public static <K, V> List<V> getIfPresentForEach(final Map<K, ? extends V> map, final Collection<?> keys) {
-        if (N.isNullOrEmpty(map) || N.isNullOrEmpty(keys)) {
-            return new ArrayList<>(0);
-        }
-
-        final List<V> result = new ArrayList<>(keys.size());
-        V val = null;
-
-        for (Object key : keys) {
-            val = map.get(key);
-
-            if (val != null || map.containsKey(key)) {
-                result.add(val);
-            }
-        }
-
-        return result;
-    }
-
-    /**
      * Returns the value to which the specified key is mapped, or {@code defaultValue} if this map contains no mapping for the key.
      *
      * @param <K> the key type
@@ -852,6 +823,157 @@ public final class Maps {
         }
     }
 
+    public static <K> String getString(final Map<? super K, ?> map, final Object key) {
+        if (N.isNullOrEmpty(map)) {
+            return null;
+        }
+
+        final Object val = map.get(key);
+
+        if (val == null) {
+            return null;
+        } else if (val instanceof String) {
+            return (String) val;
+        } else {
+            return N.toString(val);
+        }
+    }
+
+    /**
+     * Returns the mapped {@code String} or a {@code String} converted from {@code N.toString(value)}.
+     * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * 
+     * @param <K>
+     * @param map
+     * @param key
+     * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * @return
+     */
+    public static <K> String getString(final Map<? super K, ?> map, final Object key, final String defaultForNull) {
+        N.checkArgNotNull(defaultForNull, "defaultForNull");
+
+        if (N.isNullOrEmpty(map)) {
+            return defaultForNull;
+        }
+
+        final Object val = map.get(key);
+
+        if (val == null) {
+            return defaultForNull;
+        } else if (val instanceof String) {
+            return (String) val;
+        } else {
+            return N.toString(val);
+        }
+    }
+
+    public static <K, T> T get(final Map<? super K, ?> map, final Object key, final Class<? extends T> targetType) {
+        if (N.isNullOrEmpty(map)) {
+            return null;
+        }
+
+        final Object val = map.get(key);
+
+        if (val == null) {
+            return null;
+        } else if (targetType.isAssignableFrom(val.getClass())) {
+            return (T) val;
+        } else {
+            return N.valueOf(targetType, N.stringOf(val));
+        }
+    }
+
+    /**
+     * Returns the mapped {@code T} or a {@code T} converted from {@code N.valueOf((Class<T>) defaultForNull.getClass(), N.stringOf(val))}.
+     * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * 
+     * @param <K>
+     * @param <T>
+     * @param map
+     * @param key
+     * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
+     * @return
+     */
+    public static <K, T> T get(final Map<? super K, ?> map, final Object key, final T defaultForNull) {
+        N.checkArgNotNull(defaultForNull, "defaultForNull");
+
+        if (N.isNullOrEmpty(map)) {
+            return defaultForNull;
+        }
+
+        final Object val = map.get(key);
+
+        if (val == null) {
+            return defaultForNull;
+        } else if (defaultForNull.getClass().isAssignableFrom(val.getClass())) {
+            return (T) val;
+        } else {
+            return N.valueOf((Class<T>) defaultForNull.getClass(), N.stringOf(val));
+        }
+    }
+
+    /**
+     * Returns a list of values of the keys which exist in the specified <code>Map</code>.
+     * If the key dosn't exist in the <code>Map</code>, No value will be added into the returned list.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param map
+     * @param keys
+     * @return
+     */
+    public static <K, V> List<V> getIfPresentForEach(final Map<K, ? extends V> map, final Collection<?> keys) {
+        if (N.isNullOrEmpty(map) || N.isNullOrEmpty(keys)) {
+            return new ArrayList<>(0);
+        }
+
+        final List<V> result = new ArrayList<>(keys.size());
+        V val = null;
+
+        for (Object key : keys) {
+            val = map.get(key);
+
+            if (val != null || map.containsKey(key)) {
+                result.add(val);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Gets the or default for each.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param map
+     * @param keys
+     * @param defaultValue
+     * @return
+     */
+    public static <K, V> List<V> getOrDefaultForEach(final Map<K, V> map, final Collection<?> keys, final V defaultValue) {
+        if (N.isNullOrEmpty(keys)) {
+            return new ArrayList<>(0);
+        } else if (N.isNullOrEmpty(map)) {
+            return N.repeat(defaultValue, keys.size());
+        }
+
+        final List<V> result = new ArrayList<>(keys.size());
+        V val = null;
+
+        for (Object key : keys) {
+            val = map.get(key);
+
+            if (val != null || map.containsKey(key)) {
+                result.add(val);
+            } else {
+                result.add(defaultValue);
+            }
+        }
+
+        return result;
+    }
+
     /**
      * Returns the value to which the specified key is mapped, or
      * an empty immutable {@code List} if this map contains no mapping for the key.
@@ -900,39 +1022,6 @@ public final class Maps {
         } else {
             return N.emptySet();
         }
-    }
-
-    /**
-     * Gets the or default for each.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @param keys
-     * @param defaultValue
-     * @return
-     */
-    public static <K, V> List<V> getOrDefaultForEach(final Map<K, V> map, final Collection<?> keys, final V defaultValue) {
-        if (N.isNullOrEmpty(keys)) {
-            return new ArrayList<>(0);
-        } else if (N.isNullOrEmpty(map)) {
-            return N.repeat(defaultValue, keys.size());
-        }
-
-        final List<V> result = new ArrayList<>(keys.size());
-        V val = null;
-
-        for (Object key : keys) {
-            val = map.get(key);
-
-            if (val != null || map.containsKey(key)) {
-                result.add(val);
-            } else {
-                result.add(defaultValue);
-            }
-        }
-
-        return result;
     }
 
     /**
