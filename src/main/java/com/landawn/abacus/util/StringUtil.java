@@ -7559,8 +7559,10 @@ public abstract class StringUtil {
                 return N.EMPTY_STRING;
             } else if (N.isNullOrEmpty(prefix)) {
                 return suffix;
-            } else {
+            } else if (N.isNullOrEmpty(suffix)) {
                 return prefix;
+            } else {
+                return prefix + suffix;
             }
         } else if (toIndex - fromIndex == 1 && N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
             return trim ? N.toString(a[fromIndex]).trim() : N.toString(a[fromIndex]);
@@ -7739,8 +7741,10 @@ public abstract class StringUtil {
                 return N.EMPTY_STRING;
             } else if (N.isNullOrEmpty(prefix)) {
                 return suffix;
-            } else {
+            } else if (N.isNullOrEmpty(suffix)) {
                 return prefix;
+            } else {
+                return prefix + suffix;
             }
         }
 
@@ -8090,8 +8094,10 @@ public abstract class StringUtil {
                 return N.EMPTY_STRING;
             } else if (N.isNullOrEmpty(prefix)) {
                 return suffix;
-            } else {
+            } else if (N.isNullOrEmpty(suffix)) {
                 return prefix;
+            } else {
+                return prefix + suffix;
             }
         }
 

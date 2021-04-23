@@ -6565,6 +6565,7 @@ class CommonUtil {
      * @param selectPropNames
      * @return {@code targetEntity}
      */
+    @SuppressWarnings("deprecation")
     public static <T> T merge(final Object sourceEntity, final T targetEntity, final Collection<String> selectPropNames) {
         final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
         final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
@@ -6595,7 +6596,7 @@ class CommonUtil {
                 for (PropInfo propInfo : srcEntityInfo.propInfoList) {
                     propValue = srcEntityInfo.getPropValue(sourceEntity, propInfo.name);
 
-                    if (notNullOrDefault(propValue)) {
+                    if (InternalUtil.notNullOrDefault(propValue)) {
                         targetEntityInfo.setPropValue(targetEntity, propInfo.name, propValue, ignoreUnmatchedProperty);
                     }
                 }
@@ -6664,6 +6665,7 @@ class CommonUtil {
      * @param ignorePropNames
      * @return {@code targetEntity}
      */
+    @SuppressWarnings("deprecation")
     public static <T> T merge(final Object sourceEntity, final T targetEntity, final boolean ignoreUnmatchedProperty, final Set<String> ignorePropNames) {
         final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
         final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
@@ -6695,7 +6697,7 @@ class CommonUtil {
                 if (ignorePropNames == null || ignorePropNames.contains(propInfo.name) == false) {
                     propValue = propInfo.getPropValue(sourceEntity);
 
-                    if (notNullOrDefault(propValue)) {
+                    if (InternalUtil.notNullOrDefault(propValue)) {
                         targetEntityInfo.setPropValue(targetEntity, propInfo.name, propValue, ignoreUnmatchedProperty);
                     }
                 }
@@ -9369,19 +9371,6 @@ class CommonUtil {
     // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
     public static boolean notNullOrEmptyOrBlank(final CharSequence s) {
         return !CommonUtil.isNullOrEmptyOrBlank(s);
-    }
-
-    /**
-     * Checks if it's not null or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
-     *
-     *
-     * @param s
-     * @return true, if it's not null or default
-     */
-    @Internal
-    @Beta
-    static boolean notNullOrDefault(final Object value) {
-        return (value != null) && !N.equals(value, N.defaultValueOf(value.getClass()));
     }
 
     /**
