@@ -424,7 +424,7 @@ public final class Maps {
      * @param key
      * @return
      */
-    public static <K, V> Nullable<V> get(final Map<K, ? extends V> map, final Object key) {
+    public static <K, V> Nullable<V> get(final Map<K, ? extends V> map, final K key) {
         if (N.isNullOrEmpty(map)) {
             return Nullable.empty();
         }
@@ -448,7 +448,7 @@ public final class Maps {
      * @param defaultValue
      * @return
      */
-    public static <K, V> V getOrDefault(final Map<K, ? extends V> map, final Object key, final V defaultValue) {
+    public static <K, V> V getOrDefault(final Map<K, ? extends V> map, final K key, final V defaultValue) {
         if (N.isNullOrEmpty(map)) {
             return defaultValue;
         }
@@ -473,7 +473,7 @@ public final class Maps {
      * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
      * @return
      */
-    public static <K, V> V getOrDefaultIfNull(final Map<K, ? extends V> map, final Object key, final V defaultForNull) {
+    public static <K, V> V getOrDefaultIfNull(final Map<K, ? extends V> map, final K key, final V defaultForNull) {
         if (N.isNullOrEmpty(map)) {
             return defaultForNull;
         }
@@ -487,7 +487,7 @@ public final class Maps {
         }
     }
 
-    public static <K> Boolean getBoolean(final Map<? super K, ?> map, final Object key) {
+    public static <K> Boolean getBoolean(final Map<? super K, ?> map, final K key) {
         if (N.isNullOrEmpty(map)) {
             return null;
         }
@@ -513,7 +513,7 @@ public final class Maps {
      * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
      * @return
      */
-    public static <K> boolean getBoolean(final Map<? super K, ?> map, final Object key, final boolean defaultForNull) {
+    public static <K> boolean getBoolean(final Map<? super K, ?> map, final K key, final boolean defaultForNull) {
         if (N.isNullOrEmpty(map)) {
             return defaultForNull;
         }
@@ -529,7 +529,7 @@ public final class Maps {
         }
     }
 
-    public static <K> Character getChar(final Map<? super K, ?> map, final Object key) {
+    public static <K> Character getChar(final Map<? super K, ?> map, final K key) {
         if (N.isNullOrEmpty(map)) {
             return null;
         }
@@ -555,7 +555,7 @@ public final class Maps {
      * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
      * @return
      */
-    public static <K> char getChar(final Map<? super K, ?> map, final Object key, final char defaultForNull) {
+    public static <K> char getChar(final Map<? super K, ?> map, final K key, final char defaultForNull) {
         if (N.isNullOrEmpty(map)) {
             return defaultForNull;
         }
@@ -571,7 +571,7 @@ public final class Maps {
         }
     }
 
-    public static <K> Byte getByte(final Map<? super K, ?> map, final Object key) {
+    public static <K> Byte getByte(final Map<? super K, ?> map, final K key) {
         if (N.isNullOrEmpty(map)) {
             return null;
         }
@@ -597,7 +597,7 @@ public final class Maps {
      * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
      * @return
      */
-    public static <K> byte getByte(final Map<? super K, ?> map, final Object key, final byte defaultForNull) {
+    public static <K> byte getByte(final Map<? super K, ?> map, final K key, final byte defaultForNull) {
         if (N.isNullOrEmpty(map)) {
             return defaultForNull;
         }
@@ -613,7 +613,7 @@ public final class Maps {
         }
     }
 
-    public static <K> Short getShort(final Map<? super K, ?> map, final Object key) {
+    public static <K> Short getShort(final Map<? super K, ?> map, final K key) {
         if (N.isNullOrEmpty(map)) {
             return null;
         }
@@ -639,7 +639,7 @@ public final class Maps {
      * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
      * @return
      */
-    public static <K> short getShort(final Map<? super K, ?> map, final Object key, final short defaultForNull) {
+    public static <K> short getShort(final Map<? super K, ?> map, final K key, final short defaultForNull) {
         if (N.isNullOrEmpty(map)) {
             return defaultForNull;
         }
@@ -655,7 +655,7 @@ public final class Maps {
         }
     }
 
-    public static <K> Integer getInt(final Map<? super K, ?> map, final Object key) {
+    public static <K> Integer getInt(final Map<? super K, ?> map, final K key) {
         if (N.isNullOrEmpty(map)) {
             return null;
         }
@@ -681,7 +681,7 @@ public final class Maps {
      * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
      * @return
      */
-    public static <K> int getInt(final Map<? super K, ?> map, final Object key, final int defaultForNull) {
+    public static <K> int getInt(final Map<? super K, ?> map, final K key, final int defaultForNull) {
         if (N.isNullOrEmpty(map)) {
             return defaultForNull;
         }
@@ -697,7 +697,7 @@ public final class Maps {
         }
     }
 
-    public static <K> Long getLong(final Map<? super K, ?> map, final Object key) {
+    public static <K> Long getLong(final Map<? super K, ?> map, final K key) {
         if (N.isNullOrEmpty(map)) {
             return null;
         }
@@ -723,7 +723,7 @@ public final class Maps {
      * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
      * @return
      */
-    public static <K> long getLong(final Map<? super K, ?> map, final Object key, final long defaultForNull) {
+    public static <K> long getLong(final Map<? super K, ?> map, final K key, final long defaultForNull) {
         if (N.isNullOrEmpty(map)) {
             return defaultForNull;
         }
@@ -739,7 +739,7 @@ public final class Maps {
         }
     }
 
-    public static <K> Float getFloat(final Map<? super K, ?> map, final Object key) {
+    public static <K> Float getFloat(final Map<? super K, ?> map, final K key) {
         if (N.isNullOrEmpty(map)) {
             return null;
         }
@@ -765,7 +765,7 @@ public final class Maps {
      * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
      * @return
      */
-    public static <K> float getFloat(final Map<? super K, ?> map, final Object key, final float defaultForNull) {
+    public static <K> float getFloat(final Map<? super K, ?> map, final K key, final float defaultForNull) {
         if (N.isNullOrEmpty(map)) {
             return defaultForNull;
         }
@@ -781,7 +781,7 @@ public final class Maps {
         }
     }
 
-    public static <K> Double getDouble(final Map<? super K, ?> map, final Object key) {
+    public static <K> Double getDouble(final Map<? super K, ?> map, final K key) {
         if (N.isNullOrEmpty(map)) {
             return null;
         }
@@ -807,7 +807,7 @@ public final class Maps {
      * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
      * @return
      */
-    public static <K> double getDouble(final Map<? super K, ?> map, final Object key, final double defaultForNull) {
+    public static <K> double getDouble(final Map<? super K, ?> map, final K key, final double defaultForNull) {
         if (N.isNullOrEmpty(map)) {
             return defaultForNull;
         }
@@ -823,7 +823,7 @@ public final class Maps {
         }
     }
 
-    public static <K> String getString(final Map<? super K, ?> map, final Object key) {
+    public static <K> String getString(final Map<? super K, ?> map, final K key) {
         if (N.isNullOrEmpty(map)) {
             return null;
         }
@@ -849,7 +849,7 @@ public final class Maps {
      * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
      * @return
      */
-    public static <K> String getString(final Map<? super K, ?> map, final Object key, final String defaultForNull) {
+    public static <K> String getString(final Map<? super K, ?> map, final K key, final String defaultForNull) {
         N.checkArgNotNull(defaultForNull, "defaultForNull");
 
         if (N.isNullOrEmpty(map)) {
@@ -867,7 +867,7 @@ public final class Maps {
         }
     }
 
-    public static <K, T> T get(final Map<? super K, ?> map, final Object key, final Class<? extends T> targetType) {
+    public static <K, T> T get(final Map<? super K, ?> map, final K key, final Class<? extends T> targetType) {
         if (N.isNullOrEmpty(map)) {
             return null;
         }
@@ -894,7 +894,7 @@ public final class Maps {
      * @param defaultForNull to return if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
      * @return
      */
-    public static <K, T> T get(final Map<? super K, ?> map, final Object key, final T defaultForNull) {
+    public static <K, T> T get(final Map<? super K, ?> map, final K key, final T defaultForNull) {
         N.checkArgNotNull(defaultForNull, "defaultForNull");
 
         if (N.isNullOrEmpty(map)) {
@@ -913,68 +913,6 @@ public final class Maps {
     }
 
     /**
-     * Returns a list of values of the keys which exist in the specified <code>Map</code>.
-     * If the key dosn't exist in the <code>Map</code>, No value will be added into the returned list.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @param keys
-     * @return
-     */
-    public static <K, V> List<V> getIfPresentForEach(final Map<K, ? extends V> map, final Collection<?> keys) {
-        if (N.isNullOrEmpty(map) || N.isNullOrEmpty(keys)) {
-            return new ArrayList<>(0);
-        }
-
-        final List<V> result = new ArrayList<>(keys.size());
-        V val = null;
-
-        for (Object key : keys) {
-            val = map.get(key);
-
-            if (val != null || map.containsKey(key)) {
-                result.add(val);
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Gets the or default for each.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @param keys
-     * @param defaultValue
-     * @return
-     */
-    public static <K, V> List<V> getOrDefaultForEach(final Map<K, V> map, final Collection<?> keys, final V defaultValue) {
-        if (N.isNullOrEmpty(keys)) {
-            return new ArrayList<>(0);
-        } else if (N.isNullOrEmpty(map)) {
-            return N.repeat(defaultValue, keys.size());
-        }
-
-        final List<V> result = new ArrayList<>(keys.size());
-        V val = null;
-
-        for (Object key : keys) {
-            val = map.get(key);
-
-            if (val != null || map.containsKey(key)) {
-                result.add(val);
-            } else {
-                result.add(defaultValue);
-            }
-        }
-
-        return result;
-    }
-
-    /**
      * Returns the value to which the specified key is mapped, or
      * an empty immutable {@code List} if this map contains no mapping for the key.
      *
@@ -985,7 +923,7 @@ public final class Maps {
      * @param key
      * @return
      */
-    public static <K, E, V extends List<E>> List<E> getOrEmptyList(final Map<K, V> map, final Object key) {
+    public static <K, E, V extends List<E>> List<E> getOrEmptyList(final Map<K, V> map, final K key) {
         if (N.isNullOrEmpty(map)) {
             return N.<E> emptyList();
         }
@@ -1010,7 +948,7 @@ public final class Maps {
      * @param key
      * @return
      */
-    public static <K, E, V extends Set<E>> Set<E> getOrEmptySet(final Map<K, V> map, final Object key) {
+    public static <K, E, V extends Set<E>> Set<E> getOrEmptySet(final Map<K, V> map, final K key) {
         if (N.isNullOrEmpty(map)) {
             return N.<E> emptySet();
         }
@@ -1103,6 +1041,68 @@ public final class Maps {
         }
 
         return v;
+    }
+
+    /**
+     * Returns a list of values of the keys which exist in the specified <code>Map</code>.
+     * If the key dosn't exist in the <code>Map</code>, No value will be added into the returned list.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param map
+     * @param keys
+     * @return
+     */
+    public static <K, V> List<V> getIfPresentForEach(final Map<K, ? extends V> map, final Collection<?> keys) {
+        if (N.isNullOrEmpty(map) || N.isNullOrEmpty(keys)) {
+            return new ArrayList<>(0);
+        }
+
+        final List<V> result = new ArrayList<>(keys.size());
+        V val = null;
+
+        for (Object key : keys) {
+            val = map.get(key);
+
+            if (val != null || map.containsKey(key)) {
+                result.add(val);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Gets the or default for each.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param map
+     * @param keys
+     * @param defaultValue
+     * @return
+     */
+    public static <K, V> List<V> getOrDefaultForEach(final Map<K, V> map, final Collection<?> keys, final V defaultValue) {
+        if (N.isNullOrEmpty(keys)) {
+            return new ArrayList<>(0);
+        } else if (N.isNullOrEmpty(map)) {
+            return N.repeat(defaultValue, keys.size());
+        }
+
+        final List<V> result = new ArrayList<>(keys.size());
+        V val = null;
+
+        for (Object key : keys) {
+            val = map.get(key);
+
+            if (val != null || map.containsKey(key)) {
+                result.add(val);
+            } else {
+                result.add(defaultValue);
+            }
+        }
+
+        return result;
     }
 
     /**
