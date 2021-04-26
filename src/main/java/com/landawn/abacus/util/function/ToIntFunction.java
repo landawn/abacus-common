@@ -39,7 +39,7 @@ public interface ToIntFunction<T> extends Throwables.ToIntFunction<T, RuntimeExc
     };
 
     /**
-     * @deprecated replaced with {@code FROM_NUM}.
+     * @deprecated replaced by {@code FROM_NUM}.
      */
     @Deprecated
     static final ToIntFunction<Number> NUM = FROM_NUM;

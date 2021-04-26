@@ -39,7 +39,7 @@ public interface ToDoubleFunction<T> extends Throwables.ToDoubleFunction<T, Runt
     };
 
     /**
-     * @deprecated replaced with {@code FROM_NUM}.
+     * @deprecated replaced by {@code FROM_NUM}.
      */
     @Deprecated
     static final ToDoubleFunction<Number> NUM = FROM_NUM;

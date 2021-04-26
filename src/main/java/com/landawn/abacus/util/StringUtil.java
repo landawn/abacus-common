@@ -8499,7 +8499,7 @@ public abstract class StringUtil {
      *
      * <br />
      *
-     * Returns the given {@code template} string with each occurrence of {@code "%s"} replaced with
+     * Returns the given {@code template} string with each occurrence of {@code "%s"} replaced by
      * the corresponding argument value from {@code args}; or, if the placeholder and argument counts
      * do not match, returns a best-effort form of that string. Will not throw an exception under
      * normal conditions.

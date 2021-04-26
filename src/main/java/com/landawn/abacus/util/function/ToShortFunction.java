@@ -39,7 +39,7 @@ public interface ToShortFunction<T> extends Throwables.ToShortFunction<T, Runtim
     };
 
     /**
-     * @deprecated replaced with {@code FROM_NUM}.
+     * @deprecated replaced by {@code FROM_NUM}.
      */
     @Deprecated
     static final ToShortFunction<Number> NUM = FROM_NUM;

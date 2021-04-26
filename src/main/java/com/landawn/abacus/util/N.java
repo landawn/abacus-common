@@ -23794,7 +23794,7 @@ public final class N extends CommonUtil {
     }
 
     public static <T> List<T> merge(final Collection<? extends Collection<? extends T>> c, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
-        return N.toList(Iterators.mergge(c, nextSelector));
+        return N.toList(Iterators.mergeCollections(c, nextSelector));
     }
 
     public static <T, C extends Collection<T>> C merge(final Collection<? extends Collection<? extends T>> c,
@@ -23814,7 +23814,7 @@ public final class N extends CommonUtil {
             }
         };
 
-        return N.toCollection(Iterators.mergge(c, nextSelector), tmp);
+        return N.toCollection(Iterators.mergeCollections(c, nextSelector), tmp);
     }
 
     //    /**

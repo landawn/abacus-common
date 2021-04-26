@@ -39,7 +39,7 @@ public interface ToLongFunction<T> extends Throwables.ToLongFunction<T, RuntimeE
     };
 
     /**
-     * @deprecated replaced with {@code FROM_NUM}.
+     * @deprecated replaced by {@code FROM_NUM}.
      */
     @Deprecated
     static final ToLongFunction<Number> NUM = FROM_NUM;

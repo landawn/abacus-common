@@ -91,7 +91,7 @@ public class BufferedWriter extends Writer {
      *
      * @param ch
      * @throws IOException Signals that an I/O exception has occurred.
-     * @deprecated Replaced with write(char).
+     * @deprecated replaced by write(char).
      */
     @Deprecated
     @Override

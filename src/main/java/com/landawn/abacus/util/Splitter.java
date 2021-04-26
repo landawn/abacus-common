@@ -365,7 +365,7 @@ public final class Splitter {
      *
      * @param omitEmptyStrings
      * @return
-     * @deprecated replaced with {@link #omitEmptyStrings()}
+     * @deprecated replaced by {@link #omitEmptyStrings()}
      */
     @Deprecated
     public Splitter omitEmptyStrings(boolean omitEmptyStrings) {
@@ -384,7 +384,7 @@ public final class Splitter {
      *
      * @param trim
      * @return
-     * @deprecated replaced with {@link #trimResults()}
+     * @deprecated replaced by {@link #trimResults()}
      */
     @Deprecated
     public Splitter trim(boolean trim) {
@@ -405,7 +405,7 @@ public final class Splitter {
      * @param strip
      * @return
      * @see Character#isWhitespace(char)
-     * @deprecated replaced with {@link #stripResults()}
+     * @deprecated replaced by {@link #stripResults()}
      */
     @Deprecated
     public Splitter strip(boolean strip) {
@@ -803,7 +803,7 @@ public final class Splitter {
          *
          * @param omitEmptyStrings
          * @return
-         * @deprecated replaced with {@link #omitEmptyStrings()}
+         * @deprecated replaced by {@link #omitEmptyStrings()}
          */
         @Deprecated
         public MapSplitter omitEmptyStrings(boolean omitEmptyStrings) {
@@ -822,7 +822,7 @@ public final class Splitter {
          *
          * @param trim
          * @return
-         * @deprecated replaced with {@link #trimResults()}
+         * @deprecated replaced by {@link #trimResults()}
          */
         @Deprecated
         public MapSplitter trim(boolean trim) {
@@ -845,7 +845,7 @@ public final class Splitter {
          * @param strip
          * @return
          * @see Character#isWhitespace(char)
-         * @deprecated replaced with {@link #stripResults()}
+         * @deprecated replaced by {@link #stripResults()}
          */
         @Deprecated
         public MapSplitter strip(boolean strip) {

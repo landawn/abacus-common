@@ -1269,26 +1269,50 @@ public final class Iterators {
         };
     }
 
-    public static <T> ObjIterator<T> merge(final List<? extends Collection<? extends T>> c, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
-        return mergge(c, nextSelector);
+    /**
+     * 
+     * @param <T>
+     * @param collections
+     * @param nextSelector
+     * @return
+     * @deprecated replaced by {@link #mergeCollections(Collection, BiFunction)}
+     */
+    @Deprecated
+    public static <T> ObjIterator<T> merge(final List<? extends Collection<? extends T>> collections,
+            final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
+        return mergeCollections(collections, nextSelector);
     }
 
-    public static <T> ObjIterator<T> mergge(final Collection<? extends Collection<? extends T>> c,
+    /**
+     * 
+     * @param <T>
+     * @param collections
+     * @param nextSelector
+     * @return
+     * @deprecated replaced by {@link #mergeCollections(Collection, BiFunction)}
+     */
+    @Deprecated
+    public static <T> ObjIterator<T> mergge(final Collection<? extends Collection<? extends T>> collections,
+            final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
+        return mergeCollections(collections, nextSelector);
+    }
+
+    public static <T> ObjIterator<T> mergeCollections(final Collection<? extends Collection<? extends T>> collections,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
         N.checkArgNotNull(nextSelector);
 
-        if (N.isNullOrEmpty(c)) {
+        if (N.isNullOrEmpty(collections)) {
             return ObjIterator.<T> empty();
-        } else if (c.size() == 1) {
-            return ObjIterator.<T> of(c.iterator().next());
-        } else if (c.size() == 2) {
-            final Iterator<? extends Collection<? extends T>> iter = c.iterator();
+        } else if (collections.size() == 1) {
+            return ObjIterator.<T> of(collections.iterator().next());
+        } else if (collections.size() == 2) {
+            final Iterator<? extends Collection<? extends T>> iter = collections.iterator();
             return merge(iter.next(), iter.next(), nextSelector);
         }
 
-        final List<Iterator<? extends T>> iterList = new ArrayList<>(c.size());
+        final List<Iterator<? extends T>> iterList = new ArrayList<>(collections.size());
 
-        for (Collection<? extends T> e : c) {
+        for (Collection<? extends T> e : collections) {
             iterList.add(N.iterate(e));
         }
 

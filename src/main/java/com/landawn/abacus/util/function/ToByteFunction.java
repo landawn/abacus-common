@@ -39,7 +39,7 @@ public interface ToByteFunction<T> extends Throwables.ToByteFunction<T, RuntimeE
     };
 
     /**
-     * @deprecated replaced with {@code FROM_NUM}.
+     * @deprecated replaced by {@code FROM_NUM}.
      */
     @Deprecated
     static final ToByteFunction<Number> NUM = FROM_NUM;

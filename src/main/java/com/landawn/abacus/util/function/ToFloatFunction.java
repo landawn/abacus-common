@@ -39,7 +39,7 @@ public interface ToFloatFunction<T> extends Throwables.ToFloatFunction<T, Runtim
     };
 
     /**
-     * @deprecated replaced with {@code FROM_NUM}.
+     * @deprecated replaced by {@code FROM_NUM}.
      */
     @Deprecated
     static final ToFloatFunction<Number> NUM = FROM_NUM;

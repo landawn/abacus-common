@@ -136,7 +136,7 @@ public final class Result<T, E extends Throwable> implements Immutable {
      *
      * @param defaultValueIfErrorOccurred
      * @return
-     * @deprecated replaced with {@link #orElseIfFailure(Object)}
+     * @deprecated replaced by {@link #orElseIfFailure(Object)}
      */
     @Deprecated
     public T orElse(final T defaultValueIfErrorOccurred) {
@@ -149,7 +149,7 @@ public final class Result<T, E extends Throwable> implements Immutable {
      * @param otherIfErrorOccurred
      * @return
      * @throws E2
-     * @deprecated replaced with {@link #orElseGetIfFailure(com.landawn.abacus.util.Throwables.Supplier)}
+     * @deprecated replaced by {@link #orElseGetIfFailure(com.landawn.abacus.util.Throwables.Supplier)}
      */
     @Deprecated
     public <E2 extends Throwable> T orElseGet(final Throwables.Supplier<? extends T, E2> otherIfErrorOccurred) throws E2 {

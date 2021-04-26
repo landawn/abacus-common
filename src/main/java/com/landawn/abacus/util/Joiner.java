@@ -151,7 +151,7 @@ public final class Joiner implements Closeable {
      *
      * @param trim
      * @return
-     * @deprecated replaced with {@link #trimBeforeAppend()}
+     * @deprecated replaced by {@link #trimBeforeAppend()}
      */
     @Deprecated
     public Joiner trim(boolean trim) {
@@ -171,7 +171,7 @@ public final class Joiner implements Closeable {
      *
      * @param skipNull
      * @return
-     * @deprecated replaced with {@link #skipNulls()}
+     * @deprecated replaced by {@link #skipNulls()}
      */
     @Deprecated
     public Joiner skipNull(boolean skipNull) {
@@ -221,7 +221,7 @@ public final class Joiner implements Closeable {
      *
      * @param useCachedBuffer
      * @return
-     * @deprecated replaced with {@link #reuseCachedBuffer()}
+     * @deprecated replaced by {@link #reuseCachedBuffer()}
      */
     @Deprecated
     public Joiner reuseCachedBuffer(boolean useCachedBuffer) {

@@ -19013,7 +19013,7 @@ class CommonUtil {
     }
 
     /**
-     * Note: All the objects with same value will be replaced with first element with the same value.
+     * Note: All the objects with same value will be replaced by first element with the same value.
      *
      * @param a
      */
@@ -19026,7 +19026,7 @@ class CommonUtil {
     }
 
     /**
-     * Note: All the objects with same value will be replaced with first element with the same value.
+     * Note: All the objects with same value will be replaced by first element with the same value.
      *
      * @param a the elements in the array must implements the <code>Comparable</code> interface.
      * @param fromIndex
@@ -19051,7 +19051,7 @@ class CommonUtil {
     }
 
     /**
-     * Note: All the objects with same value will be replaced with first element with the same value.
+     * Note: All the objects with same value will be replaced by first element with the same value.
      *
      * @param <T>
      * @param a
@@ -19093,7 +19093,7 @@ class CommonUtil {
     }
 
     /**
-     * Note: All the objects with same value will be replaced with first element with the same value.
+     * Note: All the objects with same value will be replaced by first element with the same value.
      *
      * @param <T>
      * @param list
@@ -19107,7 +19107,7 @@ class CommonUtil {
     }
 
     /**
-     * Note: All the objects with same value will be replaced with first element with the same value.
+     * Note: All the objects with same value will be replaced by first element with the same value.
      *
      * @param <T>
      * @param list
@@ -19119,7 +19119,7 @@ class CommonUtil {
     }
 
     /**
-     * Note: All the objects with same value will be replaced with first element with the same value.
+     * Note: All the objects with same value will be replaced by first element with the same value.
      *
      * @param <T>
      * @param list
@@ -19134,7 +19134,7 @@ class CommonUtil {
     }
 
     /**
-     * Note: All the objects with same value will be replaced with first element with the same value.
+     * Note: All the objects with same value will be replaced by first element with the same value.
      *
      * @param <T>
      * @param list
