@@ -867,6 +867,19 @@ public final class Maps {
         }
     }
 
+    /**
+     * 
+     * <br />
+     * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method. 
+     * Otherwise, put the {@code targetTpye} to the first parameter of the method. 
+     * 
+     * @param <K>
+     * @param <T>
+     * @param map
+     * @param key
+     * @param targetType
+     * @return
+     */
     public static <K, T> T get(final Map<? super K, ?> map, final K key, final Class<? extends T> targetType) {
         if (N.isNullOrEmpty(map)) {
             return null;

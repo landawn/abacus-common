@@ -89,21 +89,24 @@ public final class MapEntity extends AbstractDirtyMarker implements Serializable
     }
 
     /**
+     * <br />
+     * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method. 
+     * Otherwise, put the {@code targetTpye} to the first parameter of the method. 
      *
-     * @param <T>
-     * @param clazz
      * @param propName
+     * @param targetType
+     * @param <T>
      * @return
      */
     @SuppressWarnings("unchecked")
-    public <T> T get(Class<T> clazz, String propName) {
+    public <T> T get(String propName, Class<T> targetType) {
         Object propValue = get(propName);
 
         if (propValue == null) {
-            propValue = N.defaultValueOf(clazz);
+            propValue = N.defaultValueOf(targetType);
         }
 
-        return N.convert(propValue, clazz);
+        return N.convert(propValue, targetType);
     }
 
     /**

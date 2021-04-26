@@ -228,21 +228,21 @@ public class Seid implements EntityId, Cloneable {
 
     /**
      *
-     * @param <T>
-     * @param clazz
      * @param propName
+     * @param targetType
+     * @param <T>
      * @return
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T get(Class<T> clazz, String propName) {
+    public <T> T get(String propName, Class<T> targetType) {
         Object propValue = get(propName);
 
         if (propValue == null) {
-            propValue = N.defaultValueOf(clazz);
+            propValue = N.defaultValueOf(targetType);
         }
 
-        return N.convert(propValue, clazz);
+        return N.convert(propValue, targetType);
     }
 
     /**
