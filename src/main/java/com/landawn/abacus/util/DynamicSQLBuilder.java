@@ -26,7 +26,7 @@ import com.landawn.abacus.util.function.Consumer;
  */
 public class DynamicSQLBuilder {
 
-    private static final Logger logger = LoggerFactory.getLogger(DynamicSQLBuilder.class);
+    static final Logger logger = LoggerFactory.getLogger(DynamicSQLBuilder.class);
 
     private Select select = new Select(Objectory.createStringBuilder());
 
@@ -283,9 +283,9 @@ public class DynamicSQLBuilder {
         select = null;
         from = null;
 
-        if (logger.isDebugEnabled()) {
-            logger.debug(sql);
-        }
+        //    if (logger.isDebugEnabled()) {
+        //        logger.debug(sql);
+        //    }
 
         return sql;
     }

@@ -548,8 +548,8 @@ public final class HttpProxy {
                                     args[paramLen - 1] = lastParam;
                                 }
 
-                                if (_logger.isInfoEnabled()) {
-                                    _logger.info(finalOperationConfig.parser.serialize(args, finalOperationConfig.sc));
+                                if (_logger.isDebugEnabled()) {
+                                    _logger.debug(finalOperationConfig.parser.serialize(args, finalOperationConfig.sc));
                                 }
 
                                 Object result = null;
@@ -564,12 +564,12 @@ public final class HttpProxy {
                                     throw N.toRuntimeException(e);
                                 }
 
-                                if (_logger.isInfoEnabled()) {
+                                if (_logger.isDebugEnabled()) {
                                     if (!finalOperationConfig.concreteReturnType.clazz().equals(void.class)
                                             && finalOperationConfig.concreteReturnType.isSerializable()) {
-                                        _logger.info(finalOperationConfig.concreteReturnType.stringOf(result));
+                                        _logger.debug(finalOperationConfig.concreteReturnType.stringOf(result));
                                     } else {
-                                        _logger.info(finalOperationConfig.parser.serialize(result, finalOperationConfig.sc));
+                                        _logger.debug(finalOperationConfig.parser.serialize(result, finalOperationConfig.sc));
                                     }
                                 }
 
@@ -728,15 +728,15 @@ public final class HttpProxy {
             }
 
             private Object invoke3(final Object proxy, final Method method, final Object[] args, final OperationConfig operationConfig) throws Exception {
-                if (_logger.isInfoEnabled()) {
-                    _logger.info(operationConfig.parser.serialize(args, operationConfig.sc));
+                if (_logger.isDebugEnabled()) {
+                    _logger.debug(operationConfig.parser.serialize(args, operationConfig.sc));
                 }
 
                 if (!Modifier.isAbstract(method.getModifiers())) {
                     final Object result = _config.methodCalls.get(method).apply(proxy, args);
 
-                    if (_logger.isInfoEnabled()) {
-                        _logger.info(operationConfig.parser.serialize(result, operationConfig.sc));
+                    if (_logger.isDebugEnabled()) {
+                        _logger.debug(operationConfig.parser.serialize(result, operationConfig.sc));
                     }
 
                     return result;
@@ -1034,11 +1034,11 @@ public final class HttpProxy {
                                 throw new IllegalArgumentException("Unsupported content type: " + responseContentFormat.toString());
                         }
 
-                        if (_logger.isInfoEnabled()) {
+                        if (_logger.isDebugEnabled()) {
                             if (!operationConfig.concreteReturnType.clazz().equals(void.class) && operationConfig.concreteReturnType.isSerializable()) {
-                                _logger.info(operationConfig.concreteReturnType.stringOf(result));
+                                _logger.debug(operationConfig.concreteReturnType.stringOf(result));
                             } else {
-                                _logger.info(responseParser.serialize(result, responseSC));
+                                _logger.debug(responseParser.serialize(result, responseSC));
                             }
                         }
 

@@ -565,11 +565,11 @@ public class WebServiceServlet extends AbstractHttpServlet {
                                         }
                                     }
 
-                                    if (serviceRRLogger.isInfoEnabled()) {
+                                    if (serviceRRLogger.isDebugEnabled()) {
                                         if (paramType.isSerializable()) {
-                                            serviceRRLogger.info(paramType.stringOf(parameter));
+                                            serviceRRLogger.debug(paramType.stringOf(parameter));
                                         } else {
-                                            serviceRRLogger.info(jsonParser.serialize(parameter));
+                                            serviceRRLogger.debug(jsonParser.serialize(parameter));
                                         }
                                     }
 
@@ -579,11 +579,11 @@ public class WebServiceServlet extends AbstractHttpServlet {
                                 boolean hasFieldAnnotation = parameterClass == Map.class && methodParameterNamesMap.containsKey(method.getName());
                                 final Type<Object> paramType = N.typeOf(parameter.getClass());
 
-                                if (serviceRRLogger.isInfoEnabled()) {
+                                if (serviceRRLogger.isDebugEnabled()) {
                                     if (paramType.isSerializable()) {
-                                        serviceRRLogger.info(paramType.stringOf(parameter));
+                                        serviceRRLogger.debug(paramType.stringOf(parameter));
                                     } else {
-                                        serviceRRLogger.info(jsonParser.serialize(parameter));
+                                        serviceRRLogger.debug(jsonParser.serialize(parameter));
                                     }
                                 }
 
@@ -605,8 +605,8 @@ public class WebServiceServlet extends AbstractHttpServlet {
 
                             checkHttpMethod(method, httpMethodName);
 
-                            if (serviceRRLogger.isInfoEnabled()) {
-                                serviceRRLogger.info(xmlParser.serialize(parameter));
+                            if (serviceRRLogger.isDebugEnabled()) {
+                                serviceRRLogger.debug(xmlParser.serialize(parameter));
                             }
 
                             result = ClassUtil.invokeMethod(serviceImpl, method, parameter);
@@ -628,8 +628,8 @@ public class WebServiceServlet extends AbstractHttpServlet {
                                         parameter = xmlParser.deserialize(parameterClass, is);
                                     }
 
-                                    if (serviceRRLogger.isInfoEnabled()) {
-                                        serviceRRLogger.info(xmlParser.serialize(parameter));
+                                    if (serviceRRLogger.isDebugEnabled()) {
+                                        serviceRRLogger.debug(xmlParser.serialize(parameter));
                                     }
 
                                     result = invoke(method, parameter, hasFieldAnnotation);
@@ -637,8 +637,8 @@ public class WebServiceServlet extends AbstractHttpServlet {
                             } else {
                                 boolean hasFieldAnnotation = parameterClass == Map.class && methodParameterNamesMap.containsKey(method.getName());
 
-                                if (serviceRRLogger.isInfoEnabled()) {
-                                    serviceRRLogger.info(xmlParser.serialize(parameter));
+                                if (serviceRRLogger.isDebugEnabled()) {
+                                    serviceRRLogger.debug(xmlParser.serialize(parameter));
                                 }
 
                                 result = invoke(method, parameter, hasFieldAnnotation);
@@ -667,11 +667,11 @@ public class WebServiceServlet extends AbstractHttpServlet {
 
                                     parameter = URLEncodedUtil.decode(parameterClass, IOUtil.readString(is, requestCharset));
 
-                                    if (serviceRRLogger.isInfoEnabled()) {
+                                    if (serviceRRLogger.isDebugEnabled()) {
                                         if (paramType.isSerializable()) {
-                                            serviceRRLogger.info(paramType.stringOf(parameter));
+                                            serviceRRLogger.debug(paramType.stringOf(parameter));
                                         } else {
-                                            serviceRRLogger.info(jsonParser.serialize(parameter));
+                                            serviceRRLogger.debug(jsonParser.serialize(parameter));
                                         }
                                     }
 
@@ -681,11 +681,11 @@ public class WebServiceServlet extends AbstractHttpServlet {
                                 boolean hasFieldAnnotation = parameterClass == Map.class && methodParameterNamesMap.containsKey(method.getName());
                                 final Type<Object> paramType = N.typeOf(parameter.getClass());
 
-                                if (serviceRRLogger.isInfoEnabled()) {
+                                if (serviceRRLogger.isDebugEnabled()) {
                                     if (paramType.isSerializable()) {
-                                        serviceRRLogger.info(paramType.stringOf(parameter));
+                                        serviceRRLogger.debug(paramType.stringOf(parameter));
                                     } else {
-                                        serviceRRLogger.info(jsonParser.serialize(parameter));
+                                        serviceRRLogger.debug(jsonParser.serialize(parameter));
                                     }
                                 }
 
@@ -715,11 +715,11 @@ public class WebServiceServlet extends AbstractHttpServlet {
 
                                     final Type<Object> paramType = N.typeOf(parameter.getClass());
 
-                                    if (serviceRRLogger.isInfoEnabled()) {
+                                    if (serviceRRLogger.isDebugEnabled()) {
                                         if (paramType.isSerializable()) {
-                                            serviceRRLogger.info(paramType.stringOf(parameter));
+                                            serviceRRLogger.debug(paramType.stringOf(parameter));
                                         } else {
-                                            serviceRRLogger.info(jsonParser.serialize(parameter));
+                                            serviceRRLogger.debug(jsonParser.serialize(parameter));
                                         }
                                     }
 
@@ -728,11 +728,11 @@ public class WebServiceServlet extends AbstractHttpServlet {
                             } else {
                                 final Type<Object> paramType = N.typeOf(parameter.getClass());
 
-                                if (serviceRRLogger.isInfoEnabled()) {
+                                if (serviceRRLogger.isDebugEnabled()) {
                                     if (paramType.isSerializable()) {
-                                        serviceRRLogger.info(paramType.stringOf(parameter));
+                                        serviceRRLogger.debug(paramType.stringOf(parameter));
                                     } else {
-                                        serviceRRLogger.info(jsonParser.serialize(parameter));
+                                        serviceRRLogger.debug(jsonParser.serialize(parameter));
                                     }
                                 }
 
@@ -823,7 +823,7 @@ public class WebServiceServlet extends AbstractHttpServlet {
                             str = jsonParser.serialize(result);
                         }
 
-                        serviceRRLogger.info(str);
+                        serviceRRLogger.debug(str);
 
                         os.write(str.getBytes());
                     } else {
@@ -843,7 +843,7 @@ public class WebServiceServlet extends AbstractHttpServlet {
                 case XML_GZIP: {
                     if (serviceRRLogger.isInfoEnabled()) {
                         String str = xmlParser.serialize(result);
-                        serviceRRLogger.info(str);
+                        serviceRRLogger.debug(str);
                         os.write(str.getBytes());
                     } else {
                         xmlParser.serialize(os, result);
@@ -853,8 +853,8 @@ public class WebServiceServlet extends AbstractHttpServlet {
                 }
 
                 case FormUrlEncoded: {
-                    if (serviceRRLogger.isInfoEnabled()) {
-                        serviceRRLogger.info(jsonParser.serialize(result));
+                    if (serviceRRLogger.isDebugEnabled()) {
+                        serviceRRLogger.debug(jsonParser.serialize(result));
                     }
 
                     os.write(URLEncodedUtil.encode(result, acceptCharset).getBytes(acceptCharset));
@@ -863,13 +863,13 @@ public class WebServiceServlet extends AbstractHttpServlet {
                 }
 
                 case KRYO: {
-                    if (serviceRRLogger.isInfoEnabled()) {
+                    if (serviceRRLogger.isDebugEnabled()) {
                         final Type<Object> type = N.typeOf(result.getClass());
 
                         if (type.isSerializable()) {
-                            serviceRRLogger.info(type.stringOf(result));
+                            serviceRRLogger.debug(type.stringOf(result));
                         } else {
-                            serviceRRLogger.info(jsonParser.serialize(result));
+                            serviceRRLogger.debug(jsonParser.serialize(result));
                         }
                     }
 

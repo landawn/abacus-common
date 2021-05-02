@@ -9050,7 +9050,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         isClosed = true;
 
-        logger.info("Closing ExceptionalStream");
+        logger.debug("Closing ExceptionalStream");
 
         close(closeHandlers);
     }

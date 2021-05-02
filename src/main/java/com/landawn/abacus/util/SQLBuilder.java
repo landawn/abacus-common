@@ -2642,9 +2642,9 @@ public abstract class SQLBuilder {
             activeStringBuilderCounter.decrementAndGet();
         }
 
-        if (logger.isDebugEnabled()) {
-            logger.debug(sql);
-        }
+        //    if (logger.isDebugEnabled()) {
+        //        logger.debug(sql);
+        //    }
 
         return sql;
     }
@@ -2664,20 +2664,24 @@ public abstract class SQLBuilder {
         return new SP(sql, parameters);
     }
 
+    @Beta
     public <T, E extends Exception> T apply(final Throwables.Function<? super SP, T, E> func) throws E {
         return func.apply(this.pair());
     }
 
+    @Beta
     public <T, E extends Exception> T apply(final Throwables.BiFunction<? super String, ? super List<Object>, T, E> func) throws E {
         final SP sp = this.pair();
 
         return func.apply(sp.sql, sp.parameters);
     }
 
+    @Beta
     public <E extends Exception> void accept(final Throwables.Consumer<? super SP, E> consumer) throws E {
         consumer.accept(this.pair());
     }
 
+    @Beta
     public <E extends Exception> void accept(final Throwables.BiConsumer<? super String, ? super List<Object>, E> consumer) throws E {
         final SP sp = this.pair();
 

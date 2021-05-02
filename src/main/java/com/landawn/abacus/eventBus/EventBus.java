@@ -276,8 +276,8 @@ public class EventBus {
             throw new RuntimeException("Unsupported thread mode: " + threadMode);
         }
 
-        if (logger.isInfoEnabled()) {
-            logger.info("Registering subscriber: " + subscriber + " with eventId: " + eventId + " and thread mode: " + threadMode);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Registering subscriber: " + subscriber + " with eventId: " + eventId + " and thread mode: " + threadMode);
         }
 
         final Class<?> cls = subscriber.getClass();
@@ -463,8 +463,8 @@ public class EventBus {
      * @return
      */
     public EventBus unregister(final Object subscriber) {
-        if (logger.isInfoEnabled()) {
-            logger.info("Unregistering subscriber: " + subscriber);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Unregistering subscriber: " + subscriber);
         }
 
         List<SubIdentifier> subEvents = null;
@@ -751,18 +751,19 @@ public class EventBus {
                 synchronized (sub) {
                     if (sub.interval > 0 && System.currentTimeMillis() - sub.lastPostTime < sub.interval) {
                         // ignore.
-                        if (logger.isInfoEnabled()) {
-                            logger.info("Ignoring event: " + N.toString(event) + " to subscriber: " + N.toString(sub) + " because it's in the interval: "
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Ignoring event: " + N.toString(event) + " to subscriber: " + N.toString(sub) + " because it's in the interval: "
                                     + sub.interval);
                         }
                     } else if (sub.deduplicate && (sub.previousEvent != null || sub.lastPostTime > 0) && N.equals(sub.previousEvent, event)) {
                         // ignore.
-                        if (logger.isInfoEnabled()) {
-                            logger.info("Ignoring event: " + N.toString(event) + " to subscriber: " + N.toString(sub) + " because it's same as previous event");
+                        if (logger.isDebugEnabled()) {
+                            logger.debug(
+                                    "Ignoring event: " + N.toString(event) + " to subscriber: " + N.toString(sub) + " because it's same as previous event");
                         }
                     } else {
-                        if (logger.isInfoEnabled()) {
-                            logger.info("Posting event: " + N.toString(event) + " to subscriber: " + N.toString(sub));
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Posting event: " + N.toString(event) + " to subscriber: " + N.toString(sub));
                         }
 
                         sub.lastPostTime = System.currentTimeMillis();
@@ -775,8 +776,8 @@ public class EventBus {
                     }
                 }
             } else {
-                if (logger.isInfoEnabled()) {
-                    logger.info("Posting event: " + N.toString(event) + " to subscriber: " + N.toString(sub));
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Posting event: " + N.toString(event) + " to subscriber: " + N.toString(sub));
                 }
 
                 sub.method.invoke(sub.obj, event);

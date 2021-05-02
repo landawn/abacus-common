@@ -1,3 +1,8 @@
+### 2.3.1
+
+* Improvements and bug fix.
+
+
 ### 2.3.0
 
 * Improvements and bug fix.
