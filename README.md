@@ -138,10 +138,6 @@ and [More](https://www.javadoc.io/static/com.landawn/abacus-common/2.3.1/com/lan
 [KeyedObjectPool](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/KeyedObjectPool_view.html), 
 [PoolFactory](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/PoolFactory_view.html)...
 
-* SpyMemcached/JRedis: 
-[SpyMemcached](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/SpyMemcached_view.html),
-[JRedis](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/JRedis_view.html), 
-[MemcachedLock](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/MemcachedLock_view.html).
 
 * More:
 [Charsets](https://static.javadoc.io/com.landawn/abacus-common/2.3.1/com/landawn/abacus/util/Charsets.html),
