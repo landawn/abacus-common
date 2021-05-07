@@ -1,3 +1,11 @@
+### 2.3.2
+
+* Create `abacus-cache`.
+* Create `abacus-web`.
+* Create `abacus-query`.
+* Improvements and bug fix.
+
+
 ### 2.3.1
 
 * Improvements and bug fix.

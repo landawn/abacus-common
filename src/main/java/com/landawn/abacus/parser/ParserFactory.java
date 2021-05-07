@@ -14,6 +14,16 @@
 
 package com.landawn.abacus.parser;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+import com.esotericsoftware.kryo.Serializer;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Tuple;
+import com.landawn.abacus.util.Tuple.Tuple2;
+
 /**
  * A factory for creating Parser objects.
  *
@@ -98,6 +108,14 @@ public final class ParserFactory {
             isKryoAvailable = isAvailable;
         }
     }
+
+    static final Set<Class<?>> _kryoClassSet = new HashSet<>();
+
+    static final Map<Class<?>, Integer> _kryoClassIdMap = new ConcurrentHashMap<>();
+
+    static final Map<Class<?>, Serializer<?>> _kryoClassSerializerMap = new ConcurrentHashMap<>();
+
+    static final Map<Class<?>, Tuple2<Serializer<?>, Integer>> _kryoClassSerializerIdMap = new ConcurrentHashMap<>();
 
     private ParserFactory() {
         // singleton
@@ -287,5 +305,31 @@ public final class ParserFactory {
      */
     public static JacksonMapper createJacksonMapper(final JacksonMapperConfig jmc) {
         return new JacksonMapper(jmc);
+    }
+
+    public static void registerKryo(final Class<?> type) {
+        N.checkArgNotNull(type, "type");
+
+        _kryoClassSet.add(type);
+    }
+
+    public static void registerKryo(final Class<?> type, final int id) {
+        N.checkArgNotNull(type, "type");
+
+        _kryoClassIdMap.put(type, id);
+    }
+
+    public static void registerKryo(final Class<?> type, final Serializer<?> serializer) {
+        N.checkArgNotNull(type, "type");
+        N.checkArgNotNull(serializer, "serializer");
+
+        _kryoClassSerializerMap.put(type, serializer);
+    }
+
+    public static void registerKryo(final Class<?> type, final Serializer<?> serializer, final int id) {
+        N.checkArgNotNull(type, "type");
+        N.checkArgNotNull(serializer, "serializer");
+
+        _kryoClassSerializerIdMap.put(type, Tuple.of(serializer, id));
     }
 }

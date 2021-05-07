@@ -2084,23 +2084,19 @@ public class RowDataSet implements DataSet, Cloneable {
         } else if (rowType.isList() || rowType.isSet()) {
             if (isAbstractRowClass) {
                 result = (rowType.isList() ? new ArrayList<>(columnCount) : N.newHashSet(columnCount));
+            } else if (intConstructor == null) {
+                result = ClassUtil.invokeConstructor(constructor);
             } else {
-                if (intConstructor == null) {
-                    result = ClassUtil.invokeConstructor(constructor);
-                } else {
-                    result = ClassUtil.invokeConstructor(intConstructor, columnCount);
-                }
+                result = ClassUtil.invokeConstructor(intConstructor, columnCount);
             }
 
         } else if (rowType.isMap()) {
             if (isAbstractRowClass) {
                 result = N.newHashMap(columnCount);
+            } else if (intConstructor == null) {
+                result = ClassUtil.invokeConstructor(constructor);
             } else {
-                if (intConstructor == null) {
-                    result = ClassUtil.invokeConstructor(constructor);
-                } else {
-                    result = ClassUtil.invokeConstructor(intConstructor, columnCount);
-                }
+                result = ClassUtil.invokeConstructor(intConstructor, columnCount);
             }
         } else if (rowType.isEntity()) {
             result = N.newInstance(rowClass);
@@ -3694,7 +3690,7 @@ public class RowDataSet implements DataSet, Cloneable {
         N.checkArgNotNull(entityClass, "entityClass");
 
         @SuppressWarnings("deprecation")
-        final List<String> idPropNames = ClassUtil.getIdFieldNames(entityClass);
+        final List<String> idPropNames = Seid.getIdFieldNames(entityClass);
 
         if (N.isNullOrEmpty(idPropNames)) {
             throw new IllegalArgumentException("No id property defined in class: " + entityClass);
@@ -3833,85 +3829,82 @@ public class RowDataSet implements DataSet, Cloneable {
                     if (idx <= 0) {
                         if (ignoreUnmatchedProperty) {
                             continue;
+                        }
+                        throw new IllegalArgumentException("Property " + propName + " is not found in class: " + entityClass);
+                    }
+                    final String realPropName = propName.substring(0, idx);
+                    propInfo = entityInfo.getPropInfo(realPropName);
+
+                    if (propInfo == null) {
+                        if (ignoreUnmatchedProperty) {
+                            continue;
                         } else {
                             throw new IllegalArgumentException("Property " + propName + " is not found in class: " + entityClass);
                         }
-                    } else {
-                        final String realPropName = propName.substring(0, idx);
-                        propInfo = entityInfo.getPropInfo(realPropName);
+                    }
+                    final Type<?> propEntityType = propInfo.type.isCollection() ? propInfo.type.getElementType() : propInfo.type;
 
-                        if (propInfo == null) {
-                            if (ignoreUnmatchedProperty) {
+                    if (!propEntityType.isEntity()) {
+                        throw new UnsupportedOperationException("Property: " + propInfo.name + " in class: " + entityClass + " is not an entity type");
+                    }
+
+                    final Class<?> propEntityClass = propEntityType.clazz();
+                    @SuppressWarnings("deprecation")
+                    final List<String> propEntityIdPropNames = Seid.getIdFieldNames(propEntityClass);
+                    final List<String> newPropEntityIdNames = N.isNullOrEmpty(propEntityIdPropNames) ? new ArrayList<>() : propEntityIdPropNames;
+                    final List<String> newTmpColumnNameList = new ArrayList<>();
+                    final List<List<Object>> newTmpColumnList = new ArrayList<>();
+
+                    String columnName = null;
+                    String newColumnName = null;
+
+                    for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+                        columnName = this._columnNameList.get(columnIndex);
+
+                        if (columnName.length() > idx && columnName.charAt(idx) == PROP_NAME_SEPARATOR && columnName.startsWith(realPropName)) {
+                            newColumnName = columnName.substring(idx + 1);
+                            newTmpColumnNameList.add(newColumnName);
+                            newTmpColumnList.add(_columnList.get(columnIndex));
+
+                            mergedPropNames.add(columnName);
+
+                            if (N.isNullOrEmpty(propEntityIdPropNames) && newColumnName.indexOf(PROP_NAME_SEPARATOR) < 0) {
+                                newPropEntityIdNames.add(newColumnName);
+                            }
+                        }
+                    }
+
+                    final RowDataSet tmp = new RowDataSet(newTmpColumnNameList, newTmpColumnList);
+                    final List<?> propValueList = tmp.toMergedEntities(propEntityClass, newPropEntityIdNames, tmp._columnNameList, true);
+
+                    if (propInfo.type.isCollection()) {
+                        Collection<Object> c = null;
+
+                        for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+                            if (resultEntities[rowIndex] == null || propValueList.get(rowIndex) == null) {
                                 continue;
-                            } else {
-                                throw new IllegalArgumentException("Property " + propName + " is not found in class: " + entityClass);
-                            }
-                        } else {
-                            final Type<?> propEntityType = propInfo.type.isCollection() ? propInfo.type.getElementType() : propInfo.type;
-
-                            if (!propEntityType.isEntity()) {
-                                throw new UnsupportedOperationException("Property: " + propInfo.name + " in class: " + entityClass + " is not an entity type");
                             }
 
-                            final Class<?> propEntityClass = propEntityType.clazz();
-                            @SuppressWarnings("deprecation")
-                            final List<String> propEntityIdPropNames = ClassUtil.getIdFieldNames(propEntityClass);
-                            final List<String> newPropEntityIdNames = N.isNullOrEmpty(propEntityIdPropNames) ? new ArrayList<>() : propEntityIdPropNames;
-                            final List<String> newTmpColumnNameList = new ArrayList<>();
-                            final List<List<Object>> newTmpColumnList = new ArrayList<>();
+                            c = propInfo.getPropValue(resultEntities[rowIndex]);
 
-                            String columnName = null;
-                            String newColumnName = null;
+                            if (c == null) {
+                                c = (Collection<Object>) N.newInstance(propInfo.clazz);
+                                propInfo.setPropValue(resultEntities[rowIndex], c);
 
-                            for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
-                                columnName = this._columnNameList.get(columnIndex);
-
-                                if (columnName.length() > idx && columnName.charAt(idx) == PROP_NAME_SEPARATOR && columnName.startsWith(realPropName)) {
-                                    newColumnName = columnName.substring(idx + 1);
-                                    newTmpColumnNameList.add(newColumnName);
-                                    newTmpColumnList.add(_columnList.get(columnIndex));
-
-                                    mergedPropNames.add(columnName);
-
-                                    if (N.isNullOrEmpty(propEntityIdPropNames) && newColumnName.indexOf(PROP_NAME_SEPARATOR) < 0) {
-                                        newPropEntityIdNames.add(newColumnName);
-                                    }
+                                if (!(c instanceof Set)) {
+                                    listPropValuesToDeduplicate.add(c);
                                 }
                             }
 
-                            final RowDataSet tmp = new RowDataSet(newTmpColumnNameList, newTmpColumnList);
-                            final List<?> propValueList = tmp.toMergedEntities(propEntityClass, newPropEntityIdNames, tmp._columnNameList, true);
-
-                            if (propInfo.type.isCollection()) {
-                                Collection<Object> c = null;
-
-                                for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-                                    if (resultEntities[rowIndex] == null || propValueList.get(rowIndex) == null) {
-                                        continue;
-                                    }
-
-                                    c = propInfo.getPropValue(resultEntities[rowIndex]);
-
-                                    if (c == null) {
-                                        c = (Collection<Object>) N.newInstance(propInfo.clazz);
-                                        propInfo.setPropValue(resultEntities[rowIndex], c);
-
-                                        if (!(c instanceof Set)) {
-                                            listPropValuesToDeduplicate.add(c);
-                                        }
-                                    }
-
-                                    c.add(propValueList.get(rowIndex));
-                                }
-                            } else {
-                                for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-                                    if (resultEntities[rowIndex] == null || propValueList.get(rowIndex) == null) {
-                                        continue;
-                                    }
-
-                                    propInfo.setPropValue(resultEntities[rowIndex], propValueList.get(rowIndex));
-                                }
+                            c.add(propValueList.get(rowIndex));
+                        }
+                    } else {
+                        for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+                            if (resultEntities[rowIndex] == null || propValueList.get(rowIndex) == null) {
+                                continue;
                             }
+
+                            propInfo.setPropValue(resultEntities[rowIndex], propValueList.get(rowIndex));
                         }
                     }
                 }
@@ -4143,19 +4136,17 @@ public class RowDataSet implements DataSet, Cloneable {
 
                     if (type == null) {
                         bw.write(NULL_CHAR_ARRAY);
+                    } else if (type.isSerializable()) {
+                        type.writeCharacter(bw, element, jsc);
                     } else {
-                        if (type.isSerializable()) {
-                            type.writeCharacter(bw, element, jsc);
-                        } else {
-                            // jsonParser.serialize(bw, element, jsc);
+                        // jsonParser.serialize(bw, element, jsc);
 
-                            try {
-                                jsonParser.serialize(bw, element, jsc);
-                            } catch (Exception e) {
-                                // ignore.
+                        try {
+                            jsonParser.serialize(bw, element, jsc);
+                        } catch (Exception e) {
+                            // ignore.
 
-                                strType.writeCharacter(bw, N.toString(element), jsc);
-                            }
+                            strType.writeCharacter(bw, N.toString(element), jsc);
                         }
                     }
                 }
@@ -4525,19 +4516,17 @@ public class RowDataSet implements DataSet, Cloneable {
 
                     if (type == null) {
                         bw.write(NULL_CHAR_ARRAY);
+                    } else if (type.isSerializable()) {
+                        type.writeCharacter(bw, element, xsc);
                     } else {
-                        if (type.isSerializable()) {
-                            type.writeCharacter(bw, element, xsc);
-                        } else {
-                            // xmlParser.serialize(bw, element, xsc);
+                        // xmlParser.serialize(bw, element, xsc);
 
-                            try {
-                                xmlParser.serialize(bw, element, xsc);
-                            } catch (Exception e) {
-                                // ignore.
+                        try {
+                            xmlParser.serialize(bw, element, xsc);
+                        } catch (Exception e) {
+                            // ignore.
 
-                                strType.writeCharacter(bw, N.toString(element), xsc);
-                            }
+                            strType.writeCharacter(bw, N.toString(element), xsc);
                         }
                     }
 
@@ -5464,11 +5453,9 @@ public class RowDataSet implements DataSet, Cloneable {
 
                     keyRow = Objectory.createObjectArray(columnCount);
                 }
-            } else {
-                if (keyRowSet.add(getHashKey(keyMapper.apply(disposableArray)))) {
-                    for (int i = 0; i < newColumnCount; i++) {
-                        newColumnList.get(i).add(keyRow[i]);
-                    }
+            } else if (keyRowSet.add(getHashKey(keyMapper.apply(disposableArray)))) {
+                for (int i = 0; i < newColumnCount; i++) {
+                    newColumnList.get(i).add(keyRow[i]);
                 }
             }
         }
@@ -5630,9 +5617,8 @@ public class RowDataSet implements DataSet, Cloneable {
         if (isNullOrIdentityKeyMapper) {
             if (columnNames.size() == 1) {
                 return groupBy(columnNames.iterator().next(), aggregateResultColumnName, aggregateOnColumnNames, rowClass);
-            } else {
-                return groupBy(columnNames, aggregateResultColumnName, aggregateOnColumnNames, rowClass);
             }
+            return groupBy(columnNames, aggregateResultColumnName, aggregateOnColumnNames, rowClass);
         }
 
         final int size = size();
@@ -7030,11 +7016,9 @@ public class RowDataSet implements DataSet, Cloneable {
 
                     row = Objectory.createObjectArray(columnCount);
                 }
-            } else {
-                if (rowSet.add(getHashKey(keyMapper.apply(disposableArray)))) {
-                    for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
-                        newColumnList.get(columnIndex).add(_columnList.get(columnIndex).get(rowIndex));
-                    }
+            } else if (rowSet.add(getHashKey(keyMapper.apply(disposableArray)))) {
+                for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+                    newColumnList.get(columnIndex).add(_columnList.get(columnIndex).get(rowIndex));
                 }
             }
         }
@@ -8237,61 +8221,60 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             return new RowDataSet(newColumnNameList, newColumnList);
-        } else {
-            final int[] leftJoinColumnIndexes = new int[onColumnNames.size()];
-            final int[] rightJoinColumnIndexes = new int[onColumnNames.size()];
-            final List<String> rightColumnNames = new ArrayList<>(right.columnNameList());
-
-            initColumnIndexes(leftJoinColumnIndexes, rightJoinColumnIndexes, right, onColumnNames, rightColumnNames);
-
-            final List<String> newColumnNameList = new ArrayList<>(_columnNameList.size() + rightColumnNames.size());
-            final List<List<Object>> newColumnList = new ArrayList<>(_columnNameList.size() + rightColumnNames.size());
-
-            initNewColumnList(newColumnNameList, newColumnList, rightColumnNames);
-
-            final Map<Object[], List<Integer>> joinColumnRightRowIndexMap = new ArrayHashMap<>();
-            Object[] row = null;
-
-            for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
-                row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
-
-                for (int i = 0, len = rightJoinColumnIndexes.length; i < len; i++) {
-                    row[i] = right.get(rightRowIndex, rightJoinColumnIndexes[i]);
-                }
-
-                row = putRowIndex(joinColumnRightRowIndexMap, row, rightRowIndex);
-            }
-
-            if (row != null) {
-                Objectory.recycle(row);
-                row = null;
-            }
-
-            final int[] rightColumnIndexes = right.getColumnIndexes(rightColumnNames);
-            row = Objectory.createObjectArray(leftJoinColumnIndexes.length);
-            List<Integer> rightRowIndexList = null;
-
-            for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
-                for (int i = 0, len = leftJoinColumnIndexes.length; i < len; i++) {
-                    row[i] = this.get(leftRowIndex, leftJoinColumnIndexes[i]);
-                }
-
-                rightRowIndexList = joinColumnRightRowIndexMap.get(row);
-
-                join(newColumnList, right, isLeftJoin, leftRowIndex, rightRowIndexList, rightColumnIndexes);
-            }
-
-            if (row != null) {
-                Objectory.recycle(row);
-                row = null;
-            }
-
-            for (Object[] a : joinColumnRightRowIndexMap.keySet()) {
-                Objectory.recycle(a);
-            }
-
-            return new RowDataSet(newColumnNameList, newColumnList);
         }
+        final int[] leftJoinColumnIndexes = new int[onColumnNames.size()];
+        final int[] rightJoinColumnIndexes = new int[onColumnNames.size()];
+        final List<String> rightColumnNames = new ArrayList<>(right.columnNameList());
+
+        initColumnIndexes(leftJoinColumnIndexes, rightJoinColumnIndexes, right, onColumnNames, rightColumnNames);
+
+        final List<String> newColumnNameList = new ArrayList<>(_columnNameList.size() + rightColumnNames.size());
+        final List<List<Object>> newColumnList = new ArrayList<>(_columnNameList.size() + rightColumnNames.size());
+
+        initNewColumnList(newColumnNameList, newColumnList, rightColumnNames);
+
+        final Map<Object[], List<Integer>> joinColumnRightRowIndexMap = new ArrayHashMap<>();
+        Object[] row = null;
+
+        for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
+            row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
+
+            for (int i = 0, len = rightJoinColumnIndexes.length; i < len; i++) {
+                row[i] = right.get(rightRowIndex, rightJoinColumnIndexes[i]);
+            }
+
+            row = putRowIndex(joinColumnRightRowIndexMap, row, rightRowIndex);
+        }
+
+        if (row != null) {
+            Objectory.recycle(row);
+            row = null;
+        }
+
+        final int[] rightColumnIndexes = right.getColumnIndexes(rightColumnNames);
+        row = Objectory.createObjectArray(leftJoinColumnIndexes.length);
+        List<Integer> rightRowIndexList = null;
+
+        for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
+            for (int i = 0, len = leftJoinColumnIndexes.length; i < len; i++) {
+                row[i] = this.get(leftRowIndex, leftJoinColumnIndexes[i]);
+            }
+
+            rightRowIndexList = joinColumnRightRowIndexMap.get(row);
+
+            join(newColumnList, right, isLeftJoin, leftRowIndex, rightRowIndexList, rightColumnIndexes);
+        }
+
+        if (row != null) {
+            Objectory.recycle(row);
+            row = null;
+        }
+
+        for (Object[] a : joinColumnRightRowIndexMap.keySet()) {
+            Objectory.recycle(a);
+        }
+
+        return new RowDataSet(newColumnNameList, newColumnList);
     }
 
     /**
@@ -8370,59 +8353,58 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             return new RowDataSet(newColumnNameList, newColumnList);
-        } else {
-            final int[] leftJoinColumnIndexes = new int[onColumnNames.size()];
-            final int[] rightJoinColumnIndexes = new int[onColumnNames.size()];
-
-            initColumnIndexes(leftJoinColumnIndexes, rightJoinColumnIndexes, right, onColumnNames);
-
-            final List<String> newColumnNameList = new ArrayList<>(_columnNameList.size() + 1);
-            final List<List<Object>> newColumnList = new ArrayList<>(_columnNameList.size() + 1);
-            initNewColumnList(newColumnNameList, newColumnList, newColumnName);
-
-            final Map<Object[], List<Integer>> joinColumnRightRowIndexMap = new ArrayHashMap<>();
-            Object[] row = null;
-
-            for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
-                row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
-
-                for (int i = 0, len = rightJoinColumnIndexes.length; i < len; i++) {
-                    row[i] = right.get(rightRowIndex, rightJoinColumnIndexes[i]);
-                }
-
-                row = putRowIndex(joinColumnRightRowIndexMap, row, rightRowIndex);
-            }
-
-            if (row != null) {
-                Objectory.recycle(row);
-                row = null;
-            }
-
-            final int newColumnIndex = newColumnList.size() - 1;
-            List<Integer> rightRowIndexList = null;
-            row = Objectory.createObjectArray(leftJoinColumnIndexes.length);
-
-            for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
-                for (int i = 0, len = leftJoinColumnIndexes.length; i < len; i++) {
-                    row[i] = this.get(leftRowIndex, leftJoinColumnIndexes[i]);
-                }
-
-                rightRowIndexList = joinColumnRightRowIndexMap.get(row);
-
-                join(newColumnList, right, isLeftJoin, newColumnClass, newColumnIndex, leftRowIndex, rightRowIndexList);
-            }
-
-            if (row != null) {
-                Objectory.recycle(row);
-                row = null;
-            }
-
-            for (Object[] a : joinColumnRightRowIndexMap.keySet()) {
-                Objectory.recycle(a);
-            }
-
-            return new RowDataSet(newColumnNameList, newColumnList);
         }
+        final int[] leftJoinColumnIndexes = new int[onColumnNames.size()];
+        final int[] rightJoinColumnIndexes = new int[onColumnNames.size()];
+
+        initColumnIndexes(leftJoinColumnIndexes, rightJoinColumnIndexes, right, onColumnNames);
+
+        final List<String> newColumnNameList = new ArrayList<>(_columnNameList.size() + 1);
+        final List<List<Object>> newColumnList = new ArrayList<>(_columnNameList.size() + 1);
+        initNewColumnList(newColumnNameList, newColumnList, newColumnName);
+
+        final Map<Object[], List<Integer>> joinColumnRightRowIndexMap = new ArrayHashMap<>();
+        Object[] row = null;
+
+        for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
+            row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
+
+            for (int i = 0, len = rightJoinColumnIndexes.length; i < len; i++) {
+                row[i] = right.get(rightRowIndex, rightJoinColumnIndexes[i]);
+            }
+
+            row = putRowIndex(joinColumnRightRowIndexMap, row, rightRowIndex);
+        }
+
+        if (row != null) {
+            Objectory.recycle(row);
+            row = null;
+        }
+
+        final int newColumnIndex = newColumnList.size() - 1;
+        List<Integer> rightRowIndexList = null;
+        row = Objectory.createObjectArray(leftJoinColumnIndexes.length);
+
+        for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
+            for (int i = 0, len = leftJoinColumnIndexes.length; i < len; i++) {
+                row[i] = this.get(leftRowIndex, leftJoinColumnIndexes[i]);
+            }
+
+            rightRowIndexList = joinColumnRightRowIndexMap.get(row);
+
+            join(newColumnList, right, isLeftJoin, newColumnClass, newColumnIndex, leftRowIndex, rightRowIndexList);
+        }
+
+        if (row != null) {
+            Objectory.recycle(row);
+            row = null;
+        }
+
+        for (Object[] a : joinColumnRightRowIndexMap.keySet()) {
+            Objectory.recycle(a);
+        }
+
+        return new RowDataSet(newColumnNameList, newColumnList);
     }
 
     /**
@@ -8719,59 +8701,58 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             return new RowDataSet(newColumnNameList, newColumnList);
-        } else {
-            final int[] leftJoinColumnIndexes = new int[onColumnNames.size()];
-            final int[] rightJoinColumnIndexes = new int[onColumnNames.size()];
-
-            initColumnIndexes(leftJoinColumnIndexes, rightJoinColumnIndexes, right, onColumnNames);
-
-            final List<String> newColumnNameList = new ArrayList<>(_columnNameList.size() + 1);
-            final List<List<Object>> newColumnList = new ArrayList<>(_columnNameList.size() + 1);
-            initNewColumnList(newColumnNameList, newColumnList, newColumnName);
-
-            final Map<Object[], List<Integer>> joinColumnRightRowIndexMap = new ArrayHashMap<>();
-            List<Integer> rightRowIndexList = null;
-            Object[] row = null;
-
-            for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
-                row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
-
-                for (int i = 0, len = rightJoinColumnIndexes.length; i < len; i++) {
-                    row[i] = right.get(rightRowIndex, rightJoinColumnIndexes[i]);
-                }
-
-                row = putRowIndex(joinColumnRightRowIndexMap, row, rightRowIndex);
-            }
-
-            if (row != null) {
-                Objectory.recycle(row);
-                row = null;
-            }
-
-            final int newColumnIndex = newColumnList.size() - 1;
-            row = Objectory.createObjectArray(leftJoinColumnIndexes.length);
-
-            for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
-                for (int i = 0, len = leftJoinColumnIndexes.length; i < len; i++) {
-                    row[i] = get(leftRowIndex, leftJoinColumnIndexes[i]);
-                }
-
-                rightRowIndexList = joinColumnRightRowIndexMap.get(row);
-
-                join(newColumnList, right, isLeftJoin, newColumnClass, collSupplier, newColumnIndex, leftRowIndex, rightRowIndexList);
-            }
-
-            if (row != null) {
-                Objectory.recycle(row);
-                row = null;
-            }
-
-            for (Object[] a : joinColumnRightRowIndexMap.keySet()) {
-                Objectory.recycle(a);
-            }
-
-            return new RowDataSet(newColumnNameList, newColumnList);
         }
+        final int[] leftJoinColumnIndexes = new int[onColumnNames.size()];
+        final int[] rightJoinColumnIndexes = new int[onColumnNames.size()];
+
+        initColumnIndexes(leftJoinColumnIndexes, rightJoinColumnIndexes, right, onColumnNames);
+
+        final List<String> newColumnNameList = new ArrayList<>(_columnNameList.size() + 1);
+        final List<List<Object>> newColumnList = new ArrayList<>(_columnNameList.size() + 1);
+        initNewColumnList(newColumnNameList, newColumnList, newColumnName);
+
+        final Map<Object[], List<Integer>> joinColumnRightRowIndexMap = new ArrayHashMap<>();
+        List<Integer> rightRowIndexList = null;
+        Object[] row = null;
+
+        for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
+            row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
+
+            for (int i = 0, len = rightJoinColumnIndexes.length; i < len; i++) {
+                row[i] = right.get(rightRowIndex, rightJoinColumnIndexes[i]);
+            }
+
+            row = putRowIndex(joinColumnRightRowIndexMap, row, rightRowIndex);
+        }
+
+        if (row != null) {
+            Objectory.recycle(row);
+            row = null;
+        }
+
+        final int newColumnIndex = newColumnList.size() - 1;
+        row = Objectory.createObjectArray(leftJoinColumnIndexes.length);
+
+        for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
+            for (int i = 0, len = leftJoinColumnIndexes.length; i < len; i++) {
+                row[i] = get(leftRowIndex, leftJoinColumnIndexes[i]);
+            }
+
+            rightRowIndexList = joinColumnRightRowIndexMap.get(row);
+
+            join(newColumnList, right, isLeftJoin, newColumnClass, collSupplier, newColumnIndex, leftRowIndex, rightRowIndexList);
+        }
+
+        if (row != null) {
+            Objectory.recycle(row);
+            row = null;
+        }
+
+        for (Object[] a : joinColumnRightRowIndexMap.keySet()) {
+            Objectory.recycle(a);
+        }
+
+        return new RowDataSet(newColumnNameList, newColumnList);
     }
 
     /**
@@ -8867,63 +8848,62 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             return new RowDataSet(newColumnNameList, newColumnList);
-        } else {
-            final List<String> leftColumnNames = new ArrayList<>(_columnNameList);
-            final List<String> rightColumnNames = right.columnNameList();
-            final int[] leftJoinColumnIndexes = new int[onColumnNames.size()];
-            final int[] rightJoinColumnIndexes = new int[onColumnNames.size()];
-
-            initColumnIndexesForRightJoin(leftJoinColumnIndexes, rightJoinColumnIndexes, right, onColumnNames, leftColumnNames);
-
-            final List<String> newColumnNameList = new ArrayList<>(leftColumnNames.size() + rightColumnNames.size());
-            final List<List<Object>> newColumnList = new ArrayList<>(leftColumnNames.size() + rightColumnNames.size());
-
-            initNewColumnListForRightJoin(newColumnNameList, newColumnList, right, leftColumnNames, rightColumnNames);
-
-            final Map<Object[], List<Integer>> joinColumnLeftRowIndexMap = new ArrayHashMap<>();
-            Object[] row = null;
-
-            for (int leftRowIndex = 0, leftDataSetSize = this.size(); leftRowIndex < leftDataSetSize; leftRowIndex++) {
-                row = row == null ? Objectory.createObjectArray(leftJoinColumnIndexes.length) : row;
-
-                for (int i = 0, len = leftJoinColumnIndexes.length; i < len; i++) {
-                    row[i] = this.get(leftRowIndex, leftJoinColumnIndexes[i]);
-                }
-
-                row = putRowIndex(joinColumnLeftRowIndexMap, row, leftRowIndex);
-            }
-
-            if (row != null) {
-                Objectory.recycle(row);
-                row = null;
-            }
-
-            final int[] leftColumnIndexes = this.getColumnIndexes(leftColumnNames);
-            final int[] rightColumnIndexes = right.getColumnIndexes(rightColumnNames);
-            row = Objectory.createObjectArray(rightJoinColumnIndexes.length);
-            List<Integer> leftRowIndexList = null;
-
-            for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
-                for (int i = 0, len = rightJoinColumnIndexes.length; i < len; i++) {
-                    row[i] = right.get(rightRowIndex, rightJoinColumnIndexes[i]);
-                }
-
-                leftRowIndexList = joinColumnLeftRowIndexMap.get(row);
-
-                rightJoin(newColumnList, right, rightRowIndex, rightColumnIndexes, leftColumnIndexes, leftRowIndexList);
-            }
-
-            if (row != null) {
-                Objectory.recycle(row);
-                row = null;
-            }
-
-            for (Object[] a : joinColumnLeftRowIndexMap.keySet()) {
-                Objectory.recycle(a);
-            }
-
-            return new RowDataSet(newColumnNameList, newColumnList);
         }
+        final List<String> leftColumnNames = new ArrayList<>(_columnNameList);
+        final List<String> rightColumnNames = right.columnNameList();
+        final int[] leftJoinColumnIndexes = new int[onColumnNames.size()];
+        final int[] rightJoinColumnIndexes = new int[onColumnNames.size()];
+
+        initColumnIndexesForRightJoin(leftJoinColumnIndexes, rightJoinColumnIndexes, right, onColumnNames, leftColumnNames);
+
+        final List<String> newColumnNameList = new ArrayList<>(leftColumnNames.size() + rightColumnNames.size());
+        final List<List<Object>> newColumnList = new ArrayList<>(leftColumnNames.size() + rightColumnNames.size());
+
+        initNewColumnListForRightJoin(newColumnNameList, newColumnList, right, leftColumnNames, rightColumnNames);
+
+        final Map<Object[], List<Integer>> joinColumnLeftRowIndexMap = new ArrayHashMap<>();
+        Object[] row = null;
+
+        for (int leftRowIndex = 0, leftDataSetSize = this.size(); leftRowIndex < leftDataSetSize; leftRowIndex++) {
+            row = row == null ? Objectory.createObjectArray(leftJoinColumnIndexes.length) : row;
+
+            for (int i = 0, len = leftJoinColumnIndexes.length; i < len; i++) {
+                row[i] = this.get(leftRowIndex, leftJoinColumnIndexes[i]);
+            }
+
+            row = putRowIndex(joinColumnLeftRowIndexMap, row, leftRowIndex);
+        }
+
+        if (row != null) {
+            Objectory.recycle(row);
+            row = null;
+        }
+
+        final int[] leftColumnIndexes = this.getColumnIndexes(leftColumnNames);
+        final int[] rightColumnIndexes = right.getColumnIndexes(rightColumnNames);
+        row = Objectory.createObjectArray(rightJoinColumnIndexes.length);
+        List<Integer> leftRowIndexList = null;
+
+        for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
+            for (int i = 0, len = rightJoinColumnIndexes.length; i < len; i++) {
+                row[i] = right.get(rightRowIndex, rightJoinColumnIndexes[i]);
+            }
+
+            leftRowIndexList = joinColumnLeftRowIndexMap.get(row);
+
+            rightJoin(newColumnList, right, rightRowIndex, rightColumnIndexes, leftColumnIndexes, leftRowIndexList);
+        }
+
+        if (row != null) {
+            Objectory.recycle(row);
+            row = null;
+        }
+
+        for (Object[] a : joinColumnLeftRowIndexMap.keySet()) {
+            Objectory.recycle(a);
+        }
+
+        return new RowDataSet(newColumnNameList, newColumnList);
     }
 
     /**
@@ -9076,62 +9056,61 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             return new RowDataSet(newColumnNameList, newColumnList);
-        } else {
-            final List<String> leftColumnNames = new ArrayList<>(_columnNameList);
-            final int[] leftJoinColumnIndexes = new int[onColumnNames.size()];
-            final int[] rightJoinColumnIndexes = new int[onColumnNames.size()];
-
-            initColumnIndexes(leftJoinColumnIndexes, rightJoinColumnIndexes, right, onColumnNames);
-
-            final List<String> newColumnNameList = new ArrayList<>(leftColumnNames.size() + 1);
-            final List<List<Object>> newColumnList = new ArrayList<>(leftColumnNames.size() + 1);
-
-            initNewColumnListForRightJoin(newColumnNameList, newColumnList, leftColumnNames, newColumnName);
-
-            final Map<Object[], List<Integer>> joinColumnLeftRowIndexMap = new ArrayHashMap<>();
-            Object[] row = null;
-
-            for (int leftRowIndex = 0, leftDataSetSize = this.size(); leftRowIndex < leftDataSetSize; leftRowIndex++) {
-                row = row == null ? Objectory.createObjectArray(leftJoinColumnIndexes.length) : row;
-
-                for (int i = 0, len = leftJoinColumnIndexes.length; i < len; i++) {
-                    row[i] = this.get(leftRowIndex, leftJoinColumnIndexes[i]);
-                }
-
-                row = putRowIndex(joinColumnLeftRowIndexMap, row, leftRowIndex);
-            }
-
-            if (row != null) {
-                Objectory.recycle(row);
-                row = null;
-            }
-
-            final int newColumnIndex = newColumnList.size() - 1;
-            final int[] leftColumnIndexes = this.getColumnIndexes(leftColumnNames);
-            row = Objectory.createObjectArray(rightJoinColumnIndexes.length);
-            List<Integer> leftRowIndexList = null;
-
-            for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
-                for (int i = 0, len = rightJoinColumnIndexes.length; i < len; i++) {
-                    row[i] = right.get(rightRowIndex, rightJoinColumnIndexes[i]);
-                }
-
-                leftRowIndexList = joinColumnLeftRowIndexMap.get(row);
-
-                rightJoin(newColumnList, right, newColumnClass, newColumnIndex, rightRowIndex, leftRowIndexList, leftColumnIndexes);
-            }
-
-            if (row != null) {
-                Objectory.recycle(row);
-                row = null;
-            }
-
-            for (Object[] a : joinColumnLeftRowIndexMap.keySet()) {
-                Objectory.recycle(a);
-            }
-
-            return new RowDataSet(newColumnNameList, newColumnList);
         }
+        final List<String> leftColumnNames = new ArrayList<>(_columnNameList);
+        final int[] leftJoinColumnIndexes = new int[onColumnNames.size()];
+        final int[] rightJoinColumnIndexes = new int[onColumnNames.size()];
+
+        initColumnIndexes(leftJoinColumnIndexes, rightJoinColumnIndexes, right, onColumnNames);
+
+        final List<String> newColumnNameList = new ArrayList<>(leftColumnNames.size() + 1);
+        final List<List<Object>> newColumnList = new ArrayList<>(leftColumnNames.size() + 1);
+
+        initNewColumnListForRightJoin(newColumnNameList, newColumnList, leftColumnNames, newColumnName);
+
+        final Map<Object[], List<Integer>> joinColumnLeftRowIndexMap = new ArrayHashMap<>();
+        Object[] row = null;
+
+        for (int leftRowIndex = 0, leftDataSetSize = this.size(); leftRowIndex < leftDataSetSize; leftRowIndex++) {
+            row = row == null ? Objectory.createObjectArray(leftJoinColumnIndexes.length) : row;
+
+            for (int i = 0, len = leftJoinColumnIndexes.length; i < len; i++) {
+                row[i] = this.get(leftRowIndex, leftJoinColumnIndexes[i]);
+            }
+
+            row = putRowIndex(joinColumnLeftRowIndexMap, row, leftRowIndex);
+        }
+
+        if (row != null) {
+            Objectory.recycle(row);
+            row = null;
+        }
+
+        final int newColumnIndex = newColumnList.size() - 1;
+        final int[] leftColumnIndexes = this.getColumnIndexes(leftColumnNames);
+        row = Objectory.createObjectArray(rightJoinColumnIndexes.length);
+        List<Integer> leftRowIndexList = null;
+
+        for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
+            for (int i = 0, len = rightJoinColumnIndexes.length; i < len; i++) {
+                row[i] = right.get(rightRowIndex, rightJoinColumnIndexes[i]);
+            }
+
+            leftRowIndexList = joinColumnLeftRowIndexMap.get(row);
+
+            rightJoin(newColumnList, right, newColumnClass, newColumnIndex, rightRowIndex, leftRowIndexList, leftColumnIndexes);
+        }
+
+        if (row != null) {
+            Objectory.recycle(row);
+            row = null;
+        }
+
+        for (Object[] a : joinColumnLeftRowIndexMap.keySet()) {
+            Objectory.recycle(a);
+        }
+
+        return new RowDataSet(newColumnNameList, newColumnList);
     }
 
     /**
@@ -9240,75 +9219,74 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             return new RowDataSet(newColumnNameList, newColumnList);
-        } else {
-            final List<String> leftColumnNames = new ArrayList<>(_columnNameList);
-            final int[] leftJoinColumnIndexes = new int[onColumnNames.size()];
-            final int[] rightJoinColumnIndexes = new int[onColumnNames.size()];
-
-            initColumnIndexes(leftJoinColumnIndexes, rightJoinColumnIndexes, right, onColumnNames);
-
-            final List<String> newColumnNameList = new ArrayList<>(leftColumnNames.size() + 1);
-            final List<List<Object>> newColumnList = new ArrayList<>(leftColumnNames.size() + 1);
-
-            initNewColumnListForRightJoin(newColumnNameList, newColumnList, leftColumnNames, newColumnName);
-
-            final Map<Object[], List<Integer>> joinColumnLeftRowIndexMap = new ArrayHashMap<>();
-            Object[] row = null;
-
-            for (int leftRowIndex = 0, leftDataSetSize = this.size(); leftRowIndex < leftDataSetSize; leftRowIndex++) {
-                row = row == null ? Objectory.createObjectArray(leftJoinColumnIndexes.length) : row;
-
-                for (int i = 0, len = leftJoinColumnIndexes.length; i < len; i++) {
-                    row[i] = this.get(leftRowIndex, leftJoinColumnIndexes[i]);
-                }
-
-                row = putRowIndex(joinColumnLeftRowIndexMap, row, leftRowIndex);
-            }
-
-            if (row != null) {
-                Objectory.recycle(row);
-                row = null;
-            }
-
-            final Map<Object[], List<Integer>> joinColumnRightRowIndexMap = new ArrayHashMap<>(LinkedHashMap.class);
-
-            for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
-                row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
-
-                for (int i = 0, len = rightJoinColumnIndexes.length; i < len; i++) {
-                    row[i] = right.get(rightRowIndex, rightJoinColumnIndexes[i]);
-                }
-
-                row = putRowIndex(joinColumnRightRowIndexMap, row, rightRowIndex);
-            }
-
-            if (row != null) {
-                Objectory.recycle(row);
-                row = null;
-            }
-
-            final int newColumnIndex = newColumnList.size() - 1;
-            final int[] leftColumnIndexes = this.getColumnIndexes(leftColumnNames);
-            List<Integer> leftRowIndexList = null;
-            List<Integer> rightRowIndexList = null;
-
-            for (Map.Entry<Object[], List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
-                leftRowIndexList = joinColumnLeftRowIndexMap.get(rightRowIndexEntry.getKey());
-                rightRowIndexList = rightRowIndexEntry.getValue();
-
-                rightJoin(newColumnList, right, newColumnClass, collSupplier, newColumnIndex, leftColumnIndexes, leftRowIndexList, rightRowIndexList);
-            }
-
-            for (Object[] a : joinColumnLeftRowIndexMap.keySet()) {
-                Objectory.recycle(a);
-            }
-
-            for (Object[] a : joinColumnRightRowIndexMap.keySet()) {
-                Objectory.recycle(a);
-            }
-
-            return new RowDataSet(newColumnNameList, newColumnList);
         }
+        final List<String> leftColumnNames = new ArrayList<>(_columnNameList);
+        final int[] leftJoinColumnIndexes = new int[onColumnNames.size()];
+        final int[] rightJoinColumnIndexes = new int[onColumnNames.size()];
+
+        initColumnIndexes(leftJoinColumnIndexes, rightJoinColumnIndexes, right, onColumnNames);
+
+        final List<String> newColumnNameList = new ArrayList<>(leftColumnNames.size() + 1);
+        final List<List<Object>> newColumnList = new ArrayList<>(leftColumnNames.size() + 1);
+
+        initNewColumnListForRightJoin(newColumnNameList, newColumnList, leftColumnNames, newColumnName);
+
+        final Map<Object[], List<Integer>> joinColumnLeftRowIndexMap = new ArrayHashMap<>();
+        Object[] row = null;
+
+        for (int leftRowIndex = 0, leftDataSetSize = this.size(); leftRowIndex < leftDataSetSize; leftRowIndex++) {
+            row = row == null ? Objectory.createObjectArray(leftJoinColumnIndexes.length) : row;
+
+            for (int i = 0, len = leftJoinColumnIndexes.length; i < len; i++) {
+                row[i] = this.get(leftRowIndex, leftJoinColumnIndexes[i]);
+            }
+
+            row = putRowIndex(joinColumnLeftRowIndexMap, row, leftRowIndex);
+        }
+
+        if (row != null) {
+            Objectory.recycle(row);
+            row = null;
+        }
+
+        final Map<Object[], List<Integer>> joinColumnRightRowIndexMap = new ArrayHashMap<>(LinkedHashMap.class);
+
+        for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
+            row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
+
+            for (int i = 0, len = rightJoinColumnIndexes.length; i < len; i++) {
+                row[i] = right.get(rightRowIndex, rightJoinColumnIndexes[i]);
+            }
+
+            row = putRowIndex(joinColumnRightRowIndexMap, row, rightRowIndex);
+        }
+
+        if (row != null) {
+            Objectory.recycle(row);
+            row = null;
+        }
+
+        final int newColumnIndex = newColumnList.size() - 1;
+        final int[] leftColumnIndexes = this.getColumnIndexes(leftColumnNames);
+        List<Integer> leftRowIndexList = null;
+        List<Integer> rightRowIndexList = null;
+
+        for (Map.Entry<Object[], List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
+            leftRowIndexList = joinColumnLeftRowIndexMap.get(rightRowIndexEntry.getKey());
+            rightRowIndexList = rightRowIndexEntry.getValue();
+
+            rightJoin(newColumnList, right, newColumnClass, collSupplier, newColumnIndex, leftColumnIndexes, leftRowIndexList, rightRowIndexList);
+        }
+
+        for (Object[] a : joinColumnLeftRowIndexMap.keySet()) {
+            Objectory.recycle(a);
+        }
+
+        for (Object[] a : joinColumnRightRowIndexMap.keySet()) {
+            Objectory.recycle(a);
+        }
+
+        return new RowDataSet(newColumnNameList, newColumnList);
     }
 
     /**
@@ -9420,77 +9398,76 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             return new RowDataSet(newColumnNameList, newColumnList);
-        } else {
-            final int[] leftJoinColumnIndexes = new int[onColumnNames.size()];
-            final int[] rightJoinColumnIndexes = new int[onColumnNames.size()];
-            final List<String> rightColumnNames = new ArrayList<>(right.columnNameList());
-
-            initColumnIndexes(leftJoinColumnIndexes, rightJoinColumnIndexes, right, onColumnNames, rightColumnNames);
-
-            final List<String> newColumnNameList = new ArrayList<>(_columnNameList.size() + rightColumnNames.size());
-            final List<List<Object>> newColumnList = new ArrayList<>(_columnNameList.size() + rightColumnNames.size());
-            initNewColumnList(newColumnNameList, newColumnList, rightColumnNames);
-
-            final Map<Object[], List<Integer>> joinColumnRightRowIndexMap = new ArrayHashMap<>(LinkedHashMap.class);
-            List<Integer> rightRowIndexList = null;
-            Object[] row = null;
-
-            for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
-                row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
-
-                for (int i = 0, len = rightJoinColumnIndexes.length; i < len; i++) {
-                    row[i] = right.get(rightRowIndex, rightJoinColumnIndexes[i]);
-                }
-
-                row = putRowIndex(joinColumnRightRowIndexMap, row, rightRowIndex);
-            }
-
-            if (row != null) {
-                Objectory.recycle(row);
-                row = null;
-            }
-
-            final int[] rightColumnIndexes = right.getColumnIndexes(rightColumnNames);
-            final Map<Object[], Integer> joinColumnLeftRowIndexMap = new ArrayHashMap<>();
-
-            for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
-                row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
-
-                for (int i = 0, len = leftJoinColumnIndexes.length; i < len; i++) {
-                    row[i] = this.get(leftRowIndex, leftJoinColumnIndexes[i]);
-                }
-
-                rightRowIndexList = joinColumnRightRowIndexMap.get(row);
-
-                fullJoin(newColumnList, right, leftRowIndex, rightRowIndexList, rightColumnIndexes);
-
-                if (!joinColumnLeftRowIndexMap.containsKey(row)) {
-                    joinColumnLeftRowIndexMap.put(row, leftRowIndex);
-                    row = null;
-                }
-            }
-
-            if (row != null) {
-                Objectory.recycle(row);
-                row = null;
-            }
-
-            for (Map.Entry<Object[], List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
-                if (joinColumnLeftRowIndexMap.containsKey(rightRowIndexEntry.getKey()) == false) {
-                    fullJoin(newColumnList, right, rightRowIndexEntry.getValue(), rightColumnIndexes);
-                }
-            }
-
-            for (Object[] a : joinColumnRightRowIndexMap.keySet()) {
-                Objectory.recycle(a);
-            }
-
-            for (Object[] a : joinColumnLeftRowIndexMap.keySet()) {
-                Objectory.recycle(a);
-            }
-
-            return new RowDataSet(newColumnNameList, newColumnList);
         }
+        final int[] leftJoinColumnIndexes = new int[onColumnNames.size()];
+        final int[] rightJoinColumnIndexes = new int[onColumnNames.size()];
+        final List<String> rightColumnNames = new ArrayList<>(right.columnNameList());
+
+        initColumnIndexes(leftJoinColumnIndexes, rightJoinColumnIndexes, right, onColumnNames, rightColumnNames);
+
+        final List<String> newColumnNameList = new ArrayList<>(_columnNameList.size() + rightColumnNames.size());
+        final List<List<Object>> newColumnList = new ArrayList<>(_columnNameList.size() + rightColumnNames.size());
+        initNewColumnList(newColumnNameList, newColumnList, rightColumnNames);
+
+        final Map<Object[], List<Integer>> joinColumnRightRowIndexMap = new ArrayHashMap<>(LinkedHashMap.class);
+        List<Integer> rightRowIndexList = null;
+        Object[] row = null;
+
+        for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
+            row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
+
+            for (int i = 0, len = rightJoinColumnIndexes.length; i < len; i++) {
+                row[i] = right.get(rightRowIndex, rightJoinColumnIndexes[i]);
+            }
+
+            row = putRowIndex(joinColumnRightRowIndexMap, row, rightRowIndex);
+        }
+
+        if (row != null) {
+            Objectory.recycle(row);
+            row = null;
+        }
+
+        final int[] rightColumnIndexes = right.getColumnIndexes(rightColumnNames);
+        final Map<Object[], Integer> joinColumnLeftRowIndexMap = new ArrayHashMap<>();
+
+        for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
+            row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
+
+            for (int i = 0, len = leftJoinColumnIndexes.length; i < len; i++) {
+                row[i] = this.get(leftRowIndex, leftJoinColumnIndexes[i]);
+            }
+
+            rightRowIndexList = joinColumnRightRowIndexMap.get(row);
+
+            fullJoin(newColumnList, right, leftRowIndex, rightRowIndexList, rightColumnIndexes);
+
+            if (!joinColumnLeftRowIndexMap.containsKey(row)) {
+                joinColumnLeftRowIndexMap.put(row, leftRowIndex);
+                row = null;
+            }
+        }
+
+        if (row != null) {
+            Objectory.recycle(row);
+            row = null;
+        }
+
+        for (Map.Entry<Object[], List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
+            if (joinColumnLeftRowIndexMap.containsKey(rightRowIndexEntry.getKey()) == false) {
+                fullJoin(newColumnList, right, rightRowIndexEntry.getValue(), rightColumnIndexes);
+            }
+        }
+
+        for (Object[] a : joinColumnRightRowIndexMap.keySet()) {
+            Objectory.recycle(a);
+        }
+
+        for (Object[] a : joinColumnLeftRowIndexMap.keySet()) {
+            Objectory.recycle(a);
+        }
+
+        return new RowDataSet(newColumnNameList, newColumnList);
     }
 
     /**
@@ -9596,77 +9573,76 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             return new RowDataSet(newColumnNameList, newColumnList);
-        } else {
-            final int[] leftJoinColumnIndexes = new int[onColumnNames.size()];
-            final int[] rightJoinColumnIndexes = new int[onColumnNames.size()];
-
-            initColumnIndexes(leftJoinColumnIndexes, rightJoinColumnIndexes, right, onColumnNames);
-
-            final List<String> newColumnNameList = new ArrayList<>(_columnNameList.size() + 1);
-            final List<List<Object>> newColumnList = new ArrayList<>(_columnNameList.size() + 1);
-
-            initNewColumnList(newColumnNameList, newColumnList, newColumnName);
-
-            final Map<Object[], List<Integer>> joinColumnRightRowIndexMap = new ArrayHashMap<>(LinkedHashMap.class);
-            List<Integer> rightRowIndexList = null;
-            Object[] row = null;
-
-            for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
-                row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
-
-                for (int i = 0, len = rightJoinColumnIndexes.length; i < len; i++) {
-                    row[i] = right.get(rightRowIndex, rightJoinColumnIndexes[i]);
-                }
-
-                row = putRowIndex(joinColumnRightRowIndexMap, row, rightRowIndex);
-            }
-
-            if (row != null) {
-                Objectory.recycle(row);
-                row = null;
-            }
-
-            final int newColumnIndex = newColumnList.size() - 1;
-            final Map<Object[], Integer> joinColumnLeftRowIndexMap = new ArrayHashMap<>();
-
-            for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
-                row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
-
-                for (int i = 0, len = leftJoinColumnIndexes.length; i < len; i++) {
-                    row[i] = this.get(leftRowIndex, leftJoinColumnIndexes[i]);
-                }
-
-                rightRowIndexList = joinColumnRightRowIndexMap.get(row);
-
-                fullJoin(newColumnList, right, newColumnClass, newColumnIndex, leftRowIndex, rightRowIndexList);
-
-                if (!joinColumnLeftRowIndexMap.containsKey(row)) {
-                    joinColumnLeftRowIndexMap.put(row, leftRowIndex);
-                    row = null;
-                }
-            }
-
-            if (row != null) {
-                Objectory.recycle(row);
-                row = null;
-            }
-
-            for (Map.Entry<Object[], List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
-                if (joinColumnLeftRowIndexMap.containsKey(rightRowIndexEntry.getKey()) == false) {
-                    fullJoin(newColumnList, right, newColumnClass, newColumnIndex, rightRowIndexEntry.getValue());
-                }
-            }
-
-            for (Object[] a : joinColumnRightRowIndexMap.keySet()) {
-                Objectory.recycle(a);
-            }
-
-            for (Object[] a : joinColumnLeftRowIndexMap.keySet()) {
-                Objectory.recycle(a);
-            }
-
-            return new RowDataSet(newColumnNameList, newColumnList);
         }
+        final int[] leftJoinColumnIndexes = new int[onColumnNames.size()];
+        final int[] rightJoinColumnIndexes = new int[onColumnNames.size()];
+
+        initColumnIndexes(leftJoinColumnIndexes, rightJoinColumnIndexes, right, onColumnNames);
+
+        final List<String> newColumnNameList = new ArrayList<>(_columnNameList.size() + 1);
+        final List<List<Object>> newColumnList = new ArrayList<>(_columnNameList.size() + 1);
+
+        initNewColumnList(newColumnNameList, newColumnList, newColumnName);
+
+        final Map<Object[], List<Integer>> joinColumnRightRowIndexMap = new ArrayHashMap<>(LinkedHashMap.class);
+        List<Integer> rightRowIndexList = null;
+        Object[] row = null;
+
+        for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
+            row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
+
+            for (int i = 0, len = rightJoinColumnIndexes.length; i < len; i++) {
+                row[i] = right.get(rightRowIndex, rightJoinColumnIndexes[i]);
+            }
+
+            row = putRowIndex(joinColumnRightRowIndexMap, row, rightRowIndex);
+        }
+
+        if (row != null) {
+            Objectory.recycle(row);
+            row = null;
+        }
+
+        final int newColumnIndex = newColumnList.size() - 1;
+        final Map<Object[], Integer> joinColumnLeftRowIndexMap = new ArrayHashMap<>();
+
+        for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
+            row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
+
+            for (int i = 0, len = leftJoinColumnIndexes.length; i < len; i++) {
+                row[i] = this.get(leftRowIndex, leftJoinColumnIndexes[i]);
+            }
+
+            rightRowIndexList = joinColumnRightRowIndexMap.get(row);
+
+            fullJoin(newColumnList, right, newColumnClass, newColumnIndex, leftRowIndex, rightRowIndexList);
+
+            if (!joinColumnLeftRowIndexMap.containsKey(row)) {
+                joinColumnLeftRowIndexMap.put(row, leftRowIndex);
+                row = null;
+            }
+        }
+
+        if (row != null) {
+            Objectory.recycle(row);
+            row = null;
+        }
+
+        for (Map.Entry<Object[], List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
+            if (joinColumnLeftRowIndexMap.containsKey(rightRowIndexEntry.getKey()) == false) {
+                fullJoin(newColumnList, right, newColumnClass, newColumnIndex, rightRowIndexEntry.getValue());
+            }
+        }
+
+        for (Object[] a : joinColumnRightRowIndexMap.keySet()) {
+            Objectory.recycle(a);
+        }
+
+        for (Object[] a : joinColumnLeftRowIndexMap.keySet()) {
+            Objectory.recycle(a);
+        }
+
+        return new RowDataSet(newColumnNameList, newColumnList);
     }
 
     /**
@@ -9773,76 +9749,75 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             return new RowDataSet(newColumnNameList, newColumnList);
-        } else {
-            final int[] leftJoinColumnIndexes = new int[onColumnNames.size()];
-            final int[] rightJoinColumnIndexes = new int[onColumnNames.size()];
-
-            initColumnIndexes(leftJoinColumnIndexes, rightJoinColumnIndexes, right, onColumnNames);
-
-            final List<String> newColumnNameList = new ArrayList<>(_columnNameList.size() + 1);
-            final List<List<Object>> newColumnList = new ArrayList<>(_columnNameList.size() + 1);
-            initNewColumnList(newColumnNameList, newColumnList, newColumnName);
-
-            final Map<Object[], List<Integer>> joinColumnRightRowIndexMap = new ArrayHashMap<>(LinkedHashMap.class);
-            List<Integer> rightRowIndexList = null;
-            Object[] row = null;
-
-            for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
-                row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
-
-                for (int i = 0, len = rightJoinColumnIndexes.length; i < len; i++) {
-                    row[i] = right.get(rightRowIndex, rightJoinColumnIndexes[i]);
-                }
-
-                row = putRowIndex(joinColumnRightRowIndexMap, row, rightRowIndex);
-            }
-
-            if (row != null) {
-                Objectory.recycle(row);
-                row = null;
-            }
-
-            final int newColumnIndex = newColumnList.size() - 1;
-            final Map<Object[], Integer> joinColumnLeftRowIndexMap = new ArrayHashMap<>();
-
-            for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
-                row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
-
-                for (int i = 0, len = leftJoinColumnIndexes.length; i < len; i++) {
-                    row[i] = this.get(leftRowIndex, leftJoinColumnIndexes[i]);
-                }
-
-                rightRowIndexList = joinColumnRightRowIndexMap.get(row);
-
-                fullJoin(newColumnList, right, newColumnClass, collSupplier, newColumnIndex, leftRowIndex, rightRowIndexList);
-
-                if (!joinColumnLeftRowIndexMap.containsKey(row)) {
-                    joinColumnLeftRowIndexMap.put(row, leftRowIndex);
-                    row = null;
-                }
-            }
-
-            if (row != null) {
-                Objectory.recycle(row);
-                row = null;
-            }
-
-            for (Map.Entry<Object[], List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
-                if (joinColumnLeftRowIndexMap.containsKey(rightRowIndexEntry.getKey()) == false) {
-                    fullJoin(newColumnList, right, newColumnClass, collSupplier, newColumnIndex, rightRowIndexEntry.getValue());
-                }
-            }
-
-            for (Object[] a : joinColumnRightRowIndexMap.keySet()) {
-                Objectory.recycle(a);
-            }
-
-            for (Object[] a : joinColumnLeftRowIndexMap.keySet()) {
-                Objectory.recycle(a);
-            }
-
-            return new RowDataSet(newColumnNameList, newColumnList);
         }
+        final int[] leftJoinColumnIndexes = new int[onColumnNames.size()];
+        final int[] rightJoinColumnIndexes = new int[onColumnNames.size()];
+
+        initColumnIndexes(leftJoinColumnIndexes, rightJoinColumnIndexes, right, onColumnNames);
+
+        final List<String> newColumnNameList = new ArrayList<>(_columnNameList.size() + 1);
+        final List<List<Object>> newColumnList = new ArrayList<>(_columnNameList.size() + 1);
+        initNewColumnList(newColumnNameList, newColumnList, newColumnName);
+
+        final Map<Object[], List<Integer>> joinColumnRightRowIndexMap = new ArrayHashMap<>(LinkedHashMap.class);
+        List<Integer> rightRowIndexList = null;
+        Object[] row = null;
+
+        for (int rightRowIndex = 0, rightDataSetSize = right.size(); rightRowIndex < rightDataSetSize; rightRowIndex++) {
+            row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
+
+            for (int i = 0, len = rightJoinColumnIndexes.length; i < len; i++) {
+                row[i] = right.get(rightRowIndex, rightJoinColumnIndexes[i]);
+            }
+
+            row = putRowIndex(joinColumnRightRowIndexMap, row, rightRowIndex);
+        }
+
+        if (row != null) {
+            Objectory.recycle(row);
+            row = null;
+        }
+
+        final int newColumnIndex = newColumnList.size() - 1;
+        final Map<Object[], Integer> joinColumnLeftRowIndexMap = new ArrayHashMap<>();
+
+        for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
+            row = row == null ? Objectory.createObjectArray(rightJoinColumnIndexes.length) : row;
+
+            for (int i = 0, len = leftJoinColumnIndexes.length; i < len; i++) {
+                row[i] = this.get(leftRowIndex, leftJoinColumnIndexes[i]);
+            }
+
+            rightRowIndexList = joinColumnRightRowIndexMap.get(row);
+
+            fullJoin(newColumnList, right, newColumnClass, collSupplier, newColumnIndex, leftRowIndex, rightRowIndexList);
+
+            if (!joinColumnLeftRowIndexMap.containsKey(row)) {
+                joinColumnLeftRowIndexMap.put(row, leftRowIndex);
+                row = null;
+            }
+        }
+
+        if (row != null) {
+            Objectory.recycle(row);
+            row = null;
+        }
+
+        for (Map.Entry<Object[], List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
+            if (joinColumnLeftRowIndexMap.containsKey(rightRowIndexEntry.getKey()) == false) {
+                fullJoin(newColumnList, right, newColumnClass, collSupplier, newColumnIndex, rightRowIndexEntry.getValue());
+            }
+        }
+
+        for (Object[] a : joinColumnRightRowIndexMap.keySet()) {
+            Objectory.recycle(a);
+        }
+
+        for (Object[] a : joinColumnLeftRowIndexMap.keySet()) {
+            Objectory.recycle(a);
+        }
+
+        return new RowDataSet(newColumnNameList, newColumnList);
     }
 
     /**
@@ -10485,7 +10460,7 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
+     *
      * @param chunkSize
      * @return
      * @deprecated replaced by {@link #splitToList(int)}
@@ -10497,7 +10472,7 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * 
+     *
      * @param columnNames
      * @param chunkSize
      * @return
@@ -10912,22 +10887,18 @@ public class RowDataSet implements DataSet, Cloneable {
                 } else if (rowType.isList() || rowType.isSet()) {
                     if (isAbstractRowClass) {
                         row = (rowType.isList() ? new ArrayList<>(columnCount) : N.newHashSet(columnCount));
+                    } else if (intConstructor == null) {
+                        row = ClassUtil.invokeConstructor(constructor);
                     } else {
-                        if (intConstructor == null) {
-                            row = ClassUtil.invokeConstructor(constructor);
-                        } else {
-                            row = ClassUtil.invokeConstructor(intConstructor, columnCount);
-                        }
+                        row = ClassUtil.invokeConstructor(intConstructor, columnCount);
                     }
                 } else if (rowType.isMap()) {
                     if (isAbstractRowClass) {
                         row = N.newHashMap(columnCount);
+                    } else if (intConstructor == null) {
+                        row = ClassUtil.invokeConstructor(constructor);
                     } else {
-                        if (intConstructor == null) {
-                            row = ClassUtil.invokeConstructor(constructor);
-                        } else {
-                            row = ClassUtil.invokeConstructor(intConstructor, columnCount);
-                        }
+                        row = ClassUtil.invokeConstructor(intConstructor, columnCount);
                     }
                 } else if (rowType.isEntity()) {
                     row = N.newInstance(rowClass);
@@ -11552,18 +11523,7 @@ public class RowDataSet implements DataSet, Cloneable {
             throw new IllegalArgumentException("The specified columnNames is null or empty");
         }
 
-        if (columnNames == this._columnNameList) {
-            if (this._columnIndexes == null) {
-                int count = columnNames.size();
-                this._columnIndexes = new int[count];
-
-                for (int i = 0; i < count; i++) {
-                    _columnIndexes[i] = i;
-                }
-            }
-
-            return _columnIndexes;
-        } else {
+        if (columnNames != this._columnNameList) {
             final int count = columnNames.size();
             final int[] columnNameIndexes = new int[count];
             final Iterator<String> it = columnNames.iterator();
@@ -11574,6 +11534,16 @@ public class RowDataSet implements DataSet, Cloneable {
 
             return columnNameIndexes;
         }
+        if (this._columnIndexes == null) {
+            int count = columnNames.size();
+            this._columnIndexes = new int[count];
+
+            for (int i = 0; i < count; i++) {
+                _columnIndexes[i] = i;
+            }
+        }
+
+        return _columnIndexes;
     }
 
     /**

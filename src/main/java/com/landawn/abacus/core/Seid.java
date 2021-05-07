@@ -16,7 +16,9 @@
 
 package com.landawn.abacus.core;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -26,12 +28,19 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.landawn.abacus.EntityId;
+import com.landawn.abacus.annotation.Id;
+import com.landawn.abacus.annotation.Immutable;
 import com.landawn.abacus.annotation.Internal;
+import com.landawn.abacus.annotation.ReadOnlyId;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.EntityInfo;
+import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.util.ClassUtil;
+import com.landawn.abacus.util.ImmutableList;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 
@@ -161,8 +170,7 @@ public class Seid implements EntityId, Cloneable {
      * @return
      */
     public static Seid from(Object entity) {
-        @SuppressWarnings("deprecation")
-        final List<String> idPropNames = ClassUtil.getIdFieldNames(entity.getClass());
+        final List<String> idPropNames = Seid.getIdFieldNames(entity.getClass());
 
         if (N.isNullOrEmpty(idPropNames)) {
             throw new IllegalArgumentException("No id property defined in class: " + ClassUtil.getCanonicalClassName(entity.getClass()));
@@ -209,9 +217,8 @@ public class Seid implements EntityId, Cloneable {
     public <T> T get(String propName) {
         if (NameUtil.isCanonicalName(entityName, propName)) {
             return (T) values.get(NameUtil.getSimpleName(propName));
-        } else {
-            return (T) values.get(propName);
         }
+        return (T) values.get(propName);
     }
 
     @Override
@@ -282,7 +289,8 @@ public class Seid implements EntityId, Cloneable {
     public void set(Map<String, Object> nameValues) {
         if (N.isNullOrEmpty(nameValues)) {
             return;
-        } else if (nameValues.size() == 1) {
+        }
+        if (nameValues.size() == 1) {
             final Map.Entry<String, Object> entry = nameValues.entrySet().iterator().next();
             set(entry.getKey(), entry.getValue());
         } else {
@@ -363,9 +371,8 @@ public class Seid implements EntityId, Cloneable {
 
         if (NameUtil.isCanonicalName(entityName, propName)) {
             return values.containsKey(NameUtil.getSimpleName(propName));
-        } else {
-            return values.containsKey(propName);
         }
+        return values.containsKey(propName);
     }
 
     @Override
@@ -525,5 +532,60 @@ public class Seid implements EntityId, Cloneable {
         }
 
         return strValue;
+    }
+
+    private static final Map<Class<?>, ImmutableList<String>> idPropNamesMap = new ConcurrentHashMap<>();
+
+    /**
+     * Gets the id field names.
+     *
+     * @param targetClass
+     * @return an immutable List.
+     * @deprecated for internal only.
+     */
+    @Deprecated
+    @Internal
+    @Immutable
+    static List<String> getIdFieldNames(final Class<?> targetClass) {
+        ImmutableList<String> idPropNames = idPropNamesMap.get(targetClass);
+
+        if (idPropNames == null) {
+            final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
+            final Set<String> idPropNameSet = N.newLinkedHashSet();
+
+            for (PropInfo propInfo : entityInfo.propInfoList) {
+                if (propInfo.isAnnotationPresent(Id.class) || propInfo.isAnnotationPresent(ReadOnlyId.class)) {
+                    idPropNameSet.add(propInfo.name);
+                } else {
+                    try {
+                        if (propInfo.isAnnotationPresent(javax.persistence.Id.class)) {
+                            idPropNameSet.add(propInfo.name);
+                        }
+                    } catch (Throwable e) {
+                        // ignore
+                    }
+                }
+            }
+
+            if (targetClass.isAnnotationPresent(Id.class)) {
+                String[] values = targetClass.getAnnotation(Id.class).value();
+                N.checkArgNotNullOrEmpty(values, "values for annotation @Id on Type/Class can't be null or empty");
+                idPropNameSet.addAll(Arrays.asList(values));
+            }
+
+            if (N.isNullOrEmpty(idPropNameSet)) {
+                final PropInfo idPropInfo = entityInfo.getPropInfo("id");
+                final Set<Class<?>> idType = N.<Class<?>> asSet(int.class, Integer.class, long.class, Long.class, String.class, Timestamp.class, UUID.class);
+
+                if (idPropInfo != null && idType.contains(idPropInfo.clazz)) {
+                    idPropNameSet.add(idPropInfo.name);
+                }
+            }
+
+            idPropNames = ImmutableList.copyOf(idPropNameSet);
+            idPropNamesMap.put(targetClass, idPropNames);
+        }
+
+        return N.isNullOrEmpty(idPropNames) ? N.emptyList() : idPropNames;
     }
 }

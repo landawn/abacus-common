@@ -48,13 +48,20 @@ import java.sql.RowId;
 import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.Year;
+import java.time.YearMonth;
+import java.time.ZonedDateTime;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Deque;
-import java.util.EnumMap;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -76,7 +83,6 @@ import java.util.SortedSet;
 import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.UUID;
 import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingDeque;
@@ -93,10 +99,7 @@ import java.util.jar.JarFile;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import com.landawn.abacus.DataSet;
-import com.landawn.abacus.annotation.Id;
-import com.landawn.abacus.annotation.Immutable;
 import com.landawn.abacus.annotation.Internal;
-import com.landawn.abacus.annotation.ReadOnlyId;
 import com.landawn.abacus.core.DirtyMarkerUtil;
 import com.landawn.abacus.core.NameUtil;
 import com.landawn.abacus.core.RowDataSet;
@@ -117,6 +120,7 @@ import com.landawn.abacus.util.Tuple.Tuple6;
 import com.landawn.abacus.util.Tuple.Tuple7;
 import com.landawn.abacus.util.Tuple.Tuple8;
 import com.landawn.abacus.util.Tuple.Tuple9;
+import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalBoolean;
@@ -127,6 +131,7 @@ import com.landawn.abacus.util.u.OptionalFloat;
 import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
+import com.landawn.abacus.util.u.R;
 
 /**
  *
@@ -135,8 +140,20 @@ import com.landawn.abacus.util.u.OptionalShort;
  */
 public final class ClassUtil {
 
-    private ClassUtil() {
-        // singleton
+    /**
+     * The Class ClassMask.
+     */
+    static final class ClassMask {
+
+        /** The Constant FIELD_MASK. */
+        @SuppressWarnings("hiding")
+        static final String FIELD_MASK = "FIELD_MASK";
+
+        /**
+         * Method mask.
+         */
+        static void methodMask() {
+        }
     }
 
     private static final Logger logger = LoggerFactory.getLogger(ClassUtil.class);
@@ -185,6 +202,7 @@ public final class ClassUtil {
         BUILT_IN_TYPE.put(Long.class.getCanonicalName(), Long.class);
         BUILT_IN_TYPE.put(Float.class.getCanonicalName(), Float.class);
         BUILT_IN_TYPE.put(Double.class.getCanonicalName(), Double.class);
+
         BUILT_IN_TYPE.put(String.class.getCanonicalName(), String.class);
 
         BUILT_IN_TYPE.put(Enum.class.getCanonicalName(), Enum.class);
@@ -289,11 +307,14 @@ public final class ClassUtil {
         BUILT_IN_TYPE.put(OptionalDouble.class.getCanonicalName(), OptionalDouble.class);
         BUILT_IN_TYPE.put(Optional.class.getCanonicalName(), Optional.class);
         BUILT_IN_TYPE.put(Nullable.class.getCanonicalName(), Nullable.class);
+        BUILT_IN_TYPE.put(Holder.class.getCanonicalName(), Holder.class);
+        BUILT_IN_TYPE.put(R.class.getCanonicalName(), R.class);
 
         BUILT_IN_TYPE.put(Fraction.class.getCanonicalName(), Fraction.class);
         BUILT_IN_TYPE.put(Range.class.getCanonicalName(), Range.class);
         BUILT_IN_TYPE.put(Duration.class.getCanonicalName(), Duration.class);
         BUILT_IN_TYPE.put(Pair.class.getCanonicalName(), Pair.class);
+        BUILT_IN_TYPE.put(Triple.class.getCanonicalName(), Triple.class);
         BUILT_IN_TYPE.put(Tuple.class.getCanonicalName(), Tuple.class);
         BUILT_IN_TYPE.put(Tuple1.class.getCanonicalName(), Tuple1.class);
         BUILT_IN_TYPE.put(Tuple2.class.getCanonicalName(), Tuple2.class);
@@ -320,11 +341,23 @@ public final class ClassUtil {
         BUILT_IN_TYPE.put(Type.class.getCanonicalName(), Type.class);
         BUILT_IN_TYPE.put(DataSet.class.getCanonicalName(), DataSet.class);
         BUILT_IN_TYPE.put(RowDataSet.class.getCanonicalName(), RowDataSet.class);
+        BUILT_IN_TYPE.put(Sheet.class.getCanonicalName(), Sheet.class);
 
-        //
         BUILT_IN_TYPE.put(Map.Entry.class.getCanonicalName(), Map.Entry.class);
         BUILT_IN_TYPE.put("java.util.Map.Entry", Map.Entry.class);
         BUILT_IN_TYPE.put("Map.Entry", Map.Entry.class);
+
+        BUILT_IN_TYPE.put(Instant.class.getCanonicalName(), Instant.class);
+        BUILT_IN_TYPE.put(LocalDate.class.getCanonicalName(), LocalDate.class);
+        BUILT_IN_TYPE.put(LocalDateTime.class.getCanonicalName(), LocalDateTime.class);
+        BUILT_IN_TYPE.put(LocalTime.class.getCanonicalName(), LocalTime.class);
+        BUILT_IN_TYPE.put(OffsetDateTime.class.getCanonicalName(), OffsetDateTime.class);
+        BUILT_IN_TYPE.put(OffsetTime.class.getCanonicalName(), OffsetTime.class);
+        BUILT_IN_TYPE.put(ZonedDateTime.class.getCanonicalName(), ZonedDateTime.class);
+        BUILT_IN_TYPE.put(Year.class.getCanonicalName(), Year.class);
+        BUILT_IN_TYPE.put(YearMonth.class.getCanonicalName(), YearMonth.class);
+
+        BUILT_IN_TYPE.put(Type.class.getCanonicalName(), Type.class);
 
         List<Class<?>> classes = new ArrayList<>(BUILT_IN_TYPE.values());
         for (Class<?> cls : classes) {
@@ -480,154 +513,119 @@ public final class ClassUtil {
         }
     }
 
-    /**
-     * The property maybe only has get method if its type is collection or map by xml binding specification
-     * Otherwise, it will be ignored if not registered by calling this method.
-     *
-     * @param cls
-     */
-    @SuppressWarnings("deprecation")
-    public static void registerXMLBindingClass(final Class<?> cls) {
-        if (registeredXMLBindingClassList.containsKey(cls)) {
-            return;
+    private static final Map<String, String> builtinTypeNameMap = new HashMap<>(100);
+
+    static {
+        builtinTypeNameMap.put(boolean[].class.getName(), "boolean[]");
+        builtinTypeNameMap.put(char[].class.getName(), "char[]");
+        builtinTypeNameMap.put(byte[].class.getName(), "byte[]");
+        builtinTypeNameMap.put(short[].class.getName(), "short[]");
+        builtinTypeNameMap.put(int[].class.getName(), "int[]");
+        builtinTypeNameMap.put(long[].class.getName(), "long[]");
+        builtinTypeNameMap.put(float[].class.getName(), "float[]");
+        builtinTypeNameMap.put(double[].class.getName(), "double[]");
+
+        builtinTypeNameMap.put(Boolean[].class.getName(), "Boolean[]");
+        builtinTypeNameMap.put(Character[].class.getName(), "Character[]");
+        builtinTypeNameMap.put(Byte[].class.getName(), "Byte[]");
+        builtinTypeNameMap.put(Short[].class.getName(), "Short[]");
+        builtinTypeNameMap.put(Integer[].class.getName(), "Integer[]");
+        builtinTypeNameMap.put(Long[].class.getName(), "Long[]");
+        builtinTypeNameMap.put(Float[].class.getName(), "Float[]");
+        builtinTypeNameMap.put(Double[].class.getName(), "Double[]");
+
+        builtinTypeNameMap.put(String[].class.getName(), "String[]");
+        builtinTypeNameMap.put(CharSequence[].class.getName(), "CharSequence[]");
+        builtinTypeNameMap.put(Number[].class.getName(), "Number[]");
+        builtinTypeNameMap.put(Object[].class.getName(), "Object[]");
+
+        for (String key : new ArrayList<>(builtinTypeNameMap.keySet())) {
+            builtinTypeNameMap.put("class " + key, builtinTypeNameMap.get(key));
         }
 
-        synchronized (entityDeclaredPropGetMethodPool) {
-            registeredXMLBindingClassList.put(cls, false);
+        builtinTypeNameMap.put(Boolean.class.getName(), "Boolean");
+        builtinTypeNameMap.put(Character.class.getName(), "Character");
+        builtinTypeNameMap.put(Byte.class.getName(), "Byte");
+        builtinTypeNameMap.put(Short.class.getName(), "Short");
+        builtinTypeNameMap.put(Integer.class.getName(), "Integer");
+        builtinTypeNameMap.put(Long.class.getName(), "Long");
+        builtinTypeNameMap.put(Float.class.getName(), "Float");
+        builtinTypeNameMap.put(Double.class.getName(), "Double");
 
-            if (entityDeclaredPropGetMethodPool.containsKey(cls)) {
-                entityDeclaredPropGetMethodPool.remove(cls);
-                entityDeclaredPropSetMethodPool.remove(cls);
-
-                entityPropFieldPool.remove(cls);
-                loadPropGetSetMethodList(cls);
-            }
-
-            ParserUtil.refreshEntityPropInfo(cls);
-        }
+        builtinTypeNameMap.put(String.class.getName(), "String");
+        builtinTypeNameMap.put(CharSequence.class.getName(), "CharSequence");
+        builtinTypeNameMap.put(Number.class.getName(), "Number");
+        builtinTypeNameMap.put(Object.class.getName(), "Object");
     }
 
-    /**
-     * Register non entity class.
-     *
-     * @param cls
-     */
-    @SuppressWarnings("deprecation")
-    public static void registerNonEntityClass(final Class<?> cls) {
-        registeredNonEntityClass.put(cls, cls);
+    public static MethodHandle createMethodHandle(final Method method) {
+        final Class<?> declaringClass = method.getDeclaringClass();
 
-        synchronized (entityDeclaredPropGetMethodPool) {
-            registeredXMLBindingClassList.put(cls, false);
+        try {
+            return MethodHandles.lookup().in(declaringClass).unreflectSpecial(method, declaringClass);
+        } catch (Exception e) {
+            try {
+                final Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class);
+                ClassUtil.setAccessible(constructor, true);
 
-            if (entityDeclaredPropGetMethodPool.containsKey(cls)) {
-                entityDeclaredPropGetMethodPool.remove(cls);
-                entityDeclaredPropSetMethodPool.remove(cls);
-
-                entityPropFieldPool.remove(cls);
-                loadPropGetSetMethodList(cls);
-            }
-
-            ParserUtil.refreshEntityPropInfo(cls);
-        }
-    }
-
-    /**
-     * Register non prop get set method.
-     *
-     * @param cls
-     * @param propName
-     */
-    public static void registerNonPropGetSetMethod(final Class<?> cls, final String propName) {
-        Set<String> set = registeredNonPropGetSetMethodPool.get(cls);
-
-        if (set == null) {
-            synchronized (registeredNonPropGetSetMethodPool) {
-                set = registeredNonPropGetSetMethodPool.get(cls);
-
-                if (set == null) {
-                    set = N.newHashSet();
-                    registeredNonPropGetSetMethodPool.put(cls, set);
+                return constructor.newInstance(declaringClass).in(declaringClass).unreflectSpecial(method, declaringClass);
+            } catch (Exception ex) {
+                try {
+                    return MethodHandles.lookup()
+                            .findSpecial(declaringClass, method.getName(), MethodType.methodType(method.getReturnType(), method.getParameterTypes()),
+                                    declaringClass);
+                } catch (Exception exx) {
+                    throw new UnsupportedOperationException(exx);
                 }
             }
         }
-
-        set.add(propName);
     }
 
     /**
-     * Register prop get set method.
+     * <p>Returns the number of inheritance hops between two classes.</p>
      *
-     * @param propName
-     * @param method
+     * @param child the child class, may be {@code null}
+     * @param parent the parent class, may be {@code null}
+     * @return the number of generations between the child and parent; 0 if the same class;
+     * -1 if the classes are not related as child and parent (includes where either class is null)
+     * @since 3.2
      */
-    public static void registerPropGetSetMethod(final String propName, final Method method) {
-        Class<?> cls = method.getDeclaringClass();
-
-        synchronized (entityDeclaredPropGetMethodPool) {
-            if (isGetMethod(method)) {
-                Map<String, Method> propMethodMap = entityPropGetMethodPool.get(cls);
-
-                if (propMethodMap == null) {
-                    loadPropGetSetMethodList(cls);
-                    propMethodMap = entityPropGetMethodPool.get(cls);
-                }
-
-                if (propMethodMap.containsKey(propName)) {
-                    if (method.equals(propMethodMap.get(propName)) == false) {
-                        throw new IllegalArgumentException(
-                                propName + " has already been regiestered with different method: " + propMethodMap.get(propName).getName());
-                    }
-                } else {
-                    propMethodMap.put(propName, method);
-                }
-            } else if (isSetMethod(method)) {
-                Map<String, Method> propMethodMap = entityPropSetMethodPool.get(cls);
-
-                if (propMethodMap == null) {
-                    loadPropGetSetMethodList(cls);
-                    propMethodMap = entityPropSetMethodPool.get(cls);
-                }
-
-                if (propMethodMap.containsKey(propName)) {
-                    if (method.equals(propMethodMap.get(propName)) == false) {
-                        throw new IllegalArgumentException(
-                                propName + " has already been regiestered with different method: " + propMethodMap.get(propName).getName());
-                    }
-                } else {
-                    propMethodMap.put(propName, method);
-                }
-            } else {
-                throw new IllegalArgumentException("The name of property getter/setter method must start with 'get/is/has' or 'set': " + method.getName());
-            }
-        }
-    }
-
-    /**
-     * Checks if is entity.
-     *
-     * @param cls
-     * @return true, if is entity
-     */
-    public static boolean isEntity(final Class<?> cls) {
-        Boolean b = entityClassPool.get(cls);
-
-        if (b == null) {
-            b = !registeredNonEntityClass.containsKey(cls) && N.notNullOrEmpty(ClassUtil.getPropNameList(cls));
-
-            entityClassPool.put(cls, b);
+    public static int distanceOfInheritance(final Class<?> child, final Class<?> parent) {
+        if (child == null || parent == null) {
+            return -1;
         }
 
-        return b;
+        if (child.equals(parent)) {
+            return 0;
+        }
+
+        final Class<?> cParent = child.getSuperclass();
+        int d = parent.equals(cParent) ? 1 : 0;
+
+        if (d == 1) {
+            return d;
+        }
+
+        d += distanceOfInheritance(cParent, parent);
+
+        return d > 0 ? d + 1 : -1;
     }
 
     /**
+     * File path 2 package name.
      *
-     * @param cls
+     * @param entryName
      * @return
      */
-    public static boolean isDirtyMarker(final Class<?> cls) {
-        return DirtyMarkerUtil.isDirtyMarker(cls);
+    private static String filePath2PackageName(String entryName) {
+        String pkgName = entryName.replace('/', '.').replace('\\', '.');
+        pkgName = pkgName.endsWith(".") ? pkgName.substring(0, pkgName.length() - 1) : pkgName;
+
+        return pkgName;
     }
+
+    // Superclasses/Superinterfaces. Copied from Apache Commons Lang under Apache License v2.
+    // ----------------------------------------------------------------------
 
     /**
      * Supports primitive types: boolean, char, byte, short, int, long, float, double. And array type with format {@code java.lang.String[]}
@@ -754,186 +752,30 @@ public final class ClassUtil {
         return (Class<T>) cls;
     }
 
-    // Superclasses/Superinterfaces. Copied from Apache Commons Lang under Apache License v2.
-    // ----------------------------------------------------------------------
-
     /**
-     * Copied from Apache Commons Lang under Apache License v2.
+     * It's designed for field/method/class/column/table names. and source and target Strings will be cached.
      *
-     * <p>Gets a {@code List} of super classes for the given class, excluding {@code Object.class}.</p>
-     *
-     * @param cls the class to look up.
+     * @param propName
      * @return
      */
-    public static List<Class<?>> getAllSuperclasses(final Class<?> cls) {
-        final List<Class<?>> classes = new ArrayList<>();
-        Class<?> superclass = cls.getSuperclass();
+    public static String formalizePropName(final String propName) {
+        String newPropName = formalizedPropNamePool.get(propName);
 
-        while (superclass != null && !superclass.equals(Object.class)) {
-            classes.add(superclass);
-            superclass = superclass.getSuperclass();
-        }
+        if (newPropName == null) {
+            newPropName = toCamelCase(propName);
 
-        return classes;
-    }
+            for (String keyWord : keyWordMapper.keySet()) {
+                if (keyWord.equalsIgnoreCase(newPropName)) {
+                    newPropName = keyWordMapper.get(keyWord);
 
-    /**
-     * Copied from Apache Commons Lang under Apache License v2.
-     *
-     * <p>Gets a {@code List} of all interfaces implemented by the given
-     * class and its super classes.</p>
-     *
-     * <p>The order is determined by looking through each interface in turn as
-     * declared in the source file and following its hierarchy up. Then each
-     * superclass is considered in the same way. Later duplicates are ignored,
-     * so the order is maintained.</p>
-     *
-     * @param cls the class to look up.
-     * @return
-     */
-    public static Set<Class<?>> getAllInterfaces(final Class<?> cls) {
-        final Set<Class<?>> interfacesFound = N.newLinkedHashSet();
-
-        getAllInterfaces(cls, interfacesFound);
-
-        return interfacesFound;
-    }
-
-    /**
-     * Gets the all interfaces.
-     *
-     * @param cls
-     * @param interfacesFound
-     * @return
-     */
-    private static void getAllInterfaces(Class<?> cls, final Set<Class<?>> interfacesFound) {
-        while (cls != null) {
-            final Class<?>[] interfaces = cls.getInterfaces();
-
-            for (final Class<?> i : interfaces) {
-                if (interfacesFound.add(i)) {
-                    getAllInterfaces(i, interfacesFound);
+                    break;
                 }
             }
 
-            cls = cls.getSuperclass();
-        }
-    }
-
-    /**
-     * Returns all the interfaces and super classes the specified class implements or extends, excluding {@code Object.class}.
-     *
-     * @param cls
-     * @return
-     */
-    public static Set<Class<?>> getAllSuperTypes(final Class<?> cls) {
-        final Set<Class<?>> superTypesFound = N.newLinkedHashSet();
-
-        getAllSuperTypes(cls, superTypesFound);
-
-        return superTypesFound;
-    }
-
-    /**
-     * Gets the all super types.
-     *
-     * @param cls
-     * @param superTypesFound
-     * @return
-     */
-    private static void getAllSuperTypes(Class<?> cls, final Set<Class<?>> superTypesFound) {
-        while (cls != null) {
-            final Class<?>[] interfaces = cls.getInterfaces();
-
-            for (final Class<?> i : interfaces) {
-                if (superTypesFound.add(i)) {
-                    getAllInterfaces(i, superTypesFound);
-                }
-            }
-
-            Class<?> superclass = cls.getSuperclass();
-
-            if (superclass != null && !superclass.equals(Object.class) && superTypesFound.add(superclass)) {
-                getAllSuperTypes(superclass, superTypesFound);
-            }
-
-            cls = cls.getSuperclass();
-        }
-    }
-
-    public static String getTypeName(final java.lang.reflect.Type type) {
-        return formatParameterizedTypeName(type.getTypeName());
-    }
-
-    /**
-     * Gets the parameterized type name by method.
-     *
-     * @param field
-     * @return
-     */
-    public static String getParameterizedTypeNameByField(final Field field) {
-        return formatParameterizedTypeName(field.getGenericType().getTypeName());
-    }
-
-    /**
-     * Gets the parameterized type name by method.
-     *
-     * @param method
-     * @return
-     */
-    public static String getParameterizedTypeNameByMethod(final Method method) {
-        final java.lang.reflect.Type[] genericParameterTypes = method.getGenericParameterTypes();
-
-        if (N.notNullOrEmpty(genericParameterTypes)) {
-            return formatParameterizedTypeName(genericParameterTypes[0].getTypeName());
-        } else {
-            return formatParameterizedTypeName(method.getGenericReturnType().getTypeName());
-        }
-    }
-
-    private static final Map<String, String> builtinTypeNameMap = new HashMap<>(100);
-
-    static {
-        builtinTypeNameMap.put(boolean[].class.getName(), "boolean[]");
-        builtinTypeNameMap.put(char[].class.getName(), "char[]");
-        builtinTypeNameMap.put(byte[].class.getName(), "byte[]");
-        builtinTypeNameMap.put(short[].class.getName(), "short[]");
-        builtinTypeNameMap.put(int[].class.getName(), "int[]");
-        builtinTypeNameMap.put(long[].class.getName(), "long[]");
-        builtinTypeNameMap.put(float[].class.getName(), "float[]");
-        builtinTypeNameMap.put(double[].class.getName(), "double[]");
-
-        builtinTypeNameMap.put(Boolean[].class.getName(), "Boolean[]");
-        builtinTypeNameMap.put(Character[].class.getName(), "Character[]");
-        builtinTypeNameMap.put(Byte[].class.getName(), "Byte[]");
-        builtinTypeNameMap.put(Short[].class.getName(), "Short[]");
-        builtinTypeNameMap.put(Integer[].class.getName(), "Integer[]");
-        builtinTypeNameMap.put(Long[].class.getName(), "Long[]");
-        builtinTypeNameMap.put(Float[].class.getName(), "Float[]");
-        builtinTypeNameMap.put(Double[].class.getName(), "Double[]");
-
-        builtinTypeNameMap.put(String[].class.getName(), "String[]");
-        builtinTypeNameMap.put(CharSequence[].class.getName(), "CharSequence[]");
-        builtinTypeNameMap.put(Number[].class.getName(), "Number[]");
-        builtinTypeNameMap.put(Object[].class.getName(), "Object[]");
-
-        for (String key : new ArrayList<>(builtinTypeNameMap.keySet())) {
-            builtinTypeNameMap.put("class " + key, builtinTypeNameMap.get(key));
+            formalizedPropNamePool.put(propName, newPropName);
         }
 
-        builtinTypeNameMap.put(Boolean.class.getName(), "Boolean");
-        builtinTypeNameMap.put(Character.class.getName(), "Character");
-        builtinTypeNameMap.put(Byte.class.getName(), "Byte");
-        builtinTypeNameMap.put(Short.class.getName(), "Short");
-        builtinTypeNameMap.put(Integer.class.getName(), "Integer");
-        builtinTypeNameMap.put(Long.class.getName(), "Long");
-        builtinTypeNameMap.put(Float.class.getName(), "Float");
-        builtinTypeNameMap.put(Double.class.getName(), "Double");
-
-        builtinTypeNameMap.put(String.class.getName(), "String");
-        builtinTypeNameMap.put(CharSequence.class.getName(), "CharSequence");
-        builtinTypeNameMap.put(Number.class.getName(), "Number");
-        builtinTypeNameMap.put(Object.class.getName(), "Object");
+        return newPropName;
     }
 
     /**
@@ -995,114 +837,132 @@ public final class ClassUtil {
     }
 
     /**
-     * Gets the package.
+     * Copied from Apache Commons Lang under Apache License v2.
      *
-     * @param cls
-     * @return <code>null</code> if it's primitive type or no package defined for the class.
+     * <p>Gets a {@code List} of all interfaces implemented by the given
+     * class and its super classes.</p>
+     *
+     * <p>The order is determined by looking through each interface in turn as
+     * declared in the source file and following its hierarchy up. Then each
+     * superclass is considered in the same way. Later duplicates are ignored,
+     * so the order is maintained.</p>
+     *
+     * @param cls the class to look up.
+     * @return
      */
-    public static Package getPackage(final Class<?> cls) {
-        Package pkg = packagePool.get(cls);
+    public static Set<Class<?>> getAllInterfaces(final Class<?> cls) {
+        final Set<Class<?>> interfacesFound = N.newLinkedHashSet();
 
-        if (pkg == null) {
-            if (N.isPrimitiveType(cls)) {
-                return null;
-            }
+        getAllInterfaces(cls, interfacesFound);
 
-            pkg = cls.getPackage();
-
-            if (pkg != null) {
-                packagePool.put(cls, pkg);
-            }
-        }
-
-        return pkg;
+        return interfacesFound;
     }
 
     /**
-     * Gets the package name.
+     * Gets the all interfaces.
      *
      * @param cls
-     * @return <code>null</code> if it's primitive type or no package defined for the class.
+     * @param interfacesFound
+     * @return
      */
-    public static String getPackageName(final Class<?> cls) {
-        String pkgName = packageNamePool.get(cls);
+    private static void getAllInterfaces(Class<?> cls, final Set<Class<?>> interfacesFound) {
+        while (cls != null) {
+            final Class<?>[] interfaces = cls.getInterfaces();
 
-        if (pkgName == null) {
-            Package pkg = ClassUtil.getPackage(cls);
-            pkgName = pkg == null ? "" : pkg.getName();
-            packageNamePool.put(cls, pkgName);
+            for (final Class<?> i : interfaces) {
+                if (interfacesFound.add(i)) {
+                    getAllInterfaces(i, interfacesFound);
+                }
+            }
+
+            cls = cls.getSuperclass();
         }
-
-        return pkgName;
     }
 
-    //    private static Class[] getTypeArguments(Class cls) {
-    //        java.lang.reflect.Type[] typeArgs = null;
-    //        java.lang.reflect.Type[] genericInterfaces = cls.getGenericInterfaces();
-    //
-    //        if (notNullOrEmpty(genericInterfaces)) {
-    //            for (java.lang.reflect.Type type : genericInterfaces) {
-    //                typeArgs = ((ParameterizedType) type).getActualTypeArguments();
-    //
-    //                if (notNullOrEmpty(typeArgs)) {
-    //                    break;
-    //                }
-    //            }
-    //        } else {
-    //            java.lang.reflect.Type genericSuperclass = cls.getGenericSuperclass();
-    //
-    //            if (genericSuperclass != null) {
-    //                typeArgs = ((ParameterizedType) genericSuperclass).getActualTypeArguments();
-    //            }
-    //        }
-    //
-    //        if (notNullOrEmpty(typeArgs)) {
-    //            Class[] clses = new Class[typeArgs.length];
-    //
-    //            for (int i = 0; i < typeArgs.length; i++) {
-    //                clses[i] = (Class) typeArgs[i];
-    //            }
-    //
-    //            return clses;
-    //        } else {
-    //            return null;
-    //        }
-    //    }
+    /**
+     * Copied from Apache Commons Lang under Apache License v2.
+     *
+     * <p>Gets a {@code List} of super classes for the given class, excluding {@code Object.class}.</p>
+     *
+     * @param cls the class to look up.
+     * @return
+     */
+    public static List<Class<?>> getAllSuperclasses(final Class<?> cls) {
+        final List<Class<?>> classes = new ArrayList<>();
+        Class<?> superclass = cls.getSuperclass();
 
-    //    /**
-    //     * Returns the method declared in the specified {@code cls} with the specified method name.
-    //     *
-    //     * @param cls
-    //     * @param methodName is case insensitive
-    //     * @return {@code null} if no method is found by specified name
-    //     */
-    //    public static Method findDeclaredMethodByName(Class<?> cls, String methodName) {
-    //        Method method = null;
-    //
-    //        Method[] methods = cls.getDeclaredMethods();
-    //
-    //        for (Method m : methods) {
-    //            if (m.getName().equalsIgnoreCase(methodName)) {
-    //                if ((method == null) || Modifier.isPublic(m.getModifiers())
-    //                        || (Modifier.isProtected(m.getModifiers()) && (!Modifier.isProtected(method.getModifiers())))
-    //                        || (!Modifier.isPrivate(m.getModifiers()) && Modifier.isPrivate(method.getModifiers()))) {
-    //
-    //                    method = m;
-    //                }
-    //
-    //                if (Modifier.isPublic(method.getModifiers())) {
-    //                    break;
-    //                }
-    //            }
-    //        }
-    //
-    //        // SHOULD NOT set it true here.
-    //        // if (method != null) {
-    //        // ClassUtil.setAccessible(method, true);
-    //        // }
-    //
-    //        return method;
-    //    }
+        while (superclass != null && !superclass.equals(Object.class)) {
+            classes.add(superclass);
+            superclass = superclass.getSuperclass();
+        }
+
+        return classes;
+    }
+
+    /**
+     * Returns all the interfaces and super classes the specified class implements or extends, excluding {@code Object.class}.
+     *
+     * @param cls
+     * @return
+     */
+    public static Set<Class<?>> getAllSuperTypes(final Class<?> cls) {
+        final Set<Class<?>> superTypesFound = N.newLinkedHashSet();
+
+        getAllSuperTypes(cls, superTypesFound);
+
+        return superTypesFound;
+    }
+
+    /**
+     * Gets the all super types.
+     *
+     * @param cls
+     * @param superTypesFound
+     * @return
+     */
+    private static void getAllSuperTypes(Class<?> cls, final Set<Class<?>> superTypesFound) {
+        while (cls != null) {
+            final Class<?>[] interfaces = cls.getInterfaces();
+
+            for (final Class<?> i : interfaces) {
+                if (superTypesFound.add(i)) {
+                    getAllInterfaces(i, superTypesFound);
+                }
+            }
+
+            Class<?> superclass = cls.getSuperclass();
+
+            if (superclass != null && !superclass.equals(Object.class) && superTypesFound.add(superclass)) {
+                getAllSuperTypes(superclass, superTypesFound);
+            }
+
+            cls = cls.getSuperclass();
+        }
+    }
+
+    /**
+     * Gets the canonical class name.
+     *
+     * @param cls
+     * @return
+     */
+    public static String getCanonicalClassName(final Class<?> cls) {
+        String clsName = canonicalClassNamePool.get(cls);
+
+        if (clsName == null) {
+            clsName = cls.getCanonicalName();
+
+            if (clsName == null) {
+                clsName = cls.getName();
+            }
+
+            if (clsName != null) {
+                canonicalClassNamePool.put(cls, clsName);
+            }
+        }
+
+        return clsName;
+    }
 
     /**
      * Gets the classes by package.
@@ -1247,16 +1107,796 @@ public final class ClassUtil {
     }
 
     /**
-     * Package name 2 file path.
+     * Gets the class name.
      *
-     * @param pkgName
+     * @param cls
      * @return
      */
-    private static String packageName2FilePath(String pkgName) {
-        String pkgPath = pkgName.replace('.', '/');
-        pkgPath = pkgPath.endsWith("/") ? pkgPath : (pkgPath + "/");
+    public static String getClassName(final Class<?> cls) {
+        String clsName = nameClassPool.get(cls);
 
-        return pkgPath;
+        if (clsName == null) {
+            clsName = cls.getName();
+            nameClassPool.put(cls, clsName);
+        }
+
+        return clsName;
+    }
+
+    //    private static Class[] getTypeArguments(Class cls) {
+    //        java.lang.reflect.Type[] typeArgs = null;
+    //        java.lang.reflect.Type[] genericInterfaces = cls.getGenericInterfaces();
+    //
+    //        if (notNullOrEmpty(genericInterfaces)) {
+    //            for (java.lang.reflect.Type type : genericInterfaces) {
+    //                typeArgs = ((ParameterizedType) type).getActualTypeArguments();
+    //
+    //                if (notNullOrEmpty(typeArgs)) {
+    //                    break;
+    //                }
+    //            }
+    //        } else {
+    //            java.lang.reflect.Type genericSuperclass = cls.getGenericSuperclass();
+    //
+    //            if (genericSuperclass != null) {
+    //                typeArgs = ((ParameterizedType) genericSuperclass).getActualTypeArguments();
+    //            }
+    //        }
+    //
+    //        if (notNullOrEmpty(typeArgs)) {
+    //            Class[] clses = new Class[typeArgs.length];
+    //
+    //            for (int i = 0; i < typeArgs.length; i++) {
+    //                clses[i] = (Class) typeArgs[i];
+    //            }
+    //
+    //            return clses;
+    //        } else {
+    //            return null;
+    //        }
+    //    }
+
+    //    /**
+    //     * Returns the method declared in the specified {@code cls} with the specified method name.
+    //     *
+    //     * @param cls
+    //     * @param methodName is case insensitive
+    //     * @return {@code null} if no method is found by specified name
+    //     */
+    //    public static Method findDeclaredMethodByName(Class<?> cls, String methodName) {
+    //        Method method = null;
+    //
+    //        Method[] methods = cls.getDeclaredMethods();
+    //
+    //        for (Method m : methods) {
+    //            if (m.getName().equalsIgnoreCase(methodName)) {
+    //                if ((method == null) || Modifier.isPublic(m.getModifiers())
+    //                        || (Modifier.isProtected(m.getModifiers()) && (!Modifier.isProtected(method.getModifiers())))
+    //                        || (!Modifier.isPrivate(m.getModifiers()) && Modifier.isPrivate(method.getModifiers()))) {
+    //
+    //                    method = m;
+    //                }
+    //
+    //                if (Modifier.isPublic(method.getModifiers())) {
+    //                    break;
+    //                }
+    //            }
+    //        }
+    //
+    //        // SHOULD NOT set it true here.
+    //        // if (method != null) {
+    //        // ClassUtil.setAccessible(method, true);
+    //        // }
+    //
+    //        return method;
+    //    }
+
+    /**
+     * Returns the constructor declared in the specified {@code cls} with the specified {@code parameterTypes}.
+     *
+     * @param <T>
+     * @param cls
+     * @param parameterTypes
+     * @return {@code null} if no constructor is found
+     */
+    @SafeVarargs
+    public static <T> Constructor<T> getDeclaredConstructor(final Class<T> cls, final Class<?>... parameterTypes) {
+        Map<Class<?>[], Constructor<?>> constructorPool = classDeclaredConstructorPool.get(cls);
+        Constructor<T> constructor = null;
+
+        if (constructorPool != null) {
+            constructor = (Constructor<T>) constructorPool.get(parameterTypes);
+        }
+
+        if (constructor == null) {
+            try {
+                constructor = cls.getDeclaredConstructor(parameterTypes);
+
+                // SHOULD NOT set it true here.
+                // ClassUtil.setAccessible(constructor, true);
+            } catch (NoSuchMethodException e) {
+                // ignore.
+            }
+
+            if (constructor != null) {
+                if (constructorPool == null) {
+                    constructorPool = new ArrayHashMap<>(ConcurrentHashMap.class);
+                    classDeclaredConstructorPool.put(cls, constructorPool);
+                }
+
+                constructorPool.put(parameterTypes.clone(), constructor);
+            }
+        }
+
+        return constructor;
+    }
+
+    /**
+     * Gets the declared field.
+     *
+     * @param cls
+     * @param fieldName
+     * @return
+     */
+    private static Field getDeclaredField(final Class<?> cls, final String fieldName) {
+        try {
+            return cls.getDeclaredField(fieldName);
+        } catch (NoSuchFieldException | SecurityException e) {
+            // ignore
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns the method declared in the specified {@code cls} with the specified {@code methodName} and {@code parameterTypes}.
+     *
+     * @param cls
+     * @param methodName
+     * @param parameterTypes
+     * @return {@code null} if no method is found
+     */
+    @SafeVarargs
+    public static Method getDeclaredMethod(final Class<?> cls, final String methodName, final Class<?>... parameterTypes) {
+        Map<String, Map<Class<?>[], Method>> methodNamePool = classDeclaredMethodPool.get(cls);
+        Map<Class<?>[], Method> methodPool = methodNamePool == null ? null : methodNamePool.get(methodName);
+
+        Method method = null;
+
+        if (methodPool != null) {
+            method = methodPool.get(parameterTypes);
+        }
+
+        if (method == null) {
+            method = internalGetDeclaredMethod(cls, methodName, parameterTypes);
+
+            // SHOULD NOT set it true here.
+            // if (method != null) {
+            // ClassUtil.setAccessible(method, true);
+            // }
+
+            if (method != null) {
+                if (methodNamePool == null) {
+                    methodNamePool = new ConcurrentHashMap<>();
+                    classDeclaredMethodPool.put(cls, methodNamePool);
+                }
+
+                if (methodPool == null) {
+                    methodPool = new ArrayHashMap<>(ConcurrentHashMap.class);
+                    methodNamePool.put(methodName, methodPool);
+                }
+
+                methodPool.put(parameterTypes.clone(), method);
+            }
+        }
+
+        return method;
+    }
+
+    /**
+     * Gets the enclosing class.
+     *
+     * @param cls
+     * @return
+     */
+    public static Class<?> getEnclosingClass(final Class<?> cls) {
+        Class<?> enclosingClass = enclosingClassPool.get(cls);
+
+        if (enclosingClass == null) {
+            enclosingClass = cls.getEnclosingClass();
+
+            if (enclosingClass == null) {
+                enclosingClass = CLASS_MASK;
+            }
+
+            enclosingClassPool.put(cls, enclosingClass);
+        }
+
+        return (enclosingClass == CLASS_MASK) ? null : enclosingClass;
+    }
+
+    /**
+     *
+     * @param entity
+     * @return
+     */
+    public static List<String> getNonNullPropNames(final Object entity) {
+        return getPropNames(entity, Fn.<Object> notNull());
+    }
+
+    /**
+     * Gets the package.
+     *
+     * @param cls
+     * @return <code>null</code> if it's primitive type or no package defined for the class.
+     */
+    public static Package getPackage(final Class<?> cls) {
+        Package pkg = packagePool.get(cls);
+
+        if (pkg == null) {
+            if (N.isPrimitiveType(cls)) {
+                return null;
+            }
+
+            pkg = cls.getPackage();
+
+            if (pkg != null) {
+                packagePool.put(cls, pkg);
+            }
+        }
+
+        return pkg;
+    }
+
+    /**
+     * Gets the package name.
+     *
+     * @param cls
+     * @return <code>null</code> if it's primitive type or no package defined for the class.
+     */
+    public static String getPackageName(final Class<?> cls) {
+        String pkgName = packageNamePool.get(cls);
+
+        if (pkgName == null) {
+            Package pkg = ClassUtil.getPackage(cls);
+            pkgName = pkg == null ? "" : pkg.getName();
+            packageNamePool.put(cls, pkgName);
+        }
+
+        return pkgName;
+    }
+
+    /**
+     * Gets the parameterized type name by method.
+     *
+     * @param field
+     * @return
+     */
+    public static String getParameterizedTypeNameByField(final Field field) {
+        return formatParameterizedTypeName(field.getGenericType().getTypeName());
+    }
+
+    /**
+     * Gets the parameterized type name by method.
+     *
+     * @param method
+     * @return
+     */
+    public static String getParameterizedTypeNameByMethod(final Method method) {
+        final java.lang.reflect.Type[] genericParameterTypes = method.getGenericParameterTypes();
+
+        if (N.notNullOrEmpty(genericParameterTypes)) {
+            return formatParameterizedTypeName(genericParameterTypes[0].getTypeName());
+        }
+        return formatParameterizedTypeName(method.getGenericReturnType().getTypeName());
+    }
+
+    /**
+     * Gets the prop field.
+     *
+     * @param cls
+     * @param propName
+     * @return
+     */
+    public static Field getPropField(final Class<?> cls, final String propName) {
+        Map<String, Field> propFieldMap = entityPropFieldPool.get(cls);
+
+        if (propFieldMap == null) {
+            loadPropGetSetMethodList(cls);
+            propFieldMap = entityPropFieldPool.get(cls);
+        }
+
+        Field field = propFieldMap.get(propName);
+
+        if (field == null) {
+            if (!ClassUtil.isEntity(cls)) {
+                throw new IllegalArgumentException(
+                        "No property getter/setter method or public field found in the specified entity: " + ClassUtil.getCanonicalClassName(cls));
+            }
+
+            synchronized (entityDeclaredPropGetMethodPool) {
+                final Map<String, Method> getterMethodList = ClassUtil.getPropGetMethods(cls);
+
+                for (String key : getterMethodList.keySet()) {
+                    if (isPropName(cls, propName, key)) {
+                        field = propFieldMap.get(key);
+
+                        break;
+                    }
+                }
+
+                if ((field == null) && !propName.equalsIgnoreCase(formalizePropName(propName))) {
+                    field = getPropField(cls, formalizePropName(propName));
+                }
+
+                // set method mask to avoid query next time.
+                if (field == null) {
+                    field = FIELD_MASK;
+                }
+
+                //    } else {
+                //        ClassUtil.setAccessibleQuietly(field, true);
+                //    }
+
+                propFieldMap.put(propName, field);
+            }
+        }
+
+        return (field == FIELD_MASK) ? null : field;
+    }
+
+    public static ImmutableMap<String, Field> getPropFields(final Class<?> cls) {
+        ImmutableMap<String, Field> getterMethodList = entityDeclaredPropFieldPool.get(cls);
+
+        if (getterMethodList == null) {
+            loadPropGetSetMethodList(cls);
+            getterMethodList = entityDeclaredPropFieldPool.get(cls);
+        }
+
+        return getterMethodList;
+    }
+
+    /**
+     * Returns the property get method declared in the specified {@code cls}
+     * with the specified property name {@code propName}.
+     * {@code null} is returned if no method is found.
+     *
+     * Call registerXMLBindingClassForPropGetSetMethod first to retrieve the property
+     * getter/setter method for the class/bean generated/wrote by JAXB
+     * specification
+     *
+     * @param cls
+     * @param propName
+     * @return
+     */
+    public static Method getPropGetMethod(final Class<?> cls, final String propName) {
+        Map<String, Method> propGetMethodMap = entityPropGetMethodPool.get(cls);
+
+        if (propGetMethodMap == null) {
+            loadPropGetSetMethodList(cls);
+            propGetMethodMap = entityPropGetMethodPool.get(cls);
+        }
+
+        Method method = propGetMethodMap.get(propName);
+
+        if (method == null) {
+            synchronized (entityDeclaredPropGetMethodPool) {
+                Map<String, Method> getterMethodList = getPropGetMethods(cls);
+
+                for (String key : getterMethodList.keySet()) {
+                    if (isPropName(cls, propName, key)) {
+                        method = getterMethodList.get(key);
+
+                        break;
+                    }
+                }
+
+                if ((method == null) && !propName.equalsIgnoreCase(formalizePropName(propName))) {
+                    method = getPropGetMethod(cls, formalizePropName(propName));
+                }
+
+                // set method mask to avoid query next time.
+                if (method == null) {
+                    method = METHOD_MASK;
+                }
+
+                propGetMethodMap.put(propName, method);
+            }
+        }
+
+        return (method == METHOD_MASK) ? null : method;
+    }
+
+    /**
+     * Call registerXMLBindingClassForPropGetSetMethod first to retrieve the property
+     * getter/setter method for the class/bean generated/wrote by JAXB
+     * specification.
+     *
+     * @param cls
+     * @return
+     */
+    public static ImmutableMap<String, Method> getPropGetMethods(final Class<?> cls) {
+        ImmutableMap<String, Method> getterMethodList = entityDeclaredPropGetMethodPool.get(cls);
+
+        if (getterMethodList == null) {
+            loadPropGetSetMethodList(cls);
+            getterMethodList = entityDeclaredPropGetMethodPool.get(cls);
+        }
+
+        return getterMethodList;
+    }
+
+    /**
+     * Gets the prop name by method.
+     *
+     * @param getSetMethod
+     * @return
+     */
+    public static String getPropNameByMethod(final Method getSetMethod) {
+        String propName = methodPropNamePool.get(getSetMethod);
+
+        if (propName == null) {
+            final String methodName = getSetMethod.getName();
+            final Class<?>[] paramTypes = getSetMethod.getParameterTypes();
+            final Class<?> targetType = N.isNullOrEmpty(paramTypes) ? getSetMethod.getReturnType() : paramTypes[0];
+
+            Field field = getDeclaredField(getSetMethod.getDeclaringClass(), methodName);
+
+            if (field != null && field.getType().isAssignableFrom(targetType)) {
+                propName = field.getName();
+            }
+
+            field = getDeclaredField(getSetMethod.getDeclaringClass(), "_" + methodName);
+
+            if (field != null && field.getType().isAssignableFrom(targetType)) {
+                propName = field.getName();
+            }
+
+            if (N.isNullOrEmpty(propName) && ((methodName.startsWith(IS) && methodName.length() > 2)
+                    || ((methodName.startsWith(GET) || methodName.startsWith(SET) || methodName.startsWith(HAS)) && methodName.length() > 3))) {
+                final String newName = methodName.substring(methodName.startsWith(IS) ? 2 : 3);
+                field = getDeclaredField(getSetMethod.getDeclaringClass(), StringUtil.uncapitalize(newName));
+
+                if (field != null && field.getType().isAssignableFrom(targetType)) {
+                    propName = field.getName();
+                }
+
+                if (N.isNullOrEmpty(propName) && newName.charAt(0) != '_') {
+                    field = getDeclaredField(getSetMethod.getDeclaringClass(), "_" + StringUtil.uncapitalize(newName));
+
+                    if (field != null && field.getType().isAssignableFrom(targetType)) {
+                        propName = field.getName();
+                    }
+                }
+
+                if (N.isNullOrEmpty(propName)) {
+                    field = getDeclaredField(getSetMethod.getDeclaringClass(), formalizePropName(newName));
+
+                    if (field != null && field.getType().isAssignableFrom(targetType)) {
+                        propName = field.getName();
+                    }
+                }
+
+                if (N.isNullOrEmpty(propName) && newName.charAt(0) != '_') {
+                    field = getDeclaredField(getSetMethod.getDeclaringClass(), "_" + formalizePropName(newName));
+
+                    if (field != null && field.getType().isAssignableFrom(targetType)) {
+                        propName = field.getName();
+                    }
+                }
+
+                if (N.isNullOrEmpty(propName)) {
+                    propName = formalizePropName(newName);
+                }
+            }
+
+            if (N.isNullOrEmpty(propName)) {
+                propName = methodName;
+            }
+
+            methodPropNamePool.put(getSetMethod, propName);
+        }
+
+        return propName;
+    }
+
+    /**
+     * Returns an immutable entity property name List by the specified class.
+     *
+     * @param cls
+     * @return
+     */
+    public static ImmutableList<String> getPropNameList(final Class<?> cls) {
+        ImmutableList<String> propNameList = entityDeclaredPropNameListPool.get(cls);
+
+        if (propNameList == null) {
+            loadPropGetSetMethodList(cls);
+            propNameList = entityDeclaredPropNameListPool.get(cls);
+        }
+
+        return propNameList;
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param entity
+     * @param propValueFilter first parameter is property value, second parameter is property type.
+     * @return
+     * @throws E
+     */
+    public static <E extends Exception> List<String> getPropNames(final Object entity, Throwables.BiPredicate<Object, Type<Object>, E> propValueFilter)
+            throws E {
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entity.getClass());
+        final int size = entityInfo.propInfoList.size();
+        final List<String> result = new ArrayList<>(size < 10 ? size : size / 2);
+
+        for (PropInfo propInfo : entityInfo.propInfoList) {
+            if (propValueFilter.test(propInfo.getPropValue(result), propInfo.type)) {
+                result.add(propInfo.name);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param entity
+     * @param propValueFilter
+     * @return
+     * @throws E
+     */
+    public static <E extends Exception> List<String> getPropNames(final Object entity, Throwables.Predicate<Object, E> propValueFilter) throws E {
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entity.getClass());
+        final int size = entityInfo.propInfoList.size();
+        final List<String> result = new ArrayList<>(size < 10 ? size : size / 2);
+
+        for (PropInfo propInfo : entityInfo.propInfoList) {
+            if (propValueFilter.test(propInfo.getPropValue(result))) {
+                result.add(propInfo.name);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Gets the prop name list exclusively.
+     *
+     * @param cls
+     * @param propNameToExcluded
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public static List<String> getPropNamesExclusively(final Class<?> cls, final Collection<String> propNameToExcluded) {
+        if (N.isNullOrEmpty(propNameToExcluded)) {
+            return new ArrayList<>(getPropNameList(cls));
+        }
+        if (propNameToExcluded instanceof Set) {
+            return getPropNamesExclusively(cls, (Set) propNameToExcluded);
+        }
+        return getPropNamesExclusively(cls, N.newHashSet(propNameToExcluded));
+    }
+
+    /**
+     * Gets the prop name list exclusively.
+     *
+     * @param cls
+     * @param propNameToExcluded
+     * @return
+     */
+    public static List<String> getPropNamesExclusively(final Class<?> cls, final Set<String> propNameToExcluded) {
+        final List<String> propNameList = getPropNameList(cls);
+
+        if (N.isNullOrEmpty(propNameToExcluded)) {
+            return new ArrayList<>(propNameList);
+        }
+        final List<String> result = new ArrayList<>(propNameList.size() - propNameToExcluded.size());
+
+        for (String propName : propNameList) {
+            if (!propNameToExcluded.contains(propName)) {
+                result.add(propName);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns the property set method declared in the specified {@code cls}
+     * with the specified property name {@code propName}.
+     * {@code null} is returned if no method is found.
+     *
+     * @param cls
+     * @param propName
+     * @return
+     */
+    public static Method getPropSetMethod(final Class<?> cls, final String propName) {
+        Map<String, Method> propSetMethodMap = entityPropSetMethodPool.get(cls);
+
+        if (propSetMethodMap == null) {
+            loadPropGetSetMethodList(cls);
+            propSetMethodMap = entityPropSetMethodPool.get(cls);
+        }
+
+        Method method = propSetMethodMap.get(propName);
+
+        if (method == null) {
+            synchronized (entityDeclaredPropGetMethodPool) {
+                Map<String, Method> setterMethodList = getPropSetMethods(cls);
+
+                for (String key : setterMethodList.keySet()) {
+                    if (isPropName(cls, propName, key)) {
+                        method = propSetMethodMap.get(key);
+
+                        break;
+                    }
+                }
+
+                if ((method == null) && !propName.equalsIgnoreCase(formalizePropName(propName))) {
+                    method = getPropSetMethod(cls, formalizePropName(propName));
+                }
+
+                // set method mask to avoid query next time.
+                if (method == null) {
+                    method = METHOD_MASK;
+                }
+
+                propSetMethodMap.put(propName, method);
+            }
+        }
+
+        return (method == METHOD_MASK) ? null : method;
+    }
+
+    /**
+     * Gets the prop set method list.
+     *
+     * @param cls
+     * @return
+     */
+    public static ImmutableMap<String, Method> getPropSetMethods(final Class<?> cls) {
+        ImmutableMap<String, Method> setterMethodList = entityDeclaredPropSetMethodPool.get(cls);
+
+        if (setterMethodList == null) {
+            loadPropGetSetMethodList(cls);
+            setterMethodList = entityDeclaredPropSetMethodPool.get(cls);
+        }
+
+        return setterMethodList;
+    }
+
+    /**
+     * Return the specified {@code propValue} got by the specified method
+     * {@code propSetMethod} in the specified {@code entity}.
+     *
+     * @param <T>
+     * @param entity MapEntity is not supported
+     * @param propGetMethod
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T getPropValue(final Object entity, final Method propGetMethod) {
+        try {
+            return (T) propGetMethod.invoke(entity);
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            throw N.toRuntimeException(e);
+        }
+    }
+
+    /**
+     * Refer to getPropValue(Method, Object).
+     *
+     * @param <T>
+     * @param entity
+     * @param propName is case insensitive
+     * @return {@link #getPropValue(Object, Method)}
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T getPropValue(final Object entity, final String propName) {
+        return getPropValue(entity, propName, false);
+    }
+
+    /**
+     * Gets the prop value.
+     *
+     * @param <T>
+     * @param entity
+     * @param propName
+     * @param ignoreUnmatchedProperty
+     * @return
+     * @throws IllegalArgumentException if the specified property can't be gotten and ignoreUnmatchedProperty is false.
+     */
+    public static <T> T getPropValue(final Object entity, final String propName, final boolean ignoreUnmatchedProperty) {
+        final Class<?> cls = entity.getClass();
+        final PropInfo propInfo = ParserUtil.getEntityInfo(cls).getPropInfo(propName);
+
+        if (propInfo != null) {
+            return propInfo.getPropValue(entity);
+        }
+        Map<String, List<Method>> inlinePropGetMethodMap = entityInlinePropGetMethodPool.get(cls);
+        List<Method> inlinePropGetMethodQueue = null;
+
+        if (inlinePropGetMethodMap == null) {
+            inlinePropGetMethodMap = new ObjectPool<>(ClassUtil.getPropNameList(cls).size());
+            entityInlinePropGetMethodPool.put(cls, inlinePropGetMethodMap);
+        } else {
+            inlinePropGetMethodQueue = inlinePropGetMethodMap.get(propName);
+        }
+
+        if (inlinePropGetMethodQueue == null) {
+            inlinePropGetMethodQueue = new ArrayList<>();
+
+            final String[] strs = Splitter.with(PROP_NAME_SEPARATOR).splitToArray(propName);
+
+            if (strs.length > 1) {
+                Class<?> targetClass = cls;
+
+                for (String str : strs) {
+                    Method method = getPropGetMethod(targetClass, str);
+
+                    if (method == null) {
+                        inlinePropGetMethodQueue.clear();
+
+                        break;
+                    }
+
+                    inlinePropGetMethodQueue.add(method);
+
+                    targetClass = method.getReturnType();
+                }
+            }
+
+            inlinePropGetMethodMap.put(propName, inlinePropGetMethodQueue);
+        }
+
+        if (inlinePropGetMethodQueue.size() == 0) {
+            if (ignoreUnmatchedProperty) {
+                return null;
+            }
+            throw new IllegalArgumentException(
+                    "No property method found with property name: " + propName + " in class " + ClassUtil.getCanonicalClassName(cls));
+        }
+        Object propEntity = entity;
+
+        for (int i = 0, len = inlinePropGetMethodQueue.size(); i < len; i++) {
+            propEntity = ClassUtil.getPropValue(propEntity, inlinePropGetMethodQueue.get(i));
+
+            if (propEntity == null) {
+                return (T) N.defaultValueOf(inlinePropGetMethodQueue.get(len - 1).getReturnType());
+            }
+        }
+
+        return (T) propEntity;
+    }
+
+    /**
+     * Gets the public static string fields.
+     *
+     * @param <T>
+     * @param cls
+     * @return
+     */
+    private static <T> Map<String, String> getPublicStaticStringFields(final Class<T> cls) {
+        final Map<String, String> statisFinalFields = new HashMap<>();
+
+        for (Field field : cls.getFields()) {
+            if (Modifier.isPublic(field.getModifiers()) && Modifier.isStatic(field.getModifiers()) && Modifier.isFinal(field.getModifiers())
+                    && String.class.equals(field.getType())) {
+                String value;
+
+                try {
+                    value = (String) field.get(null);
+                    statisFinalFields.put(value, value);
+                } catch (Exception e) {
+                    // ignore. should not happe
+                }
+            }
+        }
+
+        return statisFinalFields;
     }
 
     /**
@@ -1314,33 +1954,28 @@ public final class ClassUtil {
     }
 
     /**
-     * File path 2 package name.
+     * Gets the sets the method.
      *
-     * @param entryName
+     * @param declaringClass
+     * @param getMethod
      * @return
      */
-    private static String filePath2PackageName(String entryName) {
-        String pkgName = entryName.replace('/', '.').replace('\\', '.');
-        pkgName = pkgName.endsWith(".") ? pkgName.substring(0, pkgName.length() - 1) : pkgName;
+    private static Method getSetMethod(final Method getMethod) {
+        final Class<?> declaringClass = getMethod.getDeclaringClass();
+        final String getMethodName = getMethod.getName();
 
-        return pkgName;
-    }
+        final String setMethodName = SET
+                + (getMethodName.substring(getMethodName.startsWith(IS) ? 2 : ((getMethodName.startsWith(HAS) || getMethodName.startsWith(GET)) ? 3 : 0)));
 
-    /**
-     * Gets the class name.
-     *
-     * @param cls
-     * @return
-     */
-    public static String getClassName(final Class<?> cls) {
-        String clsName = nameClassPool.get(cls);
+        Method setMethod = internalGetDeclaredMethod(declaringClass, setMethodName, getMethod.getReturnType());
 
-        if (clsName == null) {
-            clsName = cls.getName();
-            nameClassPool.put(cls, clsName);
+        if (setMethod == null && getDeclaredField(declaringClass, getMethodName) != null) {
+            setMethod = internalGetDeclaredMethod(declaringClass, getMethodName, getMethod.getReturnType());
         }
 
-        return clsName;
+        return ((setMethod != null)
+                && (void.class.equals(setMethod.getReturnType()) || setMethod.getReturnType().isAssignableFrom(setMethod.getDeclaringClass()))) ? setMethod
+                        : null;
     }
 
     /**
@@ -1360,135 +1995,93 @@ public final class ClassUtil {
         return clsName;
     }
 
-    /**
-     * Gets the canonical class name.
-     *
-     * @param cls
-     * @return
-     */
-    public static String getCanonicalClassName(final Class<?> cls) {
-        String clsName = canonicalClassNamePool.get(cls);
-
-        if (clsName == null) {
-            clsName = cls.getCanonicalName();
-
-            if (clsName == null) {
-                clsName = cls.getName();
-            }
-
-            if (clsName != null) {
-                canonicalClassNamePool.put(cls, clsName);
-            }
-        }
-
-        return clsName;
+    public static String getTypeName(final java.lang.reflect.Type type) {
+        return formatParameterizedTypeName(type.getTypeName());
     }
 
     /**
-     * Gets the enclosing class.
+     * Gets an {@link Iterator} that can iterate over a class hierarchy in ascending (subclass to superclass) order,
+     * excluding interfaces.
      *
-     * @param cls
-     * @return
+     * @param type the type to get the class hierarchy from
+     * @return Iterator an Iterator over the class hierarchy of the given class
+     * @since 3.2
      */
-    public static Class<?> getEnclosingClass(final Class<?> cls) {
-        Class<?> enclosingClass = enclosingClassPool.get(cls);
-
-        if (enclosingClass == null) {
-            enclosingClass = cls.getEnclosingClass();
-
-            if (enclosingClass == null) {
-                enclosingClass = CLASS_MASK;
-            }
-
-            enclosingClassPool.put(cls, enclosingClass);
-        }
-
-        return (enclosingClass == CLASS_MASK) ? null : enclosingClass;
+    public static ObjIterator<Class<?>> hierarchy(final Class<?> type) {
+        return hierarchy(type, false);
     }
 
     /**
-     * Returns the constructor declared in the specified {@code cls} with the specified {@code parameterTypes}.
+     * Gets an {@link Iterator} that can iterate over a class hierarchy in ascending (subclass to superclass) order.
      *
-     * @param <T>
-     * @param cls
-     * @param parameterTypes
-     * @return {@code null} if no constructor is found
+     * @param type the type to get the class hierarchy from
+     * @param includeInterface switch indicating whether to include or exclude interfaces
+     * @return Iterator an Iterator over the class hierarchy of the given class
+     * @since 3.2
      */
-    @SafeVarargs
-    public static <T> Constructor<T> getDeclaredConstructor(final Class<T> cls, final Class<?>... parameterTypes) {
-        Map<Class<?>[], Constructor<?>> constructorPool = classDeclaredConstructorPool.get(cls);
-        Constructor<T> constructor = null;
+    public static ObjIterator<Class<?>> hierarchy(final Class<?> type, final boolean includeInterface) {
+        final ObjIterator<Class<?>> superClassesIter = new ObjIterator<Class<?>>() {
+            private final u.Holder<Class<?>> next = new u.Holder<>(type);
 
-        if (constructorPool != null) {
-            constructor = (Constructor<T>) constructorPool.get(parameterTypes);
-        }
-
-        if (constructor == null) {
-            try {
-                constructor = cls.getDeclaredConstructor(parameterTypes);
-
-                // SHOULD NOT set it true here.
-                // ClassUtil.setAccessible(constructor, true);
-            } catch (NoSuchMethodException e) {
-                // ignore.
+            @Override
+            public boolean hasNext() {
+                return next.value() != null;
             }
 
-            if (constructor != null) {
-                if (constructorPool == null) {
-                    constructorPool = new ArrayHashMap<>(ConcurrentHashMap.class);
-                    classDeclaredConstructorPool.put(cls, constructorPool);
-                }
-
-                constructorPool.put(parameterTypes.clone(), constructor);
+            @Override
+            public Class<?> next() {
+                final Class<?> result = next.value();
+                next.setValue(result.getSuperclass());
+                return result;
             }
+        };
+
+        if (includeInterface == false) {
+            return superClassesIter;
         }
 
-        return constructor;
-    }
+        return new ObjIterator<Class<?>>() {
+            private final Set<Class<?>> seenInterfaces = new HashSet<>();
+            private Iterator<Class<?>> interfacesIter = N.emptyIterator();
 
-    /**
-     * Returns the method declared in the specified {@code cls} with the specified {@code methodName} and {@code parameterTypes}.
-     *
-     * @param cls
-     * @param methodName
-     * @param parameterTypes
-     * @return {@code null} if no method is found
-     */
-    @SafeVarargs
-    public static Method getDeclaredMethod(final Class<?> cls, final String methodName, final Class<?>... parameterTypes) {
-        Map<String, Map<Class<?>[], Method>> methodNamePool = classDeclaredMethodPool.get(cls);
-        Map<Class<?>[], Method> methodPool = methodNamePool == null ? null : methodNamePool.get(methodName);
-
-        Method method = null;
-
-        if (methodPool != null) {
-            method = methodPool.get(parameterTypes);
-        }
-
-        if (method == null) {
-            method = internalGetDeclaredMethod(cls, methodName, parameterTypes);
-
-            // SHOULD NOT set it true here.
-            // if (method != null) {
-            // ClassUtil.setAccessible(method, true);
-            // }
-
-            if (method != null) {
-                if (methodNamePool == null) {
-                    methodNamePool = new ConcurrentHashMap<>();
-                    classDeclaredMethodPool.put(cls, methodNamePool);
-                }
-
-                if (methodPool == null) {
-                    methodPool = new ArrayHashMap<>(ConcurrentHashMap.class);
-                    methodNamePool.put(methodName, methodPool);
-                }
-
-                methodPool.put(parameterTypes.clone(), method);
+            @Override
+            public boolean hasNext() {
+                return interfacesIter.hasNext() || superClassesIter.hasNext();
             }
-        }
 
-        return method;
+            @Override
+            public Class<?> next() {
+                if (interfacesIter.hasNext()) {
+                    final Class<?> nextInterface = interfacesIter.next();
+                    seenInterfaces.add(nextInterface);
+                    return nextInterface;
+                }
+
+                final Class<?> nextSuperclass = superClassesIter.next();
+                final Set<Class<?>> currentInterfaces = new LinkedHashSet<>();
+
+                walkInterfaces(currentInterfaces, nextSuperclass);
+
+                interfacesIter = currentInterfaces.iterator();
+
+                return nextSuperclass;
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+
+            private void walkInterfaces(final Set<Class<?>> addTo, final Class<?> c) {
+                for (final Class<?> iface : c.getInterfaces()) {
+                    if (!seenInterfaces.contains(iface)) {
+                        addTo.add(iface);
+                    }
+
+                    walkInterfaces(addTo, iface);
+                }
+            }
+        };
     }
 
     /**
@@ -1571,269 +2164,119 @@ public final class ClassUtil {
     }
 
     /**
-     * Returns an immutable entity property name List by the specified class.
      *
      * @param cls
      * @return
      */
-    public static ImmutableList<String> getPropNameList(final Class<?> cls) {
-        ImmutableList<String> propNameList = entityDeclaredPropNameListPool.get(cls);
-
-        if (propNameList == null) {
-            loadPropGetSetMethodList(cls);
-            propNameList = entityDeclaredPropNameListPool.get(cls);
-        }
-
-        return propNameList;
+    public static boolean isDirtyMarker(final Class<?> cls) {
+        return DirtyMarkerUtil.isDirtyMarker(cls);
     }
 
     /**
-     * Gets the prop name list exclusively.
+     * Checks if is entity.
      *
      * @param cls
-     * @param propNameToExcluded
-     * @return
+     * @return true, if is entity
      */
-    public static List<String> getPropNamesExclusively(final Class<?> cls, final Set<String> propNameToExcluded) {
-        final List<String> propNameList = getPropNameList(cls);
+    public static boolean isEntity(final Class<?> cls) {
+        Boolean b = entityClassPool.get(cls);
 
-        if (N.isNullOrEmpty(propNameToExcluded)) {
-            return new ArrayList<>(propNameList);
-        } else {
-            final List<String> result = new ArrayList<>(propNameList.size() - propNameToExcluded.size());
+        if (b == null) {
+            b = !registeredNonEntityClass.containsKey(cls) && N.notNullOrEmpty(ClassUtil.getPropNameList(cls));
 
-            for (String propName : propNameList) {
-                if (!propNameToExcluded.contains(propName)) {
-                    result.add(propName);
-                }
-            }
+            entityClassPool.put(cls, b);
+        }
 
-            return result;
+        return b;
+    }
+
+    /**
+     * Checks if is field get method.
+     *
+     * @param method
+     * @param field
+     * @return true, if is field get method
+     */
+    static boolean isFieldGetMethod(final Method method, final Field field) {
+        if (!isGetMethod(method)) {
+            return false;
+        }
+
+        if (!method.getReturnType().isAssignableFrom(field.getType())) {
+            return false;
+        }
+
+        final String methodName = method.getName();
+
+        if (getDeclaredField(method.getDeclaringClass(), methodName) != null) {
+            return true;
+        }
+
+        final String fieldName = field.getName();
+        final String propName = methodName
+                .substring(methodName.startsWith(IS) ? 2 : ((methodName.startsWith(HAS) || methodName.startsWith(GET) || methodName.startsWith(SET)) ? 3 : 0));
+
+        return propName.equalsIgnoreCase(fieldName) || (fieldName.charAt(0) == '_' && propName.equalsIgnoreCase(fieldName.substring(1)));
+    }
+
+    /**
+     * Checks if is gets the method.
+     *
+     * @param method
+     * @return true, if is gets the method
+     */
+    private static boolean isGetMethod(final Method method) {
+        String mn = method.getName();
+
+        return (mn.startsWith(GET) || mn.startsWith(IS) || mn.startsWith(HAS) || getDeclaredField(method.getDeclaringClass(), mn) != null)
+                && (N.isNullOrEmpty(method.getParameterTypes())) && !void.class.equals(method.getReturnType()) && !nonGetSetMethodName.contains(mn);
+    }
+
+    /**
+     * Checks if is JAXB get method.
+     *
+     * @param instance
+     * @param method
+     * @return true, if is JAXB get method
+     */
+    static boolean isJAXBGetMethod(final Object instance, final Method method) {
+        try {
+            return (instance != null) && (Collection.class.isAssignableFrom(method.getReturnType()) || Map.class.isAssignableFrom(method.getReturnType()))
+                    && (invokeMethod(instance, method) != null);
+        } catch (Exception e) {
+            return false;
         }
     }
 
     /**
-     * Gets the prop name list exclusively.
+     * Checks if is prop name.
      *
      * @param cls
-     * @param propNameToExcluded
-     * @return
+     * @param inputPropName
+     * @param propNameByMethod
+     * @return true, if is prop name
      */
-    @SuppressWarnings("rawtypes")
-    public static List<String> getPropNamesExclusively(final Class<?> cls, final Collection<String> propNameToExcluded) {
-        if (N.isNullOrEmpty(propNameToExcluded)) {
-            return new ArrayList<>(getPropNameList(cls));
-        } else if (propNameToExcluded instanceof Set) {
-            return getPropNamesExclusively(cls, (Set) propNameToExcluded);
-        } else {
-            return getPropNamesExclusively(cls, N.newHashSet(propNameToExcluded));
+    static boolean isPropName(final Class<?> cls, String inputPropName, final String propNameByMethod) {
+        if (inputPropName.length() > 128) {
+            throw new IllegalArgumentException("The property name execeed 128: " + inputPropName);
         }
+
+        inputPropName = inputPropName.trim();
+
+        return inputPropName.equalsIgnoreCase(propNameByMethod) || inputPropName.replace(WD.UNDERSCORE, N.EMPTY_STRING).equalsIgnoreCase(propNameByMethod)
+                || inputPropName.equalsIgnoreCase(getSimpleClassName(cls) + WD._PERIOD + propNameByMethod)
+                || (inputPropName.startsWith(GET) && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
+                || (inputPropName.startsWith(SET) && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
+                || (inputPropName.startsWith(IS) && inputPropName.substring(2).equalsIgnoreCase(propNameByMethod))
+                || (inputPropName.startsWith(HAS) && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod));
     }
 
-    /**
-     *
-     * @param entity
-     * @return
-     */
-    public static List<String> getNonNullPropNames(final Object entity) {
-        return getPropNames(entity, Fn.<Object> notNull());
-    }
+    private static boolean isSetMethod(final Method method) {
+        String mn = method.getName();
 
-    /**
-     *
-     * @param <E>
-     * @param entity
-     * @param propValueFilter
-     * @return
-     * @throws E
-     */
-    public static <E extends Exception> List<String> getPropNames(final Object entity, Throwables.Predicate<Object, E> propValueFilter) throws E {
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entity.getClass());
-        final int size = entityInfo.propInfoList.size();
-        final List<String> result = new ArrayList<>(size < 10 ? size : size / 2);
-
-        for (PropInfo propInfo : entityInfo.propInfoList) {
-            if (propValueFilter.test(propInfo.getPropValue(result))) {
-                result.add(propInfo.name);
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param entity
-     * @param propValueFilter first parameter is property value, second parameter is property type.
-     * @return
-     * @throws E
-     */
-    public static <E extends Exception> List<String> getPropNames(final Object entity, Throwables.BiPredicate<Object, Type<Object>, E> propValueFilter)
-            throws E {
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entity.getClass());
-        final int size = entityInfo.propInfoList.size();
-        final List<String> result = new ArrayList<>(size < 10 ? size : size / 2);
-
-        for (PropInfo propInfo : entityInfo.propInfoList) {
-            if (propValueFilter.test(propInfo.getPropValue(result), propInfo.type)) {
-                result.add(propInfo.name);
-            }
-        }
-
-        return result;
-    }
-
-    public static ImmutableMap<String, Field> getPropFields(final Class<?> cls) {
-        ImmutableMap<String, Field> getterMethodList = entityDeclaredPropFieldPool.get(cls);
-
-        if (getterMethodList == null) {
-            loadPropGetSetMethodList(cls);
-            getterMethodList = entityDeclaredPropFieldPool.get(cls);
-        }
-
-        return getterMethodList;
-    }
-
-    /**
-     * Gets the prop field.
-     *
-     * @param cls
-     * @param propName
-     * @return
-     */
-    public static Field getPropField(final Class<?> cls, final String propName) {
-        Map<String, Field> propFieldMap = entityPropFieldPool.get(cls);
-
-        if (propFieldMap == null) {
-            loadPropGetSetMethodList(cls);
-            propFieldMap = entityPropFieldPool.get(cls);
-        }
-
-        Field field = propFieldMap.get(propName);
-
-        if (field == null) {
-            if (!ClassUtil.isEntity(cls)) {
-                throw new IllegalArgumentException(
-                        "No property getter/setter method or public field found in the specified entity: " + ClassUtil.getCanonicalClassName(cls));
-            }
-
-            synchronized (entityDeclaredPropGetMethodPool) {
-                final Map<String, Method> getterMethodList = ClassUtil.getPropGetMethods(cls);
-
-                for (String key : getterMethodList.keySet()) {
-                    if (isPropName(cls, propName, key)) {
-                        field = propFieldMap.get(key);
-
-                        break;
-                    }
-                }
-
-                if ((field == null) && !propName.equalsIgnoreCase(formalizePropName(propName))) {
-                    field = getPropField(cls, formalizePropName(propName));
-                }
-
-                // set method mask to avoid query next time.
-                if (field == null) {
-                    field = FIELD_MASK;
-                }
-
-                //    } else {
-                //        ClassUtil.setAccessibleQuietly(field, true);
-                //    }
-
-                propFieldMap.put(propName, field);
-            }
-        }
-
-        return (field == FIELD_MASK) ? null : field;
-    }
-
-    /**
-     * Call registerXMLBindingClassForPropGetSetMethod first to retrieve the property
-     * getter/setter method for the class/bean generated/wrote by JAXB
-     * specification.
-     *
-     * @param cls
-     * @return
-     */
-    public static ImmutableMap<String, Method> getPropGetMethods(final Class<?> cls) {
-        ImmutableMap<String, Method> getterMethodList = entityDeclaredPropGetMethodPool.get(cls);
-
-        if (getterMethodList == null) {
-            loadPropGetSetMethodList(cls);
-            getterMethodList = entityDeclaredPropGetMethodPool.get(cls);
-        }
-
-        return getterMethodList;
-    }
-
-    /**
-     * Returns the property get method declared in the specified {@code cls}
-     * with the specified property name {@code propName}.
-     * {@code null} is returned if no method is found.
-     *
-     * Call registerXMLBindingClassForPropGetSetMethod first to retrieve the property
-     * getter/setter method for the class/bean generated/wrote by JAXB
-     * specification
-     *
-     * @param cls
-     * @param propName
-     * @return
-     */
-    public static Method getPropGetMethod(final Class<?> cls, final String propName) {
-        Map<String, Method> propGetMethodMap = entityPropGetMethodPool.get(cls);
-
-        if (propGetMethodMap == null) {
-            loadPropGetSetMethodList(cls);
-            propGetMethodMap = entityPropGetMethodPool.get(cls);
-        }
-
-        Method method = propGetMethodMap.get(propName);
-
-        if (method == null) {
-            synchronized (entityDeclaredPropGetMethodPool) {
-                Map<String, Method> getterMethodList = getPropGetMethods(cls);
-
-                for (String key : getterMethodList.keySet()) {
-                    if (isPropName(cls, propName, key)) {
-                        method = getterMethodList.get(key);
-
-                        break;
-                    }
-                }
-
-                if ((method == null) && !propName.equalsIgnoreCase(formalizePropName(propName))) {
-                    method = getPropGetMethod(cls, formalizePropName(propName));
-                }
-
-                // set method mask to avoid query next time.
-                if (method == null) {
-                    method = METHOD_MASK;
-                }
-
-                propGetMethodMap.put(propName, method);
-            }
-        }
-
-        return (method == METHOD_MASK) ? null : method;
-    }
-
-    /**
-     * Gets the prop set method list.
-     *
-     * @param cls
-     * @return
-     */
-    public static ImmutableMap<String, Method> getPropSetMethods(final Class<?> cls) {
-        ImmutableMap<String, Method> setterMethodList = entityDeclaredPropSetMethodPool.get(cls);
-
-        if (setterMethodList == null) {
-            loadPropGetSetMethodList(cls);
-            setterMethodList = entityDeclaredPropSetMethodPool.get(cls);
-        }
-
-        return setterMethodList;
+        return (mn.startsWith(SET) || getDeclaredField(method.getDeclaringClass(), mn) != null) && N.len(method.getParameterTypes()) == 1
+                && (void.class.equals(method.getReturnType()) || method.getReturnType().isAssignableFrom(method.getDeclaringClass()))
+                && !nonGetSetMethodName.contains(mn);
     }
 
     /**
@@ -1915,7 +2358,8 @@ public final class ClassUtil {
                                 propSetMethodMap.put(propName, setMethod);
 
                                 break;
-                            } else if (isJAXBGetMethod(instance, method)) {
+                            }
+                            if (isJAXBGetMethod(instance, method)) {
                                 // ClassUtil.setAccessibleQuietly(field, true);
                                 ClassUtil.setAccessibleQuietly(method, true);
                                 ClassUtil.setAccessibleQuietly(setMethod, true);
@@ -2040,209 +2484,194 @@ public final class ClassUtil {
     }
 
     /**
-     * Checks if is gets the method.
+     * Make package folder.
      *
-     * @param method
-     * @return true, if is gets the method
-     */
-    private static boolean isGetMethod(final Method method) {
-        String mn = method.getName();
-
-        return (mn.startsWith(GET) || mn.startsWith(IS) || mn.startsWith(HAS) || getDeclaredField(method.getDeclaringClass(), mn) != null)
-                && (N.isNullOrEmpty(method.getParameterTypes())) && !void.class.equals(method.getReturnType()) && !nonGetSetMethodName.contains(mn);
-    }
-
-    /**
-     * Checks if is field get method.
-     *
-     * @param method
-     * @param field
-     * @return true, if is field get method
-     */
-    static boolean isFieldGetMethod(final Method method, final Field field) {
-        if (!isGetMethod(method)) {
-            return false;
-        }
-
-        if (!method.getReturnType().isAssignableFrom(field.getType())) {
-            return false;
-        }
-
-        final String methodName = method.getName();
-
-        if (getDeclaredField(method.getDeclaringClass(), methodName) != null) {
-            return true;
-        }
-
-        final String fieldName = field.getName();
-        final String propName = methodName
-                .substring(methodName.startsWith(IS) ? 2 : ((methodName.startsWith(HAS) || methodName.startsWith(GET) || methodName.startsWith(SET)) ? 3 : 0));
-
-        return propName.equalsIgnoreCase(fieldName) || (fieldName.charAt(0) == '_' && propName.equalsIgnoreCase(fieldName.substring(1)));
-    }
-
-    /**
-     * Checks if is JAXB get method.
-     *
-     * @param instance
-     * @param method
-     * @return true, if is JAXB get method
-     */
-    static boolean isJAXBGetMethod(final Object instance, final Method method) {
-        try {
-            return (instance != null) && (Collection.class.isAssignableFrom(method.getReturnType()) || Map.class.isAssignableFrom(method.getReturnType()))
-                    && (invokeMethod(instance, method) != null);
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    private static boolean isSetMethod(final Method method) {
-        String mn = method.getName();
-
-        return (mn.startsWith(SET) || getDeclaredField(method.getDeclaringClass(), mn) != null) && N.len(method.getParameterTypes()) == 1
-                && (void.class.equals(method.getReturnType()) || method.getReturnType().isAssignableFrom(method.getDeclaringClass()))
-                && !nonGetSetMethodName.contains(mn);
-    }
-
-    /**
-     * Gets the sets the method.
-     *
-     * @param declaringClass
-     * @param getMethod
+     * @param srcPath
+     * @param pkgName
      * @return
      */
-    private static Method getSetMethod(final Method getMethod) {
-        final Class<?> declaringClass = getMethod.getDeclaringClass();
-        final String getMethodName = getMethod.getName();
+    static String makePackageFolder(String srcPath, final String pkgName) {
+        srcPath = (srcPath.endsWith("/") || srcPath.endsWith("\\")) ? srcPath : (srcPath + File.separator);
 
-        final String setMethodName = SET
-                + (getMethodName.substring(getMethodName.startsWith(IS) ? 2 : ((getMethodName.startsWith(HAS) || getMethodName.startsWith(GET)) ? 3 : 0)));
+        String classFilePath = (pkgName == null) ? srcPath : (srcPath + pkgName.replace('.', File.separatorChar) + File.separator);
+        File classFileFolder = new File(classFilePath);
 
-        Method setMethod = internalGetDeclaredMethod(declaringClass, setMethodName, getMethod.getReturnType());
-
-        if (setMethod == null && getDeclaredField(declaringClass, getMethodName) != null) {
-            setMethod = internalGetDeclaredMethod(declaringClass, getMethodName, getMethod.getReturnType());
+        if (!classFileFolder.exists()) {
+            classFileFolder.mkdirs();
         }
 
-        return ((setMethod != null)
-                && (void.class.equals(setMethod.getReturnType()) || setMethod.getReturnType().isAssignableFrom(setMethod.getDeclaringClass()))) ? setMethod
-                        : null;
+        return classFilePath;
     }
 
     /**
-     * Gets the public static string fields.
+     * Package name 2 file path.
      *
-     * @param <T>
+     * @param pkgName
+     * @return
+     */
+    private static String packageName2FilePath(String pkgName) {
+        String pkgPath = pkgName.replace('.', '/');
+        pkgPath = pkgPath.endsWith("/") ? pkgPath : (pkgPath + "/");
+
+        return pkgPath;
+    }
+
+    /**
+     * Register non entity class.
+     *
      * @param cls
-     * @return
      */
-    private static <T> Map<String, String> getPublicStaticStringFields(final Class<T> cls) {
-        final Map<String, String> statisFinalFields = new HashMap<>();
+    @SuppressWarnings("deprecation")
+    public static void registerNonEntityClass(final Class<?> cls) {
+        registeredNonEntityClass.put(cls, cls);
 
-        for (Field field : cls.getFields()) {
-            if (Modifier.isPublic(field.getModifiers()) && Modifier.isStatic(field.getModifiers()) && Modifier.isFinal(field.getModifiers())
-                    && String.class.equals(field.getType())) {
-                String value;
+        synchronized (entityDeclaredPropGetMethodPool) {
+            registeredXMLBindingClassList.put(cls, false);
 
-                try {
-                    value = (String) field.get(null);
-                    statisFinalFields.put(value, value);
-                } catch (Exception e) {
-                    // ignore. should not happe
-                }
+            if (entityDeclaredPropGetMethodPool.containsKey(cls)) {
+                entityDeclaredPropGetMethodPool.remove(cls);
+                entityDeclaredPropSetMethodPool.remove(cls);
+
+                entityPropFieldPool.remove(cls);
+                loadPropGetSetMethodList(cls);
             }
-        }
 
-        return statisFinalFields;
+            ParserUtil.refreshEntityPropInfo(cls);
+        }
     }
 
     /**
-     * Checks if is prop name.
-     *
-     * @param cls
-     * @param inputPropName
-     * @param propNameByMethod
-     * @return true, if is prop name
-     */
-    static boolean isPropName(final Class<?> cls, String inputPropName, final String propNameByMethod) {
-        if (inputPropName.length() > 128) {
-            throw new IllegalArgumentException("The property name execeed 128: " + inputPropName);
-        }
-
-        inputPropName = inputPropName.trim();
-
-        return inputPropName.equalsIgnoreCase(propNameByMethod) || inputPropName.replace(WD.UNDERSCORE, N.EMPTY_STRING).equalsIgnoreCase(propNameByMethod)
-                || inputPropName.equalsIgnoreCase(getSimpleClassName(cls) + WD._PERIOD + propNameByMethod)
-                || (inputPropName.startsWith(GET) && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
-                || (inputPropName.startsWith(SET) && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
-                || (inputPropName.startsWith(IS) && inputPropName.substring(2).equalsIgnoreCase(propNameByMethod))
-                || (inputPropName.startsWith(HAS) && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod));
-    }
-
-    /**
-     * Returns the property set method declared in the specified {@code cls}
-     * with the specified property name {@code propName}.
-     * {@code null} is returned if no method is found.
+     * Register non prop get set method.
      *
      * @param cls
      * @param propName
-     * @return
      */
-    public static Method getPropSetMethod(final Class<?> cls, final String propName) {
-        Map<String, Method> propSetMethodMap = entityPropSetMethodPool.get(cls);
+    public static void registerNonPropGetSetMethod(final Class<?> cls, final String propName) {
+        Set<String> set = registeredNonPropGetSetMethodPool.get(cls);
 
-        if (propSetMethodMap == null) {
-            loadPropGetSetMethodList(cls);
-            propSetMethodMap = entityPropSetMethodPool.get(cls);
-        }
+        if (set == null) {
+            synchronized (registeredNonPropGetSetMethodPool) {
+                set = registeredNonPropGetSetMethodPool.get(cls);
 
-        Method method = propSetMethodMap.get(propName);
-
-        if (method == null) {
-            synchronized (entityDeclaredPropGetMethodPool) {
-                Map<String, Method> setterMethodList = getPropSetMethods(cls);
-
-                for (String key : setterMethodList.keySet()) {
-                    if (isPropName(cls, propName, key)) {
-                        method = propSetMethodMap.get(key);
-
-                        break;
-                    }
+                if (set == null) {
+                    set = N.newHashSet();
+                    registeredNonPropGetSetMethodPool.put(cls, set);
                 }
-
-                if ((method == null) && !propName.equalsIgnoreCase(formalizePropName(propName))) {
-                    method = getPropSetMethod(cls, formalizePropName(propName));
-                }
-
-                // set method mask to avoid query next time.
-                if (method == null) {
-                    method = METHOD_MASK;
-                }
-
-                propSetMethodMap.put(propName, method);
             }
         }
 
-        return (method == METHOD_MASK) ? null : method;
+        set.add(propName);
     }
 
     /**
-     * Return the specified {@code propValue} got by the specified method
-     * {@code propSetMethod} in the specified {@code entity}.
+     * Register prop get set method.
      *
-     * @param <T>
-     * @param entity MapEntity is not supported
-     * @param propGetMethod
-     * @return
+     * @param propName
+     * @param method
      */
-    @SuppressWarnings("unchecked")
-    public static <T> T getPropValue(final Object entity, final Method propGetMethod) {
-        try {
-            return (T) propGetMethod.invoke(entity);
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            throw N.toRuntimeException(e);
+    public static void registerPropGetSetMethod(final String propName, final Method method) {
+        Class<?> cls = method.getDeclaringClass();
+
+        synchronized (entityDeclaredPropGetMethodPool) {
+            if (isGetMethod(method)) {
+                Map<String, Method> propMethodMap = entityPropGetMethodPool.get(cls);
+
+                if (propMethodMap == null) {
+                    loadPropGetSetMethodList(cls);
+                    propMethodMap = entityPropGetMethodPool.get(cls);
+                }
+
+                if (propMethodMap.containsKey(propName)) {
+                    if (method.equals(propMethodMap.get(propName)) == false) {
+                        throw new IllegalArgumentException(
+                                propName + " has already been regiestered with different method: " + propMethodMap.get(propName).getName());
+                    }
+                } else {
+                    propMethodMap.put(propName, method);
+                }
+            } else if (isSetMethod(method)) {
+                Map<String, Method> propMethodMap = entityPropSetMethodPool.get(cls);
+
+                if (propMethodMap == null) {
+                    loadPropGetSetMethodList(cls);
+                    propMethodMap = entityPropSetMethodPool.get(cls);
+                }
+
+                if (propMethodMap.containsKey(propName)) {
+                    if (method.equals(propMethodMap.get(propName)) == false) {
+                        throw new IllegalArgumentException(
+                                propName + " has already been regiestered with different method: " + propMethodMap.get(propName).getName());
+                    }
+                } else {
+                    propMethodMap.put(propName, method);
+                }
+            } else {
+                throw new IllegalArgumentException("The name of property getter/setter method must start with 'get/is/has' or 'set': " + method.getName());
+            }
         }
+    }
+
+    /**
+     * The property maybe only has get method if its type is collection or map by xml binding specification
+     * Otherwise, it will be ignored if not registered by calling this method.
+     *
+     * @param cls
+     */
+    @SuppressWarnings("deprecation")
+    public static void registerXMLBindingClass(final Class<?> cls) {
+        if (registeredXMLBindingClassList.containsKey(cls)) {
+            return;
+        }
+
+        synchronized (entityDeclaredPropGetMethodPool) {
+            registeredXMLBindingClassList.put(cls, false);
+
+            if (entityDeclaredPropGetMethodPool.containsKey(cls)) {
+                entityDeclaredPropGetMethodPool.remove(cls);
+                entityDeclaredPropSetMethodPool.remove(cls);
+
+                entityPropFieldPool.remove(cls);
+                loadPropGetSetMethodList(cls);
+            }
+
+            ParserUtil.refreshEntityPropInfo(cls);
+        }
+    }
+
+    /**
+     *
+     * @param accessibleObject
+     * @param flag
+     */
+    public static void setAccessible(final AccessibleObject accessibleObject, final boolean flag) {
+        if (accessibleObject != null && accessibleObject.isAccessible() != flag) {
+            accessibleObject.setAccessible(flag);
+        }
+    }
+
+    /**
+     *
+     * @param accessibleObject
+     * @param flag
+     * @return {@code true} if no error happens, otherwise {@code false} is returned.
+     */
+    public static boolean setAccessibleQuietly(final AccessibleObject accessibleObject, final boolean flag) {
+        if (accessibleObject == null) {
+            return false;
+        }
+
+        if (accessibleObject.isAccessible() == flag) {
+            return true;
+        }
+
+        try {
+            accessibleObject.setAccessible(flag);
+        } catch (Exception e) {
+            logger.warn("Failed to set accessible for : " + accessibleObject + " with flag: " + flag, e);
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -2280,123 +2709,6 @@ public final class ClassUtil {
                 } catch (IllegalAccessException | InvocationTargetException e2) {
                     throw N.toRuntimeException(e);
                 }
-            }
-        }
-    }
-
-    /**
-     * Sets the prop value by get.
-     *
-     * @param entity
-     * @param propGetMethod
-     * @param propValue
-     */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static void setPropValueByGet(final Object entity, final Method propGetMethod, final Object propValue) {
-        if (propValue == null) {
-            return;
-        }
-
-        final Object rt = invokeMethod(entity, propGetMethod);
-
-        if (rt instanceof Collection) {
-            final Collection<?> c = (Collection<?>) rt;
-            c.clear();
-            c.addAll((Collection) propValue);
-        } else if (rt instanceof Map) {
-            final Map<?, ?> m = (Map<?, ?>) rt;
-            m.clear();
-            m.putAll((Map) propValue);
-        } else {
-            throw new IllegalArgumentException("Failed to set property value by getter method '" + propGetMethod.getName() + "'");
-        }
-    }
-
-    /**
-     * Refer to getPropValue(Method, Object).
-     *
-     * @param <T>
-     * @param entity
-     * @param propName is case insensitive
-     * @return {@link #getPropValue(Object, Method)}
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> T getPropValue(final Object entity, final String propName) {
-        return getPropValue(entity, propName, false);
-    }
-
-    /**
-     * Gets the prop value.
-     *
-     * @param <T>
-     * @param entity
-     * @param propName
-     * @param ignoreUnmatchedProperty
-     * @return
-     * @throws IllegalArgumentException if the specified property can't be gotten and ignoreUnmatchedProperty is false.
-     */
-    public static <T> T getPropValue(final Object entity, final String propName, final boolean ignoreUnmatchedProperty) {
-        final Class<?> cls = entity.getClass();
-        final PropInfo propInfo = ParserUtil.getEntityInfo(cls).getPropInfo(propName);
-
-        if (propInfo != null) {
-            return propInfo.getPropValue(entity);
-        } else {
-            Map<String, List<Method>> inlinePropGetMethodMap = entityInlinePropGetMethodPool.get(cls);
-            List<Method> inlinePropGetMethodQueue = null;
-
-            if (inlinePropGetMethodMap == null) {
-                inlinePropGetMethodMap = new ObjectPool<>(ClassUtil.getPropNameList(cls).size());
-                entityInlinePropGetMethodPool.put(cls, inlinePropGetMethodMap);
-            } else {
-                inlinePropGetMethodQueue = inlinePropGetMethodMap.get(propName);
-            }
-
-            if (inlinePropGetMethodQueue == null) {
-                inlinePropGetMethodQueue = new ArrayList<>();
-
-                final String[] strs = Splitter.with(PROP_NAME_SEPARATOR).splitToArray(propName);
-
-                if (strs.length > 1) {
-                    Class<?> targetClass = cls;
-
-                    for (String str : strs) {
-                        Method method = getPropGetMethod(targetClass, str);
-
-                        if (method == null) {
-                            inlinePropGetMethodQueue.clear();
-
-                            break;
-                        }
-
-                        inlinePropGetMethodQueue.add(method);
-
-                        targetClass = method.getReturnType();
-                    }
-                }
-
-                inlinePropGetMethodMap.put(propName, inlinePropGetMethodQueue);
-            }
-
-            if (inlinePropGetMethodQueue.size() == 0) {
-                if (ignoreUnmatchedProperty) {
-                    return null;
-                } else {
-                    throw new IllegalArgumentException(
-                            "No property method found with property name: " + propName + " in class " + ClassUtil.getCanonicalClassName(cls));
-                }
-            } else {
-                Object propEntity = entity;
-
-                for (int i = 0, len = inlinePropGetMethodQueue.size(); i < len; i++) {
-                    propEntity = ClassUtil.getPropValue(propEntity, inlinePropGetMethodQueue.get(i));
-
-                    if (propEntity == null) {
-                        return (T) N.defaultValueOf(inlinePropGetMethodQueue.get(len - 1).getReturnType());
-                    }
-                }
-
-                return (T) propEntity;
             }
         }
     }
@@ -2532,138 +2844,31 @@ public final class ClassUtil {
     }
 
     /**
-     * Gets the prop name by method.
+     * Sets the prop value by get.
      *
-     * @param getSetMethod
-     * @return
+     * @param entity
+     * @param propGetMethod
+     * @param propValue
      */
-    public static String getPropNameByMethod(final Method getSetMethod) {
-        String propName = methodPropNamePool.get(getSetMethod);
-
-        if (propName == null) {
-            final String methodName = getSetMethod.getName();
-            final Class<?>[] paramTypes = getSetMethod.getParameterTypes();
-            final Class<?> targetType = N.isNullOrEmpty(paramTypes) ? getSetMethod.getReturnType() : paramTypes[0];
-
-            Field field = getDeclaredField(getSetMethod.getDeclaringClass(), methodName);
-
-            if (field != null && field.getType().isAssignableFrom(targetType)) {
-                propName = field.getName();
-            }
-
-            field = getDeclaredField(getSetMethod.getDeclaringClass(), "_" + methodName);
-
-            if (field != null && field.getType().isAssignableFrom(targetType)) {
-                propName = field.getName();
-            }
-
-            if (N.isNullOrEmpty(propName) && ((methodName.startsWith(IS) && methodName.length() > 2)
-                    || ((methodName.startsWith(GET) || methodName.startsWith(SET) || methodName.startsWith(HAS)) && methodName.length() > 3))) {
-                final String newName = methodName.substring(methodName.startsWith(IS) ? 2 : 3);
-                field = getDeclaredField(getSetMethod.getDeclaringClass(), StringUtil.uncapitalize(newName));
-
-                if (field != null && field.getType().isAssignableFrom(targetType)) {
-                    propName = field.getName();
-                }
-
-                if (N.isNullOrEmpty(propName) && newName.charAt(0) != '_') {
-                    field = getDeclaredField(getSetMethod.getDeclaringClass(), "_" + StringUtil.uncapitalize(newName));
-
-                    if (field != null && field.getType().isAssignableFrom(targetType)) {
-                        propName = field.getName();
-                    }
-                }
-
-                if (N.isNullOrEmpty(propName)) {
-                    field = getDeclaredField(getSetMethod.getDeclaringClass(), formalizePropName(newName));
-
-                    if (field != null && field.getType().isAssignableFrom(targetType)) {
-                        propName = field.getName();
-                    }
-                }
-
-                if (N.isNullOrEmpty(propName) && newName.charAt(0) != '_') {
-                    field = getDeclaredField(getSetMethod.getDeclaringClass(), "_" + formalizePropName(newName));
-
-                    if (field != null && field.getType().isAssignableFrom(targetType)) {
-                        propName = field.getName();
-                    }
-                }
-
-                if (N.isNullOrEmpty(propName)) {
-                    propName = formalizePropName(newName);
-                }
-            }
-
-            if (N.isNullOrEmpty(propName)) {
-                propName = methodName;
-            }
-
-            methodPropNamePool.put(getSetMethod, propName);
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static void setPropValueByGet(final Object entity, final Method propGetMethod, final Object propValue) {
+        if (propValue == null) {
+            return;
         }
 
-        return propName;
-    }
+        final Object rt = invokeMethod(entity, propGetMethod);
 
-    /**
-     * Gets the declared field.
-     *
-     * @param cls
-     * @param fieldName
-     * @return
-     */
-    private static Field getDeclaredField(final Class<?> cls, final String fieldName) {
-        try {
-            return cls.getDeclaredField(fieldName);
-        } catch (NoSuchFieldException | SecurityException e) {
-            // ignore
+        if (rt instanceof Collection) {
+            final Collection<?> c = (Collection<?>) rt;
+            c.clear();
+            c.addAll((Collection) propValue);
+        } else if (rt instanceof Map) {
+            final Map<?, ?> m = (Map<?, ?>) rt;
+            m.clear();
+            m.putAll((Map) propValue);
+        } else {
+            throw new IllegalArgumentException("Failed to set property value by getter method '" + propGetMethod.getName() + "'");
         }
-
-        return null;
-    }
-
-    /**
-     * It's designed for field/method/class/column/table names. and source and target Strings will be cached.
-     *
-     * @param propName
-     * @return
-     */
-    public static String formalizePropName(final String propName) {
-        String newPropName = formalizedPropNamePool.get(propName);
-
-        if (newPropName == null) {
-            newPropName = toCamelCase(propName);
-
-            for (String keyWord : keyWordMapper.keySet()) {
-                if (keyWord.equalsIgnoreCase(newPropName)) {
-                    newPropName = keyWordMapper.get(keyWord);
-
-                    break;
-                }
-            }
-
-            formalizedPropNamePool.put(propName, newPropName);
-        }
-
-        return newPropName;
-    }
-
-    /**
-     * It's designed for field/method/class/column/table names. and source and target Strings will be cached.
-     *
-     * @param propName
-     * @return
-     */
-    public static String toCamelCase(final String propName) {
-        String newPropName = camelCasePropNamePool.get(propName);
-
-        if (newPropName == null) {
-            newPropName = StringUtil.toCamelCase(propName);
-            newPropName = NameUtil.getCachedName(newPropName);
-            camelCasePropNamePool.put(propName, newPropName);
-        }
-
-        return newPropName;
     }
 
     /**
@@ -2687,22 +2892,19 @@ public final class ClassUtil {
     /**
      * It's designed for field/method/class/column/table names. and source and target Strings will be cached.
      *
-     * @param str
+     * @param propName
      * @return
      */
-    public static String toLowerCaseWithUnderscore(final String str) {
-        if (N.isNullOrEmpty(str)) {
-            return str;
+    public static String toCamelCase(final String propName) {
+        String newPropName = camelCasePropNamePool.get(propName);
+
+        if (newPropName == null) {
+            newPropName = StringUtil.toCamelCase(propName);
+            newPropName = NameUtil.getCachedName(newPropName);
+            camelCasePropNamePool.put(propName, newPropName);
         }
 
-        String result = lowerCaseWithUnderscorePropNamePool.get(str);
-
-        if (result == null) {
-            result = StringUtil.toLowerCaseWithUnderscore(str);
-            lowerCaseWithUnderscorePropNamePool.put(str, result);
-        }
-
-        return result;
+        return newPropName;
     }
 
     /**
@@ -2721,244 +2923,6 @@ public final class ClassUtil {
         props.putAll(tmp);
 
         Objectory.recycle(tmp);
-    }
-
-    /**
-     * It's designed for field/method/class/column/table names. and source and target Strings will be cached.
-     *
-     * @param str
-     * @return
-     */
-    public static String toUpperCaseWithUnderscore(final String str) {
-        if (N.isNullOrEmpty(str)) {
-            return str;
-        }
-
-        String result = upperCaseWithUnderscorePropNamePool.get(str);
-
-        if (result == null) {
-            result = StringUtil.toUpperCaseWithUnderscore(str);
-            upperCaseWithUnderscorePropNamePool.put(str, result);
-        }
-
-        return result;
-    }
-
-    /**
-     * To upper case key with underscore.
-     *
-     * @param props
-     */
-    public static void toUpperCaseKeyWithUnderscore(final Map<String, Object> props) {
-        final Map<String, Object> tmp = Objectory.createLinkedHashMap();
-
-        for (Map.Entry<String, Object> entry : props.entrySet()) {
-            tmp.put(ClassUtil.toUpperCaseWithUnderscore(entry.getKey()), entry.getValue());
-        }
-
-        props.clear();
-        props.putAll(tmp);
-
-        Objectory.recycle(tmp);
-    }
-
-    private static final Map<Class<?>, ImmutableList<String>> idPropNamesMap = new ConcurrentHashMap<>();
-
-    private static final ImmutableList<String> fakeIds = ImmutableList.of("not_defined_fake_id_in_abacus_" + N.uuid());
-
-    /**
-     * Gets the id field names.
-     *
-     * @param targetClass
-     * @return an immutable List.
-     * @deprecated for internal only.
-     */
-    @Deprecated
-    @Internal
-    @Immutable
-    public static List<String> getIdFieldNames(final Class<?> targetClass) {
-        return getIdFieldNames(targetClass, false);
-    }
-
-    /**
-     * Gets the id field names.
-     *
-     * @param targetClass
-     * @param fakeIdForEmpty
-     * @return an immutable List.
-     * @deprecated for internal only.
-     */
-    @Deprecated
-    @Internal
-    @Immutable
-    public static List<String> getIdFieldNames(final Class<?> targetClass, boolean fakeIdForEmpty) {
-        ImmutableList<String> idPropNames = idPropNamesMap.get(targetClass);
-
-        if (idPropNames == null) {
-            final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
-            final Set<String> idPropNameSet = N.newLinkedHashSet();
-
-            for (PropInfo propInfo : entityInfo.propInfoList) {
-                if (propInfo.isAnnotationPresent(Id.class) || propInfo.isAnnotationPresent(ReadOnlyId.class)) {
-                    idPropNameSet.add(propInfo.name);
-                } else {
-                    try {
-                        if (propInfo.isAnnotationPresent(javax.persistence.Id.class)) {
-                            idPropNameSet.add(propInfo.name);
-                        }
-                    } catch (Throwable e) {
-                        // ignore
-                    }
-                }
-            }
-
-            if (targetClass.isAnnotationPresent(Id.class)) {
-                String[] values = targetClass.getAnnotation(Id.class).value();
-                N.checkArgNotNullOrEmpty(values, "values for annotation @Id on Type/Class can't be null or empty");
-                idPropNameSet.addAll(Arrays.asList(values));
-            }
-
-            if (N.isNullOrEmpty(idPropNameSet)) {
-                final PropInfo idPropInfo = entityInfo.getPropInfo("id");
-                final Set<Class<?>> idType = N.<Class<?>> asSet(int.class, Integer.class, long.class, Long.class, String.class, Timestamp.class, UUID.class);
-
-                if (idPropInfo != null && idType.contains(idPropInfo.clazz)) {
-                    idPropNameSet.add(idPropInfo.name);
-                }
-            }
-
-            idPropNames = ImmutableList.copyOf(idPropNameSet);
-            idPropNamesMap.put(targetClass, idPropNames);
-        }
-
-        return N.isNullOrEmpty(idPropNames) && fakeIdForEmpty ? fakeIds : idPropNames;
-    }
-
-    /**
-     * Checks if is fake id.
-     *
-     * @param idPropNames
-     * @return true, if is fake id
-     * @deprecated for internal only.
-     */
-    @Deprecated
-    @Internal
-    public static boolean isFakeId(List<String> idPropNames) {
-        if (idPropNames != null && idPropNames.size() == 1 && fakeIds.get(0).equals(idPropNames.get(0))) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Make package folder.
-     *
-     * @param srcPath
-     * @param pkgName
-     * @return
-     */
-    static String makePackageFolder(String srcPath, final String pkgName) {
-        srcPath = (srcPath.endsWith("/") || srcPath.endsWith("\\")) ? srcPath : (srcPath + File.separator);
-
-        String classFilePath = (pkgName == null) ? srcPath : (srcPath + pkgName.replace('.', File.separatorChar) + File.separator);
-        File classFileFolder = new File(classFilePath);
-
-        if (!classFileFolder.exists()) {
-            classFileFolder.mkdirs();
-        }
-
-        return classFilePath;
-    }
-
-    /**
-     *
-     * @param accessibleObject
-     * @param flag
-     */
-    public static void setAccessible(final AccessibleObject accessibleObject, final boolean flag) {
-        if (accessibleObject != null && accessibleObject.isAccessible() != flag) {
-            accessibleObject.setAccessible(flag);
-        }
-    }
-
-    /**
-     *
-     * @param accessibleObject
-     * @param flag
-     * @return {@code true} if no error happens, otherwise {@code false} is returned.
-     */
-    public static boolean setAccessibleQuietly(final AccessibleObject accessibleObject, final boolean flag) {
-        if (accessibleObject == null) {
-            return false;
-        }
-
-        if (accessibleObject.isAccessible() == flag) {
-            return true;
-        }
-
-        try {
-            accessibleObject.setAccessible(flag);
-        } catch (Exception e) {
-            logger.warn("Failed to set accessible for : " + accessibleObject + " with flag: " + flag, e);
-            return false;
-        }
-
-        return true;
-    }
-
-    public static MethodHandle createMethodHandle(final Method method) {
-        final Class<?> declaringClass = method.getDeclaringClass();
-
-        try {
-            return MethodHandles.lookup().in(declaringClass).unreflectSpecial(method, declaringClass);
-        } catch (Exception e) {
-            try {
-                final Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class);
-                ClassUtil.setAccessible(constructor, true);
-
-                return constructor.newInstance(declaringClass).in(declaringClass).unreflectSpecial(method, declaringClass);
-            } catch (Exception ex) {
-                try {
-                    return MethodHandles.lookup()
-                            .findSpecial(declaringClass, method.getName(), MethodType.methodType(method.getReturnType(), method.getParameterTypes()),
-                                    declaringClass);
-                } catch (Exception exx) {
-                    throw new UnsupportedOperationException(exx);
-                }
-            }
-        }
-    }
-
-    private static final Map<Class<?>, ImmutableMap<String, String>> column2PropNameNameMapPool = new ConcurrentHashMap<>();
-
-    /**
-     * Gets the column 2 field name map.
-     *
-     * @param entityClass
-     * @return
-     */
-    public static ImmutableMap<String, String> getColumn2PropNameMap(Class<?> entityClass) {
-        ImmutableMap<String, String> result = column2PropNameNameMapPool.get(entityClass);
-
-        if (result == null) {
-            final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
-            final Map<String, String> map = N.newHashMap(entityInfo.propInfoList.size() * 3);
-
-            for (PropInfo propInfo : entityInfo.propInfoList) {
-                if (propInfo.columnName.isPresent()) {
-                    map.put(propInfo.columnName.get(), propInfo.name);
-                    map.put(propInfo.columnName.get().toLowerCase(), propInfo.name);
-                    map.put(propInfo.columnName.get().toUpperCase(), propInfo.name);
-                }
-            }
-
-            result = ImmutableMap.copyOf(map);
-
-            column2PropNameNameMapPool.put(entityClass, result);
-        }
-
-        return result;
     }
 
     //    private static Class[] getTypeArguments(Class cls) {
@@ -3030,221 +2994,66 @@ public final class ClassUtil {
     //    }
 
     /**
-     * The Class ClassMask.
-     */
-    static final class ClassMask {
-
-        /** The Constant FIELD_MASK. */
-        @SuppressWarnings("hiding")
-        static final String FIELD_MASK = "FIELD_MASK";
-
-        /**
-         * Method mask.
-         */
-        static void methodMask() {
-        }
-    }
-
-    static final Map<Class<?>, Map<NamingPolicy, ImmutableMap<String, String>>> entityTablePropColumnNameMap = new ObjectPool<>(N.POOL_SIZE);
-
-    /**
-     * Gets the prop column name map.
+     * It's designed for field/method/class/column/table names. and source and target Strings will be cached.
      *
+     * @param str
      * @return
      */
-    public static ImmutableMap<String, String> getProp2ColumnNameMap(final Class<?> entityClass, final NamingPolicy namingPolicy) {
-        if (entityClass == null || Map.class.isAssignableFrom(entityClass)) {
-            return ImmutableMap.empty();
+    public static String toLowerCaseWithUnderscore(final String str) {
+        if (N.isNullOrEmpty(str)) {
+            return str;
         }
 
-        final Map<NamingPolicy, ImmutableMap<String, String>> namingColumnNameMap = entityTablePropColumnNameMap.get(entityClass);
-        ImmutableMap<String, String> result = null;
+        String result = lowerCaseWithUnderscorePropNamePool.get(str);
 
-        if (namingColumnNameMap == null || (result = namingColumnNameMap.get(namingPolicy)) == null) {
-            result = ClassUtil.registerEntityPropColumnNameMap(entityClass, namingPolicy, null);
+        if (result == null) {
+            result = StringUtil.toLowerCaseWithUnderscore(str);
+            lowerCaseWithUnderscorePropNamePool.put(str, result);
         }
 
         return result;
     }
 
-    static ImmutableMap<String, String> registerEntityPropColumnNameMap(final Class<?> entityClass, final NamingPolicy namingPolicy,
-            final Set<Class<?>> registeringClasses) {
-        N.checkArgNotNull(entityClass);
+    /**
+     * To upper case key with underscore.
+     *
+     * @param props
+     */
+    public static void toUpperCaseKeyWithUnderscore(final Map<String, Object> props) {
+        final Map<String, Object> tmp = Objectory.createLinkedHashMap();
 
-        if (registeringClasses != null) {
-            if (registeringClasses.contains(entityClass)) {
-                throw new RuntimeException("Cycling references found among: " + registeringClasses);
-            } else {
-                registeringClasses.add(entityClass);
-            }
+        for (Map.Entry<String, Object> entry : props.entrySet()) {
+            tmp.put(ClassUtil.toUpperCaseWithUnderscore(entry.getKey()), entry.getValue());
         }
 
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
-        Map<String, String> propColumnNameMap = N.newHashMap(entityInfo.propInfoList.size() * 2);
+        props.clear();
+        props.putAll(tmp);
 
-        for (PropInfo propInfo : entityInfo.propInfoList) {
-            if (propInfo.columnName.isPresent()) {
-                propColumnNameMap.put(propInfo.name, propInfo.columnName.get());
-            } else {
-                propColumnNameMap.put(propInfo.name, SQLBuilder.formalizeColumnName(propInfo.name, namingPolicy));
+        Objectory.recycle(tmp);
+    }
 
-                final Type<?> propType = propInfo.type.isCollection() ? propInfo.type.getElementType() : propInfo.type;
-
-                if (propType.isEntity() && (registeringClasses == null || !registeringClasses.contains(propType.clazz()))) {
-                    final Set<Class<?>> newRegisteringClasses = registeringClasses == null ? N.<Class<?>> newLinkedHashSet() : registeringClasses;
-                    newRegisteringClasses.add(entityClass);
-
-                    final Map<String, String> subPropColumnNameMap = registerEntityPropColumnNameMap(propType.clazz(), namingPolicy, newRegisteringClasses);
-
-                    if (N.notNullOrEmpty(subPropColumnNameMap)) {
-                        final String subTableName = SQLBuilder.getTableName(propType.clazz(), namingPolicy);
-
-                        for (Map.Entry<String, String> entry : subPropColumnNameMap.entrySet()) {
-                            propColumnNameMap.put(propInfo.name + WD.PERIOD + entry.getKey(), subTableName + WD.PERIOD + entry.getValue());
-                        }
-                    }
-                }
-            }
+    /**
+     * It's designed for field/method/class/column/table names. and source and target Strings will be cached.
+     *
+     * @param str
+     * @return
+     */
+    public static String toUpperCaseWithUnderscore(final String str) {
+        if (N.isNullOrEmpty(str)) {
+            return str;
         }
 
-        //    final Map<String, String> tmp = entityTablePropColumnNameMap.get(entityClass);
-        //
-        //    if (N.notNullOrEmpty(tmp)) {
-        //        propColumnNameMap.putAll(tmp);
-        //    }
+        String result = upperCaseWithUnderscorePropNamePool.get(str);
 
-        if (N.isNullOrEmpty(propColumnNameMap)) {
-            propColumnNameMap = N.<String, String> emptyMap();
+        if (result == null) {
+            result = StringUtil.toUpperCaseWithUnderscore(str);
+            upperCaseWithUnderscorePropNamePool.put(str, result);
         }
-
-        final ImmutableMap<String, String> result = ImmutableMap.of(propColumnNameMap);
-
-        Map<NamingPolicy, ImmutableMap<String, String>> namingPropColumnMap = entityTablePropColumnNameMap.get(entityClass);
-
-        if (namingPropColumnMap == null) {
-            namingPropColumnMap = new EnumMap<>(NamingPolicy.class);
-            // TODO not necessary?
-            // namingPropColumnMap = Collections.synchronizedMap(namingPropColumnMap)
-            entityTablePropColumnNameMap.put(entityClass, namingPropColumnMap);
-        }
-
-        namingPropColumnMap.put(namingPolicy, result);
 
         return result;
     }
 
-    /**
-     * Gets an {@link Iterator} that can iterate over a class hierarchy in ascending (subclass to superclass) order,
-     * excluding interfaces.
-     *
-     * @param type the type to get the class hierarchy from
-     * @return Iterator an Iterator over the class hierarchy of the given class
-     * @since 3.2
-     */
-    public static ObjIterator<Class<?>> hierarchy(final Class<?> type) {
-        return hierarchy(type, false);
-    }
-
-    /**
-     * Gets an {@link Iterator} that can iterate over a class hierarchy in ascending (subclass to superclass) order.
-     *
-     * @param type the type to get the class hierarchy from
-     * @param includeInterface switch indicating whether to include or exclude interfaces
-     * @return Iterator an Iterator over the class hierarchy of the given class
-     * @since 3.2
-     */
-    public static ObjIterator<Class<?>> hierarchy(final Class<?> type, final boolean includeInterface) {
-        final ObjIterator<Class<?>> superClassesIter = new ObjIterator<Class<?>>() {
-            private final u.Holder<Class<?>> next = new u.Holder<>(type);
-
-            @Override
-            public boolean hasNext() {
-                return next.value() != null;
-            }
-
-            @Override
-            public Class<?> next() {
-                final Class<?> result = next.value();
-                next.setValue(result.getSuperclass());
-                return result;
-            }
-        };
-
-        if (includeInterface == false) {
-            return superClassesIter;
-        }
-
-        return new ObjIterator<Class<?>>() {
-            private final Set<Class<?>> seenInterfaces = new HashSet<>();
-            private Iterator<Class<?>> interfacesIter = N.emptyIterator();
-
-            @Override
-            public boolean hasNext() {
-                return interfacesIter.hasNext() || superClassesIter.hasNext();
-            }
-
-            @Override
-            public Class<?> next() {
-                if (interfacesIter.hasNext()) {
-                    final Class<?> nextInterface = interfacesIter.next();
-                    seenInterfaces.add(nextInterface);
-                    return nextInterface;
-                }
-
-                final Class<?> nextSuperclass = superClassesIter.next();
-                final Set<Class<?>> currentInterfaces = new LinkedHashSet<>();
-
-                walkInterfaces(currentInterfaces, nextSuperclass);
-
-                interfacesIter = currentInterfaces.iterator();
-
-                return nextSuperclass;
-            }
-
-            private void walkInterfaces(final Set<Class<?>> addTo, final Class<?> c) {
-                for (final Class<?> iface : c.getInterfaces()) {
-                    if (!seenInterfaces.contains(iface)) {
-                        addTo.add(iface);
-                    }
-
-                    walkInterfaces(addTo, iface);
-                }
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
-        };
-    }
-
-    /**
-     * <p>Returns the number of inheritance hops between two classes.</p>
-     *
-     * @param child the child class, may be {@code null}
-     * @param parent the parent class, may be {@code null}
-     * @return the number of generations between the child and parent; 0 if the same class;
-     * -1 if the classes are not related as child and parent (includes where either class is null)
-     * @since 3.2
-     */
-    public static int distanceOfInheritance(final Class<?> child, final Class<?> parent) {
-        if (child == null || parent == null) {
-            return -1;
-        }
-
-        if (child.equals(parent)) {
-            return 0;
-        }
-
-        final Class<?> cParent = child.getSuperclass();
-        int d = parent.equals(cParent) ? 1 : 0;
-
-        if (d == 1) {
-            return d;
-        }
-
-        d += distanceOfInheritance(cParent, parent);
-
-        return d > 0 ? d + 1 : -1;
+    private ClassUtil() {
+        // singleton
     }
 }

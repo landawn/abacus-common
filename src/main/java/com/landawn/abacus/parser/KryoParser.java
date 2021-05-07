@@ -14,29 +14,146 @@
 
 package com.landawn.abacus.parser;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.io.Writer;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.net.URL;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Date;
+import java.sql.NClob;
+import java.sql.RowId;
+import java.sql.SQLXML;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.Year;
+import java.time.YearMonth;
+import java.time.ZonedDateTime;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Deque;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
+import java.util.NavigableSet;
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.Stack;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.Vector;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.DelayQueue;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
+
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import com.landawn.abacus.DataSet;
+import com.landawn.abacus.core.RowDataSet;
 import com.landawn.abacus.exception.UncheckedIOException;
+import com.landawn.abacus.type.Type;
+import com.landawn.abacus.util.ArrayHashMap;
+import com.landawn.abacus.util.ArrayHashSet;
+import com.landawn.abacus.util.BiMap;
+import com.landawn.abacus.util.BooleanList;
 import com.landawn.abacus.util.ByteArrayOutputStream;
+import com.landawn.abacus.util.ByteList;
+import com.landawn.abacus.util.CharList;
+import com.landawn.abacus.util.DoubleList;
+import com.landawn.abacus.util.Duration;
+import com.landawn.abacus.util.FloatList;
+import com.landawn.abacus.util.Fraction;
+import com.landawn.abacus.util.HBaseColumn;
 import com.landawn.abacus.util.IOUtil;
+import com.landawn.abacus.util.IntList;
+import com.landawn.abacus.util.LinkedArrayHashMap;
+import com.landawn.abacus.util.LinkedArrayHashSet;
+import com.landawn.abacus.util.ListMultimap;
+import com.landawn.abacus.util.LongList;
+import com.landawn.abacus.util.LongMultiset;
+import com.landawn.abacus.util.Multimap;
+import com.landawn.abacus.util.Multiset;
+import com.landawn.abacus.util.MutableBoolean;
+import com.landawn.abacus.util.MutableByte;
+import com.landawn.abacus.util.MutableChar;
+import com.landawn.abacus.util.MutableDouble;
+import com.landawn.abacus.util.MutableFloat;
+import com.landawn.abacus.util.MutableInt;
+import com.landawn.abacus.util.MutableLong;
+import com.landawn.abacus.util.MutableShort;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.Pair;
+import com.landawn.abacus.util.Range;
+import com.landawn.abacus.util.SetMultimap;
+import com.landawn.abacus.util.Sheet;
+import com.landawn.abacus.util.ShortList;
+import com.landawn.abacus.util.Triple;
+import com.landawn.abacus.util.Tuple;
+import com.landawn.abacus.util.Tuple.Tuple1;
+import com.landawn.abacus.util.Tuple.Tuple2;
+import com.landawn.abacus.util.Tuple.Tuple3;
+import com.landawn.abacus.util.Tuple.Tuple4;
+import com.landawn.abacus.util.Tuple.Tuple5;
+import com.landawn.abacus.util.Tuple.Tuple6;
+import com.landawn.abacus.util.Tuple.Tuple7;
+import com.landawn.abacus.util.Tuple.Tuple8;
+import com.landawn.abacus.util.Tuple.Tuple9;
+import com.landawn.abacus.util.u.Holder;
+import com.landawn.abacus.util.u.Nullable;
+import com.landawn.abacus.util.u.Optional;
+import com.landawn.abacus.util.u.OptionalBoolean;
+import com.landawn.abacus.util.u.OptionalByte;
+import com.landawn.abacus.util.u.OptionalChar;
+import com.landawn.abacus.util.u.OptionalDouble;
+import com.landawn.abacus.util.u.OptionalFloat;
+import com.landawn.abacus.util.u.OptionalInt;
+import com.landawn.abacus.util.u.OptionalLong;
+import com.landawn.abacus.util.u.OptionalShort;
+import com.landawn.abacus.util.u.R;
 
 /**
  * The content is encoded with Base64 if the target output is String or Writer, otherwise the content is NOT encoded with Base64 if the target output is File or OutputStream.
@@ -54,9 +171,10 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
 
     private static final List<Input> inputPool = new ArrayList<>(POOL_SIZE);
 
+    private final Set<Class<?>> kryoClassSet = new HashSet<>();
     private final Map<Class<?>, Integer> kryoClassIdMap = new ConcurrentHashMap<>();
-
     private final Map<Class<?>, Serializer<?>> kryoClassSerializerMap = new ConcurrentHashMap<>();
+    private final Map<Class<?>, Tuple2<Serializer<?>, Integer>> kryoClassSerializerIdMap = new ConcurrentHashMap<>();
 
     private final Map<Kryo, Kryo> xPool = new IdentityHashMap<>();
 
@@ -407,69 +525,304 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         }
     }
 
-    /**
-     *
-     * @param cls
-     * @param id
-     */
-    public void register(Class<?> cls, int id) {
+    public void register(Class<?> type) {
+        N.checkArgNotNull(type, "type");
+
         synchronized (kryoPool) {
-            kryoClassIdMap.put(cls, id);
+            kryoClassSet.add(type);
 
             xPool.clear();
             kryoPool.clear();
         }
     }
 
-    /**
-     *
-     * @param cls
-     * @param serializer
-     */
-    public void register(Class<?> cls, Serializer<?> serializer) {
+    public void register(Class<?> type, int id) {
+        N.checkArgNotNull(type, "type");
+
         synchronized (kryoPool) {
-            kryoClassSerializerMap.put(cls, serializer);
+            kryoClassIdMap.put(type, id);
 
             xPool.clear();
             kryoPool.clear();
         }
     }
 
-    /**
-     * Creates the kryo.
-     *
-     * @return
-     */
-    protected Kryo createKryo() {
+    public void register(Class<?> type, Serializer<?> serializer) {
+        N.checkArgNotNull(type, "type");
+        N.checkArgNotNull(serializer, "serializer");
+
         synchronized (kryoPool) {
-            if (kryoPool.size() > 0) {
-                return kryoPool.remove(kryoPool.size() - 1);
-            } else {
-                Kryo kryo = new Kryo();
+            kryoClassSerializerMap.put(type, serializer);
 
-                if (N.notNullOrEmpty(kryoClassIdMap)) {
-                    for (Class<?> cls : kryoClassIdMap.keySet()) {
-                        kryo.register(cls, kryoClassIdMap.get(cls));
-                    }
-                }
+            xPool.clear();
+            kryoPool.clear();
+        }
+    }
 
-                if (N.notNullOrEmpty(kryoClassSerializerMap)) {
-                    for (Class<?> cls : kryoClassSerializerMap.keySet()) {
-                        kryo.register(cls, kryoClassSerializerMap.get(cls));
-                    }
-                }
+    public void register(final Class<?> type, final Serializer<?> serializer, final int id) {
+        N.checkArgNotNull(type, "type");
+        N.checkArgNotNull(serializer, "serializer");
 
-                xPool.put(kryo, kryo);
+        synchronized (kryoPool) {
+            kryoClassSerializerIdMap.put(type, Tuple.of(serializer, id));
 
-                return kryo;
+            xPool.clear();
+            kryoPool.clear();
+        }
+    }
+
+    private static final Set<Class<?>> builtInClassesToRegister = new LinkedHashSet<>();
+
+    static {
+        builtInClassesToRegister.add(boolean.class);
+        builtInClassesToRegister.add(char.class);
+        builtInClassesToRegister.add(byte.class);
+        builtInClassesToRegister.add(short.class);
+        builtInClassesToRegister.add(int.class);
+        builtInClassesToRegister.add(long.class);
+        builtInClassesToRegister.add(float.class);
+        builtInClassesToRegister.add(double.class);
+
+        builtInClassesToRegister.add(Boolean.class);
+        builtInClassesToRegister.add(Character.class);
+        builtInClassesToRegister.add(Byte.class);
+        builtInClassesToRegister.add(Short.class);
+        builtInClassesToRegister.add(Integer.class);
+        builtInClassesToRegister.add(Long.class);
+        builtInClassesToRegister.add(Float.class);
+        builtInClassesToRegister.add(Double.class);
+
+        builtInClassesToRegister.add(String.class);
+
+        builtInClassesToRegister.add(Enum.class);
+        builtInClassesToRegister.add(Class.class);
+        builtInClassesToRegister.add(Object.class);
+
+        builtInClassesToRegister.add(BigInteger.class);
+        builtInClassesToRegister.add(BigDecimal.class);
+
+        builtInClassesToRegister.add(java.util.Date.class);
+        builtInClassesToRegister.add(Calendar.class);
+        builtInClassesToRegister.add(GregorianCalendar.class);
+        builtInClassesToRegister.add(XMLGregorianCalendar.class);
+
+        builtInClassesToRegister.add(Collection.class);
+        builtInClassesToRegister.add(List.class);
+        builtInClassesToRegister.add(ArrayList.class);
+        builtInClassesToRegister.add(LinkedList.class);
+        builtInClassesToRegister.add(Stack.class);
+        builtInClassesToRegister.add(Vector.class);
+        builtInClassesToRegister.add(Set.class);
+        builtInClassesToRegister.add(HashSet.class);
+        builtInClassesToRegister.add(LinkedHashSet.class);
+        builtInClassesToRegister.add(SortedSet.class);
+        builtInClassesToRegister.add(NavigableSet.class);
+        builtInClassesToRegister.add(TreeSet.class);
+        builtInClassesToRegister.add(Queue.class);
+        builtInClassesToRegister.add(Deque.class);
+        builtInClassesToRegister.add(BlockingDeque.class);
+        builtInClassesToRegister.add(ArrayDeque.class);
+        builtInClassesToRegister.add(ArrayBlockingQueue.class);
+        builtInClassesToRegister.add(LinkedBlockingQueue.class);
+        builtInClassesToRegister.add(ConcurrentLinkedQueue.class);
+        builtInClassesToRegister.add(LinkedBlockingDeque.class);
+        builtInClassesToRegister.add(ConcurrentLinkedDeque.class);
+        builtInClassesToRegister.add(PriorityQueue.class);
+        builtInClassesToRegister.add(DelayQueue.class);
+        builtInClassesToRegister.add(Map.class);
+        builtInClassesToRegister.add(HashMap.class);
+        builtInClassesToRegister.add(LinkedHashMap.class);
+        builtInClassesToRegister.add(IdentityHashMap.class);
+        builtInClassesToRegister.add(ConcurrentMap.class);
+        builtInClassesToRegister.add(ConcurrentHashMap.class);
+        builtInClassesToRegister.add(SortedMap.class);
+        builtInClassesToRegister.add(NavigableMap.class);
+        builtInClassesToRegister.add(TreeMap.class);
+        builtInClassesToRegister.add(Iterator.class);
+
+        builtInClassesToRegister.add(File.class);
+        builtInClassesToRegister.add(InputStream.class);
+        builtInClassesToRegister.add(ByteArrayInputStream.class);
+        builtInClassesToRegister.add(FileInputStream.class);
+        builtInClassesToRegister.add(OutputStream.class);
+        builtInClassesToRegister.add(ByteArrayOutputStream.class);
+        builtInClassesToRegister.add(FileOutputStream.class);
+        builtInClassesToRegister.add(Reader.class);
+        builtInClassesToRegister.add(StringReader.class);
+        builtInClassesToRegister.add(FileReader.class);
+        builtInClassesToRegister.add(InputStreamReader.class);
+        builtInClassesToRegister.add(Writer.class);
+        builtInClassesToRegister.add(StringWriter.class);
+        builtInClassesToRegister.add(FileWriter.class);
+        builtInClassesToRegister.add(OutputStreamWriter.class);
+
+        builtInClassesToRegister.add(Date.class);
+        builtInClassesToRegister.add(Time.class);
+        builtInClassesToRegister.add(Timestamp.class);
+
+        builtInClassesToRegister.add(Blob.class);
+        builtInClassesToRegister.add(Clob.class);
+        builtInClassesToRegister.add(NClob.class);
+        builtInClassesToRegister.add(SQLXML.class);
+        builtInClassesToRegister.add(RowId.class);
+
+        builtInClassesToRegister.add(URL.class);
+
+        builtInClassesToRegister.add(BooleanList.class);
+        builtInClassesToRegister.add(CharList.class);
+        builtInClassesToRegister.add(ByteList.class);
+        builtInClassesToRegister.add(ShortList.class);
+        builtInClassesToRegister.add(IntList.class);
+        builtInClassesToRegister.add(LongList.class);
+        builtInClassesToRegister.add(FloatList.class);
+        builtInClassesToRegister.add(DoubleList.class);
+
+        builtInClassesToRegister.add(MutableBoolean.class);
+        builtInClassesToRegister.add(MutableChar.class);
+        builtInClassesToRegister.add(MutableByte.class);
+        builtInClassesToRegister.add(MutableShort.class);
+        builtInClassesToRegister.add(MutableInt.class);
+        builtInClassesToRegister.add(MutableLong.class);
+        builtInClassesToRegister.add(MutableFloat.class);
+        builtInClassesToRegister.add(MutableDouble.class);
+
+        builtInClassesToRegister.add(OptionalBoolean.class);
+        builtInClassesToRegister.add(OptionalChar.class);
+        builtInClassesToRegister.add(OptionalByte.class);
+        builtInClassesToRegister.add(OptionalShort.class);
+        builtInClassesToRegister.add(OptionalInt.class);
+        builtInClassesToRegister.add(OptionalLong.class);
+        builtInClassesToRegister.add(OptionalFloat.class);
+        builtInClassesToRegister.add(OptionalDouble.class);
+        builtInClassesToRegister.add(Optional.class);
+        builtInClassesToRegister.add(Nullable.class);
+        builtInClassesToRegister.add(Holder.class);
+        builtInClassesToRegister.add(R.class);
+
+        builtInClassesToRegister.add(Fraction.class);
+        builtInClassesToRegister.add(Range.class);
+        builtInClassesToRegister.add(Duration.class);
+        builtInClassesToRegister.add(Pair.class);
+        builtInClassesToRegister.add(Triple.class);
+        builtInClassesToRegister.add(Tuple.class);
+        builtInClassesToRegister.add(Tuple1.class);
+        builtInClassesToRegister.add(Tuple2.class);
+        builtInClassesToRegister.add(Tuple3.class);
+        builtInClassesToRegister.add(Tuple4.class);
+        builtInClassesToRegister.add(Tuple5.class);
+        builtInClassesToRegister.add(Tuple6.class);
+        builtInClassesToRegister.add(Tuple7.class);
+        builtInClassesToRegister.add(Tuple8.class);
+        builtInClassesToRegister.add(Tuple9.class);
+
+        builtInClassesToRegister.add(ArrayHashMap.class);
+        builtInClassesToRegister.add(LinkedArrayHashMap.class);
+        builtInClassesToRegister.add(ArrayHashSet.class);
+        builtInClassesToRegister.add(LinkedArrayHashSet.class);
+        builtInClassesToRegister.add(BiMap.class);
+        builtInClassesToRegister.add(Multimap.class);
+        builtInClassesToRegister.add(ListMultimap.class);
+        builtInClassesToRegister.add(SetMultimap.class);
+        builtInClassesToRegister.add(Multiset.class);
+        builtInClassesToRegister.add(LongMultiset.class);
+        builtInClassesToRegister.add(HBaseColumn.class);
+
+        builtInClassesToRegister.add(Type.class);
+        builtInClassesToRegister.add(DataSet.class);
+        builtInClassesToRegister.add(RowDataSet.class);
+        builtInClassesToRegister.add(Sheet.class);
+
+        builtInClassesToRegister.add(Map.Entry.class);
+
+        builtInClassesToRegister.add(Instant.class);
+        builtInClassesToRegister.add(LocalDate.class);
+        builtInClassesToRegister.add(LocalDateTime.class);
+        builtInClassesToRegister.add(LocalTime.class);
+        builtInClassesToRegister.add(OffsetDateTime.class);
+        builtInClassesToRegister.add(OffsetTime.class);
+        builtInClassesToRegister.add(ZonedDateTime.class);
+        builtInClassesToRegister.add(Year.class);
+        builtInClassesToRegister.add(YearMonth.class);
+
+        final List<Class<?>> classes = new ArrayList<>(builtInClassesToRegister);
+        for (Class<?> cls : classes) {
+            Class<?> arrayClass = cls;
+
+            for (int i = 0; i < 3; i++) {
+                arrayClass = java.lang.reflect.Array.newInstance(arrayClass, 0).getClass();
+
+                builtInClassesToRegister.add(arrayClass);
             }
         }
     }
 
-    /**
-     *
-     * @param kryo
-     */
+    protected Kryo createKryo() {
+        synchronized (kryoPool) {
+            if (kryoPool.size() > 0) {
+                return kryoPool.remove(kryoPool.size() - 1);
+            }
+            final Kryo kryo = new Kryo();
+
+            kryo.setRegistrationRequired(false);
+
+            for (Class<?> cls : builtInClassesToRegister) {
+                kryo.register(cls);
+            }
+
+            if (N.notNullOrEmpty(ParserFactory._kryoClassSet)) {
+                for (Class<?> cls : ParserFactory._kryoClassSet) {
+                    kryo.register(cls);
+                }
+            }
+
+            if (N.notNullOrEmpty(ParserFactory._kryoClassIdMap)) {
+                for (Class<?> cls : ParserFactory._kryoClassIdMap.keySet()) {
+                    kryo.register(cls, ParserFactory._kryoClassIdMap.get(cls));
+                }
+            }
+
+            if (N.notNullOrEmpty(ParserFactory._kryoClassSerializerMap)) {
+                for (Class<?> cls : ParserFactory._kryoClassSerializerMap.keySet()) {
+                    kryo.register(cls, ParserFactory._kryoClassSerializerMap.get(cls));
+                }
+            }
+
+            if (N.notNullOrEmpty(ParserFactory._kryoClassSerializerIdMap)) {
+                for (Map.Entry<Class<?>, Tuple2<Serializer<?>, Integer>> entry : ParserFactory._kryoClassSerializerIdMap.entrySet()) {
+                    kryo.register(entry.getKey(), entry.getValue()._1, entry.getValue()._2);
+                }
+            }
+
+            if (N.notNullOrEmpty(kryoClassSet)) {
+                for (Class<?> cls : kryoClassSet) {
+                    kryo.register(cls);
+                }
+            }
+
+            if (N.notNullOrEmpty(kryoClassIdMap)) {
+                for (Class<?> cls : kryoClassIdMap.keySet()) {
+                    kryo.register(cls, kryoClassIdMap.get(cls));
+                }
+            }
+
+            if (N.notNullOrEmpty(kryoClassSerializerMap)) {
+                for (Class<?> cls : kryoClassSerializerMap.keySet()) {
+                    kryo.register(cls, kryoClassSerializerMap.get(cls));
+                }
+            }
+
+            if (N.notNullOrEmpty(kryoClassSerializerIdMap)) {
+                for (Map.Entry<Class<?>, Tuple2<Serializer<?>, Integer>> entry : kryoClassSerializerIdMap.entrySet()) {
+                    kryo.register(entry.getKey(), entry.getValue()._1, entry.getValue()._2);
+                }
+            }
+
+            xPool.put(kryo, kryo);
+
+            return kryo;
+        }
+    }
+
     protected void recycle(Kryo kryo) {
         if (kryo == null) {
             return;
@@ -482,25 +835,15 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         }
     }
 
-    /**
-     * Creates the output.
-     *
-     * @return
-     */
     protected static Output createOutput() {
         synchronized (outputPool) {
             if (outputPool.size() > 0) {
                 return outputPool.remove(outputPool.size() - 1);
-            } else {
-                return new Output(BUFFER_SIZE);
             }
+            return new Output(BUFFER_SIZE);
         }
     }
 
-    /**
-     *
-     * @param output
-     */
     protected static void recycle(Output output) {
         if ((output == null) || ((output.getBuffer() != null) && (output.getBuffer().length > BUFFER_SIZE))) {
             return;
@@ -514,25 +857,15 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         }
     }
 
-    /**
-     * Creates the input.
-     *
-     * @return
-     */
     protected static Input createInput() {
         synchronized (inputPool) {
             if (inputPool.size() > 0) {
                 return inputPool.remove(inputPool.size() - 1);
-            } else {
-                return new Input(BUFFER_SIZE);
             }
+            return new Input(BUFFER_SIZE);
         }
     }
 
-    /**
-     *
-     * @param input
-     */
     protected static void recycle(Input input) {
         if ((input == null) || ((input.getBuffer() != null) && (input.getBuffer().length > BUFFER_SIZE))) {
             return;
