@@ -111,9 +111,10 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
 
     @Override
     public String toString() {
-        return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", ignoreUnmatchedProperty=" + N.toString(isIgnoreUnmatchedProperty()) + ", elementType="
-                + N.toString(getElementType()) + ", propTypes=" + N.toString(getPropTypes()) + ", mapKeyType=" + N.toString(getMapKeyType()) + ", mapValueType="
-                + N.toString(getMapValueType()) + ", ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", schema=" + N.toString(schema) + "}";
+        return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", ignoreUnmatchedProperty=" + N.toString(isIgnoreUnmatchedProperty())
+                + ", elementType=" + N.toString(getElementType()) + ", propTypes=" + N.toString(getPropTypes()) + ", mapKeyType=" + N.toString(getMapKeyType())
+                + ", mapValueType=" + N.toString(getMapValueType()) + ", ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", schema="
+                + N.toString(schema) + "}";
     }
 
     /**

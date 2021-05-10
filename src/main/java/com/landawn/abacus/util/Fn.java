@@ -613,7 +613,6 @@ public final class Fn extends Comparators {
     };
 
     protected Fn() {
-        super();
         // for extension.
     }
 
@@ -641,7 +640,7 @@ public final class Fn extends Comparators {
     }
 
     /**
-     * 
+     *
      * @param <T>
      * @param <R>
      * @param func
@@ -1862,7 +1861,7 @@ public final class Fn extends Comparators {
     }
 
     /**
-     * 
+     *
      * @param <T>
      * @param targetValue1
      * @param targetValue2
@@ -1878,7 +1877,7 @@ public final class Fn extends Comparators {
     }
 
     /**
-     * 
+     *
      * @param <T>
      * @param targetValue1
      * @param targetValue2
@@ -1971,7 +1970,7 @@ public final class Fn extends Comparators {
 
     /**
      * Checks if the value/element: {@code minValue < e < maxValue}.
-     * 
+     *
      * @param <T>
      * @param minValue
      * @param maxValue
@@ -1988,7 +1987,7 @@ public final class Fn extends Comparators {
 
     /**
      * Checks if the value/element: {@code minValue <= e < maxValue}.
-     * 
+     *
      * @param <T>
      * @param minValue
      * @param maxValue
@@ -2005,7 +2004,7 @@ public final class Fn extends Comparators {
 
     /**
      * Checks if the value/element: {@code minValue <= e <= maxValue}.
-     * 
+     *
      * @param <T>
      * @param minValue
      * @param maxValue
@@ -2022,7 +2021,7 @@ public final class Fn extends Comparators {
 
     /**
      * Checks if the value/element: {@code minValue < e <= maxValue}.
-     * 
+     *
      * @param <T>
      * @param minValue
      * @param maxValue
@@ -3209,11 +3208,11 @@ public final class Fn extends Comparators {
         }
     };
 
-    /** 
+    /**
      * {a=[1, 2, 3], b=[4, 5, 6], c=[7, 8]} -> [{a=1, b=4, c=7}, {a=2, b=5, c=8}, {a=3, b=6}]
      *
      * @param <K> the key type
-     * @param <V> the value type 
+     * @param <V> the value type
      * @return
      * @see Maps#flatToMap(Map)
      */
@@ -4522,7 +4521,6 @@ public final class Fn extends Comparators {
      * @param <E>
      * @param biFunction
      * @param defaultOnError
-     * @return
      */
     @Beta
     public static <T, U, R, E extends Exception> BiFunction<T, U, R> ff(final Throwables.BiFunction<T, U, R, E> biFunction, final R defaultOnError) {
@@ -5144,7 +5142,7 @@ public final class Fn extends Comparators {
     /**
     *
     * @param runnable
-    * @return 
+    * @return
     * @deprecated replaced by {@link #r(Runnable)}
     */
     @Deprecated
@@ -13059,7 +13057,7 @@ public final class Fn extends Comparators {
         }
 
         /**
-         * 
+         *
          * @param <E>
          * @param runnable
          * @return
@@ -13073,7 +13071,7 @@ public final class Fn extends Comparators {
         }
 
         /**
-         * 
+         *
          * @param <R>
          * @param <E>
          * @param callable

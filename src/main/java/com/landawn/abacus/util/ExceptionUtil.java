@@ -106,10 +106,27 @@ public final class ExceptionUtil {
     private static final String UncheckedIOExceptionClassName = UncheckedIOException.class.getSimpleName();
 
     /**
+     *
+     * @param <E>
+     * @param exceptionClass
+     * @param runtimeExceptionMapper
+     */
+    @SuppressWarnings("rawtypes")
+    public static <E extends Throwable> void registerRuntimeExceptionMapper(final Class<E> exceptionClass,
+            final Function<E, RuntimeException> runtimeExceptionMapper) {
+        if (toRuntimeExceptionFuncMap.containsKey(exceptionClass)) {
+            throw new IllegalArgumentException("Exception class: " + ClassUtil.getCanonicalClassName(exceptionClass) + " has already been registered");
+        }
+
+        toRuntimeExceptionFuncMap.put((Class) exceptionClass, (Function) runtimeExceptionMapper);
+    }
+
+    /**
      * To runtime exception.
      *
      * @param e
      * @return
+     * @see #registerRuntimeExceptionMapper(Class, Function)
      */
     public static RuntimeException toRuntimeException(Throwable e) {
         final Class<Throwable> cls = (Class<Throwable>) e.getClass();
@@ -143,9 +160,10 @@ public final class ExceptionUtil {
      */
     public static String getMessage(Throwable e) {
         if (e instanceof SQLException) {
-            return e.getClass().getSimpleName() + "|" + ((SQLException) e).getErrorCode() + "|" + ((e.getMessage() == null) ? e.getCause() : e.getMessage());
+            return e.getClass().getSimpleName() + "|" + ((SQLException) e).getErrorCode() + "|"
+                    + (N.isNullOrEmpty(e.getMessage()) ? e.getCause() : e.getMessage());
         } else {
-            return e.getClass().getSimpleName() + "|" + ((e.getMessage() == null) ? e.getCause() : e.getMessage());
+            return e.getClass().getSimpleName() + "|" + (N.isNullOrEmpty(e.getMessage()) ? e.getCause() : e.getMessage());
         }
     }
 
@@ -230,7 +248,7 @@ public final class ExceptionUtil {
 
     /**
      * Returns the specified {@code throwable} if there is no cause found in it ({@code throwable.getCause() == null}).
-     * 
+     *
      * @param throwable
      * @return
      */

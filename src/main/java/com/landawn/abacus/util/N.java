@@ -360,7 +360,7 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
+     *
      * @param str
      * @param substr
      * @return
@@ -371,7 +371,7 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
+     *
      * @param <T>
      * @param a
      * @return
@@ -382,7 +382,7 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
+     *
      * @param <T>
      * @param a
      * @param mapSupplier
@@ -404,7 +404,7 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
+     *
      * @param <T>
      * @param c
      * @return
@@ -415,7 +415,7 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
+     *
      * @param <T>
      * @param c
      * @param mapSupplier
@@ -437,7 +437,7 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
+     *
      * @param <T>
      * @param c
      * @return
@@ -448,7 +448,7 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
+     *
      * @param <T>
      * @param iter
      * @param mapSupplier
@@ -2321,7 +2321,7 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Returns a new {@code List} with specified {@code objToExclude} excluded. 
+     * Returns a new {@code List} with specified {@code objToExclude} excluded.
      * That's to say no more {@code objToExclude} will present in the returned {@code List}.
      *
      * @param <T>
@@ -4250,7 +4250,7 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
+     *
      * @param <T>
      * @param c
      * @param elementsToAdd
@@ -4650,7 +4650,7 @@ public final class N extends CommonUtil {
 
     /**
      * Returns a new String
-     * 
+     *
      * @param str
      * @param index
      * @param strToInsert
@@ -7779,7 +7779,7 @@ public final class N extends CommonUtil {
      *
      * @param a
      * @param fromIndex
-     * @param toIndex 
+     * @param toIndex
      * @return
      */
     public static boolean[] removeDuplicates(final boolean[] a, final int fromIndex, final int toIndex) {
@@ -8946,7 +8946,7 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
+     *
      * @param <T>
      * @param c
      * @param fromIndex
@@ -8988,7 +8988,7 @@ public final class N extends CommonUtil {
 
     /**
      * Returns a new String.
-     * 
+     *
      * @param str
      * @param fromIndex
      * @param toIndex
@@ -10694,7 +10694,7 @@ public final class N extends CommonUtil {
      *
      * @param <T>
      * @param a an {@code Array} which must not be null or empty
-     * @param cmp 
+     * @param cmp
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      * @see Iterables#min(Object[], Comparator)
@@ -10713,7 +10713,7 @@ public final class N extends CommonUtil {
      * @param toIndex
      * @param cmp
      * @return
-     * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}. 
+     * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      */
     public static <T> T min(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) throws IllegalArgumentException {
         if (isNullOrEmpty(a) || toIndex - fromIndex < 1) {
@@ -10739,7 +10739,7 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param c 
+     * @param c
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      * @see Iterables#min(Collection)
@@ -10755,7 +10755,7 @@ public final class N extends CommonUtil {
      * @param <T>
      * @param c
      * @param fromIndex
-     * @param toIndex 
+     * @param toIndex
      * @return
      * @throws IllegalArgumentException if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      * @see Iterables#min(Collection)
@@ -17935,7 +17935,7 @@ public final class N extends CommonUtil {
     }
 
     //    /**
-    //     * 
+    //     *
     //     * @param <T>
     //     * @param iter
     //     * @param filter
@@ -19237,7 +19237,7 @@ public final class N extends CommonUtil {
     }
 
     //    /**
-    //     * 
+    //     *
     //     * @param <T>
     //     * @param <U>
     //     * @param iter
@@ -19561,7 +19561,7 @@ public final class N extends CommonUtil {
     }
 
     //    /**
-    //     * 
+    //     *
     //     * @param <T>
     //     * @param <U>
     //     * @param iter
@@ -22819,10 +22819,10 @@ public final class N extends CommonUtil {
 
     /**
      * Executes and complete the input commands in parallel.
-     * 
+     *
      * @param command to be completed in current thread.
      * @param command2 to be completed in another thread.
-     * 
+     *
      * @see Fn#jc2r(Callable)
      */
     public static void runInParallel(final Throwables.Runnable<? extends Exception> command, final Throwables.Runnable<? extends Exception> command2) {
@@ -22838,11 +22838,11 @@ public final class N extends CommonUtil {
 
     /**
      * Executes and complete the input commands in parallel.
-     * 
+     *
      * @param command to be completed in current thread.
      * @param command2 to be completed in another thread.
      * @param command3 to be completed in another thread.
-     * 
+     *
      * @see Fn#jc2r(Callable)
      */
     public static void runInParallel(final Throwables.Runnable<? extends Exception> command, final Throwables.Runnable<? extends Exception> command2,
@@ -22861,12 +22861,12 @@ public final class N extends CommonUtil {
 
     /**
      * Executes and complete the input commands in parallel.
-     * 
+     *
      * @param command to be completed in current thread.
      * @param command2 to be completed in another thread.
      * @param command3 to be completed in another thread.
      * @param command4 to be completed in another thread.
-     * 
+     *
      * @see Fn#jc2r(Callable)
      */
     public static void runInParallel(final Throwables.Runnable<? extends Exception> command, final Throwables.Runnable<? extends Exception> command2,
@@ -22887,13 +22887,13 @@ public final class N extends CommonUtil {
 
     /**
      * Executes and complete the input commands in parallel.
-     * 
+     *
      * @param command to be completed in current thread.
      * @param command2 to be completed in another thread.
      * @param command3 to be completed in another thread.
      * @param command4 to be completed in another thread.
      * @param command5 to be completed in another thread.
-     * 
+     *
      * @see Fn#jc2r(Callable)
      */
     public static void runInParallel(final Throwables.Runnable<? extends Exception> command, final Throwables.Runnable<? extends Exception> command2,
@@ -22917,10 +22917,10 @@ public final class N extends CommonUtil {
 
     /**
      * Executes and complete the input commands in parallel.
-     * 
+     *
      * @param command to be completed in current thread.
      * @param command2 to be completed in another thread.
-     * 
+     *
      * @see Fn#jr2c(Runnable)
      */
     public static <R, R2> Tuple2<R, R2> callInParallel(final Callable<R> command, final Callable<R2> command2) {
@@ -22938,11 +22938,11 @@ public final class N extends CommonUtil {
 
     /**
      * Executes and complete the input commands in parallel.
-     * 
+     *
      * @param command to be completed in current thread.
      * @param command2 to be completed in another thread.
      * @param command3 to be completed in another thread.
-     * 
+     *
      * @see Fn#jr2c(Runnable)
      */
     public static <R, R2, R3> Tuple3<R, R2, R3> callInParallel(final Callable<R> command, final Callable<R2> command2, final Callable<R3> command3) {
@@ -22962,12 +22962,12 @@ public final class N extends CommonUtil {
 
     /**
      * Executes and complete the input commands in parallel.
-     * 
+     *
      * @param command to be completed in current thread.
      * @param command2 to be completed in another thread.
      * @param command3 to be completed in another thread.
      * @param command4 to be completed in another thread.
-     * 
+     *
      * @see Fn#jr2c(Runnable)
      */
     public static <R, R2, R3, R4> Tuple4<R, R2, R3, R4> callInParallel(final Callable<R> command, final Callable<R2> command2, final Callable<R3> command3,
@@ -22990,13 +22990,13 @@ public final class N extends CommonUtil {
 
     /**
      * Executes and complete the input commands in parallel.
-     * 
+     *
      * @param command to be completed in current thread.
      * @param command2 to be completed in another thread.
      * @param command3 to be completed in another thread.
      * @param command4 to be completed in another thread.
      * @param command5 to be completed in another thread.
-     * 
+     *
      * @see Fn#jr2c(Runnable)
      */
     public static <R, R2, R3, R4, R5> Tuple5<R, R2, R3, R4, R5> callInParallel(final Callable<R> command, final Callable<R2> command2,
@@ -23362,13 +23362,14 @@ public final class N extends CommonUtil {
      * @param e
      * @return
      * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, com.landawn.abacus.util.function.Function)
      */
     public static RuntimeException toRuntimeException(final Throwable e) {
         return ExceptionUtil.toRuntimeException(e);
     }
 
     /**
-     * 
+     *
      * @param e
      * @param type
      * @return
@@ -23380,7 +23381,7 @@ public final class N extends CommonUtil {
 
     /**
      * Returns the specified {@code Throwable e} if there is no cause found in it ({@code e.getCause() == null}).
-     * 
+     *
      * @param e
      * @return
      * @see ExceptionUtil#firstCause(Throwable)
@@ -23462,9 +23463,11 @@ public final class N extends CommonUtil {
      * @param <R>
      * @param cmd
      * @return
+     * @see Try#call(com.landawn.abacus.util.Throwables.Function)
+     * @see Try#call(com.landawn.abacus.util.Throwables.Function, Object)
      */
     @Beta
-    public static <R> Nullable<R> tryOrEmpty(final Callable<R> cmd) {
+    public static <R> Nullable<R> tryOrEmptyIfNotSucceed(final Callable<R> cmd) {
         try {
             return Nullable.of(cmd.call());
         } catch (Exception e) {
@@ -23481,13 +23484,101 @@ public final class N extends CommonUtil {
      * @param init
      * @param func
      * @return
+     * @see Try#call(com.landawn.abacus.util.Throwables.Function)
+     * @see Try#call(com.landawn.abacus.util.Throwables.Function, Object)
      */
     @Beta
-    public static <T, R, E extends Exception> Nullable<R> tryOrEmpty(final T init, final Throwables.Function<? super T, R, E> func) {
+    public static <T, R, E extends Exception> Nullable<R> tryOrEmptyIfNotSucceed(final T init, final Throwables.Function<? super T, R, E> func) {
         try {
             return Nullable.of(func.apply(init));
         } catch (Exception e) {
             return Nullable.<R> empty();
+        }
+    }
+
+    /**
+     * Returns the value returned by {@code action} or {@code defaultIfNotSucceed} if exception happens.
+     *
+     * @param <R>
+     * @param cmd
+     * @param defaultIfNotSucceed
+     * @return
+     * @see Try#call(com.landawn.abacus.util.Throwables.Function)
+     * @see Try#call(com.landawn.abacus.util.Throwables.Function, Object)
+     */
+    @Beta
+    public static <R> R tryOrDefaultIfNotSucceed(final Callable<R> cmd, final R defaultIfNotSucceed) {
+        try {
+            return cmd.call();
+        } catch (Exception e) {
+            return defaultIfNotSucceed;
+        }
+    }
+
+    /**
+     * Returns the value returned by {@code action} or {@code defaultIfNotSucceed} if exception happens.
+     *
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param init
+     * @param func
+     * @param defaultIfNotSucceed
+     * @return
+     * @see Try#call(com.landawn.abacus.util.Throwables.Function)
+     * @see Try#call(com.landawn.abacus.util.Throwables.Function, Object)
+     */
+    @Beta
+    public static <T, R, E extends Exception> R tryOrDefaultIfNotSucceed(final T init, final Throwables.Function<? super T, R, E> func,
+            final R defaultIfNotSucceed) {
+        try {
+            return func.apply(init);
+        } catch (Exception e) {
+            return defaultIfNotSucceed;
+        }
+    }
+
+    /**
+     * Returns the value returned by {@code action} or {@code {@code supplierForDefaultIfNotSucceed}} if exception happens.
+     *
+     * @param <R>
+     * @param cmd
+     * @param supplierForDefaultIfNotSucceed
+     * @return
+     * @see Try#call(com.landawn.abacus.util.Throwables.Function)
+     * @see Try#call(com.landawn.abacus.util.Throwables.Function, Object)
+     * @see Try#call(com.landawn.abacus.util.Throwables.Function, Supplier)
+     */
+    @Beta
+    public static <R> R tryOrDefaultIfNotSucceed(final Callable<R> cmd, final Supplier<R> supplierForDefaultIfNotSucceed) {
+        try {
+            return cmd.call();
+        } catch (Exception e) {
+            return supplierForDefaultIfNotSucceed.get();
+        }
+    }
+
+    /**
+     * Returns the value returned by {@code action} or {@code defaultIfNotSucceed} if exception happens.
+     *
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param init
+     * @param func
+     * @param supplierForDefaultIfNotSucceed
+     * @return
+     * @see Try#call(com.landawn.abacus.util.Throwables.Function)
+     * @see Try#call(com.landawn.abacus.util.Throwables.Function, Object)
+     * @see Try#call(com.landawn.abacus.util.Throwables.Function, Supplier)
+     */
+    @Beta
+    public static <T, R, E extends Exception> R tryOrDefaultIfNotSucceed(final T init, final Throwables.Function<? super T, R, E> func,
+            final Supplier<R> supplierForDefaultIfNotSucceed) {
+        try {
+            return func.apply(init);
+        } catch (Exception e) {
+            return supplierForDefaultIfNotSucceed.get();
         }
     }
 
@@ -23608,7 +23699,7 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
+     *
      * @param <T>
      * @param a
      * @param fromIndex
@@ -23818,7 +23909,7 @@ public final class N extends CommonUtil {
     }
 
     //    /**
-    //     * 
+    //     *
     //     * @param <T>
     //     * @param a
     //     * @param b
@@ -24925,7 +25016,7 @@ public final class N extends CommonUtil {
     /**
      * Returns the corresponding wrapper type of {@code type} if it is a primitive type; otherwise
      * returns {@code type} itself. Idempotent.
-     * 
+     *
      * <pre>
      *     wrap(int.class) == Integer.class
      *     wrap(Integer.class) == Integer.class
@@ -24946,7 +25037,7 @@ public final class N extends CommonUtil {
     /**
      * Returns the corresponding primitive type of {@code type} if it is a wrapper type; otherwise
      * returns {@code type} itself. Idempotent.
-     * 
+     *
      * <pre>
      *     unwrap(Integer.class) == int.class
      *     unwrap(int.class) == int.class
@@ -25000,7 +25091,7 @@ public final class N extends CommonUtil {
 
     /**
      * Updates each element in the specified array {@code a} with specified function {@code converter}.
-     * 
+     *
      * @param <T>
      * @param <E>
      * @param a
@@ -25043,7 +25134,7 @@ public final class N extends CommonUtil {
 
     /**
      * Copy the specified array {@code a} first, then call {@code converter} on the copy.
-     * 
+     *
      * @param <E>
      * @param a
      * @param converter

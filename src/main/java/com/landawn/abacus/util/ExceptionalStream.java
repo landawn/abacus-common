@@ -92,7 +92,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @param <T>
  * @param <E>
  * @since 1.3
- * 
+ *
  * @see BaseStream
  * @see Stream
  * @see IntStream
@@ -650,9 +650,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      * Lazy evaluation.
      * <br />
-     *  
+     *
      * This is equal to: {@code ExceptionalStream.just(supplier).flattMap(it -> it.get())}.
-     * 
+     *
      * @param supplier
      * @return
      */
@@ -672,9 +672,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      * Lazy evaluation.
      * <br />
-     *  
+     *
      * This is equal to: {@code ExceptionalStream.just(supplier).flatMap(it -> it.get())}.
-     * 
+     *
      * @param supplier
      * @return
      */
@@ -2710,7 +2710,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     //    /**
-    //     * 
+    //     *
     //     * @param mapper
     //     * @return
     //     */
@@ -2727,7 +2727,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //    }
     //
     //    /**
-    //     * 
+    //     *
     //     * @param mapper
     //     * @return
     //     */
@@ -2744,7 +2744,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //    }
     //
     //    /**
-    //     * 
+    //     *
     //     * @param mapper
     //     * @return
     //     */
@@ -3569,7 +3569,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param c
      * @return
      * @see N#intersection(Collection, Collection)
@@ -3588,7 +3588,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param mapper
      * @param c
      * @return
@@ -3608,7 +3608,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param c
      * @return
      * @see N#difference(Collection, Collection)
@@ -3627,7 +3627,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param mapper
      * @param c
      * @return
@@ -3647,7 +3647,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param c
      * @return
      * @see N#symmetricDifference(Collection, Collection)
@@ -3919,16 +3919,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     public ExceptionalStream<T, E> onEach(final Throwables.Consumer<? super T, ? extends E> action) {
-        return peek(action);
-    }
-
-    /**
-     *
-     * @param action
-     * @return
-     */
-    @IntermediateOp
-    public ExceptionalStream<T, E> peek(final Throwables.Consumer<? super T, ? extends E> action) {
         assertNotClosed();
 
         return newStream(new ExceptionalIterator<T, E>() {
@@ -3944,6 +3934,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 return next;
             }
         }, sorted, cmp, closeHandlers);
+    }
+
+    /**
+     *
+     * @param action
+     * @return
+     */
+    @IntermediateOp
+    public ExceptionalStream<T, E> peek(final Throwables.Consumer<? super T, ? extends E> action) {
+        return onEach(action);
     }
 
     @IntermediateOp
@@ -5226,7 +5226,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param <U>
      * @param b
      * @return
@@ -5237,7 +5237,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param <U>
      * @param <R>
      * @param b
@@ -5262,7 +5262,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param <U>
      * @param <R>
      * @param b
@@ -5312,7 +5312,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param <U>
      * @param <K>
      * @param <R>
@@ -5349,7 +5349,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param <K>
      * @param b
      * @param keyMapper
@@ -5361,7 +5361,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param <K>
      * @param <R>
      * @param b
@@ -5376,7 +5376,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param <U>
      * @param <K>
      * @param <R>
@@ -5523,7 +5523,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     };
 
     /**
-     * 
+     *
      * @param <K>
      * @param b
      * @param keyMapper
@@ -5535,7 +5535,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param <K>
      * @param <R>
      * @param b
@@ -5713,7 +5713,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param <K>
      * @param b
      * @param keyMapper
@@ -5725,7 +5725,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param <K>
      * @param <R>
      * @param b
@@ -5879,7 +5879,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param <K>
      * @param b
      * @param keyMapper
@@ -5891,7 +5891,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param <K>
      * @param <R>
      * @param b
@@ -6010,7 +6010,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param <U>
      * @param <K>
      * @param b
@@ -6026,7 +6026,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param <U>
      * @param <K>
      * @param <R>
@@ -6076,7 +6076,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param <K>
      * @param b
      * @param keyMapper
@@ -6088,7 +6088,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param <K>
      * @param <R>
      * @param b
@@ -6103,7 +6103,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param <U>
      * @param <K>
      * @param <R>
@@ -6156,7 +6156,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param <U>
      * @param <K>
      * @param b
@@ -6173,7 +6173,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param <U>
      * @param <K>
      * @param <R>
@@ -6224,7 +6224,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param <U>
      * @param <K>
      * @param <R>
@@ -6277,7 +6277,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param <U>
      * @param <K>
      * @param <A>
@@ -6296,7 +6296,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param <U>
      * @param <K>
      * @param <A>
@@ -6349,7 +6349,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param <U>
      * @param <K>
      * @param <A>
@@ -6971,7 +6971,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Consider using: {@code stream.reversed().findFirst(predicate)} for better performance if possible.
-     * 
+     *
      * @param <E>
      * @param predicate
      * @return
@@ -8639,9 +8639,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     //    /**
-    //     * 
+    //     *
     //     * @param <U>
-    //     * @param <R> 
+    //     * @param <R>
     //     * @param terminalOp should be terminal operation.
     //     * @param mapper
     //     * @return
@@ -8653,7 +8653,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //    }
     //
     //    /**
-    //     * 
+    //     *
     //     * @param <R>
     //     * @param terminalOp should be terminal operation.
     //     * @param action
@@ -8668,7 +8668,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //    }
 
     /**
-     * 
+     *
      * @param <R>
      * @param ops
      * @return
@@ -8683,7 +8683,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     * 
+     *
      * @param <R>
      * @param maxThreadNum
      * @param ops
@@ -8700,7 +8700,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code filter} and then switch back to sequence stream.
-     * 
+     *
      * @param predicate
      * @return
      * @see Stream#spsFilter(Predicate)
@@ -8720,7 +8720,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code map} and then switch back to sequence stream.
-     * 
+     *
      * @param <R>
      * @param mapper
      * @return
@@ -8742,7 +8742,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
     
-     * 
+     *
      * @param <R>
      * @param mapper
      * @return
@@ -8763,7 +8763,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
-     * 
+     *
      * @param <R>
      * @param mapper
      * @return
@@ -8784,7 +8784,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code onEach} and then switch back to sequence stream.
-     * 
+     *
      * @param action
      * @return
      * @see Stream#onEach(Consumer)
@@ -8804,7 +8804,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code filter} and then switch back to sequence stream.
-     * 
+     *
      * @param predicate
      * @return
      * @see Stream#spsFilter(int, Predicate)
@@ -8824,7 +8824,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code map} and then switch back to sequence stream.
-     * 
+     *
      * @param <R>
      * @param mapper
      * @return
@@ -8845,7 +8845,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
-     * 
+     *
      * @param <R>
      * @param mapper
      * @return
@@ -8866,7 +8866,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
-     * 
+     *
      * @param <R>
      * @param mapper
      * @return
@@ -8887,7 +8887,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code onEach} and then switch back to sequence stream.
-     * 
+     *
      * @param action
      * @return
      * @see Stream#onEach(int, Consumer)
@@ -8903,6 +8903,224 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         };
 
         return sps(maxThreadNum, ops);
+    }
+
+    /**
+     *
+     * @param predicate
+     * @return
+     * @deprecated not sure if it's a good idea or not.
+     */
+    @SuppressWarnings("rawtypes")
+    @IntermediateOp
+    @Beta
+    @Deprecated
+    public ExceptionalStream<T, Exception> filterE(final Throwables.Predicate<? super T, ? extends Exception> predicate) {
+        assertNotClosed();
+
+        return newStream(new ExceptionalIterator<T, Exception>() {
+            private boolean hasNext = false;
+            private T next = null;
+
+            @Override
+            public boolean hasNext() throws Exception {
+                if (hasNext == false) {
+                    while (elements.hasNext()) {
+                        next = elements.next();
+
+                        if (predicate.test(next)) {
+                            hasNext = true;
+                            break;
+                        }
+                    }
+                }
+
+                return hasNext;
+            }
+
+            @Override
+            public T next() throws Exception {
+                if (hasNext == false && hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                hasNext = false;
+
+                return next;
+            }
+        }, sorted, cmp, (Deque) closeHandlers);
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param mapper
+     * @return
+     * @deprecated not sure if it's a good idea or not.
+     */
+    @SuppressWarnings("rawtypes")
+    @IntermediateOp
+    @Beta
+    @Deprecated
+    public <U> ExceptionalStream<U, Exception> mapE(final Throwables.Function<? super T, ? extends U, ? extends Exception> mapper) {
+        assertNotClosed();
+
+        return newStream(new ExceptionalIterator<U, Exception>() {
+            @Override
+            public boolean hasNext() throws Exception {
+                return elements.hasNext();
+            }
+
+            @Override
+            public U next() throws Exception {
+                return mapper.apply(elements.next());
+            }
+        }, (Deque) closeHandlers);
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param mapper
+     * @return
+     * @deprecated not sure if it's a good idea or not.
+     */
+    @IntermediateOp
+    @Beta
+    @Deprecated
+    public <R> ExceptionalStream<R, Exception> flatMapE(
+            final Throwables.Function<? super T, ? extends ExceptionalStream<? extends R, ? extends Exception>, ? extends Exception> mapper) {
+        assertNotClosed();
+
+        final ExceptionalIterator<R, Exception> iter = new ExceptionalIterator<R, Exception>() {
+            private ExceptionalIterator<? extends R, ? extends Exception> cur = null;
+            private ExceptionalStream<? extends R, ? extends Exception> s = null;
+            private Deque<? extends Throwables.Runnable<? extends Exception>> closeHandle = null;
+
+            @Override
+            public boolean hasNext() throws Exception {
+                while (cur == null || cur.hasNext() == false) {
+                    if (elements.hasNext()) {
+                        if (closeHandle != null) {
+                            final Deque<? extends Throwables.Runnable<? extends Exception>> tmp = closeHandle;
+                            closeHandle = null;
+                            ExceptionalStream.close(tmp);
+                        }
+
+                        s = mapper.apply(elements.next());
+
+                        if (N.notNullOrEmpty(s.closeHandlers)) {
+                            closeHandle = s.closeHandlers;
+                        }
+
+                        cur = s.elements;
+                    } else {
+                        cur = null;
+                        break;
+                    }
+                }
+
+                return cur != null && cur.hasNext();
+            }
+
+            @Override
+            public R next() throws Exception {
+                if ((cur == null || cur.hasNext() == false) && hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                return cur.next();
+            }
+
+            @Override
+            public void close() throws Exception {
+                if (closeHandle != null) {
+                    ExceptionalStream.close(closeHandle);
+                }
+            }
+        };
+
+        final Deque<Throwables.Runnable<? extends Exception>> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
+
+        newCloseHandlers.add(new Throwables.Runnable<Exception>() {
+            @Override
+            public void run() throws Exception {
+                iter.close();
+            }
+        });
+
+        if (N.notNullOrEmpty(closeHandlers)) {
+            newCloseHandlers.addAll(closeHandlers);
+        }
+
+        return newStream(iter, newCloseHandlers);
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param mapper
+     * @return
+     * @deprecated not sure if it's a good idea or not.
+     */
+    @SuppressWarnings("rawtypes")
+    @IntermediateOp
+    @Beta
+    @Deprecated
+    public <R> ExceptionalStream<R, Exception> flattMapE(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) {
+        assertNotClosed();
+
+        return newStream(new ExceptionalIterator<R, Exception>() {
+            private Iterator<? extends R> cur = null;
+            private Collection<? extends R> c = null;
+
+            @Override
+            public boolean hasNext() throws Exception {
+                while ((cur == null || cur.hasNext() == false) && elements.hasNext()) {
+                    c = mapper.apply(elements.next());
+                    cur = N.isNullOrEmpty(c) ? null : c.iterator();
+                }
+
+                return cur != null && cur.hasNext();
+            }
+
+            @Override
+            public R next() throws Exception {
+                if ((cur == null || cur.hasNext() == false) && hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                return cur.next();
+            }
+        }, (Deque) closeHandlers);
+    }
+
+    /**
+     *
+     * @param action
+     * @return
+     * @deprecated not sure if it's a good idea or not.
+     */
+    @SuppressWarnings("rawtypes")
+    @IntermediateOp
+    @Beta
+    @Deprecated
+    public ExceptionalStream<T, Exception> onEachE(final Throwables.Consumer<? super T, ? extends Exception> action) {
+        assertNotClosed();
+
+        return newStream(new ExceptionalIterator<T, Exception>() {
+            @Override
+            public boolean hasNext() throws Exception {
+                return elements.hasNext();
+            }
+
+            @Override
+            public T next() throws Exception {
+                final T next = elements.next();
+                action.accept(next);
+                return next;
+            }
+        }, sorted, cmp, (Deque) closeHandlers);
     }
 
     /**
@@ -9545,10 +9763,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //        }
     //    }
 
-    /** 
+    /**
      *
      * @param <T>
-     * @param <E> 
+     * @param <E>
      */
     public static final class StreamE<T, E extends Exception> extends ExceptionalStream<T, E> {
 
@@ -9559,9 +9777,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     //    /**
     //     * Mostly it's for android.
-    //     * 
+    //     *
     //     * @see {@code ExceptionalStream<T, RuntimeException>}
-    //     * 
+    //     *
     //     * @deprecated Mostly it's for android.
     //     */
     //    @Deprecated
@@ -9574,9 +9792,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Mostly it's for android.
-     * 
+     *
      * @see {@code ExceptionalStream<T, RuntimeException>}
-     * 
+     *
      * @deprecated Mostly it's for android.
      */
     @Beta
