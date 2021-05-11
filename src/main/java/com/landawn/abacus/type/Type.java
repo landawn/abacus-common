@@ -323,7 +323,7 @@ public interface Type<T> {
     }
 
     /**
-     * 
+     *
      * @return
      */
     static Type<Map<String, Object>> ofPropsMap() {
@@ -565,6 +565,13 @@ public interface Type<T> {
      * @return true, if is entity
      */
     boolean isEntity();
+
+    /**
+     * Checks if is Record.
+     *
+     * @return true, if is Record
+     */
+    boolean isRecord();
 
     /**
      * Checks if is map entity.

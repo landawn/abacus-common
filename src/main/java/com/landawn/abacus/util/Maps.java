@@ -14,6 +14,9 @@
 
 package com.landawn.abacus.util;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
@@ -28,11 +31,15 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import com.landawn.abacus.DirtyMarker;
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.core.DirtyMarkerUtil;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
+import com.landawn.abacus.type.Type;
+import com.landawn.abacus.util.ClassUtil.RecordInfo;
 import com.landawn.abacus.util.Fn.Suppliers;
+import com.landawn.abacus.util.Tuple.Tuple5;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.function.BiFunction;
 import com.landawn.abacus.util.function.BinaryOperator;
@@ -44,7 +51,7 @@ import com.landawn.abacus.util.function.Supplier;
  * Note: This class includes codes copied from Apache Commons Lang, Google Guava and other open source projects under the Apache License 2.0.
  * The methods copied from other libraries/frameworks/projects may be modified in this class.
  * </p>
- * 
+ *
  * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
@@ -463,9 +470,9 @@ public final class Maps {
     }
 
     /**
-     * Returns the value to which the specified key is mapped if it's not {@code null}, 
+     * Returns the value to which the specified key is mapped if it's not {@code null},
      * or {@code defaultForNull} if this map contains no mapping for the key or it's {@code null}.
-     * 
+     *
      * @param <K>
      * @param <V>
      * @param map
@@ -506,7 +513,7 @@ public final class Maps {
     /**
      * Returns the mapped {@code boolean} or a boolean converted from String.
      * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
-     * 
+     *
      * @param <K>
      * @param map
      * @param key
@@ -548,7 +555,7 @@ public final class Maps {
     /**
      * Returns the mapped {@code char} or a char converted from String.
      * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
-     * 
+     *
      * @param <K>
      * @param map
      * @param key
@@ -590,7 +597,7 @@ public final class Maps {
     /**
      * Returns the mapped {@code byte} or a byte converted from String.
      * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
-     * 
+     *
      * @param <K>
      * @param map
      * @param key
@@ -632,7 +639,7 @@ public final class Maps {
     /**
      * Returns the mapped {@code short} or a short converted from String.
      * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
-     * 
+     *
      * @param <K>
      * @param map
      * @param key
@@ -674,7 +681,7 @@ public final class Maps {
     /**
      * Returns the mapped {@code integer} or an integer converted from String.
      * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
-     * 
+     *
      * @param <K>
      * @param map
      * @param key
@@ -716,7 +723,7 @@ public final class Maps {
     /**
      * Returns the mapped {@code long} or a long converted from String.
      * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
-     * 
+     *
      * @param <K>
      * @param map
      * @param key
@@ -758,7 +765,7 @@ public final class Maps {
     /**
      * Returns the mapped {@code float} or a float converted from String.
      * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
-     * 
+     *
      * @param <K>
      * @param map
      * @param key
@@ -800,7 +807,7 @@ public final class Maps {
     /**
      * Returns the mapped {@code double} or a double converted from String.
      * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
-     * 
+     *
      * @param <K>
      * @param map
      * @param key
@@ -842,7 +849,7 @@ public final class Maps {
     /**
      * Returns the mapped {@code String} or a {@code String} converted from {@code N.toString(value)}.
      * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
-     * 
+     *
      * @param <K>
      * @param map
      * @param key
@@ -868,11 +875,11 @@ public final class Maps {
     }
 
     /**
-     * 
+     *
      * <br />
-     * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method. 
-     * Otherwise, put the {@code targetTpye} to the first parameter of the method. 
-     * 
+     * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
+     * Otherwise, put the {@code targetTpye} to the first parameter of the method.
+     *
      * @param <K>
      * @param <T>
      * @param map
@@ -899,7 +906,7 @@ public final class Maps {
     /**
      * Returns the mapped {@code T} or a {@code T} converted from {@code N.valueOf((Class<T>) defaultForNull.getClass(), N.stringOf(val))}.
      * {@code defaultForNull} is returned if the specified {@code map} doesn't contain the specified {@code key} or the mapped value is {@code null}.
-     * 
+     *
      * @param <K>
      * @param <T>
      * @param map
@@ -1786,7 +1793,7 @@ public final class Maps {
 
     /**
      * {a=[1, 2, 3], b=[4, 5, 6], c=[7, 8]} -> [{a=1, b=4, c=7}, {a=2, b=5, c=8}, {a=3, b=6}]
-     * 
+     *
      * @param <K>
      * @param <V>
      * @param map
@@ -2053,6 +2060,10 @@ public final class Maps {
             final boolean ignoreUnmatchedProperty) {
         checkEntityClass(targetClass);
 
+        if (m == null) {
+            return null;
+        }
+
         final T entity = N.newInstance(targetClass);
         final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
         PropInfo propInfo = null;
@@ -2095,6 +2106,10 @@ public final class Maps {
      */
     public static <T> T map2Entity(final Class<T> targetClass, final Map<String, Object> m, final Collection<String> selectPropNames) {
         checkEntityClass(targetClass);
+
+        if (m == null) {
+            return null;
+        }
 
         final T entity = N.newInstance(targetClass);
         final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
@@ -2235,6 +2250,10 @@ public final class Maps {
      */
     public static Map<String, Object> entity2Map(final Object entity, final boolean ignoreNullProperty, final Collection<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy) {
+        if (entity == null) {
+            return null;
+        }
+
         final int initCapacity = (entity instanceof DirtyMarker ? DirtyMarkerUtil.signedPropNames((DirtyMarker) entity).size()
                 : ClassUtil.getPropNameList(entity.getClass()).size());
         final Map<String, Object> resultMap = N.newLinkedHashMap(initCapacity);
@@ -2253,6 +2272,10 @@ public final class Maps {
      * @return
      */
     public static <M extends Map<String, Object>> M entity2Map(final Object entity, final Supplier<? extends M> mapSupplier) {
+        if (entity == null) {
+            return null;
+        }
+
         return entity2Map(mapSupplier.get(), entity);
     }
 
@@ -2504,6 +2527,10 @@ public final class Maps {
      */
     public static Map<String, Object> deepEntity2Map(final Object entity, final boolean ignoreNullProperty, final Collection<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy) {
+        if (entity == null) {
+            return null;
+        }
+
         final int initCapacity = entity instanceof DirtyMarker ? DirtyMarkerUtil.signedPropNames((DirtyMarker) entity).size()
                 : ClassUtil.getPropNameList(entity.getClass()).size();
         final Map<String, Object> resultMap = N.newLinkedHashMap(initCapacity);
@@ -2522,6 +2549,10 @@ public final class Maps {
      * @return
      */
     public static <M extends Map<String, Object>> M deepEntity2Map(final Object entity, final Supplier<? extends M> mapSupplier) {
+        if (entity == null) {
+            return null;
+        }
+
         return deepEntity2Map(mapSupplier.get(), entity);
     }
 
@@ -2792,6 +2823,10 @@ public final class Maps {
      */
     public static Map<String, Object> entity2FlatMap(final Object entity, final boolean ignoreNullProperty, final Collection<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy) {
+        if (entity == null) {
+            return null;
+        }
+
         final int initCapacity = entity instanceof DirtyMarker ? DirtyMarkerUtil.signedPropNames((DirtyMarker) entity).size()
                 : ClassUtil.getPropNameList(entity.getClass()).size();
         final Map<String, Object> resultMap = N.newLinkedHashMap(initCapacity);
@@ -2810,6 +2845,10 @@ public final class Maps {
      * @return
      */
     public static <M extends Map<String, Object>> M entity2FlatMap(final Object entity, final Supplier<? extends M> mapSupplier) {
+        if (entity == null) {
+            return null;
+        }
+
         return entity2FlatMap(mapSupplier.get(), entity);
     }
 
@@ -3043,5 +3082,88 @@ public final class Maps {
         if (!ClassUtil.isEntity(cls)) {
             throw new IllegalArgumentException("No property getter/setter method is found in the specified class: " + ClassUtil.getCanonicalClassName(cls));
         }
+    }
+
+    @SuppressWarnings("deprecation")
+    @Beta
+    public static <T> Map<String, Object> record2Map(final T record) {
+        if (record == null) {
+            return null;
+        }
+
+        final Class<?> recordClass = record.getClass();
+
+        return record2Map(new LinkedHashMap<>(ClassUtil.getRecordInfo(recordClass).fieldNames().size()), record);
+    }
+
+    @Beta
+    public static <T, M extends Map<String, Object>> M record2Map(final T record, final Supplier<? extends M> mapSupplier) {
+        if (record == null) {
+            return null;
+        }
+
+        return record2Map(mapSupplier.get(), record);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Beta
+    public static <T, M extends Map<String, Object>> M record2Map(final T record, final IntFunction<? extends M> mapSupplier) {
+        if (record == null) {
+            return null;
+        }
+
+        final Class<?> recordClass = record.getClass();
+
+        return record2Map(mapSupplier.apply(ClassUtil.getRecordInfo(recordClass).fieldNames().size()), record);
+    }
+
+    @Beta
+    static <M extends Map<String, Object>> M record2Map(final M resultMap, final Object record) {
+        if (record == null) {
+            return resultMap;
+        }
+
+        final Class<?> recordClass = record.getClass();
+
+        @SuppressWarnings("deprecation")
+        final RecordInfo<?> recordInfo = ClassUtil.getRecordInfo(recordClass);
+
+        try {
+            for (Tuple5<String, Field, Method, Type<Object>, Integer> tp : recordInfo.fieldMap().values()) {
+                resultMap.put(tp._1, tp._3.invoke(record));
+            }
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            // Should never happen.
+            throw N.toRuntimeException(e);
+        }
+
+        return resultMap;
+    }
+
+    @Beta
+    public static <T> T map2Record(final Map<String, Object> map, final Class<T> recordClass) {
+        @SuppressWarnings("deprecation")
+        final RecordInfo<?> recordInfo = ClassUtil.getRecordInfo(recordClass);
+
+        if (map == null) {
+            return null;
+        }
+
+        final Object[] args = new Object[recordInfo.fieldNames().size()];
+        Object val = null;
+        int idx = 0;
+
+        for (String fieldName : recordInfo.fieldNames()) {
+            val = map.get(fieldName);
+
+            // TODO, should be ignored?
+            //    if (val == null && !map.containsKey(tp._1)) {
+            //        throw new IllegalArgumentException("No value found for field: " + tp._1 + " from the input map");
+            //    }
+
+            args[idx++] = val;
+        }
+
+        return (T) recordInfo.creator().apply(args);
     }
 }

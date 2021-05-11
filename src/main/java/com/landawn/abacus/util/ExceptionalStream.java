@@ -5226,6 +5226,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <U>
      * @param b
@@ -5237,6 +5238,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <U>
      * @param <R>
@@ -5262,6 +5264,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <U>
      * @param <R>
@@ -5296,6 +5299,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+    * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <U>
      * @param <K>
@@ -5312,6 +5316,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+    * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <U>
      * @param <K>
@@ -5349,6 +5354,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+    * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <K>
      * @param b
@@ -5361,6 +5367,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+    * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <K>
      * @param <R>
@@ -5376,6 +5383,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+    * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <U>
      * @param <K>
@@ -5415,29 +5423,51 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <U>
      * @param b
      * @param predicate
      * @return
+     * @deprecated The time complexity is <i>O(n * m). You should try {@code innerJoin(Collection, Function, Function)} first.
      */
+    @Deprecated
+    @SuppressWarnings("rawtypes")
     @IntermediateOp
     public <U> ExceptionalStream<Pair<T, U>, E> innerJoin(final Collection<? extends U> b,
             final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate) {
+        return innerJoin(b, predicate, (Throwables.BiFunction) Fn.pair());
+    }
+
+    /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <R>
+     * @param b
+     * @param predicate
+     * @param func
+     * @return
+     * @deprecated The time complexity is <i>O(n * m). You should try {@code innerJoin(Collection, Function, Function, BiFunction)} first.
+     */
+    @Deprecated
+    @IntermediateOp
+    public <U, R> ExceptionalStream<R, E> innerJoin(final Collection<? extends U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate,
+            final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
         assertNotClosed();
 
-        return flatMap(new Throwables.Function<T, ExceptionalStream<Pair<T, U>, E>, E>() {
+        return flatMap(new Throwables.Function<T, ExceptionalStream<R, E>, E>() {
             @Override
-            public ExceptionalStream<Pair<T, U>, E> apply(final T t) {
+            public ExceptionalStream<R, E> apply(final T t) {
                 return ExceptionalStream.<U, E> of(b).filter(new Throwables.Predicate<U, E>() {
                     @Override
                     public boolean test(final U u) throws E {
                         return predicate.test(t, u);
                     }
-                }).map(new Throwables.Function<U, Pair<T, U>, E>() {
+                }).map(new Throwables.Function<U, R, E>() {
                     @Override
-                    public Pair<T, U> apply(U u) {
-                        return Pair.of(t, u);
+                    public R apply(U u) throws E {
+                        return func.apply(t, u);
                     }
                 });
             }
@@ -5445,6 +5475,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <K>
      * @param <U>
@@ -5461,6 +5492,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <K>
      * @param <U>
@@ -5523,6 +5555,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     };
 
     /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <K>
      * @param b
@@ -5535,6 +5568,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <K>
      * @param <R>
@@ -5613,50 +5647,73 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <U>
      * @param b
      * @param predicate
      * @return
+     * @deprecated The time complexity is <i>O(n * m). You should try {@code fullJoin(Collection, Function, Function)} first.
      */
+    @Deprecated
+    @SuppressWarnings("rawtypes")
     @IntermediateOp
     public <U> ExceptionalStream<Pair<T, U>, E> fullJoin(final Collection<? extends U> b,
             final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate) {
+        return fullJoin(b, predicate, (Throwables.BiFunction) Fn.pair());
+    }
+
+    /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <R>
+     * @param b
+     * @param predicate
+     * @param func
+     * @return
+     * @deprecated The time complexity is <i>O(n * m). You should try {@code fullJoin(Collection, Function, Function, BiFunction)} first.
+     */
+    @Deprecated
+    @IntermediateOp
+    public <U, R> ExceptionalStream<R, E> fullJoin(final Collection<? extends U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate,
+            final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
         assertNotClosed();
 
         final Map<U, U> joinedRights = new IdentityHashMap<>();
 
-        return flatMap(new Throwables.Function<T, ExceptionalStream<Pair<T, U>, E>, E>() {
+        return flatMap(new Throwables.Function<T, ExceptionalStream<R, E>, E>() {
             @Override
-            public ExceptionalStream<Pair<T, U>, E> apply(final T t) {
+            public ExceptionalStream<R, E> apply(final T t) {
                 return ExceptionalStream.<U, E> of(b).filter(new Throwables.Predicate<U, E>() {
                     @Override
                     public boolean test(final U u) throws E {
                         return predicate.test(t, u);
                     }
-                }).map(new Throwables.Function<U, Pair<T, U>, E>() {
+                }).map(new Throwables.Function<U, R, E>() {
                     @Override
-                    public Pair<T, U> apply(U u) {
+                    public R apply(U u) throws E {
                         joinedRights.put(u, u);
 
-                        return Pair.of(t, u);
+                        return func.apply(t, u);
                     }
-                }).appendIfEmpty(Pair.of(t, (U) null));
+                }).appendIfEmpty(() -> ExceptionalStream.<T, E> just(t).map(tt -> func.apply(t, (U) null)));
             }
         }).append(ExceptionalStream.<U, E> of(b).filter(new Throwables.Predicate<U, E>() {
             @Override
             public boolean test(U u) {
                 return joinedRights.containsKey(u) == false;
             }
-        }).map(new Throwables.Function<U, Pair<T, U>, E>() {
+        }).map(new Throwables.Function<U, R, E>() {
             @Override
-            public Pair<T, U> apply(U u) {
-                return Pair.of((T) null, u);
+            public R apply(U u) throws E {
+                return func.apply((T) null, u);
             }
         }));
     }
 
     /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <K>
      * @param <U>
@@ -5673,6 +5730,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <K>
      * @param <U>
@@ -5713,6 +5771,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <K>
      * @param b
@@ -5725,6 +5784,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <K>
      * @param <R>
@@ -5740,6 +5800,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <K>
      * @param <U>
@@ -5782,36 +5843,59 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <U>
      * @param b
      * @param predicate
      * @return
+     * @deprecated The time complexity is <i>O(n * m). You should try {@code leftJoin(Collection, Function, Function)} first.
      */
+    @Deprecated
+    @SuppressWarnings("rawtypes")
     @IntermediateOp
     public <U> ExceptionalStream<Pair<T, U>, E> leftJoin(final Collection<? extends U> b,
             final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate) {
+        return leftJoin(b, predicate, (Throwables.BiFunction) Fn.pair());
+    }
+
+    /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <R>
+     * @param b
+     * @param predicate
+     * @param func
+     * @return
+     * @deprecated The time complexity is <i>O(n * m). You should try {@code leftJoin(Collection, Function, Function, BiFunction)} first.
+     */
+    @Deprecated
+    @IntermediateOp
+    public <U, R> ExceptionalStream<R, E> leftJoin(final Collection<? extends U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate,
+            final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
         assertNotClosed();
 
-        return flatMap(new Throwables.Function<T, ExceptionalStream<Pair<T, U>, E>, E>() {
+        return flatMap(new Throwables.Function<T, ExceptionalStream<R, E>, E>() {
             @Override
-            public ExceptionalStream<Pair<T, U>, E> apply(final T t) {
+            public ExceptionalStream<R, E> apply(final T t) {
                 return ExceptionalStream.<U, E> of(b).filter(new Throwables.Predicate<U, E>() {
                     @Override
                     public boolean test(final U u) throws E {
                         return predicate.test(t, u);
                     }
-                }).map(new Throwables.Function<U, Pair<T, U>, E>() {
+                }).map(new Throwables.Function<U, R, E>() {
                     @Override
-                    public Pair<T, U> apply(U u) {
-                        return Pair.of(t, u);
+                    public R apply(U u) throws E {
+                        return func.apply(t, u);
                     }
-                }).appendIfEmpty(Pair.of(t, (U) null));
+                }).appendIfEmpty(() -> ExceptionalStream.<T, E> just(t).map(tt -> func.apply(t, (U) null)));
             }
         });
     }
 
     /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <K>
      * @param <U>
@@ -5828,6 +5912,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <K>
      * @param <U>
@@ -5879,6 +5964,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <K>
      * @param b
@@ -5891,6 +5977,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <K>
      * @param <R>
@@ -5906,6 +5993,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <K>
      * @param <U>
@@ -5966,33 +6054,55 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <U>
      * @param b
      * @param predicate
      * @return
+     * @deprecated The time complexity is <i>O(n * m). You should try {@code rightJoin(Collection, Function, Function)} first.
      */
+    @Deprecated
+    @SuppressWarnings("rawtypes")
     @IntermediateOp
     public <U> ExceptionalStream<Pair<T, U>, E> rightJoin(final Collection<? extends U> b,
             final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate) {
+        return rightJoin(b, predicate, (Throwables.BiFunction) Fn.pair());
+    }
+
+    /**
+     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
+     *
+     * @param <U>
+     * @param <R>
+     * @param b
+     * @param predicate
+     * @param func
+     * @return
+     * @deprecated The time complexity is <i>O(n * m). You should try {@code rightJoin(Collection, Function, Function, BiFunction)} first.
+     */
+    @Deprecated
+    @IntermediateOp
+    public <U, R> ExceptionalStream<R, E> rightJoin(final Collection<? extends U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate,
+            final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
         assertNotClosed();
 
         final Map<U, U> joinedRights = new IdentityHashMap<>();
 
-        return flatMap(new Throwables.Function<T, ExceptionalStream<Pair<T, U>, E>, E>() {
+        return flatMap(new Throwables.Function<T, ExceptionalStream<R, E>, E>() {
             @Override
-            public ExceptionalStream<Pair<T, U>, E> apply(final T t) {
+            public ExceptionalStream<R, E> apply(final T t) {
                 return ExceptionalStream.<U, E> of(b).filter(new Throwables.Predicate<U, E>() {
                     @Override
                     public boolean test(final U u) throws E {
                         return predicate.test(t, u);
                     }
-                }).map(new Throwables.Function<U, Pair<T, U>, E>() {
+                }).map(new Throwables.Function<U, R, E>() {
                     @Override
-                    public Pair<T, U> apply(U u) {
+                    public R apply(U u) throws E {
                         joinedRights.put(u, u);
 
-                        return Pair.of(t, u);
+                        return func.apply(t, u);
                     }
                 });
             }
@@ -6001,15 +6111,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             public boolean test(U u) {
                 return joinedRights.containsKey(u) == false;
             }
-        }).map(new Throwables.Function<U, Pair<T, U>, E>() {
+        }).map(new Throwables.Function<U, R, E>() {
             @Override
-            public Pair<T, U> apply(U u) {
-                return Pair.of((T) null, u);
+            public R apply(U u) throws E {
+                return func.apply((T) null, u);
             }
         }));
     }
 
     /**
+    * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <U>
      * @param <K>
@@ -6026,6 +6137,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+    * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <U>
      * @param <K>
@@ -6076,6 +6188,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <K>
      * @param b
@@ -6088,6 +6201,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <K>
      * @param <R>
@@ -6103,6 +6217,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <U>
      * @param <K>
@@ -6156,6 +6271,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <U>
      * @param <K>
@@ -6173,6 +6289,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <U>
      * @param <K>
@@ -6224,6 +6341,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <U>
      * @param <K>
@@ -6277,6 +6395,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <U>
      * @param <K>
@@ -6296,6 +6415,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <U>
      * @param <K>
@@ -6349,6 +6469,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+    * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Stream</code> and <i>m</i> is the size of specified collection <code>b</code>.
      *
      * @param <U>
      * @param <K>
@@ -8741,7 +8862,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
-    
+
      *
      * @param <R>
      * @param mapper

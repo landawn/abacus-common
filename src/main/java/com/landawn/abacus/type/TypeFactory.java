@@ -915,6 +915,8 @@ public final class TypeFactory {
                     }
                 } else if (ClassUtil.isEntity(cls)) {
                     type = new EntityType(cls);
+                } else if (ClassUtil.isRecord(cls)) {
+                    type = new RecordType(cls);
                 } else if (Type.class.isAssignableFrom(cls)) {
                     type = (Type) TypeAttrParser.newInstance(cls, typeName);
                 } else if (Object[].class.isAssignableFrom(cls)) {

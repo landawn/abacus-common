@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -89,7 +90,9 @@ import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
+import com.landawn.abacus.util.ClassUtil.RecordInfo;
 import com.landawn.abacus.util.Iterables.Slice;
+import com.landawn.abacus.util.Tuple.Tuple5;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalInt;
@@ -2105,6 +2108,7 @@ class CommonUtil {
      * @param rows list of row which can be: Map/Entity/Array/List
      * @return
      */
+    @SuppressWarnings("deprecation")
     public static <T> DataSet newDataSet(Collection<String> columnNames, Collection<T> rowList) {
         if (CommonUtil.isNullOrEmpty(columnNames) && CommonUtil.isNullOrEmpty(rowList)) {
             // throw new IllegalArgumentException("Column name list and row list can not be both null or empty");
@@ -2127,6 +2131,8 @@ class CommonUtil {
 
             if (type.isMap()) {
                 columnNames = new ArrayList<>(((Map<String, Object>) firstNonNullRow).keySet());
+            } else if (type.isRecord()) {
+                columnNames = new ArrayList<>(ClassUtil.getRecordInfo(cls).fieldNames());
             } else if (type.isEntity()) {
                 if (N.isDirtyMarker(cls)) {
                     final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) firstNonNullRow);
@@ -2195,7 +2201,8 @@ class CommonUtil {
                 continue;
             }
 
-            type = CommonUtil.typeOf(row.getClass());
+            final Class<?> cls = row.getClass();
+            type = CommonUtil.typeOf(cls);
 
             if (type.isMap()) {
                 Map<String, Object> props = (Map<String, Object>) row;
@@ -2203,8 +2210,26 @@ class CommonUtil {
                 for (int i = 0; i < columnCount; i++) {
                     columnList.get(i).add(props.get(columnNameList.get(i)));
                 }
+            } else if (type.isRecord()) {
+                final RecordInfo<?> recordInfo = ClassUtil.getRecordInfo(cls);
+                final ImmutableMap<String, Tuple5<String, Field, Method, Type<Object>, Integer>> fieldMap = recordInfo.fieldMap();
+
+                try {
+                    Tuple5<String, Field, Method, Type<Object>, Integer> tp = null;
+
+                    for (int i = 0; i < columnCount; i++) {
+                        tp = fieldMap.get(columnNameList.get(i));
+
+                        if (tp == null) {
+                            columnList.get(i).add(null);
+                        } else {
+                            columnList.get(i).add(tp._3.invoke(row));
+                        }
+                    }
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    throw N.toRuntimeException(e);
+                }
             } else if (type.isEntity()) {
-                final Class<?> cls = row.getClass();
                 final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
                 PropInfo propInfo = null;
 
@@ -5882,33 +5907,114 @@ class CommonUtil {
             return targetType.defaultValue();
         }
 
-        final Class<?> srcPropClass = obj.getClass();
+        final Class<?> srcClass = obj.getClass();
 
-        if (targetType.clazz().isAssignableFrom(srcPropClass)) {
+        if (targetType.clazz().isAssignableFrom(srcClass)) {
             return (T) obj;
         }
 
-        final Type<Object> srcPropType = typeOf(srcPropClass);
+        final Type<Object> srcType = typeOf(srcClass);
 
-        if (targetType.isBoolean() && srcPropType.isNumber()) {
+        if (targetType.isBoolean() && srcType.isNumber()) {
             return (T) ((Boolean) (((Number) obj).longValue() > 0));
         }
 
         if (targetType.isEntity()) {
-            if (srcPropType.isEntity()) {
+            if (srcType.isEntity()) {
                 return copy(targetType.clazz(), obj);
-            } else if (srcPropType.isMap()) {
+            } else if (srcType.isRecord()) {
+                @SuppressWarnings("deprecation")
+                final RecordInfo<?> recordInfo = ClassUtil.getRecordInfo(srcClass);
+                final Object result = N.newInstance(targetType.clazz());
+                final EntityInfo entitInfo = ParserUtil.getEntityInfo(targetType.clazz());
+                PropInfo propInfo = null;
+
+                try {
+                    for (Tuple5<String, Field, Method, Type<Object>, Integer> tp : recordInfo.fieldMap().values()) {
+                        propInfo = entitInfo.getPropInfo(tp._1);
+
+                        if (propInfo == null) {
+                            continue;
+                        }
+
+                        propInfo.setPropValue(result, tp._3.invoke(obj));
+                    }
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    // Should never happen.
+                    throw N.toRuntimeException(e);
+                }
+
+                return (T) result;
+            } else if (srcType.isMap()) {
                 return Maps.map2Entity(targetType.clazz(), (Map<String, Object>) obj);
             }
+        } else if (targetType.isRecord()) {
+            if (srcType.isEntity()) {
+                @SuppressWarnings("deprecation")
+                final RecordInfo<?> targetRecordInfo = ClassUtil.getRecordInfo(targetType.clazz());
+                final EntityInfo entitInfo = ParserUtil.getEntityInfo(srcClass);
+                final Object[] args = new Object[targetRecordInfo.fieldNames().size()];
+                PropInfo propInfo = null;
+                int idx = 0;
+
+                for (String fieldName : targetRecordInfo.fieldNames()) {
+                    propInfo = entitInfo.getPropInfo(fieldName);
+
+                    if (propInfo == null) {
+                        idx++;
+                        continue;
+                    }
+
+                    args[idx++] = propInfo.getPropValue(obj);
+                }
+
+                return (T) targetRecordInfo.creator().apply(args);
+            } else if (srcType.isRecord()) {
+                @SuppressWarnings("deprecation")
+                final RecordInfo<?> targetRecordInfo = ClassUtil.getRecordInfo(targetType.clazz());
+                @SuppressWarnings("deprecation")
+                final RecordInfo<?> srcRecordInfo = ClassUtil.getRecordInfo(srcClass);
+                final ImmutableMap<String, Tuple5<String, Field, Method, Type<Object>, Integer>> srcFieldMap = srcRecordInfo.fieldMap();
+                final Object[] args = new Object[targetRecordInfo.fieldNames().size()];
+                Tuple5<String, Field, Method, Type<Object>, Integer> tp = null;
+                int idx = 0;
+
+                try {
+                    for (String fieldName : targetRecordInfo.fieldNames()) {
+                        tp = srcFieldMap.get(fieldName);
+
+                        if (tp == null) {
+                            idx++;
+                            continue;
+                        }
+
+                        args[idx++] = tp._3.invoke(obj);
+                    }
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    // Should never happen.
+                    throw N.toRuntimeException(e);
+                }
+
+                return (T) targetRecordInfo.creator().apply(args);
+            } else if (srcType.isMap()) {
+                return Maps.map2Record((Map<String, Object>) obj, targetType.clazz());
+            }
         } else if (targetType.isMap()) {
-            if (srcPropType.isEntity() && targetType.getParameterTypes()[0].clazz().isAssignableFrom(String.class)
+            if (srcType.isEntity() && targetType.getParameterTypes()[0].clazz().isAssignableFrom(String.class)
                     && Object.class.equals(targetType.getParameterTypes()[1].clazz())) {
                 try {
                     return (T) Maps.entity2Map((Map<String, Object>) CommonUtil.newInstance(targetType.clazz()), obj);
                 } catch (Exception e) {
                     // ignore.
                 }
-            } else if (srcPropType.isMap() && Object.class.equals(targetType.getParameterTypes()[0].clazz())
+            } else if (srcType.isRecord() && targetType.getParameterTypes()[0].clazz().isAssignableFrom(String.class)
+                    && Object.class.equals(targetType.getParameterTypes()[1].clazz())) {
+                try {
+                    return (T) Maps.record2Map((Map<String, Object>) CommonUtil.newInstance(targetType.clazz()), obj);
+                } catch (Exception e) {
+                    // ignore.
+                }
+            } else if (srcType.isMap() && Object.class.equals(targetType.getParameterTypes()[0].clazz())
                     && Object.class.equals(targetType.getParameterTypes()[1].clazz())) {
                 final Map result = (Map) CommonUtil.newInstance(targetType.clazz());
                 result.putAll((Map) obj);
@@ -5917,14 +6023,14 @@ class CommonUtil {
         }
 
         if (targetType.isCollection()) {
-            if (srcPropType.isCollection() && Object.class.equals(targetType.getParameterTypes()[0].clazz())) {
+            if (srcType.isCollection() && Object.class.equals(targetType.getParameterTypes()[0].clazz())) {
                 final Collection result = (Collection) CommonUtil.newInstance(targetType.clazz());
                 result.addAll((Collection) obj);
                 return (T) result;
             }
         }
 
-        if (targetType.isNumber() && srcPropType.isNumber() && CLASS_TYPE_ENUM.containsKey(targetType.clazz())) {
+        if (targetType.isNumber() && srcType.isNumber() && CLASS_TYPE_ENUM.containsKey(targetType.clazz())) {
             switch (CLASS_TYPE_ENUM.get(targetType.clazz())) {
                 case 3:
                 case 23:
@@ -5951,11 +6057,11 @@ class CommonUtil {
                     return (T) (Double) ((Number) obj).doubleValue();
 
             }
-        } else if ((targetType.clazz().equals(int.class) || targetType.clazz().equals(Integer.class)) && srcPropType.clazz().equals(Character.class)) {
+        } else if ((targetType.clazz().equals(int.class) || targetType.clazz().equals(Integer.class)) && srcType.clazz().equals(Character.class)) {
             return (T) (Integer.valueOf(((Character) obj).charValue()));
-        } else if ((targetType.clazz().equals(char.class) || targetType.clazz().equals(Character.class)) && srcPropType.clazz().equals(Integer.class)) {
+        } else if ((targetType.clazz().equals(char.class) || targetType.clazz().equals(Character.class)) && srcType.clazz().equals(Integer.class)) {
             return (T) (Character.valueOf((char) ((Integer) obj).intValue()));
-        } else if (targetType.clazz().equals(byte[].class) && srcPropType.clazz().equals(Blob.class)) {
+        } else if (targetType.clazz().equals(byte[].class) && srcType.clazz().equals(Blob.class)) {
             final Blob blob = (Blob) obj;
 
             try {
@@ -5969,7 +6075,7 @@ class CommonUtil {
                     throw new UncheckedSQLException(e);
                 }
             }
-        } else if (targetType.clazz().equals(char[].class) && srcPropType.clazz().equals(Clob.class)) {
+        } else if (targetType.clazz().equals(char[].class) && srcType.clazz().equals(Clob.class)) {
             final Clob clob = (Clob) obj;
 
             try {
@@ -5983,7 +6089,7 @@ class CommonUtil {
                     throw new UncheckedSQLException(e);
                 }
             }
-        } else if (targetType.clazz().equals(String.class) && srcPropType.clazz().equals(Clob.class)) {
+        } else if (targetType.clazz().equals(String.class) && srcType.clazz().equals(Clob.class)) {
             final Clob clob = (Clob) obj;
 
             try {
@@ -6049,7 +6155,7 @@ class CommonUtil {
      *
      * @param str
      * @return
-     * @throws NumberFormatException If the string is not a parsable {@code short}. 
+     * @throws NumberFormatException If the string is not a parsable {@code short}.
      * @deprecated replaced by {@code Numbers.toShort(String)}
      * @see Numbers#toShort(String)
      */
@@ -6065,7 +6171,7 @@ class CommonUtil {
      *
      * @param str
      * @return
-     * @throws NumberFormatException If the string is not a parsable {@code int}. 
+     * @throws NumberFormatException If the string is not a parsable {@code int}.
      * @deprecated replaced by {@code Numbers.toInt(String)}
      * @see Numbers#toInt(String)
      */
@@ -6081,7 +6187,7 @@ class CommonUtil {
      *
      * @param str
      * @return
-     * @throws NumberFormatException If the string is not a parsable {@code long}. 
+     * @throws NumberFormatException If the string is not a parsable {@code long}.
      * @deprecated replaced by {@code Numbers.toLong(String)}
      * @see Numbers#toLong(String)
      */
@@ -6097,7 +6203,7 @@ class CommonUtil {
      *
      * @param str
      * @return
-     * @throws NumberFormatException If the string is not a parsable {@code float}. 
+     * @throws NumberFormatException If the string is not a parsable {@code float}.
      * @deprecated replaced by {@code Numbers.toFloat(String)}
      * @see Numbers#toFloat(String)
      */
@@ -6113,7 +6219,7 @@ class CommonUtil {
      *
      * @param str
      * @return
-     * @throws NumberFormatException If the string is not a parsable {@code double}. 
+     * @throws NumberFormatException If the string is not a parsable {@code double}.
      * @deprecated replaced by {@code Numbers.toDouble(String)}
      * @see Numbers#toDouble(String)
      */
@@ -8126,7 +8232,7 @@ class CommonUtil {
     }
 
     /**
-     * 
+     *
      * @param <T>
      * @param <E>
      * @param iter
@@ -8309,7 +8415,7 @@ class CommonUtil {
     }
 
     /**
-     * 
+     *
      * @param <T>
      * @param <E>
      * @param iter
@@ -8503,7 +8609,7 @@ class CommonUtil {
     }
 
     /**
-     * 
+     *
      * @param <T>
      * @param iter
      * @param fromIndex
@@ -10505,7 +10611,7 @@ class CommonUtil {
      *
      * @param <E>
      * @param b
-     * @param errorMessageSupplier 
+     * @param errorMessageSupplier
      */
     public static void checkState(boolean b, Supplier<String> errorMessageSupplier) {
         if (!b) {
@@ -11566,7 +11672,7 @@ class CommonUtil {
     }
 
     /**
-     * 
+     *
      * @param <T>
      * @param a
      * @param fromIndexA
@@ -11667,7 +11773,7 @@ class CommonUtil {
 
     /**
      * Returns {@code true} is {@code a < b}, otherwise {@code false} is returned.
-     * 
+     *
      * @param <T>
      * @param a
      * @param b
@@ -11679,7 +11785,7 @@ class CommonUtil {
 
     /**
      * Returns {@code true} is {@code a <= b}, otherwise {@code false} is returned.
-     * 
+     *
      * @param <T>
      * @param a
      * @param b
@@ -11691,7 +11797,7 @@ class CommonUtil {
 
     /**
      * Returns {@code true} is {@code a > b}, otherwise {@code false} is returned.
-     * 
+     *
      * @param <T>
      * @param a
      * @param b
@@ -11703,7 +11809,7 @@ class CommonUtil {
 
     /**
      * Returns {@code true} is {@code a >= b}, otherwise {@code false} is returned.
-     * 
+     *
      * @param <T>
      * @param a
      * @param b
@@ -11715,7 +11821,7 @@ class CommonUtil {
 
     /**
      * Returns {@code true} is {@code min < value < max}, otherwise {@code false} is returned.
-     * 
+     *
      * @param <T>
      * @param value
      * @param min
@@ -11732,7 +11838,7 @@ class CommonUtil {
 
     /**
      * Returns {@code true} is {@code min <= value < max}, otherwise {@code false} is returned.
-     * 
+     *
      * @param <T>
      * @param value
      * @param min
@@ -11749,7 +11855,7 @@ class CommonUtil {
 
     /**
      * Returns {@code true} is {@code min <= value <= max}, otherwise {@code false} is returned.
-     * 
+     *
      * @param <T>
      * @param value
      * @param min
@@ -11766,7 +11872,7 @@ class CommonUtil {
 
     /**
      * Returns {@code true} is {@code min < value <= max}, otherwise {@code false} is returned.
-     * 
+     *
      * @param <T>
      * @param value
      * @param min

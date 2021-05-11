@@ -99,6 +99,7 @@ import java.util.jar.JarFile;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import com.landawn.abacus.DataSet;
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.core.DirtyMarkerUtil;
 import com.landawn.abacus.core.NameUtil;
@@ -111,6 +112,7 @@ import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.ObjectType;
 import com.landawn.abacus.type.Type;
+import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.Tuple.Tuple1;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
@@ -132,6 +134,10 @@ import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
 import com.landawn.abacus.util.u.R;
+import com.landawn.abacus.util.function.Function;
+
+import lombok.Value;
+import lombok.experimental.Accessors;
 
 /**
  *
@@ -2667,7 +2673,7 @@ public final class ClassUtil {
         try {
             accessibleObject.setAccessible(flag);
         } catch (Exception e) {
-            logger.warn("Failed to set accessible for : " + accessibleObject + " with flag: " + flag, e);
+            logger.warn("Failed to set accessible for : " + accessibleObject + " with flag: " + flag + " due to error: " + e.getMessage());
             return false;
         }
 
@@ -3051,6 +3057,101 @@ public final class ClassUtil {
         }
 
         return result;
+    }
+
+    /**
+     * Checks if is entity.
+     *
+     * @param cls
+     * @return true, if is entity
+     */
+    public static boolean isRecord(final Class<?> cls) {
+        if (recordClass == null) {
+            return false;
+        } else if (recordClass.isAssignableFrom(cls)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static final Class<?> recordClass;
+    static {
+        Class<?> cls = null;
+
+        try {
+            cls = Class.forName("java.lang.Record");
+        } catch (ClassNotFoundException e) {
+            // ignore.
+        }
+
+        recordClass = cls;
+    }
+
+    private static final Map<Class<?>, RecordInfo<?>> recordInfoMap = new ConcurrentHashMap<>();
+
+    /**
+     *
+     * @param recordClass
+     * @return
+     * @deprecated for internal use only
+     */
+    @Deprecated
+    @Beta
+    public static <T> RecordInfo<T> getRecordInfo(final Class<T> recordClass) {
+        if (!isRecord(recordClass)) {
+            throw new IllegalArgumentException(ClassUtil.getCanonicalClassName(recordClass) + " is not a Record class");
+        }
+
+        RecordInfo<T> recordInfo = (RecordInfo<T>) recordInfoMap.get(recordClass);
+
+        if (recordInfo == null) {
+            final Field[] fields = recordClass.getDeclaredFields();
+            final Map<String, Tuple5<String, Field, Method, Type<Object>, Integer>> map = new LinkedHashMap<>(fields.length);
+
+            try {
+                String name = null;
+                int idx = 0;
+
+                for (Field field : fields) {
+                    name = field.getName();
+
+                    map.put(name, Tuple.of(name, field, recordClass.getDeclaredMethod(name), TypeFactory.getType(field.getGenericType()), idx++));
+                }
+            } catch (NoSuchMethodException | SecurityException e) {
+                // Should never happen.
+                throw N.toRuntimeException(e);
+            }
+
+            final Constructor<?> constructor = recordClass.getDeclaredConstructors()[0];
+
+            final Function<Object[], T> creator = new Function<Object[], T>() {
+                @Override
+                public T apply(final Object[] args) throws RuntimeException {
+                    try {
+                        return (T) constructor.newInstance(args);
+                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                        // Should never happen.
+                        throw N.toRuntimeException(e);
+                    }
+                }
+            };
+
+            recordInfo = new RecordInfo<>(recordClass, creator, ImmutableList.copyOf(map.keySet()), ImmutableMap.of(map));
+
+            recordInfoMap.put(recordClass, recordInfo);
+        }
+
+        return recordInfo;
+    }
+
+    @Value
+    @Accessors(fluent = true)
+    public static final class RecordInfo<T> {
+        private final Class<T> clazz;
+        private final Function<Object[], T> creator;
+        private final ImmutableList<String> fieldNames;
+        private final ImmutableMap<String, Tuple5<String, Field, Method, Type<Object>, Integer>> fieldMap;
     }
 
     private ClassUtil() {
