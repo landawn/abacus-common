@@ -484,6 +484,11 @@ public final class ParserUtil {
 
         public final Optional<String> tableName;
 
+        private final Class<?>[] fieldTypes;
+        private final Object[] defaultFieldValues;
+        private final Constructor<?> noArgsConstructor;
+        private final Constructor<?> allArgsConstructor;
+
         @SuppressWarnings("deprecation")
         public EntityInfo(Class<?> cls) {
             simpleClassName = ClassUtil.getSimpleClassName(cls);
@@ -513,7 +518,7 @@ public final class ParserUtil {
             hashPropInfoMap = new ObjectPool<>((propNameList.size() + 1) * 2);
 
             PropInfo propInfo = null;
-            int i = 0;
+            int idx = 0;
 
             final Multiset<Integer> multiSet = N.newMultiset(propNameList.size() + 16);
             int maxLength = 0;
@@ -527,7 +532,7 @@ public final class ParserUtil {
                 propInfo = ASMUtil.isASMAvailable() ? new ASMPropInfo(propName, field, getMethod, jsonXmlConfig, annotations)
                         : new PropInfo(propName, field, getMethod, jsonXmlConfig, annotations);
 
-                propInfos[i++] = propInfo;
+                propInfos[idx++] = propInfo;
                 propInfoMap.put(propName, propInfo);
                 String jsonTagName = null;
 
@@ -619,6 +624,30 @@ public final class ParserUtil {
             }
 
             this.tableName = N.isNullOrEmpty(tmpTableName) ? Optional.<String> empty() : Optional.ofNullable(tmpTableName);
+
+            this.fieldTypes = new Class[propInfos.length];
+            this.defaultFieldValues = new Object[propInfos.length];
+
+            for (int i = 0, len = propInfos.length; i < len; i++) {
+                fieldTypes[i] = propInfos[i].field == null ? propInfos[i].clazz : propInfos[i].field.getType();
+                defaultFieldValues[i] = N.defaultValueOf(fieldTypes[i]);
+            }
+
+            this.noArgsConstructor = ClassUtil.getDeclaredConstructor(cls);
+            this.allArgsConstructor = ClassUtil.getDeclaredConstructor(cls, fieldTypes);
+
+            if (this.noArgsConstructor != null) {
+                ClassUtil.setAccessibleQuietly(noArgsConstructor, true);
+            }
+
+            if (this.allArgsConstructor != null) {
+                ClassUtil.setAccessibleQuietly(allArgsConstructor, true);
+            }
+
+            //    if (this.noArgsConstructor == null && this.allArgsConstructor == null) {
+            //        throw new RuntimeException("No Constructor found with empty arg or full args: " + N.toString(fieldTypes) + " in Entity/Record class: "
+            //                + ClassUtil.getCanonicalClassName(cls));
+            //    }
         }
 
         /**
@@ -981,6 +1010,19 @@ public final class ParserUtil {
             return annotations;
         }
 
+        public <T> T newInstance() {
+            return (T) (noArgsConstructor == null ? ClassUtil.invokeConstructor(allArgsConstructor, defaultFieldValues)
+                    : ClassUtil.invokeConstructor(noArgsConstructor));
+        }
+
+        public <T> T newInstance(final Object... args) {
+            if (N.isNullOrEmpty(args)) {
+                return newInstance();
+            }
+
+            return (T) ClassUtil.invokeConstructor(allArgsConstructor, args);
+        }
+
         /**
          *
          * @return
@@ -1064,6 +1106,8 @@ public final class ParserUtil {
 
         public final Optional<String> columnName;
 
+        final boolean canSetFieldByGetMethod;
+
         @SuppressWarnings("deprecation")
         PropInfo(String propName) {
             this.declaringClass = null;
@@ -1096,6 +1140,7 @@ public final class ParserUtil {
 
             isMarkedToColumn = false;
             columnName = Optional.<String> empty();
+            canSetFieldByGetMethod = false;
         }
 
         @SuppressWarnings("deprecation")
@@ -1187,6 +1232,9 @@ public final class ParserUtil {
             this.isMarkedToColumn = tmpIsMarkedToColumn;
 
             this.columnName = N.isNullOrEmpty(tmpColumnName) ? Optional.<String> empty() : Optional.ofNullable(tmpColumnName);
+
+            this.canSetFieldByGetMethod = ClassUtil.isRegisteredXMLBindingClass(declaringClass) && getMethod != null
+                    && (Map.class.isAssignableFrom(getMethod.getReturnType()) || Collection.class.isAssignableFrom(getMethod.getReturnType()));
         }
 
         /**
@@ -1219,7 +1267,7 @@ public final class ParserUtil {
                     field.set(obj, propValue);
                 } else if (setMethod != null) {
                     setMethod.invoke(obj, propValue);
-                } else if (getMethod != null) {
+                } else if (canSetFieldByGetMethod) {
                     ClassUtil.setPropValueByGet(obj, getMethod, propValue);
                 } else {
                     field.set(obj, propValue);
@@ -1890,7 +1938,7 @@ public final class ParserUtil {
                     fieldAccess.set(obj, fieldAccessIndex, propValue);
                 } else if (setMethodAccessIndex > -1) {
                     methodAccess.invoke(obj, setMethodAccessIndex, propValue);
-                } else if (getMethod != null) {
+                } else if (canSetFieldByGetMethod) {
                     ClassUtil.setPropValueByGet(obj, getMethod, propValue);
                 } else {
                     field.set(obj, propValue);
@@ -1910,7 +1958,7 @@ public final class ParserUtil {
                     try {
                         field.set(obj, propValue);
                     } catch (Exception e2) {
-                        N.toRuntimeException(e);
+                        throw N.toRuntimeException(e);
                     }
                 }
             }
@@ -2005,7 +2053,7 @@ public final class ParserUtil {
         }
     }
 
-    static interface DateTimeReaderWriter<T> {
+    interface DateTimeReaderWriter<T> {
         T read(PropInfo propInfo, String strValue);
 
         void write(PropInfo propInfo, T x, CharacterWriter writer) throws IOException;

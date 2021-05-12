@@ -326,16 +326,6 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if is entity.
-     *
-     * @return true, if is entity
-     */
-    @Override
-    public boolean isRecord() {
-        return false;
-    }
-
-    /**
      * Checks if is map entity.
      *
      * @return true, if is map entity

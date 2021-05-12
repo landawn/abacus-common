@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 HaiYang Li
+ * Copyright (C) 2021 HaiYang Li
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -11,23 +11,23 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.annotation;
 
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-/** 
- * The field is identity and will be excluded by add/addAll/batchAdd and update/updateAll/batchUpdate operations if the input is an entity. 
+/**
+ * This is a test annotation to identify the entity class created by {@code Lombok} is a mock {@code record} in jdk 16.
+ *
  */
+@Test
 @Documented
-@Target(value = { FIELD, /* METHOD, */ TYPE })
+@Target(value = { ElementType.TYPE })
 @Retention(RUNTIME)
-public @interface ReadOnlyId {
+public @interface Record {
 
 }

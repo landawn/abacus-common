@@ -32,7 +32,6 @@ import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.JSONSerializationConfig.JSC;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
-import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.WD;
 import com.landawn.abacus.util.XMLUtil;
@@ -53,12 +52,6 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
     protected static final JSONSerializationConfig jsc = JSC.create().setCharQuotation(WD.CHAR_0);
 
     protected static final JSONSerializationConfig jscWithCircularRefSupported = JSC.create().setCharQuotation(WD.CHAR_0).supportCircularReference(true);
-
-    protected static final Type<Object> objType = TypeFactory.getType(Object.class);
-
-    protected static final Type<String> strType = TypeFactory.getType(String.class);
-
-    protected static final Type<Boolean> boolType = TypeFactory.getType(Boolean.class);
 
     protected static final Type<?> defaultKeyType = objType;
 

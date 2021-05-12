@@ -36,6 +36,7 @@ import com.landawn.abacus.exception.ParseException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.type.Type;
+import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.BiMap;
 import com.landawn.abacus.util.ImmutableBiMap;
 import com.landawn.abacus.util.ImmutableCollection;
@@ -82,6 +83,14 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     static final int POOL_SIZE = 1000;
 
     static final int CLS_POOL_SIZE = 3000;
+
+    static final Type<Object> objType = TypeFactory.getType(Object.class);
+
+    static final Type<String> strType = TypeFactory.getType(String.class);
+
+    static final Type<Boolean> boolType = TypeFactory.getType(Boolean.class);
+
+    static final Type<Map<String, Object>> propsMapType = TypeFactory.getType("Map<String, Object>");
 
     /**
      *

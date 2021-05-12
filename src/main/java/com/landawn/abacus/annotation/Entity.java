@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018, 2019 HaiYang Li
+ * Copyright (C) 2021 HaiYang Li
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -11,18 +11,20 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.landawn.abacus.annotation;
+
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+@Beta
 @Documented
-@Retention(value = RetentionPolicy.CLASS)
-@Target(value = { ElementType.METHOD, ElementType.TYPE })
-public @interface ParallelSupported {
+@Target(value = { ElementType.TYPE })
+@Retention(RUNTIME)
+public @interface Entity {
 
+    String name() default "";
 }

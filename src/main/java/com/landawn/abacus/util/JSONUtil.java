@@ -29,7 +29,6 @@ import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
-import com.landawn.abacus.util.ClassUtil.RecordInfo;
 
 /**
  *
@@ -224,17 +223,6 @@ public final class JSONUtil {
             }
 
             return (T) map;
-        } else if (type.isRecord()) {
-            @SuppressWarnings("deprecation")
-            final RecordInfo<?> recordInfo = ClassUtil.getRecordInfo(cls);
-            final Object[] args = new Object[recordInfo.fieldNames().size()];
-            int idx = 0;
-
-            for (String fieldName : recordInfo.fieldNames()) {
-                args[idx++] = jsonObject.get(fieldName);
-            }
-
-            return (T) recordInfo.creator().apply(args);
         } else {
             final Object entity = N.newEntity(cls, null);
             final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);

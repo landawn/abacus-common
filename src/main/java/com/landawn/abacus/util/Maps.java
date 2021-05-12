@@ -14,9 +14,6 @@
 
 package com.landawn.abacus.util;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
@@ -31,15 +28,11 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import com.landawn.abacus.DirtyMarker;
-import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.core.DirtyMarkerUtil;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
-import com.landawn.abacus.type.Type;
-import com.landawn.abacus.util.ClassUtil.RecordInfo;
 import com.landawn.abacus.util.Fn.Suppliers;
-import com.landawn.abacus.util.Tuple.Tuple5;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.function.BiFunction;
 import com.landawn.abacus.util.function.BinaryOperator;
@@ -3084,86 +3077,86 @@ public final class Maps {
         }
     }
 
-    @SuppressWarnings("deprecation")
-    @Beta
-    public static <T> Map<String, Object> record2Map(final T record) {
-        if (record == null) {
-            return null;
-        }
-
-        final Class<?> recordClass = record.getClass();
-
-        return record2Map(new LinkedHashMap<>(ClassUtil.getRecordInfo(recordClass).fieldNames().size()), record);
-    }
-
-    @Beta
-    public static <T, M extends Map<String, Object>> M record2Map(final T record, final Supplier<? extends M> mapSupplier) {
-        if (record == null) {
-            return null;
-        }
-
-        return record2Map(mapSupplier.get(), record);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Beta
-    public static <T, M extends Map<String, Object>> M record2Map(final T record, final IntFunction<? extends M> mapSupplier) {
-        if (record == null) {
-            return null;
-        }
-
-        final Class<?> recordClass = record.getClass();
-
-        return record2Map(mapSupplier.apply(ClassUtil.getRecordInfo(recordClass).fieldNames().size()), record);
-    }
-
-    @Beta
-    static <M extends Map<String, Object>> M record2Map(final M resultMap, final Object record) {
-        if (record == null) {
-            return resultMap;
-        }
-
-        final Class<?> recordClass = record.getClass();
-
-        @SuppressWarnings("deprecation")
-        final RecordInfo<?> recordInfo = ClassUtil.getRecordInfo(recordClass);
-
-        try {
-            for (Tuple5<String, Field, Method, Type<Object>, Integer> tp : recordInfo.fieldMap().values()) {
-                resultMap.put(tp._1, tp._3.invoke(record));
-            }
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            // Should never happen.
-            throw N.toRuntimeException(e);
-        }
-
-        return resultMap;
-    }
-
-    @Beta
-    public static <T> T map2Record(final Map<String, Object> map, final Class<T> recordClass) {
-        @SuppressWarnings("deprecation")
-        final RecordInfo<?> recordInfo = ClassUtil.getRecordInfo(recordClass);
-
-        if (map == null) {
-            return null;
-        }
-
-        final Object[] args = new Object[recordInfo.fieldNames().size()];
-        Object val = null;
-        int idx = 0;
-
-        for (String fieldName : recordInfo.fieldNames()) {
-            val = map.get(fieldName);
-
-            // TODO, should be ignored?
-            //    if (val == null && !map.containsKey(tp._1)) {
-            //        throw new IllegalArgumentException("No value found for field: " + tp._1 + " from the input map");
-            //    }
-
-            args[idx++] = val;
-        }
-
-        return (T) recordInfo.creator().apply(args);
-    }
+    //    @SuppressWarnings("deprecation")
+    //    @Beta
+    //    public static <T> Map<String, Object> record2Map(final T record) {
+    //        if (record == null) {
+    //            return null;
+    //        }
+    //
+    //        final Class<?> recordClass = record.getClass();
+    //
+    //        return record2Map(new LinkedHashMap<>(ClassUtil.getRecordInfo(recordClass).fieldNames().size()), record);
+    //    }
+    //
+    //    @Beta
+    //    public static <T, M extends Map<String, Object>> M record2Map(final T record, final Supplier<? extends M> mapSupplier) {
+    //        if (record == null) {
+    //            return null;
+    //        }
+    //
+    //        return record2Map(mapSupplier.get(), record);
+    //    }
+    //
+    //    @SuppressWarnings("deprecation")
+    //    @Beta
+    //    public static <T, M extends Map<String, Object>> M record2Map(final T record, final IntFunction<? extends M> mapSupplier) {
+    //        if (record == null) {
+    //            return null;
+    //        }
+    //
+    //        final Class<?> recordClass = record.getClass();
+    //
+    //        return record2Map(mapSupplier.apply(ClassUtil.getRecordInfo(recordClass).fieldNames().size()), record);
+    //    }
+    //
+    //    @Beta
+    //    static <M extends Map<String, Object>> M record2Map(final M resultMap, final Object record) {
+    //        if (record == null) {
+    //            return resultMap;
+    //        }
+    //
+    //        final Class<?> recordClass = record.getClass();
+    //
+    //        @SuppressWarnings("deprecation")
+    //        final RecordInfo<?> recordInfo = ClassUtil.getRecordInfo(recordClass);
+    //
+    //        try {
+    //            for (Tuple5<String, Field, Method, Type<Object>, Integer> tp : recordInfo.fieldMap().values()) {
+    //                resultMap.put(tp._1, tp._3.invoke(record));
+    //            }
+    //        } catch (IllegalAccessException | InvocationTargetException e) {
+    //            // Should never happen.
+    //            throw N.toRuntimeException(e);
+    //        }
+    //
+    //        return resultMap;
+    //    }
+    //
+    //    @Beta
+    //    public static <T> T map2Record(final Map<String, Object> map, final Class<T> recordClass) {
+    //        @SuppressWarnings("deprecation")
+    //        final RecordInfo<?> recordInfo = ClassUtil.getRecordInfo(recordClass);
+    //
+    //        if (map == null) {
+    //            return null;
+    //        }
+    //
+    //        final Object[] args = new Object[recordInfo.fieldNames().size()];
+    //        Object val = null;
+    //        int idx = 0;
+    //
+    //        for (String fieldName : recordInfo.fieldNames()) {
+    //            val = map.get(fieldName);
+    //
+    //            // TODO, should be ignored?
+    //            //    if (val == null && !map.containsKey(tp._1)) {
+    //            //        throw new IllegalArgumentException("No value found for field: " + tp._1 + " from the input map");
+    //            //    }
+    //
+    //            args[idx++] = val;
+    //        }
+    //
+    //        return (T) recordInfo.creator().apply(args);
+    //    }
 }

@@ -20,7 +20,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -90,9 +89,7 @@ import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
-import com.landawn.abacus.util.ClassUtil.RecordInfo;
 import com.landawn.abacus.util.Iterables.Slice;
-import com.landawn.abacus.util.Tuple.Tuple5;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalInt;
@@ -969,8 +966,8 @@ class CommonUtil {
             }
         }
 
-        try {
-            if (Modifier.isStatic(cls.getModifiers()) == false && (cls.isAnonymousClass() || cls.isMemberClass())) {
+        if (Modifier.isStatic(cls.getModifiers()) == false && (cls.isAnonymousClass() || cls.isMemberClass())) {
+            try {
                 // http://stackoverflow.com/questions/2097982/is-it-possible-to-create-an-instance-of-nested-class-using-java-reflection
 
                 final List<Class<?>> toInstantiate = new ArrayList<>();
@@ -994,7 +991,13 @@ class CommonUtil {
                 }
 
                 return invoke(ClassUtil.getDeclaredConstructor(cls, instance.getClass()), instance);
-            } else {
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                throw N.toRuntimeException(e);
+            }
+        } else if (ClassUtil.isEntity(cls)) {
+            return ParserUtil.getEntityInfo(cls).newInstance();
+        } else {
+            try {
                 final Constructor<T> constructor = ClassUtil.getDeclaredConstructor(cls);
 
                 if (constructor == null) {
@@ -1002,9 +1005,9 @@ class CommonUtil {
                 }
 
                 return invoke(constructor);
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                throw N.toRuntimeException(e);
             }
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            throw N.toRuntimeException(e);
         }
     }
 
@@ -2108,7 +2111,6 @@ class CommonUtil {
      * @param rows list of row which can be: Map/Entity/Array/List
      * @return
      */
-    @SuppressWarnings("deprecation")
     public static <T> DataSet newDataSet(Collection<String> columnNames, Collection<T> rowList) {
         if (CommonUtil.isNullOrEmpty(columnNames) && CommonUtil.isNullOrEmpty(rowList)) {
             // throw new IllegalArgumentException("Column name list and row list can not be both null or empty");
@@ -2131,8 +2133,6 @@ class CommonUtil {
 
             if (type.isMap()) {
                 columnNames = new ArrayList<>(((Map<String, Object>) firstNonNullRow).keySet());
-            } else if (type.isRecord()) {
-                columnNames = new ArrayList<>(ClassUtil.getRecordInfo(cls).fieldNames());
             } else if (type.isEntity()) {
                 if (N.isDirtyMarker(cls)) {
                     final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) firstNonNullRow);
@@ -2209,25 +2209,6 @@ class CommonUtil {
 
                 for (int i = 0; i < columnCount; i++) {
                     columnList.get(i).add(props.get(columnNameList.get(i)));
-                }
-            } else if (type.isRecord()) {
-                final RecordInfo<?> recordInfo = ClassUtil.getRecordInfo(cls);
-                final ImmutableMap<String, Tuple5<String, Field, Method, Type<Object>, Integer>> fieldMap = recordInfo.fieldMap();
-
-                try {
-                    Tuple5<String, Field, Method, Type<Object>, Integer> tp = null;
-
-                    for (int i = 0; i < columnCount; i++) {
-                        tp = fieldMap.get(columnNameList.get(i));
-
-                        if (tp == null) {
-                            columnList.get(i).add(null);
-                        } else {
-                            columnList.get(i).add(tp._3.invoke(row));
-                        }
-                    }
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw N.toRuntimeException(e);
                 }
             } else if (type.isEntity()) {
                 final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
@@ -5922,95 +5903,14 @@ class CommonUtil {
         if (targetType.isEntity()) {
             if (srcType.isEntity()) {
                 return copy(targetType.clazz(), obj);
-            } else if (srcType.isRecord()) {
-                @SuppressWarnings("deprecation")
-                final RecordInfo<?> recordInfo = ClassUtil.getRecordInfo(srcClass);
-                final Object result = N.newInstance(targetType.clazz());
-                final EntityInfo entitInfo = ParserUtil.getEntityInfo(targetType.clazz());
-                PropInfo propInfo = null;
-
-                try {
-                    for (Tuple5<String, Field, Method, Type<Object>, Integer> tp : recordInfo.fieldMap().values()) {
-                        propInfo = entitInfo.getPropInfo(tp._1);
-
-                        if (propInfo == null) {
-                            continue;
-                        }
-
-                        propInfo.setPropValue(result, tp._3.invoke(obj));
-                    }
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    // Should never happen.
-                    throw N.toRuntimeException(e);
-                }
-
-                return (T) result;
             } else if (srcType.isMap()) {
                 return Maps.map2Entity(targetType.clazz(), (Map<String, Object>) obj);
-            }
-        } else if (targetType.isRecord()) {
-            if (srcType.isEntity()) {
-                @SuppressWarnings("deprecation")
-                final RecordInfo<?> targetRecordInfo = ClassUtil.getRecordInfo(targetType.clazz());
-                final EntityInfo entitInfo = ParserUtil.getEntityInfo(srcClass);
-                final Object[] args = new Object[targetRecordInfo.fieldNames().size()];
-                PropInfo propInfo = null;
-                int idx = 0;
-
-                for (String fieldName : targetRecordInfo.fieldNames()) {
-                    propInfo = entitInfo.getPropInfo(fieldName);
-
-                    if (propInfo == null) {
-                        idx++;
-                        continue;
-                    }
-
-                    args[idx++] = propInfo.getPropValue(obj);
-                }
-
-                return (T) targetRecordInfo.creator().apply(args);
-            } else if (srcType.isRecord()) {
-                @SuppressWarnings("deprecation")
-                final RecordInfo<?> targetRecordInfo = ClassUtil.getRecordInfo(targetType.clazz());
-                @SuppressWarnings("deprecation")
-                final RecordInfo<?> srcRecordInfo = ClassUtil.getRecordInfo(srcClass);
-                final ImmutableMap<String, Tuple5<String, Field, Method, Type<Object>, Integer>> srcFieldMap = srcRecordInfo.fieldMap();
-                final Object[] args = new Object[targetRecordInfo.fieldNames().size()];
-                Tuple5<String, Field, Method, Type<Object>, Integer> tp = null;
-                int idx = 0;
-
-                try {
-                    for (String fieldName : targetRecordInfo.fieldNames()) {
-                        tp = srcFieldMap.get(fieldName);
-
-                        if (tp == null) {
-                            idx++;
-                            continue;
-                        }
-
-                        args[idx++] = tp._3.invoke(obj);
-                    }
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    // Should never happen.
-                    throw N.toRuntimeException(e);
-                }
-
-                return (T) targetRecordInfo.creator().apply(args);
-            } else if (srcType.isMap()) {
-                return Maps.map2Record((Map<String, Object>) obj, targetType.clazz());
             }
         } else if (targetType.isMap()) {
             if (srcType.isEntity() && targetType.getParameterTypes()[0].clazz().isAssignableFrom(String.class)
                     && Object.class.equals(targetType.getParameterTypes()[1].clazz())) {
                 try {
                     return (T) Maps.entity2Map((Map<String, Object>) CommonUtil.newInstance(targetType.clazz()), obj);
-                } catch (Exception e) {
-                    // ignore.
-                }
-            } else if (srcType.isRecord() && targetType.getParameterTypes()[0].clazz().isAssignableFrom(String.class)
-                    && Object.class.equals(targetType.getParameterTypes()[1].clazz())) {
-                try {
-                    return (T) Maps.record2Map((Map<String, Object>) CommonUtil.newInstance(targetType.clazz()), obj);
                 } catch (Exception e) {
                     // ignore.
                 }

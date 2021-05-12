@@ -567,13 +567,6 @@ public interface Type<T> {
     boolean isEntity();
 
     /**
-     * Checks if is Record.
-     *
-     * @return true, if is Record
-     */
-    boolean isRecord();
-
-    /**
      * Checks if is map entity.
      *
      * @return true, if is map entity
@@ -866,28 +859,7 @@ public interface Type<T> {
      */
     String deepToString(T x);
 
-    /**
-     * The Enum SerializationType.
-     */
     enum SerializationType {
-
-        /** The serializable. */
-        SERIALIZABLE,
-        /** The entity. */
-        ENTITY,
-        /** The map. */
-        MAP,
-        /** The array. */
-        ARRAY,
-        /** The collection. */
-        COLLECTION,
-        /** The map entity. */
-        MAP_ENTITY,
-        /** The entity id. */
-        ENTITY_ID,
-        /** The data set. */
-        DATA_SET,
-        /** The unknown. */
-        UNKNOWN;
+        SERIALIZABLE, ENTITY, MAP, ARRAY, COLLECTION, MAP_ENTITY, ENTITY_ID, DATA_SET, UNKNOWN;
     }
 }
