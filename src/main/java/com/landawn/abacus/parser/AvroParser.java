@@ -463,17 +463,17 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
 
         if (type.isEntity()) {
             final EntityInfo entitInfo = ParserUtil.getEntityInfo(targetClass);
-            final T entity = N.newInstance(targetClass);
+            final Object result = entitInfo.createEntityResult();
             Object propValue = null;
 
             for (Field field : record.getSchema().getFields()) {
                 propValue = record.get(field.name());
 
                 if (propValue != null) {
-                    entitInfo.setPropValue(entity, field.name(), propValue);
+                    entitInfo.setPropValue(result, field.name(), propValue);
                 }
             }
-            return entity;
+            return entitInfo.finishEntityResult(result);
         } else if (type.isMap()) {
             final Map<String, Object> m = (Map<String, Object>) N.newInstance(targetClass);
             Object propValue = null;

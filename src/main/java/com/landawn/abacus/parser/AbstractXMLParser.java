@@ -376,28 +376,7 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
         return config == null || config.supportCircularReference == false ? jsc : jscWithCircularRefSupported;
     }
 
-    /**
-     * The Enum NodeType.
-     */
     enum NodeType {
-
-        /** The entity. */
-        ENTITY,
-        /** The property. */
-        PROPERTY,
-        /** The array. */
-        ARRAY,
-        /** The element. */
-        ELEMENT,
-        /** The collection. */
-        COLLECTION,
-        /** The map. */
-        MAP,
-        /** The entry. */
-        ENTRY,
-        /** The key. */
-        KEY,
-        /** The value. */
-        VALUE;
+        ENTITY, PROPERTY, ARRAY, ELEMENT, COLLECTION, MAP, ENTRY, KEY, VALUE;
     }
 }

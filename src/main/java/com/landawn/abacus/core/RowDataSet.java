@@ -2072,6 +2072,7 @@ public class RowDataSet implements DataSet, Cloneable {
         checkRowNum(rowNum);
 
         final Type<?> rowType = N.typeOf(rowClass);
+        final EntityInfo entityInfo = rowType.isEntity() ? ParserUtil.getEntityInfo(rowClass) : null;
         final boolean isAbstractRowClass = Modifier.isAbstract(rowClass.getModifiers());
         final Constructor<?> intConstructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowClass, int.class);
         final Constructor<?> constructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowClass);
@@ -2099,15 +2100,15 @@ public class RowDataSet implements DataSet, Cloneable {
                 result = ClassUtil.invokeConstructor(intConstructor, columnCount);
             }
         } else if (rowType.isEntity()) {
-            result = N.newInstance(rowClass);
+            result = entityInfo.createEntityResult();
         } else {
             throw new IllegalArgumentException(
                     "Unsupported row type: " + ClassUtil.getCanonicalClassName(rowClass) + ". Only Array, List/Set, Map and entity class are supported");
         }
 
-        getRow(rowType, result, checkColumnName(columnNames), columnNames, rowNum);
+        getRow(rowType, entityInfo, result, checkColumnName(columnNames), columnNames, rowNum);
 
-        return (T) result;
+        return entityInfo == null ? (T) result : entityInfo.finishEntityResult(result);
     }
 
     /**
@@ -2138,7 +2139,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
         final T row = rowSupplier.apply(columnNames.size());
 
-        getRow(N.typeOf(row.getClass()), row, checkColumnName(columnNames), columnNames, rowNum);
+        getRow(N.typeOf(row.getClass()), null, row, checkColumnName(columnNames), columnNames, rowNum);
 
         return row;
     }
@@ -2238,7 +2239,8 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param rowNum
      * @return
      */
-    private void getRow(final Type<?> rowType, final Object output, int[] columnIndexes, final Collection<String> columnNames, final int rowNum) {
+    private void getRow(final Type<?> rowType, final EntityInfo entityInfo, final Object output, int[] columnIndexes, final Collection<String> columnNames,
+            final int rowNum) {
         checkRowNum(rowNum);
 
         if (columnIndexes == null) {
@@ -2269,7 +2271,6 @@ public class RowDataSet implements DataSet, Cloneable {
 
         } else if (rowType.isEntity()) {
             final boolean ignoreUnmatchedProperty = columnNames == _columnNameList;
-            final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowType.clazz());
             Object result = output;
             String propName = null;
             Object propValue = null;
@@ -2279,10 +2280,6 @@ public class RowDataSet implements DataSet, Cloneable {
                 propValue = _columnList.get(columnIndexes[i]).get(rowNum);
 
                 entityInfo.setPropValue(result, propName, propValue, ignoreUnmatchedProperty);
-            }
-
-            if (result instanceof DirtyMarker) {
-                DirtyMarkerUtil.markDirty((DirtyMarker) result, false);
             }
         } else {
             throw new IllegalArgumentException(
@@ -2725,12 +2722,13 @@ public class RowDataSet implements DataSet, Cloneable {
                 rowList.add(row);
             }
         } else if (rowType.isEntity()) {
+            final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
+
             for (int rowNum = fromRowIndex; rowNum < toRowIndex; rowNum++) {
-                rowList.add(N.newInstance(rowClass));
+                rowList.add(entityInfo.createEntityResult());
             }
 
             final boolean ignoreUnmatchedProperty = columnNames == _columnNameList;
-            final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
             List<Object> column = null;
             String propName = null;
             PropInfo propInfo = null;
@@ -2753,10 +2751,8 @@ public class RowDataSet implements DataSet, Cloneable {
                 }
             }
 
-            if ((rowList.size() > 0) && rowList.get(0) instanceof DirtyMarker) {
-                for (Object e : rowList) {
-                    DirtyMarkerUtil.markDirty((DirtyMarker) e, false);
-                }
+            for (int i = 0, size = rowList.size(); i < size; i++) {
+                rowList.set(i, entityInfo.finishEntityResult(rowList.get(i)));
             }
         } else {
             throw new IllegalArgumentException(
@@ -2840,12 +2836,13 @@ public class RowDataSet implements DataSet, Cloneable {
                 rowList.add(row);
             }
         } else if (rowType.isEntity()) {
+            final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
+
             for (int rowNum = fromRowIndex; rowNum < toRowIndex; rowNum++) {
-                rowList.add(N.newInstance(rowClass));
+                rowList.add(entityInfo.createEntityResult());
             }
 
             final boolean ignoreUnmatchedProperty = false;
-            final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
             int columnIndex = -1;
             String propName = null;
             List<Object> column = null;
@@ -2870,10 +2867,8 @@ public class RowDataSet implements DataSet, Cloneable {
                 }
             }
 
-            if ((rowList.size() > 0) && rowList.get(0) instanceof DirtyMarker) {
-                for (Object e : rowList) {
-                    DirtyMarkerUtil.markDirty((DirtyMarker) e, false);
-                }
+            for (int i = 0, size = rowList.size(); i < size; i++) {
+                rowList.set(i, entityInfo.finishEntityResult(rowList.get(i)));
             }
         } else {
             throw new IllegalArgumentException(
@@ -3196,23 +3191,20 @@ public class RowDataSet implements DataSet, Cloneable {
                 resultMap.put(_columnList.get(keyColumnIndex).get(rowIndex), value);
             }
         } else if (valueType.isEntity()) {
-            final boolean ignoreUnmatchedProperty = valueColumnNames == _columnNameList;
-            final boolean isDirtyMarker = DirtyMarkerUtil.isDirtyMarker(rowClass);
             final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
+            final boolean ignoreUnmatchedProperty = valueColumnNames == _columnNameList;
             Object value = null;
             String propName = null;
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                value = N.newInstance(rowClass);
+                value = entityInfo.createEntityResult();
 
                 for (int columIndex : valueColumnIndexes) {
                     propName = _columnNameList.get(columIndex);
                     entityInfo.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnmatchedProperty);
                 }
 
-                if (isDirtyMarker) {
-                    DirtyMarkerUtil.markDirty((DirtyMarker) value, false);
-                }
+                value = entityInfo.finishEntityResult(value);
 
                 resultMap.put(_columnList.get(keyColumnIndex).get(rowIndex), value);
             }
@@ -3523,23 +3515,20 @@ public class RowDataSet implements DataSet, Cloneable {
                 resultMap.put((K) _columnList.get(keyColumnIndex).get(rowIndex), (E) value);
             }
         } else if (elementType.isEntity()) {
-            final boolean ignoreUnmatchedProperty = valueColumnNames == _columnNameList;
-            final boolean isDirtyMarker = DirtyMarkerUtil.isDirtyMarker(rowClass);
             final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
+            final boolean ignoreUnmatchedProperty = valueColumnNames == _columnNameList;
             Object value = null;
             String propName = null;
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                value = N.newInstance(rowClass);
+                value = entityInfo.createEntityResult();
 
                 for (int columIndex : valueColumnIndexes) {
                     propName = _columnNameList.get(columIndex);
                     entityInfo.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnmatchedProperty);
                 }
 
-                if (isDirtyMarker) {
-                    DirtyMarkerUtil.markDirty((DirtyMarker) value, false);
-                }
+                value = entityInfo.finishEntityResult(value);
 
                 resultMap.put((K) _columnList.get(keyColumnIndex).get(rowIndex), (E) value);
             }
@@ -3752,7 +3741,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 entity = idEntityMap.get(rowKey);
 
                 if (entity == null) {
-                    entity = N.newInstance(entityClass);
+                    entity = entityInfo.createEntityResult();
                     idEntityMap.put(rowKey, entity);
                 }
 
@@ -3784,7 +3773,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 entity = idEntityMap.get(rowKey);
 
                 if (entity == null) {
-                    entity = N.newInstance(entityClass);
+                    entity = entityInfo.createEntityResult();
                     idEntityMap.put(rowKey, entity);
 
                     keyRow = Objectory.createObjectArray(idColumnCount);
@@ -3916,7 +3905,13 @@ public class RowDataSet implements DataSet, Cloneable {
                 }
             }
 
-            return returnAllList ? (List<T>) N.asList(resultEntities) : new ArrayList<>((Collection<T>) idEntityMap.values());
+            final List<T> result = returnAllList ? (List<T>) N.asList(resultEntities) : new ArrayList<>((Collection<T>) idEntityMap.values());
+
+            for (int i = 0, size = result.size(); i < size; i++) {
+                result.set(i, entityInfo.finishEntityResult(result.get(i)));
+            }
+
+            return result;
         } finally {
             if (idColumnIndexes.length > 1) {
                 for (Wrapper<Object[]> e : ((Map<Wrapper<Object[]>, Object>) ((Map) idEntityMap)).keySet()) {
@@ -10760,7 +10755,7 @@ public class RowDataSet implements DataSet, Cloneable {
                     throw new NoSuchElementException();
                 }
 
-                getRow(rowType, row, columnIndexes, columnNames, cursor);
+                getRow(rowType, null, row, columnIndexes, columnNames, cursor);
 
                 cursor++;
 
@@ -10857,6 +10852,7 @@ public class RowDataSet implements DataSet, Cloneable {
         final int[] columnIndexes = this.checkColumnName(columnNames);
 
         final Type<?> rowType = N.typeOf(rowClass);
+        final EntityInfo entityInfo = rowType.isEntity() ? ParserUtil.getEntityInfo(rowClass) : null;
         final boolean isAbstractRowClass = Modifier.isAbstract(rowClass.getModifiers());
         final Constructor<?> intConstructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowClass, int.class);
         final Constructor<?> constructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowClass);
@@ -10901,17 +10897,17 @@ public class RowDataSet implements DataSet, Cloneable {
                         row = ClassUtil.invokeConstructor(intConstructor, columnCount);
                     }
                 } else if (rowType.isEntity()) {
-                    row = N.newInstance(rowClass);
+                    row = entityInfo.createEntityResult();
                 } else {
                     throw new IllegalArgumentException("Unsupported row type: " + ClassUtil.getCanonicalClassName(rowClass)
                             + ". Only Array, List/Set, Map and entity class are supported");
                 }
 
-                getRow(rowType, row, columnIndexes, columnNames, cursor);
+                getRow(rowType, entityInfo, row, columnIndexes, columnNames, cursor);
 
                 cursor++;
 
-                return (T) row;
+                return entityInfo == null ? (T) row : entityInfo.finishEntityResult(row);
             }
 
             @Override
@@ -11006,6 +11002,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
         final Class<?> rowClass = rowSupplier.apply(0).getClass();
         final Type<?> rowType = N.typeOf(rowClass);
+        final EntityInfo entityInfo = rowType.isEntity() ? ParserUtil.getEntityInfo(rowClass) : null;
         final int columnCount = columnNames.size();
 
         return Stream.of(new ObjIteratorEx<T>() {
@@ -11029,7 +11026,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 final Object row = rowSupplier.apply(columnCount);
 
-                getRow(rowType, row, columnIndexes, columnNames, cursor);
+                getRow(rowType, entityInfo, row, columnIndexes, columnNames, cursor);
 
                 cursor++;
 

@@ -251,16 +251,16 @@ public final class URLEncodedUtil {
      * @return
      */
     public static <T> T decode(final Class<T> targetClass, final String urlQuery, final Charset charset) {
-        final T result = N.newInstance(targetClass);
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
+        final Object result = entityInfo.createEntityResult();
 
         if (N.isNullOrEmpty(urlQuery)) {
-            return result;
+            return (T) entityInfo.finishEntityResult(result);
         }
 
         try (final Scanner scanner = new Scanner(urlQuery)) {
             scanner.useDelimiter(QP_SEP_PATTERN);
 
-            final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
             Type<?> propType = null;
             Object propValue = null;
             String name = null;
@@ -290,7 +290,7 @@ public final class URLEncodedUtil {
             }
         }
 
-        return result;
+        return (T) entityInfo.finishEntityResult(result);
     }
 
     /**
@@ -302,13 +302,12 @@ public final class URLEncodedUtil {
      * @return
      */
     public static <T> T parameters2Entity(final Class<T> targetClass, final Map<String, String[]> parameters) {
-        final T result = N.newInstance(targetClass);
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
+        final Object result = entityInfo.createEntityResult();
 
         if (N.isNullOrEmpty(parameters)) {
-            return result;
+            return (T) entityInfo.finishEntityResult(result);
         }
-
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
 
         PropInfo propInfo = null;
         Object propValue = null;
@@ -331,7 +330,7 @@ public final class URLEncodedUtil {
             propInfo.setPropValue(result, propValue);
         }
 
-        return result;
+        return (T) entityInfo.finishEntityResult(result);
     }
 
     /**

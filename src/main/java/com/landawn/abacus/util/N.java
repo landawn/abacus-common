@@ -24538,23 +24538,23 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param <L>
-     * @param <R>
+     * @param <A>
+     * @param <B>
      * @param <E>
      * @param c
      * @param unzip the second parameter is an output parameter.
      * @return
      * @throws E the e
      */
-    public static <T, L, R, E extends Exception> Pair<List<L>, List<R>> unzip(final Collection<? extends T> c,
-            final Throwables.BiConsumer<? super T, Pair<L, R>, E> unzip) throws E {
+    public static <T, A, B, E extends Exception> Pair<List<A>, List<B>> unzip(final Collection<? extends T> c,
+            final Throwables.BiConsumer<? super T, Pair<A, B>, E> unzip) throws E {
         checkArgNotNull(unzip);
 
         final int len = size(c);
 
-        final List<L> l = new ArrayList<>(len);
-        final List<R> r = new ArrayList<>(len);
-        final Pair<L, R> p = new Pair<>();
+        final List<A> l = new ArrayList<>(len);
+        final List<B> r = new ArrayList<>(len);
+        final Pair<A, B> p = new Pair<>();
 
         if (notNullOrEmpty(c)) {
             for (T e : c) {
@@ -24571,8 +24571,8 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param <L>
-     * @param <R>
+     * @param <A>
+     * @param <B>
      * @param <LC>
      * @param <RC>
      * @param <E>
@@ -24582,15 +24582,15 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, L, R, LC extends Collection<L>, RC extends Collection<R>, E extends Exception> Pair<LC, RC> unzip(final Collection<? extends T> c,
-            final Throwables.BiConsumer<? super T, Pair<L, R>, E> unzip, final IntFunction<? extends Collection<?>> supplier) throws E {
+    public static <T, A, B, LC extends Collection<A>, RC extends Collection<B>, E extends Exception> Pair<LC, RC> unzip(final Collection<? extends T> c,
+            final Throwables.BiConsumer<? super T, Pair<A, B>, E> unzip, final IntFunction<? extends Collection<?>> supplier) throws E {
         checkArgNotNull(unzip);
 
         final int len = size(c);
 
         final LC l = (LC) supplier.apply(len);
         final RC r = (RC) supplier.apply(len);
-        final Pair<L, R> p = new Pair<>();
+        final Pair<A, B> p = new Pair<>();
 
         if (notNullOrEmpty(c)) {
             for (T e : c) {
@@ -24643,25 +24643,25 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param <L>
-     * @param <M>
-     * @param <R>
+     * @param <A>
+     * @param <B>
+     * @param <C>
      * @param <E>
      * @param c
      * @param unzip the second parameter is an output parameter.
      * @return
      * @throws E the e
      */
-    public static <T, L, M, R, E extends Exception> Triple<List<L>, List<M>, List<R>> unzipp(final Collection<? extends T> c,
-            final Throwables.BiConsumer<? super T, Triple<L, M, R>, E> unzip) throws E {
+    public static <T, A, B, C, E extends Exception> Triple<List<A>, List<B>, List<C>> unzipp(final Collection<? extends T> c,
+            final Throwables.BiConsumer<? super T, Triple<A, B, C>, E> unzip) throws E {
         checkArgNotNull(unzip);
 
         final int len = size(c);
 
-        final List<L> l = new ArrayList<>(len);
-        final List<M> m = new ArrayList<>(len);
-        final List<R> r = new ArrayList<>(len);
-        final Triple<L, M, R> t = new Triple<>();
+        final List<A> l = new ArrayList<>(len);
+        final List<B> m = new ArrayList<>(len);
+        final List<C> r = new ArrayList<>(len);
+        final Triple<A, B, C> t = new Triple<>();
 
         if (notNullOrEmpty(c)) {
             for (T e : c) {
@@ -24679,9 +24679,9 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param <L>
-     * @param <M>
-     * @param <R>
+     * @param <A>
+     * @param <B>
+     * @param <C>
      * @param <LC>
      * @param <MC>
      * @param <RC>
@@ -24692,8 +24692,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, L, M, R, LC extends Collection<L>, MC extends Collection<M>, RC extends Collection<R>, E extends Exception> Triple<LC, MC, RC> unzipp(
-            final Collection<? extends T> c, final Throwables.BiConsumer<? super T, Triple<L, M, R>, E> unzip,
+    public static <T, A, B, C, LC extends Collection<A>, MC extends Collection<B>, RC extends Collection<C>, E extends Exception> Triple<LC, MC, RC> unzipp(
+            final Collection<? extends T> c, final Throwables.BiConsumer<? super T, Triple<A, B, C>, E> unzip,
             final IntFunction<? extends Collection<?>> supplier) throws E {
         checkArgNotNull(unzip);
 
@@ -24702,7 +24702,7 @@ public final class N extends CommonUtil {
         final LC l = (LC) supplier.apply(len);
         final MC m = (MC) supplier.apply(len);
         final RC r = (RC) supplier.apply(len);
-        final Triple<L, M, R> t = new Triple<>();
+        final Triple<A, B, C> t = new Triple<>();
 
         if (notNullOrEmpty(c)) {
             for (T e : c) {

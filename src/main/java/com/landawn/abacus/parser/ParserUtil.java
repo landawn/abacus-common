@@ -35,7 +35,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
+import com.landawn.abacus.DirtyMarker;
 import com.landawn.abacus.annotation.AccessFieldByMethod;
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Column;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.JsonXmlConfig;
@@ -56,6 +58,7 @@ import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.DateUtil;
 import com.landawn.abacus.util.ImmutableList;
 import com.landawn.abacus.util.ImmutableMap;
+import com.landawn.abacus.util.InternalUtil;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
@@ -89,7 +92,8 @@ public final class ParserUtil {
 
     private static final String HAS = "has".intern();
 
-    private static final int POOL_SIZE = 1024;
+    @SuppressWarnings("deprecation")
+    private static final int POOL_SIZE = InternalUtil.POOL_SIZE;
 
     private static final int defaultNameIndex = NamingPolicy.LOWER_CAMEL_CASE.ordinal();
 
@@ -442,7 +446,13 @@ public final class ParserUtil {
 
     public static class EntityInfo implements JSONReader.SymbolReader {
 
+        /**
+         * @deprecated replaced by {@code clazz}.
+         */
+        @Deprecated
         public final Class<Object> cls;
+
+        public final Class<Object> clazz;
 
         public final String simpleClassName;
 
@@ -489,12 +499,17 @@ public final class ParserUtil {
         private final Constructor<?> noArgsConstructor;
         private final Constructor<?> allArgsConstructor;
 
+        public final boolean isImmutable;
+
+        private final boolean isDirtyMarker;
+
         @SuppressWarnings("deprecation")
-        public EntityInfo(Class<?> cls) {
+        EntityInfo(Class<?> cls) {
             simpleClassName = ClassUtil.getSimpleClassName(cls);
             canonicalClassName = ClassUtil.getCanonicalClassName(cls);
             name = ClassUtil.formalizePropName(simpleClassName);
             this.cls = (Class<Object>) cls;
+            this.clazz = this.cls;
             type = N.typeOf(cls);
             typeName = type.name();
 
@@ -529,8 +544,8 @@ public final class ParserUtil {
                 field = ClassUtil.getPropField(cls, propName);
                 getMethod = ClassUtil.getPropGetMethod(cls, propName);
 
-                propInfo = ASMUtil.isASMAvailable() ? new ASMPropInfo(propName, field, getMethod, jsonXmlConfig, annotations)
-                        : new PropInfo(propName, field, getMethod, jsonXmlConfig, annotations);
+                propInfo = ASMUtil.isASMAvailable() ? new ASMPropInfo(propName, field, getMethod, jsonXmlConfig, annotations, idx, false)
+                        : new PropInfo(propName, field, getMethod, jsonXmlConfig, annotations, idx, false);
 
                 propInfos[idx++] = propInfo;
                 propInfoMap.put(propName, propInfo);
@@ -648,6 +663,45 @@ public final class ParserUtil {
             //        throw new RuntimeException("No Constructor found with empty arg or full args: " + N.toString(fieldTypes) + " in Entity/Record class: "
             //                + ClassUtil.getCanonicalClassName(cls));
             //    }
+
+            boolean isImmutable = true;
+
+            if (ClassUtil.isRecord(cls)) {
+                isImmutable = true;
+            } else if (ClassUtil.isRegisteredXMLBindingClass(cls)) {
+                isImmutable = false;
+            } else {
+                try {
+                    final Object tmp = N.newInstance(cls);
+
+                    for (int i = 0, len = propInfos.length; i < len; i++) {
+                        if (propInfos[i].setMethod != null) {
+                            isImmutable = false;
+                            break;
+                        } else if (propInfos[i].field != null) {
+                            try {
+                                propInfos[i].field.set(tmp, defaultFieldValues[i]);
+
+                                isImmutable = false;
+                            } catch (Throwable e) {
+                                // ignore.
+                            }
+
+                            break;
+                        }
+                    }
+                } catch (Throwable e) {
+                    // ignore.
+                }
+            }
+
+            this.isImmutable = isImmutable;
+
+            for (int i = 0, len = propInfos.length; i < len; i++) {
+                propInfos[i].isImmutableEntity = this.isImmutable;
+            }
+
+            this.isDirtyMarker = DirtyMarker.class.isAssignableFrom(this.clazz);
         }
 
         /**
@@ -668,7 +722,7 @@ public final class ParserUtil {
             PropInfo propInfo = propInfoMap.get(propName);
 
             if (propInfo == null) {
-                Method method = ClassUtil.getPropGetMethod(cls, propName);
+                Method method = ClassUtil.getPropGetMethod(clazz, propName);
 
                 if (method != null) {
                     propInfo = propInfoMap.get(ClassUtil.getPropNameByMethod(method));
@@ -676,7 +730,7 @@ public final class ParserUtil {
 
                 if (propInfo == null) {
                     for (String key : propInfoMap.keySet()) {
-                        if (isPropName(cls, propName, key)) {
+                        if (isPropName(clazz, propName, key)) {
                             propInfo = propInfoMap.get(key);
 
                             break;
@@ -728,7 +782,7 @@ public final class ParserUtil {
                 final List<PropInfo> propInfoQueue = getPropInfoQueue(propName);
 
                 if (propInfoQueue.size() == 0) {
-                    throw new RuntimeException("No property method found with property name: " + propName + " in class: " + cls.getCanonicalName());
+                    throw new RuntimeException("No property method found with property name: " + propName + " in class: " + clazz.getCanonicalName());
                 } else {
                     Object propEntity = obj;
 
@@ -768,7 +822,7 @@ public final class ParserUtil {
 
                 if (propInfoQueue.size() == 0) {
                     if (!ignoreUnmatchedProperty) {
-                        throw new RuntimeException("No property method found with property name: " + propName + " in class: " + cls.getCanonicalName());
+                        throw new RuntimeException("No property method found with property name: " + propName + " in class: " + clazz.getCanonicalName());
                     } else {
                         return false;
                     }
@@ -851,7 +905,7 @@ public final class ParserUtil {
                 final String[] strs = Splitter.with(PROP_NAME_SEPARATOR).splitToArray(propName);
 
                 if (strs.length > 1) {
-                    Class<?> propClass = cls;
+                    Class<?> propClass = clazz;
 
                     PropInfo propInfo = null;
 
@@ -1010,11 +1064,24 @@ public final class ParserUtil {
             return annotations;
         }
 
+        /**
+         *
+         * @param <T>
+         * @return
+         */
+        @Beta
         public <T> T newInstance() {
             return (T) (noArgsConstructor == null ? ClassUtil.invokeConstructor(allArgsConstructor, defaultFieldValues)
                     : ClassUtil.invokeConstructor(noArgsConstructor));
         }
 
+        /**
+         *
+         * @param <T>
+         * @param args
+         * @return
+         */
+        @Beta
         public <T> T newInstance(final Object... args) {
             if (N.isNullOrEmpty(args)) {
                 return newInstance();
@@ -1027,9 +1094,48 @@ public final class ParserUtil {
          *
          * @return
          */
+        @Beta
+        public Object createEntityResult() {
+            return isImmutable ? createArgsForConstructor() : N.newInstance(clazz);
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param result
+         * @return
+         */
+        @Beta
+        @SuppressWarnings("deprecation")
+        public <T> T finishEntityResult(final Object result) {
+            if (result == null) {
+                return null;
+            }
+
+            final T entity = isImmutable ? newInstance(((Object[]) result)) : (T) result;
+
+            if (isDirtyMarker) {
+                ((DirtyMarker) entity).markDirty(false);
+            }
+
+            return entity;
+        }
+
+        private Object[] createArgsForConstructor() {
+            if (allArgsConstructor == null) {
+                throw new UnsupportedOperationException("No all arguments constructor found in class: " + ClassUtil.getCanonicalClassName(clazz));
+            }
+
+            return defaultFieldValues.clone();
+        }
+
+        /**
+         *
+         * @return
+         */
         @Override
         public int hashCode() {
-            return (cls == null) ? 0 : cls.hashCode();
+            return (clazz == null) ? 0 : clazz.hashCode();
         }
 
         /**
@@ -1039,12 +1145,12 @@ public final class ParserUtil {
          */
         @Override
         public boolean equals(Object obj) {
-            return this == obj || (obj instanceof EntityInfo && N.equals(((EntityInfo) obj).cls, cls));
+            return this == obj || (obj instanceof EntityInfo && N.equals(((EntityInfo) obj).clazz, clazz));
         }
 
         @Override
         public String toString() {
-            return ClassUtil.getCanonicalClassName(cls);
+            return ClassUtil.getCanonicalClassName(clazz);
         }
     }
 
@@ -1108,6 +1214,10 @@ public final class ParserUtil {
 
         final boolean canSetFieldByGetMethod;
 
+        final int fieldOrder;
+
+        boolean isImmutableEntity;
+
         @SuppressWarnings("deprecation")
         PropInfo(String propName) {
             this.declaringClass = null;
@@ -1141,11 +1251,14 @@ public final class ParserUtil {
             isMarkedToColumn = false;
             columnName = Optional.<String> empty();
             canSetFieldByGetMethod = false;
+
+            fieldOrder = -1;
+            isImmutableEntity = false;
         }
 
         @SuppressWarnings("deprecation")
-        public PropInfo(final String propName, final Field field, final Method getMethod, final JsonXmlConfig jsonXmlConfig,
-                final ImmutableMap<Class<? extends Annotation>, Annotation> classAnnotations) {
+        PropInfo(final String propName, final Field field, final Method getMethod, final JsonXmlConfig jsonXmlConfig,
+                final ImmutableMap<Class<? extends Annotation>, Annotation> classAnnotations, final int fieldOrder, final boolean isImmutableEntity) {
             this.declaringClass = (Class<Object>) (field != null ? field.getDeclaringClass() : getMethod.getDeclaringClass());
             this.isDirtyMark = DirtyMarkerUtil.isDirtyMarker(declaringClass);
             this.field = field;
@@ -1235,6 +1348,9 @@ public final class ParserUtil {
 
             this.canSetFieldByGetMethod = ClassUtil.isRegisteredXMLBindingClass(declaringClass) && getMethod != null
                     && (Map.class.isAssignableFrom(getMethod.getReturnType()) || Collection.class.isAssignableFrom(getMethod.getReturnType()));
+
+            this.fieldOrder = fieldOrder;
+            this.isImmutableEntity = isImmutableEntity;
         }
 
         /**
@@ -1246,6 +1362,10 @@ public final class ParserUtil {
          */
         @SuppressWarnings("unchecked")
         public <T> T getPropValue(Object obj) {
+            if (isImmutableEntity && obj instanceof Object[]) {
+                return (T) ((Object[]) obj)[fieldOrder];
+            }
+
             try {
                 return (T) (isFieldAccessible ? field.get(obj) : getMethod.invoke(obj));
             } catch (Exception e) {
@@ -1260,6 +1380,11 @@ public final class ParserUtil {
          * @param propValue
          */
         public void setPropValue(final Object obj, Object propValue) {
+            if (isImmutableEntity) {
+                ((Object[]) obj)[fieldOrder] = propValue;
+                return;
+            }
+
             propValue = propValue == null ? type.defaultValue() : propValue;
 
             try {
@@ -1898,9 +2023,9 @@ public final class ParserUtil {
 
         final int fieldAccessIndex;
 
-        public ASMPropInfo(final String name, final Field field, final Method getMethod, final JsonXmlConfig jsonXmlConfig,
-                final ImmutableMap<Class<? extends Annotation>, Annotation> classAnnotations) {
-            super(name, field, getMethod, jsonXmlConfig, classAnnotations);
+        ASMPropInfo(final String name, final Field field, final Method getMethod, final JsonXmlConfig jsonXmlConfig,
+                final ImmutableMap<Class<? extends Annotation>, Annotation> classAnnotations, final int fieldOrder, final boolean isImmutableEntity) {
+            super(name, field, getMethod, jsonXmlConfig, classAnnotations, fieldOrder, isImmutableEntity);
 
             methodAccess = com.esotericsoftware.reflectasm.MethodAccess.get(declaringClass);
             getMethodAccessIndex = getMethod == null ? -1 : methodAccess.getIndex(getMethod.getName(), 0);
@@ -1931,6 +2056,11 @@ public final class ParserUtil {
          */
         @Override
         public void setPropValue(final Object obj, Object propValue) {
+            if (isImmutableEntity) {
+                ((Object[]) obj)[fieldOrder] = propValue;
+                return;
+            }
+
             propValue = propValue == null ? type.defaultValue() : propValue;
 
             try {
@@ -2068,4 +2198,75 @@ public final class ParserUtil {
             this.dtf = org.joda.time.format.DateTimeFormat.forPattern(dateFormat).withZone(dtz);
         }
     }
+
+    //    private static final Map<Class<?>, RecordInfo<?>> recordInfoMap = new ConcurrentHashMap<>();
+    //
+    //    /**
+    //     *
+    //     * @param recordClass
+    //     * @return
+    //     * @deprecated for internal use only
+    //     */
+    //    @Deprecated
+    //    @Beta
+    //    public static <T> RecordInfo<T> getRecordInfo(final Class<T> recordClass) {
+    //        if (!ClassUtil.isRecord(recordClass)) {
+    //            throw new IllegalArgumentException(ClassUtil.getCanonicalClassName(recordClass) + " is not a Record class");
+    //        }
+    //
+    //        RecordInfo<T> recordInfo = (RecordInfo<T>) recordInfoMap.get(recordClass);
+    //
+    //        if (recordInfo == null) {
+    //            final EntityInfo entityInfo = ParserUtil.getEntityInfo(recordClass);
+    //
+    //            final Field[] fields = recordClass.getDeclaredFields();
+    //            final Map<String, Tuple5<String, Field, Method, PropInfo, Integer>> map = new LinkedHashMap<>(fields.length);
+    //
+    //            try {
+    //                PropInfo propInfo = null;
+    //                String name = null;
+    //                int idx = 0;
+    //
+    //                for (Field field : fields) {
+    //                    name = field.getName();
+    //                    propInfo = entityInfo.getPropInfo(name);
+    //
+    //                    map.put(name, Tuple.of(name, field, recordClass.getDeclaredMethod(name), propInfo, idx++));
+    //                }
+    //            } catch (NoSuchMethodException | SecurityException e) {
+    //                // Should never happen.
+    //                throw N.toRuntimeException(e);
+    //            }
+    //
+    //            final Constructor<?> constructor = recordClass.getDeclaredConstructors()[0];
+    //
+    //            final Function<Object[], T> creator = new Function<Object[], T>() {
+    //                @Override
+    //                public T apply(final Object[] args) throws RuntimeException {
+    //                    try {
+    //                        return (T) constructor.newInstance(args);
+    //                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+    //                        // Should never happen.
+    //                        throw N.toRuntimeException(e);
+    //                    }
+    //                }
+    //            };
+    //
+    //            recordInfo = new RecordInfo<>(recordClass, entityInfo, creator, ImmutableList.copyOf(map.keySet()), ImmutableMap.of(map));
+    //
+    //            recordInfoMap.put(recordClass, recordInfo);
+    //        }
+    //
+    //        return recordInfo;
+    //    }
+    //
+    //    @Value
+    //    @Accessors(fluent = true)
+    //    public static final class RecordInfo<T> {
+    //        private final Class<T> clazz;
+    //        private final EntityInfo entityInfo;
+    //        private final Function<Object[], T> creator;
+    //        private final ImmutableList<String> fieldNames;
+    //        private final ImmutableMap<String, Tuple5<String, Field, Method, PropInfo, Integer>> fieldMap;
+    //    }
 }

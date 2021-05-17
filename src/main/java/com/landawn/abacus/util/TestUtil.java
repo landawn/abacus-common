@@ -47,42 +47,14 @@ public final class TestUtil {
     /**
      * Fill the properties of the entity with random values.
      *
-     * @param <T>
-     * @param entityClass entity class with getter/setter methods
-     * @return
-     */
-    public static <T> T fill(final Class<T> entityClass) {
-        N.checkArgument(ClassUtil.isEntity(entityClass), "{} is not a valid entity class with property getter/setter method", entityClass);
-
-        return fill(entityClass, ClassUtil.getPropNameList(entityClass));
-    }
-
-    /**
-     * Fill the properties of the entity with random values.
-     *
-     * @param <T>
-     * @param entityClass entity class with getter/setter methods
-     * @param count
-     * @return
-     */
-    public static <T> List<T> fill(final Class<T> entityClass, final int count) {
-        N.checkArgument(ClassUtil.isEntity(entityClass), "{} is not a valid entity class with property getter/setter method", entityClass);
-
-        return fill(entityClass, ClassUtil.getPropNameList(entityClass), count);
-    }
-
-    /**
-     * Fill the properties of the entity with random values.
-     *
      * @param entity an entity object with getter/setter method
      * @param propNamesToFill
      */
     public static void fill(final Object entity, final Collection<String> propNamesToFill) {
-        final Class<?> entityClass = entity.getClass();
+        fill(ParserUtil.getEntityInfo(entity.getClass()), entity, propNamesToFill);
+    }
 
-        N.checkArgument(ClassUtil.isEntity(entityClass), "{} is not a valid entity class with property getter/setter method", entityClass);
-
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
+    private static void fill(final EntityInfo entityInfo, final Object entity, final Collection<String> propNamesToFill) {
         PropInfo propInfo = null;
         Type<Object> type = null;
         Class<?> parameterClass = null;
@@ -130,17 +102,45 @@ public final class TestUtil {
      *
      * @param <T>
      * @param entityClass entity class with getter/setter methods
+     * @return
+     */
+    public static <T> T fill(final Class<T> entityClass) {
+        N.checkArgument(ClassUtil.isEntity(entityClass), "{} is not a valid entity class with property getter/setter method", entityClass);
+
+        return fill(entityClass, ClassUtil.getPropNameList(entityClass));
+    }
+
+    /**
+     * Fill the properties of the entity with random values.
+     *
+     * @param <T>
+     * @param entityClass entity class with getter/setter methods
+     * @param count
+     * @return
+     */
+    public static <T> List<T> fill(final Class<T> entityClass, final int count) {
+        N.checkArgument(ClassUtil.isEntity(entityClass), "{} is not a valid entity class with property getter/setter method", entityClass);
+
+        return fill(entityClass, ClassUtil.getPropNameList(entityClass), count);
+    }
+
+    /**
+     * Fill the properties of the entity with random values.
+     *
+     * @param <T>
+     * @param entityClass entity class with getter/setter methods
      * @param propNamesToFill
      * @return
      */
     public static <T> T fill(final Class<T> entityClass, final Collection<String> propNamesToFill) {
         N.checkArgument(ClassUtil.isEntity(entityClass), "{} is not a valid entity class with property getter/setter method", entityClass);
 
-        final T entity = N.newInstance(entityClass);
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
+        final Object result = entityInfo.createEntityResult();
 
-        fill(entity, propNamesToFill);
+        fill(entityInfo, result, propNamesToFill);
 
-        return entity;
+        return (T) entityInfo.finishEntityResult(result);
     }
 
     /**
@@ -157,11 +157,15 @@ public final class TestUtil {
         N.checkArgNotNegative(count, "count");
 
         final List<T> resultList = new ArrayList<>(count);
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
+        Object result = null;
 
         for (int i = 0; i < count; i++) {
-            final T entity = N.newInstance(entityClass);
-            fill(entity, propNamesToFill);
-            resultList.add(entity);
+            result = entityInfo.createEntityResult();
+
+            fill(entityInfo, result, propNamesToFill);
+
+            resultList.add((T) entityInfo.finishEntityResult(result));
         }
 
         return resultList;

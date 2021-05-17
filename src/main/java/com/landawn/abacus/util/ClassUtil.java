@@ -179,7 +179,8 @@ public final class ClassUtil {
 
     // ... it has to be big enough to make it's safety to add element to
     // ArrayBlockingQueue.
-    private static final int POOL_SIZE = Internals.POOL_SIZE;
+    @SuppressWarnings("deprecation")
+    private static final int POOL_SIZE = InternalUtil.POOL_SIZE;
 
     // formalized property name list.
     private static final Map<String, Class<?>> BUILT_IN_TYPE = new ObjectPool<>(POOL_SIZE); // new LinkedHashMap<>();
@@ -2780,7 +2781,6 @@ public final class ClassUtil {
                             if (isJAXBGetMethod(instance, method) || annotatedWithEntity(cls) || isRecord(clazz)) {
                                 // ClassUtil.setAccessibleQuietly(field, true);
                                 ClassUtil.setAccessibleQuietly(method, true);
-                                ClassUtil.setAccessibleQuietly(setMethod, true);
 
                                 propFieldMap.put(propName, field);
                                 propGetMethodMap.put(propName, method);
@@ -3187,72 +3187,6 @@ public final class ClassUtil {
 
         return ret;
     }
-
-    //    private static final Map<Class<?>, RecordInfo<?>> recordInfoMap = new ConcurrentHashMap<>();
-    //
-    //    /**
-    //     *
-    //     * @param recordClass
-    //     * @return
-    //     * @deprecated for internal use only
-    //     */
-    //    @Deprecated
-    //    @Beta
-    //    public static <T> RecordInfo<T> getRecordInfo(final Class<T> recordClass) {
-    //        if (!isRecord(recordClass)) {
-    //            throw new IllegalArgumentException(ClassUtil.getCanonicalClassName(recordClass) + " is not a Record class");
-    //        }
-    //
-    //        RecordInfo<T> recordInfo = (RecordInfo<T>) recordInfoMap.get(recordClass);
-    //
-    //        if (recordInfo == null) {
-    //            final Field[] fields = recordClass.getDeclaredFields();
-    //            final Map<String, Tuple5<String, Field, Method, Type<Object>, Integer>> map = new LinkedHashMap<>(fields.length);
-    //
-    //            try {
-    //                String name = null;
-    //                int idx = 0;
-    //
-    //                for (Field field : fields) {
-    //                    name = field.getName();
-    //
-    //                    map.put(name, Tuple.of(name, field, recordClass.getDeclaredMethod(name), TypeFactory.getType(field.getGenericType()), idx++));
-    //                }
-    //            } catch (NoSuchMethodException | SecurityException e) {
-    //                // Should never happen.
-    //                throw N.toRuntimeException(e);
-    //            }
-    //
-    //            final Constructor<?> constructor = recordClass.getDeclaredConstructors()[0];
-    //
-    //            final Function<Object[], T> creator = new Function<Object[], T>() {
-    //                @Override
-    //                public T apply(final Object[] args) throws RuntimeException {
-    //                    try {
-    //                        return (T) constructor.newInstance(args);
-    //                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-    //                        // Should never happen.
-    //                        throw N.toRuntimeException(e);
-    //                    }
-    //                }
-    //            };
-    //
-    //            recordInfo = new RecordInfo<>(recordClass, creator, ImmutableList.copyOf(map.keySet()), ImmutableMap.of(map));
-    //
-    //            recordInfoMap.put(recordClass, recordInfo);
-    //        }
-    //
-    //        return recordInfo;
-    //    }
-    //
-    //    @Value
-    //    @Accessors(fluent = true)
-    //    public static final class RecordInfo<T> {
-    //        private final Class<T> clazz;
-    //        private final Function<Object[], T> creator;
-    //        private final ImmutableList<String> fieldNames;
-    //        private final ImmutableMap<String, Tuple5<String, Field, Method, Type<Object>, Integer>> fieldMap;
-    //    }
 
     private ClassUtil() {
         // singleton

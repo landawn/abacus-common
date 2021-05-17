@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Haiyang Li.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
+import com.landawn.abacus.util.InternalUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.ObjectPool;
 import com.landawn.abacus.util.WD;
@@ -35,7 +36,8 @@ import com.landawn.abacus.util.WD;
 @SuppressFBWarnings("JLM_JSR166_UTILCONCURRENT_MONITORENTER")
 public final class NameUtil {
 
-    static final int POOL_SIZE = (int) (Runtime.getRuntime().maxMemory() / 1024) < 8192 ? 8192 : (int) (Runtime.getRuntime().maxMemory() / 1024);
+    @SuppressWarnings("deprecation")
+    static final int POOL_SIZE = InternalUtil.POOL_SIZE;
 
     private static final Map<String, String> cachedNamePool = new ObjectPool<>(POOL_SIZE);
 

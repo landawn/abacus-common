@@ -101,6 +101,9 @@ public abstract class DateUtil {
             /* Calendar.DAY_OF_YEAR, Calendar.DAY_OF_WEEK, Calendar.DAY_OF_WEEK_IN_MONTH */
             }, { Calendar.MONTH, SEMI_MONTH }, { Calendar.YEAR }, { Calendar.ERA } };
 
+    @SuppressWarnings("deprecation")
+    private static final int POOL_SIZE = InternalUtil.POOL_SIZE;
+
     /**
      * A new instance of <code>java.sql.Time</code> returned is based on the
      * current time in the default time zone with the default locale.
@@ -173,14 +176,14 @@ public abstract class DateUtil {
 
     private static final Map<TimeZone, Queue<Calendar>> calendarPool = new ObjectPool<>(64);
 
-    private static final Queue<DateFormat> utcTimestampDFPool = new ArrayBlockingQueue<>(Internals.POOL_SIZE);
+    private static final Queue<DateFormat> utcTimestampDFPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
-    private static final Queue<DateFormat> utcDateTimeDFPool = new ArrayBlockingQueue<>(Internals.POOL_SIZE);
+    private static final Queue<DateFormat> utcDateTimeDFPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
-    private static final Queue<Calendar> utcCalendarPool = new ArrayBlockingQueue<>(Internals.POOL_SIZE);
+    private static final Queue<Calendar> utcCalendarPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
     // ...
-    private static final Queue<char[]> utcTimestampFormatCharsPool = new ArrayBlockingQueue<>(Internals.POOL_SIZE);
+    private static final Queue<char[]> utcTimestampFormatCharsPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
     private static final DatatypeFactory dataTypeFactory;
 
@@ -1054,7 +1057,7 @@ public abstract class DateUtil {
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
-     * 
+     *
      * Sets the years field to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
@@ -1073,7 +1076,7 @@ public abstract class DateUtil {
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
-     * 
+     *
      * Sets the months field to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
@@ -1092,7 +1095,7 @@ public abstract class DateUtil {
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
-     * 
+     *
      * Sets the day of month field to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
@@ -1111,7 +1114,7 @@ public abstract class DateUtil {
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
-     * 
+     *
      * Sets the hours field to a date returning a new object.  Hours range
      * from  0-23.
      * The original {@code Date} is unchanged.
@@ -1131,7 +1134,7 @@ public abstract class DateUtil {
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
-     * 
+     *
      * Sets the minute field to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
@@ -1150,7 +1153,7 @@ public abstract class DateUtil {
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
-     * 
+     *
      * Sets the seconds field to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
@@ -1169,7 +1172,7 @@ public abstract class DateUtil {
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
-     * 
+     *
      * Sets the milliseconds field to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
@@ -1188,7 +1191,7 @@ public abstract class DateUtil {
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
-     * 
+     *
      * Sets the specified field to a date returning a new object.
      * This does not use a lenient calendar.
      * The original {@code Date} is unchanged.
@@ -1564,15 +1567,15 @@ public abstract class DateUtil {
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
-     * 
+     *
      * <p>Rounds a date, leaving the field specified as the most
      * significant field.</p>
-     * 
+     *
      * <p>For example, if you had the date-time of 28 Mar 2002
      * 13:45:01.231, if this was passed with HOUR, it would return
      * 28 Mar 2002 14:00:00.000. If this was passed with MONTH, it
      * would return 1 April 2002 0:00:00.000.</p>
-     * 
+     *
      * <p>For a date in a timezone that handles the change to daylight
      * saving time, rounding to Calendar.HOUR_OF_DAY will behave as follows.
      * Suppose daylight saving time begins at 02:00 on March 30. Rounding a
@@ -1604,15 +1607,15 @@ public abstract class DateUtil {
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
-     * 
+     *
      * <p>Rounds a date, leaving the field specified as the most
      * significant field.</p>
-     * 
+     *
      * <p>For example, if you had the date-time of 28 Mar 2002
      * 13:45:01.231, if this was passed with HOUR, it would return
      * 28 Mar 2002 14:00:00.000. If this was passed with MONTH, it
      * would return 1 April 2002 0:00:00.000.</p>
-     * 
+     *
      * <p>For a date in a timezone that handles the change to daylight
      * saving time, rounding to Calendar.HOUR_OF_DAY will behave as follows.
      * Suppose daylight saving time begins at 02:00 on March 30. Rounding a
@@ -1649,10 +1652,10 @@ public abstract class DateUtil {
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
-     * 
+     *
      * <p>Truncates a date, leaving the field specified as the most
      * significant field.</p>
-     * 
+     *
      * <p>For example, if you had the date-time of 28 Mar 2002
      * 13:45:01.231, if you passed with HOUR, it would return 28 Mar
      * 2002 13:00:00.000.  If this was passed with MONTH, it would
@@ -1678,10 +1681,10 @@ public abstract class DateUtil {
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
-     * 
+     *
      * <p>Truncates a date, leaving the field specified as the most
      * significant field.</p>
-     * 
+     *
      * <p>For example, if you had the date-time of 28 Mar 2002
      * 13:45:01.231, if you passed with HOUR, it would return 28 Mar
      * 2002 13:00:00.000.  If this was passed with MONTH, it would
@@ -1711,10 +1714,10 @@ public abstract class DateUtil {
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
-     * 
+     *
      * <p>Gets a date ceiling, leaving the field specified as the most
      * significant field.</p>
-     * 
+     *
      * <p>For example, if you had the date-time of 28 Mar 2002
      * 13:45:01.231, if you passed with HOUR, it would return 28 Mar
      * 2002 14:00:00.000.  If this was passed with MONTH, it would
@@ -1741,10 +1744,10 @@ public abstract class DateUtil {
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
-     * 
+     *
      * <p>Gets a date ceiling, leaving the field specified as the most
      * significant field.</p>
-     * 
+     *
      * <p>For example, if you had the date-time of 28 Mar 2002
      * 13:45:01.231, if you passed with HOUR, it would return 28 Mar
      * 2002 14:00:00.000.  If this was passed with MONTH, it would
@@ -1776,7 +1779,7 @@ public abstract class DateUtil {
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
-     * 
+     *
      * <p>Internal calculation method.</p>
      *
      * @param val the calendar, not null
@@ -1929,7 +1932,7 @@ public abstract class DateUtil {
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
-     * 
+     *
      * Determines if two calendars are equal up to no more than the specified
      * most significant field.
      *
@@ -1949,7 +1952,7 @@ public abstract class DateUtil {
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
-     * 
+     *
      * Determines if two dates are equal up to no more than the specified
      * most significant field.
      *
@@ -1969,7 +1972,7 @@ public abstract class DateUtil {
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
-     * 
+     *
      * Determines how two calendars compare up to no more than the specified
      * most significant field.
      *
@@ -1990,7 +1993,7 @@ public abstract class DateUtil {
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
-     * 
+     *
      * Determines how two dates compare up to no more than the specified
      * most significant field.
      *
@@ -2012,7 +2015,7 @@ public abstract class DateUtil {
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
-     * 
+     *
      * <p>Checks if two date objects are on the same day ignoring time.</p>
      *
      * <p>28 Mar 2002 13:45 and 28 Mar 2002 06:01 would return true.
@@ -2041,7 +2044,7 @@ public abstract class DateUtil {
     /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
-     * 
+     *
      * <p>Checks if two calendar objects are on the same day ignoring time.</p>
      *
      * <p>28 Mar 2002 13:45 and 28 Mar 2002 06:01 would return true.
@@ -2097,7 +2100,7 @@ public abstract class DateUtil {
         Queue<DateFormat> queue = dfPool.get(format);
 
         if (queue == null) {
-            queue = new ArrayBlockingQueue<>(Internals.POOL_SIZE);
+            queue = new ArrayBlockingQueue<>(POOL_SIZE);
             dfPool.put(format, queue);
         }
 
@@ -2276,7 +2279,7 @@ public abstract class DateUtil {
             timeZoneCalendarQueue = calendarPool.get(timeZone);
 
             if (timeZoneCalendarQueue == null) {
-                timeZoneCalendarQueue = new ArrayBlockingQueue<>(Internals.POOL_SIZE);
+                timeZoneCalendarQueue = new ArrayBlockingQueue<>(POOL_SIZE);
                 calendarPool.put(timeZone, timeZoneCalendarQueue);
             } else {
                 c = timeZoneCalendarQueue.poll();
@@ -2520,7 +2523,7 @@ public abstract class DateUtil {
     /**
      * Calendar modification types.
      */
-    private static enum ModifyType {
+    private enum ModifyType {
         /**
          * Truncation.
          */

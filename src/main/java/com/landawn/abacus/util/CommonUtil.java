@@ -130,7 +130,8 @@ import com.landawn.abacus.util.function.ToLongFunction;
 class CommonUtil {
     // ... it has to be big enough to make it's safety to add element to
     // ArrayBlockingQueue.
-    static final int POOL_SIZE = Internals.POOL_SIZE;
+    @SuppressWarnings("deprecation")
+    static final int POOL_SIZE = InternalUtil.POOL_SIZE;
 
     /**
      * An empty immutable {@code Boolean} array.
@@ -994,8 +995,6 @@ class CommonUtil {
             } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                 throw N.toRuntimeException(e);
             }
-        } else if (ClassUtil.isEntity(cls)) {
-            return ParserUtil.getEntityInfo(cls).newInstance();
         } else {
             try {
                 final Constructor<T> constructor = ClassUtil.getDeclaredConstructor(cls);
@@ -1091,13 +1090,7 @@ class CommonUtil {
             return (T) new MapEntity(entityName);
         }
 
-        final Class<?> enclosingClass = ClassUtil.getEnclosingClass(cls);
-
-        if (enclosingClass == null || Modifier.isStatic(cls.getModifiers())) {
-            return newInstance(cls);
-        } else {
-            return ClassUtil.invokeConstructor(ClassUtil.getDeclaredConstructor(cls, enclosingClass), newInstance(enclosingClass));
-        }
+        return newInstance(cls);
     }
 
     /**
@@ -6487,11 +6480,14 @@ class CommonUtil {
     @SuppressWarnings({ "unchecked" })
     public static <T> T copy(final Class<? extends T> targetClass, final Object entity, final Collection<String> selectPropNames) {
         final Class<?> srcCls = entity.getClass();
-        T copy = null;
 
         if (selectPropNames == null && Utils.kryoParser != null && targetClass.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
             try {
-                copy = (T) Utils.kryoParser.copy(entity);
+                final T copy = (T) Utils.kryoParser.copy(entity);
+
+                if (copy != null) {
+                    return copy;
+                }
             } catch (Exception e) {
                 notKryoCompatible.add(srcCls);
 
@@ -6499,17 +6495,17 @@ class CommonUtil {
             }
         }
 
-        if (copy != null) {
-            return copy;
-        }
+        final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetClass);
 
-        copy = CommonUtil.newInstance(targetClass);
+        Object result = targetEntityInfo.createEntityResult();
 
-        merge(entity, copy, selectPropNames);
+        merge(entity, result, selectPropNames, targetEntityInfo);
 
-        DirtyMarkerUtil.setDirtyMarker(entity, copy);
+        result = targetEntityInfo.finishEntityResult(result);
 
-        return copy;
+        DirtyMarkerUtil.setDirtyMarker(entity, result);
+
+        return (T) result;
     }
 
     /**
@@ -6525,11 +6521,14 @@ class CommonUtil {
     public static <T> T copy(final Class<? extends T> targetClass, final Object entity, final boolean ignoreUnmatchedProperty,
             final Set<String> ignorePropNames) {
         final Class<?> srcCls = entity.getClass();
-        T copy = null;
 
         if (ignorePropNames == null && Utils.kryoParser != null && targetClass.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
             try {
-                copy = (T) Utils.kryoParser.copy(entity);
+                final T copy = (T) Utils.kryoParser.copy(entity);
+
+                if (copy != null) {
+                    return copy;
+                }
             } catch (Exception e) {
                 notKryoCompatible.add(srcCls);
 
@@ -6537,17 +6536,17 @@ class CommonUtil {
             }
         }
 
-        if (copy != null) {
-            return copy;
-        }
+        final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetClass);
 
-        copy = CommonUtil.newInstance(targetClass);
+        Object result = targetEntityInfo.createEntityResult();
 
-        merge(entity, copy, ignoreUnmatchedProperty, ignorePropNames);
+        merge(entity, result, ignoreUnmatchedProperty, ignorePropNames, targetEntityInfo);
 
-        DirtyMarkerUtil.setDirtyMarker(entity, copy);
+        result = targetEntityInfo.finishEntityResult(result);
 
-        return copy;
+        DirtyMarkerUtil.setDirtyMarker(entity, result);
+
+        return (T) result;
     }
 
     /**
@@ -6571,10 +6570,13 @@ class CommonUtil {
      * @param selectPropNames
      * @return {@code targetEntity}
      */
-    @SuppressWarnings("deprecation")
     public static <T> T merge(final Object sourceEntity, final T targetEntity, final Collection<String> selectPropNames) {
+        return merge(sourceEntity, targetEntity, selectPropNames, ParserUtil.getEntityInfo(targetEntity.getClass()));
+    }
+
+    @SuppressWarnings("deprecation")
+    private static <T> T merge(final Object sourceEntity, final T targetEntity, final Collection<String> selectPropNames, final EntityInfo targetEntityInfo) {
         final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
-        final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
         final boolean ignoreUnmatchedProperty = selectPropNames == null;
 
         if (selectPropNames == null) {
@@ -6671,10 +6673,14 @@ class CommonUtil {
      * @param ignorePropNames
      * @return {@code targetEntity}
      */
-    @SuppressWarnings("deprecation")
     public static <T> T merge(final Object sourceEntity, final T targetEntity, final boolean ignoreUnmatchedProperty, final Set<String> ignorePropNames) {
+        return merge(sourceEntity, targetEntity, ignoreUnmatchedProperty, ignorePropNames, ParserUtil.getEntityInfo(targetEntity.getClass()));
+    }
+
+    @SuppressWarnings("deprecation")
+    private static <T> T merge(final Object sourceEntity, final T targetEntity, final boolean ignoreUnmatchedProperty, final Set<String> ignorePropNames,
+            final EntityInfo targetEntityInfo) {
         final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
-        final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
 
         if (sourceEntity instanceof DirtyMarker) {
             final Set<String> signedPropNames = DirtyMarkerUtil.signedPropNames((DirtyMarker) sourceEntity);

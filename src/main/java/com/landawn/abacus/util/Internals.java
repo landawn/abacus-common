@@ -18,14 +18,6 @@ import com.landawn.abacus.annotation.Internal;
 @Internal
 final class Internals {
 
-    static final int POOL_SIZE;
-
-    static {
-        int multi = (int) (Runtime.getRuntime().maxMemory() / ((1024 * 1024) * 256));
-
-        POOL_SIZE = Math.max(1000, Math.min(1000 * multi, 8192));
-    }
-
     private Internals() {
         // singleton.
     }

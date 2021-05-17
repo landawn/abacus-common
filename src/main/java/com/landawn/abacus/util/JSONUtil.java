@@ -224,8 +224,8 @@ public final class JSONUtil {
 
             return (T) map;
         } else {
-            final Object entity = N.newEntity(cls, null);
             final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
+            final Object result = entityInfo.createEntityResult();
             final Iterator<String> iter = jsonObject.keys();
             String key = null;
             Object value = null;
@@ -248,10 +248,10 @@ public final class JSONUtil {
                     }
                 }
 
-                propInfo.setPropValue(entity, value);
+                propInfo.setPropValue(result, value);
             }
 
-            return (T) entity;
+            return (T) entityInfo.finishEntityResult(result);
         }
     }
 

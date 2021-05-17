@@ -2057,8 +2057,8 @@ public final class Maps {
             return null;
         }
 
-        final T entity = N.newInstance(targetClass);
         final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
+        final Object result = entityInfo.createEntityResult();
         PropInfo propInfo = null;
 
         String propName = null;
@@ -2075,17 +2075,17 @@ public final class Maps {
             propInfo = entityInfo.getPropInfo(propName);
 
             if (propInfo == null) {
-                entityInfo.setPropValue(entity, propName, propValue, ignoreUnmatchedProperty);
+                entityInfo.setPropValue(result, propName, propValue, ignoreUnmatchedProperty);
             } else {
                 if (propValue != null && N.typeOf(propValue.getClass()).isMap() && propInfo.type.isEntity()) {
-                    propInfo.setPropValue(entity, map2Entity(propInfo.clazz, (Map<String, Object>) propValue, ignoreNullProperty, ignoreUnmatchedProperty));
+                    propInfo.setPropValue(result, map2Entity(propInfo.clazz, (Map<String, Object>) propValue, ignoreNullProperty, ignoreUnmatchedProperty));
                 } else {
-                    propInfo.setPropValue(entity, propValue);
+                    propInfo.setPropValue(result, propValue);
                 }
             }
         }
 
-        return entity;
+        return entityInfo.finishEntityResult(result);
     }
 
     /**
@@ -2104,8 +2104,8 @@ public final class Maps {
             return null;
         }
 
-        final T entity = N.newInstance(targetClass);
         final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
+        final Object result = entityInfo.createEntityResult();
         PropInfo propInfo = null;
         Object propValue = null;
 
@@ -2119,17 +2119,17 @@ public final class Maps {
             propInfo = entityInfo.getPropInfo(propName);
 
             if (propInfo == null) {
-                entityInfo.setPropValue(entity, propName, propValue, false);
+                entityInfo.setPropValue(result, propName, propValue, false);
             } else {
                 if (propValue != null && N.typeOf(propValue.getClass()).isMap() && propInfo.type.isEntity()) {
-                    propInfo.setPropValue(entity, map2Entity(propInfo.clazz, (Map<String, Object>) propValue));
+                    propInfo.setPropValue(result, map2Entity(propInfo.clazz, (Map<String, Object>) propValue));
                 } else {
-                    propInfo.setPropValue(entity, propValue);
+                    propInfo.setPropValue(result, propValue);
                 }
             }
         }
 
-        return entity;
+        return entityInfo.finishEntityResult(result);
     }
 
     /**

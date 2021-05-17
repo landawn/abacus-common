@@ -25,15 +25,27 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.annotation.Stateful;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
+import com.landawn.abacus.util.function.BiConsumer;
+import com.landawn.abacus.util.function.BiFunction;
+import com.landawn.abacus.util.function.BooleanConsumer;
+import com.landawn.abacus.util.function.ByteConsumer;
+import com.landawn.abacus.util.function.CharConsumer;
 import com.landawn.abacus.util.function.Consumer;
+import com.landawn.abacus.util.function.DoubleConsumer;
+import com.landawn.abacus.util.function.FloatConsumer;
 import com.landawn.abacus.util.function.Function;
+import com.landawn.abacus.util.function.IntConsumer;
 import com.landawn.abacus.util.function.IntFunction;
+import com.landawn.abacus.util.function.LongConsumer;
+import com.landawn.abacus.util.function.ShortConsumer;
+import com.landawn.abacus.util.function.TriConsumer;
+import com.landawn.abacus.util.function.TriFunction;
 
 /**
  * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
- * 
+ *
  * @since 1.3
- * 
+ *
  * @author Haiyang Li
  */
 @Beta
@@ -139,11 +151,12 @@ public interface NoCachingNoUpdating {
 
         /**
          *
-         * @param delimiter
-         * @return
+         * @param action
          */
-        public String join(String delimiter) {
-            return StringUtil.join(a, delimiter);
+        public void forEach(final Consumer<? super T> action) {
+            for (T e : a) {
+                action.accept(e);
+            }
         }
 
         /**
@@ -162,6 +175,15 @@ public interface NoCachingNoUpdating {
          */
         public void accept(final Consumer<? super T[]> action) {
             action.accept(a);
+        }
+
+        /**
+         *
+         * @param delimiter
+         * @return
+         */
+        public String join(String delimiter) {
+            return StringUtil.join(a, delimiter);
         }
 
         /**
@@ -283,11 +305,12 @@ public interface NoCachingNoUpdating {
 
         /**
          *
-         * @param delimiter
-         * @return
+         * @param action
          */
-        public String join(String delimiter) {
-            return StringUtil.join(a, delimiter);
+        public void forEach(final BooleanConsumer action) {
+            for (boolean e : a) {
+                action.accept(e);
+            }
         }
 
         /**
@@ -306,6 +329,15 @@ public interface NoCachingNoUpdating {
          */
         public void accept(final Consumer<? super boolean[]> action) {
             action.accept(a);
+        }
+
+        /**
+         *
+         * @param delimiter
+         * @return
+         */
+        public String join(String delimiter) {
+            return StringUtil.join(a, delimiter);
         }
 
         /**
@@ -400,15 +432,6 @@ public interface NoCachingNoUpdating {
 
         /**
          *
-         * @param delimiter
-         * @return
-         */
-        public String join(String delimiter) {
-            return StringUtil.join(a, delimiter);
-        }
-
-        /**
-         *
          * @return
          */
         public int sum() {
@@ -441,6 +464,16 @@ public interface NoCachingNoUpdating {
 
         /**
          *
+         * @param action
+         */
+        public void forEach(final CharConsumer action) {
+            for (char e : a) {
+                action.accept(e);
+            }
+        }
+
+        /**
+         *
          * @param <R>
          * @param func
          * @return
@@ -455,6 +488,15 @@ public interface NoCachingNoUpdating {
          */
         public void accept(final Consumer<? super char[]> action) {
             action.accept(a);
+        }
+
+        /**
+         *
+         * @param delimiter
+         * @return
+         */
+        public String join(String delimiter) {
+            return StringUtil.join(a, delimiter);
         }
 
         /**
@@ -549,15 +591,6 @@ public interface NoCachingNoUpdating {
 
         /**
          *
-         * @param delimiter
-         * @return
-         */
-        public String join(String delimiter) {
-            return StringUtil.join(a, delimiter);
-        }
-
-        /**
-         *
          * @return
          */
         public int sum() {
@@ -590,6 +623,16 @@ public interface NoCachingNoUpdating {
 
         /**
          *
+         * @param action
+         */
+        public void forEach(final ByteConsumer action) {
+            for (byte e : a) {
+                action.accept(e);
+            }
+        }
+
+        /**
+         *
          * @param <R>
          * @param func
          * @return
@@ -604,6 +647,15 @@ public interface NoCachingNoUpdating {
          */
         public void accept(final Consumer<? super byte[]> action) {
             action.accept(a);
+        }
+
+        /**
+         *
+         * @param delimiter
+         * @return
+         */
+        public String join(String delimiter) {
+            return StringUtil.join(a, delimiter);
         }
 
         /**
@@ -698,15 +750,6 @@ public interface NoCachingNoUpdating {
 
         /**
          *
-         * @param delimiter
-         * @return
-         */
-        public String join(String delimiter) {
-            return StringUtil.join(a, delimiter);
-        }
-
-        /**
-         *
          * @return
          */
         public int sum() {
@@ -739,6 +782,16 @@ public interface NoCachingNoUpdating {
 
         /**
          *
+         * @param action
+         */
+        public void forEach(final ShortConsumer action) {
+            for (short e : a) {
+                action.accept(e);
+            }
+        }
+
+        /**
+         *
          * @param <R>
          * @param func
          * @return
@@ -753,6 +806,15 @@ public interface NoCachingNoUpdating {
          */
         public void accept(final Consumer<? super short[]> action) {
             action.accept(a);
+        }
+
+        /**
+         *
+         * @param delimiter
+         * @return
+         */
+        public String join(String delimiter) {
+            return StringUtil.join(a, delimiter);
         }
 
         /**
@@ -847,15 +909,6 @@ public interface NoCachingNoUpdating {
 
         /**
          *
-         * @param delimiter
-         * @return
-         */
-        public String join(String delimiter) {
-            return StringUtil.join(a, delimiter);
-        }
-
-        /**
-         *
          * @return
          */
         public int sum() {
@@ -888,6 +941,16 @@ public interface NoCachingNoUpdating {
 
         /**
          *
+         * @param action
+         */
+        public void forEach(final IntConsumer action) {
+            for (int e : a) {
+                action.accept(e);
+            }
+        }
+
+        /**
+         *
          * @param <R>
          * @param func
          * @return
@@ -902,6 +965,15 @@ public interface NoCachingNoUpdating {
          */
         public void accept(final Consumer<? super int[]> action) {
             action.accept(a);
+        }
+
+        /**
+         *
+         * @param delimiter
+         * @return
+         */
+        public String join(String delimiter) {
+            return StringUtil.join(a, delimiter);
         }
 
         /**
@@ -996,15 +1068,6 @@ public interface NoCachingNoUpdating {
 
         /**
          *
-         * @param delimiter
-         * @return
-         */
-        public String join(String delimiter) {
-            return StringUtil.join(a, delimiter);
-        }
-
-        /**
-         *
          * @return
          */
         public long sum() {
@@ -1037,6 +1100,16 @@ public interface NoCachingNoUpdating {
 
         /**
          *
+         * @param action
+         */
+        public void forEach(final LongConsumer action) {
+            for (long e : a) {
+                action.accept(e);
+            }
+        }
+
+        /**
+         *
          * @param <R>
          * @param func
          * @return
@@ -1051,6 +1124,15 @@ public interface NoCachingNoUpdating {
          */
         public void accept(final Consumer<? super long[]> action) {
             action.accept(a);
+        }
+
+        /**
+         *
+         * @param delimiter
+         * @return
+         */
+        public String join(String delimiter) {
+            return StringUtil.join(a, delimiter);
         }
 
         /**
@@ -1145,15 +1227,6 @@ public interface NoCachingNoUpdating {
 
         /**
          *
-         * @param delimiter
-         * @return
-         */
-        public String join(String delimiter) {
-            return StringUtil.join(a, delimiter);
-        }
-
-        /**
-         *
          * @return
          */
         public float sum() {
@@ -1186,6 +1259,16 @@ public interface NoCachingNoUpdating {
 
         /**
          *
+         * @param action
+         */
+        public void forEach(final FloatConsumer action) {
+            for (float e : a) {
+                action.accept(e);
+            }
+        }
+
+        /**
+         *
          * @param <R>
          * @param func
          * @return
@@ -1200,6 +1283,15 @@ public interface NoCachingNoUpdating {
          */
         public void accept(final Consumer<? super float[]> action) {
             action.accept(a);
+        }
+
+        /**
+         *
+         * @param delimiter
+         * @return
+         */
+        public String join(String delimiter) {
+            return StringUtil.join(a, delimiter);
         }
 
         /**
@@ -1294,15 +1386,6 @@ public interface NoCachingNoUpdating {
 
         /**
          *
-         * @param delimiter
-         * @return
-         */
-        public String join(String delimiter) {
-            return StringUtil.join(a, delimiter);
-        }
-
-        /**
-         *
          * @return
          */
         public double sum() {
@@ -1335,6 +1418,16 @@ public interface NoCachingNoUpdating {
 
         /**
          *
+         * @param action
+         */
+        public void forEach(final DoubleConsumer action) {
+            for (double e : a) {
+                action.accept(e);
+            }
+        }
+
+        /**
+         *
          * @param <R>
          * @param func
          * @return
@@ -1349,6 +1442,15 @@ public interface NoCachingNoUpdating {
          */
         public void accept(final Consumer<? super double[]> action) {
             action.accept(a);
+        }
+
+        /**
+         *
+         * @param delimiter
+         * @return
+         */
+        public String join(String delimiter) {
+            return StringUtil.join(a, delimiter);
         }
 
         /**
@@ -1460,11 +1562,12 @@ public interface NoCachingNoUpdating {
 
         /**
          *
-         * @param delimiter
-         * @return
+         * @param action
          */
-        public String join(String delimiter) {
-            return StringUtil.join(deque, delimiter);
+        public void forEach(final Consumer<? super T> action) {
+            for (T e : deque) {
+                action.accept(e);
+            }
         }
 
         /**
@@ -1483,6 +1586,15 @@ public interface NoCachingNoUpdating {
          */
         public void accept(final Consumer<? super Deque<T>> action) {
             action.accept(deque);
+        }
+
+        /**
+         *
+         * @param delimiter
+         * @return
+         */
+        public String join(String delimiter) {
+            return StringUtil.join(deque, delimiter);
         }
 
         /**
@@ -1545,30 +1657,24 @@ public interface NoCachingNoUpdating {
             throw new UnsupportedOperationException();
         }
 
-        /**
-         *
-         * @return
-         */
         public Map.Entry<K, V> copy() {
             return new AbstractMap.SimpleEntry<>(getKey(), getValue());
         }
 
-        /**
-         *
-         * @param <R>
-         * @param func
-         * @return
-         */
         public <R> R apply(final Function<? super Map.Entry<K, V>, R> func) {
             return func.apply(this);
         }
 
-        /**
-         *
-         * @param action
-         */
+        public <R> R apply(final BiFunction<? super K, ? super V, R> func) {
+            return func.apply(this.getKey(), this.getValue());
+        }
+
         public void accept(final Consumer<? super Map.Entry<K, V>> action) {
             action.accept(this);
+        }
+
+        public void accept(final BiConsumer<? super K, ? super V> action) {
+            action.accept(this.getKey(), this.getValue());
         }
 
         /**
@@ -1578,6 +1684,132 @@ public interface NoCachingNoUpdating {
         @Override
         public String toString() {
             return getKey() + "=" + getValue();
+        }
+    }
+
+    /**
+     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     *
+     * @param <L>
+     * @param <R>
+     */
+    @Beta
+    @SequentialOnly
+    @Stateful
+    public static abstract class DisposablePair<L, R> implements NoCachingNoUpdating {
+
+        /**
+         *
+         * @param <L>
+         * @param <R>
+         * @param p
+         * @return
+         */
+        public static <L, R> DisposablePair<L, R> wrap(final Pair<L, R> p) {
+            N.checkArgNotNull(p, "pair");
+
+            return new DisposablePair<L, R>() {
+                private final Pair<L, R> pair = p;
+
+                @Override
+                public L left() {
+                    return pair.left;
+                }
+
+                @Override
+                public R right() {
+                    return pair.right;
+                }
+            };
+        }
+
+        public abstract L left();
+
+        public abstract R right();
+
+        public Pair<L, R> copy() {
+            return Pair.of(left(), right());
+        }
+
+        public <U> U apply(final BiFunction<? super L, ? super R, U> func) {
+            return func.apply(left(), right());
+        }
+
+        public void accept(final BiConsumer<? super L, ? super R> action) {
+            action.accept(left(), right());
+        }
+
+        @Override
+        public String toString() {
+            return "[" + N.toString(left()) + ", " + N.toString(right()) + "]";
+            // return N.toString(left()) + "=" + N.toString(right());
+        }
+    }
+
+    /**
+     * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     *
+     * @param <L>
+     * @param <M>
+     * @param <R>
+     */
+    @Beta
+    @SequentialOnly
+    @Stateful
+    public static abstract class DisposableTriple<L, M, R> implements NoCachingNoUpdating {
+
+        /**
+         *
+         * @param <L>
+         * @param <M>
+         * @param <R>
+         * @param p
+         * @return
+         */
+        public static <L, M, R> DisposableTriple<L, M, R> wrap(final Triple<L, M, R> p) {
+            N.checkArgNotNull(p, "triple");
+
+            return new DisposableTriple<L, M, R>() {
+                private final Triple<L, M, R> triple = p;
+
+                @Override
+                public L left() {
+                    return triple.left;
+                }
+
+                @Override
+                public M middle() {
+                    return triple.middle;
+                }
+
+                @Override
+                public R right() {
+                    return triple.right;
+                }
+            };
+        }
+
+        public abstract L left();
+
+        public abstract M middle();
+
+        public abstract R right();
+
+        public Triple<L, M, R> copy() {
+            return Triple.of(left(), middle(), right());
+        }
+
+        public <U> U apply(final TriFunction<? super L, ? super M, ? super R, U> func) {
+            return func.apply(left(), middle(), right());
+        }
+
+        public void accept(final TriConsumer<? super L, ? super M, ? super R> action) {
+            action.accept(left(), middle(), right());
+        }
+
+        @Override
+        public String toString() {
+            return "[" + N.toString(left()) + ", " + N.toString(middle()) + ", " + N.toString(right()) + "]";
         }
     }
 }

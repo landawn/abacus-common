@@ -22,6 +22,7 @@ import java.util.Set;
 
 import com.landawn.abacus.DirtyMarker;
 import com.landawn.abacus.annotation.Internal;
+import com.landawn.abacus.util.InternalUtil;
 import com.landawn.abacus.util.ObjectPool;
 
 /**
@@ -32,19 +33,14 @@ import com.landawn.abacus.util.ObjectPool;
 @Internal
 public final class DirtyMarkerUtil {
 
-    static final int POOL_SIZE;
+    @SuppressWarnings("deprecation")
+    static final int POOL_SIZE = InternalUtil.POOL_SIZE;
 
-    static {
-        int multi = (int) (Runtime.getRuntime().maxMemory() / ((1024 * 1024) * 256));
-
-        POOL_SIZE = Math.max(1000, Math.min(1000 * multi, 8192));
-    }
+    private static final Map<Class<?>, Boolean> dirtyMarkerClassPool = new ObjectPool<>(POOL_SIZE);
 
     private DirtyMarkerUtil() {
         // no instance.
     }
-
-    private static final Map<Class<?>, Boolean> dirtyMarkerClassPool = new ObjectPool<>(POOL_SIZE);
 
     /**
      * Checks if is dirty marker.

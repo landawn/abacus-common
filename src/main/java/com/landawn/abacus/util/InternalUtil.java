@@ -25,16 +25,20 @@ import java.util.List;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
 
-/**  
- * 
- * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
- */
-@Deprecated
 @Internal
-@Beta
 public final class InternalUtil {
-    private InternalUtil() {
-        // singleton for utility class
+    /**
+     *
+     * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
+     */
+    @Deprecated
+    @Internal
+    public static final int POOL_SIZE;
+
+    static {
+        int multi = (int) (Runtime.getRuntime().maxMemory() / ((1024 * 1024) * 256));
+
+        POOL_SIZE = Math.max(1000, Math.min(1000 * multi, 8192));
     }
 
     // ...
@@ -67,12 +71,14 @@ public final class InternalUtil {
     }
 
     /**
-     * 
+     *
      * @param c
      * @return
-     * @deprecated internal use only
+     * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
      */
     @Deprecated
+    @Internal
+    @Beta
     static Object[] getInternalArray(final Collection<?> c) {
         if (c == null) {
             return null;
@@ -99,7 +105,11 @@ public final class InternalUtil {
      * @param <T>
      * @param a
      * @return
+     * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
      */
+    @Deprecated
+    @Internal
+    @Beta
     @SafeVarargs
     static <T> List<T> createList(final T... a) {
         if (CommonUtil.isNullOrEmpty(a)) {
@@ -147,7 +157,11 @@ public final class InternalUtil {
      *
      * @param str
      * @return
+     * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
      */
+    @Deprecated
+    @Internal
+    @Beta
     public static char[] getCharsForReadOnly(final String str) {
         if (isStringCharsGettable && strValueField != null && str.length() > 3) {
             try {
@@ -175,7 +189,11 @@ public final class InternalUtil {
      * @param share the same array will be shared with the new created ArrayList
      *            if it's true.
      * @return
+     * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
      */
+    @Deprecated
+    @Internal
+    @Beta
     static String newString(final char[] a, final boolean share) {
         if (isStringCharsCreatable && share && sharedStringConstructor != null) {
             try {
@@ -209,9 +227,10 @@ public final class InternalUtil {
      *
      * @param s
      * @return true, if is null or default
+     * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
      */
+    @Deprecated
     @Internal
-    @Beta
     static boolean isNullOrDefault(final Object value) {
         return (value == null) || N.equals(value, N.defaultValueOf(value.getClass()));
     }
@@ -222,10 +241,15 @@ public final class InternalUtil {
      *
      * @param s
      * @return true, if it's not null or default
+     * @deprecated DO NOT call the methods defined in this class. it's for internal use only.
      */
+    @Deprecated
     @Internal
-    @Beta
     static boolean notNullOrDefault(final Object value) {
         return (value != null) && !CommonUtil.equals(value, CommonUtil.defaultValueOf(value.getClass()));
+    }
+
+    private InternalUtil() {
+        // singleton for utility class
     }
 }

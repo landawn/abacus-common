@@ -424,14 +424,14 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     /**
      *
      * @param <T>
-     * @param <L>
-     * @param <M>
-     * @param <R>
+     * @param <A>
+     * @param <B>
+     * @param <C>
      * @param iter
      * @param unzip output parameter.
      * @return
      */
-    public static <T, L, M, R> TriIterator<L, M, R> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<L, M, R>> unzip) {
+    public static <T, A, B, C> TriIterator<A, B, C> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzip) {
         if (iter == null) {
             return TriIterator.empty();
         }
@@ -443,9 +443,9 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             }
         };
 
-        final Consumer<Triple<L, M, R>> output = new Consumer<Triple<L, M, R>>() {
+        final Consumer<Triple<A, B, C>> output = new Consumer<Triple<A, B, C>>() {
             @Override
-            public void accept(Triple<L, M, R> out) {
+            public void accept(Triple<A, B, C> out) {
                 unzip.accept(iter.next(), out);
             }
         };

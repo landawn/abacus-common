@@ -41,10 +41,10 @@ import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.JSONParser;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.HBaseColumn;
-import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.ImmutableList;
 import com.landawn.abacus.util.ImmutableSet;
 import com.landawn.abacus.util.Indexed;
+import com.landawn.abacus.util.InternalUtil;
 import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.LongMultiset;
 import com.landawn.abacus.util.Multimap;
@@ -84,7 +84,8 @@ public final class TypeFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(TypeFactory.class);
 
-    private static final int POOL_SIZE = Math.max(1024, Math.min(8096, IOUtil.MAX_MEMORY_IN_MB));
+    @SuppressWarnings("deprecation")
+    private static final int POOL_SIZE = InternalUtil.POOL_SIZE;
 
     private static final Map<Class<?>, Type<?>> classTypePool = new ObjectPool<>(POOL_SIZE);
 

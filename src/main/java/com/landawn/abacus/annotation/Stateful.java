@@ -20,6 +20,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Generally, don't cache/save the stateful object or access/update it with multiple threads.
+ *
+ */
 @Documented
 @Retention(value = RetentionPolicy.CLASS)
 @Target(value = { ElementType.FIELD, ElementType.METHOD, ElementType.TYPE })

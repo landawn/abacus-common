@@ -22,7 +22,6 @@ import java.lang.annotation.Target;
 
 /**
  * This is a test annotation to identify the entity class created by {@code Lombok} is a mock {@code record} in jdk 16.
- *
  */
 @Test
 @Documented

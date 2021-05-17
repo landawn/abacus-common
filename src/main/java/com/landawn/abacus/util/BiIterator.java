@@ -471,13 +471,13 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     /**
      *
      * @param <T>
-     * @param <L>
-     * @param <R>
+     * @param <A>
+     * @param <B>
      * @param iter
      * @param unzip output parameter.
      * @return
      */
-    public static <T, L, R> BiIterator<L, R> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Pair<L, R>> unzip) {
+    public static <T, A, B> BiIterator<A, B> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Pair<A, B>> unzip) {
         if (iter == null) {
             return BiIterator.empty();
         }
@@ -489,9 +489,9 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             }
         };
 
-        final Consumer<Pair<L, R>> output = new Consumer<Pair<L, R>>() {
+        final Consumer<Pair<A, B>> output = new Consumer<Pair<A, B>>() {
             @Override
-            public void accept(Pair<L, R> out) {
+            public void accept(Pair<A, B> out) {
                 unzip.accept(iter.next(), out);
             }
         };

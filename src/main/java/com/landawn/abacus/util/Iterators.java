@@ -1625,54 +1625,54 @@ public final class Iterators {
     /**
      *
      * @param <T>
-     * @param <L>
-     * @param <R>
+     * @param <A>
+     * @param <B>
      * @param iter
      * @param unzip the second parameter is an output parameter.
      * @return
      */
-    public static <T, L, R> BiIterator<L, R> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Pair<L, R>> unzip) {
+    public static <T, A, B> BiIterator<A, B> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Pair<A, B>> unzip) {
         return BiIterator.unzip(iter, unzip);
     }
 
     /**
      *
      * @param <T>
-     * @param <L>
-     * @param <R>
+     * @param <A>
+     * @param <B>
      * @param c
      * @param unzip the second parameter is an output parameter.
      * @return
      */
-    public static <T, L, R> BiIterator<L, R> unzip(final Collection<? extends T> c, final BiConsumer<? super T, Pair<L, R>> unzip) {
+    public static <T, A, B> BiIterator<A, B> unzip(final Collection<? extends T> c, final BiConsumer<? super T, Pair<A, B>> unzip) {
         return BiIterator.unzip(c == null ? ObjIterator.<T> empty() : c.iterator(), unzip);
     }
 
     /**
      *
      * @param <T>
-     * @param <L>
-     * @param <M>
-     * @param <R>
+     * @param <A>
+     * @param <B>
+     * @param <C>
      * @param iter
      * @param unzip the second parameter is an output parameter.
      * @return
      */
-    public static <T, L, M, R> TriIterator<L, M, R> unzipp(final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<L, M, R>> unzip) {
+    public static <T, A, B, C> TriIterator<A, B, C> unzipp(final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzip) {
         return TriIterator.unzip(iter, unzip);
     }
 
     /**
      *
      * @param <T>
-     * @param <L>
-     * @param <M>
-     * @param <R>
+     * @param <A>
+     * @param <B>
+     * @param <C>
      * @param c
      * @param unzip the second parameter is an output parameter.
      * @return
      */
-    public static <T, L, M, R> TriIterator<L, M, R> unzipp(final Collection<? extends T> c, final BiConsumer<? super T, Triple<L, M, R>> unzip) {
+    public static <T, A, B, C> TriIterator<A, B, C> unzipp(final Collection<? extends T> c, final BiConsumer<? super T, Triple<A, B, C>> unzip) {
         return TriIterator.unzip(c == null ? ObjIterator.<T> empty() : c.iterator(), unzip);
     }
 
