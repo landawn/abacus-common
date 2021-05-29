@@ -20,6 +20,7 @@ package com.landawn.abacus.util;
  * @author HaiYang Li
  * @param <K> the key type
  * @param <T>
+ * @see Wrapper
  */
 @com.landawn.abacus.annotation.Immutable
 public final class Keyed<K, T> implements Immutable {

@@ -52,51 +52,6 @@ public final class IndexedFloat extends AbstractIndexed {
         return new IndexedFloat(index, value);
     }
 
-    /**
-     *
-     * @param iter
-     * @return
-     */
-    public static ObjIterator<IndexedFloat> of(final FloatIterator iter) {
-        return of(iter, 0);
-    }
-
-    /**
-     *
-     * @param iter
-     * @param startIndex
-     * @return
-     */
-    public static ObjIterator<IndexedFloat> of(final FloatIterator iter, final int startIndex) {
-        return of(iter, (long) startIndex);
-    }
-
-    /**
-     *
-     * @param iter
-     * @param startIndex
-     * @return
-     */
-    public static ObjIterator<IndexedFloat> of(final FloatIterator iter, final long startIndex) {
-        if (startIndex < 0) {
-            throw new IllegalArgumentException("Invalid start index: " + startIndex);
-        }
-
-        return new ObjIterator<IndexedFloat>() {
-            private long idx = startIndex;
-
-            @Override
-            public boolean hasNext() {
-                return iter.hasNext();
-            }
-
-            @Override
-            public IndexedFloat next() {
-                return IndexedFloat.of(iter.nextFloat(), idx++);
-            }
-        };
-    }
-
     public float value() {
         return value;
     }

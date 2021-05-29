@@ -681,13 +681,12 @@ public final class ParserUtil {
                         } else if (propInfos[i].field != null) {
                             try {
                                 propInfos[i].field.set(tmp, defaultFieldValues[i]);
-
                                 isImmutable = false;
+
+                                break;
                             } catch (Throwable e) {
                                 // ignore.
                             }
-
-                            break;
                         }
                     }
                 } catch (Throwable e) {
@@ -845,14 +844,21 @@ public final class ParserUtil {
                                     c.add(subPropValue);
                                     propInfo.setPropValue(propEntity, c);
                                 } else {
+                                    // TODO what's about if propInfo.clazz is immutable (Record)?
+                                    // For example: set "account.Name.firstName" key in Maps.map2Entity, if Account.Name is a Record?
                                     subPropValue = N.newInstance(propInfo.clazz);
                                     propInfo.setPropValue(propEntity, subPropValue);
                                 }
                             } else if (propInfo.type.isCollection()) {
-                                if (propInfo.type.isList()) {
-                                    subPropValue = ((List) subPropValue).get(0);
+                                final Collection c = (Collection) subPropValue;
+
+                                if (c.size() == 0) {
+                                    subPropValue = N.newInstance(propInfo.type.getElementType().clazz());
+                                    c.add(subPropValue);
+                                } else if (propInfo.type.isList()) {
+                                    subPropValue = ((List) c).get(0);
                                 } else {
-                                    subPropValue = N.firstOrNullIfEmpty((Collection) subPropValue);
+                                    subPropValue = N.firstOrNullIfEmpty(c);
                                 }
                             }
 
@@ -1070,7 +1076,7 @@ public final class ParserUtil {
          * @return
          */
         @Beta
-        public <T> T newInstance() {
+        <T> T newInstance() {
             return (T) (noArgsConstructor == null ? ClassUtil.invokeConstructor(allArgsConstructor, defaultFieldValues)
                     : ClassUtil.invokeConstructor(noArgsConstructor));
         }
@@ -1082,7 +1088,7 @@ public final class ParserUtil {
          * @return
          */
         @Beta
-        public <T> T newInstance(final Object... args) {
+        <T> T newInstance(final Object... args) {
             if (N.isNullOrEmpty(args)) {
                 return newInstance();
             }

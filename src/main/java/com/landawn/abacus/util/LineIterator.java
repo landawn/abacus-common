@@ -30,7 +30,7 @@ import com.landawn.abacus.exception.UncheckedIOException;
 
 /**
  * Note: it's copied from Apache Commons IO developed at The Apache Software Foundation (http://www.apache.org/), or under the Apache License 2.0.
- * 
+ *
  * An Iterator over the lines in a <code>Reader</code>.
  * <p>
  * <code>LineIterator</code> holds a reference to an open <code>Reader</code>.
@@ -52,7 +52,7 @@ import com.landawn.abacus.exception.UncheckedIOException;
  * @version $Id: LineIterator.java 1471767 2013-04-24 23:24:19Z sebb $
  * @since 1.2
  */
-public final class LineIterator extends ImmutableIterator<String> implements Closeable {
+public final class LineIterator extends ObjIterator<String> implements Closeable {
     // N.B. This class deliberately does not implement Iterable, see https://issues.apache.org/jira/browse/IO-181
 
     private final BufferedReader bufferedReader;
@@ -297,6 +297,7 @@ public final class LineIterator extends ImmutableIterator<String> implements Clo
      * @param action
      * @throws E the e
      */
+    @Override
     public <E extends Exception> void foreachRemaining(Throwables.Consumer<? super String, E> action) throws E {
         N.checkArgNotNull(action);
 
@@ -311,6 +312,7 @@ public final class LineIterator extends ImmutableIterator<String> implements Clo
      * @param action
      * @throws E the e
      */
+    @Override
     public <E extends Exception> void foreachIndexed(Throwables.IndexedConsumer<? super String, E> action) throws E {
         N.checkArgNotNull(action);
 

@@ -16,6 +16,7 @@ package com.landawn.abacus.util;
 
 import java.util.NoSuchElementException;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.function.BooleanSupplier;
 import com.landawn.abacus.util.function.LongSupplier;
 import com.landawn.abacus.util.function.Supplier;
@@ -262,6 +263,34 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
 
     public LongStream stream() {
         return LongStream.of(this);
+    }
+
+    @Beta
+    public ObjIterator<IndexedLong> indexed() {
+        return indexed(0);
+    }
+
+    @Beta
+    public ObjIterator<IndexedLong> indexed(final long startIndex) {
+        if (startIndex < 0) {
+            throw new IllegalArgumentException("Invalid start index: " + startIndex);
+        }
+
+        final LongIterator iter = this;
+
+        return new ObjIterator<IndexedLong>() {
+            private long idx = startIndex;
+
+            @Override
+            public boolean hasNext() {
+                return iter.hasNext();
+            }
+
+            @Override
+            public IndexedLong next() {
+                return IndexedLong.of(iter.nextLong(), idx++);
+            }
+        };
     }
 
     /**

@@ -52,51 +52,6 @@ public final class IndexedLong extends AbstractIndexed {
         return new IndexedLong(index, value);
     }
 
-    /**
-     *
-     * @param iter
-     * @return
-     */
-    public static ObjIterator<IndexedLong> of(final LongIterator iter) {
-        return of(iter, 0);
-    }
-
-    /**
-     *
-     * @param iter
-     * @param startIndex
-     * @return
-     */
-    public static ObjIterator<IndexedLong> of(final LongIterator iter, final int startIndex) {
-        return of(iter, (long) startIndex);
-    }
-
-    /**
-     *
-     * @param iter
-     * @param startIndex
-     * @return
-     */
-    public static ObjIterator<IndexedLong> of(final LongIterator iter, final long startIndex) {
-        if (startIndex < 0) {
-            throw new IllegalArgumentException("Invalid start index: " + startIndex);
-        }
-
-        return new ObjIterator<IndexedLong>() {
-            private long idx = startIndex;
-
-            @Override
-            public boolean hasNext() {
-                return iter.hasNext();
-            }
-
-            @Override
-            public IndexedLong next() {
-                return IndexedLong.of(iter.nextLong(), idx++);
-            }
-        };
-    }
-
     public long value() {
         return value;
     }

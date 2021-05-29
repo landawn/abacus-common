@@ -54,51 +54,6 @@ public final class IndexedBoolean extends AbstractIndexed {
 
     /**
      *
-     * @param iter
-     * @return
-     */
-    public static ObjIterator<IndexedBoolean> of(final BooleanIterator iter) {
-        return of(iter, 0);
-    }
-
-    /**
-     *
-     * @param iter
-     * @param startIndex
-     * @return
-     */
-    public static ObjIterator<IndexedBoolean> of(final BooleanIterator iter, final int startIndex) {
-        return of(iter, (long) startIndex);
-    }
-
-    /**
-     *
-     * @param iter
-     * @param startIndex
-     * @return
-     */
-    public static ObjIterator<IndexedBoolean> of(final BooleanIterator iter, final long startIndex) {
-        if (startIndex < 0) {
-            throw new IllegalArgumentException("Invalid start index: " + startIndex);
-        }
-
-        return new ObjIterator<IndexedBoolean>() {
-            private long idx = startIndex;
-
-            @Override
-            public boolean hasNext() {
-                return iter.hasNext();
-            }
-
-            @Override
-            public IndexedBoolean next() {
-                return IndexedBoolean.of(iter.nextBoolean(), idx++);
-            }
-        };
-    }
-
-    /**
-     *
      * @return
      */
     public boolean value() {

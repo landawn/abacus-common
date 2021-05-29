@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.pool;
 
+import com.landawn.abacus.util.Immutable;
 import com.landawn.abacus.util.N;
 
 /**
@@ -22,7 +23,8 @@ import com.landawn.abacus.util.N;
  * @param <T>
  * @since 0.8
  */
-public final class PoolableWrapper<T> extends AbstractPoolable {
+@com.landawn.abacus.annotation.Immutable
+public final class PoolableWrapper<T> extends AbstractPoolable implements Immutable {
 
     private T srcObject;
 

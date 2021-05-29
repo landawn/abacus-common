@@ -8453,6 +8453,20 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return persist(TO_LINE_OF_STRING, header, tail, file);
     }
 
+    /**
+     * toCSV:
+     * <pre>
+     * final JSONSerializationConfig jsc = JSC.create().setBracketRootValue(false);
+     * final Throwables.Function<? super T, String, IOException> toLine = it -> N.toJSON(it, jsc);
+     * stream.persist(toLine, header, outputFile);
+     * </pre>
+     *
+     * @param toLine
+     * @param file
+     * @return
+     * @throws E
+     * @throws IOException
+     */
     public long persist(final Throwables.Function<? super T, String, IOException> toLine, final File file) throws E, IOException {
         return persist(toLine, null, null, file);
     }
@@ -8482,6 +8496,20 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    /**
+     * toCSV:
+     * <pre>
+     * final JSONSerializationConfig jsc = JSC.create().setBracketRootValue(false);
+     * final Throwables.Function<? super T, String, IOException> toLine = it -> N.toJSON(it, jsc);
+     * stream.persist(toLine, header, outputFile);
+     * </pre>
+     *
+     * @param toLine
+     * @param writer
+     * @return
+     * @throws E
+     * @throws IOException
+     */
     public long persist(Throwables.Function<? super T, String, IOException> toLine, Writer writer) throws E, IOException {
         assertNotClosed();
 
@@ -8527,8 +8555,54 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final Writer writer) throws E, IOException {
+        assertNotClosed();
+
+        return persist(writeLine, null, null, writer);
+    }
+
+    public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final String header, final String tail, final Writer writer)
+            throws E, IOException {
+        assertNotClosed();
+
+        try {
+            boolean isBufferedWriter = writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
+            final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);
+            final ExceptionalIterator<T, E> iter = iterator();
+            long cnt = 0;
+
+            try {
+                if (header != null) {
+                    bw.write(header);
+                    bw.write(IOUtil.LINE_SEPARATOR);
+                }
+
+                while (iter.hasNext()) {
+                    writeLine.accept(iter.next(), writer);
+                    bw.write(IOUtil.LINE_SEPARATOR);
+                    cnt++;
+                }
+
+                if (tail != null) {
+                    bw.write(tail);
+                    bw.write(IOUtil.LINE_SEPARATOR);
+                }
+
+                bw.flush();
+            } finally {
+                if (!isBufferedWriter) {
+                    Objectory.recycle((BufferedWriter) bw);
+                }
+            }
+
+            return cnt;
+        } finally {
+            close();
+        }
+    }
+
     public long persist(final Connection conn, final String insertSQL, final int batchSize, final int batchInterval,
-            final Throwables.BiConsumer<? super PreparedStatement, ? super T, SQLException> stmtSetter) throws E, SQLException {
+            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws E, SQLException {
         assertNotClosed();
 
         PreparedStatement stmt = null;
@@ -8543,7 +8617,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     public long persist(final PreparedStatement stmt, final int batchSize, final int batchInterval,
-            final Throwables.BiConsumer<? super PreparedStatement, ? super T, SQLException> stmtSetter) throws E, SQLException {
+            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws E, SQLException {
         assertNotClosed();
 
         checkArgument(batchSize > 0 && batchInterval >= 0, "'batchSize'=%s must be greater than 0 and 'batchInterval'=%s can't be negative", batchSize,
@@ -8553,7 +8627,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             final ExceptionalIterator<T, E> iter = iterator();
             long cnt = 0;
             while (iter.hasNext()) {
-                stmtSetter.accept(stmt, iter.next());
+                stmtSetter.accept(iter.next(), stmt);
 
                 stmt.addBatch();
 
@@ -8862,7 +8936,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
-
+    
      *
      * @param <R>
      * @param mapper

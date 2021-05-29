@@ -16,6 +16,7 @@ package com.landawn.abacus.util;
 
 import java.util.NoSuchElementException;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.function.BooleanSupplier;
 import com.landawn.abacus.util.function.CharSupplier;
 import com.landawn.abacus.util.function.Supplier;
@@ -262,6 +263,34 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
 
     public CharStream stream() {
         return CharStream.of(this);
+    }
+
+    @Beta
+    public ObjIterator<IndexedChar> indexed() {
+        return indexed(0);
+    }
+
+    @Beta
+    public ObjIterator<IndexedChar> indexed(final long startIndex) {
+        if (startIndex < 0) {
+            throw new IllegalArgumentException("Invalid start index: " + startIndex);
+        }
+
+        final CharIterator iter = this;
+
+        return new ObjIterator<IndexedChar>() {
+            private long idx = startIndex;
+
+            @Override
+            public boolean hasNext() {
+                return iter.hasNext();
+            }
+
+            @Override
+            public IndexedChar next() {
+                return IndexedChar.of(iter.nextChar(), idx++);
+            }
+        };
     }
 
     /**

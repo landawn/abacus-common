@@ -46,8 +46,22 @@ public final class ImmutableArray<T> implements Immutable {
         }
     }
 
+    public <E extends Exception> void forEachIndexed(final Throwables.IndexedConsumer<T, E> consumer) throws E {
+        N.checkArgNotNull(consumer, "consumer");
+
+        for (int i = 0; i < length; i++) {
+            consumer.accept(i, elements[i]);
+        }
+    }
+
     public Stream<T> stream() {
         return Stream.of(elements);
+    }
+
+    public ImmutableArray<T> copy(final int fromIndex, final int toIndex) {
+        N.checkFromToIndex(fromIndex, toIndex, length);
+
+        return ImmutableArray.of(N.copyOfRange(elements, fromIndex, toIndex));
     }
 
     @Override

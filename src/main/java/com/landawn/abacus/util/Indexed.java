@@ -14,8 +14,6 @@
 
 package com.landawn.abacus.util;
 
-import java.util.Iterator;
-
 /**
  *
  * @author Haiyang Li
@@ -55,54 +53,6 @@ public final class Indexed<T> extends AbstractIndexed {
         N.checkArgNotNegative(index, "index");
 
         return new Indexed<>(index, value);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param iter
-     * @return
-     */
-    public static <T> ObjIterator<Indexed<T>> iterate(final Iterator<? extends T> iter) {
-        return iterate(iter, 0);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param iter
-     * @param startIndex
-     * @return
-     */
-    public static <T> ObjIterator<Indexed<T>> iterate(final Iterator<? extends T> iter, final int startIndex) {
-        N.checkArgNotNegative(startIndex, "startIndex");
-
-        return iterate(iter, (long) startIndex);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param iter
-     * @param startIndex
-     * @return
-     */
-    public static <T> ObjIterator<Indexed<T>> iterate(final Iterator<? extends T> iter, final long startIndex) {
-        N.checkArgNotNegative(startIndex, "startIndex");
-
-        return new ObjIterator<Indexed<T>>() {
-            private long idx = startIndex;
-
-            @Override
-            public boolean hasNext() {
-                return iter.hasNext();
-            }
-
-            @Override
-            public Indexed<T> next() {
-                return Indexed.of((T) iter.next(), idx++);
-            }
-        };
     }
 
     public T value() {

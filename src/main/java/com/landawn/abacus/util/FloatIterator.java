@@ -16,6 +16,7 @@ package com.landawn.abacus.util;
 
 import java.util.NoSuchElementException;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.function.BooleanSupplier;
 import com.landawn.abacus.util.function.FloatSupplier;
 import com.landawn.abacus.util.function.Supplier;
@@ -262,6 +263,34 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
 
     public FloatStream stream() {
         return FloatStream.of(this);
+    }
+
+    @Beta
+    public ObjIterator<IndexedFloat> indexed() {
+        return indexed(0);
+    }
+
+    @Beta
+    public ObjIterator<IndexedFloat> indexed(final long startIndex) {
+        if (startIndex < 0) {
+            throw new IllegalArgumentException("Invalid start index: " + startIndex);
+        }
+
+        final FloatIterator iter = this;
+
+        return new ObjIterator<IndexedFloat>() {
+            private long idx = startIndex;
+
+            @Override
+            public boolean hasNext() {
+                return iter.hasNext();
+            }
+
+            @Override
+            public IndexedFloat next() {
+                return IndexedFloat.of(iter.nextFloat(), idx++);
+            }
+        };
     }
 
     /**

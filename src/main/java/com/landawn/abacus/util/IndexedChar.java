@@ -52,51 +52,6 @@ public final class IndexedChar extends AbstractIndexed {
         return new IndexedChar(index, value);
     }
 
-    /**
-     *
-     * @param iter
-     * @return
-     */
-    public static ObjIterator<IndexedChar> of(final CharIterator iter) {
-        return of(iter, 0);
-    }
-
-    /**
-     *
-     * @param iter
-     * @param startIndex
-     * @return
-     */
-    public static ObjIterator<IndexedChar> of(final CharIterator iter, final int startIndex) {
-        return of(iter, (long) startIndex);
-    }
-
-    /**
-     *
-     * @param iter
-     * @param startIndex
-     * @return
-     */
-    public static ObjIterator<IndexedChar> of(final CharIterator iter, final long startIndex) {
-        if (startIndex < 0) {
-            throw new IllegalArgumentException("Invalid start index: " + startIndex);
-        }
-
-        return new ObjIterator<IndexedChar>() {
-            private long idx = startIndex;
-
-            @Override
-            public boolean hasNext() {
-                return iter.hasNext();
-            }
-
-            @Override
-            public IndexedChar next() {
-                return IndexedChar.of(iter.nextChar(), idx++);
-            }
-        };
-    }
-
     public char value() {
         return value;
     }

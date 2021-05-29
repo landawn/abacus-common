@@ -16,6 +16,7 @@ package com.landawn.abacus.util;
 
 import java.util.NoSuchElementException;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.function.BooleanSupplier;
 import com.landawn.abacus.util.function.ByteSupplier;
 import com.landawn.abacus.util.function.Supplier;
@@ -262,6 +263,34 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
 
     public ByteStream stream() {
         return ByteStream.of(this);
+    }
+
+    @Beta
+    public ObjIterator<IndexedByte> indexed() {
+        return indexed(0);
+    }
+
+    @Beta
+    public ObjIterator<IndexedByte> indexed(final long startIndex) {
+        if (startIndex < 0) {
+            throw new IllegalArgumentException("Invalid start index: " + startIndex);
+        }
+
+        final ByteIterator iter = this;
+
+        return new ObjIterator<IndexedByte>() {
+            private long idx = startIndex;
+
+            @Override
+            public boolean hasNext() {
+                return iter.hasNext();
+            }
+
+            @Override
+            public IndexedByte next() {
+                return IndexedByte.of(iter.nextByte(), idx++);
+            }
+        };
     }
 
     /**

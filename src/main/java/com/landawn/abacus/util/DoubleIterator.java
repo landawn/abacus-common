@@ -16,6 +16,7 @@ package com.landawn.abacus.util;
 
 import java.util.NoSuchElementException;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.function.BooleanSupplier;
 import com.landawn.abacus.util.function.DoubleSupplier;
 import com.landawn.abacus.util.function.Supplier;
@@ -264,23 +265,40 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         return DoubleStream.of(this);
     }
 
-    /**
-     * For each remaining.
-     *
-     * @param action
-     */
+    @Beta
+    public ObjIterator<IndexedDouble> indexed() {
+        return indexed(0);
+    }
+
+    @Beta
+    public ObjIterator<IndexedDouble> indexed(final long startIndex) {
+        if (startIndex < 0) {
+            throw new IllegalArgumentException("Invalid start index: " + startIndex);
+        }
+
+        final DoubleIterator iter = this;
+
+        return new ObjIterator<IndexedDouble>() {
+            private long idx = startIndex;
+
+            @Override
+            public boolean hasNext() {
+                return iter.hasNext();
+            }
+
+            @Override
+            public IndexedDouble next() {
+                return IndexedDouble.of(iter.nextDouble(), idx++);
+            }
+        };
+    }
+
     @Override
     @Deprecated
     public void forEachRemaining(java.util.function.Consumer<? super Double> action) {
         super.forEachRemaining(action);
     }
 
-    /**
-     *
-     * @param <E>
-     * @param action
-     * @throws E the e
-     */
     public <E extends Exception> void foreachRemaining(Throwables.DoubleConsumer<E> action) throws E {
         N.checkArgNotNull(action);
 
@@ -289,12 +307,6 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         }
     }
 
-    /**
-     *
-     * @param <E>
-     * @param action
-     * @throws E the e
-     */
     public <E extends Exception> void foreachIndexed(Throwables.IndexedDoubleConsumer<E> action) throws E {
         N.checkArgNotNull(action);
 

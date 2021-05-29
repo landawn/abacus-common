@@ -16,6 +16,7 @@ package com.landawn.abacus.util;
 
 import java.util.NoSuchElementException;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.function.BooleanSupplier;
 import com.landawn.abacus.util.function.ShortSupplier;
 import com.landawn.abacus.util.function.Supplier;
@@ -262,6 +263,34 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
 
     public ShortStream stream() {
         return ShortStream.of(this);
+    }
+
+    @Beta
+    public ObjIterator<IndexedShort> indexed() {
+        return indexed(0);
+    }
+
+    @Beta
+    public ObjIterator<IndexedShort> indexed(final long startIndex) {
+        if (startIndex < 0) {
+            throw new IllegalArgumentException("Invalid start index: " + startIndex);
+        }
+
+        final ShortIterator iter = this;
+
+        return new ObjIterator<IndexedShort>() {
+            private long idx = startIndex;
+
+            @Override
+            public boolean hasNext() {
+                return iter.hasNext();
+            }
+
+            @Override
+            public IndexedShort next() {
+                return IndexedShort.of(iter.nextShort(), idx++);
+            }
+        };
     }
 
     /**

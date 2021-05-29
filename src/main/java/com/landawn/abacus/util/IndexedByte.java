@@ -52,51 +52,6 @@ public final class IndexedByte extends AbstractIndexed {
         return new IndexedByte(index, value);
     }
 
-    /**
-     *
-     * @param iter
-     * @return
-     */
-    public static ObjIterator<IndexedByte> of(final ByteIterator iter) {
-        return of(iter, 0);
-    }
-
-    /**
-     *
-     * @param iter
-     * @param startIndex
-     * @return
-     */
-    public static ObjIterator<IndexedByte> of(final ByteIterator iter, final int startIndex) {
-        return of(iter, (long) startIndex);
-    }
-
-    /**
-     *
-     * @param iter
-     * @param startIndex
-     * @return
-     */
-    public static ObjIterator<IndexedByte> of(final ByteIterator iter, final long startIndex) {
-        if (startIndex < 0) {
-            throw new IllegalArgumentException("Invalid start index: " + startIndex);
-        }
-
-        return new ObjIterator<IndexedByte>() {
-            private long idx = startIndex;
-
-            @Override
-            public boolean hasNext() {
-                return iter.hasNext();
-            }
-
-            @Override
-            public IndexedByte next() {
-                return IndexedByte.of(iter.nextByte(), idx++);
-            }
-        };
-    }
-
     public byte value() {
         return value;
     }

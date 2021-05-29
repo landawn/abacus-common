@@ -16,6 +16,7 @@ package com.landawn.abacus.util;
 
 import java.util.NoSuchElementException;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.function.BooleanSupplier;
 import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.Stream;
@@ -265,6 +266,34 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
     public Stream<Boolean> stream() {
         return Stream.of(this);
+    }
+
+    @Beta
+    public ObjIterator<IndexedBoolean> indexed() {
+        return indexed(0);
+    }
+
+    @Beta
+    public ObjIterator<IndexedBoolean> indexed(final long startIndex) {
+        if (startIndex < 0) {
+            throw new IllegalArgumentException("Invalid start index: " + startIndex);
+        }
+
+        final BooleanIterator iter = this;
+
+        return new ObjIterator<IndexedBoolean>() {
+            private long idx = startIndex;
+
+            @Override
+            public boolean hasNext() {
+                return iter.hasNext();
+            }
+
+            @Override
+            public IndexedBoolean next() {
+                return IndexedBoolean.of(iter.nextBoolean(), idx++);
+            }
+        };
     }
 
     /**

@@ -1,3 +1,8 @@
+### 2.3.7
+
+* Improvements and bug fix.
+
+
 ### 2.3.6
 
 * Support `Record`.

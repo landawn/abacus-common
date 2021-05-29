@@ -29,11 +29,11 @@ public final class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry
 
     private static final long serialVersionUID = -7667037689002186862L;
 
-    public ImmutableEntry(K key, V value) {
+    ImmutableEntry(K key, V value) {
         super(key, value);
     }
 
-    public ImmutableEntry(Map.Entry<? extends K, ? extends V> entry) {
+    ImmutableEntry(Map.Entry<? extends K, ? extends V> entry) {
         super(entry);
     }
 
@@ -66,7 +66,7 @@ public final class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry
      * @param v
      * @return
      * @throws UnsupportedOperationException the unsupported operation exception
-     * @deprecated 
+     * @deprecated
      */
     @Deprecated
     @Override

@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Haiyang Li.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@ import com.landawn.abacus.util.function.ToIntFunction;
  * @author Haiyang Li
  * @param <T>
  * @since 0.8
+ * @see Keyed
  */
 @com.landawn.abacus.annotation.Immutable
 public final class Wrapper<T> implements Immutable {

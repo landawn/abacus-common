@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2017, Haiyang Li.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.function.BooleanSupplier;
 import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.Stream;
@@ -333,7 +334,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
 
     //    /**
     //     * Returns a new {@code ObjIterator}.
-    //     * 
+    //     *
     //     * @param n
     //     * @return
     //     * @see Iterators#skip(Iterator, long)
@@ -344,7 +345,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     //
     //    /**
     //     * Returns a new {@code ObjIterator}.
-    //     * 
+    //     *
     //     * @param count
     //     * @return
     //     * @see Iterators#limit(Iterator, long)
@@ -355,7 +356,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     //
     //    /**
     //     * Returns a new {@code ObjIterator}.
-    //     * 
+    //     *
     //     * @param offset
     //     * @param count
     //     * @return
@@ -367,7 +368,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     //
     //    /**
     //     * Returns a new {@code ObjIterator}.
-    //     * 
+    //     *
     //     * @param filter
     //     * @return
     //     * @see Iterators#filter(Iterator, Predicate)
@@ -378,7 +379,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     //
     //    /**
     //     * Returns a new {@code ObjIterator}.
-    //     * 
+    //     *
     //     * @param filter
     //     * @return
     //     * @see Iterators#takeWhile(Iterator, Predicate)
@@ -389,7 +390,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     //
     //    /**
     //     * Returns a new {@code ObjIterator}.
-    //     * 
+    //     *
     //     * @param filter
     //     * @return
     //     * @see Iterators#takeWhileInclusive(Iterator, Predicate)
@@ -400,7 +401,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     //
     //    /**
     //     * Returns a new {@code ObjIterator}.
-    //     * 
+    //     *
     //     * @param filter
     //     * @return
     //     * @see Iterators#dropWhile(Iterator, Predicate)
@@ -411,7 +412,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     //
     //    /**
     //     * Returns a new {@code ObjIterator}.
-    //     * 
+    //     *
     //     * @param filter
     //     * @return
     //     * @see Iterators#skipUntil(Iterator, Predicate)
@@ -422,7 +423,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     //
     //    /**
     //     * Returns a new {@code ObjIterator}.
-    //     * 
+    //     *
     //     * @param <U>
     //     * @param mapper
     //     * @return
@@ -434,7 +435,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     //
     //    /**
     //     * Returns a new {@code ObjIterator}.
-    //     * 
+    //     *
     //     * @param <U>
     //     * @param mapper
     //     * @return
@@ -446,7 +447,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     //
     //    /**
     //     * Returns a new {@code ObjIterator}.
-    //     * 
+    //     *
     //     * @param <U>
     //     * @param mapper
     //     * @return
@@ -476,6 +477,34 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
 
     public Stream<T> stream() {
         return Stream.of(this);
+    }
+
+    @Beta
+    public ObjIterator<Indexed<T>> indexed() {
+        return indexed(0);
+    }
+
+    @Beta
+    public ObjIterator<Indexed<T>> indexed(final long startIndex) {
+        if (startIndex < 0) {
+            throw new IllegalArgumentException("Invalid start index: " + startIndex);
+        }
+
+        final ObjIterator<T> iter = this;
+
+        return new ObjIterator<Indexed<T>>() {
+            private long idx = startIndex;
+
+            @Override
+            public boolean hasNext() {
+                return iter.hasNext();
+            }
+
+            @Override
+            public Indexed<T> next() {
+                return Indexed.of(iter.next(), idx++);
+            }
+        };
     }
 
     /**
