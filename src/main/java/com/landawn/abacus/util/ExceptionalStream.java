@@ -5268,7 +5268,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      *
      * @param <U>
      * @param <R>
-     * @param b
+     * @param b will be loaded to memory. If {@code b} is too big to load to memory, please use {@code b.cronJoin(this, ...)}
      * @param func
      * @return
      */
@@ -5277,7 +5277,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
         assertNotClosed();
 
-        checkArgNotNull(b, "stream");
+        checkArgNotNull(b, "stream 'b' can not be null");
 
         return flatMap(new Throwables.Function<T, ExceptionalStream<R, E>, E>() {
             private Collection<? extends U> c = null;
@@ -5388,7 +5388,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param <U>
      * @param <K>
      * @param <R>
-     * @param b
+     * @param b will be loaded to memory. If {@code b} is too big to load to memory, please use {@code b.innerJoin(this, ...)}
      * @param leftKeyMapper
      * @param rightKeyMapper
      * @param func
@@ -5401,7 +5401,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
         assertNotClosed();
 
-        checkArgNotNull(b, "stream");
+        checkArgNotNull(b, "stream 'b' can not be null");
 
         return flatMap(new Throwables.Function<T, ExceptionalStream<R, E>, E>() {
             private ListMultimap<K, U> rightKeyMap = null;
@@ -5588,7 +5588,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param <K>
      * @param <U>
      * @param <R>
-     * @param b
+     * @param b will be loaded to memory. If {@code b} is too big to load to memory, please use {@code b.fullJoin(this, ...)}
      * @param leftKeyMapper
      * @param rightKeyMapper
      * @param func
@@ -5601,7 +5601,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
         assertNotClosed();
 
-        checkArgNotNull(b, "stream");
+        checkArgNotNull(b, "stream 'b' can not be null");
 
         final Map<U, U> joinedRights = new IdentityHashMap<>();
         final Holder<List<U>> holder = new Holder<>();
@@ -5805,7 +5805,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param <K>
      * @param <U>
      * @param <R>
-     * @param b
+     * @param b will be loaded to memory. If {@code b} is too big to load to memory, please use {@code b.leftJoin(this, ...)}
      * @param leftKeyMapper
      * @param rightKeyMapper
      * @param func
@@ -5818,7 +5818,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
         assertNotClosed();
 
-        checkArgNotNull(b, "stream");
+        checkArgNotNull(b, "stream 'b' can not be null");
 
         return flatMap(new Throwables.Function<T, ExceptionalStream<R, E>, E>() {
             private ListMultimap<K, U> rightKeyMap = null;
@@ -5998,7 +5998,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param <K>
      * @param <U>
      * @param <R>
-     * @param b
+     * @param b will be loaded to memory. If {@code b} is too big to load to memory, please use {@code b.rightJoin(this, ...)}
      * @param leftKeyMapper
      * @param rightKeyMapper
      * @param func
@@ -6011,7 +6011,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
         assertNotClosed();
 
-        checkArgNotNull(b, "stream");
+        checkArgNotNull(b, "stream 'b' can not be null");
 
         final Map<U, U> joinedRights = new IdentityHashMap<>();
         final Holder<List<U>> holder = new Holder<>();
@@ -6222,7 +6222,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param <U>
      * @param <K>
      * @param <R>
-     * @param b
+     * @param b will be loaded to memory. If {@code b} is too big to load to memory, please use {@code b.groupJoin(this, ...)}
      * @param leftKeyMapper
      * @param rightKeyMapper
      * @param func
@@ -6235,7 +6235,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             final Throwables.BiFunction<? super T, ? super List<U>, R, ? extends E> func) {
         assertNotClosed();
 
-        checkArgNotNull(b, "stream");
+        checkArgNotNull(b, "stream 'b' can not be null");
 
         final Throwables.Function<T, R, E> mapper = new Throwables.Function<T, R, E>() {
             private volatile boolean initialized = false;
@@ -6346,7 +6346,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param <U>
      * @param <K>
      * @param <R>
-     * @param b
+     * @param b will be loaded to memory. If {@code b} is too big to load to memory, please use {@code b.groupJoin(this, ...)}
      * @param leftKeyMapper
      * @param rightKeyMapper
      * @param mergeFunction
@@ -6360,7 +6360,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
         assertNotClosed();
 
-        checkArgNotNull(b, "stream");
+        checkArgNotNull(b, "stream 'b' can not be null");
 
         final Throwables.Function<T, R, E> mapper = new Throwables.Function<T, R, E>() {
             private volatile boolean initialized = false;
@@ -6490,7 +6490,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             final Throwables.BiFunction<? super T, ? super D, R, ? extends E> func) {
         assertNotClosed();
 
-        checkArgNotNull(b, "stream");
+        checkArgNotNull(b, "stream 'b' can not be null");
 
         final Throwables.Function<T, R, E> mapper = new Throwables.Function<T, R, E>() {
             private volatile boolean initialized = false;
@@ -8936,7 +8936,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
-    
+
      *
      * @param <R>
      * @param mapper
