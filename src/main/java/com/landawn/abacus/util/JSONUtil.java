@@ -16,10 +16,13 @@
 package com.landawn.abacus.util;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -223,7 +226,7 @@ public final class JSONUtil {
             }
 
             return (T) map;
-        } else {
+        } else if (type.isEntity()) {
             final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
             final Object result = entityInfo.createEntityResult();
             final Iterator<String> iter = jsonObject.keys();
@@ -252,6 +255,8 @@ public final class JSONUtil {
             }
 
             return (T) entityInfo.finishEntityResult(result);
+        } else {
+            throw new IllegalArgumentException(type.name() + " is not a map or entity type");
         }
     }
 
@@ -263,7 +268,52 @@ public final class JSONUtil {
      * @throws JSONException the JSON exception
      */
     public static <T> List<T> unwrap(final JSONArray jsonArray) throws JSONException {
-        return unwrap(List.class, jsonArray);
+        return (List<T>) unwrap(jsonArray, Object.class);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param jsonArray
+     * @param elementClass
+     * @return
+     * @throws JSONException the JSON exception
+     */
+    public static <T> List<T> unwrap(final JSONArray jsonArray, Class<T> elementClass) throws JSONException {
+        return unwrap(jsonArray, Type.of(elementClass));
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param jsonArray
+     * @param elementType
+     * @return
+     * @throws JSONException the JSON exception
+     */
+    public static <T> List<T> unwrap(final JSONArray jsonArray, Type<T> elementType) throws JSONException {
+        final int len = jsonArray.length();
+        final List<Object> coll = new ArrayList<>(len);
+
+        Object element = null;
+
+        for (int i = 0; i < len; i++) {
+            element = jsonArray.get(i);
+
+            if (element == JSONObject.NULL) {
+                element = null;
+            } else if (element != null) {
+                if (element instanceof JSONObject) {
+                    element = unwrap(elementType, (JSONObject) element);
+                } else if (element instanceof JSONArray) {
+                    element = unwrap(elementType, (JSONArray) element);
+                }
+            }
+
+            coll.add(element);
+        }
+
+        return (List<T>) coll;
     }
 
     /**
@@ -294,7 +344,9 @@ public final class JSONUtil {
         if (type.clazz().isAssignableFrom(JSONArray.class)) {
             return (T) jsonArray;
         } else if (type.isCollection()) {
-            final Collection<Object> coll = (Collection<Object>) N.newInstance(type.clazz());
+            final Collection<Object> coll = List.class.equals(type.clazz()) || ArrayList.class.equals(type.clazz()) ? new ArrayList<>(len)
+                    : (Set.class.equals(type.clazz()) || HashSet.class.equals(type.clazz()) ? new HashSet<>(len)
+                            : (Collection<Object>) N.newInstance(type.clazz()));
             final Type<?> elementType = type.getElementType();
             Object element = null;
 

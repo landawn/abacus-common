@@ -269,10 +269,11 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     public abstract String join(final int fromIndex, final int toIndex, final String delimiter);
 
     /**
-     * Trim to size.
+     * Trim to size and return {@code this) list. There is no new list instance created.
      *
      * @return this List with trailing unused space removed.
      */
+    @Beta
     public abstract L trimToSize();
 
     /**

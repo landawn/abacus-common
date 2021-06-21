@@ -74,9 +74,11 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
     public static <E> ImmutableSet<E> of(E... a) {
         if (N.isNullOrEmpty(a)) {
             return empty();
+        } else if (a.length == 1) {
+            return new ImmutableSet<>(Collections.singleton(a[0]));
+        } else {
+            return new ImmutableSet<>(N.asLinkedHashSet(a));
         }
-
-        return new ImmutableSet<>(N.asLinkedHashSet(a));
     }
 
     /**
@@ -110,7 +112,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
     }
 
     /**
-     * 
+     *
      * @param <E>
      * @param c
      * @return
