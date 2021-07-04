@@ -487,6 +487,17 @@ public final class Maps {
         }
     }
 
+    /**
+     * Note: {@code null} will be returned if the specified {@code map} is null, or no value found by the specified {@code key}.
+     * To avoid {@code NullPointerException}, use {@link #getBoolean(Map, Object, boolean)}
+     *
+     *
+     * @param <K>
+     * @param map
+     * @param key
+     * @return
+     * @see #getBoolean(Map, Object, boolean)
+     */
     public static <K> Boolean getBoolean(final Map<? super K, ?> map, final K key) {
         if (N.isNullOrEmpty(map)) {
             return null;

@@ -451,8 +451,18 @@ public class u {
         /**
          *
          * @return
+         * @deprecated using {@link #orElseNull()}
          */
+        @Deprecated
         public T orNull() {
+            return isPresent() ? value : null;
+        }
+
+        /**
+         *
+         * @return
+         */
+        public T orElseNull() {
             return isPresent() ? value : null;
         }
 
@@ -858,7 +868,9 @@ public class u {
         /**
          *
          * @return
+         * @deprecated use {@link #orElse(false)}
          */
+        @Deprecated
         public boolean orFalse() {
             return isPresent ? value : false;
         }
@@ -870,7 +882,9 @@ public class u {
         /**
          *
          * @return
+         * @deprecated use {@link #orElse(true)}
          */
+        @Deprecated
         public boolean orTrue() {
             return isPresent ? value : true;
         }
@@ -1326,14 +1340,16 @@ public class u {
         /**
          *
          * @return
+         * @deprecated use {@link #orElseZero()}
          */
+        @Deprecated
         public char orZero() {
             return isPresent() ? value : 0;
         }
 
-        //    public char orElseZero() {
-        //        return isPresent() ? value : 0;
-        //    }
+        public char orElseZero() {
+            return isPresent() ? value : 0;
+        }
 
         /**
          * Or else throw.
@@ -1782,14 +1798,16 @@ public class u {
         /**
          *
          * @return
+         * @deprecated use {@link #orElseZero()}
          */
+        @Deprecated
         public byte orZero() {
             return isPresent ? value : 0;
         }
 
-        //    public byte orElseZero() {
-        //        return isPresent ? value : 0;
-        //    }
+        public byte orElseZero() {
+            return isPresent ? value : 0;
+        }
 
         /**
          * Or else throw.
@@ -2238,14 +2256,16 @@ public class u {
         /**
          *
          * @return
+         * @deprecated use {@link #orElseZero()}
          */
+        @Deprecated
         public short orZero() {
             return isPresent ? value : 0;
         }
 
-        //    public short orElseZero() {
-        //        return isPresent ? value : 0;
-        //    }
+        public short orElseZero() {
+            return isPresent ? value : 0;
+        }
 
         /**
          * Or else throw.
@@ -2743,14 +2763,16 @@ public class u {
         /**
          *
          * @return
+         * @deprecated use {@link #orElseZero()}
          */
+        @Deprecated
         public int orZero() {
             return isPresent ? value : 0;
         }
 
-        //    public int orElseZero() {
-        //        return isPresent ? value : 0;
-        //    }
+        public int orElseZero() {
+            return isPresent ? value : 0;
+        }
 
         /**
          * Or else throw.
@@ -3242,14 +3264,16 @@ public class u {
         /**
          *
          * @return
+         * @deprecated use {@link #orElseZero()}
          */
+        @Deprecated
         public long orZero() {
             return isPresent ? value : 0;
         }
 
-        //    public long orElseZero() {
-        //        return isPresent ? value : 0;
-        //    }
+        public long orElseZero() {
+            return isPresent ? value : 0;
+        }
 
         /**
          * Or else throw.
@@ -3713,14 +3737,16 @@ public class u {
         /**
          *
          * @return
+         * @deprecated use {@link #orElseZero()}
          */
+        @Deprecated
         public float orZero() {
             return isPresent ? value : 0;
         }
 
-        //    public float orElseZero() {
-        //        return isPresent ? value : 0;
-        //    }
+        public float orElseZero() {
+            return isPresent ? value : 0;
+        }
 
         /**
          * Or else throw.
@@ -4185,14 +4211,16 @@ public class u {
         /**
          *
          * @return
+         * @deprecated use {@link #orElseZero()}
          */
+        @Deprecated
         public double orZero() {
             return isPresent ? value : 0;
         }
 
-        //    public double orElseZero() {
-        //        return isPresent ? value : 0;
-        //    }
+        public double orElseZero() {
+            return isPresent ? value : 0;
+        }
 
         /**
          * Or else throw.
@@ -5117,16 +5145,22 @@ public class u {
         }
 
         /**
-         *
-         * @return
-         */
+        *
+        * @return
+        * @deprecated using {@link #orElseNull()}
+        */
+        @Deprecated
         public T orNull() {
             return isPresent() ? value : null;
         }
 
-        //    public T orElseNull() {
-        //        return isPresent() ? value : null;
-        //    }
+        /**
+        *
+        * @return
+        */
+        public T orElseNull() {
+            return isPresent() ? value : null;
+        }
 
         /**
          *

@@ -10087,7 +10087,7 @@ public final class N extends CommonUtil {
             summation.add(a[i]);
         }
 
-        return summation.average().orZero();
+        return summation.average().orElseZero();
     }
 
     /**
@@ -10126,7 +10126,7 @@ public final class N extends CommonUtil {
             summation.add(a[i]);
         }
 
-        return summation.average().orZero();
+        return summation.average().orElseZero();
     }
 
     /**
@@ -14186,7 +14186,7 @@ public final class N extends CommonUtil {
             return 0d;
         }
 
-        return Iterables.averageDouble(a, fromIndex, toIndex, func).orZero();
+        return Iterables.averageDouble(a, fromIndex, toIndex, func).orElseZero();
     }
 
     /**
@@ -14231,7 +14231,7 @@ public final class N extends CommonUtil {
             return 0d;
         }
 
-        return Iterables.averageDouble(c, func).orZero();
+        return Iterables.averageDouble(c, func).orElseZero();
     }
 
     /**
@@ -14255,7 +14255,7 @@ public final class N extends CommonUtil {
             return 0d;
         }
 
-        return Iterables.averageDouble(c, fromIndex, toIndex, func).orZero();
+        return Iterables.averageDouble(c, fromIndex, toIndex, func).orElseZero();
     }
 
     /**
@@ -21133,6 +21133,62 @@ public final class N extends CommonUtil {
         }
 
         return cnt >= atLeast && cnt <= atMost;
+    }
+
+    public static boolean allTrue(final boolean[] a) {
+        if (N.isNullOrEmpty(a)) {
+            return true;
+        }
+
+        for (boolean b : a) {
+            if (b == false) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static boolean allFalse(final boolean[] a) {
+        if (N.isNullOrEmpty(a)) {
+            return true;
+        }
+
+        for (boolean b : a) {
+            if (b == true) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static boolean anyTrue(final boolean[] a) {
+        if (N.isNullOrEmpty(a)) {
+            return false;
+        }
+
+        for (boolean b : a) {
+            if (b == true) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean anyFalse(final boolean[] a) {
+        if (N.isNullOrEmpty(a)) {
+            return false;
+        }
+
+        for (boolean b : a) {
+            if (b == false) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

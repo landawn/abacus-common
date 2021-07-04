@@ -109,7 +109,7 @@ public class KahanSummation {
 
     @Override
     public String toString() {
-        return String.format("{count=%d, sum=%f, average=%f}", count(), sum(), average().orZero());
+        return String.format("{count=%d, sum=%f, average=%f}", count(), sum(), average().orElseZero());
     }
 
     // https://en.wikipedia.org/wiki/Kahan_summation_algorithm
