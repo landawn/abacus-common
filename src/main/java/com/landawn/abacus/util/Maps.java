@@ -34,6 +34,15 @@ import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.u.Nullable;
+import com.landawn.abacus.util.u.Optional;
+import com.landawn.abacus.util.u.OptionalBoolean;
+import com.landawn.abacus.util.u.OptionalByte;
+import com.landawn.abacus.util.u.OptionalChar;
+import com.landawn.abacus.util.u.OptionalDouble;
+import com.landawn.abacus.util.u.OptionalFloat;
+import com.landawn.abacus.util.u.OptionalInt;
+import com.landawn.abacus.util.u.OptionalLong;
+import com.landawn.abacus.util.u.OptionalShort;
 import com.landawn.abacus.util.function.BiFunction;
 import com.landawn.abacus.util.function.BinaryOperator;
 import com.landawn.abacus.util.function.IntFunction;
@@ -488,29 +497,26 @@ public final class Maps {
     }
 
     /**
-     * Note: {@code null} will be returned if the specified {@code map} is null, or no value found by the specified {@code key}.
-     * To avoid {@code NullPointerException}, use {@link #getBoolean(Map, Object, boolean)}
-     *
+     * Returns an empty {@code OptionalBoolean} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the value is {@code null}.
      *
      * @param <K>
      * @param map
      * @param key
      * @return
-     * @see #getBoolean(Map, Object, boolean)
      */
-    public static <K> Boolean getBoolean(final Map<? super K, ?> map, final K key) {
+    public static <K> OptionalBoolean getBoolean(final Map<? super K, ?> map, final K key) {
         if (N.isNullOrEmpty(map)) {
-            return null;
+            return OptionalBoolean.empty();
         }
 
         final Object val = map.get(key);
 
         if (val == null) {
-            return null;
+            return OptionalBoolean.empty();
         } else if (val instanceof Boolean) {
-            return (Boolean) val;
+            return OptionalBoolean.of((Boolean) val);
         } else {
-            return N.parseBoolean(N.toString(val));
+            return OptionalBoolean.of(N.parseBoolean(N.toString(val)));
         }
     }
 
@@ -540,19 +546,27 @@ public final class Maps {
         }
     }
 
-    public static <K> Character getChar(final Map<? super K, ?> map, final K key) {
+    /**
+     * Returns an empty {@code OptionalChar} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the value is {@code null}.
+     *
+     * @param <K>
+     * @param map
+     * @param key
+     * @return
+     */
+    public static <K> OptionalChar getChar(final Map<? super K, ?> map, final K key) {
         if (N.isNullOrEmpty(map)) {
-            return null;
+            return OptionalChar.empty();
         }
 
         final Object val = map.get(key);
 
         if (val == null) {
-            return null;
+            return OptionalChar.empty();
         } else if (val instanceof Character) {
-            return (Character) val;
+            return OptionalChar.of(((Character) val).charValue());
         } else {
-            return N.parseChar(N.toString(val));
+            return OptionalChar.of(N.parseChar(N.toString(val)));
         }
     }
 
@@ -582,19 +596,27 @@ public final class Maps {
         }
     }
 
-    public static <K> Byte getByte(final Map<? super K, ?> map, final K key) {
+    /**
+     * Returns an empty {@code OptionalByte} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the value is {@code null}.
+     *
+     * @param <K>
+     * @param map
+     * @param key
+     * @return
+     */
+    public static <K> OptionalByte getByte(final Map<? super K, ?> map, final K key) {
         if (N.isNullOrEmpty(map)) {
-            return null;
+            return OptionalByte.empty();
         }
 
         final Object val = map.get(key);
 
         if (val == null) {
-            return null;
+            return OptionalByte.empty();
         } else if (val instanceof Number) {
-            return ((Number) val).byteValue();
+            return OptionalByte.of(((Number) val).byteValue());
         } else {
-            return Numbers.toByte(N.toString(val));
+            return OptionalByte.of(Numbers.toByte(N.toString(val)));
         }
     }
 
@@ -624,19 +646,27 @@ public final class Maps {
         }
     }
 
-    public static <K> Short getShort(final Map<? super K, ?> map, final K key) {
+    /**
+     * Returns an empty {@code OptionalShort} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the value is {@code null}.
+     *
+     * @param <K>
+     * @param map
+     * @param key
+     * @return
+     */
+    public static <K> OptionalShort getShort(final Map<? super K, ?> map, final K key) {
         if (N.isNullOrEmpty(map)) {
-            return null;
+            return OptionalShort.empty();
         }
 
         final Object val = map.get(key);
 
         if (val == null) {
-            return null;
+            return OptionalShort.empty();
         } else if (val instanceof Number) {
-            return ((Number) val).shortValue();
+            return OptionalShort.of(((Number) val).shortValue());
         } else {
-            return Numbers.toShort(N.toString(val));
+            return OptionalShort.of(Numbers.toShort(N.toString(val)));
         }
     }
 
@@ -666,19 +696,27 @@ public final class Maps {
         }
     }
 
-    public static <K> Integer getInt(final Map<? super K, ?> map, final K key) {
+    /**
+     * Returns an empty {@code OptionalInt} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the value is {@code null}.
+     *
+     * @param <K>
+     * @param map
+     * @param key
+     * @return
+     */
+    public static <K> OptionalInt getInt(final Map<? super K, ?> map, final K key) {
         if (N.isNullOrEmpty(map)) {
-            return null;
+            return OptionalInt.empty();
         }
 
         final Object val = map.get(key);
 
         if (val == null) {
-            return null;
+            return OptionalInt.empty();
         } else if (val instanceof Number) {
-            return ((Number) val).intValue();
+            return OptionalInt.of(((Number) val).intValue());
         } else {
-            return Numbers.toInt(N.toString(val));
+            return OptionalInt.of(Numbers.toInt(N.toString(val)));
         }
     }
 
@@ -708,19 +746,27 @@ public final class Maps {
         }
     }
 
-    public static <K> Long getLong(final Map<? super K, ?> map, final K key) {
+    /**
+     * Returns an empty {@code OptionalLong} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the value is {@code null}.
+     *
+     * @param <K>
+     * @param map
+     * @param key
+     * @return
+     */
+    public static <K> OptionalLong getLong(final Map<? super K, ?> map, final K key) {
         if (N.isNullOrEmpty(map)) {
-            return null;
+            return OptionalLong.empty();
         }
 
         final Object val = map.get(key);
 
         if (val == null) {
-            return null;
+            return OptionalLong.empty();
         } else if (val instanceof Number) {
-            return ((Number) val).longValue();
+            return OptionalLong.of(((Number) val).longValue());
         } else {
-            return Numbers.toLong(N.toString(val));
+            return OptionalLong.of(Numbers.toLong(N.toString(val)));
         }
     }
 
@@ -750,19 +796,27 @@ public final class Maps {
         }
     }
 
-    public static <K> Float getFloat(final Map<? super K, ?> map, final K key) {
+    /**
+     * Returns an empty {@code OptionalFloat} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the value is {@code null}.
+     *
+     * @param <K>
+     * @param map
+     * @param key
+     * @return
+     */
+    public static <K> OptionalFloat getFloat(final Map<? super K, ?> map, final K key) {
         if (N.isNullOrEmpty(map)) {
-            return null;
+            return OptionalFloat.empty();
         }
 
         final Object val = map.get(key);
 
         if (val == null) {
-            return null;
+            return OptionalFloat.empty();
         } else if (val instanceof Number) {
-            return ((Number) val).floatValue();
+            return OptionalFloat.of(((Number) val).floatValue());
         } else {
-            return Numbers.toFloat(N.toString(val));
+            return OptionalFloat.of(Numbers.toFloat(N.toString(val)));
         }
     }
 
@@ -792,19 +846,27 @@ public final class Maps {
         }
     }
 
-    public static <K> Double getDouble(final Map<? super K, ?> map, final K key) {
+    /**
+     * Returns an empty {@code OptionalDouble} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the value is {@code null}.
+     *
+     * @param <K>
+     * @param map
+     * @param key
+     * @return
+     */
+    public static <K> OptionalDouble getDouble(final Map<? super K, ?> map, final K key) {
         if (N.isNullOrEmpty(map)) {
-            return null;
+            return OptionalDouble.empty();
         }
 
         final Object val = map.get(key);
 
         if (val == null) {
-            return null;
+            return OptionalDouble.empty();
         } else if (val instanceof Number) {
-            return ((Number) val).doubleValue();
+            return OptionalDouble.of(((Number) val).doubleValue());
         } else {
-            return Numbers.toDouble(N.toString(val));
+            return OptionalDouble.of(Numbers.toDouble(N.toString(val)));
         }
     }
 
@@ -834,19 +896,27 @@ public final class Maps {
         }
     }
 
-    public static <K> String getString(final Map<? super K, ?> map, final K key) {
+    /**
+     * Returns an empty {@code Optional<String>} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the value is {@code null}.
+     *
+     * @param <K>
+     * @param map
+     * @param key
+     * @return
+     */
+    public static <K> Optional<String> getString(final Map<? super K, ?> map, final K key) {
         if (N.isNullOrEmpty(map)) {
-            return null;
+            return Optional.empty();
         }
 
         final Object val = map.get(key);
 
         if (val == null) {
-            return null;
+            return Optional.empty();
         } else if (val instanceof String) {
-            return (String) val;
+            return Optional.of((String) val);
         } else {
-            return N.toString(val);
+            return Optional.of(N.toString(val));
         }
     }
 
@@ -879,6 +949,7 @@ public final class Maps {
     }
 
     /**
+     * Returns an empty {@code Optional<String>} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the value is {@code null}.
      *
      * <br />
      * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
@@ -891,19 +962,19 @@ public final class Maps {
      * @param targetType
      * @return
      */
-    public static <K, T> T get(final Map<? super K, ?> map, final K key, final Class<? extends T> targetType) {
+    public static <K, T> Optional<T> get(final Map<? super K, ?> map, final K key, final Class<? extends T> targetType) {
         if (N.isNullOrEmpty(map)) {
-            return null;
+            return Optional.empty();
         }
 
         final Object val = map.get(key);
 
         if (val == null) {
-            return null;
+            return Optional.empty();
         } else if (targetType.isAssignableFrom(val.getClass())) {
-            return (T) val;
+            return Optional.of((T) val);
         } else {
-            return N.valueOf(targetType, N.stringOf(val));
+            return Optional.of(N.valueOf(targetType, N.stringOf(val)));
         }
     }
 
@@ -1123,6 +1194,29 @@ public final class Maps {
                 result.add(val);
             } else {
                 result.add(defaultValue);
+            }
+        }
+
+        return result;
+    }
+
+    public static <K, V> List<V> getOrDefaultIfNullForEach(final Map<K, V> map, final Collection<?> keys, final V defaultValue) {
+        if (N.isNullOrEmpty(keys)) {
+            return new ArrayList<>(0);
+        } else if (N.isNullOrEmpty(map)) {
+            return N.repeat(defaultValue, keys.size());
+        }
+
+        final List<V> result = new ArrayList<>(keys.size());
+        V val = null;
+
+        for (Object key : keys) {
+            val = map.get(key);
+
+            if (val == null) {
+                result.add(defaultValue);
+            } else {
+                result.add(val);
             }
         }
 

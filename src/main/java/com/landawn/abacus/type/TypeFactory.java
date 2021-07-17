@@ -962,7 +962,7 @@ public final class TypeFactory {
                 }
             }
 
-            if (typeName != null && typeName.endsWith("[]") && type.isArray() == false) {
+            if (typeName.endsWith("[]") && type.isArray() == false) {
                 type = new ObjectArrayType(type);
             }
 

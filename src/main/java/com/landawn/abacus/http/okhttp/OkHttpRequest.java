@@ -218,7 +218,7 @@ public final class OkHttpRequest {
     }
 
     /**
-     * 
+     *
      * @param user
      * @param password
      * @return
@@ -229,9 +229,9 @@ public final class OkHttpRequest {
     }
 
     /**
-     * Sets the header named {@code name} to {@code value}. 
-     * If this request already has any headers with that name, they are all replaced. 
-     * 
+     * Sets the header named {@code name} to {@code value}.
+     * If this request already has any headers with that name, they are all replaced.
+     *
      * @param name
      * @param value
      * @return
@@ -245,7 +245,7 @@ public final class OkHttpRequest {
     /**
      * Set http headers specified by {@code name1/value1}, {@code name2/value2}.
      * If this request already has any headers with that name, they are all replaced.
-     * 
+     *
      * @param name1
      * @param value1
      * @param name2
@@ -263,7 +263,7 @@ public final class OkHttpRequest {
     /**
      * Set http headers specified by {@code name1/value1}, {@code name2/value2}, {@code name3/value3}.
      * If this request already has any headers with that name, they are all replaced.
-     * 
+     *
      * @param name1
      * @param value1
      * @param name2
@@ -284,7 +284,7 @@ public final class OkHttpRequest {
     /**
      * Set http headers specified by the key/value entities from {@code Map}.
      * If this request already has any headers with that name, they are all replaced.
-     * 
+     *
      * @param headers
      * @return
      * @see Request.Builder#header(String, String)
@@ -301,13 +301,30 @@ public final class OkHttpRequest {
 
     /**
      * Removes all headers on this builder and adds {@code headers}
-     * 
+     *
      * @param headers
      * @return
      * @see Request.Builder#headers(Headers)
      */
     public OkHttpRequest headers(Headers headers) {
         builder.headers(headers);
+        return this;
+    }
+
+    /**
+     * Removes all headers on this builder and adds {@code headers}
+     *
+     * @param headers
+     * @return
+     * @see Request.Builder#headers(Headers)
+     */
+    public OkHttpRequest headers(HttpHeaders headers) {
+        if (headers != null && !headers.isEmpty()) {
+            for (String headerName : headers.headerNameSet()) {
+                builder.header(headerName, HttpHeaders.valueOf(headers.get(headerName)));
+            }
+        }
+
         return this;
     }
 
@@ -326,7 +343,7 @@ public final class OkHttpRequest {
     }
 
     /**
-     * 
+     *
      * @param name
      * @return
      * @deprecated no use case?
@@ -338,7 +355,7 @@ public final class OkHttpRequest {
     }
 
     /**
-     * 
+     *
      * @param json
      * @return
      */
@@ -347,7 +364,7 @@ public final class OkHttpRequest {
     }
 
     /**
-     * 
+     *
      * @param obj
      * @return
      */

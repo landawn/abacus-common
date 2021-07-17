@@ -10929,7 +10929,10 @@ class CommonUtil {
      * @param a4
      * @param b4
      * @return
+     * @deprecated please use {@code Chain.ComparisonChain}
+     * @see Chain#compare(Comparable, Comparable)
      */
+    @Deprecated
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>> int compare(T1 a1, T1 b1, T2 a2,
             T2 b2, T3 a3, T3 b3, T4 a4, T4 b4) {
         int res = 0;
@@ -10965,7 +10968,10 @@ class CommonUtil {
      * @param a5
      * @param b5
      * @return
+     * @deprecated please use {@code Chain.ComparisonChain}
+     * @see Chain#compare(Comparable, Comparable)
      */
+    @Deprecated
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>, T5 extends Comparable<T5>> int compare(
             T1 a1, T1 b1, T2 a2, T2 b2, T3 a3, T3 b3, T4 a4, T4 b4, T5 a5, T5 b5) {
         int res = 0;
@@ -11006,7 +11012,10 @@ class CommonUtil {
      * @param a6
      * @param b6
      * @return
+     * @deprecated please use {@code Chain.ComparisonChain}
+     * @see Chain#compare(Comparable, Comparable)
      */
+    @Deprecated
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>, T5 extends Comparable<T5>, T6 extends Comparable<T6>> int compare(
             T1 a1, T1 b1, T2 a2, T2 b2, T3 a3, T3 b3, T4 a4, T4 b4, T5 a5, T5 b5, T6 a6, T6 b6) {
         int res = 0;
@@ -11052,7 +11061,10 @@ class CommonUtil {
      * @param a7
      * @param b7
      * @return
+     * @deprecated please use {@code Chain.ComparisonChain}
+     * @see Chain#compare(Comparable, Comparable)
      */
+    @Deprecated
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>, T5 extends Comparable<T5>, T6 extends Comparable<T6>, T7 extends Comparable<T7>> int compare(
             T1 a1, T1 b1, T2 a2, T2 b2, T3 a3, T3 b3, T4 a4, T4 b4, T5 a5, T5 b5, T6 a6, T6 b6, T7 a7, T7 b7) {
         int res = 0;

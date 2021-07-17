@@ -65,7 +65,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
             numberEnum.put(enumConstant.ordinal(), enumConstant);
 
             String jsonXmlName = getJsonXmlName(enumConstant);
-            enumJsonXmlNameMap.put(enumConstant, getJsonXmlName(enumConstant));
+            enumJsonXmlNameMap.put(enumConstant, jsonXmlName);
             jsonXmlNameEnumMap.put(jsonXmlName, enumConstant);
         }
 

@@ -519,7 +519,7 @@ public final class If {
         public static final OrElse FALSE = new OrElse(false);
 
         /** The b. */
-        private final boolean b;
+        private final boolean isIfTrue;
 
         /**
          * Instantiates a new or.
@@ -527,7 +527,7 @@ public final class If {
          * @param b
          */
         OrElse(final boolean b) {
-            this.b = b;
+            this.isIfTrue = b;
         }
 
         /**
@@ -555,7 +555,7 @@ public final class If {
         public <E extends Throwable> void orElse(final Throwables.Runnable<E> cmd) throws E {
             N.checkArgNotNull(cmd);
 
-            if (!b) {
+            if (!isIfTrue) {
                 cmd.run();
             }
         }
@@ -571,7 +571,7 @@ public final class If {
         public <U, E extends Throwable> void orElse(final U init, final Throwables.Consumer<? super U, E> action) throws E {
             N.checkArgNotNull(action);
 
-            if (!b) {
+            if (!isIfTrue) {
                 action.accept(init);
             }
         }
@@ -586,7 +586,7 @@ public final class If {
         public <E extends Throwable> void orElseThrow(final Supplier<? extends E> exceptionSupplier) throws E {
             N.checkArgNotNull(exceptionSupplier);
 
-            if (!b) {
+            if (!isIfTrue) {
                 throw exceptionSupplier.get();
             }
         }

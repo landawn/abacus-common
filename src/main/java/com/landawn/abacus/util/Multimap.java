@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Haiyang Li.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,8 @@ import java.util.Set;
 
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.util.Fn.Suppliers;
+import com.landawn.abacus.util.If.OrElse;
+import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.function.IntFunction;
 import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.EntryStream;
@@ -37,7 +39,7 @@ import com.landawn.abacus.util.stream.Stream;
 
 /**
  * Similar to {@link Map}, but in which each key may be associated with <i>multiple</i> values.
- * 
+ *
  * <ul>
  * <li>a ->1, 2
  * <li>b -> 3
@@ -418,7 +420,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     }
 
     /**
-     * If the specified value is not already associated with the specified key 
+     * If the specified value is not already associated with the specified key
      * associates it with the given key and returns {@code true}, else returns {@code false}.
      *
      * @param key
@@ -482,7 +484,7 @@ public class Multimap<K, E, V extends Collection<E>> {
 
     /**
      * If the specified key is not already associated with any value (or is mapped
-     * to {@code null}) associates it with the given values in the specified {@code collection} 
+     * to {@code null}) associates it with the given values in the specified {@code collection}
      * and returns {@code true}, else returns {@code false}.
      *
      * @param key
@@ -1449,20 +1451,20 @@ public class Multimap<K, E, V extends Collection<E>> {
 
     /**
      * The implementation is equivalent to performing the following steps for this Multimap:
-     * 
+     *
      * <pre>
      * final V oldValue = get(key);
-     * 
+     *
      * if (N.notNullOrEmpty(oldValue)) {
      *     return oldValue;
      * }
-     * 
+     *
      * final V newValue = mappingFunction.apply(key);
-     * 
+     *
      * if (N.notNullOrEmpty(newValue)) {
      *     valueMap.put(key, newValue);
      * }
-     * 
+     *
      * return newValue;
      * </pre>
      *
@@ -1492,22 +1494,22 @@ public class Multimap<K, E, V extends Collection<E>> {
 
     /**
      * The implementation is equivalent to performing the following steps for this Multimap:
-     * 
+     *
      * <pre>
      * final V oldValue = get(key);
-     * 
+     *
      * if (N.isNullOrEmpty(oldValue)) {
      *     return oldValue;
      * }
-     * 
+     *
      * final V newValue = remappingFunction.apply(key, oldValue);
-     * 
+     *
      * if (N.notNullOrEmpty(newValue)) {
      *     valueMap.put(key, newValue);
      * } else {
      *     valueMap.remove(key);
      * }
-     * 
+     *
      * return newValue;
      * </pre>
      *
@@ -1539,11 +1541,11 @@ public class Multimap<K, E, V extends Collection<E>> {
 
     /**
      * The implementation is equivalent to performing the following steps for this Multimap:
-     * 
+     *
      * <pre>
      * final V oldValue = get(key);
      * final V newValue = remappingFunction.apply(key, oldValue);
-     * 
+     *
      * if (N.notNullOrEmpty(newValue)) {
      *     valueMap.put(key, newValue);
      * } else {
@@ -1551,7 +1553,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      *         valueMap.remove(key);
      *     }
      * }
-     * 
+     *
      * return newValue;
      * </pre>
      *
@@ -1580,11 +1582,11 @@ public class Multimap<K, E, V extends Collection<E>> {
 
     /**
      * The implementation is equivalent to performing the following steps for this Multimap:
-     * 
+     *
      * <pre>
      * final V oldValue = get(key);
      * final V newValue = oldValue == null ? value : remappingFunction.apply(oldValue, value);
-     * 
+     *
      * if (N.notNullOrEmpty(newValue)) {
      *     valueMap.put(key, newValue);
      * } else {
@@ -1592,7 +1594,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      *         valueMap.remove(key);
      *     }
      * }
-     * 
+     *
      * return newValue;
      * </pre>
      *
@@ -1623,17 +1625,17 @@ public class Multimap<K, E, V extends Collection<E>> {
 
     /**
      * The implementation is equivalent to performing the following steps for this Multimap:
-     * 
+     *
      * <pre>
      * final V oldValue = get(key);
-     * 
+     *
      * if (N.isNullOrEmpty(oldValue)) {
      *     put(key, e);
      *     return get(key);
      * }
-     * 
+     *
      * final V newValue = remappingFunction.apply(oldValue, e);
-     * 
+     *
      * if (N.notNullOrEmpty(newValue)) {
      *     valueMap.put(key, newValue);
      * } else {
@@ -1641,7 +1643,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      *         valueMap.remove(key);
      *     }
      * }
-     * 
+     *
      * return newValue;
      * </pre>
      *
@@ -1760,7 +1762,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     //    /**
     //     * Returns a synchronized {@code Multimap} which shares the same internal {@code Map} with this {@code Multimap}.
     //     * That's to say the changes in one of the returned {@code Multimap} and this {@code Multimap} will impact another one.
-    //     * 
+    //     *
     //     * @see Collections#synchronizedMap(Map)
     //     */
     //    public Multimap<K, E, V> synchronizedd() {
@@ -1770,7 +1772,7 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Returns a view of this multimap as a {@code Map} from each distinct key
      * to the nonempty collection of that key's associated values.
-     * 
+     *
      * <p>Changes to the returned map or the collections that serve as its values
      * will update the underlying multimap, and vice versa.
      *
@@ -1837,12 +1839,35 @@ public class Multimap<K, E, V extends Collection<E>> {
 
     /**
      *
+     * @param <R>
+     * @param <X>
+     * @param func
+     * @return
+     * @throws X the x
+     */
+    public <R, X extends Exception> Optional<R> applyIfNotEmpty(Throwables.Function<? super Multimap<K, E, V>, R, X> func) throws X {
+        return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
+    }
+
+    /**
+     *
      * @param <X>
      * @param action
      * @throws X the x
      */
     public <X extends Exception> void accept(Throwables.Consumer<? super Multimap<K, E, V>, X> action) throws X {
         action.accept(this);
+    }
+
+    /**
+     * Accept if not empty.
+     *
+     * @param <X>
+     * @param action
+     * @throws X the x
+     */
+    public <X extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super Multimap<K, E, V>, X> action) throws X {
+        return If.is(size() > 0).then(this, action);
     }
 
     @Override

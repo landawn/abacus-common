@@ -14,12 +14,17 @@
 
 package com.landawn.abacus.http;
 
+import java.time.Instant;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.http.HttpUtil.HttpDate;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.StringUtil;
 import com.landawn.abacus.util.function.BiConsumer;
@@ -471,9 +476,9 @@ public final class HttpHeaders {
 
     /**
      * Copied from Google Guava under Apache License v2.
-     * 
+     *
      * <br />
-     * 
+     *
      * Values for the <a href="https://www.w3.org/TR/referrer-policy/">{@code Referrer-Policy}</a>
      * header.
      *
@@ -554,12 +559,16 @@ public final class HttpHeaders {
             return (String) headerValue;
         } else if (headerValue instanceof Collection) {
             return StringUtil.join((Collection<?>) headerValue, "; ");
+        } else if (headerValue instanceof Date) {
+            return HttpDate.format((Date) headerValue);
+        } else if (headerValue instanceof Instant) {
+            return HttpDate.format(new Date(((Instant) headerValue).toEpochMilli()));
         } else {
             return N.stringOf(headerValue);
         }
     }
 
-    /** 
+    /**
      *
      * @param value
      * @return
@@ -694,7 +703,7 @@ public final class HttpHeaders {
         return this;
     }
 
-    /** 
+    /**
      *
      * @param value
      * @return
@@ -705,7 +714,7 @@ public final class HttpHeaders {
         return this;
     }
 
-    /** 
+    /**
      *
      * @param value
      * @return
@@ -716,7 +725,7 @@ public final class HttpHeaders {
         return this;
     }
 
-    /** 
+    /**
      *
      * @param value
      * @return
@@ -727,7 +736,7 @@ public final class HttpHeaders {
         return this;
     }
 
-    /** 
+    /**
      *
      * @param value
      * @return
@@ -738,7 +747,7 @@ public final class HttpHeaders {
         return this;
     }
 
-    /** 
+    /**
      *
      * @param value
      * @return
@@ -749,7 +758,7 @@ public final class HttpHeaders {
         return this;
     }
 
-    /** 
+    /**
      *
      * @param value
      * @return
@@ -812,7 +821,7 @@ public final class HttpHeaders {
     }
 
     /**
-     * 
+     *
      * @param action
      */
     public void forEach(final BiConsumer<String, Object> action) {
@@ -833,6 +842,10 @@ public final class HttpHeaders {
      */
     public boolean isEmpty() {
         return map.isEmpty();
+    }
+
+    public Map<String, Object> toMap() {
+        return map instanceof LinkedHashMap || map instanceof SortedMap ? new LinkedHashMap<>(map) : new HashMap<>(map);
     }
 
     public HttpHeaders copy() {

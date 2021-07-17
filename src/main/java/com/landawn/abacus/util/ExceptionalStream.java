@@ -8868,7 +8868,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @Beta
-    public <TT, EE extends Exception> ExceptionalStream<TT, EE> __(Function<? super ExceptionalStream<T, E>, ExceptionalStream<TT, EE>> transfer) {
+    public <TT, EE extends Exception> ExceptionalStream<TT, EE> __(Throwables.Function<? super ExceptionalStream<T, E>, ExceptionalStream<TT, EE>, E> transfer)
+            throws E {
         assertNotClosed();
 
         checkArgNotNull(transfer, "transfer");

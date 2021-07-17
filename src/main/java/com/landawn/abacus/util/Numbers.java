@@ -152,14 +152,14 @@ public final class Numbers {
     // halfPowersOf10[i] = largest int less than 10^(i + 0.5)
     static final int[] int_halfPowersOf10 = { 3, 31, 316, 3162, 31622, 316227, 3162277, 31622776, 316227766, Integer.MAX_VALUE };
 
-    // maxLog10ForLeadingZeros[i] == floor(log10(2^(Long.SIZE - i))) 
+    // maxLog10ForLeadingZeros[i] == floor(log10(2^(Long.SIZE - i)))
     static final byte[] maxLog10ForLeadingZeros = { 19, 18, 18, 18, 18, 17, 17, 17, 16, 16, 16, 15, 15, 15, 15, 14, 14, 14, 13, 13, 13, 12, 12, 12, 12, 11, 11,
             11, 10, 10, 10, 9, 9, 9, 9, 8, 8, 8, 7, 7, 7, 6, 6, 6, 6, 5, 5, 5, 4, 4, 4, 3, 3, 3, 3, 2, 2, 2, 1, 1, 1, 0, 0, 0 };
 
     static final long[] powersOf10 = { 1L, 10L, 100L, 1000L, 10000L, 100000L, 1000000L, 10000000L, 100000000L, 1000000000L, 10000000000L, 100000000000L,
             1000000000000L, 10000000000000L, 100000000000000L, 1000000000000000L, 10000000000000000L, 100000000000000000L, 1000000000000000000L };
 
-    // halfPowersOf10[i] = largest long less than 10^(i + 0.5)  
+    // halfPowersOf10[i] = largest long less than 10^(i + 0.5)
     static final long[] halfPowersOf10 = { 3L, 31L, 316L, 3162L, 31622L, 316227L, 3162277L, 31622776L, 316227766L, 3162277660L, 31622776601L, 316227766016L,
             3162277660168L, 31622776601683L, 316227766016837L, 3162277660168379L, 31622776601683793L, 316227766016837933L, 3162277660168379331L };
 
@@ -242,10 +242,10 @@ public final class Numbers {
     static final double F_1_4 = 1d / 4d;
 
     /**
-     * 
+     *
      * @param str
      * @return {@code 0} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code byte}. 
+     * @throws NumberFormatException If the string is not a parsable {@code byte}.
      * @see #isParsable(String)
      * @see Byte#parseByte(String)
      * @see Byte#decode(String)
@@ -255,11 +255,22 @@ public final class Numbers {
     }
 
     /**
-     * 
+     *
+     * @param obj
+     * @return {@code 0} if the specified {@code str} is null or empty.
+     * @throws NumberFormatException If the string is not a parsable {@code byte}.
+     * @see #toByte(String)
+     */
+    public static byte toByte(final Object obj) throws NumberFormatException {
+        return toByte(obj, (byte) 0);
+    }
+
+    /**
+     *
      * @param str
      * @param defaultValue
      * @return {@code defaultValue} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code byte}. 
+     * @throws NumberFormatException If the string is not a parsable {@code byte}.
      * @see #isParsable(String)
      * @see Byte#parseByte(String)
      * @see Byte#decode(String)
@@ -285,10 +296,30 @@ public final class Numbers {
     }
 
     /**
-     * 
-     * @param str 
+     *
+     * @param str
+     * @param defaultValue
+     * @return {@code defaultValue} if the specified {@code str} is null or empty.
+     * @throws NumberFormatException If the string is not a parsable {@code byte}.
+     * @see #toByte(String, byte)
+     */
+    public static byte toByte(final Object obj, final byte defaultValue) throws NumberFormatException {
+        if (obj == null) {
+            return defaultValue;
+        }
+
+        if (obj instanceof Number) {
+            return ((Number) obj).byteValue();
+        }
+
+        return toByte(obj.toString(), defaultValue);
+    }
+
+    /**
+     *
+     * @param str
      * @return {@code 0} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code short}. 
+     * @throws NumberFormatException If the string is not a parsable {@code short}.
      * @see #isParsable(String)
      * @see Short#parseShort(String)
      * @see Short#decode(String)
@@ -298,11 +329,22 @@ public final class Numbers {
     }
 
     /**
-     * 
+     *
+     * @param obj
+     * @return {@code 0} if the specified {@code str} is null or empty.
+     * @throws NumberFormatException If the string is not a parsable {@code short}.
+     * @see #toShort(String)
+     */
+    public static short toShort(final Object obj) throws NumberFormatException {
+        return toShort(obj, (short) 0);
+    }
+
+    /**
+     *
      * @param str
      * @param defaultValue
      * @return {@code defaultValue} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code short}. 
+     * @throws NumberFormatException If the string is not a parsable {@code short}.
      * @see #isParsable(String)
      * @see Short#parseShort(String)
      * @see Short#decode(String)
@@ -324,10 +366,30 @@ public final class Numbers {
     }
 
     /**
-     * 
+     *
+     * @param str
+     * @param defaultValue
+     * @return {@code defaultValue} if the specified {@code str} is null or empty.
+     * @throws NumberFormatException If the string is not a parsable {@code short}.
+     * @see #toShort(String, short)
+     */
+    public static short toShort(final Object obj, final short defaultValue) throws NumberFormatException {
+        if (obj == null) {
+            return defaultValue;
+        }
+
+        if (obj instanceof Number) {
+            return ((Number) obj).shortValue();
+        }
+
+        return toShort(obj.toString(), defaultValue);
+    }
+
+    /**
+     *
      * @param str
      * @return {@code 0} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code int}. 
+     * @throws NumberFormatException If the string is not a parsable {@code int}.
      * @see #isParsable(String)
      * @see Integer#parseInt(String)
      * @see Integer#decode(String)
@@ -337,11 +399,22 @@ public final class Numbers {
     }
 
     /**
-     * 
+     *
+     * @param obj
+     * @return {@code 0} if the specified {@code str} is null or empty.
+     * @throws NumberFormatException If the string is not a parsable {@code int}.
+     * @see #toInt(String)
+     */
+    public static int toInt(final Object obj) throws NumberFormatException {
+        return toInt(obj, 0);
+    }
+
+    /**
+     *
      * @param str
      * @param defaultValue
      * @return {@code defaultValue} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code int}. 
+     * @throws NumberFormatException If the string is not a parsable {@code int}.
      * @see #isParsable(String)
      * @see Integer#parseInt(String)
      * @see Integer#decode(String)
@@ -363,10 +436,30 @@ public final class Numbers {
     }
 
     /**
-     * 
+     *
+     * @param str
+     * @param defaultValue
+     * @return {@code defaultValue} if the specified {@code str} is null or empty.
+     * @throws NumberFormatException If the string is not a parsable {@code int}.
+     * @see #toInt(String, int)
+     */
+    public static int toInt(final Object obj, final int defaultValue) throws NumberFormatException {
+        if (obj == null) {
+            return defaultValue;
+        }
+
+        if (obj instanceof Number) {
+            return ((Number) obj).intValue();
+        }
+
+        return toInt(obj.toString(), defaultValue);
+    }
+
+    /**
+     *
      * @param str
      * @return {@code 0} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code long}. 
+     * @throws NumberFormatException If the string is not a parsable {@code long}.
      * @see #isParsable(String)
      * @see Long#parseLong(String)
      * @see Long#decode(String)
@@ -376,11 +469,22 @@ public final class Numbers {
     }
 
     /**
-     * 
+     *
+     * @param obj
+     * @return {@code 0} if the specified {@code str} is null or empty.
+     * @throws NumberFormatException If the string is not a parsable {@code long}.
+     * @see #toLong(String)
+     */
+    public static long toLong(final Object obj) throws NumberFormatException {
+        return toLong(obj, 0);
+    }
+
+    /**
+     *
      * @param str
      * @param defaultValue
      * @return {@code defaultValue} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code long}. 
+     * @throws NumberFormatException If the string is not a parsable {@code long}.
      * @see #isParsable(String)
      * @see Long#parseLong(String)
      * @see Long#decode(String)
@@ -401,23 +505,54 @@ public final class Numbers {
     }
 
     /**
-     * 
+     *
+     * @param str
+     * @param defaultValue
+     * @return {@code defaultValue} if the specified {@code str} is null or empty.
+     * @throws NumberFormatException If the string is not a parsable {@code long}.
+     * @see #toLong(String, long)
+     */
+    public static long toLong(final Object obj, final long defaultValue) throws NumberFormatException {
+        if (obj == null) {
+            return defaultValue;
+        }
+
+        if (obj instanceof Number) {
+            return ((Number) obj).longValue();
+        }
+
+        return toLong(obj.toString(), defaultValue);
+    }
+
+    /**
+     *
      * @param str
      * @return {@code 0} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code float}. 
+     * @throws NumberFormatException If the string is not a parsable {@code float}.
      * @see #isParsable(String)
-     * @see Float#parseFloat(String) 
+     * @see Float#parseFloat(String)
      */
     public static float toFloat(final String str) throws NumberFormatException {
         return toFloat(str, 0.0f);
     }
 
     /**
-     * 
+     *
+     * @param obj
+     * @return {@code 0} if the specified {@code str} is null or empty.
+     * @throws NumberFormatException If the string is not a parsable {@code float}.
+     * @see #toFloat(String)
+     */
+    public static float toFloat(final Object obj) throws NumberFormatException {
+        return toFloat(obj, 0);
+    }
+
+    /**
+     *
      * @param str
-     * @param defaultValue 
+     * @param defaultValue
      * @return {@code defaultValue} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code float}. 
+     * @throws NumberFormatException If the string is not a parsable {@code float}.
      * @see #isParsable(String)
      * @see Float#parseFloat(String)
      */
@@ -430,10 +565,30 @@ public final class Numbers {
     }
 
     /**
-     * 
-     * @param str 
+     *
+     * @param str
+     * @param defaultValue
+     * @return {@code defaultValue} if the specified {@code str} is null or empty.
+     * @throws NumberFormatException If the string is not a parsable {@code float}.
+     * @see #toFloat(String, float)
+     */
+    public static float toFloat(final Object obj, final float defaultValue) throws NumberFormatException {
+        if (obj == null) {
+            return defaultValue;
+        }
+
+        if (obj instanceof Number) {
+            return ((Number) obj).floatValue();
+        }
+
+        return toFloat(obj.toString(), defaultValue);
+    }
+
+    /**
+     *
+     * @param str
      * @return {@code 0.0d} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code double}. 
+     * @throws NumberFormatException If the string is not a parsable {@code double}.
      * @see #isParsable(String)
      * @see Double#parseDouble(String)
      */
@@ -442,11 +597,22 @@ public final class Numbers {
     }
 
     /**
-     * 
+     *
+     * @param obj
+     * @return {@code 0} if the specified {@code str} is null or empty.
+     * @throws NumberFormatException If the string is not a parsable {@code double}.
+     * @see #toDouble(String)
+     */
+    public static double toDouble(final Object obj) throws NumberFormatException {
+        return toDouble(obj, 0);
+    }
+
+    /**
+     *
      * @param str
      * @param defaultValue
      * @return {@code defaultValue} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code double}. 
+     * @throws NumberFormatException If the string is not a parsable {@code double}.
      * @see #isParsable(String)
      * @see Double#parseDouble(String)
      */
@@ -456,6 +622,26 @@ public final class Numbers {
         }
 
         return Double.parseDouble(str);
+    }
+
+    /**
+     *
+     * @param str
+     * @param defaultValue
+     * @return {@code defaultValue} if the specified {@code str} is null or empty.
+     * @throws NumberFormatException If the string is not a parsable {@code double}.
+     * @see #toDouble(String, double)
+     */
+    public static double toDouble(final Object obj, final double defaultValue) throws NumberFormatException {
+        if (obj == null) {
+            return defaultValue;
+        }
+
+        if (obj instanceof Number) {
+            return ((Number) obj).doubleValue();
+        }
+
+        return toDouble(obj.toString(), defaultValue);
     }
 
     /**
@@ -511,7 +697,7 @@ public final class Numbers {
      * </p>
      *
      * @param str a <code>String</code> to convert, may be null
-     * @return 
+     * @return
      * @see #isCreatable(String)
      */
     public static OptionalInt createInteger(final String str) {
@@ -538,7 +724,7 @@ public final class Numbers {
      * </p>
      *
      * @param str a <code>String</code> to convert, may be null
-     * @return 
+     * @return
      * @see #isCreatable(String)
      */
     public static OptionalLong createLong(final String str) {
@@ -564,7 +750,7 @@ public final class Numbers {
      * </p>
      *
      * @param str a <code>String</code> to convert, may be null
-     * @return 
+     * @return
      * @see #isCreatable(String)
      */
     public static OptionalFloat createFloat(final String str) {
@@ -591,7 +777,7 @@ public final class Numbers {
      * </p>
      *
      * @param str a <code>String</code> to convert, may be null
-     * @return 
+     * @return
      * @see #isCreatable(String)
      */
     public static OptionalDouble createDouble(final String str) {
@@ -617,7 +803,7 @@ public final class Numbers {
      * </p>
      *
      * @param str a <code>String</code> to convert, may be null
-     * @return 
+     * @return
      * @see #isCreatable(String)
      */
     public static Optional<BigInteger> createBigInteger(final String str) {
@@ -661,7 +847,7 @@ public final class Numbers {
      * </p>
      *
      * @param str a <code>String</code> to convert, may be null
-     * @return 
+     * @return
      * @see #isCreatable(String)
      */
     public static Optional<BigDecimal> createBigDecimal(final String str) {
@@ -751,7 +937,7 @@ public final class Numbers {
      * </p>
      *
      * @param str a String containing a number, may be null
-     * @return 
+     * @return
      * @see #isCreatable(String)
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -900,7 +1086,7 @@ public final class Numbers {
         //User doesn't have a preference on the return type, so let's start
         //small and go from there...
         if (expPos > -1 && expPos < str.length() - 1) {
-            exp = str.substring(expPos + 1, str.length());
+            exp = str.substring(expPos + 1);
         } else {
             exp = null;
         }
@@ -1209,8 +1395,8 @@ public final class Numbers {
     }
 
     //    /**
-    //     * Primality test: tells if the argument is a (provable) prime or not. 
-    //     * 
+    //     * Primality test: tells if the argument is a (provable) prime or not.
+    //     *
     //     * @param n number to test.
     //     * @return true if n is prime. (All numbers &lt; 2 return false).
     //     */
@@ -1236,7 +1422,7 @@ public final class Numbers {
      * than one</i> that cannot be factored into a product of <i>smaller</i> positive integers.
      * Returns {@code false} if {@code n} is zero, one, or a composite number (one which <i>can</i>
      * be factored into smaller positive integers).
-     * 
+     *
      * <p>To test larger numbers, use {@link BigInteger#isProbablePrime}.
      *
      * @param n
@@ -1461,16 +1647,16 @@ public final class Numbers {
 
     /**
      * Returns the base 2 logarithm of a double value.
-     * 
+     *
      * <p>Special cases:
      * <ul>
      * <li>If {@code x} is NaN or less than zero, the result is NaN.
      * <li>If {@code x} is positive infinity, the result is positive infinity.
      * <li>If {@code x} is positive or negative zero, the result is negative infinity.
      * </ul>
-     * 
+     *
      * <p>The computed result is within 1 ulp of the exact result.
-     * 
+     *
      * <p>If the result of this method will be immediately rounded to an {@code int},
      * {@link #log2(double, RoundingMode)} is faster.
      *
@@ -1484,7 +1670,7 @@ public final class Numbers {
     /**
      * Returns the base 2 logarithm of a double value, rounded with the specified rounding mode to an
      * {@code int}.
-     * 
+     *
      * <p>Regardless of the rounding mode, this is faster than {@code (int) log2(x)}.
      *
      * @param x
@@ -1952,7 +2138,7 @@ public final class Numbers {
                  * We wish to test whether or not x <= (sqrtFloor + 0.5)^2 = halfSquare + 0.25. Since both
                  * x and halfSquare are integers, this is equivalent to testing whether or not x <=
                  * halfSquare. (We have to deal with overflow, though.)
-                 * 
+                 *
                  * If we treat halfSquare as an unsigned int, we know that
                  *            sqrtFloor^2 <= x < (sqrtFloor + 1)^2
                  * halfSquare - sqrtFloor <= x < halfSquare + sqrtFloor + 1
@@ -2296,9 +2482,9 @@ public final class Numbers {
     /**
      * Returns {@code x mod m}, a non-negative value less than {@code m}.
      * This differs from {@code x % m}, which might be negative.
-     * 
+     *
      * <p>For example:<pre> {@code
-     * 
+     *
      * mod(7, 4) == 3
      * mod(-7, 4) == 1
      * mod(-1, 4) == 3
@@ -2323,11 +2509,11 @@ public final class Numbers {
     /**
      * Returns {@code x mod m}, a non-negative value less than {@code m}. This differs from
      * {@code x % m}, which might be negative.
-     * 
+     *
      * <p>For example:
-     * 
+     *
      * <pre> {@code
-     * 
+     *
      * mod(7, 4) == 3
      * mod(-7, 4) == 1
      * mod(-1, 4) == 3
@@ -2349,11 +2535,11 @@ public final class Numbers {
     /**
      * Returns {@code x mod m}, a non-negative value less than {@code m}. This differs from
      * {@code x % m}, which might be negative.
-     * 
+     *
      * <p>For example:
-     * 
+     *
      * <pre> {@code
-     * 
+     *
      * mod(7, 4) == 3
      * mod(-7, 4) == 1
      * mod(-1, 4) == 3
@@ -2652,7 +2838,7 @@ public final class Numbers {
 
     /**
      * Returns the {@code b} to the {@code k}th power, provided it does not overflow.
-     * 
+     *
      * <p>{@link #pow} may be faster, but does not check for overflow.
      *
      * @param b
@@ -3033,7 +3219,7 @@ public final class Numbers {
      * Returns {@code n!}, that is, the product of the first {@code n} positive integers, {@code 1} if
      * {@code n == 0}, or {@code n!}, or {@link Double#POSITIVE_INFINITY} if
      * {@code n! > Double.MAX_VALUE}.
-     * 
+     *
      * <p>The result is within 1 ulp of the true value.
      *
      * @param n
@@ -3058,9 +3244,9 @@ public final class Numbers {
     /**
      * Returns {@code n!}, that is, the product of the first {@code n} positive integers, or {@code 1}
      * if {@code n == 0}.
-     * 
+     *
      * <p><b>Warning:</b> the result takes <i>O(n log n)</i> space, so use cautiously.
-     * 
+     *
      * <p>This uses an efficient binary recursive algorithm to compute the factorial with balanced
      * multiplies. It also removes all the 2s from the intermediate products (shifting them back in at
      * the end).
@@ -3263,7 +3449,7 @@ public final class Numbers {
     /**
      * Returns {@code n} choose {@code k}, also known as the binomial coefficient of {@code n} and
      * {@code k}, that is, {@code n! / (k! (n - k)!)}.
-     * 
+     *
      * <p><b>Warning:</b> the result can take as much as <i>O(k log n)</i> space.
      *
      * @param n
@@ -3359,7 +3545,7 @@ public final class Numbers {
     /**
      * Returns the <a href="http://en.wikipedia.org/wiki/Arithmetic_mean">arithmetic mean</a> of
      * {@code values}.
-     * 
+     *
      * <p>If these values are a sample drawn from a population, this is also an unbiased estimator of
      * the arithmetic mean of the population.
      *
@@ -3383,7 +3569,7 @@ public final class Numbers {
     /**
      * Returns the <a href="http://en.wikipedia.org/wiki/Arithmetic_mean">arithmetic mean</a> of
      * {@code values}.
-     * 
+     *
      * <p>If these values are a sample drawn from a population, this is also an unbiased estimator of
      * the arithmetic mean of the population.
      *
@@ -3578,10 +3764,10 @@ public final class Numbers {
 
     /**
      * Returns {@code true} if {@code a} and {@code b} are within {@code tolerance} of each other.
-     * 
+     *
      * <p>Technically speaking, this is equivalent to
      * {@code Math.abs(a - b) <= tolerance || Double.valueOf(a).equals(Double.valueOf(b))}.
-     * 
+     *
      * <p>Notable special cases include:
      * <ul>
      * <li>All NaNs are fuzzily equal.
@@ -3592,7 +3778,7 @@ public final class Numbers {
      * <li>With {@link Double#POSITIVE_INFINITY} tolerance, all non-NaN values are fuzzily equal.
      * <li>With finite tolerance, {@code Double.POSITIVE_INFINITY} and {@code
      *     Double.NEGATIVE_INFINITY} are fuzzily equal only to themselves.
-     * 
+     *
      * <p>This is reflexive and symmetric, but <em>not</em> transitive, so it is <em>not</em> an
      * equivalence relation and <em>not</em> suitable for use in {@link Object#equals}
      * implementations.
@@ -3614,12 +3800,12 @@ public final class Numbers {
 
     /**
      * Compares {@code a} and {@code b} "fuzzily," with a tolerance for nearly-equal values.
-     * 
+     *
      * <p>This method is equivalent to
      * {@code fuzzyEquals(a, b, tolerance) ? 0 : Double.compare(a, b)}. In particular, like
      * {@link Double#compare(double, double)}, it treats all NaN values as equal and greater than all
      * other values (including {@link Double#POSITIVE_INFINITY}).
-     * 
+     *
      * <p>This is <em>not</em> a total ordering and is <em>not</em> suitable for use in
      * {@link Comparable#compareTo} implementations. In particular, it is not transitive.
      *
@@ -3644,7 +3830,7 @@ public final class Numbers {
 
     /**
      * Returns {@code true} if {@code x} represents a mathematical integer.
-     * 
+     *
      * <p>This is equivalent to, but not necessarily implemented as, the expression {@code
      * !Double.isNaN(x) && !Double.isInfinite(x) && x == Math.rint(x)}.
      *
