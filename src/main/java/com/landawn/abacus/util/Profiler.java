@@ -350,7 +350,7 @@ public final class Profiler {
                 } catch (Exception e) {
                     // ignore;
                     e.printStackTrace(ps);
-                    logger.warn(ExceptionUtil.getMessage(e));
+                    logger.warn(ExceptionUtil.getErrorMessage(e, true));
                 }
             }
             final long startTimeInMillis = System.currentTimeMillis();
@@ -364,7 +364,7 @@ public final class Profiler {
                 } catch (Exception e) {
                     // ignore;
                     e.printStackTrace(ps);
-                    logger.warn(ExceptionUtil.getMessage(e));
+                    logger.warn(ExceptionUtil.getErrorMessage(e, true));
                 }
             }
             final SingleLoopStatistics loopStatistics = new SingleLoopStatistics(startTimeInMillis, endTimeInMillis, startTimeInNano, endTimeInNano,
@@ -394,7 +394,7 @@ public final class Profiler {
             } catch (Exception e) {
                 // ignore;
                 e.printStackTrace(ps);
-                logger.warn(ExceptionUtil.getMessage(e));
+                logger.warn(ExceptionUtil.getErrorMessage(e, true));
             }
         }
         final long startTimeInMillis = System.currentTimeMillis();
@@ -408,11 +408,11 @@ public final class Profiler {
             }
         } catch (InvocationTargetException e) {
             e.printStackTrace(ps);
-            logger.warn(ExceptionUtil.getMessage(e));
+            logger.warn(ExceptionUtil.getErrorMessage(e, true));
             result = e.getTargetException();
         } catch (Exception e) {
             e.printStackTrace(ps);
-            logger.warn(ExceptionUtil.getMessage(e));
+            logger.warn(ExceptionUtil.getErrorMessage(e, true));
             result = e;
         }
         final long endTimeInNano = System.nanoTime();
@@ -423,7 +423,7 @@ public final class Profiler {
             } catch (Exception e) {
                 // ignore;
                 e.printStackTrace(ps);
-                logger.warn(ExceptionUtil.getMessage(e));
+                logger.warn(ExceptionUtil.getErrorMessage(e, true));
             }
         }
         MethodStatistics methodStatistics = new MethodStatistics(methodName, startTimeInMillis, endTimeInMillis, startTimeInNano, endTimeInNano, result);
@@ -839,7 +839,6 @@ public final class Profiler {
          * @param methodName
          */
         public MethodStatistics(final String methodName) {
-            super();
             this.methodName = methodName;
         }
 
@@ -941,7 +940,6 @@ public final class Profiler {
          * Instantiates a new single loop statistics.
          */
         public SingleLoopStatistics() {
-            super();
         }
 
         /**

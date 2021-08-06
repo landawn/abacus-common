@@ -47,8 +47,8 @@ import com.landawn.abacus.util.function.Supplier;
  * Note: This class includes codes copied from Apache Commons Lang, Google Guava and other open source projects under the Apache License 2.0.
  * The methods copied from other libraries/frameworks/projects may be modified in this class.
  * </p>
- * 
- * 
+ *
+ *
  * @see {@code Joiner}, {@code Splitter}
  *
  * @see com.landawn.abacus.util.N
@@ -147,7 +147,7 @@ public abstract class StringUtil {
 
     /**
      * Same as {@code N.isNullOrEmpty(CharSequence)}.
-     * 
+     *
      * @param cs
      * @return
      * @see N#isNullOrEmpty(CharSequence)
@@ -158,7 +158,7 @@ public abstract class StringUtil {
 
     /**
      * Same as {@code N.isNullOrEmptyOrBlank(CharSequence)}.
-     * 
+     *
      * @param cs
      * @return
      * @see N#isNullOrEmptyOrBlank(CharSequence)
@@ -169,7 +169,7 @@ public abstract class StringUtil {
 
     /**
      * Same as {@code N.notNullOrEmpty(CharSequence)}.
-     * 
+     *
      * @param cs
      * @return
      * @see N#notNullOrEmpty(CharSequence)
@@ -180,7 +180,7 @@ public abstract class StringUtil {
 
     /**
      * Same as {@code N.notNullOrEmptyOrBlank(CharSequence)}.
-     * 
+     *
      * @param cs
      * @return
      * @see N#notNullOrEmptyOrBlank(CharSequence)
@@ -328,7 +328,7 @@ public abstract class StringUtil {
 
     /**
      * Same as {@code N.defaultIfNullOrEmpty(CharSequence, CharSequence)}.
-     * 
+     *
      * @param <T>
      * @param str
      * @param defaultStr
@@ -340,7 +340,7 @@ public abstract class StringUtil {
     }
 
     /**
-     * 
+     *
      * @param <T>
      * @param str
      * @param getterForDefaultStr
@@ -356,7 +356,7 @@ public abstract class StringUtil {
 
     /**
      * Same as {@code N.defaultIfNullOrEmptyOrBlank(CharSequence, CharSequence)}.
-     * 
+     *
      * @param <T>
      * @param str
      * @param defaultStr
@@ -368,7 +368,7 @@ public abstract class StringUtil {
     }
 
     /**
-     * 
+     *
      * @param <T>
      * @param str
      * @param getterForDefaultStr
@@ -709,8 +709,8 @@ public abstract class StringUtil {
      * <p>Equivalent to {@code center(str, size, " ")}.</p>
      *
      * <pre>
-     * StringUtil.center(null, 4)     = "    " 
-     * StringUtil.center("", 4)     = "    " 
+     * StringUtil.center(null, 4)     = "    "
+     * StringUtil.center("", 4)     = "    "
      * StringUtil.center("ab", 4)   = " ab "
      * StringUtil.center("abcd", 2) = "abcd"
      * StringUtil.center("a", 4)    = " a  "
@@ -731,8 +731,8 @@ public abstract class StringUtil {
      * <p>If the size is less than the String length, the String is returned.
      *
      * <pre>
-     * StringUtil.center(null, 4, ' ')     = "    " 
-     * StringUtil.center("", 4, ' ')     = "    " 
+     * StringUtil.center(null, 4, ' ')     = "    "
+     * StringUtil.center("", 4, ' ')     = "    "
      * StringUtil.center("ab", 4, ' ')   = " ab "
      * StringUtil.center("abcd", 2, ' ') = "abcd"
      * StringUtil.center("a", 4, ' ')    = " a  "
@@ -771,12 +771,12 @@ public abstract class StringUtil {
      * <p>If the size is less than the String length, the String is returned.
      *
      * <pre>
-     * StringUtil.center(null, 4, " ")     = "    " 
-     * StringUtil.center("", 4, " ")     = "    " 
+     * StringUtil.center(null, 4, " ")     = "    "
+     * StringUtil.center("", 4, " ")     = "    "
      * StringUtil.center("ab", 4, " ")   = " ab "
      * StringUtil.center("abcd", 2, " ") = "abcd"
      * StringUtil.center("a", 4, " ")    = " a  "
-     * StringUtil.center("a", 4, "yz")   = "yzayz" 
+     * StringUtil.center("a", 4, "yz")   = "yzayz"
      * StringUtil.center("abc", 7, "")   = "  abc  "
      * </pre>
      *
@@ -1047,7 +1047,7 @@ public abstract class StringUtil {
     }
 
     /**
-     * 
+     *
      * @param str
      * @param n
      * @param delimiter
@@ -1192,10 +1192,11 @@ public abstract class StringUtil {
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
+        char ch = 0;
 
         try {
             for (int i = 0, len = str.length(); i < len; i++) {
-                char ch = str.charAt(i);
+                ch = str.charAt(i);
 
                 if (Character.isUpperCase(ch)) {
                     if (i > 0 && (Character.isLowerCase(str.charAt(i - 1)) || (i < len - 1 && Character.isLowerCase(str.charAt(i + 1))))) {
@@ -1313,10 +1314,11 @@ public abstract class StringUtil {
         }
 
         final StringBuilder sb = Objectory.createStringBuilder();
+        char ch = 0;
 
         try {
             for (int i = 0, len = str.length(); i < len; i++) {
-                char ch = str.charAt(i);
+                ch = str.charAt(i);
 
                 if (Character.isUpperCase(ch)) {
                     if (i > 0 && (Character.isLowerCase(str.charAt(i - 1)) || (i < len - 1 && Character.isLowerCase(str.charAt(i + 1))))) {
@@ -3217,7 +3219,7 @@ public abstract class StringUtil {
     }
 
     /**
-     * 
+     *
      * @param str
      * @param suffix
      * @return
@@ -4559,8 +4561,11 @@ public abstract class StringUtil {
         final int strLast = strLen - 1;
         final int chsLen = chs.length;
         final int chsLast = chsLen - 1;
+        char ch = 0;
+
         for (int i = 0; i < strLen; i++) {
-            final char ch = str.charAt(i);
+            ch = str.charAt(i);
+
             for (int j = 0; j < chsLen; j++) {
                 if (chs[j] == ch) {
                     if (i < strLast && j < chsLast && Character.isHighSurrogate(ch)) {
@@ -4632,8 +4637,11 @@ public abstract class StringUtil {
         final int strLast = strLen - 1;
         final int chsLen = chs.length;
         final int chsLast = chsLen - 1;
+        char ch = 0;
+
         outer: for (int i = 0; i < strLen; i++) {
-            final char ch = str.charAt(i);
+            ch = str.charAt(i);
+
             for (int j = 0; j < chsLen; j++) {
                 if (chs[j] == ch) {
                     if (i < strLast && j < chsLast && Character.isHighSurrogate(ch)) {
@@ -5054,7 +5062,7 @@ public abstract class StringUtil {
     }
 
     /**
-     * 
+     *
      * @param str
      * @param substr
      * @return
@@ -5185,8 +5193,11 @@ public abstract class StringUtil {
         final int strLast = strLen - 1;
         final int chsLen = chs.length;
         final int chsLast = chsLen - 1;
+        char ch = 0;
+
         for (int i = 0; i < strLen; i++) {
-            final char ch = str.charAt(i);
+            ch = str.charAt(i);
+
             for (int j = 0; j < chsLen; j++) {
                 if (chs[j] == ch) {
                     if (Character.isHighSurrogate(ch)) {
@@ -5535,8 +5546,11 @@ public abstract class StringUtil {
 
         // find the position with the first difference across all strings
         int firstDiff = -1;
+        char comparisonChar = 0;
+
         for (int stringPos = 0; stringPos < shortestStrLen; stringPos++) {
-            final char comparisonChar = strs[0].charAt(stringPos);
+            comparisonChar = strs[0].charAt(stringPos);
+
             for (int arrayPos = 1; arrayPos < arrayLen; arrayPos++) {
                 if (strs[arrayPos].charAt(stringPos) != comparisonChar) {
                     firstDiff = stringPos;
@@ -5717,8 +5731,8 @@ public abstract class StringUtil {
         return index >= 0 && index <= (str.length() - 2) && Character.isHighSurrogate(str.charAt(index)) && Character.isLowSurrogate(str.charAt(index + 1));
     }
 
-    /** 
-     * 
+    /**
+     *
      * @param a
      * @param b
      * @return an empty String {@code ""} is {@code a} or {@code b} is empty or {@code null}.
@@ -6173,7 +6187,7 @@ public abstract class StringUtil {
 
     /**
      * Returns the substring after first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
-     * 
+     *
      * @param str
      * @param delimiterOfExclusiveBeginIndex
      * @return
@@ -6194,7 +6208,7 @@ public abstract class StringUtil {
 
     /**
      * Returns the substring after last {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
-     * 
+     *
      * @param str
      * @param delimiterOfExclusiveBeginIndex
      * @return
@@ -6215,7 +6229,7 @@ public abstract class StringUtil {
 
     /**
      * Returns the substring before first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
-     * 
+     *
      * @param str
      * @param delimiterOfExclusiveEndIndex
      * @return
@@ -6236,7 +6250,7 @@ public abstract class StringUtil {
 
     /**
      * Returns the substring before last {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
-     * 
+     *
      * @param str
      * @param delimiterOfExclusiveEndIndex
      * @return
@@ -7540,7 +7554,7 @@ public abstract class StringUtil {
     }
 
     /**
-     * 
+     *
      * @param a
      * @param fromIndex
      * @param toIndex
@@ -7722,7 +7736,7 @@ public abstract class StringUtil {
     }
 
     /**
-     * 
+     *
      * @param c
      * @param fromIndex
      * @param toIndex
@@ -8763,8 +8777,8 @@ public abstract class StringUtil {
      * StringUtil.overlay(null, "abc", 0, 0)          = "abc"
      * StringUtil.overlay("", "abc", 0, 0)          = "abc"
      * StringUtil.overlay("abcdef", null, 2, 4)     = "abef"
-     * StringUtil.overlay("abcdef", "", 2, 4)       = "abef" 
-     * StringUtil.overlay("abcdef", "zzzz", 2, 4)   = "abzzzzef" 
+     * StringUtil.overlay("abcdef", "", 2, 4)       = "abef"
+     * StringUtil.overlay("abcdef", "zzzz", 2, 4)   = "abzzzzef"
      * </pre>
      *
      * @param str  the String to do overlaying in, may be null
@@ -9060,7 +9074,7 @@ public abstract class StringUtil {
 
         /**
          * Returns the substring after first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
-         * 
+         *
          * @param str
          * @param delimiterOfExclusiveBeginIndex
          * @return
@@ -9072,7 +9086,7 @@ public abstract class StringUtil {
 
         /**
          * Returns the substring after last {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
-         * 
+         *
          * @param str
          * @param delimiterOfExclusiveBeginIndex
          * @return
@@ -9084,7 +9098,7 @@ public abstract class StringUtil {
 
         /**
          * Returns the substring before first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
-         * 
+         *
          * @param str
          * @param delimiterOfExclusiveEndIndex
          * @return
@@ -9096,7 +9110,7 @@ public abstract class StringUtil {
 
         /**
          * Returns the substring last first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
-         * 
+         *
          * @param str
          * @param delimiterOfExclusiveEndIndex
          * @return
@@ -9107,7 +9121,7 @@ public abstract class StringUtil {
         }
 
         /**
-         * 
+         *
          * @param strs
          * @return
          * @see N#copyThenApply(Object[], com.landawn.abacus.util.Throwables.Function)
@@ -9121,7 +9135,7 @@ public abstract class StringUtil {
         }
 
         /**
-         * 
+         *
          * @param strs
          * @return
          * @see N#copyThenApply(Object[], com.landawn.abacus.util.Throwables.Function)

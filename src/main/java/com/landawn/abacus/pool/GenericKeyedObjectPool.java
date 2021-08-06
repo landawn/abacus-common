@@ -121,7 +121,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                     } catch (Exception e) {
                         // ignore
                         if (logger.isWarnEnabled()) {
-                            logger.warn(ExceptionUtil.getMessage(e));
+                            logger.warn(ExceptionUtil.getErrorMessage(e, true));
                         }
                     }
                 }
@@ -468,7 +468,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * scan the object pool to find the idle object which inactive time greater than permitted the inactive time for it
      * or it's time out.
-     * 
+     *
      */
     @SuppressWarnings("null")
     protected void evict() {
@@ -525,7 +525,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             } catch (Exception e) {
 
                 if (logger.isWarnEnabled()) {
-                    logger.warn(ExceptionUtil.getMessage(e));
+                    logger.warn(ExceptionUtil.getErrorMessage(e, true));
                 }
             }
         }

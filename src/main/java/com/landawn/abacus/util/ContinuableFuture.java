@@ -59,7 +59,7 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param <E>
      * @param action
-     * @return 
+     * @return
      * @see N#asyncExecute(com.landawn.abacus.util.Throwables.Runnable)
      */
     public static <E extends Exception> ContinuableFuture<Void> run(final Throwables.Runnable<E> action) {
@@ -92,7 +92,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param <T>
      * @param <E>
      * @param action
-     * @return 
+     * @return
      * @see N#asyncExecute(Callable)
      */
     public static <T> ContinuableFuture<T> call(final Callable<T> action) {
@@ -1389,4 +1389,35 @@ public class ContinuableFuture<T> implements Future<T> {
             }
         };
     }
+
+    // Doesn't work.
+    //    public CompletableFuture<T> toCompletableFuture() {
+    //        return new CompletableFuture<T>() {
+    //
+    //            @Override
+    //            public boolean cancel(boolean mayInterruptIfRunning) {
+    //                return ContinuableFuture.this.cancel(mayInterruptIfRunning);
+    //            }
+    //
+    //            @Override
+    //            public boolean isCancelled() {
+    //                return ContinuableFuture.this.isAllCancelled();
+    //            }
+    //
+    //            @Override
+    //            public boolean isDone() {
+    //                return ContinuableFuture.this.isDone();
+    //            }
+    //
+    //            @Override
+    //            public T get() throws InterruptedException, ExecutionException {
+    //                return ContinuableFuture.this.get();
+    //            }
+    //
+    //            @Override
+    //            public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+    //                return ContinuableFuture.this.get(timeout, unit);
+    //            }
+    //        };
+    //    }
 }

@@ -1374,9 +1374,12 @@ public final class Numbers {
 
     private static boolean withDecimalsParsing(final String str, final int beginIdx) {
         int decimalPoints = 0;
+        boolean isDecimalPoint = false;
+        char ch = 0;
 
         for (int i = beginIdx; i < str.length(); i++) {
-            final boolean isDecimalPoint = str.charAt(i) == '.';
+            ch = str.charAt(i);
+            isDecimalPoint = ch == '.';
 
             if (isDecimalPoint) {
                 decimalPoints++;
@@ -1386,7 +1389,7 @@ public final class Numbers {
                 return false;
             }
 
-            if (!isDecimalPoint && !Character.isDigit(str.charAt(i))) {
+            if (!isDecimalPoint && !Character.isDigit(ch)) {
                 return false;
             }
         }

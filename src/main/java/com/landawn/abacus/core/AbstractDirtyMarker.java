@@ -317,13 +317,13 @@ public abstract class AbstractDirtyMarker implements DirtyMarker {
             // ignore;
 
             if (logger.isWarnEnabled()) {
-                logger.warn(ExceptionUtil.getMessage(e));
+                logger.warn(ExceptionUtil.getErrorMessage(e, true));
             }
         } catch (IllegalAccessException e) {
             // ignore;
 
             if (logger.isWarnEnabled()) {
-                logger.warn(ExceptionUtil.getMessage(e));
+                logger.warn(ExceptionUtil.getErrorMessage(e, true));
             }
         }
 

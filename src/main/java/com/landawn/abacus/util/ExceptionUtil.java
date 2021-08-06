@@ -20,11 +20,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
+import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.exception.UncheckedException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedSQLException;
@@ -41,7 +42,7 @@ public final class ExceptionUtil {
         // singleton
     }
 
-    private static final Map<Class<? extends Throwable>, Function<Throwable, RuntimeException>> toRuntimeExceptionFuncMap = new HashMap<>();
+    private static final Map<Class<? extends Throwable>, Function<Throwable, RuntimeException>> toRuntimeExceptionFuncMap = new ConcurrentHashMap<>();
 
     static {
         toRuntimeExceptionFuncMap.put(RuntimeException.class, new Function<Throwable, RuntimeException>() {
@@ -147,6 +148,8 @@ public final class ExceptionUtil {
                     func = CHECKED_FUNC;
                 }
             }
+
+            toRuntimeExceptionFuncMap.put(cls, func);
         }
 
         return func.apply(e);
@@ -157,14 +160,12 @@ public final class ExceptionUtil {
      *
      * @param e
      * @return
+     * @deprecated replaced by {@link #getErrorMessage(Throwable, true)}
      */
+    @Deprecated
+    @Internal
     public static String getMessage(Throwable e) {
-        if (e instanceof SQLException) {
-            return e.getClass().getSimpleName() + "|" + ((SQLException) e).getErrorCode() + "|"
-                    + (N.isNullOrEmpty(e.getMessage()) ? e.getCause() : e.getMessage());
-        } else {
-            return e.getClass().getSimpleName() + "|" + (N.isNullOrEmpty(e.getMessage()) ? e.getCause() : e.getMessage());
-        }
+        return getErrorMessage(e, true);
     }
 
     //-----------------------------------------------------------------------
@@ -282,11 +283,21 @@ public final class ExceptionUtil {
         }
 
         if (N.isNullOrEmpty(msg)) {
-            return e.getClass().getCanonicalName();
-        } else if (withExceptionClassName) {
-            return withExceptionClassName + ": " + msg;
+            msg = e.getClass().getCanonicalName();
+        }
+
+        if (withExceptionClassName) {
+            if (e instanceof SQLException) {
+                return e.getClass().getSimpleName() + "|" + ((SQLException) e).getErrorCode() + "|" + msg;
+            } else {
+                return e.getClass().getSimpleName() + "|" + msg;
+            }
         } else {
-            return msg;
+            if (e instanceof SQLException) {
+                return ((SQLException) e).getErrorCode() + "|" + msg;
+            } else {
+                return msg;
+            }
         }
     }
 

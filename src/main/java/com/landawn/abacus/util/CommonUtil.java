@@ -11807,6 +11807,20 @@ class CommonUtil {
 
     /**
      *
+     * @param <T>
+     * @param value
+     * @param min
+     * @param max
+     * @return
+     * @deprecated replaced by {@link #gtAndLt(Comparable, Comparable, Comparable)}
+     */
+    @Deprecated
+    public static <T extends Comparable<? super T>> boolean between(final T value, final T min, final T max) {
+        return gtAndLt(value, min, max);
+    }
+
+    /**
+     *
      * @param a
      * @param b
      * @return boolean
