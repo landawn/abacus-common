@@ -137,8 +137,11 @@ public final class Retry<T> {
             try {
                 result = callable.call();
 
-                while (retriedTimes < retryTimes && (retryCondition2 != null && retryCondition2.test(result, null))) {
+                if (retryCondition2 == null || retryCondition2.test(result, null) == false) {
+                    return result;
+                }
 
+                while (retriedTimes < retryTimes) {
                     retriedTimes++;
 
                     if (retryInterval > 0) {
@@ -158,9 +161,11 @@ public final class Retry<T> {
 
                 Exception ex = e;
 
-                while (retriedTimes < retryTimes
-                        && ((retryCondition != null && retryCondition.test(ex)) || (retryCondition2 != null && retryCondition2.test(null, ex)))) {
+                if (!((retryCondition != null && retryCondition.test(ex)) || (retryCondition2 != null && retryCondition2.test(null, ex)))) {
+                    throw ex;
+                }
 
+                while (retriedTimes < retryTimes) {
                     retriedTimes++;
 
                     try {
@@ -179,6 +184,10 @@ public final class Retry<T> {
                         logger.error("Retried: " + retriedTimes, e2);
 
                         ex = e2;
+
+                        if (!((retryCondition != null && retryCondition.test(ex)) || (retryCondition2 != null && retryCondition2.test(null, ex)))) {
+                            throw ex;
+                        }
                     }
                 }
 
@@ -306,8 +315,11 @@ public final class Retry<T> {
                 try {
                     result = callable.call();
 
-                    while (retriedTimes < retryTimes && (retryCondition2 != null && retryCondition2.test(result, null))) {
+                    if (retryCondition2 == null || retryCondition2.test(result, null) == false) {
+                        return result;
+                    }
 
+                    while (retriedTimes < retryTimes) {
                         retriedTimes++;
 
                         if (retryInterval > 0) {
@@ -327,9 +339,11 @@ public final class Retry<T> {
 
                     RuntimeException ex = e;
 
-                    while (retriedTimes < retryTimes
-                            && ((retryCondition != null && retryCondition.test(ex)) || (retryCondition2 != null && retryCondition2.test(null, ex)))) {
+                    if (!((retryCondition != null && retryCondition.test(ex)) || (retryCondition2 != null && retryCondition2.test(null, ex)))) {
+                        throw ex;
+                    }
 
+                    while (retriedTimes < retryTimes) {
                         retriedTimes++;
 
                         try {
@@ -348,6 +362,10 @@ public final class Retry<T> {
                             logger.error("Retried: " + retriedTimes, e2);
 
                             ex = e2;
+
+                            if (!((retryCondition != null && retryCondition.test(ex)) || (retryCondition2 != null && retryCondition2.test(null, ex)))) {
+                                throw ex;
+                            }
                         }
                     }
 

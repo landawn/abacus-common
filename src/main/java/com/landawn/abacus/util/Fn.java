@@ -17,6 +17,7 @@ package com.landawn.abacus.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayDeque;
@@ -13083,6 +13084,41 @@ public final class Fn extends Comparators {
             N.checkArgNotNull(callable);
 
             return callable;
+        }
+
+        // private static final JSONSerializationConfig jsc = JSC.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP);
+
+        private static final Throwables.BiConsumer<Collection<?>, Writer, IOException> writeCSVLine = new Throwables.BiConsumer<Collection<?>, Writer, IOException>() {
+            @Override
+            public void accept(Collection<?> c, Writer writer) throws IOException {
+                int idx = 0;
+
+                for (Object e : c) {
+                    if (idx++ > 0) {
+                        writer.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                    }
+
+                    if (e == null) {
+                        writer.write(N.NULL_CHAR_ARRAY);
+                    } else if (e instanceof String) {
+                        writer.write(WD._QUOTATION_D);
+                        writer.write(e.toString().replace("\"", "\"\""));
+                        writer.write(WD._QUOTATION_D);
+                    } else if (e instanceof Number || e instanceof Boolean) {
+                        writer.write(e.toString());
+                    } else {
+                        writer.write(WD._QUOTATION_D);
+                        // writer.write(N.toJSON(e).replace("\"", "\"\""));
+                        // N.toJSON(writer, e, jsc);
+                        writer.write(N.toString(e).replace("\"", "\"\""));
+                        writer.write(WD._QUOTATION_D);
+                    }
+                }
+            }
+        };
+
+        public static Throwables.BiConsumer<Collection<?>, Writer, IOException> writeCSVLine() {
+            return writeCSVLine;
         }
     }
 }
