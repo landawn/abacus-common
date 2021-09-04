@@ -5086,6 +5086,129 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }, sorted, cmp, closeHandlers);
     }
 
+    @SequentialOnly
+    @IntermediateOp
+    public ExceptionalStream<T, E> cycled() {
+        assertNotClosed();
+
+        return newStream(new ExceptionalIterator<T, E>() {
+            private ExceptionalIterator<T, E> iter = null;
+            private List<T> list = null;
+            private T[] a = null;
+            private int len = 0;
+            private int cursor = -1;
+            private T e = null;
+
+            private boolean initialized = false;
+
+            @Override
+            public boolean hasNext() throws E {
+                if (initialized == false) {
+                    init();
+                }
+
+                if (a == null && !iter.hasNext()) {
+                    a = (T[]) list.toArray();
+                    len = a.length;
+                    cursor = 0;
+                }
+
+                return cursor < len || iter.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                if (len > 0) {
+                    if (cursor >= len) {
+                        cursor = 0;
+                    }
+
+                    return a[cursor++];
+                } else {
+                    e = iter.next();
+                    list.add(e);
+
+                    return e;
+                }
+            }
+
+            private void init() {
+                if (initialized == false) {
+                    initialized = true;
+                    iter = ExceptionalStream.this.iteratorEx();
+                    list = new ArrayList<>();
+                }
+            }
+        }, false, null, closeHandlers);
+    }
+
+    @SequentialOnly
+    @IntermediateOp
+    public ExceptionalStream<T, E> cycled(long times) {
+        assertNotClosed();
+
+        return newStream(new ExceptionalIterator<T, E>() {
+            private ExceptionalIterator<T, E> iter = null;
+            private List<T> list = null;
+            private T[] a = null;
+            private int len = 0;
+            private int cursor = -1;
+            private T e = null;
+            private long m = 0;
+
+            private boolean initialized = false;
+
+            @Override
+            public boolean hasNext() throws E {
+                if (initialized == false) {
+                    init();
+                }
+
+                if (a == null && !iter.hasNext()) {
+                    a = (T[]) list.toArray();
+                    len = a.length;
+                    cursor = 0;
+                    m = 1;
+                }
+
+                return m < times && (cursor < len || times - m > 1) && (len > 0 || iter.hasNext());
+            }
+
+            @Override
+            public T next() throws E {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                if (len > 0) {
+                    if (cursor >= len) {
+                        cursor = 0;
+                        m++;
+                    }
+
+                    return a[cursor++];
+                } else {
+                    e = iter.next();
+                    list.add(e);
+
+                    return e;
+                }
+            }
+
+            private void init() {
+                if (initialized == false) {
+                    initialized = true;
+                    iter = ExceptionalStream.this.iteratorEx();
+                    list = new ArrayList<>();
+                }
+            }
+        }, false, null, closeHandlers);
+    }
+
     @IntermediateOp
     public ExceptionalStream<T, E> intersperse(final T delimiter) {
         assertNotClosed();
