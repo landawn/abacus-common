@@ -23,6 +23,7 @@ import java.util.Set;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.util.u.Nullable;
+import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.Stream;
 
@@ -1483,6 +1484,44 @@ public final class Joiner implements Closeable {
 
     /**
      *
+     * @param m
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     */
+    public <K, V> Joiner appendEntries(final Map<K, V> m, final Function<? super K, ?> keyMapper, final Function<? super V, ?> valueMapper) {
+        N.checkArgNotNull(keyMapper, "keyMapper");
+        N.checkArgNotNull(valueMapper, "valueMapper");
+
+        StringBuilder sb = null;
+
+        for (Map.Entry<K, V> entry : m.entrySet()) {
+            if (entry.getValue() != null || skipNulls == false) {
+                if (sb == null) {
+                    sb = prepareBuilder().append(toString(keyMapper.apply(entry.getKey())))
+                            .append(keyValueDelimiter)
+                            .append(toString(valueMapper.apply(entry.getValue())));
+                } else {
+                    if (isEmptyDelimiter) {
+                        sb.append(toString(keyMapper.apply(entry.getKey())));
+                    } else {
+                        sb.append(delimiter).append(toString(keyMapper.apply(entry.getKey())));
+                    }
+
+                    if (isEmptyKeyValueDelimiter) {
+                        sb.append(toString(toString(valueMapper.apply(entry.getValue()))));
+                    } else {
+                        sb.append(keyValueDelimiter).append(toString(valueMapper.apply(entry.getValue())));
+                    }
+                }
+            }
+        }
+
+        return this;
+    }
+
+    /**
+     *
      * @param entity entity class with getter/setter methods.
      * @return
      */
@@ -1636,7 +1675,7 @@ public final class Joiner implements Closeable {
      * then elements from the other {@code StringJoiner} are concatenated with
      * that delimiter and the result is appended to this {@code StringJoiner}
      * as a single element.
-     * 
+     *
      * <p>Remember to close {@code other} Joiner if {@code reuseCachedBuffer} is set to {@code} true.
      *
      * @param other The {@code StringJoiner} whose contents should be merged

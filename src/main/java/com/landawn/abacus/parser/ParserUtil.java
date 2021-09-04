@@ -56,6 +56,7 @@ import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.DateUtil;
+import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.ImmutableList;
 import com.landawn.abacus.util.ImmutableMap;
 import com.landawn.abacus.util.InternalUtil;
@@ -1375,7 +1376,7 @@ public final class ParserUtil {
             try {
                 return (T) (isFieldAccessible ? field.get(obj) : getMethod.invoke(obj));
             } catch (Exception e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e);
             }
         }
 
@@ -1419,7 +1420,7 @@ public final class ParserUtil {
                         field.set(obj, propValue);
                     }
                 } catch (Exception e2) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         }
@@ -2094,7 +2095,7 @@ public final class ParserUtil {
                     try {
                         field.set(obj, propValue);
                     } catch (Exception e2) {
-                        throw N.toRuntimeException(e);
+                        throw ExceptionUtil.toRuntimeException(e);
                     }
                 }
             }
@@ -2241,7 +2242,7 @@ public final class ParserUtil {
     //                }
     //            } catch (NoSuchMethodException | SecurityException e) {
     //                // Should never happen.
-    //                throw N.toRuntimeException(e);
+    //                throw ExceptionUtil.toRuntimeException(e);
     //            }
     //
     //            final Constructor<?> constructor = recordClass.getDeclaredConstructors()[0];
@@ -2253,7 +2254,7 @@ public final class ParserUtil {
     //                        return (T) constructor.newInstance(args);
     //                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
     //                        // Should never happen.
-    //                        throw N.toRuntimeException(e);
+    //                        throw ExceptionUtil.toRuntimeException(e);
     //                    }
     //                }
     //            };

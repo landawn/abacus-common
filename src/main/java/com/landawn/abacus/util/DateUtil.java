@@ -2022,8 +2022,8 @@ public abstract class DateUtil {
      * 28 Mar 2002 13:45 and 12 Mar 2002 13:45 would return false.
      * </p>
      *
-     * @param date1  the first date, not altered, not null
-     * @param date2  the second date, not altered, not null
+     * @param date1 the first date, not altered, not null
+     * @param date2 the second date, not altered, not null
      * @return true if they represent the same day
      * @throws IllegalArgumentException if either date is {@code null}
      * @since 2.1
@@ -2051,8 +2051,8 @@ public abstract class DateUtil {
      * 28 Mar 2002 13:45 and 12 Mar 2002 13:45 would return false.
      * </p>
      *
-     * @param cal1  the first calendar, not altered, not null
-     * @param cal2  the second calendar, not altered, not null
+     * @param cal1 the first calendar, not altered, not null
+     * @param cal2 the second calendar, not altered, not null
      * @return true if they represent the same day
      * @throws IllegalArgumentException if either calendar is {@code null}
      * @since 2.1

@@ -112,10 +112,25 @@ public final class ExceptionUtil {
      * @param exceptionClass
      * @param runtimeExceptionMapper
      */
-    @SuppressWarnings("rawtypes")
     public static <E extends Throwable> void registerRuntimeExceptionMapper(final Class<E> exceptionClass,
             final Function<E, RuntimeException> runtimeExceptionMapper) {
-        if (toRuntimeExceptionFuncMap.containsKey(exceptionClass)) {
+        registerRuntimeExceptionMapper(exceptionClass, runtimeExceptionMapper, false);
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param exceptionClass
+     * @param runtimeExceptionMapper
+     * @param force
+     */
+    @SuppressWarnings("rawtypes")
+    public static <E extends Throwable> void registerRuntimeExceptionMapper(final Class<E> exceptionClass,
+            final Function<E, RuntimeException> runtimeExceptionMapper, final boolean force) {
+        N.checkArgNotNull(exceptionClass, "exceptionClass");
+        N.checkArgNotNull(runtimeExceptionMapper, "runtimeExceptionMapper");
+
+        if (!force && toRuntimeExceptionFuncMap.containsKey(exceptionClass)) {
             throw new IllegalArgumentException("Exception class: " + ClassUtil.getCanonicalClassName(exceptionClass) + " has already been registered");
         }
 

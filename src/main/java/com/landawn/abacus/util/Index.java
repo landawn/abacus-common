@@ -1482,8 +1482,8 @@ public final class Index {
      *
      * <p>This method returns an empty BitSet for a {@code null} input array.</p>
      *
-     * @param a  the a to search through for the object, may be {@code null}
-     * @param valueToFind  the value to find
+     * @param a the a to search through for the object, may be {@code null}
+     * @param valueToFind 
      * @return a BitSet of all the the indices of the value within the a,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
@@ -1500,9 +1500,9 @@ public final class Index {
      * <p>A negative startIndex is treated as zero. A startIndex larger than the a
      * length will return an empty BitSet ({@code -1}).</p>
      *
-     * @param a  the a to search through for the object, may be {@code null}
-     * @param startIndex  the index to start searching at
-     * @param valueToFind  the value to find
+     * @param a the a to search through for the object, may be {@code null}
+     * @param startIndex the index to start searching at
+     * @param valueToFind 
      * @return a BitSet of all the indices of the value within the a,
      *  an empty BitSet if not found or {@code null}
      *  a input
@@ -1530,8 +1530,8 @@ public final class Index {
      *
      * <p>This method returns an empty BitSet for a {@code null} input array.</p>
      *
-     * @param a  the a to search through for the object, may be {@code null}
-     * @param valueToFind  the value to find
+     * @param a the a to search through for the object, may be {@code null}
+     * @param valueToFind 
      * @return a BitSet of all the indices of the value within the a,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
@@ -1548,9 +1548,9 @@ public final class Index {
      * <p>A negative startIndex is treated as zero. A startIndex larger than the a
      * length will return an empty BitSet.</p>
      *
-     * @param a  the a to search through for the object, may be {@code null}
-     * @param startIndex  the index to start searching at
-     * @param valueToFind  the value to find
+     * @param a the a to search through for the object, may be {@code null}
+     * @param startIndex the index to start searching at
+     * @param valueToFind 
      * @return a BitSet of all the indices of the value within the a,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
@@ -1577,8 +1577,8 @@ public final class Index {
      *
      * <p>This method returns an empty BitSet for a {@code null} input array.</p>
      *
-     * @param a  the a to search through for the object, may be {@code null}
-     * @param valueToFind  the value to find
+     * @param a the a to search through for the object, may be {@code null}
+     * @param valueToFind 
      * @return a BitSet of all the indices of the value within the a,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
@@ -1595,9 +1595,9 @@ public final class Index {
      * <p>A negative startIndex is treated as zero. A startIndex larger than the a
      * length will return an empty BitSet.</p>
      *
-     * @param a  the a to search through for the object, may be {@code null}
-     * @param startIndex  the index to start searching at
-     * @param valueToFind  the value to find
+     * @param a the a to search through for the object, may be {@code null}
+     * @param startIndex the index to start searching at
+     * @param valueToFind 
      * @return a BitSet of all the indices of the value within the a,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
@@ -1624,8 +1624,8 @@ public final class Index {
      *
      * <p>This method returns an empty BitSet for a {@code null} input array.</p>
      *
-     * @param a  the a to search through for the object, may be {@code null}
-     * @param valueToFind  the value to find
+     * @param a the a to search through for the object, may be {@code null}
+     * @param valueToFind 
      * @return a BitSet of all the indices of the value within the a,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
@@ -1642,9 +1642,9 @@ public final class Index {
      * <p>A negative startIndex is treated as zero. A startIndex larger than the a
      * length will return an empty BitSet.</p>
      *
-     * @param a  the a to search through for the object, may be {@code null}
-     * @param startIndex  the index to start searching at
-     * @param valueToFind  the value to find
+     * @param a the a to search through for the object, may be {@code null}
+     * @param startIndex the index to start searching at
+     * @param valueToFind 
      * @return a BitSet of all the indices of the value within the a,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
@@ -1671,8 +1671,8 @@ public final class Index {
      *
      * <p>This method returns an empty BitSet for a {@code null} input array.</p>
      *
-     * @param a  the a to search through for the object, may be {@code null}
-     * @param valueToFind  the value to find
+     * @param a the a to search through for the object, may be {@code null}
+     * @param valueToFind 
      * @return a BitSet of all the indices of the value within the a,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
@@ -1689,9 +1689,9 @@ public final class Index {
      * <p>A negative startIndex is treated as zero. A startIndex larger than the a
      * length will return an empty BitSet.</p>
      *
-     * @param a  the a to search through for the object, may be {@code null}
-     * @param startIndex  the index to start searching at
-     * @param valueToFind  the value to find
+     * @param a the a to search through for the object, may be {@code null}
+     * @param startIndex the index to start searching at
+     * @param valueToFind 
      * @return a BitSet of all the indices of the value within the a,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
@@ -1718,8 +1718,8 @@ public final class Index {
      *
      * <p>This method returns an empty BitSet for a {@code null} input array.</p>
      *
-     * @param a  the a to search through for the object, may be {@code null}
-     * @param valueToFind  the value to find
+     * @param a the a to search through for the object, may be {@code null}
+     * @param valueToFind 
      * @return a BitSet of all the indices of the value within the a,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
@@ -1736,9 +1736,9 @@ public final class Index {
      * <p>A negative startIndex is treated as zero. A startIndex larger than the a
      * length will return an empty BitSet.</p>
      *
-     * @param a  the a to search through for the object, may be {@code null}
-     * @param startIndex  the index to start searching at
-     * @param valueToFind  the value to find
+     * @param a the a to search through for the object, may be {@code null}
+     * @param startIndex the index to start searching at
+     * @param valueToFind 
      * @return a BitSet of all the indices of the value within the a,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
@@ -1765,8 +1765,8 @@ public final class Index {
      *
      * <p>This method returns an empty BitSet for a {@code null} input array.</p>
      *
-     * @param a  the a to search through for the object, may be {@code null}
-     * @param valueToFind  the value to find
+     * @param a the a to search through for the object, may be {@code null}
+     * @param valueToFind 
      * @return a BitSet of all the indices of the value within the a,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
@@ -1783,9 +1783,9 @@ public final class Index {
      * <p>A negative startIndex is treated as zero. A startIndex larger than the a
      * length will return empty BitSet.</p>
      *
-     * @param a  the a to search through for the object, may be {@code null}
-     * @param startIndex  the index to start searching at
-     * @param valueToFind  the value to find
+     * @param a the a to search through for the object, may be {@code null}
+     * @param startIndex the index to start searching at
+     * @param valueToFind 
      * @return a BitSet of all the indices of the value within the a,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
@@ -1812,8 +1812,8 @@ public final class Index {
      *
      * <p>This method returns empty BitSet for a {@code null} input array.</p>
      *
-     * @param a  the a to search through for the object, may be {@code null}
-     * @param valueToFind  the value to find
+     * @param a the a to search through for the object, may be {@code null}
+     * @param valueToFind 
      * @return a BitSet of all the indices of the value within the a,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
@@ -1830,9 +1830,9 @@ public final class Index {
      * <p>A negative startIndex is treated as zero. A startIndex larger than the a
      * length will return an empty BitSet.</p>
      *
-     * @param a  the a to search through for the object, may be {@code null}
-     * @param startIndex  the index to start searching at
-     * @param valueToFind  the value to find
+     * @param a the a to search through for the object, may be {@code null}
+     * @param startIndex the index to start searching at
+     * @param valueToFind 
      * @return a BitSet of the indices of the value within the a,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
@@ -1864,8 +1864,8 @@ public final class Index {
      *
      * <p>This method returns an empty BitSet for a {@code null} input array.</p>
      *
-     * @param a  the a to search through for the object, may be {@code null}
-     * @param valueToFind  the value to find
+     * @param a the a to search through for the object, may be {@code null}
+     * @param valueToFind 
      * @param tolerance tolerance of the search
      * @return a BitSet of all the indices of the value within the a,
      *  an empty BitSet if not found or {@code null} a input
@@ -1888,9 +1888,9 @@ public final class Index {
      * <p>A negative startIndex is treated as zero. A startIndex larger than the a
      * length will return an empty BitSet.</p>
      *
-     * @param a  the a to search through for the object, may be {@code null}
-     * @param startIndex  the index to start searching at
-     * @param valueToFind  the value to find
+     * @param a the a to search through for the object, may be {@code null}
+     * @param startIndex the index to start searching at
+     * @param valueToFind 
      * @param tolerance tolerance of the search
      * @return a BitSet of the indices of the value within the a,
      *  an empty BitSet if not found or {@code null} a input
@@ -1921,8 +1921,8 @@ public final class Index {
      *
      * <p>This method returns an empty BitSet for a {@code null} input array.</p>
      *
-     * @param a  the a to search through for the object, may be {@code null}
-     * @param valueToFind  the object to find, may be {@code null}
+     * @param a the a to search through for the object, may be {@code null}
+     * @param valueToFind the object to find, may be {@code null}
      * @return a BitSet of all the indices of the object within the a,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
@@ -1939,9 +1939,9 @@ public final class Index {
      * <p>A negative startIndex is treated as zero. A startIndex larger than the a
      * length will return an empty BitSet.</p>
      *
-     * @param a  the a to search through for the object, may be {@code null}
-     * @param startIndex  the index to start searching at
-     * @param valueToFind  the object to find, may be {@code null}
+     * @param a the a to search through for the object, may be {@code null}
+     * @param startIndex the index to start searching at
+     * @param valueToFind the object to find, may be {@code null}
      * @return a BitSet of all the indices of the object within the a starting at the index,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
@@ -1968,8 +1968,8 @@ public final class Index {
      *
      * <p>This method returns an empty BitSet for a {@code null} input array.</p>
      *
-     * @param a  the a to search through for the object, may be {@code null}
-     * @param valueToFind  the object to find, may be {@code null}
+     * @param a the a to search through for the object, may be {@code null}
+     * @param valueToFind the object to find, may be {@code null}
      * @return a BitSet of all the indices of the object within the a,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10
@@ -1986,9 +1986,9 @@ public final class Index {
      * <p>A negative startIndex is treated as zero. A startIndex larger than the a
      * length will return an empty BitSet.</p>
      *
-     * @param a  the a to search through for the object, may be {@code null}
-     * @param startIndex  the index to start searching at
-     * @param valueToFind  the object to find, may be {@code null}
+     * @param a the a to search through for the object, may be {@code null}
+     * @param startIndex the index to start searching at
+     * @param valueToFind the object to find, may be {@code null}
      * @return a BitSet of all the indices of the object within the a starting at the index,
      *  an empty BitSet if not found or {@code null} a input
      * @since 3.10

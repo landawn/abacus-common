@@ -328,7 +328,7 @@ public final class Fn extends Comparators {
     private static final Function<Throwable, RuntimeException> TO_RUNTIME_EXCEPTION = new Function<Throwable, RuntimeException>() {
         @Override
         public RuntimeException apply(Throwable e) {
-            return N.toRuntimeException(e);
+            return ExceptionUtil.toRuntimeException(e);
         }
     };
 
@@ -3637,7 +3637,7 @@ public final class Fn extends Comparators {
                 try {
                     return f.get();
                 } catch (InterruptedException | ExecutionException e) {
-                    // throw N.toRuntimeException(e);
+                    // throw ExceptionUtil.toRuntimeException(e);
                     return defaultValue;
                 }
             }
@@ -3650,7 +3650,7 @@ public final class Fn extends Comparators {
             try {
                 return f.get();
             } catch (InterruptedException | ExecutionException e) {
-                return N.toRuntimeException(e);
+                return ExceptionUtil.toRuntimeException(e);
             }
         }
     };
@@ -4103,7 +4103,7 @@ public final class Fn extends Comparators {
                 try {
                     return predicate.test(value);
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         };
@@ -4128,7 +4128,7 @@ public final class Fn extends Comparators {
                 try {
                     return biPredicate.test(a, t);
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         };
@@ -4155,7 +4155,7 @@ public final class Fn extends Comparators {
                 try {
                     return triPredicate.test(a, b, t);
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         };
@@ -4179,7 +4179,7 @@ public final class Fn extends Comparators {
                 try {
                     return biPredicate.test(t, u);
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         };
@@ -4205,7 +4205,7 @@ public final class Fn extends Comparators {
                 try {
                     return triPredicate.test(a, t, u);
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         };
@@ -4230,7 +4230,7 @@ public final class Fn extends Comparators {
                 try {
                     return triPredicate.test(a, b, c);
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         };
@@ -4253,7 +4253,7 @@ public final class Fn extends Comparators {
                 try {
                     consumer.accept(t);
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         };
@@ -4278,7 +4278,7 @@ public final class Fn extends Comparators {
                 try {
                     biConsumer.accept(a, t);
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         };
@@ -4305,7 +4305,7 @@ public final class Fn extends Comparators {
                 try {
                     triConsumer.accept(a, b, t);
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         };
@@ -4329,7 +4329,7 @@ public final class Fn extends Comparators {
                 try {
                     biConsumer.accept(t, u);
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         };
@@ -4355,7 +4355,7 @@ public final class Fn extends Comparators {
                 try {
                     triConsumer.accept(a, t, u);
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         };
@@ -4380,7 +4380,7 @@ public final class Fn extends Comparators {
                 try {
                     triConsumer.accept(a, b, c);
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         };
@@ -4404,7 +4404,7 @@ public final class Fn extends Comparators {
                 try {
                     return function.apply(t);
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         };
@@ -4455,7 +4455,7 @@ public final class Fn extends Comparators {
                 try {
                     return biFunction.apply(a, t);
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         };
@@ -4483,7 +4483,7 @@ public final class Fn extends Comparators {
                 try {
                     return triFunction.apply(a, b, t);
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         };
@@ -4508,7 +4508,7 @@ public final class Fn extends Comparators {
                 try {
                     return biFunction.apply(t, u);
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         };
@@ -4560,7 +4560,7 @@ public final class Fn extends Comparators {
                 try {
                     return triFunction.apply(a, t, u);
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         };
@@ -4586,7 +4586,7 @@ public final class Fn extends Comparators {
                 try {
                     return triFunction.apply(a, b, c);
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         };
@@ -4985,7 +4985,7 @@ public final class Fn extends Comparators {
                 try {
                     runnbale.run();
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         };
@@ -4998,7 +4998,7 @@ public final class Fn extends Comparators {
                 try {
                     return callable.call();
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         };
@@ -5119,7 +5119,7 @@ public final class Fn extends Comparators {
                 try {
                     return callable.call();
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         };
@@ -5134,7 +5134,7 @@ public final class Fn extends Comparators {
                 try {
                     callable.call();
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         };
@@ -9714,7 +9714,7 @@ public final class Fn extends Comparators {
                     try {
                         return f.apply(e.getKey(), e.getValue());
                     } catch (Exception ex) {
-                        throw N.toRuntimeException(ex);
+                        throw ExceptionUtil.toRuntimeException(ex);
                     }
                 }
             };
@@ -9737,7 +9737,7 @@ public final class Fn extends Comparators {
                     try {
                         return p.test(e.getKey(), e.getValue());
                     } catch (Exception ex) {
-                        throw N.toRuntimeException(ex);
+                        throw ExceptionUtil.toRuntimeException(ex);
                     }
                 }
             };
@@ -9760,7 +9760,7 @@ public final class Fn extends Comparators {
                     try {
                         c.accept(e.getKey(), e.getValue());
                     } catch (Exception ex) {
-                        throw N.toRuntimeException(ex);
+                        throw ExceptionUtil.toRuntimeException(ex);
                     }
                 }
             };
@@ -13021,7 +13021,7 @@ public final class Fn extends Comparators {
                     try {
                         runnable.run();
                     } catch (Throwable e) {
-                        throw N.toRuntimeException(e);
+                        throw ExceptionUtil.toRuntimeException(e);
                     }
                 }
             };

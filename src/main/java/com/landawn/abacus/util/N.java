@@ -588,9 +588,8 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Contains all.
      *
-     * @param c the c
+     * @param c
      * @param valuesToFind the objs to find
      * @return
      */
@@ -605,9 +604,8 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Contains all.
      *
-     * @param c the c
+     * @param c
      * @param valuesToFind the objs to find
      * @return
      */
@@ -642,9 +640,8 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Contains any.
      *
-     * @param c the c
+     * @param c
      * @param valuesToFind the objs to find
      * @return
      */
@@ -657,9 +654,8 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Contains any.
      *
-     * @param c the c
+     * @param c
      * @param valuesToFind the objs to find
      * @return
      */
@@ -688,8 +684,8 @@ public final class N extends CommonUtil {
     /**
      * Gets the only element.
      *
-     * @param <T> the generic type
-     * @param iterable the iterable
+     * @param <T>
+     * @param iterable
      * @return throws DuplicatedResultException if there are more than one elements in the specified {@code iterable}.
      */
     public static <T> Nullable<T> getOnlyElement(Iterable<? extends T> iterable) throws DuplicatedResultException {
@@ -1358,11 +1354,11 @@ public final class N extends CommonUtil {
      * </code>
      * </pre>
      *
-     * @param <T> the generic type
+     * @param <T>
      * @param maxCount max count of chunk want to split {@code totalSize} into.
-     * @param totalSize the total size
-     * @param smallerFirst the smaller first
-     * @param func the func
+     * @param totalSize
+     * @param smallerFirst
+     * @param func
      * @return the stream
      */
     public static <T> Stream<T> splitByCount(final int maxCount, final int totalSize, final boolean smallerFirst, final IntBiFunction<T> func) {
@@ -1382,10 +1378,10 @@ public final class N extends CommonUtil {
      * </code>
      * </pre>
      *
-     * @param <T> the generic type
-     * @param maxCount the max count
-     * @param totalSize the total size
-     * @param func the func
+     * @param <T>
+     * @param maxCount
+     * @param totalSize
+     * @param func
      * @return the stream
      */
     static <T> Stream<T> splitByCountSmallerFirst(final int maxCount, final int totalSize, final IntBiFunction<T> func) {
@@ -1447,10 +1443,10 @@ public final class N extends CommonUtil {
      * </code>
      * </pre>
      *
-     * @param <T> the generic type
-     * @param maxCount the max count
-     * @param totalSize the total size
-     * @param func the func
+     * @param <T>
+     * @param maxCount
+     * @param totalSize
+     * @param func
      * @return the stream
      */
     static <T> Stream<T> splitByCountSmallerLast(final int maxCount, final int totalSize, final IntBiFunction<T> func) {
@@ -2170,11 +2166,10 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Different set.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
+     * @param <T>
+     * @param a
+     * @param b
      * @return the sets the
      * @see #difference(Collection, Collection)
      * @see #excludeAll(Collection, Collection)
@@ -2200,9 +2195,9 @@ public final class N extends CommonUtil {
     /**
      * Symmetric different set.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
+     * @param <T>
+     * @param a
+     * @param b
      * @return the sets the
      * @see #symmetricDifference(Collection, Collection)
      * @see #excludeAll(Collection, Collection)
@@ -2235,11 +2230,10 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Common set.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param b the b
+     * @param <T>
+     * @param a
+     * @param b
      * @return the sets the
      * @see #intersection(Collection, Collection)
      * @see Collection#retainAll(Collection)
@@ -2253,10 +2247,9 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Common set.
      *
-     * @param <T> the generic type
-     * @param c the c
+     * @param <T>
+     * @param c
      * @return the sets the
      * @see #intersection(Collection)
      * @see Collection#retainAll(Collection)
@@ -2442,8 +2435,8 @@ public final class N extends CommonUtil {
      * equal to the cardinality of <i>e</i> in <i>coll</i>, for each element <i>e</i>
      * in <i>subColl</i>.
      *
-     * @param subColl  the first (sub?) collection, must not be null
-     * @param coll  the second (super?) collection, must not be null
+     * @param subColl the first (sub?) collection, must not be null
+     * @param coll the second (super?) collection, must not be null
      * @return <code>true</code> if <i>subColl</i> is a sub-collection of <i>coll</i>
      * @see #isProperSubCollection
      * @see Collection#containsAll
@@ -2486,8 +2479,8 @@ public final class N extends CommonUtil {
      *    <li><code>subColl.size() &lt; Integer.MAXVALUE</code></li>
      * </ul>
      *
-     * @param subColl  the first (sub?) collection, must not be null
-     * @param coll  the second (super?) collection, must not be null
+     * @param subColl the first (sub?) collection, must not be null
+     * @param coll the second (super?) collection, must not be null
      * @return <code>true</code> if <i>subColl</i> is a <i>proper</i> sub-collection of <i>coll</i>
      * @see #isSubCollection
      * @see Collection#containsAll
@@ -2508,8 +2501,8 @@ public final class N extends CommonUtil {
      * for each element <i>e</i> in <i>a</i> or <i>b</i>.
      * </p>
      *
-     * @param a  the first collection
-     * @param b  the second collection
+     * @param a the first collection
+     * @param b the second collection
      * @return <code>true</code> if the collections contain the same elements with the same cardinalities.
      */
     public static boolean isEqualCollection(final Collection<?> a, final Collection<?> b) {
@@ -16492,10 +16485,10 @@ public final class N extends CommonUtil {
     /**
      * For each pair.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param action the action
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param action
      * @throws E the e
      */
     public static <T, E extends Exception> void forEachPair(final T[] a, final Throwables.BiConsumer<? super T, ? super T, E> action) throws E {
@@ -16505,11 +16498,11 @@ public final class N extends CommonUtil {
     /**
      * For each pair.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param action the action
-     * @param increment the increment
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param action
+     * @param increment
      * @throws E the e
      */
     public static <T, E extends Exception> void forEachPair(final T[] a, final Throwables.BiConsumer<? super T, ? super T, E> action, final int increment)
@@ -16529,10 +16522,10 @@ public final class N extends CommonUtil {
     /**
      * For each pair.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param action the action
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param action
      * @throws E the e
      */
     public static <T, E extends Exception> void forEachPair(final Collection<? extends T> c, final Throwables.BiConsumer<? super T, ? super T, E> action)
@@ -16543,11 +16536,11 @@ public final class N extends CommonUtil {
     /**
      * For each pair.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param action the action
-     * @param increment the increment
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param action
+     * @param increment
      * @throws E the e
      */
     public static <T, E extends Exception> void forEachPair(final Collection<? extends T> c, final Throwables.BiConsumer<? super T, ? super T, E> action,
@@ -16627,10 +16620,10 @@ public final class N extends CommonUtil {
     /**
      * For each triple.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param action the action
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param action
      * @throws E the e
      */
     public static <T, E extends Exception> void forEachTriple(final T[] a, final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action) throws E {
@@ -16640,11 +16633,11 @@ public final class N extends CommonUtil {
     /**
      * For each triple.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param action the action
-     * @param increment the increment
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param action
+     * @param increment
      * @throws E the e
      */
     public static <T, E extends Exception> void forEachTriple(final T[] a, final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action,
@@ -16664,10 +16657,10 @@ public final class N extends CommonUtil {
     /**
      * For each triple.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param action the action
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param action
      * @throws E the e
      */
     public static <T, E extends Exception> void forEachTriple(final Collection<? extends T> c,
@@ -16678,11 +16671,11 @@ public final class N extends CommonUtil {
     /**
      * For each triple.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param action the action
-     * @param increment the increment
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param action
+     * @param increment
      * @throws E the e
      */
     public static <T, E extends Exception> void forEachTriple(final Collection<? extends T> c,
@@ -20027,12 +20020,11 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Take while.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param filter the filter
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param filter
      * @return the list
      * @throws E the e
      */
@@ -20057,12 +20049,11 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Take while.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param filter
      * @return the list
      * @throws E the e
      */
@@ -20089,10 +20080,10 @@ public final class N extends CommonUtil {
     /**
      * Take while inclusive.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param filter the filter
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param filter
      * @return the list
      * @throws E the e
      */
@@ -20120,10 +20111,10 @@ public final class N extends CommonUtil {
     /**
      * Take while inclusive.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param filter
      * @return the list
      * @throws E the e
      */
@@ -20148,12 +20139,11 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Drop while.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param filter the filter
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param filter
      * @return the list
      * @throws E the e
      */
@@ -20186,12 +20176,11 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Drop while.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param filter
      * @return the list
      * @throws E the e
      */
@@ -20219,12 +20208,11 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Skip until.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param filter the filter
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param filter
      * @return the list
      * @throws E the e
      */
@@ -20257,12 +20245,11 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Skip until.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param filter
      * @return the list
      * @throws E the e
      */
@@ -20795,10 +20782,10 @@ public final class N extends CommonUtil {
 
     /**
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param filter
      * @return
      * @throws E the e
      */
@@ -20820,10 +20807,10 @@ public final class N extends CommonUtil {
 
     /**
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param filter the filter
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param filter
      * @return
      * @throws E the e
      */
@@ -20845,10 +20832,10 @@ public final class N extends CommonUtil {
 
     /**
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param iter the iter
-     * @param filter the filter
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param filter
      * @return
      * @throws E the e
      */
@@ -20870,10 +20857,10 @@ public final class N extends CommonUtil {
 
     /**
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param filter
      * @return
      * @throws E the e
      */
@@ -20895,10 +20882,10 @@ public final class N extends CommonUtil {
 
     /**
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param filter the filter
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param filter
      * @return
      * @throws E the e
      */
@@ -20920,10 +20907,10 @@ public final class N extends CommonUtil {
 
     /**
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param iter the iter
-     * @param filter the filter
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param filter
      * @return
      * @throws E the e
      */
@@ -20945,10 +20932,10 @@ public final class N extends CommonUtil {
 
     /**
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param filter the filter
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param filter
      * @return
      * @throws E the e
      */
@@ -20970,10 +20957,10 @@ public final class N extends CommonUtil {
 
     /**
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param filter the filter
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param filter
      * @return
      * @throws E the e
      */
@@ -20995,10 +20982,10 @@ public final class N extends CommonUtil {
 
     /**
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param iter the iter
-     * @param filter the filter
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param filter
      * @return
      * @throws E the e
      */
@@ -21020,12 +21007,12 @@ public final class N extends CommonUtil {
 
     /**
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param atLeast the at least
-     * @param atMost the at most
-     * @param filter the filter
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param atLeast
+     * @param atMost
+     * @param filter
      * @return
      * @throws E the e
      */
@@ -21061,12 +21048,12 @@ public final class N extends CommonUtil {
 
     /**
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param atLeast the at least
-     * @param atMost the at most
-     * @param filter the filter
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param atLeast
+     * @param atMost
+     * @param filter
      * @return
      * @throws E the e
      */
@@ -21102,12 +21089,12 @@ public final class N extends CommonUtil {
 
     /**
     *
-    * @param <T> the generic type
-    * @param <E> the element type
-    * @param c the c
-    * @param atLeast the at least
-    * @param atMost the at most
-    * @param filter the filter
+    * @param <T>
+    * @param <E>
+    * @param c
+    * @param atLeast
+    * @param atMost
+    * @param filter
     * @return
     * @throws E the e
     */

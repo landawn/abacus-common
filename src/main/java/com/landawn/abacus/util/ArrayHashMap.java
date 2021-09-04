@@ -65,9 +65,9 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         try {
             map = Modifier.isAbstract(mapType.getModifiers()) ? N.newInstance(mapType) : mapType.newInstance();
         } catch (InstantiationException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         } catch (IllegalAccessException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 

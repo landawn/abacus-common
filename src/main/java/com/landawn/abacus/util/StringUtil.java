@@ -39,6 +39,7 @@ import java.util.regex.Pattern;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalChar;
+import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.IntUnaryOperator;
 import com.landawn.abacus.util.function.Supplier;
 
@@ -204,7 +205,7 @@ public abstract class StringUtil {
      * StringUtil.isAllEmpty("foo", "bar")     = false
      * </pre>
      *
-     * @param css  the CharSequences to check, may be null or empty
+     * @param css the CharSequences to check, may be null or empty
      * @return {@code true} if all of the CharSequences are empty or null
      * @since 3.6
      */
@@ -239,7 +240,7 @@ public abstract class StringUtil {
      * StringUtil.isAllBlank(new String[] {})  = true
      * </pre>
      *
-     * @param css  the CharSequences to check, may be null or empty
+     * @param css the CharSequences to check, may be null or empty
      * @return {@code true} if all of the CharSequences are empty or null or whitespace only
      * @since 3.6
      */
@@ -272,7 +273,7 @@ public abstract class StringUtil {
      * StringUtil.isAnyEmpty(new String[]{""}) = true
      * </pre>
      *
-     * @param css  the CharSequences to check, may be null or empty
+     * @param css the CharSequences to check, may be null or empty
      * @return {@code true} if any of the CharSequences are empty or null
      * @since 3.2
      */
@@ -309,7 +310,7 @@ public abstract class StringUtil {
      * StringUtil.isAnyBlank("foo", "bar")     = false
      * </pre>
      *
-     * @param css  the CharSequences to check, may be null or empty
+     * @param css the CharSequences to check, may be null or empty
      * @return {@code true} if any of the CharSequences are empty or null or whitespace only
      * @since 3.2
      */
@@ -413,7 +414,7 @@ public abstract class StringUtil {
      * </pre>
      *
      * @param <T> the specific kind of CharSequence
-     * @param values  the values to test, may be {@code null} or empty
+     * @param values the values to test, may be {@code null} or empty
      * @return the first value from {@code values} which is not empty,
      *  or {@code null} if there are no non-empty values
      * @since 3.8
@@ -457,8 +458,8 @@ public abstract class StringUtil {
      * StringUtil.abbreviate("abcdefg", 3) = IllegalArgumentException
      * </pre>
      *
-     * @param str  the String to check, may be null
-     * @param maxWidth  maximum length of result String, must be at least 4
+     * @param str the String to check, may be null
+     * @param maxWidth maximum length of result String, must be at least 4
      * @return abbreviated String
      * @throws IllegalArgumentException if the width is too small
      * @since 2.0
@@ -523,9 +524,9 @@ public abstract class StringUtil {
      * StringUtil.abbreviate("abcdefghij", 5, 6)        = IllegalArgumentException
      * </pre>
      *
-     * @param str  the String to check, may be null
-     * @param offset  left edge of source String
-     * @param maxWidth  maximum length of result String, must be at least 4
+     * @param str the String to check, may be null
+     * @param offset left edge of source String
+     * @param maxWidth maximum length of result String, must be at least 4
      * @return abbreviated String, {@code null} if null String input
      * @throws IllegalArgumentException if the width is too small
      * @since 2.0
@@ -565,9 +566,9 @@ public abstract class StringUtil {
      * StringUtil.abbreviate("abcdefg", "...", 3) = IllegalArgumentException
      * </pre>
      *
-     * @param str  the String to check, may be null
-     * @param abbrevMarker  the String used as replacement marker
-     * @param maxWidth  maximum length of result String, must be at least {@code abbrevMarker.length + 1}
+     * @param str the String to check, may be null
+     * @param abbrevMarker the String used as replacement marker
+     * @param maxWidth maximum length of result String, must be at least {@code abbrevMarker.length + 1}
      * @return abbreviated String
      * @throws IllegalArgumentException if the width is too small
      * @since 3.6
@@ -605,10 +606,10 @@ public abstract class StringUtil {
      * StringUtil.abbreviate("abcdefghij", "...", 5, 6)        = IllegalArgumentException
      * </pre>
      *
-     * @param str  the String to check, may be null
-     * @param abbrevMarker  the String used as replacement marker
-     * @param offset  left edge of source String
-     * @param maxWidth  maximum length of result String, must be at least 4
+     * @param str the String to check, may be null
+     * @param abbrevMarker the String used as replacement marker
+     * @param offset left edge of source String
+     * @param maxWidth maximum length of result String, must be at least 4
      * @return abbreviated String
      * @throws IllegalArgumentException if the width is too small
      * @since 3.6
@@ -680,7 +681,7 @@ public abstract class StringUtil {
      * StringUtil.abbreviateMiddle("abcdef", ".", 4)     = "ab.f"
      * </pre>
      *
-     * @param str  the String to abbreviate, may be null
+     * @param str the String to abbreviate, may be null
      * @param middle the String to replace the middle characters with, may be null
      * @param length the length to abbreviate {@code str} to.
      * @return the abbreviated String if the above criteria is met, or the original String supplied for abbreviation.
@@ -716,8 +717,8 @@ public abstract class StringUtil {
      * StringUtil.center("a", 4)    = " a  "
      * </pre>
      *
-     * @param str  the String to center, may be null
-     * @param size  the int size of new String
+     * @param str the String to center, may be null
+     * @param size the int size of new String
      * @return centered String
      */
     public static String center(final String str, final int size) {
@@ -739,9 +740,9 @@ public abstract class StringUtil {
      * StringUtil.center("a", 4, 'y')    = "yayy"
      * </pre>
      *
-     * @param str  the String to center, may be null
-     * @param size  the int size of new String.
-     * @param padChar  the character to pad the new String with
+     * @param str the String to center, may be null
+     * @param size the int size of new String.
+     * @param padChar the character to pad the new String with
      * @return centered String
      * @since 2.0
      */
@@ -780,9 +781,9 @@ public abstract class StringUtil {
      * StringUtil.center("abc", 7, "")   = "  abc  "
      * </pre>
      *
-     * @param str  the String to center, may be null
-     * @param minLength  the minimum size of new String.
-     * @param padStr  the String to pad the new String with, must not be null or empty
+     * @param str the String to center, may be null
+     * @param minLength the minimum size of new String.
+     * @param padStr the String to pad the new String with, must not be null or empty
      * @return centered String
      */
     public static String center(String str, final int minLength, String padStr) {
@@ -1743,9 +1744,9 @@ public abstract class StringUtil {
      * </pre>
      *
      * @see #replace(String text, String searchString, String replacement, int max)
-     * @param text  text to search and replace in, may be null
-     * @param searchString  the String to search for, may be null
-     * @param replacement  the String to replace with, may be null
+     * @param text text to search and replace in, may be null
+     * @param searchString the String to search for, may be null
+     * @param replacement the String to replace with, may be null
      * @return the text with any replacements processed,
      *  {@code null} if null String input
      */
@@ -3067,8 +3068,8 @@ public abstract class StringUtil {
      * StringUtil.truncate("abcdefg", -1) = throws an IllegalArgumentException
      * </pre>
      *
-     * @param str  the String to truncate, may be null
-     * @param maxWidth  maximum length of result String, must be positive
+     * @param str the String to truncate, may be null
+     * @param maxWidth maximum length of result String, must be positive
      * @return truncated String, {@code null} if null String input
      * @throws IllegalArgumentException If {@code maxWidth} is less than {@code 0}
      * @since 3.5
@@ -3130,9 +3131,9 @@ public abstract class StringUtil {
      * StringUtil.truncate("abcdefghij", -2, 4) = throws an IllegalArgumentException
      * </pre>
      *
-     * @param str  the String to truncate, may be null
-     * @param offset  left edge of source String
-     * @param maxWidth  maximum length of result String, must be positive
+     * @param str the String to truncate, may be null
+     * @param offset left edge of source String
+     * @param maxWidth maximum length of result String, must be positive
      * @return truncated String, {@code null} if null String input
      * @throws IllegalArgumentException If {@code offset} or {@code maxWidth} is less than {@code 0}
      * @since 3.5
@@ -8130,13 +8131,71 @@ public abstract class StringUtil {
                 }
 
                 if (i > fromIndex) {
-                    sb.append(trim ? N.toString(entry.getKey()).trim() : N.toString(entry.getKey()));
-                    sb.append(keyValueDelimiter);
-                    sb.append(trim ? N.toString(entry.getValue()).trim() : N.toString(entry.getValue()));
+                    if (trim) {
+                        sb.append(N.toString(entry.getKey()).trim());
+                        sb.append(keyValueDelimiter);
+                        sb.append(N.toString(entry.getValue()).trim());
+                    } else {
+                        sb.append(N.toString(entry.getKey()));
+                        sb.append(keyValueDelimiter);
+                        sb.append(N.toString(entry.getValue()));
+                    }
                 }
 
                 if (i >= toIndex) {
                     break;
+                }
+            }
+
+            if (N.notNullOrEmpty(suffix)) {
+                sb.append(suffix);
+            }
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
+        }
+    }
+
+    public static <K, V> String joinEntries(final Map<K, V> m, final String entryDelimiter, final String keyValueDelimiter, final String prefix,
+            final String suffix, final boolean trim, final Function<? super K, ?> keyMapper, final Function<? super V, ?> valueMapper) {
+        N.checkArgNotNull(keyMapper, "keyMapper");
+        N.checkArgNotNull(valueMapper, "valueMapper");
+
+        if (N.isNullOrEmpty(m)) {
+            if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+                return N.EMPTY_STRING;
+            } else if (N.isNullOrEmpty(prefix)) {
+                return suffix;
+            } else if (N.isNullOrEmpty(suffix)) {
+                return prefix;
+            } else {
+                return prefix + suffix;
+            }
+        }
+
+        final StringBuilder sb = Objectory.createStringBuilder();
+
+        try {
+            if (N.notNullOrEmpty(prefix)) {
+                sb.append(prefix);
+            }
+
+            int i = 0;
+
+            for (Map.Entry<K, V> entry : m.entrySet()) {
+                if (i++ > 0) {
+                    sb.append(entryDelimiter);
+                }
+
+                if (trim) {
+                    sb.append(N.toString(keyMapper.apply(entry.getKey())).trim());
+                    sb.append(keyValueDelimiter);
+                    sb.append(N.toString(valueMapper.apply(entry.getValue())).trim());
+                } else {
+                    sb.append(N.toString(keyMapper.apply(entry.getKey())));
+                    sb.append(keyValueDelimiter);
+                    sb.append(N.toString(valueMapper.apply(entry.getValue())));
                 }
             }
 
@@ -8723,8 +8782,8 @@ public abstract class StringUtil {
      * StringUtil.rotate("abcdefg", -9)  = "cdefgab"
      * </pre>
      *
-     * @param str  the String to rotate, may be null
-     * @param shift  number of time to shift (positive : right shift, negative : left shift)
+     * @param str the String to rotate, may be null
+     * @param shift number of time to shift (positive : right shift, negative : left shift)
      * @return the rotated String,
      *          or the original String if {@code shift == 0},
      *          or {@code null} if null String input
@@ -8781,10 +8840,10 @@ public abstract class StringUtil {
      * StringUtil.overlay("abcdef", "zzzz", 2, 4)   = "abzzzzef"
      * </pre>
      *
-     * @param str  the String to do overlaying in, may be null
-     * @param overlay  the String to overlay, may be null
-     * @param start  the position to start overlaying at
-     * @param end  the position to stop overlaying before
+     * @param str the String to do overlaying in, may be null
+     * @param overlay the String to overlay, may be null
+     * @param start the position to start overlaying at
+     * @param end the position to stop overlaying before
      * @return overlayed String, {@code ""} if null String input
      * @since 2.0
      */

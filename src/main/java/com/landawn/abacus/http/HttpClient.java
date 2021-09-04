@@ -47,6 +47,7 @@ import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.BufferedReader;
 import com.landawn.abacus.util.BufferedWriter;
 import com.landawn.abacus.util.ContinuableFuture;
+import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
@@ -139,7 +140,7 @@ public final class HttpClient {
         try {
             this._netURL = new URL(url);
         } catch (MalformedURLException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
 
         this._activeConnectionCounter = sharedActiveConnectionCounter;
@@ -1252,8 +1253,8 @@ public final class HttpClient {
             Object headerValue = null;
 
             for (String headerName : headers.headerNameSet()) {
-                // lazy set content-encoding 
-                // because if content-encoding(lz4/snappy/kryo...) is set but no parameter/result write to OutputStream, 
+                // lazy set content-encoding
+                // because if content-encoding(lz4/snappy/kryo...) is set but no parameter/result write to OutputStream,
                 // error may happen when read the input stream in sever side.
 
                 if (Names.CONTENT_ENCODING.equalsIgnoreCase(headerName)) {

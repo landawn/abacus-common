@@ -131,7 +131,7 @@ public class CSVParser {
      *
      * @param separator The delimiter to use for separating entries
      * @param quotechar The character to use for quoted elements
-     * @param escape    The character to use for escaping a separator or quote
+     * @param escape The character to use for escaping a separator or quote
      */
     public CSVParser(char separator, char quotechar, char escape) {
         this(separator, quotechar, escape, DEFAULT_STRICT_QUOTES);
@@ -141,9 +141,9 @@ public class CSVParser {
      * Constructs CSVParser with supplied separator and quote char.
      * Allows setting the "strict quotes" flag.
      *
-     * @param separator    The delimiter to use for separating entries
-     * @param quotechar    The character to use for quoted elements
-     * @param escape       The character to use for escaping a separator or quote
+     * @param separator The delimiter to use for separating entries
+     * @param quotechar The character to use for quoted elements
+     * @param escape The character to use for escaping a separator or quote
      * @param strictQuotes If true, characters outside the quotes are ignored
      */
     public CSVParser(char separator, char quotechar, char escape, boolean strictQuotes) {
@@ -154,10 +154,10 @@ public class CSVParser {
      * Constructs CSVParser with supplied separator and quote char.
      * Allows setting the "strict quotes" and "ignore leading whitespace" flags.
      *
-     * @param separator               The delimiter to use for separating entries
-     * @param quotechar               The character to use for quoted elements
-     * @param escape                  The character to use for escaping a separator or quote
-     * @param strictQuotes            If true, characters outside the quotes are ignored
+     * @param separator The delimiter to use for separating entries
+     * @param quotechar The character to use for quoted elements
+     * @param escape The character to use for escaping a separator or quote
+     * @param strictQuotes If true, characters outside the quotes are ignored
      * @param ignoreLeadingWhiteSpace If true, white space in front of a quote in a field is ignored
      */
     public CSVParser(char separator, char quotechar, char escape, boolean strictQuotes, boolean ignoreLeadingWhiteSpace) {
@@ -168,12 +168,12 @@ public class CSVParser {
      * Constructs CSVParser with supplied separator and quote char.
      * Allows setting the "strict quotes" and "ignore leading whitespace" flags.
      *
-     * @param separator               The delimiter to use for separating entries
-     * @param quotechar               The character to use for quoted elements
-     * @param escape                  The character to use for escaping a separator or quote
-     * @param strictQuotes            If true, characters outside the quotes are ignored
+     * @param separator The delimiter to use for separating entries
+     * @param quotechar The character to use for quoted elements
+     * @param escape The character to use for escaping a separator or quote
+     * @param strictQuotes If true, characters outside the quotes are ignored
      * @param ignoreLeadingWhiteSpace If true, white space in front of a quote in a field is ignored
-     * @param ignoreQuotations        If true, treat quotations like any other character.
+     * @param ignoreQuotations If true, treat quotations like any other character.
      */
     public CSVParser(char separator, char quotechar, char escape, boolean strictQuotes, boolean ignoreLeadingWhiteSpace, boolean ignoreQuotations) {
         if (anyCharactersAreTheSame(separator, quotechar, escape)) {
@@ -241,7 +241,7 @@ public class CSVParser {
      *
      * @param separator The defined separator character
      * @param quotechar The defined quotation cahracter
-     * @param escape    The defined escape character
+     * @param escape The defined escape character
      * @return True if any two of the three are the same.
      */
     private boolean anyCharactersAreTheSame(char separator, char quotechar, char escape) {
@@ -447,7 +447,7 @@ public class CSVParser {
      *
      * @param nextLine The current line
      * @param inQuotes True if the current context is quoted
-     * @param i        Current index in line
+     * @param i Current index in line
      * @return True if the following character is a quote
      */
     private boolean isNextCharacterEscapedQuote(String nextLine, boolean inQuotes, int i) {
@@ -498,7 +498,7 @@ public class CSVParser {
      *
      * @param nextLine The current line
      * @param inQuotes True if the current context is quoted
-     * @param i        Current index in line
+     * @param i Current index in line
      * @return True if the following character is a quote
      */
     protected boolean isNextCharacterEscapable(String nextLine, boolean inQuotes, int i) {

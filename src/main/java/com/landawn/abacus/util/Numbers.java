@@ -676,7 +676,7 @@ public final class Numbers {
      * </pre>
      *
      * @param value the {@code BigDecimal} to convert, may be {@code null}.
-     * @param defaultValue the default value
+     * @param defaultValue
      * @return the double represented by the {@code BigDecimal} or the
      *  defaultValue if the {@code BigDecimal} is {@code null}.
      * @since 3.8
@@ -1201,7 +1201,7 @@ public final class Numbers {
      * <p>Note, {@link #createNumber(String)} should return a number for every
      * input resulting in {@code true}.</p>
      *
-     * @param str  the {@code String} to check
+     * @param str the {@code String} to check
      * @return {@code true} if the string is a correctly formatted number
      * @since 3.5
      */
@@ -1365,7 +1365,7 @@ public final class Numbers {
      * <p>{@code Null} and empty String will return
      * {@code false}.</p>
      *
-     * @param str  the {@code String} to check
+     * @param str the {@code String} to check
      * @return {@code true} if str contains only Unicode numeric
      */
     public static boolean isDigits(final String str) {

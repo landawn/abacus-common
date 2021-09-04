@@ -35,7 +35,7 @@ public final class Throwables {
         try {
             cmd.run();
         } catch (Throwable e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -66,7 +66,7 @@ public final class Throwables {
         try {
             return cmd.call();
         } catch (Throwable e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -140,7 +140,7 @@ public final class Throwables {
             if (predicate.test(e)) {
                 return supplier.get();
             } else {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e);
             }
         }
     }
@@ -164,7 +164,7 @@ public final class Throwables {
             if (predicate.test(e)) {
                 return defaultValue;
             } else {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e);
             }
         }
     }

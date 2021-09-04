@@ -14,14 +14,14 @@
 
 package com.landawn.abacus.type;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
+import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.N;
 
 /**
@@ -66,7 +66,7 @@ public class URLType extends AbstractType<URL> {
         try {
             return new URL(str);
         } catch (MalformedURLException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 

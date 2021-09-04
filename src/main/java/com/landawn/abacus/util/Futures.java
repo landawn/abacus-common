@@ -238,7 +238,7 @@ public final class Futures {
                 } catch (InterruptedException | ExecutionException e) {
                     throw e;
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
 
@@ -251,7 +251,7 @@ public final class Futures {
                 } catch (InterruptedException | ExecutionException | TimeoutException e) {
                     throw e;
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         });
@@ -762,7 +762,7 @@ public final class Futures {
                 final Pair<T, Exception> result = iter.next();
 
                 if (result.right != null) {
-                    throw N.toRuntimeException(result.right);
+                    throw ExceptionUtil.toRuntimeException(result.right);
                 }
 
                 return result.left;
@@ -886,7 +886,7 @@ public final class Futures {
             } else if (result.right instanceof ExecutionException) {
                 throw ((ExecutionException) result.right);
             } else {
-                throw N.toRuntimeException(result.right);
+                throw ExceptionUtil.toRuntimeException(result.right);
             }
         }
 

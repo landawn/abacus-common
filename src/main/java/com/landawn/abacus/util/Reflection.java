@@ -138,7 +138,7 @@ public final class Reflection<T> {
 
                 return (V) field.get(target);
             } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e);
             }
         }
     }
@@ -159,7 +159,7 @@ public final class Reflection<T> {
 
                 field.set(target, value);
             } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e);
             }
         }
 
@@ -184,7 +184,7 @@ public final class Reflection<T> {
 
                 return (V) method.invoke(target, args);
             } catch (SecurityException | IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e);
             }
         }
     }

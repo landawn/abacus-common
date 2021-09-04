@@ -167,7 +167,7 @@ public final class XMLUtil {
 
             return writer.toString();
         } catch (JAXBException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -198,7 +198,7 @@ public final class XMLUtil {
 
             return (T) nnmarshaller.unmarshal(reader);
         } catch (JAXBException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -219,7 +219,7 @@ public final class XMLUtil {
 
             return jc.createMarshaller();
         } catch (JAXBException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -240,7 +240,7 @@ public final class XMLUtil {
 
             return jc.createMarshaller();
         } catch (JAXBException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -261,7 +261,7 @@ public final class XMLUtil {
 
             return jc.createUnmarshaller();
         } catch (JAXBException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -282,7 +282,7 @@ public final class XMLUtil {
 
             return jc.createUnmarshaller();
         } catch (JAXBException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -297,7 +297,7 @@ public final class XMLUtil {
             try {
                 return docBuilderFactory.newDocumentBuilder();
             } catch (ParserConfigurationException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e);
             }
         }
     }
@@ -325,7 +325,7 @@ public final class XMLUtil {
                 docBuilderFactory.setIgnoringComments(orgIgnoreComments);
                 docBuilderFactory.setIgnoringElementContentWhitespace(orgIgnoringElementContentWhitespace);
             } catch (ParserConfigurationException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e);
             }
         }
 
@@ -360,7 +360,7 @@ public final class XMLUtil {
                     docBuilderFactory.setIgnoringElementContentWhitespace(orgIgnoringElementContentWhitespace);
                 }
             } catch (ParserConfigurationException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e);
             }
 
             return documentBuilder;
@@ -398,7 +398,7 @@ public final class XMLUtil {
                 try {
                     saxParser = saxParserFactory.newSAXParser();
                 } catch (ParserConfigurationException e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 } catch (SAXException e) {
                     throw new ParseException(e);
                 }
@@ -436,7 +436,7 @@ public final class XMLUtil {
         try {
             return xmlInputFactory.createXMLStreamReader(reader);
         } catch (XMLStreamException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -450,7 +450,7 @@ public final class XMLUtil {
         try {
             return xmlInputFactory.createXMLStreamReader(stream);
         } catch (XMLStreamException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -465,7 +465,7 @@ public final class XMLUtil {
         try {
             return xmlInputFactory.createXMLStreamReader(stream, encoding);
         } catch (XMLStreamException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -480,7 +480,7 @@ public final class XMLUtil {
         try {
             return xmlInputFactory.createFilteredReader(reader, filter);
         } catch (XMLStreamException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -494,7 +494,7 @@ public final class XMLUtil {
         try {
             return xmlOutputFactory.createXMLStreamWriter(writer);
         } catch (XMLStreamException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -508,7 +508,7 @@ public final class XMLUtil {
         try {
             return xmlOutputFactory.createXMLStreamWriter(stream);
         } catch (XMLStreamException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -523,7 +523,7 @@ public final class XMLUtil {
         try {
             return xmlOutputFactory.createXMLStreamWriter(stream, encoding);
         } catch (XMLStreamException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -536,7 +536,7 @@ public final class XMLUtil {
         try {
             return transferFactory.newTransformer();
         } catch (TransformerConfigurationException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -581,7 +581,7 @@ public final class XMLUtil {
         try {
             createXMLTransformer().transform(source, result);
         } catch (TransformerException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 

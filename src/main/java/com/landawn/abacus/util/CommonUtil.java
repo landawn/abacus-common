@@ -993,7 +993,7 @@ class CommonUtil {
 
                 return invoke(ClassUtil.getDeclaredConstructor(cls, instance.getClass()), instance);
             } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e);
             }
         } else {
             try {
@@ -1005,7 +1005,7 @@ class CommonUtil {
 
                 return invoke(constructor);
             } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e);
             }
         }
     }
@@ -8090,12 +8090,11 @@ class CommonUtil {
     }
 
     /**
-     * Find first.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param predicate the predicate
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param predicate
      * @return the nullable
      * @throws E the e
      */
@@ -8114,12 +8113,11 @@ class CommonUtil {
     }
 
     /**
-     * Find first.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param predicate the predicate
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param predicate
      * @return the nullable
      * @throws E the e
      */
@@ -8165,12 +8163,11 @@ class CommonUtil {
     }
 
     /**
-     * Find last.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param predicate the predicate
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param predicate
      * @return the nullable
      * @throws E the e
      */
@@ -8189,12 +8186,11 @@ class CommonUtil {
     }
 
     /**
-     * Find last.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param predicate the predicate
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param predicate
      * @return the nullable
      * @throws E the e
      */
@@ -8203,14 +8199,13 @@ class CommonUtil {
     }
 
     /**
-     * Find last.
      *
-     * @param <T> the generic type
-     * @param <R> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param predicate the predicate
-     * @param isForNonNull the is for non null
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param c
+     * @param predicate
+     * @param isForNonNull
      * @return the r
      * @throws E the e
      */
@@ -8274,10 +8269,10 @@ class CommonUtil {
     /**
      * Find first non null.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param predicate the predicate
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param predicate
      * @return the optional
      * @throws E the e
      */
@@ -8298,10 +8293,10 @@ class CommonUtil {
     /**
      * Find first non null.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param predicate the predicate
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param predicate
      * @return the optional
      * @throws E the e
      */
@@ -8351,10 +8346,10 @@ class CommonUtil {
     /**
      * Find last non null.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param predicate the predicate
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param predicate
      * @return the optional
      * @throws E the e
      */
@@ -8375,10 +8370,10 @@ class CommonUtil {
     /**
      * Find last non null.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param predicate the predicate
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param predicate
      * @return the optional
      * @throws E the e
      */
@@ -8389,9 +8384,9 @@ class CommonUtil {
     /**
      * Return at most first <code>n</code> elements.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param n the n
+     * @param <T>
+     * @param c
+     * @param n
      * @return the list
      */
     public static <T> List<T> first(final Collection<? extends T> c, final int n) {
@@ -8422,9 +8417,9 @@ class CommonUtil {
     /**
      * Return at most last <code>n</code> elements.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param n the n
+     * @param <T>
+     * @param c
+     * @param n
      * @return the list
      */
     public static <T> List<T> last(final Collection<? extends T> c, final int n) {
@@ -8456,10 +8451,10 @@ class CommonUtil {
     /**
      * Returns a read-only <code>Seq</code>.
      *
-     * @param <T> the generic type
-     * @param a the a
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      * @return the immutable collection<? extends t>
      */
     public static <T> ImmutableList<? extends T> slice(final T[] a, final int fromIndex, final int toIndex) {
@@ -8475,10 +8470,10 @@ class CommonUtil {
     /**
      * Returns a read-only <code>ImmutableCollection</code>.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
      * @return the immutable collection<? extends t>
      */
     public static <T> ImmutableList<? extends T> slice(final List<? extends T> c, final int fromIndex, final int toIndex) {
@@ -8494,10 +8489,10 @@ class CommonUtil {
     /**
      * Returns a read-only <code>ImmutableCollection</code>.
      *
-     * @param <T> the generic type
-     * @param c the c
-     * @param fromIndex the from index
-     * @param toIndex the to index
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
      * @return the immutable collection<? extends t>
      */
     public static <T> ImmutableCollection<? extends T> slice(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
@@ -20034,8 +20029,8 @@ class CommonUtil {
      *
      * <p>This method returns {@link #INDEX_NOT_FOUND} ({@code -1}) for a {@code null} input array.
      *
-     * @param a  the array to search through for the object, may be {@code null}
-     * @param valueToFind  the value to find
+     * @param a the array to search through for the object, may be {@code null}
+     * @param valueToFind 
      * @param tolerance tolerance of the search
      * @return the index of the value within the array,
      *  {@link #INDEX_NOT_FOUND} ({@code -1}) if not found or {@code null} array input
@@ -20054,9 +20049,9 @@ class CommonUtil {
      * <p>A negative startIndex is treated as zero. A startIndex larger than the array
      * length will return {@link #INDEX_NOT_FOUND} ({@code -1}).
      *
-     * @param a  the array to search through for the object, may be {@code null}
-     * @param valueToFind  the value to find
-     * @param startIndex  the index to start searching at
+     * @param a the array to search through for the object, may be {@code null}
+     * @param valueToFind 
+     * @param startIndex the index to start searching at
      * @param tolerance tolerance of the search
      * @return the index of the value within the array,
      *  {@link #INDEX_NOT_FOUND} ({@code -1}) if not found or {@code null} array input
@@ -20545,8 +20540,8 @@ class CommonUtil {
      *
      * <p>This method returns {@link #INDEX_NOT_FOUND} ({@code -1}) for a {@code null} input array.
      *
-     * @param a  the array to search through for the object, may be {@code null}
-     * @param valueToFind  the value to find
+     * @param a the array to search through for the object, may be {@code null}
+     * @param valueToFind 
      * @param tolerance tolerance of the search
      * @return the index of the value within the array,
      *  {@link #INDEX_NOT_FOUND} ({@code -1}) if not found or {@code null} array input
@@ -20565,10 +20560,10 @@ class CommonUtil {
      * <p>A negative startIndex will return {@link #INDEX_NOT_FOUND} ({@code -1}). A startIndex larger than the
      * array length will search from the end of the array.
      *
-     * @param a  the array to traverse for looking for the object, may be {@code null}
-     * @param valueToFind  the value to find
-     * @param startIndexFromBack  the start index to traverse backwards from
-     * @param tolerance  search for value within plus/minus this amount
+     * @param a the array to traverse for looking for the object, may be {@code null}
+     * @param valueToFind 
+     * @param startIndexFromBack the start index to traverse backwards from
+     * @param tolerance search for value within plus/minus this amount
      * @return the last index of the value within the array,
      *  {@link #INDEX_NOT_FOUND} ({@code -1}) if not found or {@code null} array input
      */
@@ -20720,10 +20715,10 @@ class CommonUtil {
     /**
      * Find first index.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param predicate the predicate
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param predicate
      * @return the optional int
      * @throws E the e
      */
@@ -20744,10 +20739,10 @@ class CommonUtil {
     /**
      * Find first index.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param predicate the predicate
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param predicate
      * @return the optional int
      * @throws E the e
      */
@@ -20773,10 +20768,10 @@ class CommonUtil {
     /**
      * Find last index.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param a the a
-     * @param predicate the predicate
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param predicate
      * @return the optional int
      * @throws E the e
      */
@@ -20797,10 +20792,10 @@ class CommonUtil {
     /**
      * Find last index.
      *
-     * @param <T> the generic type
-     * @param <E> the element type
-     * @param c the c
-     * @param predicate the predicate
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param predicate
      * @return the optional int
      * @throws E the e
      */

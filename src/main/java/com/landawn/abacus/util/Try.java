@@ -83,7 +83,7 @@ public final class Try<T extends AutoCloseable> {
         try {
             cmd.run();
         } catch (Exception e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -111,7 +111,7 @@ public final class Try<T extends AutoCloseable> {
         try {
             return cmd.call();
         } catch (Exception e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -176,7 +176,7 @@ public final class Try<T extends AutoCloseable> {
             if (predicate.test(e)) {
                 return supplier.get();
             } else {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e);
             }
         }
     }
@@ -197,7 +197,7 @@ public final class Try<T extends AutoCloseable> {
             if (predicate.test(e)) {
                 return defaultValue;
             } else {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e);
             }
         }
     }
@@ -218,7 +218,7 @@ public final class Try<T extends AutoCloseable> {
         try (final AutoCloseable c = targetResource == null ? (targetResourceSupplier == null ? EMPTY : targetResourceSupplier.get()) : targetResource) {
             cmd.accept(targetResource);
         } catch (Exception e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         } finally {
             if (finalAction != null) {
                 finalAction.run();
@@ -253,7 +253,7 @@ public final class Try<T extends AutoCloseable> {
         try (final AutoCloseable c = targetResource == null ? (targetResourceSupplier == null ? EMPTY : targetResourceSupplier.get()) : targetResource) {
             return cmd.apply(targetResource);
         } catch (Exception e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         } finally {
             if (finalAction != null) {
                 finalAction.run();
@@ -334,7 +334,7 @@ public final class Try<T extends AutoCloseable> {
             if (predicate.test(e)) {
                 return supplier.get();
             } else {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e);
             }
         } finally {
             if (finalAction != null) {
@@ -358,7 +358,7 @@ public final class Try<T extends AutoCloseable> {
             if (predicate.test(e)) {
                 return defaultValue;
             } else {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e);
             }
         } finally {
             if (finalAction != null) {

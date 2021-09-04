@@ -511,7 +511,7 @@ public final class ClassUtil {
         try {
             FIELD_MASK = ClassMask.class.getDeclaredField(ClassMask.FIELD_MASK);
         } catch (Exception e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -1997,7 +1997,7 @@ public final class ClassUtil {
         try {
             return (T) propGetMethod.invoke(entity);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -2105,7 +2105,7 @@ public final class ClassUtil {
             try {
                 propSetMethod.invoke(entity, N.defaultValueOf(propSetMethod.getParameterTypes()[0]));
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                throw N.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e);
             }
         } else {
             try {
@@ -2120,7 +2120,7 @@ public final class ClassUtil {
                 try {
                     propSetMethod.invoke(entity, propValue);
                 } catch (IllegalAccessException | InvocationTargetException e2) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         }
@@ -2523,7 +2523,7 @@ public final class ClassUtil {
         try {
             return constructor.newInstance(args);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -2554,7 +2554,7 @@ public final class ClassUtil {
         try {
             return (T) method.invoke(instance, args);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 

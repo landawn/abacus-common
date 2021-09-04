@@ -334,7 +334,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     public static <K, V, E extends Exception> ExceptionalStream<Map.Entry<K, V>, E> of(final Map<K, V> m) {
-        if (m == null) {
+        if (N.isNullOrEmpty(m)) {
             return empty();
         }
 
@@ -703,7 +703,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     public static <K, V, E extends Exception> ExceptionalStream<K, E> ofKeys(final Map<K, V> map, final Throwables.Predicate<? super V, E> valueFilter) {
-        if (map == null || map.size() == 0) {
+        if (N.isNullOrEmpty(map)) {
             return empty();
         }
 
@@ -712,7 +712,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     public static <K, V, E extends Exception> ExceptionalStream<K, E> ofKeys(final Map<K, V> map,
             final Throwables.BiPredicate<? super K, ? super V, E> filter) {
-        if (map == null || map.size() == 0) {
+        if (N.isNullOrEmpty(map)) {
             return empty();
         }
 
@@ -728,7 +728,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     public static <K, V, E extends Exception> ExceptionalStream<V, E> ofValues(final Map<K, V> map, final Throwables.Predicate<? super K, E> keyFilter) {
-        if (map == null || map.size() == 0) {
+        if (N.isNullOrEmpty(map)) {
             return empty();
         }
 
@@ -737,7 +737,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     public static <K, V, E extends Exception> ExceptionalStream<V, E> ofValues(final Map<K, V> map,
             final Throwables.BiPredicate<? super K, ? super V, E> filter) {
-        if (map == null || map.size() == 0) {
+        if (N.isNullOrEmpty(map)) {
             return empty();
         }
 
@@ -1211,7 +1211,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     }
 
                     cur = iterators.next();
-                    iter = cur.elements;
+                    iter = cur == null ? null : cur.elements;
                 }
 
                 return iter != null && iter.hasNext();
@@ -1291,14 +1291,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     public static <A, B, T, E extends Exception> ExceptionalStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
             final Throwables.BiFunction<? super A, ? super B, T, ? extends E> zipFunction) {
         return newStream(new ExceptionalIterator<T, E>() {
+            private final Iterator<? extends A> iterA = a == null ? ObjIterator.<A> empty() : a;
+            private final Iterator<? extends B> iterB = b == null ? ObjIterator.<B> empty() : b;
+
             @Override
             public boolean hasNext() throws E {
-                return a.hasNext() && b.hasNext();
+                return iterA.hasNext() && iterB.hasNext();
             }
 
             @Override
             public T next() throws E {
-                return zipFunction.apply(a.next(), b.next());
+                return zipFunction.apply(iterA.next(), iterB.next());
             }
         });
     }
@@ -1314,14 +1317,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     public static <A, B, C, T, E extends Exception> ExceptionalStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
             final Iterator<? extends C> c, final Throwables.TriFunction<? super A, ? super B, ? super C, T, ? extends E> zipFunction) {
         return newStream(new ExceptionalIterator<T, E>() {
+            private final Iterator<? extends A> iterA = a == null ? ObjIterator.<A> empty() : a;
+            private final Iterator<? extends B> iterB = b == null ? ObjIterator.<B> empty() : b;
+            private final Iterator<? extends C> iterC = c == null ? ObjIterator.<C> empty() : c;
+
             @Override
             public boolean hasNext() throws E {
-                return a.hasNext() && b.hasNext() && c.hasNext();
+                return iterA.hasNext() && iterB.hasNext() && iterC.hasNext();
             }
 
             @Override
             public T next() throws E {
-                return zipFunction.apply(a.next(), b.next(), c.next());
+                return zipFunction.apply(iterA.next(), iterB.next(), iterC.next());
             }
         });
     }
@@ -1337,8 +1344,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     public static <A, B, T, E extends Exception> ExceptionalStream<T, E> zip(final ExceptionalStream<? extends A, E> a,
             final ExceptionalStream<? extends B, E> b, final Throwables.BiFunction<? super A, ? super B, T, ? extends E> zipFunction) {
         return newStream(new ExceptionalIterator<T, E>() {
-            private final ExceptionalIterator<? extends A, E> iterA = a.elements;
-            private final ExceptionalIterator<? extends B, E> iterB = b.elements;
+            private final ExceptionalIterator<? extends A, E> iterA = iterate(a);
+            private final ExceptionalIterator<? extends B, E> iterB = iterate(b);
 
             @Override
             public boolean hasNext() throws E {
@@ -1365,9 +1372,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             final ExceptionalStream<? extends B, E> b, final ExceptionalStream<? extends C, E> c,
             final Throwables.TriFunction<? super A, ? super B, ? super C, T, ? extends E> zipFunction) {
         return newStream(new ExceptionalIterator<T, E>() {
-            private final ExceptionalIterator<? extends A, E> iterA = a.elements;
-            private final ExceptionalIterator<? extends B, E> iterB = b.elements;
-            private final ExceptionalIterator<? extends C, E> iterC = c.elements;
+            private final ExceptionalIterator<? extends A, E> iterA = iterate(a);
+            private final ExceptionalIterator<? extends B, E> iterB = iterate(b);
+            private final ExceptionalIterator<? extends C, E> iterC = iterate(c);
 
             @Override
             public boolean hasNext() throws E {
@@ -1464,9 +1471,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     public static <A, B, T, E extends Exception> ExceptionalStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
             final A valueForNoneA, final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, T, ? extends E> zipFunction) {
         return newStream(new ExceptionalIterator<T, E>() {
+            private final Iterator<? extends A> iterA = a == null ? ObjIterator.<A> empty() : a;
+            private final Iterator<? extends B> iterB = b == null ? ObjIterator.<B> empty() : b;
+
             @Override
             public boolean hasNext() throws E {
-                return a.hasNext() || b.hasNext();
+                return iterA.hasNext() || iterB.hasNext();
             }
 
             @Override
@@ -1475,7 +1485,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     throw new NoSuchElementException();
                 }
 
-                return zipFunction.apply(a.hasNext() ? a.next() : valueForNoneA, b.hasNext() ? b.next() : valueForNoneB);
+                return zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB);
             }
         });
     }
@@ -1497,9 +1507,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             final Iterator<? extends C> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
             final Throwables.TriFunction<? super A, ? super B, ? super C, T, ? extends E> zipFunction) {
         return newStream(new ExceptionalIterator<T, E>() {
+            private final Iterator<? extends A> iterA = a == null ? ObjIterator.<A> empty() : a;
+            private final Iterator<? extends B> iterB = b == null ? ObjIterator.<B> empty() : b;
+            private final Iterator<? extends C> iterC = c == null ? ObjIterator.<C> empty() : c;
+
             @Override
             public boolean hasNext() throws E {
-                return a.hasNext() || b.hasNext() || c.hasNext();
+                return iterA.hasNext() || iterB.hasNext() || iterC.hasNext();
             }
 
             @Override
@@ -1508,8 +1522,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     throw new NoSuchElementException();
                 }
 
-                return zipFunction.apply(a.hasNext() ? a.next() : valueForNoneA, b.hasNext() ? b.next() : valueForNoneB,
-                        c.hasNext() ? c.next() : valueForNoneC);
+                return zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB,
+                        iterC.hasNext() ? iterC.next() : valueForNoneC);
             }
         });
     }
@@ -1526,8 +1540,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             final ExceptionalStream<? extends B, E> b, final A valueForNoneA, final B valueForNoneB,
             final Throwables.BiFunction<? super A, ? super B, T, ? extends E> zipFunction) {
         return newStream(new ExceptionalIterator<T, E>() {
-            private final ExceptionalIterator<? extends A, E> iterA = a.elements;
-            private final ExceptionalIterator<? extends B, E> iterB = b.elements;
+            private final ExceptionalIterator<? extends A, E> iterA = iterate(a);
+            private final ExceptionalIterator<? extends B, E> iterB = iterate(b);
 
             @Override
             public boolean hasNext() throws E {
@@ -1558,9 +1572,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             final ExceptionalStream<? extends B, E> b, final ExceptionalStream<? extends C, E> c, final A valueForNoneA, final B valueForNoneB,
             final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, T, ? extends E> zipFunction) {
         return newStream(new ExceptionalIterator<T, E>() {
-            private final ExceptionalIterator<? extends A, E> iterA = a.elements;
-            private final ExceptionalIterator<? extends B, E> iterB = b.elements;
-            private final ExceptionalIterator<? extends C, E> iterC = c.elements;
+            private final ExceptionalIterator<? extends A, E> iterA = iterate(a);
+            private final ExceptionalIterator<? extends B, E> iterB = iterate(b);
+            private final ExceptionalIterator<? extends C, E> iterC = iterate(c);
 
             @Override
             public boolean hasNext() throws E {
@@ -1663,7 +1677,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> merge(final T[] a, final T[] b, final T[] c,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
-        return merge(merge(a, b, nextSelector).iterator(), ExceptionalIterator.<T, E> wrap(N.iterate(c)), nextSelector);
+        return merge(merge(a, b, nextSelector).iteratorEx(), ExceptionalIterator.<T, E> wrap(N.iterate(c)), nextSelector);
     }
 
     /**
@@ -1713,7 +1727,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
             final Iterator<? extends T> c, final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
-        return merge(merge(a, b, nextSelector).iterator(), ExceptionalIterator.<T, E> wrap(c), nextSelector);
+        return merge(merge(a, b, nextSelector).iteratorEx(), ExceptionalIterator.<T, E> wrap(c), nextSelector);
     }
 
     /**
@@ -1725,13 +1739,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> merge(final ExceptionalStream<? extends T, E> a, final ExceptionalStream<? extends T, E> b,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
-        return merge(a.iterator(), b.iterator(), nextSelector).onClose(new Throwables.Runnable<E>() {
+        return merge(iterate(a), iterate(b), nextSelector).onClose(new Throwables.Runnable<E>() {
             @Override
             public void run() throws E {
                 try {
-                    a.close();
+                    if (a != null) {
+                        a.close();
+                    }
                 } finally {
-                    b.close();
+                    if (b != null) {
+                        b.close();
+                    }
                 }
             }
         });
@@ -1745,6 +1763,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     static <T, E extends Exception> ExceptionalStream<T, E> merge(final ExceptionalIterator<? extends T, E> a, final ExceptionalIterator<? extends T, E> b,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
         return newStream(new ExceptionalIterator<T, E>() {
+            private final ExceptionalIterator<T, E> iterA = a == null ? ExceptionalIterator.EMPTY : (ExceptionalIterator<T, E>) a;
+            private final ExceptionalIterator<T, E> iterB = b == null ? ExceptionalIterator.EMPTY : (ExceptionalIterator<T, E>) b;
+
             private T nextA = null;
             private T nextB = null;
             private boolean hasNextA = false;
@@ -1752,14 +1773,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
             @Override
             public boolean hasNext() throws E {
-                return hasNextA || hasNextB || a.hasNext() || b.hasNext();
+                return hasNextA || hasNextB || iterA.hasNext() || iterB.hasNext();
             }
 
             @Override
             public T next() throws E {
                 if (hasNextA) {
-                    if (b.hasNext()) {
-                        if (nextSelector.apply(nextA, (nextB = b.next())) == MergeResult.TAKE_FIRST) {
+                    if (iterB.hasNext()) {
+                        if (nextSelector.apply(nextA, (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
                             hasNextA = false;
                             hasNextB = true;
                             return nextA;
@@ -1771,8 +1792,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                         return nextA;
                     }
                 } else if (hasNextB) {
-                    if (a.hasNext()) {
-                        if (nextSelector.apply((nextA = a.next()), nextB) == MergeResult.TAKE_FIRST) {
+                    if (iterA.hasNext()) {
+                        if (nextSelector.apply((nextA = iterA.next()), nextB) == MergeResult.TAKE_FIRST) {
                             return nextA;
                         } else {
                             hasNextA = true;
@@ -1783,9 +1804,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                         hasNextB = false;
                         return nextB;
                     }
-                } else if (a.hasNext()) {
-                    if (b.hasNext()) {
-                        if (nextSelector.apply((nextA = a.next()), (nextB = b.next())) == MergeResult.TAKE_FIRST) {
+                } else if (iterA.hasNext()) {
+                    if (iterB.hasNext()) {
+                        if (nextSelector.apply((nextA = iterA.next()), (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
                             hasNextB = true;
                             return nextA;
                         } else {
@@ -1793,10 +1814,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                             return nextB;
                         }
                     } else {
-                        return a.next();
+                        return iterA.next();
                     }
-                } else if (b.hasNext()) {
-                    return b.next();
+                } else if (iterB.hasNext()) {
+                    return iterB.next();
                 } else {
                     throw new NoSuchElementException();
                 }
@@ -2242,11 +2263,15 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                         s = mapper.apply(elements.next());
 
-                        if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers;
-                        }
+                        if (s == null) {
+                            cur = null;
+                        } else {
+                            if (N.notNullOrEmpty(s.closeHandlers)) {
+                                closeHandle = s.closeHandlers;
+                            }
 
-                        cur = s.elements;
+                            cur = s.elements;
+                        }
                     } else {
                         cur = null;
                         break;
@@ -3863,7 +3888,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     } else {
                         final ExceptionalStream<T, E> s = supplier.get();
                         holder.setValue(s);
-                        iter = s.iterator();
+                        iter = iterate(s);
                     }
                 }
             }
@@ -5066,7 +5091,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         assertNotClosed();
 
         return newStream(new ExceptionalIterator<T, E>() {
-            private final ExceptionalIterator<T, E> iter = iterator();
+            private final ExceptionalIterator<T, E> iter = iteratorEx();
             private boolean toInsert = false;
 
             @Override
@@ -8565,7 +8590,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         try {
             boolean isBufferedWriter = writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
             final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);
-            final ExceptionalIterator<T, E> iter = iterator();
+            final ExceptionalIterator<T, E> iter = iteratorEx();
             long cnt = 0;
 
             try {
@@ -8598,6 +8623,25 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final File file) throws E, IOException {
+        assertNotClosed();
+
+        return persist(writeLine, null, null, file);
+    }
+
+    public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final String header, final String tail, final File file)
+            throws E, IOException {
+        assertNotClosed();
+
+        final Writer writer = new FileWriter(file);
+
+        try {
+            return persist(writeLine, header, tail, writer);
+        } finally {
+            IOUtil.close(writer);
+        }
+    }
+
     public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final Writer writer) throws E, IOException {
         assertNotClosed();
 
@@ -8611,7 +8655,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         try {
             boolean isBufferedWriter = writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
             final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);
-            final ExceptionalIterator<T, E> iter = iterator();
+            final ExceptionalIterator<T, E> iter = iteratorEx();
             long cnt = 0;
 
             try {
@@ -8667,7 +8711,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 batchInterval);
 
         try {
-            final ExceptionalIterator<T, E> iter = iterator();
+            final ExceptionalIterator<T, E> iter = iteratorEx();
             long cnt = 0;
             while (iter.hasNext()) {
                 stmtSetter.accept(iter.next(), stmt);
@@ -8724,7 +8768,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     try {
                         ExceptionalStream.this.close();
                     } catch (Exception e) {
-                        throw N.toRuntimeException(e);
+                        throw ExceptionUtil.toRuntimeException(e);
                     }
                 }
             });
@@ -8746,7 +8790,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     try {
                         ExceptionalStream.this.close();
                     } catch (Exception e) {
-                        throw N.toRuntimeException(e);
+                        throw ExceptionUtil.toRuntimeException(e);
                     }
                 }
             });
@@ -8859,6 +8903,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //        }, sorted, comparator, newCloseHandlers);
     //    }
 
+    @IntermediateOp
+    @Beta
+    public ExceptionalStream<T, Exception> cast() {
+        assertNotClosed();
+
+        return (ExceptionalStream<T, Exception>) this;
+    }
+
     /**
      *
      * @param <SS>
@@ -8907,11 +8959,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //    }
 
     /**
+     * Temporarily switch the stream to parallel stream for operation {@code ops} and then switch back to sequence stream.
+     * <br />
+     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
      *
      * @param <R>
      * @param ops
      * @return
      * @see Stream#sps(Function)
+     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
+     * @see ExceptionUtil#hasCause(Throwable, Class)
+     * @see ExceptionUtil#hasCause(Throwable, Predicate)
      */
     @IntermediateOp
     @Beta
@@ -8922,12 +8981,19 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * Temporarily switch the stream to parallel stream for operation {@code ops} and then switch back to sequence stream.
+     * <br />
+     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
      *
      * @param <R>
      * @param maxThreadNum
      * @param ops
      * @return
      * @see Stream#sps(int, Function)
+     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
+     * @see ExceptionUtil#hasCause(Throwable, Class)
+     * @see ExceptionUtil#hasCause(Throwable, Predicate)
      */
     @IntermediateOp
     @Beta
@@ -8939,10 +9005,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code filter} and then switch back to sequence stream.
+     * <br />
+     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
      *
      * @param predicate
      * @return
      * @see Stream#spsFilter(Predicate)
+     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
+     * @see ExceptionUtil#hasCause(Throwable, Class)
+     * @see ExceptionUtil#hasCause(Throwable, Predicate)
      */
     @IntermediateOp
     @Beta
@@ -8959,11 +9031,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code map} and then switch back to sequence stream.
+     * <br />
+     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
      *
      * @param <R>
      * @param mapper
      * @return
      * @see Stream#spsMap(Function)
+     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
+     * @see ExceptionUtil#hasCause(Throwable, Class)
+     * @see ExceptionUtil#hasCause(Throwable, Predicate)
      */
     @IntermediateOp
     @Beta
@@ -8980,11 +9058,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
+     * <br />
+     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
      *
      * @param <R>
      * @param mapper
      * @return
      * @see Stream#spsFlatMap(Function)
+     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
+     * @see ExceptionUtil#hasCause(Throwable, Class)
+     * @see ExceptionUtil#hasCause(Throwable, Predicate)
      */
     @IntermediateOp
     @Beta
@@ -9001,11 +9085,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
+     * <br />
+     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
      *
      * @param <R>
      * @param mapper
      * @return
      * @see Stream#spsFlattMap(Function)
+     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
+     * @see ExceptionUtil#hasCause(Throwable, Class)
+     * @see ExceptionUtil#hasCause(Throwable, Predicate)
      */
     @IntermediateOp
     @Beta
@@ -9022,10 +9112,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code onEach} and then switch back to sequence stream.
+     * <br />
+     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
      *
      * @param action
      * @return
      * @see Stream#onEach(Consumer)
+     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
+     * @see ExceptionUtil#hasCause(Throwable, Class)
+     * @see ExceptionUtil#hasCause(Throwable, Predicate)
      */
     @IntermediateOp
     @Beta
@@ -9042,10 +9138,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code filter} and then switch back to sequence stream.
+     * <br />
+     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
      *
      * @param predicate
      * @return
      * @see Stream#spsFilter(int, Predicate)
+     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
+     * @see ExceptionUtil#hasCause(Throwable, Class)
+     * @see ExceptionUtil#hasCause(Throwable, Predicate)
      */
     @IntermediateOp
     @Beta
@@ -9062,11 +9164,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code map} and then switch back to sequence stream.
+     * <br />
+     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
      *
      * @param <R>
      * @param mapper
      * @return
      * @see Stream#spsMap(int, Function)
+     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
+     * @see ExceptionUtil#hasCause(Throwable, Class)
+     * @see ExceptionUtil#hasCause(Throwable, Predicate)
      */
     @IntermediateOp
     @Beta
@@ -9083,11 +9191,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
+     * <br />
+     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
      *
      * @param <R>
      * @param mapper
      * @return
      * @see Stream#spsFlatMap(int, Function)
+     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
+     * @see ExceptionUtil#hasCause(Throwable, Class)
+     * @see ExceptionUtil#hasCause(Throwable, Predicate)
      */
     @IntermediateOp
     @Beta
@@ -9104,11 +9218,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
+     * <br />
+     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
      *
      * @param <R>
      * @param mapper
      * @return
      * @see Stream#spsFlattMap(int, Function)
+     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
+     * @see ExceptionUtil#hasCause(Throwable, Class)
+     * @see ExceptionUtil#hasCause(Throwable, Predicate)
      */
     @IntermediateOp
     @Beta
@@ -9125,10 +9245,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code onEach} and then switch back to sequence stream.
+     * <br />
+     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
      *
      * @param action
      * @return
      * @see Stream#onEach(int, Consumer)
+     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
+     * @see ExceptionUtil#hasCause(Throwable, Class)
+     * @see ExceptionUtil#hasCause(Throwable, Predicate)
      */
     @IntermediateOp
     @Beta
@@ -9145,10 +9271,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code filter} and then switch back to sequence stream.
+     * <br />
+     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
      *
      * @param predicate
      * @return
      * @see Stream#spsFilter(Predicate)
+     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
+     * @see ExceptionUtil#hasCause(Throwable, Class)
+     * @see ExceptionUtil#hasCause(Throwable, Predicate)
      */
     @IntermediateOp
     @Beta
@@ -9158,11 +9290,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code map} and then switch back to sequence stream.
+     * <br />
+     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
      *
      * @param <R>
      * @param mapper
      * @return
      * @see Stream#spsMap(Function)
+     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
+     * @see ExceptionUtil#hasCause(Throwable, Class)
+     * @see ExceptionUtil#hasCause(Throwable, Predicate)
      */
     @IntermediateOp
     @Beta
@@ -9172,11 +9310,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
+     * <br />
+     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
      *
      * @param <R>
      * @param mapper
      * @return
      * @see Stream#spsFlatMap(Function)
+     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
+     * @see ExceptionUtil#hasCause(Throwable, Class)
+     * @see ExceptionUtil#hasCause(Throwable, Predicate)
      */
     @IntermediateOp
     @Beta
@@ -9186,11 +9330,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
+     * <br />
+     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
      *
      * @param <R>
      * @param mapper
      * @return
      * @see Stream#spsFlattMap(Function)
+     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
+     * @see ExceptionUtil#hasCause(Throwable, Class)
+     * @see ExceptionUtil#hasCause(Throwable, Predicate)
      */
     @IntermediateOp
     @Beta
@@ -9201,10 +9351,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code onEach} and then switch back to sequence stream.
+     * <br />
+     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
      *
      * @param action
      * @return
      * @see Stream#onEach(Consumer)
+     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
+     * @see ExceptionUtil#hasCause(Throwable, Class)
+     * @see ExceptionUtil#hasCause(Throwable, Predicate)
      */
     @IntermediateOp
     @Beta
@@ -9214,11 +9370,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code filter} and then switch back to sequence stream.
+     * <br />
+     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
      *
      * @param maxThreadNum
      * @param predicate
      * @return
      * @see Stream#spsFilter(Predicate)
+     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
+     * @see ExceptionUtil#hasCause(Throwable, Class)
+     * @see ExceptionUtil#hasCause(Throwable, Predicate)
      */
     @IntermediateOp
     @Beta
@@ -9228,12 +9390,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code map} and then switch back to sequence stream.
+     * <br />
+     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
      *
      * @param <R>
      * @param maxThreadNum
      * @param mapper
      * @return
      * @see Stream#spsMap(Function)
+     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
+     * @see ExceptionUtil#hasCause(Throwable, Class)
+     * @see ExceptionUtil#hasCause(Throwable, Predicate)
      */
     @IntermediateOp
     @Beta
@@ -9243,12 +9411,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
+     * <br />
+     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
      *
      * @param <R>
      * @param maxThreadNum
      * @param mapper
      * @return
      * @see Stream#spsFlatMap(Function)
+     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
+     * @see ExceptionUtil#hasCause(Throwable, Class)
+     * @see ExceptionUtil#hasCause(Throwable, Predicate)
      */
     @IntermediateOp
     @Beta
@@ -9259,12 +9433,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
+     * <br />
+     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
      *
      * @param <R>
      * @param maxThreadNum
      * @param mapper
      * @return
      * @see Stream#spsFlattMap(Function)
+     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
+     * @see ExceptionUtil#hasCause(Throwable, Class)
+     * @see ExceptionUtil#hasCause(Throwable, Predicate)
      */
     @IntermediateOp
     @Beta
@@ -9275,11 +9455,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code onEach} and then switch back to sequence stream.
+     * <br />
+     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
      *
      * @param maxThreadNum
      * @param action
      * @return
      * @see Stream#onEach(Consumer)
+     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
+     * @see ExceptionUtil#hasCause(Throwable, Class)
+     * @see ExceptionUtil#hasCause(Throwable, Predicate)
      */
     @IntermediateOp
     @Beta
@@ -9385,11 +9571,15 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                         s = mapper.apply(elements.next());
 
-                        if (N.notNullOrEmpty(s.closeHandlers)) {
-                            closeHandle = s.closeHandlers;
-                        }
+                        if (s == null) {
+                            cur = null;
+                        } else {
+                            if (N.notNullOrEmpty(s.closeHandlers)) {
+                                closeHandle = s.closeHandlers;
+                            }
 
-                        cur = s.elements;
+                            cur = s.elements;
+                        }
                     } else {
                         cur = null;
                         break;
@@ -9662,11 +9852,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
 
         if (ex != null) {
-            throw N.toRuntimeException(ex);
+            throw ExceptionUtil.toRuntimeException(ex);
         }
     }
 
-    ExceptionalIterator<T, E> iterator() {
+    ExceptionalIterator<T, E> iteratorEx() {
         return elements;
     }
 
@@ -9694,7 +9884,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 try {
                     close();
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         }
@@ -9717,7 +9907,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 try {
                     close();
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         }
@@ -9741,7 +9931,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 try {
                     close();
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         }
@@ -9762,7 +9952,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 try {
                     close();
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         }
@@ -9783,7 +9973,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 try {
                     close();
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         }
@@ -9796,7 +9986,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 try {
                     return elements.hasNext();
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
 
@@ -9805,7 +9995,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 try {
                     return elements.next();
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
 
@@ -9814,7 +10004,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 try {
                     elements.advance(n);
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
 
@@ -9823,7 +10013,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 try {
                     return elements.count();
                 } catch (Exception e) {
-                    throw N.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e);
                 }
             }
         };
@@ -9886,6 +10076,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     static boolean isSameComparator(Comparator<?> a, Comparator<?> b) {
         return a == b || (a == null && b == Comparators.NATURAL_ORDER) || (b == null && a == Comparators.NATURAL_ORDER);
+    }
+
+    static <T, E extends Exception> ExceptionalIterator<T, E> iterate(final ExceptionalStream<? extends T, E> s) {
+        return s == null ? ExceptionalIterator.EMPTY : (ExceptionalIterator<T, E>) iterate(s);
     }
 
     /**

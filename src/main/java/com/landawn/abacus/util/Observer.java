@@ -1080,7 +1080,7 @@ public abstract class Observer<T> implements Immutable {
                         if (isOnError) {
                             onError.accept(e);
                         } else {
-                            throw N.toRuntimeException(e);
+                            throw ExceptionUtil.toRuntimeException(e);
                         }
                     } finally {
                         cancelScheduledFutures();
@@ -1153,7 +1153,7 @@ public abstract class Observer<T> implements Immutable {
                         if (isOnError) {
                             onError.accept(e);
                         } else {
-                            throw N.toRuntimeException(e);
+                            throw ExceptionUtil.toRuntimeException(e);
                         }
                     } finally {
                         cancelScheduledFutures();
