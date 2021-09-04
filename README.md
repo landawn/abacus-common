@@ -202,7 +202,7 @@ compile 'abacus-common-se-jdk7:2.3.14'
 Please refer to [Wiki](https://github.com/landawn/abacus-common/wiki)
 
 
-## Also See: [abacus-jdbc](https://github.com/landawn/abacus-jdbc), [abacus-web](https://github.com/landawn/abacus-web), [abacus-cache](https://github.com/landawn/abacus-cache), [abacus-query](https://github.com/landawn/abacus-query) and [abacus-android](https://github.com/landawn/abacus-android)
+## Also See: [abacus-jdbc](https://github.com/landawn/abacus-jdbc), [abacus-cache](https://github.com/landawn/abacus-cache), [abacus-query](https://github.com/landawn/abacus-query) and [abacus-android](https://github.com/landawn/abacus-android)
 
 
 ## Recommended Java programming libraries/frameworks:
