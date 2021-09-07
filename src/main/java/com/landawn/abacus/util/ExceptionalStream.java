@@ -3327,7 +3327,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * </pre>
      *
      * <br />
-     * This method only run sequentially, even in parallel stream.
+     * This method only runs sequentially, even in parallel stream.
      *
      * @param collapsible
      * @param mergeFunction
@@ -9084,7 +9084,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      * Temporarily switch the stream to parallel stream for operation {@code ops} and then switch back to sequence stream.
      * <br />
-     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
+     *
      *
      * @param <R>
      * @param ops
@@ -9100,13 +9100,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     public <R> ExceptionalStream<R, E> sps(final Function<? super Stream<T>, ? extends Stream<? extends R>> ops) {
         assertNotClosed();
 
-        return ((Stream<R>) ops.apply(this.unchecked().parallel())).<E> checked();
+        return checked(((Stream<R>) ops.apply(this.unchecked().parallel())), true);
     }
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code ops} and then switch back to sequence stream.
      * <br />
-     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
+     *
      *
      * @param <R>
      * @param maxThreadNum
@@ -9123,13 +9123,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     public <R> ExceptionalStream<R, E> sps(final int maxThreadNum, final Function<? super Stream<T>, ? extends Stream<? extends R>> ops) {
         assertNotClosed();
 
-        return ((Stream<R>) ops.apply(this.unchecked().parallel(maxThreadNum))).<E> checked();
+        return checked(((Stream<R>) ops.apply(this.unchecked().parallel(maxThreadNum))), true);
     }
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code filter} and then switch back to sequence stream.
      * <br />
-     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
+     *
      *
      * @param predicate
      * @return
@@ -9155,7 +9155,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      * Temporarily switch the stream to parallel stream for operation {@code map} and then switch back to sequence stream.
      * <br />
-     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
+     *
      *
      * @param <R>
      * @param mapper
@@ -9182,7 +9182,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
      * <br />
-     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
+     *
      *
      * @param <R>
      * @param mapper
@@ -9209,7 +9209,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
      * <br />
-     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
+     *
      *
      * @param <R>
      * @param mapper
@@ -9236,7 +9236,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      * Temporarily switch the stream to parallel stream for operation {@code onEach} and then switch back to sequence stream.
      * <br />
-     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
+     *
      *
      * @param action
      * @return
@@ -9262,7 +9262,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      * Temporarily switch the stream to parallel stream for operation {@code filter} and then switch back to sequence stream.
      * <br />
-     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
+     *
      *
      * @param predicate
      * @return
@@ -9288,7 +9288,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      * Temporarily switch the stream to parallel stream for operation {@code map} and then switch back to sequence stream.
      * <br />
-     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
+     *
      *
      * @param <R>
      * @param mapper
@@ -9315,7 +9315,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
      * <br />
-     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
+     *
      *
      * @param <R>
      * @param mapper
@@ -9342,7 +9342,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
      * <br />
-     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
+     *
      *
      * @param <R>
      * @param mapper
@@ -9369,7 +9369,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      * Temporarily switch the stream to parallel stream for operation {@code onEach} and then switch back to sequence stream.
      * <br />
-     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
+     *
      *
      * @param action
      * @return
@@ -9395,7 +9395,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      * Temporarily switch the stream to parallel stream for operation {@code filter} and then switch back to sequence stream.
      * <br />
-     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
+     *
      *
      * @param predicate
      * @return
@@ -9408,13 +9408,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @IntermediateOp
     @Beta
     public ExceptionalStream<T, Exception> spsFilterE(final Throwables.Predicate<? super T, ? extends Exception> predicate) {
-        return unchecked().spsFilterE(predicate).<Exception> checked();
+        return checked(unchecked().spsFilterE(predicate), true);
     }
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code map} and then switch back to sequence stream.
      * <br />
-     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
+     *
      *
      * @param <R>
      * @param mapper
@@ -9428,13 +9428,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @IntermediateOp
     @Beta
     public <U> ExceptionalStream<U, Exception> spsMapE(final Throwables.Function<? super T, ? extends U, ? extends Exception> mapper) {
-        return unchecked().<U> spsMapE(mapper).<Exception> checked();
+        return checked(unchecked().<U> spsMapE(mapper), true);
     }
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
      * <br />
-     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
+     *
      *
      * @param <R>
      * @param mapper
@@ -9448,13 +9448,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @IntermediateOp
     @Beta
     public <R> ExceptionalStream<R, Exception> spsFlatMapE(final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends Exception> mapper) {
-        return unchecked().<R> spsFlatMapE(mapper).<Exception> checked();
+        return checked(unchecked().<R> spsFlatMapE(mapper), true);
     }
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
      * <br />
-     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
+     *
      *
      * @param <R>
      * @param mapper
@@ -9469,13 +9469,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @Beta
     public <R> ExceptionalStream<R, Exception> spsFlattMapE(
             final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) {
-        return unchecked().<R> spsFlattMapE(mapper).<Exception> checked();
+        return checked(unchecked().<R> spsFlattMapE(mapper), true);
     }
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code onEach} and then switch back to sequence stream.
      * <br />
-     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
+     *
      *
      * @param action
      * @return
@@ -9488,13 +9488,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @IntermediateOp
     @Beta
     public ExceptionalStream<T, Exception> spsOnEachE(final Throwables.Consumer<? super T, ? extends Exception> action) {
-        return unchecked().spsOnEachE(action).<Exception> checked();
+        return checked(unchecked().spsOnEachE(action), true);
     }
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code filter} and then switch back to sequence stream.
      * <br />
-     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
+     *
      *
      * @param maxThreadNum
      * @param predicate
@@ -9508,13 +9508,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @IntermediateOp
     @Beta
     public ExceptionalStream<T, Exception> spsFilterE(final int maxThreadNum, final Throwables.Predicate<? super T, ? extends Exception> predicate) {
-        return unchecked().spsFilterE(maxThreadNum, predicate).<Exception> checked();
+        return checked(unchecked().spsFilterE(maxThreadNum, predicate), true);
     }
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code map} and then switch back to sequence stream.
      * <br />
-     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
+     *
      *
      * @param <R>
      * @param maxThreadNum
@@ -9529,13 +9529,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @IntermediateOp
     @Beta
     public <U> ExceptionalStream<U, Exception> spsMapE(final int maxThreadNum, final Throwables.Function<? super T, ? extends U, ? extends Exception> mapper) {
-        return unchecked().<U> spsMapE(maxThreadNum, mapper).<Exception> checked();
+        return checked(unchecked().<U> spsMapE(maxThreadNum, mapper), true);
     }
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
      * <br />
-     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
+     *
      *
      * @param <R>
      * @param maxThreadNum
@@ -9551,13 +9551,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @Beta
     public <R> ExceptionalStream<R, Exception> spsFlatMapE(final int maxThreadNum,
             final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends Exception> mapper) {
-        return unchecked().<R> spsFlatMapE(maxThreadNum, mapper).<Exception> checked();
+        return checked(unchecked().<R> spsFlatMapE(maxThreadNum, mapper), true);
     }
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
      * <br />
-     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
+     *
      *
      * @param <R>
      * @param maxThreadNum
@@ -9573,13 +9573,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @Beta
     public <R> ExceptionalStream<R, Exception> spsFlattMapE(final int maxThreadNum,
             final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) {
-        return unchecked().<R> spsFlattMapE(maxThreadNum, mapper).<Exception> checked();
+        return checked(unchecked().<R> spsFlattMapE(maxThreadNum, mapper), true);
     }
 
     /**
      * Temporarily switch the stream to parallel stream for operation {@code onEach} and then switch back to sequence stream.
      * <br />
-     * <b>Warning</b>: Any checked exception thrown during parallel execution will be converted {@code RuntimeException}, even it's {@code E} type exception.
+     *
      *
      * @param maxThreadNum
      * @param action
@@ -9593,7 +9593,98 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @IntermediateOp
     @Beta
     public ExceptionalStream<T, Exception> spsOnEachE(final int maxThreadNum, final Throwables.Consumer<? super T, ? extends Exception> action) {
-        return unchecked().spsOnEachE(maxThreadNum, action).<Exception> checked();
+        return checked(unchecked().spsOnEachE(maxThreadNum, action), true);
+    }
+
+    static <R, E extends Exception> ExceptionalStream<R, E> checked(final Stream<R> stream, final boolean isForSps) {
+        if (isForSps) {
+            if (stream == null) {
+                return empty();
+            }
+
+            final ExceptionalIterator<R, E> iter = new ExceptionalIterator<R, E>() {
+                private Stream<R> s = stream;
+                private Iterator<? extends R> iter = null;
+                private boolean isInitialized = false;
+
+                @Override
+                public boolean hasNext() throws E {
+                    try {
+                        if (isInitialized == false) {
+                            init();
+                        }
+
+                        return iter.hasNext();
+                    } catch (Exception e) {
+                        throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
+                    }
+                }
+
+                @Override
+                public R next() throws E {
+                    try {
+                        if (isInitialized == false) {
+                            init();
+                        }
+
+                        return iter.next();
+                    } catch (Exception e) {
+                        throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
+                    }
+                }
+
+                @Override
+                public void advance(long n) throws E {
+                    try {
+                        if (iter == null) {
+                            s = s.skip(n);
+                        } else {
+                            super.advance(n);
+                        }
+                    } catch (Exception e) {
+                        throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
+                    }
+                }
+
+                @Override
+                public long count() throws E {
+                    try {
+                        if (iter == null) {
+                            return s.count();
+                        } else {
+                            return super.count();
+                        }
+                    } catch (Exception e) {
+                        throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
+                    }
+                }
+
+                @Override
+                public void close() throws E {
+                    try {
+                        s.close();
+                    } catch (Exception e) {
+                        throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
+                    }
+                }
+
+                private void init() {
+                    if (isInitialized == false) {
+                        isInitialized = true;
+                        iter = s.iterator();
+                    }
+                }
+            };
+
+            return newStream(iter).onClose(new Throwables.Runnable<E>() {
+                @Override
+                public void run() throws E {
+                    iter.close();
+                }
+            });
+        } else {
+            return stream.checked();
+        }
     }
 
     /**

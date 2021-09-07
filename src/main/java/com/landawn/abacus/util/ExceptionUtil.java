@@ -170,6 +170,16 @@ public final class ExceptionUtil {
         return func.apply(e);
     }
 
+    public static Exception tryToGetOriginalCheckedException(final Exception e) {
+        if (e.getCause() != null //
+                && (e instanceof UncheckedException || "UncheckedException".equals(ClassUtil.getSimpleClassName(e.getClass()))) //
+                && ((e.getCause() instanceof Exception) && !(e.getCause() instanceof RuntimeException))) {
+            return (Exception) e.getCause();
+        } else {
+            return e;
+        }
+    }
+
     /**
      * Gets the error msg.
      *
