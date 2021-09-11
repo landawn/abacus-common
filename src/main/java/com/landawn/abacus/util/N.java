@@ -9759,13 +9759,13 @@ public final class N extends CommonUtil {
             return 0;
         }
 
-        int sum = 0;
+        long sum = 0;
 
         for (int i = fromIndex; i < toIndex; i++) {
             sum += a[i];
         }
 
-        return sum;
+        return N.toIntExact(sum);
     }
 
     /**
@@ -13438,13 +13438,13 @@ public final class N extends CommonUtil {
             return 0;
         }
 
-        int sum = 0;
+        long sum = 0;
 
         for (int i = fromIndex; i < toIndex; i++) {
             sum += func.applyAsInt(a[i]);
         }
 
-        return sum;
+        return N.toIntExact(sum);
     }
 
     /**
@@ -13483,13 +13483,13 @@ public final class N extends CommonUtil {
             return 0;
         }
 
-        int sum = 0;
+        long sum = 0;
 
         for (T e : c) {
             sum += func.applyAsInt(e);
         }
 
-        return sum;
+        return N.toIntExact(sum);
     }
 
     /**
@@ -13511,7 +13511,7 @@ public final class N extends CommonUtil {
             return 0;
         }
 
-        int sum = 0;
+        long sum = 0;
 
         if (c instanceof List && c instanceof RandomAccess) {
             final List<T> list = (List<T>) c;
@@ -13535,7 +13535,7 @@ public final class N extends CommonUtil {
             }
         }
 
-        return sum;
+        return N.toIntExact(sum);
     }
 
     /**

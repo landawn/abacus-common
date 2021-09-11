@@ -39,6 +39,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -68,7 +69,6 @@ import com.landawn.abacus.util.StringUtil.Strings;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
-import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.function.BiConsumer;
 import com.landawn.abacus.util.function.BinaryOperator;
 import com.landawn.abacus.util.function.Consumer;
@@ -322,7 +322,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             return empty();
         }
 
-        return of(iterable.iterator());
+        if (iterable instanceof Collection) {
+            return of((Collection<T>) iterable);
+        } else {
+            return of(iterable.iterator());
+        }
     }
 
     /**
@@ -349,70 +353,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> of(final Stream<? extends T> stream) {
-        if (stream == null) {
-            return empty();
-        }
-
-        final ExceptionalIterator<T, E> iter = new ExceptionalIterator<T, E>() {
-            private Stream<? extends T> s = stream;
-            private Iterator<? extends T> iter = null;
-            private boolean isInitialized = false;
-
-            @Override
-            public boolean hasNext() throws E {
-                if (isInitialized == false) {
-                    init();
-                }
-
-                return iter.hasNext();
-            }
-
-            @Override
-            public T next() throws E {
-                if (isInitialized == false) {
-                    init();
-                }
-
-                return iter.next();
-            }
-
-            @Override
-            public void advance(long n) throws E {
-                if (iter == null) {
-                    s = s.skip(n);
-                } else {
-                    super.advance(n);
-                }
-            }
-
-            @Override
-            public long count() throws E {
-                if (iter == null) {
-                    return s.count();
-                } else {
-                    return super.count();
-                }
-            }
-
-            @Override
-            public void close() throws E {
-                s.close();
-            }
-
-            private void init() {
-                if (isInitialized == false) {
-                    isInitialized = true;
-                    iter = stream.iterator();
-                }
-            }
-        };
-
-        return newStream(iter).onClose(new Throwables.Runnable<E>() {
-            @Override
-            public void run() throws E {
-                iter.close();
-            }
-        });
+        return checked(stream, false);
     }
 
     /**
@@ -514,6 +455,150 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return of(stream);
     }
 
+    public static <E extends Exception> ExceptionalStream<Boolean, E> of(final boolean[] a) {
+        if (N.isNullOrEmpty(a)) {
+            return empty();
+        }
+
+        final int len = N.len(a);
+
+        return newStream(new ExceptionalIterator<Boolean, E>() {
+            private int position = 0;
+
+            @Override
+            public boolean hasNext() throws E {
+                return position < len;
+            }
+
+            @Override
+            public Boolean next() throws E {
+                return a[position++];
+            }
+
+            @Override
+            public long count() throws E {
+                return len - position;
+            }
+
+            @Override
+            public void advance(long n) throws E {
+                if (n > len - position) {
+                    position = len;
+                } else {
+                    position += n;
+                }
+            }
+        });
+    }
+
+    public static <E extends Exception> ExceptionalStream<Character, E> of(final char[] a) {
+        if (N.isNullOrEmpty(a)) {
+            return empty();
+        }
+
+        final int len = N.len(a);
+
+        return newStream(new ExceptionalIterator<Character, E>() {
+            private int position = 0;
+
+            @Override
+            public boolean hasNext() throws E {
+                return position < len;
+            }
+
+            @Override
+            public Character next() throws E {
+                return a[position++];
+            }
+
+            @Override
+            public long count() throws E {
+                return len - position;
+            }
+
+            @Override
+            public void advance(long n) throws E {
+                if (n > len - position) {
+                    position = len;
+                } else {
+                    position += n;
+                }
+            }
+        });
+    }
+
+    public static <E extends Exception> ExceptionalStream<Byte, E> of(final byte[] a) {
+        if (N.isNullOrEmpty(a)) {
+            return empty();
+        }
+
+        final int len = N.len(a);
+
+        return newStream(new ExceptionalIterator<Byte, E>() {
+            private int position = 0;
+
+            @Override
+            public boolean hasNext() throws E {
+                return position < len;
+            }
+
+            @Override
+            public Byte next() throws E {
+                return a[position++];
+            }
+
+            @Override
+            public long count() throws E {
+                return len - position;
+            }
+
+            @Override
+            public void advance(long n) throws E {
+                if (n > len - position) {
+                    position = len;
+                } else {
+                    position += n;
+                }
+            }
+        });
+    }
+
+    public static <E extends Exception> ExceptionalStream<Short, E> of(final short[] a) {
+        if (N.isNullOrEmpty(a)) {
+            return empty();
+        }
+
+        final int len = N.len(a);
+
+        return newStream(new ExceptionalIterator<Short, E>() {
+            private int position = 0;
+
+            @Override
+            public boolean hasNext() throws E {
+                return position < len;
+            }
+
+            @Override
+            public Short next() throws E {
+                return a[position++];
+            }
+
+            @Override
+            public long count() throws E {
+                return len - position;
+            }
+
+            @Override
+            public void advance(long n) throws E {
+                if (n > len - position) {
+                    position = len;
+                } else {
+                    position += n;
+                }
+            }
+        });
+    }
+
     /**
      *
      * @param <E>
@@ -579,6 +664,42 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
             @Override
             public Long next() throws E {
+                return a[position++];
+            }
+
+            @Override
+            public long count() throws E {
+                return len - position;
+            }
+
+            @Override
+            public void advance(long n) throws E {
+                if (n > len - position) {
+                    position = len;
+                } else {
+                    position += n;
+                }
+            }
+        });
+    }
+
+    public static <E extends Exception> ExceptionalStream<Float, E> of(final float[] a) {
+        if (N.isNullOrEmpty(a)) {
+            return empty();
+        }
+
+        final int len = N.len(a);
+
+        return newStream(new ExceptionalIterator<Float, E>() {
+            private int position = 0;
+
+            @Override
+            public boolean hasNext() throws E {
+                return position < len;
+            }
+
+            @Override
+            public Float next() throws E {
                 return a[position++];
             }
 
@@ -2392,6 +2513,41 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * @implNote same as ====>
+     * <pre>
+     * skipNull().flattMap(mapper)
+     * </pre>
+     *
+     * @param <R>
+     * @param mapper
+     * @return
+     */
+    @IntermediateOp
+    @Beta
+    public <R> ExceptionalStream<R, E> flattMapIfNotNull(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends E> mapper) {
+        return skipNull().flattMap(mapper);
+    }
+
+    /**
+     * @implNote same as ====>
+     * <pre>
+     * skipNull().flattMap(mapper).skipNull().flattMap(mapper2)
+     * </pre>
+     *
+     * @param <U>
+     * @param <R>
+     * @param mapper
+     * @param mapper2
+     * @return
+     */
+    @IntermediateOp
+    @Beta
+    public <U, R> ExceptionalStream<R, E> flattMapIfNotNull(final Throwables.Function<? super T, ? extends Collection<? extends U>, ? extends E> mapper,
+            final Throwables.Function<? super U, ? extends Collection<? extends R>, ? extends E> mapper2) {
+        return skipNull().flattMap(mapper).skipNull().flattMap(mapper2);
+    }
+
+    /**
      *
      * @param <R>
      * @param mapper
@@ -3214,6 +3370,56 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      *
+     * @param predicate
+     * @return
+     * @see Collectors#partitioningBy(Predicate)
+     */
+    @IntermediateOp
+    @TerminalOpTriggered
+    public ExceptionalStream<Map.Entry<Boolean, List<T>>, E> partitionBy(final Throwables.Predicate<? super T, E> predicate) {
+        assertNotClosed();
+
+        return partitionBy(predicate, Collectors.<T> toList());
+    }
+
+    /**
+     *
+     * @param predicate
+     * @param downstream
+     * @return
+     * @see Collectors#partitioningBy(Predicate, Collector)
+     */
+    @IntermediateOp
+    @TerminalOpTriggered
+    public <A, D> ExceptionalStream<Map.Entry<Boolean, D>, E> partitionBy(final Throwables.Predicate<? super T, E> predicate,
+            final Collector<? super T, A, D> downstream) {
+        assertNotClosed();
+
+        return newStream(new ExceptionalIterator<Entry<Boolean, D>, E>() {
+            private Iterator<Entry<Boolean, D>> iter = null;
+
+            @Override
+            public boolean hasNext() throws E {
+                init();
+                return iter.hasNext();
+            }
+
+            @Override
+            public Entry<Boolean, D> next() throws E {
+                init();
+                return iter.next();
+            }
+
+            private void init() throws E {
+                if (iter == null) {
+                    iter = ExceptionalStream.this.partitionTo(predicate, downstream).entrySet().iterator();
+                }
+            }
+        }, closeHandlers);
+    }
+
+    /**
+     *
      * @param <K>
      * @param keyMapper
      * @return
@@ -3697,22 +3903,33 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-    *
-    * @param defaultValue
-    * @return
-    * @see #appendIfEmpty(Object...)
-    */
+     *
+     * @param defaultValue
+     * @return
+     * @see #appendIfEmpty(Object...)
+     */
     @IntermediateOp
     public final ExceptionalStream<T, E> defaultIfEmpty(final T defaultValue) {
         return appendIfEmpty(defaultValue);
     }
 
+    //    /**
+    //     *
+    //     * @param defaultValues
+    //     * @return
+    //     * @see #appendIfEmpty(Object...)
+    //     */
+    //    @IntermediateOp
+    //    public final ExceptionalStream<T, E> defaultIfEmpty(final Collection<? extends T> defaultValues) {
+    //        return appendIfEmpty(defaultValues);
+    //    }
+
     /**
-    *
-    * @param supplier
-    * @return
-    * @see #appendIfEmpty(Throwables.Supplier)
-    */
+     *
+     * @param supplier
+     * @return
+     * @see #appendIfEmpty(Throwables.Supplier)
+     */
     @IntermediateOp
     public final ExceptionalStream<T, E> defaultIfEmpty(final Throwables.Supplier<? extends ExceptionalStream<T, E>, ? extends E> supplier) {
         return appendIfEmpty(supplier);
@@ -7014,6 +7231,48 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      *
+     * @param <E2>
+     * @param action
+     * @throws E the e
+     * @throws E2 the e2
+     */
+    @TerminalOp
+    @Beta
+    public <E2 extends Exception> void forEachInParallel(Throwables.Consumer<? super T, E2> action, final int threadNum) throws E, E2 {
+        assertNotClosed();
+
+        checkArgNotNull(action, "action");
+
+        try {
+            unchecked().parallel(threadNum).forEach(action);
+        } catch (Exception e) {
+            throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
+        }
+    }
+
+    /**
+     *
+     * @param <E2>
+     * @param action
+     * @throws E the e
+     * @throws E2 the e2
+     */
+    @TerminalOp
+    @Beta
+    public <E2 extends Exception> void forEachInParallel(Throwables.Consumer<? super T, E2> action, final int threadNum, final Executor executor) throws E, E2 {
+        assertNotClosed();
+
+        checkArgNotNull(action, "action");
+
+        try {
+            unchecked().parallel(threadNum, executor).forEach(action);
+        } catch (Exception e) {
+            throw (E) ExceptionUtil.tryToGetOriginalCheckedException(e);
+        }
+    }
+
+    /**
+     *
      * @param comparator
      * @return
      * @throws E the e
@@ -8108,6 +8367,56 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    /**
+    *
+    * @param predicate
+    * @return
+    * @see Collectors#partitioningBy(Predicate)
+    */
+    @TerminalOp
+    public <E2 extends Exception> Map<Boolean, List<T>> partitionTo(final Throwables.Predicate<? super T, E2> predicate) throws E, E2 {
+        assertNotClosed();
+
+        return partitionTo(predicate, Collectors.<T> toList());
+    }
+
+    /**
+    *
+    * @param predicate
+    * @param downstream
+    * @return
+    * @see Collectors#partitioningBy(Predicate, Collector)
+    */
+    @TerminalOp
+    public <A, D, E2 extends Exception> Map<Boolean, D> partitionTo(final Throwables.Predicate<? super T, E2> predicate,
+            final Collector<? super T, A, D> downstream) throws E, E2 {
+        assertNotClosed();
+
+        final Throwables.Function<T, Boolean, E2> keyMapper = new Throwables.Function<T, Boolean, E2>() {
+            @Override
+            public Boolean apply(T t) throws E2 {
+                return predicate.test(t);
+            }
+        };
+
+        final Supplier<Map<Boolean, D>> mapFactory = new Supplier<Map<Boolean, D>>() {
+            @Override
+            public Map<Boolean, D> get() {
+                return N.<Boolean, D> newHashMap(2);
+            }
+        };
+
+        final Map<Boolean, D> map = toMap(keyMapper, downstream, mapFactory);
+
+        if (map.containsKey(Boolean.TRUE) == false) {
+            map.put(Boolean.TRUE, downstream.finisher().apply(downstream.supplier().get()));
+        } else if (map.containsKey(Boolean.FALSE) == false) {
+            map.put(Boolean.FALSE, downstream.finisher().apply(downstream.supplier().get()));
+        }
+
+        return map;
+    }
+
     @TerminalOp
     public <K, E2 extends Exception> ListMultimap<K, T> toMultimap(final Throwables.Function<? super T, ? extends K, E2> keyMapper) throws E, E2 {
         return toMultimap(keyMapper, Suppliers.<K, T> ofListMultimap());
@@ -8212,21 +8521,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @throws E the e
      */
     @TerminalOp
-    public <E2 extends Exception> OptionalLong sumInt(Throwables.ToIntFunction<? super T, E2> func) throws E, E2 {
+    public <E2 extends Exception> long sumInt(Throwables.ToIntFunction<? super T, E2> func) throws E, E2 {
         assertNotClosed();
 
         try {
-            if (elements.hasNext() == false) {
-                return OptionalLong.empty();
-            }
-
             long sum = 0;
 
             while (elements.hasNext()) {
                 sum += func.applyAsInt(elements.next());
             }
 
-            return OptionalLong.of(sum);
+            return sum;
         } finally {
             close();
         }
@@ -8239,21 +8544,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @throws E the e
      */
     @TerminalOp
-    public <E2 extends Exception> OptionalLong sumLong(Throwables.ToLongFunction<? super T, E2> func) throws E, E2 {
+    public <E2 extends Exception> long sumLong(Throwables.ToLongFunction<? super T, E2> func) throws E, E2 {
         assertNotClosed();
 
         try {
-            if (elements.hasNext() == false) {
-                return OptionalLong.empty();
-            }
-
             long sum = 0;
 
             while (elements.hasNext()) {
                 sum += func.applyAsLong(elements.next());
             }
 
-            return OptionalLong.of(sum);
+            return sum;
         } finally {
             close();
         }
@@ -8266,21 +8567,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @throws E the e
      */
     @TerminalOp
-    public <E2 extends Exception> OptionalDouble sumDouble(Throwables.ToDoubleFunction<? super T, E2> func) throws E, E2 {
+    public <E2 extends Exception> double sumDouble(Throwables.ToDoubleFunction<? super T, E2> func) throws E, E2 {
         assertNotClosed();
 
         try {
-            if (elements.hasNext() == false) {
-                return OptionalDouble.empty();
-            }
-
             final KahanSummation summation = new KahanSummation();
 
             while (elements.hasNext()) {
                 summation.add(func.applyAsDouble(elements.next()));
             }
 
-            return OptionalDouble.of(summation.sum());
+            return summation.sum();
         } finally {
             close();
         }
@@ -9596,15 +9893,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return checked(unchecked().spsOnEachE(maxThreadNum, action), true);
     }
 
-    static <R, E extends Exception> ExceptionalStream<R, E> checked(final Stream<R> stream, final boolean isForSps) {
-        if (isForSps) {
-            if (stream == null) {
-                return empty();
-            }
+    static <T, E extends Exception> ExceptionalStream<T, E> checked(final Stream<? extends T> stream, final boolean isForSps) {
+        if (stream == null) {
+            return empty();
+        }
 
-            final ExceptionalIterator<R, E> iter = new ExceptionalIterator<R, E>() {
-                private Stream<R> s = stream;
-                private Iterator<? extends R> iter = null;
+        ExceptionalIterator<T, E> iter = null;
+
+        if (isForSps) {
+            iter = new ExceptionalIterator<T, E>() {
+                private Stream<? extends T> s = stream;
+                private Iterator<? extends T> iter = null;
                 private boolean isInitialized = false;
 
                 @Override
@@ -9621,7 +9920,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 }
 
                 @Override
-                public R next() throws E {
+                public T next() throws E {
                     try {
                         if (isInitialized == false) {
                             init();
@@ -9675,16 +9974,70 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     }
                 }
             };
-
-            return newStream(iter).onClose(new Throwables.Runnable<E>() {
-                @Override
-                public void run() throws E {
-                    iter.close();
-                }
-            });
         } else {
-            return stream.checked();
+            iter = new ExceptionalIterator<T, E>() {
+                private Stream<? extends T> s = stream;
+                private Iterator<? extends T> iter = null;
+                private boolean isInitialized = false;
+
+                @Override
+                public boolean hasNext() throws E {
+                    if (isInitialized == false) {
+                        init();
+                    }
+
+                    return iter.hasNext();
+                }
+
+                @Override
+                public T next() throws E {
+                    if (isInitialized == false) {
+                        init();
+                    }
+
+                    return iter.next();
+                }
+
+                @Override
+                public void advance(long n) throws E {
+                    if (iter == null) {
+                        s = s.skip(n);
+                    } else {
+                        super.advance(n);
+                    }
+                }
+
+                @Override
+                public long count() throws E {
+                    if (iter == null) {
+                        return s.count();
+                    } else {
+                        return super.count();
+                    }
+                }
+
+                @Override
+                public void close() throws E {
+                    s.close();
+                }
+
+                private void init() {
+                    if (isInitialized == false) {
+                        isInitialized = true;
+                        iter = stream.iterator();
+                    }
+                }
+            };
         }
+
+        final ExceptionalIterator<T, E> tmp = iter;
+
+        return newStream(tmp).onClose(new Throwables.Runnable<E>() {
+            @Override
+            public void run() throws E {
+                tmp.close();
+            }
+        });
     }
 
     /**
@@ -10621,11 +10974,35 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             return ExceptionalStream.<T, RuntimeException> of(stream);
         }
 
+        public static <T> ExceptionalStream<T, RuntimeException> of(final java.util.stream.Stream<? extends T> stream) {
+            return ExceptionalStream.<T, RuntimeException> of(stream);
+        }
+
+        public static ExceptionalStream<Boolean, RuntimeException> of(final boolean[] a) {
+            return ExceptionalStream.<RuntimeException> of(a);
+        }
+
+        public static ExceptionalStream<Character, RuntimeException> of(final char[] a) {
+            return ExceptionalStream.<RuntimeException> of(a);
+        }
+
+        public static ExceptionalStream<Byte, RuntimeException> of(final byte[] a) {
+            return ExceptionalStream.<RuntimeException> of(a);
+        }
+
+        public static ExceptionalStream<Short, RuntimeException> of(final short[] a) {
+            return ExceptionalStream.<RuntimeException> of(a);
+        }
+
         public static ExceptionalStream<Integer, RuntimeException> of(final int[] a) {
             return ExceptionalStream.<RuntimeException> of(a);
         }
 
         public static ExceptionalStream<Long, RuntimeException> of(final long[] a) {
+            return ExceptionalStream.<RuntimeException> of(a);
+        }
+
+        public static ExceptionalStream<Float, RuntimeException> of(final float[] a) {
             return ExceptionalStream.<RuntimeException> of(a);
         }
 

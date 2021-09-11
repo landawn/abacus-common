@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Pattern;
 
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.exception.UncheckedException;
@@ -170,52 +171,37 @@ public final class ExceptionUtil {
         return func.apply(e);
     }
 
+    static final java.util.function.Predicate<String> uncheckedExceptionNameTester = Pattern.compile("Unchecked[a-zA-Z0-9]*Exception").asPredicate();
+    static final Map<Class<? extends Throwable>, Class<? extends Throwable>> runtimeToCheckedExceptionClassMap = new ConcurrentHashMap<>();
+
     public static Exception tryToGetOriginalCheckedException(final Exception e) {
-        if (e.getCause() != null //
-                && (e instanceof UncheckedException || "UncheckedException".equals(ClassUtil.getSimpleClassName(e.getClass()))) //
-                && ((e.getCause() instanceof Exception) && !(e.getCause() instanceof RuntimeException))) {
-            return (Exception) e.getCause();
-        } else {
-            return e;
+        if (e instanceof RuntimeException && e.getCause() != null && (!(e.getCause() instanceof RuntimeException) && (e.getCause() instanceof Exception))) {
+            if (e instanceof UncheckedException //
+                    || (uncheckedExceptionNameTester.test(ClassUtil.getSimpleClassName(e.getClass())))) {
+                return (Exception) e.getCause();
+            }
+
+            final Throwable cause = e.getCause();
+
+            if (runtimeToCheckedExceptionClassMap.containsKey(e.getClass()) && runtimeToCheckedExceptionClassMap.get(e.getClass()).equals(cause.getClass())) {
+                return (Exception) cause;
+            }
+
+            if (toRuntimeExceptionFuncMap.containsKey(cause.getClass())
+                    && toRuntimeExceptionFuncMap.get(cause.getClass()).apply(cause).getClass().equals(e.getClass())) {
+
+                runtimeToCheckedExceptionClassMap.put(e.getClass(), cause.getClass());
+
+                return (Exception) cause;
+            }
         }
+
+        return e;
     }
 
-    /**
-     * Gets the error msg.
-     *
-     * @param e
-     * @return
-     * @deprecated replaced by {@link #getErrorMessage(Throwable, true)}
-     */
-    @Deprecated
-    @Internal
-    public static String getMessage(Throwable e) {
-        return getErrorMessage(e, true);
-    }
-
-    //-----------------------------------------------------------------------
-    /**
-     * <p>Gets the stack trace from a Throwable as a String.</p>
-     *
-     * <p>The result of this method vary by JDK version as this method
-     * uses {@link Throwable#printStackTrace(java.io.PrintWriter)}.
-     * On JDK1.3 and earlier, the cause exception will not be shown
-     * unless the specified throwable alters printStackTrace.</p>
-     *
-     * @param throwable the <code>Throwable</code> to be examined
-     * @return
-     *  <code>printStackTrace(PrintWriter)</code> method
-     */
-    public static String getStackTrace(final Throwable throwable) {
-        final StringWriter sw = new StringWriter();
-        final PrintWriter pw = new PrintWriter(sw, true);
-        throwable.printStackTrace(pw);
-        return sw.getBuffer().toString();
-    }
-
-    public static boolean hasCause(Throwable throwable, final Class<? extends Throwable> type) {
+    public static boolean hasCause(Throwable throwable, final Class<? extends Throwable> targetExceptionType) {
         while (throwable != null) {
-            if (type.isAssignableFrom(throwable.getClass())) {
+            if (targetExceptionType.isAssignableFrom(throwable.getClass())) {
                 return true;
             }
 
@@ -225,9 +211,9 @@ public final class ExceptionUtil {
         return false;
     }
 
-    public static boolean hasCause(Throwable throwable, final Predicate<? super Throwable> predicate) {
+    public static boolean hasCause(Throwable throwable, final Predicate<? super Throwable> targetExceptionTester) {
         while (throwable != null) {
-            if (predicate.test(throwable)) {
+            if (targetExceptionTester.test(throwable)) {
                 return true;
             }
 
@@ -286,6 +272,39 @@ public final class ExceptionUtil {
         }
 
         return result;
+    }
+
+    //-----------------------------------------------------------------------
+    /**
+     * <p>Gets the stack trace from a Throwable as a String.</p>
+     *
+     * <p>The result of this method vary by JDK version as this method
+     * uses {@link Throwable#printStackTrace(java.io.PrintWriter)}.
+     * On JDK1.3 and earlier, the cause exception will not be shown
+     * unless the specified throwable alters printStackTrace.</p>
+     *
+     * @param throwable the <code>Throwable</code> to be examined
+     * @return
+     *  <code>printStackTrace(PrintWriter)</code> method
+     */
+    public static String getStackTrace(final Throwable throwable) {
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw, true);
+        throwable.printStackTrace(pw);
+        return sw.getBuffer().toString();
+    }
+
+    /**
+     * Gets the error msg.
+     *
+     * @param e
+     * @return
+     * @deprecated replaced by {@link #getErrorMessage(Throwable, true)}
+     */
+    @Deprecated
+    @Internal
+    public static String getMessage(Throwable e) {
+        return getErrorMessage(e, true);
     }
 
     public static String getErrorMessage(final Throwable e) {
