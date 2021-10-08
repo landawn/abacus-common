@@ -588,7 +588,7 @@ public final class Objectory {
 
         if (listPool.size() < POOL_SIZE) {
             list.clear();
-            listPool.add(list);
+            listPool.offer(list);
         }
     }
 
@@ -604,12 +604,12 @@ public final class Objectory {
         if (set instanceof LinkedHashSet) {
             if (linkedHashSetPool.size() < POOL_SIZE) {
                 set.clear();
-                linkedHashSetPool.add(set);
+                linkedHashSetPool.offer(set);
             }
         } else {
             if (setPool.size() < POOL_SIZE) {
                 set.clear();
-                setPool.add(set);
+                setPool.offer(set);
             }
         }
     }
@@ -626,12 +626,12 @@ public final class Objectory {
         if (map instanceof LinkedHashMap) {
             if (linkedHashMapPool.size() < POOL_SIZE) {
                 map.clear();
-                linkedHashMapPool.add(map);
+                linkedHashMapPool.offer(map);
             }
         } else {
             if (mapPool.size() < POOL_SIZE) {
                 map.clear();
-                mapPool.add(map);
+                mapPool.offer(map);
             }
         }
     }
@@ -655,7 +655,7 @@ public final class Objectory {
 
         if (arrayQueue.size() < poolSize) {
             Arrays.fill(objArray, null);
-            arrayQueue.add(objArray);
+            arrayQueue.offer(objArray);
         }
     }
 
@@ -668,7 +668,7 @@ public final class Objectory {
             return;
         }
 
-        charArrayBufferPool.add(cbuf);
+        charArrayBufferPool.offer(cbuf);
     }
 
     /**
@@ -680,7 +680,7 @@ public final class Objectory {
             return;
         }
 
-        byteArrayBufferPool.add(bbuf);
+        byteArrayBufferPool.offer(bbuf);
     }
 
     /**
@@ -694,7 +694,7 @@ public final class Objectory {
 
         if (stringBuilderPool.size() < POOL_SIZE) {
             sb.setLength(0);
-            stringBuilderPool.add(sb);
+            stringBuilderPool.offer(sb);
         }
     }
 
@@ -709,7 +709,7 @@ public final class Objectory {
 
         if (byteArrayOutputStreamPool.size() < POOL_SIZE) {
             os.reset();
-            byteArrayOutputStreamPool.add(os);
+            byteArrayOutputStreamPool.offer(os);
         }
     }
 
@@ -729,7 +729,7 @@ public final class Objectory {
         }
 
         bw._reset();
-        bufferedWriterPool.add(bw);
+        bufferedWriterPool.offer(bw);
     }
 
     /**
@@ -748,7 +748,7 @@ public final class Objectory {
         }
 
         bw._reset();
-        bufferedXMLWriterPool.add(bw);
+        bufferedXMLWriterPool.offer(bw);
     }
 
     /**
@@ -767,7 +767,7 @@ public final class Objectory {
         }
 
         bw._reset();
-        bufferedJSONWriterPool.add(bw);
+        bufferedJSONWriterPool.offer(bw);
     }
 
     /**
@@ -780,6 +780,6 @@ public final class Objectory {
         }
 
         br._reset();
-        bufferedReaderPool.add(br);
+        bufferedReaderPool.offer(br);
     }
 }

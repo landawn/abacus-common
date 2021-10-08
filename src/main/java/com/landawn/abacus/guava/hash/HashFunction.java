@@ -22,7 +22,7 @@ import com.google.common.primitives.Ints;
 
 /**
  * Note: It's copied from Google Guava under Apache License 2.0 and modified.
- * 
+ *
  * A hash function is a collision-averse pure function that maps an arbitrary block of data to a
  * number called a <i>hash code</i>.
  *
@@ -127,7 +127,7 @@ public interface HashFunction {
     /**
      * Begins a new hash code computation by returning an initialized, stateful {@code
      * Hasher} instance that is ready to receive data. Example: <pre>   {@code
-     * 
+     *
      *   HashFunction hf = Hashing.md5();
      *   HashCode hc = hf.newHasher()
      *       .putLong(id)
@@ -212,7 +212,7 @@ public interface HashFunction {
      * <i>might</i> perform better than its longhand equivalent, but should not perform worse. Note
      * that no character encoding is performed; the low byte and high byte of each {@code char} are
      * hashed directly (in that order).
-     * 
+     *
      * <p><b>Warning:</b> This method will produce different output than most other languages do when
      * running the same hash function on the equivalent input. For cross-language compatibility, use
      * {@link #hashString}, usually with a charset of UTF-8. For other use cases, use {@code
@@ -228,7 +228,7 @@ public interface HashFunction {
      * Shortcut for {@code newHasher().putString(input, charset).hash()}. Characters are encoded using
      * the given {@link Charset}. The implementation <i>might</i> perform better than its longhand
      * equivalent, but should not perform worse.
-     * 
+     *
      * <p><b>Warning:</b> This method, which reencodes the input before hashing it, is useful only for
      * cross-language compatibility. For other use cases, prefer {@link #hashUnencodedChars}, which is
      * faster, produces the same output across Java releases, and hashes every {@code char} in the

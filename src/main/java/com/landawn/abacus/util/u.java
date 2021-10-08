@@ -5409,6 +5409,7 @@ public class u {
         }
 
         /**
+         * Returns an empty {@code Optional} if it's empty or value is null.
          *
          * @return
          */
@@ -5421,7 +5422,7 @@ public class u {
         }
 
         /**
-         * To jdk optional.
+         * Returns an empty {@code java.util.Optional} if it's empty or value is null.
          *
          * @return
          */

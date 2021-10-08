@@ -2357,6 +2357,32 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * Note: copied from StreamEx: https://github.com/amaembo/streamex
+     *
+     * @param <R>
+     * @param mapper
+     * @return
+     */
+    @IntermediateOp
+    @Beta
+    public <R> ExceptionalStream<R, E> mapPartial(final Throwables.Function<? super T, ? extends Optional<? extends R>, E> mapper) {
+        return map(mapper).filter(it -> it.isPresent()).map(it -> it.get());
+    }
+
+    /**
+     * Note: copied from StreamEx: https://github.com/amaembo/streamex
+     *
+     * @param <R>
+     * @param mapper
+     * @return
+     */
+    @IntermediateOp
+    @Beta
+    public <R> ExceptionalStream<R, E> mapPartialJdk(final Throwables.Function<? super T, ? extends java.util.Optional<? extends R>, E> mapper) {
+        return map(mapper).filter(it -> it.isPresent()).map(it -> it.get());
+    }
+
+    /**
      *
      * @param <R>
      * @param mapper
@@ -3826,7 +3852,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      * @see N#intersection(Collection, Collection)
      */
-    public ExceptionalStream<T, E> intersection(final Throwables.Function<? super T, ?, E> mapper, final Collection<?> c) {
+    public <U> ExceptionalStream<T, E> intersection(final Throwables.Function<? super T, ? extends U, E> mapper, final Collection<U> c) {
         assertNotClosed();
 
         final Multiset<?> multiset = Multiset.from(c);
@@ -3865,7 +3891,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      * @see N#difference(Collection, Collection)
      */
-    public ExceptionalStream<T, E> difference(final Function<? super T, ?> mapper, final Collection<?> c) {
+    public <U> ExceptionalStream<T, E> difference(final Function<? super T, ? extends U> mapper, final Collection<U> c) {
         assertNotClosed();
 
         final Multiset<?> multiset = Multiset.from(c);
@@ -9340,8 +9366,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @IntermediateOp
     @Beta
-    public <TT, EE extends Exception> ExceptionalStream<TT, EE> __(Throwables.Function<? super ExceptionalStream<T, E>, ExceptionalStream<TT, EE>, E> transfer)
-            throws E {
+    public <TT, EE extends Exception> ExceptionalStream<TT, EE> __(Function<? super ExceptionalStream<T, E>, ExceptionalStream<TT, EE>> transfer) {
         assertNotClosed();
 
         checkArgNotNull(transfer, "transfer");

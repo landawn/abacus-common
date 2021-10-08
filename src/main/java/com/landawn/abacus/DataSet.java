@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Haiyang Li.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -214,10 +214,10 @@ public interface DataSet {
     /**
      * There is NO underline auto-conversion from column value to target type: {@code T}.
      * So the column values must be the type which is assignable to target type.
-     * 
+     *
      * <br />
-     * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method. 
-     * Otherwise, put the {@code targetTpye} to the first parameter of the method. 
+     * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
+     * Otherwise, put the {@code targetTpye} to the first parameter of the method.
      *
      * @param <T>
      * @param targetType
@@ -247,7 +247,7 @@ public interface DataSet {
     boolean isNull(int rowIndex, int columnIndex);
 
     /**
-     *  
+     *
      * There is NO underline auto-conversion from column value to target type: {@code T}.
      * So the column values must be the type which is assignable to target type.
      *
@@ -258,7 +258,7 @@ public interface DataSet {
     <T> T get(int columnIndex);
 
     /**
-     *  
+     *
      * There is NO underline auto-conversion from column value to target type: {@code T}.
      * So the column values must be the type which is assignable to target type.
      *
@@ -271,10 +271,10 @@ public interface DataSet {
     /**
      * There is NO underline auto-conversion from column value to target type: {@code T}.
      * So the column values must be the type which is assignable to target type.
-     * 
+     *
      * <br />
-     * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method. 
-     * Otherwise, put the {@code targetTpye} to the first parameter of the method. 
+     * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
+     * Otherwise, put the {@code targetTpye} to the first parameter of the method.
      *
      * @param <T>
      * @param targetType
@@ -286,13 +286,13 @@ public interface DataSet {
     <T> T get(Class<T> targetType, int columnIndex);
 
     /**
-     *  
+     *
      * There is NO underline auto-conversion from column value to target type: {@code T}.
      * So the column values must be the type which is assignable to target type.
-     * 
+     *
      * <br />
-     * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method. 
-     * Otherwise, put the {@code targetTpye} to the first parameter of the method. 
+     * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
+     * Otherwise, put the {@code targetTpye} to the first parameter of the method.
      *
      * @param <T>
      * @param targetType
@@ -304,7 +304,7 @@ public interface DataSet {
     <T> T get(Class<T> targetType, String columnName);
 
     /**
-     * Returns the value from the current row and specified column if the specified {@code columnIndex} is equal or bigger than zero, 
+     * Returns the value from the current row and specified column if the specified {@code columnIndex} is equal or bigger than zero,
      * or the specified {@code defaultValue} otherwise.
      * <br />
      * There is NO underline auto-conversion from column value to target type: {@code T}.
@@ -314,13 +314,13 @@ public interface DataSet {
      * @param columnIndex
      * @param defaultValue
      * @return
-     * @deprecated 
+     * @deprecated
      */
     @Deprecated
     <T> T getOrDefault(int columnIndex, T defaultValue);
 
     /**
-     * Returns the value from the current row and specified column if the specified {@code columnName} exists, 
+     * Returns the value from the current row and specified column if the specified {@code columnName} exists,
      * or the specified {@code defaultValue} otherwise.
      * <br />
      * There is NO underline auto-conversion from column value to target type: {@code T}.
@@ -330,7 +330,7 @@ public interface DataSet {
      * @param columnName
      * @param defaultValue
      * @return
-     * @deprecated 
+     * @deprecated
      */
     @Deprecated
     <T> T getOrDefault(String columnName, T defaultValue);
@@ -1536,7 +1536,7 @@ public interface DataSet {
             Collection<String> valueColumnNames, int fromRowIndex, int toRowIndex, IntFunction<? extends M> supplier);
 
     /**
-     * 
+     *
      * @param <T>
      * @param entityClass
      * @return
@@ -1544,7 +1544,7 @@ public interface DataSet {
     <T> List<T> toMergedEntities(Class<T> entityClass);
 
     /**
-     * 
+     *
      * @param <T>
      * @param entityClass
      * @param selectPropNames
@@ -1553,7 +1553,7 @@ public interface DataSet {
     <T> List<T> toMergedEntities(Class<T> entityClass, Collection<String> selectPropNames);
 
     /**
-     * 
+     *
      * @param <T>
      * @param entityClass
      * @param idPropName
@@ -1562,7 +1562,7 @@ public interface DataSet {
     <T> List<T> toMergedEntities(Class<T> entityClass, String idPropName);
 
     /**
-     * 
+     *
      * @param <T>
      * @param entityClass
      * @param idPropName
@@ -1572,7 +1572,7 @@ public interface DataSet {
     <T> List<T> toMergedEntities(Class<T> entityClass, String idPropName, Collection<String> selectPropNames);
 
     /**
-     * 
+     *
      * @param <T>
      * @param entityClass
      * @param idPropNames
@@ -2205,7 +2205,7 @@ public interface DataSet {
     /**
      *
      * @param columnNames
-     * @return 
+     * @return
      */
     DataSet groupBy(Collection<String> columnNames);
 
@@ -3431,7 +3431,7 @@ public interface DataSet {
      * This operation removes duplicate rows from the final result set.
      *
      * @param other
-     * @return 
+     * @return
      */
     DataSet intersect(DataSet other);
 
@@ -3465,7 +3465,7 @@ public interface DataSet {
     DataSet except(DataSet other);
 
     /**
-     * Returns a new <code>DataSet</code>.
+     * Returns a new <code>DataSet</code> with different rows in common columns from the specified {@code DataSet}.
      *
      * @param dataSet
      * @return a new DataSet
@@ -3735,7 +3735,7 @@ public interface DataSet {
     PaginatedDataSet paginate(int pageSize);
 
     /**
-     * 
+     *
      * @param columnNames
      * @param pageSize
      * @return

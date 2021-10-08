@@ -58,15 +58,15 @@ import com.landawn.abacus.util.stream.Stream;
  * Note: This class includes codes copied from Apache Commons Lang, Google Guava and other open source projects under the Apache License 2.0.
  * The methods copied from other libraries/frameworks/projects may be modified in this class.
  * </p>
- *  
+ *
  * <p>
  * This is a utility class for iterable data structures, including {@code Collection/Array/Iterator}.
  * </p>
- * 
+ *
  * <p>
  * The methods in this class should only read the input {@code Collection/Array/Iterator} parameters, not modify them.
  * </p>
- * 
+ *
  * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Maps
@@ -82,7 +82,7 @@ public final class Iterables {
 
     /**
      * Returns {@code OptionalChar.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param a
      * @return
      */
@@ -93,7 +93,7 @@ public final class Iterables {
 
     /**
      * Returns {@code OptionalByte.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param a
      * @return
      */
@@ -104,7 +104,7 @@ public final class Iterables {
 
     /**
      * Returns {@code OptionalShort.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param a
      * @return
      */
@@ -115,7 +115,7 @@ public final class Iterables {
 
     /**
      * Returns {@code OptionalInt.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param a
      * @return
      */
@@ -126,7 +126,7 @@ public final class Iterables {
 
     /**
      * Returns {@code OptionalLong.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param a
      * @return
      */
@@ -137,7 +137,7 @@ public final class Iterables {
 
     /**
      * Returns {@code OptionalFloat.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param a
      * @return
      */
@@ -148,7 +148,7 @@ public final class Iterables {
 
     /**
      * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param a
      * @return
      */
@@ -159,7 +159,7 @@ public final class Iterables {
 
     /**
      * Returns {@code OptionalChar.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param a
      * @return
      */
@@ -170,7 +170,7 @@ public final class Iterables {
 
     /**
      * Returns {@code OptionalByte.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param a
      * @return
      */
@@ -181,7 +181,7 @@ public final class Iterables {
 
     /**
      * Returns {@code OptionalShort.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param a
      * @return
      */
@@ -192,7 +192,7 @@ public final class Iterables {
 
     /**
      * Returns {@code OptionalInt.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param a
      * @return
      */
@@ -203,7 +203,7 @@ public final class Iterables {
 
     /**
      * Returns {@code OptionalLong.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param a
      * @return
      */
@@ -214,7 +214,7 @@ public final class Iterables {
 
     /**
      * Returns {@code OptionalFloat.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param a
      * @return
      */
@@ -225,7 +225,7 @@ public final class Iterables {
 
     /**
      * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param a
      * @return
      */
@@ -236,7 +236,7 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param a
      * @return
      */
@@ -246,7 +246,7 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param a
      * @param cmp
      * @return
@@ -257,7 +257,7 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param c
      * @return
      */
@@ -267,7 +267,7 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param c
      * @param cmp
      * @return
@@ -278,7 +278,7 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param iter
      * @return
      */
@@ -288,7 +288,7 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param iter
      * @param cmp
      * @return
@@ -318,7 +318,7 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param a
      * @param cmp
      * @return
@@ -330,7 +330,7 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param c
      * @param cmp
      * @return
@@ -342,7 +342,7 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param iter
      * @param cmp
      * @return
@@ -354,7 +354,7 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param a
      * @return
      */
@@ -364,7 +364,7 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param a
      * @param cmp
      * @return
@@ -375,8 +375,8 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
-     * @param c 
+     *
+     * @param c
      * @return
      */
     public static <T extends Comparable<? super T>> Nullable<T> max(final Collection<? extends T> c) {
@@ -385,8 +385,8 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
-     * @param c 
+     *
+     * @param c
      * @return
      */
     public static <T> Nullable<T> max(final Collection<? extends T> c, final Comparator<? super T> cmp) {
@@ -395,8 +395,8 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
-     * @param iter 
+     *
+     * @param iter
      * @return
      */
     public static <T extends Comparable<? super T>> Nullable<T> max(final Iterator<? extends T> iter) {
@@ -405,7 +405,7 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param iter
      * @param cmp
      * @return
@@ -435,7 +435,7 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param a
      * @param cmp
      * @return
@@ -447,7 +447,7 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param c
      * @param cmp
      * @return
@@ -459,7 +459,7 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param iter
      * @param cmp
      * @return
@@ -471,7 +471,7 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param a
      * @return
      */
@@ -481,8 +481,8 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
-     * @param c 
+     *
+     * @param c
      * @return
      */
     public static <T extends Comparable<? super T>> Nullable<T> median(final Collection<? extends T> c) {
@@ -491,7 +491,7 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param a
      * @param cmp
      * @return
@@ -502,7 +502,7 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param c
      * @param cmp
      * @return
@@ -513,7 +513,7 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param a
      * @param keyMapper
      * @return
@@ -525,7 +525,7 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
-     * 
+     *
      * @param c
      * @param keyMapper
      * @return
@@ -537,9 +537,9 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}.
-     * 
+     *
      * @param c
-     * @param k 
+     * @param k
      * @return
      */
     public static <T extends Comparable<? super T>> Nullable<T> kthLargest(final Collection<? extends T> c, final int k) {
@@ -548,9 +548,9 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}.
-     * 
+     *
      * @param a
-     * @param k 
+     * @param k
      * @return
      */
     public static <T extends Comparable<? super T>> Nullable<T> kthLargest(final T[] a, final int k) {
@@ -559,7 +559,7 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}.
-     * 
+     *
      * @param c
      * @param k
      * @param cmp
@@ -571,7 +571,7 @@ public final class Iterables {
 
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}.
-     * 
+     *
      * @param a
      * @param k
      * @param cmp
@@ -1256,439 +1256,6 @@ public final class Iterables {
 
         return Pair.of(N.findFirst(c, predicateForFirst), N.findLast(c, predicateForLast));
     }
-
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param <U>
-    //     * @param a
-    //     * @param b
-    //     * @return
-    //     * @see N#crossJoin(Collection, Collection)
-    //     * @deprecated replaced by {@code N.crossJoin(Collection, Collection)}
-    //     */
-    //    @Deprecated
-    //    public static <T, U> List<Pair<T, U>> crossJoin(final Collection<T> a, final Collection<U> b) {
-    //        return crossJoin(a, b, Fn.<T, U> pair());
-    //    }
-    //
-    //    /**
-    //     *
-    //     * @param <T>
-    //     * @param <U>
-    //     * @param <R>
-    //     * @param <E>
-    //     * @param a
-    //     * @param b
-    //     * @param func
-    //     * @return
-    //     * @throws E
-    //     * @see N#crossJoin(Collection, Collection, com.landawn.abacus.util.Throwables.BiFunction)
-    //     * @deprecated replaced by {@code N.crossJoin(Collection, Collection, com.landawn.abacus.util.Try.BiFunction)}
-    //     */
-    //    @Deprecated
-    //    public static <T, U, R, E extends Exception> List<R> crossJoin(final Collection<T> a, final Collection<U> b,
-    //            final Throwables.BiFunction<? super T, ? super U, R, E> func) throws E {
-    //        N.checkArgNotNull(func, "func");
-    //
-    //        final List<R> result = new ArrayList<>(N.size(a) * N.size(b));
-    //
-    //        if (N.isNullOrEmpty(a) || N.isNullOrEmpty(b)) {
-    //            return result;
-    //        }
-    //
-    //        for (T ae : a) {
-    //            for (U be : b) {
-    //                result.add(func.apply(ae, be));
-    //            }
-    //        }
-    //
-    //        return result;
-    //    }
-    //
-    //    /**
-    //     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
-    //     *
-    //     * @param <T> the generic type
-    //     * @param <U> the generic type
-    //     * @param <E> the element type
-    //     * @param <E2> the generic type
-    //     * @param a the a
-    //     * @param b the b
-    //     * @param leftKeyMapper the left key mapper
-    //     * @param rightKeyMapper the right key mapper
-    //     * @return the list
-    //     * @throws E the e
-    //     * @throws E2 the e2
-    //     * @see N#innerJoin(Collection, Collection, com.landawn.abacus.util.Throwables.Function, com.landawn.abacus.util.Throwables.Function)
-    //     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
-    //     * @deprecated replaced by {@code N.innerJoin(Collection, Collection, com.landawn.abacus.util.Try.Function, com.landawn.abacus.util.Try.Function)}
-    //     */
-    //    @Deprecated
-    //    public static <T, U, K, E extends Exception, E2 extends Exception> List<Pair<T, U>> innerJoin(final Collection<T> a, final Collection<U> b,
-    //            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper)
-    //            throws E, E2 {
-    //        final List<Pair<T, U>> result = new ArrayList<>(N.min(9, N.size(a), N.size(b)));
-    //
-    //        if (N.isNullOrEmpty(a) || N.isNullOrEmpty(b)) {
-    //            return result;
-    //        }
-    //
-    //        final ListMultimap<K, U> rightKeyMap = ListMultimap.from(b, rightKeyMapper);
-    //
-    //        for (T left : a) {
-    //            final List<U> rights = rightKeyMap.get(leftKeyMapper.apply(left));
-    //
-    //            if (N.notNullOrEmpty(rights)) {
-    //                for (U right : rights) {
-    //                    result.add(Pair.of(left, right));
-    //                }
-    //            }
-    //        }
-    //
-    //        return result;
-    //    }
-    //
-    //    /**
-    //     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
-    //     *
-    //     * @param <T> the generic type
-    //     * @param <U> the generic type
-    //     * @param <E> the element type
-    //     * @param a the a
-    //     * @param b the b
-    //     * @param predicate the predicate
-    //     * @return the list
-    //     * @throws E the e
-    //     * @see N#innerJoin(Collection, Collection, com.landawn.abacus.util.Throwables.BiPredicate)
-    //     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
-    //     * @deprecated replaced by {@code N.innerJoin(Collection, Collection, com.landawn.abacus.util.Try.BiPredicate)}
-    //     */
-    //    @Deprecated
-    //    public static <T, U, E extends Exception> List<Pair<T, U>> innerJoin(final Collection<T> a, final Collection<U> b,
-    //            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
-    //        final List<Pair<T, U>> result = new ArrayList<>(N.min(9, N.size(a), N.size(b)));
-    //
-    //        if (N.isNullOrEmpty(a) || N.isNullOrEmpty(b)) {
-    //            return result;
-    //        }
-    //
-    //        for (T left : a) {
-    //            for (U right : b) {
-    //                if (predicate.test(left, right)) {
-    //                    result.add(Pair.of(left, right));
-    //                }
-    //            }
-    //        }
-    //
-    //        return result;
-    //    }
-    //
-    //    /**
-    //     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
-    //     *
-    //     * @param <T> the generic type
-    //     * @param <U> the generic type
-    //     * @param <E> the element type
-    //     * @param <E2> the generic type
-    //     * @param a the a
-    //     * @param b the b
-    //     * @param leftKeyMapper the left key mapper
-    //     * @param rightKeyMapper the right key mapper
-    //     * @return the list
-    //     * @throws E the e
-    //     * @throws E2 the e2
-    //     * @see N#fullJoin(Collection, Collection, com.landawn.abacus.util.Throwables.Function, com.landawn.abacus.util.Throwables.Function)
-    //     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
-    //     * @deprecated replaced by {@code N.fullJoin(Collection, Collection, com.landawn.abacus.util.Try.Function, com.landawn.abacus.util.Try.Function)}
-    //     */
-    //    @Deprecated
-    //    public static <T, U, K, E extends Exception, E2 extends Exception> List<Pair<T, U>> fullJoin(final Collection<T> a, final Collection<U> b,
-    //            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper)
-    //            throws E, E2 {
-    //        final List<Pair<T, U>> result = new ArrayList<>(N.max(9, N.size(a), N.size(b)));
-    //
-    //        if (N.isNullOrEmpty(a)) {
-    //            for (T left : a) {
-    //                result.add(Pair.of(left, (U) null));
-    //            }
-    //        } else if (N.isNullOrEmpty(b)) {
-    //            for (U right : b) {
-    //                result.add(Pair.of((T) null, right));
-    //            }
-    //        } else {
-    //            final ListMultimap<K, U> rightKeyMap = ListMultimap.from(b, rightKeyMapper);
-    //            final Map<U, U> joinedRights = new IdentityHashMap<>();
-    //
-    //            for (T left : a) {
-    //                final List<U> rights = rightKeyMap.get(leftKeyMapper.apply(left));
-    //
-    //                if (N.notNullOrEmpty(rights)) {
-    //                    for (U right : rights) {
-    //                        result.add(Pair.of(left, right));
-    //                        joinedRights.put(right, right);
-    //                    }
-    //                } else {
-    //                    result.add(Pair.of(left, (U) null));
-    //                }
-    //            }
-    //
-    //            for (U right : b) {
-    //                if (joinedRights.containsKey(right) == false) {
-    //                    result.add(Pair.of((T) null, right));
-    //                }
-    //            }
-    //        }
-    //
-    //        return result;
-    //    }
-    //
-    //    /**
-    //     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
-    //     *
-    //     * @param <T> the generic type
-    //     * @param <U> the generic type
-    //     * @param <E> the element type
-    //     * @param a the a
-    //     * @param b the b
-    //     * @param predicate the predicate
-    //     * @return the list
-    //     * @throws E the e
-    //     * @see N#fullJoin(Collection, Collection, com.landawn.abacus.util.Throwables.BiPredicate)
-    //     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
-    //     * @deprecated replaced by {@code N.fullJoin(Collection, Collection, com.landawn.abacus.util.Try.BiPredicate)}
-    //     */
-    //    @Deprecated
-    //    public static <T, U, E extends Exception> List<Pair<T, U>> fullJoin(final Collection<T> a, final Collection<U> b,
-    //            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
-    //        final List<Pair<T, U>> result = new ArrayList<>(N.max(9, N.size(a), N.size(b)));
-    //
-    //        if (N.isNullOrEmpty(a)) {
-    //            for (T left : a) {
-    //                result.add(Pair.of(left, (U) null));
-    //            }
-    //        } else if (N.isNullOrEmpty(b)) {
-    //            for (U right : b) {
-    //                result.add(Pair.of((T) null, right));
-    //            }
-    //        } else {
-    //            final Map<U, U> joinedRights = new IdentityHashMap<>();
-    //
-    //            for (T left : a) {
-    //                boolean joined = false;
-    //
-    //                for (U right : b) {
-    //                    if (predicate.test(left, right)) {
-    //                        result.add(Pair.of(left, right));
-    //                        joinedRights.put(right, right);
-    //                        joined = true;
-    //                    }
-    //                }
-    //
-    //                if (joined == false) {
-    //                    result.add(Pair.of(left, (U) null));
-    //                }
-    //            }
-    //
-    //            for (U right : b) {
-    //                if (joinedRights.containsKey(right) == false) {
-    //                    result.add(Pair.of((T) null, right));
-    //                }
-    //            }
-    //        }
-    //
-    //        return result;
-    //    }
-    //
-    //    /**
-    //     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
-    //     *
-    //     * @param <T> the generic type
-    //     * @param <U> the generic type
-    //     * @param <E> the element type
-    //     * @param <E2> the generic type
-    //     * @param a the a
-    //     * @param b the b
-    //     * @param leftKeyMapper the left key mapper
-    //     * @param rightKeyMapper the right key mapper
-    //     * @return the list
-    //     * @throws E the e
-    //     * @throws E2 the e2
-    //     * @see N#leftJoin(Collection, Collection, com.landawn.abacus.util.Throwables.Function, com.landawn.abacus.util.Throwables.Function)
-    //     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
-    //     * @deprecated replaced by {@code N.leftJoin(Collection, Collection, com.landawn.abacus.util.Try.Function, com.landawn.abacus.util.Try.Function)}
-    //     */
-    //    @Deprecated
-    //    public static <T, U, K, E extends Exception, E2 extends Exception> List<Pair<T, U>> leftJoin(final Collection<T> a, final Collection<U> b,
-    //            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper)
-    //            throws E, E2 {
-    //        final List<Pair<T, U>> result = new ArrayList<>(N.size(a));
-    //
-    //        if (N.isNullOrEmpty(a)) {
-    //            return result;
-    //        } else if (N.isNullOrEmpty(b)) {
-    //            for (T left : a) {
-    //                result.add(Pair.of(left, (U) null));
-    //            }
-    //        } else {
-    //            final ListMultimap<K, U> rightKeyMap = ListMultimap.from(b, rightKeyMapper);
-    //
-    //            for (T left : a) {
-    //                final List<U> rights = rightKeyMap.get(leftKeyMapper.apply(left));
-    //
-    //                if (N.notNullOrEmpty(rights)) {
-    //                    for (U right : rights) {
-    //                        result.add(Pair.of(left, right));
-    //                    }
-    //                } else {
-    //                    result.add(Pair.of(left, (U) null));
-    //                }
-    //            }
-    //        }
-    //
-    //        return result;
-    //    }
-    //
-    //    /**
-    //     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
-    //     *
-    //     * @param <T> the generic type
-    //     * @param <U> the generic type
-    //     * @param <E> the element type
-    //     * @param a the a
-    //     * @param b the b
-    //     * @param predicate the predicate
-    //     * @return the list
-    //     * @throws E the e
-    //     * @see N#leftJoin(Collection, Collection, com.landawn.abacus.util.Throwables.BiPredicate)
-    //     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
-    //     * @deprecated replaced by {@code N.leftJoin(Collection, Collection, com.landawn.abacus.util.Try.BiPredicate)}
-    //     */
-    //    @Deprecated
-    //    public static <T, U, E extends Exception> List<Pair<T, U>> leftJoin(final Collection<T> a, final Collection<U> b,
-    //            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
-    //        final List<Pair<T, U>> result = new ArrayList<>(N.size(a));
-    //
-    //        if (N.isNullOrEmpty(a)) {
-    //            return result;
-    //        } else if (N.isNullOrEmpty(b)) {
-    //            for (T left : a) {
-    //                result.add(Pair.of(left, (U) null));
-    //            }
-    //        } else {
-    //            for (T left : a) {
-    //                boolean joined = false;
-    //
-    //                for (U right : b) {
-    //                    if (predicate.test(left, right)) {
-    //                        result.add(Pair.of(left, right));
-    //                        joined = true;
-    //                    }
-    //                }
-    //
-    //                if (joined == false) {
-    //                    result.add(Pair.of(left, (U) null));
-    //                }
-    //            }
-    //        }
-    //
-    //        return result;
-    //    }
-    //
-    //    /**
-    //     * The time complexity is <i>O(n + m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
-    //     *
-    //     * @param <T> the generic type
-    //     * @param <U> the generic type
-    //     * @param <E> the element type
-    //     * @param <E2> the generic type
-    //     * @param a the a
-    //     * @param b the b
-    //     * @param leftKeyMapper the left key mapper
-    //     * @param rightKeyMapper the right key mapper
-    //     * @return the list
-    //     * @throws E the e
-    //     * @throws E2 the e2
-    //     * @see N#rightJoin(Collection, Collection, com.landawn.abacus.util.Throwables.Function, com.landawn.abacus.util.Throwables.Function)
-    //     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
-    //     * @deprecated replaced by {@code N.rightJoin(Collection, Collection, com.landawn.abacus.util.Try.Function, com.landawn.abacus.util.Try.Function)}
-    //     */
-    //    @Deprecated
-    //    public static <T, U, K, E extends Exception, E2 extends Exception> List<Pair<T, U>> rightJoin(final Collection<T> a, final Collection<U> b,
-    //            final Throwables.Function<? super T, ? extends K, E> leftKeyMapper, final Throwables.Function<? super U, ? extends K, E2> rightKeyMapper)
-    //            throws E, E2 {
-    //        final List<Pair<T, U>> result = new ArrayList<>(N.size(b));
-    //
-    //        if (N.isNullOrEmpty(b)) {
-    //            return result;
-    //        } else if (N.isNullOrEmpty(a)) {
-    //            for (U right : b) {
-    //                result.add(Pair.of((T) null, right));
-    //            }
-    //        } else {
-    //            final ListMultimap<K, T> leftKeyMap = ListMultimap.from(a, leftKeyMapper);
-    //
-    //            for (U right : b) {
-    //                final List<T> lefts = leftKeyMap.get(rightKeyMapper.apply(right));
-    //
-    //                if (N.notNullOrEmpty(lefts)) {
-    //                    for (T left : lefts) {
-    //                        result.add(Pair.of(left, right));
-    //                    }
-    //                } else {
-    //                    result.add(Pair.of((T) null, right));
-    //                }
-    //            }
-    //        }
-    //
-    //        return result;
-    //    }
-    //
-    //    /**
-    //     * The time complexity is <i>O(n * m)</i> : <i>n</i> is the size of this <code>Seq</code> and <i>m</i> is the size of specified collection <code>b</code>.
-    //     *
-    //     * @param <T> the generic type
-    //     * @param <U> the generic type
-    //     * @param <E> the element type
-    //     * @param a the a
-    //     * @param b the b
-    //     * @param predicate the predicate
-    //     * @return the list
-    //     * @throws E the e
-    //     * @see N#rightJoin(Collection, Collection, com.landawn.abacus.util.Throwables.BiPredicate)
-    //     * @see <a href="http://stackoverflow.com/questions/5706437/whats-the-difference-between-inner-join-left-join-right-join-and-full-join">sql join</a>
-    //     * @deprecated replaced by {@code N.rightJoin(Collection, Collection, com.landawn.abacus.util.Try.BiPredicate)}
-    //     */
-    //    @Deprecated
-    //    public static <T, U, E extends Exception> List<Pair<T, U>> rightJoin(final Collection<T> a, final Collection<U> b,
-    //            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
-    //        final List<Pair<T, U>> result = new ArrayList<>(N.size(b));
-    //
-    //        if (N.isNullOrEmpty(b)) {
-    //            return result;
-    //        } else if (N.isNullOrEmpty(a)) {
-    //            for (U right : b) {
-    //                result.add(Pair.of((T) null, right));
-    //            }
-    //        } else {
-    //            for (U right : b) {
-    //                boolean joined = false;
-    //
-    //                for (T left : a) {
-    //                    if (predicate.test(left, right)) {
-    //                        result.add(Pair.of(left, right));
-    //                        joined = true;
-    //                    }
-    //                }
-    //
-    //                if (joined == false) {
-    //                    result.add(Pair.of((T) null, right));
-    //                }
-    //            }
-    //        }
-    //
-    //        return result;
-    //    }
 
     /**
      *
@@ -2486,7 +2053,7 @@ public final class Iterables {
     }
 
     /**
-     * 
+     *
      * Note: copy from Google Guava under Apache License v2.
      * <br />
      *

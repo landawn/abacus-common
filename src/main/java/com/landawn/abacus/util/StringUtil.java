@@ -39,7 +39,6 @@ import java.util.regex.Pattern;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalChar;
-import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.IntUnaryOperator;
 import com.landawn.abacus.util.function.Supplier;
 
@@ -631,16 +630,18 @@ public abstract class StringUtil {
             return str;
         }
 
-        if (str.length() <= maxWidth) {
+        final int strLen = str.length();
+
+        if (strLen <= maxWidth) {
             return str;
         }
 
-        if (offset > str.length()) {
-            offset = str.length();
+        if (offset > strLen) {
+            offset = strLen;
         }
 
-        if (str.length() - offset < maxWidth - abbrevMarkerLength) {
-            offset = str.length() - (maxWidth - abbrevMarkerLength);
+        if (strLen - offset < maxWidth - abbrevMarkerLength) {
+            offset = strLen - (maxWidth - abbrevMarkerLength);
         }
 
         if (offset <= abbrevMarkerLength + 1) {
@@ -651,11 +652,11 @@ public abstract class StringUtil {
             throw new IllegalArgumentException(String.format("Minimum abbreviation width with offset is %d", minAbbrevWidthOffset));
         }
 
-        if (offset + maxWidth - abbrevMarkerLength < str.length()) {
+        if (offset + maxWidth - abbrevMarkerLength < strLen) {
             return abbrevMarker + abbreviate(str.substring(offset), abbrevMarker, maxWidth - abbrevMarkerLength);
         }
 
-        return abbrevMarker + str.substring(str.length() - (maxWidth - abbrevMarkerLength));
+        return abbrevMarker + str.substring(strLen - (maxWidth - abbrevMarkerLength));
     }
 
     /**
@@ -2893,16 +2894,33 @@ public abstract class StringUtil {
     // characters by their unaccented equivalent (and uncommitted bug fix:
     // https://issues.apache.org/jira/browse/LUCENE-1343?focusedCommentId=12858907&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#action_12858907).
     public static String stripAccents(final String str) {
-        if (N.isNullOrEmpty(str)) {
-            return str;
+        if (str == null) {
+            return null;
         }
-
-        final String decomposed = Normalizer.normalize(str, Normalizer.Form.NFD);
+        final StringBuilder decomposed = new StringBuilder(Normalizer.normalize(str, Normalizer.Form.NFD));
+        convertRemainingAccentCharacters(decomposed);
         // Note that this doesn't correctly remove ligatures...
-        return pattern_accent.matcher(decomposed).replaceAll("");//$NON-NLS-1$
+        return STRIP_ACCENTS_PATTERN.matcher(decomposed).replaceAll(EMPTY);
     }
 
-    private static final Pattern pattern_accent = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");//$NON-NLS-1$
+    /**
+     * Pattern used in {@link #stripAccents(String)}.
+     */
+    private static final Pattern STRIP_ACCENTS_PATTERN = Pattern.compile("\\p{InCombiningDiacriticalMarks}+"); //$NON-NLS-1$
+
+    private static void convertRemainingAccentCharacters(final StringBuilder decomposed) {
+        char ch = 0;
+
+        for (int i = 0; i < decomposed.length(); i++) {
+            ch = decomposed.charAt(i);
+
+            if (ch == '\u0141') {
+                decomposed.setCharAt(i, 'L');
+            } else if (ch == '\u0142') {
+                decomposed.setCharAt(i, 'l');
+            }
+        }
+    }
 
     public static void stripAccents(final String[] strs) {
         if (N.isNullOrEmpty(strs)) {
@@ -2952,6 +2970,7 @@ public abstract class StringUtil {
 
         if (str.length() == 1) {
             final char ch = str.charAt(0);
+
             if (ch == N.CHAR_CR || ch == N.CHAR_LF) {
                 return N.EMPTY_STRING;
             }
@@ -3531,12 +3550,18 @@ public abstract class StringUtil {
                 }
             }
         } else {
+            char ch = 0;
+
             for (int i = 0; i < len; i++) {
                 if (containsUppercase && containsLowercase) {
                     return true;
-                } else if (Character.isUpperCase(cs.charAt(i))) {
+                }
+
+                ch = cs.charAt(i);
+
+                if (Character.isUpperCase(ch)) {
                     containsUppercase = true;
-                } else if (Character.isLowerCase(cs.charAt(i))) {
+                } else if (Character.isLowerCase(ch)) {
                     containsLowercase = true;
                 }
             }
@@ -3844,8 +3869,12 @@ public abstract class StringUtil {
                 }
             }
         } else {
+            char ch = 0;
+
             for (int i = 0; i < len; i++) {
-                if (isAsciiAlpha(cs.charAt(i)) == false && cs.charAt(i) != ' ') {
+                ch = cs.charAt(i);
+
+                if (isAsciiAlpha(ch) == false && ch != ' ') {
                     return false;
                 }
             }
@@ -3910,8 +3939,12 @@ public abstract class StringUtil {
                 }
             }
         } else {
+            char ch = 0;
+
             for (int i = 0; i < len; i++) {
-                if (isAsciiAlphanumeric(cs.charAt(i)) == false && cs.charAt(i) != ' ') {
+                ch = cs.charAt(i);
+
+                if (isAsciiAlphanumeric(ch) == false && ch != ' ') {
                     return false;
                 }
             }
@@ -4051,8 +4084,12 @@ public abstract class StringUtil {
                 }
             }
         } else {
+            char ch = 0;
+
             for (int i = 0; i < len; i++) {
-                if (Character.isLetter(cs.charAt(i)) == false && cs.charAt(i) != ' ') {
+                ch = cs.charAt(i);
+
+                if (Character.isLetter(ch) == false && ch != ' ') {
                     return false;
                 }
             }
@@ -4160,8 +4197,12 @@ public abstract class StringUtil {
                 }
             }
         } else {
+            char ch = 0;
+
             for (int i = 0; i < len; i++) {
-                if (Character.isLetterOrDigit(cs.charAt(i)) == false && cs.charAt(i) != ' ') {
+                ch = cs.charAt(i);
+
+                if (Character.isLetterOrDigit(ch) == false && ch != ' ') {
                     return false;
                 }
             }
@@ -4281,8 +4322,12 @@ public abstract class StringUtil {
                 }
             }
         } else {
+            char ch = 0;
+
             for (int i = 0; i < len; i++) {
-                if (Character.isDigit(cs.charAt(i)) == false && cs.charAt(i) != ' ') {
+                ch = cs.charAt(i);
+
+                if (Character.isDigit(ch) == false && ch != ' ') {
                     return false;
                 }
             }
@@ -5161,6 +5206,42 @@ public abstract class StringUtil {
         }
 
         return indexOfAny(str, chs) != N.INDEX_NOT_FOUND;
+    }
+
+    /**
+     *
+     * @param str
+     * @param searchStrs
+     * @return
+     */
+    @SafeVarargs
+    public static boolean containsAny(final String str, final String... searchStrs) {
+        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(searchStrs)) {
+            return false;
+        }
+
+        return indexOfAny(str, searchStrs) != N.INDEX_NOT_FOUND;
+    }
+
+    /**
+     *
+     * @param str
+     * @param searchStrs
+     * @return
+     */
+    @SafeVarargs
+    public static boolean containsAnyIgnoreCase(final String str, final String... searchStrs) {
+        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(searchStrs)) {
+            return false;
+        }
+
+        for (String searchStr : searchStrs) {
+            if (N.notNullOrEmpty(searchStr) && indexOf(str, searchStr) != N.INDEX_NOT_FOUND) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -8157,8 +8238,9 @@ public abstract class StringUtil {
         }
     }
 
-    public static <K, V> String joinEntries(final Map<K, V> m, final String entryDelimiter, final String keyValueDelimiter, final String prefix,
-            final String suffix, final boolean trim, final Function<? super K, ?> keyMapper, final Function<? super V, ?> valueMapper) {
+    public static <K, V, E extends Exception, E2 extends Exception> String joinEntries(final Map<K, V> m, final String entryDelimiter,
+            final String keyValueDelimiter, final String prefix, final String suffix, final boolean trim, final Throwables.Function<? super K, ?, E> keyMapper,
+            final Throwables.Function<? super V, ?, E2> valueMapper) throws E, E2 {
         N.checkArgNotNull(keyMapper, "keyMapper");
         N.checkArgNotNull(valueMapper, "valueMapper");
 

@@ -635,6 +635,7 @@ public final class Fn extends Comparators {
      * @return
      */
     @Beta
+    @SequentialOnly
     @Stateful
     public static <T> Supplier<T> memoize(final Supplier<T> supplier) {
         return LazyInitializer.of(supplier);
@@ -648,6 +649,7 @@ public final class Fn extends Comparators {
      * @return
      */
     @Beta
+    @SequentialOnly
     @Stateful
     public static <T, R> Function<T, R> memoize(final Function<? super T, ? extends R> func) {
         return new Function<T, R>() {
@@ -702,10 +704,10 @@ public final class Fn extends Comparators {
      * @see {@code Stream.split/sliding};
      * @deprecated
      */
-    @Stateful
     @Deprecated
     @Beta
     @SequentialOnly
+    @Stateful
     public static <T, C extends Collection<T>> Supplier<? extends C> reuse(final Supplier<? extends C> supplier) {
         return new Supplier<C>() {
             private C c;
@@ -735,10 +737,10 @@ public final class Fn extends Comparators {
      * @see {@code Stream.split/sliding};
      * @deprecated
      */
-    @Stateful
     @Deprecated
     @Beta
     @SequentialOnly
+    @Stateful
     public static <T, C extends Collection<T>> IntFunction<? extends C> reuse(final IntFunction<? extends C> supplier) {
         return new IntFunction<C>() {
             private C c;
@@ -3382,6 +3384,7 @@ public final class Fn extends Comparators {
      * @return
      */
     @Beta
+    @SequentialOnly
     @Stateful
     public static <T> Predicate<T> limitThenFilter(final int limit, final Predicate<T> predicate) {
         N.checkArgNotNull(predicate);
@@ -3406,6 +3409,7 @@ public final class Fn extends Comparators {
      * @return
      */
     @Beta
+    @SequentialOnly
     @Stateful
     public static <T, U> BiPredicate<T, U> limitThenFilter(final int limit, final BiPredicate<T, U> predicate) {
         N.checkArgNotNull(predicate);
@@ -3429,6 +3433,7 @@ public final class Fn extends Comparators {
      * @return
      */
     @Beta
+    @SequentialOnly
     @Stateful
     public static <T> Predicate<T> filterThenLimit(final Predicate<T> predicate, final int limit) {
         N.checkArgNotNull(predicate);
@@ -3453,6 +3458,7 @@ public final class Fn extends Comparators {
      * @return
      */
     @Beta
+    @SequentialOnly
     @Stateful
     public static <T, U> BiPredicate<T, U> filterThenLimit(final BiPredicate<T, U> predicate, final int limit) {
         N.checkArgNotNull(predicate);
@@ -3475,6 +3481,7 @@ public final class Fn extends Comparators {
      * @return
      */
     @Beta
+    @SequentialOnly
     @Stateful
     public static <T> Predicate<T> timeLimit(final long timeInMillis) {
         N.checkArgNotNegative(timeInMillis, "timeInMillis");
@@ -3510,6 +3517,7 @@ public final class Fn extends Comparators {
      * @return
      */
     @Beta
+    @SequentialOnly
     @Stateful
     public static <T> Predicate<T> timeLimit(final Duration duration) {
         N.checkArgNotNull(duration, "duration");
@@ -7911,6 +7919,7 @@ public final class Fn extends Comparators {
          * @return
          */
         @Beta
+        @SequentialOnly
         @Stateful
         public static <T> Predicate<T> concurrentDistinct() {
             return new Predicate<T>() {
@@ -7931,6 +7940,7 @@ public final class Fn extends Comparators {
          * @return
          */
         @Beta
+        @SequentialOnly
         @Stateful
         public static <T> Predicate<T> concurrentDistinctBy(final Function<? super T, ?> mapper) {
             return new Predicate<T>() {

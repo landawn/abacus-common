@@ -194,6 +194,8 @@ public final class ExceptionUtil {
 
                 return (Exception) cause;
             }
+        } else if (e.getCause() != null && e.getCause() instanceof Exception && (e instanceof InvocationTargetException || e instanceof ExecutionException)) {
+            return tryToGetOriginalCheckedException((Exception) e.getCause());
         }
 
         return e;

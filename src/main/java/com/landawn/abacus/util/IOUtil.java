@@ -70,7 +70,7 @@ import com.landawn.abacus.util.function.BiPredicate;
  * Note: This class includes codes copied from Apache Commons Lang, Apache Commons IO, Google Guava and other open source projects under the Apache License 2.0.
  * The methods copied from other libraries/frameworks/projects may be modified in this class.
  * </p>
- * 
+ *
  * @version $Revision: 0.8 $
  */
 public final class IOUtil {
@@ -195,7 +195,7 @@ public final class IOUtil {
     // ...
     public static final String JAVA_HOME = System.getProperty("java.home");
 
-    public static final String JAVA_VERSION = System.getProperty("java.version");
+    public static final JavaVersion JAVA_VERSION = JavaVersion.of(System.getProperty("java.version"));
 
     public static final String JAVA_VENDOR = System.getProperty("java.vendor");
 
@@ -600,7 +600,7 @@ public final class IOUtil {
      *
      * @param file
      * @return
-     * @throws IOException the unchecked IO exception 
+     * @throws IOException the unchecked IO exception
      * @see #readAllBytes(File)
      */
     public static byte[] readBytes(final File file) throws IOException {
@@ -765,7 +765,7 @@ public final class IOUtil {
      *
      * @param file
      * @return
-     * @throws IOException 
+     * @throws IOException
      * @see #readAllChars(File)
      */
     public static char[] readChars(final File file) throws IOException {
@@ -777,7 +777,7 @@ public final class IOUtil {
      * @param file
      * @param encoding
      * @return
-     * @throws IOException 
+     * @throws IOException
      * @see #readAllChars(File, Charset)
      */
     public static char[] readChars(final File file, final Charset encoding) throws IOException {
@@ -835,7 +835,7 @@ public final class IOUtil {
      * @param is
      * @param encoding
      * @return
-     * @throws IOException 
+     * @throws IOException
      * @see #readAllChars(InputStream, encoding)
      */
     public static char[] readChars(final InputStream is, final Charset encoding) throws IOException {
@@ -881,7 +881,7 @@ public final class IOUtil {
      *
      * @param reader
      * @return
-     * @throws IOException 
+     * @throws IOException
      * @see #readAllChars(Reader)
      */
     public static char[] readChars(final Reader reader) throws IOException {
@@ -1272,7 +1272,7 @@ public final class IOUtil {
      *
      * @param file
      * @return
-     * @throws IOException 
+     * @throws IOException
      * @see #readAllLines(File)
      */
     public static List<String> readLines(final File file) throws IOException {
@@ -1284,7 +1284,7 @@ public final class IOUtil {
      * @param file
      * @param encoding
      * @return
-     * @throws IOException 
+     * @throws IOException
      * @see #readAllLines(File, Charset)
      */
     public static List<String> readLines(final File file, final Charset encoding) throws IOException {
@@ -1330,7 +1330,7 @@ public final class IOUtil {
      *
      * @param is
      * @return
-     * @throws IOException 
+     * @throws IOException
      * @see #readAllLines(is)
      */
     public static List<String> readLines(final InputStream is) throws IOException {
@@ -1342,7 +1342,7 @@ public final class IOUtil {
      * @param is
      * @param encoding
      * @return
-     * @throws IOException 
+     * @throws IOException
      * @see #readAllLines(is, Charset)
      */
     public static List<String> readLines(final InputStream is, final Charset encoding) throws IOException {
@@ -1390,7 +1390,7 @@ public final class IOUtil {
      *
      * @param reader
      * @return
-     * @throws IOException 
+     * @throws IOException
      * @see #readAllLines(Reader)
      */
     public static List<String> readLines(final Reader reader) throws IOException {
@@ -3854,7 +3854,7 @@ public final class IOUtil {
      * New buffered writer.
      *
      * @param os
-     * @return 
+     * @return
      */
     public static java.io.BufferedWriter newBufferedWriter(OutputStream os) {
         return new java.io.BufferedWriter(new OutputStreamWriter(os));
@@ -3865,7 +3865,7 @@ public final class IOUtil {
      *
      * @param os
      * @param charset
-     * @return 
+     * @return
      */
     public static java.io.BufferedWriter newBufferedWriter(OutputStream os, Charset charset) {
         return new java.io.BufferedWriter(new OutputStreamWriter(os, charset == null ? Charsets.UTF_8 : charset));
@@ -3875,7 +3875,7 @@ public final class IOUtil {
      * New LZ 4 block input stream.
      *
      * @param is
-     * @return 
+     * @return
      */
     public static LZ4BlockInputStream newLZ4BlockInputStream(final InputStream is) {
         return new LZ4BlockInputStream(is);
@@ -3885,7 +3885,7 @@ public final class IOUtil {
      * New LZ 4 block output stream.
      *
      * @param os
-     * @return 
+     * @return
      */
     public static LZ4BlockOutputStream newLZ4BlockOutputStream(final OutputStream os) {
         return new LZ4BlockOutputStream(os);
@@ -3896,7 +3896,7 @@ public final class IOUtil {
      *
      * @param os
      * @param blockSize
-     * @return 
+     * @return
      */
     public static LZ4BlockOutputStream newLZ4BlockOutputStream(final OutputStream os, final int blockSize) {
         return new LZ4BlockOutputStream(os, blockSize);
@@ -3921,7 +3921,7 @@ public final class IOUtil {
      * New snappy output stream.
      *
      * @param os
-     * @return 
+     * @return
      */
     public static SnappyOutputStream newSnappyOutputStream(final OutputStream os) {
         return new SnappyOutputStream(os);
@@ -3932,7 +3932,7 @@ public final class IOUtil {
      *
      * @param os
      * @param bufferSize
-     * @return 
+     * @return
      */
     public static SnappyOutputStream newSnappyOutputStream(final OutputStream os, final int bufferSize) {
         return new SnappyOutputStream(os, bufferSize);
@@ -4628,7 +4628,7 @@ public final class IOUtil {
      *
      * @param file the {@code File} of which the modification date must be compared
      * @param reference the {@code File} of which the modification date is used
-     * @return true if the {@code File} exists and has been modified more recently than the reference {@code File} 
+     * @return true if the {@code File} exists and has been modified more recently than the reference {@code File}
      * @throws IllegalArgumentException if the file or reference file is {@code null} or the reference file doesn't exist
      */
     public static boolean isFileNewer(final File file, final File reference) {
@@ -4713,7 +4713,7 @@ public final class IOUtil {
      *             of (must not be {@code null}).
      *
      * @return the length of the file, or recursive size of the directory, provided (in bytes).
-     * 
+     *
      * @throws IllegalArgumentException  if the file is {@code null} or the file does not exist.
      *
      * @since 2.0

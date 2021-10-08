@@ -3708,9 +3708,39 @@ public class RowDataSet implements DataSet, Cloneable {
             final boolean returnAllList) {
         N.checkArgNotNull(entityClass, "entityClass");
         N.checkArgNotNull(idPropNames, "idPropNames");
-        N.checkArgument(this._columnNameList.containsAll(idPropNames), "Some id properties {} are not found in DataSet: {}", idPropNames, this._columnNameList);
+
+        List<String> idPropNamesToUse = idPropNames;
+
+        if (!this._columnNameList.containsAll(idPropNamesToUse)) {
+            final List<String> tmp = new ArrayList<>(idPropNamesToUse.size());
+            final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
+            PropInfo propInfo = null;
+
+            for (String idPropName : idPropNamesToUse) {
+                if (this._columnNameList.contains(idPropName)) {
+                    tmp.add(idPropName);
+                } else {
+                    propInfo = entityInfo.getPropInfo(idPropName);
+
+                    if (propInfo != null && propInfo.columnName.isPresent() && this._columnNameList.contains(propInfo.columnName.get())) {
+                        tmp.add(propInfo.columnName.get());
+                    } else {
+                        tmp.add(idPropName);
+                    }
+                }
+            }
+
+            if (this._columnNameList.containsAll(tmp)) {
+                idPropNamesToUse = tmp;
+            }
+        }
+
+        N.checkArgument(this._columnNameList.containsAll(idPropNamesToUse), "Some id properties {} are not found in DataSet: {} for entity {}",
+                idPropNamesToUse, this._columnNameList, ClassUtil.getSimpleClassName(entityClass));
+
         N.checkArgument(N.isNullOrEmpty(selectPropNames) || selectPropNames == this._columnNameList || this._columnNameList.containsAll(selectPropNames),
-                "Some select properties {} are not found in DataSet: {}", selectPropNames, this._columnNameList);
+                "Some select properties {} are not found in DataSet: {} for entity {}", selectPropNames, this._columnNameList,
+                ClassUtil.getSimpleClassName(entityClass));
 
         selectPropNames = N.isNullOrEmpty(selectPropNames) ? this._columnNameList : selectPropNames;
 
@@ -3718,7 +3748,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
         final int rowCount = size();
         final int columnCount = _columnList.size();
-        final int[] idColumnIndexes = getColumnIndexes(idPropNames);
+        final int[] idColumnIndexes = getColumnIndexes(idPropNamesToUse);
         final boolean ignoreUnmatchedProperty = selectPropNames == this._columnNameList;
 
         final Object[] resultEntities = new Object[rowCount];
@@ -3850,6 +3880,10 @@ public class RowDataSet implements DataSet, Cloneable {
                     for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
                         columnName = this._columnNameList.get(columnIndex);
 
+                        if (mergedPropNames.contains(columnName)) {
+                            continue;
+                        }
+
                         if (columnName.length() > idx && columnName.charAt(idx) == PROP_NAME_SEPARATOR && columnName.startsWith(realPropName)) {
                             newColumnName = columnName.substring(idx + 1);
                             newTmpColumnNameList.add(newColumnName);
@@ -3864,7 +3898,11 @@ public class RowDataSet implements DataSet, Cloneable {
                     }
 
                     final RowDataSet tmp = new RowDataSet(newTmpColumnNameList, newTmpColumnList);
-                    final List<?> propValueList = tmp.toMergedEntities(propEntityClass, newPropEntityIdNames, tmp._columnNameList, true);
+
+                    final boolean isToMerge = N.notNullOrEmpty(newPropEntityIdNames) && tmp._columnNameList.containsAll(newPropEntityIdNames);
+
+                    final List<?> propValueList = isToMerge ? tmp.toMergedEntities(propEntityClass, newPropEntityIdNames, tmp._columnNameList, true)
+                            : tmp.toList(propEntityClass);
 
                     if (propInfo.type.isCollection()) {
                         Collection<Object> c = null;
@@ -3880,7 +3918,7 @@ public class RowDataSet implements DataSet, Cloneable {
                                 c = (Collection<Object>) N.newInstance(propInfo.clazz);
                                 propInfo.setPropValue(resultEntities[rowIndex], c);
 
-                                if (!(c instanceof Set)) {
+                                if (isToMerge && !(c instanceof Set)) {
                                     listPropValuesToDeduplicate.add(c);
                                 }
                             }

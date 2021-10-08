@@ -89,7 +89,8 @@ abstract class SingleValueType<T> extends AbstractType<T> {
                 }
 
                 try {
-                    if (m.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonValue.class)) {
+                    if (m.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonValue.class)
+                            && m.getAnnotation(com.fasterxml.jackson.annotation.JsonValue.class).value()) {
                         localJsonValueMethod = m;
                     }
                 } catch (Throwable e) {
@@ -108,7 +109,8 @@ abstract class SingleValueType<T> extends AbstractType<T> {
                     localJsonValueField = field;
                 } else {
                     try {
-                        if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonValue.class)) {
+                        if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonValue.class)
+                                && field.getAnnotation(com.fasterxml.jackson.annotation.JsonValue.class).value()) {
                             localJsonValueField = field;
                         }
                     } catch (Throwable e) {

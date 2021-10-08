@@ -237,10 +237,32 @@ public final class ParserUtil {
 
         if (field != null && field.isAnnotationPresent(JsonXmlField.class)) {
             isJsonRawValue = field.getAnnotation(JsonXmlField.class).isJsonRawValue();
+        }
 
-            if (isJsonRawValue && !CharSequence.class.isAssignableFrom(field.getType())) {
-                throw new IllegalArgumentException("'isJsonRawValue' can only be applied to CharSequence type field");
+        if (isJsonRawValue == false) {
+            try {
+                if (field != null && field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonRawValue.class)
+                        && field.getAnnotation(com.fasterxml.jackson.annotation.JsonRawValue.class).value()) {
+                    isJsonRawValue = true;
+                }
+            } catch (Throwable e) {
+                // ignore.
             }
+        }
+
+        if (isJsonRawValue == false) {
+            try {
+                if (field != null && field.isAnnotationPresent(com.alibaba.fastjson.annotation.JSONField.class)
+                        && field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).jsonDirect()) {
+                    isJsonRawValue = true;
+                }
+            } catch (Throwable e) {
+                // ignore.
+            }
+        }
+
+        if (isJsonRawValue && !CharSequence.class.isAssignableFrom(field.getType())) {
+            throw new IllegalArgumentException("'isJsonRawValue' can only be applied to CharSequence type field");
         }
 
         return isJsonRawValue;
@@ -346,12 +368,12 @@ public final class ParserUtil {
         String[] alias = null;
 
         if (field != null) {
-            if (field.isAnnotationPresent(JsonXmlField.class) && N.notNullOrEmpty(field.getAnnotation(JsonXmlField.class).name())) {
+            if (field.isAnnotationPresent(JsonXmlField.class) && N.notNullOrEmpty(field.getAnnotation(JsonXmlField.class).alias())) {
                 alias = field.getAnnotation(JsonXmlField.class).alias();
             } else {
                 try {
                     if (field.isAnnotationPresent(com.alibaba.fastjson.annotation.JSONField.class)
-                            && N.notNullOrEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name())) {
+                            && N.notNullOrEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).alternateNames())) {
                         alias = field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).alternateNames();
                     }
                 } catch (Throwable e) {
@@ -369,6 +391,10 @@ public final class ParserUtil {
                     }
                 }
             }
+        }
+
+        if (N.notNullOrEmpty(alias) && field != null) {
+            alias = N.removeAllOccurrences(alias, field.getName());
         }
 
         return alias;
@@ -562,6 +588,14 @@ public final class ParserUtil {
 
                 if (propInfo.columnName.isPresent() && !propInfoMap.containsKey(propInfo.columnName.get())) {
                     propInfoMap.put(propInfo.columnName.get(), propInfo);
+
+                    if (!propInfoMap.containsKey(propInfo.columnName.get().toLowerCase())) {
+                        propInfoMap.put(propInfo.columnName.get().toLowerCase(), propInfo);
+                    }
+
+                    if (!propInfoMap.containsKey(propInfo.columnName.get().toUpperCase())) {
+                        propInfoMap.put(propInfo.columnName.get().toUpperCase(), propInfo);
+                    }
                 }
 
                 final String[] alias = getAlias(propInfo.field);
@@ -903,7 +937,7 @@ public final class ParserUtil {
          * @param propName
          * @return
          */
-        private List<PropInfo> getPropInfoQueue(String propName) {
+        public List<PropInfo> getPropInfoQueue(String propName) {
             List<PropInfo> propInfoQueue = propInfoQueueMap.get(propName);
 
             if (propInfoQueue == null) {
@@ -913,15 +947,20 @@ public final class ParserUtil {
 
                 if (strs.length > 1) {
                     Class<?> propClass = clazz;
+                    EntityInfo propEntityInfo = null;
 
                     PropInfo propInfo = null;
 
                     for (int i = 0, len = strs.length; i < len; i++) {
-                        propInfo = getEntityInfo(propClass).getPropInfo(strs[i]);
+                        propEntityInfo = ClassUtil.isEntity(propClass) ? ParserUtil.getEntityInfo(propClass) : null;
+                        propInfo = propEntityInfo == null ? null : propEntityInfo.getPropInfo(strs[i]);
 
                         if (propInfo == null) {
-                            propInfoQueue.clear();
+                            if (i == 0) {
+                                return N.emptyList(); // return directly because the first part is not valid property/field name of the target entity class.
+                            }
 
+                            propInfoQueue.clear();
                             break;
                         }
 
@@ -934,6 +973,8 @@ public final class ParserUtil {
                         }
                     }
                 }
+
+                propInfoQueue = N.isNullOrEmpty(propInfoQueue) ? N.<PropInfo> emptyList() : ImmutableList.of(propInfoQueue);
 
                 propInfoQueueMap.put(propName, propInfoQueue);
             }
@@ -1387,6 +1428,10 @@ public final class ParserUtil {
          * @param propValue
          */
         public void setPropValue(final Object obj, Object propValue) {
+            if (isJsonRawValue && propValue != null && !clazz.isAssignableFrom(propValue.getClass())) {
+                propValue = N.toJSON(propValue);
+            }
+
             if (isImmutableEntity) {
                 ((Object[]) obj)[fieldOrder] = propValue;
                 return;

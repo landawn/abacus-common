@@ -18,28 +18,16 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.annotation.Stateful;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
-import com.landawn.abacus.util.function.BiConsumer;
-import com.landawn.abacus.util.function.BiFunction;
-import com.landawn.abacus.util.function.BooleanConsumer;
-import com.landawn.abacus.util.function.ByteConsumer;
-import com.landawn.abacus.util.function.CharConsumer;
-import com.landawn.abacus.util.function.Consumer;
-import com.landawn.abacus.util.function.DoubleConsumer;
-import com.landawn.abacus.util.function.FloatConsumer;
-import com.landawn.abacus.util.function.Function;
-import com.landawn.abacus.util.function.IntConsumer;
 import com.landawn.abacus.util.function.IntFunction;
-import com.landawn.abacus.util.function.LongConsumer;
-import com.landawn.abacus.util.function.ShortConsumer;
-import com.landawn.abacus.util.function.TriConsumer;
-import com.landawn.abacus.util.function.TriFunction;
 
 /**
  * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
@@ -55,6 +43,8 @@ public interface NoCachingNoUpdating {
 
     /**
      * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * <br />
+     * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the array itself.
      *
      * @param <T>
      */
@@ -139,6 +129,14 @@ public interface NoCachingNoUpdating {
 
         /**
          *
+         * @return
+         */
+        public Set<T> toSet() {
+            return N.toSet(a);
+        }
+
+        /**
+         *
          * @param <C>
          * @param supplier
          * @return
@@ -153,7 +151,7 @@ public interface NoCachingNoUpdating {
          *
          * @param action
          */
-        public void forEach(final Consumer<? super T> action) {
+        public <E extends Exception> void forEach(final Throwables.Consumer<? super T, E> action) throws E {
             for (T e : a) {
                 action.accept(e);
             }
@@ -165,7 +163,7 @@ public interface NoCachingNoUpdating {
          * @param func
          * @return
          */
-        public <R> R apply(final Function<? super T[], R> func) {
+        public <R, E extends Exception> R apply(final Throwables.Function<? super T[], R, E> func) throws E {
             return func.apply(a);
         }
 
@@ -173,7 +171,7 @@ public interface NoCachingNoUpdating {
          *
          * @param action
          */
-        public void accept(final Consumer<? super T[]> action) {
+        public <E extends Exception> void accept(final Throwables.Consumer<? super T[], E> action) throws E {
             action.accept(a);
         }
 
@@ -184,6 +182,17 @@ public interface NoCachingNoUpdating {
          */
         public String join(String delimiter) {
             return StringUtil.join(a, delimiter);
+        }
+
+        /**
+         *
+         * @param delimiter
+         * @param prefix
+         * @param suffix
+         * @return
+         */
+        public String join(String delimiter, String prefix, String suffix) {
+            return StringUtil.join(a, delimiter, prefix, suffix);
         }
 
         /**
@@ -206,6 +215,8 @@ public interface NoCachingNoUpdating {
 
     /**
      * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * <br />
+     * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the array itself.
      */
     @Beta
     @SequentialOnly
@@ -233,6 +244,8 @@ public interface NoCachingNoUpdating {
 
     /**
      * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * <br />
+     * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the array itself.
      */
     @Beta
     @SequentialOnly
@@ -305,9 +318,25 @@ public interface NoCachingNoUpdating {
 
         /**
          *
+         * @param <C>
+         * @param supplier
+         * @return
+         */
+        public <C extends Collection<Boolean>> C toCollection(final IntFunction<? extends C> supplier) {
+            final C result = supplier.apply(length());
+
+            for (boolean e : a) {
+                result.add(e);
+            }
+
+            return result;
+        }
+
+        /**
+         *
          * @param action
          */
-        public void forEach(final BooleanConsumer action) {
+        public <E extends Exception> void forEach(final Throwables.BooleanConsumer<E> action) throws E {
             for (boolean e : a) {
                 action.accept(e);
             }
@@ -319,7 +348,7 @@ public interface NoCachingNoUpdating {
          * @param func
          * @return
          */
-        public <R> R apply(final Function<? super boolean[], R> func) {
+        public <R, E extends Exception> R apply(final Throwables.Function<? super boolean[], R, E> func) throws E {
             return func.apply(a);
         }
 
@@ -327,7 +356,7 @@ public interface NoCachingNoUpdating {
          *
          * @param action
          */
-        public void accept(final Consumer<? super boolean[]> action) {
+        public <E extends Exception> void accept(final Throwables.Consumer<? super boolean[], E> action) throws E {
             action.accept(a);
         }
 
@@ -360,6 +389,8 @@ public interface NoCachingNoUpdating {
 
     /**
      * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * <br />
+     * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the array itself.
      */
     @Beta
     @SequentialOnly
@@ -432,6 +463,22 @@ public interface NoCachingNoUpdating {
 
         /**
          *
+         * @param <C>
+         * @param supplier
+         * @return
+         */
+        public <C extends Collection<Character>> C toCollection(final IntFunction<? extends C> supplier) {
+            final C result = supplier.apply(length());
+
+            for (char e : a) {
+                result.add(e);
+            }
+
+            return result;
+        }
+
+        /**
+         *
          * @return
          */
         public int sum() {
@@ -466,7 +513,7 @@ public interface NoCachingNoUpdating {
          *
          * @param action
          */
-        public void forEach(final CharConsumer action) {
+        public <E extends Exception> void forEach(final Throwables.CharConsumer<E> action) throws E {
             for (char e : a) {
                 action.accept(e);
             }
@@ -478,7 +525,7 @@ public interface NoCachingNoUpdating {
          * @param func
          * @return
          */
-        public <R> R apply(final Function<? super char[], R> func) {
+        public <R, E extends Exception> R apply(final Throwables.Function<? super char[], R, E> func) throws E {
             return func.apply(a);
         }
 
@@ -486,7 +533,7 @@ public interface NoCachingNoUpdating {
          *
          * @param action
          */
-        public void accept(final Consumer<? super char[]> action) {
+        public <E extends Exception> void accept(final Throwables.Consumer<? super char[], E> action) throws E {
             action.accept(a);
         }
 
@@ -519,6 +566,8 @@ public interface NoCachingNoUpdating {
 
     /**
      * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * <br />
+     * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the array itself.
      */
     @Beta
     @SequentialOnly
@@ -591,6 +640,22 @@ public interface NoCachingNoUpdating {
 
         /**
          *
+         * @param <C>
+         * @param supplier
+         * @return
+         */
+        public <C extends Collection<Byte>> C toCollection(final IntFunction<? extends C> supplier) {
+            final C result = supplier.apply(length());
+
+            for (byte e : a) {
+                result.add(e);
+            }
+
+            return result;
+        }
+
+        /**
+         *
          * @return
          */
         public int sum() {
@@ -625,7 +690,7 @@ public interface NoCachingNoUpdating {
          *
          * @param action
          */
-        public void forEach(final ByteConsumer action) {
+        public <E extends Exception> void forEach(final Throwables.ByteConsumer<E> action) throws E {
             for (byte e : a) {
                 action.accept(e);
             }
@@ -637,7 +702,7 @@ public interface NoCachingNoUpdating {
          * @param func
          * @return
          */
-        public <R> R apply(final Function<? super byte[], R> func) {
+        public <R, E extends Exception> R apply(final Throwables.Function<? super byte[], R, E> func) throws E {
             return func.apply(a);
         }
 
@@ -645,7 +710,7 @@ public interface NoCachingNoUpdating {
          *
          * @param action
          */
-        public void accept(final Consumer<? super byte[]> action) {
+        public <E extends Exception> void accept(final Throwables.Consumer<? super byte[], E> action) throws E {
             action.accept(a);
         }
 
@@ -678,6 +743,8 @@ public interface NoCachingNoUpdating {
 
     /**
      * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * <br />
+     * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the array itself.
      */
     @Beta
     @SequentialOnly
@@ -750,6 +817,22 @@ public interface NoCachingNoUpdating {
 
         /**
          *
+         * @param <C>
+         * @param supplier
+         * @return
+         */
+        public <C extends Collection<Short>> C toCollection(final IntFunction<? extends C> supplier) {
+            final C result = supplier.apply(length());
+
+            for (short e : a) {
+                result.add(e);
+            }
+
+            return result;
+        }
+
+        /**
+         *
          * @return
          */
         public int sum() {
@@ -784,7 +867,7 @@ public interface NoCachingNoUpdating {
          *
          * @param action
          */
-        public void forEach(final ShortConsumer action) {
+        public <E extends Exception> void forEach(final Throwables.ShortConsumer<E> action) throws E {
             for (short e : a) {
                 action.accept(e);
             }
@@ -796,7 +879,7 @@ public interface NoCachingNoUpdating {
          * @param func
          * @return
          */
-        public <R> R apply(final Function<? super short[], R> func) {
+        public <R, E extends Exception> R apply(final Throwables.Function<? super short[], R, E> func) throws E {
             return func.apply(a);
         }
 
@@ -804,7 +887,7 @@ public interface NoCachingNoUpdating {
          *
          * @param action
          */
-        public void accept(final Consumer<? super short[]> action) {
+        public <E extends Exception> void accept(final Throwables.Consumer<? super short[], E> action) throws E {
             action.accept(a);
         }
 
@@ -837,6 +920,8 @@ public interface NoCachingNoUpdating {
 
     /**
      * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * <br />
+     * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the array itself.
      */
     @Beta
     @SequentialOnly
@@ -909,6 +994,22 @@ public interface NoCachingNoUpdating {
 
         /**
          *
+         * @param <C>
+         * @param supplier
+         * @return
+         */
+        public <C extends Collection<Integer>> C toCollection(final IntFunction<? extends C> supplier) {
+            final C result = supplier.apply(length());
+
+            for (int e : a) {
+                result.add(e);
+            }
+
+            return result;
+        }
+
+        /**
+         *
          * @return
          */
         public int sum() {
@@ -943,7 +1044,7 @@ public interface NoCachingNoUpdating {
          *
          * @param action
          */
-        public void forEach(final IntConsumer action) {
+        public <E extends Exception> void forEach(final Throwables.IntConsumer<E> action) throws E {
             for (int e : a) {
                 action.accept(e);
             }
@@ -955,7 +1056,7 @@ public interface NoCachingNoUpdating {
          * @param func
          * @return
          */
-        public <R> R apply(final Function<? super int[], R> func) {
+        public <R, E extends Exception> R apply(final Throwables.Function<? super int[], R, E> func) throws E {
             return func.apply(a);
         }
 
@@ -963,7 +1064,7 @@ public interface NoCachingNoUpdating {
          *
          * @param action
          */
-        public void accept(final Consumer<? super int[]> action) {
+        public <E extends Exception> void accept(final Throwables.Consumer<? super int[], E> action) throws E {
             action.accept(a);
         }
 
@@ -996,6 +1097,8 @@ public interface NoCachingNoUpdating {
 
     /**
      * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * <br />
+     * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the array itself.
      */
     @Beta
     @SequentialOnly
@@ -1068,6 +1171,22 @@ public interface NoCachingNoUpdating {
 
         /**
          *
+         * @param <C>
+         * @param supplier
+         * @return
+         */
+        public <C extends Collection<Long>> C toCollection(final IntFunction<? extends C> supplier) {
+            final C result = supplier.apply(length());
+
+            for (long e : a) {
+                result.add(e);
+            }
+
+            return result;
+        }
+
+        /**
+         *
          * @return
          */
         public long sum() {
@@ -1102,7 +1221,7 @@ public interface NoCachingNoUpdating {
          *
          * @param action
          */
-        public void forEach(final LongConsumer action) {
+        public <E extends Exception> void forEach(final Throwables.LongConsumer<E> action) throws E {
             for (long e : a) {
                 action.accept(e);
             }
@@ -1114,7 +1233,7 @@ public interface NoCachingNoUpdating {
          * @param func
          * @return
          */
-        public <R> R apply(final Function<? super long[], R> func) {
+        public <R, E extends Exception> R apply(final Throwables.Function<? super long[], R, E> func) throws E {
             return func.apply(a);
         }
 
@@ -1122,7 +1241,7 @@ public interface NoCachingNoUpdating {
          *
          * @param action
          */
-        public void accept(final Consumer<? super long[]> action) {
+        public <E extends Exception> void accept(final Throwables.Consumer<? super long[], E> action) throws E {
             action.accept(a);
         }
 
@@ -1155,6 +1274,8 @@ public interface NoCachingNoUpdating {
 
     /**
      * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * <br />
+     * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the array itself.
      */
     @Beta
     @SequentialOnly
@@ -1227,6 +1348,22 @@ public interface NoCachingNoUpdating {
 
         /**
          *
+         * @param <C>
+         * @param supplier
+         * @return
+         */
+        public <C extends Collection<Float>> C toCollection(final IntFunction<? extends C> supplier) {
+            final C result = supplier.apply(length());
+
+            for (float e : a) {
+                result.add(e);
+            }
+
+            return result;
+        }
+
+        /**
+         *
          * @return
          */
         public float sum() {
@@ -1261,7 +1398,7 @@ public interface NoCachingNoUpdating {
          *
          * @param action
          */
-        public void forEach(final FloatConsumer action) {
+        public <E extends Exception> void forEach(final Throwables.FloatConsumer<E> action) throws E {
             for (float e : a) {
                 action.accept(e);
             }
@@ -1273,7 +1410,7 @@ public interface NoCachingNoUpdating {
          * @param func
          * @return
          */
-        public <R> R apply(final Function<? super float[], R> func) {
+        public <R, E extends Exception> R apply(final Throwables.Function<? super float[], R, E> func) throws E {
             return func.apply(a);
         }
 
@@ -1281,7 +1418,7 @@ public interface NoCachingNoUpdating {
          *
          * @param action
          */
-        public void accept(final Consumer<? super float[]> action) {
+        public <E extends Exception> void accept(final Throwables.Consumer<? super float[], E> action) throws E {
             action.accept(a);
         }
 
@@ -1314,6 +1451,8 @@ public interface NoCachingNoUpdating {
 
     /**
      * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * <br />
+     * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the array itself.
      */
     @Beta
     @SequentialOnly
@@ -1386,6 +1525,22 @@ public interface NoCachingNoUpdating {
 
         /**
          *
+         * @param <C>
+         * @param supplier
+         * @return
+         */
+        public <C extends Collection<Double>> C toCollection(final IntFunction<? extends C> supplier) {
+            final C result = supplier.apply(length());
+
+            for (double e : a) {
+                result.add(e);
+            }
+
+            return result;
+        }
+
+        /**
+         *
          * @return
          */
         public double sum() {
@@ -1420,7 +1575,7 @@ public interface NoCachingNoUpdating {
          *
          * @param action
          */
-        public void forEach(final DoubleConsumer action) {
+        public <E extends Exception> void forEach(final Throwables.DoubleConsumer<E> action) throws E {
             for (double e : a) {
                 action.accept(e);
             }
@@ -1432,7 +1587,7 @@ public interface NoCachingNoUpdating {
          * @param func
          * @return
          */
-        public <R> R apply(final Function<? super double[], R> func) {
+        public <R, E extends Exception> R apply(final Throwables.Function<? super double[], R, E> func) throws E {
             return func.apply(a);
         }
 
@@ -1440,7 +1595,7 @@ public interface NoCachingNoUpdating {
          *
          * @param action
          */
-        public void accept(final Consumer<? super double[]> action) {
+        public <E extends Exception> void accept(final Throwables.Consumer<? super double[], E> action) throws E {
             action.accept(a);
         }
 
@@ -1473,6 +1628,8 @@ public interface NoCachingNoUpdating {
 
     /**
      * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * <br />
+     * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the {@code Queue} itself.
      *
      * @param <T>
      */
@@ -1550,6 +1707,14 @@ public interface NoCachingNoUpdating {
 
         /**
          *
+         * @return
+         */
+        public Set<T> toSet() {
+            return new HashSet<>(deque);
+        }
+
+        /**
+         *
          * @param <C>
          * @param supplier
          * @return
@@ -1564,7 +1729,7 @@ public interface NoCachingNoUpdating {
          *
          * @param action
          */
-        public void forEach(final Consumer<? super T> action) {
+        public <E extends Exception> void forEach(final Throwables.Consumer<? super T, E> action) throws E {
             for (T e : deque) {
                 action.accept(e);
             }
@@ -1576,7 +1741,7 @@ public interface NoCachingNoUpdating {
          * @param func
          * @return
          */
-        public <R> R apply(final Function<? super Deque<T>, R> func) {
+        public <R, E extends Exception> R apply(final Throwables.Function<? super Deque<T>, R, E> func) throws E {
             return func.apply(deque);
         }
 
@@ -1584,7 +1749,7 @@ public interface NoCachingNoUpdating {
          *
          * @param action
          */
-        public void accept(final Consumer<? super Deque<T>> action) {
+        public <E extends Exception> void accept(final Throwables.Consumer<? super Deque<T>, E> action) throws E {
             action.accept(deque);
         }
 
@@ -1609,6 +1774,8 @@ public interface NoCachingNoUpdating {
 
     /**
      * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * <br />
+     * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the {@code Entry} itself.
      *
      * @param <K> the key type
      * @param <V> the value type
@@ -1661,19 +1828,19 @@ public interface NoCachingNoUpdating {
             return new AbstractMap.SimpleEntry<>(getKey(), getValue());
         }
 
-        public <R> R apply(final Function<? super Map.Entry<K, V>, R> func) {
+        public <R, E extends Exception> R apply(final Throwables.Function<? super DisposableEntry<K, V>, R, E> func) throws E {
             return func.apply(this);
         }
 
-        public <R> R apply(final BiFunction<? super K, ? super V, R> func) {
+        public <R, E extends Exception> R apply(final Throwables.BiFunction<? super K, ? super V, R, E> func) throws E {
             return func.apply(this.getKey(), this.getValue());
         }
 
-        public void accept(final Consumer<? super Map.Entry<K, V>> action) {
+        public <E extends Exception> void accept(final Throwables.Consumer<? super DisposableEntry<K, V>, E> action) throws E {
             action.accept(this);
         }
 
-        public void accept(final BiConsumer<? super K, ? super V> action) {
+        public <E extends Exception> void accept(final Throwables.BiConsumer<? super K, ? super V, E> action) throws E {
             action.accept(this.getKey(), this.getValue());
         }
 
@@ -1689,6 +1856,8 @@ public interface NoCachingNoUpdating {
 
     /**
      * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * <br />
+     * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the {@code Pair} itself.
      *
      * @param <L>
      * @param <R>
@@ -1731,11 +1900,11 @@ public interface NoCachingNoUpdating {
             return Pair.of(left(), right());
         }
 
-        public <U> U apply(final BiFunction<? super L, ? super R, U> func) {
+        public <U, E extends Exception> U apply(final Throwables.BiFunction<? super L, ? super R, U, E> func) throws E {
             return func.apply(left(), right());
         }
 
-        public void accept(final BiConsumer<? super L, ? super R> action) {
+        public <E extends Exception> void accept(final Throwables.BiConsumer<? super L, ? super R, E> action) throws E {
             action.accept(left(), right());
         }
 
@@ -1748,6 +1917,8 @@ public interface NoCachingNoUpdating {
 
     /**
      * One-off Object. No caching/saving in memory, No updating. To cache/save/update the Object, call {@code clone()/copy()}.
+     * <br />
+     * Depends on context, it should be okay to cache/save the elements from the array, but never save or cache the {@code Tripe} itself.
      *
      * @param <L>
      * @param <M>
@@ -1799,11 +1970,11 @@ public interface NoCachingNoUpdating {
             return Triple.of(left(), middle(), right());
         }
 
-        public <U> U apply(final TriFunction<? super L, ? super M, ? super R, U> func) {
+        public <U, E extends Exception> U apply(final Throwables.TriFunction<? super L, ? super M, ? super R, U, E> func) throws E {
             return func.apply(left(), middle(), right());
         }
 
-        public void accept(final TriConsumer<? super L, ? super M, ? super R> action) {
+        public <E extends Exception> void accept(final Throwables.TriConsumer<? super L, ? super M, ? super R, E> action) throws E {
             action.accept(left(), middle(), right());
         }
 

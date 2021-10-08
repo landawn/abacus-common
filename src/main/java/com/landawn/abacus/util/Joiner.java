@@ -23,7 +23,6 @@ import java.util.Set;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.util.u.Nullable;
-import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.Stream;
 
@@ -1489,7 +1488,8 @@ public final class Joiner implements Closeable {
      * @param toIndex
      * @return
      */
-    public <K, V> Joiner appendEntries(final Map<K, V> m, final Function<? super K, ?> keyMapper, final Function<? super V, ?> valueMapper) {
+    public <K, V, E extends Exception, E2 extends Exception> Joiner appendEntries(final Map<K, V> m, final Throwables.Function<? super K, ?, E> keyMapper,
+            final Throwables.Function<? super V, ?, E2> valueMapper) throws E, E2 {
         N.checkArgNotNull(keyMapper, "keyMapper");
         N.checkArgNotNull(valueMapper, "valueMapper");
 

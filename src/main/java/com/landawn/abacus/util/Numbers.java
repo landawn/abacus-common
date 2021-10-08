@@ -1068,7 +1068,7 @@ public final class Numbers {
                     try {
                         final Double d = Double.valueOf(str);
 
-                        if (!(d.isInfinite() || d.floatValue() == 0.0D && !allZeros)) {
+                        if (!(d.isInfinite() || d == 0.0D && !allZeros)) {
                             return (Optional) Optional.of(d);
                         }
                     } catch (final NumberFormatException nfe) { // NOPMD
