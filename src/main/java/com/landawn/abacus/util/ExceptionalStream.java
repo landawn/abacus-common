@@ -54,6 +54,7 @@ import java.util.stream.StreamSupport;
 import com.landawn.abacus.DataSet;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.IntermediateOp;
+import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.LazyEvaluation;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.annotation.TerminalOp;
@@ -76,7 +77,6 @@ import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.IntFunction;
 import com.landawn.abacus.util.function.Predicate;
 import com.landawn.abacus.util.function.Supplier;
-import com.landawn.abacus.util.stream.BaseStream;
 import com.landawn.abacus.util.stream.Collector;
 import com.landawn.abacus.util.stream.Collectors;
 import com.landawn.abacus.util.stream.DoubleStream;
@@ -779,13 +779,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @Beta
-    public static <T, E extends Exception> ExceptionalStream<T, E> of(final Throwables.Supplier<Collection<? extends T>, ? extends E> supplier) {
+    public static <T, E extends Exception> ExceptionalStream<T, E> of(final Throwables.Supplier<? extends Collection<? extends T>, ? extends E> supplier) {
         N.checkArgNotNull(supplier, "supplier");
 
-        return ExceptionalStream.<Throwables.Supplier<Collection<? extends T>, ? extends E>, E> just(supplier)
-                .flattMap(new Throwables.Function<Throwables.Supplier<Collection<? extends T>, ? extends E>, Collection<? extends T>, E>() {
+        return ExceptionalStream.<Throwables.Supplier<? extends Collection<? extends T>, ? extends E>, E> just(supplier)
+                .flattMap(new Throwables.Function<Throwables.Supplier<? extends Collection<? extends T>, ? extends E>, Collection<? extends T>, E>() {
                     @Override
-                    public Collection<? extends T> apply(Throwables.Supplier<Collection<? extends T>, ? extends E> t) throws E {
+                    public Collection<? extends T> apply(Throwables.Supplier<? extends Collection<? extends T>, ? extends E> t) throws E {
                         return t.get();
                     }
                 });
@@ -801,15 +801,15 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> from(
-            final Throwables.Supplier<ExceptionalStream<? extends T, ? extends E>, ? extends E> supplier) {
+            final Throwables.Supplier<? extends ExceptionalStream<? extends T, ? extends E>, ? extends E> supplier) {
         N.checkArgNotNull(supplier, "supplier");
 
-        return ExceptionalStream.<Throwables.Supplier<ExceptionalStream<? extends T, ? extends E>, ? extends E>, E> just(supplier)
+        return ExceptionalStream.<Throwables.Supplier<? extends ExceptionalStream<? extends T, ? extends E>, ? extends E>, E> just(supplier)
                 .flatMap(
-                        new Throwables.Function<Throwables.Supplier<ExceptionalStream<? extends T, ? extends E>, ? extends E>, ExceptionalStream<? extends T, ? extends E>, E>() {
+                        new Throwables.Function<Throwables.Supplier<? extends ExceptionalStream<? extends T, ? extends E>, ? extends E>, ExceptionalStream<? extends T, ? extends E>, E>() {
                             @Override
                             public ExceptionalStream<? extends T, ? extends E> apply(
-                                    Throwables.Supplier<ExceptionalStream<? extends T, ? extends E>, ? extends E> t) throws E {
+                                    Throwables.Supplier<? extends ExceptionalStream<? extends T, ? extends E>, ? extends E> t) throws E {
                                 return t.get();
                             }
                         });
@@ -1095,12 +1095,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         final ExceptionalIterator<String, IOException> iter = createLazyLineIterator(file, null, charset, null, true);
 
-        return newStream(iter).onClose(new Throwables.Runnable<IOException>() {
-            @Override
-            public void run() throws IOException {
-                iter.close();
-            }
-        });
+        return newStream(iter).onClose(newCloseHandler(iter));
     }
 
     /**
@@ -1123,12 +1118,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         final ExceptionalIterator<String, IOException> iter = createLazyLineIterator(null, path, charset, null, true);
 
-        return newStream(iter).onClose(new Throwables.Runnable<IOException>() {
-            @Override
-            public void run() throws IOException {
-                iter.close();
-            }
-        });
+        return newStream(iter).onClose(newCloseHandler(iter));
     }
 
     /**
@@ -2447,12 +2437,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         final Deque<Throwables.Runnable<? extends E>> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
 
-        newCloseHandlers.add(new Throwables.Runnable<E>() {
-            @Override
-            public void run() throws E {
-                iter.close();
-            }
-        });
+        newCloseHandlers.add(newCloseHandler(iter));
 
         if (N.notNullOrEmpty(closeHandlers)) {
             newCloseHandlers.addAll(closeHandlers);
@@ -3388,7 +3373,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
             private void init() throws E {
                 if (iter == null) {
-                    iter = ExceptionalStream.this.toMap(keyMapper, valueMapper, downstream, mapFactory).entrySet().iterator();
+                    iter = ExceptionalStream.this.groupTo(keyMapper, valueMapper, downstream, mapFactory).entrySet().iterator();
                 }
             }
         }, closeHandlers);
@@ -3458,7 +3443,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      *
-     * @param collapsible
+     * @param collapsible test the current element with its previous element. The first parameter is the previous element of current element, the second parameter is the current element.
      * @return
      */
     @IntermediateOp
@@ -3478,12 +3463,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
             @Override
             public Stream<T> next() throws E {
-                if (hasNext == false) {
-                    next = iter.next();
-                }
-
                 final List<T> c = new ArrayList<>();
-                c.add(next);
+                c.add(hasNext ? next : (next = iter.next()));
 
                 while ((hasNext = iter.hasNext())) {
                     if (collapsible.test(next, (next = iter.next()))) {
@@ -3501,7 +3482,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      *
      * @param <C>
-     * @param collapsible
+     * @param collapsible test the current element with its previous element. The first parameter is the previous element of current element, the second parameter is the current element.
      * @param supplier
      * @return
      */
@@ -3523,12 +3504,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
             @Override
             public C next() throws E {
-                if (hasNext == false) {
-                    next = iter.next();
-                }
-
                 final C c = supplier.get();
-                c.add(next);
+                c.add(hasNext ? next : (next = iter.next()));
 
                 while ((hasNext = iter.hasNext())) {
                     if (collapsible.test(next, (next = iter.next()))) {
@@ -3550,18 +3527,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * <p>Example:
      * <pre>
      * <code>
-     * Stream.of(new Integer[0]).collapse((a, b) -> a < b, (a, b) -> a + b) => []
-     * Stream.of(1).collapse((a, b) -> a < b, (a, b) -> a + b) => [1]
-     * Stream.of(1, 2).collapse((a, b) -> a < b, (a, b) -> a + b) => [3]
-     * Stream.of(1, 2, 3).collapse((a, b) -> a < b, (a, b) -> a + b) => [6]
-     * Stream.of(1, 2, 3, 3, 2, 1).collapse((a, b) -> a < b, (a, b) -> a + b) => [6, 3, 2, 1]
+     * ExceptionalStream.of(new Integer[0]).collapse((p, c) -> p < c, (r, c) -> r + c) => []
+     * ExceptionalStream.of(1).collapse((p, c) -> p < c, (r, c) -> r + c) => [1]
+     * ExceptionalStream.of(1, 2).collapse((p, c) -> p < c, (r, c) -> r + c) => [3]
+     * ExceptionalStream.of(1, 2, 3).collapse((p, c) -> p < c, (r, c) -> r + c) => [6]
+     * ExceptionalStream.of(1, 2, 3, 3, 2, 1).collapse((p, c) -> p < c, (r, c) -> r + c) => [6, 3, 2, 1]
      * </code>
      * </pre>
      *
      * <br />
      * This method only runs sequentially, even in parallel stream.
      *
-     * @param collapsible
+     * @param collapsible test the current element with its previous element. The first parameter is the previous element of current element, the second parameter is the current element.
      * @param mergeFunction
      * @return
      */
@@ -3601,8 +3578,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      *
      * @param <U>
-     * @param collapsible
-     * @param init
+     * @param collapsible test the current element with its previous element. The first parameter is the previous element of current element, the second parameter is the current element.
+     * @param init is used by {@code op} to generate the first result value in the series.
      * @param op
      * @return
      */
@@ -3642,7 +3619,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      *
      * @param <R>
-     * @param collapsible
+     * @param collapsible test the current element with its previous element. The first parameter is the previous element of current element, the second parameter is the current element.
      * @param supplier
      * @param accumulator
      * @return
@@ -3685,7 +3662,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      *
      * @param <R>
      * @param <A>
-     * @param collapsible
+     * @param collapsible test the current element with its previous element. The first parameter is the previous element of current element, the second parameter is the current element.
      * @param collector
      * @return
      */
@@ -3716,6 +3693,289 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                 while ((hasNext = iter.hasNext())) {
                     if (collapsible.test(next, (next = iter.next()))) {
+                        accumulator.accept(container, next);
+                    } else {
+                        break;
+                    }
+                }
+
+                return finisher.apply(container);
+            }
+        }, closeHandlers);
+    }
+
+    /**
+     *
+     * @param collapsible test the current element with the first element and previous element in the series. The first parameter is the first element of this series, the second parameter is the previous element and the third parameter is the current element.
+     * @return
+     */
+    @IntermediateOp
+    public ExceptionalStream<Stream<T>, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible) {
+        assertNotClosed();
+
+        final ExceptionalIterator<T, E> iter = elements;
+
+        return newStream(new ExceptionalIterator<Stream<T>, E>() {
+            private boolean hasNext = false;
+            private T next = null;
+
+            @Override
+            public boolean hasNext() throws E {
+                return hasNext || iter.hasNext();
+            }
+
+            @Override
+            public Stream<T> next() throws E {
+                final T first = hasNext ? next : (next = iter.next());
+                final List<T> c = new ArrayList<>();
+                c.add(first);
+
+                while ((hasNext = iter.hasNext())) {
+                    if (collapsible.test(first, next, (next = iter.next()))) {
+                        c.add(next);
+                    } else {
+                        break;
+                    }
+                }
+
+                return Stream.of(c);
+            }
+        }, closeHandlers);
+    }
+
+    /**
+     *
+     * @param <C>
+     * @param collapsible test the current element with the first element and previous element in the series. The first parameter is the first element of this series, the second parameter is the previous element and the third parameter is the current element.
+     * @param supplier
+     * @return
+     */
+    @IntermediateOp
+    public <C extends Collection<T>> ExceptionalStream<C, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible,
+            final Supplier<? extends C> supplier) {
+        assertNotClosed();
+
+        final ExceptionalIterator<T, E> iter = elements;
+
+        return newStream(new ExceptionalIterator<C, E>() {
+            private boolean hasNext = false;
+            private T next = null;
+
+            @Override
+            public boolean hasNext() throws E {
+                return hasNext || iter.hasNext();
+            }
+
+            @Override
+            public C next() throws E {
+                final T first = hasNext ? next : (next = iter.next());
+                final C c = supplier.get();
+                c.add(first);
+
+                while ((hasNext = iter.hasNext())) {
+                    if (collapsible.test(first, next, (next = iter.next()))) {
+                        c.add(next);
+                    } else {
+                        break;
+                    }
+                }
+
+                return c;
+            }
+        }, closeHandlers);
+    }
+
+    /**
+     * Merge series of adjacent elements which satisfy the given predicate using
+     * the merger function and return a new stream.
+     *
+     * <p>Example:
+     * <pre>
+     * <code>
+     * Stream.of(new Integer[0]).collapse((f, p, c) -> f < c, (r, c) -> r + c) => []
+     * Stream.of(1).collapse((f, p, c) -> f < c, (r, c) -> r + c) => [1]
+     * Stream.of(1, 2).collapse((f, p, c) -> f < c, (r, c) -> r + c) => [3]
+     * Stream.of(1, 2, 3).collapse((f, p, c) -> f < c, (r, c) -> r + c) => [6]
+     * Stream.of(1, 2, 3, 3, 2, 1).collapse((f, p, c) -> f < c, (r, c) -> r + c) => [11, 1]
+     * </code>
+     * </pre>
+     *
+     * <br />
+     * This method only runs sequentially, even in parallel stream.
+     *
+     * @param collapsible test the current element with the first element and previous element in the series. The first parameter is the first element of this series, the second parameter is the previous element and the third parameter is the current element.
+     * @param mergeFunction
+     * @return
+     */
+    @IntermediateOp
+    public ExceptionalStream<T, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible,
+            final Throwables.BiFunction<? super T, ? super T, T, ? extends E> mergeFunction) {
+        assertNotClosed();
+
+        final ExceptionalIterator<T, E> iter = elements;
+
+        return newStream(new ExceptionalIterator<T, E>() {
+            private boolean hasNext = false;
+            private T next = null;
+
+            @Override
+            public boolean hasNext() throws E {
+                return hasNext || iter.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                final T first = hasNext ? next : (next = iter.next());
+                T res = first;
+
+                while ((hasNext = iter.hasNext())) {
+                    if (collapsible.test(first, next, (next = iter.next()))) {
+                        res = mergeFunction.apply(res, next);
+                    } else {
+                        break;
+                    }
+                }
+
+                return res;
+            }
+        }, closeHandlers);
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param collapsible test the current element with the first element and previous element in the series. The first parameter is the first element of this series, the second parameter is the previous element and the third parameter is the current element.
+     * @param init is used by {@code op} to generate the first result value in the series.
+     * @param op
+     * @return
+     */
+    @IntermediateOp
+    public <U> ExceptionalStream<U, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible, final U init,
+            final Throwables.BiFunction<U, ? super T, U, ? extends E> op) {
+        assertNotClosed();
+
+        final ExceptionalIterator<T, E> iter = elements;
+
+        return newStream(new ExceptionalIterator<U, E>() {
+            private boolean hasNext = false;
+            private T next = null;
+
+            @Override
+            public boolean hasNext() throws E {
+                return hasNext || iter.hasNext();
+            }
+
+            @Override
+            public U next() throws E {
+                final T first = hasNext ? next : (next = iter.next());
+                U res = op.apply(init, first);
+
+                while ((hasNext = iter.hasNext())) {
+                    if (collapsible.test(first, next, (next = iter.next()))) {
+                        res = op.apply(res, next);
+                    } else {
+                        break;
+                    }
+                }
+
+                return res;
+            }
+        }, closeHandlers);
+    }
+
+    /**
+     *
+     * @param <R>
+     *@param collapsible test the current element with the first element and previous element in the series. The first parameter is the first element of this series, the second parameter is the previous element and the third parameter is the current element.
+     * @param supplier
+     * @param accumulator
+     * @return
+     */
+    @IntermediateOp
+    public <R> ExceptionalStream<R, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible,
+            final Throwables.Supplier<R, E> supplier, final Throwables.BiConsumer<? super R, ? super T, ? extends E> accumulator) {
+        assertNotClosed();
+
+        final ExceptionalIterator<T, E> iter = elements;
+
+        return newStream(new ExceptionalIterator<R, E>() {
+            private boolean hasNext = false;
+            private T next = null;
+
+            @Override
+            public boolean hasNext() throws E {
+                return hasNext || iter.hasNext();
+            }
+
+            @Override
+            public R next() throws E {
+                final T first = hasNext ? next : (next = iter.next());
+                final R container = supplier.get();
+                accumulator.accept(container, first);
+
+                while ((hasNext = iter.hasNext())) {
+                    if (collapsible.test(first, next, (next = iter.next()))) {
+                        accumulator.accept(container, next);
+                    } else {
+                        break;
+                    }
+                }
+
+                return container;
+            }
+        }, closeHandlers);
+    }
+
+    /**
+     * Merge series of adjacent elements which satisfy the given predicate using
+     * the merger function and return a new stream.
+     *
+     * <p>Example:
+     * <pre>
+     * <code>
+     * ExceptionalStream.of(new Integer[0]).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => []
+     * ExceptionalStream.of(1).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [1]
+     * ExceptionalStream.of(1, 2).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [3]
+     * ExceptionalStream.of(1, 2, 3).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [6]
+     * ExceptionalStream.of(1, 2, 3, 3, 2, 1).collapse((f, p, c) -> f < c, Collectors.summingInt(Fn.unboxI())) => [11, 1]
+     * </code>
+     * </pre>
+     *
+     *
+     * @param <R>
+     * @param <A>
+     * @param collapsible test the current element with the first element and previous element in the series. The first parameter is the first element of this series, the second parameter is the previous element and the third parameter is the current element.
+     * @param collector
+     * @return
+     */
+    @IntermediateOp
+    public <R, A> ExceptionalStream<R, E> collapse(final Throwables.TriPredicate<? super T, ? super T, ? super T, ? extends E> collapsible,
+            final Collector<? super T, A, R> collector) {
+        assertNotClosed();
+
+        final Supplier<A> supplier = collector.supplier();
+        final BiConsumer<A, ? super T> accumulator = collector.accumulator();
+        final Function<A, R> finisher = collector.finisher();
+
+        final ExceptionalIterator<T, E> iter = elements;
+
+        return newStream(new ExceptionalIterator<R, E>() {
+            private boolean hasNext = false;
+            private T next = null;
+
+            @Override
+            public boolean hasNext() throws E {
+                return hasNext || iter.hasNext();
+            }
+
+            @Override
+            public R next() throws E {
+                final T first = hasNext ? next : (next = iter.next());
+                final A container = supplier.get();
+                accumulator.accept(container, first);
+
+                while ((hasNext = iter.hasNext())) {
+                    if (collapsible.test(first, next, (next = iter.next()))) {
                         accumulator.accept(container, next);
                     } else {
                         break;
@@ -4143,6 +4403,341 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         });
     }
 
+    @Beta
+    @IntermediateOp
+    public ExceptionalStream<T, E> appendOnError(final T fallbackValue) {
+        assertNotClosed();
+
+        return newStream(new ExceptionalIterator<T, E>() {
+            private boolean fallbackValueAvaiable = true;
+
+            @Override
+            public boolean hasNext() throws E {
+                try {
+                    return fallbackValueAvaiable && elements.hasNext();
+                } catch (Exception e) {
+                    return fallbackValueAvaiable;
+                }
+            }
+
+            @Override
+            public T next() throws E {
+                if (hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                try {
+                    return elements.next();
+                } catch (Exception e) {
+                    fallbackValueAvaiable = false;
+                    return fallbackValue;
+                }
+            }
+        }, false, null, closeHandlers);
+    }
+
+    @Beta
+    @IntermediateOp
+    public <XE extends Exception> ExceptionalStream<T, E> appendOnError(final Class<XE> type, final T fallbackValue) {
+        assertNotClosed();
+        this.checkArgNotNull(type, "type");
+
+        return newStream(new ExceptionalIterator<T, E>() {
+            private boolean fallbackValueAvaiable = true;
+
+            @Override
+            public boolean hasNext() throws E {
+                try {
+                    return fallbackValueAvaiable && elements.hasNext();
+                } catch (Exception e) {
+                    if (ExceptionUtil.hasCause(e, type)) {
+                        return fallbackValueAvaiable;
+                    } else {
+                        throw (E) e;
+                    }
+                }
+            }
+
+            @Override
+            public T next() throws E {
+                if (hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                try {
+                    return elements.next();
+                } catch (Exception e) {
+                    if (ExceptionUtil.hasCause(e, type)) {
+                        fallbackValueAvaiable = false;
+                        return fallbackValue;
+                    } else {
+                        throw (E) e;
+                    }
+                }
+            }
+        }, false, null, closeHandlers);
+    }
+
+    @Beta
+    @IntermediateOp
+    public ExceptionalStream<T, E> appendOnError(final Predicate<? super Exception> predicate, final T fallbackValue) {
+        assertNotClosed();
+        this.checkArgNotNull(predicate, "predicate");
+
+        return newStream(new ExceptionalIterator<T, E>() {
+            private boolean fallbackValueAvaiable = true;
+
+            @Override
+            public boolean hasNext() throws E {
+                try {
+                    return fallbackValueAvaiable && elements.hasNext();
+                } catch (Exception e) {
+                    if (predicate.test(e)) {
+                        return fallbackValueAvaiable;
+                    } else {
+                        throw (E) e;
+                    }
+                }
+            }
+
+            @Override
+            public T next() throws E {
+                if (hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                try {
+                    return elements.next();
+                } catch (Exception e) {
+                    if (predicate.test(e)) {
+                        fallbackValueAvaiable = false;
+                        return fallbackValue;
+                    } else {
+                        throw (E) e;
+                    }
+                }
+            }
+        }, false, null, closeHandlers);
+    }
+
+    @Beta
+    @IntermediateOp
+    public ExceptionalStream<T, E> appendOnError(final Supplier<ExceptionalStream<T, E>> fallbackStreamSupplier) {
+        assertNotClosed();
+        this.checkArgNotNull(fallbackStreamSupplier, "fallbackStreamSupplier");
+
+        final ExceptionalIterator<T, E> iter = new ExceptionalIterator<T, E>() {
+            private boolean fallbackValueAvaiable = true;
+            private ExceptionalIterator<T, E> iter = ExceptionalStream.this.elements;
+            private ExceptionalStream<T, E> s = null;
+
+            @Override
+            public boolean hasNext() throws E {
+                try {
+                    return iter.hasNext();
+                } catch (Exception e) {
+                    if (fallbackValueAvaiable) {
+                        useFallbackStream(fallbackStreamSupplier);
+
+                        return iter.hasNext();
+                    } else {
+                        throw (E) e;
+                    }
+                }
+            }
+
+            @Override
+            public T next() throws E {
+                if (hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                try {
+                    return iter.next();
+                } catch (Exception e) {
+                    if (fallbackValueAvaiable) {
+                        useFallbackStream(fallbackStreamSupplier);
+
+                        if (iter.hasNext()) {
+                            return iter.next();
+                        } else {
+                            return (T) N.NULL_MASK;
+                        }
+                    } else {
+                        throw (E) e;
+                    }
+                }
+            }
+
+            @Override
+            public void close() {
+                if ((s != null && N.notNullOrEmpty(s.closeHandlers)) || N.notNullOrEmpty(ExceptionalStream.this.closeHandlers)) {
+                    try {
+                        if (s != null) {
+                            s.close();
+                        }
+                    } finally {
+                        ExceptionalStream.this.close();
+                    }
+                }
+            }
+
+            private void useFallbackStream(final Supplier<ExceptionalStream<T, E>> fallbackStream) {
+                fallbackValueAvaiable = false;
+                s = fallbackStream.get();
+                iter = s.elements;
+            }
+        };
+
+        return newStream(iter).onClose(newCloseHandler(iter)).filter(NOT_NULL_MASK);
+    }
+
+    @Beta
+    @IntermediateOp
+    public <XE extends Exception> ExceptionalStream<T, E> appendOnError(final Class<XE> type, final Supplier<ExceptionalStream<T, E>> fallbackStreamSupplier) {
+        assertNotClosed();
+        this.checkArgNotNull(type, "type");
+        this.checkArgNotNull(fallbackStreamSupplier, "fallbackStreamSupplier");
+
+        final ExceptionalIterator<T, E> iter = new ExceptionalIterator<T, E>() {
+            private boolean fallbackValueAvaiable = true;
+            private ExceptionalIterator<T, E> iter = ExceptionalStream.this.elements;
+            private ExceptionalStream<T, E> s = null;
+
+            @Override
+            public boolean hasNext() throws E {
+                try {
+                    return iter.hasNext();
+                } catch (Exception e) {
+                    if (fallbackValueAvaiable && ExceptionUtil.hasCause(e, type)) {
+                        useFallbackStream(fallbackStreamSupplier);
+
+                        return iter.hasNext();
+                    } else {
+                        throw (E) e;
+                    }
+                }
+            }
+
+            @Override
+            public T next() throws E {
+                if (hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                try {
+                    return iter.next();
+                } catch (Exception e) {
+                    if (fallbackValueAvaiable && ExceptionUtil.hasCause(e, type)) {
+                        useFallbackStream(fallbackStreamSupplier);
+
+                        if (iter.hasNext()) {
+                            return iter.next();
+                        } else {
+                            return (T) N.NULL_MASK;
+                        }
+                    } else {
+                        throw (E) e;
+                    }
+                }
+            }
+
+            @Override
+            public void close() {
+                if ((s != null && N.notNullOrEmpty(s.closeHandlers)) || N.notNullOrEmpty(ExceptionalStream.this.closeHandlers)) {
+                    try {
+                        if (s != null) {
+                            s.close();
+                        }
+                    } finally {
+                        ExceptionalStream.this.close();
+                    }
+                }
+            }
+
+            private void useFallbackStream(final Supplier<ExceptionalStream<T, E>> fallbackStream) {
+                fallbackValueAvaiable = false;
+                s = fallbackStream.get();
+                iter = s.elements;
+            }
+        };
+
+        return newStream(iter).onClose(newCloseHandler(iter)).filter(NOT_NULL_MASK);
+    }
+
+    @Beta
+    @IntermediateOp
+    public ExceptionalStream<T, E> appendOnError(final Predicate<? super Exception> predicate, final Supplier<ExceptionalStream<T, E>> fallbackStreamSupplier) {
+        assertNotClosed();
+        this.checkArgNotNull(predicate, "predicate");
+        this.checkArgNotNull(fallbackStreamSupplier, "fallbackStreamSupplier");
+
+        final ExceptionalIterator<T, E> iter = new ExceptionalIterator<T, E>() {
+            private boolean fallbackValueAvaiable = true;
+            private ExceptionalIterator<T, E> iter = ExceptionalStream.this.elements;
+            private ExceptionalStream<T, E> s = null;
+
+            @Override
+            public boolean hasNext() throws E {
+                try {
+                    return iter.hasNext();
+                } catch (Exception e) {
+                    if (fallbackValueAvaiable && predicate.test(e)) {
+                        useFallbackStream(fallbackStreamSupplier);
+
+                        return iter.hasNext();
+                    } else {
+                        throw (E) e;
+                    }
+                }
+            }
+
+            @Override
+            public T next() throws E {
+                if (hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                try {
+                    return iter.next();
+                } catch (Exception e) {
+                    if (fallbackValueAvaiable && predicate.test(e)) {
+                        useFallbackStream(fallbackStreamSupplier);
+
+                        if (iter.hasNext()) {
+                            return iter.next();
+                        } else {
+                            return (T) N.NULL_MASK;
+                        }
+                    } else {
+                        throw (E) e;
+                    }
+                }
+            }
+
+            @Override
+            public void close() {
+                if ((s != null && N.notNullOrEmpty(s.closeHandlers)) || N.notNullOrEmpty(ExceptionalStream.this.closeHandlers)) {
+                    try {
+                        if (s != null) {
+                            s.close();
+                        }
+                    } finally {
+                        ExceptionalStream.this.close();
+                    }
+                }
+            }
+
+            private void useFallbackStream(final Supplier<ExceptionalStream<T, E>> fallbackStream) {
+                fallbackValueAvaiable = false;
+                s = fallbackStream.get();
+                iter = s.elements;
+            }
+        };
+
+        return newStream(iter).onClose(newCloseHandler(iter)).filter(NOT_NULL_MASK);
+    }
+
     @IntermediateOp
     public ExceptionalStream<T, E> throwIfEmpty(final Supplier<? extends E> exceptionSupplier) {
         this.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
@@ -4194,6 +4789,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         return OrElse.FALSE;
     }
+
+    @SuppressWarnings("rawtypes")
+    private static final Throwables.Predicate NOT_NULL_MASK = new Throwables.Predicate<Object, RuntimeException>() {
+        @Override
+        public boolean test(final Object t) {
+            return t != N.NULL_MASK;
+        }
+    };
 
     /**
      *
@@ -4764,6 +5367,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         assertNotClosed();
 
         checkArgNotNegative(n, "n");
+
+        if (n == 0) {
+            return newStream(elements, sorted, cmp, closeHandlers);
+        }
 
         return newStream(new ExceptionalIterator<T, E>() {
             private boolean skipped = false;
@@ -5485,6 +6092,37 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     @Beta
     @IntermediateOp
+    public ExceptionalStream<T, E> step(final long step) {
+        assertNotClosed();
+
+        checkArgPositive(step, "step");
+
+        if (step == 1) {
+            return skip(0);
+        }
+
+        final long skip = step - 1;
+        final ExceptionalIterator<T, E> iter = this.iteratorEx();
+
+        final ExceptionalIterator<T, E> iterator = new ExceptionalIterator<T, E>() {
+            @Override
+            public boolean hasNext() throws E {
+                return iter.hasNext();
+            }
+
+            @Override
+            public T next() throws E {
+                final T next = iter.next();
+                iter.advance(skip);
+                return next;
+            }
+        };
+
+        return newStream(iterator, sorted, cmp, closeHandlers);
+    }
+
+    @Beta
+    @IntermediateOp
     public ExceptionalStream<Indexed<T>, E> indexed() {
         assertNotClosed();
 
@@ -5679,7 +6317,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <U, R> ExceptionalStream<R, E> crossJoin(final ExceptionalStream<? extends U, E> b,
+    public <U, R> ExceptionalStream<R, E> crossJoin(final ExceptionalStream<U, ? extends E> b,
             final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
         assertNotClosed();
 
@@ -5701,7 +6339,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     }
                 });
             }
-        });
+        }).onClose(newCloseHandler(b));
     }
 
     /**
@@ -5801,7 +6439,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <U, K, R> ExceptionalStream<R, E> innerJoin(final ExceptionalStream<? extends U, E> b,
+    public <U, K, R> ExceptionalStream<R, E> innerJoin(final ExceptionalStream<U, ? extends E> b,
             final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
             final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
             final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
@@ -5825,7 +6463,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     }
                 });
             }
-        });
+        }).onClose(newCloseHandler(b));
     }
 
     /**
@@ -6001,7 +6639,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <U, K, R> ExceptionalStream<R, E> fullJoin(final ExceptionalStream<? extends U, E> b,
+    public <U, K, R> ExceptionalStream<R, E> fullJoin(final ExceptionalStream<U, ? extends E> b,
             final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
             final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
             final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
@@ -6019,7 +6657,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public ExceptionalStream<R, E> apply(final T t) throws E {
                 if (rightKeyMap == null) {
-                    c = (List<U>) b.toList();
+                    c = b.toList();
                     rightKeyMap = ListMultimap.from(c, rightKeyMapper);
                     holder.setValue(c);
                 }
@@ -6049,7 +6687,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     public R apply(U u) throws E {
                         return func.apply((T) null, u);
                     }
-                }));
+                })).onClose(newCloseHandler(b));
     }
 
     /**
@@ -6218,7 +6856,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <U, K, R> ExceptionalStream<R, E> leftJoin(final ExceptionalStream<? extends U, E> b,
+    public <U, K, R> ExceptionalStream<R, E> leftJoin(final ExceptionalStream<U, ? extends E> b,
             final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
             final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
             final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
@@ -6245,7 +6883,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                             }
                         });
             }
-        });
+        }).onClose(newCloseHandler(b));
     }
 
     /**
@@ -6411,7 +7049,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <U, K, R> ExceptionalStream<R, E> rightJoin(final ExceptionalStream<? extends U, E> b,
+    public <U, K, R> ExceptionalStream<R, E> rightJoin(final ExceptionalStream<U, ? extends E> b,
             final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
             final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
             final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
@@ -6429,7 +7067,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @Override
             public ExceptionalStream<R, E> apply(final T t) throws E {
                 if (rightKeyMap == null) {
-                    c = (List<U>) b.toList();
+                    c = b.toList();
                     rightKeyMap = ListMultimap.from(c, rightKeyMapper);
                     holder.setValue(c);
                 }
@@ -6456,7 +7094,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     public R apply(U u) throws E {
                         return func.apply((T) null, u);
                     }
-                }));
+                })).onClose(newCloseHandler(b));
     }
 
     /**
@@ -6635,7 +7273,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <U, K, R> ExceptionalStream<R, E> groupJoin(final ExceptionalStream<? extends U, E> b,
+    public <U, K, R> ExceptionalStream<R, E> groupJoin(final ExceptionalStream<U, ? extends E> b,
             final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
             final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper,
             final Throwables.BiFunction<? super T, ? super List<U>, R, ? extends E> func) {
@@ -6673,7 +7311,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
         };
 
-        return map(mapper);
+        return map(mapper).onClose(newCloseHandler(b));
     }
 
     /**
@@ -6760,7 +7398,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <U, K, R> ExceptionalStream<R, E> groupJoin(final ExceptionalStream<? extends U, E> b,
+    public <U, K, R> ExceptionalStream<R, E> groupJoin(final ExceptionalStream<U, ? extends E> b,
             final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
             final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper, final Throwables.BinaryOperator<U, ? extends E> mergeFunction,
             final Throwables.BiFunction<? super T, ? super U, R, ? extends E> func) {
@@ -6797,7 +7435,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
         };
 
-        return map(mapper);
+        return map(mapper).onClose(newCloseHandler(b));
     }
 
     /**
@@ -6866,7 +7504,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 if (initialized == false) {
                     initialized = true;
 
-                    map = ExceptionalStream.<U, E> of(b).toMap(rightKeyMapper, Fnn.<U, E> identity(), downstream);
+                    map = ExceptionalStream.<U, E> of(b).groupTo(rightKeyMapper, Fnn.<U, E> identity(), downstream);
                 }
             }
         };
@@ -6890,7 +7528,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <U, K, A, D, R> ExceptionalStream<R, E> groupJoin(final ExceptionalStream<? extends U, E> b,
+    public <U, K, A, D, R> ExceptionalStream<R, E> groupJoin(final ExceptionalStream<U, ? extends E> b,
             final Throwables.Function<? super T, ? extends K, ? extends E> leftKeyMapper,
             final Throwables.Function<? super U, ? extends K, ? extends E> rightKeyMapper, final Collector<? super U, A, D> downstream,
             final Throwables.BiFunction<? super T, ? super D, R, ? extends E> func) {
@@ -6922,12 +7560,764 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 if (initialized == false) {
                     initialized = true;
 
-                    map = b.toMap(rightKeyMapper, Fnn.<U, E> identity(), downstream);
+                    map = b.groupTo(rightKeyMapper, Fnn.<U, E> identity(), downstream);
                 }
             }
         };
 
+        return map(mapper).onClose(newCloseHandler(b));
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param b should be ordered
+     * @param predicate
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U> ExceptionalStream<Pair<T, List<U>>, E> joinByRange(final Iterator<U> b,
+            final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "Iterator 'b' can not be null");
+        checkArgNotNull(predicate, "'predicate' can not be null");
+
+        final Throwables.Function<T, Pair<T, List<U>>, E> mapper = new Throwables.Function<T, Pair<T, List<U>>, E>() {
+            private final Iterator<U> iter = b;
+            private final U none = (U) N.NULL_MASK;
+            private U next = none;
+
+            @Override
+            public Pair<T, List<U>> apply(T t) throws E {
+                final List<U> list = new ArrayList<>();
+
+                if (next == none) {
+                    if (iter.hasNext()) {
+                        next = iter.next();
+                    } else {
+                        return Pair.of(t, list);
+                    }
+                }
+
+                while (predicate.test(t, next)) {
+                    list.add(next);
+
+                    if (iter.hasNext()) {
+                        next = iter.next();
+                    } else {
+                        next = none;
+                        break;
+                    }
+                }
+
+                return Pair.of(t, list);
+            }
+        };
+
         return map(mapper);
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param <A>
+     * @param <R>
+     * @param b should be ordered
+     * @param predicate
+     * @param collector
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, A, R> ExceptionalStream<Pair<T, R>, E> joinByRange(final Iterator<U> b,
+            final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate, final Collector<? super U, A, R> collector) {
+        return joinByRange(b, predicate, collector, Fnn.pair());
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param <A>
+     * @param <D>
+     * @param <R>
+     * @param b should be ordered
+     * @param predicate
+     * @param collector
+     * @param func
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, A, D, R> ExceptionalStream<R, E> joinByRange(final Iterator<U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate,
+            final Collector<? super U, A, D> collector, final Throwables.BiFunction<? super T, ? super D, R, ? extends E> func) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "Iterator 'b' can not be null");
+        checkArgNotNull(predicate, "'predicate' can not be null");
+        checkArgNotNull(collector, "'collector' can not be null");
+        checkArgNotNull(func, "'func' can not be null");
+
+        final Supplier<A> supplier = collector.supplier();
+        final BiConsumer<A, ? super U> accumulator = collector.accumulator();
+        final Function<A, D> finisher = collector.finisher();
+
+        final Throwables.Function<T, R, E> mapper = new Throwables.Function<T, R, E>() {
+            private final Iterator<U> iter = b;
+            private final U none = (U) N.NULL_MASK;
+            private U next = none;
+
+            @Override
+            public R apply(T t) throws E {
+                final A container = supplier.get();
+
+                if (next == none) {
+                    if (iter.hasNext()) {
+                        next = iter.next();
+                    } else {
+                        return func.apply(t, finisher.apply(container));
+                    }
+                }
+
+                while (predicate.test(t, next)) {
+                    accumulator.accept(container, next);
+
+                    if (iter.hasNext()) {
+                        next = iter.next();
+                    } else {
+                        next = none;
+                        break;
+                    }
+                }
+
+                return func.apply(t, finisher.apply(container));
+            }
+        };
+
+        return map(mapper);
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param <A>
+     * @param <D>
+     * @param <R>
+     * @param b should be ordered
+     * @param predicate
+     * @param collector
+     * @param func
+     * @param mapperForUnJoinedEelements
+     *       In a lot of scenarios, there could be an previous element which is took out from the specified {@code Iterator b} but not joined, you may need to consider including that element in this {@code mapperForUnJoinedEelements}.
+     *       <br />
+     *       This input {@code Iterator} is the input {@code b}
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, A, D, R> ExceptionalStream<R, E> joinByRange(final Iterator<U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate,
+            final Collector<? super U, A, D> collector, final Throwables.BiFunction<? super T, ? super D, R, ? extends E> func,
+            final Throwables.Function<Iterator<U>, ExceptionalStream<R, E>, ? extends E> mapperForUnJoinedEelements) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "Iterator 'b' can not be null");
+        checkArgNotNull(predicate, "'predicate' can not be null");
+        checkArgNotNull(collector, "'collector' can not be null");
+        checkArgNotNull(func, "'func' can not be null");
+        checkArgNotNull(mapperForUnJoinedEelements, "'mapperForUnJoinedEelements' can not be null");
+
+        final Supplier<A> supplier = collector.supplier();
+        final BiConsumer<A, ? super U> accumulator = collector.accumulator();
+        final Function<A, D> finisher = collector.finisher();
+        final U none = (U) N.NULL_MASK;
+        final Holder<U> nextValueHolder = Holder.of(none);
+
+        final Throwables.Function<T, R, E> mapper = new Throwables.Function<T, R, E>() {
+            private final Iterator<U> iter = b;
+            private U next = none;
+
+            @Override
+            public R apply(T t) throws E {
+                final A container = supplier.get();
+
+                if (next == none) {
+                    if (iter.hasNext()) {
+                        next = iter.next();
+                    } else {
+                        return func.apply(t, finisher.apply(container));
+                    }
+                }
+
+                while (predicate.test(t, next)) {
+                    accumulator.accept(container, next);
+
+                    if (iter.hasNext()) {
+                        next = iter.next();
+                    } else {
+                        next = none;
+                        break;
+                    }
+                }
+
+                nextValueHolder.setValue(next);
+
+                return func.apply(t, finisher.apply(container));
+            }
+        };
+
+        final Throwables.Supplier<ExceptionalStream<R, E>, E> tmp = new Throwables.Supplier<ExceptionalStream<R, E>, E>() {
+            @Override
+            public ExceptionalStream<R, E> get() throws E {
+                return nextValueHolder.value() == none ? ExceptionalStream.<R, E> empty()
+                        : mapperForUnJoinedEelements.apply(Iterators.concat(ObjIterator.of(nextValueHolder.value()), b));
+            }
+        };
+
+        return map(mapper).append(ExceptionalStream.from(tmp));
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param b should be ordered. It will be closed along with this {@code ExceptionalStream}
+     * @param predicate
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U> ExceptionalStream<Pair<T, List<U>>, E> joinByRange(final Stream<U> b,
+            final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "Stream 'b' can not be null");
+        checkArgNotNull(predicate, "'predicate' can not be null");
+
+        return joinByRange(b.iterator(), predicate).onClose(newCloseHandler(b));
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param <A>
+     * @param <R>
+     * @param b should be ordered. It will be closed along with this {@code ExceptionalStream}
+     * @param predicate
+     * @param collector
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, A, R> ExceptionalStream<Pair<T, R>, E> joinByRange(final Stream<U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate,
+            final Collector<? super U, A, R> collector) {
+        return joinByRange(b, predicate, collector, Fnn.pair());
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param <A>
+     * @param <D>
+     * @param <R>
+     * @param b should be ordered. It will be closed along with this {@code ExceptionalStream}
+     * @param predicate
+     * @param collector
+     * @param func
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, A, D, R> ExceptionalStream<R, E> joinByRange(final Stream<U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate,
+            final Collector<? super U, A, D> collector, final Throwables.BiFunction<? super T, ? super D, R, ? extends E> func) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "Stream 'b' can not be null");
+        checkArgNotNull(predicate, "'predicate' can not be null");
+        checkArgNotNull(collector, "'collector' can not be null");
+        checkArgNotNull(func, "'func' can not be null");
+
+        return joinByRange(b.iterator(), predicate, collector, func).onClose(newCloseHandler(b));
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param <A>
+     * @param <D>
+     * @param <R>
+     * @param b should be ordered. It will be closed along with this {@code ExceptionalStream}
+     * @param predicate
+     * @param collector
+     * @param func
+     * @param mapperForUnJoinedEelements
+     *       In a lot of scenarios, there could be an previous element which is took out from the specified {@code Iterator b} but not joined, you may need to consider including that element in this {@code mapperForUnJoinedEelements}.
+     *       <br />
+     *       This input {@code Iterator} comes from {@code b.iterator()}.
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, A, D, R> ExceptionalStream<R, E> joinByRange(final Stream<U> b, final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate,
+            final Collector<? super U, A, D> collector, final Throwables.BiFunction<? super T, ? super D, R, ? extends E> func,
+            final Throwables.Function<Iterator<U>, ExceptionalStream<R, E>, ? extends E> mapperForUnJoinedEelements) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "Stream 'b' can not be null");
+        checkArgNotNull(predicate, "'predicate' can not be null");
+        checkArgNotNull(collector, "'collector' can not be null");
+        checkArgNotNull(func, "'func' can not be null");
+        checkArgNotNull(mapperForUnJoinedEelements, "'mapperForUnJoinedEelements' can not be null");
+
+        return joinByRange(b.iterator(), predicate, collector, func, mapperForUnJoinedEelements).onClose(newCloseHandler(b));
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param b should be ordered. It will be closed along with this {@code ExceptionalStream}
+     * @param predicate
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U> ExceptionalStream<Pair<T, List<U>>, E> joinByRange(final ExceptionalStream<U, ? extends E> b,
+            final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "ExceptionalStream 'b' can not be null");
+        checkArgNotNull(predicate, "'predicate' can not be null");
+
+        final Throwables.Function<T, Pair<T, List<U>>, E> mapper = new Throwables.Function<T, Pair<T, List<U>>, E>() {
+            private final ExceptionalIterator<U, ? extends E> iter = b.iteratorEx();
+            private final U none = (U) N.NULL_MASK;
+            private U next = none;
+
+            @Override
+            public Pair<T, List<U>> apply(T t) throws E {
+                final List<U> list = new ArrayList<>();
+
+                if (next == none) {
+                    if (iter.hasNext()) {
+                        next = iter.next();
+                    } else {
+                        return Pair.of(t, list);
+                    }
+                }
+
+                while (predicate.test(t, next)) {
+                    list.add(next);
+
+                    if (iter.hasNext()) {
+                        next = iter.next();
+                    } else {
+                        next = none;
+                        break;
+                    }
+                }
+
+                return Pair.of(t, list);
+            }
+        };
+
+        return map(mapper).onClose(newCloseHandler(b));
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param <A>
+     * @param <R>
+     * @param b should be ordered. It will be closed along with this {@code ExceptionalStream}
+     * @param predicate
+     * @param collector
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, A, R> ExceptionalStream<Pair<T, R>, E> joinByRange(final ExceptionalStream<U, ? extends E> b,
+            final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate, final Collector<? super U, A, R> collector) {
+        return joinByRange(b, predicate, collector, Fnn.pair());
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param <A>
+     * @param <D>
+     * @param <R>
+     * @param b should be ordered. It will be closed along with this {@code ExceptionalStream}
+     * @param predicate
+     * @param collector
+     * @param func
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, A, D, R> ExceptionalStream<R, E> joinByRange(final ExceptionalStream<U, ? extends E> b,
+            final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate, final Collector<? super U, A, D> collector,
+            final Throwables.BiFunction<? super T, ? super D, R, ? extends E> func) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "ExceptionalStream 'b' can not be null");
+        checkArgNotNull(predicate, "'predicate' can not be null");
+        checkArgNotNull(collector, "'collector' can not be null");
+        checkArgNotNull(func, "'func' can not be null");
+
+        final Supplier<A> supplier = collector.supplier();
+        final BiConsumer<A, ? super U> accumulator = collector.accumulator();
+        final Function<A, D> finisher = collector.finisher();
+
+        final Throwables.Function<T, R, E> mapper = new Throwables.Function<T, R, E>() {
+            private final ExceptionalIterator<U, ? extends E> iter = b.iteratorEx();
+            private final U none = (U) N.NULL_MASK;
+            private U next = none;
+
+            @Override
+            public R apply(T t) throws E {
+                final A container = supplier.get();
+
+                if (next == none) {
+                    if (iter.hasNext()) {
+                        next = iter.next();
+                    } else {
+                        return func.apply(t, finisher.apply(container));
+                    }
+                }
+
+                while (predicate.test(t, next)) {
+                    accumulator.accept(container, next);
+
+                    if (iter.hasNext()) {
+                        next = iter.next();
+                    } else {
+                        next = none;
+                        break;
+                    }
+                }
+
+                return func.apply(t, finisher.apply(container));
+            }
+        };
+
+        return map(mapper).onClose(newCloseHandler(b));
+    }
+
+    /**
+     *
+     * @param <U>
+     * @param <A>
+     * @param <D>
+     * @param <R>
+     * @param b should be ordered. It will be closed along with this {@code ExceptionalStream}
+     * @param predicate
+     * @param collector
+     * @param func
+     * @param mapperForUnJoinedEelements
+     *       In a lot of scenarios, there could be an previous element which is took out from the specified {@code Iterator b} but not joined, you may need to consider including that element in this {@code mapperForUnJoinedEelements}.
+     *       <br />
+     *       This input {@code ExceptionalIterator} comes from {@code b.iterator()}.
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, A, D, R> ExceptionalStream<R, E> joinByRange(final ExceptionalStream<U, ? extends E> b,
+            final Throwables.BiPredicate<? super T, ? super U, ? extends E> predicate, final Collector<? super U, A, D> collector,
+            final Throwables.BiFunction<? super T, ? super D, R, ? extends E> func,
+            final Throwables.Function<ExceptionalIterator<U, E>, ExceptionalStream<R, E>, ? extends E> mapperForUnJoinedEelements) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "ExceptionalStream 'b' can not be null");
+        checkArgNotNull(predicate, "'predicate' can not be null");
+        checkArgNotNull(collector, "'collector' can not be null");
+        checkArgNotNull(func, "'func' can not be null");
+        checkArgNotNull(mapperForUnJoinedEelements, "'mapperForUnJoinedEelements' can not be null");
+
+        final Supplier<A> supplier = collector.supplier();
+        final BiConsumer<A, ? super U> accumulator = collector.accumulator();
+        final Function<A, D> finisher = collector.finisher();
+        final U none = (U) N.NULL_MASK;
+        final Holder<U> nextValueHolder = Holder.of(none);
+        final ExceptionalIterator<U, ? extends E> iter = b.iteratorEx();
+
+        final Throwables.Function<T, R, E> mapper = new Throwables.Function<T, R, E>() {
+            private U next = none;
+
+            @Override
+            public R apply(T t) throws E {
+                final A container = supplier.get();
+
+                if (next == none) {
+                    if (iter.hasNext()) {
+                        next = iter.next();
+                    } else {
+                        return func.apply(t, finisher.apply(container));
+                    }
+                }
+
+                while (predicate.test(t, next)) {
+                    accumulator.accept(container, next);
+
+                    if (iter.hasNext()) {
+                        next = iter.next();
+                    } else {
+                        next = none;
+                        break;
+                    }
+                }
+
+                nextValueHolder.setValue(next);
+
+                return func.apply(t, finisher.apply(container));
+            }
+        };
+
+        final Throwables.Supplier<ExceptionalStream<R, E>, E> tmp = new Throwables.Supplier<ExceptionalStream<R, E>, E>() {
+            @Override
+            public ExceptionalStream<R, E> get() throws E {
+                return nextValueHolder.value() == none ? ExceptionalStream.<R, E> empty()
+                        : mapperForUnJoinedEelements.apply(ExceptionalIterator.concat(ExceptionalIterator.of(nextValueHolder.value()), iter));
+            }
+        };
+
+        return map(mapper).append(ExceptionalStream.from(tmp)).onClose(newCloseHandler(b));
+    }
+
+    /**
+     * If there is no value to join and want to skip that element, {@code joinFunc} can return {@code null} and then skip the {@code null} element by {@code stream.join(b, joinFunc).skipNull()}.
+     *
+     *
+     * @param <B>
+     * @param <R>
+     * @param b
+     * @param joinFunc
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <B extends Collection<?>, R> ExceptionalStream<R, E> join(final B b, final Throwables.BiFunction<? super T, ? super B, R, ? extends E> joinFunc) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "Collection 'b' can not be null");
+        checkArgNotNull(joinFunc, "'joinFunc' can not be null");
+
+        final Throwables.Function<T, R, E> mapper = new Throwables.Function<T, R, E>() {
+            @Override
+            public R apply(T t) throws E {
+                return joinFunc.apply(t, b);
+            }
+        };
+
+        return map(mapper);
+    }
+
+    /**
+     * If there is no value to join and want to skip that element, {@code joinFunc} can return {@code null} and then skip the {@code null} element by {@code stream.join(b, joinFunc).skipNull()}.
+     *
+     * @param <B>
+     * @param <R>
+     * @param b
+     * @param joinFunc
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <B extends Map<?, ?>, R> ExceptionalStream<R, E> join(final B b, final Throwables.BiFunction<? super T, ? super B, R, ? extends E> joinFunc) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "Map 'b' can not be null");
+        checkArgNotNull(joinFunc, "'joinFunc' can not be null");
+
+        final Throwables.Function<T, R, E> mapper = new Throwables.Function<T, R, E>() {
+            @Override
+            public R apply(T t) throws E {
+                return joinFunc.apply(t, b);
+            }
+        };
+
+        return map(mapper);
+    }
+
+    /**
+     * If there is no value to join and want to skip that element, {@code joinFunc} can return {@code null} and then skip the {@code null} element by {@code stream.join(b, joinFunc).skipNull()}.
+     *
+     *
+     * @param <B>
+     * @param <R>
+     * @param b should be ordered
+     * @param joinFunc
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <B extends Iterator<?>, R> ExceptionalStream<R, E> join(final B b, final Throwables.BiFunction<? super T, ? super B, R, ? extends E> joinFunc) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "Iterator 'b' can not be null");
+        checkArgNotNull(joinFunc, "'joinFunc' can not be null");
+
+        final Throwables.Function<T, R, E> mapper = new Throwables.Function<T, R, E>() {
+            @Override
+            public R apply(T t) throws E {
+                return joinFunc.apply(t, b);
+            }
+        };
+
+        return map(mapper);
+    }
+
+    /**
+     * If there is no value to join and want to skip that element, {@code joinFunc} can return {@code null} and then skip the {@code null} element by {@code stream.join(b, joinFunc).skipNull()}.
+     *
+     *
+     * @param <B>
+     * @param <R>
+     * @param b should be ordered
+     * @param joinFunc
+     * @param mapperForUnJoinedEelements In a lot of scenarios, there could be an previous element which is took out from the specified {@code Iterator b} but not joined, you may need to consider including that element in this {@code mapperForUnJoinedEelements}
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, B extends Iterator<U>, R> ExceptionalStream<R, E> join(final B b, final Throwables.BiFunction<? super T, ? super B, R, ? extends E> joinFunc,
+            final Throwables.Function<? super Iterator<U>, ExceptionalStream<R, E>, ? extends E> mapperForUnJoinedEelements) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "Iterator 'b' can not be null");
+        checkArgNotNull(joinFunc, "'joinFunc' can not be null");
+        checkArgNotNull(mapperForUnJoinedEelements, "'mapperForUnJoinedEelements' can not be null");
+
+        final Throwables.Function<T, R, E> mapper = new Throwables.Function<T, R, E>() {
+            @Override
+            public R apply(T t) throws E {
+                return joinFunc.apply(t, b);
+            }
+        };
+
+        Throwables.Supplier<? extends ExceptionalStream<R, E>, E> supplier = new Throwables.Supplier<ExceptionalStream<R, E>, E>() {
+            @Override
+            public ExceptionalStream<R, E> get() throws E {
+                return mapperForUnJoinedEelements.apply(b);
+            }
+        };
+
+        return map(mapper).append(ExceptionalStream.<R, E> from(supplier));
+    }
+
+    /**
+     * If there is no value to join and want to skip that element, {@code joinFunc} can return {@code null} and then skip the {@code null} element by {@code stream.join(b, joinFunc).skipNull()}.
+     *
+     *
+     * @param <B>
+     * @param <R>
+     * @param b should be ordered. It will be closed along with this stream. It can also be closed earlier by {@code joinFunc}.
+     * @param joinFunc
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, R> ExceptionalStream<R, E> join(final Stream<U> b, final Throwables.BiFunction<? super T, ? super Iterator<U>, R, ? extends E> joinFunc) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "Stream 'b' can not be null");
+        checkArgNotNull(joinFunc, "'joinFunc' can not be null");
+
+        return join(b.iterator(), joinFunc).onClose(newCloseHandler(b));
+    }
+
+    /**
+     * If there is no value to join and want to skip that element, {@code joinFunc} can return {@code null} and then skip the {@code null} element by {@code stream.join(b, joinFunc).skipNull()}.
+     *
+     *
+     * @param <B>
+     * @param <R>
+     * @param b should be ordered. It will be closed along with this stream. It can also be closed earlier by {@code joinFunc}.
+     * @param joinFunc
+     * @param mapperForUnJoinedEelements In a lot of scenarios, there could be an previous element which is took out from the specified {@code Iterator b} but not joined, you may need to consider including that element in this {@code mapperForUnJoinedEelements}
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, R> ExceptionalStream<R, E> join(final Stream<U> b, final Throwables.BiFunction<? super T, ? super Iterator<U>, R, ? extends E> joinFunc,
+            final Throwables.Function<? super Iterator<U>, ExceptionalStream<R, E>, ? extends E> mapperForUnJoinedEelements) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "Stream 'b' can not be null");
+        checkArgNotNull(joinFunc, "'joinFunc' can not be null");
+        checkArgNotNull(mapperForUnJoinedEelements, "'mapperForUnJoinedEelements' can not be null");
+
+        return join(b.iterator(), joinFunc, mapperForUnJoinedEelements).onClose(newCloseHandler(b));
+    }
+
+    /**
+     * If there is no value to join and want to skip that element, {@code joinFunc} can return {@code null} and then skip the {@code null} element by {@code stream.join(b, joinFunc).skipNull()}.
+     *
+     *
+     * @param <U>
+     * @param <R>
+     * @param b should be ordered. It will be closed along with this stream. It can also be closed earlier by {@code joinFunc}.
+     * @param joinFunc
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, R> ExceptionalStream<R, E> join(final ExceptionalStream<U, ? extends E> b,
+            final Throwables.BiFunction<? super T, ? super ExceptionalIterator<U, ? extends E>, R, ? extends E> joinFunc) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "ExceptionalStream 'b' can not be null");
+        checkArgNotNull(joinFunc, "'joinFunc' can not be null");
+
+        final ExceptionalIterator<U, ? extends E> iter = b.iteratorEx();
+
+        final Throwables.Function<T, R, E> mapper = new Throwables.Function<T, R, E>() {
+            @Override
+            public R apply(T t) throws E {
+                return joinFunc.apply(t, iter);
+            }
+        };
+
+        return map(mapper).onClose(newCloseHandler(b));
+    }
+
+    /**
+     * If there is no value to join and want to skip that element, {@code joinFunc} can return {@code null} and then skip the {@code null} element by {@code stream.join(b, joinFunc).skipNull()}.
+     *
+     *
+     * @param <U>
+     * @param <R>
+     * @param b should be ordered. It will be closed along with this stream. It can also be closed earlier by {@code joinFunc}.
+     * @param joinFunc
+     * @param mapperForUnJoinedEelements In a lot of scenarios, there could be an previous element which is took out from the specified {@code Iterator b} but not joined, you may need to consider including that element in this {@code mapperForUnJoinedEelements}
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <U, R> ExceptionalStream<R, E> join(final ExceptionalStream<U, ? extends E> b,
+            final Throwables.BiFunction<? super T, ? super ExceptionalIterator<U, ? extends E>, R, ? extends E> joinFunc,
+            final Throwables.Function<? super ExceptionalIterator<U, ? extends E>, ExceptionalStream<R, E>, ? extends E> mapperForUnJoinedEelements) {
+        assertNotClosed();
+
+        checkArgNotNull(b, "ExceptionalStream 'b' can not be null");
+        checkArgNotNull(joinFunc, "'joinFunc' can not be null");
+        checkArgNotNull(mapperForUnJoinedEelements, "'mapperForUnJoinedEelements' can not be null");
+
+        final ExceptionalIterator<U, ? extends E> iter = b.iteratorEx();
+
+        final Throwables.Function<T, R, E> mapper = new Throwables.Function<T, R, E>() {
+            @Override
+            public R apply(T t) throws E {
+                return joinFunc.apply(t, iter);
+            }
+        };
+
+        final Throwables.Supplier<? extends ExceptionalStream<R, E>, E> supplier = new Throwables.Supplier<ExceptionalStream<R, E>, E>() {
+            @Override
+            public ExceptionalStream<R, E> get() throws E {
+                return mapperForUnJoinedEelements.apply(iter);
+            }
+        };
+
+        return map(mapper).append(ExceptionalStream.from(supplier)).onClose(newCloseHandler(b));
     }
 
     /**
@@ -8107,6 +9497,45 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @see {@link Fn.Fnn#ignoringMerger()}
      */
     @TerminalOp
+    public <K, V, E2 extends Exception, E3 extends Exception> ImmutableMap<K, V> toImmutableMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
+            final Throwables.Function<? super T, ? extends V, E3> valueMapper) throws E, E2, E3, IllegalStateException {
+        return ImmutableMap.of(toMap(keyMapper, valueMapper));
+    }
+
+    /**
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param keyMapper
+     * @param valueMapper
+     * @param mergeFunction
+     * @return
+     * @throws E the e
+     * @see {@link Fn.Fnn#throwingMerger()}
+     * @see {@link Fn.Fnn#replacingMerger()}
+     * @see {@link Fn.Fnn#ignoringMerger()}
+     */
+    @TerminalOp
+    public <K, V, E2 extends Exception, E3 extends Exception, E4 extends Exception> ImmutableMap<K, V> toImmutableMap(
+            final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
+            final Throwables.BinaryOperator<V, E4> mergeFunction) throws E, E2, E3, E4 {
+        return ImmutableMap.of(toMap(keyMapper, valueMapper, mergeFunction));
+    }
+
+    /**
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param keyMapper
+     * @param valueMapper
+     * @return
+     * @throws E the e
+     * @throws IllegalStateException if there are duplicated keys.
+     * @see {@link Fn.Fnn#throwingMerger()}
+     * @see {@link Fn.Fnn#replacingMerger()}
+     * @see {@link Fn.Fnn#ignoringMerger()}
+     */
+    @TerminalOp
     public <K, V, E2 extends Exception, E3 extends Exception> Map<K, V> toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
             final Throwables.Function<? super T, ? extends V, E3> valueMapper) throws E, E2, E3, IllegalStateException {
         return toMap(keyMapper, valueMapper, Suppliers.<K, V> ofMap());
@@ -8147,8 +9576,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @see {@link Fn.Fnn#ignoringMerger()}
      */
     @TerminalOp
-    public <K, V, E2 extends Exception, E3 extends Exception> Map<K, V> toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-            final Throwables.Function<? super T, ? extends V, E3> valueMapper, final Throwables.BinaryOperator<V, ? extends E> mergeFunction) throws E, E2, E3 {
+    public <K, V, E2 extends Exception, E3 extends Exception, E4 extends Exception> Map<K, V> toMap(
+            final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
+            final Throwables.BinaryOperator<V, E4> mergeFunction) throws E, E2, E3, E4 {
         return toMap(keyMapper, valueMapper, mergeFunction, Suppliers.<K, V> ofMap());
     }
 
@@ -8168,9 +9598,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @see {@link Fn.Fnn#ignoringMerger()}
      */
     @TerminalOp
-    public <K, V, M extends Map<K, V>, E2 extends Exception, E3 extends Exception> M toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-            final Throwables.Function<? super T, ? extends V, E3> valueMapper, final Throwables.BinaryOperator<V, ? extends E> mergeFunction,
-            final Supplier<? extends M> mapFactory) throws E, E2, E3 {
+    public <K, V, M extends Map<K, V>, E2 extends Exception, E3 extends Exception, E4 extends Exception> M toMap(
+            final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
+            final Throwables.BinaryOperator<V, E4> mergeFunction, final Supplier<? extends M> mapFactory) throws E, E2, E3, E4 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, "keyMapper");
@@ -8195,113 +9625,67 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      *
-     * @param <K> the key type
-     * @param <A>
-     * @param <D>
      * @param keyMapper
      * @param downstream
      * @return
-     * @throws E the e
+     * @see #groupTo(com.landawn.abacus.util.Throwables.Function, Collector)
+     * @deprecated replaced by {@code groupTo}
      */
+    @Deprecated
     @TerminalOp
-    public <K, A, D, E2 extends Exception> Map<K, D> toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
+    public final <K, A, D, E2 extends Exception> Map<K, D> toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
             final Collector<? super T, A, D> downstream) throws E, E2 {
-        return toMap(keyMapper, downstream, Suppliers.<K, D> ofMap());
+        return groupTo(keyMapper, downstream);
     }
 
     /**
      *
-     * @param <K> the key type
-     * @param <A>
-     * @param <D>
-     * @param <M>
      * @param keyMapper
      * @param downstream
      * @param mapFactory
      * @return
-     * @throws E the e
+     * @see #groupTo(com.landawn.abacus.util.Throwables.Function, Collector, Supplier)
+     * @deprecated replaced by {@code groupTo}
      */
+    @Deprecated
     @TerminalOp
-    public <K, A, D, M extends Map<K, D>, E2 extends Exception> M toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
+    public final <K, A, D, M extends Map<K, D>, E2 extends Exception> M toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
             final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) throws E, E2 {
-        return toMap(keyMapper, Fnn.<T, E> identity(), downstream, mapFactory);
+        return groupTo(keyMapper, downstream, mapFactory);
     }
 
     /**
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <A>
-     * @param <D>
      * @param keyMapper
      * @param valueMapper
      * @param downstream
      * @return
-     * @throws E the e
+     * @see #groupTo(com.landawn.abacus.util.Throwables.Function, com.landawn.abacus.util.Throwables.Function, Collector)
+     * @deprecated replaced by {@code groupTo}
      */
+    @Deprecated
     @TerminalOp
-    public <K, V, A, D, E2 extends Exception, E3 extends Exception> Map<K, D> toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
+    public final <K, V, A, D, E2 extends Exception, E3 extends Exception> Map<K, D> toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
             final Throwables.Function<? super T, ? extends V, E3> valueMapper, final Collector<? super V, A, D> downstream) throws E, E2, E3 {
-        return toMap(keyMapper, valueMapper, downstream, Suppliers.<K, D> ofMap());
+        return groupTo(keyMapper, valueMapper, downstream);
     }
 
     /**
      *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <A>
-     * @param <D>
-     * @param <M>
      * @param keyMapper
      * @param valueMapper
      * @param downstream
      * @param mapFactory
      * @return
-     * @throws E the e
+     * @see #groupTo(com.landawn.abacus.util.Throwables.Function, com.landawn.abacus.util.Throwables.Function, Collector, Supplier)
+     * @deprecated replaced by {@code groupTo}
      */
+    @Deprecated
     @TerminalOp
-    public <K, V, A, D, M extends Map<K, D>, E2 extends Exception, E3 extends Exception> M toMap(
+    public final <K, V, A, D, M extends Map<K, D>, E2 extends Exception, E3 extends Exception> M toMap(
             final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
             final Collector<? super V, A, D> downstream, final Supplier<? extends M> mapFactory) throws E, E2, E3 {
-        assertNotClosed();
-
-        checkArgNotNull(keyMapper, "keyMapper");
-        checkArgNotNull(valueMapper, "valueMapper");
-        checkArgNotNull(downstream, "downstream");
-        checkArgNotNull(mapFactory, "mapFactory");
-
-        try {
-            final Supplier<A> downstreamSupplier = downstream.supplier();
-            final BiConsumer<A, ? super V> downstreamAccumulator = downstream.accumulator();
-            final Function<A, D> downstreamFinisher = downstream.finisher();
-
-            final M result = mapFactory.get();
-            final Map<K, A> tmp = (Map<K, A>) result;
-            T next = null;
-            K key = null;
-            A container = null;
-
-            while (elements.hasNext()) {
-                next = elements.next();
-                key = keyMapper.apply(next);
-                container = tmp.get(key);
-
-                if (container == null) {
-                    container = downstreamSupplier.get();
-                    tmp.put(key, container);
-                }
-
-                downstreamAccumulator.accept(container, valueMapper.apply(next));
-            }
-
-            for (Map.Entry<K, D> entry : result.entrySet()) {
-                entry.setValue(downstreamFinisher.apply((A) entry.getValue()));
-            }
-
-            return result;
-        } finally {
-            close();
-        }
+        return groupTo(keyMapper, valueMapper, downstream, mapFactory);
     }
 
     /**
@@ -8394,6 +9778,117 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     *
+     * @param <K> the key type
+     * @param <A>
+     * @param <D>
+     * @param keyMapper
+     * @param downstream
+     * @return
+     * @throws E the e
+     */
+    @TerminalOp
+    public <K, A, D, E2 extends Exception> Map<K, D> groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
+            final Collector<? super T, A, D> downstream) throws E, E2 {
+        return groupTo(keyMapper, downstream, Suppliers.<K, D> ofMap());
+    }
+
+    /**
+     *
+     * @param <K> the key type
+     * @param <A>
+     * @param <D>
+     * @param <M>
+     * @param keyMapper
+     * @param downstream
+     * @param mapFactory
+     * @return
+     * @throws E the e
+     */
+    @TerminalOp
+    public <K, A, D, M extends Map<K, D>, E2 extends Exception> M groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
+            final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) throws E, E2 {
+        return groupTo(keyMapper, Fnn.<T, E> identity(), downstream, mapFactory);
+    }
+
+    /**
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <A>
+     * @param <D>
+     * @param keyMapper
+     * @param valueMapper
+     * @param downstream
+     * @return
+     * @throws E the e
+     */
+    @TerminalOp
+    public <K, V, A, D, E2 extends Exception, E3 extends Exception> Map<K, D> groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
+            final Throwables.Function<? super T, ? extends V, E3> valueMapper, final Collector<? super V, A, D> downstream) throws E, E2, E3 {
+        return groupTo(keyMapper, valueMapper, downstream, Suppliers.<K, D> ofMap());
+    }
+
+    /**
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <A>
+     * @param <D>
+     * @param <M>
+     * @param keyMapper
+     * @param valueMapper
+     * @param downstream
+     * @param mapFactory
+     * @return
+     * @throws E the e
+     */
+    @TerminalOp
+    public <K, V, A, D, M extends Map<K, D>, E2 extends Exception, E3 extends Exception> M groupTo(
+            final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
+            final Collector<? super V, A, D> downstream, final Supplier<? extends M> mapFactory) throws E, E2, E3 {
+        assertNotClosed();
+
+        checkArgNotNull(keyMapper, "keyMapper");
+        checkArgNotNull(valueMapper, "valueMapper");
+        checkArgNotNull(downstream, "downstream");
+        checkArgNotNull(mapFactory, "mapFactory");
+
+        try {
+            final Supplier<A> downstreamSupplier = downstream.supplier();
+            final BiConsumer<A, ? super V> downstreamAccumulator = downstream.accumulator();
+            final Function<A, D> downstreamFinisher = downstream.finisher();
+
+            final M result = mapFactory.get();
+            final Map<K, A> tmp = (Map<K, A>) result;
+            T next = null;
+            K key = null;
+            A container = null;
+
+            while (elements.hasNext()) {
+                next = elements.next();
+                key = keyMapper.apply(next);
+                container = tmp.get(key);
+
+                if (container == null) {
+                    container = downstreamSupplier.get();
+                    tmp.put(key, container);
+                }
+
+                downstreamAccumulator.accept(container, valueMapper.apply(next));
+            }
+
+            for (Map.Entry<K, D> entry : result.entrySet()) {
+                entry.setValue(downstreamFinisher.apply((A) entry.getValue()));
+            }
+
+            return result;
+        } finally {
+            close();
+        }
+    }
+
+    /**
     *
     * @param predicate
     * @return
@@ -8432,7 +9927,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
         };
 
-        final Map<Boolean, D> map = toMap(keyMapper, downstream, mapFactory);
+        final Map<Boolean, D> map = groupTo(keyMapper, downstream, mapFactory);
 
         if (map.containsKey(Boolean.TRUE) == false) {
             map.put(Boolean.TRUE, downstream.finisher().apply(downstream.supplier().get()));
@@ -8501,6 +9996,30 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         try {
             final Multiset<T> result = supplier.get();
+
+            while (elements.hasNext()) {
+                result.add(elements.next());
+            }
+
+            return result;
+        } finally {
+            close();
+        }
+    }
+
+    @TerminalOp
+    public LongMultiset<T> toLongMultiset() throws E {
+        return toLongMultiset(Suppliers.<T> ofLongMultiset());
+    }
+
+    @TerminalOp
+    public LongMultiset<T> toLongMultiset(Supplier<? extends LongMultiset<T>> supplier) throws E {
+        assertNotClosed();
+
+        checkArgNotNull(supplier, "supplier");
+
+        try {
+            final LongMultiset<T> result = supplier.get();
 
             while (elements.hasNext()) {
                 result.add(elements.next());
@@ -10057,12 +11576,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         final ExceptionalIterator<T, E> tmp = iter;
 
-        return newStream(tmp).onClose(new Throwables.Runnable<E>() {
-            @Override
-            public void run() throws E {
-                tmp.close();
-            }
-        });
+        return newStream(tmp).onClose(newCloseHandler(tmp));
     }
 
     /**
@@ -10200,12 +11714,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         final Deque<Throwables.Runnable<? extends Exception>> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
 
-        newCloseHandlers.add(new Throwables.Runnable<Exception>() {
-            @Override
-            public void run() throws Exception {
-                iter.close();
-            }
-        });
+        newCloseHandlers.add(newCloseHandler(iter));
 
         if (N.notNullOrEmpty(closeHandlers)) {
             newCloseHandlers.addAll(closeHandlers);
@@ -10428,6 +11937,53 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         close(closeHandlers);
     }
 
+    @SuppressWarnings("rawtypes")
+    private static final Throwables.Runnable EMPTY_CLOSE_HANDLER = new Throwables.Runnable() {
+        @Override
+        public void run() {
+            // do nothing.
+        }
+    };
+
+    private static <E extends Exception, T> Throwables.Runnable<E> newCloseHandler(final ExceptionalIterator<T, E> iter) {
+        if (iter == null) {
+            return EMPTY_CLOSE_HANDLER;
+        }
+
+        return new Throwables.Runnable<E>() {
+            @Override
+            public void run() throws E {
+                iter.close();
+            }
+        };
+    }
+
+    private static <E extends Exception> Throwables.Runnable<E> newCloseHandler(final ExceptionalStream<?, E> b) {
+        if (b == null || N.isNullOrEmpty(b.closeHandlers)) {
+            return EMPTY_CLOSE_HANDLER;
+        }
+
+        return new Throwables.Runnable<E>() {
+            @Override
+            public void run() throws E {
+                b.close();
+            }
+        };
+    }
+
+    private static <E extends Exception> Throwables.Runnable<E> newCloseHandler(final Stream<?> b) {
+        if (b == null) {
+            return EMPTY_CLOSE_HANDLER;
+        }
+
+        return new Throwables.Runnable<E>() {
+            @Override
+            public void run() throws E {
+                b.close();
+            }
+        };
+    }
+
     static <E extends Exception> void close(final Deque<? extends Throwables.Runnable<? extends E>> closeHandlers) {
         Throwable ex = null;
 
@@ -10469,6 +12025,22 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     private int checkArgPositive(final int arg, final String argNameOrErrorMsg) {
+        if (arg <= 0) {
+            try {
+                N.checkArgPositive(arg, argNameOrErrorMsg);
+            } finally {
+                try {
+                    close();
+                } catch (Exception e) {
+                    throw ExceptionUtil.toRuntimeException(e);
+                }
+            }
+        }
+
+        return arg;
+    }
+
+    private long checkArgPositive(final long arg, final String argNameOrErrorMsg) {
         if (arg <= 0) {
             try {
                 N.checkArgPositive(arg, argNameOrErrorMsg);
@@ -10680,8 +12252,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param <T>
      * @param <E>
      */
+    @Internal
     @com.landawn.abacus.annotation.Immutable
-    static abstract class ExceptionalIterator<T, E extends Exception> implements Immutable {
+    public static abstract class ExceptionalIterator<T, E extends Exception> implements Immutable {
 
         /** The Constant EMPTY. */
         @SuppressWarnings("rawtypes")
@@ -10697,20 +12270,93 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
         };
 
-        public static <T, E extends Exception> ExceptionalIterator<T, E> wrap(final Iterator<? extends T> iter) {
-            if (iter == null) {
+        public static <T, E extends Exception> ExceptionalIterator<T, E> empty() {
+            return EMPTY;
+        }
+
+        /**
+        *
+        * @param <T>
+        * @param val
+        * @return
+        */
+        public static <T, E extends Exception> ExceptionalIterator<T, E> just(final T val) {
+            return new ExceptionalIterator<T, E>() {
+                private boolean done = false;
+
+                @Override
+                public boolean hasNext() {
+                    return done == false;
+                }
+
+                @Override
+                public T next() {
+                    if (done) {
+                        throw new NoSuchElementException();
+                    }
+
+                    done = true;
+
+                    return val;
+                }
+            };
+        }
+
+        /**
+        *
+        * @param <T>
+        * @param a
+        * @return
+        */
+        @SafeVarargs
+        public static <T, E extends Exception> ExceptionalIterator<T, E> of(final T... a) {
+            return N.isNullOrEmpty(a) ? EMPTY : of(a, 0, a.length);
+        }
+
+        /**
+        *
+        * @param <T>
+        * @param a
+        * @param fromIndex
+        * @param toIndex
+        * @return
+        */
+        public static <T, E extends Exception> ExceptionalIterator<T, E> of(final T[] a, final int fromIndex, final int toIndex) {
+            N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+
+            if (fromIndex == toIndex) {
                 return EMPTY;
             }
 
             return new ExceptionalIterator<T, E>() {
+                private int cursor = fromIndex;
+
                 @Override
-                public boolean hasNext() throws E {
-                    return iter.hasNext();
+                public boolean hasNext() {
+                    return cursor < toIndex;
                 }
 
                 @Override
-                public T next() throws E {
-                    return iter.next();
+                public T next() {
+                    if (cursor >= toIndex) {
+                        throw new NoSuchElementException();
+                    }
+
+                    return a[cursor++];
+                }
+
+                @Override
+                public void advance(long n) throws E {
+                    if (n > toIndex - cursor) {
+                        cursor = toIndex;
+                    } else {
+                        cursor += n;
+                    }
+                }
+
+                @Override
+                public long count() {
+                    return toIndex - cursor;
                 }
             };
         }
@@ -10723,7 +12369,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
          * @param iteratorSupplier
          * @return
          */
-        public static <T, E extends Exception> ExceptionalIterator<T, E> of(final Throwables.Supplier<ExceptionalIterator<T, E>, E> iteratorSupplier) {
+        static <T, E extends Exception> ExceptionalIterator<T, E> of(final Throwables.Supplier<ExceptionalIterator<T, E>, E> iteratorSupplier) {
             N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
 
             return new ExceptionalIterator<T, E>() {
@@ -10794,7 +12440,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
          * @param arraySupplier
          * @return
          */
-        public static <T, E extends Exception> ExceptionalIterator<T, E> oF(final Throwables.Supplier<T[], E> arraySupplier) {
+        static <T, E extends Exception> ExceptionalIterator<T, E> oF(final Throwables.Supplier<T[], E> arraySupplier) {
             N.checkArgNotNull(arraySupplier, "arraySupplier");
 
             return new ExceptionalIterator<T, E>() {
@@ -10860,6 +12506,57 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             };
         }
 
+        public static <T, E extends Exception> ExceptionalIterator<T, E> wrap(final Iterator<? extends T> iter) {
+            if (iter == null) {
+                return EMPTY;
+            }
+
+            return new ExceptionalIterator<T, E>() {
+                @Override
+                public boolean hasNext() throws E {
+                    return iter.hasNext();
+                }
+
+                @Override
+                public T next() throws E {
+                    return iter.next();
+                }
+            };
+        }
+
+        public static <T, E extends Exception> ExceptionalIterator<T, E> concat(final ExceptionalIterator<? extends T, ? extends E>... a) {
+            return concat(N.asList(a));
+        }
+
+        public static <T, E extends Exception> ExceptionalIterator<T, E> concat(final Collection<? extends ExceptionalIterator<? extends T, ? extends E>> c) {
+            if (N.isNullOrEmpty(c)) {
+                return ExceptionalIterator.empty();
+            }
+
+            return new ExceptionalIterator<T, E>() {
+                private final Iterator<? extends ExceptionalIterator<? extends T, ? extends E>> iter = c.iterator();
+                private ExceptionalIterator<? extends T, ? extends E> cur;
+
+                @Override
+                public boolean hasNext() throws E {
+                    while ((cur == null || cur.hasNext() == false) && iter.hasNext()) {
+                        cur = iter.next();
+                    }
+
+                    return cur != null && cur.hasNext();
+                }
+
+                @Override
+                public T next() throws E {
+                    if ((cur == null || cur.hasNext() == false) && hasNext() == false) {
+                        throw new NoSuchElementException();
+                    }
+
+                    return cur.next();
+                }
+            };
+        }
+
         /**
          * Checks for next.
          *
@@ -10908,7 +12605,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
          *
          * @throws E the e
          */
-        public void close() throws E {
+        void close() throws E {
             // Nothing to do by default.
         }
     }

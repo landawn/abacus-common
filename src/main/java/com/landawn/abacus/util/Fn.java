@@ -3559,6 +3559,226 @@ public final class Fn extends Comparators {
         return Predicates.indexed(predicate);
     }
 
+    /** The Constant MIN. */
+    @SuppressWarnings({ "rawtypes" })
+    private static final BinaryOperator<Comparable> MIN = new BinaryOperator<Comparable>() {
+        @Override
+        public Comparable apply(Comparable t, Comparable u) {
+            return N.compare(t, u) <= 0 ? t : u;
+        }
+    };
+
+    /** The Constant RETURN_FIRST. */
+    private static final BinaryOperator<Object> RETURN_FIRST = new BinaryOperator<Object>() {
+        @Override
+        public Object apply(Object t, Object u) {
+            return t;
+        }
+    };
+
+    /**
+     *
+     * @param <T>
+     * @param <U>
+     * @return
+     */
+    public static <T> BinaryOperator<T> selectFirst() {
+        return (BinaryOperator<T>) RETURN_FIRST;
+    }
+
+    /** The Constant RETURN_SECOND. */
+    private static final BinaryOperator<Object> RETURN_SECOND = new BinaryOperator<Object>() {
+        @Override
+        public Object apply(Object t, Object u) {
+            return u;
+        }
+    };
+
+    /**
+     *
+     * @param <T>
+     * @param <U>
+     * @return
+     */
+    public static <T> BinaryOperator<T> selectSecond() {
+        return (BinaryOperator<T>) RETURN_SECOND;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @return
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static <T extends Comparable<? super T>> BinaryOperator<T> min() {
+        return (BinaryOperator) MIN;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param comparator
+     * @return
+     */
+    public static <T> BinaryOperator<T> min(final Comparator<? super T> comparator) {
+        N.checkArgNotNull(comparator);
+
+        return new BinaryOperator<T>() {
+            @Override
+            public T apply(T t, T u) {
+                return comparator.compare(t, u) <= 0 ? t : u;
+            }
+        };
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param comparator
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public static <T> BinaryOperator<T> minBy(final Function<? super T, ? extends Comparable> keyMapper) {
+        N.checkArgNotNull(keyMapper);
+
+        return new BinaryOperator<T>() {
+            @Override
+            public T apply(T t, T u) {
+                return N.compare(keyMapper.apply(t), keyMapper.apply(u)) <= 0 ? t : u;
+            }
+        };
+    }
+
+    /** The Constant MIN_BY_KEY. */
+    @SuppressWarnings("rawtypes")
+    private static final BinaryOperator<Map.Entry<Comparable, Object>> MIN_BY_KEY = new BinaryOperator<Map.Entry<Comparable, Object>>() {
+        @Override
+        public Map.Entry<Comparable, Object> apply(Map.Entry<Comparable, Object> t, Map.Entry<Comparable, Object> u) {
+            return N.compare(t.getKey(), u.getKey()) <= 0 ? t : u;
+        }
+    };
+
+    /**
+     *
+     * @param <T>
+     * @return
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static <K extends Comparable<? super K>, V> BinaryOperator<Map.Entry<K, V>> minByKey() {
+        return (BinaryOperator) MIN_BY_KEY;
+    }
+
+    /** The Constant MIN_BY_VALUE. */
+    @SuppressWarnings("rawtypes")
+    private static final BinaryOperator<Map.Entry<Object, Comparable>> MIN_BY_VALUE = new BinaryOperator<Map.Entry<Object, Comparable>>() {
+        @Override
+        public Map.Entry<Object, Comparable> apply(Map.Entry<Object, Comparable> t, Map.Entry<Object, Comparable> u) {
+            return N.compare(t.getValue(), u.getValue()) <= 0 ? t : u;
+        }
+    };
+
+    /**
+     *
+     * @param <T>
+     * @return
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static <K, V extends Comparable<? super V>> BinaryOperator<Map.Entry<K, V>> minByValue() {
+        return (BinaryOperator) MIN_BY_VALUE;
+    }
+
+    /** The Constant MAX. */
+    @SuppressWarnings("rawtypes")
+    private static final BinaryOperator<Comparable> MAX = new BinaryOperator<Comparable>() {
+        @Override
+        public Comparable apply(Comparable t, Comparable u) {
+            return N.compare(t, u) >= 0 ? t : u;
+        }
+    };
+
+    /**
+     *
+     * @param <T>
+     * @return
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static <T extends Comparable<? super T>> BinaryOperator<T> max() {
+        return (BinaryOperator) MAX;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param comparator
+     * @return
+     */
+    public static <T> BinaryOperator<T> max(final Comparator<? super T> comparator) {
+        N.checkArgNotNull(comparator);
+
+        return new BinaryOperator<T>() {
+            @Override
+            public T apply(T t, T u) {
+                return comparator.compare(t, u) >= 0 ? t : u;
+            }
+        };
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param comparator
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public static <T> BinaryOperator<T> maxBy(final Function<? super T, ? extends Comparable> keyMapper) {
+        N.checkArgNotNull(keyMapper);
+
+        return new BinaryOperator<T>() {
+            @Override
+            public T apply(T t, T u) {
+                return N.compare(keyMapper.apply(t), keyMapper.apply(u)) >= 0 ? t : u;
+            }
+        };
+    }
+
+    /** The Constant MAX_BY_KEY. */
+    @SuppressWarnings("rawtypes")
+    private static final BinaryOperator<Map.Entry<Comparable, Object>> MAX_BY_KEY = new BinaryOperator<Map.Entry<Comparable, Object>>() {
+        @Override
+        public Map.Entry<Comparable, Object> apply(Map.Entry<Comparable, Object> t, Map.Entry<Comparable, Object> u) {
+            return N.compare(t.getKey(), u.getKey()) >= 0 ? t : u;
+        }
+    };
+
+    /**
+     *
+     * @param <T>
+     * @return
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static <K extends Comparable<? super K>, V> BinaryOperator<Map.Entry<K, V>> maxByKey() {
+        return (BinaryOperator) MAX_BY_KEY;
+    }
+
+    /** The Constant MAX_BY_VALUE. */
+    @SuppressWarnings("rawtypes")
+    private static final BinaryOperator<Map.Entry<Object, Comparable>> MAX_BY_VALUE = new BinaryOperator<Map.Entry<Object, Comparable>>() {
+        @Override
+        public Map.Entry<Object, Comparable> apply(Map.Entry<Object, Comparable> t, Map.Entry<Object, Comparable> u) {
+            return N.compare(t.getValue(), u.getValue()) >= 0 ? t : u;
+        }
+    };
+
+    /**
+     *
+     * @param <T>
+     * @return
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static <K, V extends Comparable<? super V>> BinaryOperator<Map.Entry<K, V>> maxByValue() {
+        return (BinaryOperator) MAX_BY_VALUE;
+    }
+
     /**
      *
      * @param <T>
@@ -8792,7 +9012,7 @@ public final class Fn extends Comparators {
          * @param <U>
          * @return
          */
-        public static <T, U> BiFunction<T, U, T> returnFirst() {
+        public static <T, U> BiFunction<T, U, T> selectFirst() {
             return (BiFunction<T, U, T>) RETURN_FIRST;
         }
 
@@ -8802,7 +9022,7 @@ public final class Fn extends Comparators {
          * @param <U>
          * @return
          */
-        public static <T, U> BiFunction<T, U, U> returnSecond() {
+        public static <T, U> BiFunction<T, U, U> selectSecond() {
             return (BiFunction<T, U, U>) RETURN_SECOND;
         }
 
@@ -9138,24 +9358,6 @@ public final class Fn extends Comparators {
             }
         };
 
-        /** The Constant MIN. */
-        @SuppressWarnings({ "rawtypes" })
-        private static final BinaryOperator<Comparable> MIN = new BinaryOperator<Comparable>() {
-            @Override
-            public Comparable apply(Comparable t, Comparable u) {
-                return N.compare(t, u) <= 0 ? t : u;
-            }
-        };
-
-        /** The Constant MAX. */
-        @SuppressWarnings("rawtypes")
-        private static final BinaryOperator<Comparable> MAX = new BinaryOperator<Comparable>() {
-            @Override
-            public Comparable apply(Comparable t, Comparable u) {
-                return N.compare(t, u) >= 0 ? t : u;
-            }
-        };
-
         /**
          * Instantiates a new binary operators.
          */
@@ -9375,172 +9577,6 @@ public final class Fn extends Comparators {
          */
         public static BinaryOperator<BigDecimal> ofAddBigDecimal() {
             return ADD_BIG_DECIMAL;
-        }
-
-        /**
-         *
-         * @param <T>
-         * @return
-         */
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        public static <T extends Comparable<? super T>> BinaryOperator<T> min() {
-            return (BinaryOperator) MIN;
-        }
-
-        /**
-         *
-         * @param <T>
-         * @param comparator
-         * @return
-         */
-        public static <T> BinaryOperator<T> min(final Comparator<? super T> comparator) {
-            N.checkArgNotNull(comparator);
-
-            return new BinaryOperator<T>() {
-                @Override
-                public T apply(T t, T u) {
-                    return comparator.compare(t, u) <= 0 ? t : u;
-                }
-            };
-        }
-
-        /**
-         *
-         * @param <T>
-         * @param comparator
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <T> BinaryOperator<T> minBy(final Function<? super T, ? extends Comparable> keyMapper) {
-            N.checkArgNotNull(keyMapper);
-
-            return new BinaryOperator<T>() {
-                @Override
-                public T apply(T t, T u) {
-                    return N.compare(keyMapper.apply(t), keyMapper.apply(u)) <= 0 ? t : u;
-                }
-            };
-        }
-
-        /** The Constant MIN_BY_KEY. */
-        @SuppressWarnings("rawtypes")
-        private static final BinaryOperator<Map.Entry<Comparable, Object>> MIN_BY_KEY = new BinaryOperator<Map.Entry<Comparable, Object>>() {
-            @Override
-            public Map.Entry<Comparable, Object> apply(Map.Entry<Comparable, Object> t, Map.Entry<Comparable, Object> u) {
-                return N.compare(t.getKey(), u.getKey()) <= 0 ? t : u;
-            }
-        };
-
-        /**
-         *
-         * @param <T>
-         * @return
-         */
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        public static <K extends Comparable<? super K>, V> BinaryOperator<Map.Entry<K, V>> minByKey() {
-            return (BinaryOperator) MIN_BY_KEY;
-        }
-
-        /** The Constant MIN_BY_VALUE. */
-        @SuppressWarnings("rawtypes")
-        private static final BinaryOperator<Map.Entry<Object, Comparable>> MIN_BY_VALUE = new BinaryOperator<Map.Entry<Object, Comparable>>() {
-            @Override
-            public Map.Entry<Object, Comparable> apply(Map.Entry<Object, Comparable> t, Map.Entry<Object, Comparable> u) {
-                return N.compare(t.getValue(), u.getValue()) <= 0 ? t : u;
-            }
-        };
-
-        /**
-         *
-         * @param <T>
-         * @return
-         */
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        public static <K, V extends Comparable<? super V>> BinaryOperator<Map.Entry<K, V>> minByValue() {
-            return (BinaryOperator) MIN_BY_VALUE;
-        }
-
-        /**
-         *
-         * @param <T>
-         * @return
-         */
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        public static <T extends Comparable<? super T>> BinaryOperator<T> max() {
-            return (BinaryOperator) MAX;
-        }
-
-        /**
-         *
-         * @param <T>
-         * @param comparator
-         * @return
-         */
-        public static <T> BinaryOperator<T> max(final Comparator<? super T> comparator) {
-            N.checkArgNotNull(comparator);
-
-            return new BinaryOperator<T>() {
-                @Override
-                public T apply(T t, T u) {
-                    return comparator.compare(t, u) >= 0 ? t : u;
-                }
-            };
-        }
-
-        /**
-         *
-         * @param <T>
-         * @param comparator
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <T> BinaryOperator<T> maxBy(final Function<? super T, ? extends Comparable> keyMapper) {
-            N.checkArgNotNull(keyMapper);
-
-            return new BinaryOperator<T>() {
-                @Override
-                public T apply(T t, T u) {
-                    return N.compare(keyMapper.apply(t), keyMapper.apply(u)) >= 0 ? t : u;
-                }
-            };
-        }
-
-        /** The Constant MAX_BY_KEY. */
-        @SuppressWarnings("rawtypes")
-        private static final BinaryOperator<Map.Entry<Comparable, Object>> MAX_BY_KEY = new BinaryOperator<Map.Entry<Comparable, Object>>() {
-            @Override
-            public Map.Entry<Comparable, Object> apply(Map.Entry<Comparable, Object> t, Map.Entry<Comparable, Object> u) {
-                return N.compare(t.getKey(), u.getKey()) >= 0 ? t : u;
-            }
-        };
-
-        /**
-         *
-         * @param <T>
-         * @return
-         */
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        public static <K extends Comparable<? super K>, V> BinaryOperator<Map.Entry<K, V>> maxByKey() {
-            return (BinaryOperator) MAX_BY_KEY;
-        }
-
-        /** The Constant MAX_BY_VALUE. */
-        @SuppressWarnings("rawtypes")
-        private static final BinaryOperator<Map.Entry<Object, Comparable>> MAX_BY_VALUE = new BinaryOperator<Map.Entry<Object, Comparable>>() {
-            @Override
-            public Map.Entry<Object, Comparable> apply(Map.Entry<Object, Comparable> t, Map.Entry<Object, Comparable> u) {
-                return N.compare(t.getValue(), u.getValue()) >= 0 ? t : u;
-            }
-        };
-
-        /**
-         *
-         * @param <T>
-         * @return
-         */
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        public static <K, V extends Comparable<? super V>> BinaryOperator<Map.Entry<K, V>> maxByValue() {
-            return (BinaryOperator) MAX_BY_VALUE;
         }
     }
 

@@ -222,6 +222,20 @@ public abstract class StringUtil {
         return true;
     }
 
+    public static boolean isAllEmpty(final Collection<? extends CharSequence> css) {
+        if (N.isNullOrEmpty(css)) {
+            return true;
+        }
+
+        for (final CharSequence cs : css) {
+            if (isNotEmpty(cs)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     /**
      * <p>Checks if all of the CharSequences are empty (""), null or whitespace only.</p>
      *
@@ -253,6 +267,21 @@ public abstract class StringUtil {
                 return false;
             }
         }
+
+        return true;
+    }
+
+    public static boolean isAllBlank(final Collection<? extends CharSequence> css) {
+        if (N.isNullOrEmpty(css)) {
+            return true;
+        }
+
+        for (final CharSequence cs : css) {
+            if (isNotBlank(cs)) {
+                return false;
+            }
+        }
+
         return true;
     }
 
@@ -277,6 +306,20 @@ public abstract class StringUtil {
      * @since 3.2
      */
     public static boolean isAnyEmpty(final CharSequence... css) {
+        if (N.isNullOrEmpty(css)) {
+            return false;
+        }
+
+        for (final CharSequence cs : css) {
+            if (isEmpty(cs)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean isAnyEmpty(final Collection<? extends CharSequence> css) {
         if (N.isNullOrEmpty(css)) {
             return false;
         }
@@ -323,6 +366,21 @@ public abstract class StringUtil {
                 return true;
             }
         }
+
+        return false;
+    }
+
+    public static boolean isAnyBlank(final Collection<? extends CharSequence> css) {
+        if (N.isNullOrEmpty(css)) {
+            return false;
+        }
+
+        for (final CharSequence cs : css) {
+            if (isBlank(cs)) {
+                return true;
+            }
+        }
+
         return false;
     }
 
