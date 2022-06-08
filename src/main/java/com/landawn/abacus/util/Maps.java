@@ -1222,6 +1222,110 @@ public final class Maps {
 
         return result;
     }
+    
+
+    
+
+    /**
+     * Recursively get the values from the specified {@code map} by {@code path}. For example:
+     * <pre>
+     * <code>
+        Map map = N.asMap("key1", "val1");
+        assertEquals("val1", Maps.getByPath(map, "key1"));
+
+        map = N.asMap("key1", N.asList("val1"));
+        assertEquals("val1", Maps.getByPath(map, "key1[0]"));
+
+        map = N.asMap("key1", N.asSet("val1"));
+        assertEquals("val1", Maps.getByPath(map, "key1[0]"));
+
+        map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", "val2")));
+        assertEquals("val2", Maps.getByPath(map, "key1[0][1]"));
+
+        map = N.asMap("key1", N.asSet(N.asList(N.asSet("val1"))));
+        assertEquals("val1", Maps.getByPath(map, "key1[0][0][0]"));
+
+        map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", "val22"))));
+        assertEquals("val22", Maps.getByPath(map, "key1[0][1].key2"));
+
+        map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
+        assertEquals("val33", Maps.getByPath(map, "key1[0][1].key2[1].key3"));
+
+        map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
+        assertNull(Maps.getByPath(map, "key1[0][2].key2[1].key3"));
+
+        map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
+     * </code>
+     * </pre>
+     *
+     * @param <T>
+     * @param map
+     * @param path
+     * @return
+     */
+    public static <T> T getByPath(final Map<?, ?> map, final String path) {
+        return getOrDefaultByPath(map, path, null);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param map
+     * @param path
+     * @param defaultValue
+     * @return
+     * @see #getByPath(Map, String)
+     */
+    @SuppressWarnings("rawtypes")
+    public static <T> T getOrDefaultByPath(final Map<?, ?> map, final String path, final T defaultValue) {
+        if (N.isNullOrEmpty(map)) {
+            return defaultValue;
+        }
+
+        final String[] keys = StringUtil.split(path, '.');
+        Map intermediateMap = map;
+        Collection intermediateColl = null;
+        String key = null;
+
+        for (int i = 0, len = keys.length; i < len; i++) {
+            key = keys[i];
+
+            if (N.isNullOrEmpty(intermediateMap)) {
+                return defaultValue;
+            }
+
+            if (key.charAt(key.length() - 1) == ']') {
+                final int[] indexes = StringUtil.findAllSubstringsBetween(key, "[", "]").stream().mapToInt(Numbers::toInt).toArray();
+                final int idx = key.indexOf('[');
+                intermediateColl = (Collection) intermediateMap.get(key.substring(0, idx));
+
+                for (int j = 0, idxLen = indexes.length; j < idxLen; j++) {
+                    if (N.isNullOrEmpty(intermediateColl) || intermediateColl.size() <= indexes[j]) {
+                        return defaultValue;
+                    } else {
+                        if (j == idxLen - 1) {
+                            if (i == len - 1) {
+                                return (T) Iterables.get(intermediateColl, indexes[j]);
+                            } else {
+                                intermediateMap = (Map) Iterables.get(intermediateColl, indexes[j]);
+                            }
+                        } else {
+                            intermediateColl = (Collection) Iterables.get(intermediateColl, indexes[j]);
+                        }
+                    }
+                }
+            } else {
+                if (i == len - 1) {
+                    return (T) intermediateMap.get(key);
+                } else {
+                    intermediateMap = (Map) intermediateMap.get(key);
+                }
+            }
+        }
+
+        return defaultValue;
+    }
+    
 
     /**
      * Check if the specified <code>Map</code> contains the specified <code>Entry</code>.
