@@ -35,7 +35,7 @@
 		<dependency>
 			<groupId>com.landawn</groupId>
 			<artifactId>abacus-jdbc</artifactId>
-			<version>3.1</version>
+			<version>3.1.2</version>
 			<scope>provided</scope>
 		</dependency>
 
