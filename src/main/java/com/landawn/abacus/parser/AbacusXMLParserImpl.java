@@ -1,0 +1,3154 @@
+/*
+ * Copyright (C) 2015 HaiYang Li
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
+package com.landawn.abacus.parser;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.SAXParser;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+
+import com.landawn.abacus.annotation.JsonXmlField;
+import com.landawn.abacus.exception.ParseException;
+import com.landawn.abacus.exception.UncheckedIOException;
+import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
+import com.landawn.abacus.parser.ParserUtil.EntityInfo;
+import com.landawn.abacus.parser.ParserUtil.PropInfo;
+import com.landawn.abacus.type.Type;
+import com.landawn.abacus.util.BufferedReader;
+import com.landawn.abacus.util.BufferedXMLWriter;
+import com.landawn.abacus.util.ClassUtil;
+import com.landawn.abacus.util.IOUtil;
+import com.landawn.abacus.util.IdentityHashSet;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.NamingPolicy;
+import com.landawn.abacus.util.ObjectPool;
+import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.XMLUtil;
+import com.landawn.abacus.util.u.Holder;
+
+/**
+ *
+ * @author Haiyang Li
+ * @since 0.8
+ */
+final class AbacusXMLParserImpl extends AbstractXMLParser {
+
+    // ...
+    private static final Map<Class<?>, Map<String, Class<?>>> nodeNameClassMapPool = new ConcurrentHashMap<>(POOL_SIZE);
+
+    private static final Map<String, NodeType> nodeTypePool = new ObjectPool<>(64);
+
+    static {
+        nodeTypePool.put(XMLConstants.ARRAY, NodeType.ARRAY);
+        nodeTypePool.put(XMLConstants.LIST, NodeType.COLLECTION);
+        nodeTypePool.put(XMLConstants.SET, NodeType.COLLECTION);
+        nodeTypePool.put(XMLConstants.COLLECTION, NodeType.COLLECTION);
+        nodeTypePool.put(XMLConstants.MAP, NodeType.MAP);
+        nodeTypePool.put(XMLConstants.E, NodeType.ELEMENT);
+        nodeTypePool.put(XMLConstants.ENTRY, NodeType.ENTRY);
+        nodeTypePool.put(XMLConstants.KEY, NodeType.KEY);
+        nodeTypePool.put(XMLConstants.VALUE, NodeType.VALUE);
+    }
+
+    // ...
+    private static final Queue<XmlSAXHandler<?>> xmlSAXHandlerPool = new ArrayBlockingQueue<>(POOL_SIZE);
+
+    private final XMLParserType parserType;
+
+    AbacusXMLParserImpl(final XMLParserType parserType) {
+        this.parserType = parserType;
+    }
+
+    AbacusXMLParserImpl(final XMLParserType parserType, final XMLSerializationConfig xsc, final XMLDeserializationConfig xdc) {
+        super(xsc, xdc);
+        this.parserType = parserType;
+    }
+
+    /**
+     *
+     * @param obj
+     * @param config
+     * @return
+     */
+    @Override
+    public String serialize(final Object obj, final XMLSerializationConfig config) {
+        if (obj == null) {
+            return N.EMPTY_STRING;
+        }
+
+        final BufferedXMLWriter bw = Objectory.createBufferedXMLWriter();
+        final IdentityHashSet<Object> serializedObjects = config != null && config.supportCircularReference() ? new IdentityHashSet<>() : null;
+
+        try {
+            write(bw, obj, null, config, false, null, serializedObjects);
+
+            return bw.toString();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        } finally {
+            Objectory.recycle(bw);
+        }
+    }
+
+    /**
+     *
+     * @param file
+     * @param obj
+     * @param config
+     */
+    @Override
+    public void serialize(final File file, final Object obj, final XMLSerializationConfig config) {
+        OutputStream os = null;
+
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+
+            os = new FileOutputStream(file);
+
+            serialize(os, obj, config);
+
+            os.flush();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        } finally {
+            IOUtil.close(os);
+        }
+    }
+
+    /**
+     *
+     * @param os
+     * @param obj
+     * @param config
+     */
+    @Override
+    public void serialize(final OutputStream os, final Object obj, final XMLSerializationConfig config) {
+        final BufferedXMLWriter bw = Objectory.createBufferedXMLWriter(os);
+        final IdentityHashSet<Object> serializedObjects = config != null && config.supportCircularReference() ? new IdentityHashSet<>() : null;
+
+        try {
+            write(bw, obj, null, config, true, null, serializedObjects);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        } finally {
+            Objectory.recycle(bw);
+        }
+    }
+
+    /**
+     *
+     * @param writer
+     * @param obj
+     * @param config
+     */
+    @Override
+    public void serialize(final Writer writer, final Object obj, final XMLSerializationConfig config) {
+        final boolean isBufferedWriter = writer instanceof BufferedXMLWriter;
+        final BufferedXMLWriter bw = isBufferedWriter ? (BufferedXMLWriter) writer : Objectory.createBufferedXMLWriter(writer);
+        final IdentityHashSet<Object> serializedObjects = config != null && config.supportCircularReference() ? new IdentityHashSet<>() : null;
+
+        try {
+            write(bw, obj, null, config, true, null, serializedObjects);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        } finally {
+            if (!isBufferedWriter) {
+                Objectory.recycle(bw);
+            }
+        }
+    }
+
+    /**
+     *
+     * @param bw
+     * @param obj
+     * @param propInfo
+     * @param config
+     * @param flush
+     * @param indentation
+     * @param serializedObjects
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    protected void write(final BufferedXMLWriter bw, final Object obj, final PropInfo propInfo, final XMLSerializationConfig config, final boolean flush,
+            final String indentation, final IdentityHashSet<Object> serializedObjects) throws IOException {
+        final XMLSerializationConfig configToUse = check(config);
+
+        if (obj == null) {
+            IOUtil.write(bw, N.EMPTY_STRING);
+            return;
+        }
+
+        final Class<?> cls = obj.getClass();
+        final Type<Object> type = N.typeOf(cls);
+
+        switch (type.getSerializationType()) {
+            case SERIALIZABLE:
+                if (type.isObjectArray()) {
+                    writeArray(bw, type, obj, configToUse, indentation, serializedObjects);
+                } else if (type.isCollection()) {
+                    writeCollection(bw, type, (Collection<?>) obj, configToUse, indentation, serializedObjects);
+                } else {
+                    if (propInfo != null && propInfo.hasFormat) {
+                        propInfo.writePropValue(bw, obj, configToUse);
+                    } else {
+                        type.writeCharacter(bw, obj, configToUse);
+                    }
+                }
+
+                break;
+
+            case ENTITY:
+                writeEntity(bw, type, obj, configToUse, indentation, serializedObjects);
+
+                break;
+
+            case MAP:
+                writeMap(bw, type, (Map<?, ?>) obj, configToUse, indentation, serializedObjects);
+
+                break;
+
+            case ARRAY:
+                writeArray(bw, type, obj, configToUse, indentation, serializedObjects);
+
+                break;
+
+            case COLLECTION:
+                writeCollection(bw, type, (Collection<?>) obj, configToUse, indentation, serializedObjects);
+
+                break;
+
+            default:
+                throw new ParseException("Unsupported class: " + ClassUtil.getCanonicalClassName(cls)
+                + ". Only Array/List/Map and Entity class with getter/setter methods are supported");
+        }
+
+        if (flush) {
+            bw.flush();
+        }
+    }
+
+    /**
+     *
+     * @param bw
+     * @param type TODO
+     * @param obj
+     * @param config
+     * @param indentation
+     * @param serializedObjects
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    protected void writeEntity(final BufferedXMLWriter bw, final Type<Object> type, final Object obj, final XMLSerializationConfig config,
+            final String indentation, final IdentityHashSet<Object> serializedObjects) throws IOException {
+        if (hasCircularReference(bw, obj, serializedObjects)) {
+            return;
+        }
+
+        final Class<?> cls = type.clazz();
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
+
+        if (N.isNullOrEmpty(entityInfo.jsonXmlSerializablePropInfos)) {
+            throw new ParseException("No serializable property is found in class: " + ClassUtil.getCanonicalClassName(cls));
+        }
+
+        final boolean tagByPropertyName = config.isTagByPropertyName();
+        final boolean ignoreTypeInfo = config.isIgnoreTypeInfo();
+        final boolean isPrettyFormat = config.isPrettyFormat();
+        final NamingPolicy jsonXmlNamingPolicy = config.getPropNamingPolicy() == null ? entityInfo.jsonXmlNamingPolicy : config.getPropNamingPolicy();
+        final int nameTagIdx = jsonXmlNamingPolicy.ordinal();
+
+        if (isPrettyFormat && indentation != null) {
+            bw.write(IOUtil.LINE_SEPARATOR);
+            bw.write(indentation);
+        }
+
+        if (tagByPropertyName) {
+            if (ignoreTypeInfo) {
+                bw.write(entityInfo.xmlNameTags[nameTagIdx].namedStart);
+            } else {
+                bw.write(entityInfo.xmlNameTags[nameTagIdx].namedStartWithType);
+            }
+        } else {
+            if (ignoreTypeInfo) {
+                bw.write(entityInfo.xmlNameTags[nameTagIdx].epStart);
+            } else {
+                bw.write(entityInfo.xmlNameTags[nameTagIdx].epStartWithType);
+            }
+        }
+
+        final String propIndentation = isPrettyFormat ? ((indentation == null ? N.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+
+        writeProperties(bw, type, obj, config, propIndentation, serializedObjects);
+
+        if (isPrettyFormat) {
+            bw.write(IOUtil.LINE_SEPARATOR);
+
+            if (indentation != null) {
+                bw.write(indentation);
+            }
+        }
+
+        if (tagByPropertyName) {
+            bw.write(entityInfo.xmlNameTags[nameTagIdx].namedEnd);
+        } else {
+            bw.write(entityInfo.xmlNameTags[nameTagIdx].epEnd);
+        }
+    }
+
+    /**
+     *
+     * @param bw
+     * @param type TODO
+     * @param obj
+     * @param config
+     * @param propIndentation
+     * @param serializedObjects
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    protected void writeProperties(final BufferedXMLWriter bw, final Type<Object> type, final Object obj, final XMLSerializationConfig config,
+            final String propIndentation, final IdentityHashSet<Object> serializedObjects) throws IOException {
+        if (hasCircularReference(bw, obj, serializedObjects)) {
+            return;
+        }
+
+        final Class<?> cls = type.clazz();
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
+
+        final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(cls);
+        final boolean ignoreNullProperty = (config.getExclusion() == Exclusion.NULL) || (config.getExclusion() == Exclusion.DEFAULT);
+        final boolean ignoreDefaultProperty = (config.getExclusion() == Exclusion.DEFAULT);
+        final boolean tagByPropertyName = config.isTagByPropertyName();
+        final boolean ignoreTypeInfo = config.isIgnoreTypeInfo();
+        final boolean isPrettyFormat = config.isPrettyFormat();
+
+        final String nextIndentation = isPrettyFormat ? ((propIndentation == null ? N.EMPTY_STRING : propIndentation) + config.getIndentation()) : null;
+        final PropInfo[] propInfoList = config.isSkipTransientField() ? entityInfo.nonTransientSeriPropInfos : entityInfo.jsonXmlSerializablePropInfos;
+        final NamingPolicy jsonXmlNamingPolicy = config.getPropNamingPolicy() == null ? entityInfo.jsonXmlNamingPolicy : config.getPropNamingPolicy();
+        final int nameTagIdx = jsonXmlNamingPolicy.ordinal();
+        PropInfo propInfo = null;
+        String propName = null;
+        Object propValue = null;
+
+        for (PropInfo element : propInfoList) {
+            propInfo = element;
+            propName = propInfo.name;
+
+            if (propInfo.jsonXmlExpose == JsonXmlField.Expose.DESERIALIZE_ONLY
+                    || ((ignoredClassPropNames != null) && ignoredClassPropNames.contains(propName))) {
+                continue;
+            }
+
+            propValue = propInfo.getPropValue(obj);
+
+            if ((ignoreNullProperty && propValue == null) || (ignoreDefaultProperty && propValue != null && (propInfo.jsonXmlType != null)
+                    && propInfo.jsonXmlType.isPrimitiveType() && propValue.equals(propInfo.jsonXmlType.defaultValue()))) {
+                continue;
+            }
+
+            if (isPrettyFormat) {
+                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(propIndentation);
+            }
+
+            if (propValue == null) {
+                if (tagByPropertyName) {
+                    if (ignoreTypeInfo) {
+                        bw.write(propInfo.xmlNameTags[nameTagIdx].namedNull);
+                    } else {
+                        bw.write(propInfo.xmlNameTags[nameTagIdx].namedNullWithType);
+                    }
+                } else {
+                    if (ignoreTypeInfo) {
+                        bw.write(propInfo.xmlNameTags[nameTagIdx].epNull);
+                    } else {
+                        bw.write(propInfo.xmlNameTags[nameTagIdx].epNullWithType);
+                    }
+                }
+            } else {
+                if (tagByPropertyName) {
+                    if (ignoreTypeInfo) {
+                        bw.write(propInfo.xmlNameTags[nameTagIdx].namedStart);
+                    } else {
+                        bw.write(propInfo.xmlNameTags[nameTagIdx].namedStartWithType);
+                    }
+                } else {
+                    if (ignoreTypeInfo) {
+                        bw.write(propInfo.xmlNameTags[nameTagIdx].epStart);
+                    } else {
+                        bw.write(propInfo.xmlNameTags[nameTagIdx].epStartWithType);
+                    }
+                }
+
+                if (propInfo.jsonXmlType.isSerializable()) {
+                    if (propInfo.jsonXmlType.isObjectArray() || propInfo.jsonXmlType.isCollection()) {
+                        // jsonParser.serialize(bw, propValue);
+
+                        strType.writeCharacter(bw, jsonParser.serialize(propValue, getJSC(config)), config);
+                    } else {
+                        if (propInfo.hasFormat) {
+                            propInfo.writePropValue(bw, propValue, config);
+                        } else {
+                            propInfo.jsonXmlType.writeCharacter(bw, propValue, config);
+                        }
+                    }
+                } else {
+                    write(bw, propValue, propInfo, config, false, nextIndentation, serializedObjects);
+
+                    if (isPrettyFormat) {
+                        bw.write(IOUtil.LINE_SEPARATOR);
+                        bw.write(propIndentation);
+                    }
+                }
+
+                if (tagByPropertyName) {
+                    bw.write(propInfo.xmlNameTags[nameTagIdx].namedEnd);
+                } else {
+                    bw.write(propInfo.xmlNameTags[nameTagIdx].epEnd);
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     * @param bw
+     * @param type TODO
+     * @param m
+     * @param config
+     * @param indentation
+     * @param serializedObjects
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    protected void writeMap(final BufferedXMLWriter bw, final Type<Object> type, final Map<?, ?> m, final XMLSerializationConfig config,
+            final String indentation, final IdentityHashSet<Object> serializedObjects) throws IOException {
+        if (hasCircularReference(bw, m, serializedObjects)) {
+            return;
+        }
+
+        final Class<?> cls = type.clazz();
+        final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(Map.class);
+        // final boolean ignoreNullProperty = (config.getExclusion() == Exclusion.NULL) || (config.getExclusion() == Exclusion.DEFAULT);
+        final boolean ignoreTypeInfo = config.isIgnoreTypeInfo();
+        final boolean isPrettyFormat = config.isPrettyFormat();
+
+        if (isPrettyFormat && indentation != null) {
+            bw.write(IOUtil.LINE_SEPARATOR);
+            bw.write(indentation);
+        }
+
+        if (ignoreTypeInfo) {
+            bw.write(XMLConstants.MAP_ELE_START);
+        } else {
+            bw.write(XMLConstants.START_MAP_ELE_WITH_TYPE);
+            bw.write(N.typeOf(cls).xmlName());
+            bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
+        }
+
+        final String entryIndentation = isPrettyFormat ? ((indentation == null ? N.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String keyValueIndentation = entryIndentation + config.getIndentation();
+        final String nextIndentation = keyValueIndentation + config.getIndentation();
+
+        final Type<Object> stringType = N.typeOf(String.class);
+        Object value = null;
+        Type<Object> keyType = null;
+        Type<Object> valueType = null;
+
+        for (Object key : m.keySet()) {
+            if ((ignoredClassPropNames != null) && ignoredClassPropNames.contains(key)) {
+                continue;
+            }
+
+            value = m.get(key);
+
+            //    if (ignoreNullProperty && value == null) {
+            //        continue;
+            //    }
+
+            if (isPrettyFormat) {
+                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(entryIndentation);
+            }
+
+            bw.write(XMLConstants.ENTRY_ELE_START);
+
+            if (isPrettyFormat) {
+                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(keyValueIndentation);
+            }
+
+            if (key == null) {
+                bw.write(XMLConstants.KEY_NULL_ELE);
+            } else {
+                if (key.getClass() == String.class) {
+                    if (ignoreTypeInfo) {
+                        bw.write(XMLConstants.KEY_ELE_START);
+                    } else {
+                        bw.write(XMLConstants.START_KEY_ELE_WITH_STRING_TYPE);
+                    }
+
+                    stringType.writeCharacter(bw, key, config);
+                } else {
+                    keyType = N.typeOf(key.getClass());
+
+                    if (ignoreTypeInfo) {
+                        bw.write(XMLConstants.KEY_ELE_START);
+                    } else {
+                        bw.write(XMLConstants.START_KEY_ELE_WITH_TYPE);
+                        bw.write(keyType.xmlName());
+                        bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
+                    }
+
+                    if (keyType.isSerializable()) {
+                        if (keyType.isObjectArray() || keyType.isCollection()) {
+                            // jsonParser.serialize(bw, key);
+
+                            strType.writeCharacter(bw, jsonParser.serialize(key, getJSC(config)), config);
+                        } else {
+                            keyType.writeCharacter(bw, key, config);
+                        }
+                    } else {
+                        write(bw, key, null, config, false, nextIndentation, serializedObjects);
+
+                        if (isPrettyFormat) {
+                            bw.write(IOUtil.LINE_SEPARATOR);
+                            bw.write(keyValueIndentation);
+                        }
+                    }
+                }
+
+                bw.write(XMLConstants.KEY_ELE_END);
+            }
+
+            if (isPrettyFormat) {
+                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(keyValueIndentation);
+            }
+
+            if (value == null) {
+                bw.write(XMLConstants.VALUE_NULL_ELE);
+            } else {
+                valueType = N.typeOf(value.getClass());
+
+                if (ignoreTypeInfo) {
+                    bw.write(XMLConstants.VALUE_ELE_START);
+                } else {
+                    bw.write(XMLConstants.START_VALUE_ELE_WITH_TYPE);
+                    bw.write(valueType.xmlName());
+                    bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
+                }
+
+                if (valueType.isSerializable()) {
+                    if (valueType.isObjectArray() || valueType.isCollection()) {
+                        // jsonParser.serialize(bw, value);
+
+                        strType.writeCharacter(bw, jsonParser.serialize(value, getJSC(config)), config);
+                    } else {
+                        valueType.writeCharacter(bw, value, config);
+                    }
+                } else {
+                    write(bw, value, null, config, false, nextIndentation, serializedObjects);
+
+                    if (isPrettyFormat) {
+                        bw.write(IOUtil.LINE_SEPARATOR);
+                        bw.write(keyValueIndentation);
+                    }
+                }
+
+                bw.write(XMLConstants.VALUE_ELE_END);
+            }
+
+            if (isPrettyFormat) {
+                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(entryIndentation);
+            }
+
+            bw.write(XMLConstants.ENTRY_ELE_END);
+        }
+
+        if (isPrettyFormat) {
+            bw.write(IOUtil.LINE_SEPARATOR);
+
+            if (indentation != null) {
+                bw.write(indentation);
+            }
+        }
+
+        bw.write(XMLConstants.MAP_ELE_END);
+    }
+
+    /**
+     *
+     * @param bw
+     * @param type TODO
+     * @param obj
+     * @param config
+     * @param indentation
+     * @param serializedObjects
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    protected void writeArray(final BufferedXMLWriter bw, final Type<Object> type, final Object obj, final XMLSerializationConfig config,
+            final String indentation, final IdentityHashSet<Object> serializedObjects) throws IOException {
+        if (hasCircularReference(bw, obj, serializedObjects)) {
+            return;
+        }
+
+        final Class<?> cls = type.clazz();
+        final boolean ignoreTypeInfo = config.isIgnoreTypeInfo();
+        final boolean isPrettyFormat = config.isPrettyFormat();
+
+        if (isPrettyFormat && indentation != null) {
+            bw.write(IOUtil.LINE_SEPARATOR);
+            bw.write(indentation);
+        }
+
+        if (ignoreTypeInfo) {
+            bw.write(XMLConstants.ARRAY_ELE_START);
+        } else {
+            bw.write(XMLConstants.START_ARRAY_ELE_WITH_TYPE);
+            bw.write(N.typeOf(cls).xmlName());
+            bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
+        }
+
+        final String eleIndentation = isPrettyFormat ? ((indentation == null ? N.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String nextIndentation = eleIndentation + config.getIndentation();
+        final Object[] a = (Object[]) obj;
+        Type<Object> eleType = null;
+
+        for (Object e : a) {
+            if (isPrettyFormat) {
+                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(eleIndentation);
+            }
+
+            if (e == null) {
+                bw.write(XMLConstants.E_NULL_ELE);
+            } else {
+                eleType = N.typeOf(e.getClass());
+
+                if (ignoreTypeInfo) {
+                    bw.write(XMLConstants.E_ELE_START);
+                } else {
+                    bw.write(XMLConstants.START_E_ELE_WITH_TYPE);
+                    bw.write(eleType.xmlName());
+                    bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
+                }
+
+                if (eleType.isSerializable()) {
+                    if (eleType.isObjectArray() || eleType.isCollection()) {
+                        // jsonParser.serialize(bw, e);
+
+                        strType.writeCharacter(bw, jsonParser.serialize(e, getJSC(config)), config);
+                    } else {
+                        eleType.writeCharacter(bw, e, config);
+                    }
+                } else {
+                    write(bw, e, null, config, false, nextIndentation, serializedObjects);
+
+                    if (isPrettyFormat) {
+                        bw.write(IOUtil.LINE_SEPARATOR);
+                        bw.write(eleIndentation);
+                    }
+                }
+
+                bw.write(XMLConstants.E_ELE_END);
+            }
+        }
+
+        if (isPrettyFormat) {
+            bw.write(IOUtil.LINE_SEPARATOR);
+
+            if (indentation != null) {
+                bw.write(indentation);
+            }
+        }
+
+        bw.write(XMLConstants.ARRAY_ELE_END);
+    }
+
+    /**
+     *
+     * @param bw
+     * @param type TODO
+     * @param c
+     * @param config
+     * @param indentation
+     * @param serializedObjects
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    protected void writeCollection(final BufferedXMLWriter bw, final Type<Object> type, final Collection<?> c, final XMLSerializationConfig config,
+            final String indentation, final IdentityHashSet<Object> serializedObjects) throws IOException {
+        if (hasCircularReference(bw, c, serializedObjects)) {
+            return;
+        }
+
+        final boolean ignoreTypeInfo = config.isIgnoreTypeInfo();
+        final boolean isPrettyFormat = config.isPrettyFormat();
+
+        if (isPrettyFormat && indentation != null) {
+            bw.write(IOUtil.LINE_SEPARATOR);
+            bw.write(indentation);
+        }
+
+        if (type.isList()) {
+            if (ignoreTypeInfo) {
+                bw.write(XMLConstants.LIST_ELE_START);
+            } else {
+                bw.write(XMLConstants.START_LIST_ELE_WITH_TYPE);
+                bw.write(type.xmlName());
+                bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
+            }
+        } else if (type.isSet()) {
+            if (ignoreTypeInfo) {
+                bw.write(XMLConstants.SET_ELE_START);
+            } else {
+                bw.write(XMLConstants.START_SET_ELE_WITH_TYPE);
+                bw.write(type.xmlName());
+                bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
+            }
+        } else {
+            if (ignoreTypeInfo) {
+                bw.write(XMLConstants.COLLECTION_ELE_START);
+            } else {
+                bw.write(XMLConstants.START_COLLECTION_ELE_WITH_TYPE);
+                bw.write(type.xmlName());
+                bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
+            }
+        }
+
+        final String eleIndentation = isPrettyFormat ? ((indentation == null ? N.EMPTY_STRING : indentation) + config.getIndentation()) : null;
+        final String nextIndentation = eleIndentation + config.getIndentation();
+
+        Type<Object> eleType = null;
+
+        for (Object e : c) {
+            if (isPrettyFormat) {
+                bw.write(IOUtil.LINE_SEPARATOR);
+                bw.write(eleIndentation);
+            }
+
+            if (e == null) {
+                bw.write(XMLConstants.E_NULL_ELE);
+            } else {
+                eleType = N.typeOf(e.getClass());
+
+                if (ignoreTypeInfo) {
+                    bw.write(XMLConstants.E_ELE_START);
+                } else {
+                    bw.write(XMLConstants.START_E_ELE_WITH_TYPE);
+                    bw.write(eleType.xmlName());
+                    bw.write(XMLConstants.CLOSE_ATTR_AND_ELE);
+                }
+
+                if (eleType.isSerializable()) {
+                    if (eleType.isObjectArray() || eleType.isCollection()) {
+                        // jsonParser.serialize(bw, e);
+
+                        strType.writeCharacter(bw, jsonParser.serialize(e, getJSC(config)), config);
+                    } else {
+                        eleType.writeCharacter(bw, e, config);
+                    }
+                } else {
+                    write(bw, e, null, config, false, nextIndentation, serializedObjects);
+
+                    if (isPrettyFormat) {
+                        bw.write(IOUtil.LINE_SEPARATOR);
+                        bw.write(eleIndentation);
+                    }
+                }
+
+                bw.write(XMLConstants.E_ELE_END);
+            }
+        }
+
+        if (isPrettyFormat) {
+            bw.write(IOUtil.LINE_SEPARATOR);
+
+            if (indentation != null) {
+                bw.write(indentation);
+            }
+        }
+
+        if (type.isList()) {
+            bw.write(XMLConstants.LIST_ELE_END);
+        } else if (type.isSet()) {
+            bw.write(XMLConstants.SET_ELE_END);
+        } else {
+            bw.write(XMLConstants.COLLECTION_ELE_END);
+        }
+    }
+
+    /**
+     * Checks for circular reference.
+     *
+     * @param bw
+     * @param obj
+     * @param serializedObjects
+     * @return true, if successful
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    private boolean hasCircularReference(BufferedXMLWriter bw, Object obj, final IdentityHashSet<Object> serializedObjects) throws IOException {
+        if (obj != null && serializedObjects != null) {
+            if (serializedObjects.contains(obj)) {
+                bw.write("null");
+                return true;
+            } else {
+                serializedObjects.add(obj);
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param targetClass
+     * @param st
+     * @param config
+     * @return
+     */
+    @Override
+    public <T> T deserialize(Class<T> targetClass, String st, final XMLDeserializationConfig config) {
+        if (N.isNullOrEmpty(st)) {
+            return N.defaultValueOf(targetClass);
+        }
+
+        final BufferedReader br = Objectory.createBufferedReader(st);
+
+        try {
+            return read(null, targetClass, br, config);
+        } finally {
+            Objectory.recycle(br);
+        }
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param targetClass
+     * @param file
+     * @param config
+     * @return
+     */
+    @Override
+    public <T> T deserialize(Class<T> targetClass, File file, final XMLDeserializationConfig config) {
+        InputStream is = null;
+
+        try {
+            is = new FileInputStream(file);
+
+            return deserialize(targetClass, is, config);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        } finally {
+            IOUtil.closeQuietly(is);
+        }
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param targetClass
+     * @param is
+     * @param config
+     * @return
+     */
+    @Override
+    public <T> T deserialize(Class<T> targetClass, InputStream is, final XMLDeserializationConfig config) {
+        final BufferedReader br = Objectory.createBufferedReader(is);
+
+        try {
+            return read(null, targetClass, br, config);
+        } finally {
+            Objectory.recycle(br);
+        }
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param targetClass
+     * @param reader
+     * @param config
+     * @return
+     */
+    @Override
+    public <T> T deserialize(Class<T> targetClass, Reader reader, final XMLDeserializationConfig config) {
+        // BufferedReader? will the target parser create the BufferedReader
+        // internally.
+        return read(null, targetClass, reader, config);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param targetClass
+     * @param node
+     * @param config
+     * @return
+     */
+    @Override
+    public <T> T deserialize(Class<T> targetClass, Node node, final XMLDeserializationConfig config) {
+        return readByDOMParser(targetClass, node, config);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param nodeClasses
+     * @param is
+     * @param config
+     * @return
+     */
+    @Override
+    public <T> T deserialize(Map<String, Class<?>> nodeClasses, InputStream is, final XMLDeserializationConfig config) {
+        final BufferedReader br = Objectory.createBufferedReader(is);
+
+        try {
+            return read(nodeClasses, null, br, config);
+        } finally {
+            Objectory.recycle(br);
+        }
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param nodeClasses
+     * @param reader
+     * @param config
+     * @return
+     */
+    @Override
+    public <T> T deserialize(Map<String, Class<?>> nodeClasses, Reader reader, final XMLDeserializationConfig config) {
+        return read(nodeClasses, null, reader, config);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param nodeClasses
+     * @param node
+     * @param config
+     * @return
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T deserialize(Map<String, Class<?>> nodeClasses, Node node, final XMLDeserializationConfig config) {
+        return (T) readByDOMParser(nodeClasses.get(node.getNodeName()), node, config);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param nodeClasses
+     * @param targetClass
+     * @param br
+     * @param config
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    protected <T> T read(Map<String, Class<?>> nodeClasses, Class<T> targetClass, Reader br, final XMLDeserializationConfig config) {
+        final XMLDeserializationConfig configToUse = check(config);
+
+        switch (parserType) {
+            case SAX:
+
+                final SAXParser saxParser = XMLUtil.createSAXParser();
+                final XmlSAXHandler<T> dh = getXmlSAXHandler(nodeClasses, targetClass, configToUse);
+                T result = null;
+
+                try {
+                    saxParser.parse(new InputSource(br), dh);
+                    result = dh.resultHolder.value();
+                } catch (SAXException e) {
+                    throw new ParseException(e);
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                } finally {
+                    recycle(dh);
+                    XMLUtil.recycleSAXParser(saxParser);
+                }
+
+                return result;
+
+            case StAX:
+                try {
+                    final XMLStreamReader xmlReader = createXMLStreamReader(br);
+
+                    for (int event = xmlReader.next(); event != XMLStreamConstants.START_ELEMENT && xmlReader.hasNext(); event = xmlReader.next()) {
+                        // do nothing.
+                    }
+
+                    if (targetClass == null && N.notNullOrEmpty(nodeClasses)) {
+                        String nodeName = null;
+
+                        if (xmlReader.getAttributeCount() > 0) {
+                            nodeName = xmlReader.getAttributeValue(null, XMLConstants.NAME);
+                        }
+
+                        if (N.isNullOrEmpty(nodeName)) {
+                            nodeName = xmlReader.getLocalName();
+                        }
+
+                        targetClass = (Class<T>) nodeClasses.get(nodeName);
+                    }
+
+                    if (targetClass == null) {
+                        throw new ParseException("No target class is specified");
+                    }
+
+                    return readByStreamParser(targetClass, xmlReader, configToUse);
+                } catch (XMLStreamException e) {
+                    throw new ParseException(e);
+                }
+
+            case DOM:
+                final DocumentBuilder docBuilder = XMLUtil.createContentParser();
+
+                try {
+                    Document doc = docBuilder.parse(new InputSource(br));
+                    Node node = doc.getFirstChild();
+
+                    if (targetClass == null && N.notNullOrEmpty(nodeClasses)) {
+                        String nodeName = XMLUtil.getAttribute(node, XMLConstants.NAME);
+
+                        if (N.isNullOrEmpty(nodeName)) {
+                            nodeName = node.getNodeName();
+                        }
+
+                        targetClass = (Class<T>) nodeClasses.get(nodeName);
+                    }
+
+                    if (targetClass == null) {
+                        throw new ParseException("No target class is specified");
+                    }
+
+                    return readByDOMParser(targetClass, node, configToUse);
+                } catch (SAXException e) {
+                    throw new ParseException(e);
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                } finally {
+                    XMLUtil.recycleContentParser(docBuilder);
+                }
+
+            default:
+                throw new ParseException("Unsupported parser: " + parserType);
+        }
+    }
+
+    /**
+     * Read by stream parser.
+     *
+     * @param <T>
+     * @param inputClass
+     * @param xmlReader
+     * @param config
+     * @return
+     * @throws XMLStreamException the XML stream exception
+     */
+    protected <T> T readByStreamParser(Class<T> inputClass, XMLStreamReader xmlReader, final XMLDeserializationConfig config) throws XMLStreamException {
+        return readByStreamParser(inputClass, inputClass, xmlReader, config, null, null, false, false, false, true);
+    }
+
+    /**
+     * Read by stream parser.
+     *
+     * @param <T>
+     * @param inputClass
+     * @param targetClass
+     * @param xmlReader
+     * @param config
+     * @param propType
+     * @param propInfo
+     * @param checkedAttr
+     * @param isTagByPropertyName
+     * @param ignoreTypeInfo
+     * @param isFirstCall
+     * @return
+     * @throws XMLStreamException the XML stream exception
+     */
+    @SuppressWarnings({ "null", "incomplete-switch", "fallthrough", "unused" })
+    protected <T> T readByStreamParser(Class<?> inputClass, Class<?> targetClass, XMLStreamReader xmlReader, final XMLDeserializationConfig config,
+            Type<?> propType, PropInfo propInfo, boolean checkedAttr, boolean isTagByPropertyName, boolean ignoreTypeInfo, boolean isFirstCall)
+                    throws XMLStreamException {
+
+        final boolean hasPropTypes = N.notNullOrEmpty(config.getPropTypes());
+        String nodeName = null;
+
+        if (checkedAttr) {
+            nodeName = isTagByPropertyName || xmlReader.getAttributeCount() == 0 ? xmlReader.getLocalName() : getAttribute(xmlReader, XMLConstants.NAME);
+        } else {
+            String nameAttr = getAttribute(xmlReader, XMLConstants.NAME);
+            nodeName = N.notNullOrEmpty(nameAttr) ? nameAttr : xmlReader.getLocalName();
+        }
+
+        if (hasPropTypes && config.hasPropType(nodeName)) {
+            targetClass = config.getPropType(nodeName).clazz();
+        }
+
+        targetClass = checkedAttr ? (ignoreTypeInfo ? targetClass : getConcreteClass(targetClass, xmlReader)) : getConcreteClass(targetClass, xmlReader);
+        NodeType nodeType = null;
+
+        if (nodeName == null) {
+            Type<?> targetType = N.typeOf(targetClass);
+            if (targetType.isMap()) {
+                nodeType = NodeType.MAP;
+            } else if (targetType.isArray()) {
+                nodeType = NodeType.ARRAY;
+            } else if (targetType.isCollection()) {
+                nodeType = NodeType.COLLECTION;
+            } else if (targetType.isEntity()) {
+                nodeType = NodeType.ENTITY;
+            } else {
+                nodeType = NodeType.PROPERTY;
+            }
+        } else {
+            nodeType = getNodeType(nodeName, null);
+        }
+
+        String propName = null;
+        Object propValue = null;
+        boolean isNullValue = false;
+        String text = null;
+        StringBuilder sb = null;
+
+        switch (nodeType) {
+            case ENTITY: {
+                if ((targetClass == null) || !ClassUtil.isEntity(targetClass)) {
+                    if ((propType != null) && ClassUtil.isEntity(propType.clazz())) {
+                        targetClass = propType.clazz();
+                    } else {
+                        if (ClassUtil.getSimpleClassName(inputClass).equalsIgnoreCase(nodeName)) {
+                            targetClass = inputClass;
+                        } else {
+                            if (Collection.class.isAssignableFrom(inputClass) || Map.class.isAssignableFrom(inputClass) || inputClass.isArray()) {
+                                if (propType != null) {
+                                    targetClass = getClassByNodeName(propType.clazz(), nodeName);
+                                }
+                            } else {
+                                targetClass = getClassByNodeName(inputClass, nodeName);
+                            }
+
+                            if ((targetClass == null) || !ClassUtil.isEntity(targetClass)) {
+                                throw new ParseException(
+                                        "No entity class found by node name : " + nodeName + " in package of class: " + inputClass.getCanonicalName());
+                            }
+                        }
+                    }
+                }
+
+                if (!checkedAttr) {
+                    isTagByPropertyName = N.isNullOrEmpty(getAttribute(xmlReader, XMLConstants.NAME));
+                    ignoreTypeInfo = N.isNullOrEmpty(getAttribute(xmlReader, XMLConstants.TYPE));
+                    checkedAttr = true;
+                }
+
+                isNullValue = Boolean.parseBoolean(getAttribute(xmlReader, XMLConstants.IS_NULL));
+
+                final boolean ignoreUnmatchedProperty = config.isIgnoreUnmatchedProperty();
+                final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(targetClass);
+                final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
+                final Object result = isNullValue ? null : entityInfo.createEntityResult();
+                int attrCount = 0;
+
+                for (int event = xmlReader.next(); xmlReader.hasNext(); event = xmlReader.next()) {
+                    switch (event) {
+                        case XMLStreamConstants.START_ELEMENT: {
+                            // N.println(xmlReader.getLocalName());
+
+                            if (propName == null) {
+                                isNullValue = Boolean.parseBoolean(getAttribute(xmlReader, XMLConstants.IS_NULL));
+
+                                propName = isTagByPropertyName ? xmlReader.getLocalName() : getAttribute(xmlReader, XMLConstants.NAME);
+                                propInfo = entityInfo.getPropInfo(propName);
+
+                                if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
+                                    continue;
+                                }
+
+                                if (propInfo == null) {
+                                    if (ignoreUnmatchedProperty) {
+                                        continue;
+                                    } else {
+                                        throw new ParseException("Unknown property element: " + propName + " for class: " + targetClass.getCanonicalName());
+                                    }
+                                }
+
+                                propType = hasPropTypes ? config.getPropType(propName) : null;
+
+                                if (propType == null) {
+                                    if (propInfo.jsonXmlType.isSerializable()) {
+                                        propType = propInfo.jsonXmlType;
+                                    } else {
+                                        attrCount = xmlReader.getAttributeCount();
+
+                                        if (attrCount == 1) {
+                                            if (XMLConstants.TYPE.equals(xmlReader.getAttributeLocalName(0))) {
+                                                propType = N.typeOf(xmlReader.getAttributeValue(0));
+                                            }
+                                        } else if (attrCount > 1) {
+                                            for (int i = 0; i < attrCount; i++) {
+                                                if (XMLConstants.TYPE.equals(xmlReader.getAttributeLocalName(i))) {
+                                                    propType = N.typeOf(xmlReader.getAttributeValue(i));
+
+                                                    break;
+                                                }
+                                            }
+                                        }
+
+                                        if (propType == null) {
+                                            propType = propInfo.jsonXmlType;
+                                        }
+                                    }
+                                }
+
+                            } else {
+                                if (propInfo == null || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
+                                    for (int startCount = 1, e = xmlReader.next();; e = xmlReader.next()) {
+                                        startCount += (e == XMLStreamConstants.START_ELEMENT) ? 1 : (e == XMLStreamConstants.END_ELEMENT ? -1 : 0);
+
+                                        if (startCount < 0 || !xmlReader.hasNext()) {
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    propValue = readByStreamParser(inputClass, propType.clazz(), xmlReader, config, propType, propInfo, checkedAttr,
+                                            isTagByPropertyName, ignoreTypeInfo, false);
+
+                                    for (int startCount = 0, e = xmlReader.next();; e = xmlReader.next()) {
+                                        startCount += (e == XMLStreamConstants.START_ELEMENT) ? 1 : (e == XMLStreamConstants.END_ELEMENT ? -1 : 0);
+
+                                        if (startCount < 0 || !xmlReader.hasNext()) {
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                if (xmlReader.getEventType() == XMLStreamConstants.END_ELEMENT
+                                        && (isTagByPropertyName ? xmlReader.getLocalName().equals(propName)
+                                                : xmlReader.getLocalName().equals(XMLConstants.PROPERTY))) {
+                                    if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
+                                            || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
+                                        // ignore.
+                                    } else {
+                                        propInfo.setPropValue(result, propValue);
+                                    }
+
+                                    propName = null;
+                                    propValue = null;
+                                    propInfo = null;
+                                } else {
+                                    throw new ParseException("Unknown parser error at element: " + xmlReader.getLocalName());
+                                }
+                            }
+
+                            break;
+                        }
+
+                        case XMLStreamConstants.CHARACTERS: {
+                            text = xmlReader.getText();
+
+                            if (text != null && text.length() > TEXT_SIZE_TO_READ_MORE) {
+                                while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                                    if (sb == null) {
+                                        sb = new StringBuilder(text.length() * 2);
+                                        sb.append(text);
+                                    } else if (sb.length() == 0) {
+                                        sb.append(text);
+                                    }
+
+                                    sb.append(xmlReader.getText());
+                                }
+
+                                if (sb != null && sb.length() > text.length()) {
+                                    text = sb.toString();
+                                    sb.setLength(0);
+                                }
+                            }
+
+                            propValue = (isNullValue || propInfo == null) ? null : (propInfo.hasFormat ? propInfo.readPropValue(text) : propType.valueOf(text));
+
+                            if (event == XMLStreamConstants.END_ELEMENT) {
+                                if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
+                                        || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
+                                    // ignore;
+                                } else {
+                                    propInfo.setPropValue(result, isNullValue ? null : (propValue == null ? propType.valueOf(N.EMPTY_STRING) : propValue));
+                                }
+
+                                propName = null;
+                                propValue = null;
+                                propInfo = null;
+                            }
+
+                            break;
+                        }
+
+                        case XMLStreamConstants.END_ELEMENT: {
+                            if (propName == null) {
+                                return entityInfo.finishEntityResult(result);
+                            } else {
+                                if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
+                                        || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
+                                    // ignore;
+                                } else {
+                                    propInfo.setPropValue(result, isNullValue ? null : (propValue == null ? propType.valueOf(N.EMPTY_STRING) : propValue));
+                                }
+
+                                propName = null;
+                                propValue = null;
+                                propInfo = null;
+                            }
+
+                            break;
+                        }
+
+                        default:
+                            // continue;
+                    }
+                }
+
+                throw new ParseException("Unknown parser error");
+            }
+
+            case MAP: {
+                if ((targetClass == null) || !Map.class.isAssignableFrom(targetClass)) {
+                    if ((propType != null) && Map.class.isAssignableFrom(propType.clazz())) {
+                        targetClass = propType.clazz();
+                    } else {
+                        targetClass = LinkedHashMap.class;
+                    }
+                }
+
+                final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(Map.class);
+                Type<?> keyType = defaultKeyType;
+
+                if (propInfo != null && propInfo.jsonXmlType.getParameterTypes().length == 2
+                        && !Object.class.equals(propInfo.jsonXmlType.getParameterTypes()[0].clazz())) {
+                    keyType = propInfo.jsonXmlType.getParameterTypes()[0];
+                } else if (propType != null && propType.getParameterTypes().length == 2 && Map.class.isAssignableFrom(propType.clazz())
+                        && !Object.class.equals(propType.getParameterTypes()[0].clazz())) {
+                    keyType = propType.getParameterTypes()[0];
+                } else {
+                    if (config.getMapKeyType() != null && !Object.class.equals(config.getMapKeyType().clazz())) {
+                        keyType = config.getMapKeyType();
+                    }
+                }
+
+                Type<?> valueType = defaultValueType;
+
+                if (propInfo != null && propInfo.jsonXmlType.getParameterTypes().length == 2
+                        && !Object.class.equals(propInfo.jsonXmlType.getParameterTypes()[1].clazz())) {
+                    valueType = propInfo.jsonXmlType.getParameterTypes()[1];
+                } else if (propType != null && propType.getParameterTypes().length == 2 && Map.class.isAssignableFrom(propType.clazz())
+                        && !Object.class.equals(propType.getParameterTypes()[1].clazz())) {
+                    valueType = propType.getParameterTypes()[1];
+                } else {
+                    if (config.getMapValueType() != null && !Object.class.equals(config.getMapValueType().clazz())) {
+                        valueType = config.getMapValueType();
+                    }
+                }
+
+                isNullValue = Boolean.parseBoolean(getAttribute(xmlReader, XMLConstants.IS_NULL));
+                final Map<Object, Object> mResult = isNullValue ? null : (Map<Object, Object>) N.newInstance(targetClass);
+                Object key = null;
+                Type<?> entryKeyType = null;
+                Type<?> entryValueType = null;
+                String typeAttr = null;
+                boolean isStringKey = false;
+
+                for (int event = xmlReader.next(); xmlReader.hasNext(); event = xmlReader.next()) {
+                    switch (event) {
+                        case XMLStreamConstants.START_ELEMENT: {
+                            // move to key element;
+                            xmlReader.next();
+
+                            isNullValue = Boolean.parseBoolean(getAttribute(xmlReader, XMLConstants.IS_NULL));
+                            typeAttr = getAttribute(xmlReader, XMLConstants.TYPE);
+                            entryKeyType = N.isNullOrEmpty(typeAttr) ? keyType : N.typeOf(typeAttr);
+                            isStringKey = entryKeyType.clazz().equals(String.class);
+
+                            switch (event = xmlReader.next()) {
+                                case XMLStreamConstants.START_ELEMENT:
+                                    key = readByStreamParser(inputClass, entryKeyType.clazz(), xmlReader, config, entryKeyType, null, checkedAttr,
+                                            isTagByPropertyName, ignoreTypeInfo, false);
+
+                                    // end of key.
+                                    xmlReader.next();
+
+                                    break;
+
+                                case XMLStreamConstants.CHARACTERS:
+                                    text = xmlReader.getText();
+
+                                    if (text != null && text.length() > TEXT_SIZE_TO_READ_MORE) {
+                                        while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                                            if (sb == null) {
+                                                sb = new StringBuilder(text.length() * 2);
+                                                sb.append(text);
+                                            } else if (sb.length() == 0) {
+                                                sb.append(text);
+                                            }
+
+                                            sb.append(xmlReader.getText());
+                                        }
+
+                                        if (sb != null && sb.length() > text.length()) {
+                                            text = sb.toString();
+                                            sb.setLength(0);
+                                        }
+                                    }
+
+                                    key = isNullValue ? null : entryKeyType.valueOf(text);
+
+                                    if (event == XMLStreamConstants.CHARACTERS) {
+                                        // end of key.
+                                        xmlReader.next();
+                                    }
+
+                                    break;
+
+                                case XMLStreamConstants.END_ELEMENT: {
+                                    key = isNullValue ? null : (key == null ? entryKeyType.valueOf(N.EMPTY_STRING) : key);
+
+                                    break;
+                                }
+                            }
+
+                            // move to value element;
+                            xmlReader.next();
+
+                            isNullValue = Boolean.parseBoolean(getAttribute(xmlReader, XMLConstants.IS_NULL));
+                            typeAttr = getAttribute(xmlReader, XMLConstants.TYPE);
+                            entryValueType = N.isNullOrEmpty(typeAttr) ? valueType : N.typeOf(typeAttr);
+
+                            if (hasPropTypes && isStringKey) {
+                                Type<?> tmpType = config.getPropType(N.toString(key));
+                                if (tmpType != null) {
+                                    entryValueType = tmpType;
+                                }
+                            }
+
+                            switch (event = xmlReader.next()) {
+                                case XMLStreamConstants.START_ELEMENT:
+                                    propValue = readByStreamParser(inputClass, entryValueType.clazz(), xmlReader, config, entryValueType, null, checkedAttr,
+                                            isTagByPropertyName, ignoreTypeInfo, false);
+
+                                    // end of value.
+                                    xmlReader.next();
+
+                                    break;
+
+                                case XMLStreamConstants.CHARACTERS:
+                                    text = xmlReader.getText();
+
+                                    if (text != null && text.length() > TEXT_SIZE_TO_READ_MORE) {
+                                        while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                                            if (sb == null) {
+                                                sb = new StringBuilder(text.length() * 2);
+                                                sb.append(text);
+                                            } else if (sb.length() == 0) {
+                                                sb.append(text);
+                                            }
+
+                                            sb.append(xmlReader.getText());
+                                        }
+
+                                        if (sb != null && sb.length() > text.length()) {
+                                            text = sb.toString();
+                                            sb.setLength(0);
+                                        }
+                                    }
+
+                                    propValue = isNullValue ? null : entryValueType.valueOf(text);
+
+                                    if (event == XMLStreamConstants.CHARACTERS) {
+                                        // end of value.
+                                        xmlReader.next();
+                                    }
+
+                                    break;
+
+                                case XMLStreamConstants.END_ELEMENT: {
+                                    propValue = isNullValue ? null : (propValue == null ? entryValueType.valueOf(N.EMPTY_STRING) : propValue);
+
+                                    break;
+                                }
+                            }
+
+                            // end of entry.
+                            xmlReader.next();
+
+                            if (key != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(key.toString())) {
+                                // ignore.
+                            } else {
+                                mResult.put(key, propValue);
+                            }
+
+                            key = null;
+                            propValue = null;
+
+                            break;
+                        }
+
+                        case XMLStreamConstants.END_ELEMENT: {
+                            return (T) mResult;
+                        }
+                    }
+                }
+            }
+
+            case ARRAY: {
+                if ((targetClass == null) || !targetClass.isArray()) {
+                    if ((propType != null) && propType.clazz().isArray()) {
+                        targetClass = propType.clazz();
+                    } else {
+                        targetClass = String[].class;
+                    }
+                }
+
+                Type<?> eleType = null;
+
+                if (propInfo != null && propInfo.clazz.isArray() && !Object.class.equals(propInfo.clazz.getComponentType())) {
+                    eleType = N.typeOf(propInfo.clazz.getComponentType());
+                } else {
+                    if (config.getElementType() != null && !Object.class.equals(config.getElementType().clazz())) {
+                        eleType = config.getElementType();
+                    } else {
+                        eleType = N.typeOf(targetClass.isArray() ? targetClass.getComponentType() : String.class);
+                    }
+                }
+
+                isNullValue = Boolean.parseBoolean(getAttribute(xmlReader, XMLConstants.IS_NULL));
+                final List<Object> list = isNullValue ? null : Objectory.createList();
+
+                try {
+                    for (int event = xmlReader.next(); xmlReader.hasNext(); event = xmlReader.next()) {
+                        switch (event) {
+                            case XMLStreamConstants.START_ELEMENT: {
+                                isNullValue = Boolean.parseBoolean(getAttribute(xmlReader, XMLConstants.IS_NULL));
+
+                                switch (event = xmlReader.next()) {
+                                    case XMLStreamConstants.START_ELEMENT: {
+                                        list.add(readByStreamParser(inputClass, eleType.clazz(), xmlReader, config, eleType, null, checkedAttr,
+                                                isTagByPropertyName, ignoreTypeInfo, false));
+
+                                        // end of element.
+                                        xmlReader.next();
+
+                                        break;
+                                    }
+
+                                    case XMLStreamConstants.CHARACTERS: {
+                                        text = xmlReader.getText();
+
+                                        if (text != null && text.length() > TEXT_SIZE_TO_READ_MORE) {
+                                            while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                                                if (sb == null) {
+                                                    sb = new StringBuilder(text.length() * 2);
+                                                    sb.append(text);
+                                                } else if (sb.length() == 0) {
+                                                    sb.append(text);
+                                                }
+
+                                                sb.append(xmlReader.getText());
+                                            }
+
+                                            if (sb != null && sb.length() > text.length()) {
+                                                text = sb.toString();
+                                                sb.setLength(0);
+                                            }
+                                        }
+
+                                        list.add(isNullValue ? null : eleType.valueOf(text));
+
+                                        if (event == XMLStreamConstants.CHARACTERS) {
+                                            // end of element.
+                                            xmlReader.next();
+                                        }
+
+                                        break;
+                                    }
+
+                                    case XMLStreamConstants.END_ELEMENT: {
+                                        list.add(isNullValue ? null : eleType.valueOf(N.EMPTY_STRING));
+
+                                        break;
+                                    }
+                                }
+
+                                break;
+                            }
+
+                            // simple array with sample format <array>[1, 2,
+                            // 3...]</array>
+                            case XMLStreamConstants.CHARACTERS: {
+                                text = xmlReader.getText();
+
+                                if (text != null && text.length() > TEXT_SIZE_TO_READ_MORE) {
+                                    while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                                        if (sb == null) {
+                                            sb = new StringBuilder(text.length() * 2);
+                                            sb.append(text);
+                                        } else if (sb.length() == 0) {
+                                            sb.append(text);
+                                        }
+
+                                        sb.append(xmlReader.getText());
+                                    }
+
+                                    if (sb != null && sb.length() > text.length()) {
+                                        text = sb.toString();
+                                        sb.setLength(0);
+                                    }
+                                }
+
+                                if (eleType.clazz() == String.class || eleType.clazz() == Object.class) {
+                                    propValue = isNullValue ? null : N.typeOf(targetClass).valueOf(text);
+                                } else {
+                                    propValue = isNullValue ? null : jsonParser.deserialize(targetClass, text, JDC.create().setElementType(eleType.clazz()));
+                                }
+
+                                if (event == XMLStreamConstants.END_ELEMENT) {
+                                    if (propValue != null) {
+                                        return (T) propValue;
+                                    } else {
+                                        return collection2Array(targetClass, list);
+                                    }
+                                }
+
+                                break;
+                            }
+
+                            case XMLStreamConstants.END_ELEMENT: {
+                                if (propValue != null) {
+                                    return (T) propValue;
+                                } else {
+                                    return collection2Array(targetClass, list);
+                                }
+                            }
+
+                            default:
+                                // continue;
+                        }
+                    }
+
+                } finally {
+                    if (list != null) {
+                        Objectory.recycle(list);
+                    }
+                }
+
+                throw new ParseException("Unknown parser error");
+            }
+
+            case COLLECTION: {
+                if ((targetClass == null) || !Collection.class.isAssignableFrom(targetClass)) {
+                    if ((propType != null) && Collection.class.isAssignableFrom(propType.clazz())) {
+                        targetClass = propType.clazz();
+                    } else {
+                        targetClass = List.class;
+                    }
+                }
+
+                Type<?> eleType = defaultValueType;
+
+                if (propInfo != null && propInfo.clazz.isArray() && !Object.class.equals(propInfo.clazz.getComponentType())) {
+                    eleType = N.typeOf(propInfo.clazz.getComponentType());
+                } else if (propType != null && propType.getParameterTypes().length == 1 && Collection.class.isAssignableFrom(propType.clazz())
+                        && !Object.class.equals(propType.getParameterTypes()[0].clazz())) {
+                    eleType = propType.getParameterTypes()[0];
+                } else {
+                    if (config.getElementType() != null && !Object.class.equals(config.getElementType().clazz())) {
+                        eleType = config.getElementType();
+                    }
+                }
+
+                isNullValue = Boolean.parseBoolean(getAttribute(xmlReader, XMLConstants.IS_NULL));
+                final Collection<Object> result = isNullValue ? null : (Collection<Object>) N.newInstance(targetClass);
+
+                for (int event = xmlReader.next(); xmlReader.hasNext(); event = xmlReader.next()) {
+                    switch (event) {
+                        case XMLStreamConstants.START_ELEMENT: {
+                            // N.println(xmlReader.getLocalName());
+
+                            isNullValue = Boolean.parseBoolean(getAttribute(xmlReader, XMLConstants.IS_NULL));
+
+                            switch (event = xmlReader.next()) {
+                                case XMLStreamConstants.START_ELEMENT: {
+                                    result.add(readByStreamParser(inputClass, eleType.clazz(), xmlReader, config, eleType, null, checkedAttr,
+                                            isTagByPropertyName, ignoreTypeInfo, false));
+                                    // N.println(xmlReader.getLocalName());
+
+                                    // end of element.
+                                    xmlReader.next();
+
+                                    break;
+                                }
+
+                                case XMLStreamConstants.CHARACTERS: {
+                                    text = xmlReader.getText();
+
+                                    if (text != null && text.length() > TEXT_SIZE_TO_READ_MORE) {
+                                        while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                                            if (sb == null) {
+                                                sb = new StringBuilder(text.length() * 2);
+                                                sb.append(text);
+                                            } else if (sb.length() == 0) {
+                                                sb.append(text);
+                                            }
+
+                                            sb.append(xmlReader.getText());
+                                        }
+
+                                        if (sb != null && sb.length() > text.length()) {
+                                            text = sb.toString();
+                                            sb.setLength(0);
+                                        }
+                                    }
+
+                                    result.add(isNullValue ? null : eleType.valueOf(text));
+
+                                    if (event == XMLStreamConstants.CHARACTERS) {
+                                        // end of element.
+                                        xmlReader.next();
+                                    }
+
+                                    break;
+                                }
+
+                                case XMLStreamConstants.END_ELEMENT: {
+                                    result.add(isNullValue ? null : eleType.valueOf(N.EMPTY_STRING));
+
+                                    break;
+                                }
+                            }
+
+                            break;
+                        }
+
+                        // simple list with sample format <list>[1, 2, 3...]</list>
+                        case XMLStreamConstants.CHARACTERS: {
+                            text = xmlReader.getText();
+
+                            if (text != null && text.length() > TEXT_SIZE_TO_READ_MORE) {
+                                while ((event = xmlReader.next()) == XMLStreamConstants.CHARACTERS) {
+                                    if (sb == null) {
+                                        sb = new StringBuilder(text.length() * 2);
+                                        sb.append(text);
+                                    } else if (sb.length() == 0) {
+                                        sb.append(text);
+                                    }
+
+                                    sb.append(xmlReader.getText());
+                                }
+
+                                if (sb != null && sb.length() > text.length()) {
+                                    text = sb.toString();
+                                    sb.setLength(0);
+                                }
+                            }
+
+                            if (eleType.clazz() == String.class || eleType.clazz() == Object.class) {
+                                propValue = isNullValue ? null : N.typeOf(targetClass).valueOf(text);
+                            } else {
+                                propValue = isNullValue ? null : jsonParser.deserialize(targetClass, text, JDC.create().setElementType(eleType.clazz()));
+                            }
+
+                            if (event == XMLStreamConstants.END_ELEMENT) {
+                                if (propValue != null) {
+                                    return (T) propValue;
+                                } else {
+                                    return (T) result;
+                                }
+                            }
+
+                            break;
+                        }
+
+                        case XMLStreamConstants.END_ELEMENT: {
+                            if (propValue != null) {
+                                return (T) propValue;
+                            } else {
+                                return (T) result;
+                            }
+                        }
+
+                        default:
+                            // continue;
+                    }
+                }
+
+                throw new ParseException("Unknown parser error");
+            }
+
+            default:
+                throw new ParseException("Unsupported class type: " + ClassUtil.getCanonicalClassName(targetClass)
+                + ". Only array, collection, map and entity types are supported");
+        }
+    }
+
+    /**
+     * Read by DOM parser.
+     *
+     * @param <T>
+     * @param targetClass
+     * @param node
+     * @param config
+     * @return
+     */
+    protected <T> T readByDOMParser(Class<T> targetClass, Node node, final XMLDeserializationConfig config) {
+        final XMLDeserializationConfig configToUse = check(config);
+
+        return readByDOMParser(targetClass, node, configToUse, null, configToUse.getElementType(), false, false, false, true);
+    }
+
+    /**
+     * Read by DOM parser.
+     *
+     * @param <T>
+     * @param inputClass
+     * @param node
+     * @param config
+     * @param propName
+     * @param propType
+     * @param checkedAttr
+     * @param isTagByPropertyName
+     * @param ignoreTypeInfo
+     * @param isFirstCall
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    protected <T> T readByDOMParser(Class<T> inputClass, Node node, final XMLDeserializationConfig config, String propName, Type<?> propType,
+            boolean checkedAttr, boolean isTagByPropertyName, boolean ignoreTypeInfo, boolean isFirstCall) {
+        if (node.getNodeType() == Document.TEXT_NODE) {
+            return null;
+        }
+
+        final boolean hasPropTypes = N.notNullOrEmpty(config.getPropTypes());
+
+        String nodeName = checkedAttr ? (isTagByPropertyName ? node.getNodeName() : XMLUtil.getAttribute(node, XMLConstants.NAME))
+                : XMLUtil.getAttribute(node, XMLConstants.NAME);
+        nodeName = (nodeName == null) ? node.getNodeName() : nodeName;
+
+        Class<?> targetClass = null;
+
+        if (isFirstCall) {
+            targetClass = inputClass;
+        } else {
+            if (propType == null || String.class.equals(propType.clazz()) || Object.class.equals(propType.clazz())) {
+                targetClass = hasPropTypes && config.hasPropType(nodeName) ? config.getPropType(nodeName).clazz() : null;
+            } else {
+                targetClass = propType.clazz();
+            }
+
+            if (targetClass == null || String.class.equals(targetClass) || Object.class.equals(targetClass)) {
+                // if (isOneNode(node)) {
+                // targetClass = Map.class;
+                // } else {
+                // targetClass = List.class;
+                // }
+                //
+                targetClass = List.class;
+            }
+        }
+
+        Class<?> typeClass = checkedAttr ? (ignoreTypeInfo ? targetClass : getConcreteClass(targetClass, node)) : getConcreteClass(targetClass, node);
+        NodeType nodeType = getNodeType(nodeName, null);
+
+        NodeList propNodes = node.getChildNodes();
+        int propNodeLength = (propNodes == null) ? 0 : propNodes.getLength();
+        PropInfo propInfo = null;
+        Node propNode = null;
+        Object propValue = null;
+
+        switch (nodeType) {
+            case ENTITY: {
+                if ((typeClass == null) || !ClassUtil.isEntity(typeClass)) {
+                    if ((propType != null) && ClassUtil.isEntity(propType.clazz())) {
+                        typeClass = propType.clazz();
+                    } else {
+                        if (ClassUtil.getSimpleClassName(inputClass).equalsIgnoreCase(nodeName)) {
+                            typeClass = inputClass;
+                        } else {
+                            if (Collection.class.isAssignableFrom(inputClass) || Map.class.isAssignableFrom(inputClass) || inputClass.isArray()) {
+                                if (propType != null) {
+                                    typeClass = getClassByNodeName(propType.clazz(), nodeName);
+                                }
+                            } else {
+                                typeClass = getClassByNodeName(inputClass, nodeName);
+                            }
+
+                            if ((typeClass == null) || !ClassUtil.isEntity(typeClass)) {
+                                throw new ParseException(
+                                        "No entity class found by node name : " + nodeName + " in package of class: " + inputClass.getCanonicalName());
+                            }
+                        }
+                    }
+                }
+
+                if (!checkedAttr) {
+                    isTagByPropertyName = N.isNullOrEmpty(XMLUtil.getAttribute(node, XMLConstants.NAME));
+                    ignoreTypeInfo = N.isNullOrEmpty(XMLUtil.getAttribute(node, XMLConstants.TYPE));
+                    checkedAttr = true;
+                }
+
+                final boolean ignoreUnmatchedProperty = config.isIgnoreUnmatchedProperty();
+                final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(typeClass);
+                final EntityInfo entityInfo = ParserUtil.getEntityInfo(typeClass);
+                final Object result = entityInfo.createEntityResult();
+
+                for (int i = 0; i < propNodeLength; i++) {
+                    propNode = propNodes.item(i);
+
+                    if (propNode.getNodeType() == Document.TEXT_NODE) {
+                        continue;
+                    }
+
+                    propName = isTagByPropertyName ? propNode.getNodeName() : XMLUtil.getAttribute(propNode, XMLConstants.NAME);
+                    propInfo = entityInfo.getPropInfo(propName);
+
+                    if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
+                        continue;
+                    }
+
+                    if (propInfo == null) {
+                        if (ignoreUnmatchedProperty) {
+                            continue;
+                        } else {
+                            throw new ParseException("Unknown property element: " + propName + " for class: " + typeClass.getCanonicalName());
+                        }
+                    }
+
+                    propType = hasPropTypes ? config.getPropType(propName) : null;
+
+                    if (propType == null) {
+                        if (propInfo.jsonXmlType.isSerializable()) {
+                            propType = propInfo.jsonXmlType;
+                        } else {
+                            propType = ignoreTypeInfo ? propInfo.jsonXmlType : N.typeOf(getConcreteClass(propInfo.jsonXmlType.clazz(), propNode));
+                        }
+                    }
+
+                    if (XMLUtil.isTextElement(propNode)) {
+                        propValue = getPropValue(propName, propType, propInfo, propNode);
+                    } else {
+                        propValue = readByDOMParser(inputClass, checkOneNode(propNode), config, propName, propType, checkedAttr, isTagByPropertyName,
+                                ignoreTypeInfo, false);
+                    }
+
+                    if (propInfo.jsonXmlExpose != JsonXmlField.Expose.SERIALIZE_ONLY) {
+                        propInfo.setPropValue(result, propValue);
+                    }
+                }
+
+                return entityInfo.finishEntityResult(result);
+            }
+
+            case MAP: {
+                if ((typeClass == null) || !Map.class.isAssignableFrom(typeClass)) {
+                    if ((propType != null) && Map.class.isAssignableFrom(propType.clazz())) {
+                        typeClass = propType.clazz();
+                    } else {
+                        typeClass = LinkedHashMap.class;
+                    }
+                }
+
+                final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(Map.class);
+                Type<?> keyType = defaultKeyType;
+
+                if (propType != null && propType.isMap() && !Object.class.equals(propType.getParameterTypes()[0].clazz())) {
+                    keyType = propType.getParameterTypes()[0];
+                } else {
+                    if (config.getMapKeyType() != null && !Object.class.equals(config.getMapKeyType().clazz())) {
+                        keyType = config.getMapKeyType();
+                    }
+                }
+
+                boolean isStringKey = keyType.clazz() == String.class;
+
+                Type<?> valueType = defaultValueType;
+
+                if (propType != null && propType.isMap() && !Object.class.equals(propType.getParameterTypes()[1].clazz())) {
+                    valueType = propType.getParameterTypes()[1];
+                } else {
+                    if (config.getMapValueType() != null && !Object.class.equals(config.getMapValueType().clazz())) {
+                        valueType = config.getMapValueType();
+                    }
+                }
+
+                final Map<Object, Object> mResult = newPropInstance(typeClass, node);
+
+                NodeList entryNodes = node.getChildNodes();
+                Node entryNode = null;
+                NodeList subEntryNodes = null;
+                Node propKeyNode = null;
+                Node propValueNode = null;
+                Class<?> propKeyClass = null;
+                Class<?> propValueClass = null;
+                Type<?> propKeyType = null;
+                Type<?> propValueType = null;
+                Object propKey = null;
+
+                for (int k = 0; k < entryNodes.getLength(); k++) {
+                    entryNode = entryNodes.item(k);
+
+                    if (entryNode.getNodeType() == Document.TEXT_NODE) {
+                        continue;
+                    }
+
+                    subEntryNodes = entryNode.getChildNodes();
+
+                    int index = 0;
+
+                    for (; index < subEntryNodes.getLength(); index++) {
+                        propKeyNode = subEntryNodes.item(index);
+
+                        if (propKeyNode.getNodeType() == Document.ELEMENT_NODE) {
+                            index++;
+
+                            break;
+                        }
+                    }
+
+                    for (; index < subEntryNodes.getLength(); index++) {
+                        propValueNode = subEntryNodes.item(index);
+
+                        if (propValueNode.getNodeType() == Document.ELEMENT_NODE) {
+                            break;
+                        }
+                    }
+
+                    propKeyClass = checkedAttr ? (ignoreTypeInfo ? keyType.clazz() : getConcreteClass(keyType.clazz(), propKeyNode))
+                            : getConcreteClass(keyType.clazz(), propKeyNode);
+
+                    if (propKeyClass == Object.class) {
+                        propKeyClass = String.class;
+                    }
+
+                    propKeyType = propKeyClass == keyType.clazz() ? keyType : N.typeOf(propKeyClass);
+
+                    if (XMLUtil.isTextElement(propKeyNode)) {
+                        propKey = getPropValue(XMLConstants.KEY, propKeyType, propInfo, propKeyNode);
+                    } else {
+                        propKey = readByDOMParser(inputClass, checkOneNode(propKeyNode), config, XMLConstants.KEY, keyType, checkedAttr, isTagByPropertyName,
+                                ignoreTypeInfo, false);
+                    }
+
+                    if (ignoredClassPropNames != null && ignoredClassPropNames.contains(propKey)) {
+                        continue;
+                    }
+
+                    propValueType = hasPropTypes && isStringKey ? config.getPropType(N.toString(propKey)) : null;
+
+                    if (propValueType == null) {
+                        propValueClass = checkedAttr ? (ignoreTypeInfo ? valueType.clazz() : getConcreteClass(valueType.clazz(), propValueNode))
+                                : getConcreteClass(valueType.clazz(), propValueNode);
+                    } else {
+                        propValueClass = propValueType.clazz();
+                    }
+
+                    if (propValueClass == Object.class) {
+                        propValueClass = String.class;
+                    }
+
+                    propValueType = propValueClass == valueType.clazz() ? valueType : N.typeOf(propValueClass);
+
+                    if (XMLUtil.isTextElement(propValueNode)) {
+                        propValue = getPropValue(XMLConstants.VALUE, propValueType, propInfo, propValueNode);
+                    } else {
+                        propValue = readByDOMParser(inputClass, checkOneNode(propValueNode), config, XMLConstants.VALUE, propValueType, checkedAttr,
+                                isTagByPropertyName, ignoreTypeInfo, false);
+                    }
+
+                    mResult.put(propKey, propValue);
+                }
+
+                return (T) mResult;
+            }
+
+            case ARRAY: {
+                if ((typeClass == null) || !typeClass.isArray()) {
+                    if ((propType != null) && propType.clazz().isArray()) {
+                        typeClass = propType.clazz();
+                    } else {
+                        typeClass = String[].class;
+                    }
+                }
+
+                Type<?> eleType = null;
+                Class<?> propClass = null;
+
+                if (propType != null && (propType.isArray() || propType.isCollection()) && propType.getElementType() != null
+                        && !Object.class.equals(propType.getElementType().clazz())) {
+                    eleType = propType.getElementType();
+                } else {
+                    if (config.getElementType() != null && !Object.class.equals(config.getElementType().clazz())) {
+                        eleType = config.getElementType();
+                    } else {
+                        eleType = N.typeOf(typeClass.isArray() ? typeClass.getComponentType() : Object.class);
+                    }
+                }
+
+                propName = XMLConstants.E;
+
+                if (XMLUtil.isTextElement(node)) {
+                    String st = XMLUtil.getTextContent(node);
+
+                    if (N.isNullOrEmpty(st)) {
+                        return (T) N.newArray(eleType.clazz(), 0);
+                    } else {
+                        return (T) N.valueOf(typeClass, st);
+                    }
+                } else {
+                    final List<Object> c = Objectory.createList();
+                    try {
+                        NodeList eleNodes = node.getChildNodes();
+                        Node eleNode = null;
+
+                        for (int k = 0; k < eleNodes.getLength(); k++) {
+                            eleNode = eleNodes.item(k);
+
+                            if (eleNode.getNodeType() == Document.TEXT_NODE) {
+                                continue;
+                            }
+
+                            propClass = checkedAttr ? (ignoreTypeInfo ? eleType.clazz() : getConcreteClass(eleType.clazz(), eleNode))
+                                    : getConcreteClass(eleType.clazz(), eleNode);
+
+                            if (propClass == Object.class) {
+                                propClass = String.class;
+                            }
+
+                            propType = propClass == eleType.clazz() ? eleType : N.typeOf(propClass);
+
+                            if (XMLUtil.isTextElement(eleNode)) {
+                                c.add(getPropValue(propName, propType, propInfo, eleNode));
+                            } else {
+                                c.add(readByDOMParser(inputClass, checkOneNode(eleNode), config, propName, propType, checkedAttr, isTagByPropertyName,
+                                        ignoreTypeInfo, false));
+                            }
+                        }
+
+                        return collection2Array(typeClass, c);
+                    } finally {
+                        Objectory.recycle(c);
+                    }
+                }
+            }
+
+            case COLLECTION: {
+                if ((typeClass == null) || !Collection.class.isAssignableFrom(typeClass)) {
+                    if ((propType != null) && Collection.class.isAssignableFrom(propType.clazz())) {
+                        typeClass = propType.clazz();
+                    } else {
+                        typeClass = List.class;
+                    }
+                }
+
+                Type<?> eleType = null;
+                Class<?> propClass = null;
+
+                if (propType != null && (propType.isCollection() || propType.isArray()) && !Object.class.equals(propType.getElementType().clazz())) {
+                    eleType = propType.getElementType();
+                } else {
+                    if (config.getElementType() != null && !Object.class.equals(config.getElementType().clazz())) {
+                        eleType = config.getElementType();
+                    } else {
+                        eleType = objType;
+                    }
+                }
+
+                propName = XMLConstants.E;
+
+                final Collection<Object> result = newPropInstance(typeClass, node);
+
+                NodeList eleNodes = node.getChildNodes();
+                Node eleNode = null;
+
+                for (int k = 0; k < eleNodes.getLength(); k++) {
+                    eleNode = eleNodes.item(k);
+
+                    if (eleNode.getNodeType() == Document.TEXT_NODE) {
+                        continue;
+                    }
+
+                    propClass = checkedAttr ? (ignoreTypeInfo ? eleType.clazz() : getConcreteClass(eleType.clazz(), eleNode))
+                            : getConcreteClass(eleType.clazz(), eleNode);
+
+                    if (propClass == Object.class) {
+                        propClass = String.class;
+                    }
+
+                    propType = propClass == eleType.clazz() ? eleType : N.typeOf(propClass);
+
+                    if (XMLUtil.isTextElement(eleNode)) {
+                        result.add(getPropValue(propName, propType, propInfo, eleNode));
+                    } else {
+                        result.add(readByDOMParser(inputClass, checkOneNode(eleNode), config, propName, propType, checkedAttr, isTagByPropertyName,
+                                ignoreTypeInfo, false));
+                    }
+                }
+
+                return (T) result;
+            }
+
+            default:
+                throw new ParseException("Unsupported class type: " + ClassUtil.getCanonicalClassName(targetClass)
+                + ". Only array, collection, map and entity types are supported");
+        }
+    }
+
+    /**
+     * Gets the node type.
+     *
+     * @param nodeName
+     * @param previousNodeType
+     * @return
+     */
+    private static NodeType getNodeType(String nodeName, NodeType previousNodeType) {
+        if (previousNodeType == NodeType.ENTITY) {
+            return NodeType.PROPERTY;
+        }
+
+        NodeType nodeType = nodeTypePool.get(nodeName);
+
+        if (nodeType == null) {
+            return NodeType.ENTITY;
+        }
+
+        return nodeType;
+    }
+
+    /**
+     * Gets the class by node name.
+     *
+     * @param <T>
+     * @param cls
+     * @param nodeName
+     * @return
+     */
+    @SuppressWarnings({ "unchecked", "deprecation", "null" })
+    private static <T> Class<T> getClassByNodeName(Class<?> cls, String nodeName) {
+        if (cls == null) {
+            return null;
+        }
+
+        Class<?> nodeClass = null;
+        Map<String, Class<?>> nodeNameClassMap = nodeNameClassMapPool.get(cls);
+
+        if (nodeNameClassMap == null) {
+            nodeNameClassMap = new ConcurrentHashMap<>();
+            nodeNameClassMapPool.put(cls, nodeNameClassMap);
+        } else {
+            nodeClass = nodeNameClassMap.get(nodeName);
+        }
+
+        if (nodeClass == null) {
+            String packName = null;
+
+            if ((cls == null) || (cls.getPackage() == null) || (cls.getPackage().getName() == null) || cls.getPackage().getName().startsWith("java.lang")
+                    || cls.getPackage().getName().startsWith("java.util")) {
+                StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+                String xmlUtilPackageName = AbacusXMLParserImpl.class.getPackage().getName();
+                String className = null;
+
+                for (int i = stackTrace.length - 1; i >= 0; i--) {
+                    className = stackTrace[i].getClassName();
+
+                    if (!(className.startsWith("java.lang") || className.startsWith("java.util") || className.startsWith(xmlUtilPackageName))) {
+                        packName = ClassUtil.forClass(className).getPackage().getName();
+
+                        break;
+                    }
+                }
+            } else {
+                packName = cls.getPackage().getName();
+            }
+
+            if (N.isNullOrEmpty(packName)) {
+                return null;
+            }
+
+            final String[] tokens = packName.split("\\.");
+
+            // search the entity class under package:
+            // com.companayName.componentName
+            if (tokens.length > 3) {
+                String tmp = "";
+
+                for (int i = 0; i < 3; i++) {
+                    if (i > 0) {
+                        tmp += ".";
+                    }
+
+                    tmp += tokens[i];
+                }
+
+                packName = tmp;
+            }
+
+            final List<Class<?>> classList = ClassUtil.getClassesByPackage(packName, true, true);
+
+            for (Class<?> e : classList) {
+                if (ClassUtil.getSimpleClassName(e).equalsIgnoreCase(nodeName)) {
+                    nodeClass = e;
+
+                    break;
+                }
+            }
+
+            if ((nodeClass == null) && !nodeName.equalsIgnoreCase(ClassUtil.formalizePropName(nodeName))) {
+                nodeClass = getClassByNodeName(cls, ClassUtil.formalizePropName(nodeName));
+            }
+
+            if (nodeClass == null) {
+                nodeClass = ClassUtil.CLASS_MASK;
+            }
+
+            nodeNameClassMap.put(nodeName, nodeClass);
+        }
+
+        return (Class<T>) ((nodeClass == ClassUtil.CLASS_MASK) ? null : nodeClass);
+    }
+
+    /**
+     * Gets the xml SAX handler.
+     *
+     * @param <T>
+     * @param nodeClasses
+     * @param targetClass
+     * @param config
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    private static <T> XmlSAXHandler<T> getXmlSAXHandler(Map<String, Class<?>> nodeClasses, Class<T> targetClass, final XMLDeserializationConfig config) {
+        XmlSAXHandler<T> xmlSAXHandler = (XmlSAXHandler<T>) xmlSAXHandlerPool.poll();
+
+        if (xmlSAXHandler == null) {
+            xmlSAXHandler = new XmlSAXHandler<>();
+        }
+
+        xmlSAXHandler.nodeClasses = nodeClasses;
+        xmlSAXHandler.inputClass = targetClass;
+        xmlSAXHandler.setConfig(config);
+
+        return xmlSAXHandler;
+    }
+
+    /**
+     *
+     * @param xmlSAXHandler
+     */
+    private static void recycle(XmlSAXHandler<?> xmlSAXHandler) {
+        if (xmlSAXHandler == null) {
+            return;
+        }
+
+        synchronized (xmlSAXHandlerPool) {
+            if (xmlSAXHandlerPool.size() < POOL_SIZE) {
+                xmlSAXHandler.reset();
+                xmlSAXHandlerPool.add(xmlSAXHandler);
+            }
+        }
+    }
+
+    /**
+     * The Class XmlSAXHandler.
+     *
+     * @param <T>
+     */
+    static class XmlSAXHandler<T> extends DefaultHandler {
+
+        private final Holder<T> resultHolder = new Holder<>();
+
+        private StringBuilder sb = null;
+
+        private Map<String, Class<?>> nodeClasses;
+
+        private Class<T> inputClass;
+
+        private XMLDeserializationConfig config;
+
+        private boolean hasPropTypes = false;
+
+        private Map<String, Type<?>> propTypes;
+
+        private boolean ignoreUnmatchedProperty;
+
+        private Collection<String> mapIgnoredPropNames;
+
+        private EntityInfo entityInfo;
+
+        private PropInfo propInfo;
+
+        private final List<String> entityOrPropNameQueue = new ArrayList<>();
+
+        private final List<NodeType> nodeTypeQueue = new ArrayList<>();
+
+        private final List<Object> nodeValueQueue = new ArrayList<>();
+
+        private final List<Object> keyQueue = new ArrayList<>();
+
+        // ...
+        private String nodeName;
+
+        private String entityOrPropName;
+
+        private Collection<String> ignoredClassPropNames;
+
+        private Object entity;
+
+        private Class<?> entityClass;
+
+        private Object array;
+
+        private Collection<Object> coll;
+
+        private Map<Object, Object> map;
+
+        private Object eleValue;
+
+        private Class<?> targetClass;
+
+        private Class<?> typeClass;
+
+        private Type<?> propType;
+
+        private Type<?> eleType;
+
+        private Type<?> keyType;
+
+        private Type<?> valueType;
+
+        private final List<Type<?>> eleTypeQueue = new ArrayList<>();
+
+        private final List<Type<?>> keyTypeQueue = new ArrayList<>();
+
+        private final List<Type<?>> valueTypeQueue = new ArrayList<>();
+
+        private final IdentityHashMap<Object, EntityInfo> entityInfoQueue = new IdentityHashMap<>(1);
+
+        private boolean isNull = false;
+
+        private boolean checkedPropNameTag = false;
+
+        private boolean checkedTypeInfo = false;
+
+        private boolean isTagByPropertyName = false;
+
+        private boolean ignoreTypeInfo = false;
+
+        private boolean isFirstCall = true;
+
+        private int inIgnorePropRefCount = 0;
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public void startElement(String namespaceURI, String localName, String qName, Attributes attrs) throws SAXException {
+            if (inIgnorePropRefCount > 0) {
+                inIgnorePropRefCount++;
+
+                return;
+            }
+
+            if (sb == null) {
+                sb = Objectory.createStringBuilder();
+            } else {
+                sb.setLength(0);
+            }
+
+            nodeName = qName;
+            if (checkedPropNameTag) {
+                entityOrPropName = isTagByPropertyName || attrs == null || attrs.getLength() == 0 ? nodeName : attrs.getValue(XMLConstants.NAME);
+            } else {
+                entityOrPropName = attrs.getValue(XMLConstants.NAME);
+                if (entityOrPropName == null) {
+                    entityOrPropName = nodeName;
+                }
+            }
+
+            if (isFirstCall) {
+                if ((nodeClasses != null) && (inputClass == null)) {
+                    inputClass = (Class<T>) nodeClasses.get(entityOrPropName);
+                }
+
+                if (inputClass == null) {
+                    throw new ParseException("No input class found for node: " + nodeName);
+                }
+
+                targetClass = inputClass;
+            } else {
+                if (propType == null || String.class.equals(propType.clazz()) || Object.class.equals(propType.clazz())) {
+                    targetClass = hasPropTypes && config.hasPropType(nodeName) ? config.getPropType(nodeName).clazz() : null;
+                } else {
+                    targetClass = propType.clazz();
+                }
+            }
+
+            if (targetClass == null) {
+                typeClass = null;
+            } else {
+                typeClass = checkedTypeInfo ? ((ignoreTypeInfo || attrs == null || attrs.getLength() == 0) ? targetClass : getConcreteClass(targetClass, attrs))
+                        : ((attrs == null || attrs.getLength() == 0) ? targetClass : getConcreteClass(targetClass, attrs));
+            }
+
+            NodeType previousNodeType = (nodeTypeQueue.size() == 0) ? null : nodeTypeQueue.get(nodeTypeQueue.size() - 1);
+            NodeType nodeType = getNodeType(nodeName, previousNodeType);
+
+            isNull = (attrs == null || attrs.getLength() == 0) ? false : Boolean.parseBoolean(attrs.getValue(XMLConstants.IS_NULL));
+
+            switch (nodeType) {
+                case ENTITY: {
+
+                    if (!checkedPropNameTag) {
+                        isTagByPropertyName = (attrs == null) || (N.isNullOrEmpty(attrs.getValue(XMLConstants.NAME)));
+                        ignoreTypeInfo = (attrs == null) || (N.isNullOrEmpty(attrs.getValue(XMLConstants.TYPE)));
+                        checkedPropNameTag = true;
+                        checkedTypeInfo = true;
+                    }
+
+                    if (!isTagByPropertyName) {
+                        entityOrPropName = attrs.getValue(XMLConstants.NAME);
+                        entityOrPropNameQueue.add(entityOrPropName);
+                    }
+
+                    if (hasPropTypes && config.hasPropType(entityOrPropName)) {
+                        typeClass = propTypes.get(entityOrPropName).clazz();
+                    }
+
+                    if (typeClass == null || !N.typeOf(typeClass).isEntity()) {
+                        if ((eleType != null) && ClassUtil.isEntity(eleType.clazz())) {
+                            typeClass = eleType.clazz();
+                        } else {
+                            if (ClassUtil.getSimpleClassName(inputClass).equalsIgnoreCase(entityOrPropName)) {
+                                typeClass = inputClass;
+                            } else {
+                                if (Collection.class.isAssignableFrom(inputClass) || Map.class.isAssignableFrom(inputClass) || inputClass.isArray()) {
+                                    if (config.getElementType() != null) {
+                                        typeClass = getClassByNodeName(config.getElementType().clazz(), entityOrPropName);
+                                    }
+                                } else {
+                                    typeClass = getClassByNodeName(inputClass, entityOrPropName);
+                                }
+
+                                if ((typeClass == null) || !ClassUtil.isEntity(typeClass)) {
+                                    throw new ParseException("No entity class found by node name : " + entityOrPropName + " in package of class: "
+                                            + inputClass.getCanonicalName());
+                                }
+                            }
+                        }
+                    }
+
+                    entityClass = typeClass;
+                    entityInfo = ParserUtil.getEntityInfo(entityClass);
+
+                    entity = entityInfo.createEntityResult();
+                    nodeValueQueue.add(entity);
+
+                    entityInfoQueue.put(entity, entityInfo);
+
+                    if (isFirstCall) {
+                        resultHolder.setValue((T) entity);
+                        isFirstCall = false;
+                    }
+
+                    propInfo = null;
+                    propType = null;
+
+                    break;
+                }
+
+                case MAP: {
+
+                    if (!checkedTypeInfo) {
+                        ignoreTypeInfo = (attrs == null) || (N.isNullOrEmpty(attrs.getValue(XMLConstants.TYPE)));
+                        checkedTypeInfo = true;
+                    }
+
+                    if (typeClass == null || !N.typeOf(typeClass).isMap()) {
+                        if ((eleType != null) && Map.class.isAssignableFrom(eleType.clazz())) {
+                            typeClass = eleType.clazz();
+                        } else {
+                            typeClass = LinkedHashMap.class;
+                        }
+                    }
+
+                    if (propInfo != null && propInfo.jsonXmlType.getParameterTypes().length == 2
+                            && !Object.class.equals(propInfo.jsonXmlType.getParameterTypes()[0].clazz())) {
+                        keyType = propInfo.jsonXmlType.getParameterTypes()[0];
+                    } else if (propType != null && propType.getParameterTypes().length == 2 && Map.class.isAssignableFrom(propType.clazz())
+                            && !Object.class.equals(propType.getParameterTypes()[0].clazz())) {
+                        keyType = propType.getParameterTypes()[0];
+                    } else {
+                        if (config.getMapKeyType() != null && !Object.class.equals(config.getMapKeyType().clazz())) {
+                            keyType = config.getMapKeyType();
+                        } else {
+                            keyType = defaultKeyType;
+                        }
+                    }
+
+                    if (propInfo != null && propInfo.jsonXmlType.getParameterTypes().length == 2
+                            && !Object.class.equals(propInfo.jsonXmlType.getParameterTypes()[1].clazz())) {
+                        valueType = propInfo.jsonXmlType.getParameterTypes()[1];
+                    } else if (propType != null && propType.getParameterTypes().length == 2 && Map.class.isAssignableFrom(propType.clazz())
+                            && !Object.class.equals(propType.getParameterTypes()[1].clazz())) {
+                        valueType = propType.getParameterTypes()[1];
+                    } else {
+                        if (config.getMapValueType() != null && !Object.class.equals(config.getMapValueType().clazz())) {
+                            valueType = config.getMapValueType();
+                        } else {
+                            valueType = defaultValueType;
+                        }
+                    }
+
+                    keyTypeQueue.add(keyType);
+                    valueTypeQueue.add(valueType);
+
+                    map = newPropInstance(typeClass, attrs);
+                    nodeValueQueue.add(map);
+
+                    if (isFirstCall) {
+                        resultHolder.setValue((T) map);
+                        isFirstCall = false;
+                    }
+
+                    propInfo = null;
+                    propType = null;
+
+                    break;
+                }
+
+                case ARRAY: {
+
+                    if (!checkedTypeInfo) {
+                        ignoreTypeInfo = (attrs == null) || (N.isNullOrEmpty(attrs.getValue(XMLConstants.TYPE)));
+                        checkedTypeInfo = true;
+                    }
+
+                    if (typeClass == null || !N.typeOf(typeClass).isArray()) {
+                        if ((eleType != null) && eleType.clazz().isArray()) {
+                            typeClass = eleType.clazz();
+                        } else {
+                            typeClass = String[].class;
+                        }
+                    }
+
+                    if (propInfo != null && propInfo.clazz.isArray() && !Object.class.equals(propInfo.clazz.getComponentType())) {
+                        eleType = N.typeOf(propInfo.clazz.getComponentType());
+                    } else {
+                        if (config.getElementType() != null && !Object.class.equals(config.getElementType().clazz())) {
+                            eleType = config.getElementType();
+                        } else {
+                            eleType = N.typeOf(
+                                    typeClass.isArray() && !Object.class.equals(typeClass.getComponentType()) ? typeClass.getComponentType() : String.class);
+                        }
+                    }
+
+                    eleTypeQueue.add(eleType);
+
+                    array = N.newArray(eleType.clazz(), 0);
+                    nodeValueQueue.add(array);
+
+                    coll = new ArrayList<>();
+                    nodeValueQueue.add(coll);
+
+                    if (isFirstCall) {
+                        // resultHolder.setObject((T) array);
+                        isFirstCall = false;
+                    }
+
+                    propInfo = null;
+                    propType = null;
+
+                    break;
+                }
+
+                case COLLECTION: {
+
+                    if (!checkedTypeInfo) {
+                        ignoreTypeInfo = (attrs == null) || (N.isNullOrEmpty(attrs.getValue(XMLConstants.TYPE)));
+                        checkedTypeInfo = true;
+                    }
+
+                    if (typeClass == null || !N.typeOf(typeClass).isCollection()) {
+                        if ((eleType != null) && Collection.class.isAssignableFrom(eleType.clazz())) {
+                            typeClass = eleType.clazz();
+                        } else {
+                            typeClass = List.class;
+                        }
+                    }
+
+                    if (propInfo != null && propInfo.jsonXmlType.getParameterTypes().length == 1
+                            && !Object.class.equals(propInfo.jsonXmlType.getParameterTypes()[0].clazz())) {
+                        eleType = propInfo.jsonXmlType.getParameterTypes()[0];
+                    } else if (propType != null && propType.getParameterTypes().length == 1 && Collection.class.isAssignableFrom(propType.clazz())
+                            && !Object.class.equals(propType.getParameterTypes()[0].clazz())) {
+                        eleType = propType.getParameterTypes()[0];
+                    } else {
+                        if (config.getElementType() != null && !Object.class.equals(config.getElementType().clazz())) {
+                            eleType = config.getElementType();
+                        } else {
+                            eleType = defaultValueType;
+                        }
+                    }
+
+                    eleTypeQueue.add(eleType);
+
+                    coll = newPropInstance(typeClass, attrs);
+                    nodeValueQueue.add(coll);
+
+                    if (isFirstCall) {
+                        resultHolder.setValue((T) coll);
+                        isFirstCall = false;
+                    }
+
+                    propInfo = null;
+                    propType = null;
+
+                    break;
+                }
+
+                case PROPERTY: {
+                    if (!isTagByPropertyName) {
+                        entityOrPropName = attrs.getValue(XMLConstants.NAME);
+                        entityOrPropNameQueue.add(entityOrPropName);
+                    }
+
+                    propInfo = entityInfo.getPropInfo(entityOrPropName);
+                    ignoredClassPropNames = config.getIgnoredPropNames(entityClass);
+
+                    if (N.notNullOrEmpty(ignoredClassPropNames) && ignoredClassPropNames.contains(entityOrPropName)) {
+                        inIgnorePropRefCount = 1;
+
+                        break;
+                    }
+
+                    if (propInfo == null) {
+                        if (ignoreUnmatchedProperty) {
+                            break;
+                        } else {
+                            throw new ParseException("Unknown property element: " + entityOrPropName + " for class: " + entityClass.getCanonicalName());
+                        }
+                    }
+
+                    if (hasPropTypes) {
+                        propType = propTypes.get(entityOrPropName);
+
+                        if (propType == null) {
+                            propType = ignoreTypeInfo ? propInfo.jsonXmlType : N.typeOf(getConcreteClass(propInfo.clazz, attrs));
+                        }
+                    } else {
+                        propType = ignoreTypeInfo ? propInfo.jsonXmlType : N.typeOf(getConcreteClass(propInfo.clazz, attrs));
+                    }
+
+                    if ((propType == null) || propType.clazz() == Object.class) {
+                        propType = defaultValueType;
+                    }
+
+                    break;
+                }
+
+                case ELEMENT: {
+
+                    propType = ignoreTypeInfo ? eleType : N.typeOf(getConcreteClass(eleType.clazz(), attrs));
+
+                    if ((propType == null) || propType.clazz() == Object.class) {
+                        propType = defaultValueType;
+                    }
+
+                    break;
+                }
+
+                case KEY: {
+
+                    propType = ignoreTypeInfo ? keyType : N.typeOf(getConcreteClass(keyType.clazz(), attrs));
+
+                    if ((propType == null) || propType.clazz() == Object.class) {
+                        propType = defaultKeyType;
+                    }
+
+                    break;
+                }
+
+                case VALUE: {
+                    if (hasPropTypes) {
+                        Object key = keyQueue.get(keyQueue.size() - 1);
+                        if (key != null && key.getClass() == String.class) {
+                            propType = propTypes.get(key);
+
+                            if (propType == null) {
+                                propType = ignoreTypeInfo ? valueType : N.typeOf(getConcreteClass(valueType.clazz(), attrs));
+                            }
+                        } else {
+                            propType = ignoreTypeInfo ? valueType : N.typeOf(getConcreteClass(valueType.clazz(), attrs));
+                        }
+                    } else {
+                        propType = ignoreTypeInfo ? valueType : N.typeOf(getConcreteClass(valueType.clazz(), attrs));
+                    }
+
+                    if ((propType == null) || propType.clazz() == Object.class) {
+                        propType = defaultValueType;
+                    }
+
+                    break;
+                }
+
+                case ENTRY: {
+
+                    break;
+                }
+
+                default:
+                    throw new ParseException("only array, collection, map and entity nodes are supported");
+            }
+
+            if (isFirstCall) {
+                throw new ParseException("only array, collection, map and entity nodes are supported");
+            }
+
+            nodeTypeQueue.add(nodeType);
+        }
+
+        @Override
+        @SuppressWarnings({ "unchecked" })
+        public void endElement(String namespaceURI, String localName, String qName) throws SAXException {
+            if (inIgnorePropRefCount > 1) {
+                inIgnorePropRefCount--;
+
+                return;
+            }
+
+            nodeName = qName;
+            entityOrPropName = nodeName;
+
+            NodeType nodeType = nodeTypeQueue.remove(nodeTypeQueue.size() - 1);
+
+            switch (nodeType) {
+                case ENTITY: {
+
+                    if (!isTagByPropertyName) {
+                        entityOrPropName = entityOrPropNameQueue.remove(entityOrPropNameQueue.size() - 1);
+                    }
+
+                    popupNodeValue();
+
+                    break;
+                }
+
+                case ARRAY: {
+
+                    if (coll.size() > 0) {
+                        array = collection2Array(nodeValueQueue.get(nodeValueQueue.size() - 2).getClass(), coll);
+                    } else if (sb.length() > 0) {
+                        array = N.valueOf(typeClass, sb.toString());
+                    }
+
+                    if (nodeTypeQueue.size() == 0) {
+                        resultHolder.setValue((T) array);
+                    }
+
+                    array = null;
+
+                    nodeValueQueue.remove(nodeValueQueue.size() - 1);
+
+                    popupNodeValue();
+
+                    break;
+                }
+
+                case COLLECTION: {
+
+                    popupNodeValue();
+
+                    break;
+                }
+
+                case MAP: {
+
+                    popupNodeValue();
+
+                    break;
+                }
+
+                case PROPERTY: {
+                    if (inIgnorePropRefCount == 1) {
+                        inIgnorePropRefCount--;
+
+                        eleValue = null;
+                        propInfo = null;
+                        propType = null;
+
+                        break;
+                    }
+
+                    if (!isTagByPropertyName) {
+                        entityOrPropName = entityOrPropNameQueue.remove(entityOrPropNameQueue.size() - 1);
+                    }
+
+                    propInfo = entityInfo.getPropInfo(entityOrPropName);
+
+                    // for propInfo is null if it's unknown property
+                    if (propInfo != null && propInfo.jsonXmlExpose != JsonXmlField.Expose.SERIALIZE_ONLY) {
+                        if (eleValue == null) {
+                            if (isNull) {
+                                propInfo.setPropValue(entity, null);
+                            } else {
+                                propInfo.setPropValue(entity,
+                                        propInfo.hasFormat ? propInfo.readPropValue(sb.toString()) : propInfo.jsonXmlType.valueOf(sb.toString()));
+                            }
+                        } else {
+                            propInfo.setPropValue(entity, eleValue);
+
+                            eleValue = null;
+                        }
+                    }
+
+                    propInfo = null;
+                    propType = null;
+
+                    break;
+                }
+
+                case ELEMENT: {
+
+                    if (eleValue == null) {
+                        if (isNull) {
+                            coll.add(null);
+                        } else {
+                            coll.add(propType.valueOf(sb.toString()));
+                        }
+                    } else {
+                        coll.add(eleValue);
+                        eleValue = null;
+                    }
+
+                    propType = null;
+
+                    break;
+                }
+
+                case KEY: {
+
+                    if (eleValue == null) {
+                        if (isNull) {
+                            keyQueue.add(null);
+                        } else {
+                            keyQueue.add(propType.valueOf(sb.toString()));
+                        }
+                    } else {
+                        keyQueue.add(eleValue);
+                        eleValue = null;
+                    }
+
+                    propType = null;
+
+                    if (mapIgnoredPropNames != null) {
+                        Object latestKey = keyQueue.get(keyQueue.size() - 1);
+                        if (latestKey != null && mapIgnoredPropNames.contains(latestKey)) {
+                            inIgnorePropRefCount = 1;
+                        }
+                    }
+
+                    break;
+                }
+
+                case VALUE: {
+                    if (inIgnorePropRefCount == 1) {
+                        inIgnorePropRefCount--;
+
+                        eleValue = null;
+                        propType = null;
+
+                        break;
+                    }
+
+                    if (eleValue == null) {
+                        if (isNull) {
+                            map.put(keyQueue.remove(keyQueue.size() - 1), null);
+                        } else {
+                            map.put(keyQueue.remove(keyQueue.size() - 1), propType.valueOf(sb.toString()));
+                        }
+                    } else {
+                        map.put(keyQueue.remove(keyQueue.size() - 1), eleValue);
+                        eleValue = null;
+                    }
+
+                    propType = null;
+
+                    break;
+                }
+
+                case ENTRY:
+
+                    break;
+
+                default:
+                    throw new ParseException("only array, collection, map and entity nodes are supported");
+            }
+        }
+
+        @Override
+        public void characters(char[] buffer, int offset, int length) throws SAXException {
+            if (inIgnorePropRefCount > 0) {
+                // ignore.
+            } else {
+                sb.append(buffer, offset, length);
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        private void popupNodeValue() {
+            eleValue = nodeValueQueue.remove(nodeValueQueue.size() - 1);
+            entityInfo = entityInfoQueue.remove(eleValue);
+
+            if (entityInfo != null) {
+                entityClass = entityInfo.clazz;
+
+                if (resultHolder.value() == entity) {
+                    entity = entityInfo.finishEntityResult(entity);
+                    resultHolder.setValue((T) entity);
+                } else {
+                    entity = entityInfo.finishEntityResult(entity);
+                }
+            } else if (eleValue instanceof Map) {
+                keyTypeQueue.remove(keyTypeQueue.size() - 1);
+                valueTypeQueue.remove(valueTypeQueue.size() - 1);
+            } else if (eleValue.getClass().isArray() || eleValue instanceof Collection) {
+                eleTypeQueue.remove(eleTypeQueue.size() - 1);
+            }
+
+            if ((nodeValueQueue.size() > 0)) {
+                final Object next = nodeValueQueue.get(nodeValueQueue.size() - 1);
+                entityInfo = entityInfoQueue.get(next);
+
+                if (entityInfo != null) {
+                    entity = next;
+                    entityClass = entityInfo.clazz;
+                } else {
+                    typeClass = next.getClass();
+
+                    if (next instanceof Collection) {
+                        coll = ((Collection<Object>) next);
+
+                        eleType = eleTypeQueue.get(eleTypeQueue.size() - 1);
+                        // Should not happen
+                        // } else if (next.getClass().isArray()) {
+                        //
+                        // eleType = eleTypeQueue.get(eleTypeQueue.size() - 1);
+                    } else if (next instanceof Map) {
+                        map = ((Map<Object, Object>) next);
+
+                        keyType = keyTypeQueue.get(keyTypeQueue.size() - 1);
+                        valueType = valueTypeQueue.get(valueTypeQueue.size() - 1);
+                    }
+                }
+            }
+        }
+
+        private void setConfig(XMLDeserializationConfig config) {
+            this.config = config;
+            propTypes = config.getPropTypes();
+            hasPropTypes = N.notNullOrEmpty(propTypes);
+            ignoreUnmatchedProperty = config.isIgnoreUnmatchedProperty();
+            mapIgnoredPropNames = config.getIgnoredPropNames(Map.class);
+        }
+
+        private void reset() {
+            resultHolder.setValue(null);
+            Objectory.recycle(sb);
+            sb = null;
+
+            // ...
+            nodeClasses = null;
+            inputClass = null;
+            config = null;
+
+            // ...
+            hasPropTypes = false;
+            propTypes = null;
+            ignoreUnmatchedProperty = false;
+            mapIgnoredPropNames = null;
+
+            // ...
+            entityInfo = null;
+            propInfo = null;
+
+            entityOrPropNameQueue.clear();
+            nodeTypeQueue.clear();
+            nodeValueQueue.clear();
+            keyQueue.clear();
+
+            nodeName = null;
+            entityOrPropName = null;
+            ignoredClassPropNames = null;
+            entity = null;
+            entityClass = null;
+            array = null;
+            coll = null;
+            map = null;
+            eleValue = null;
+            targetClass = null;
+            typeClass = null;
+            eleType = null;
+            propType = null;
+            keyType = null;
+            valueType = null;
+            eleTypeQueue.clear();
+            keyTypeQueue.clear();
+            valueTypeQueue.clear();
+            entityInfoQueue.clear();
+
+            // ...
+            isNull = false;
+            checkedPropNameTag = false;
+            checkedTypeInfo = false;
+            isTagByPropertyName = false;
+            ignoreTypeInfo = false;
+            isFirstCall = true;
+            inIgnorePropRefCount = 0;
+        }
+    }
+}

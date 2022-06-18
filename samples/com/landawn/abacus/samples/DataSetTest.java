@@ -4,9 +4,9 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import com.landawn.abacus.DataSet;
 import com.landawn.abacus.samples.entity.Account;
 import com.landawn.abacus.samples.entity.Contact;
+import com.landawn.abacus.util.DataSet;
 import com.landawn.abacus.util.N;
 
 public class DataSetTest {
