@@ -215,13 +215,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.mongodb</groupId>
-			<artifactId>bson</artifactId>
-			<version>3.10.2</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-dynamodb</artifactId>
 			<version>1.11.603</version>
@@ -310,6 +303,13 @@
 			<artifactId>boon</artifactId>
 			<version>0.34</version>
 			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongodb-driver-sync</artifactId>
+			<version>4.6.1</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
