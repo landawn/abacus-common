@@ -1317,7 +1317,8 @@ public final class ParserUtil {
             this.getMethod = getMethod;
             this.setMethod = setMethod; // ClassUtil.getPropSetMethod(declaringClass, propName);
             this.annotations = ImmutableMap.of(getAnnotations());
-            this.isTransient = annotations.containsKey(Transient.class) || (field != null && Modifier.isTransient(field.getModifiers()));
+            this.isTransient = annotations.containsKey(Transient.class) || annotations.keySet().stream().anyMatch(it -> it.getSimpleName().equals("Transient"))
+                    || (field != null && Modifier.isTransient(field.getModifiers()));
 
             this.clazz = (Class<Object>) (field == null ? (setMethod == null ? getMethod.getReturnType() : setMethod.getParameterTypes()[0]) : field.getType());
             this.type = getType(getAnnoType(this.field, this.getMethod, this.setMethod, clazz, jsonXmlConfig), this.field, this.getMethod, this.setMethod,
@@ -1731,7 +1732,7 @@ public final class ParserUtil {
          * @return
          */
         public Object readPropValue(String strValue) {
-            if (N.notNullOrEmpty(dateFormat)) {
+            if (hasFormat) {
                 final DateTimeReaderWriter<?> func = propFuncMap.get(clazz);
 
                 if (func == null) {

@@ -260,7 +260,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
             default:
                 throw new ParseException("Unsupported class: " + ClassUtil.getCanonicalClassName(cls)
-                + ". Only Array/List/Map and Entity class with getter/setter methods are supported");
+                        + ". Only Array/List/Map and Entity class with getter/setter methods are supported");
         }
 
         if (flush) {
@@ -1112,7 +1112,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
     @SuppressWarnings({ "null", "incomplete-switch", "fallthrough", "unused" })
     protected <T> T readByStreamParser(Class<?> inputClass, Class<?> targetClass, XMLStreamReader xmlReader, final XMLDeserializationConfig config,
             Type<?> propType, PropInfo propInfo, boolean checkedAttr, boolean isTagByPropertyName, boolean ignoreTypeInfo, boolean isFirstCall)
-                    throws XMLStreamException {
+            throws XMLStreamException {
 
         final boolean hasPropTypes = N.notNullOrEmpty(config.getPropTypes());
         String nodeName = null;
@@ -1308,7 +1308,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                 }
                             }
 
-                            propValue = (isNullValue || propInfo == null) ? null : (propInfo.hasFormat ? propInfo.readPropValue(text) : propType.valueOf(text));
+                            propValue = (isNullValue || propInfo == null) ? null : propInfo.readPropValue(text);
 
                             if (event == XMLStreamConstants.END_ELEMENT) {
                                 if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
@@ -1826,7 +1826,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
             default:
                 throw new ParseException("Unsupported class type: " + ClassUtil.getCanonicalClassName(targetClass)
-                + ". Only array, collection, map and entity types are supported");
+                        + ". Only array, collection, map and entity types are supported");
         }
     }
 
@@ -2237,7 +2237,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
             default:
                 throw new ParseException("Unsupported class type: " + ClassUtil.getCanonicalClassName(targetClass)
-                + ". Only array, collection, map and entity types are supported");
+                        + ". Only array, collection, map and entity types are supported");
         }
     }
 
@@ -2936,8 +2936,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                             if (isNull) {
                                 propInfo.setPropValue(entity, null);
                             } else {
-                                propInfo.setPropValue(entity,
-                                        propInfo.hasFormat ? propInfo.readPropValue(sb.toString()) : propInfo.jsonXmlType.valueOf(sb.toString()));
+                                propInfo.setPropValue(entity, propInfo.readPropValue(sb.toString()));
                             }
                         } else {
                             propInfo.setPropValue(entity, eleValue);

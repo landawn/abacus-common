@@ -37,7 +37,6 @@ import java.util.Scanner;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
-import com.landawn.abacus.type.Type;
 
 /**
  * <p>
@@ -261,7 +260,7 @@ public final class URLEncodedUtil {
         try (final Scanner scanner = new Scanner(urlQuery)) {
             scanner.useDelimiter(QP_SEP_PATTERN);
 
-            Type<?> propType = null;
+            PropInfo propInfo = null;
             Object propValue = null;
             String name = null;
             String value = null;
@@ -278,12 +277,12 @@ public final class URLEncodedUtil {
                     value = null;
                 }
 
-                propType = entityInfo.getPropInfo(name).jsonXmlType;
+                propInfo = entityInfo.getPropInfo(name);
 
                 if (value == null) {
-                    propValue = propType.defaultValue();
+                    propValue = propInfo.jsonXmlType.defaultValue();
                 } else {
-                    propValue = propType.valueOf(value);
+                    propValue = propInfo.readPropValue(value);
                 }
 
                 entityInfo.setPropValue(result, name, propValue);
@@ -323,7 +322,7 @@ public final class URLEncodedUtil {
                 if (propInfo.jsonXmlType.clazz().equals(String[].class)) {
                     propValue = values;
                 } else {
-                    propValue = propInfo.jsonXmlType.valueOf(StringUtil.join(values, ", "));
+                    propValue = propInfo.readPropValue(StringUtil.join(values, ", "));
                 }
             }
 

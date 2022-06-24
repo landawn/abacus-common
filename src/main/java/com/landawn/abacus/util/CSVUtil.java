@@ -62,13 +62,13 @@ public final class CSVUtil {
 
     public static final BiConsumer<String[], String> CSV_LINE_PARSER_BY_SPLITTER = (output, line) -> lineSplitter.splitToArray(output, line);
 
-    public static final Function<String, String[]> CSV_HEADER_PARSER_IN_JSON = line -> jsonParser.readString(String[].class, line, jdc);
+    static final Function<String, String[]> CSV_HEADER_PARSER_IN_JSON = line -> jsonParser.readString(String[].class, line, jdc);
 
-    public static final BiConsumer<String[], String> CSV_LINE_PARSER_IN_JSON = (output, line) -> jsonParser.readString(output, line, jdc);
+    static final BiConsumer<String[], String> CSV_LINE_PARSER_IN_JSON = (output, line) -> jsonParser.readString(output, line, jdc);
 
-    static final Function<String, String[]> defaultCsvHeadereParser = CSV_HEADER_PARSER;
+    static final Function<String, String[]> defaultCsvHeadereParser = CSV_HEADER_PARSER_IN_JSON;
 
-    static final BiConsumer<String[], String> defaultCsvLineParser = CSV_LINE_PARSER;
+    static final BiConsumer<String[], String> defaultCsvLineParser = CSV_LINE_PARSER_IN_JSON;
 
     static final ThreadLocal<Function<String, String[]>> csvHeaderParser_TL = new ThreadLocal<>();
     static final ThreadLocal<BiConsumer<String[], String>> csvLineParser_TL = new ThreadLocal<>();
@@ -528,21 +528,20 @@ public final class CSVUtil {
             final String[] titles = headerParser.apply(line);
 
             final int columnCount = titles.length;
-            final Type<?>[] columnTypes = new Type<?>[columnCount];
+            final PropInfo[] propInfos = new PropInfo[columnCount];
             final List<String> columnNameList = new ArrayList<>(selectColumnNames == null ? columnCount : selectColumnNames.size());
             final List<List<Object>> columnList = new ArrayList<>(selectColumnNames == null ? columnCount : selectColumnNames.size());
             final Set<String> selectPropNameSet = selectColumnNames == null ? null : N.newHashSet(selectColumnNames);
 
             for (int i = 0; i < columnCount; i++) {
                 if (selectPropNameSet == null || selectPropNameSet.remove(titles[i])) {
-                    PropInfo propInfo = entityInfo.getPropInfo(titles[i]);
+                    propInfos[i] = entityInfo.getPropInfo(titles[i]);
 
-                    if (propInfo == null && selectPropNameSet != null) {
+                    if (propInfos[i] == null && selectPropNameSet != null) {
                         throw new IllegalArgumentException(titles[i] + " is not defined in entity class: " + ClassUtil.getCanonicalClassName(entityClass));
                     }
 
-                    if (propInfo != null) {
-                        columnTypes[i] = propInfo.jsonXmlType;
+                    if (propInfos[i] != null) {
                         columnNameList.add(titles[i]);
                         columnList.add(new ArrayList<>());
                     }
@@ -566,8 +565,8 @@ public final class CSVUtil {
                 }
 
                 for (int i = 0, columnIndex = 0; i < columnCount; i++) {
-                    if (columnTypes[i] != null) {
-                        columnList.get(columnIndex++).add(columnTypes[i].valueOf(strs[i]));
+                    if (propInfos[i] != null) {
+                        columnList.get(columnIndex++).add(propInfos[i].readPropValue(strs[i]));
                     }
                 }
 
