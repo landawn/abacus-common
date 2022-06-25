@@ -5148,10 +5148,20 @@ public abstract class StringUtil {
     public static boolean containsAnyIgnoreCase(final String str, final String... searchStrs) {
         if (N.isNullOrEmpty(str) || N.isNullOrEmpty(searchStrs)) {
             return false;
+        } else if (searchStrs.length == 1) {
+            return containsIgnoreCase(str, searchStrs[0]);
+        } else if (searchStrs.length == 2) {
+            if (containsIgnoreCase(str, searchStrs[0])) {
+                return true;
+            }
+
+            return containsIgnoreCase(str, searchStrs[1]);
         }
 
+        final String sourceText = str.toLowerCase();
+
         for (String searchStr : searchStrs) {
-            if (N.notNullOrEmpty(searchStr) && indexOf(str, searchStr) != N.INDEX_NOT_FOUND) {
+            if (N.notNullOrEmpty(searchStr) && indexOf(sourceText, searchStr.toLowerCase()) != N.INDEX_NOT_FOUND) {
                 return true;
             }
         }
@@ -5387,17 +5397,27 @@ public abstract class StringUtil {
      * Equals with any.
      *
      * @param str
-     * @param searchStrings
+     * @param searchStrs
      * @return
      */
     @SafeVarargs
-    public static boolean equalsAnyIgnoreCase(final String str, final String... searchStrings) {
-        if (N.isNullOrEmpty(searchStrings)) {
+    public static boolean equalsAnyIgnoreCase(final String str, final String... searchStrs) {
+        if (N.isNullOrEmpty(searchStrs)) {
             return false;
+        } else if (searchStrs.length == 1) {
+            return equalsIgnoreCase(str, searchStrs[0]);
+        } else if (searchStrs.length == 2) {
+            if (equalsIgnoreCase(str, searchStrs[0])) {
+                return true;
+            }
+
+            return equalsIgnoreCase(str, searchStrs[1]);
         }
 
-        for (final String searchString : searchStrings) {
-            if (equalsIgnoreCase(str, searchString)) {
+        final String sourceText = str.toLowerCase();
+
+        for (String searchStr : searchStrs) {
+            if (equals(sourceText, searchStr.toLowerCase())) {
                 return true;
             }
         }
