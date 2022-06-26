@@ -6545,10 +6545,14 @@ class CommonUtil {
      *
      * @param <T>
      * @param obj a Java object which must be serializable and deserialiable through {@code Kryo} or {@code JSON}.
-     * @return
+     * @return {@code null} if {@code entity} is {@code null}
      */
     @SuppressWarnings("unchecked")
     public static <T> T clone(final T obj) {
+        if (obj == null) {
+            return null;
+        }
+
         return (T) clone(obj.getClass(), obj);
     }
 
@@ -6558,10 +6562,21 @@ class CommonUtil {
      * @param <T>
      * @param targetClass
      * @param obj a Java object which must be serializable and deserialiable through {@code Kryo} or {@code JSON}.
-     * @return
+     * @return a new instance of {@code targetClass} even if {@code entity} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
     @SuppressWarnings("unchecked")
-    public static <T> T clone(final Class<? extends T> targetClass, final Object obj) {
+    public static <T> T clone(final Class<? extends T> targetClass, final Object obj) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, "targetClass");
+
+        if (obj == null) {
+            if (ClassUtil.isEntity(targetClass)) {
+                return copy(targetClass, obj);
+            } else {
+                return newInstance(targetClass);
+            }
+        }
+
         final Class<?> srcCls = obj.getClass();
         Object copy = null;
 
@@ -6590,10 +6605,14 @@ class CommonUtil {
      * @param <T>
      * @param entity a Java Object what allows access to properties using getter
      *            and setter methods.
-     * @return
+     * @return {@code null} if {@code entity} is {@code null}
      */
     @SuppressWarnings("unchecked")
     public static <T> T copy(final T entity) {
+        if (entity == null) {
+            return null;
+        }
+
         return copy((Class<T>) entity.getClass(), entity);
     }
 
@@ -6602,9 +6621,13 @@ class CommonUtil {
      * @param <T>
      * @param entity
      * @param selectPropNames
-     * @return
+     * @return {@code null} if {@code entity} is {@code null}
      */
     public static <T> T copy(final T entity, final Collection<String> selectPropNames) {
+        if (entity == null) {
+            return null;
+        }
+
         return copy((Class<T>) entity.getClass(), entity, selectPropNames);
     }
 
@@ -6613,9 +6636,10 @@ class CommonUtil {
      * @param <T>
      * @param targetClass
      * @param entity
-     * @return
+     * @return a new instance of {@code targetClass} even if {@code entity} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
-    public static <T> T copy(final Class<? extends T> targetClass, final Object entity) {
+    public static <T> T copy(final Class<? extends T> targetClass, final Object entity) throws IllegalArgumentException {
         return copy(targetClass, entity, null);
     }
 
@@ -6630,31 +6654,38 @@ class CommonUtil {
      * @param entity a Java Object what allows access to properties using getter
      *            and setter methods.
      * @param selectPropNames
-     * @return
+     * @return a new instance of {@code targetClass} even if {@code entity} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
     @SuppressWarnings({ "unchecked" })
-    public static <T> T copy(final Class<? extends T> targetClass, final Object entity, final Collection<String> selectPropNames) {
-        final Class<?> srcCls = entity.getClass();
+    public static <T> T copy(final Class<? extends T> targetClass, final Object entity, final Collection<String> selectPropNames)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, "targetClass");
 
-        if (selectPropNames == null && Utils.kryoParser != null && targetClass.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
-            try {
-                final T copy = (T) Utils.kryoParser.copy(entity);
+        if (entity != null) {
+            final Class<?> srcCls = entity.getClass();
 
-                if (copy != null) {
-                    return copy;
+            if (selectPropNames == null && Utils.kryoParser != null && targetClass.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
+                try {
+                    final T copy = (T) Utils.kryoParser.copy(entity);
+
+                    if (copy != null) {
+                        return copy;
+                    }
+                } catch (Exception e) {
+                    notKryoCompatible.add(srcCls);
+
+                    // ignore
                 }
-            } catch (Exception e) {
-                notKryoCompatible.add(srcCls);
-
-                // ignore
             }
         }
 
         final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetClass);
-
         Object result = targetEntityInfo.createEntityResult();
 
-        merge(entity, result, selectPropNames, targetEntityInfo);
+        if (entity != null) {
+            merge(entity, result, selectPropNames, targetEntityInfo);
+        }
 
         result = targetEntityInfo.finishEntityResult(result);
 
@@ -6668,32 +6699,38 @@ class CommonUtil {
      * @param entity
      * @param ignoreUnmatchedProperty
      * @param ignorePropNames
-     * @return
+     * @return a new instance of {@code targetClass} even if {@code entity} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
     @SuppressWarnings({ "unchecked" })
     public static <T> T copy(final Class<? extends T> targetClass, final Object entity, final boolean ignoreUnmatchedProperty,
-            final Set<String> ignorePropNames) {
-        final Class<?> srcCls = entity.getClass();
+            final Set<String> ignorePropNames) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, "targetClass");
 
-        if (ignorePropNames == null && Utils.kryoParser != null && targetClass.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
-            try {
-                final T copy = (T) Utils.kryoParser.copy(entity);
+        if (entity != null) {
+            final Class<?> srcCls = entity.getClass();
 
-                if (copy != null) {
-                    return copy;
+            if (ignorePropNames == null && Utils.kryoParser != null && targetClass.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
+                try {
+                    final T copy = (T) Utils.kryoParser.copy(entity);
+
+                    if (copy != null) {
+                        return copy;
+                    }
+                } catch (Exception e) {
+                    notKryoCompatible.add(srcCls);
+
+                    // ignore
                 }
-            } catch (Exception e) {
-                notKryoCompatible.add(srcCls);
-
-                // ignore
             }
         }
 
         final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetClass);
-
         Object result = targetEntityInfo.createEntityResult();
 
-        merge(entity, result, ignoreUnmatchedProperty, ignorePropNames, targetEntityInfo);
+        if (entity != null) {
+            merge(entity, result, ignoreUnmatchedProperty, ignorePropNames, targetEntityInfo);
+        }
 
         result = targetEntityInfo.finishEntityResult(result);
 
@@ -6705,8 +6742,9 @@ class CommonUtil {
      * @param sourceEntity
      * @param targetEntity
      * @return {@code targetEntity}
+     * @throws IllegalArgumentException if {@code targetEntity} is {@code null}.
      */
-    public static <T> T merge(final Object sourceEntity, final T targetEntity) {
+    public static <T> T merge(final Object sourceEntity, final T targetEntity) throws IllegalArgumentException {
         return merge(sourceEntity, targetEntity, (Collection<String>) null);
     }
 
@@ -6720,13 +6758,23 @@ class CommonUtil {
      *            and setter methods.
      * @param selectPropNames
      * @return {@code targetEntity}
+     * @throws IllegalArgumentException if {@code targetEntity} is {@code null}.
      */
-    public static <T> T merge(final Object sourceEntity, final T targetEntity, final Collection<String> selectPropNames) {
+    public static <T> T merge(final Object sourceEntity, final T targetEntity, final Collection<String> selectPropNames) throws IllegalArgumentException {
+        N.checkArgNotNull(targetEntity, "targetEntity");
+
         return merge(sourceEntity, targetEntity, selectPropNames, ParserUtil.getEntityInfo(targetEntity.getClass()));
     }
 
     @SuppressWarnings("deprecation")
-    private static <T> T merge(final Object sourceEntity, final T targetEntity, final Collection<String> selectPropNames, final EntityInfo targetEntityInfo) {
+    private static <T> T merge(final Object sourceEntity, final T targetEntity, final Collection<String> selectPropNames, final EntityInfo targetEntityInfo)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(targetEntity, "targetEntity");
+
+        if (sourceEntity == null) {
+            return targetEntity;
+        }
+
         final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
         final boolean ignoreUnmatchedProperty = selectPropNames == null;
 
@@ -6759,8 +6807,15 @@ class CommonUtil {
      *            and setter methods.
      * @param filter
      * @return {@code targetEntity}
+     * @throws IllegalArgumentException if {@code targetEntity} is {@code null}.
      */
-    public static <T> T merge(final Object sourceEntity, final T targetEntity, final BiPredicate<String, ?> filter) {
+    public static <T> T merge(final Object sourceEntity, final T targetEntity, final BiPredicate<String, ?> filter) throws IllegalArgumentException {
+        N.checkArgNotNull(targetEntity, "targetEntity");
+
+        if (sourceEntity == null) {
+            return targetEntity;
+        }
+
         final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
         final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
         final BiPredicate<String, Object> objFilter = (BiPredicate<String, Object>) filter;
@@ -6785,14 +6840,28 @@ class CommonUtil {
      * @param ignoreUnmatchedProperty
      * @param ignorePropNames
      * @return {@code targetEntity}
+     * @throws IllegalArgumentException if {@code targetEntity} is {@code null}.
      */
-    public static <T> T merge(final Object sourceEntity, final T targetEntity, final boolean ignoreUnmatchedProperty, final Set<String> ignorePropNames) {
+    public static <T> T merge(final Object sourceEntity, final T targetEntity, final boolean ignoreUnmatchedProperty, final Set<String> ignorePropNames)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(targetEntity, "targetEntity");
+
+        if (sourceEntity == null) {
+            return targetEntity;
+        }
+
         return merge(sourceEntity, targetEntity, ignoreUnmatchedProperty, ignorePropNames, ParserUtil.getEntityInfo(targetEntity.getClass()));
     }
 
     @SuppressWarnings("deprecation")
     private static <T> T merge(final Object sourceEntity, final T targetEntity, final boolean ignoreUnmatchedProperty, final Set<String> ignorePropNames,
-            final EntityInfo targetEntityInfo) {
+            final EntityInfo targetEntityInfo) throws IllegalArgumentException {
+        N.checkArgNotNull(targetEntity, "targetEntity");
+
+        if (sourceEntity == null) {
+            return targetEntity;
+        }
+
         final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
 
         Object propValue = null;
@@ -6816,8 +6885,9 @@ class CommonUtil {
      * @param targetEntity
      * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
      * @return {@code targetEntity}
+     * @throws IllegalArgumentException if {@code targetEntity} is {@code null}.
      */
-    public static <T> T merge(final Object sourceEntity, final T targetEntity, final BinaryOperator<?> mergeFunc) {
+    public static <T> T merge(final Object sourceEntity, final T targetEntity, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
         return merge(sourceEntity, targetEntity, (Collection<String>) null, mergeFunc);
     }
 
@@ -6832,8 +6902,16 @@ class CommonUtil {
      * @param selectPropNames
      * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
      * @return {@code targetEntity}
+     * @throws IllegalArgumentException if {@code targetEntity} is {@code null}.
      */
-    public static <T> T merge(final Object sourceEntity, final T targetEntity, final Collection<String> selectPropNames, final BinaryOperator<?> mergeFunc) {
+    public static <T> T merge(final Object sourceEntity, final T targetEntity, final Collection<String> selectPropNames, final BinaryOperator<?> mergeFunc)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(targetEntity, "targetEntity");
+
+        if (sourceEntity == null) {
+            return targetEntity;
+        }
+
         final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
         final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
         final BinaryOperator<Object> objMergeFunc = (BinaryOperator<Object>) mergeFunc;
@@ -6888,8 +6966,16 @@ class CommonUtil {
      * @param filter
      * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
      * @return {@code targetEntity}
+     * @throws IllegalArgumentException if {@code targetEntity} is {@code null}.
      */
-    public static <T> T merge(final Object sourceEntity, final T targetEntity, final BiPredicate<String, ?> filter, final BinaryOperator<?> mergeFunc) {
+    public static <T> T merge(final Object sourceEntity, final T targetEntity, final BiPredicate<String, ?> filter, final BinaryOperator<?> mergeFunc)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(targetEntity, "targetEntity");
+
+        if (sourceEntity == null) {
+            return targetEntity;
+        }
+
         final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
         final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
         final BiPredicate<String, Object> objFilter = (BiPredicate<String, Object>) filter;
@@ -6923,9 +7009,16 @@ class CommonUtil {
      * @param ignorePropNames
      * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
      * @return {@code targetEntity}
+     * @throws IllegalArgumentException if {@code targetEntity} is {@code null}.
      */
     public static <T> T merge(final Object sourceEntity, final T targetEntity, final boolean ignoreUnmatchedProperty, final Set<String> ignorePropNames,
-            final BinaryOperator<?> mergeFunc) {
+            final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
+        N.checkArgNotNull(targetEntity, "targetEntity");
+
+        if (sourceEntity == null) {
+            return targetEntity;
+        }
+
         final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
         final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
         final BinaryOperator<Object> objMergeFunc = (BinaryOperator<Object>) mergeFunc;

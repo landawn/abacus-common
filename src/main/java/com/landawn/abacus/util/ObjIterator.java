@@ -24,6 +24,8 @@ import java.util.NoSuchElementException;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.function.BooleanSupplier;
+import com.landawn.abacus.util.function.Function;
+import com.landawn.abacus.util.function.Predicate;
 import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.Stream;
 
@@ -473,6 +475,16 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
         }
 
         return list;
+    }
+
+    @Beta
+    public ObjIterator<T> filter(final Predicate<? super T> filter) {
+        return Iterators.filter(this, filter);
+    }
+
+    @Beta
+    public <U> ObjIterator<U> map(final Function<? super T, U> mapper) {
+        return Iterators.map(this, mapper);
     }
 
     public Stream<T> stream() {

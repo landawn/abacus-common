@@ -173,6 +173,30 @@ public final class HttpRequest {
         return this;
     }
 
+    public HttpRequest connectionTimeout(int connectionTimeout) {
+        checkSettings();
+
+        settings.setConnectionTimeout(connectionTimeout);
+
+        return this;
+    }
+
+    public HttpRequest readTimeout(int readTimeout) {
+        checkSettings();
+
+        settings.setReadTimeout(readTimeout);
+
+        return this;
+    }
+
+    public HttpRequest useCaches(boolean useCaches) {
+        checkSettings();
+
+        settings.setUseCaches(useCaches);
+
+        return this;
+    }
+
     /**
      *
      * @return
@@ -665,29 +689,5 @@ public final class HttpRequest {
         if (settings == null) {
             settings = new HttpSettings();
         }
-    }
-
-    public HttpRequest connectionTimeout(int connectionTimeout) {
-        checkSettings();
-
-        settings.setConnectionTimeout(connectionTimeout);
-
-        return this;
-    }
-
-    public HttpRequest readTimeout(int readTimeout) {
-        checkSettings();
-
-        settings.setReadTimeout(readTimeout);
-
-        return this;
-    }
-
-    public HttpRequest useCaches(boolean useCaches) {
-        checkSettings();
-
-        settings.setUseCaches(useCaches);
-
-        return this;
     }
 }
