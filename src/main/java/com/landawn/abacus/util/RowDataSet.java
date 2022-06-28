@@ -4785,16 +4785,7 @@ public class RowDataSet implements DataSet, Cloneable {
                         if (type.isSerializable()) {
                             type.writeCharacter(bw, element, config);
                         } else {
-                            // strType.writeCharacters(bw,
-                            // jsonParser.serialize(element, config), config);
-
-                            try {
-                                strType.writeCharacter(bw, jsonParser.serialize(element, config), config);
-                            } catch (Exception e) {
-                                // ignore.
-
-                                strType.writeCharacter(bw, N.toString(element), config);
-                            }
+                            strType.writeCharacter(bw, jsonParser.serialize(element, config), config);
                         }
                     }
                 }
