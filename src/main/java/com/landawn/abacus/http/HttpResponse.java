@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
+import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.URLEncodedUtil;
 
@@ -122,6 +123,34 @@ public class HttpResponse {
                 return URLEncodedUtil.decode(resultClass, new String(body, respCharset));
             } else {
                 return HttpUtil.getParser(bodyFormat).deserialize(resultClass, new String(body, respCharset));
+            }
+        }
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param resultType
+     * @return
+     */
+    public <T> T body(Type<T> resultType) {
+        N.checkArgNotNull(resultType, "resultType");
+
+        if (resultType == null || resultType.clazz().equals(String.class)) {
+            return (T) new String(body, respCharset);
+        } else if (resultType.clazz().equals(byte[].class)) {
+            return (T) body;
+        } else {
+            if (bodyFormat == ContentFormat.KRYO && HttpUtil.kryoParser != null) {
+                return HttpUtil.kryoParser.deserialize(resultType.clazz(), new ByteArrayInputStream(body));
+            } else if (bodyFormat == ContentFormat.FormUrlEncoded) {
+                return URLEncodedUtil.decode(resultType.clazz(), new String(body, respCharset));
+            } else if (bodyFormat != null && bodyFormat.name().contains("JSON")) {
+                return N.fromJSON(resultType, new String(body, respCharset));
+            } else if (bodyFormat != null && bodyFormat.name().contains("XML")) {
+                return N.fromXML(resultType, new String(body, respCharset));
+            } else {
+                return HttpUtil.getParser(bodyFormat).deserialize(resultType.clazz(), new String(body, respCharset));
             }
         }
     }

@@ -1662,6 +1662,41 @@ public abstract class StringUtil {
         }
     }
 
+    /**
+     *
+     * @param str
+     * @param quoteChar it should be {@code "} or {@code '}.
+     * @return
+     */
+    public static String quoteEscaped(final String str, final char quoteChar) {
+        if (N.isNullOrEmpty(str)) {
+            return str;
+        }
+
+        final StringBuilder sb = Objectory.createStringBuilder();
+
+        try {
+            char ch = 0;
+            for (int i = 0, len = str.length(); i < len; i++) {
+                ch = str.charAt(i);
+
+                if ((ch == _BACKSLASH) && (i < (len - 1))) {
+                    sb.append(ch);
+                    sb.append(str.charAt(++i));
+                } else if (ch == quoteChar) {
+                    sb.append(_BACKSLASH);
+                    sb.append(ch);
+                } else {
+                    sb.append(ch);
+                }
+            }
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
+        }
+    }
+
     // --------------------------------------------------------------------------
     /**
      * <p>
