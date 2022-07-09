@@ -61,6 +61,14 @@ import com.landawn.abacus.annotation.TerminalOpTriggered;
 import com.landawn.abacus.exception.DuplicatedResultException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
+import com.landawn.abacus.parser.JSONParser;
+import com.landawn.abacus.parser.JSONSerializationConfig;
+import com.landawn.abacus.parser.JSONSerializationConfig.JSC;
+import com.landawn.abacus.parser.ParserFactory;
+import com.landawn.abacus.parser.ParserUtil;
+import com.landawn.abacus.parser.ParserUtil.EntityInfo;
+import com.landawn.abacus.parser.ParserUtil.PropInfo;
+import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.Fn.Fnn;
 import com.landawn.abacus.util.Fn.Suppliers;
@@ -2155,6 +2163,32 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * Distinct and filter by occurrences.
+     *
+     * @param mergeFunction
+     * @return
+     * @see #groupBy(Function, Function, BinaryOperator)
+     */
+    @IntermediateOp
+    @TerminalOpTriggered
+    public ExceptionalStream<T, E> distinct(final Throwables.BinaryOperator<T, ? extends E> mergeFunction) {
+        return distinctBy(Fnn.identity(), mergeFunction);
+    }
+
+    /**
+     * Distinct and filter by occurrences.
+     *
+     * @param occurrencesFilter
+     * @return
+     * @see #groupBy(Function, Collector)
+     */
+    @IntermediateOp
+    @TerminalOpTriggered
+    public ExceptionalStream<T, E> distinct(final Throwables.Predicate<? super Long, ? extends E> occurrencesFilter) {
+        return distinctBy(Fnn.identity(), occurrencesFilter);
+    }
+
+    /**
      * Distinct by the value mapped from <code>keyMapper</code> .
      *
      * @param keyMapper don't change value of the input parameter.
@@ -2167,6 +2201,25 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         final Set<Object> set = N.newHashSet();
 
         return filter(value -> set.add(hashKey(keyMapper.apply(value))));
+    }
+
+    /**
+     * Distinct and filter by occurrences.
+     *
+     * @param keyMapper
+     * @param mergeFunction
+     * @return
+     * @see #groupBy(Function, Function, BinaryOperator)
+     */
+    @IntermediateOp
+    @TerminalOpTriggered
+    public <K> ExceptionalStream<T, E> distinctBy(final Throwables.Function<? super T, K, ? extends E> keyMapper,
+            final Throwables.BinaryOperator<T, ? extends E> mergeFunction) {
+        assertNotClosed();
+
+        final Supplier<? extends Map<K, T>> supplier = Suppliers.<K, T> ofMap();
+
+        return groupBy(keyMapper, Fnn.<T, E> identity(), mergeFunction, supplier).map(Fnn.<K, T, E> value());
     }
 
     /**
@@ -2190,27 +2243,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         final Throwables.Predicate<Map.Entry<Keyed<K, T>, Long>, ? extends E> predicate = e -> occurrencesFilter.test(e.getValue());
 
-        return groupBy(keyedMapper, Collectors.counting(), supplier).filter(predicate)
-                .map((Throwables.Function<Map.Entry<Keyed<K, T>, Long>, T, E>) (Throwables.Function) KK);
-    }
-
-    /**
-     * Distinct and filter by occurrences.
-     *
-     * @param keyMapper
-     * @param occurrencesFilter
-     * @return
-     * @see #groupBy(Function, Function, BinaryOperator)
-     */
-    @IntermediateOp
-    @TerminalOpTriggered
-    public <K> ExceptionalStream<T, E> distinctBy(final Throwables.Function<? super T, K, ? extends E> keyMapper,
-            final Throwables.BinaryOperator<T, ? extends E> mergeFunction) {
-        assertNotClosed();
-
-        final Supplier<? extends Map<K, T>> supplier = Suppliers.<K, T> ofLinkedHashMap();
-
-        return groupBy(keyMapper, Fnn.<T, E> identity(), mergeFunction, supplier).map(Fnn.<K, T, E> value());
+        return newStream(groupBy(keyedMapper, Collectors.counting(), supplier).filter(predicate)
+                .map((Throwables.Function<Map.Entry<Keyed<K, T>, Long>, T, E>) (Throwables.Function) KK)
+                .iteratorEx(), sorted, cmp, closeHandlers);
     }
 
     /**
@@ -3056,7 +3091,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @SuppressWarnings("rawtypes")
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> mapPartial(final Throwables.Function<? super T, ? extends Optional<? extends R>, E> mapper) {
+    public <R> ExceptionalStream<R, E> mapPartial(final Throwables.Function<? super T, Optional<? extends R>, E> mapper) {
         return map(mapper).filter((Throwables.Predicate) IS_PRESENT_IT).map(GET_AS_IT);
     }
 
@@ -3109,7 +3144,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @SuppressWarnings("rawtypes")
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> mapPartialJdk(final Throwables.Function<? super T, ? extends java.util.Optional<? extends R>, E> mapper) {
+    public <R> ExceptionalStream<R, E> mapPartialJdk(final Throwables.Function<? super T, java.util.Optional<? extends R>, E> mapper) {
         return map(mapper).filter((Throwables.Predicate) IS_PRESENT_IT_JDK).map(GET_AS_IT_JDK);
     }
 
@@ -11886,10 +11921,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     private static final Throwables.Function<Object, String, IOException> TO_LINE_OF_STRING = t -> N.stringOf(t);
 
+    @TerminalOp
     public long persist(final File file) throws E, IOException {
         return persist(TO_LINE_OF_STRING, file);
     }
 
+    @TerminalOp
     public long persist(final String header, final String tail, final File file) throws E, IOException {
         return persist(TO_LINE_OF_STRING, header, tail, file);
     }
@@ -11908,10 +11945,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @throws E
      * @throws IOException
      */
+    @TerminalOp
     public long persist(final Throwables.Function<? super T, String, IOException> toLine, final File file) throws E, IOException {
         return persist(toLine, null, null, file);
     }
 
+    @TerminalOp
     public long persist(final Throwables.Function<? super T, String, IOException> toLine, final String header, final String tail, final File file)
             throws E, IOException {
         assertNotClosed();
@@ -11925,6 +11964,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    @TerminalOp
     public long persist(final Throwables.Function<? super T, String, IOException> toLine, final OutputStream os) throws E, IOException {
         assertNotClosed();
 
@@ -11951,12 +11991,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @throws E
      * @throws IOException
      */
+    @TerminalOp
     public long persist(Throwables.Function<? super T, String, IOException> toLine, Writer writer) throws E, IOException {
         assertNotClosed();
 
         return persist(toLine, null, null, writer);
     }
 
+    @TerminalOp
     public long persist(Throwables.Function<? super T, String, IOException> toLine, String header, String tail, Writer writer) throws E, IOException {
         assertNotClosed();
 
@@ -11996,12 +12038,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    @TerminalOp
     public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final File file) throws E, IOException {
         assertNotClosed();
 
         return persist(writeLine, null, null, file);
     }
 
+    @TerminalOp
     public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final String header, final String tail, final File file)
             throws E, IOException {
         assertNotClosed();
@@ -12015,12 +12059,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    @TerminalOp
     public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final Writer writer) throws E, IOException {
         assertNotClosed();
 
         return persist(writeLine, null, null, writer);
     }
 
+    @TerminalOp
     public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final String header, final String tail, final Writer writer)
             throws E, IOException {
         assertNotClosed();
@@ -12061,6 +12107,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    @TerminalOp
     public long persist(final Connection conn, final String insertSQL, final int batchSize, final int batchInterval,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws E, SQLException {
         assertNotClosed();
@@ -12076,6 +12123,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    @TerminalOp
     public long persist(final PreparedStatement stmt, final int batchSize, final int batchInterval,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws E, SQLException {
         assertNotClosed();
@@ -12119,6 +12167,439 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             } catch (SQLException e) {
                 logger.error("Failed to clear batch parameters after executeBatch", e);
             }
+        }
+    }
+
+    /**
+     * Each line in the output file/Writer is an array of JSON String without root bracket.
+     *
+     * @param file
+     * @return
+     * @throws E
+     * @throws IOException
+     */
+    @TerminalOp
+    public long persistToCSV(File file) throws E, IOException {
+        final Writer writer = new FileWriter(file);
+
+        try {
+            return persistToCSV(writer);
+        } finally {
+            IOUtil.close(writer);
+        }
+    }
+
+    /**
+     * Each line in the output file/Writer is an array of JSON String without root bracket.
+     *
+     * @param headers
+     * @param file
+     * @return
+     * @throws E
+     * @throws IOException
+     */
+    @TerminalOp
+    public long persistToCSV(List<String> headers, File file) throws E, IOException {
+        final Writer writer = new FileWriter(file);
+
+        try {
+            return persistToCSV(headers, writer);
+        } finally {
+            IOUtil.close(writer);
+        }
+    }
+
+    /**
+     * Each line in the output file/Writer is an array of JSON String without root bracket.
+     *
+     * @param os
+     * @return
+     * @throws E
+     * @throws IOException
+     */
+    @TerminalOp
+    public long persistToCSV(OutputStream os) throws E, IOException {
+        final BufferedWriter bw = Objectory.createBufferedWriter(os);
+
+        try {
+            return persistToCSV(bw);
+        } finally {
+            IOUtil.close(bw);
+        }
+    }
+
+    /**
+     * Each line in the output file/Writer is an array of JSON String without root bracket.
+     *
+     * @param headers
+     * @param os
+     * @return
+     * @throws E
+     * @throws IOException
+     */
+    @TerminalOp
+    public long persistToCSV(List<String> headers, OutputStream os) throws E, IOException {
+        final BufferedWriter bw = Objectory.createBufferedWriter(os);
+
+        try {
+            return persistToCSV(headers, bw);
+        } finally {
+            IOUtil.close(bw);
+        }
+    }
+
+    private static final Throwables.TriConsumer<Type<Object>, Object, BufferedJSONWriter, IOException> WRITE_CSV_ELEMENT_WITH_TYPE;
+    private static final Throwables.BiConsumer<Object, BufferedJSONWriter, IOException> WRITE_CSV_ELEMENT;
+    static {
+        final JSONParser jsonParser = ParserFactory.createJSONParser();
+        final Type<Object> strType = N.typeOf(String.class);
+        final JSONSerializationConfig config = JSC.create();
+        config.setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP);
+        config.setQuoteMapKey(true);
+        config.setQuotePropName(true);
+
+        WRITE_CSV_ELEMENT_WITH_TYPE = (type, element, bw) -> {
+            if (element == null) {
+                bw.write(N.NULL_CHAR_ARRAY);
+            } else {
+                if (type.isSerializable()) {
+                    type.writeCharacter(bw, element, config);
+                } else {
+                    strType.writeCharacter(bw, jsonParser.serialize(element, config), config);
+                }
+            }
+        };
+
+        WRITE_CSV_ELEMENT = (element, bw) -> {
+            if (element == null) {
+                bw.write(N.NULL_CHAR_ARRAY);
+            } else {
+                WRITE_CSV_ELEMENT_WITH_TYPE.accept(N.typeOf(element.getClass()), element, bw);
+            }
+        };
+    }
+
+    /**
+     * Each line in the output file/Writer is an array of JSON String without root bracket.
+     *
+     * @param writer
+     * @return
+     * @throws E
+     * @throws IOException
+     */
+    @TerminalOp
+    public long persistToCSV(Writer writer) throws E, IOException {
+        assertNotClosed();
+
+        try {
+            final boolean isBufferedWriter = writer instanceof BufferedJSONWriter;
+            final BufferedJSONWriter bw = isBufferedWriter ? (BufferedJSONWriter) writer : Objectory.createBufferedJSONWriter(writer);
+
+            final ExceptionalIterator<T, E> iter = iteratorEx();
+            long cnt = 0;
+            T next = null;
+            Class<?> cls = null;
+
+            try {
+                if (iter.hasNext()) {
+                    next = iter.next();
+                    cnt++;
+                    cls = next.getClass();
+
+                    if (ClassUtil.isEntity(cls)) {
+                        final List<PropInfo> propInfoList = ParserUtil.getEntityInfo(cls).propInfoList;
+                        final int headerSize = propInfoList.size();
+                        PropInfo propInfo = null;
+
+                        for (int i = 0; i < headerSize; i++) {
+                            if (i > 0) {
+                                bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                            }
+
+                            WRITE_CSV_ELEMENT.accept(propInfoList.get(i).name, bw);
+                        }
+
+                        bw.write(IOUtil.LINE_SEPARATOR);
+
+                        for (int i = 0; i < headerSize; i++) {
+                            propInfo = propInfoList.get(i);
+
+                            if (i > 0) {
+                                bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                            }
+
+                            WRITE_CSV_ELEMENT_WITH_TYPE.accept(propInfo.jsonXmlType, propInfo.getPropValue(next), bw);
+                        }
+
+                        while (iter.hasNext()) {
+                            next = iter.next();
+                            cnt++;
+
+                            bw.write(IOUtil.LINE_SEPARATOR);
+
+                            for (int i = 0; i < headerSize; i++) {
+                                propInfo = propInfoList.get(i);
+
+                                if (i > 0) {
+                                    bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                }
+
+                                WRITE_CSV_ELEMENT_WITH_TYPE.accept(propInfo.jsonXmlType, propInfo.getPropValue(next), bw);
+                            }
+                        }
+                    } else if (next instanceof Map) {
+                        Map<Object, Object> row = (Map<Object, Object>) next;
+                        final List<Object> keys = new ArrayList<>(row.keySet());
+                        final int headerSize = keys.size();
+
+                        for (int i = 0; i < headerSize; i++) {
+                            if (i > 0) {
+                                bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                            }
+
+                            WRITE_CSV_ELEMENT.accept(keys.get(i), bw);
+                        }
+
+                        bw.write(IOUtil.LINE_SEPARATOR);
+
+                        for (int i = 0; i < headerSize; i++) {
+                            if (i > 0) {
+                                bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                            }
+
+                            WRITE_CSV_ELEMENT.accept(row.get(keys.get(i)), bw);
+                        }
+
+                        while (iter.hasNext()) {
+                            row = (Map<Object, Object>) iter.next();
+                            cnt++;
+
+                            bw.write(IOUtil.LINE_SEPARATOR);
+
+                            for (int i = 0; i < headerSize; i++) {
+                                if (i > 0) {
+                                    bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                }
+
+                                WRITE_CSV_ELEMENT.accept(row.get(keys.get(i)), bw);
+                            }
+                        }
+                    } else {
+                        throw new RuntimeException(cls + " is no supported for CSV format. Only entity/Map are supported");
+                    }
+                }
+
+                bw.flush();
+            } finally {
+                if (!isBufferedWriter) {
+                    Objectory.recycle((BufferedWriter) bw);
+                }
+            }
+
+            return cnt;
+        } finally {
+            close();
+        }
+    }
+
+    /**
+     * Each line in the output file/Writer is an array of JSON String without root bracket.
+     *
+     * @param headers
+     * @param writer
+     * @return
+     * @throws E
+     * @throws IOException
+     */
+    @TerminalOp
+    public long persistToCSV(List<String> headers, Writer writer) throws E, IOException {
+        N.checkArgNotNullOrEmpty(headers, "headers");
+        assertNotClosed();
+
+        try {
+            final boolean isBufferedWriter = writer instanceof BufferedJSONWriter;
+            final BufferedJSONWriter bw = isBufferedWriter ? (BufferedJSONWriter) writer : Objectory.createBufferedJSONWriter(writer);
+
+            final int headSize = headers.size();
+            final ExceptionalIterator<T, E> iter = iteratorEx();
+            long cnt = 0;
+            T next = null;
+            Class<?> cls = null;
+
+            try {
+                if (iter.hasNext()) {
+                    next = iter.next();
+                    cnt++;
+                    cls = next.getClass();
+
+                    if (ClassUtil.isEntity(cls)) {
+                        final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
+                        final PropInfo[] propInfos = new PropInfo[headSize];
+                        PropInfo propInfo = null;
+
+                        for (int i = 0; i < headSize; i++) {
+                            propInfos[i] = entityInfo.getPropInfo(headers.get(i));
+                        }
+
+                        for (int i = 0; i < headSize; i++) {
+                            if (i > 0) {
+                                bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                            }
+
+                            WRITE_CSV_ELEMENT.accept(propInfos[i].name, bw);
+                        }
+
+                        bw.write(IOUtil.LINE_SEPARATOR);
+
+                        for (int i = 0; i < headSize; i++) {
+                            propInfo = propInfos[i];
+
+                            if (i > 0) {
+                                bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                            }
+
+                            WRITE_CSV_ELEMENT_WITH_TYPE.accept(propInfo.jsonXmlType, propInfo.getPropValue(next), bw);
+                        }
+
+                        while (iter.hasNext()) {
+                            next = iter.next();
+                            cnt++;
+
+                            bw.write(IOUtil.LINE_SEPARATOR);
+
+                            for (int i = 0; i < headSize; i++) {
+                                propInfo = propInfos[i];
+
+                                if (i > 0) {
+                                    bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                }
+
+                                WRITE_CSV_ELEMENT_WITH_TYPE.accept(propInfo.jsonXmlType, propInfo.getPropValue(next), bw);
+                            }
+                        }
+                    } else if (next instanceof Map) {
+                        Map<Object, Object> row = (Map<Object, Object>) next;
+
+                        for (int i = 0; i < headSize; i++) {
+                            if (i > 0) {
+                                bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                            }
+
+                            WRITE_CSV_ELEMENT.accept(headers.get(i), bw);
+                        }
+
+                        bw.write(IOUtil.LINE_SEPARATOR);
+
+                        for (int i = 0; i < headSize; i++) {
+                            if (i > 0) {
+                                bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                            }
+
+                            WRITE_CSV_ELEMENT.accept(row.get(headers.get(i)), bw);
+                        }
+
+                        while (iter.hasNext()) {
+                            row = (Map<Object, Object>) iter.next();
+                            cnt++;
+
+                            bw.write(IOUtil.LINE_SEPARATOR);
+
+                            for (int i = 0; i < headSize; i++) {
+                                if (i > 0) {
+                                    bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                }
+
+                                WRITE_CSV_ELEMENT.accept(row.get(headers.get(i)), bw);
+                            }
+                        }
+                    } else if (next instanceof Collection) {
+                        Collection<Object> row = (Collection<Object>) next;
+
+                        for (int i = 0; i < headSize; i++) {
+                            if (i > 0) {
+                                bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                            }
+
+                            WRITE_CSV_ELEMENT.accept(headers.get(i), bw);
+                        }
+
+                        bw.write(IOUtil.LINE_SEPARATOR);
+
+                        Iterator<Object> rowIter = row.iterator();
+
+                        for (int i = 0; i < headSize; i++) {
+                            if (i > 0) {
+                                bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                            }
+
+                            WRITE_CSV_ELEMENT.accept(rowIter.next(), bw);
+                        }
+
+                        while (iter.hasNext()) {
+                            row = (Collection<Object>) iter.next();
+                            rowIter = row.iterator();
+                            cnt++;
+
+                            bw.write(IOUtil.LINE_SEPARATOR);
+
+                            for (int i = 0; i < headSize; i++) {
+                                if (i > 0) {
+                                    bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                }
+
+                                WRITE_CSV_ELEMENT.accept(rowIter.next(), bw);
+                            }
+                        }
+                    } else if (next instanceof Object[]) {
+                        Object[] row = (Object[]) next;
+
+                        for (int i = 0; i < headSize; i++) {
+                            if (i > 0) {
+                                bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                            }
+
+                            WRITE_CSV_ELEMENT.accept(headers.get(i), bw);
+                        }
+
+                        bw.write(IOUtil.LINE_SEPARATOR);
+
+                        for (int i = 0; i < headSize; i++) {
+                            if (i > 0) {
+                                bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                            }
+
+                            WRITE_CSV_ELEMENT.accept(row[i], bw);
+                        }
+
+                        while (iter.hasNext()) {
+                            row = (Object[]) iter.next();
+                            cnt++;
+
+                            bw.write(IOUtil.LINE_SEPARATOR);
+
+                            for (int i = 0; i < headSize; i++) {
+                                if (i > 0) {
+                                    bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                }
+
+                                WRITE_CSV_ELEMENT.accept(row[i], bw);
+                            }
+                        }
+                    } else {
+                        throw new RuntimeException(cls + " is no supported for CSV format. Only entity/Map are supported");
+                    }
+                }
+
+                bw.flush();
+            } finally {
+                if (!isBufferedWriter) {
+                    Objectory.recycle((BufferedWriter) bw);
+                }
+            }
+
+            return cnt;
+        } finally {
+            close();
         }
     }
 

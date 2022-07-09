@@ -880,7 +880,7 @@ public final class IOUtil {
         try {
             while (totalCount < maxLen && EOF != (count = read(reader, buf, 0, Math.min(maxLen - totalCount, bufLength)))) {
                 if ((count == bufLength && count < maxLen) && (sb == null)) {
-                    sb = Objectory.createStringBuilder();
+                    sb = Objectory.createBigStringBuilder();
                 }
 
                 if (sb != null) {

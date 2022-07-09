@@ -1878,9 +1878,15 @@ public interface DataSet {
      */
     void toXML(Writer output, String rowElementName, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
+    /**
+     * Each line in the output file/Writer is an array of JSON String without root bracket.
+     *
+     * @return
+     */
     String toCSV();
 
     /**
+     * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
      * @param columnNames
      * @param fromRowIndex
@@ -1890,6 +1896,7 @@ public interface DataSet {
     String toCSV(Collection<String> columnNames, int fromRowIndex, int toRowIndex);
 
     /**
+     * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
      * @param writeTitle
      * @param quoteValue
@@ -1898,6 +1905,7 @@ public interface DataSet {
     String toCSV(boolean writeTitle, boolean quoteValue);
 
     /**
+     * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
      * @param columnNames
      * @param fromRowIndex
@@ -1909,6 +1917,7 @@ public interface DataSet {
     String toCSV(Collection<String> columnNames, int fromRowIndex, int toRowIndex, boolean writeTitle, boolean quoteValue);
 
     /**
+     * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
      * @param output
      * @throws UncheckedIOException the unchecked IO exception
@@ -1916,6 +1925,7 @@ public interface DataSet {
     void toCSV(File output) throws UncheckedIOException;
 
     /**
+     * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
      * @param output
      * @param columnNames
@@ -1926,6 +1936,7 @@ public interface DataSet {
     void toCSV(File output, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
     /**
+     * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
      * @param output
      * @param writeTitle
@@ -1935,6 +1946,7 @@ public interface DataSet {
     void toCSV(File output, boolean writeTitle, boolean quoteValue) throws UncheckedIOException;
 
     /**
+     * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
      * @param output
      * @param columnNames
@@ -1948,6 +1960,7 @@ public interface DataSet {
             throws UncheckedIOException;
 
     /**
+     * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
      * @param output
      * @throws UncheckedIOException the unchecked IO exception
@@ -1955,6 +1968,7 @@ public interface DataSet {
     void toCSV(OutputStream output);
 
     /**
+     * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
      * @param output
      * @param columnNames
@@ -1965,6 +1979,7 @@ public interface DataSet {
     void toCSV(OutputStream output, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
     /**
+     * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
      * @param output
      * @param writeTitle
@@ -1974,6 +1989,7 @@ public interface DataSet {
     void toCSV(OutputStream output, boolean writeTitle, boolean quoteValue) throws UncheckedIOException;
 
     /**
+     * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
      * @param output
      * @param columnNames
@@ -1987,6 +2003,7 @@ public interface DataSet {
             throws UncheckedIOException;
 
     /**
+     * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
      * @param output
      * @throws UncheckedIOException the unchecked IO exception
@@ -1994,6 +2011,7 @@ public interface DataSet {
     void toCSV(Writer output);
 
     /**
+     * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
      * @param output
      * @param columnNames
@@ -2004,6 +2022,7 @@ public interface DataSet {
     void toCSV(Writer output, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
     /**
+     * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
      * @param output
      * @param writeTitle
@@ -2013,6 +2032,7 @@ public interface DataSet {
     void toCSV(Writer output, boolean writeTitle, boolean quoteValue) throws UncheckedIOException;
 
     /**
+     * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
      * @param output
      * @param columnNames

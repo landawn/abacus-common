@@ -337,32 +337,30 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> {
             return NULL_STRING;
         }
 
-        final BufferedWriter bw = Objectory.createBufferedWriter();
+        final StringBuilder sb = Objectory.createStringBuilder();
 
         try {
-            bw.write(WD._BRACKET_L);
+            sb.append(WD._BRACKET_L);
 
             Object[] a = x;
 
             for (int i = 0, len = a.length; i < len; i++) {
                 if (i > 0) {
-                    bw.write(ELEMENT_SEPARATOR);
+                    sb.append(ELEMENT_SEPARATOR);
                 }
 
                 if (a[i] == null) {
-                    bw.write(NULL_CHAR_ARRAY);
+                    sb.append(NULL_CHAR_ARRAY);
                 } else {
-                    bw.write(a[i].toString());
+                    sb.append(a[i].toString());
                 }
             }
 
-            bw.write(WD._BRACKET_R);
+            sb.append(WD._BRACKET_R);
 
-            return bw.toString();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+            return sb.toString();
         } finally {
-            Objectory.recycle(bw);
+            Objectory.recycle(sb);
         }
     }
 

@@ -930,12 +930,13 @@ public abstract class DateUtil {
      */
     public static String format(final Calendar c, final String format, final TimeZone timeZone) {
         if ((format == null) && (timeZone == null)) {
-            final BufferedWriter cbuff = Objectory.createBufferedWriter();
-            fastDateFormat(cbuff, c.getTimeInMillis(), false);
+            final StringBuilder sb = Objectory.createStringBuilder();
 
-            String str = cbuff.toString();
+            fastDateFormat(sb, null, c.getTimeInMillis(), false);
 
-            Objectory.recycle(cbuff);
+            String str = sb.toString();
+
+            Objectory.recycle(sb);
 
             return str;
         }
@@ -971,7 +972,7 @@ public abstract class DateUtil {
      */
     public static void format(final Writer writer, final Calendar c, final String format, final TimeZone timeZone) {
         if ((format == null) && (timeZone == null)) {
-            fastDateFormat(writer, c.getTimeInMillis(), false);
+            fastDateFormat(null, writer, c.getTimeInMillis(), false);
         } else {
             format(writer, createJUDate(c), format, timeZone);
         }
@@ -1005,13 +1006,13 @@ public abstract class DateUtil {
      */
     public static String format(final XMLGregorianCalendar c, final String format, final TimeZone timeZone) {
         if ((format == null) && (timeZone == null)) {
-            final BufferedWriter cbuff = Objectory.createBufferedWriter();
+            final StringBuilder sb = Objectory.createStringBuilder();
 
-            fastDateFormat(cbuff, c.toGregorianCalendar().getTimeInMillis(), false);
+            fastDateFormat(sb, null, c.toGregorianCalendar().getTimeInMillis(), false);
 
-            String str = cbuff.toString();
+            String str = sb.toString();
 
-            Objectory.recycle(cbuff);
+            Objectory.recycle(sb);
 
             return str;
         }
@@ -1047,7 +1048,7 @@ public abstract class DateUtil {
      */
     public static void format(final Writer writer, final XMLGregorianCalendar c, final String format, final TimeZone timeZone) {
         if ((format == null) && (timeZone == null)) {
-            fastDateFormat(writer, c.toGregorianCalendar().getTimeInMillis(), false);
+            fastDateFormat(null, writer, c.toGregorianCalendar().getTimeInMillis(), false);
         } else {
             format(writer, createJUDate(c.toGregorianCalendar()), format, timeZone);
         }
@@ -2387,17 +2388,17 @@ public abstract class DateUtil {
 
         if ((format == null) && (timeZone == null)) {
             if (writer == null) {
-                final BufferedWriter bw = Objectory.createBufferedWriter();
+                final StringBuilder sb = Objectory.createStringBuilder();
 
-                fastDateFormat(bw, date.getTime(), isTimestamp);
+                fastDateFormat(sb, null, date.getTime(), isTimestamp);
 
-                String str = bw.toString();
+                String str = sb.toString();
 
-                Objectory.recycle(bw);
+                Objectory.recycle(sb);
 
                 return str;
             } else {
-                fastDateFormat(writer, date.getTime(), isTimestamp);
+                fastDateFormat(null, writer, date.getTime(), isTimestamp);
 
                 return null;
             }
@@ -2428,12 +2429,12 @@ public abstract class DateUtil {
 
     /**
      * Fast date format.
-     *
+     * @param sb TODO
      * @param writer
      * @param timeInMillis
      * @param isTimestamp
      */
-    private static void fastDateFormat(final Writer writer, final long timeInMillis, final boolean isTimestamp) {
+    private static void fastDateFormat(final StringBuilder sb, final Writer writer, final long timeInMillis, final boolean isTimestamp) {
         Calendar c = utcCalendarPool.poll();
 
         if (c == null) {
@@ -2504,9 +2505,17 @@ public abstract class DateUtil {
 
         try {
             if (isTimestamp) {
-                writer.write(utcTimestamp);
+                if (sb == null) {
+                    writer.write(utcTimestamp);
+                } else {
+                    sb.append(utcTimestamp);
+                }
             } else {
-                writer.write(utcTimestamp, 0, 20);
+                if (sb == null) {
+                    writer.write(utcTimestamp, 0, 20);
+                } else {
+                    sb.append(utcTimestamp, 0, 20);
+                }
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);

@@ -53,9 +53,13 @@ public final class Objectory {
 
     static final int POOL_SIZE = 1024;
 
+    static final int POOL_SIZE_FOR_BIG_BUFFER = 64;
+
     static final int POOLABLE_SIZE = 8192;
 
     static final int BUFFER_SIZE = Math.min(Math.max(IOUtil.MAX_MEMORY_IN_MB, KB * 8), 64 * KB);
+
+    static final int BIG_BUFFER_SIZE = BUFFER_SIZE * 8;
 
     private static final int POOLABLE_ARRAY_LENGTH = 128;
 
@@ -76,11 +80,13 @@ public final class Objectory {
     @SuppressWarnings("unchecked")
     private static final Queue<Object[]>[] objectArrayPool = new Queue[POOLABLE_SIZE + 1];
 
-    private static final Queue<char[]> charArrayBufferPool = new ArrayBlockingQueue<>(POOL_SIZE);
-
-    private static final Queue<byte[]> byteArrayBufferPool = new ArrayBlockingQueue<>(POOL_SIZE);
-
     private static final Queue<StringBuilder> stringBuilderPool = new ArrayBlockingQueue<>(POOL_SIZE);
+
+    private static final Queue<StringBuilder> bigStringBuilderPool = new ArrayBlockingQueue<>(POOL_SIZE_FOR_BIG_BUFFER);
+
+    private static final Queue<char[]> charArrayBufferPool = new ArrayBlockingQueue<>(POOL_SIZE_FOR_BIG_BUFFER);
+
+    private static final Queue<byte[]> byteArrayBufferPool = new ArrayBlockingQueue<>(POOL_SIZE_FOR_BIG_BUFFER);
 
     private static final Queue<ByteArrayOutputStream> byteArrayOutputStreamPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
@@ -198,72 +204,6 @@ public final class Objectory {
     }
 
     /**
-     * Creates the char array buffer.
-     *
-     * @return
-     */
-    public static char[] createCharArrayBuffer() {
-        return createCharArrayBuffer(BUFFER_SIZE);
-    }
-
-    /**
-     * Creates the char array buffer.
-     *
-     * @param capacity
-     * @return
-     */
-    public static char[] createCharArrayBuffer(int capacity) {
-        if (capacity > BUFFER_SIZE) {
-            // logCreated("createCharArrayBuffer");
-
-            return new char[capacity];
-        }
-
-        char[] cbuf = charArrayBufferPool.poll();
-
-        if (cbuf == null) {
-            logCreated("createCharArrayBuffer");
-
-            cbuf = new char[BUFFER_SIZE];
-        }
-
-        return cbuf;
-    }
-
-    /**
-     * Creates the byte array buffer.
-     *
-     * @return
-     */
-    public static byte[] createByteArrayBuffer() {
-        return createByteArrayBuffer(BUFFER_SIZE);
-    }
-
-    /**
-     * Creates the byte array buffer.
-     *
-     * @param capacity
-     * @return
-     */
-    public static byte[] createByteArrayBuffer(int capacity) {
-        if (capacity > BUFFER_SIZE) {
-            // logCreated("createByteArrayBuffer");
-
-            return new byte[capacity];
-        }
-
-        byte[] bbuf = byteArrayBufferPool.poll();
-
-        if (bbuf == null) {
-            logCreated("createByteArrayBuffer");
-
-            bbuf = new byte[BUFFER_SIZE];
-        }
-
-        return bbuf;
-    }
-
-    /**
      * Creates the string builder.
      *
      * @return
@@ -279,21 +219,103 @@ public final class Objectory {
      * @return
      */
     public static StringBuilder createStringBuilder(int initCapacity) {
-        if (initCapacity > BUFFER_SIZE) {
+        if (initCapacity > BIG_BUFFER_SIZE) {
             // logCreated("createStringBuilder");
 
             return new StringBuilder(initCapacity);
         }
 
-        StringBuilder sb = stringBuilderPool.poll();
+        if (initCapacity <= BUFFER_SIZE) {
+            StringBuilder sb = stringBuilderPool.poll();
+
+            if (sb == null) {
+                logCreated("createStringBuilder");
+
+                sb = new StringBuilder(BUFFER_SIZE);
+            }
+
+            return sb;
+        } else {
+            return createBigStringBuilder();
+        }
+    }
+
+    public static StringBuilder createBigStringBuilder() {
+        StringBuilder sb = bigStringBuilderPool.poll();
 
         if (sb == null) {
-            logCreated("createStringBuilder");
+            logCreated("bigStringBuilderPool");
 
-            sb = new StringBuilder(BUFFER_SIZE);
+            sb = new StringBuilder(BIG_BUFFER_SIZE);
         }
 
         return sb;
+    }
+
+    /**
+     * Creates the char array buffer.
+     *
+     * @return
+     */
+    public static char[] createCharArrayBuffer() {
+        return createCharArrayBuffer(BIG_BUFFER_SIZE);
+    }
+
+    /**
+     * Creates the char array buffer.
+     *
+     * @param capacity
+     * @return
+     */
+    public static char[] createCharArrayBuffer(int capacity) {
+        if (capacity > BIG_BUFFER_SIZE) {
+            // logCreated("createCharArrayBuffer");
+
+            return new char[capacity];
+        }
+
+        char[] cbuf = charArrayBufferPool.poll();
+
+        if (cbuf == null) {
+            logCreated("createCharArrayBuffer");
+
+            cbuf = new char[BIG_BUFFER_SIZE];
+        }
+
+        return cbuf;
+    }
+
+    /**
+     * Creates the byte array buffer.
+     *
+     * @return
+     */
+    public static byte[] createByteArrayBuffer() {
+        return createByteArrayBuffer(BIG_BUFFER_SIZE);
+    }
+
+    /**
+     * Creates the byte array buffer.
+     *
+     * @param capacity
+     * @return
+     */
+    public static byte[] createByteArrayBuffer(int capacity) {
+        if (capacity > BIG_BUFFER_SIZE) {
+            // logCreated("createByteArrayBuffer");
+
+            return new byte[capacity];
+        }
+
+        byte[] bbuf = byteArrayBufferPool.poll();
+
+        if (bbuf == null) {
+            logCreated("createByteArrayBuffer");
+
+            bbuf = new byte[BIG_BUFFER_SIZE];
+        }
+
+        return bbuf;
     }
 
     /**
@@ -571,7 +593,7 @@ public final class Objectory {
      * @param methodName
      */
     private static void logCreated(String methodName) {
-        if (logger.isWarnEnabled() && (created.incrementAndGet() % 100) == 0) {
+        if (logger.isWarnEnabled() && (created.incrementAndGet() % 1000) == 0) {
             logger.warn("The " + created.get() + "th cachable object is created by " + methodName,
                     new RuntimeException("No error. It's only for debug to print stack trace:"));
         }
@@ -661,10 +683,32 @@ public final class Objectory {
 
     /**
      *
+     * @param sb
+     */
+    public static void recycle(StringBuilder sb) {
+        if ((sb == null) || (sb.capacity() > BIG_BUFFER_SIZE)) {
+            return;
+        }
+
+        if (sb.capacity() <= BUFFER_SIZE) {
+            if (stringBuilderPool.size() < POOL_SIZE) {
+                sb.setLength(0);
+                stringBuilderPool.offer(sb);
+            }
+        } else {
+            if (bigStringBuilderPool.size() < POOL_SIZE_FOR_BIG_BUFFER) {
+                sb.setLength(0);
+                bigStringBuilderPool.offer(sb);
+            }
+        }
+    }
+
+    /**
+     *
      * @param cbuf
      */
     public static void recycle(char[] cbuf) {
-        if ((cbuf == null) || (cbuf.length > BUFFER_SIZE)) {
+        if ((cbuf == null) || (cbuf.length > BIG_BUFFER_SIZE)) {
             return;
         }
 
@@ -676,26 +720,11 @@ public final class Objectory {
      * @param bbuf
      */
     public static void recycle(byte[] bbuf) {
-        if ((bbuf == null) || (bbuf.length > BUFFER_SIZE)) {
+        if ((bbuf == null) || (bbuf.length > BIG_BUFFER_SIZE)) {
             return;
         }
 
         byteArrayBufferPool.offer(bbuf);
-    }
-
-    /**
-     *
-     * @param sb
-     */
-    public static void recycle(StringBuilder sb) {
-        if ((sb == null) || (sb.capacity() > BUFFER_SIZE)) {
-            return;
-        }
-
-        if (stringBuilderPool.size() < POOL_SIZE) {
-            sb.setLength(0);
-            stringBuilderPool.offer(sb);
-        }
     }
 
     /**

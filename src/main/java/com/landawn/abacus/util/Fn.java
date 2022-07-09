@@ -2897,10 +2897,6 @@ public final class Fn extends Comparators {
         return Predicates.indexed(predicate);
     }
 
-    /** The Constant MIN. */
-    @SuppressWarnings({ "rawtypes" })
-    private static final BinaryOperator<Comparable> MIN = (t, u) -> N.compare(t, u) <= 0 ? t : u;
-
     /** The Constant RETURN_FIRST. */
     private static final BinaryOperator<Object> RETURN_FIRST = (t, u) -> t;
 
@@ -2926,6 +2922,10 @@ public final class Fn extends Comparators {
     public static <T> BinaryOperator<T> selectSecond() {
         return (BinaryOperator<T>) RETURN_SECOND;
     }
+
+    /** The Constant MIN. */
+    @SuppressWarnings({ "rawtypes" })
+    private static final BinaryOperator<Comparable> MIN = (t, u) -> N.compare(t, u) <= 0 ? t : u;
 
     /**
      *
@@ -9985,6 +9985,172 @@ public final class Fn extends Comparators {
             N.checkArgNotNull(func);
 
             return entry -> func.apply(entry.getValue());
+        }
+
+        /** The Constant RETURN_FIRST. */
+        private static final Throwables.BinaryOperator<Object, Throwable> RETURN_FIRST = (t, u) -> t;
+
+        /**
+         *
+         * @param <T>
+         * @param <U>
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> selectFirst() {
+            return (Throwables.BinaryOperator) RETURN_FIRST;
+        }
+
+        /** The Constant RETURN_SECOND. */
+        private static final Throwables.BinaryOperator<Object, Throwable> RETURN_SECOND = (t, u) -> u;
+
+        /**
+         *
+         * @param <T>
+         * @param <U>
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> selectSecond() {
+            return (Throwables.BinaryOperator) RETURN_SECOND;
+        }
+
+        /** The Constant MIN. */
+        @SuppressWarnings({ "rawtypes" })
+        private static final Throwables.BinaryOperator<Comparable, Throwable> MIN = (t, u) -> N.compare(t, u) <= 0 ? t : u;
+
+        /**
+         *
+         * @param <T>
+         * @return
+         */
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        public static <T extends Comparable<? super T>, E extends Throwable> Throwables.BinaryOperator<T, E> min() {
+            return (Throwables.BinaryOperator) MIN;
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param comparator
+         * @return
+         */
+        public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> min(final Comparator<? super T> comparator) {
+            N.checkArgNotNull(comparator);
+
+            return (t, u) -> comparator.compare(t, u) <= 0 ? t : u;
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param comparator
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> minBy(final Function<? super T, ? extends Comparable> keyMapper) {
+            N.checkArgNotNull(keyMapper);
+
+            return (t, u) -> N.compare(keyMapper.apply(t), keyMapper.apply(u)) <= 0 ? t : u;
+        }
+
+        /** The Constant MIN_BY_KEY. */
+        @SuppressWarnings("rawtypes")
+        private static final Throwables.BinaryOperator<Map.Entry<Comparable, Object>, Throwable> MIN_BY_KEY = (t,
+                u) -> N.compare(t.getKey(), u.getKey()) <= 0 ? t : u;
+
+        /**
+         *
+         * @param <T>
+         * @return
+         */
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        public static <K extends Comparable<? super K>, V, E extends Throwable> Throwables.BinaryOperator<Map.Entry<K, V>, E> minByKey() {
+            return (Throwables.BinaryOperator) MIN_BY_KEY;
+        }
+
+        /** The Constant MIN_BY_VALUE. */
+        @SuppressWarnings("rawtypes")
+        private static final Throwables.BinaryOperator<Map.Entry<Object, Comparable>, Throwable> MIN_BY_VALUE = (t,
+                u) -> N.compare(t.getValue(), u.getValue()) <= 0 ? t : u;
+
+        /**
+         *
+         * @param <T>
+         * @return
+         */
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        public static <K, V extends Comparable<? super V>, E extends Throwable> Throwables.BinaryOperator<Map.Entry<K, V>, E> minByValue() {
+            return (Throwables.BinaryOperator) MIN_BY_VALUE;
+        }
+
+        /** The Constant MAX. */
+        @SuppressWarnings("rawtypes")
+        private static final Throwables.BinaryOperator<Comparable, Throwable> MAX = (t, u) -> N.compare(t, u) >= 0 ? t : u;
+
+        /**
+         *
+         * @param <T>
+         * @return
+         */
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        public static <T extends Comparable<? super T>, E extends Throwable> Throwables.BinaryOperator<T, E> max() {
+            return (Throwables.BinaryOperator) MAX;
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param comparator
+         * @return
+         */
+        public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> max(final Comparator<? super T> comparator) {
+            N.checkArgNotNull(comparator);
+
+            return (t, u) -> comparator.compare(t, u) >= 0 ? t : u;
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param comparator
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> maxBy(final Function<? super T, ? extends Comparable> keyMapper) {
+            N.checkArgNotNull(keyMapper);
+
+            return (t, u) -> N.compare(keyMapper.apply(t), keyMapper.apply(u)) >= 0 ? t : u;
+        }
+
+        /** The Constant MAX_BY_KEY. */
+        @SuppressWarnings("rawtypes")
+        private static final Throwables.BinaryOperator<Map.Entry<Comparable, Object>, Throwable> MAX_BY_KEY = (t,
+                u) -> N.compare(t.getKey(), u.getKey()) >= 0 ? t : u;
+
+        /**
+         *
+         * @param <T>
+         * @return
+         */
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        public static <K extends Comparable<? super K>, V, E extends Throwable> Throwables.BinaryOperator<Map.Entry<K, V>, E> maxByKey() {
+            return (Throwables.BinaryOperator) MAX_BY_KEY;
+        }
+
+        /** The Constant MAX_BY_VALUE. */
+        @SuppressWarnings("rawtypes")
+        private static final Throwables.BinaryOperator<Map.Entry<Object, Comparable>, Throwable> MAX_BY_VALUE = (t,
+                u) -> N.compare(t.getValue(), u.getValue()) >= 0 ? t : u;
+
+        /**
+         *
+         * @param <T>
+         * @return
+         */
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        public static <K, V extends Comparable<? super V>, E extends Throwable> Throwables.BinaryOperator<Map.Entry<K, V>, E> maxByValue() {
+            return (Throwables.BinaryOperator) MAX_BY_VALUE;
         }
 
         public static <T, E extends Throwable> Throwables.Predicate<T, E> not(final Throwables.Predicate<T, E> predicate) {

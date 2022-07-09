@@ -2933,7 +2933,7 @@ public final class Sheet<R, C, E> implements Cloneable {
 
     @Override
     public String toString() {
-        final StringBuilder sb = Objectory.createStringBuilder();
+        final StringBuilder sb = Objectory.createBigStringBuilder();
 
         sb.append("{rowKeySet=");
         sb.append(_rowKeySet);
