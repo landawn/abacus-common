@@ -62,15 +62,15 @@ public class Properties<K, V> implements Map<K, V> {
 
     /**
      * To avoid <code>NullPointerException</code> for primitive type if the target property is null or not set.
+     * @param propName
+     * @param targetType
      *
      * @param <T>
-     * @param targetClass
-     * @param propName
      * @return
      */
     @SuppressWarnings("unchecked")
-    public <T> T get(Class<T> targetClass, Object propName) {
-        return N.convert(values.get(propName), targetClass);
+    public <T> T get(Object propName, Class<T> targetType) {
+        return N.convert(values.get(propName), targetType);
     }
 
     /**
@@ -95,21 +95,21 @@ public class Properties<K, V> implements Map<K, V> {
 
     /**
      * Gets the or default.
-     *
-     * @param <T>
-     * @param targetClass
      * @param propName
      * @param defaultValue is returned if the specified {@code propName} is not contained in this Properties instance or it's null.
+     * @param targetType
+     *
+     * @param <T>
      * @return
      */
-    public <T> T getOrDefault(Class<T> targetClass, Object propName, T defaultValue) {
+    public <T> T getOrDefault(Object propName, T defaultValue, Class<T> targetType) {
         Object result = values.get(propName);
 
         if (result == null) {
             return defaultValue;
         }
 
-        return N.convert(result, targetClass);
+        return N.convert(result, targetType);
     }
 
     /**

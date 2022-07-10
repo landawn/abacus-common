@@ -24,6 +24,7 @@ import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
+import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
@@ -38,8 +39,6 @@ import javax.mail.internet.MimeMultipart;
  */
 public final class EmailUtil {
 
-    private static final String MAIL_SMTP_HOST = "mail.smtp.host";
-
     private EmailUtil() {
         // singleton.
     }
@@ -50,10 +49,12 @@ public final class EmailUtil {
      * @param from
      * @param subject
      * @param content
-     * @param mailServer
+     * @param userName
+     * @param password
+     * @param props
      */
-    public static void sendMail(String[] recipients, String from, String subject, String content, String mailServer) {
-        sendMailWithAttachment(recipients, from, subject, content, mailServer, null);
+    public static void sendEmail(String[] recipients, String from, String subject, String content, String userName, String password, Properties props) {
+        sendEmailWithAttachment(recipients, from, subject, content, null, userName, password, props);
     }
 
     /**
@@ -66,8 +67,9 @@ public final class EmailUtil {
      * @param mailServer
      * @param attachedFiles
      */
-    public static void sendMailWithAttachment(String[] recipients, String from, String subject, String content, String mailServer, String[] attachedFiles) {
-        send(recipients, from, subject, content, attachedFiles, mailServer, false);
+    public static void sendEmailWithAttachment(String[] recipients, String from, String subject, String content, String[] attachedFiles, String userName,
+            String password, Properties props) {
+        send(recipients, from, subject, content, attachedFiles, false, userName, password, props);
     }
 
     /**
@@ -79,8 +81,8 @@ public final class EmailUtil {
      * @param content
      * @param mailServer
      */
-    public static void sendHTMLMail(String[] recipients, String from, String subject, String content, String mailServer) {
-        sendHTMLMailWithAttachment(recipients, from, subject, content, mailServer, null);
+    public static void sendHTMLEmail(String[] recipients, String from, String subject, String content, String userName, String password, Properties props) {
+        sendHTMLEmailWithAttachment(recipients, from, subject, content, null, userName, password, props);
     }
 
     /**
@@ -93,8 +95,9 @@ public final class EmailUtil {
      * @param mailServer
      * @param attachedFiles
      */
-    public static void sendHTMLMailWithAttachment(String[] recipients, String from, String subject, String content, String mailServer, String[] attachedFiles) {
-        send(recipients, from, subject, content, attachedFiles, mailServer, true);
+    public static void sendHTMLEmailWithAttachment(String[] recipients, String from, String subject, String content, String[] attachedFiles, String userName,
+            String password, Properties props) {
+        send(recipients, from, subject, content, attachedFiles, true, userName, password, props);
     }
 
     /**
@@ -107,16 +110,16 @@ public final class EmailUtil {
      * @param mailServer
      * @param isHTML
      */
-    private static void send(String[] recipients, String from, String subject, String content, String[] attachedFiles, String mailServer, boolean isHTML) {
-        // Get system properties
-        Properties props = System.getProperties();
-
-        // Setup mail server
-        props.put(MAIL_SMTP_HOST, mailServer);
+    private static void send(String[] recipients, String from, String subject, String content, String[] attachedFiles, boolean isHTML, String userName,
+            String password, Properties props) {
 
         try {
-            // Get session
-            Session session = Session.getDefaultInstance(props, null);
+            Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(userName, password);
+                }
+            });
 
             // Define message
             MimeMessage mail = new MimeMessage(session);

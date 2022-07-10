@@ -14,9 +14,17 @@
 
 package com.landawn.abacus.util;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
@@ -30,6 +38,7 @@ import java.util.TreeMap;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
+import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
@@ -914,7 +923,7 @@ public final class Maps {
         } else if (val instanceof String) {
             return Optional.of((String) val);
         } else {
-            return Optional.of(N.toString(val));
+            return Optional.of(N.stringOf(val));
         }
     }
 
@@ -942,7 +951,7 @@ public final class Maps {
         } else if (val instanceof String) {
             return (String) val;
         } else {
-            return N.toString(val);
+            return N.stringOf(val);
         }
     }
 
@@ -972,7 +981,37 @@ public final class Maps {
         } else if (targetType.isAssignableFrom(val.getClass())) {
             return Optional.of((T) val);
         } else {
-            return Optional.of(N.valueOf(targetType, N.stringOf(val)));
+            return Optional.of(N.convert(val, targetType));
+        }
+    }
+
+    /**
+     * Returns an empty {@code Optional<String>} if the specified {@code map} is empty, or no value found by the specified {@code key}, or the value is {@code null}.
+     *
+     * <br />
+     * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
+     * Otherwise, put the {@code targetTpye} to the first parameter of the method.
+     *
+     * @param <K>
+     * @param <T>
+     * @param map
+     * @param key
+     * @param targetType
+     * @return
+     */
+    public static <K, T> Optional<T> get(final Map<? super K, ?> map, final K key, final Type<? extends T> targetType) {
+        if (N.isNullOrEmpty(map)) {
+            return Optional.empty();
+        }
+
+        final Object val = map.get(key);
+
+        if (val == null) {
+            return Optional.empty();
+        } else if (targetType.clazz().isAssignableFrom(val.getClass())) {
+            return Optional.of((T) val);
+        } else {
+            return Optional.of(N.convert(val, targetType));
         }
     }
 
@@ -1001,7 +1040,7 @@ public final class Maps {
         } else if (defaultForNull.getClass().isAssignableFrom(val.getClass())) {
             return (T) val;
         } else {
-            return N.valueOf((Class<T>) defaultForNull.getClass(), N.stringOf(val));
+            return (T) N.convert(val, defaultForNull.getClass());
         }
     }
 
@@ -1227,28 +1266,28 @@ public final class Maps {
      * <code>
         Map map = N.asMap("key1", "val1");
         assertEquals("val1", Maps.getByPath(map, "key1"));
-    
+
         map = N.asMap("key1", N.asList("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-    
+
         map = N.asMap("key1", N.asSet("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", "val2")));
         assertEquals("val2", Maps.getByPath(map, "key1[0][1]"));
-    
+
         map = N.asMap("key1", N.asSet(N.asList(N.asSet("val1"))));
         assertEquals("val1", Maps.getByPath(map, "key1[0][0][0]"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", "val22"))));
         assertEquals("val22", Maps.getByPath(map, "key1[0][1].key2"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertEquals("val33", Maps.getByPath(map, "key1[0][1].key2[1].key3"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertNull(Maps.getByPath(map, "key1[0][2].key2[1].key3"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
      * </code>
      * </pre>
@@ -1260,6 +1299,26 @@ public final class Maps {
      */
     public static <T> T getByPath(final Map<?, ?> map, final String path) {
         return getOrDefaultByPath(map, path, null);
+    }
+
+    public static <T> T getByPath(final Map<?, ?> map, final String path, final Class<? extends T> targetType) {
+        final Object val = getOrDefaultByPath(map, path, null);
+
+        if (val == null || targetType.isAssignableFrom(val.getClass())) {
+            return (T) val;
+        }
+
+        return N.convert(val, targetType);
+    }
+
+    public static <T> T getByPath(final Map<?, ?> map, final String path, final Type<? extends T> targetType) {
+        final Object val = getOrDefaultByPath(map, path, null);
+
+        if (val == null || targetType.clazz().isAssignableFrom(val.getClass())) {
+            return (T) val;
+        }
+
+        return N.convert(val, targetType);
     }
 
     /**
@@ -3260,4 +3319,287 @@ public final class Maps {
     //
     //        return (T) recordInfo.creator().apply(args);
     //    }
+
+    public static class MapGetter<K, V> {
+
+        private final Map<K, V> map;
+        private final boolean defaultForPrimitive;
+
+        MapGetter(final Map<K, V> map, final boolean defaultForPrimitive) {
+            this.map = map;
+            this.defaultForPrimitive = defaultForPrimitive;
+        }
+
+        public static <K, V> MapGetter<K, V> of(final Map<K, V> map) {
+            return of(map, false);
+        }
+
+        public static <K, V> MapGetter<K, V> of(final Map<K, V> map, final boolean defaultForPrimitive) {
+            return new MapGetter<>(map, defaultForPrimitive);
+        }
+
+        public Boolean getBoolean(Object key) {
+            Object value = map.get(key);
+
+            if (value == null && defaultForPrimitive) {
+                return Boolean.FALSE;
+            } else if (value instanceof Boolean) {
+                return (Boolean) value;
+            }
+
+            return N.parseBoolean(N.toString(value));
+        }
+
+        public Character getChar(Object key) {
+            Object value = map.get(key);
+
+            if (value == null && defaultForPrimitive) {
+                return 0;
+            } else if (value instanceof Character) {
+                return (Character) value;
+            }
+
+            return N.parseChar(N.toString(value));
+        }
+
+        public Byte getByte(Object key) {
+            Object value = map.get(key);
+
+            if (value == null && defaultForPrimitive) {
+                return 0;
+            } else if (value instanceof Byte) {
+                return (Byte) value;
+            }
+
+            return Numbers.toByte(N.toString(value));
+        }
+
+        public Short getShort(Object key) {
+            Object value = map.get(key);
+
+            if (value == null && defaultForPrimitive) {
+                return 0;
+            } else if (value instanceof Short) {
+                return (Short) value;
+            }
+
+            return Numbers.toShort(N.toString(value));
+        }
+
+        public Integer getInt(Object key) {
+            Object value = map.get(key);
+
+            if (value == null && defaultForPrimitive) {
+                return 0;
+            } else if (value instanceof Integer) {
+                return (Integer) value;
+            }
+
+            return Numbers.toInt(N.toString(value));
+        }
+
+        public Long getLong(Object key) {
+            Object value = map.get(key);
+
+            if (value == null && defaultForPrimitive) {
+                return 0L;
+            } else if (value instanceof Long) {
+                return (Long) value;
+            }
+
+            return Numbers.toLong(N.toString(value));
+        }
+
+        public Float getFloat(Object key) {
+            Object value = map.get(key);
+
+            if (value == null && defaultForPrimitive) {
+                return 0F;
+            } else if (value instanceof Float) {
+                return (Float) value;
+            }
+
+            return Numbers.toFloat(N.toString(value));
+        }
+
+        public Double getDouble(Object key) {
+            Object value = map.get(key);
+
+            if (value == null && defaultForPrimitive) {
+                return 0d;
+            } else if (value instanceof Double) {
+                return (Double) value;
+            }
+
+            return Numbers.toDouble(N.toString(value));
+        }
+
+        public BigInteger getBigInteger(Object key) {
+            Object value = map.get(key);
+
+            if (value == null || value instanceof BigInteger) {
+                return (BigInteger) value;
+            }
+
+            return N.convert(value, BigInteger.class);
+        }
+
+        public BigDecimal getBigDecimal(Object key) {
+            Object value = map.get(key);
+
+            if (value == null || value instanceof BigDecimal) {
+                return (BigDecimal) value;
+            }
+
+            return N.convert(value, BigDecimal.class);
+        }
+
+        public String getString(Object key) {
+            Object value = map.get(key);
+
+            if (value == null || value instanceof String) {
+                return (String) value;
+            }
+
+            return N.stringOf(value);
+        }
+
+        public Calendar getCalendar(Object key) {
+            Object value = map.get(key);
+
+            if (value == null || value instanceof Calendar) {
+                return (Calendar) value;
+            }
+
+            return N.convert(value, Calendar.class);
+        }
+
+        public Date getJUDate(Object key) {
+            Object value = map.get(key);
+
+            if (value == null || value instanceof Date) {
+                return (Date) value;
+            }
+
+            return N.convert(value, Date.class);
+        }
+
+        public java.sql.Date getDate(Object key) {
+            Object value = map.get(key);
+
+            if (value == null || value instanceof java.sql.Date) {
+                return (java.sql.Date) value;
+            }
+
+            return N.convert(value, java.sql.Date.class);
+        }
+
+        public java.sql.Time getTime(Object key) {
+            Object value = map.get(key);
+
+            if (value == null || value instanceof java.sql.Time) {
+                return (java.sql.Time) value;
+            }
+
+            return N.convert(value, java.sql.Time.class);
+        }
+
+        public java.sql.Timestamp getTimestamp(Object key) {
+            Object value = map.get(key);
+
+            if (value == null || value instanceof java.sql.Timestamp) {
+                return (java.sql.Timestamp) value;
+            }
+
+            return N.convert(value, java.sql.Timestamp.class);
+        }
+
+        public LocalDate getLocalDate(Object key) {
+            Object value = map.get(key);
+
+            if (value == null || value instanceof LocalDate) {
+                return (LocalDate) value;
+            }
+
+            return N.convert(value, LocalDate.class);
+        }
+
+        public LocalTime getLocalTime(Object key) {
+            Object value = map.get(key);
+
+            if (value == null || value instanceof LocalTime) {
+                return (LocalTime) value;
+            }
+
+            return N.convert(value, LocalTime.class);
+        }
+
+        public LocalDateTime getLocalDateTime(Object key) {
+            Object value = map.get(key);
+
+            if (value == null || value instanceof LocalDateTime) {
+                return (LocalDateTime) value;
+            }
+
+            return N.convert(value, LocalDateTime.class);
+        }
+
+        public ZonedDateTime getZonedDateTime(Object key) {
+            Object value = map.get(key);
+
+            if (value == null || value instanceof ZonedDateTime) {
+                return (ZonedDateTime) value;
+            }
+
+            return N.convert(value, ZonedDateTime.class);
+        }
+
+        public Object getObject(Object key) {
+            return map.get(key);
+        }
+
+        /**
+         * Returns {@code null} if no value found by the specified {@code key}, or the value is {@code null}.
+         *
+         * <br />
+         * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
+         * Otherwise, put the {@code targetTpye} to the first parameter of the method.
+         *
+         * @param <T>
+         * @param key
+         * @param targetType
+         * @return
+         */
+        public <T> T get(Object key, Class<T> targetType) {
+            final V val = map.get(key);
+
+            if (val == null || targetType.isAssignableFrom(val.getClass())) {
+                return (T) val;
+            }
+
+            return N.convert(val, targetType);
+        }
+
+        /**
+         * Returns {@code null} if no value found by the specified {@code key}, or the value is {@code null}.
+         *
+         * <br />
+         * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
+         * Otherwise, put the {@code targetTpye} to the first parameter of the method.
+         *
+         * @param <T>
+         * @param key
+         * @param targetType
+         * @return
+         */
+        public <T> T get(Object key, Type<T> targetType) {
+            final V val = map.get(key);
+
+            if (val == null || targetType.clazz().isAssignableFrom(val.getClass())) {
+                return (T) val;
+            }
+
+            return N.convert(val, targetType);
+        }
+    }
 }
