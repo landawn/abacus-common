@@ -44,6 +44,11 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
+import java.util.function.IntFunction;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.exception.DuplicatedResultException;
@@ -63,12 +68,7 @@ import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.Tuple.Tuple4;
 import com.landawn.abacus.util.Tuple.Tuple5;
 import com.landawn.abacus.util.u.Nullable;
-import com.landawn.abacus.util.function.BiFunction;
-import com.landawn.abacus.util.function.BiPredicate;
 import com.landawn.abacus.util.function.IntBiFunction;
-import com.landawn.abacus.util.function.IntFunction;
-import com.landawn.abacus.util.function.Predicate;
-import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.ObjIteratorEx;
 import com.landawn.abacus.util.stream.Stream;
 
@@ -24390,7 +24390,7 @@ public final class N extends CommonUtil {
      * @param e
      * @return
      * @see ExceptionUtil#toRuntimeException(Throwable)
-     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, com.landawn.abacus.util.function.Function)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class,Function)
      */
     public static RuntimeException toRuntimeException(final Throwable e) {
         return ExceptionUtil.toRuntimeException(e);

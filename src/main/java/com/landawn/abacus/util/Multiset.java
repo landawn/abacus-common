@@ -27,15 +27,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.function.IntFunction;
+import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
-import com.landawn.abacus.util.function.Function;
-import com.landawn.abacus.util.function.IntFunction;
-import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.EntryStream;
 import com.landawn.abacus.util.stream.Stream;
 
@@ -1701,7 +1700,7 @@ public final class Multiset<T> implements Iterable<T> {
         return Stream.of(flatIterator());
     }
 
-    private static final Function<MutableInt, Integer> TO_INT = t -> t.value();
+    private static final com.landawn.abacus.util.function.Function<MutableInt, Integer> TO_INT = t -> t.value();
 
     public EntryStream<T, Integer> entryStream() {
         return EntryStream.of(valueMap).mapValue(TO_INT);

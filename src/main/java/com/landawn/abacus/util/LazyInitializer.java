@@ -15,9 +15,9 @@
  */
 package com.landawn.abacus.util;
 
-import com.landawn.abacus.util.function.Supplier;
+import java.util.function.Supplier;
 
-public final class LazyInitializer<T> implements Supplier<T> {
+public final class LazyInitializer<T> implements com.landawn.abacus.util.function.Supplier<T> {
     private volatile boolean initialized = false;
     private volatile T value = null;
     private final Supplier<T> supplier;

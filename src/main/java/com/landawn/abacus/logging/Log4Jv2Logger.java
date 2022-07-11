@@ -14,10 +14,10 @@
 
 package com.landawn.abacus.logging;
 
+import java.util.function.Supplier;
+
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.spi.ExtendedLogger;
-
-import com.landawn.abacus.util.function.Supplier;
 
 /**
  *

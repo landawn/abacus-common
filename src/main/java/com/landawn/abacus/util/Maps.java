@@ -34,6 +34,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
+import java.util.function.IntFunction;
+import java.util.function.Supplier;
 
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.EntityInfo;
@@ -50,10 +54,6 @@ import com.landawn.abacus.util.u.OptionalFloat;
 import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
-import com.landawn.abacus.util.function.BiFunction;
-import com.landawn.abacus.util.function.BinaryOperator;
-import com.landawn.abacus.util.function.IntFunction;
-import com.landawn.abacus.util.function.Supplier;
 
 /**
  * <p>
@@ -1266,28 +1266,28 @@ public final class Maps {
      * <code>
         Map map = N.asMap("key1", "val1");
         assertEquals("val1", Maps.getByPath(map, "key1"));
-
+    
         map = N.asMap("key1", N.asList("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-
+    
         map = N.asMap("key1", N.asSet("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-
+    
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", "val2")));
         assertEquals("val2", Maps.getByPath(map, "key1[0][1]"));
-
+    
         map = N.asMap("key1", N.asSet(N.asList(N.asSet("val1"))));
         assertEquals("val1", Maps.getByPath(map, "key1[0][0][0]"));
-
+    
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", "val22"))));
         assertEquals("val22", Maps.getByPath(map, "key1[0][1].key2"));
-
+    
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertEquals("val33", Maps.getByPath(map, "key1[0][1].key2[1].key3"));
-
+    
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertNull(Maps.getByPath(map, "key1[0][2].key2[1].key3"));
-
+    
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
      * </code>
      * </pre>
@@ -1958,7 +1958,7 @@ public final class Maps {
      * @param <V> the value type
      * @param map
      * @return
-     * @see Multimap#invertFrom(Map, com.landawn.abacus.util.function.Supplier)
+     * @see Multimap#invertFrom(Map, Supplier)
      * @see ListMultimap#invertFrom(Map)
      * @see ListMultimap#invertFrom(Map)
      */
@@ -2015,7 +2015,7 @@ public final class Maps {
      * @param <V> the value type
      * @param map
      * @return
-     * @see Multimap#flatInvertFrom(Map, com.landawn.abacus.util.function.Supplier)
+     * @see Multimap#flatInvertFrom(Map, Supplier)
      * @see ListMultimap#flatInvertFrom(Map)
      * @see SetMultimap#flatInvertFrom(Map)
      */

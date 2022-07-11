@@ -15,9 +15,9 @@ package com.landawn.abacus.util;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.util.function.Supplier;
 
 /**
  * This class is mainly designed for functional programming.

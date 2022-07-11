@@ -1,9 +1,9 @@
 package com.landawn.abacus.util;
 
-import com.landawn.abacus.util.function.Consumer;
-import com.landawn.abacus.util.function.Function;
-import com.landawn.abacus.util.function.Predicate;
-import com.landawn.abacus.util.function.Supplier;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /*
  * Copyright (C) 2019 HaiYang Li

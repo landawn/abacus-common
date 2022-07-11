@@ -14,9 +14,10 @@
 
 package com.landawn.abacus.logging;
 
+import java.util.function.Supplier;
+
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
-import com.landawn.abacus.util.function.Supplier;
 
 /**
  *

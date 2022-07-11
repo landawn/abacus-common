@@ -22,12 +22,12 @@ import java.util.Map;
 import java.util.Random;
 import java.util.RandomAccess;
 import java.util.Set;
+import java.util.function.IntFunction;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.u.Optional;
-import com.landawn.abacus.util.function.IntFunction;
 
 /**
  *

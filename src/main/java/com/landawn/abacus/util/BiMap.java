@@ -21,9 +21,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Internal;
-import com.landawn.abacus.util.function.Supplier;
 
 /**
  * A BiMap (or "bidirectional map") is a map that preserves the uniqueness of its values as well as that of its keys.

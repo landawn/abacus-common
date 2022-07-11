@@ -24,8 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
-
-import com.landawn.abacus.util.function.Supplier;
+import java.util.function.Supplier;
 
 public final class Enumerations {
 

@@ -62,7 +62,6 @@ import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.Fn.BiPredicates;
 import com.landawn.abacus.util.u.Holder;
-import com.landawn.abacus.util.function.BiPredicate;
 
 /**
  * <p>
@@ -274,11 +273,11 @@ public final class IOUtil {
     // ...
     public static final int EOF = -1;
 
-    private static final BiPredicate<File, File> all_files_filter = (parentDir, file) -> true;
+    private static final com.landawn.abacus.util.function.BiPredicate<File, File> all_files_filter = (parentDir, file) -> true;
 
-    private static final BiPredicate<File, File> directories_excluded_filter = (parentDir, file) -> !file.isDirectory();
+    private static final com.landawn.abacus.util.function.BiPredicate<File, File> directories_excluded_filter = (parentDir, file) -> !file.isDirectory();
 
-    private static final BiPredicate<File, File> directories_only_filter = (parentDir, file) -> file.isDirectory();
+    private static final com.landawn.abacus.util.function.BiPredicate<File, File> directories_only_filter = (parentDir, file) -> file.isDirectory();
 
     /**
      * Constructor for FileUtil.

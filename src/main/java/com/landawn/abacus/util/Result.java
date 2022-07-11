@@ -16,10 +16,11 @@
 
 package com.landawn.abacus.util;
 
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.Tuple.Tuple2;
-import com.landawn.abacus.util.function.Function;
-import com.landawn.abacus.util.function.Supplier;
 
 /**
  *

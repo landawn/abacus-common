@@ -19,11 +19,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.IntFunction;
+import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
-import com.landawn.abacus.util.function.IntFunction;
-import com.landawn.abacus.util.function.Supplier;
 
 /**
  *
@@ -341,7 +341,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param <E>
      * @param map
      * @return
-     * @see Multimap#invertFrom(Map, com.landawn.abacus.util.function.Supplier)
+     * @see Multimap#invertFrom(Map, Supplier)
      */
     public static <K, E> ListMultimap<E, K> invertFrom(final Map<K, E> map) {
         final ListMultimap<E, K> multimap = new ListMultimap<>(Maps.newOrderingMap(map), ArrayList.class);
@@ -362,7 +362,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param <E>
      * @param map
      * @return
-     * @see Multimap#flatInvertFrom(Map, com.landawn.abacus.util.function.Supplier)
+     * @see Multimap#flatInvertFrom(Map, Supplier)
      */
     public static <K, E> ListMultimap<E, K> flatInvertFrom(final Map<K, ? extends Collection<? extends E>> map) {
         final ListMultimap<E, K> multimap = new ListMultimap<>(Maps.newOrderingMap(map), ArrayList.class);

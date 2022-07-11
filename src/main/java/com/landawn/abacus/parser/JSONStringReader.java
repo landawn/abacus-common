@@ -499,10 +499,10 @@ class JSONStringReader extends AbstractJSONReader {
             case 'f':
                 return '\f';
 
-                // // fall-through
-                // case '\'':
-                // case '"':
-                // case '\\':
+            // // fall-through
+            // case '\'':
+            // case '"':
+            // case '\\':
             default:
                 return (char) escaped;
         }

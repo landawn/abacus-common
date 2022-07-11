@@ -2445,6 +2445,74 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param mapper
      * @return
      */
+    @Beta
+    @IntermediateOp
+    public <R> ExceptionalStream<R, E> flatmap(final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends E> mapper) {
+        assertNotClosed();
+
+        final ExceptionalIterator<R, E> iter = new ExceptionalIterator<>() {
+            private Stream<? extends R> s = null;
+            private Iterator<? extends R> cur = null;
+
+            @Override
+            public boolean hasNext() throws E {
+                while (cur == null || !cur.hasNext()) {
+                    if (elements.hasNext()) {
+                        if (s != null) {
+                            s.close();
+                            s = null;
+                        }
+
+                        s = mapper.apply(elements.next());
+
+                        if (s == null) {
+                            cur = null;
+                        } else {
+                            cur = s.iterator();
+                        }
+                    } else {
+                        cur = null;
+                        break;
+                    }
+                }
+
+                return cur != null && cur.hasNext();
+            }
+
+            @Override
+            public R next() throws E {
+                if ((cur == null || !cur.hasNext()) && !hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                return cur.next();
+            }
+
+            @Override
+            public void close() throws E {
+                if (s != null) {
+                    s.close();
+                }
+            }
+        };
+
+        final Deque<Throwables.Runnable<? extends E>> newCloseHandlers = new ArrayDeque<>(N.size(closeHandlers) + 1);
+
+        newCloseHandlers.add(newCloseHandler(iter));
+
+        if (N.notNullOrEmpty(closeHandlers)) {
+            newCloseHandlers.addAll(closeHandlers);
+        }
+
+        return newStream(iter, newCloseHandlers);
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param mapper
+     * @return
+     */
     @IntermediateOp
     public <R> ExceptionalStream<R, E> flattMap(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends E> mapper) {
         assertNotClosed();

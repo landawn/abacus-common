@@ -25,7 +25,7 @@
 
 package com.landawn.abacus.logging;
 
-import com.landawn.abacus.util.function.Supplier;
+import java.util.function.Supplier;
 
 /**
  * The org.slf4j.Logger interface is the main user entry point of SLF4J API. It is expected that logging takes place

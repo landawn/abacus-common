@@ -77,8 +77,7 @@ public final class Throwables {
      * @param actionOnError
      * @return
      */
-    public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd,
-            final com.landawn.abacus.util.function.Function<? super Throwable, R> actionOnError) {
+    public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd, final java.util.function.Function<? super Throwable, R> actionOnError) {
         N.checkArgNotNull(actionOnError);
 
         try {
@@ -95,7 +94,7 @@ public final class Throwables {
      * @param supplier
      * @return
      */
-    public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd, final com.landawn.abacus.util.function.Supplier<R> supplier) {
+    public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd, final java.util.function.Supplier<R> supplier) {
         N.checkArgNotNull(supplier);
 
         try {
@@ -129,8 +128,8 @@ public final class Throwables {
      * @return
      * @throws RuntimeException if some error happens and <code>predicate</code> return false.
      */
-    public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd,
-            final com.landawn.abacus.util.function.Predicate<? super Throwable> predicate, final com.landawn.abacus.util.function.Supplier<R> supplier) {
+    public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd, final java.util.function.Predicate<? super Throwable> predicate,
+            final java.util.function.Supplier<R> supplier) {
         N.checkArgNotNull(predicate);
         N.checkArgNotNull(supplier);
 
@@ -154,8 +153,8 @@ public final class Throwables {
      * @return
      * @throws RuntimeException if some error happens and <code>predicate</code> return false.
      */
-    public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd,
-            final com.landawn.abacus.util.function.Predicate<? super Throwable> predicate, final R defaultValue) {
+    public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd, final java.util.function.Predicate<? super Throwable> predicate,
+            final R defaultValue) {
         N.checkArgNotNull(predicate);
 
         try {

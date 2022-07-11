@@ -42,6 +42,11 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.function.IntFunction;
+import java.util.function.Supplier;
+import java.util.stream.Collector;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedIOException;
@@ -68,13 +73,7 @@ import com.landawn.abacus.util.Throwables.TriPredicate;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.u.Optional;
-import com.landawn.abacus.util.function.BiConsumer;
-import com.landawn.abacus.util.function.Consumer;
-import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.IndexedConsumer;
-import com.landawn.abacus.util.function.IntFunction;
-import com.landawn.abacus.util.function.Supplier;
-import com.landawn.abacus.util.stream.Collector;
 import com.landawn.abacus.util.stream.Collectors;
 import com.landawn.abacus.util.stream.IntStream;
 import com.landawn.abacus.util.stream.ObjIteratorEx;
@@ -123,26 +122,6 @@ public class RowDataSet implements DataSet, Cloneable {
     private static final XMLSerializationConfig xsc = XSC.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP);
 
     private static final Type<Object> strType = N.typeOf(String.class);
-
-    @SuppressWarnings("rawtypes")
-    private static final Comparator<Object[]> MULTI_COLUMN_COMPARATOR = new Comparator<>() {
-        private final Comparator<Comparable> naturalOrder = Comparators.naturalOrder();
-
-        @Override
-        public int compare(final Object[] o1, final Object[] o2) {
-            int rt = 0;
-
-            for (int i = 0, len = o1.length; i < len; i++) {
-                rt = naturalOrder.compare((Comparable) o1[i], (Comparable) o2[i]);
-
-                if (rt != 0) {
-                    return rt;
-                }
-            }
-
-            return rt;
-        }
-    };
 
     List<String> _columnNameList;
 
@@ -4808,7 +4787,7 @@ public class RowDataSet implements DataSet, Cloneable {
     //     */
     //    @Override
     //    public DataSet groupBy(final String columnName) {
-    //        return groupBy(columnName, (Function<?, ?>) null);
+    //        return groupBy(columnName, NULL_PARAM_INDICATOR_1);
     //    }
 
     /**
@@ -4822,7 +4801,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <T> DataSet groupBy(final String columnName, String aggregateResultColumnName, String aggregateOnColumnName, final Collector<T, ?, ?> collector) {
-        return groupBy(columnName, (Function<?, ?>) null, aggregateResultColumnName, aggregateOnColumnName, collector);
+        return groupBy(columnName, NULL_PARAM_INDICATOR_1, aggregateResultColumnName, aggregateOnColumnName, collector);
     }
 
     @Override
@@ -4884,7 +4863,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public <U, E extends Exception> DataSet groupBy(final String columnName, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
             final Throwables.Function<? super DisposableObjArray, U, E> rowMapper, final Collector<? super U, ?, ?> collector) throws E {
-        return groupBy(columnName, (Function<?, ?>) null, aggregateResultColumnName, aggregateOnColumnNames, rowMapper, collector);
+        return groupBy(columnName, NULL_PARAM_INDICATOR_1, aggregateResultColumnName, aggregateOnColumnNames, rowMapper, collector);
     }
 
     /**
@@ -4901,7 +4880,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public <T, E extends Exception> DataSet groupBy(final String columnName, String aggregateResultColumnName, String aggregateOnColumnName,
             final Throwables.Function<Stream<T>, ?, E> func) throws E {
-        return groupBy(columnName, (Function<?, ?>) null, aggregateResultColumnName, aggregateOnColumnName, func);
+        return groupBy(columnName, NULL_PARAM_INDICATOR_1, aggregateResultColumnName, aggregateOnColumnName, func);
     }
 
     /**
@@ -5086,7 +5065,9 @@ public class RowDataSet implements DataSet, Cloneable {
         return new RowDataSet(newColumnNameList, newColumnList);
     }
 
-    private static final Function<DisposableObjArray, Object[]> CLONE = t -> t.clone();
+    private static final Throwables.Function<DisposableObjArray, Object[], RuntimeException> CLONE = DisposableObjArray::clone;
+    private static final Throwables.Function<?, ?, RuntimeException> NULL_PARAM_INDICATOR_1 = null;
+    private static final Throwables.Function<? super DisposableObjArray, ?, RuntimeException> NULL_PARAM_INDICATOR_2 = null;
 
     /**
      *
@@ -5202,7 +5183,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public DataSet groupBy(final Collection<String> columnNames) {
-        return groupBy(columnNames, (Function<? super DisposableObjArray, ?>) null);
+        return groupBy(columnNames, NULL_PARAM_INDICATOR_2);
     }
 
     /**
@@ -5217,7 +5198,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public <T> DataSet groupBy(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName,
             final Collector<T, ?, ?> collector) {
-        return groupBy(columnNames, (Function<? super DisposableObjArray, ?>) null, aggregateResultColumnName, aggregateOnColumnName, collector);
+        return groupBy(columnNames, NULL_PARAM_INDICATOR_2, aggregateResultColumnName, aggregateOnColumnName, collector);
     }
 
     /**
@@ -5234,7 +5215,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public <T, E extends Exception> DataSet groupBy(Collection<String> columnNames, String aggregateResultColumnName, String aggregateOnColumnName,
             final Throwables.Function<Stream<T>, ?, E> func) throws E {
-        return groupBy(columnNames, (Function<? super DisposableObjArray, ?>) null, aggregateResultColumnName, aggregateOnColumnName, func);
+        return groupBy(columnNames, NULL_PARAM_INDICATOR_2, aggregateResultColumnName, aggregateOnColumnName, func);
     }
 
     @Override
@@ -5339,7 +5320,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public <U, E extends Exception> DataSet groupBy(Collection<String> columnNames, String aggregateResultColumnName, Collection<String> aggregateOnColumnNames,
             final Throwables.Function<? super DisposableObjArray, U, E> rowMapper, final Collector<? super U, ?, ?> collector) throws E {
-        return groupBy(columnNames, (Function<? super DisposableObjArray, ?>) null, aggregateResultColumnName, aggregateOnColumnNames, rowMapper, collector);
+        return groupBy(columnNames, NULL_PARAM_INDICATOR_2, aggregateResultColumnName, aggregateOnColumnNames, rowMapper, collector);
     }
 
     /**
@@ -6145,9 +6126,9 @@ public class RowDataSet implements DataSet, Cloneable {
                         (Callable<DataSet>) () -> groupBy(columnNames1, keyMapper, aggregateResultColumnName, aggregateOnColumnNames, rowMapper, collector)));
     }
 
-    private static final Function<Set<String>, Integer> TO_SIZE_FUNC = t -> t.size();
+    private static final com.landawn.abacus.util.function.Function<Set<String>, Integer> TO_SIZE_FUNC = t -> t.size();
 
-    private static final Consumer<List<Set<String>>> REVERSE_ACTION = t -> N.reverse(t);
+    private static final com.landawn.abacus.util.function.Consumer<List<Set<String>>> REVERSE_ACTION = t -> N.reverse(t);
 
     /**
      *
@@ -6189,7 +6170,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public void sortBy(final Collection<String> columnNames) {
-        sortBy(columnNames, (Comparator<? super Object[]>) null);
+        sortBy(columnNames, Comparators.OBJECT_ARRAY_COMPARATOR);
     }
 
     /**
@@ -6242,7 +6223,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public void parallelSortBy(final Collection<String> columnNames) {
-        parallelSortBy(columnNames, (Comparator<? super Object[]>) null);
+        parallelSortBy(columnNames, Comparators.OBJECT_ARRAY_COMPARATOR);
     }
 
     /**
@@ -6320,7 +6301,7 @@ public class RowDataSet implements DataSet, Cloneable {
             final Comparator<Object> cmp2 = (Comparator<Object>) cmp;
             pairCmp = (a, b) -> cmp2.compare(a.value(), b.value());
         } else {
-            pairCmp = (a, b) -> MULTI_COLUMN_COMPARATOR.compare(a.value(), b.value());
+            pairCmp = (a, b) -> Comparators.OBJECT_ARRAY_COMPARATOR.compare(a.value(), b.value());
         }
 
         return pairCmp;
@@ -6503,7 +6484,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public DataSet topBy(final Collection<String> columnNames, final int n) {
-        return topBy(columnNames, n, (Comparator<? super Object[]>) null);
+        return topBy(columnNames, n, Comparators.OBJECT_ARRAY_COMPARATOR);
     }
 
     /**
@@ -6707,7 +6688,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public DataSet distinctBy(final Collection<String> columnNames) {
-        return distinctBy(columnNames, (Function<? super DisposableObjArray, ?>) null);
+        return distinctBy(columnNames, NULL_PARAM_INDICATOR_2);
     }
 
     /**

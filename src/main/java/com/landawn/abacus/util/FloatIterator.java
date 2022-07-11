@@ -15,11 +15,11 @@
 package com.landawn.abacus.util;
 
 import java.util.NoSuchElementException;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.util.function.BooleanSupplier;
 import com.landawn.abacus.util.function.FloatSupplier;
-import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.FloatStream;
 
 /**

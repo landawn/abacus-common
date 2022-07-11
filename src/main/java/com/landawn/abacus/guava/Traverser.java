@@ -15,10 +15,10 @@ package com.landawn.abacus.guava;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.function.Function;
 
 import com.google.common.graph.SuccessorsFunction;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.stream.Stream;
 
 /**

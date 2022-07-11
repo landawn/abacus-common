@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -69,8 +71,6 @@ import com.landawn.abacus.util.Tuple.Tuple9;
 import com.landawn.abacus.util.TypeAttrParser;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
-import com.landawn.abacus.util.function.BiFunction;
-import com.landawn.abacus.util.function.Function;
 
 /**
  * A factory for creating Type objects.

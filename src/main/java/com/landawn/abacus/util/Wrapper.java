@@ -18,10 +18,9 @@ package com.landawn.abacus.util;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import com.landawn.abacus.util.function.BiPredicate;
-import com.landawn.abacus.util.function.Function;
-import com.landawn.abacus.util.function.ToIntFunction;
+import java.util.function.BiPredicate;
+import java.util.function.Function;
+import java.util.function.ToIntFunction;
 
 /**
  *

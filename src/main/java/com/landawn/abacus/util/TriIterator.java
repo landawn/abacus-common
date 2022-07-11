@@ -19,11 +19,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.function.BiConsumer;
+import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
 import com.landawn.abacus.util.Fn.Suppliers;
-import com.landawn.abacus.util.function.BiConsumer;
-import com.landawn.abacus.util.function.BooleanSupplier;
-import com.landawn.abacus.util.function.Consumer;
 import com.landawn.abacus.util.function.IndexedConsumer;
 import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.stream.Stream;
@@ -84,7 +84,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @return
      */
     public static <A, B, C> TriIterator<A, B, C> generate(final Consumer<Triple<A, B, C>> output) {
-        return generate(BooleanSupplier.TRUE, output);
+        return generate(com.landawn.abacus.util.function.BooleanSupplier.TRUE, output);
     }
 
     /**

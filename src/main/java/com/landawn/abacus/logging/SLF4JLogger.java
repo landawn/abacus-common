@@ -17,10 +17,10 @@ package com.landawn.abacus.logging;
 import static org.slf4j.spi.LocationAwareLogger.ERROR_INT;
 import static org.slf4j.spi.LocationAwareLogger.WARN_INT;
 
+import java.util.function.Supplier;
+
 import org.slf4j.helpers.NOPLoggerFactory;
 import org.slf4j.spi.LocationAwareLogger;
-
-import com.landawn.abacus.util.function.Supplier;
 
 /**
  *

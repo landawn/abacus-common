@@ -124,9 +124,9 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     @Override
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", ignoreUnmatchedProperty=" + N.toString(ignoreUnmatchedProperty)
-        + ", ignoreNullOrEmpty=" + N.toString(ignoreNullOrEmpty) + ", nullToEmpty=" + N.toString(nullToEmpty) + ", elementType="
-        + N.toString(elementType) + ", keyType=" + N.toString(keyType) + ", valueType=" + N.toString(valueType) + ", propTypes=" + N.toString(propTypes)
-        + "}";
+                + ", ignoreNullOrEmpty=" + N.toString(ignoreNullOrEmpty) + ", nullToEmpty=" + N.toString(nullToEmpty) + ", elementType="
+                + N.toString(elementType) + ", keyType=" + N.toString(keyType) + ", valueType=" + N.toString(valueType) + ", propTypes=" + N.toString(propTypes)
+                + "}";
     }
 
     /**

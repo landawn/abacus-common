@@ -15,11 +15,11 @@
 package com.landawn.abacus.util;
 
 import java.util.Iterator;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
-import com.landawn.abacus.util.function.BiPredicate;
-import com.landawn.abacus.util.function.Predicate;
 
 /**
  *

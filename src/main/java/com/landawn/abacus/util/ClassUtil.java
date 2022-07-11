@@ -131,8 +131,6 @@ import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
 import com.landawn.abacus.util.u.R;
-import com.landawn.abacus.util.function.Function;
-import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
@@ -2435,12 +2433,14 @@ public final class ClassUtil {
                         : null;
     }
 
-    private static final Map<Class<?>, Tuple3<Class<?>, Supplier<Object>, Function<Object, Object>>> builderMap = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, Tuple3<Class<?>, com.landawn.abacus.util.function.Supplier<Object>, com.landawn.abacus.util.function.Function<Object, Object>>> builderMap = new ConcurrentHashMap<>();
 
-    public static Tuple3<Class<?>, Supplier<Object>, Function<Object, Object>> getBuilderInfo(final Class<?> cls) {
+    public static Tuple3<Class<?>, com.landawn.abacus.util.function.Supplier<Object>, com.landawn.abacus.util.function.Function<Object, Object>> getBuilderInfo(
+            final Class<?> cls) {
         N.checkArgNotNull(cls, "cls");
 
-        Tuple3<Class<?>, Supplier<Object>, Function<Object, Object>> builderInfo = builderMap.get(cls);
+        Tuple3<Class<?>, com.landawn.abacus.util.function.Supplier<Object>, com.landawn.abacus.util.function.Function<Object, Object>> builderInfo = builderMap
+                .get(cls);
 
         if (builderInfo == null) {
             Method buildMethod = null;
@@ -2466,8 +2466,8 @@ public final class ClassUtil {
                     final Method finalBuilderMethod = builderMethod;
                     final Method finalBuildMethod = buildMethod;
 
-                    final Supplier<Object> builderSupplier = () -> ClassUtil.invokeMethod(finalBuilderMethod);
-                    final Function<Object, Object> buildFunc = instance -> ClassUtil.invokeMethod(instance, finalBuildMethod);
+                    final com.landawn.abacus.util.function.Supplier<Object> builderSupplier = () -> ClassUtil.invokeMethod(finalBuilderMethod);
+                    final com.landawn.abacus.util.function.Function<Object, Object> buildFunc = instance -> ClassUtil.invokeMethod(instance, finalBuildMethod);
 
                     builderInfo = Tuple.of(builderClass, builderSupplier, buildFunc);
 
@@ -2876,7 +2876,8 @@ public final class ClassUtil {
                 allClasses.add(superClass);
             }
 
-            final Tuple3<Class<?>, Supplier<Object>, Function<Object, Object>> builderInfo = getBuilderInfo(cls);
+            final Tuple3<Class<?>, com.landawn.abacus.util.function.Supplier<Object>, com.landawn.abacus.util.function.Function<Object, Object>> builderInfo = getBuilderInfo(
+                    cls);
             final Class<?> builderClass = builderInfo == null ? null : builderInfo._1;
 
             final Map<String, Field> propFieldMap = new LinkedHashMap<>();

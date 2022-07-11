@@ -24,14 +24,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.exception.UncheckedException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedSQLException;
-import com.landawn.abacus.util.function.Function;
-import com.landawn.abacus.util.function.Predicate;
 
 /**
  * Note: This class contains the methods copied from Apache Commons and Google Guava under Apache License v2.

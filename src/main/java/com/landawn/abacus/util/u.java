@@ -21,9 +21,9 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
-import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.ByteStream;
 import com.landawn.abacus.util.stream.CharStream;
 import com.landawn.abacus.util.stream.DoubleStream;

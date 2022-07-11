@@ -18,9 +18,9 @@ package com.landawn.abacus.util;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import com.landawn.abacus.util.Fn.Suppliers;
-import com.landawn.abacus.util.function.Supplier;
 
 /**
  *

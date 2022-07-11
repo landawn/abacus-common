@@ -20,12 +20,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
 import com.landawn.abacus.util.Fn.Suppliers;
-import com.landawn.abacus.util.function.BiConsumer;
-import com.landawn.abacus.util.function.BiFunction;
-import com.landawn.abacus.util.function.BooleanSupplier;
-import com.landawn.abacus.util.function.Consumer;
 import com.landawn.abacus.util.function.IndexedConsumer;
 import com.landawn.abacus.util.stream.Stream;
 
@@ -156,7 +156,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @return
      */
     public static <A, B> BiIterator<A, B> generate(final Consumer<Pair<A, B>> output) {
-        return generate(BooleanSupplier.TRUE, output);
+        return generate(com.landawn.abacus.util.function.BooleanSupplier.TRUE, output);
     }
 
     /**
