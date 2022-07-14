@@ -950,9 +950,9 @@ public final class ClassUtil {
                     final String tmp = res.substring(i + 1, j);
 
                     if (tmp.substring(0, tmp.length() / 2).equals(tmp.substring(tmp.length() / 2 + 1))) {
-                        sb.append(StringUtil.reverse(tmp.substring(0, tmp.length() / 2)));
+                        sb.append(Strings.reverse(tmp.substring(0, tmp.length() / 2)));
                     } else {
-                        sb.append(StringUtil.reverse(tmp));
+                        sb.append(Strings.reverse(tmp));
                     }
 
                     i++;
@@ -1669,14 +1669,14 @@ public final class ClassUtil {
             if (N.isNullOrEmpty(propName) && ((methodName.startsWith(IS) && methodName.length() > 2)
                     || ((methodName.startsWith(GET) || methodName.startsWith(SET) || methodName.startsWith(HAS)) && methodName.length() > 3))) {
                 final String newName = methodName.substring(methodName.startsWith(IS) ? 2 : 3);
-                field = getDeclaredField(getSetMethod.getDeclaringClass(), StringUtil.uncapitalize(newName));
+                field = getDeclaredField(getSetMethod.getDeclaringClass(), Strings.uncapitalize(newName));
 
                 if (field != null && field.getType().isAssignableFrom(targetType)) {
                     propName = field.getName();
                 }
 
                 if (N.isNullOrEmpty(propName) && newName.charAt(0) != '_') {
-                    field = getDeclaredField(getSetMethod.getDeclaringClass(), "_" + StringUtil.uncapitalize(newName));
+                    field = getDeclaredField(getSetMethod.getDeclaringClass(), "_" + Strings.uncapitalize(newName));
 
                     if (field != null && field.getType().isAssignableFrom(targetType)) {
                         propName = field.getName();
@@ -3205,7 +3205,7 @@ public final class ClassUtil {
         String newPropName = camelCasePropNamePool.get(propName);
 
         if (newPropName == null) {
-            newPropName = StringUtil.toCamelCase(propName);
+            newPropName = Strings.toCamelCase(propName);
             newPropName = NameUtil.getCachedName(newPropName);
             camelCasePropNamePool.put(propName, newPropName);
         }
@@ -3313,7 +3313,7 @@ public final class ClassUtil {
         String result = lowerCaseWithUnderscorePropNamePool.get(str);
 
         if (result == null) {
-            result = StringUtil.toLowerCaseWithUnderscore(str);
+            result = Strings.toLowerCaseWithUnderscore(str);
             lowerCaseWithUnderscorePropNamePool.put(str, result);
         }
 
@@ -3334,7 +3334,7 @@ public final class ClassUtil {
         String result = upperCaseWithUnderscorePropNamePool.get(str);
 
         if (result == null) {
-            result = StringUtil.toUpperCaseWithUnderscore(str);
+            result = Strings.toUpperCaseWithUnderscore(str);
             upperCaseWithUnderscorePropNamePool.put(str, result);
         }
 

@@ -64,7 +64,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
- * @see com.landawn.abacus.util.StringUtil
+ * @see com.landawn.abacus.util.Strings
  */
 public final class Maps {
 
@@ -1336,7 +1336,7 @@ public final class Maps {
             return defaultValue;
         }
 
-        final String[] keys = StringUtil.split(path, '.');
+        final String[] keys = Strings.split(path, '.');
         Map intermediateMap = map;
         Collection intermediateColl = null;
         String key = null;
@@ -1349,7 +1349,7 @@ public final class Maps {
             }
 
             if (key.charAt(key.length() - 1) == ']') {
-                final int[] indexes = StringUtil.findAllSubstringsBetween(key, "[", "]").stream().mapToInt(Numbers::toInt).toArray();
+                final int[] indexes = Strings.findAllSubstringsBetween(key, "[", "]").stream().mapToInt(Numbers::toInt).toArray();
                 final int idx = key.indexOf('[');
                 intermediateColl = (Collection) intermediateMap.get(key.substring(0, idx));
 

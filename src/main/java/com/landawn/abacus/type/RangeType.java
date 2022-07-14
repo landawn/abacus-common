@@ -27,7 +27,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Range;
 import com.landawn.abacus.util.Range.BoundType;
-import com.landawn.abacus.util.StringUtil;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 /**
@@ -136,7 +136,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      */
     @Override
     public Range<T> valueOf(String str) {
-        str = StringUtil.trim(str);
+        str = Strings.trim(str);
 
         if (N.isNullOrEmpty(str)) {
             return null;

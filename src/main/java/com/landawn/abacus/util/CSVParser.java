@@ -367,7 +367,7 @@ public class CSVParser {
                                 && nextLine.length() > (i + 1) && nextLine.charAt(i + 1) != this.separator //not at the   end of an escape sequence
                         ) {
 
-                            if (ignoreLeadingWhiteSpace && sb.length() > 0 && StringUtil.isWhitespace(sb)) {
+                            if (ignoreLeadingWhiteSpace && sb.length() > 0 && Strings.isWhitespace(sb)) {
                                 sb.setLength(0);
                             } else {
                                 sb.append(c);

@@ -1646,7 +1646,7 @@ public final class Joiner implements Closeable {
                 append(newString);
             }
         } else {
-            append(StringUtil.repeat(newString, n, delimiter));
+            append(Strings.repeat(newString, n, delimiter));
         }
 
         return this;

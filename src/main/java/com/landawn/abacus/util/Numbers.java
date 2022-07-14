@@ -1181,8 +1181,7 @@ public final class Numbers {
             switch (lastChar) {
                 case 'l':
                 case 'L':
-                    if (dec == null && exp == null
-                            && (numeric.charAt(0) == '-' && StringUtil.isNumeric(numeric.substring(1)) || StringUtil.isNumeric(numeric))) {
+                    if (dec == null && exp == null && (numeric.charAt(0) == '-' && Strings.isNumeric(numeric.substring(1)) || Strings.isNumeric(numeric))) {
 
                         op = createLong(numeric).boxed();
 
@@ -1353,7 +1352,7 @@ public final class Numbers {
      * @since 3.5
      */
     public static boolean isCreatable(final String str) {
-        if (StringUtil.isEmpty(str)) {
+        if (Strings.isEmpty(str)) {
             return false;
         }
 
@@ -1366,7 +1365,7 @@ public final class Numbers {
         // deal with any possible sign up front
         final int start = chars[0] == '-' || chars[0] == '+' ? 1 : 0;
 
-        if (sz > start + 1 && chars[start] == '0' && !StringUtil.contains(str, '.')) { // leading 0, skip if is a decimal number
+        if (sz > start + 1 && chars[start] == '0' && !Strings.contains(str, '.')) { // leading 0, skip if is a decimal number
             if (chars[start + 1] == 'x' || chars[start + 1] == 'X') { // leading 0x/0X
                 int i = start + 2;
                 if (i == sz) {
@@ -1481,7 +1480,7 @@ public final class Numbers {
      * @since 3.4
      */
     public static boolean isParsable(final String str) {
-        if (StringUtil.isEmpty(str) || (str.charAt(str.length() - 1) == '.')) {
+        if (Strings.isEmpty(str) || (str.charAt(str.length() - 1) == '.')) {
             return false;
         }
 
@@ -1508,7 +1507,7 @@ public final class Numbers {
      * @return {@code true} if str contains only Unicode numeric
      */
     public static boolean isDigits(final String str) {
-        return StringUtil.isNumeric(str);
+        return Strings.isNumeric(str);
     }
 
     private static boolean withDecimalsParsing(final String str, final int beginIdx) {

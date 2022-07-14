@@ -132,7 +132,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
 
     @Override
     public String toString() {
-        return StringUtil.concat("{min=", min == null ? "null" : df.format(min), ", max=", max == null ? "null" : df.format(max), ", count=",
+        return Strings.concat("{min=", min == null ? "null" : df.format(min), ", max=", max == null ? "null" : df.format(max), ", count=",
                 String.valueOf(count), ", sum=", df.format(getSum()), ", average=", df.format(getAverage()), "}");
     }
 }

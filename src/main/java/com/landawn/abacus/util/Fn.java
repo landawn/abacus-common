@@ -205,28 +205,28 @@ public final class Fn extends Comparators {
     private static final Consumer<AutoCloseable> CLOSE_QUIETLY = closeable -> IOUtil.closeQuietly(closeable);
 
     @SuppressWarnings("rawtypes")
-    private static final BiConsumer PRINTLN_EQUAL = (key, value) -> N.println(StringUtil.concat(N.toString(key), "=", N.toString(value)));
+    private static final BiConsumer PRINTLN_EQUAL = (key, value) -> N.println(Strings.concat(N.toString(key), "=", N.toString(value)));
 
     @SuppressWarnings("rawtypes")
-    private static final BiConsumer PRINTLN_HYPHEN = (key, value) -> N.println(StringUtil.concat(N.toString(key), "-", N.toString(value)));
+    private static final BiConsumer PRINTLN_HYPHEN = (key, value) -> N.println(Strings.concat(N.toString(key), "-", N.toString(value)));
 
     @SuppressWarnings("rawtypes")
-    private static final BiConsumer PRINTLN_UNDERSCORE = (key, value) -> N.println(StringUtil.concat(N.toString(key), "_", N.toString(value)));
+    private static final BiConsumer PRINTLN_UNDERSCORE = (key, value) -> N.println(Strings.concat(N.toString(key), "_", N.toString(value)));
 
     @SuppressWarnings("rawtypes")
-    private static final BiConsumer PRINTLN_COLON = (key, value) -> N.println(StringUtil.concat(N.toString(key), ":", N.toString(value)));
+    private static final BiConsumer PRINTLN_COLON = (key, value) -> N.println(Strings.concat(N.toString(key), ":", N.toString(value)));
 
     @SuppressWarnings("rawtypes")
-    private static final BiConsumer PRINTLN_COLON_SPACE = (key, value) -> N.println(StringUtil.concat(N.toString(key), ": ", N.toString(value)));
+    private static final BiConsumer PRINTLN_COLON_SPACE = (key, value) -> N.println(Strings.concat(N.toString(key), ": ", N.toString(value)));
 
     @SuppressWarnings("rawtypes")
-    private static final BiConsumer PRINTLN_COMMA = (key, value) -> N.println(StringUtil.concat(N.toString(key), ",", N.toString(value)));
+    private static final BiConsumer PRINTLN_COMMA = (key, value) -> N.println(Strings.concat(N.toString(key), ",", N.toString(value)));
 
     @SuppressWarnings("rawtypes")
-    private static final BiConsumer PRINTLN_COMMA_SPACE = (key, value) -> N.println(StringUtil.concat(N.toString(key), ", ", N.toString(value)));
+    private static final BiConsumer PRINTLN_COMMA_SPACE = (key, value) -> N.println(Strings.concat(N.toString(key), ", ", N.toString(value)));
 
     @SuppressWarnings("rawtypes")
-    private static final BiConsumer PRINTLN_EMPTY = (key, value) -> N.println(StringUtil.concat(N.toString(key), N.toString(value)));
+    private static final BiConsumer PRINTLN_EMPTY = (key, value) -> N.println(Strings.concat(N.toString(key), N.toString(value)));
 
     @SuppressWarnings("rawtypes")
     private static final Consumer PRINTLN = value -> N.println(value);
@@ -234,15 +234,15 @@ public final class Fn extends Comparators {
     @SuppressWarnings("rawtypes")
     private static final Function TO_STRING = t -> N.toString(t);
 
-    private static final Function<String, String> TO_CAMEL_CASE = t -> StringUtil.toCamelCase(t);
+    private static final Function<String, String> TO_CAMEL_CASE = t -> Strings.toCamelCase(t);
 
-    private static final Function<String, String> TO_LOWER_CASE = t -> StringUtil.toLowerCase(t);
+    private static final Function<String, String> TO_LOWER_CASE = t -> Strings.toLowerCase(t);
 
-    private static final Function<String, String> TO_LOWER_CASE_WITH_UNDERSCORE = t -> StringUtil.toLowerCaseWithUnderscore(t);
+    private static final Function<String, String> TO_LOWER_CASE_WITH_UNDERSCORE = t -> Strings.toLowerCaseWithUnderscore(t);
 
-    private static final Function<String, String> TO_UPPER_CASE = t -> StringUtil.toUpperCase(t);
+    private static final Function<String, String> TO_UPPER_CASE = t -> Strings.toUpperCase(t);
 
-    private static final Function<String, String> TO_UPPER_CASE_WITH_UNDERSCORE = t -> StringUtil.toUpperCaseWithUnderscore(t);
+    private static final Function<String, String> TO_UPPER_CASE_WITH_UNDERSCORE = t -> Strings.toUpperCaseWithUnderscore(t);
 
     private static final Function<Throwable, RuntimeException> TO_RUNTIME_EXCEPTION = e -> ExceptionUtil.toRuntimeException(e);
 
@@ -264,11 +264,11 @@ public final class Fn extends Comparators {
         return t;
     };
 
-    private static final Function<String, String> STRIP = t -> StringUtil.strip(t);
+    private static final Function<String, String> STRIP = t -> Strings.strip(t);
 
-    private static final Function<String, String> STRIP_TO_EMPTY = t -> StringUtil.stripToEmpty(t);
+    private static final Function<String, String> STRIP_TO_EMPTY = t -> Strings.stripToEmpty(t);
 
-    private static final Function<String, String> STRIP_TO_NULL = t -> StringUtil.stripToNull(t);
+    private static final Function<String, String> STRIP_TO_NULL = t -> Strings.stripToNull(t);
 
     private static final Function<String, String> NULL_TO_EMPTY = t -> t == null ? N.EMPTY_STRING : t;
 

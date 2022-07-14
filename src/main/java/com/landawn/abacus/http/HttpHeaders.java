@@ -27,8 +27,8 @@ import java.util.function.BiConsumer;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.http.HttpUtil.HttpDate;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.StringUtil;
-import com.landawn.abacus.util.StringUtil.Strings;
+import com.landawn.abacus.util.Strings;
+import com.landawn.abacus.util.Strings.StringUtil;
 
 /**
  *
@@ -37,7 +37,7 @@ import com.landawn.abacus.util.StringUtil.Strings;
  */
 public final class HttpHeaders {
 
-    private static final char LF = Strings.LF.charAt(0);
+    private static final char LF = StringUtil.LF.charAt(0);
 
     public static boolean isValidHttpHeader(String key, String value) {
         if (N.isNullOrEmpty(key) || key.indexOf(LF) >= 0 || key.indexOf(':') >= 0) {
@@ -590,7 +590,7 @@ public final class HttpHeaders {
         if (headerValue instanceof String) {
             return (String) headerValue;
         } else if (headerValue instanceof Collection) {
-            return StringUtil.join((Collection<?>) headerValue, "; ");
+            return Strings.join((Collection<?>) headerValue, "; ");
         } else if (headerValue instanceof Date) {
             return HttpDate.format((Date) headerValue);
         } else if (headerValue instanceof Instant) {

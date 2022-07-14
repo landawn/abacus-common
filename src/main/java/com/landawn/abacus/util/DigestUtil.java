@@ -196,7 +196,7 @@ public final class DigestUtil {
      * Calculates the MD2 digest and returns the value as a 16 element <code>byte[]</code>.
      *
      * @param data
-     *            Data to digest; converted to bytes using {@link StringUtils#getBytesUtf8(String)}
+     *            Data to digest; converted to bytes using {@link Strings#getBytesUtf8(String)}
      * @return MD2 digest
      * @since 1.7
      */
@@ -309,7 +309,7 @@ public final class DigestUtil {
      * Calculates the MD5 digest and returns the value as a 16 element <code>byte[]</code>.
      *
      * @param data
-     *            Data to digest; converted to bytes using {@link StringUtils#getBytesUtf8(String)}
+     *            Data to digest; converted to bytes using {@link Strings#getBytesUtf8(String)}
      * @return MD5 digest
      */
     public static byte[] md5(final String data) {
@@ -420,7 +420,7 @@ public final class DigestUtil {
      * Calculates the SHA-1 digest and returns the value as a <code>byte[]</code>.
      *
      * @param data
-     *            Data to digest; converted to bytes using {@link StringUtils#getBytesUtf8(String)}
+     *            Data to digest; converted to bytes using {@link Strings#getBytesUtf8(String)}
      * @return SHA-1 digest
      */
     public static byte[] sha1(final String data) {
@@ -542,7 +542,7 @@ public final class DigestUtil {
      * </p>
      *
      * @param data
-     *            Data to digest; converted to bytes using {@link StringUtils#getBytesUtf8(String)}
+     *            Data to digest; converted to bytes using {@link Strings#getBytesUtf8(String)}
      * @return SHA-256 digest
      * @since 1.4
      */
@@ -674,7 +674,7 @@ public final class DigestUtil {
      * </p>
      *
      * @param data
-     *            Data to digest; converted to bytes using {@link StringUtils#getBytesUtf8(String)}
+     *            Data to digest; converted to bytes using {@link Strings#getBytesUtf8(String)}
      * @return SHA-384 digest
      * @since 1.4
      */
@@ -806,7 +806,7 @@ public final class DigestUtil {
      * </p>
      *
      * @param data
-     *            Data to digest; converted to bytes using {@link StringUtils#getBytesUtf8(String)}
+     *            Data to digest; converted to bytes using {@link Strings#getBytesUtf8(String)}
      * @return SHA-512 digest
      * @since 1.4
      */

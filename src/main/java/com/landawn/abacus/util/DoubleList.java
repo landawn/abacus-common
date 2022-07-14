@@ -1998,7 +1998,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     public String join(int fromIndex, int toIndex, char delimiter) {
         checkFromToIndex(fromIndex, toIndex);
 
-        return StringUtil.join(elementData, fromIndex, toIndex, delimiter);
+        return Strings.join(elementData, fromIndex, toIndex, delimiter);
     }
 
     /**
@@ -2012,7 +2012,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     public String join(int fromIndex, int toIndex, String delimiter) {
         checkFromToIndex(fromIndex, toIndex);
 
-        return StringUtil.join(elementData, fromIndex, toIndex, delimiter);
+        return Strings.join(elementData, fromIndex, toIndex, delimiter);
     }
 
     /**

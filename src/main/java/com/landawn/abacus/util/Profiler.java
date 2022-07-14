@@ -1594,7 +1594,7 @@ public final class Profiler {
             }
             writer.println();
             maxMethodNameLength += 3;
-            writer.println(StringUtil.padEnd(methodNameTitil + ",  ", maxMethodNameLength)
+            writer.println(Strings.padEnd(methodNameTitil + ",  ", maxMethodNameLength)
                     + "|avg time|, |min time|, |max time|, |0.01% >=|, |0.1% >=|,  |1% >=|,    |10% >=|,   |20% >=|,   |50% >=|,   |80% >=|,   |90% >=|,   |99% >=|,   |99.9% >=|, |99.99% >=|");
             for (String methodName : methodNameList) {
                 List<MethodStatistics> methodStatisticsList = getMethodStatisticsList(methodName);
@@ -1605,21 +1605,19 @@ public final class Profiler {
                 double maxTime = methodStatisticsList.get(0).getElapsedTimeInMillis();
                 double minTime = methodStatisticsList.get(size - 1).getElapsedTimeInMillis();
                 final int minLen = 12;
-                writer.println(StringUtil.padEnd(methodName + ",  ", maxMethodNameLength) + StringUtil.padEnd(elapsedTimeFormat.format(avgTime) + ",  ", minLen)
-                        + StringUtil.padEnd(elapsedTimeFormat.format(minTime) + ",  ", minLen)
-                        + StringUtil.padEnd(elapsedTimeFormat.format(maxTime) + ",  ", minLen)
-                        + StringUtil.padEnd(elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.0001)).getElapsedTimeInMillis()) + ",  ", minLen)
-                        + StringUtil.padEnd(elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.001)).getElapsedTimeInMillis()) + ",  ", minLen)
-                        + StringUtil.padEnd(elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.01)).getElapsedTimeInMillis()) + ",  ", minLen)
-                        + StringUtil.padEnd(elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.1)).getElapsedTimeInMillis()) + ",  ", minLen)
-                        + StringUtil.padEnd(elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.2)).getElapsedTimeInMillis()) + ",  ", minLen)
-                        + StringUtil.padEnd(elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.5)).getElapsedTimeInMillis()) + ",  ", minLen)
-                        + StringUtil.padEnd(elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.8)).getElapsedTimeInMillis()) + ",  ", minLen)
-                        + StringUtil.padEnd(elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.9)).getElapsedTimeInMillis()) + ",  ", minLen)
-                        + StringUtil.padEnd(elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.99)).getElapsedTimeInMillis()) + ",  ", minLen)
-                        + StringUtil.padEnd(elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.999)).getElapsedTimeInMillis()) + ",  ", minLen)
-                        + StringUtil.padEnd(elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.9999)).getElapsedTimeInMillis()) + ",  ",
-                                minLen));
+                writer.println(Strings.padEnd(methodName + ",  ", maxMethodNameLength) + Strings.padEnd(elapsedTimeFormat.format(avgTime) + ",  ", minLen)
+                        + Strings.padEnd(elapsedTimeFormat.format(minTime) + ",  ", minLen) + Strings.padEnd(elapsedTimeFormat.format(maxTime) + ",  ", minLen)
+                        + Strings.padEnd(elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.0001)).getElapsedTimeInMillis()) + ",  ", minLen)
+                        + Strings.padEnd(elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.001)).getElapsedTimeInMillis()) + ",  ", minLen)
+                        + Strings.padEnd(elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.01)).getElapsedTimeInMillis()) + ",  ", minLen)
+                        + Strings.padEnd(elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.1)).getElapsedTimeInMillis()) + ",  ", minLen)
+                        + Strings.padEnd(elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.2)).getElapsedTimeInMillis()) + ",  ", minLen)
+                        + Strings.padEnd(elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.5)).getElapsedTimeInMillis()) + ",  ", minLen)
+                        + Strings.padEnd(elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.8)).getElapsedTimeInMillis()) + ",  ", minLen)
+                        + Strings.padEnd(elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.9)).getElapsedTimeInMillis()) + ",  ", minLen)
+                        + Strings.padEnd(elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.99)).getElapsedTimeInMillis()) + ",  ", minLen)
+                        + Strings.padEnd(elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.999)).getElapsedTimeInMillis()) + ",  ", minLen)
+                        + Strings.padEnd(elapsedTimeFormat.format(methodStatisticsList.get((int) (size * 0.9999)).getElapsedTimeInMillis()) + ",  ", minLen));
             }
             writer.println();
             writeError(writer);

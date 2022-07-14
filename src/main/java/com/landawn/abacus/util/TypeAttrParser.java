@@ -112,7 +112,7 @@ public final class TypeAttrParser {
                 }
 
                 if (bracketNum == 0 && (ch == ',' || idx == endIndex - 1)) {
-                    typeParameterList.add(StringUtil.trim(ch == ',' ? attr.substring(previousIndex, idx) : attr.substring(previousIndex, idx + 1)));
+                    typeParameterList.add(Strings.trim(ch == ',' ? attr.substring(previousIndex, idx) : attr.substring(previousIndex, idx + 1)));
 
                     previousIndex = idx + 1;
                 }

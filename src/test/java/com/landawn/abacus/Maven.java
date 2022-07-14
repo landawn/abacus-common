@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.StringUtil;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.stream.Stream.StreamEx;
 
 public class Maven {
@@ -18,7 +18,7 @@ public class Maven {
         final String targetVersion = StreamEx.lines(new File("./pom.xml"))
                 .filter(line -> line.indexOf("<version>") > 0 && line.indexOf("</version>") > 0)
                 .first()
-                .map(line -> StringUtil.findAllSubstringsBetween(line, "<version>", "</version>").get(0))
+                .map(line -> Strings.findAllSubstringsBetween(line, "<version>", "</version>").get(0))
                 .get();
 
         final String commonMavenPath = "./maven/";

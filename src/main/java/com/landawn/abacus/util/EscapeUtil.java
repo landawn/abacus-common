@@ -1474,11 +1474,11 @@ public final class EscapeUtil {
                 throw new IllegalStateException("CsvEscaper should never reach the [1] index");
             }
 
-            if (StringUtil.containsNone(input.toString(), CSV_SEARCH_CHARS)) {
+            if (Strings.containsNone(input.toString(), CSV_SEARCH_CHARS)) {
                 out.write(input.toString());
             } else {
                 out.write(CSV_QUOTE);
-                out.write(StringUtil.replaceAll(input.toString(), CSV_QUOTE_STR, CSV_QUOTE_STR + CSV_QUOTE_STR));
+                out.write(Strings.replaceAll(input.toString(), CSV_QUOTE_STR, CSV_QUOTE_STR + CSV_QUOTE_STR));
                 out.write(CSV_QUOTE);
             }
             return Character.codePointCount(input, 0, input.length());
@@ -1525,9 +1525,9 @@ public final class EscapeUtil {
             // strip quotes
             final String quoteless = input.subSequence(1, input.length() - 1).toString();
 
-            if (StringUtil.containsAny(quoteless, CSV_SEARCH_CHARS)) {
+            if (Strings.containsAny(quoteless, CSV_SEARCH_CHARS)) {
                 // deal with escaped quotes; ie) ""
-                out.write(StringUtil.replaceAll(quoteless, CSV_QUOTE_STR + CSV_QUOTE_STR, CSV_QUOTE_STR));
+                out.write(Strings.replaceAll(quoteless, CSV_QUOTE_STR + CSV_QUOTE_STR, CSV_QUOTE_STR));
             } else {
                 out.write(input.toString());
             }

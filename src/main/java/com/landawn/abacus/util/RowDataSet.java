@@ -10991,7 +10991,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 for (int i = 0; i < columnLen; i++) {
                     bw.write('+');
 
-                    bw.write(StringUtil.repeat(hch, maxColumnLens[i] + hchDelta));
+                    bw.write(Strings.repeat(hch, maxColumnLens[i] + hchDelta));
                 }
 
                 bw.write('+');
@@ -11005,7 +11005,7 @@ public class RowDataSet implements DataSet, Cloneable {
                         bw.write(" | ");
                     }
 
-                    bw.write(StringUtil.padEnd(columnNameList.get(i), maxColumnLens[i]));
+                    bw.write(Strings.padEnd(columnNameList.get(i), maxColumnLens[i]));
                 }
 
                 bw.write(" |");
@@ -11015,7 +11015,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 for (int i = 0; i < columnLen; i++) {
                     bw.write('+');
 
-                    bw.write(StringUtil.repeat(hch, maxColumnLens[i] + hchDelta));
+                    bw.write(Strings.repeat(hch, maxColumnLens[i] + hchDelta));
                 }
 
                 bw.write('+');
@@ -11030,7 +11030,7 @@ public class RowDataSet implements DataSet, Cloneable {
                             bw.write(" | ");
                         }
 
-                        bw.write(StringUtil.padEnd(strColumnList.get(i).get(j), maxColumnLens[i]));
+                        bw.write(Strings.padEnd(strColumnList.get(i).get(j), maxColumnLens[i]));
                     }
 
                     bw.write(" |");
@@ -11042,9 +11042,9 @@ public class RowDataSet implements DataSet, Cloneable {
                     for (int i = 0; i < columnLen; i++) {
                         if (i == 0) {
                             bw.write("| ");
-                            bw.write(StringUtil.padEnd("", maxColumnLens[i]));
+                            bw.write(Strings.padEnd("", maxColumnLens[i]));
                         } else {
-                            bw.write(StringUtil.padEnd("", maxColumnLens[i] + 3));
+                            bw.write(Strings.padEnd("", maxColumnLens[i] + 3));
                         }
                     }
 
@@ -11056,7 +11056,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 for (int i = 0; i < columnLen; i++) {
                     bw.write('+');
 
-                    bw.write(StringUtil.repeat(hch, maxColumnLens[i] + hchDelta));
+                    bw.write(Strings.repeat(hch, maxColumnLens[i] + hchDelta));
                 }
 
                 bw.write('+');

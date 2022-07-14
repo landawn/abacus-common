@@ -93,7 +93,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Maps
- * @see com.landawn.abacus.util.StringUtil
+ * @see com.landawn.abacus.util.Strings
  * @see com.landawn.abacus.util.IOUtil
  */
 public final class N extends CommonUtil {
@@ -391,10 +391,10 @@ public final class N extends CommonUtil {
      * @param str
      * @param substr
      * @return
-     * @see StringUtil#occurrencesOf(String, String)
+     * @see Strings#occurrencesOf(String, String)
      */
     public static int occurrencesOf(final String str, final String substr) {
-        return StringUtil.occurrencesOf(str, substr);
+        return Strings.occurrencesOf(str, substr);
     }
 
     /**
@@ -737,7 +737,7 @@ public final class N extends CommonUtil {
         final T first = iter.next();
 
         if (iter.hasNext()) {
-            throw new DuplicatedResultException("Expected at most one element but was: [" + StringUtil.concat(first, ", ", iter.next(), "...]"));
+            throw new DuplicatedResultException("Expected at most one element but was: [" + Strings.concat(first, ", ", iter.next(), "...]"));
         }
 
         return Nullable.of(first);
@@ -4679,7 +4679,7 @@ public final class N extends CommonUtil {
         } else if (isNullOrEmpty(str)) {
             return nullToEmpty(strToInsert);
         } else if (index == str.length()) {
-            return StringUtil.concat(str + strToInsert);
+            return Strings.concat(str + strToInsert);
         }
 
         return str;
@@ -7320,7 +7320,7 @@ public final class N extends CommonUtil {
             return N.EMPTY_STRING;
         }
 
-        return StringUtil.concat(str.substring(0, fromIndex) + str.subSequence(toIndex, len));
+        return Strings.concat(str.substring(0, fromIndex) + str.subSequence(toIndex, len));
     }
 
     /**

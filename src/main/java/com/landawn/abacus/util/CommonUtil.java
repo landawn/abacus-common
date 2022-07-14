@@ -117,7 +117,7 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Maps
- * @see com.landawn.abacus.util.StringUtil
+ * @see com.landawn.abacus.util.Strings
  * @see com.landawn.abacus.util.IOUtil
  */
 class CommonUtil {

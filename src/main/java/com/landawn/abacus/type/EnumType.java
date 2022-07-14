@@ -32,7 +32,7 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
-import com.landawn.abacus.util.StringUtil;
+import com.landawn.abacus.util.Strings;
 
 /**
  *
@@ -104,7 +104,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
                 return null;
             }
 
-            if (StringUtil.isAsciiDigtalInteger(str)) {
+            if (Strings.isAsciiDigtalInteger(str)) {
                 return valueOf(Numbers.toInt(str));
             } else {
                 final T val = jsonXmlNameEnumMap.get(str);

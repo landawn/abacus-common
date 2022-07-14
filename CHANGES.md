@@ -1,5 +1,11 @@
 ### 3.1.9
 
+* Rename `StringUtli` to `Strings` to Keep consistent with `Numbers`, `Iterators` and `Iterables`.
+* Improvements and bug fix.
+
+
+### 3.1.9
+
 * Improvements and bug fix.
 
 

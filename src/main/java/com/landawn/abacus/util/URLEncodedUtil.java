@@ -322,7 +322,7 @@ public final class URLEncodedUtil {
                 if (propInfo.jsonXmlType.clazz().equals(String[].class)) {
                     propValue = values;
                 } else {
-                    propValue = propInfo.readPropValue(StringUtil.join(values, ", "));
+                    propValue = propInfo.readPropValue(Strings.join(values, ", "));
                 }
             }
 

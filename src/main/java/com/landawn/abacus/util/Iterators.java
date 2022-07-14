@@ -54,7 +54,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.Maps
- * @see com.landawn.abacus.util.StringUtil
+ * @see com.landawn.abacus.util.Strings
  */
 public final class Iterators {
 

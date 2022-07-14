@@ -3614,7 +3614,7 @@ public final class IOUtil {
         }
 
         // put it back together
-        String result = StringUtil.join(path, '/');
+        String result = Strings.join(path, '/');
 
         if (pathname.charAt(0) == '/') {
             result = "/" + result;
@@ -4983,7 +4983,7 @@ public final class IOUtil {
             input = new FileInputStream(file);
 
             for (int i = 0; i < numOfParts; i++) {
-                String subFileNmae = destDir.getAbsolutePath() + IOUtil.FILE_SEPARATOR + fileName + "_" + StringUtil.padStart(N.stringOf(fileSerNum++), 4, '0');
+                String subFileNmae = destDir.getAbsolutePath() + IOUtil.FILE_SEPARATOR + fileName + "_" + Strings.padStart(N.stringOf(fileSerNum++), 4, '0');
                 output = new FileOutputStream(new File(subFileNmae));
                 long partLength = sizeOfPart;
 
@@ -5053,7 +5053,7 @@ public final class IOUtil {
 
             br = Objectory.createBufferedReader(is);
 
-            String subFileNmae = destDir.getAbsolutePath() + IOUtil.FILE_SEPARATOR + prefix + "_" + StringUtil.padStart(N.stringOf(fileSerNum++), 4, '0')
+            String subFileNmae = destDir.getAbsolutePath() + IOUtil.FILE_SEPARATOR + prefix + "_" + Strings.padStart(N.stringOf(fileSerNum++), 4, '0')
                     + postfix;
             bw = Objectory.createBufferedWriter(new FileWriter(new File(subFileNmae)));
 
@@ -5071,7 +5071,7 @@ public final class IOUtil {
                         bw = null;
                     }
 
-                    subFileNmae = destDir.getAbsolutePath() + IOUtil.FILE_SEPARATOR + prefix + "_" + StringUtil.padStart(N.stringOf(fileSerNum++), 4, '0')
+                    subFileNmae = destDir.getAbsolutePath() + IOUtil.FILE_SEPARATOR + prefix + "_" + Strings.padStart(N.stringOf(fileSerNum++), 4, '0')
                             + postfix;
                     bw = Objectory.createBufferedWriter(new FileWriter(new File(subFileNmae)));
                 }

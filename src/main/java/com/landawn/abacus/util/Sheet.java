@@ -2808,11 +2808,11 @@ public final class Sheet<R, C, E> implements Cloneable {
                 final char hchDelta = 2;
                 for (int i = 0; i < columnLen; i++) {
                     if (i == 0) {
-                        bw.write(StringUtil.repeat(' ', maxColumnLens[i] + hchDelta + 1));
+                        bw.write(Strings.repeat(' ', maxColumnLens[i] + hchDelta + 1));
                     } else {
                         bw.write('+');
 
-                        bw.write(StringUtil.repeat(hch, maxColumnLens[i] + hchDelta));
+                        bw.write(Strings.repeat(hch, maxColumnLens[i] + hchDelta));
                     }
                 }
 
@@ -2827,7 +2827,7 @@ public final class Sheet<R, C, E> implements Cloneable {
                         bw.write(" | ");
                     }
 
-                    bw.write(StringUtil.padEnd(columnNameList.get(i), maxColumnLens[i]));
+                    bw.write(Strings.padEnd(columnNameList.get(i), maxColumnLens[i]));
                 }
 
                 bw.write(" |");
@@ -2838,9 +2838,9 @@ public final class Sheet<R, C, E> implements Cloneable {
                     bw.write('+');
 
                     if (i == 1 && N.isNullOrEmpty(columnKeySet)) {
-                        bw.write(StringUtil.repeat(' ', maxColumnLens[i] + hchDelta));
+                        bw.write(Strings.repeat(' ', maxColumnLens[i] + hchDelta));
                     } else {
-                        bw.write(StringUtil.repeat(hch, maxColumnLens[i] + hchDelta));
+                        bw.write(Strings.repeat(hch, maxColumnLens[i] + hchDelta));
                     }
                 }
 
@@ -2856,7 +2856,7 @@ public final class Sheet<R, C, E> implements Cloneable {
                             bw.write(" | ");
                         }
 
-                        bw.write(StringUtil.padEnd(strColumnList.get(i).get(j), maxColumnLens[i]));
+                        bw.write(Strings.padEnd(strColumnList.get(i).get(j), maxColumnLens[i]));
                     }
 
                     bw.write(" |");
@@ -2868,9 +2868,9 @@ public final class Sheet<R, C, E> implements Cloneable {
                     for (int i = 0; i < columnLen; i++) {
                         if (i == 0) {
                             bw.write("| ");
-                            bw.write(StringUtil.padEnd("", maxColumnLens[i]));
+                            bw.write(Strings.padEnd("", maxColumnLens[i]));
                         } else {
-                            bw.write(StringUtil.padEnd("", maxColumnLens[i] + 3));
+                            bw.write(Strings.padEnd("", maxColumnLens[i] + 3));
                         }
                     }
 
@@ -2882,7 +2882,7 @@ public final class Sheet<R, C, E> implements Cloneable {
                 for (int i = 0; i < columnLen; i++) {
                     bw.write('+');
 
-                    bw.write(StringUtil.repeat(hch, maxColumnLens[i] + hchDelta));
+                    bw.write(Strings.repeat(hch, maxColumnLens[i] + hchDelta));
                 }
 
                 bw.write('+');
@@ -3203,7 +3203,7 @@ public final class Sheet<R, C, E> implements Cloneable {
          */
         @Override
         public String toString() {
-            return StringUtil.concat("[", N.toString(rowKey), ", ", N.toString(columnKey), "]=", N.toString(value));
+            return Strings.concat("[", N.toString(rowKey), ", ", N.toString(columnKey), "]=", N.toString(value));
         }
     }
 

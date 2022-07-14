@@ -526,7 +526,7 @@ public final class PropertiesUtil {
             Method removeMethod = null;
             for (String key : oldKeySet) {
                 if (!newKeySet.contains(key)) {
-                    removeMethod = ClassUtil.getDeclaredMethod(properties.getClass(), "remove" + StringUtil.capitalize(key));
+                    removeMethod = ClassUtil.getDeclaredMethod(properties.getClass(), "remove" + Strings.capitalize(key));
 
                     if (removeMethod == null) {
                         properties.remove(key);
@@ -817,7 +817,7 @@ public final class PropertiesUtil {
             }
 
             if (className == null) {
-                className = StringUtil.capitalize(root.getNodeName());
+                className = Strings.capitalize(root.getNodeName());
             }
 
             String classFilePath = ClassUtil.makePackageFolder(srcPath, packageName);
@@ -876,7 +876,7 @@ public final class PropertiesUtil {
     private static void xmlProperties2Java(Node node, Writer writer, String className, boolean isPublicField, String spaces, boolean isRoot)
             throws IOException {
         if (className == null) {
-            className = StringUtil.capitalize(node.getNodeName());
+            className = Strings.capitalize(node.getNodeName());
         }
 
         writer.write(IOUtil.LINE_SEPARATOR);
@@ -1078,13 +1078,13 @@ public final class PropertiesUtil {
         String listPropName = propName + "List";
         String elementTypeName = N.typeOf(typeName).isPrimitiveType() ? ClassUtil.getSimpleClassName(N.wrap(N.typeOf(typeName).clazz())) : typeName;
 
-        writer.write(spaces + "public " + typeName + " get" + StringUtil.capitalize(propName) + "() {" + IOUtil.LINE_SEPARATOR);
+        writer.write(spaces + "public " + typeName + " get" + Strings.capitalize(propName) + "() {" + IOUtil.LINE_SEPARATOR);
         writer.write(spaces + "    " + "return " + propName + ";" + IOUtil.LINE_SEPARATOR);
         writer.write(spaces + "}" + IOUtil.LINE_SEPARATOR);
 
         writer.write(IOUtil.LINE_SEPARATOR);
 
-        writer.write(spaces + "public void set" + StringUtil.capitalize(propName) + "(" + typeName + " " + propName + ") {" + IOUtil.LINE_SEPARATOR);
+        writer.write(spaces + "public void set" + Strings.capitalize(propName) + "(" + typeName + " " + propName + ") {" + IOUtil.LINE_SEPARATOR);
         writer.write(spaces + "    " + "super.put(\"" + propName + "\", " + propName + ");" + IOUtil.LINE_SEPARATOR);
         writer.write(spaces + "    " + "this." + propName + " = " + propName + ";" + IOUtil.LINE_SEPARATOR);
 
@@ -1097,7 +1097,7 @@ public final class PropertiesUtil {
 
         writer.write(IOUtil.LINE_SEPARATOR);
 
-        writer.write(spaces + "public void remove" + StringUtil.capitalize(propName) + "() {" + IOUtil.LINE_SEPARATOR);
+        writer.write(spaces + "public void remove" + Strings.capitalize(propName) + "() {" + IOUtil.LINE_SEPARATOR);
         writer.write(spaces + "    " + "super.remove(\"" + propName + "\");" + IOUtil.LINE_SEPARATOR);
         writer.write(spaces + "    " + "this." + propName + " = " + N.typeOf(typeName).defaultValue() + ";" + IOUtil.LINE_SEPARATOR);
 
@@ -1112,13 +1112,13 @@ public final class PropertiesUtil {
         if (duplicatedPropNameSet.contains(propName)) {
             writer.write(IOUtil.LINE_SEPARATOR);
 
-            writer.write(spaces + "public List<" + elementTypeName + "> get" + StringUtil.capitalize(listPropName) + "() {" + IOUtil.LINE_SEPARATOR);
+            writer.write(spaces + "public List<" + elementTypeName + "> get" + Strings.capitalize(listPropName) + "() {" + IOUtil.LINE_SEPARATOR);
             writer.write(spaces + "    " + "return " + listPropName + ";" + IOUtil.LINE_SEPARATOR);
             writer.write(spaces + "}" + IOUtil.LINE_SEPARATOR);
 
             writer.write(IOUtil.LINE_SEPARATOR);
 
-            writer.write(spaces + "public void set" + StringUtil.capitalize(listPropName) + "(List<" + elementTypeName + "> " + listPropName + ") {"
+            writer.write(spaces + "public void set" + Strings.capitalize(listPropName) + "(List<" + elementTypeName + "> " + listPropName + ") {"
                     + IOUtil.LINE_SEPARATOR);
             writer.write(spaces + "    " + "super.put(\"" + listPropName + "\", " + listPropName + ");" + IOUtil.LINE_SEPARATOR);
             writer.write(spaces + "    " + "this." + listPropName + " = " + listPropName + ";" + IOUtil.LINE_SEPARATOR);
@@ -1134,7 +1134,7 @@ public final class PropertiesUtil {
      * @return
      */
     private static String getTypeName(Node node, String propName) {
-        String typeName = node.getChildNodes().getLength() > 1 ? StringUtil.capitalize(propName) : "String";
+        String typeName = node.getChildNodes().getLength() > 1 ? Strings.capitalize(propName) : "String";
         String typeAttr = XMLUtil.getAttribute(node, TYPE);
 
         if (N.notNullOrEmpty(typeAttr)) {

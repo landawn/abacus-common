@@ -25,11 +25,11 @@ import com.landawn.abacus.util.function.Function;
  */
 public enum NamingPolicy {
 
-    LOWER_CAMEL_CASE(str -> StringUtil.toCamelCase(str)),
+    LOWER_CAMEL_CASE(str -> Strings.toCamelCase(str)),
 
-    LOWER_CASE_WITH_UNDERSCORE(str -> StringUtil.toLowerCaseWithUnderscore(str)),
+    LOWER_CASE_WITH_UNDERSCORE(str -> Strings.toLowerCaseWithUnderscore(str)),
 
-    UPPER_CASE_WITH_UNDERSCORE(str -> StringUtil.toUpperCaseWithUnderscore(str)),
+    UPPER_CASE_WITH_UNDERSCORE(str -> Strings.toUpperCaseWithUnderscore(str)),
 
     @Beta
     NO_CHANGE(str -> str);

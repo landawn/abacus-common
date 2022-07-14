@@ -73,7 +73,7 @@ import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.Fn.Fnn;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.If.OrElse;
-import com.landawn.abacus.util.StringUtil.Strings;
+import com.landawn.abacus.util.Strings.StringUtil;
 import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
@@ -10731,7 +10731,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 result = Optional.of(elements.next());
 
                 if (elements.hasNext()) {
-                    throw new DuplicatedResultException("There are at least two elements: " + Strings.concat(result.get(), ", ", elements.next()));
+                    throw new DuplicatedResultException("There are at least two elements: " + StringUtil.concat(result.get(), ", ", elements.next()));
                 }
             }
 

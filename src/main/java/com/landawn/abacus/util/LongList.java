@@ -2041,7 +2041,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     public String join(int fromIndex, int toIndex, char delimiter) {
         checkFromToIndex(fromIndex, toIndex);
 
-        return StringUtil.join(elementData, fromIndex, toIndex, delimiter);
+        return Strings.join(elementData, fromIndex, toIndex, delimiter);
     }
 
     /**
@@ -2055,7 +2055,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     public String join(int fromIndex, int toIndex, String delimiter) {
         checkFromToIndex(fromIndex, toIndex);
 
-        return StringUtil.join(elementData, fromIndex, toIndex, delimiter);
+        return Strings.join(elementData, fromIndex, toIndex, delimiter);
     }
 
     /**

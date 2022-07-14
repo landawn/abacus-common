@@ -64,7 +64,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * @see com.landawn.abacus.util.N
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Maps
- * @see com.landawn.abacus.util.StringUtil
+ * @see com.landawn.abacus.util.Strings
  */
 public final class Iterables {
 

@@ -295,7 +295,7 @@ public final class Index {
      * @return
      */
     public static OptionalInt of(final String str, final int valueToFind) {
-        return toOptionalInt(StringUtil.indexOf(str, valueToFind));
+        return toOptionalInt(Strings.indexOf(str, valueToFind));
     }
 
     /**
@@ -306,7 +306,7 @@ public final class Index {
      * @return
      */
     public static OptionalInt of(final String str, final int startIndex, final int valueToFind) {
-        return toOptionalInt(StringUtil.indexOf(str, startIndex, valueToFind));
+        return toOptionalInt(Strings.indexOf(str, startIndex, valueToFind));
     }
 
     /**
@@ -316,7 +316,7 @@ public final class Index {
      * @return
      */
     public static OptionalInt of(final String str, final String valueToFind) {
-        return toOptionalInt(StringUtil.indexOf(str, valueToFind));
+        return toOptionalInt(Strings.indexOf(str, valueToFind));
     }
 
     /**
@@ -327,7 +327,7 @@ public final class Index {
      * @return
      */
     public static OptionalInt of(final String str, final int startIndex, final String valueToFind) {
-        return toOptionalInt(StringUtil.indexOf(str, startIndex, valueToFind));
+        return toOptionalInt(Strings.indexOf(str, startIndex, valueToFind));
     }
 
     public static OptionalInt ofSubArray(final boolean[] sourceArray, final boolean[] subArrayToFind) {
@@ -1007,7 +1007,7 @@ public final class Index {
      * @return
      */
     public static OptionalInt last(final String str, final int valueToFind) {
-        return toOptionalInt(StringUtil.lastIndexOf(str, valueToFind));
+        return toOptionalInt(Strings.lastIndexOf(str, valueToFind));
     }
 
     /**
@@ -1018,7 +1018,7 @@ public final class Index {
      * @return
      */
     public static OptionalInt last(final String str, final int startIndexFromBack, final int valueToFind) {
-        return toOptionalInt(StringUtil.lastIndexOf(str, startIndexFromBack, valueToFind));
+        return toOptionalInt(Strings.lastIndexOf(str, startIndexFromBack, valueToFind));
     }
 
     /**
@@ -1028,7 +1028,7 @@ public final class Index {
      * @return
      */
     public static OptionalInt last(final String str, final String valueToFind) {
-        return toOptionalInt(StringUtil.lastIndexOf(str, valueToFind));
+        return toOptionalInt(Strings.lastIndexOf(str, valueToFind));
     }
 
     /**
@@ -1039,7 +1039,7 @@ public final class Index {
      * @return
      */
     public static OptionalInt last(final String str, final int startIndexFromBack, final String valueToFind) {
-        return toOptionalInt(StringUtil.lastIndexOf(str, startIndexFromBack, valueToFind));
+        return toOptionalInt(Strings.lastIndexOf(str, startIndexFromBack, valueToFind));
     }
 
     public static OptionalInt lastOfSubArray(final boolean[] sourceArray, final boolean[] subArrayToFind) {

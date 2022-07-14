@@ -53,7 +53,7 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.LZ4BlockOutputStream;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.ObjectPool;
-import com.landawn.abacus.util.StringUtil;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.WD;
 
 /**
@@ -149,13 +149,13 @@ public final class HttpUtil {
                 contentTypeEncoding2Format.put(entry.getValue(), contentEncoding2Format);
             }
 
-            if (StringUtil.containsIgnoreCase(entry.getKey().name(), GZIP)) {
+            if (Strings.containsIgnoreCase(entry.getKey().name(), GZIP)) {
                 contentEncoding2Format.put(GZIP, entry.getKey());
-            } else if (StringUtil.containsIgnoreCase(entry.getKey().name(), SNAPPY)) {
+            } else if (Strings.containsIgnoreCase(entry.getKey().name(), SNAPPY)) {
                 contentEncoding2Format.put(SNAPPY, entry.getKey());
-            } else if (StringUtil.containsIgnoreCase(entry.getKey().name(), LZ4)) {
+            } else if (Strings.containsIgnoreCase(entry.getKey().name(), LZ4)) {
                 contentEncoding2Format.put(LZ4, entry.getKey());
-            } else if (StringUtil.containsIgnoreCase(entry.getKey().name(), KRYO)) {
+            } else if (Strings.containsIgnoreCase(entry.getKey().name(), KRYO)) {
                 contentEncoding2Format.put(KRYO, entry.getKey());
                 contentEncoding2Format.put(N.EMPTY_STRING, entry.getKey());
             } else {
@@ -440,25 +440,25 @@ public final class HttpUtil {
         Map<String, ContentFormat> contentEncoding2Format = contentTypeEncoding2Format.get(contentType);
 
         if (contentEncoding2Format == null) {
-            if (StringUtil.containsIgnoreCase(contentType, HttpHeaders.Values.APPLICATION_JSON)) {
+            if (Strings.containsIgnoreCase(contentType, HttpHeaders.Values.APPLICATION_JSON)) {
                 contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_JSON);
-            } else if (StringUtil.containsIgnoreCase(contentType, HttpHeaders.Values.APPLICATION_XML)) {
+            } else if (Strings.containsIgnoreCase(contentType, HttpHeaders.Values.APPLICATION_XML)) {
                 contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_XML);
-            } else if (StringUtil.containsIgnoreCase(contentType, HttpHeaders.Values.APPLICATION_URL_ENCODED)) {
+            } else if (Strings.containsIgnoreCase(contentType, HttpHeaders.Values.APPLICATION_URL_ENCODED)) {
                 contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_URL_ENCODED);
-            } else if (StringUtil.containsIgnoreCase(contentType, HttpHeaders.Values.APPLICATION_KRYO)) {
+            } else if (Strings.containsIgnoreCase(contentType, HttpHeaders.Values.APPLICATION_KRYO)) {
                 contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_KRYO);
             }
         }
 
         if (contentEncoding2Format == null) {
-            if (StringUtil.containsIgnoreCase(contentType, JSON)) {
+            if (Strings.containsIgnoreCase(contentType, JSON)) {
                 contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_JSON);
-            } else if (StringUtil.containsIgnoreCase(contentType, XML)) {
+            } else if (Strings.containsIgnoreCase(contentType, XML)) {
                 contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_XML);
-            } else if (StringUtil.containsIgnoreCase(contentType, URL_ENCODED)) {
+            } else if (Strings.containsIgnoreCase(contentType, URL_ENCODED)) {
                 contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_URL_ENCODED);
-            } else if (StringUtil.containsIgnoreCase(contentType, KRYO)) {
+            } else if (Strings.containsIgnoreCase(contentType, KRYO)) {
                 contentEncoding2Format = contentTypeEncoding2Format.get(HttpHeaders.Values.APPLICATION_KRYO);
             } else {
                 contentEncoding2Format = contentTypeEncoding2Format.get(N.EMPTY_STRING);
@@ -468,13 +468,13 @@ public final class HttpUtil {
         ContentFormat contentFormat = contentEncoding2Format.get(contentEncoding);
 
         if (contentFormat == null) {
-            if (StringUtil.containsIgnoreCase(contentEncoding, GZIP)) {
+            if (Strings.containsIgnoreCase(contentEncoding, GZIP)) {
                 contentFormat = contentEncoding2Format.get(GZIP);
-            } else if (StringUtil.containsIgnoreCase(contentEncoding, SNAPPY)) {
+            } else if (Strings.containsIgnoreCase(contentEncoding, SNAPPY)) {
                 contentFormat = contentEncoding2Format.get(SNAPPY);
-            } else if (StringUtil.containsIgnoreCase(contentEncoding, LZ4)) {
+            } else if (Strings.containsIgnoreCase(contentEncoding, LZ4)) {
                 contentFormat = contentEncoding2Format.get(LZ4);
-            } else if (StringUtil.containsIgnoreCase(contentEncoding, KRYO)) {
+            } else if (Strings.containsIgnoreCase(contentEncoding, KRYO)) {
                 contentFormat = contentEncoding2Format.get(KRYO);
             } else {
                 contentFormat = contentEncoding2Format.get(N.EMPTY_STRING);
@@ -547,11 +547,11 @@ public final class HttpUtil {
 
         final String contentFormatName = contentFormat.name();
 
-        if (StringUtil.containsIgnoreCase(contentFormatName, GZIP)) {
+        if (Strings.containsIgnoreCase(contentFormatName, GZIP)) {
             return IOUtil.newGZIPInputStream(is);
-        } else if (StringUtil.containsIgnoreCase(contentFormatName, SNAPPY)) {
+        } else if (Strings.containsIgnoreCase(contentFormatName, SNAPPY)) {
             return IOUtil.newSnappyInputStream(is);
-        } else if (StringUtil.containsIgnoreCase(contentFormatName, LZ4)) {
+        } else if (Strings.containsIgnoreCase(contentFormatName, LZ4)) {
             return IOUtil.newLZ4BlockInputStream(is);
         } else {
             return is;
@@ -572,11 +572,11 @@ public final class HttpUtil {
 
         final String contentFormatName = contentFormat.name();
 
-        if (StringUtil.containsIgnoreCase(contentFormatName, GZIP)) {
+        if (Strings.containsIgnoreCase(contentFormatName, GZIP)) {
             return IOUtil.newGZIPOutputStream(os);
-        } else if (StringUtil.containsIgnoreCase(contentFormatName, SNAPPY)) {
+        } else if (Strings.containsIgnoreCase(contentFormatName, SNAPPY)) {
             return IOUtil.newSnappyOutputStream(os);
-        } else if (StringUtil.containsIgnoreCase(contentFormatName, LZ4)) {
+        } else if (Strings.containsIgnoreCase(contentFormatName, LZ4)) {
             return IOUtil.newLZ4BlockOutputStream(os);
         } else {
             return os;
@@ -665,7 +665,7 @@ public final class HttpUtil {
             return defaultIfNull;
         }
 
-        int fromIndex = StringUtil.indexOfIgnoreCase(contentType, CHARSET_SEQUAL);
+        int fromIndex = Strings.indexOfIgnoreCase(contentType, CHARSET_SEQUAL);
 
         if (fromIndex < 0) {
             return defaultIfNull;

@@ -64,7 +64,7 @@ import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.ObjectPool;
 import com.landawn.abacus.util.Splitter;
-import com.landawn.abacus.util.StringUtil;
+import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.WD;
 import com.landawn.abacus.util.u.Optional;
@@ -310,7 +310,7 @@ public final class ParserUtil {
             }
         }
 
-        if (N.notNullOrEmpty(jsonXmlFieldName) && !jsonXmlFieldName.equals(StringUtil.strip(jsonXmlFieldName))) {
+        if (N.notNullOrEmpty(jsonXmlFieldName) && !jsonXmlFieldName.equals(Strings.strip(jsonXmlFieldName))) {
             throw new IllegalArgumentException(
                     "JsonXmlFieldName name: \"" + jsonXmlFieldName + "\" must not start or end with any whitespace for field: " + field);
         }
@@ -353,7 +353,7 @@ public final class ParserUtil {
             }
         }
 
-        if (N.notNullOrEmpty(jsonXmlFieldName) && !jsonXmlFieldName.equals(StringUtil.strip(jsonXmlFieldName))) {
+        if (N.notNullOrEmpty(jsonXmlFieldName) && !jsonXmlFieldName.equals(Strings.strip(jsonXmlFieldName))) {
             throw new IllegalArgumentException(
                     "JsonXmlFieldName name: \"" + jsonXmlFieldName + "\" must not start or end with any whitespace for field: " + field);
         }
@@ -712,7 +712,7 @@ public final class ParserUtil {
                 }
             }
 
-            if (N.notNullOrEmpty(tmpTableName) && !tmpTableName.equals(StringUtil.strip(tmpTableName))) {
+            if (N.notNullOrEmpty(tmpTableName) && !tmpTableName.equals(Strings.strip(tmpTableName))) {
                 throw new IllegalArgumentException("Table name: \"" + tmpTableName + "\" must not start or end with any whitespace in class: " + cls);
             }
 
@@ -1338,8 +1338,8 @@ public final class ParserUtil {
             isFieldAccessible = field != null && field.isAccessible();
             isFieldSettable = field != null && field.isAccessible() && !Modifier.isFinal(field.getModifiers()) && !isByBuilder;
 
-            String timeZoneStr = StringUtil.trim(getTimeZone(field, jsonXmlConfig));
-            String dateFormatStr = StringUtil.trim(getDateFormat(field, jsonXmlConfig));
+            String timeZoneStr = Strings.trim(getTimeZone(field, jsonXmlConfig));
+            String dateFormatStr = Strings.trim(getDateFormat(field, jsonXmlConfig));
             this.dateFormat = N.isNullOrEmpty(dateFormatStr) ? null : dateFormatStr;
             this.timeZone = N.isNullOrEmpty(timeZoneStr) ? TimeZone.getDefault() : TimeZone.getTimeZone(timeZoneStr);
             this.zoneId = timeZone.toZoneId();
@@ -1364,7 +1364,7 @@ public final class ParserUtil {
                 throw new UnsupportedOperationException("Date format can't be 'long' for type java.time.LocalTime/LocalDate");
             }
 
-            String numberFormatStr = StringUtil.trim(getNumberFormat(field, jsonXmlConfig));
+            String numberFormatStr = Strings.trim(getNumberFormat(field, jsonXmlConfig));
             this.numberFormat = N.isNullOrEmpty(numberFormatStr) ? null : new DecimalFormat(numberFormatStr);
 
             this.hasFormat = N.notNullOrEmpty(dateFormat) || numberFormat != null;
@@ -1395,7 +1395,7 @@ public final class ParserUtil {
                 }
             }
 
-            if (N.notNullOrEmpty(tmpColumnName) && !tmpColumnName.equals(StringUtil.strip(tmpColumnName))) {
+            if (N.notNullOrEmpty(tmpColumnName) && !tmpColumnName.equals(Strings.strip(tmpColumnName))) {
                 throw new IllegalArgumentException("Column name: \"" + tmpColumnName + "\" must not start or end with any whitespace for field: " + field);
             }
 
@@ -1927,7 +1927,7 @@ public final class ParserUtil {
 
             final Optional<String> typeName = N.firstNonEmpty(typeAnno.value(), typeAnno.name());
 
-            if (typeName.isPresent() && !typeName.get().equals(StringUtil.strip(typeName.get()))) {
+            if (typeName.isPresent() && !typeName.get().equals(Strings.strip(typeName.get()))) {
                 throw new IllegalArgumentException("Type name: \"" + typeName.get() + "\" must not start or end with any whitespace for field: " + field);
             }
 

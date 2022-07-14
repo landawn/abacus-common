@@ -186,7 +186,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         public String join(String delimiter) {
-            return StringUtil.join(a, delimiter);
+            return Strings.join(a, delimiter);
         }
 
         /**
@@ -197,7 +197,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         public String join(String delimiter, String prefix, String suffix) {
-            return StringUtil.join(a, delimiter, prefix, suffix);
+            return Strings.join(a, delimiter, prefix, suffix);
         }
 
         /**
@@ -393,7 +393,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         public String join(String delimiter) {
-            return StringUtil.join(a, delimiter);
+            return Strings.join(a, delimiter);
         }
 
         /**
@@ -574,7 +574,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         public String join(String delimiter) {
-            return StringUtil.join(a, delimiter);
+            return Strings.join(a, delimiter);
         }
 
         /**
@@ -755,7 +755,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         public String join(String delimiter) {
-            return StringUtil.join(a, delimiter);
+            return Strings.join(a, delimiter);
         }
 
         /**
@@ -936,7 +936,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         public String join(String delimiter) {
-            return StringUtil.join(a, delimiter);
+            return Strings.join(a, delimiter);
         }
 
         /**
@@ -1117,7 +1117,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         public String join(String delimiter) {
-            return StringUtil.join(a, delimiter);
+            return Strings.join(a, delimiter);
         }
 
         /**
@@ -1298,7 +1298,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         public String join(String delimiter) {
-            return StringUtil.join(a, delimiter);
+            return Strings.join(a, delimiter);
         }
 
         /**
@@ -1479,7 +1479,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         public String join(String delimiter) {
-            return StringUtil.join(a, delimiter);
+            return Strings.join(a, delimiter);
         }
 
         /**
@@ -1660,7 +1660,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         public String join(String delimiter) {
-            return StringUtil.join(a, delimiter);
+            return Strings.join(a, delimiter);
         }
 
         /**
@@ -1818,7 +1818,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         public String join(String delimiter) {
-            return StringUtil.join(deque, delimiter);
+            return Strings.join(deque, delimiter);
         }
 
         /**
