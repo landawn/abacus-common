@@ -9,7 +9,7 @@ A general programming library in Java. It's easy to learn and simple to use with
 
 * Most daily used APIs: [CommonUtil](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/CommonUtil_view.html), 
 [N](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/N_view.html), 
-[StringUtil](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/StringUtil_view.html), 
+[Strings](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Strings_view.html), 
 [Numbers](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Numbers_view.html), 
 [Array](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Array_view.html), 
 [Iterables](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Iterables_view.html), 
@@ -163,6 +163,7 @@ and [More](https://www.javadoc.io/static/com.landawn/abacus-common/3.1.10/com/la
 [Stopwatch](https://static.javadoc.io/com.landawn/abacus-common/3.1.10/com/landawn/abacus/util/Stopwatch.html),
 [RateLimiter](https://static.javadoc.io/com.landawn/abacus-common/3.1.10/com/landawn/abacus/util/RateLimiter.html),
 [TypeReference](https://static.javadoc.io/com.landawn/abacus-common/3.1.10/com/landawn/abacus/util/TypeReference.html),
+[WebUtil](https://static.javadoc.io/com.landawn/abacus-common/3.1.10/com/landawn/abacus/guava/WebUtil.html),
 [Files](https://static.javadoc.io/com.landawn/abacus-common/3.1.10/com/landawn/abacus/guava/Files.html),
 [Traverser](https://static.javadoc.io/com.landawn/abacus-common/3.1.10/com/landawn/abacus/guava/Traverser.html)(copied from Apache commons, Google Guava...under Apache License v2) ...
 
