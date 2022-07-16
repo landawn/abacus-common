@@ -33,7 +33,7 @@ import com.landawn.abacus.util.stream.Stream;
  */
 public final class Joiner implements Closeable {
 
-    public static final String DEFAULT_DELIMITER = N.ELEMENT_SEPARATOR;
+    public static final String DEFAULT_DELIMITER = Strings.ELEMENT_SEPARATOR;
 
     public static final String DEFAULT_KEY_VALUE_DELIMITER = "=";
 
@@ -55,7 +55,7 @@ public final class Joiner implements Closeable {
 
     private boolean useCachedBuffer = false;
 
-    private String nullText = N.NULL_STRING;
+    private String nullText = Strings.NULL_STRING;
 
     private StringBuilder buffer;
 
@@ -193,7 +193,7 @@ public final class Joiner implements Closeable {
      * @return
      */
     public Joiner useForNull(String nullText) {
-        this.nullText = nullText == null ? N.NULL_STRING : nullText;
+        this.nullText = nullText == null ? Strings.NULL_STRING : nullText;
 
         return this;
     }

@@ -56,6 +56,7 @@ import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.BufferedReader;
 import com.landawn.abacus.util.BufferedXMLWriter;
 import com.landawn.abacus.util.ClassUtil;
+import com.landawn.abacus.util.Holder;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.IdentityHashSet;
 import com.landawn.abacus.util.N;
@@ -63,7 +64,6 @@ import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.ObjectPool;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.XMLUtil;
-import com.landawn.abacus.util.u.Holder;
 
 /**
  *

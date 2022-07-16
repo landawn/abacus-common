@@ -50,7 +50,7 @@ import com.landawn.abacus.util.stream.Stream;
  */
 public final class Sheet<R, C, E> implements Cloneable {
 
-    static final char[] ELEMENT_SEPARATOR_CHAR_ARRAY = N.ELEMENT_SEPARATOR_CHAR_ARRAY;
+    static final char[] ELEMENT_SEPARATOR_CHAR_ARRAY = Strings.ELEMENT_SEPARATOR_CHAR_ARRAY;
 
     static final KryoParser kryoParser = ParserFactory.isKryoAvailable() ? ParserFactory.createKryoParser() : null;
 

@@ -67,6 +67,8 @@ public final class BufferedXMLWriter extends CharacterWriter {
         // REPLACEMENT_CHARS['\f'] = getHexString('\f');
     }
 
+    static final char CHAR_0 = WD.CHAR_0;
+
     BufferedXMLWriter() {
         super(REPLACEMENT_CHARS);
     }
@@ -85,7 +87,7 @@ public final class BufferedXMLWriter extends CharacterWriter {
      * @return
      */
     char getCharQuotation() {
-        return N.CHAR_0;
+        return CHAR_0;
     }
 
     /**

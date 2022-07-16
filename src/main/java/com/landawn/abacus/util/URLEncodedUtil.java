@@ -471,7 +471,9 @@ public final class URLEncodedUtil {
             }
         } else if (ClassUtil.isEntity(parameters.getClass())) {
             encode(output, Maps.entity2Map(parameters, true, null, namingPolicy), charset, NamingPolicy.NO_CHANGE);
-        } else if (parameters instanceof Object[] a) {
+        } else if (parameters instanceof Object[]) {
+            final Object[] a = (Object[]) parameters;
+
             if (0 != (a.length % 2)) {
                 throw new IllegalArgumentException(
                         "The parameters must be the pairs of property name and value, or Map, or an entity class with getter/setter methods.");
@@ -587,7 +589,7 @@ public final class URLEncodedUtil {
      */
     private static void urlEncode(final StringBuilder sb, final String content, final Charset charset, final BitSet safechars, final boolean blankAsPlus) {
         if (content == null) {
-            sb.append(N.NULL_STRING);
+            sb.append(Strings.NULL_STRING);
 
             return;
         }

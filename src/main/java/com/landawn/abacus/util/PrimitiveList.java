@@ -219,7 +219,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
     //    public abstract List<L> split(final int fromIndex, final int toIndex, P predicate);
 
     public String join() {
-        return join(N.ELEMENT_SEPARATOR);
+        return join(Strings.ELEMENT_SEPARATOR);
     }
 
     /**
@@ -247,7 +247,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @return
      */
     public String join(final int fromIndex, final int toIndex) {
-        return join(fromIndex, toIndex, N.ELEMENT_SEPARATOR);
+        return join(fromIndex, toIndex, Strings.ELEMENT_SEPARATOR);
     }
 
     /**

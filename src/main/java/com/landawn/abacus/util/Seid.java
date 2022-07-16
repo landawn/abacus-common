@@ -482,7 +482,7 @@ public class Seid implements EntityId, Cloneable {
                     Map.Entry<String, Object> entry2 = it.next();
                     String propName2 = NameUtil.isCanonicalName(entityName, entry2.getKey()) ? NameUtil.getSimpleName(entry2.getKey()) : entry2.getKey();
 
-                    strValue = entityName + ": {" + propName1 + "=" + N.stringOf(entry1.getValue()) + N.ELEMENT_SEPARATOR + propName2 + "="
+                    strValue = entityName + ": {" + propName1 + "=" + N.stringOf(entry1.getValue()) + Strings.ELEMENT_SEPARATOR + propName2 + "="
                             + N.stringOf(entry2.getValue()) + "}";
 
                     break;
@@ -502,7 +502,7 @@ public class Seid implements EntityId, Cloneable {
 
                     for (Map.Entry<String, Object> entry : entrySet) {
                         if (i++ > 0) {
-                            sb.append(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                            sb.append(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                         }
 
                         String propName = NameUtil.isCanonicalName(entityName, entry.getKey()) ? NameUtil.getSimpleName(entry.getKey()) : entry.getKey();

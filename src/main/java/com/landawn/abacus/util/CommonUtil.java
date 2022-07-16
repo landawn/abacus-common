@@ -163,10 +163,6 @@ class CommonUtil {
      */
     static final Class<?>[] EMPTY_CLASS_ARRAY = new Class[0];
 
-    public static final String NULL_STRING = "null".intern();
-
-    public static final char[] NULL_CHAR_ARRAY = NULL_STRING.toCharArray();
-
     static final String TRUE = Boolean.TRUE.toString().intern();
 
     static final char[] TRUE_CHAR_ARRAY = TRUE.toCharArray();
@@ -175,12 +171,22 @@ class CommonUtil {
 
     static final char[] FALSE_CHAR_ARRAY = FALSE.toCharArray();
 
-    public static final byte BYTE_0 = 0;
+    //    /**
+    //     * String with value {@code "null"}.
+    //     * @deprecated replaced by {@code Strings.NULL_STRING}
+    //     * @see Strings#NULL_STRING
+    //     */
+    //    @Deprecated
+    //    public static final String NULL_STRING = "null".intern();
+    //
+    //    /**
+    //     * @deprecated replaced by {@code Strings.NULL_CHAR_ARRAY}
+    //     * @see Strings#NULL_CHAR_ARRAY
+    //     */
+    //    @Deprecated
+    //    public static final char[] NULL_CHAR_ARRAY = NULL_STRING.toCharArray();
 
-    public static final byte BYTE_1 = 0;
-
-    // ...
-    public static final char CHAR_0 = WD.CHAR_0;
+    static final char CHAR_0 = WD.CHAR_0;
 
     /**
      * The Constant CHAR_LF.
@@ -203,10 +209,6 @@ class CommonUtil {
     static final char CHAR_CR = WD.CHAR_CR;
 
     static final int BINARYSEARCH_THRESHOLD = 64;
-
-    public static final String ELEMENT_SEPARATOR = ", ".intern();
-
-    public static final char[] ELEMENT_SEPARATOR_CHAR_ARRAY = ELEMENT_SEPARATOR.toCharArray();
 
     // ...
     /**
@@ -575,7 +577,7 @@ class CommonUtil {
      */
     public static char defaultIfNull(Character c) {
         if (c == null) {
-            return CommonUtil.CHAR_0;
+            return CHAR_0;
         }
 
         return c;
@@ -2690,7 +2692,7 @@ class CommonUtil {
             final boolean[] result = new boolean[len];
 
             for (int i = 0; i < len; i++) {
-                result[i] = a[i] > BYTE_0;
+                result[i] = a[i] > Numbers.BYTE_ZERO;
             }
 
             return result;
@@ -2883,7 +2885,7 @@ class CommonUtil {
             final byte[] result = new byte[len];
 
             for (int i = 0; i < len; i++) {
-                result[i] = a[i] ? BYTE_1 : BYTE_0;
+                result[i] = a[i] ? Numbers.BYTE_ONE : Numbers.BYTE_ZERO;
             }
 
             return result;
@@ -12959,7 +12961,7 @@ class CommonUtil {
      */
     public static String toString(final Object obj) {
         if (obj == null) {
-            return NULL_STRING;
+            return Strings.NULL_STRING;
         } else if (obj instanceof CharSequence) {
             return obj.toString();
         }
@@ -13020,7 +13022,7 @@ class CommonUtil {
      */
     public static String deepToString(final Object obj) {
         if (obj == null) {
-            return NULL_STRING;
+            return Strings.NULL_STRING;
         }
 
         if (obj.getClass().isArray()) {
@@ -13038,7 +13040,7 @@ class CommonUtil {
      */
     public static String toString(final boolean[] a) {
         if (a == null) {
-            return CommonUtil.NULL_STRING;
+            return Strings.NULL_STRING;
         }
 
         if (a.length == 0) {
@@ -13074,7 +13076,7 @@ class CommonUtil {
      */
     static void toString(final StringBuilder sb, final boolean[] a) {
         if (a == null) {
-            sb.append(NULL_STRING);
+            sb.append(Strings.NULL_STRING);
         } else if (a.length == 0) {
             sb.append("[]");
         } else {
@@ -13111,7 +13113,7 @@ class CommonUtil {
      */
     public static String toString(final char[] a) {
         if (a == null) {
-            return CommonUtil.NULL_STRING;
+            return Strings.NULL_STRING;
         } else if (a.length == 0) {
             return "[]";
         }
@@ -13145,7 +13147,7 @@ class CommonUtil {
      */
     static void toString(final StringBuilder sb, final char[] a) {
         if (a == null) {
-            sb.append(NULL_STRING);
+            sb.append(Strings.NULL_STRING);
         } else if (a.length == 0) {
             sb.append("[]");
         } else {
@@ -13182,7 +13184,7 @@ class CommonUtil {
      */
     public static String toString(final byte[] a) {
         if (a == null) {
-            return CommonUtil.NULL_STRING;
+            return Strings.NULL_STRING;
         } else if (a.length == 0) {
             return "[]";
         }
@@ -13216,7 +13218,7 @@ class CommonUtil {
      */
     static void toString(final StringBuilder sb, final byte[] a) {
         if (a == null) {
-            sb.append(NULL_STRING);
+            sb.append(Strings.NULL_STRING);
         } else if (a.length == 0) {
             sb.append("[]");
         } else {
@@ -13253,7 +13255,7 @@ class CommonUtil {
      */
     public static String toString(final short[] a) {
         if (a == null) {
-            return CommonUtil.NULL_STRING;
+            return Strings.NULL_STRING;
         } else if (a.length == 0) {
             return "[]";
         }
@@ -13287,7 +13289,7 @@ class CommonUtil {
      */
     static void toString(final StringBuilder sb, final short[] a) {
         if (a == null) {
-            sb.append(NULL_STRING);
+            sb.append(Strings.NULL_STRING);
         } else if (a.length == 0) {
             sb.append("[]");
         } else {
@@ -13324,7 +13326,7 @@ class CommonUtil {
      */
     public static String toString(final int[] a) {
         if (a == null) {
-            return CommonUtil.NULL_STRING;
+            return Strings.NULL_STRING;
         } else if (a.length == 0) {
             return "[]";
         }
@@ -13358,7 +13360,7 @@ class CommonUtil {
      */
     static void toString(final StringBuilder sb, final int[] a) {
         if (a == null) {
-            sb.append(NULL_STRING);
+            sb.append(Strings.NULL_STRING);
         } else if (a.length == 0) {
             sb.append("[]");
         } else {
@@ -13395,7 +13397,7 @@ class CommonUtil {
      */
     public static String toString(final long[] a) {
         if (a == null) {
-            return CommonUtil.NULL_STRING;
+            return Strings.NULL_STRING;
         } else if (a.length == 0) {
             return "[]";
         }
@@ -13429,7 +13431,7 @@ class CommonUtil {
      */
     static void toString(final StringBuilder sb, final long[] a) {
         if (a == null) {
-            sb.append(NULL_STRING);
+            sb.append(Strings.NULL_STRING);
         } else if (a.length == 0) {
             sb.append("[]");
         } else {
@@ -13466,7 +13468,7 @@ class CommonUtil {
      */
     public static String toString(final float[] a) {
         if (a == null) {
-            return CommonUtil.NULL_STRING;
+            return Strings.NULL_STRING;
         } else if (a.length == 0) {
             return "[]";
         }
@@ -13500,7 +13502,7 @@ class CommonUtil {
      */
     static void toString(final StringBuilder sb, final float[] a) {
         if (a == null) {
-            sb.append(NULL_STRING);
+            sb.append(Strings.NULL_STRING);
         } else if (a.length == 0) {
             sb.append("[]");
         } else {
@@ -13537,7 +13539,7 @@ class CommonUtil {
      */
     public static String toString(final double[] a) {
         if (a == null) {
-            return CommonUtil.NULL_STRING;
+            return Strings.NULL_STRING;
         } else if (a.length == 0) {
             return "[]";
         }
@@ -13571,7 +13573,7 @@ class CommonUtil {
      */
     static void toString(final StringBuilder sb, final double[] a) {
         if (a == null) {
-            sb.append(NULL_STRING);
+            sb.append(Strings.NULL_STRING);
         } else if (a.length == 0) {
             sb.append("[]");
         } else {
@@ -13608,7 +13610,7 @@ class CommonUtil {
      */
     public static String toString(final Object[] a) {
         if (a == null) {
-            return CommonUtil.NULL_STRING;
+            return Strings.NULL_STRING;
         } else if (a.length == 0) {
             return "[]";
         }
@@ -13642,7 +13644,7 @@ class CommonUtil {
      */
     static void toString(final StringBuilder sb, final Object[] a) {
         if (a == null) {
-            sb.append(NULL_STRING);
+            sb.append(Strings.NULL_STRING);
         } else if (a.length == 0) {
             sb.append("[]");
         } else {
@@ -13690,7 +13692,7 @@ class CommonUtil {
      */
     public static String deepToString(final Object[] a) {
         if (a == null) {
-            return CommonUtil.NULL_STRING;
+            return Strings.NULL_STRING;
         } else if (a.length == 0) {
             return "[]";
         }
@@ -13755,7 +13757,7 @@ class CommonUtil {
             }
 
             if (element == null) {
-                sb.append(CommonUtil.NULL_CHAR_ARRAY);
+                sb.append(Strings.NULL_CHAR_ARRAY);
 
                 continue;
             }

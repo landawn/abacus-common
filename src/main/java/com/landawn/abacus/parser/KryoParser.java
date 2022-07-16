@@ -106,6 +106,7 @@ import com.landawn.abacus.util.Duration;
 import com.landawn.abacus.util.FloatList;
 import com.landawn.abacus.util.Fraction;
 import com.landawn.abacus.util.HBaseColumn;
+import com.landawn.abacus.util.Holder;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.IntList;
 import com.landawn.abacus.util.LinkedArrayHashMap;
@@ -142,7 +143,6 @@ import com.landawn.abacus.util.Tuple.Tuple6;
 import com.landawn.abacus.util.Tuple.Tuple7;
 import com.landawn.abacus.util.Tuple.Tuple8;
 import com.landawn.abacus.util.Tuple.Tuple9;
-import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalBoolean;
@@ -153,7 +153,6 @@ import com.landawn.abacus.util.u.OptionalFloat;
 import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
-import com.landawn.abacus.util.u.R;
 
 /**
  * The content is encoded with Base64 if the target output is String or Writer, otherwise the content is NOT encoded with Base64 if the target output is File or OutputStream.
@@ -697,7 +696,6 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         builtInClassesToRegister.add(Optional.class);
         builtInClassesToRegister.add(Nullable.class);
         builtInClassesToRegister.add(Holder.class);
-        builtInClassesToRegister.add(R.class);
 
         builtInClassesToRegister.add(Fraction.class);
         builtInClassesToRegister.add(Range.class);

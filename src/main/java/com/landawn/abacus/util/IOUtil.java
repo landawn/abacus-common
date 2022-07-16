@@ -61,7 +61,6 @@ import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.Fn.BiPredicates;
-import com.landawn.abacus.util.u.Holder;
 
 /**
  * <p>
@@ -1634,7 +1633,7 @@ public final class IOUtil {
      */
     public static void writeLine(final Writer writer, final Object obj, final boolean flush) throws IOException {
         if (obj == null) {
-            writer.write(N.NULL_CHAR_ARRAY);
+            writer.write(Strings.NULL_CHAR_ARRAY);
         } else {
             writer.write(N.toString(obj));
         }
@@ -1816,7 +1815,7 @@ public final class IOUtil {
             for (Object line : lines) {
                 if (lineNum++ >= offset) {
                     if (line == null) {
-                        writer.write(N.NULL_CHAR_ARRAY);
+                        writer.write(Strings.NULL_CHAR_ARRAY);
                     } else {
                         writer.write(N.toString(line));
                     }
@@ -2011,7 +2010,7 @@ public final class IOUtil {
             for (Object line : lines) {
                 if (lineNum++ >= offset) {
                     if (line == null) {
-                        writer.write(N.NULL_CHAR_ARRAY);
+                        writer.write(Strings.NULL_CHAR_ARRAY);
                     } else {
                         writer.write(N.toString(line));
                     }
@@ -5035,6 +5034,8 @@ public final class IOUtil {
      */
     @SuppressWarnings("null")
     static void splitByLine(final File file, final int numOfParts, final File destDir) throws UncheckedIOException {
+        final int suffixLen = String.valueOf(numOfParts).length();
+
         final long lineNumOfPart = estimateLineCount(file, 10000) / numOfParts;
 
         int index = file.getName().lastIndexOf('.');
@@ -5053,41 +5054,38 @@ public final class IOUtil {
 
             br = Objectory.createBufferedReader(is);
 
-            String subFileNmae = destDir.getAbsolutePath() + IOUtil.FILE_SEPARATOR + prefix + "_" + Strings.padStart(N.stringOf(fileSerNum++), 4, '0')
+            String subFileNmae = destDir.getAbsolutePath() + IOUtil.FILE_SEPARATOR + prefix + "_" + Strings.padStart(N.stringOf(fileSerNum++), suffixLen, '0')
                     + postfix;
             bw = Objectory.createBufferedWriter(new FileWriter(new File(subFileNmae)));
 
             int lineCounter = 0;
-            String line = null;
-            while ((line = br.readLine()) != null) {
-                bw.write(line);
+
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                bw.writeNonNull(line);
                 bw.write(IOUtil.LINE_SEPARATOR);
                 lineCounter++;
 
                 if ((lineCounter % lineNumOfPart) == 0) {
-                    if (bw != null) {
-                        close(bw);
-                        Objectory.recycle(bw);
-                        bw = null;
-                    }
+                    close(bw);
+                    Objectory.recycle(bw);
+                    bw = null;
 
-                    subFileNmae = destDir.getAbsolutePath() + IOUtil.FILE_SEPARATOR + prefix + "_" + Strings.padStart(N.stringOf(fileSerNum++), 4, '0')
+                    subFileNmae = destDir.getAbsolutePath() + IOUtil.FILE_SEPARATOR + prefix + "_" + Strings.padStart(N.stringOf(fileSerNum++), suffixLen, '0')
                             + postfix;
                     bw = Objectory.createBufferedWriter(new FileWriter(new File(subFileNmae)));
                 }
             }
 
-            if (bw != null) {
-                close(bw);
-                Objectory.recycle(bw);
-                bw = null;
-            }
+            close(bw);
+            Objectory.recycle(bw);
+            bw = null;
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         } finally {
             if (bw != null) {
                 close(bw);
                 Objectory.recycle(bw);
+                bw = null;
             }
 
             closeQuietly(is);
@@ -6219,6 +6217,6 @@ public final class IOUtil {
      */
     @SuppressWarnings("deprecation")
     private static char[] toCharArray(CharSequence str) {
-        return str == null ? N.NULL_CHAR_ARRAY : InternalUtil.getCharsForReadOnly(str instanceof String ? (String) str : str.toString());
+        return str == null ? Strings.NULL_CHAR_ARRAY : InternalUtil.getCharsForReadOnly(str instanceof String ? (String) str : str.toString());
     }
 }

@@ -24,6 +24,7 @@ import java.util.Date;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.exception.UncheckedIOException;
 
 /**
@@ -195,7 +196,7 @@ public class BufferedWriter extends Writer {
     @Override
     public void write(String str) throws IOException {
         if (str == null) {
-            write(N.NULL_CHAR_ARRAY);
+            write(Strings.NULL_CHAR_ARRAY);
         } else {
             write(str, 0, str.length());
         }
@@ -211,35 +212,50 @@ public class BufferedWriter extends Writer {
     @Override
     public void write(String str, int off, int len) throws IOException {
         if (str == null) {
-            write(N.NULL_CHAR_ARRAY, off, len);
+            write(Strings.NULL_CHAR_ARRAY, off, len);
         } else {
-            // write(InternalUtil.getCharsForReadOnly(str), off, len);
+            writeNonNull(str, off, len);
+        }
+    }
 
-            len = Math.min(str.length() - off, len);
+    /**
+     *
+     * @param str
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    @Internal
+    void writeNonNull(String str) throws IOException {
+        writeNonNull(str, 0, str.length());
+    }
 
-            if (value == null) {
-                if (len > (Objectory.BUFFER_SIZE - nextChar)) {
-                    if (nextChar > 0) {
-                        flushBuffer();
-                    }
+    @Internal
+    void writeNonNull(String str, int off, int len) throws IOException {
+        // write(InternalUtil.getCharsForReadOnly(str), off, len);
 
-                    out.write(str, off, len);
-                } else {
-                    if (this._cbuf == null) {
-                        this._cbuf = Objectory.createCharArrayBuffer();
-                    }
+        len = Math.min(str.length() - off, len);
 
-                    str.getChars(off, off + len, this._cbuf, nextChar);
-                    nextChar += len;
+        if (value == null) {
+            if (len > (Objectory.BUFFER_SIZE - nextChar)) {
+                if (nextChar > 0) {
+                    flushBuffer();
                 }
+
+                out.write(str, off, len);
             } else {
-                if (len > (value.length - count)) {
-                    expandCapacity(count + len);
+                if (this._cbuf == null) {
+                    this._cbuf = Objectory.createCharArrayBuffer();
                 }
 
-                str.getChars(off, off + len, value, count);
-                count += len;
+                str.getChars(off, off + len, this._cbuf, nextChar);
+                nextChar += len;
             }
+        } else {
+            if (len > (value.length - count)) {
+                expandCapacity(count + len);
+            }
+
+            str.getChars(off, off + len, value, count);
+            count += len;
         }
     }
 

@@ -1359,12 +1359,12 @@ public final class Maps {
                     } else {
                         if (j == idxLen - 1) {
                             if (i == len - 1) {
-                                return (T) Iterables.get(intermediateColl, indexes[j]);
+                                return (T) N.getElement(intermediateColl, indexes[j]);
                             } else {
-                                intermediateMap = (Map) Iterables.get(intermediateColl, indexes[j]);
+                                intermediateMap = (Map) N.getElement(intermediateColl, indexes[j]);
                             }
                         } else {
-                            intermediateColl = (Collection) Iterables.get(intermediateColl, indexes[j]);
+                            intermediateColl = (Collection) N.getElement(intermediateColl, indexes[j]);
                         }
                     }
                 }

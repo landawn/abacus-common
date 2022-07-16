@@ -135,7 +135,7 @@ public abstract class CharacterWriter extends BufferedWriter {
     @SuppressWarnings("deprecation")
     public void writeCharacter(final String str) throws IOException {
         if (str == null) {
-            write(N.NULL_CHAR_ARRAY);
+            write(Strings.NULL_CHAR_ARRAY);
         } else {
             writeCharacter(InternalUtil.getCharsForReadOnly(str));
         }
@@ -151,7 +151,7 @@ public abstract class CharacterWriter extends BufferedWriter {
     @SuppressWarnings("deprecation")
     public void writeCharacter(final String str, int off, int len) throws IOException {
         if (str == null) {
-            write(N.NULL_CHAR_ARRAY, off, len);
+            write(Strings.NULL_CHAR_ARRAY, off, len);
         } else {
             writeCharacter(InternalUtil.getCharsForReadOnly(str), off, len);
         }

@@ -98,11 +98,7 @@ import com.landawn.abacus.util.stream.Stream;
  */
 public final class N extends CommonUtil {
 
-    public static final int CPU_CORES = Runtime.getRuntime().availableProcessors();
-
-    public static final int MAX_MEMORY_IN_MB = (int) (Runtime.getRuntime().maxMemory() / (1024 * 1024));
-
-    public static final JavaVersion JAVA_VERSION = JavaVersion.of(System.getProperty("java.version"));
+    private static final int CPU_CORES = Runtime.getRuntime().availableProcessors();
 
     private static final float LOAD_FACTOR_FOR_FLAT_MAP = 1.75f;
 
@@ -704,6 +700,30 @@ public final class N extends CommonUtil {
         }
 
         return false;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param c
+     * @param index
+     * @return
+     * @throws IndexOutOfBoundsException the index out of bounds exception
+     */
+    public static <T> T getElement(final Collection<? extends T> c, int index) throws IndexOutOfBoundsException {
+        N.checkIndex(index, N.size(c));
+
+        if (c instanceof List) {
+            return ((List<T>) c).get(index);
+        }
+
+        final Iterator<? extends T> iter = c.iterator();
+
+        while (index-- > 0) {
+            iter.next();
+        }
+
+        return iter.next();
     }
 
     /**
@@ -24427,9 +24447,9 @@ public final class N extends CommonUtil {
     @SuppressWarnings("rawtypes")
     public static <T> T println(final T obj) {
         if (obj instanceof Collection) {
-            System.out.println(Joiner.with(ELEMENT_SEPARATOR, "[", "]").reuseCachedBuffer().appendAll((Collection) obj));
+            System.out.println(Joiner.with(Strings.ELEMENT_SEPARATOR, "[", "]").reuseCachedBuffer().appendAll((Collection) obj));
         } else if (obj instanceof Map) {
-            System.out.println(Joiner.with(ELEMENT_SEPARATOR, "=", "{", "}").reuseCachedBuffer().appendEntries((Map) obj));
+            System.out.println(Joiner.with(Strings.ELEMENT_SEPARATOR, "=", "{", "}").reuseCachedBuffer().appendEntries((Map) obj));
         } else {
             System.out.println(toString(obj));
         }

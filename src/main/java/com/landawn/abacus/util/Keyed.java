@@ -61,21 +61,12 @@ public final class Keyed<K, T> implements Immutable {
 
     /**
      *
-     * @param val
+     * @param obj
      * @return
      */
     @Override
-    public boolean equals(Object val) {
-        if (val == this) {
-            return true;
-        }
-
-        if (val instanceof Keyed) {
-            final Keyed<K, T> other = (Keyed<K, T>) val;
-            return N.equals(key, other.key);
-        }
-
-        return false;
+    public boolean equals(final Object obj) {
+        return (obj == this) || (obj instanceof Keyed && N.equals(((Keyed<K, T>) obj).key, key));
     }
 
     @Override

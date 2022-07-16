@@ -58,7 +58,20 @@ import com.landawn.abacus.util.u.OptionalChar;
  * @see com.landawn.abacus.util.Maps
  */
 public abstract class Strings {
-    // public static final String EMPTY_STRING = N.EMPTY_STRING;
+    public static final String ELEMENT_SEPARATOR = ", ".intern();
+
+    public static final char[] ELEMENT_SEPARATOR_CHAR_ARRAY = ELEMENT_SEPARATOR.toCharArray();
+
+    /**
+     * String with value {@code "null"}.
+     */
+    public static final String NULL_STRING = "null".intern();
+
+    /**
+     *
+     * Char array with value {@code "['n', 'u', 'l', 'l']"}.
+     */
+    public static final char[] NULL_CHAR_ARRAY = NULL_STRING.toCharArray();
 
     /**
      * The empty String {@code ""}.
@@ -90,6 +103,13 @@ public abstract class Strings {
      * @since 3.2
      */
     public static final String CR = "\r";
+
+    @Beta
+    public static final char _SPACE = SPACE.charAt(0);
+    @Beta
+    public static final char _LF = LF.charAt(0);
+    @Beta
+    public static final char _CR = CR.charAt(0);
 
     /**
      * A regex pattern for recognizing blocks of whitespace characters. The
@@ -6286,18 +6306,43 @@ public abstract class Strings {
     /**
      *
      * @param str
+     * @param tag
+     * @return
+     * @see #substringBetween(String, String, String)
+     * @see #substringBetween(String, int, int)
+     */
+    public static String substringBetween(String str, String tag) {
+        return substringBetween(str, tag, tag);
+    }
+
+    /**
+     *
+     * @param str
      * @param delimiterOfExclusiveBeginIndex
      * @param delimiterOfExclusiveBeginIndex
      * @return
      * @see #substringBetween(String, int, int)
      */
     public static String substringBetween(String str, String delimiterOfExclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
+        return substringBetween(str, 0, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex);
+    }
+
+    /**
+     *
+     * @param str
+     * @param fromIndex start index for {@code delimiterOfExclusive}. {@code str.indexOf(delimiterOfExclusiveBeginIndex, fromIndex)}
+     * @param delimiterOfExclusiveBeginIndex
+     * @param delimiterOfExclusiveBeginIndex
+     * @return
+     * @see #substringBetween(String, int, int)
+     */
+    public static String substringBetween(String str, int fromIndex, String delimiterOfExclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
         if (str == null || str.length() == 0 || delimiterOfExclusiveBeginIndex == null || delimiterOfExclusiveBeginIndex.length() == 0
                 || delimiterOfExclusiveEndIndex == null || delimiterOfExclusiveEndIndex.length() == 0) {
             return null;
         }
 
-        final int start = str.indexOf(delimiterOfExclusiveBeginIndex);
+        final int start = fromIndex == 0 ? str.indexOf(delimiterOfExclusiveBeginIndex) : str.indexOf(delimiterOfExclusiveBeginIndex, fromIndex);
 
         if (start < 0) {
             return null;
@@ -6310,18 +6355,6 @@ public abstract class Strings {
         }
 
         return substringBetween(str, start + delimiterOfExclusiveBeginIndex.length() - 1, end);
-    }
-
-    /**
-     *
-     * @param str
-     * @param tag
-     * @return
-     * @see #substringBetween(String, String, String)
-     * @see #substringBetween(String, int, int)
-     */
-    public static String substringBetween(String str, String tag) {
-        return substringBetween(str, tag, tag);
     }
 
     /**
@@ -6610,7 +6643,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final boolean[] a) {
-        return join(a, N.ELEMENT_SEPARATOR);
+        return join(a, Strings.ELEMENT_SEPARATOR);
     }
 
     /**
@@ -6721,7 +6754,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final char[] a) {
-        return join(a, N.ELEMENT_SEPARATOR);
+        return join(a, Strings.ELEMENT_SEPARATOR);
     }
 
     /**
@@ -6832,7 +6865,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final byte[] a) {
-        return join(a, N.ELEMENT_SEPARATOR);
+        return join(a, Strings.ELEMENT_SEPARATOR);
     }
 
     /**
@@ -6943,7 +6976,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final short[] a) {
-        return join(a, N.ELEMENT_SEPARATOR);
+        return join(a, Strings.ELEMENT_SEPARATOR);
     }
 
     /**
@@ -7054,7 +7087,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final int[] a) {
-        return join(a, N.ELEMENT_SEPARATOR);
+        return join(a, Strings.ELEMENT_SEPARATOR);
     }
 
     /**
@@ -7165,7 +7198,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final long[] a) {
-        return join(a, N.ELEMENT_SEPARATOR);
+        return join(a, Strings.ELEMENT_SEPARATOR);
     }
 
     /**
@@ -7276,7 +7309,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final float[] a) {
-        return join(a, N.ELEMENT_SEPARATOR);
+        return join(a, Strings.ELEMENT_SEPARATOR);
     }
 
     /**
@@ -7387,7 +7420,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final double[] a) {
-        return join(a, N.ELEMENT_SEPARATOR);
+        return join(a, Strings.ELEMENT_SEPARATOR);
     }
 
     /**
@@ -7498,7 +7531,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final Object[] a) {
-        return join(a, N.ELEMENT_SEPARATOR);
+        return join(a, Strings.ELEMENT_SEPARATOR);
     }
 
     /**
@@ -7527,6 +7560,14 @@ public abstract class Strings {
         }
 
         return join(a, 0, a.length, delimiter);
+    }
+
+    public static String join(final Object[] a, final String delimiter, final String prefix, final String suffix) {
+        return join(a, 0, N.len(a), delimiter, prefix, suffix, false);
+    }
+
+    public static String join(final Object[] a, final String delimiter, final String prefix, final String suffix, final boolean trim) {
+        return join(a, 0, N.len(a), delimiter, prefix, suffix, trim);
     }
 
     /**
@@ -7601,14 +7642,6 @@ public abstract class Strings {
         return join(a, fromIndex, toIndex, delimiter, null, null, trim);
     }
 
-    public static String join(final Object[] a, final String delimiter, final String prefix, final String suffix) {
-        return join(a, 0, N.len(a), delimiter, prefix, suffix, false);
-    }
-
-    public static String join(final Object[] a, final String delimiter, final String prefix, final String suffix, final boolean trim) {
-        return join(a, 0, N.len(a), delimiter, prefix, suffix, trim);
-    }
-
     /**
      *
      * @param a
@@ -7674,8 +7707,8 @@ public abstract class Strings {
      * @param c
      * @return
      */
-    public static String join(final Collection<?> c) {
-        return join(c, N.ELEMENT_SEPARATOR);
+    public static String join(final Iterable<?> c) {
+        return join(c, Strings.ELEMENT_SEPARATOR);
     }
 
     /**
@@ -7684,12 +7717,8 @@ public abstract class Strings {
      * @param delimiter
      * @return
      */
-    public static String join(final Collection<?> c, final char delimiter) {
-        if (N.isNullOrEmpty(c)) {
-            return N.EMPTY_STRING;
-        }
-
-        return join(c, 0, c.size(), delimiter);
+    public static String join(final Iterable<?> c, final char delimiter) {
+        return join(c == null ? null : c.iterator(), delimiter);
     }
 
     /**
@@ -7698,12 +7727,16 @@ public abstract class Strings {
      * @param delimiter
      * @return
      */
-    public static String join(final Collection<?> c, final String delimiter) {
-        if (N.isNullOrEmpty(c)) {
-            return N.EMPTY_STRING;
-        }
+    public static String join(final Iterable<?> c, final String delimiter) {
+        return join(c == null ? null : c.iterator(), delimiter);
+    }
 
-        return join(c, 0, c.size(), delimiter);
+    public static String join(final Iterable<?> c, final String delimiter, final String prefix, final String suffix) {
+        return join(c == null ? null : c.iterator(), delimiter, prefix, suffix);
+    }
+
+    public static String join(final Iterable<?> c, final String delimiter, final String prefix, final String suffix, final boolean trim) {
+        return join(c == null ? null : c.iterator(), delimiter, prefix, suffix, trim);
     }
 
     /**
@@ -7781,14 +7814,6 @@ public abstract class Strings {
      */
     public static String join(final Collection<?> c, final int fromIndex, final int toIndex, final String delimiter, final boolean trim) {
         return join(c, fromIndex, toIndex, delimiter, null, null, trim);
-    }
-
-    public static String join(final Collection<?> c, final String delimiter, final String prefix, final String suffix) {
-        return join(c, 0, N.size(c), delimiter, prefix, suffix, false);
-    }
-
-    public static String join(final Collection<?> c, final String delimiter, final String prefix, final String suffix, final boolean trim) {
-        return join(c, 0, N.size(c), delimiter, prefix, suffix, trim);
     }
 
     /**
@@ -7881,7 +7906,7 @@ public abstract class Strings {
     }
 
     public static String join(final Iterator<?> iter) {
-        return join(iter, N.ELEMENT_SEPARATOR);
+        return join(iter, Strings.ELEMENT_SEPARATOR);
     }
 
     public static String join(final Iterator<?> iter, final char delimiter) {
@@ -7910,6 +7935,10 @@ public abstract class Strings {
 
     public static String join(final Iterator<?> iter, final String delimiter) {
         return join(iter, delimiter, EMPTY, EMPTY, false);
+    }
+
+    public static String join(final Iterator<?> iter, final String delimiter, final String prefix, final String suffix) {
+        return join(iter, delimiter, prefix, suffix, false);
     }
 
     public static String join(final Iterator<?> iter, final String delimiter, final String prefix, final String suffix, final boolean trim) {
@@ -7964,7 +7993,7 @@ public abstract class Strings {
      * @return
      */
     public static String joinEntries(final Map<?, ?> m) {
-        return joinEntries(m, N.ELEMENT_SEPARATOR);
+        return joinEntries(m, Strings.ELEMENT_SEPARATOR);
     }
 
     /**
@@ -7993,6 +8022,98 @@ public abstract class Strings {
         }
 
         return joinEntries(m, 0, m.size(), entryDelimiter);
+    }
+
+    /**
+     *
+     * @param m
+     * @param entryDelimiter
+     * @param keyValueDelimiter
+     * @return
+     */
+    public static String joinEntries(final Map<?, ?> m, final char entryDelimiter, final char keyValueDelimiter) {
+        if (N.isNullOrEmpty(m)) {
+            return N.EMPTY_STRING;
+        }
+
+        return joinEntries(m, 0, m.size(), entryDelimiter, keyValueDelimiter);
+    }
+
+    /**
+     *
+     * @param m
+     * @param entryDelimiter
+     * @param keyValueDelimiter
+     * @return
+     */
+    public static String joinEntries(final Map<?, ?> m, final String entryDelimiter, final String keyValueDelimiter) {
+        if (N.isNullOrEmpty(m)) {
+            return N.EMPTY_STRING;
+        }
+
+        return joinEntries(m, 0, m.size(), entryDelimiter, keyValueDelimiter);
+    }
+
+    public static String joinEntries(final Map<?, ?> m, final String entryDelimiter, final String keyValueDelimiter, final String prefix, final String suffix) {
+        return joinEntries(m, 0, N.size(m), entryDelimiter, keyValueDelimiter, prefix, suffix, false);
+    }
+
+    public static String joinEntries(final Map<?, ?> m, final String entryDelimiter, final String keyValueDelimiter, final String prefix, final String suffix,
+            final boolean trim) {
+        return joinEntries(m, 0, N.size(m), entryDelimiter, keyValueDelimiter, prefix, suffix, trim);
+    }
+
+    public static <K, V, E extends Exception, E2 extends Exception> String joinEntries(final Map<K, V> m, final String entryDelimiter,
+            final String keyValueDelimiter, final String prefix, final String suffix, final boolean trim, final Throwables.Function<? super K, ?, E> keyMapper,
+            final Throwables.Function<? super V, ?, E2> valueMapper) throws E, E2 {
+        N.checkArgNotNull(keyMapper, "keyMapper");
+        N.checkArgNotNull(valueMapper, "valueMapper");
+
+        if (N.isNullOrEmpty(m)) {
+            if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+                return N.EMPTY_STRING;
+            } else if (N.isNullOrEmpty(prefix)) {
+                return suffix;
+            } else if (N.isNullOrEmpty(suffix)) {
+                return prefix;
+            } else {
+                return prefix + suffix;
+            }
+        }
+
+        final StringBuilder sb = Objectory.createStringBuilder();
+
+        try {
+            if (N.notNullOrEmpty(prefix)) {
+                sb.append(prefix);
+            }
+
+            int i = 0;
+
+            for (Map.Entry<K, V> entry : m.entrySet()) {
+                if (i++ > 0) {
+                    sb.append(entryDelimiter);
+                }
+
+                if (trim) {
+                    sb.append(N.toString(keyMapper.apply(entry.getKey())).trim());
+                    sb.append(keyValueDelimiter);
+                    sb.append(N.toString(valueMapper.apply(entry.getValue())).trim());
+                } else {
+                    sb.append(N.toString(keyMapper.apply(entry.getKey())));
+                    sb.append(keyValueDelimiter);
+                    sb.append(N.toString(valueMapper.apply(entry.getValue())));
+                }
+            }
+
+            if (N.notNullOrEmpty(suffix)) {
+                sb.append(suffix);
+            }
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
+        }
     }
 
     /**
@@ -8043,36 +8164,6 @@ public abstract class Strings {
      */
     public static String joinEntries(final Map<?, ?> m, final int fromIndex, final int toIndex, final String entryDelimiter, final boolean trim) {
         return joinEntries(m, fromIndex, toIndex, entryDelimiter, WD.EQUAL, null, null, trim);
-    }
-
-    /**
-     *
-     * @param m
-     * @param entryDelimiter
-     * @param keyValueDelimiter
-     * @return
-     */
-    public static String joinEntries(final Map<?, ?> m, final char entryDelimiter, final char keyValueDelimiter) {
-        if (N.isNullOrEmpty(m)) {
-            return N.EMPTY_STRING;
-        }
-
-        return joinEntries(m, 0, m.size(), entryDelimiter, keyValueDelimiter);
-    }
-
-    /**
-     *
-     * @param m
-     * @param entryDelimiter
-     * @param keyValueDelimiter
-     * @return
-     */
-    public static String joinEntries(final Map<?, ?> m, final String entryDelimiter, final String keyValueDelimiter) {
-        if (N.isNullOrEmpty(m)) {
-            return N.EMPTY_STRING;
-        }
-
-        return joinEntries(m, 0, m.size(), entryDelimiter, keyValueDelimiter);
     }
 
     /**
@@ -8146,15 +8237,6 @@ public abstract class Strings {
         return joinEntries(m, fromIndex, toIndex, entryDelimiter, keyValueDelimiter, null, null, false);
     }
 
-    public static String joinEntries(final Map<?, ?> m, final String entryDelimiter, final String keyValueDelimiter, final String prefix, final String suffix) {
-        return joinEntries(m, 0, N.size(m), entryDelimiter, keyValueDelimiter, prefix, suffix, false);
-    }
-
-    public static String joinEntries(final Map<?, ?> m, final String entryDelimiter, final String keyValueDelimiter, final String prefix, final String suffix,
-            final boolean trim) {
-        return joinEntries(m, 0, N.size(m), entryDelimiter, keyValueDelimiter, prefix, suffix, trim);
-    }
-
     public static String joinEntries(final Map<?, ?> m, final int fromIndex, final int toIndex, final String entryDelimiter, final String keyValueDelimiter,
             final String prefix, final String suffix, final boolean trim) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(m));
@@ -8199,59 +8281,6 @@ public abstract class Strings {
 
                 if (i >= toIndex) {
                     break;
-                }
-            }
-
-            if (N.notNullOrEmpty(suffix)) {
-                sb.append(suffix);
-            }
-
-            return sb.toString();
-        } finally {
-            Objectory.recycle(sb);
-        }
-    }
-
-    public static <K, V, E extends Exception, E2 extends Exception> String joinEntries(final Map<K, V> m, final String entryDelimiter,
-            final String keyValueDelimiter, final String prefix, final String suffix, final boolean trim, final Throwables.Function<? super K, ?, E> keyMapper,
-            final Throwables.Function<? super V, ?, E2> valueMapper) throws E, E2 {
-        N.checkArgNotNull(keyMapper, "keyMapper");
-        N.checkArgNotNull(valueMapper, "valueMapper");
-
-        if (N.isNullOrEmpty(m)) {
-            if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
-                return N.EMPTY_STRING;
-            } else if (N.isNullOrEmpty(prefix)) {
-                return suffix;
-            } else if (N.isNullOrEmpty(suffix)) {
-                return prefix;
-            } else {
-                return prefix + suffix;
-            }
-        }
-
-        final StringBuilder sb = Objectory.createStringBuilder();
-
-        try {
-            if (N.notNullOrEmpty(prefix)) {
-                sb.append(prefix);
-            }
-
-            int i = 0;
-
-            for (Map.Entry<K, V> entry : m.entrySet()) {
-                if (i++ > 0) {
-                    sb.append(entryDelimiter);
-                }
-
-                if (trim) {
-                    sb.append(N.toString(keyMapper.apply(entry.getKey())).trim());
-                    sb.append(keyValueDelimiter);
-                    sb.append(N.toString(valueMapper.apply(entry.getValue())).trim());
-                } else {
-                    sb.append(N.toString(keyMapper.apply(entry.getKey())));
-                    sb.append(keyValueDelimiter);
-                    sb.append(N.toString(valueMapper.apply(entry.getValue())));
                 }
             }
 
@@ -9226,6 +9255,18 @@ public abstract class Strings {
         /**
          *
          * @param str
+         * @param tag
+         * @return
+         * @see #substringBetween(String, String, String)
+         * @see #substringBetween(String, int, int)
+         */
+        public static Optional<String> substringBetween(String str, String tag) {
+            return substringBetween(str, tag, tag);
+        }
+
+        /**
+         *
+         * @param str
          * @param delimiterOfExclusiveBeginIndex
          * @param delimiterOfExclusiveBeginIndex
          * @return
@@ -9238,13 +9279,14 @@ public abstract class Strings {
         /**
          *
          * @param str
-         * @param tag
+         * @param fromIndex start index for {@code delimiterOfExclusive}. {@code str.indexOf(delimiterOfExclusiveBeginIndex, fromIndex)}
+         * @param delimiterOfExclusiveBeginIndex
+         * @param delimiterOfExclusiveBeginIndex
          * @return
-         * @see #substringBetween(String, String, String)
          * @see #substringBetween(String, int, int)
          */
-        public static Optional<String> substringBetween(String str, String tag) {
-            return substringBetween(str, tag, tag);
+        public static Optional<String> substringBetween(String str, int fromIndex, String delimiterOfExclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
+            return Optional.ofNullable(Strings.substringBetween(str, fromIndex, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex));
         }
 
         /**

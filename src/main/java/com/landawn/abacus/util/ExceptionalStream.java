@@ -74,7 +74,6 @@ import com.landawn.abacus.util.Fn.Fnn;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.Strings.StringUtil;
-import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalInt;
@@ -12328,7 +12327,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         WRITE_CSV_ELEMENT_WITH_TYPE = (type, element, bw) -> {
             if (element == null) {
-                bw.write(N.NULL_CHAR_ARRAY);
+                bw.write(Strings.NULL_CHAR_ARRAY);
             } else {
                 if (type.isSerializable()) {
                     type.writeCharacter(bw, element, config);
@@ -12340,7 +12339,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         WRITE_CSV_ELEMENT = (element, bw) -> {
             if (element == null) {
-                bw.write(N.NULL_CHAR_ARRAY);
+                bw.write(Strings.NULL_CHAR_ARRAY);
             } else {
                 WRITE_CSV_ELEMENT_WITH_TYPE.accept(N.typeOf(element.getClass()), element, bw);
             }
@@ -12381,7 +12380,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                         for (int i = 0; i < headerSize; i++) {
                             if (i > 0) {
-                                bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
                             WRITE_CSV_ELEMENT.accept(propInfoList.get(i).name, bw);
@@ -12393,7 +12392,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                             propInfo = propInfoList.get(i);
 
                             if (i > 0) {
-                                bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
                             WRITE_CSV_ELEMENT_WITH_TYPE.accept(propInfo.jsonXmlType, propInfo.getPropValue(next), bw);
@@ -12409,7 +12408,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                                 propInfo = propInfoList.get(i);
 
                                 if (i > 0) {
-                                    bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                    bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                                 }
 
                                 WRITE_CSV_ELEMENT_WITH_TYPE.accept(propInfo.jsonXmlType, propInfo.getPropValue(next), bw);
@@ -12422,7 +12421,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                         for (int i = 0; i < headerSize; i++) {
                             if (i > 0) {
-                                bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
                             WRITE_CSV_ELEMENT.accept(keys.get(i), bw);
@@ -12432,7 +12431,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                         for (int i = 0; i < headerSize; i++) {
                             if (i > 0) {
-                                bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
                             WRITE_CSV_ELEMENT.accept(row.get(keys.get(i)), bw);
@@ -12446,7 +12445,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                             for (int i = 0; i < headerSize; i++) {
                                 if (i > 0) {
-                                    bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                    bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                                 }
 
                                 WRITE_CSV_ELEMENT.accept(row.get(keys.get(i)), bw);
@@ -12511,7 +12510,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                         for (int i = 0; i < headSize; i++) {
                             if (i > 0) {
-                                bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
                             WRITE_CSV_ELEMENT.accept(propInfos[i].name, bw);
@@ -12523,7 +12522,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                             propInfo = propInfos[i];
 
                             if (i > 0) {
-                                bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
                             WRITE_CSV_ELEMENT_WITH_TYPE.accept(propInfo.jsonXmlType, propInfo.getPropValue(next), bw);
@@ -12539,7 +12538,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                                 propInfo = propInfos[i];
 
                                 if (i > 0) {
-                                    bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                    bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                                 }
 
                                 WRITE_CSV_ELEMENT_WITH_TYPE.accept(propInfo.jsonXmlType, propInfo.getPropValue(next), bw);
@@ -12550,7 +12549,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                         for (int i = 0; i < headSize; i++) {
                             if (i > 0) {
-                                bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
                             WRITE_CSV_ELEMENT.accept(headers.get(i), bw);
@@ -12560,7 +12559,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                         for (int i = 0; i < headSize; i++) {
                             if (i > 0) {
-                                bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
                             WRITE_CSV_ELEMENT.accept(row.get(headers.get(i)), bw);
@@ -12574,7 +12573,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                             for (int i = 0; i < headSize; i++) {
                                 if (i > 0) {
-                                    bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                    bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                                 }
 
                                 WRITE_CSV_ELEMENT.accept(row.get(headers.get(i)), bw);
@@ -12585,7 +12584,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                         for (int i = 0; i < headSize; i++) {
                             if (i > 0) {
-                                bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
                             WRITE_CSV_ELEMENT.accept(headers.get(i), bw);
@@ -12597,7 +12596,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                         for (int i = 0; i < headSize; i++) {
                             if (i > 0) {
-                                bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
                             WRITE_CSV_ELEMENT.accept(rowIter.next(), bw);
@@ -12612,7 +12611,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                             for (int i = 0; i < headSize; i++) {
                                 if (i > 0) {
-                                    bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                    bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                                 }
 
                                 WRITE_CSV_ELEMENT.accept(rowIter.next(), bw);
@@ -12623,7 +12622,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                         for (int i = 0; i < headSize; i++) {
                             if (i > 0) {
-                                bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
                             WRITE_CSV_ELEMENT.accept(headers.get(i), bw);
@@ -12633,7 +12632,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                         for (int i = 0; i < headSize; i++) {
                             if (i > 0) {
-                                bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
                             WRITE_CSV_ELEMENT.accept(row[i], bw);
@@ -12647,7 +12646,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                             for (int i = 0; i < headSize; i++) {
                                 if (i > 0) {
-                                    bw.write(N.ELEMENT_SEPARATOR_CHAR_ARRAY);
+                                    bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                                 }
 
                                 WRITE_CSV_ELEMENT.accept(row[i], bw);

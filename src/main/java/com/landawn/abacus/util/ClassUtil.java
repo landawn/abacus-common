@@ -119,7 +119,6 @@ import com.landawn.abacus.util.Tuple.Tuple6;
 import com.landawn.abacus.util.Tuple.Tuple7;
 import com.landawn.abacus.util.Tuple.Tuple8;
 import com.landawn.abacus.util.Tuple.Tuple9;
-import com.landawn.abacus.util.u.Holder;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalBoolean;
@@ -130,7 +129,6 @@ import com.landawn.abacus.util.u.OptionalFloat;
 import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
-import com.landawn.abacus.util.u.R;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
@@ -306,7 +304,6 @@ public final class ClassUtil {
         BUILT_IN_TYPE.put(Optional.class.getCanonicalName(), Optional.class);
         BUILT_IN_TYPE.put(Nullable.class.getCanonicalName(), Nullable.class);
         BUILT_IN_TYPE.put(Holder.class.getCanonicalName(), Holder.class);
-        BUILT_IN_TYPE.put(R.class.getCanonicalName(), R.class);
 
         BUILT_IN_TYPE.put(Fraction.class.getCanonicalName(), Fraction.class);
         BUILT_IN_TYPE.put(Range.class.getCanonicalName(), Range.class);
@@ -2571,7 +2568,7 @@ public final class ClassUtil {
      */
     public static ObjIterator<Class<?>> hierarchy(final Class<?> type, final boolean includeInterface) {
         final ObjIterator<Class<?>> superClassesIter = new ObjIterator<>() {
-            private final u.Holder<Class<?>> next = new u.Holder<>(type);
+            private final Holder<Class<?>> next = new Holder<>(type);
 
             @Override
             public boolean hasNext() {

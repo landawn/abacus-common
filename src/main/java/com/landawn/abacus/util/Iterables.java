@@ -73,30 +73,6 @@ public final class Iterables {
     }
 
     /**
-     *
-     * @param <T>
-     * @param c
-     * @param index
-     * @return
-     * @throws IndexOutOfBoundsException the index out of bounds exception
-     */
-    public static <T> T get(final Collection<? extends T> c, int index) throws IndexOutOfBoundsException {
-        N.checkIndex(index, N.size(c));
-
-        if (c instanceof List) {
-            return ((List<T>) c).get(index);
-        }
-
-        final Iterator<? extends T> iter = c.iterator();
-
-        while (index-- > 0) {
-            iter.next();
-        }
-
-        return iter.next();
-    }
-
-    /**
      * Returns {@code OptionalChar.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
      * @param a

@@ -869,7 +869,7 @@ public final class XMLUtil {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public static void writeCharacters(StringBuilder sb, String str) throws IOException {
-        str = (str == null) ? N.NULL_STRING : str;
+        str = (str == null) ? Strings.NULL_STRING : str;
         writeCharacters(sb, str, 0, str.length());
     }
 
@@ -917,7 +917,7 @@ public final class XMLUtil {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public static void writeCharacters(OutputStream os, String str) throws IOException {
-        str = (str == null) ? N.NULL_STRING : str;
+        str = (str == null) ? Strings.NULL_STRING : str;
         writeCharacters(os, str, 0, str.length());
     }
 
@@ -976,7 +976,7 @@ public final class XMLUtil {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public static void writeCharacters(Writer writer, String str) throws IOException {
-        str = (str == null) ? N.NULL_STRING : str;
+        str = (str == null) ? Strings.NULL_STRING : str;
         writeCharacters(writer, str, 0, str.length());
     }
 
