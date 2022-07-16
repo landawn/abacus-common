@@ -38,8 +38,8 @@ public class XMLSerializationConfig extends SerializationConfig<XMLSerialization
     boolean ignoreTypeInfo = defaultIgnoreTypeInfo;
 
     public XMLSerializationConfig() {
-        setCharQuotation(WD.CHAR_0);
-        setStringQuotation(WD.CHAR_0);
+        setCharQuotation(WD.CHAR_ZERO);
+        setStringQuotation(WD.CHAR_ZERO);
     }
 
     /**
@@ -68,6 +68,48 @@ public class XMLSerializationConfig extends SerializationConfig<XMLSerialization
     @Override
     public XMLSerializationConfig setCharQuotation(char charQuotation) {
         super.setCharQuotation(charQuotation);
+
+        return this;
+    }
+
+    /**
+    * Sets the string quotation.
+    *
+    * @return
+    * @deprecated this method should not be called
+    */
+    @Deprecated
+    @Override
+    public XMLSerializationConfig noCharQuotation() {
+        super.noCharQuotation();
+
+        return this;
+    }
+
+    /**
+    * Sets the string quotation.
+    *
+    * @return
+    * @deprecated this method should not be called
+    */
+    @Deprecated
+    @Override
+    public XMLSerializationConfig noStringQuotation() {
+        super.noStringQuotation();
+
+        return this;
+    }
+
+    /**
+    * Sets the string quotation.
+    *
+    * @return
+    * @deprecated this method should not be called
+    */
+    @Deprecated
+    @Override
+    public XMLSerializationConfig noQuotation() {
+        super.noQuotation();
 
         return this;
     }

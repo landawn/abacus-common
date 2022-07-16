@@ -162,7 +162,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
         } else {
             writer.write(WD._BRACKET_L);
 
-            final char charQuotation = (config == null) ? WD.CHAR_0 : config.getCharQuotation();
+            final char charQuotation = (config == null) ? WD.CHAR_ZERO : config.getCharQuotation();
 
             if (charQuotation > 0) {
                 for (int i = 0, len = x.length; i < len; i++) {

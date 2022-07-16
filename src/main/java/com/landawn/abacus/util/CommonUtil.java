@@ -186,7 +186,7 @@ class CommonUtil {
     //    @Deprecated
     //    public static final char[] NULL_CHAR_ARRAY = NULL_STRING.toCharArray();
 
-    static final char CHAR_0 = WD.CHAR_0;
+    static final char CHAR_ZERO = WD.CHAR_ZERO;
 
     /**
      * The Constant CHAR_LF.
@@ -577,7 +577,7 @@ class CommonUtil {
      */
     public static char defaultIfNull(Character c) {
         if (c == null) {
-            return CHAR_0;
+            return CHAR_ZERO;
         }
 
         return c;
@@ -6194,7 +6194,7 @@ class CommonUtil {
      * @return
      */
     public static char parseChar(final String str) {
-        return isNullOrEmpty(str) ? CHAR_0 : ((str.length() == 1) ? str.charAt(0) : (char) Integer.parseInt(str));
+        return isNullOrEmpty(str) ? CHAR_ZERO : ((str.length() == 1) ? str.charAt(0) : (char) Integer.parseInt(str));
     }
 
     /**

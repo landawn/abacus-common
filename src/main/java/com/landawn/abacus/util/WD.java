@@ -32,7 +32,7 @@ public final class WD {
     }
 
     // ...
-    public static final char CHAR_0 = (char) 0;
+    public static final char CHAR_ZERO = (char) 0;
 
     /**
      * {@code} linefeed LF ('\n').

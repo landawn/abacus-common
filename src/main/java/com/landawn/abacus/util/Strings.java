@@ -60,7 +60,7 @@ import com.landawn.abacus.util.u.OptionalChar;
 public abstract class Strings {
     public static final String ELEMENT_SEPARATOR = ", ".intern();
 
-    public static final char[] ELEMENT_SEPARATOR_CHAR_ARRAY = ELEMENT_SEPARATOR.toCharArray();
+    static final char[] ELEMENT_SEPARATOR_CHAR_ARRAY = ELEMENT_SEPARATOR.toCharArray();
 
     /**
      * String with value {@code "null"}.
@@ -71,7 +71,7 @@ public abstract class Strings {
      *
      * Char array with value {@code "['n', 'u', 'l', 'l']"}.
      */
-    public static final char[] NULL_CHAR_ARRAY = NULL_STRING.toCharArray();
+    static final char[] NULL_CHAR_ARRAY = NULL_STRING.toCharArray();
 
     /**
      * The empty String {@code ""}.
@@ -105,11 +105,13 @@ public abstract class Strings {
     public static final String CR = "\r";
 
     @Beta
-    public static final char _SPACE = SPACE.charAt(0);
+    public static final char CHAR_ZERO = (char) 0;
     @Beta
-    public static final char _LF = LF.charAt(0);
+    public static final char CHAR_SPACE = SPACE.charAt(0);
     @Beta
-    public static final char _CR = CR.charAt(0);
+    public static final char CHAR_LF = LF.charAt(0);
+    @Beta
+    public static final char CHAR_CR = CR.charAt(0);
 
     /**
      * A regex pattern for recognizing blocks of whitespace characters. The

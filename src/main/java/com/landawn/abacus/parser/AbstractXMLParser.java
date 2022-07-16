@@ -49,10 +49,10 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
     protected static final JSONParser jsonParser = ParserFactory.createJSONParser();
 
     @SuppressWarnings("deprecation")
-    protected static final JSONSerializationConfig jsc = JSC.create().setCharQuotation(WD.CHAR_0);
+    protected static final JSONSerializationConfig jsc = JSC.create().setCharQuotation(WD.CHAR_ZERO);
 
     @SuppressWarnings("deprecation")
-    protected static final JSONSerializationConfig jscWithCircularRefSupported = JSC.create().setCharQuotation(WD.CHAR_0).supportCircularReference(true);
+    protected static final JSONSerializationConfig jscWithCircularRefSupported = JSC.create().setCharQuotation(WD.CHAR_ZERO).supportCircularReference(true);
 
     protected static final Type<?> defaultKeyType = objType;
 

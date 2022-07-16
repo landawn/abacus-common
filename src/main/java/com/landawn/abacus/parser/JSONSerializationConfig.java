@@ -48,6 +48,21 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
     }
 
     /**
+     * Sets the char quotation.
+     *
+     * @param charQuotation
+     * @return
+     * @deprecated this method should not be called
+     */
+    @Deprecated
+    @Override
+    public JSONSerializationConfig setCharQuotation(char charQuotation) {
+        super.setCharQuotation(charQuotation);
+
+        return this;
+    }
+
+    /**
      * Sets the string quotation.
      *
      * @param stringQuotation
@@ -63,16 +78,43 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
     }
 
     /**
-     * Sets the char quotation.
+     * Sets the string quotation.
      *
-     * @param charQuotation
      * @return
      * @deprecated this method should not be called
      */
     @Deprecated
     @Override
-    public JSONSerializationConfig setCharQuotation(char charQuotation) {
-        super.setCharQuotation(charQuotation);
+    public JSONSerializationConfig noCharQuotation() {
+        super.noCharQuotation();
+
+        return this;
+    }
+
+    /**
+     * Sets the string quotation.
+     *
+     * @return
+     * @deprecated this method should not be called
+     */
+    @Deprecated
+    @Override
+    public JSONSerializationConfig noStringQuotation() {
+        super.noStringQuotation();
+
+        return this;
+    }
+
+    /**
+     * Sets the string quotation.
+     *
+     * @return
+     * @deprecated this method should not be called
+     */
+    @Deprecated
+    @Override
+    public JSONSerializationConfig noQuotation() {
+        super.noQuotation();
 
         return this;
     }

@@ -4721,8 +4721,7 @@ public class RowDataSet implements DataSet, Cloneable {
         } else {
             config.setQuoteMapKey(false);
             config.setQuotePropName(false);
-            config.setCharQuotation((char) 0);
-            config.setStringQuotation((char) 0);
+            config.noCharQuotation();
         }
 
         final boolean isBufferedWriter = output instanceof BufferedJSONWriter;

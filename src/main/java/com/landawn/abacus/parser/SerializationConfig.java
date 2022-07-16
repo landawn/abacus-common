@@ -153,6 +153,18 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
         return (C) this;
     }
 
+    public C noCharQuotation() {
+        return setCharQuotation((char) 0);
+    }
+
+    public C noStringQuotation() {
+        return setStringQuotation((char) 0);
+    }
+
+    public C noQuotation() {
+        return setCharQuotation((char) 0).setStringQuotation((char) 0);
+    }
+
     /**
      * The default format is: <code>LONG</code>.
      *
