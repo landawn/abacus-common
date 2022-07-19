@@ -4563,7 +4563,6 @@ public abstract class Strings {
     }
 
     /**
-     * Index of any.
      *
      * @param str
      * @param chs
@@ -4571,6 +4570,19 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static int indexOfAny(final String str, final char... chs) {
+        return indexOfAny(str, 0, chs);
+    }
+
+    /**
+     *
+     *
+     * @param str
+     * @param fromIndex
+     * @param chs
+     * @return
+     */
+    @SafeVarargs
+    public static int indexOfAny(final String str, final int fromIndex, final char... chs) {
         if (N.isNullOrEmpty(str) || N.isNullOrEmpty(chs)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -4581,7 +4593,7 @@ public abstract class Strings {
         final int chsLast = chsLen - 1;
         char ch = 0;
 
-        for (int i = 0; i < strLen; i++) {
+        for (int i = fromIndex < 0 ? 0 : fromIndex; i < strLen; i++) {
             ch = str.charAt(i);
 
             for (int j = 0; j < chsLen; j++) {
@@ -4602,32 +4614,103 @@ public abstract class Strings {
     }
 
     /**
-     * Index of any.
      *
      * @param str
      * @param substrs
      * @return
+     * @see #smallestIndexOfAll(String, String...)
      */
     @SafeVarargs
     public static int indexOfAny(final String str, final String... substrs) {
+        return indexOfAny(str, 0, substrs);
+    }
+
+    /**
+     *
+     *
+     * @param str
+     * @param fromIndex
+     * @param substrs
+     * @return
+     * @see #smallestIndexOfAll(String, int, String...)
+     */
+    @SafeVarargs
+    public static int indexOfAny(final String str, final int fromIndex, final String... substrs) {
         if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substrs)) {
             return N.INDEX_NOT_FOUND;
         }
 
-        int result = N.INDEX_NOT_FOUND;
-        int tmp = 0;
+        int idx = 0;
 
-        for (String substr : substrs) {
-            if (N.isNullOrEmpty(substr)) {
+        for (int i = 0, len = substrs.length; i < len; i++) {
+            if (N.isNullOrEmpty(substrs[i])) {
                 continue;
             }
 
-            tmp = indexOf(str, substr);
+            idx = indexOf(str, fromIndex, substrs[i]);
 
-            if (tmp == N.INDEX_NOT_FOUND) {
+            if (idx != N.INDEX_NOT_FOUND) {
+                return idx;
+            }
+        }
+
+        return N.INDEX_NOT_FOUND;
+    }
+
+    /**
+     * <p>Find the first index of any of a set of potential substrings.</p>
+     *
+     * @param str
+     * @param substrs
+     * @return
+     * @see #indexOfAny(String, String...)
+     */
+    @SafeVarargs
+    public static int smallestIndexOfAll(final String str, final String... substrs) {
+        return smallestIndexOfAll(str, 0, substrs);
+    }
+
+    /**
+     * <p>Find the first index of any of a set of potential substrings from {@code fromIndex}.</p>
+     *
+     *
+     * @param str
+     * @param fromIndex
+     * @param substrs
+     * @return
+     * @see #indexOfAny(String, int, String...)
+     */
+    @SafeVarargs
+    public static int smallestIndexOfAll(final String str, final int fromIndex, final String... substrs) {
+        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substrs)) {
+            return N.INDEX_NOT_FOUND;
+        }
+
+        String srcStr = str;
+        int result = N.INDEX_NOT_FOUND;
+        int idx = 0;
+
+        for (int i = 0, len = substrs.length; i < len; i++) {
+            if (N.isNullOrEmpty(substrs[i])) {
                 continue;
-            } else if (result == N.INDEX_NOT_FOUND || tmp < result) {
-                result = tmp;
+            }
+
+            idx = indexOf(srcStr, fromIndex, substrs[i]);
+
+            if (idx != N.INDEX_NOT_FOUND && (result == N.INDEX_NOT_FOUND || idx < result)) {
+                result = idx;
+
+                if (len - i > 1) {
+                    int max = 0;
+
+                    for (int j = i + 1; j < len; j++) {
+                        max = N.max(max, N.len(substrs[j]));
+                    }
+
+                    if (max > 0 && idx + max < srcStr.length() * 0.8) {
+                        srcStr = srcStr.substring(0, idx + max - 1);
+                    }
+                }
             }
         }
 
@@ -4643,6 +4726,11 @@ public abstract class Strings {
      */
     @SafeVarargs
     public static int indexOfAnyBut(final String str, final char... chs) {
+        return indexOfAnyBut(str, 0, chs);
+    }
+
+    @SafeVarargs
+    public static int indexOfAnyBut(final String str, final int fromIndex, final char... chs) {
         if (N.isNullOrEmpty(str)) {
             return N.INDEX_NOT_FOUND;
         }
@@ -4657,7 +4745,7 @@ public abstract class Strings {
         final int chsLast = chsLen - 1;
         char ch = 0;
 
-        outer: for (int i = 0; i < strLen; i++) {
+        outer: for (int i = fromIndex < 0 ? 0 : fromIndex; i < strLen; i++) {
             ch = str.charAt(i);
 
             for (int j = 0; j < chsLen; j++) {
@@ -4671,6 +4759,7 @@ public abstract class Strings {
                     }
                 }
             }
+
             return i;
         }
 
@@ -4876,68 +4965,6 @@ public abstract class Strings {
     }
 
     /**
-     * Last index of any.
-     *
-     * @param str
-     * @param chs
-     * @return
-     */
-    @SafeVarargs
-    public static int lastIndexOfAny(final String str, final char... chs) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(chs)) {
-            return N.INDEX_NOT_FOUND;
-        }
-
-        int result = N.INDEX_NOT_FOUND;
-        int tmp = 0;
-
-        for (char ch : chs) {
-            tmp = str.lastIndexOf(ch);
-
-            if (tmp == N.INDEX_NOT_FOUND) {
-                continue;
-            } else if (result == N.INDEX_NOT_FOUND || tmp > result) {
-                result = tmp;
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Last index of any.
-     *
-     * @param str
-     * @param substrs
-     * @return
-     */
-    @SafeVarargs
-    public static int lastIndexOfAny(final String str, final String... substrs) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substrs)) {
-            return N.INDEX_NOT_FOUND;
-        }
-
-        int result = N.INDEX_NOT_FOUND;
-        int tmp = 0;
-
-        for (String substr : substrs) {
-            if (N.isNullOrEmpty(substr)) {
-                continue;
-            }
-
-            tmp = str.lastIndexOf(substr);
-
-            if (tmp == N.INDEX_NOT_FOUND) {
-                continue;
-            } else if (result == N.INDEX_NOT_FOUND || tmp > result) {
-                result = tmp;
-            }
-        }
-
-        return result;
-    }
-
-    /**
      * Last index of.
      *
      * @param str
@@ -5022,6 +5049,118 @@ public abstract class Strings {
         }
 
         return N.INDEX_NOT_FOUND;
+    }
+
+    /**
+     * Last index of any.
+     *
+     * @param str
+     * @param chs
+     * @return
+     */
+    @SafeVarargs
+    public static int lastIndexOfAny(final String str, final char... chs) {
+        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(chs)) {
+            return N.INDEX_NOT_FOUND;
+        }
+
+        int idx = 0;
+
+        for (char ch : chs) {
+            idx = str.lastIndexOf(ch);
+
+            if (idx != N.INDEX_NOT_FOUND) {
+                return idx;
+            }
+        }
+
+        final int strLen = str.length();
+        final int chsLen = chs.length;
+        char ch = 0;
+
+        for (int i = strLen - 1; i >= 0; i--) {
+            ch = str.charAt(i);
+
+            for (int j = chsLen - 1; j >= 0; j--) {
+                if (chs[j] == ch) {
+                    if (i > 0 && j > 0 && Character.isHighSurrogate(ch = str.charAt(i - 1))) {
+                        // ch is a supplementary character
+                        if (chs[j - 1] == ch) {
+                            return i - 1;
+                        }
+                    } else {
+                        return i;
+                    }
+                }
+            }
+        }
+
+        return N.INDEX_NOT_FOUND;
+
+    }
+
+    /**
+     * Last index of any.
+     *
+     * @param str
+     * @param substrs
+     * @return
+     * @see #largestIndexOfAll(String, String...)
+     */
+    @SafeVarargs
+    public static int lastIndexOfAny(final String str, final String... substrs) {
+        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substrs)) {
+            return N.INDEX_NOT_FOUND;
+        }
+
+        int idx = 0;
+
+        for (String substr : substrs) {
+            if (N.isNullOrEmpty(substr)) {
+                continue;
+            }
+
+            idx = str.lastIndexOf(substr);
+
+            if (idx != N.INDEX_NOT_FOUND) {
+                return idx;
+            }
+        }
+
+        return N.INDEX_NOT_FOUND;
+    }
+
+    /**
+     * Last index of any.
+     *
+     * @param str
+     * @param substrs
+     * @return
+     * @see #lastIndexOfAny(String, String...)
+     */
+    @SafeVarargs
+    public static int largestIndexOfAll(final String str, final String... substrs) {
+        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substrs)) {
+            return N.INDEX_NOT_FOUND;
+        }
+
+        int result = N.INDEX_NOT_FOUND;
+        int tmp = 0;
+
+        for (String substr : substrs) {
+            if (N.isNullOrEmpty(substr)) {
+                continue;
+            }
+
+            tmp = str.lastIndexOf(substr);
+
+            if (tmp != N.INDEX_NOT_FOUND && (result == N.INDEX_NOT_FOUND || tmp > result)) {
+                result = tmp;
+                // TODO performance improvement: refer to smallestIndexOfAll
+            }
+        }
+
+        return result;
     }
 
     /**

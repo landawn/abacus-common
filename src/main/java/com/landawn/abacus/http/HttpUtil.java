@@ -54,7 +54,6 @@ import com.landawn.abacus.util.LZ4BlockOutputStream;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.ObjectPool;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.WD;
 
 /**
  *
@@ -181,16 +180,58 @@ public final class HttpUtil {
         // Singleton for utility class.
     }
 
-    private static String readValue(Object value) {
-        if (value != null) {
-            if (value instanceof Collection) {
-                return N.firstOrNullIfEmpty((Collection<String>) value);
-            } else {
-                return N.stringOf(value);
+    public static boolean isSuccessfulResponseCode(int code) {
+        return code >= 200 && code < 300;
+    }
+
+    public static boolean isValidHttpHeader(String key, String value) {
+        if (N.isNullOrEmpty(key) || key.indexOf(HttpHeaders.LF) >= 0 || key.indexOf(':') >= 0) {
+            return false;
+        }
+
+        if (N.notNullOrEmpty(value)) {
+            final int len = value.length();
+            int idx = value.indexOf(HttpHeaders.LF);
+
+            while (idx != -1) {
+                idx++;
+
+                if (idx < len) {
+                    char c = value.charAt(idx);
+
+                    if ((c == ' ') || (c == '\t')) {
+                        idx = value.indexOf(HttpHeaders.LF, idx);
+
+                        continue;
+                    }
+                }
+
+                return false;
             }
         }
 
-        return null;
+        return true;
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static String readHttpHeadValue(Object value) {
+        if (value == null) {
+            return Strings.EMPTY;
+        }
+
+        if (value instanceof Collection) {
+            final Collection c = (Collection) value;
+
+            if (N.isNullOrEmpty(c)) {
+                return Strings.EMPTY;
+            } else if (c.size() == 1) {
+                return N.stringOf(N.firstOrNullIfEmpty(c));
+            } else {
+                return Strings.join((Collection) value, ",");
+            }
+        } else {
+            return N.stringOf(value);
+        }
     }
 
     public static String getContentType(final Map<String, ?> httpHeaders) {
@@ -204,7 +245,7 @@ public final class HttpUtil {
             value = httpHeaders.get(HttpHeaders.Names.L_CONTENT_TYPE);
         }
 
-        return readValue(value);
+        return readHttpHeadValue(value);
     }
 
     public static String getContentType(final HttpHeaders httpHeaders) {
@@ -218,7 +259,7 @@ public final class HttpUtil {
             value = httpHeaders.get(HttpHeaders.Names.L_CONTENT_TYPE);
         }
 
-        return readValue(value);
+        return readHttpHeadValue(value);
     }
 
     public static String getContentType(final HttpSettings httpSettings) {
@@ -244,7 +285,7 @@ public final class HttpUtil {
             value = httpHeaders.get(HttpHeaders.Names.L_CONTENT_ENCODING);
         }
 
-        return readValue(value);
+        return readHttpHeadValue(value);
     }
 
     public static String getContentEncoding(final HttpHeaders httpHeaders) {
@@ -258,7 +299,7 @@ public final class HttpUtil {
             value = httpHeaders.get(HttpHeaders.Names.L_CONTENT_ENCODING);
         }
 
-        return readValue(value);
+        return readHttpHeadValue(value);
     }
 
     public static String getContentEncoding(final HttpSettings httpSettings) {
@@ -284,7 +325,7 @@ public final class HttpUtil {
             value = httpHeaders.get(HttpHeaders.Names.L_ACCEPT);
         }
 
-        return readValue(value);
+        return readHttpHeadValue(value);
     }
 
     public static String getAccept(final HttpHeaders httpHeaders) {
@@ -298,7 +339,7 @@ public final class HttpUtil {
             value = httpHeaders.get(HttpHeaders.Names.L_ACCEPT);
         }
 
-        return readValue(value);
+        return readHttpHeadValue(value);
     }
 
     public static String getAccept(final HttpSettings httpSettings) {
@@ -324,7 +365,7 @@ public final class HttpUtil {
             value = httpHeaders.get(HttpHeaders.Names.L_ACCEPT_ENCODING);
         }
 
-        return readValue(value);
+        return readHttpHeadValue(value);
     }
 
     public static String getAcceptEncoding(final HttpHeaders httpHeaders) {
@@ -338,7 +379,7 @@ public final class HttpUtil {
             value = httpHeaders.get(HttpHeaders.Names.L_ACCEPT_ENCODING);
         }
 
-        return readValue(value);
+        return readHttpHeadValue(value);
     }
 
     public static String getAcceptEncoding(final HttpSettings httpSettings) {
@@ -364,7 +405,7 @@ public final class HttpUtil {
             value = httpHeaders.get(HttpHeaders.Names.L_ACCEPT_CHARSET);
         }
 
-        return readValue(value);
+        return readHttpHeadValue(value);
     }
 
     public static String getAcceptCharset(final HttpHeaders httpHeaders) {
@@ -378,7 +419,7 @@ public final class HttpUtil {
             value = httpHeaders.get(HttpHeaders.Names.L_ACCEPT_CHARSET);
         }
 
-        return readValue(value);
+        return readHttpHeadValue(value);
     }
 
     public static String getAcceptCharset(final HttpSettings httpSettings) {
@@ -658,22 +699,21 @@ public final class HttpUtil {
         return getCharset(contentType, DEFAULT_CHARSET);
     }
 
-    private static final String CHARSET_SEQUAL = "charset=";
-
     public static Charset getCharset(final String contentType, final Charset defaultIfNull) {
         if (N.isNullOrEmpty(contentType)) {
             return defaultIfNull;
         }
 
-        int fromIndex = Strings.indexOfIgnoreCase(contentType, CHARSET_SEQUAL);
+        int fromIndex = -1;
 
-        if (fromIndex < 0) {
-            return defaultIfNull;
+        if ((fromIndex = contentType.indexOf("charset")) >= 0) {
+            fromIndex = contentType.indexOf('=', fromIndex) + 1;
+            int endIndex = Strings.indexOfAny(contentType, fromIndex, ';', ',');
+
+            return Charset.forName(endIndex < 0 ? contentType.substring(fromIndex).trim() : contentType.substring(fromIndex, endIndex).trim());
         }
 
-        int toIndex = contentType.indexOf(WD._SEMICOLON, fromIndex);
-
-        return Charsets.get(contentType.substring(fromIndex + CHARSET_SEQUAL.length(), toIndex > 0 ? toIndex : contentType.length()));
+        return defaultIfNull;
     }
 
     /**

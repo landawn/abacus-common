@@ -990,7 +990,7 @@ public final class HttpClient {
 
             is = HttpUtil.getInputStream(connection, respContentFormat);
 
-            if ((code < 200 || code >= 300) && (resultClass == null || !resultClass.equals(HttpResponse.class))) {
+            if (!HttpUtil.isSuccessfulResponseCode(code) && (resultClass == null || !resultClass.equals(HttpResponse.class))) {
                 throw new UncheckedIOException(new IOException(code + ": " + connection.getResponseMessage() + ". " + IOUtil.readString(is, respCharset)));
             }
 

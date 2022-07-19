@@ -6077,6 +6077,10 @@ public final class Fn extends Comparators {
         @SuppressWarnings("rawtypes")
         private static final Supplier<? super ConcurrentHashMap> CONCURRENT_HASH_MAP = () -> new ConcurrentHashMap();
 
+        /** The Constant CONCURRENT_HASH_SET. */
+        @SuppressWarnings("rawtypes")
+        private static final Supplier<? super Set> CONCURRENT_HASH_SET = () -> ConcurrentHashMap.newKeySet();
+
         /** The Constant BI_MAP. */
         @SuppressWarnings("rawtypes")
         private static final Supplier<? super BiMap> BI_MAP = () -> new BiMap();
@@ -6521,6 +6525,11 @@ public final class Fn extends Comparators {
         @SuppressWarnings("rawtypes")
         public static <K, V> Supplier<ConcurrentHashMap<K, V>> ofConcurrentHashMap() {
             return (Supplier) CONCURRENT_HASH_MAP;
+        }
+
+        @SuppressWarnings("rawtypes")
+        public static <T> Supplier<Set<T>> ofConcurrentHashSet() {
+            return (Supplier) CONCURRENT_HASH_SET;
         }
 
         @SuppressWarnings("rawtypes")

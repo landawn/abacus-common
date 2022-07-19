@@ -2280,7 +2280,7 @@ public final class ParserUtil {
     //    @Deprecated
     //    @Beta
     //    public static <T> RecordInfo<T> getRecordInfo(final Class<T> recordClass) {
-    //        if (!ClassUtil.isRecord(recordClass)) {
+    //        if (!ClassUtil.isRecordClass(recordClass)) {
     //            throw new IllegalArgumentException(ClassUtil.getCanonicalClassName(recordClass) + " is not a Record class");
     //        }
     //

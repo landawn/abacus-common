@@ -66,7 +66,7 @@ public class HttpResponse {
      * @return true, if is successful
      */
     public boolean isSuccessful() {
-        return code >= 200 && code < 300;
+        return HttpUtil.isSuccessfulResponseCode(code);
     }
 
     /**
