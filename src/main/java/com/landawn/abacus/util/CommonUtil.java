@@ -71,6 +71,7 @@ import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -5824,26 +5825,6 @@ class CommonUtil {
         return Collections.singletonMap(key, value);
     }
 
-    /**
-     * Try to convert the specified {@code obj} to the specified
-     * {@code targetClass}. Default value of {@code targetClass} is returned if
-     * {@code sourceObject} is null. An instance of {@code targetClass} is returned if
-     * convert successfully
-     *
-     * @param <T>
-     * @param obj
-     * @param targetClass
-     * @return
-     */
-    public static <T> T convert(final Object obj, final Class<? extends T> targetClass) {
-        if (obj == null) {
-            return CommonUtil.defaultValueOf(targetClass);
-        }
-
-        final Type<T> type = typeOf(targetClass);
-        return convert(obj, type);
-    }
-
     private static final Map<Class<?>, Map<Class<?>, Function<Number, Number>>> numberConverterFuncMap = new HashMap<>();
 
     static {
@@ -6060,6 +6041,50 @@ class CommonUtil {
         }
     }
 
+    private static final Map<Class<?>, BiFunction<Object, Class<?>, Object>> converterMap = new ConcurrentHashMap<>();
+
+    /**
+     *
+     * @param srcClass
+     * @param converter
+     * @return the previous {@code converter} associated with {@code srcClass}, or
+     *         {@code null} if there was no mapping for {@code srcClass}.
+     */
+    @SuppressWarnings("rawtypes")
+    public static BiFunction<Object, Class<?>, Object> registerConverter(final Class<?> srcClass, final BiFunction<?, Class<?>, ?> converter) {
+        N.checkArgNotNull(srcClass, "srcClass");
+        N.checkArgNotNull(converter, "converter");
+
+        return converterMap.put(srcClass, (BiFunction) converter);
+    }
+
+    /**
+     * Try to convert the specified {@code obj} to the specified
+     * {@code targetClass}. Default value of {@code targetClass} is returned if
+     * {@code sourceObject} is null. An instance of {@code targetClass} is returned if
+     * convert successfully
+     *
+     * @param <T>
+     * @param obj
+     * @param targetClass
+     * @return
+     */
+    public static <T> T convert(final Object obj, final Class<? extends T> targetClass) {
+        if (obj == null) {
+            return CommonUtil.defaultValueOf(targetClass);
+        }
+
+        final Class<?> srcClass = obj.getClass();
+        BiFunction<Object, Class<?>, Object> converterFunc = null;
+
+        if ((converterFunc = converterMap.get(srcClass)) != null) {
+            return (T) converterFunc.apply(obj, targetClass);
+        }
+
+        final Type<T> type = typeOf(targetClass);
+        return convert(obj, srcClass, type);
+    }
+
     /**
      *
      * @param <T>
@@ -6067,13 +6092,23 @@ class CommonUtil {
      * @param targetType
      * @return
      */
-    @SuppressWarnings({ "rawtypes" })
     public static <T> T convert(final Object obj, final Type<? extends T> targetType) {
         if (obj == null) {
             return targetType.defaultValue();
         }
 
         final Class<?> srcClass = obj.getClass();
+        BiFunction<Object, Class<?>, Object> converterFunc = null;
+
+        if ((converterFunc = converterMap.get(srcClass)) != null) {
+            return (T) converterFunc.apply(obj, targetType.clazz());
+        }
+
+        return convert(obj, srcClass, targetType);
+    }
+
+    @SuppressWarnings({ "rawtypes" })
+    private static <T> T convert(final Object obj, Class<?> srcClass, final Type<? extends T> targetType) {
 
         if (targetType.clazz().isAssignableFrom(srcClass)) {
             return (T) obj;

@@ -113,16 +113,16 @@ public class AsyncExecutor {
     /**
      *
      * @param command
-     * @param onComplete
+     * @param actionInFinal
      * @return
      */
-    public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> command, final java.lang.Runnable onComplete) {
+    public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> command, final java.lang.Runnable actionInFinal) {
         return execute(new FutureTask<>(() -> {
             try {
                 command.run();
                 return null;
             } finally {
-                onComplete.run();
+                actionInFinal.run();
             }
         }));
     }
@@ -182,15 +182,15 @@ public class AsyncExecutor {
      *
      * @param <R>
      * @param command
-     * @param onComplete
+     * @param actioInFinal
      * @return
      */
-    public <R> ContinuableFuture<R> execute(final Callable<R> command, final java.lang.Runnable onComplete) {
+    public <R> ContinuableFuture<R> execute(final Callable<R> command, final java.lang.Runnable actioInFinal) {
         return execute(new FutureTask<>(() -> {
             try {
                 return command.call();
             } finally {
-                onComplete.run();
+                actioInFinal.run();
             }
         }));
     }

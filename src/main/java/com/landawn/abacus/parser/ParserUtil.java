@@ -20,6 +20,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.Instant;
@@ -27,6 +28,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
@@ -34,14 +36,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.UUID;
 
 import com.landawn.abacus.annotation.AccessFieldByMethod;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Column;
+import com.landawn.abacus.annotation.Entity;
+import com.landawn.abacus.annotation.Id;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.JsonXmlConfig;
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.annotation.JsonXmlField.Expose;
+import com.landawn.abacus.annotation.ReadOnlyId;
 import com.landawn.abacus.annotation.Table;
 import com.landawn.abacus.annotation.Transient;
 import com.landawn.abacus.annotation.Type.EnumBy;
@@ -93,6 +99,9 @@ public final class ParserUtil {
     private static final String IS = "is".intern();
 
     private static final String HAS = "has".intern();
+
+    private static final Set<Class<?>> idTypeSet = N.<Class<?>> asSet(int.class, Integer.class, long.class, Long.class, String.class, Timestamp.class,
+            UUID.class);
 
     @SuppressWarnings("deprecation")
     private static final int POOL_SIZE = InternalUtil.POOL_SIZE;
@@ -488,6 +497,14 @@ public final class ParserUtil {
 
         public final ImmutableList<PropInfo> propInfoList;
 
+        public final ImmutableList<PropInfo> idPropInfoList;
+
+        public final ImmutableList<String> idPropNameList;
+
+        public final ImmutableList<PropInfo> readOnlyIdPropInfoList;
+
+        public final ImmutableList<String> readOnlyIdPropNameList;
+
         public final ImmutableMap<Class<? extends Annotation>, Annotation> annotations;
 
         final NamingPolicy jsonXmlNamingPolicy;
@@ -527,8 +544,11 @@ public final class ParserUtil {
         private final boolean isByBuilder;
         private final Tuple3<Class<?>, Supplier<Object>, Function<Object, Object>> builderInfo;
 
+        public final boolean isMarkedToEntity;
+
         @SuppressWarnings("deprecation")
-        EntityInfo(Class<?> cls) {
+        EntityInfo(final Class<?> cls) {
+            this.annotations = ImmutableMap.of(getAnnotations(cls));
             simpleClassName = ClassUtil.getSimpleClassName(cls);
             canonicalClassName = ClassUtil.getCanonicalClassName(cls);
             name = ClassUtil.formalizePropName(simpleClassName);
@@ -577,14 +597,28 @@ public final class ParserUtil {
             this.builderInfo = isImmutable ? ClassUtil.getBuilderInfo(cls) : null;
             this.isByBuilder = isImmutable && builderInfo != null;
 
-            this.annotations = ImmutableMap.of(getAnnotations(cls));
-
             final JsonXmlConfig jsonXmlConfig = (JsonXmlConfig) annotations.get(JsonXmlConfig.class);
             this.jsonXmlNamingPolicy = jsonXmlConfig == null || jsonXmlConfig.namingPolicy() == null ? NamingPolicy.LOWER_CAMEL_CASE
                     : jsonXmlConfig.namingPolicy();
 
             jsonNameTags = getJsonNameTags(name);
             xmlNameTags = getXmlNameTags(name, typeName, true);
+
+            final List<String> idPropNames = new ArrayList<>();
+            final List<String> readOnlyIdPropNames = new ArrayList<>();
+
+            if (cls.isAnnotationPresent(Id.class)) {
+                String[] values = cls.getAnnotation(Id.class).value();
+                N.checkArgNotNullOrEmpty(values, "values for annotation @Id on Type/Class can't be null or empty");
+                idPropNames.addAll(Arrays.asList(values));
+            }
+
+            if (cls.isAnnotationPresent(ReadOnlyId.class)) {
+                String[] values = cls.getAnnotation(ReadOnlyId.class).value();
+                N.checkArgNotNullOrEmpty(values, "values for annotation @ReadOnlyId on Type/Class can't be null or empty");
+                idPropNames.addAll(Arrays.asList(values));
+                readOnlyIdPropNames.addAll(Arrays.asList(values));
+            }
 
             final List<PropInfo> seriPropInfoList = new ArrayList<>();
             final List<PropInfo> nonTransientSeriPropInfoList = new ArrayList<>();
@@ -610,8 +644,10 @@ public final class ParserUtil {
                 setMethod = isByBuilder ? ClassUtil.getPropSetMethod(builderInfo._1, propName) : ClassUtil.getPropSetMethod(cls, propName);
 
                 propInfo = ASMUtil.isASMAvailable()
-                        ? new ASMPropInfo(propName, field, getMethod, setMethod, jsonXmlConfig, annotations, idx, this.isImmutable, this.isByBuilder)
-                        : new PropInfo(propName, field, getMethod, setMethod, jsonXmlConfig, annotations, idx, this.isImmutable, this.isByBuilder);
+                        ? new ASMPropInfo(propName, field, getMethod, setMethod, jsonXmlConfig, annotations, idx, this.isImmutable, this.isByBuilder,
+                                idPropNames, readOnlyIdPropNames)
+                        : new PropInfo(propName, field, getMethod, setMethod, jsonXmlConfig, annotations, idx, this.isImmutable, this.isByBuilder, idPropNames,
+                                readOnlyIdPropNames);
 
                 propInfos[idx++] = propInfo;
                 propInfoMap.put(propName, propInfo);
@@ -694,6 +730,18 @@ public final class ParserUtil {
 
             this.propInfoList = ImmutableList.of(propInfos);
 
+            final List<PropInfo> tmpIdPropInfoList = N.filter(propInfos, it -> it.isMarkedToId);
+
+            if (N.isNullOrEmpty(tmpIdPropInfoList)) {
+                tmpIdPropInfoList.addAll(N.filter(propInfos, it -> "id".equals(it.name) && idTypeSet.contains(it.clazz)));
+            }
+
+            this.idPropInfoList = ImmutableList.of(tmpIdPropInfoList);
+            this.idPropNameList = ImmutableList.of(N.map(idPropInfoList, it -> it.name));
+
+            this.readOnlyIdPropInfoList = ImmutableList.of(N.filter(propInfos, it -> it.isMarkedToReadOnlyId));
+            this.readOnlyIdPropNameList = ImmutableList.of(N.map(readOnlyIdPropInfoList, it -> it.name));
+
             String tmpTableName = null;
 
             if (this.annotations.containsKey(Table.class)) {
@@ -736,6 +784,18 @@ public final class ParserUtil {
             if (this.allArgsConstructor != null) {
                 ClassUtil.setAccessibleQuietly(allArgsConstructor, true);
             }
+
+            boolean tmpIsMarkedToEntity = this.annotations.containsKey(Entity.class);
+
+            if (tmpIsMarkedToEntity == false) {
+                try {
+                    tmpIsMarkedToEntity = this.annotations.containsKey(javax.persistence.Entity.class);
+                } catch (Throwable e) {
+                    // ignore
+                }
+            }
+
+            this.isMarkedToEntity = tmpIsMarkedToEntity;
 
             //    if (this.noArgsConstructor == null && this.allArgsConstructor == null) {
             //        throw new RuntimeException("No Constructor found with empty arg or full args: " + N.toString(fieldTypes) + " in Entity/Record class: "
@@ -1256,6 +1316,10 @@ public final class ParserUtil {
 
         public final Expose jsonXmlExpose;
 
+        public final boolean isMarkedToId;
+
+        public final boolean isMarkedToReadOnlyId;
+
         public final boolean isMarkedToColumn;
 
         public final Optional<String> columnName;
@@ -1296,6 +1360,8 @@ public final class ParserUtil {
             hasFormat = false;
 
             isTransient = false;
+            isMarkedToId = false;
+            isMarkedToReadOnlyId = false;
             jsonXmlExpose = JsonXmlField.Expose.DEFAULT;
 
             isMarkedToColumn = false;
@@ -1310,7 +1376,7 @@ public final class ParserUtil {
         @SuppressWarnings("deprecation")
         PropInfo(final String propName, final Field field, final Method getMethod, final Method setMethod, final JsonXmlConfig jsonXmlConfig,
                 final ImmutableMap<Class<? extends Annotation>, Annotation> classAnnotations, final int fieldOrder, final boolean isImmutableEntity,
-                final boolean isByBuilder) {
+                final boolean isByBuilder, final List<String> idPropNames, final List<String> readOnlyIdPropNames) {
             this.declaringClass = (Class<Object>) (field != null ? field.getDeclaringClass() : getMethod.getDeclaringClass());
             this.field = field;
             this.name = propName;
@@ -1371,6 +1437,21 @@ public final class ParserUtil {
 
             this.jsonXmlExpose = field != null && field.isAnnotationPresent(JsonXmlField.class) ? field.getAnnotation(JsonXmlField.class).expose()
                     : JsonXmlField.Expose.DEFAULT;
+
+            boolean tmpIsMarkedToId = this.annotations.containsKey(Id.class) || this.annotations.containsKey(ReadOnlyId.class)
+                    || idPropNames.contains(propName);
+
+            if (!tmpIsMarkedToId) {
+                try {
+                    tmpIsMarkedToId = this.annotations.containsKey(javax.persistence.Id.class);
+                } catch (Throwable e) {
+                    // ignore
+                }
+            }
+
+            this.isMarkedToId = tmpIsMarkedToId;
+
+            this.isMarkedToReadOnlyId = this.annotations.containsKey(ReadOnlyId.class) || readOnlyIdPropNames.contains(propName);
 
             String tmpColumnName = null;
             boolean tmpIsMarkedToColumn = false;
@@ -2092,8 +2173,9 @@ public final class ParserUtil {
 
         ASMPropInfo(final String name, final Field field, final Method getMethod, final Method setMethod, final JsonXmlConfig jsonXmlConfig,
                 final ImmutableMap<Class<? extends Annotation>, Annotation> classAnnotations, final int fieldOrder, final boolean isImmutableEntity,
-                final boolean isByBuilder) {
-            super(name, field, getMethod, setMethod, jsonXmlConfig, classAnnotations, fieldOrder, isImmutableEntity, isByBuilder);
+                final boolean isByBuilder, final List<String> idPropNames, final List<String> readOnlyIdPropNames) {
+            super(name, field, getMethod, setMethod, jsonXmlConfig, classAnnotations, fieldOrder, isImmutableEntity, isByBuilder, idPropNames,
+                    readOnlyIdPropNames);
 
             methodAccess = com.esotericsoftware.reflectasm.MethodAccess.get(declaringClass);
             getMethodAccessIndex = getMethod == null ? -1 : methodAccess.getIndex(getMethod.getName(), 0);

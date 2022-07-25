@@ -1,6 +1,12 @@
+### 3.2.3
+
+* Improvements and bug fix.
+
+
 ### 3.2.2
 
 * Improvements and bug fix.
+
 
 ### 3.2.1
 

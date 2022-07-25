@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.IntFunction;
@@ -43,6 +44,7 @@ import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
+import com.landawn.abacus.util.Fn.IntFunctions;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
@@ -267,6 +269,34 @@ public final class Maps {
     }
 
     /**
+     *
+     * @param <K>
+     * @param <V>
+     * @param key
+     * @param value
+     * @return
+     * @deprecated replaced by {@link N#newEntry(Object, Object)}
+     */
+    @Deprecated
+    public static <K, V> Map.Entry<K, V> newEntry(final K key, final V value) {
+        return N.newEntry(key, value);
+    }
+
+    /**
+     *
+     * @param <K>
+     * @param <V>
+     * @param key
+     * @param value
+     * @return
+     * @deprecated replaced by {@link N#newImmutableEntry(Object, Object)}
+     */
+    @Deprecated
+    public static <K, V> ImmutableEntry<K, V> newImmutableEntry(final K key, final V value) {
+        return N.newImmutableEntry(key, value);
+    }
+
+    /**
      * New target map.
      *
      * @param m
@@ -325,55 +355,57 @@ public final class Maps {
             return new HashMap<>();
         }
 
+        return newTargetMap(m.getClass(), m.size());
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static Map newTargetMap(final Class<?> cls, int size) {
         Map res = null;
 
-        if (HashMap.class.equals(m.getClass())) {
-            res = N.newHashMap(m.size());
-        } else if (m instanceof SortedMap) {
-            res = N.newLinkedHashMap(m.size());
-        } else if (m instanceof IdentityHashMap) {
-            res = N.newIdentityHashMap(m.size());
-        } else if (m instanceof LinkedHashMap) {
-            res = N.newLinkedHashMap(m.size());
-        } else if (m instanceof ImmutableMap) {
-            res = N.newLinkedHashMap(m.size());
+        if (Map.class.equals(cls) || HashMap.class.equals(cls)) {
+            res = N.newHashMap(size);
+        } else if (LinkedHashMap.class.isAssignableFrom(cls)) {
+            res = N.newLinkedHashMap(size);
+        } else if (SortedMap.class.isAssignableFrom(cls)) {
+            res = new TreeMap<>();
+        } else if (IdentityHashMap.class.isAssignableFrom(cls)) {
+            res = N.newIdentityHashMap(size);
+        } else if (ConcurrentHashMap.class.isAssignableFrom(cls)) {
+            res = N.newConcurrentHashMap(size);
+        } else if (BiMap.class.isAssignableFrom(cls)) {
+            res = N.newBiMap(size);
+        } else if (ImmutableMap.class.isAssignableFrom(cls)) {
+            res = N.newLinkedHashMap(size);
         } else {
             try {
-                res = N.newInstance(m.getClass());
+                res = (Map) N.newInstance(cls);
             } catch (Exception e) {
-                res = N.newLinkedHashMap(m.size());
+                res = N.newLinkedHashMap(size);
             }
         }
 
         return res;
     }
 
-    /**
-     *
-     * @param <K>
-     * @param <V>
-     * @param key
-     * @param value
-     * @return
-     * @deprecated replaced by {@link N#newEntry(Object, Object)}
-     */
-    @Deprecated
-    public static <K, V> Map.Entry<K, V> newEntry(final K key, final V value) {
-        return N.newEntry(key, value);
-    }
-
-    /**
-     *
-     * @param <K>
-     * @param <V>
-     * @param key
-     * @param value
-     * @return
-     * @deprecated replaced by {@link N#newImmutableEntry(Object, Object)}
-     */
-    @Deprecated
-    public static <K, V> ImmutableEntry<K, V> newImmutableEntry(final K key, final V value) {
-        return N.newImmutableEntry(key, value);
+    @SuppressWarnings("rawtypes")
+    public static IntFunction<Map<String, Object>> createMapSupplier(final Class<?> cls) {
+        if (Map.class.equals(cls) || HashMap.class.equals(cls)) {
+            return IntFunctions.ofMap();
+        } else if (LinkedHashMap.class.isAssignableFrom(cls)) {
+            return (IntFunction) IntFunctions.ofLinkedHashMap();
+        } else if (SortedMap.class.isAssignableFrom(cls)) {
+            return (IntFunction) IntFunctions.ofSortedMap();
+        } else if (IdentityHashMap.class.isAssignableFrom(cls)) {
+            return (IntFunction) IntFunctions.ofIdentityHashMap();
+        } else if (ConcurrentHashMap.class.isAssignableFrom(cls)) {
+            return (IntFunction) IntFunctions.ofConcurrentHashMap();
+        } else if (BiMap.class.isAssignableFrom(cls)) {
+            return (IntFunction) IntFunctions.ofLinkedHashMap();
+        } else if (ImmutableMap.class.isAssignableFrom(cls)) {
+            return (IntFunction) IntFunctions.ofLinkedHashMap();
+        } else {
+            return IntFunctions.ofMap();
+        }
     }
 
     public static <K, V> Map<K, V> zip(final Collection<? extends K> keys, final Collection<? extends V> values) {
@@ -1266,28 +1298,28 @@ public final class Maps {
      * <code>
         Map map = N.asMap("key1", "val1");
         assertEquals("val1", Maps.getByPath(map, "key1"));
-    
+
         map = N.asMap("key1", N.asList("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-    
+
         map = N.asMap("key1", N.asSet("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", "val2")));
         assertEquals("val2", Maps.getByPath(map, "key1[0][1]"));
-    
+
         map = N.asMap("key1", N.asSet(N.asList(N.asSet("val1"))));
         assertEquals("val1", Maps.getByPath(map, "key1[0][0][0]"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", "val22"))));
         assertEquals("val22", Maps.getByPath(map, "key1[0][1].key2"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertEquals("val33", Maps.getByPath(map, "key1[0][1].key2[1].key3"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertNull(Maps.getByPath(map, "key1[0][2].key2[1].key3"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
      * </code>
      * </pre>

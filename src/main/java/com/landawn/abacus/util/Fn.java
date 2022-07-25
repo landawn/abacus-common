@@ -2252,6 +2252,34 @@ public final class Fn extends Comparators {
         return entry -> consumer.accept(entry.getValue());
     }
 
+    @Beta
+    public static <T> Consumer<T> acceptIf(final Predicate<? super T> predicate, final Consumer<? super T> consumer) {
+        N.checkArgNotNull(predicate);
+        N.checkArgNotNull(consumer);
+
+        return t -> {
+            if (predicate.test(t)) {
+                consumer.accept(t);
+            }
+        };
+    }
+
+    @Beta
+    public static <T> Consumer<T> acceptIfOrElse(final Predicate<? super T> predicate, final Consumer<? super T> consumerForTrue,
+            final Consumer<? super T> consumerForFalse) {
+        N.checkArgNotNull(predicate);
+        N.checkArgNotNull(consumerForTrue);
+        N.checkArgNotNull(consumerForFalse);
+
+        return t -> {
+            if (predicate.test(t)) {
+                consumerForTrue.accept(t);
+            } else {
+                consumerForFalse.accept(t);
+            }
+        };
+    }
+
     /**
      * Apply by key.
      *
@@ -2280,6 +2308,36 @@ public final class Fn extends Comparators {
         N.checkArgNotNull(func);
 
         return entry -> func.apply(entry.getValue());
+    }
+
+    @Beta
+    public static <T, R> Function<T, R> applyIfOrElseDefault(final Predicate<? super T> predicate, final Function<? super T, R> func, final R defaultValue) {
+        N.checkArgNotNull(predicate);
+        N.checkArgNotNull(func);
+
+        return t -> {
+            if (predicate.test(t)) {
+                return func.apply(t);
+            } else {
+                return defaultValue;
+            }
+        };
+    }
+
+    @Beta
+    public static <T, R> Function<T, R> applyIfOrElseGet(final Predicate<? super T> predicate, final Function<? super T, R> func,
+            final Supplier<? extends R> supplier) {
+        N.checkArgNotNull(predicate);
+        N.checkArgNotNull(func);
+        N.checkArgNotNull(supplier);
+
+        return t -> {
+            if (predicate.test(t)) {
+                return func.apply(t);
+            } else {
+                return supplier.get();
+            }
+        };
     }
 
     /**

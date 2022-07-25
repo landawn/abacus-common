@@ -3171,7 +3171,7 @@ public final class ClassUtil {
             return false;
         }
 
-        return true;
+        return accessibleObject.isAccessible() == flag;
     }
 
     /**

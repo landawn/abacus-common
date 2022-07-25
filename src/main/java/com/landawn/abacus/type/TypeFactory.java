@@ -278,14 +278,6 @@ public final class TypeFactory {
             }
 
             try {
-                if (Class.forName("com.amazonaws.services.dynamodbv2.model.AttributeValue") != null) {
-                    classes.add(com.landawn.abacus.type.AttributeValueType.class);
-                }
-            } catch (Throwable e) {
-                // ignore.
-            }
-
-            try {
                 if (Class.forName("org.joda.time.DateTime") != null) {
                     classes.add(com.landawn.abacus.type.JodaDateTimeType.class);
                     classes.add(com.landawn.abacus.type.JodaMutableDateTimeType.class);

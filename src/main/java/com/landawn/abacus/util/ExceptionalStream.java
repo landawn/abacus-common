@@ -5184,6 +5184,49 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      *
+     * @param predicate
+     * @param action
+     * @return
+     */
+    @IntermediateOp
+    public ExceptionalStream<T, E> peekIf(final Throwables.Predicate<? super T, E> predicate, final Throwables.Consumer<? super T, E> action) {
+        assertNotClosed();
+
+        checkArgNotNull(predicate, "predicate");
+        checkArgNotNull(action, "action");
+
+        return peek(it -> {
+            if (predicate.test(it)) {
+                action.accept(it);
+            }
+        });
+    }
+
+    /**
+     *
+     * @param predicate The first parameter is the element. The second parameter is the count of iterated elements, starts with 1.
+     * @param action
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public ExceptionalStream<T, E> peekIf(final Throwables.BiPredicate<? super T, ? super Long, E> predicate, final Consumer<? super T> action) {
+        assertNotClosed();
+
+        checkArgNotNull(predicate, "predicate");
+        checkArgNotNull(action, "action");
+
+        final MutableLong count = MutableLong.of(0);
+
+        return onEach(it -> {
+            if (predicate.test(it, count.incrementAndGet())) {
+                action.accept(it);
+            }
+        });
+    }
+
+    /**
+     *
      * @param chunkSize
      * @return
      */
