@@ -2161,7 +2161,8 @@ public final class ParserUtil {
     }
 
     static class ASMPropInfo extends PropInfo {
-        final com.esotericsoftware.reflectasm.MethodAccess methodAccess;
+        final com.esotericsoftware.reflectasm.MethodAccess getMethodAccess;
+        final com.esotericsoftware.reflectasm.MethodAccess setMethodAccess;
 
         final int getMethodAccessIndex;
 
@@ -2177,9 +2178,10 @@ public final class ParserUtil {
             super(name, field, getMethod, setMethod, jsonXmlConfig, classAnnotations, fieldOrder, isImmutableEntity, isByBuilder, idPropNames,
                     readOnlyIdPropNames);
 
-            methodAccess = com.esotericsoftware.reflectasm.MethodAccess.get(declaringClass);
-            getMethodAccessIndex = getMethod == null ? -1 : methodAccess.getIndex(getMethod.getName(), 0);
-            setMethodAccessIndex = setMethod == null ? -1 : methodAccess.getIndex(setMethod.getName(), setMethod.getParameterTypes());
+            getMethodAccess = getMethod == null ? null : com.esotericsoftware.reflectasm.MethodAccess.get(declaringClass);
+            setMethodAccess = setMethod == null ? null : com.esotericsoftware.reflectasm.MethodAccess.get(setMethod.getDeclaringClass());
+            getMethodAccessIndex = getMethod == null ? -1 : getMethodAccess.getIndex(getMethod.getName(), 0);
+            setMethodAccessIndex = setMethod == null ? -1 : setMethodAccess.getIndex(setMethod.getName(), setMethod.getParameterTypes());
             fieldAccess = com.esotericsoftware.reflectasm.FieldAccess.get(declaringClass);
             fieldAccessIndex = (field == null || !this.isFieldAccessible || Modifier.isPrivate(field.getModifiers()) || Modifier.isFinal(field.getModifiers()))
                     ? -1
@@ -2196,7 +2198,7 @@ public final class ParserUtil {
         @Override
         @SuppressWarnings("unchecked")
         public <T> T getPropValue(Object obj) {
-            return (T) ((fieldAccessIndex > -1) ? fieldAccess.get(obj, fieldAccessIndex) : methodAccess.invoke(obj, getMethodAccessIndex));
+            return (T) ((fieldAccessIndex > -1) ? fieldAccess.get(obj, fieldAccessIndex) : getMethodAccess.invoke(obj, getMethodAccessIndex));
         }
 
         /**
@@ -2219,7 +2221,7 @@ public final class ParserUtil {
                 if (isFieldSettable && fieldAccessIndex > -1) {
                     fieldAccess.set(obj, fieldAccessIndex, propValue);
                 } else if (setMethodAccessIndex > -1) {
-                    methodAccess.invoke(obj, setMethodAccessIndex, propValue);
+                    setMethodAccess.invoke(obj, setMethodAccessIndex, propValue);
                 } else if (canSetFieldByGetMethod) {
                     ClassUtil.setPropValueByGet(obj, getMethod, propValue);
                 } else {
@@ -2235,7 +2237,7 @@ public final class ParserUtil {
                 if (fieldAccessIndex > -1) {
                     fieldAccess.set(obj, fieldAccessIndex, propValue);
                 } else if (setMethodAccessIndex > -1) {
-                    methodAccess.invoke(obj, setMethodAccessIndex, propValue);
+                    getMethodAccess.invoke(obj, setMethodAccessIndex, propValue);
                 } else {
                     try {
                         field.set(obj, propValue);

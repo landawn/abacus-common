@@ -400,7 +400,7 @@ public final class Maps {
         } else if (ConcurrentHashMap.class.isAssignableFrom(cls)) {
             return (IntFunction) IntFunctions.ofConcurrentHashMap();
         } else if (BiMap.class.isAssignableFrom(cls)) {
-            return (IntFunction) IntFunctions.ofLinkedHashMap();
+            return (IntFunction) IntFunctions.ofBiMap();
         } else if (ImmutableMap.class.isAssignableFrom(cls)) {
             return (IntFunction) IntFunctions.ofLinkedHashMap();
         } else {

@@ -60,14 +60,6 @@ public final class InternalUtil {
         if (listElementDataField != null) {
             ClassUtil.setAccessibleQuietly(listElementDataField, true);
         }
-
-        tmp = null;
-
-        try {
-            tmp = ArrayList.class.getDeclaredField("size");
-        } catch (Throwable e) {
-            // ignore.
-        }
     }
 
     /**

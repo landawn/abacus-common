@@ -25,15 +25,18 @@ public enum ContentFormat {
     JSON_LZ4("application/json", "lz4"), //
     JSON_SNAPPY("application/json", "snappy"), //
     JSON_GZIP("application/json", "gzip"), //
+    JSON_BR("application/json", "br"), //
     XML("application/xml", ""), //
     XML_LZ4("application/xml", "lz4"), //
     XML_SNAPPY("application/xml", "snappy"), //
     XML_GZIP("application/xml", "gzip"), //
+    XML_BR("application/xml", "br"), //
     FormUrlEncoded("application/x-www-form-urlencoded", ""), //
     KRYO("", "kryo"), //
     LZ4("", "lz4"), //
     SNAPPY("", "snappy"), //
-    GZIP("", "gzip");
+    GZIP("", "gzip"), //
+    BR("", "br");
 
     private final String contentType;
     private final String contentEncoding;

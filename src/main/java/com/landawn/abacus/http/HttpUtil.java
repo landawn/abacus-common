@@ -72,6 +72,8 @@ public final class HttpUtil {
 
     static final String GZIP = "gzip";
 
+    static final String BR = "br";
+
     static final String SNAPPY = "snappy";
 
     static final String LZ4 = "lz4";
@@ -93,10 +95,12 @@ public final class HttpUtil {
         contentFormat2Parser.put(ContentFormat.JSON_LZ4, jsonParser);
         contentFormat2Parser.put(ContentFormat.JSON_SNAPPY, jsonParser);
         contentFormat2Parser.put(ContentFormat.JSON_GZIP, jsonParser);
+        contentFormat2Parser.put(ContentFormat.JSON_BR, jsonParser);
         contentFormat2Parser.put(ContentFormat.XML, xmlParser);
         contentFormat2Parser.put(ContentFormat.XML_LZ4, xmlParser);
         contentFormat2Parser.put(ContentFormat.XML_SNAPPY, xmlParser);
         contentFormat2Parser.put(ContentFormat.XML_GZIP, xmlParser);
+        contentFormat2Parser.put(ContentFormat.XML_BR, xmlParser);
         contentFormat2Parser.put(ContentFormat.FormUrlEncoded, jsonParser);
         contentFormat2Parser.put(ContentFormat.KRYO, kryoParser);
 
@@ -105,6 +109,7 @@ public final class HttpUtil {
         contentFormat2Parser.put(ContentFormat.LZ4, jsonParser);
         contentFormat2Parser.put(ContentFormat.SNAPPY, jsonParser);
         contentFormat2Parser.put(ContentFormat.GZIP, jsonParser);
+        contentFormat2Parser.put(ContentFormat.BR, jsonParser);
     }
 
     private static final Map<ContentFormat, String> contentFormat2Type = new EnumMap<>(ContentFormat.class);
@@ -114,10 +119,12 @@ public final class HttpUtil {
         contentFormat2Type.put(ContentFormat.JSON_LZ4, HttpHeaders.Values.APPLICATION_JSON);
         contentFormat2Type.put(ContentFormat.JSON_SNAPPY, HttpHeaders.Values.APPLICATION_JSON);
         contentFormat2Type.put(ContentFormat.JSON_GZIP, HttpHeaders.Values.APPLICATION_JSON);
+        contentFormat2Type.put(ContentFormat.JSON_BR, HttpHeaders.Values.APPLICATION_JSON);
         contentFormat2Type.put(ContentFormat.XML, HttpHeaders.Values.APPLICATION_XML);
         contentFormat2Type.put(ContentFormat.XML_LZ4, HttpHeaders.Values.APPLICATION_XML);
         contentFormat2Type.put(ContentFormat.XML_SNAPPY, HttpHeaders.Values.APPLICATION_XML);
         contentFormat2Type.put(ContentFormat.XML_GZIP, HttpHeaders.Values.APPLICATION_XML);
+        contentFormat2Type.put(ContentFormat.XML_BR, HttpHeaders.Values.APPLICATION_XML);
         contentFormat2Type.put(ContentFormat.FormUrlEncoded, HttpHeaders.Values.APPLICATION_URL_ENCODED);
         contentFormat2Type.put(ContentFormat.KRYO, HttpHeaders.Values.APPLICATION_KRYO);
     }
@@ -126,12 +133,15 @@ public final class HttpUtil {
 
     static {
         contentFormat2Encoding.put(ContentFormat.XML_GZIP, GZIP);
+        contentFormat2Encoding.put(ContentFormat.XML_BR, BR);
         contentFormat2Encoding.put(ContentFormat.XML_SNAPPY, SNAPPY);
         contentFormat2Encoding.put(ContentFormat.XML_LZ4, LZ4);
         contentFormat2Encoding.put(ContentFormat.JSON_GZIP, GZIP);
+        contentFormat2Encoding.put(ContentFormat.JSON_BR, BR);
         contentFormat2Encoding.put(ContentFormat.JSON_SNAPPY, SNAPPY);
         contentFormat2Encoding.put(ContentFormat.JSON_LZ4, LZ4);
         contentFormat2Encoding.put(ContentFormat.GZIP, GZIP);
+        contentFormat2Encoding.put(ContentFormat.BR, BR);
         contentFormat2Encoding.put(ContentFormat.SNAPPY, SNAPPY);
         contentFormat2Encoding.put(ContentFormat.LZ4, LZ4);
         contentFormat2Encoding.put(ContentFormat.KRYO, KRYO);
@@ -150,6 +160,8 @@ public final class HttpUtil {
 
             if (Strings.containsIgnoreCase(entry.getKey().name(), GZIP)) {
                 contentEncoding2Format.put(GZIP, entry.getKey());
+            } else if (Strings.containsIgnoreCase(entry.getKey().name(), BR)) {
+                contentEncoding2Format.put(BR, entry.getKey());
             } else if (Strings.containsIgnoreCase(entry.getKey().name(), SNAPPY)) {
                 contentEncoding2Format.put(SNAPPY, entry.getKey());
             } else if (Strings.containsIgnoreCase(entry.getKey().name(), LZ4)) {
@@ -170,6 +182,7 @@ public final class HttpUtil {
         }
 
         contentEncoding2Format.put(GZIP, ContentFormat.GZIP);
+        contentEncoding2Format.put(BR, ContentFormat.BR);
         contentEncoding2Format.put(SNAPPY, ContentFormat.SNAPPY);
         contentEncoding2Format.put(LZ4, ContentFormat.LZ4);
         contentEncoding2Format.put(KRYO, ContentFormat.KRYO);
@@ -511,6 +524,8 @@ public final class HttpUtil {
         if (contentFormat == null) {
             if (Strings.containsIgnoreCase(contentEncoding, GZIP)) {
                 contentFormat = contentEncoding2Format.get(GZIP);
+            } else if (Strings.containsIgnoreCase(contentEncoding, BR)) {
+                contentFormat = contentEncoding2Format.get(BR);
             } else if (Strings.containsIgnoreCase(contentEncoding, SNAPPY)) {
                 contentFormat = contentEncoding2Format.get(SNAPPY);
             } else if (Strings.containsIgnoreCase(contentEncoding, LZ4)) {
@@ -590,6 +605,8 @@ public final class HttpUtil {
 
         if (Strings.containsIgnoreCase(contentFormatName, GZIP)) {
             return IOUtil.newGZIPInputStream(is);
+        } else if (Strings.containsIgnoreCase(contentFormatName, BR)) {
+            return IOUtil.newBrotliInputStream(is);
         } else if (Strings.containsIgnoreCase(contentFormatName, SNAPPY)) {
             return IOUtil.newSnappyInputStream(is);
         } else if (Strings.containsIgnoreCase(contentFormatName, LZ4)) {
@@ -615,6 +632,9 @@ public final class HttpUtil {
 
         if (Strings.containsIgnoreCase(contentFormatName, GZIP)) {
             return IOUtil.newGZIPOutputStream(os);
+        } else if (Strings.containsIgnoreCase(contentFormatName, BR)) {
+            // return IOUtil.newBrotliOutputStream(os);
+            throw new UnsupportedOperationException("Unsupported content encoding: Brotli for http request");
         } else if (Strings.containsIgnoreCase(contentFormatName, SNAPPY)) {
             return IOUtil.newSnappyOutputStream(os);
         } else if (Strings.containsIgnoreCase(contentFormatName, LZ4)) {
@@ -668,7 +688,7 @@ public final class HttpUtil {
         try {
             return N.defaultIfNull(wrapInputStream(connection.getInputStream(), contentFormat), N.emptyInputStream());
         } catch (IOException e) {
-            return N.defaultIfNull(connection.getErrorStream(), N.emptyInputStream());
+            return N.defaultIfNull(wrapInputStream(connection.getErrorStream(), contentFormat), N.emptyInputStream());
         }
     }
 

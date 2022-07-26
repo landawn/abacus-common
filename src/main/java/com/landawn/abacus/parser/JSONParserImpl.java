@@ -41,6 +41,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.exception.ParseException;
@@ -82,8 +84,6 @@ import com.landawn.abacus.util.Tuple.Tuple6;
 import com.landawn.abacus.util.Tuple.Tuple7;
 import com.landawn.abacus.util.Tuple.Tuple8;
 import com.landawn.abacus.util.Tuple.Tuple9;
-import com.landawn.abacus.util.function.BiFunction;
-import com.landawn.abacus.util.function.Function;
 
 /**
  *

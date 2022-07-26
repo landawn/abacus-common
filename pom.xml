@@ -4,7 +4,7 @@
 
 	<groupId>com.landawn</groupId>
 	<artifactId>abacus-common</artifactId>
-	<version>3.2.4</version>
+	<version>3.2.5</version>
 	<packaging>jar</packaging>
 
 	<name>abacus-common</name>
@@ -28,7 +28,7 @@
 		<dependency>
 			<groupId>com.landawn</groupId>
 			<artifactId>abacus-common</artifactId>
-			<version>3.2.3</version>
+			<version>3.2.4</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -205,6 +205,12 @@
 			<artifactId>snappy-java</artifactId>
 			<version>1.1.7.3</version>
 			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.brotli</groupId>
+			<artifactId>dec</artifactId>
+			<version>0.1.2</version>
 		</dependency>
 
 		<dependency>
