@@ -33,7 +33,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
     public ByteSummaryStatistics() {
     }
 
-    public ByteSummaryStatistics(long count, long sum, byte min, byte max) {
+    public ByteSummaryStatistics(long count, byte min, byte max, long sum) {
         this.count = count;
         this.sum = sum;
         this.min = min;

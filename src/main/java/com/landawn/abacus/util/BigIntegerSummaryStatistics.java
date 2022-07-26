@@ -37,7 +37,7 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
     public BigIntegerSummaryStatistics() {
     }
 
-    public BigIntegerSummaryStatistics(long count, BigInteger sum, BigInteger min, BigInteger max) {
+    public BigIntegerSummaryStatistics(long count, BigInteger min, BigInteger max, BigInteger sum) {
         this.count = count;
         this.sum = sum;
         this.min = min;

@@ -33,7 +33,7 @@ public class IntSummaryStatistics implements IntConsumer {
     public IntSummaryStatistics() {
     }
 
-    public IntSummaryStatistics(long count, long sum, int min, int max) {
+    public IntSummaryStatistics(long count, int min, int max, long sum) {
         this.count = count;
         this.sum = sum;
         this.min = min;

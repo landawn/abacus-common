@@ -49,6 +49,7 @@ import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collector;
 import java.util.stream.StreamSupport;
 
 import com.landawn.abacus.annotation.Beta;
@@ -78,7 +79,6 @@ import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.u.OptionalLong;
-import com.landawn.abacus.util.function.BiConsumer;
 import com.landawn.abacus.util.function.BinaryOperator;
 import com.landawn.abacus.util.function.Consumer;
 import com.landawn.abacus.util.function.Function;
@@ -86,7 +86,6 @@ import com.landawn.abacus.util.function.IntFunction;
 import com.landawn.abacus.util.function.LongSupplier;
 import com.landawn.abacus.util.function.Predicate;
 import com.landawn.abacus.util.function.Supplier;
-import com.landawn.abacus.util.stream.Collector;
 import com.landawn.abacus.util.stream.Collectors;
 import com.landawn.abacus.util.stream.DoubleStream;
 import com.landawn.abacus.util.stream.IntStream;
@@ -4006,9 +4005,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             final Collector<? super T, A, R> collector) {
         assertNotClosed();
 
-        final Supplier<A> supplier = collector.supplier();
-        final BiConsumer<A, ? super T> accumulator = collector.accumulator();
-        final Function<A, R> finisher = collector.finisher();
+        final java.util.function.Supplier<A> supplier = collector.supplier();
+        final java.util.function.BiConsumer<A, ? super T> accumulator = collector.accumulator();
+        final java.util.function.Function<A, R> finisher = collector.finisher();
 
         final ExceptionalIterator<T, E> iter = elements;
 
@@ -4288,9 +4287,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             final Collector<? super T, A, R> collector) {
         assertNotClosed();
 
-        final Supplier<A> supplier = collector.supplier();
-        final BiConsumer<A, ? super T> accumulator = collector.accumulator();
-        final Function<A, R> finisher = collector.finisher();
+        final java.util.function.Supplier<A> supplier = collector.supplier();
+        final java.util.function.BiConsumer<A, ? super T> accumulator = collector.accumulator();
+        final java.util.function.Function<A, R> finisher = collector.finisher();
 
         final ExceptionalIterator<T, E> iter = elements;
 
@@ -5327,9 +5326,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         checkArgPositive(chunkSize, "chunkSize");
 
-        final Supplier<A> supplier = collector.supplier();
-        final BiConsumer<A, ? super T> accumulator = collector.accumulator();
-        final Function<A, R> finisher = collector.finisher();
+        final java.util.function.Supplier<A> supplier = collector.supplier();
+        final java.util.function.BiConsumer<A, ? super T> accumulator = collector.accumulator();
+        final java.util.function.Function<A, R> finisher = collector.finisher();
 
         return newStream(new ExceptionalIterator<R, E>() {
             @Override
@@ -5734,9 +5733,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
 
-        final Supplier<A> supplier = collector.supplier();
-        final BiConsumer<A, ? super T> accumulator = collector.accumulator();
-        final Function<A, R> finisher = collector.finisher();
+        final java.util.function.Supplier<A> supplier = collector.supplier();
+        final java.util.function.BiConsumer<A, ? super T> accumulator = collector.accumulator();
+        final java.util.function.Function<A, R> finisher = collector.finisher();
 
         return newStream(new ExceptionalIterator<R, E>() {
             private Deque<T> queue = null;
@@ -6869,9 +6868,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             private final Deque<Timed<T>> queue = useQueue ? new ArrayDeque<>() : null;
             private Iterator<Timed<T>> queueIter;
 
-            private Supplier<A> supplier;
-            private BiConsumer<A, ? super T> accumulator;
-            private Function<A, R> finisher;
+            private java.util.function.Supplier<A> supplier;
+            private java.util.function.BiConsumer<A, ? super T> accumulator;
+            private java.util.function.Function<A, R> finisher;
 
             private ExceptionalIterator<T, E> iter;
             private Timed<T> timedNext = null;
@@ -7153,9 +7152,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return newStream(new ExceptionalIterator<R, E>() {
             private final long maxDurationInMillis = maxDuration.toMillis();
 
-            private Supplier<A> supplier;
-            private BiConsumer<A, ? super T> accumulator;
-            private Function<A, R> finisher;
+            private java.util.function.Supplier<A> supplier;
+            private java.util.function.BiConsumer<A, ? super T> accumulator;
+            private java.util.function.Function<A, R> finisher;
 
             private ExceptionalIterator<T, E> iter;
             private Timed<T> timedNext = null;
@@ -8678,9 +8677,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         checkArgNotNull(collector, "'collector' can not be null");
         checkArgNotNull(func, "'func' can not be null");
 
-        final Supplier<A> supplier = collector.supplier();
-        final BiConsumer<A, ? super U> accumulator = collector.accumulator();
-        final Function<A, D> finisher = collector.finisher();
+        final java.util.function.Supplier<A> supplier = collector.supplier();
+        final java.util.function.BiConsumer<A, ? super U> accumulator = collector.accumulator();
+        final java.util.function.Function<A, D> finisher = collector.finisher();
 
         final Throwables.Function<T, R, E> mapper = new Throwables.Function<>() {
             private final Iterator<U> iter = b;
@@ -8746,9 +8745,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         checkArgNotNull(func, "'func' can not be null");
         checkArgNotNull(mapperForUnJoinedEelements, "'mapperForUnJoinedEelements' can not be null");
 
-        final Supplier<A> supplier = collector.supplier();
-        final BiConsumer<A, ? super U> accumulator = collector.accumulator();
-        final Function<A, D> finisher = collector.finisher();
+        final java.util.function.Supplier<A> supplier = collector.supplier();
+        final java.util.function.BiConsumer<A, ? super U> accumulator = collector.accumulator();
+        final java.util.function.Function<A, D> finisher = collector.finisher();
         final U none = (U) N.NULL_MASK;
         final Holder<U> nextValueHolder = Holder.of(none);
 
@@ -8977,9 +8976,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         checkArgNotNull(collector, "'collector' can not be null");
         checkArgNotNull(func, "'func' can not be null");
 
-        final Supplier<A> supplier = collector.supplier();
-        final BiConsumer<A, ? super U> accumulator = collector.accumulator();
-        final Function<A, D> finisher = collector.finisher();
+        final java.util.function.Supplier<A> supplier = collector.supplier();
+        final java.util.function.BiConsumer<A, ? super U> accumulator = collector.accumulator();
+        final java.util.function.Function<A, D> finisher = collector.finisher();
 
         final Throwables.Function<T, R, E> mapper = new Throwables.Function<>() {
             private final ExceptionalIterator<U, ? extends E> iter = b.iteratorEx();
@@ -9046,9 +9045,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         checkArgNotNull(func, "'func' can not be null");
         checkArgNotNull(mapperForUnJoinedEelements, "'mapperForUnJoinedEelements' can not be null");
 
-        final Supplier<A> supplier = collector.supplier();
-        final BiConsumer<A, ? super U> accumulator = collector.accumulator();
-        final Function<A, D> finisher = collector.finisher();
+        final java.util.function.Supplier<A> supplier = collector.supplier();
+        final java.util.function.BiConsumer<A, ? super U> accumulator = collector.accumulator();
+        final java.util.function.Function<A, D> finisher = collector.finisher();
         final U none = (U) N.NULL_MASK;
         final Holder<U> nextValueHolder = Holder.of(none);
         final ExceptionalIterator<U, ? extends E> iter = b.iteratorEx();
@@ -11351,9 +11350,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         checkArgNotNull(mapFactory, "mapFactory");
 
         try {
-            final Supplier<A> downstreamSupplier = downstream.supplier();
-            final BiConsumer<A, ? super V> downstreamAccumulator = downstream.accumulator();
-            final Function<A, D> downstreamFinisher = downstream.finisher();
+            final java.util.function.Supplier<A> downstreamSupplier = downstream.supplier();
+            final java.util.function.BiConsumer<A, ? super V> downstreamAccumulator = downstream.accumulator();
+            final java.util.function.Function<A, D> downstreamFinisher = downstream.finisher();
 
             final M result = mapFactory.get();
             final Map<K, A> tmp = (Map<K, A>) result;
@@ -11919,34 +11918,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         try {
             final A container = collector.supplier().get();
-            final BiConsumer<A, ? super T> accumulator = collector.accumulator();
-
-            while (elements.hasNext()) {
-                accumulator.accept(container, elements.next());
-            }
-
-            return collector.finisher().apply(container);
-        } finally {
-            close();
-        }
-    }
-
-    /**
-     *
-     * @param <R>
-     * @param <A>
-     * @param collector
-     * @return
-     * @throws E the e
-     */
-    @TerminalOp
-    public <R, A> R collect(java.util.stream.Collector<? super T, A, R> collector) throws E {
-        assertNotClosed();
-
-        checkArgNotNull(collector, "collector");
-
-        try {
-            final A container = collector.supplier().get();
             final java.util.function.BiConsumer<A, ? super T> accumulator = collector.accumulator();
 
             while (elements.hasNext()) {
@@ -11974,30 +11945,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @TerminalOp
     public <R, RR, A, E2 extends Exception> RR collectAndThen(final Collector<? super T, A, R> collector,
-            final Throwables.Function<? super R, ? extends RR, E2> func) throws E, E2 {
-        assertNotClosed();
-
-        checkArgNotNull(collector, "collector");
-        checkArgNotNull(func, "func");
-
-        return func.apply(collect(collector));
-    }
-
-    /**
-     * Collect and then.
-     *
-     * @param <R>
-     * @param <RR>
-     * @param <A>
-     * @param <E2>
-     * @param collector
-     * @param func
-     * @return
-     * @throws E the e
-     * @throws E2 the e2
-     */
-    @TerminalOp
-    public <R, RR, A, E2 extends Exception> RR collectAndThen(final java.util.stream.Collector<? super T, A, R> collector,
             final Throwables.Function<? super R, ? extends RR, E2> func) throws E, E2 {
         assertNotClosed();
 

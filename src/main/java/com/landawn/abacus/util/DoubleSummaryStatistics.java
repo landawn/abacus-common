@@ -31,7 +31,7 @@ public class DoubleSummaryStatistics implements DoubleConsumer {
     public DoubleSummaryStatistics() {
     }
 
-    public DoubleSummaryStatistics(long count, double sum, double min, double max) {
+    public DoubleSummaryStatistics(long count, double min, double max, double sum) {
         summation.combine(count, sum);
 
         this.min = min;

@@ -33,7 +33,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
     public ShortSummaryStatistics() {
     }
 
-    public ShortSummaryStatistics(long count, long sum, short min, short max) {
+    public ShortSummaryStatistics(long count, short min, short max, long sum) {
         this.count = count;
         this.sum = sum;
         this.min = min;

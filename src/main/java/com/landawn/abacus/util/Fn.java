@@ -52,6 +52,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
+import java.util.stream.Collector;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SequentialOnly;
@@ -145,7 +146,6 @@ import com.landawn.abacus.util.function.TriConsumer;
 import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.function.TriPredicate;
 import com.landawn.abacus.util.function.UnaryOperator;
-import com.landawn.abacus.util.stream.Collector;
 import com.landawn.abacus.util.stream.ObjIteratorEx;
 import com.landawn.abacus.util.stream.Stream;
 
@@ -3312,19 +3312,6 @@ public final class Fn extends Comparators {
     /**
      *
      * @param <T>
-     * @param <A>
-     * @param <R>
-     * @param collector
-     * @return
-     */
-    @Beta
-    public static <T, A, R> Collector<T, A, R> from(final java.util.stream.Collector<T, A, R> collector) {
-        return Collector.from(collector);
-    }
-
-    /**
-     *
-     * @param <T>
      * @param predicate
      * @return
      */
@@ -4807,9 +4794,9 @@ public final class Fn extends Comparators {
                 private Deque<Timed<T>> queue;
                 private Iterator<Timed<T>> queueIter;
 
-                private Supplier<A> supplier;
-                private BiConsumer<A, ? super Timed<T>> accumulator;
-                private Function<A, R> finisher;
+                private java.util.function.Supplier<A> supplier;
+                private java.util.function.BiConsumer<A, ? super Timed<T>> accumulator;
+                private java.util.function.Function<A, R> finisher;
 
                 private ObjIterator<Timed<T>> iter;
                 private Timed<T> next = null;
@@ -5096,9 +5083,9 @@ public final class Fn extends Comparators {
             final ObjIterator<R> iter = new ObjIteratorEx<>() {
                 private long maxDurationInMillis;
 
-                private Supplier<A> supplier;
-                private BiConsumer<A, ? super Timed<T>> accumulator;
-                private Function<A, R> finisher;
+                private java.util.function.Supplier<A> supplier;
+                private java.util.function.BiConsumer<A, ? super Timed<T>> accumulator;
+                private java.util.function.Function<A, R> finisher;
 
                 private ObjIterator<Timed<T>> iter;
                 private Timed<T> next = null;

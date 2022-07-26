@@ -34,7 +34,7 @@ public class LongSummaryStatistics implements LongConsumer, IntConsumer {
     public LongSummaryStatistics() {
     }
 
-    public LongSummaryStatistics(long count, long sum, long min, long max) {
+    public LongSummaryStatistics(long count, long min, long max, long sum) {
         this.count = count;
         this.sum = sum;
         this.min = min;

@@ -31,7 +31,7 @@ public class FloatSummaryStatistics implements FloatConsumer {
     public FloatSummaryStatistics() {
     }
 
-    public FloatSummaryStatistics(long count, double sum, float min, float max) {
+    public FloatSummaryStatistics(long count, float min, float max, double sum) {
         summation.combine(count, sum);
 
         this.min = min;

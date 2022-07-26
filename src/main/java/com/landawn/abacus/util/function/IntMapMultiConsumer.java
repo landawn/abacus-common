@@ -14,7 +14,8 @@
 
 package com.landawn.abacus.util.function;
 
-public interface IntMapMultiConsumer {
+public interface IntMapMultiConsumer extends java.util.stream.IntStream.IntMapMultiConsumer {
 
-    void accept(int value, IntConsumer ic);
+    @Override
+    void accept(int value, java.util.function.IntConsumer ic);
 }

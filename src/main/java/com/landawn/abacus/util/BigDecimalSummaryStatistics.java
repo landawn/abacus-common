@@ -37,7 +37,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
     public BigDecimalSummaryStatistics() {
     }
 
-    public BigDecimalSummaryStatistics(long count, BigDecimal sum, BigDecimal min, BigDecimal max) {
+    public BigDecimalSummaryStatistics(long count, BigDecimal min, BigDecimal max, BigDecimal sum) {
         this.count = count;
         this.sum = sum;
         this.min = min;

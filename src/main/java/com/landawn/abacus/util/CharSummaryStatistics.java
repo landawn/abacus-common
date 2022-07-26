@@ -30,7 +30,7 @@ public class CharSummaryStatistics implements CharConsumer {
     public CharSummaryStatistics() {
     }
 
-    public CharSummaryStatistics(long count, long sum, char min, char max) {
+    public CharSummaryStatistics(long count, char min, char max, long sum) {
         this.count = count;
         this.sum = sum;
         this.min = min;
