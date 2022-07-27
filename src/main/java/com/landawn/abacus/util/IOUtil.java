@@ -57,8 +57,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-import org.brotli.dec.BrotliInputStream;
-
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
@@ -3915,21 +3913,6 @@ public final class IOUtil {
     }
 
     /**
-     * New GZIP input stream.
-     *
-     * @param is
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public static BrotliInputStream newBrotliInputStream(final InputStream is) throws UncheckedIOException {
-        try {
-            return new BrotliInputStream(is);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    /**
      * Creates a new input stream with the specified buffer size.
      *
      * @param is
@@ -3979,6 +3962,21 @@ public final class IOUtil {
     public static GZIPOutputStream newGZIPOutputStream(final OutputStream os, final int bufferSize) throws UncheckedIOException {
         try {
             return new GZIPOutputStream(os, bufferSize);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
+     * New GZIP input stream.
+     *
+     * @param is
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public static BrotliInputStream newBrotliInputStream(final InputStream is) throws UncheckedIOException {
+        try {
+            return new BrotliInputStream(is);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

@@ -771,6 +771,33 @@ public final class Fn extends Comparators {
     }
 
     /**
+     * Returns a stateful <code>Consumer</code>. Don't save or cache for reuse
+     *
+     * @param <T>
+     * @param rateLimiter
+     * @return
+     * @see RateLimiter#acquire()
+     * @see RateLimiter#create(double)
+     */
+    @Stateful
+    public static <T> Consumer<T> rateLimiter(final double permitsPerSecond) {
+        return rateLimiter(RateLimiter.create(permitsPerSecond));
+    }
+
+    /**
+     * Returns a stateful <code>Consumer</code>. Don't save or cache for reuse
+     *
+     * @param <T>
+     * @param rateLimiter
+     * @return
+     * @see RateLimiter#acquire()
+     */
+    @Stateful
+    public static <T> Consumer<T> rateLimiter(final RateLimiter rateLimiter) {
+        return t -> rateLimiter.acquire();
+    }
+
+    /**
      *
      * @param <T>
      * @return
@@ -9883,6 +9910,33 @@ public final class Fn extends Comparators {
 
         public static <T, E extends Exception> Throwables.Consumer<T, E> sleepUninterruptibly(final long millis) {
             return t -> N.sleepUninterruptibly(millis);
+        }
+
+        /**
+         * Returns a stateful <code>Consumer</code>. Don't save or cache for reuse
+         *
+         * @param <T>
+         * @param rateLimiter
+         * @return
+         * @see RateLimiter#acquire()
+         * @see RateLimiter#create(double)
+         */
+        @Stateful
+        public static <T, E extends Exception> Throwables.Consumer<T, E> rateLimiter(final double permitsPerSecond) {
+            return rateLimiter(RateLimiter.create(permitsPerSecond));
+        }
+
+        /**
+         * Returns a stateful <code>Consumer</code>. Don't save or cache for reuse
+         *
+         * @param <T>
+         * @param rateLimiter
+         * @return
+         * @see RateLimiter#acquire()
+         */
+        @Stateful
+        public static <T, E extends Exception> Throwables.Consumer<T, E> rateLimiter(final RateLimiter rateLimiter) {
+            return t -> rateLimiter.acquire();
         }
 
         private static final Throwables.Consumer<AutoCloseable, Exception> CLOSE = closeable -> {

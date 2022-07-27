@@ -23,10 +23,10 @@ public class HARUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(HARUtil.class);
 
-    private static final BiPredicate<String, String> defaultHttpHeaderValidatorForHARRequest = HttpUtil::isValidHttpHeader;
+    private static final BiPredicate<String, String> defaultHttpHeaderFilterForHARRequest = HttpUtil::isValidHttpHeader;
 
-    private static final ThreadLocal<BiPredicate<String, String>> httpHeaderValidatorForHARRequest_TL = ThreadLocal
-            .withInitial(() -> defaultHttpHeaderValidatorForHARRequest);
+    private static final ThreadLocal<BiPredicate<String, String>> httpHeaderFilterForHARRequest_TL = ThreadLocal
+            .withInitial(() -> defaultHttpHeaderFilterForHARRequest);
 
     private static final Consumer<String> defaultCurlLogHandler = curl -> {
         if (logger.isInfoEnabled()) {
@@ -37,14 +37,14 @@ public class HARUtil {
     private static final ThreadLocal<Tuple3<Boolean, Character, Consumer<String>>> logRequestCurlForHARRequest_TL = ThreadLocal
             .withInitial(() -> Tuple.of(false, '\'', defaultCurlLogHandler));
 
-    public static void setHttpHeaderValidatorForHARRequest(final BiPredicate<String, String> httpHeaderValidatorForHARRequest) {
-        N.checkArgNotNull(httpHeaderValidatorForHARRequest, "httpHeaderValidatorForHARRequest");
+    public static void setHttpHeaderFilterForHARRequest(final BiPredicate<String, String> httpHeaderFilterForHARRequest) {
+        N.checkArgNotNull(httpHeaderFilterForHARRequest, "httpHeaderFilterForHARRequest");
 
-        httpHeaderValidatorForHARRequest_TL.set(httpHeaderValidatorForHARRequest);
+        httpHeaderFilterForHARRequest_TL.set(httpHeaderFilterForHARRequest);
     }
 
-    public static void resetHttpHeaderValidatorForHARRequest() {
-        httpHeaderValidatorForHARRequest_TL.set(defaultHttpHeaderValidatorForHARRequest);
+    public static void resetHttpHeaderFilterForHARRequest() {
+        httpHeaderFilterForHARRequest_TL.set(defaultHttpHeaderFilterForHARRequest);
     }
 
     public static void logRequestCurlForHARRequest(final boolean logRequest) {
@@ -239,7 +239,7 @@ public class HARUtil {
     }
 
     public static HttpHeaders getHeadersByRequestEntry(final Map<String, Object> requestEntry) {
-        final BiPredicate<String, String> httpHeaderValidatorForHARRequest = httpHeaderValidatorForHARRequest_TL.get();
+        final BiPredicate<String, String> httpHeaderValidatorForHARRequest = httpHeaderFilterForHARRequest_TL.get();
         final HttpHeaders httpHeaders = HttpHeaders.create();
         final List<Map<String, String>> headers = (List<Map<String, String>>) requestEntry.get("headers");
         String headerName = null;
