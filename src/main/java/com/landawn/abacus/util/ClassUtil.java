@@ -2901,14 +2901,16 @@ public final class ClassUtil {
 
                 // sort the methods by the order of declared fields
                 for (Field field : clazz.getDeclaredFields()) {
-                    for (Method method : clazz.getMethods()) {
-                        if (isFieldGetMethod(method, field)) {
-                            fieldGetMethodList.add(Tuple.of(field, method));
-                        } else if (Modifier.isPublic(field.getModifiers()) && !Modifier.isStatic(field.getModifiers())
-                                && !Modifier.isFinal(field.getModifiers())) {
-                            fieldGetMethodList.add(Tuple.of(field, null));
-                        }
-                    }
+                    Stream.of(clazz.getMethods())
+                            .filter(method -> isFieldGetMethod(method, field))
+                            .sortedBy(method -> method.getName().length())
+                            .last()
+                            .ifPresentOrElse(method -> fieldGetMethodList.add(Tuple.of(field, method)), () -> {
+                                if (Modifier.isPublic(field.getModifiers()) && !Modifier.isStatic(field.getModifiers())
+                                        && !Modifier.isFinal(field.getModifiers())) {
+                                    fieldGetMethodList.add(Tuple.of(field, null));
+                                }
+                            });
                 }
 
                 if (noArgConstructor == null && clazz == cls) {

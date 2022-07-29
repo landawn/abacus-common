@@ -17,17 +17,26 @@ package com.landawn.abacus.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.AbstractCollection;
+import java.util.AbstractList;
+import java.util.AbstractMap;
+import java.util.AbstractQueue;
+import java.util.AbstractSet;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -44,11 +53,15 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
@@ -3239,8 +3252,9 @@ public final class Fn extends Comparators {
      * @return
      */
     @Beta
+    @SuppressWarnings("rawtypes")
     public static <T> Supplier<T> from(final java.util.function.Supplier<T> supplier) {
-        return () -> supplier.get();
+        return supplier instanceof Supplier ? ((Supplier) supplier) : supplier::get;
     }
 
     /**
@@ -3250,8 +3264,9 @@ public final class Fn extends Comparators {
      * @return
      */
     @Beta
+    @SuppressWarnings("rawtypes")
     public static <T> Predicate<T> from(final java.util.function.Predicate<T> predicate) {
-        return t -> predicate.test(t);
+        return predicate instanceof Predicate ? ((Predicate) predicate) : predicate::test;
     }
 
     /**
@@ -3262,8 +3277,9 @@ public final class Fn extends Comparators {
      * @return
      */
     @Beta
+    @SuppressWarnings("rawtypes")
     public static <T, U> BiPredicate<T, U> from(final java.util.function.BiPredicate<T, U> predicate) {
-        return (t, u) -> predicate.test(t, u);
+        return predicate instanceof BiPredicate ? ((BiPredicate) predicate) : predicate::test;
     }
 
     /**
@@ -3273,8 +3289,9 @@ public final class Fn extends Comparators {
      * @return
      */
     @Beta
+    @SuppressWarnings("rawtypes")
     public static <T> Consumer<T> from(final java.util.function.Consumer<T> consumer) {
-        return t -> consumer.accept(t);
+        return consumer instanceof Consumer ? ((Consumer) consumer) : consumer::accept;
     }
 
     /**
@@ -3285,8 +3302,9 @@ public final class Fn extends Comparators {
      * @return
      */
     @Beta
+    @SuppressWarnings("rawtypes")
     public static <T, U> BiConsumer<T, U> from(final java.util.function.BiConsumer<T, U> consumer) {
-        return (t, u) -> consumer.accept(t, u);
+        return consumer instanceof BiConsumer ? ((BiConsumer) consumer) : consumer::accept;
     }
 
     /**
@@ -3297,8 +3315,9 @@ public final class Fn extends Comparators {
      * @return
      */
     @Beta
+    @SuppressWarnings("rawtypes")
     public static <T, R> Function<T, R> from(final java.util.function.Function<T, R> function) {
-        return t -> function.apply(t);
+        return function instanceof Function ? ((Function) function) : function::apply;
     }
 
     /**
@@ -3310,8 +3329,9 @@ public final class Fn extends Comparators {
      * @return
      */
     @Beta
+    @SuppressWarnings("rawtypes")
     public static <T, U, R> BiFunction<T, U, R> from(final java.util.function.BiFunction<T, U, R> function) {
-        return (t, u) -> function.apply(t, u);
+        return function instanceof BiFunction ? ((BiFunction) function) : function::apply;
     }
 
     /**
@@ -3321,8 +3341,9 @@ public final class Fn extends Comparators {
      * @return
      */
     @Beta
+    @SuppressWarnings("rawtypes")
     public static <T> UnaryOperator<T> from(final java.util.function.UnaryOperator<T> op) {
-        return t -> op.apply(t);
+        return op instanceof UnaryOperator ? ((UnaryOperator) op) : op::apply;
     }
 
     /**
@@ -3332,8 +3353,9 @@ public final class Fn extends Comparators {
      * @return
      */
     @Beta
+    @SuppressWarnings("rawtypes")
     public static <T> BinaryOperator<T> from(final java.util.function.BinaryOperator<T> op) {
-        return (t1, t2) -> op.apply(t1, t2);
+        return op instanceof BinaryOperator ? ((BinaryOperator) op) : op::apply;
     }
 
     /**
@@ -5279,748 +5301,6 @@ public final class Fn extends Comparators {
     }
 
     /**
-     * Adds the all.
-     *
-     * @param <T>
-     * @param <C>
-     * @return
-     * @deprecated replaced by {@code BiConsumers#ofAddAll()}
-     */
-    @Deprecated
-    static <T, C extends Collection<T>> BiConsumer<C, C> addAll() {
-        return BiConsumers.<T, C> ofAddAll();
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <M>
-     * @return
-     * @deprecated replaced by {@code BiConsumers#ofPutAll()}
-     */
-    @Deprecated
-    static <K, V, M extends Map<K, V>> BiConsumer<M, M> putAll() {
-        return BiConsumers.<K, V, M> ofPutAll();
-    }
-
-    /**
-     * The Class Factory.
-     */
-    public static abstract class Factory {
-
-        /** The Constant BOOLEAN_ARRAY. */
-        private static final IntFunction<boolean[]> BOOLEAN_ARRAY = len -> new boolean[len];
-
-        /** The Constant CHAR_ARRAY. */
-        private static final IntFunction<char[]> CHAR_ARRAY = len -> new char[len];
-
-        /** The Constant BYTE_ARRAY. */
-        private static final IntFunction<byte[]> BYTE_ARRAY = len -> new byte[len];
-
-        /** The Constant SHORT_ARRAY. */
-        private static final IntFunction<short[]> SHORT_ARRAY = len -> new short[len];
-
-        /** The Constant INT_ARRAY. */
-        private static final IntFunction<int[]> INT_ARRAY = len -> new int[len];
-
-        /** The Constant LONG_ARRAY. */
-        private static final IntFunction<long[]> LONG_ARRAY = len -> new long[len];
-
-        /** The Constant FLOAT_ARRAY. */
-        private static final IntFunction<float[]> FLOAT_ARRAY = len -> new float[len];
-
-        /** The Constant DOUBLE_ARRAY. */
-        private static final IntFunction<double[]> DOUBLE_ARRAY = len -> new double[len];
-
-        /** The Constant STRING_ARRAY. */
-        private static final IntFunction<String[]> STRING_ARRAY = len -> new String[len];
-
-        /** The Constant OBJECT_ARRAY. */
-        private static final IntFunction<Object[]> OBJECT_ARRAY = len -> new Object[len];
-
-        /** The Constant BOOLEAN_LIST. */
-        private static final IntFunction<BooleanList> BOOLEAN_LIST = len -> new BooleanList(len);
-
-        /** The Constant CHAR_LIST. */
-        private static final IntFunction<CharList> CHAR_LIST = len -> new CharList(len);
-
-        /** The Constant BYTE_LIST. */
-        private static final IntFunction<ByteList> BYTE_LIST = len -> new ByteList(len);
-
-        /** The Constant SHORT_LIST. */
-        private static final IntFunction<ShortList> SHORT_LIST = len -> new ShortList(len);
-
-        /** The Constant INT_LIST. */
-        private static final IntFunction<IntList> INT_LIST = len -> new IntList(len);
-
-        /** The Constant LONG_LIST. */
-        private static final IntFunction<LongList> LONG_LIST = len -> new LongList(len);
-
-        /** The Constant FLOAT_LIST. */
-        private static final IntFunction<FloatList> FLOAT_LIST = len -> new FloatList(len);
-
-        /** The Constant DOUBLE_LIST. */
-        private static final IntFunction<DoubleList> DOUBLE_LIST = len -> new DoubleList(len);
-
-        /** The Constant LIST_FACTORY. */
-        @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super List> LIST_FACTORY = len -> new ArrayList<>(len);
-
-        /** The Constant LINKED_LIST_FACTORY. */
-        @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super LinkedList> LINKED_LIST_FACTORY = len -> new LinkedList<>();
-
-        /** The Constant SET_FACTORY. */
-        @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super Set> SET_FACTORY = len -> N.newHashSet(len);
-
-        /** The Constant LINKED_HASH_SET_FACTORY. */
-        @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super Set> LINKED_HASH_SET_FACTORY = len -> N.newLinkedHashSet(len);
-
-        /** The Constant TREE_SET_FACTORY. */
-        @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super TreeSet> TREE_SET_FACTORY = len -> new TreeSet<>();
-
-        /** The Constant QUEUE_FACTORY. */
-        @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super Queue> QUEUE_FACTORY = len -> new LinkedList();
-
-        /** The Constant DEQUE_FACTORY. */
-        @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super Deque> DEQUE_FACTORY = len -> new LinkedList();
-
-        /** The Constant ARRAY_DEQUE_FACTORY. */
-        @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super ArrayDeque> ARRAY_DEQUE_FACTORY = len -> new ArrayDeque(len);
-
-        /** The Constant LINKED_BLOCKING_QUEUE_FACTORY. */
-        @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super LinkedBlockingQueue> LINKED_BLOCKING_QUEUE_FACTORY = len -> new LinkedBlockingQueue(len);
-
-        /** The Constant CONCURRENT_LINKED_QUEUE_FACTORY. */
-        @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super ConcurrentLinkedQueue> CONCURRENT_LINKED_QUEUE_FACTORY = len -> new ConcurrentLinkedQueue();
-
-        /** The Constant PRIORITY_QUEUE_FACTORY. */
-        @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super PriorityQueue> PRIORITY_QUEUE_FACTORY = len -> new PriorityQueue(len);
-
-        /** The Constant MAP_FACTORY. */
-        @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super Map> MAP_FACTORY = len -> N.newHashMap(len);
-
-        /** The Constant LINKED_HASH_MAP_FACTORY. */
-        @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super Map> LINKED_HASH_MAP_FACTORY = len -> N.newLinkedHashMap(len);
-
-        /** The Constant IDENTITY_HASH_MAP_FACTORY. */
-        @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super IdentityHashMap> IDENTITY_HASH_MAP_FACTORY = len -> N.newIdentityHashMap(len);
-
-        /** The Constant TREE_MAP_FACTORY. */
-        @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super TreeMap> TREE_MAP_FACTORY = len -> N.newTreeMap();
-
-        /** The Constant CONCURRENT_HASH_MAP_FACTORY. */
-        @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super ConcurrentHashMap> CONCURRENT_HASH_MAP_FACTORY = len -> N.newConcurrentHashMap(len);
-
-        /** The Constant BI_MAP_FACTORY. */
-        @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super BiMap> BI_MAP_FACTORY = len -> N.newBiMap(len);
-
-        /** The Constant MULTISET_FACTORY. */
-        @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super Multiset> MULTISET_FACTORY = len -> N.newMultiset(len);
-
-        /** The Constant LONG_MULTISET_FACTORY. */
-        @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super LongMultiset> LONG_MULTISET_FACTORY = len -> N.newLongMultiset(len);
-
-        /** The Constant LIST_MULTIMAP_FACTORY. */
-        @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super ListMultimap> LIST_MULTIMAP_FACTORY = len -> N.newLinkedListMultimap(len);
-
-        /** The Constant SET_MULTIMAP_FACTORY. */
-        @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super SetMultimap> SET_MULTIMAP_FACTORY = len -> N.newSetMultimap(len);
-
-        /**
-         * Instantiates a new factory.
-         */
-        protected Factory() {
-            // for extention
-        }
-
-        /**
-         * Of boolean array.
-         *
-         * @return
-         */
-        public static IntFunction<boolean[]> ofBooleanArray() {
-            return BOOLEAN_ARRAY;
-        }
-
-        /**
-         * Of char array.
-         *
-         * @return
-         */
-        public static IntFunction<char[]> ofCharArray() {
-            return CHAR_ARRAY;
-        }
-
-        /**
-         * Of byte array.
-         *
-         * @return
-         */
-        public static IntFunction<byte[]> ofByteArray() {
-            return BYTE_ARRAY;
-        }
-
-        /**
-         * Of short array.
-         *
-         * @return
-         */
-        public static IntFunction<short[]> ofShortArray() {
-            return SHORT_ARRAY;
-        }
-
-        /**
-         * Of int array.
-         *
-         * @return
-         */
-        public static IntFunction<int[]> ofIntArray() {
-            return INT_ARRAY;
-        }
-
-        /**
-         * Of long array.
-         *
-         * @return
-         */
-        public static IntFunction<long[]> ofLongArray() {
-            return LONG_ARRAY;
-        }
-
-        /**
-         * Of float array.
-         *
-         * @return
-         */
-        public static IntFunction<float[]> ofFloatArray() {
-            return FLOAT_ARRAY;
-        }
-
-        /**
-         * Of double array.
-         *
-         * @return
-         */
-        public static IntFunction<double[]> ofDoubleArray() {
-            return DOUBLE_ARRAY;
-        }
-
-        /**
-         * Of string array.
-         *
-         * @return
-         */
-        public static IntFunction<String[]> ofStringArray() {
-            return STRING_ARRAY;
-        }
-
-        /**
-         * Of object array.
-         *
-         * @return
-         */
-        public static IntFunction<Object[]> ofObjectArray() {
-            return OBJECT_ARRAY;
-        }
-
-        /**
-         * Of boolean list.
-         *
-         * @return
-         */
-        public static IntFunction<BooleanList> ofBooleanList() {
-            return BOOLEAN_LIST;
-        }
-
-        /**
-         * Of char list.
-         *
-         * @return
-         */
-        public static IntFunction<CharList> ofCharList() {
-            return CHAR_LIST;
-        }
-
-        /**
-         * Of byte list.
-         *
-         * @return
-         */
-        public static IntFunction<ByteList> ofByteList() {
-            return BYTE_LIST;
-        }
-
-        /**
-         * Of short list.
-         *
-         * @return
-         */
-        public static IntFunction<ShortList> ofShortList() {
-            return SHORT_LIST;
-        }
-
-        /**
-         * Of int list.
-         *
-         * @return
-         */
-        public static IntFunction<IntList> ofIntList() {
-            return INT_LIST;
-        }
-
-        /**
-         * Of long list.
-         *
-         * @return
-         */
-        public static IntFunction<LongList> ofLongList() {
-            return LONG_LIST;
-        }
-
-        /**
-         * Of float list.
-         *
-         * @return
-         */
-        public static IntFunction<FloatList> ofFloatList() {
-            return FLOAT_LIST;
-        }
-
-        /**
-         * Of double list.
-         *
-         * @return
-         */
-        public static IntFunction<DoubleList> ofDoubleList() {
-            return DOUBLE_LIST;
-        }
-
-        /**
-         *
-         * @param <T>
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <T> IntFunction<List<T>> ofList() {
-            return (IntFunction) LIST_FACTORY;
-        }
-
-        /**
-         * Of linked list.
-         *
-         * @param <T>
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <T> IntFunction<LinkedList<T>> ofLinkedList() {
-            return (IntFunction) LINKED_LIST_FACTORY;
-        }
-
-        /**
-         *
-         * @param <T>
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <T> IntFunction<Set<T>> ofSet() {
-            return (IntFunction) SET_FACTORY;
-        }
-
-        /**
-         * Of linked hash set.
-         *
-         * @param <T>
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <T> IntFunction<Set<T>> ofLinkedHashSet() {
-            return (IntFunction) LINKED_HASH_SET_FACTORY;
-        }
-
-        /**
-         * Of sorted set.
-         *
-         * @param <T>
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <T> IntFunction<SortedSet<T>> ofSortedSet() {
-            return (IntFunction) TREE_SET_FACTORY;
-        }
-
-        /**
-         * Of navigable set.
-         *
-         * @param <T>
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <T> IntFunction<NavigableSet<T>> ofNavigableSet() {
-            return (IntFunction) TREE_SET_FACTORY;
-        }
-
-        /**
-         * Of tree set.
-         *
-         * @param <T>
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <T> IntFunction<TreeSet<T>> ofTreeSet() {
-            return (IntFunction) TREE_SET_FACTORY;
-        }
-
-        /**
-         *
-         * @param <T>
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <T> IntFunction<Queue<T>> ofQueue() {
-            return (IntFunction) QUEUE_FACTORY;
-        }
-
-        /**
-         *
-         * @param <T>
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <T> IntFunction<Deque<T>> ofDeque() {
-            return (IntFunction) DEQUE_FACTORY;
-        }
-
-        /**
-         * Of array deque.
-         *
-         * @param <T>
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <T> IntFunction<ArrayDeque<T>> ofArrayDeque() {
-            return (IntFunction) ARRAY_DEQUE_FACTORY;
-        }
-
-        /**
-         * Of linked blocking queue.
-         *
-         * @param <T>
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <T> IntFunction<LinkedBlockingQueue<T>> ofLinkedBlockingQueue() {
-            return (IntFunction) LINKED_BLOCKING_QUEUE_FACTORY;
-        }
-
-        /**
-         * Of concurrent linked queue.
-         *
-         * @param <T>
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <T> IntFunction<ConcurrentLinkedQueue<T>> ofConcurrentLinkedQueue() {
-            return (IntFunction) CONCURRENT_LINKED_QUEUE_FACTORY;
-        }
-
-        /**
-         * Of priority queue.
-         *
-         * @param <T>
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <T> IntFunction<PriorityQueue<T>> ofPriorityQueue() {
-            return (IntFunction) PRIORITY_QUEUE_FACTORY;
-        }
-
-        /**
-         *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <K, V> IntFunction<Map<K, V>> ofMap() {
-            return (IntFunction) MAP_FACTORY;
-        }
-
-        /**
-         * Of linked hash map.
-         *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <K, V> IntFunction<Map<K, V>> ofLinkedHashMap() {
-            return (IntFunction) LINKED_HASH_MAP_FACTORY;
-        }
-
-        /**
-         * Of identity hash map.
-         *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <K, V> IntFunction<IdentityHashMap<K, V>> ofIdentityHashMap() {
-            return (IntFunction) IDENTITY_HASH_MAP_FACTORY;
-        }
-
-        /**
-         * Of sorted map.
-         *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <K, V> IntFunction<SortedMap<K, V>> ofSortedMap() {
-            return (IntFunction) TREE_MAP_FACTORY;
-        }
-
-        /**
-         * Of navigable map.
-         *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <K, V> IntFunction<NavigableMap<K, V>> ofNavigableMap() {
-            return (IntFunction) TREE_MAP_FACTORY;
-        }
-
-        /**
-         * Of tree map.
-         *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <K, V> IntFunction<TreeMap<K, V>> ofTreeMap() {
-            return (IntFunction) TREE_MAP_FACTORY;
-        }
-
-        /**
-         * Of concurrent map.
-         *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <K, V> IntFunction<ConcurrentMap<K, V>> ofConcurrentMap() {
-            return (IntFunction) CONCURRENT_HASH_MAP_FACTORY;
-        }
-
-        /**
-         * Of concurrent hash map.
-         *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <K, V> IntFunction<ConcurrentHashMap<K, V>> ofConcurrentHashMap() {
-            return (IntFunction) CONCURRENT_HASH_MAP_FACTORY;
-        }
-
-        /**
-         * Of bi map.
-         *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <K, V> IntFunction<BiMap<K, V>> ofBiMap() {
-            return (IntFunction) BI_MAP_FACTORY;
-        }
-
-        /**
-         *
-         * @param <T>
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <T> IntFunction<Multiset<T>> ofMultiset() {
-            return (IntFunction) MULTISET_FACTORY;
-        }
-
-        /**
-         * Of long multiset.
-         *
-         * @param <T>
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <T> IntFunction<LongMultiset<T>> ofLongMultiset() {
-            return (IntFunction) LONG_MULTISET_FACTORY;
-        }
-
-        /**
-         * Of list multimap.
-         *
-         * @param <K> the key type
-         * @param <E>
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <K, E> IntFunction<ListMultimap<K, E>> ofListMultimap() {
-            return (IntFunction) LIST_MULTIMAP_FACTORY;
-        }
-
-        /**
-         * Of set multimap.
-         *
-         * @param <K> the key type
-         * @param <E>
-         * @return
-         */
-        @SuppressWarnings("rawtypes")
-        public static <K, E> IntFunction<SetMultimap<K, E>> ofSetMultimap() {
-            return (IntFunction) SET_MULTIMAP_FACTORY;
-        }
-
-        /**
-         *
-         * @return a new created {@code IntFunction} whose {@code apply} will return the same {@code DisposableObjArray} which is defined as a private field.
-         */
-        @Beta
-        @SequentialOnly
-        @Stateful
-        public static IntFunction<DisposableObjArray> ofDisposableArray() {
-            return new IntFunction<>() {
-                private DisposableObjArray ret = null;
-
-                @Override
-                public DisposableObjArray apply(int len) {
-                    if (ret == null) {
-                        ret = DisposableObjArray.wrap(new Object[len]);
-                    }
-
-                    return ret;
-                }
-            };
-        }
-
-        /**
-         *
-         * @return a new created {@code IntFunction} whose {@code apply} will return the same {@code DisposableArray} which is defined as a private field.
-         */
-        @Beta
-        @SequentialOnly
-        @Stateful
-        public static <T> IntFunction<DisposableArray<T>> ofDisposableArray(final Class<T> componentType) {
-            return new IntFunction<>() {
-                private DisposableArray<T> ret = null;
-
-                @Override
-                public DisposableArray<T> apply(int len) {
-                    if (ret == null) {
-                        ret = DisposableArray.wrap(N.newArray(componentType, len));
-                    }
-
-                    return ret;
-                }
-            };
-        }
-
-        /**
-         *
-         * @return
-         * @throws UnsupportedOperationException the unsupported operation exception
-         */
-        @Deprecated
-        public static IntFunction<ImmutableList<?>> ofImmutableList() {
-            throw new UnsupportedOperationException();
-        }
-
-        /**
-         *
-         * @return
-         * @throws UnsupportedOperationException the unsupported operation exception
-         */
-        @Deprecated
-        public static IntFunction<ImmutableSet<?>> ofImmutableSet() {
-            throw new UnsupportedOperationException();
-        }
-
-        /**
-         *
-         * @return
-         * @throws UnsupportedOperationException the unsupported operation exception
-         */
-        @Deprecated
-        public static IntFunction<ImmutableMap<?, ?>> ofImmutableMap() {
-            throw new UnsupportedOperationException();
-        }
-
-        /**
-         *
-         * @param <T>
-         * @param <C>
-         * @param supplier
-         * @return
-         */
-        @Deprecated
-        public static <T, C extends Collection<T>> IntFunction<? extends C> single(final IntFunction<? extends C> supplier) {
-            return new IntFunction<C>() {
-                private C c = null;
-
-                @Override
-                public C apply(int t) {
-                    if (c == null) {
-                        c = supplier.apply(t);
-                    } else {
-                        c.clear();
-                    }
-
-                    return c;
-                }
-            };
-        }
-    }
-
-    /**
-     * The Class IntFunctions.
-     */
-    public static final class IntFunctions extends Factory {
-
-        /**
-         * Instantiates a new int functions.
-         */
-        protected IntFunctions() {
-            // for extention.
-        }
-    }
-
-    /**
      * The Class Suppliers.
      */
     public static final class Suppliers {
@@ -6121,6 +5401,14 @@ public final class Fn extends Comparators {
         @SuppressWarnings("rawtypes")
         private static final Supplier<? super LinkedBlockingQueue> LINKED_BLOCKING_QUEUE = () -> new LinkedBlockingQueue();
 
+        /** The Constant ARRAY_BLOCKING_QUEUE. */
+        @SuppressWarnings("rawtypes")
+        private static final Supplier<? super ArrayBlockingQueue> ARRAY_BLOCKING_QUEUE = () -> new ArrayBlockingQueue(0);
+
+        /** The Constant LINKED_BLOCKING_DEQUE. */
+        @SuppressWarnings("rawtypes")
+        private static final Supplier<? super LinkedBlockingDeque> LINKED_BLOCKING_DEQUE = () -> new LinkedBlockingDeque();
+
         /** The Constant CONCURRENT_LINKED_QUEUE. */
         @SuppressWarnings("rawtypes")
         private static final Supplier<? super ConcurrentLinkedQueue> CONCURRENT_LINKED_QUEUE = () -> new ConcurrentLinkedQueue();
@@ -6176,11 +5464,7 @@ public final class Fn extends Comparators {
         /** The Constant STRING_BUILDER. */
         private static final Supplier<StringBuilder> STRING_BUILDER = () -> new StringBuilder();
 
-        /**
-         * Instantiates a new suppliers.
-         */
-        protected Suppliers() {
-            // for extention.
+        private Suppliers() {
         }
 
         /**
@@ -6489,6 +5773,16 @@ public final class Fn extends Comparators {
             return (Supplier) LINKED_BLOCKING_QUEUE;
         }
 
+        @SuppressWarnings("rawtypes")
+        public static <T> Supplier<ArrayBlockingQueue<T>> ofArrayBlockingQueue() {
+            return (Supplier) ARRAY_BLOCKING_QUEUE;
+        }
+
+        @SuppressWarnings("rawtypes")
+        public static <T> Supplier<LinkedBlockingDeque<T>> ofLinkedBlockingDeque() {
+            return (Supplier) LINKED_BLOCKING_DEQUE;
+        }
+
         /**
          * Of concurrent linked queue.
          *
@@ -6691,10 +5985,168 @@ public final class Fn extends Comparators {
             return STRING_BUILDER;
         }
 
+        @SuppressWarnings("rawtypes")
+        private static final Map<Class<?>, Supplier> collectionSupplierPool = new ConcurrentHashMap<>();
+
+        @SuppressWarnings("rawtypes")
+        public static <T> Supplier<? extends Collection<T>> ofCollection(final Class<?> targetClass) {
+            Supplier ret = collectionSupplierPool.get(targetClass);
+
+            if (ret == null) {
+                CommonUtil.checkArgument(Collection.class.isAssignableFrom(targetClass), "'targetClass': {} is not a Collection class", targetClass);
+
+                if (Collection.class.equals(targetClass) || AbstractCollection.class.equals(targetClass) || List.class.equals(targetClass)
+                        || AbstractList.class.equals(targetClass) || ArrayList.class.equals(targetClass)) {
+                    ret = ofList();
+                } else if (Set.class.equals(targetClass) || AbstractSet.class.equals(targetClass) || HashSet.class.equals(targetClass)) {
+                    ret = ofSet();
+                } else if (LinkedHashSet.class.equals(targetClass)) {
+                    ret = ofLinkedHashSet();
+                } else if (SortedSet.class.isAssignableFrom(targetClass)) {
+                    ret = ofSortedSet();
+                } else if (Queue.class.equals(targetClass) || AbstractQueue.class.equals(targetClass) || Deque.class.equals(targetClass)) {
+                    return ofDeque();
+                } else if (BlockingQueue.class.equals(targetClass) || LinkedBlockingQueue.class.equals(targetClass)) {
+                    return ofLinkedBlockingQueue();
+                } else if (ArrayBlockingQueue.class.equals(targetClass)) {
+                    return ofArrayBlockingQueue();
+                } else if (BlockingDeque.class.equals(targetClass) || LinkedBlockingDeque.class.equals(targetClass)) {
+                    return ofLinkedBlockingDeque();
+                } else if (ConcurrentLinkedQueue.class.equals(targetClass)) {
+                    return ofConcurrentLinkedQueue();
+                } else if (PriorityQueue.class.equals(targetClass)) {
+                    return ofPriorityQueue();
+                } else if (ImmutableList.class.isAssignableFrom(targetClass)) {
+                    ret = ofList();
+                } else if (ImmutableSet.class.isAssignableFrom(targetClass)) {
+                    ret = ofSet();
+                } else if (Modifier.isAbstract(targetClass.getModifiers())) {
+                    throw new IllegalArgumentException("Can't create instance for abstract class: " + targetClass);
+                } else {
+                    try {
+                        if (N.newInstance(targetClass) != null) {
+                            if (Set.class.isAssignableFrom(targetClass)) {
+                                ret = () -> {
+                                    try {
+                                        return N.newInstance(targetClass);
+                                    } catch (Exception e) {
+                                        return N.newHashSet();
+                                    }
+                                };
+                            } else {
+                                ret = () -> {
+                                    try {
+                                        return N.newInstance(targetClass);
+                                    } catch (Exception e) {
+                                        return N.newArrayList();
+                                    }
+                                };
+                            }
+                        }
+                    } catch (Throwable e) {
+                        // ignore
+                    }
+
+                    if (ret == null) {
+                        if (Set.class.isAssignableFrom(targetClass)) {
+                            ret = ofSet();
+                        } else {
+                            ret = ofList();
+                        }
+                    }
+                }
+
+                collectionSupplierPool.put(targetClass, ret);
+            }
+
+            return ret;
+        }
+
+        @SuppressWarnings("rawtypes")
+        private static final Map<Class<?>, Supplier> mapSupplierPool = new ConcurrentHashMap<>();
+
+        @SuppressWarnings("rawtypes")
+        public static <K, V> Supplier<? extends Map<K, V>> ofMap(final Class<?> targetClass) {
+            Supplier ret = mapSupplierPool.get(targetClass);
+
+            if (ret == null) {
+                CommonUtil.checkArgument(Map.class.isAssignableFrom(targetClass), "'targetClass': {} is not a Map class", targetClass);
+
+                if (Map.class.equals(targetClass) || AbstractMap.class.equals(targetClass) || HashMap.class.equals(targetClass)) {
+                    ret = ofMap();
+                } else if (LinkedHashMap.class.equals(targetClass)) {
+                    ret = ofLinkedHashMap();
+                } else if (SortedMap.class.isAssignableFrom(targetClass)) {
+                    ret = ofSortedMap();
+                } else if (IdentityHashMap.class.isAssignableFrom(targetClass)) {
+                    ret = ofIdentityHashMap();
+                } else if (ConcurrentHashMap.class.isAssignableFrom(targetClass)) {
+                    ret = ofConcurrentHashMap();
+                } else if (BiMap.class.isAssignableFrom(targetClass)) {
+                    ret = ofBiMap();
+                } else if (ImmutableMap.class.isAssignableFrom(targetClass)) {
+                    ret = ofMap();
+                } else if (Modifier.isAbstract(targetClass.getModifiers())) {
+                    throw new IllegalArgumentException("Can't create instance for abstract class: " + targetClass);
+                } else {
+                    try {
+                        if (CommonUtil.newInstance(targetClass) != null) {
+                            ret = () -> {
+                                try {
+                                    return CommonUtil.newInstance(targetClass);
+                                } catch (Exception e) {
+                                    return CommonUtil.newHashMap();
+                                }
+                            };
+                        }
+                    } catch (Throwable e) {
+                        // ignore
+                    }
+
+                    if (ret == null) {
+                        ret = ofMap();
+                    }
+                }
+
+                mapSupplierPool.put(targetClass, ret);
+            }
+
+            return ret;
+        }
+
+        @SuppressWarnings("rawtypes")
+        public static <T extends Collection> boolean registerForCollection(final Class<T> targetClass, final Supplier<T> supplier) {
+            N.checkArgNotNull(targetClass, "targetClass");
+            N.checkArgNotNull(supplier, "supplier");
+
+            if (collectionSupplierPool.containsKey(targetClass)) {
+                return false;
+            }
+
+            collectionSupplierPool.put(targetClass, supplier);
+
+            return true;
+        }
+
+        @SuppressWarnings("rawtypes")
+        public static <T extends Map> boolean registerForMap(final Class<T> targetClass, final Supplier<T> supplier) {
+            N.checkArgNotNull(targetClass, "targetClass");
+            N.checkArgNotNull(supplier, "supplier");
+
+            if (mapSupplierPool.containsKey(targetClass)) {
+                return false;
+            }
+
+            mapSupplierPool.put(targetClass, supplier);
+
+            return true;
+        }
+
         /**
          *
          * @return
          * @throws UnsupportedOperationException the unsupported operation exception
+         * @deprecated unsupported operation.
          */
         @Deprecated
         public static Supplier<ImmutableList<?>> ofImmutableList() {
@@ -6705,6 +6157,7 @@ public final class Fn extends Comparators {
          *
          * @return
          * @throws UnsupportedOperationException the unsupported operation exception
+         * @deprecated unsupported operation.
          */
         @Deprecated
         public static Supplier<ImmutableSet<?>> ofImmutableSet() {
@@ -6715,6 +6168,7 @@ public final class Fn extends Comparators {
          *
          * @return
          * @throws UnsupportedOperationException the unsupported operation exception
+         * @deprecated unsupported operation.
          */
         @Deprecated
         public static Supplier<ImmutableMap<?, ?>> ofImmutableMap() {
@@ -6727,8 +6181,11 @@ public final class Fn extends Comparators {
          * @param <C>
          * @param supplier
          * @return
+         * @deprecated
          */
         @Deprecated
+        @SequentialOnly
+        @Stateful
         public static <T, C extends Collection<T>> Supplier<? extends C> single(final Supplier<? extends C> supplier) {
             return new Supplier<C>() {
                 private C c = null;
@@ -6748,15 +6205,969 @@ public final class Fn extends Comparators {
     }
 
     /**
+     * Adds the all.
+     *
+     * @param <T>
+     * @param <C>
+     * @return
+     * @deprecated replaced by {@code BiConsumers#ofAddAll()}
+     */
+    @Deprecated
+    static <T, C extends Collection<T>> BiConsumer<C, C> addAll() {
+        return BiConsumers.<T, C> ofAddAll();
+    }
+
+    /**
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <M>
+     * @return
+     * @deprecated replaced by {@code BiConsumers#ofPutAll()}
+     */
+    @Deprecated
+    static <K, V, M extends Map<K, V>> BiConsumer<M, M> putAll() {
+        return BiConsumers.<K, V, M> ofPutAll();
+    }
+
+    /**
+     * The Class Factory.
+     */
+    public static abstract class Factory {
+
+        /** The Constant BOOLEAN_ARRAY. */
+        private static final IntFunction<boolean[]> BOOLEAN_ARRAY = len -> new boolean[len];
+
+        /** The Constant CHAR_ARRAY. */
+        private static final IntFunction<char[]> CHAR_ARRAY = len -> new char[len];
+
+        /** The Constant BYTE_ARRAY. */
+        private static final IntFunction<byte[]> BYTE_ARRAY = len -> new byte[len];
+
+        /** The Constant SHORT_ARRAY. */
+        private static final IntFunction<short[]> SHORT_ARRAY = len -> new short[len];
+
+        /** The Constant INT_ARRAY. */
+        private static final IntFunction<int[]> INT_ARRAY = len -> new int[len];
+
+        /** The Constant LONG_ARRAY. */
+        private static final IntFunction<long[]> LONG_ARRAY = len -> new long[len];
+
+        /** The Constant FLOAT_ARRAY. */
+        private static final IntFunction<float[]> FLOAT_ARRAY = len -> new float[len];
+
+        /** The Constant DOUBLE_ARRAY. */
+        private static final IntFunction<double[]> DOUBLE_ARRAY = len -> new double[len];
+
+        /** The Constant STRING_ARRAY. */
+        private static final IntFunction<String[]> STRING_ARRAY = len -> new String[len];
+
+        /** The Constant OBJECT_ARRAY. */
+        private static final IntFunction<Object[]> OBJECT_ARRAY = len -> new Object[len];
+
+        /** The Constant BOOLEAN_LIST. */
+        private static final IntFunction<BooleanList> BOOLEAN_LIST = len -> new BooleanList(len);
+
+        /** The Constant CHAR_LIST. */
+        private static final IntFunction<CharList> CHAR_LIST = len -> new CharList(len);
+
+        /** The Constant BYTE_LIST. */
+        private static final IntFunction<ByteList> BYTE_LIST = len -> new ByteList(len);
+
+        /** The Constant SHORT_LIST. */
+        private static final IntFunction<ShortList> SHORT_LIST = len -> new ShortList(len);
+
+        /** The Constant INT_LIST. */
+        private static final IntFunction<IntList> INT_LIST = len -> new IntList(len);
+
+        /** The Constant LONG_LIST. */
+        private static final IntFunction<LongList> LONG_LIST = len -> new LongList(len);
+
+        /** The Constant FLOAT_LIST. */
+        private static final IntFunction<FloatList> FLOAT_LIST = len -> new FloatList(len);
+
+        /** The Constant DOUBLE_LIST. */
+        private static final IntFunction<DoubleList> DOUBLE_LIST = len -> new DoubleList(len);
+
+        /** The Constant LIST_FACTORY. */
+        @SuppressWarnings("rawtypes")
+        private static final IntFunction<? super List> LIST_FACTORY = len -> new ArrayList<>(len);
+
+        /** The Constant LINKED_LIST_FACTORY. */
+        @SuppressWarnings("rawtypes")
+        private static final IntFunction<? super LinkedList> LINKED_LIST_FACTORY = len -> new LinkedList<>();
+
+        /** The Constant SET_FACTORY. */
+        @SuppressWarnings("rawtypes")
+        private static final IntFunction<? super Set> SET_FACTORY = len -> N.newHashSet(len);
+
+        /** The Constant LINKED_HASH_SET_FACTORY. */
+        @SuppressWarnings("rawtypes")
+        private static final IntFunction<? super Set> LINKED_HASH_SET_FACTORY = len -> N.newLinkedHashSet(len);
+
+        /** The Constant TREE_SET_FACTORY. */
+        @SuppressWarnings("rawtypes")
+        private static final IntFunction<? super TreeSet> TREE_SET_FACTORY = len -> new TreeSet<>();
+
+        /** The Constant QUEUE_FACTORY. */
+        @SuppressWarnings("rawtypes")
+        private static final IntFunction<? super Queue> QUEUE_FACTORY = len -> new LinkedList();
+
+        /** The Constant DEQUE_FACTORY. */
+        @SuppressWarnings("rawtypes")
+        private static final IntFunction<? super Deque> DEQUE_FACTORY = len -> new LinkedList();
+
+        /** The Constant ARRAY_DEQUE_FACTORY. */
+        @SuppressWarnings("rawtypes")
+        private static final IntFunction<? super ArrayDeque> ARRAY_DEQUE_FACTORY = numElements -> new ArrayDeque(numElements);
+
+        /** The Constant LINKED_BLOCKING_QUEUE_FACTORY. */
+        @SuppressWarnings("rawtypes")
+        private static final IntFunction<? super LinkedBlockingQueue> LINKED_BLOCKING_QUEUE_FACTORY = capacity -> new LinkedBlockingQueue(capacity);
+
+        /** The Constant ARRAY_BLOCKING_QUEUE_FACTORY. */
+        @SuppressWarnings("rawtypes")
+        private static final IntFunction<? super ArrayBlockingQueue> ARRAY_BLOCKING_QUEUE_FACTORY = capacity -> new ArrayBlockingQueue(capacity);
+
+        /** The Constant LINKED_BLOCKING_DEQUE_FACTORY. */
+        @SuppressWarnings("rawtypes")
+        private static final IntFunction<? super LinkedBlockingDeque> LINKED_BLOCKING_DEQUE_FACTORY = capacity -> new LinkedBlockingDeque(capacity);
+
+        /** The Constant CONCURRENT_LINKED_QUEUE_FACTORY. */
+        @SuppressWarnings("rawtypes")
+        private static final IntFunction<? super ConcurrentLinkedQueue> CONCURRENT_LINKED_QUEUE_FACTORY = capacity -> new ConcurrentLinkedQueue();
+
+        /** The Constant PRIORITY_QUEUE_FACTORY. */
+        @SuppressWarnings("rawtypes")
+        private static final IntFunction<? super PriorityQueue> PRIORITY_QUEUE_FACTORY = len -> new PriorityQueue(len);
+
+        /** The Constant MAP_FACTORY. */
+        @SuppressWarnings("rawtypes")
+        private static final IntFunction<? super Map> MAP_FACTORY = len -> N.newHashMap(len);
+
+        /** The Constant LINKED_HASH_MAP_FACTORY. */
+        @SuppressWarnings("rawtypes")
+        private static final IntFunction<? super Map> LINKED_HASH_MAP_FACTORY = len -> N.newLinkedHashMap(len);
+
+        /** The Constant IDENTITY_HASH_MAP_FACTORY. */
+        @SuppressWarnings("rawtypes")
+        private static final IntFunction<? super IdentityHashMap> IDENTITY_HASH_MAP_FACTORY = len -> N.newIdentityHashMap(len);
+
+        /** The Constant TREE_MAP_FACTORY. */
+        @SuppressWarnings("rawtypes")
+        private static final IntFunction<? super TreeMap> TREE_MAP_FACTORY = len -> N.newTreeMap();
+
+        /** The Constant CONCURRENT_HASH_MAP_FACTORY. */
+        @SuppressWarnings("rawtypes")
+        private static final IntFunction<? super ConcurrentHashMap> CONCURRENT_HASH_MAP_FACTORY = len -> N.newConcurrentHashMap(len);
+
+        /** The Constant BI_MAP_FACTORY. */
+        @SuppressWarnings("rawtypes")
+        private static final IntFunction<? super BiMap> BI_MAP_FACTORY = len -> N.newBiMap(len);
+
+        /** The Constant MULTISET_FACTORY. */
+        @SuppressWarnings("rawtypes")
+        private static final IntFunction<? super Multiset> MULTISET_FACTORY = len -> N.newMultiset(len);
+
+        /** The Constant LONG_MULTISET_FACTORY. */
+        @SuppressWarnings("rawtypes")
+        private static final IntFunction<? super LongMultiset> LONG_MULTISET_FACTORY = len -> N.newLongMultiset(len);
+
+        /** The Constant LIST_MULTIMAP_FACTORY. */
+        @SuppressWarnings("rawtypes")
+        private static final IntFunction<? super ListMultimap> LIST_MULTIMAP_FACTORY = len -> N.newLinkedListMultimap(len);
+
+        /** The Constant SET_MULTIMAP_FACTORY. */
+        @SuppressWarnings("rawtypes")
+        private static final IntFunction<? super SetMultimap> SET_MULTIMAP_FACTORY = len -> N.newSetMultimap(len);
+
+        protected Factory() {
+            // for extention
+        }
+
+        /**
+         * Of boolean array.
+         *
+         * @return
+         */
+        public static IntFunction<boolean[]> ofBooleanArray() {
+            return BOOLEAN_ARRAY;
+        }
+
+        /**
+         * Of char array.
+         *
+         * @return
+         */
+        public static IntFunction<char[]> ofCharArray() {
+            return CHAR_ARRAY;
+        }
+
+        /**
+         * Of byte array.
+         *
+         * @return
+         */
+        public static IntFunction<byte[]> ofByteArray() {
+            return BYTE_ARRAY;
+        }
+
+        /**
+         * Of short array.
+         *
+         * @return
+         */
+        public static IntFunction<short[]> ofShortArray() {
+            return SHORT_ARRAY;
+        }
+
+        /**
+         * Of int array.
+         *
+         * @return
+         */
+        public static IntFunction<int[]> ofIntArray() {
+            return INT_ARRAY;
+        }
+
+        /**
+         * Of long array.
+         *
+         * @return
+         */
+        public static IntFunction<long[]> ofLongArray() {
+            return LONG_ARRAY;
+        }
+
+        /**
+         * Of float array.
+         *
+         * @return
+         */
+        public static IntFunction<float[]> ofFloatArray() {
+            return FLOAT_ARRAY;
+        }
+
+        /**
+         * Of double array.
+         *
+         * @return
+         */
+        public static IntFunction<double[]> ofDoubleArray() {
+            return DOUBLE_ARRAY;
+        }
+
+        /**
+         * Of string array.
+         *
+         * @return
+         */
+        public static IntFunction<String[]> ofStringArray() {
+            return STRING_ARRAY;
+        }
+
+        /**
+         * Of object array.
+         *
+         * @return
+         */
+        public static IntFunction<Object[]> ofObjectArray() {
+            return OBJECT_ARRAY;
+        }
+
+        /**
+         * Of boolean list.
+         *
+         * @return
+         */
+        public static IntFunction<BooleanList> ofBooleanList() {
+            return BOOLEAN_LIST;
+        }
+
+        /**
+         * Of char list.
+         *
+         * @return
+         */
+        public static IntFunction<CharList> ofCharList() {
+            return CHAR_LIST;
+        }
+
+        /**
+         * Of byte list.
+         *
+         * @return
+         */
+        public static IntFunction<ByteList> ofByteList() {
+            return BYTE_LIST;
+        }
+
+        /**
+         * Of short list.
+         *
+         * @return
+         */
+        public static IntFunction<ShortList> ofShortList() {
+            return SHORT_LIST;
+        }
+
+        /**
+         * Of int list.
+         *
+         * @return
+         */
+        public static IntFunction<IntList> ofIntList() {
+            return INT_LIST;
+        }
+
+        /**
+         * Of long list.
+         *
+         * @return
+         */
+        public static IntFunction<LongList> ofLongList() {
+            return LONG_LIST;
+        }
+
+        /**
+         * Of float list.
+         *
+         * @return
+         */
+        public static IntFunction<FloatList> ofFloatList() {
+            return FLOAT_LIST;
+        }
+
+        /**
+         * Of double list.
+         *
+         * @return
+         */
+        public static IntFunction<DoubleList> ofDoubleList() {
+            return DOUBLE_LIST;
+        }
+
+        /**
+         *
+         * @param <T>
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <T> IntFunction<List<T>> ofList() {
+            return (IntFunction) LIST_FACTORY;
+        }
+
+        /**
+         * Of linked list.
+         *
+         * @param <T>
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <T> IntFunction<LinkedList<T>> ofLinkedList() {
+            return (IntFunction) LINKED_LIST_FACTORY;
+        }
+
+        /**
+         *
+         * @param <T>
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <T> IntFunction<Set<T>> ofSet() {
+            return (IntFunction) SET_FACTORY;
+        }
+
+        /**
+         * Of linked hash set.
+         *
+         * @param <T>
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <T> IntFunction<Set<T>> ofLinkedHashSet() {
+            return (IntFunction) LINKED_HASH_SET_FACTORY;
+        }
+
+        /**
+         * Of sorted set.
+         *
+         * @param <T>
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <T> IntFunction<SortedSet<T>> ofSortedSet() {
+            return (IntFunction) TREE_SET_FACTORY;
+        }
+
+        /**
+         * Of navigable set.
+         *
+         * @param <T>
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <T> IntFunction<NavigableSet<T>> ofNavigableSet() {
+            return (IntFunction) TREE_SET_FACTORY;
+        }
+
+        /**
+         * Of tree set.
+         *
+         * @param <T>
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <T> IntFunction<TreeSet<T>> ofTreeSet() {
+            return (IntFunction) TREE_SET_FACTORY;
+        }
+
+        /**
+         *
+         * @param <T>
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <T> IntFunction<Queue<T>> ofQueue() {
+            return (IntFunction) QUEUE_FACTORY;
+        }
+
+        /**
+         *
+         * @param <T>
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <T> IntFunction<Deque<T>> ofDeque() {
+            return (IntFunction) DEQUE_FACTORY;
+        }
+
+        /**
+         * Of array deque.
+         *
+         * @param <T>
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <T> IntFunction<ArrayDeque<T>> ofArrayDeque() {
+            return (IntFunction) ARRAY_DEQUE_FACTORY;
+        }
+
+        @SuppressWarnings("rawtypes")
+        public static <T> IntFunction<LinkedBlockingQueue<T>> ofLinkedBlockingQueue() {
+            return (IntFunction) LINKED_BLOCKING_QUEUE_FACTORY;
+        }
+
+        @SuppressWarnings("rawtypes")
+        public static <T> IntFunction<ArrayBlockingQueue<T>> ofArrayBlockingQueue() {
+            return (IntFunction) ARRAY_BLOCKING_QUEUE_FACTORY;
+        }
+
+        @SuppressWarnings("rawtypes")
+        public static <T> IntFunction<LinkedBlockingDeque<T>> ofLinkedBlockingDeque() {
+            return (IntFunction) LINKED_BLOCKING_DEQUE_FACTORY;
+        }
+
+        @SuppressWarnings("rawtypes")
+        public static <T> IntFunction<ConcurrentLinkedQueue<T>> ofConcurrentLinkedQueue() {
+            return (IntFunction) CONCURRENT_LINKED_QUEUE_FACTORY;
+        }
+
+        /**
+         * Of priority queue.
+         *
+         * @param <T>
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <T> IntFunction<PriorityQueue<T>> ofPriorityQueue() {
+            return (IntFunction) PRIORITY_QUEUE_FACTORY;
+        }
+
+        /**
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <K, V> IntFunction<Map<K, V>> ofMap() {
+            return (IntFunction) MAP_FACTORY;
+        }
+
+        /**
+         * Of linked hash map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <K, V> IntFunction<Map<K, V>> ofLinkedHashMap() {
+            return (IntFunction) LINKED_HASH_MAP_FACTORY;
+        }
+
+        /**
+         * Of identity hash map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <K, V> IntFunction<IdentityHashMap<K, V>> ofIdentityHashMap() {
+            return (IntFunction) IDENTITY_HASH_MAP_FACTORY;
+        }
+
+        /**
+         * Of sorted map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <K, V> IntFunction<SortedMap<K, V>> ofSortedMap() {
+            return (IntFunction) TREE_MAP_FACTORY;
+        }
+
+        /**
+         * Of navigable map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <K, V> IntFunction<NavigableMap<K, V>> ofNavigableMap() {
+            return (IntFunction) TREE_MAP_FACTORY;
+        }
+
+        /**
+         * Of tree map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <K, V> IntFunction<TreeMap<K, V>> ofTreeMap() {
+            return (IntFunction) TREE_MAP_FACTORY;
+        }
+
+        /**
+         * Of concurrent map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <K, V> IntFunction<ConcurrentMap<K, V>> ofConcurrentMap() {
+            return (IntFunction) CONCURRENT_HASH_MAP_FACTORY;
+        }
+
+        /**
+         * Of concurrent hash map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <K, V> IntFunction<ConcurrentHashMap<K, V>> ofConcurrentHashMap() {
+            return (IntFunction) CONCURRENT_HASH_MAP_FACTORY;
+        }
+
+        /**
+         * Of bi map.
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <K, V> IntFunction<BiMap<K, V>> ofBiMap() {
+            return (IntFunction) BI_MAP_FACTORY;
+        }
+
+        /**
+         *
+         * @param <T>
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <T> IntFunction<Multiset<T>> ofMultiset() {
+            return (IntFunction) MULTISET_FACTORY;
+        }
+
+        /**
+         * Of long multiset.
+         *
+         * @param <T>
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <T> IntFunction<LongMultiset<T>> ofLongMultiset() {
+            return (IntFunction) LONG_MULTISET_FACTORY;
+        }
+
+        /**
+         * Of list multimap.
+         *
+         * @param <K> the key type
+         * @param <E>
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <K, E> IntFunction<ListMultimap<K, E>> ofListMultimap() {
+            return (IntFunction) LIST_MULTIMAP_FACTORY;
+        }
+
+        /**
+         * Of set multimap.
+         *
+         * @param <K> the key type
+         * @param <E>
+         * @return
+         */
+        @SuppressWarnings("rawtypes")
+        public static <K, E> IntFunction<SetMultimap<K, E>> ofSetMultimap() {
+            return (IntFunction) SET_MULTIMAP_FACTORY;
+        }
+
+        /**
+         *
+         * @return a new created {@code IntFunction} whose {@code apply} will return the same {@code DisposableObjArray} which is defined as a private field.
+         */
+        @Beta
+        @SequentialOnly
+        @Stateful
+        public static IntFunction<DisposableObjArray> ofDisposableArray() {
+            return new IntFunction<>() {
+                private DisposableObjArray ret = null;
+
+                @Override
+                public DisposableObjArray apply(int len) {
+                    if (ret == null) {
+                        ret = DisposableObjArray.wrap(new Object[len]);
+                    }
+
+                    return ret;
+                }
+            };
+        }
+
+        /**
+         *
+         * @return a new created {@code IntFunction} whose {@code apply} will return the same {@code DisposableArray} which is defined as a private field.
+         */
+        @Beta
+        @SequentialOnly
+        @Stateful
+        public static <T> IntFunction<DisposableArray<T>> ofDisposableArray(final Class<T> componentType) {
+            return new IntFunction<>() {
+                private DisposableArray<T> ret = null;
+
+                @Override
+                public DisposableArray<T> apply(int len) {
+                    if (ret == null) {
+                        ret = DisposableArray.wrap(N.newArray(componentType, len));
+                    }
+
+                    return ret;
+                }
+            };
+        }
+
+        @SuppressWarnings("rawtypes")
+        private static final Map<Class<?>, IntFunction> collectionCreatorPool = new ConcurrentHashMap<>();
+
+        @SuppressWarnings("rawtypes")
+        public static <T> IntFunction<? extends Collection<T>> ofCollection(final Class<?> targetClass) {
+            IntFunction ret = collectionCreatorPool.get(targetClass);
+
+            if (ret == null) {
+                CommonUtil.checkArgument(Collection.class.isAssignableFrom(targetClass), "'targetClass': {} is not a Collection class", targetClass);
+
+                if (Collection.class.equals(targetClass) || AbstractCollection.class.equals(targetClass) || List.class.equals(targetClass)
+                        || AbstractList.class.equals(targetClass) || ArrayList.class.equals(targetClass)) {
+                    ret = IntFunctions.ofList();
+                } else if (Set.class.equals(targetClass) || AbstractSet.class.equals(targetClass) || HashSet.class.equals(targetClass)) {
+                    ret = IntFunctions.ofSet();
+                } else if (LinkedHashSet.class.equals(targetClass)) {
+                    ret = IntFunctions.ofLinkedHashSet();
+                } else if (SortedSet.class.isAssignableFrom(targetClass)) {
+                    ret = IntFunctions.ofSortedSet();
+                } else if (Queue.class.equals(targetClass) || AbstractQueue.class.equals(targetClass) || Deque.class.equals(targetClass)) {
+                    return IntFunctions.ofDeque();
+                } else if (BlockingQueue.class.equals(targetClass) || LinkedBlockingQueue.class.equals(targetClass)) {
+                    return IntFunctions.ofLinkedBlockingQueue();
+                } else if (ArrayBlockingQueue.class.equals(targetClass)) {
+                    return IntFunctions.ofArrayBlockingQueue();
+                } else if (BlockingDeque.class.equals(targetClass) || LinkedBlockingDeque.class.equals(targetClass)) {
+                    return IntFunctions.ofLinkedBlockingDeque();
+                } else if (ConcurrentLinkedQueue.class.equals(targetClass)) {
+                    return IntFunctions.ofConcurrentLinkedQueue();
+                } else if (PriorityQueue.class.equals(targetClass)) {
+                    return IntFunctions.ofPriorityQueue();
+                } else if (ImmutableList.class.isAssignableFrom(targetClass)) {
+                    ret = IntFunctions.ofList();
+                } else if (ImmutableSet.class.isAssignableFrom(targetClass)) {
+                    ret = IntFunctions.ofSet();
+                } else if (Modifier.isAbstract(targetClass.getModifiers())) {
+                    throw new IllegalArgumentException("Can't create instance for abstract class: " + targetClass);
+                } else {
+                    try {
+                        final Constructor<?> constructor = ClassUtil.getDeclaredConstructor(targetClass, int.class);
+
+                        if (constructor != null && N.invoke(constructor, 9) != null) { // magic number?
+                            if (Set.class.isAssignableFrom(targetClass)) {
+                                ret = size -> {
+                                    try {
+                                        return (Collection<T>) N.invoke(constructor, size);
+                                    } catch (Throwable e) {
+                                        try {
+                                            return (Collection<T>) N.newInstance(targetClass);
+                                        } catch (Throwable e2) {
+                                            return (Collection<T>) N.newHashSet(size);
+                                        }
+                                    }
+                                };
+                            } else {
+                                ret = size -> {
+                                    try {
+                                        return (Collection<T>) N.invoke(constructor, size);
+                                    } catch (Throwable e) {
+                                        try {
+                                            return (Collection<T>) N.newInstance(targetClass);
+                                        } catch (Throwable e2) {
+                                            return (Collection<T>) N.newArrayList(size);
+                                        }
+                                    }
+                                };
+                            }
+                        }
+                    } catch (Throwable e) {
+                        // ignore
+                    }
+
+                    try {
+                        if (ret == null && N.newInstance(targetClass) != null) {
+                            if (Set.class.isAssignableFrom(targetClass)) {
+                                ret = size -> {
+                                    try {
+                                        return (Collection<T>) N.newInstance(targetClass);
+                                    } catch (Exception e2) {
+                                        return (Collection<T>) N.newHashSet(size);
+                                    }
+                                };
+
+                            } else {
+                                ret = size -> {
+                                    try {
+                                        return (Collection<T>) N.newInstance(targetClass);
+                                    } catch (Exception e2) {
+                                        return (Collection<T>) N.newArrayList(size);
+                                    }
+                                };
+                            }
+                        }
+                    } catch (Throwable e) {
+                        // ignore
+                    }
+
+                    if (ret == null) {
+                        if (Set.class.isAssignableFrom(targetClass)) {
+                            ret = IntFunctions.ofSet();
+                        } else {
+                            ret = IntFunctions.ofList();
+                        }
+                    }
+                }
+
+                collectionCreatorPool.put(targetClass, ret);
+            }
+
+            return ret;
+        }
+
+        @SuppressWarnings("rawtypes")
+        private static final Map<Class<?>, IntFunction> mapCreatorPool = new ConcurrentHashMap<>();
+
+        @SuppressWarnings("rawtypes")
+        public static <K, V> IntFunction<? extends Map<K, V>> ofMap(final Class<?> targetClass) {
+            IntFunction ret = mapCreatorPool.get(targetClass);
+
+            if (ret == null) {
+                CommonUtil.checkArgument(Map.class.isAssignableFrom(targetClass), "'targetClass': {} is not a Map class", targetClass);
+
+                if (Map.class.equals(targetClass) || AbstractMap.class.equals(targetClass) || HashMap.class.equals(targetClass)) {
+                    ret = IntFunctions.ofMap();
+                } else if (LinkedHashMap.class.equals(targetClass)) {
+                    ret = IntFunctions.ofLinkedHashMap();
+                } else if (SortedMap.class.isAssignableFrom(targetClass)) {
+                    ret = IntFunctions.ofSortedMap();
+                } else if (IdentityHashMap.class.isAssignableFrom(targetClass)) {
+                    ret = IntFunctions.ofIdentityHashMap();
+                } else if (ConcurrentHashMap.class.isAssignableFrom(targetClass)) {
+                    ret = IntFunctions.ofConcurrentHashMap();
+                } else if (BiMap.class.isAssignableFrom(targetClass)) {
+                    ret = IntFunctions.ofBiMap();
+                } else if (ImmutableMap.class.isAssignableFrom(targetClass)) {
+                    ret = IntFunctions.ofMap();
+                } else if (Modifier.isAbstract(targetClass.getModifiers())) {
+                    throw new IllegalArgumentException("Can't create instance for abstract class: " + targetClass);
+                } else {
+                    try {
+                        final Constructor<?> constructor = ClassUtil.getDeclaredConstructor(targetClass, int.class);
+
+                        if (constructor != null && CommonUtil.invoke(constructor, 9) != null) { // magic number?
+                            ret = size -> {
+                                try {
+                                    return (Map<K, V>) CommonUtil.invoke(constructor, size);
+                                } catch (Throwable e) {
+                                    try {
+                                        return (Map<K, V>) CommonUtil.newInstance(targetClass);
+                                    } catch (Throwable e2) {
+                                        return (Map<K, V>) CommonUtil.newHashMap(size);
+                                    }
+                                }
+                            };
+                        }
+                    } catch (Throwable e) {
+                        // ignore
+                    }
+
+                    try {
+                        if (ret == null && CommonUtil.newInstance(targetClass) != null) {
+                            ret = size -> {
+                                try {
+                                    return (Map<K, V>) CommonUtil.newInstance(targetClass);
+                                } catch (Exception e2) {
+                                    return (Map<K, V>) CommonUtil.newHashMap(size);
+                                }
+                            };
+                        }
+                    } catch (Throwable e) {
+                        // ignore
+                    }
+
+                    if (ret == null) {
+                        ret = IntFunctions.ofMap();
+                    }
+                }
+
+                mapCreatorPool.put(targetClass, ret);
+            }
+
+            return ret;
+        }
+
+        @SuppressWarnings("rawtypes")
+        public static <T extends Collection> boolean registerForCollection(final Class<T> targetClass, final IntFunction<T> creator) {
+            N.checkArgNotNull(targetClass, "targetClass");
+            N.checkArgNotNull(creator, "creator");
+
+            if (collectionCreatorPool.containsKey(targetClass)) {
+                return false;
+            }
+
+            collectionCreatorPool.put(targetClass, creator);
+
+            return true;
+        }
+
+        @SuppressWarnings("rawtypes")
+        public static <T extends Map> boolean registerForMap(final Class<T> targetClass, final IntFunction<T> creator) {
+            N.checkArgNotNull(targetClass, "targetClass");
+            N.checkArgNotNull(creator, "creator");
+
+            if (mapCreatorPool.containsKey(targetClass)) {
+                return false;
+            }
+
+            mapCreatorPool.put(targetClass, creator);
+
+            return true;
+        }
+
+        /**
+         *
+         * @return
+         * @throws UnsupportedOperationException the unsupported operation exception
+         * @deprecated unsupported operation.
+         */
+        @Deprecated
+        public static IntFunction<ImmutableList<?>> ofImmutableList() {
+            throw new UnsupportedOperationException();
+        }
+
+        /**
+         *
+         * @return
+         * @throws UnsupportedOperationException the unsupported operation exception
+         * @deprecated unsupported operation.
+         */
+        @Deprecated
+        public static IntFunction<ImmutableSet<?>> ofImmutableSet() {
+            throw new UnsupportedOperationException();
+        }
+
+        /**
+         *
+         * @return
+         * @throws UnsupportedOperationException the unsupported operation exception
+         * @deprecated unsupported operation.
+         */
+        @Deprecated
+        public static IntFunction<ImmutableMap<?, ?>> ofImmutableMap() {
+            throw new UnsupportedOperationException();
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param <C>
+         * @param supplier
+         * @return
+         * @deprecated
+         */
+        @Deprecated
+        @SequentialOnly
+        @Stateful
+        public static <T, C extends Collection<T>> IntFunction<? extends C> single(final IntFunction<? extends C> supplier) {
+            return new IntFunction<C>() {
+                private C c = null;
+
+                @Override
+                public C apply(int t) {
+                    if (c == null) {
+                        c = supplier.apply(t);
+                    } else {
+                        c.clear();
+                    }
+
+                    return c;
+                }
+            };
+        }
+    }
+
+    /**
+     * The Class IntFunctions.
+     */
+    public static final class IntFunctions extends Factory {
+        private IntFunctions() {
+        }
+    }
+
+    /**
      * The Class Predicates.
      */
     public static final class Predicates {
 
-        /**
-         * Instantiates a new predicates.
-         */
-        protected Predicates() {
-            // for extention.
+        private Predicates() {
         }
 
         /**
@@ -6898,6 +7309,8 @@ public final class Fn extends Comparators {
          */
         @Deprecated
         @Beta
+        @SequentialOnly
+        @Stateful
         public static <T> Predicate<T> invertedByDuration(final long periodInMillis, final MutableBoolean cancellationFlag) {
             final MutableBoolean switcher = MutableBoolean.of(true);
 
@@ -6929,6 +7342,8 @@ public final class Fn extends Comparators {
          */
         @Deprecated
         @Beta
+        @SequentialOnly
+        @Stateful
         public static <T> Predicate<T> invertedByDuration(final long periodInMillis, final MutableBoolean cancellationFlag, final java.lang.Runnable update) {
             final MutableBoolean switcher = MutableBoolean.of(true);
 
@@ -6961,6 +7376,8 @@ public final class Fn extends Comparators {
          */
         @Deprecated
         @Beta
+        @SequentialOnly
+        @Stateful
         public static <T> Predicate<T> invertedByDuration(final long delayInMillis, final long periodInMillis, final MutableBoolean cancellationFlag) {
             final MutableBoolean switcher = MutableBoolean.of(true);
 
@@ -6993,6 +7410,8 @@ public final class Fn extends Comparators {
          */
         @Deprecated
         @Beta
+        @SequentialOnly
+        @Stateful
         public static <T> Predicate<T> invertedByDuration(final long delayInMillis, final long periodInMillis, final MutableBoolean cancellationFlag,
                 final java.lang.Runnable update) {
             final MutableBoolean switcher = MutableBoolean.of(true);
@@ -7052,11 +7471,7 @@ public final class Fn extends Comparators {
         @SuppressWarnings("rawtypes")
         private static final BiPredicate<? extends Comparable, ? extends Comparable> LESS_EQUAL = (t, u) -> N.compare(t, u) <= 0;
 
-        /**
-         * Instantiates a new bi predicates.
-         */
-        protected BiPredicates() {
-            // for extention.
+        private BiPredicates() {
         }
 
         /**
@@ -7118,11 +7533,7 @@ public final class Fn extends Comparators {
         @SuppressWarnings({ "rawtypes", "hiding" })
         private static final TriPredicate ALWAYS_FALSE = (a, b, c) -> false;
 
-        /**
-         * Instantiates a new tri predicates.
-         */
-        protected TriPredicates() {
-            // for extention.
+        private TriPredicates() {
         }
 
         /**
@@ -7153,12 +7564,7 @@ public final class Fn extends Comparators {
      * The Class Consumers.
      */
     public static final class Consumers {
-
-        /**
-         * Instantiates a new consumers.
-         */
-        protected Consumers() {
-            // for extention.
+        private Consumers() {
         }
 
         /**
@@ -7231,11 +7637,7 @@ public final class Fn extends Comparators {
         /** The Constant APPEND. */
         private static final BiConsumer<StringBuilder, Object> APPEND = (t, u) -> t.append(u);
 
-        /**
-         * Instantiates a new bi consumers.
-         */
-        protected BiConsumers() {
-            // for extention.
+        private BiConsumers() {
         }
 
         /**
@@ -7395,12 +7797,7 @@ public final class Fn extends Comparators {
      * The Class TriConsumers.
      */
     public static final class TriConsumers {
-
-        /**
-         * Instantiates a new tri consumers.
-         */
-        protected TriConsumers() {
-            // for extention.
+        private TriConsumers() {
         }
     }
 
@@ -7409,11 +7806,7 @@ public final class Fn extends Comparators {
      */
     public static final class Functions {
 
-        /**
-         * Instantiates a new functions.
-         */
-        protected Functions() {
-            // for extention.
+        private Functions() {
         }
 
         /**
@@ -7515,11 +7908,7 @@ public final class Fn extends Comparators {
         /** The Constant APPEND. */
         private static final BiFunction<StringBuilder, Object, StringBuilder> APPEND = (t, u) -> t.append(u);
 
-        /**
-         * Instantiates a new bi functions.
-         */
-        protected BiFunctions() {
-            // for extention.
+        private BiFunctions() {
         }
 
         /**
@@ -7691,11 +8080,7 @@ public final class Fn extends Comparators {
      */
     public static final class TriFunctions {
 
-        /**
-         * Instantiates a new tri functions.
-         */
-        protected TriFunctions() {
-            // for extention.
+        private TriFunctions() {
         }
     }
 
@@ -7800,11 +8185,7 @@ public final class Fn extends Comparators {
         /** The Constant ADD_BIG_DECIMAL. */
         private static final BinaryOperator<BigDecimal> ADD_BIG_DECIMAL = (t, u) -> t.add(u);
 
-        /**
-         * Instantiates a new binary operators.
-         */
-        protected BinaryOperators() {
-            // for extention.
+        private BinaryOperators() {
         }
 
         /**
@@ -8031,11 +8412,7 @@ public final class Fn extends Comparators {
         @SuppressWarnings("rawtypes")
         private static final UnaryOperator IDENTITY = t -> t;
 
-        /**
-         * Instantiates a new unary operators.
-         */
-        protected UnaryOperators() {
-            // for extention.
+        private UnaryOperators() {
         }
 
         /**
@@ -8053,11 +8430,7 @@ public final class Fn extends Comparators {
      */
     public static final class Entries {
 
-        /**
-         * Instantiates a new entries.
-         */
-        protected Entries() {
-            // for extention.
+        private Entries() {
         }
 
         /**
@@ -8222,11 +8595,7 @@ public final class Fn extends Comparators {
         @SuppressWarnings("rawtypes")
         private static final Function<Pair, Set> PAIR_TO_SET = t -> N.asSet(t.left, t.right);
 
-        /**
-         * Instantiates a new pairs.
-         */
-        protected Pairs() {
-            // for extention.
+        private Pairs() {
         }
 
         /**
@@ -8264,11 +8633,7 @@ public final class Fn extends Comparators {
         @SuppressWarnings("rawtypes")
         private static final Function<Triple, Set> TRIPLE_TO_SET = t -> N.asSet(t.left, t.middle, t.right);
 
-        /**
-         * Instantiates a new triples.
-         */
-        protected Triples() {
-            // for extention.
+        private Triples() {
         }
 
         /**
@@ -8305,11 +8670,7 @@ public final class Fn extends Comparators {
         @SuppressWarnings("rawtypes")
         private static final Function<DisposableArray, String> TO_STRING = t -> t.toString();
 
-        /**
-         * Instantiates a new disposables.
-         */
         private Disposables() {
-            // singleton.
         }
 
         /**
@@ -8380,11 +8741,7 @@ public final class Fn extends Comparators {
         /** The Constant LEN. */
         private static final Function<char[], Integer> LEN = t -> t == null ? 0 : t.length;
 
-        /**
-         * Instantiates a new fn C.
-         */
-        protected FnC() {
-            // for extention.
+        private FnC() {
         }
 
         /**
@@ -8568,11 +8925,7 @@ public final class Fn extends Comparators {
         /** The Constant LEN. */
         private static final Function<byte[], Integer> LEN = t -> t == null ? 0 : t.length;
 
-        /**
-         * Instantiates a new fn B.
-         */
-        protected FnB() {
-            // for extention.
+        private FnB() {
         }
 
         /**
@@ -8778,11 +9131,7 @@ public final class Fn extends Comparators {
         /** The Constant LEN. */
         private static final Function<short[], Integer> LEN = t -> t == null ? 0 : t.length;
 
-        /**
-         * Instantiates a new fn S.
-         */
-        protected FnS() {
-            // for extention.
+        private FnS() {
         }
 
         /**
@@ -8988,11 +9337,7 @@ public final class Fn extends Comparators {
         /** The Constant LEN. */
         private static final Function<int[], Integer> LEN = t -> t == null ? 0 : t.length;
 
-        /**
-         * Instantiates a new fn I.
-         */
-        protected FnI() {
-            // for extention.
+        private FnI() {
         }
 
         /**
@@ -9198,11 +9543,7 @@ public final class Fn extends Comparators {
         /** The Constant LEN. */
         private static final Function<long[], Integer> LEN = t -> t == null ? 0 : t.length;
 
-        /**
-         * Instantiates a new fn L.
-         */
-        protected FnL() {
-            // for extention.
+        private FnL() {
         }
 
         /**
@@ -9408,11 +9749,7 @@ public final class Fn extends Comparators {
         /** The Constant LEN. */
         private static final Function<float[], Integer> LEN = t -> t == null ? 0 : t.length;
 
-        /**
-         * Instantiates a new fn F.
-         */
-        protected FnF() {
-            // for extention.
+        private FnF() {
         }
 
         /**
@@ -9618,11 +9955,7 @@ public final class Fn extends Comparators {
         /** The Constant LEN. */
         private static final Function<double[], Integer> LEN = t -> t == null ? 0 : t.length;
 
-        /**
-         * Instantiates a new fn D.
-         */
-        protected FnD() {
-            // for extention.
+        private FnD() {
         }
 
         /**
@@ -10280,48 +10613,57 @@ public final class Fn extends Comparators {
         }
 
         @Beta
+        @SuppressWarnings("rawtypes")
         public static <T, E extends Throwable> Throwables.Supplier<T, E> from(final java.util.function.Supplier<T> supplier) {
-            return () -> supplier.get();
+            return supplier instanceof Throwables.Supplier ? ((Throwables.Supplier) supplier) : supplier::get;
         }
 
         @Beta
+        @SuppressWarnings("rawtypes")
         public static <T, E extends Throwable> Throwables.Predicate<T, E> from(final java.util.function.Predicate<T> predicate) {
-            return t -> predicate.test(t);
+            return predicate instanceof Throwables.Predicate ? ((Throwables.Predicate) predicate) : predicate::test;
         }
 
         @Beta
+        @SuppressWarnings("rawtypes")
         public static <T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> from(final java.util.function.BiPredicate<T, U> predicate) {
-            return (t, u) -> predicate.test(t, u);
+            return predicate instanceof Throwables.BiPredicate ? ((Throwables.BiPredicate) predicate) : predicate::test;
         }
 
         @Beta
+        @SuppressWarnings("rawtypes")
         public static <T, E extends Throwable> Throwables.Consumer<T, E> from(final java.util.function.Consumer<T> consumer) {
-            return t -> consumer.accept(t);
+            return consumer instanceof Throwables.Consumer ? ((Throwables.Consumer) consumer) : consumer::accept;
         }
 
         @Beta
+        @SuppressWarnings("rawtypes")
         public static <T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> from(final java.util.function.BiConsumer<T, U> consumer) {
-            return (t, u) -> consumer.accept(t, u);
+            return consumer instanceof Throwables.BiConsumer ? ((Throwables.BiConsumer) consumer) : consumer::accept;
         }
 
         @Beta
+        @SuppressWarnings("rawtypes")
         public static <T, R, E extends Throwable> Throwables.Function<T, R, E> from(final java.util.function.Function<T, R> function) {
-            return t -> function.apply(t);
+            return function instanceof Throwables.Function ? ((Throwables.Function) function) : function::apply;
         }
 
         @Beta
+        @SuppressWarnings("rawtypes")
         public static <T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> from(final java.util.function.BiFunction<T, U, R> function) {
-            return (t, u) -> function.apply(t, u);
+            return function instanceof Throwables.BiFunction ? ((Throwables.BiFunction) function) : function::apply;
         }
 
         @Beta
+        @SuppressWarnings("rawtypes")
         public static <T, E extends Throwable> Throwables.UnaryOperator<T, E> from(final java.util.function.UnaryOperator<T> op) {
-            return t -> op.apply(t);
+            return op instanceof Throwables.UnaryOperator ? ((Throwables.UnaryOperator) op) : op::apply;
         }
 
         @Beta
+        @SuppressWarnings("rawtypes")
         public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> from(final java.util.function.BinaryOperator<T> op) {
-            return (t1, t2) -> op.apply(t1, t2);
+            return op instanceof Throwables.BinaryOperator ? ((Throwables.BinaryOperator) op) : op::apply;
         }
 
         @Beta

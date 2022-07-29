@@ -62,8 +62,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -91,6 +89,8 @@ import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
+import com.landawn.abacus.util.Fn.IntFunctions;
+import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.Iterables.Slice;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
@@ -964,25 +964,23 @@ class CommonUtil {
      * @param <T>
      * @param cls
      * @return T
+     * @see Suppliers#ofCollection(Class)
+     * @see Suppliers#registerForCollection(Class, com.landawn.abacus.util.function.Supplier)
+     * @see Suppliers#ofMap(Class)
+     * @see Suppliers#registerForMap(Class, com.landawn.abacus.util.function.Supplier)
+     * @see IntFunctions#ofCollection(Class)
+     * @see IntFunctions#registerForCollection(Class, com.landawn.abacus.util.function.IntFunction)
+     * @see IntFunctions#ofMap(Class)
+     * @see IntFunctions#registerForMap(Class, com.landawn.abacus.util.function.IntFunction)
      */
     public static <T> T newInstance(final Class<T> cls) {
         if (Modifier.isAbstract(cls.getModifiers())) {
-            if (cls.equals(Map.class)) {
-                return (T) new HashMap<>();
-            } else if (cls.equals(List.class)) {
-                return (T) new ArrayList<>();
-            } else if (cls.equals(Set.class)) {
-                return (T) new HashSet<>();
-            } else if (cls.equals(Queue.class) || cls.equals(Deque.class)) {
-                return (T) new ArrayDeque<>();
-            } else if (cls.equals(SortedMap.class) || cls.equals(NavigableMap.class)) {
-                return (T) new TreeMap<>();
-            } else if (cls.equals(SortedSet.class) || cls.equals(NavigableSet.class)) {
-                return (T) new TreeSet<>();
-            } else if (cls.equals(BlockingQueue.class)) {
-                return (T) new LinkedBlockingQueue<>();
-            } else if (cls.equals(BlockingDeque.class)) {
-                return (T) new LinkedBlockingDeque<>();
+            if (Collection.class.isAssignableFrom(cls)) {
+                return (T) Suppliers.ofCollection(cls).get();
+            } else if (Map.class.isAssignableFrom(cls)) {
+                return (T) Suppliers.ofMap(cls).get();
+            } else {
+                throw new IllegalArgumentException("Can't create instance for abstract class: " + cls);
             }
         }
 
@@ -1041,7 +1039,7 @@ class CommonUtil {
      * @throws InvocationTargetException the invocation target exception
      */
     @SuppressWarnings({ "unchecked", "deprecation" })
-    private static <T> T invoke(final Constructor<T> c, final Object... args)
+    static <T> T invoke(final Constructor<T> c, final Object... args)
             throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         if (!c.isAccessible()) {
             ClassUtil.setAccessibleQuietly(c, true);
@@ -1072,6 +1070,58 @@ class CommonUtil {
      */
     public static <T> T newProxyInstance(final Class<?>[] interfaceClasses, final InvocationHandler h) {
         return (T) Proxy.newProxyInstance(CommonUtil.class.getClassLoader(), interfaceClasses, h);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param targetClass
+     * @return
+     * @see Suppliers#ofCollection(Class)
+     * @see Suppliers#registerForCollection(Class, com.landawn.abacus.util.function.Supplier)
+     */
+    public static <T> Collection<T> newCollection(final Class<?> targetClass) {
+        return Suppliers.<T> ofCollection(targetClass).get();
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param targetClass
+     * @param size
+     * @return
+     * @see IntFunctions#ofCollection(Class)
+     * @see IntFunctions#registerForCollection(Class, com.landawn.abacus.util.function.IntFunction)
+     */
+    public static <T> Collection<T> newCollection(final Class<?> targetClass, final int size) {
+        return IntFunctions.<T> ofCollection(targetClass).apply(size);
+    }
+
+    /**
+     *
+     * @param <K>
+     * @param <V>
+     * @param targetClass
+     * @return
+     * @see Suppliers#ofMap(Class)
+     * @see Suppliers#registerForMap(Class, com.landawn.abacus.util.function.Supplier)
+     */
+    public static <K, V> Map<K, V> newMap(final Class<?> targetClass) {
+        return Suppliers.<K, V> ofMap(targetClass).get();
+    }
+
+    /**
+     *
+     * @param <K>
+     * @param <V>
+     * @param targetClass
+     * @param size
+     * @return
+     * @see IntFunctions#ofMap(Class)
+     * @see IntFunctions#registerForMap(Class, com.landawn.abacus.util.function.IntFunction)
+     */
+    public static <K, V> Map<K, V> newMap(final Class<?> targetClass, final int size) {
+        return IntFunctions.<K, V> ofMap(targetClass).apply(size);
     }
 
     /**
@@ -6130,20 +6180,20 @@ class CommonUtil {
             if (srcType.isEntity() && targetType.getParameterTypes()[0].clazz().isAssignableFrom(String.class)
                     && Object.class.equals(targetType.getParameterTypes()[1].clazz())) {
                 try {
-                    return (T) Maps.entity2Map((Map<String, Object>) CommonUtil.newInstance(targetType.clazz()), obj);
+                    return (T) Maps.entity2Map(N.<String, Object> newMap(targetType.clazz()), obj);
                 } catch (Exception e) {
                     // ignore.
                 }
             } else if (srcType.isMap() && Object.class.equals(targetType.getParameterTypes()[0].clazz())
                     && Object.class.equals(targetType.getParameterTypes()[1].clazz())) {
-                final Map result = (Map) CommonUtil.newInstance(targetType.clazz());
+                final Map result = N.newMap(targetType.clazz());
                 result.putAll((Map) obj);
                 return (T) result;
             }
         }
 
         if (targetType.isCollection() && (srcType.isCollection() && Object.class.equals(targetType.getParameterTypes()[0].clazz()))) {
-            final Collection result = (Collection) CommonUtil.newInstance(targetType.clazz());
+            final Collection result = N.newCollection(targetType.clazz());
             result.addAll((Collection) obj);
             return (T) result;
         }

@@ -23198,10 +23198,11 @@ public final class N extends CommonUtil {
      * @param <T>
      * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
+     * @param closeInputStreamWhenStreamIsClosed
      * @return
      */
-    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<T> elementClass, InputStream source) {
-        return Utils.jsonParser.stream(elementClass, source);
+    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<T> elementClass, InputStream source, boolean closeInputStreamWhenStreamIsClosed) {
+        return Utils.jsonParser.stream(elementClass, source, closeInputStreamWhenStreamIsClosed);
     }
 
     /**
@@ -23209,11 +23210,13 @@ public final class N extends CommonUtil {
      * @param <T>
      * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
+     * @param closeInputStreamWhenStreamIsClosed
      * @param config
      * @return
      */
-    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<T> elementClass, InputStream source, JSONDeserializationConfig config) {
-        return Utils.jsonParser.stream(elementClass, source, config);
+    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<T> elementClass, InputStream source, boolean closeInputStreamWhenStreamIsClosed,
+            JSONDeserializationConfig config) {
+        return Utils.jsonParser.stream(elementClass, source, closeInputStreamWhenStreamIsClosed, config);
     }
 
     /**
@@ -23221,10 +23224,11 @@ public final class N extends CommonUtil {
      * @param <T>
      * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
+     * @param closeReaderWhenStreamIsClosed
      * @return
      */
-    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<T> elementClass, Reader source) {
-        return Utils.jsonParser.stream(elementClass, source);
+    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<T> elementClass, Reader source, boolean closeReaderWhenStreamIsClosed) {
+        return Utils.jsonParser.stream(elementClass, source, closeReaderWhenStreamIsClosed);
     }
 
     /**
@@ -23232,11 +23236,13 @@ public final class N extends CommonUtil {
      * @param <T>
      * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
+     * @param closeReaderWhenStreamIsClosed
      * @param config
      * @return
      */
-    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<T> elementClass, Reader source, JSONDeserializationConfig config) {
-        return Utils.jsonParser.stream(elementClass, source, config);
+    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<T> elementClass, Reader source, boolean closeReaderWhenStreamIsClosed,
+            JSONDeserializationConfig config) {
+        return Utils.jsonParser.stream(elementClass, source, closeReaderWhenStreamIsClosed, config);
     }
 
     /**

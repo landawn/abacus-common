@@ -44,7 +44,7 @@ public class ArrayHashSet<E> implements Set<E> {
 
     @SuppressWarnings("rawtypes")
     public ArrayHashSet(final Class<? extends Set> setType) {
-        this.set = N.newInstance(setType);
+        this.set = (Set) N.newCollection(setType);
     }
 
     public ArrayHashSet(final Collection<? extends E> coll) {

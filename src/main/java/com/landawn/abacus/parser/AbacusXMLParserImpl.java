@@ -1392,7 +1392,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 }
 
                 isNullValue = Boolean.parseBoolean(getAttribute(xmlReader, XMLConstants.IS_NULL));
-                final Map<Object, Object> mResult = isNullValue ? null : (Map<Object, Object>) N.newInstance(targetClass);
+                final Map<Object, Object> mResult = isNullValue ? null : (Map<Object, Object>) N.newMap(targetClass);
                 Object key = null;
                 Type<?> entryKeyType = null;
                 Type<?> entryValueType = null;
@@ -1707,7 +1707,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 }
 
                 isNullValue = Boolean.parseBoolean(getAttribute(xmlReader, XMLConstants.IS_NULL));
-                final Collection<Object> result = isNullValue ? null : (Collection<Object>) N.newInstance(targetClass);
+                final Collection<Object> result = isNullValue ? null : (Collection<Object>) N.newCollection(targetClass);
 
                 for (int event = xmlReader.next(); xmlReader.hasNext(); event = xmlReader.next()) {
                     switch (event) {

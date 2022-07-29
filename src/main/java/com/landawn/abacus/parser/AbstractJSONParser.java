@@ -216,13 +216,13 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     @Override
-    public <T> ExceptionalStream<T, IOException> stream(Class<T> elementClass, InputStream is) {
-        return stream(elementClass, is, null);
+    public <T> ExceptionalStream<T, IOException> stream(Class<T> elementClass, InputStream is, boolean closeInputStreamWhenStreamIsClosed) {
+        return stream(elementClass, is, closeInputStreamWhenStreamIsClosed, null);
     }
 
     @Override
-    public <T> ExceptionalStream<T, IOException> stream(Class<T> elementClass, Reader reader) {
-        return stream(elementClass, reader, null);
+    public <T> ExceptionalStream<T, IOException> stream(Class<T> elementClass, Reader reader, boolean closeReaderWhenStreamIsClosed) {
+        return stream(elementClass, reader, closeReaderWhenStreamIsClosed, null);
     }
 
     /**

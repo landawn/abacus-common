@@ -160,36 +160,41 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param <T>
      * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
+     * @param closeInputStreamWhenStreamIsClosed
      * @return
      */
-    <T> ExceptionalStream<T, IOException> stream(Class<T> elementClass, InputStream source);
+    <T> ExceptionalStream<T, IOException> stream(Class<T> elementClass, InputStream source, boolean closeInputStreamWhenStreamIsClosed);
 
     /**
      *
      * @param <T>
      * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
+     * @param closeInputStreamWhenStreamIsClosed
      * @param config
      * @return
      */
-    <T> ExceptionalStream<T, IOException> stream(Class<T> elementClass, InputStream source, JSONDeserializationConfig config);
+    <T> ExceptionalStream<T, IOException> stream(Class<T> elementClass, InputStream source, boolean closeInputStreamWhenStreamIsClosed,
+            JSONDeserializationConfig config);
 
     /**
      *
      * @param <T>
      * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
+     * @param closeReaderWhenStreamIsClosed
      * @return
      */
-    <T> ExceptionalStream<T, IOException> stream(Class<T> elementClass, Reader source);
+    <T> ExceptionalStream<T, IOException> stream(Class<T> elementClass, Reader source, boolean closeReaderWhenStreamIsClosed);
 
     /**
      *
      * @param <T>
      * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
+     * @param closeReaderWhenStreamIsClosed
      * @param config
      * @return
      */
-    <T> ExceptionalStream<T, IOException> stream(Class<T> elementClass, Reader source, JSONDeserializationConfig config);
+    <T> ExceptionalStream<T, IOException> stream(Class<T> elementClass, Reader source, boolean closeReaderWhenStreamIsClosed, JSONDeserializationConfig config);
 }

@@ -3815,7 +3815,7 @@ public class RowDataSet implements DataSet, Cloneable {
                             c = propInfo.getPropValue(resultEntities[rowIndex]);
 
                             if (c == null) {
-                                c = (Collection<Object>) N.newInstance(propInfo.clazz);
+                                c = N.newCollection(propInfo.clazz);
                                 propInfo.setPropValue(resultEntities[rowIndex], c);
 
                                 if (isToMerge && !(c instanceof Set)) {

@@ -17,6 +17,7 @@ package com.landawn.abacus.util;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -28,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
@@ -38,6 +40,8 @@ import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
+import com.landawn.abacus.util.Fn.Fnn;
+import com.landawn.abacus.util.stream.Stream;
 
 /**
  *
@@ -54,13 +58,13 @@ public final class CSVUtil {
 
     static final CSVParser csvParser = new CSVParser();
 
-    public static final Function<String, String[]> CSV_HEADER_PARSER = line -> csvParser.parseLineToArray(line);
+    public static final Function<String, String[]> CSV_HEADER_PARSER = csvParser::parseLineToArray;
 
-    public static final BiConsumer<String[], String> CSV_LINE_PARSER = (output, line) -> csvParser.parseLineToArray(output, line);
+    public static final BiConsumer<String[], String> CSV_LINE_PARSER = csvParser::parseLineToArray;
 
-    public static final Function<String, String[]> CSV_HEADER_PARSER_BY_SPLITTER = line -> lineSplitter.splitToArray(line);
+    public static final Function<String, String[]> CSV_HEADER_PARSER_BY_SPLITTER = lineSplitter::splitToArray;
 
-    public static final BiConsumer<String[], String> CSV_LINE_PARSER_BY_SPLITTER = (output, line) -> lineSplitter.splitToArray(output, line);
+    public static final BiConsumer<String[], String> CSV_LINE_PARSER_BY_SPLITTER = lineSplitter::splitToArray;
 
     static final Function<String, String[]> CSV_HEADER_PARSER_IN_JSON = line -> jsonParser.readString(String[].class, line, jdc);
 
@@ -282,6 +286,11 @@ public final class CSVUtil {
 
         try {
             String line = br.readLine();
+
+            if (line == null) {
+                return N.newEmptyDataSet();
+            }
+
             final String[] titles = headerParser.apply(line);
 
             final int columnCount = titles.length;
@@ -319,8 +328,6 @@ public final class CSVUtil {
                         columnList.get(columnIndex++).add(strs[i]);
                     }
                 }
-
-                N.fill(strs, null);
 
                 count--;
             }
@@ -525,6 +532,11 @@ public final class CSVUtil {
 
         try {
             String line = br.readLine();
+
+            if (line == null) {
+                return N.newEmptyDataSet();
+            }
+
             final String[] titles = headerParser.apply(line);
 
             final int columnCount = titles.length;
@@ -537,18 +549,22 @@ public final class CSVUtil {
                 if (selectPropNameSet == null || selectPropNameSet.remove(titles[i])) {
                     propInfos[i] = entityInfo.getPropInfo(titles[i]);
 
-                    if (propInfos[i] == null && selectPropNameSet != null) {
-                        throw new IllegalArgumentException(titles[i] + " is not defined in entity class: " + ClassUtil.getCanonicalClassName(entityClass));
-                    }
-
-                    if (propInfos[i] != null) {
-                        columnNameList.add(titles[i]);
-                        columnList.add(new ArrayList<>());
+                    if (propInfos[i] == null) {
+                        if (selectPropNameSet != null && selectPropNameSet.remove(titles[i])) {
+                            throw new IllegalArgumentException(titles[i] + " is not defined in entity class: " + ClassUtil.getCanonicalClassName(entityClass));
+                        }
+                    } else {
+                        if (selectPropNameSet == null || selectPropNameSet.remove(titles[i]) || selectPropNameSet.remove(propInfos[i].name)) {
+                            columnNameList.add(titles[i]);
+                            columnList.add(new ArrayList<>());
+                        } else {
+                            propInfos[i] = null;
+                        }
                     }
                 }
             }
 
-            if (selectPropNameSet != null && selectPropNameSet.size() > 0) {
+            if (N.notNullOrEmpty(selectPropNameSet)) {
                 throw new IllegalArgumentException(selectColumnNames + " are not included in titles: " + N.toString(titles));
             }
 
@@ -569,8 +585,6 @@ public final class CSVUtil {
                         columnList.get(columnIndex++).add(propInfos[i].readPropValue(strs[i]));
                     }
                 }
-
-                N.fill(strs, null);
 
                 count--;
             }
@@ -744,6 +758,11 @@ public final class CSVUtil {
 
         try {
             String line = br.readLine();
+
+            if (line == null) {
+                return N.newEmptyDataSet();
+            }
+
             final String[] titles = headerParser.apply(line);
 
             final int columnCount = titles.length;
@@ -782,8 +801,6 @@ public final class CSVUtil {
                         columnList.get(columnIndex++).add(columnTypes[i].valueOf(strs[i]));
                     }
                 }
-
-                N.fill(strs, null);
 
                 count--;
             }
@@ -954,6 +971,11 @@ public final class CSVUtil {
 
         try {
             String line = br.readLine();
+
+            if (line == null) {
+                return N.newEmptyDataSet();
+            }
+
             final String[] titles = headerParser.apply(line);
 
             final int columnCount = titles.length;
@@ -985,8 +1007,6 @@ public final class CSVUtil {
                     }
                 }
 
-                N.fill(strs, null);
-
                 count--;
             }
 
@@ -998,5 +1018,222 @@ public final class CSVUtil {
                 Objectory.recycle(br);
             }
         }
+    }
+
+    public static <T> Stream<T> stream(final Class<T> targetType, final File csvFile) {
+        return stream(targetType, csvFile, (Collection<String>) null);
+    }
+
+    public static <T> Stream<T> stream(final Class<T> targetType, final File csvFile, final Collection<String> selectColumnNames) {
+        return stream(targetType, csvFile, selectColumnNames, 0, Long.MAX_VALUE, Fn.alwaysTrue());
+    }
+
+    public static <T> Stream<T> stream(final Class<T> targetType, final File csvFile, final Collection<String> selectColumnNames, final long offset,
+            final long count, final Predicate<String[]> filter) {
+        FileReader csvReader = null;
+
+        try {
+            csvReader = new FileReader(csvFile);
+
+            return stream(targetType, csvReader, selectColumnNames, offset, count, true, filter);
+        } catch (Exception e) {
+            if (csvReader != null) {
+                IOUtil.closeQuietly(csvReader);
+            }
+
+            throw N.toRuntimeException(e);
+        }
+    }
+
+    public static <T> Stream<T> stream(final Class<T> targetType, final Reader csvReader, final boolean closeReaderWhenStreamIsClosed) {
+        return stream(targetType, csvReader, (Collection<String>) null, closeReaderWhenStreamIsClosed);
+    }
+
+    public static <T> Stream<T> stream(final Class<T> targetType, final Reader csvReader, final Collection<String> selectColumnNames,
+            final boolean closeReaderWhenStreamIsClosed) {
+        return stream(targetType, csvReader, selectColumnNames, 0, Long.MAX_VALUE, closeReaderWhenStreamIsClosed, Fn.alwaysTrue());
+    }
+
+    public static <T> Stream<T> stream(final Class<T> targetType, final Reader csvReader, final Collection<String> selectColumnNames, final long offset,
+            final long count, final boolean closeReaderWhenStreamIsClosed, final Predicate<String[]> filter) {
+
+        return Stream.defer(() -> {
+            N.checkArgNotNull(targetType, "targetType");
+            N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
+
+            final BufferedReader br = csvReader instanceof BufferedReader ? (BufferedReader) csvReader : Objectory.createBufferedReader(csvReader);
+            boolean noException = false;
+
+            try {
+                final Function<String, String[]> headerParser = csvHeaderParser_TL.get();
+                final BiConsumer<String[], String> lineParser = csvLineParser_TL.get();
+
+                String line = br.readLine();
+
+                if (line == null) {
+                    noException = true;
+                    return Stream.empty();
+                }
+
+                final String[] titles = headerParser.apply(line);
+
+                final boolean isEntity = ClassUtil.isEntity(targetType);
+                final EntityInfo entityInfo = isEntity ? ParserUtil.getEntityInfo(targetType) : null;
+
+                final int columnCount = titles.length;
+                final String[] resultColumnNames = new String[columnCount];
+                final Set<String> selectPropNameSet = selectColumnNames == null ? null : N.newHashSet(selectColumnNames);
+                final PropInfo[] propInfos = isEntity ? new PropInfo[columnCount] : null;
+                int resultColumnCount = 0;
+
+                for (int i = 0; i < columnCount; i++) {
+                    if (isEntity) {
+                        propInfos[i] = entityInfo.getPropInfo(titles[i]);
+
+                        if (propInfos[i] == null) {
+                            if (selectPropNameSet != null && selectPropNameSet.remove(titles[i])) {
+                                throw new IllegalArgumentException(
+                                        titles[i] + " is not defined in entity class: " + ClassUtil.getCanonicalClassName(targetType));
+                            }
+                        } else {
+                            if (selectPropNameSet == null || selectPropNameSet.remove(titles[i]) || selectPropNameSet.remove(propInfos[i].name)) {
+                                resultColumnNames[i] = titles[i];
+                                resultColumnCount++;
+                            } else {
+                                propInfos[i] = null;
+                            }
+                        }
+                    } else {
+                        if (selectPropNameSet == null || selectPropNameSet.remove(titles[i])) {
+                            resultColumnNames[i] = titles[i];
+                            resultColumnCount++;
+                        }
+                    }
+                }
+
+                if (N.notNullOrEmpty(selectPropNameSet)) {
+                    throw new IllegalArgumentException(selectColumnNames + " are not included in titles: " + N.toString(titles));
+                }
+
+                long offsetTmp = offset;
+
+                while (offsetTmp-- > 0 && br.readLine() != null) {
+                }
+
+                final Type<T> type = Type.of(targetType);
+                final int finalResultColumnCount = resultColumnCount;
+
+                com.landawn.abacus.util.function.Function<String[], T> mapper = null;
+
+                if (type.isObjectArray()) {
+                    final Class<?> componentType = targetType.getComponentType();
+
+                    mapper = values -> {
+                        final Object[] result = N.newArray(componentType, finalResultColumnCount);
+
+                        for (int i = 0, j = 0; i < columnCount; i++) {
+                            if (resultColumnNames[i] != null) {
+                                result[j++] = values[i];
+                            }
+                        }
+
+                        return (T) result;
+                    };
+
+                } else if (type.isCollection()) {
+                    mapper = values -> {
+                        final Collection<Object> result = N.newCollection(targetType, finalResultColumnCount);
+
+                        for (int i = 0; i < columnCount; i++) {
+                            if (resultColumnNames[i] != null) {
+                                result.add(values[i]);
+                            }
+                        }
+
+                        return (T) result;
+                    };
+
+                } else if (type.isMap()) {
+                    mapper = values -> {
+                        final Map<String, Object> result = N.newMap(targetType, finalResultColumnCount);
+
+                        for (int i = 0; i < columnCount; i++) {
+                            if (resultColumnNames[i] != null) {
+                                result.put(resultColumnNames[i], values[i]);
+                            }
+                        }
+
+                        return (T) result;
+                    };
+
+                } else if (type.isEntity()) {
+                    mapper = values -> {
+                        final Object result = entityInfo.createEntityResult();
+
+                        for (int i = 0; i < columnCount; i++) {
+                            if (resultColumnNames[i] != null) {
+                                propInfos[i].setPropValue(result, propInfos[i].readPropValue(values[i]));
+                            }
+                        }
+
+                        entityInfo.finishEntityResult(result);
+
+                        return (T) result;
+                    };
+
+                } else if (finalResultColumnCount == 1) {
+                    int targetColumnIndex = 0;
+
+                    for (int i = 0; i < columnCount; i++) {
+                        if (resultColumnNames[i] != null) {
+                            targetColumnIndex = i;
+                            break;
+                        }
+                    }
+
+                    final int finalTargetColumnIndex = targetColumnIndex;
+
+                    mapper = values -> {
+                        return type.valueOf(values[finalTargetColumnIndex]);
+                    };
+
+                } else {
+                    throw new IllegalArgumentException("Unsupported target type: " + targetType);
+                }
+
+                final String[] strs = new String[titles.length];
+
+                Stream<T> ret = ((filter == null || N.equals(filter, Fn.alwaysTrue()) || N.equals(filter, Fnn.alwaysTrue())) //
+                        ? Stream.lines(br).map(it -> {
+                            lineParser.accept(strs, it);
+                            return strs;
+                        }) //
+                        : Stream.lines(br).map(it -> {
+                            lineParser.accept(strs, it);
+                            return strs;
+                        }).filter(Fn.from(filter))) //
+                                .limit(count)
+                                .map(mapper)
+                                .onClose(() -> {
+                                    if (br != csvReader) {
+                                        Objectory.recycle(br);
+                                    }
+                                });
+
+                noException = true;
+
+                return ret;
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            } finally {
+                if (!noException && br != csvReader) {
+                    Objectory.recycle(br);
+                }
+            }
+        }).onClose(() -> {
+            if (closeReaderWhenStreamIsClosed) {
+                IOUtil.close(csvReader);
+            }
+        });
     }
 }

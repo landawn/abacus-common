@@ -140,7 +140,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
         if (str == null) {
             return null;
         } else if (str.length() == 0 || "{}".equals(str)) {
-            return N.newInstance(typeClass);
+            return (T) N.newMap(typeClass);
         } else {
             return Utils.jsonParser.deserialize(typeClass, str, jdc);
         }

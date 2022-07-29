@@ -15,13 +15,7 @@
 package com.landawn.abacus.type;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Modifier;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.Queue;
-import java.util.Set;
 
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.WD;
@@ -72,36 +66,9 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
             return null;
         }
 
-        Collection<E> c = newCollection(collClass, Array.getLength(x));
+        Collection<E> c = N.newCollection(collClass, Array.getLength(x));
 
         return array2Collection(c, x);
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param cls
-     * @param len
-     * @return
-     */
-    protected static <E> Collection<E> newCollection(Class<?> cls, int len) {
-        Collection<E> c = null;
-
-        if (Modifier.isAbstract(cls.getModifiers())) {
-            if (List.class.isAssignableFrom(cls)) {
-                c = new ArrayList<>(len);
-            } else if (Set.class.isAssignableFrom(cls)) {
-                c = N.newHashSet(len);
-            } else if (Queue.class.isAssignableFrom(cls)) {
-                c = new ArrayDeque<>(len);
-            } else {
-                c = (Collection<E>) N.newInstance(cls);
-            }
-        } else {
-            c = (Collection<E>) N.newInstance(cls);
-        }
-
-        return c;
     }
 
     /**

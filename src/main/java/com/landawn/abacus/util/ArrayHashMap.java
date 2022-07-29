@@ -16,8 +16,6 @@
 
 package com.landawn.abacus.util;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -61,14 +59,7 @@ public class ArrayHashMap<K, V> implements Map<K, V> {
         ......
         */
 
-        // map = N.newInstance(mapType);
-
-        try {
-            map = Modifier.isAbstract(mapType.getModifiers()) ? N.newInstance(mapType) : mapType.getDeclaredConstructor().newInstance();
-        } catch (InstantiationException | InvocationTargetException | IllegalAccessException | IllegalArgumentException | NoSuchMethodException
-                | SecurityException e) {
-            throw ExceptionUtil.toRuntimeException(e);
-        }
+        map = N.newMap(mapType);
     }
 
     public ArrayHashMap(final Map<? extends K, ? extends V> m) {

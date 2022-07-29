@@ -367,7 +367,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
                 || (targetType.isObjectArray() && SpecificRecord.class.isAssignableFrom(targetClass.getComponentType())))) {
             final Class<Object> eleClass = eleType != null && SpecificRecord.class.isAssignableFrom(eleType.clazz()) ? eleType.clazz()
                     : (Class<Object>) targetClass.getComponentType();
-            final Collection<Object> c = targetType.isCollection() ? ((Collection<Object>) N.newInstance(targetClass)) : new ArrayList<>();
+            final Collection<Object> c = targetType.isCollection() ? ((Collection<Object>) N.newCollection(targetClass)) : new ArrayList<>();
             final DatumReader<Object> datumReader = new SpecificDatumReader<>(eleClass);
             DataFileStream<Object> dataFileReader = null;
 
@@ -402,7 +402,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
                     return dataFileReader.hasNext() ? fromGenericRecord(targetClass, dataFileReader.next()) : null;
                 } else if (targetType.isCollection() || targetType.isObjectArray()) {
                     if (eleType != null && (eleType.isEntity() || eleType.isMap() || GenericRecord.class.isAssignableFrom(eleType.clazz()))) {
-                        final Collection<Object> c = targetType.isCollection() ? ((Collection<Object>) N.newInstance(targetClass)) : new ArrayList<>();
+                        final Collection<Object> c = targetType.isCollection() ? ((Collection<Object>) N.newCollection(targetClass)) : new ArrayList<>();
 
                         while (dataFileReader.hasNext()) {
                             c.add(fromGenericRecord(eleType.clazz(), dataFileReader.next()));
@@ -411,7 +411,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
                         return (T) (targetType.isCollection() ? c : c.toArray((Object[]) N.newArray(targetClass.getComponentType(), c.size())));
                     } else if (targetType.isObjectArray() && (targetType.getElementType().isEntity() || targetType.getElementType().isMap()
                             || GenericRecord.class.isAssignableFrom(targetClass.getComponentType()))) {
-                        final Collection<Object> c = targetType.isCollection() ? ((Collection<Object>) N.newInstance(targetClass)) : new ArrayList<>();
+                        final Collection<Object> c = targetType.isCollection() ? ((Collection<Object>) N.newCollection(targetClass)) : new ArrayList<>();
 
                         while (dataFileReader.hasNext()) {
                             c.add(fromGenericRecord(targetClass.getComponentType(), dataFileReader.next()));
@@ -476,7 +476,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
             }
             return entitInfo.finishEntityResult(result);
         } else if (type.isMap()) {
-            final Map<String, Object> m = (Map<String, Object>) N.newInstance(targetClass);
+            final Map<String, Object> m = N.newMap(targetClass);
             Object propValue = null;
 
             for (Field field : record.getSchema().getFields()) {
@@ -489,7 +489,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
 
             return (T) m;
         } else if (type.isCollection() || type.isObjectArray()) {
-            final Collection<Object> c = type.isCollection() ? (Collection<Object>) N.newInstance(targetClass) : new ArrayList<>();
+            final Collection<Object> c = type.isCollection() ? (Collection<Object>) N.newCollection(targetClass) : new ArrayList<>();
             Object propValue = null;
 
             for (Field field : record.getSchema().getFields()) {

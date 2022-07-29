@@ -942,7 +942,7 @@ public final class ParserUtil {
                             if (subPropValue == null) {
                                 if (propInfo.type.isCollection()) {
                                     subPropValue = N.newInstance(propInfo.type.getElementType().clazz());
-                                    final Collection c = (Collection) N.newInstance(propInfo.type.clazz());
+                                    final Collection c = N.newCollection(propInfo.type.clazz());
                                     c.add(subPropValue);
                                     propInfo.setPropValue(propEntity, c);
                                 } else {
@@ -955,7 +955,7 @@ public final class ParserUtil {
                                 final Collection c = (Collection) subPropValue;
 
                                 if (c.size() == 0) {
-                                    subPropValue = N.newInstance(propInfo.type.getElementType().clazz());
+                                    subPropValue = N.newCollection(propInfo.type.getElementType().clazz());
                                     c.add(subPropValue);
                                 } else if (propInfo.type.isList()) {
                                     subPropValue = ((List) c).get(0);
@@ -2178,11 +2178,11 @@ public final class ParserUtil {
             super(name, field, getMethod, setMethod, jsonXmlConfig, classAnnotations, fieldOrder, isImmutableEntity, isByBuilder, idPropNames,
                     readOnlyIdPropNames);
 
-            getMethodAccess = getMethod == null ? null : com.esotericsoftware.reflectasm.MethodAccess.get(declaringClass);
+            getMethodAccess = getMethod == null ? null : com.esotericsoftware.reflectasm.MethodAccess.get(getMethod.getDeclaringClass());
             setMethodAccess = setMethod == null ? null : com.esotericsoftware.reflectasm.MethodAccess.get(setMethod.getDeclaringClass());
             getMethodAccessIndex = getMethod == null ? -1 : getMethodAccess.getIndex(getMethod.getName(), 0);
             setMethodAccessIndex = setMethod == null ? -1 : setMethodAccess.getIndex(setMethod.getName(), setMethod.getParameterTypes());
-            fieldAccess = com.esotericsoftware.reflectasm.FieldAccess.get(declaringClass);
+            fieldAccess = field == null ? null : com.esotericsoftware.reflectasm.FieldAccess.get(field.getDeclaringClass());
             fieldAccessIndex = (field == null || !this.isFieldAccessible || Modifier.isPrivate(field.getModifiers()) || Modifier.isFinal(field.getModifiers()))
                     ? -1
                     : fieldAccess.getIndex(field.getName());

@@ -16,7 +16,6 @@
 
 package com.landawn.abacus.util;
 
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -25,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
@@ -108,19 +106,7 @@ public class Multimap<K, E, V extends Collection<E>> {
      */
     @SuppressWarnings("rawtypes")
     static Supplier valueType2Supplier(final Class<? extends Collection> valueType) {
-        if (Modifier.isAbstract(valueType.getModifiers())) {
-            if (List.class.isAssignableFrom(valueType)) {
-                return Suppliers.ofList();
-            } else if (Set.class.isAssignableFrom(valueType)) {
-                return Suppliers.ofSet();
-            } else if (Queue.class.isAssignableFrom(valueType)) {
-                return Suppliers.ofArrayDeque();
-            } else {
-                throw new IllegalArgumentException("Unsupported collection type: " + valueType.getCanonicalName());
-            }
-        } else {
-            return () -> N.newInstance(valueType);
-        }
+        return Suppliers.ofCollection(valueType);
     }
 
     /**

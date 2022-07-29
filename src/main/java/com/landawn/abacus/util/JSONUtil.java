@@ -18,11 +18,9 @@ package com.landawn.abacus.util;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -202,7 +200,7 @@ public final class JSONUtil {
         if (type.clazz().isAssignableFrom(JSONObject.class)) {
             return (T) jsonObject;
         } else if (type.isMap()) {
-            final Map<String, Object> map = (Map<String, Object>) N.newInstance(cls);
+            final Map<String, Object> map = N.newMap(cls, jsonObject.keySet().size());
             final Iterator<String> iter = jsonObject.keys();
             final Type<?> valueType = type.getParameterTypes()[1];
             String key = null;
@@ -344,9 +342,7 @@ public final class JSONUtil {
         if (type.clazz().isAssignableFrom(JSONArray.class)) {
             return (T) jsonArray;
         } else if (type.isCollection()) {
-            final Collection<Object> coll = List.class.equals(type.clazz()) || ArrayList.class.equals(type.clazz()) ? new ArrayList<>(len)
-                    : (Set.class.equals(type.clazz()) || HashSet.class.equals(type.clazz()) ? new HashSet<>(len)
-                            : (Collection<Object>) N.newInstance(type.clazz()));
+            final Collection<Object> coll = N.newCollection(type.clazz(), len);
             final Type<?> elementType = type.getElementType();
             Object element = null;
 

@@ -34,7 +34,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.IntFunction;
@@ -44,7 +43,6 @@ import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
-import com.landawn.abacus.util.Fn.IntFunctions;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
@@ -320,27 +318,11 @@ public final class Maps {
             return new HashMap<>();
         }
 
-        Map res = null;
-
-        if (HashMap.class.equals(m.getClass())) {
-            res = N.newHashMap(size);
-        } else if (m instanceof SortedMap) {
-            res = new TreeMap<>(((SortedMap) m).comparator());
-        } else if (m instanceof IdentityHashMap) {
-            res = N.newIdentityHashMap(size);
-        } else if (m instanceof LinkedHashMap) {
-            res = N.newLinkedHashMap(size);
-        } else if (m instanceof ImmutableMap) {
-            res = N.newLinkedHashMap(size);
-        } else {
-            try {
-                res = N.newInstance(m.getClass());
-            } catch (Exception e) {
-                res = N.newLinkedHashMap(size);
-            }
+        if (m instanceof SortedMap) {
+            return new TreeMap<>(((SortedMap) m).comparator());
         }
 
-        return res;
+        return N.newMap(m.getClass(), size);
     }
 
     /**
@@ -355,57 +337,7 @@ public final class Maps {
             return new HashMap<>();
         }
 
-        return newTargetMap(m.getClass(), m.size());
-    }
-
-    @SuppressWarnings("rawtypes")
-    public static Map newTargetMap(final Class<?> cls, int size) {
-        Map res = null;
-
-        if (Map.class.equals(cls) || HashMap.class.equals(cls)) {
-            res = N.newHashMap(size);
-        } else if (LinkedHashMap.class.isAssignableFrom(cls)) {
-            res = N.newLinkedHashMap(size);
-        } else if (SortedMap.class.isAssignableFrom(cls)) {
-            res = new TreeMap<>();
-        } else if (IdentityHashMap.class.isAssignableFrom(cls)) {
-            res = N.newIdentityHashMap(size);
-        } else if (ConcurrentHashMap.class.isAssignableFrom(cls)) {
-            res = N.newConcurrentHashMap(size);
-        } else if (BiMap.class.isAssignableFrom(cls)) {
-            res = N.newBiMap(size);
-        } else if (ImmutableMap.class.isAssignableFrom(cls)) {
-            res = N.newLinkedHashMap(size);
-        } else {
-            try {
-                res = (Map) N.newInstance(cls);
-            } catch (Exception e) {
-                res = N.newLinkedHashMap(size);
-            }
-        }
-
-        return res;
-    }
-
-    @SuppressWarnings("rawtypes")
-    public static IntFunction<Map<String, Object>> createMapSupplier(final Class<?> cls) {
-        if (Map.class.equals(cls) || HashMap.class.equals(cls)) {
-            return IntFunctions.ofMap();
-        } else if (LinkedHashMap.class.isAssignableFrom(cls)) {
-            return (IntFunction) IntFunctions.ofLinkedHashMap();
-        } else if (SortedMap.class.isAssignableFrom(cls)) {
-            return (IntFunction) IntFunctions.ofSortedMap();
-        } else if (IdentityHashMap.class.isAssignableFrom(cls)) {
-            return (IntFunction) IntFunctions.ofIdentityHashMap();
-        } else if (ConcurrentHashMap.class.isAssignableFrom(cls)) {
-            return (IntFunction) IntFunctions.ofConcurrentHashMap();
-        } else if (BiMap.class.isAssignableFrom(cls)) {
-            return (IntFunction) IntFunctions.ofBiMap();
-        } else if (ImmutableMap.class.isAssignableFrom(cls)) {
-            return (IntFunction) IntFunctions.ofLinkedHashMap();
-        } else {
-            return IntFunctions.ofMap();
-        }
+        return N.newMap(m.getClass(), m.size());
     }
 
     public static <K, V> Map<K, V> zip(final Collection<? extends K> keys, final Collection<? extends V> values) {
@@ -2256,25 +2188,7 @@ public final class Maps {
      */
     @SuppressWarnings("rawtypes")
     static Supplier mapType2Supplier(final Class<? extends Map> mapType) {
-        if (HashMap.class.equals(mapType)) {
-            return Suppliers.ofMap();
-        } else if (SortedMap.class.isAssignableFrom(mapType)) {
-            return Suppliers.ofTreeMap();
-        } else if (IdentityHashMap.class.isAssignableFrom(mapType)) {
-            return Suppliers.ofIdentityHashMap();
-        } else if (LinkedHashMap.class.isAssignableFrom(mapType)) {
-            return Suppliers.ofLinkedHashMap();
-        } else if (ImmutableMap.class.isAssignableFrom(mapType)) {
-            return Suppliers.ofLinkedHashMap();
-        } else {
-            return () -> {
-                try {
-                    return N.newInstance(mapType);
-                } catch (Exception e) {
-                    return new LinkedHashMap<>();
-                }
-            };
-        }
+        return Suppliers.ofMap(mapType);
     }
 
     /**

@@ -57,8 +57,6 @@ import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.DataSet;
 import com.landawn.abacus.util.EntityId;
 import com.landawn.abacus.util.ExceptionalStream;
-import com.landawn.abacus.util.Fn;
-import com.landawn.abacus.util.Fn.Fnn;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.IdentityHashSet;
 import com.landawn.abacus.util.ImmutableEntry;
@@ -3136,7 +3134,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         try {
             is = new FileInputStream(file);
 
-            result = stream(elementClass, is, config).onClose(Fnn.<IOException> rr(Fn.closeQuietly(is)));
+            result = stream(elementClass, is, true, config);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -3149,28 +3147,34 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     @Override
-    public <T> ExceptionalStream<T, IOException> stream(final Class<T> elementClass, final InputStream is, final JSONDeserializationConfig config) {
+    public <T> ExceptionalStream<T, IOException> stream(final Class<T> elementClass, final InputStream is, final boolean closeInputStreamWhenStreamIsClosed,
+            final JSONDeserializationConfig config) {
         final Reader reader = new InputStreamReader(is);
 
-        return stream(elementClass, reader, config);
+        return stream(elementClass, reader, closeInputStreamWhenStreamIsClosed, config);
     }
 
     @Override
-    public <T> ExceptionalStream<T, IOException> stream(final Class<T> elementClass, final Reader reader, final JSONDeserializationConfig config) {
+    public <T> ExceptionalStream<T, IOException> stream(final Class<T> elementClass, final Reader reader, final boolean closeReaderWhenStreamIsClosed,
+            final JSONDeserializationConfig config) {
         N.checkArgNotNull(reader, "reader");
-        final Type<T> eleType = checkStreamSupportedType(elementClass);
-        final JSONDeserializationConfig configToUse = check(config);
-
+        ExceptionalStream<T, IOException> result = null;
         final char[] rbuf = Objectory.createCharArrayBuffer();
         final char[] cbuf = Objectory.createCharArrayBuffer();
-        ExceptionalStream<T, IOException> result = null;
 
         try {
+            final Type<T> eleType = checkStreamSupportedType(elementClass);
+            final JSONDeserializationConfig configToUse = check(config);
+
             final JSONReader jr = JSONStreamReader.parse(reader, rbuf, cbuf);
 
             result = stream(eleType, elementClass, reader, jr, configToUse).onClose(() -> {
                 Objectory.recycle(rbuf);
                 Objectory.recycle(cbuf);
+
+                if (closeReaderWhenStreamIsClosed) {
+                    IOUtil.closeQuietly(reader);
+                }
             });
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -3178,6 +3182,10 @@ final class JSONParserImpl extends AbstractJSONParser {
             if (result == null) {
                 Objectory.recycle(rbuf);
                 Objectory.recycle(cbuf);
+
+                if (closeReaderWhenStreamIsClosed) {
+                    IOUtil.closeQuietly(reader);
+                }
             }
         }
 

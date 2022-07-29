@@ -1279,7 +1279,7 @@ final class XMLParserImpl extends AbstractXMLParser {
 
                                     } else {
                                         Collection<Object> c = Collection.class.isAssignableFrom(propType.clazz())
-                                                ? (Collection<Object>) N.newInstance(propType.clazz())
+                                                ? (Collection<Object>) N.newCollection(propType.clazz())
                                                 : new ArrayList<>();
 
                                         Type<?> propEleType = getPropEleType(propType);
@@ -1416,7 +1416,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                     }
                 }
 
-                final Map<Object, Object> map = (Map<Object, Object>) N.newInstance(targetClass);
+                final Map<Object, Object> map = N.newMap(targetClass);
                 int attrCount = 0;
 
                 for (int event = xmlReader.next(); xmlReader.hasNext(); event = xmlReader.next()) {
@@ -1474,7 +1474,7 @@ final class XMLParserImpl extends AbstractXMLParser {
 
                                     } else {
                                         Collection<Object> c = Collection.class.isAssignableFrom(propType.clazz())
-                                                ? (Collection<Object>) N.newInstance(propType.clazz())
+                                                ? (Collection<Object>) N.newCollection(propType.clazz())
                                                 : new ArrayList<>();
 
                                         Type<?> propEleType = getPropEleType(propType);
@@ -1647,7 +1647,7 @@ final class XMLParserImpl extends AbstractXMLParser {
 
                                     } else {
                                         Collection<Object> c = Collection.class.isAssignableFrom(propType.clazz())
-                                                ? (Collection<Object>) N.newInstance(propType.clazz())
+                                                ? (Collection<Object>) N.newCollection(propType.clazz())
                                                 : new ArrayList<>();
 
                                         Type<?> propEleType = getPropEleType(propType);
@@ -1853,7 +1853,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                     }
                 }
 
-                Collection<Object> result = (Collection<Object>) N.newInstance(targetClass);
+                Collection<Object> result = N.newCollection(targetClass);
 
                 for (int event = xmlReader.next(); xmlReader.hasNext(); event = xmlReader.next()) {
                     switch (event) {
@@ -2385,7 +2385,7 @@ final class XMLParserImpl extends AbstractXMLParser {
 
                 propValue = readByDOMParser(inputClass, propNode, config, propName, propType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false);
             } else {
-                Collection<Object> coll = Collection.class.isAssignableFrom(propType.clazz()) ? (Collection<Object>) N.newInstance(propType.clazz())
+                Collection<Object> coll = Collection.class.isAssignableFrom(propType.clazz()) ? (Collection<Object>) N.newCollection(propType.clazz())
                         : new ArrayList<>();
 
                 Type<?> propEleType = getPropEleType(propType);
