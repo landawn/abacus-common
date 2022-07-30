@@ -4734,7 +4734,8 @@ public class RowDataSet implements DataSet, Cloneable {
                         bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                     }
 
-                    bw.write(getColumnName(columnIndexes[i]));
+                    // bw.write(getColumnName(columnIndexes[i]));
+                    strType.writeCharacter(bw, getColumnName(columnIndexes[i]), config);
                 }
 
                 bw.write(IOUtil.LINE_SEPARATOR);

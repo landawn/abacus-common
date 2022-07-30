@@ -74,13 +74,8 @@ public final class CSVUtil {
 
     static final BiConsumer<String[], String> defaultCsvLineParser = CSV_LINE_PARSER_IN_JSON;
 
-    static final ThreadLocal<Function<String, String[]>> csvHeaderParser_TL = new ThreadLocal<>();
-    static final ThreadLocal<BiConsumer<String[], String>> csvLineParser_TL = new ThreadLocal<>();
-
-    static {
-        csvHeaderParser_TL.set(defaultCsvHeadereParser);
-        csvLineParser_TL.set(defaultCsvLineParser);
-    }
+    static final ThreadLocal<Function<String, String[]>> csvHeaderParser_TL = ThreadLocal.withInitial(() -> defaultCsvHeadereParser);
+    static final ThreadLocal<BiConsumer<String[], String>> csvLineParser_TL = ThreadLocal.withInitial(() -> defaultCsvLineParser);
 
     // TODO should share/use the same parser for line?
     public static void setCSVHeaderParser(final Function<String, String[]> parser) {
