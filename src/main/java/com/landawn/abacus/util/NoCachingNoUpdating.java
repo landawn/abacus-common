@@ -2042,4 +2042,73 @@ public interface NoCachingNoUpdating {
             return "[" + N.toString(left()) + ", " + N.toString(middle()) + ", " + N.toString(right()) + "]";
         }
     }
+
+    public static class Timed<T> implements NoCachingNoUpdating {
+
+        protected T value;
+        protected long timeInMillis;
+
+        protected Timed(T value, long timeInMillis) {
+            this.value = value;
+            this.timeInMillis = timeInMillis;
+        }
+
+        /**
+         *
+         * @param <T>
+         * @param value
+         * @param timeInMillis
+         * @return
+         */
+        public static <T> Timed<T> of(T value, long timeInMillis) {
+            return new Timed<>(value, timeInMillis);
+        }
+
+        protected void set(T value, long timeInMillis) {
+            this.value = value;
+            this.timeInMillis = timeInMillis;
+        }
+
+        /**
+         *
+         * @return time in milliseconds.
+         */
+        public long timestamp() {
+            return timeInMillis;
+        }
+
+        public T value() {
+            return value;
+        }
+
+        @Override
+        public int hashCode() {
+            return (int) (timeInMillis * 31 + (value == null ? 0 : value.hashCode()));
+        }
+
+        /**
+         *
+         * @param obj
+         * @return
+         */
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+
+            if (obj instanceof Timed) {
+                final Timed<?> other = (Timed<?>) obj;
+
+                return this.timeInMillis == other.timeInMillis && N.equals(this.value, other.value);
+            }
+
+            return false;
+        }
+
+        @Override
+        public String toString() {
+            return timeInMillis + ": " + N.toString(value);
+        }
+    }
 }
