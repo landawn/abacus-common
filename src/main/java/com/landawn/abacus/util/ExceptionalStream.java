@@ -17,7 +17,6 @@ package com.landawn.abacus.util;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Reader;
@@ -1296,7 +1295,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     @SafeVarargs
-    public static <T, E extends Exception> ExceptionalStream<T, E> concat(final Collection<? extends T>... a) {
+    public static <T, E extends Exception> ExceptionalStream<T, E> concat(final Iterable<? extends T>... a) {
+        if (N.isNullOrEmpty(a)) {
+            return empty();
+        }
+
+        return of(Iterators.concat(a));
+    }
+
+    @SafeVarargs
+    public static <T, E extends Exception> ExceptionalStream<T, E> concat(final Iterator<? extends T>... a) {
         if (N.isNullOrEmpty(a)) {
             return empty();
         }
@@ -6327,12 +6335,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return sorted(Comparators.NATURAL_ORDER);
     }
 
-    @IntermediateOp
-    @TerminalOpTriggered
-    public ExceptionalStream<T, E> reverseSorted() {
-        return sorted(Comparators.REVERSED_ORDER);
-    }
-
     /**
      *
      * @param comparator
@@ -6370,6 +6372,20 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         final Comparator<? super T> comparator = (o1, o2) -> N.compare(keyMapper.apply(o1), keyMapper.apply(o2));
 
         return sorted(comparator);
+    }
+
+    @IntermediateOp
+    @TerminalOpTriggered
+    public ExceptionalStream<T, E> reverseSorted() {
+        return sorted(Comparators.REVERSED_ORDER);
+    }
+
+    @IntermediateOp
+    @TerminalOpTriggered
+    public ExceptionalStream<T, E> reverseSorted(Comparator<? super T> comparator) {
+        final Comparator<? super T> cmp = comparator == null ? Comparators.REVERSED_ORDER : comparator.reversed();
+
+        return sorted(cmp);
     }
 
     /**
@@ -6729,6 +6745,45 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      *
      * @param <T2>
+     * @param <T3>
+     * @param <R>
+     * @param b
+     * @param c
+     * @param zipFunction
+     * @return
+     */
+    @IntermediateOp
+    public <T2, T3, R> ExceptionalStream<R, E> zipWith(final Collection<T2> b, final Collection<T3> c,
+            final Throwables.TriFunction<? super T, ? super T2, ? super T3, R, ? extends E> zipFunction) {
+        assertNotClosed();
+
+        return zip(this, ExceptionalStream.of(b), ExceptionalStream.of(c), zipFunction);
+    }
+
+    /**
+     *
+     * @param <T2>
+     * @param <T3>
+     * @param <R>
+     * @param b
+     * @param c
+     * @param valueForNoneA
+     * @param valueForNoneB
+     * @param valueForNoneC
+     * @param zipFunction
+     * @return
+     */
+    @IntermediateOp
+    public <T2, T3, R> ExceptionalStream<R, E> zipWith(final Collection<T2> b, final Collection<T3> c, final T valueForNoneA, final T2 valueForNoneB,
+            final T3 valueForNoneC, final Throwables.TriFunction<? super T, ? super T2, ? super T3, R, ? extends E> zipFunction) {
+        assertNotClosed();
+
+        return zip(this, ExceptionalStream.of(b), ExceptionalStream.of(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
+    }
+
+    /**
+     *
+     * @param <T2>
      * @param <R>
      * @param b
      * @param zipFunction
@@ -6887,7 +6942,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                                 errorConsumer.accept(e);
                             } else {
-                                throw ExceptionUtil.toRuntimeException(e);
+                                throwThrowable(e);
                             }
                         }
                     }
@@ -6945,7 +7000,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                                 errorConsumer.accept(e);
                             } else {
-                                throw ExceptionUtil.toRuntimeException(e);
+                                throwThrowable(e);
                             }
                         }
                     }
@@ -7007,7 +7062,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                                     errorConsumer.accept(e);
                                 } else {
-                                    throw ExceptionUtil.toRuntimeException(e);
+                                    throwThrowable(e);
                                 }
                             } else {
                                 break;
@@ -7100,7 +7155,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             private T ret = null;
 
             @Override
-            public boolean hasNext() {
+            public boolean hasNext() throws E {
                 if (next == none) {
                     try {
                         if (iter.hasNext()) {
@@ -7112,7 +7167,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                             next = fallbackValue;
                         } else {
-                            throw ExceptionUtil.toRuntimeException(e);
+                            throwThrowable(e);
                         }
                     }
                 }
@@ -7121,7 +7176,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
 
             @Override
-            public T next() {
+            public T next() throws E {
                 if (!hasNext()) {
                     throw new NoSuchElementException();
                 }
@@ -7165,7 +7220,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                             next = fallbackValue;
                         } else {
-                            throw ExceptionUtil.toRuntimeException(e);
+                            throwThrowable(e);
                         }
                     }
                 }
@@ -7219,7 +7274,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                             next = supplierForFallbackValue.get();
                         } else {
-                            throw ExceptionUtil.toRuntimeException(e);
+                            throwThrowable(e);
                         }
                     }
                 }
@@ -7277,7 +7332,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                                 next = mapperForFallbackValue.apply(e);
                             } else {
-                                throw ExceptionUtil.toRuntimeException(e);
+                                throwThrowable(e);
                             }
                         } else {
                             // break;
@@ -7338,6 +7393,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 return ret;
             }
         }, sorted, cmp, closeHandlers);
+    }
+
+    private void throwThrowable(Throwable e) throws E {
+        if (e instanceof Error) {
+            throw (Error) e;
+        } else {
+            throw (E) e;
+        }
     }
 
     /**
@@ -9523,7 +9586,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             throws E, IOException {
         assertNotClosed();
 
-        final Writer writer = new FileWriter(file);
+        final Writer writer = IOUtil.newFileWriter(file);
 
         try {
             return persist(toLine, header, tail, writer);
@@ -9618,7 +9681,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             throws E, IOException {
         assertNotClosed();
 
-        final Writer writer = new FileWriter(file);
+        final Writer writer = IOUtil.newFileWriter(file);
 
         try {
             return persist(writeLine, header, tail, writer);
@@ -9748,7 +9811,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @TerminalOp
     public long persistToCSV(File file) throws E, IOException {
-        final Writer writer = new FileWriter(file);
+        final Writer writer = IOUtil.newFileWriter(file);
 
         try {
             return persistToCSV(writer);
@@ -9768,7 +9831,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @TerminalOp
     public long persistToCSV(List<String> headers, File file) throws E, IOException {
-        final Writer writer = new FileWriter(file);
+        final Writer writer = IOUtil.newFileWriter(file);
 
         try {
             return persistToCSV(headers, writer);

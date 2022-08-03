@@ -18,7 +18,6 @@ import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -554,7 +553,7 @@ public final class XMLUtil {
                 xmlFile.createNewFile();
             }
 
-            os = new FileOutputStream(xmlFile);
+            os = IOUtil.newFileOutputStream(xmlFile);
 
             transform(doc, os);
 

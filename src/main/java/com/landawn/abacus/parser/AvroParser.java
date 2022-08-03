@@ -16,8 +16,6 @@ package com.landawn.abacus.parser;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -97,7 +95,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
                 file.createNewFile();
             }
 
-            os = new FileOutputStream(file);
+            os = IOUtil.newFileOutputStream(file);
 
             serialize(os, obj, config);
 
@@ -322,11 +320,9 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
         InputStream is = null;
 
         try {
-            is = new FileInputStream(file);
+            is = IOUtil.newFileInputStream(file);
 
             return deserialize(targetClass, is, config);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
         } finally {
             IOUtil.close(is);
         }

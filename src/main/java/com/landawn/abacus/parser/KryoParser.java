@@ -216,7 +216,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
                 file.createNewFile();
             }
 
-            os = new FileOutputStream(file);
+            os = IOUtil.newFileOutputStream(file);
 
             write(os, obj, config);
 
@@ -338,11 +338,9 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         InputStream is = null;
 
         try {
-            is = new FileInputStream(file);
+            is = IOUtil.newFileInputStream(file);
 
             return read(targetClass, is, config);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
         } finally {
             IOUtil.close(is);
         }

@@ -19,7 +19,6 @@ package com.landawn.abacus.util;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -145,17 +144,20 @@ public final class LineIterator extends ObjIterator<String> implements Closeable
      */
     public static LineIterator of(final File file, final Charset encoding) {
         InputStream in = null;
+        boolean noException = false;
 
         try {
-            in = new FileInputStream(file);
+            in = IOUtil.newFileInputStream(file);
 
-            return of(in, encoding);
-        } catch (final IOException ex) {
-            IOUtil.closeQuietly(in);
-            throw new UncheckedIOException(ex);
-        } catch (final RuntimeException ex) {
-            IOUtil.closeQuietly(in);
-            throw ex;
+            LineIterator iter = of(in, encoding);
+
+            noException = true;
+
+            return iter;
+        } finally {
+            if (noException == false && in != null) {
+                IOUtil.closeQuietly(in);
+            }
         }
     }
 

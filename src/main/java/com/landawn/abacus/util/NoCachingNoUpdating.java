@@ -2069,16 +2069,16 @@ public interface NoCachingNoUpdating {
             this.timeInMillis = timeInMillis;
         }
 
+        public T value() {
+            return value;
+        }
+
         /**
          *
          * @return time in milliseconds.
          */
         public long timestamp() {
             return timeInMillis;
-        }
-
-        public T value() {
-            return value;
         }
 
         @Override

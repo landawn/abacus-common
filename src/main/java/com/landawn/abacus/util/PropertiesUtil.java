@@ -15,9 +15,6 @@
 package com.landawn.abacus.util;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -109,7 +106,7 @@ public final class PropertiesUtil {
                             }
 
                             try {
-                                is = new FileInputStream(resource.getFile());
+                                is = IOUtil.newFileInputStream(resource.getFile());
 
                                 if (resource.getType() == ResourceType.PROPERTIES) {
                                     load((Properties<String, String>) properties, is);
@@ -185,7 +182,7 @@ public final class PropertiesUtil {
 
         InputStream is = null;
         try {
-            is = new FileInputStream(file);
+            is = IOUtil.newFileInputStream(file);
 
             if (autoRefresh) {
                 Resource resource = new Resource(Properties.class, file, ResourceType.PROPERTIES);
@@ -204,8 +201,6 @@ public final class PropertiesUtil {
             }
 
             return properties;
-        } catch (FileNotFoundException e) {
-            throw new UncheckedIOException(e);
         } finally {
             IOUtil.close(is);
         }
@@ -349,7 +344,7 @@ public final class PropertiesUtil {
         InputStream is = null;
 
         try {
-            is = new FileInputStream(file);
+            is = IOUtil.newFileInputStream(file);
 
             if (autoRefresh) {
                 Resource resource = new Resource(targetClass, file, ResourceType.XML);
@@ -369,8 +364,6 @@ public final class PropertiesUtil {
             }
 
             return properties;
-        } catch (FileNotFoundException e) {
-            throw new UncheckedIOException(e);
         } finally {
             IOUtil.close(is);
         }
@@ -555,7 +548,7 @@ public final class PropertiesUtil {
                 file.createNewFile();
             }
 
-            os = new FileOutputStream(file);
+            os = IOUtil.newFileOutputStream(file);
 
             store(properties, os, comments);
 
@@ -620,7 +613,7 @@ public final class PropertiesUtil {
                 file.createNewFile();
             }
 
-            os = new FileOutputStream(file);
+            os = IOUtil.newFileOutputStream(file);
 
             storeToXML(properties, os, rootElementName, ignoreTypeInfo);
 
@@ -784,11 +777,9 @@ public final class PropertiesUtil {
         InputStream is = null;
 
         try {
-            is = new FileInputStream(file);
+            is = IOUtil.newFileInputStream(file);
 
             xml2Java(is, srcPath, packageName, className, isPublicField);
-        } catch (FileNotFoundException e) {
-            throw new UncheckedIOException(e);
         } finally {
             IOUtil.close(is);
         }
@@ -828,7 +819,7 @@ public final class PropertiesUtil {
             }
 
             classFile.createNewFile();
-            writer = new OutputStreamWriter(new FileOutputStream(classFile), Charsets.UTF_8);
+            writer = new OutputStreamWriter(IOUtil.newFileOutputStream(classFile), Charsets.UTF_8);
             writer.write("package " + packageName + ";" + IOUtil.LINE_SEPARATOR);
 
             writer.write(IOUtil.LINE_SEPARATOR);

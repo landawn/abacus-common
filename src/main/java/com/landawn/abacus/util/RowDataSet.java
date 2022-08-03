@@ -17,7 +17,6 @@
 package com.landawn.abacus.util;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -3932,7 +3931,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 output.createNewFile();
             }
 
-            os = new FileOutputStream(output);
+            os = IOUtil.newFileOutputStream(output);
 
             toJSON(os, columnNames, fromRowIndex, toRowIndex);
 
@@ -4243,7 +4242,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 output.createNewFile();
             }
 
-            os = new FileOutputStream(output);
+            os = IOUtil.newFileOutputStream(output);
 
             toXML(os, rowElementName, columnNames, fromRowIndex, toRowIndex);
 
@@ -4585,7 +4584,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 output.createNewFile();
             }
 
-            os = new FileOutputStream(output);
+            os = IOUtil.newFileOutputStream(output);
 
             toCSV(os, columnNames, fromRowIndex, toRowIndex, writeTitle, quoted);
 

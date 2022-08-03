@@ -1411,7 +1411,7 @@ public final class IOUtil {
         InputStream is = null;
 
         try {
-            is = new FileInputStream(file);
+            is = IOUtil.newFileInputStream(file);
 
             return read(is, buf, off, len);
         } finally {
@@ -1517,7 +1517,7 @@ public final class IOUtil {
         Reader reader = null;
 
         try {
-            reader = new InputStreamReader(new FileInputStream(file), charset == null ? Charsets.UTF_8 : charset);
+            reader = new InputStreamReader(IOUtil.newFileInputStream(file), charset == null ? Charsets.UTF_8 : charset);
 
             return read(reader, buf, off, len);
         } finally {
@@ -1583,7 +1583,7 @@ public final class IOUtil {
         Writer writer = null;
 
         try {
-            writer = new FileWriter(file);
+            writer = IOUtil.newFileWriter(file);
 
             writeLine(writer, obj);
 
@@ -1675,7 +1675,7 @@ public final class IOUtil {
         Writer writer = null;
 
         try {
-            writer = new FileWriter(file);
+            writer = IOUtil.newFileWriter(file);
 
             writeLines(writer, lines, offset, count);
 
@@ -1870,7 +1870,7 @@ public final class IOUtil {
         Writer writer = null;
 
         try {
-            writer = new FileWriter(file);
+            writer = IOUtil.newFileWriter(file);
 
             writeLines(writer, lines, offset, count);
 
@@ -2604,7 +2604,7 @@ public final class IOUtil {
                 output.createNewFile();
             }
 
-            os = new FileOutputStream(output);
+            os = IOUtil.newFileOutputStream(output);
 
             write(os, bytes, offset, len);
 
@@ -2709,7 +2709,7 @@ public final class IOUtil {
                 output.createNewFile();
             }
 
-            os = new FileOutputStream(output);
+            os = IOUtil.newFileOutputStream(output);
 
             long result = write(os, input, offset, len);
 
@@ -2849,7 +2849,7 @@ public final class IOUtil {
         Writer writer = null;
 
         try {
-            writer = new OutputStreamWriter(new FileOutputStream(output), charset == null ? Charsets.UTF_8 : charset);
+            writer = new OutputStreamWriter(IOUtil.newFileOutputStream(output), charset == null ? Charsets.UTF_8 : charset);
 
             long result = write(writer, input, offset, len);
 
@@ -2964,8 +2964,8 @@ public final class IOUtil {
         InputStream is = null;
 
         try {
-            os = new FileOutputStream(output);
-            is = new FileInputStream(input);
+            os = IOUtil.newFileOutputStream(output);
+            is = IOUtil.newFileInputStream(input);
 
             return write(os, is, offset, len, true);
         } finally {
@@ -3023,7 +3023,7 @@ public final class IOUtil {
     public static long write(final OutputStream output, final File input, final long offset, final long len, final boolean flush) throws IOException {
         InputStream is = null;
         try {
-            is = new FileInputStream(input);
+            is = IOUtil.newFileInputStream(input);
 
             return write(output, is, offset, len, flush);
         } finally {
@@ -3080,7 +3080,7 @@ public final class IOUtil {
     public static long write(final Writer output, final File input, final long offset, final long len, final boolean flush) throws IOException {
         Reader reader = null;
         try {
-            reader = new FileReader(input);
+            reader = IOUtil.newBufferedReader(input);
 
             return write(output, reader, offset, len, flush);
         } finally {
@@ -3345,7 +3345,7 @@ public final class IOUtil {
 
         try {
             os = new FileOutputStream(output, true);
-            is = new FileInputStream(input);
+            is = IOUtil.newFileInputStream(input);
 
             return write(os, is, offset, len, true);
         } finally {
@@ -3671,6 +3671,62 @@ public final class IOUtil {
         return (dotIndex == -1) ? fileName : fileName.substring(0, dotIndex);
     }
 
+    public static FileOutputStream newFileOutputStream(final File file) throws UncheckedIOException {
+        try {
+            return new FileOutputStream(file);
+        } catch (FileNotFoundException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public static FileInputStream newFileInputStream(final File file) throws UncheckedIOException {
+        try {
+            return new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public static FileOutputStream newFileOutputStream(final String name) throws UncheckedIOException {
+        try {
+            return new FileOutputStream(name);
+        } catch (FileNotFoundException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public static FileReader newFileReader(final File file) throws UncheckedIOException {
+        try {
+            return new FileReader(file);
+        } catch (FileNotFoundException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public static FileReader newFileReader(final File file, final Charset charset) throws UncheckedIOException {
+        try {
+            return new FileReader(file, charset);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public static FileWriter newFileWriter(final File file) throws UncheckedIOException {
+        try {
+            return new FileWriter(file);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public static FileWriter newFileWriter(final File file, final Charset charset) throws UncheckedIOException {
+        try {
+            return new FileWriter(file, charset);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     /**
      * New buffered reader.
      *
@@ -3690,11 +3746,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static java.io.BufferedReader newBufferedReader(File file) throws UncheckedIOException {
-        try {
-            return new java.io.BufferedReader(new FileReader(file));
-        } catch (FileNotFoundException e) {
-            throw new UncheckedIOException(e);
-        }
+        return new java.io.BufferedReader(IOUtil.newFileReader(file));
     }
 
     /**
@@ -3706,11 +3758,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static java.io.BufferedReader newBufferedReader(File file, Charset charset) throws UncheckedIOException {
-        try {
-            return new java.io.BufferedReader(new InputStreamReader(new FileInputStream(file), charset == null ? Charsets.UTF_8 : charset));
-        } catch (FileNotFoundException e) {
-            throw new UncheckedIOException(e);
-        }
+        return new java.io.BufferedReader(new InputStreamReader(IOUtil.newFileInputStream(file), charset == null ? Charsets.UTF_8 : charset));
     }
 
     /**
@@ -3786,11 +3834,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static java.io.BufferedWriter newBufferedWriter(File file) throws UncheckedIOException {
-        try {
-            return new java.io.BufferedWriter(new FileWriter(file));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        return new java.io.BufferedWriter(IOUtil.newFileWriter(file));
     }
 
     /**
@@ -3802,11 +3846,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public static java.io.BufferedWriter newBufferedWriter(File file, Charset charset) throws UncheckedIOException {
-        try {
-            return new java.io.BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), charset == null ? Charsets.UTF_8 : charset));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        return new java.io.BufferedWriter(new OutputStreamWriter(IOUtil.newFileOutputStream(file), charset == null ? Charsets.UTF_8 : charset));
     }
 
     /**
@@ -4249,8 +4289,8 @@ public final class IOUtil {
         FileChannel output = null;
 
         try {
-            fis = new FileInputStream(srcFile);
-            fos = new FileOutputStream(destFile);
+            fis = IOUtil.newFileInputStream(srcFile);
+            fos = IOUtil.newFileOutputStream(destFile);
             input = fis.getChannel();
             output = fos.getChannel();
 
@@ -4797,7 +4837,7 @@ public final class IOUtil {
         ZipOutputStream zos = null;
 
         try {
-            zos = new ZipOutputStream(new FileOutputStream(targetFile));
+            zos = new ZipOutputStream(IOUtil.newFileOutputStream(targetFile));
             zipFile(sourceFile, zos, targetFile);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -4816,7 +4856,7 @@ public final class IOUtil {
         ZipOutputStream zos = null;
 
         try {
-            zos = new ZipOutputStream(new FileOutputStream(targetFile));
+            zos = new ZipOutputStream(IOUtil.newFileOutputStream(targetFile));
 
             for (File sourceFile : sourceFiles) {
                 zipFile(sourceFile, zos, targetFile);
@@ -4878,7 +4918,7 @@ public final class IOUtil {
         ze.setTime(file.lastModified());
         zos.putNextEntry(ze);
 
-        InputStream is = new FileInputStream(file);
+        InputStream is = IOUtil.newFileInputStream(file);
 
         final byte[] buf = Objectory.createByteArrayBuffer();
 
@@ -5002,11 +5042,11 @@ public final class IOUtil {
         InputStream input = null;
         OutputStream output = null;
         try {
-            input = new FileInputStream(file);
+            input = IOUtil.newFileInputStream(file);
 
             for (int i = 0; i < numOfParts; i++) {
                 String subFileNmae = destDir.getAbsolutePath() + IOUtil.FILE_SEPARATOR + fileName + "_" + Strings.padStart(N.stringOf(fileSerNum++), 4, '0');
-                output = new FileOutputStream(new File(subFileNmae));
+                output = IOUtil.newFileOutputStream(new File(subFileNmae));
                 long partLength = sizeOfPart;
 
                 if (i == numOfParts - 1) {
@@ -5079,7 +5119,7 @@ public final class IOUtil {
 
             String subFileNmae = destDir.getAbsolutePath() + IOUtil.FILE_SEPARATOR + prefix + "_" + Strings.padStart(N.stringOf(fileSerNum++), suffixLen, '0')
                     + postfix;
-            bw = Objectory.createBufferedWriter(new FileWriter(new File(subFileNmae)));
+            bw = Objectory.createBufferedWriter(IOUtil.newFileWriter(new File(subFileNmae)));
 
             int lineCounter = 0;
 
@@ -5095,7 +5135,7 @@ public final class IOUtil {
 
                     subFileNmae = destDir.getAbsolutePath() + IOUtil.FILE_SEPARATOR + prefix + "_" + Strings.padStart(N.stringOf(fileSerNum++), suffixLen, '0')
                             + postfix;
-                    bw = Objectory.createBufferedWriter(new FileWriter(new File(subFileNmae)));
+                    bw = Objectory.createBufferedWriter(IOUtil.newFileWriter(new File(subFileNmae)));
                 }
             }
 
@@ -5182,12 +5222,12 @@ public final class IOUtil {
         OutputStream output = null;
 
         try {
-            output = new FileOutputStream(destFile);
+            output = IOUtil.newFileOutputStream(destFile);
 
             InputStream input = null;
             for (File file : sourceFiles) {
                 try {
-                    input = new FileInputStream(file);
+                    input = IOUtil.newFileInputStream(file);
 
                     int count = 0;
                     while (EOF != (count = read(input, buf, 0, buf.length))) {
@@ -6218,7 +6258,7 @@ public final class IOUtil {
         InputStream is = null;
 
         if (file.getName().endsWith(GZ)) {
-            is = new GZIPInputStream(new FileInputStream(file));
+            is = new GZIPInputStream(IOUtil.newFileInputStream(file));
         } else if (file.getName().endsWith(ZIP)) {
             ZipFile zf = new ZipFile(file);
 

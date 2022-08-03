@@ -27,8 +27,6 @@ import static com.landawn.abacus.parser.JSONReader.START_QUOTATION_D;
 import static com.landawn.abacus.parser.JSONReader.START_QUOTATION_S;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -384,7 +382,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                 file.createNewFile();
             }
 
-            os = new FileOutputStream(file);
+            os = IOUtil.newFileOutputStream(file);
 
             serialize(os, obj, configToUse);
 
@@ -1579,11 +1577,9 @@ final class JSONParserImpl extends AbstractJSONParser {
         InputStream is = null;
 
         try {
-            is = new FileInputStream(file);
+            is = IOUtil.newFileInputStream(file);
 
             return deserialize(targetClass, is, config);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
         } finally {
             IOUtil.closeQuietly(is);
         }
@@ -3132,11 +3128,9 @@ final class JSONParserImpl extends AbstractJSONParser {
         InputStream is = null;
 
         try {
-            is = new FileInputStream(file);
+            is = IOUtil.newFileInputStream(file);
 
             result = stream(elementClass, is, true, config);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
         } finally {
             if (result == null) {
                 IOUtil.closeQuietly(is);

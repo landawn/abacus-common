@@ -15,8 +15,6 @@
 package com.landawn.abacus.parser;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -118,7 +116,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                 file.createNewFile();
             }
 
-            os = new FileOutputStream(file);
+            os = IOUtil.newFileOutputStream(file);
 
             serialize(os, obj, config);
 
@@ -950,11 +948,9 @@ final class XMLParserImpl extends AbstractXMLParser {
         InputStream is = null;
 
         try {
-            is = new FileInputStream(file);
+            is = IOUtil.newFileInputStream(file);
 
             return deserialize(targetClass, is, config);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
         } finally {
             IOUtil.closeQuietly(is);
         }

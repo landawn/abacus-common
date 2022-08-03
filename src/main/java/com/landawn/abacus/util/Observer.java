@@ -70,15 +70,15 @@ public abstract class Observer<T> implements Immutable {
     protected static final ScheduledThreadPoolExecutor schedulerForIntermediateOp = new ScheduledThreadPoolExecutor(
             IOUtil.IS_PLATFORM_ANDROID ? Math.max(8, IOUtil.CPU_CORES) : Math.max(64, Math.min(IOUtil.CPU_CORES * 8, IOUtil.MAX_MEMORY_IN_MB / 1024) * 32));
 
-    static {
-        schedulerForIntermediateOp.setRemoveOnCancelPolicy(true);
-    }
-
     protected static final ScheduledThreadPoolExecutor schedulerForObserveOp = new ScheduledThreadPoolExecutor(
             IOUtil.IS_PLATFORM_ANDROID ? Math.max(8, IOUtil.CPU_CORES) : Math.max(64, Math.min(IOUtil.CPU_CORES * 8, IOUtil.MAX_MEMORY_IN_MB / 1024) * 32));
 
     static {
+        schedulerForIntermediateOp.setRemoveOnCancelPolicy(true);
         schedulerForObserveOp.setRemoveOnCancelPolicy(true);
+
+        MoreExecutors.addDelayedShutdownHook(schedulerForIntermediateOp, 120, TimeUnit.SECONDS);
+        MoreExecutors.addDelayedShutdownHook(schedulerForObserveOp, 120, TimeUnit.SECONDS);
     }
 
     protected final Map<ScheduledFuture<?>, Long> scheduledFutures = new LinkedHashMap<>();

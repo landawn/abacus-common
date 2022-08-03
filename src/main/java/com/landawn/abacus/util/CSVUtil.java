@@ -16,7 +16,6 @@
 package com.landawn.abacus.util;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -159,11 +158,9 @@ public final class CSVUtil {
         InputStream csvInputStream = null;
 
         try {
-            csvInputStream = new FileInputStream(csvFile);
+            csvInputStream = IOUtil.newFileInputStream(csvFile);
 
             return loadCSV(csvInputStream, selectColumnNames, offset, count, filter);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
         } finally {
             IOUtil.closeQuietly(csvInputStream);
         }
@@ -394,11 +391,9 @@ public final class CSVUtil {
         InputStream csvInputStream = null;
 
         try {
-            csvInputStream = new FileInputStream(csvFile);
+            csvInputStream = IOUtil.newFileInputStream(csvFile);
 
             return loadCSV(entityClass, csvInputStream, selectColumnNames, offset, count, filter);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
         } finally {
             IOUtil.closeQuietly(csvInputStream);
         }
@@ -640,11 +635,9 @@ public final class CSVUtil {
         InputStream csvInputStream = null;
 
         try {
-            csvInputStream = new FileInputStream(csvFile);
+            csvInputStream = IOUtil.newFileInputStream(csvFile);
 
             return loadCSV(csvInputStream, offset, count, filter, columnTypeMap);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
         } finally {
             IOUtil.closeQuietly(csvInputStream);
         }
@@ -856,11 +849,9 @@ public final class CSVUtil {
         InputStream csvInputStream = null;
 
         try {
-            csvInputStream = new FileInputStream(csvFile);
+            csvInputStream = IOUtil.newFileInputStream(csvFile);
 
             return loadCSV(csvInputStream, offset, count, filter, columnTypeList);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
         } finally {
             IOUtil.closeQuietly(csvInputStream);
         }
@@ -1028,7 +1019,7 @@ public final class CSVUtil {
         FileReader csvReader = null;
 
         try {
-            csvReader = new FileReader(csvFile);
+            csvReader = IOUtil.newFileReader(csvFile);
 
             return stream(targetType, csvReader, selectColumnNames, offset, count, true, filter);
         } catch (Exception e) {
