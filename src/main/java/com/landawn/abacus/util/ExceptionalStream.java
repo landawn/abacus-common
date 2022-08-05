@@ -47,6 +47,12 @@ import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BinaryOperator;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.IntFunction;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.StreamSupport;
 
@@ -77,12 +83,6 @@ import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.u.OptionalLong;
-import com.landawn.abacus.util.function.BinaryOperator;
-import com.landawn.abacus.util.function.Consumer;
-import com.landawn.abacus.util.function.Function;
-import com.landawn.abacus.util.function.IntFunction;
-import com.landawn.abacus.util.function.Predicate;
-import com.landawn.abacus.util.function.Supplier;
 import com.landawn.abacus.util.stream.Collectors;
 import com.landawn.abacus.util.stream.DoubleStream;
 import com.landawn.abacus.util.stream.IntStream;
@@ -124,7 +124,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     static final Throwables.Function<OptionalDouble, Double, RuntimeException> GET_AS_DOUBLE = OptionalDouble::get;
 
     @SuppressWarnings("rawtypes")
-    static final Function<Optional, Object> GET_AS_IT = it -> it.orElse(null);
+    static final Throwables.Function<Optional, Object, RuntimeException> GET_AS_IT = it -> it.orElse(null);
 
     static final Throwables.Function<java.util.OptionalInt, Integer, RuntimeException> GET_AS_INT_JDK = java.util.OptionalInt::getAsInt;
 
@@ -133,7 +133,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     static final Throwables.Function<java.util.OptionalDouble, Double, RuntimeException> GET_AS_DOUBLE_JDK = java.util.OptionalDouble::getAsDouble;
 
     @SuppressWarnings("rawtypes")
-    static final Function<java.util.Optional, Object> GET_AS_IT_JDK = it -> it.orElse(null);
+    static final Throwables.Function<java.util.Optional, Object, RuntimeException> GET_AS_IT_JDK = it -> it.orElse(null);
 
     static final Throwables.Predicate<OptionalInt, RuntimeException> IS_PRESENT_INT = OptionalInt::isPresent;
 
@@ -9823,18 +9823,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
-     * @param headers
+     * @param csvHeaders
      * @param file
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persistToCSV(List<String> headers, File file) throws E, IOException {
+    public long persistToCSV(Collection<String> csvHeaders, File file) throws E, IOException {
         final Writer writer = IOUtil.newFileWriter(file);
 
         try {
-            return persistToCSV(headers, writer);
+            return persistToCSV(csvHeaders, writer);
         } finally {
             IOUtil.close(writer);
         }
@@ -9862,18 +9862,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
-     * @param headers
+     * @param csvHeaders
      * @param os
      * @return
      * @throws E
      * @throws IOException
      */
     @TerminalOp
-    public long persistToCSV(List<String> headers, OutputStream os) throws E, IOException {
+    public long persistToCSV(Collection<String> csvHeaders, OutputStream os) throws E, IOException {
         final BufferedWriter bw = Objectory.createBufferedWriter(os);
 
         try {
-            return persistToCSV(headers, bw);
+            return persistToCSV(csvHeaders, bw);
         } finally {
             IOUtil.close(bw);
         }
@@ -9881,6 +9881,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     private static final Throwables.TriConsumer<Type<Object>, Object, BufferedJSONWriter, IOException> WRITE_CSV_ELEMENT_WITH_TYPE;
     private static final Throwables.BiConsumer<Object, BufferedJSONWriter, IOException> WRITE_CSV_ELEMENT;
+    private static final Throwables.BiConsumer<String, BufferedJSONWriter, IOException> WRITE_CSV_STRING;
+
     static {
         final JSONParser jsonParser = ParserFactory.createJSONParser();
         final Type<Object> strType = N.typeOf(String.class);
@@ -9908,6 +9910,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 WRITE_CSV_ELEMENT_WITH_TYPE.accept(N.typeOf(element.getClass()), element, bw);
             }
         };
+
+        WRITE_CSV_STRING = (str, bw) -> strType.writeCharacter(bw, str, config);
     }
 
     /**
@@ -9947,7 +9951,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                                 bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
-                            WRITE_CSV_ELEMENT.accept(propInfoList.get(i).name, bw);
+                            WRITE_CSV_STRING.accept(propInfoList.get(i).name, bw);
                         }
 
                         bw.write(IOUtil.LINE_SEPARATOR);
@@ -10043,11 +10047,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @throws IOException
      */
     @TerminalOp
-    public long persistToCSV(List<String> headers, Writer writer) throws E, IOException {
-        N.checkArgNotNullOrEmpty(headers, "headers");
+    public long persistToCSV(Collection<String> csvHeaders, Writer writer) throws E, IOException {
+        checkArgNotNullOrEmpty(csvHeaders, "csvHeaders");
         assertNotClosed();
 
         try {
+            List<String> headers = new ArrayList<>(csvHeaders);
             final boolean isBufferedWriter = writer instanceof BufferedJSONWriter;
             final BufferedJSONWriter bw = isBufferedWriter ? (BufferedJSONWriter) writer : Objectory.createBufferedJSONWriter(writer);
 
@@ -10077,7 +10082,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                                 bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
-                            WRITE_CSV_ELEMENT.accept(propInfos[i].name, bw);
+                            WRITE_CSV_STRING.accept(headers.get(i), bw);
                         }
 
                         bw.write(IOUtil.LINE_SEPARATOR);
@@ -10116,7 +10121,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                                 bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
-                            WRITE_CSV_ELEMENT.accept(headers.get(i), bw);
+                            WRITE_CSV_STRING.accept(headers.get(i), bw);
                         }
 
                         bw.write(IOUtil.LINE_SEPARATOR);
@@ -10151,7 +10156,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                                 bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
-                            WRITE_CSV_ELEMENT.accept(headers.get(i), bw);
+                            WRITE_CSV_STRING.accept(headers.get(i), bw);
                         }
 
                         bw.write(IOUtil.LINE_SEPARATOR);
@@ -10189,7 +10194,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                                 bw.write(Strings.ELEMENT_SEPARATOR_CHAR_ARRAY);
                             }
 
-                            WRITE_CSV_ELEMENT.accept(headers.get(i), bw);
+                            WRITE_CSV_STRING.accept(headers.get(i), bw);
                         }
 
                         bw.write(IOUtil.LINE_SEPARATOR);
@@ -11503,6 +11508,23 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         if (obj == null) {
             try {
                 N.checkArgNotNull(obj, errorMessage);
+            } finally {
+                try {
+                    close();
+                } catch (Exception e) {
+                    throw ExceptionUtil.toRuntimeException(e);
+                }
+            }
+        }
+
+        return obj;
+    }
+
+    @SuppressWarnings("rawtypes")
+    <ARG extends Collection> ARG checkArgNotNullOrEmpty(final ARG obj, final String errorMessage) {
+        if (obj == null || obj.size() == 0) {
+            try {
+                N.checkArgNotNullOrEmpty(obj, errorMessage);
             } finally {
                 try {
                     close();

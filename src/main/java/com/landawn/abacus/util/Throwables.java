@@ -44,8 +44,7 @@ public final class Throwables {
      * @param cmd
      * @param actionOnError
      */
-    public static void run(final Throwables.Runnable<? extends Throwable> cmd,
-            final com.landawn.abacus.util.function.Consumer<? super Throwable> actionOnError) {
+    public static void run(final Throwables.Runnable<? extends Throwable> cmd, final java.util.function.Consumer<? super Throwable> actionOnError) {
         N.checkArgNotNull(actionOnError);
 
         try {
