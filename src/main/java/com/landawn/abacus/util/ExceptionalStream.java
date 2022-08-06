@@ -115,6 +115,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     static final Logger logger = LoggerFactory.getLogger(ExceptionalStream.class);
 
+    static final Object NONE = N.NULL_MASK;
+
     static final Random RAND = new SecureRandom();
 
     static final Throwables.Function<OptionalInt, Integer, RuntimeException> GET_AS_INT = OptionalInt::get;
@@ -935,7 +937,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         N.checkArgNotNull(f, "f");
 
         return newStream(new ExceptionalIterator<T, E>() {
-            private final T none = (T) N.NULL_MASK;
+            private final T none = (T) NONE;
             private T t = none;
             private boolean hasNextVal = false;
 
@@ -975,7 +977,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         N.checkArgNotNull(f, "f");
 
         return newStream(new ExceptionalIterator<T, E>() {
-            private final T none = (T) N.NULL_MASK;
+            private final T none = (T) NONE;
             private T t = none;
             private T cur = none;
             private boolean hasMore = true;
@@ -1020,7 +1022,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         N.checkArgNotNull(f, "f");
 
         return newStream(new ExceptionalIterator<T, E>() {
-            private final T none = (T) N.NULL_MASK;
+            private final T none = (T) NONE;
             private T t = none;
 
             @Override
@@ -3335,7 +3337,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         return newStream(new ExceptionalIterator<R, E>() {
             @SuppressWarnings("unchecked")
-            private final T none = (T) N.NULL_MASK;
+            private final T none = (T) NONE;
             private T prev = none;
             private T _1 = none;
 
@@ -3421,7 +3423,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         return newStream(new ExceptionalIterator<R, E>() {
             @SuppressWarnings("unchecked")
-            private final T none = (T) N.NULL_MASK;
+            private final T none = (T) NONE;
             private T prev = none;
             private T prev2 = none;
             private T _1 = none;
@@ -4712,7 +4714,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //    private static final Throwables.Predicate NOT_NULL_MASK = new Throwables.Predicate<Object, RuntimeException>() {
     //        @Override
     //        public boolean test(final Object t) {
-    //            return t != N.NULL_MASK;
+    //            return t != NONE;
     //        }
     //    };
     //
@@ -4874,7 +4876,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //                        if (iter.hasNext()) {
     //                            return iter.next();
     //                        } else {
-    //                            return (T) N.NULL_MASK;
+    //                            return (T) NONE;
     //                        }
     //                    } else {
     //                        throw (E) e;
@@ -4947,7 +4949,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //                        if (iter.hasNext()) {
     //                            return iter.next();
     //                        } else {
-    //                            return (T) N.NULL_MASK;
+    //                            return (T) NONE;
     //                        }
     //                    } else {
     //                        throw (E) e;
@@ -5020,7 +5022,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //                        if (iter.hasNext()) {
     //                            return iter.next();
     //                        } else {
-    //                            return (T) N.NULL_MASK;
+    //                            return (T) NONE;
     //                        }
     //                    } else {
     //                        throw (E) e;
@@ -6868,7 +6870,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         return newStream(new ExceptionalIterator<T, E>() {
             private final ExceptionalIterator<T, E> iter = iteratorEx();
-            private final T none = (T) N.NULL_MASK;
+            private final T none = (T) NONE;
             private T next = none;
             private T ret = null;
 
@@ -6922,7 +6924,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         return newStream(new ExceptionalIterator<T, E>() {
             private final ExceptionalIterator<T, E> iter = iteratorEx();
-            private final T none = (T) N.NULL_MASK;
+            private final T none = (T) NONE;
             private T next = none;
             private T ret = null;
 
@@ -6980,7 +6982,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         return newStream(new ExceptionalIterator<T, E>() {
             private final ExceptionalIterator<T, E> iter = iteratorEx();
-            private final T none = (T) N.NULL_MASK;
+            private final T none = (T) NONE;
             private T next = none;
             private T ret = null;
 
@@ -7041,7 +7043,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return newStream(new ExceptionalIterator<T, E>() {
             private final AtomicInteger errorCounter = new AtomicInteger(maxErrorCountToStop);
             private final ExceptionalIterator<T, E> iter = iteratorEx();
-            private final T none = (T) N.NULL_MASK;
+            private final T none = (T) NONE;
             private T next = none;
             private T ret = null;
 
@@ -7101,7 +7103,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         return newStream(new ExceptionalIterator<T, E>() {
             private final ExceptionalIterator<T, E> iter = iteratorEx();
-            private final T none = (T) N.NULL_MASK;
+            private final T none = (T) NONE;
             private T next = none;
             private T ret = null;
 
@@ -7150,7 +7152,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         return newStream(new ExceptionalIterator<T, E>() {
             private final ExceptionalIterator<T, E> iter = iteratorEx();
-            private final T none = (T) N.NULL_MASK;
+            private final T none = (T) NONE;
             private T next = none;
             private T ret = null;
 
@@ -7203,7 +7205,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         return newStream(new ExceptionalIterator<T, E>() {
             private final ExceptionalIterator<T, E> iter = iteratorEx();
-            private final T none = (T) N.NULL_MASK;
+            private final T none = (T) NONE;
             private T next = none;
             private T ret = null;
 
@@ -7257,7 +7259,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         return newStream(new ExceptionalIterator<T, E>() {
             private final ExceptionalIterator<T, E> iter = iteratorEx();
-            private final T none = (T) N.NULL_MASK;
+            private final T none = (T) NONE;
             private T next = none;
             private T ret = null;
 
@@ -7314,7 +7316,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return newStream(new ExceptionalIterator<T, E>() {
             private final AtomicInteger errorCounter = new AtomicInteger(maxErrorCountToStop);
             private final ExceptionalIterator<T, E> iter = iteratorEx();
-            private final T none = (T) N.NULL_MASK;
+            private final T none = (T) NONE;
             private T next = none;
             private T ret = null;
 
@@ -7363,7 +7365,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         return newStream(new ExceptionalIterator<T, E>() {
             private final ExceptionalIterator<T, E> iter = iteratorEx();
-            private final T none = (T) N.NULL_MASK;
+            private final T none = (T) NONE;
             private T next = none;
             private T ret = null;
 
@@ -8015,20 +8017,122 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         assertNotClosed();
 
         try {
-            T e = null;
+            T next = null;
 
             while (elements.hasNext()) {
-                e = elements.next();
+                next = elements.next();
 
-                if (predicate.test(e)) {
-                    return Optional.of(e);
+                if (predicate.test(next)) {
+                    return Optional.of(next);
                 }
             }
+
+            return Optional.<T> empty();
         } finally {
             close();
         }
+    }
 
-        return (Optional<T>) Optional.empty();
+    /**
+     *
+     * @param <E2>
+     * @param predicateForFirst
+     * @return
+     * @throws E
+     * @throws E2
+     */
+    @TerminalOp
+    public <E2 extends Exception> Optional<T> findFirstOrAny(final Throwables.Predicate<? super T, E2> predicateForFirst) throws E, E2 {
+        assertNotClosed();
+
+        try {
+            T ret = (T) NONE;
+            T next = null;
+
+            while (elements.hasNext()) {
+                next = elements.next();
+
+                if (predicateForFirst.test(next)) {
+                    return Optional.of(next);
+                } else if (ret == NONE) {
+                    ret = next;
+                }
+            }
+
+            return ret == NONE ? Optional.<T> empty() : Optional.of(ret);
+        } finally {
+            close();
+        }
+    }
+
+    /**
+     *
+     * @param <E2>
+     * @param <E3>
+     * @param predicateForFirst
+     * @param predicateForAny
+     * @return
+     * @throws E
+     * @throws E2
+     * @throws E3
+     */
+    @TerminalOp
+    public <E2 extends Exception, E3 extends Exception> Optional<T> findFirstOrAny(final Throwables.Predicate<? super T, E2> predicateForFirst,
+            final Throwables.Predicate<? super T, E3> predicateForAny) throws E, E2, E3 {
+        assertNotClosed();
+
+        try {
+            T ret = (T) NONE;
+            T next = null;
+
+            while (elements.hasNext()) {
+                next = elements.next();
+
+                if (predicateForFirst.test(next)) {
+                    return Optional.of(next);
+                } else if (ret == NONE) {
+                    if (predicateForAny.test(next)) {
+                        ret = next;
+                    }
+                }
+            }
+
+            return ret == NONE ? Optional.<T> empty() : Optional.of(ret);
+        } finally {
+            close();
+        }
+    }
+
+    /**
+     *
+     * @param <E2>
+     * @param predicateForFirst
+     * @return
+     * @throws E
+     * @throws E2
+     */
+    @TerminalOp
+    public <E2 extends Exception> Optional<T> findFirstOrLast(final Throwables.Predicate<? super T, E2> predicateForFirst) throws E, E2 {
+        assertNotClosed();
+
+        try {
+            T ret = (T) NONE;
+            T next = null;
+
+            while (elements.hasNext()) {
+                next = elements.next();
+
+                if (predicateForFirst.test(next)) {
+                    return Optional.of(next);
+                } else {
+                    ret = next;
+                }
+            }
+
+            return ret == NONE ? Optional.<T> empty() : Optional.of(ret);
+        } finally {
+            close();
+        }
     }
 
     /**
@@ -8045,24 +8149,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         assertNotClosed();
 
         try {
-            if (!elements.hasNext()) {
-                return (Optional<T>) Optional.empty();
-            }
-
-            boolean hasResult = false;
-            T e = null;
-            T result = null;
+            T result = (T) NONE;
+            T next = null;
 
             while (elements.hasNext()) {
-                e = elements.next();
+                next = elements.next();
 
-                if (predicate.test(e)) {
-                    result = e;
-                    hasResult = true;
+                if (predicate.test(next)) {
+                    result = next;
                 }
             }
 
-            return hasResult ? Optional.of(result) : (Optional<T>) Optional.empty();
+            return result == NONE ? Optional.<T> empty() : Optional.of(result);
         } finally {
             close();
         }
@@ -12261,7 +12359,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
 
         @SafeVarargs
-        public static <T> ExceptionalStream<T, RuntimeException> concat(final Collection<? extends T>... a) {
+        public static <T> ExceptionalStream<T, RuntimeException> concat(final Iterable<? extends T>... a) {
+            return ExceptionalStream.<T, RuntimeException> concat(a);
+        }
+
+        @SafeVarargs
+        public static <T> ExceptionalStream<T, RuntimeException> concat(final Iterator<? extends T>... a) {
             return ExceptionalStream.<T, RuntimeException> concat(a);
         }
 
