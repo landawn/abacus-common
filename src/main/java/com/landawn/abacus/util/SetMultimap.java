@@ -491,7 +491,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
         N.checkArgNotNull(map, "map");
         N.checkArgNotNull(valueSupplier, "valueSupplier");
 
-        return new SetMultimap<K, E>((Map) map, valueSupplier);
+        return new SetMultimap<>((Map) map, valueSupplier);
     }
 
     /**

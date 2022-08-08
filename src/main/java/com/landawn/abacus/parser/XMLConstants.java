@@ -506,49 +506,49 @@ public class XMLConstants {
     /**
      * Field START_ARRAY_ELE_WITH_TYPE. (value is ""<array type=\""")
      */
-    public static final char[] START_ARRAY_ELE_WITH_TYPE = "<array type=\"".toCharArray();
+    static final char[] START_ARRAY_ELE_WITH_TYPE = "<array type=\"".toCharArray();
     /**
      * Field START_LIST_ELE_WITH_TYPE. (value is ""<list type=\""")
      */
-    public static final char[] START_LIST_ELE_WITH_TYPE = "<list type=\"".toCharArray();
+    static final char[] START_LIST_ELE_WITH_TYPE = "<list type=\"".toCharArray();
     /**
      * Field START_SET_ELE_WITH_TYPE. (value is ""<set type=\""")
      */
-    public static final char[] START_SET_ELE_WITH_TYPE = "<set type=\"".toCharArray();
+    static final char[] START_SET_ELE_WITH_TYPE = "<set type=\"".toCharArray();
     /**
      * Field START_COLLECTION_ELE_WITH_TYPE. (value is ""<collection type=\""")
      */
-    public static final char[] START_COLLECTION_ELE_WITH_TYPE = "<collection type=\"".toCharArray();
+    static final char[] START_COLLECTION_ELE_WITH_TYPE = "<collection type=\"".toCharArray();
     /**
      * Field START_E_ELE_WITH_TYPE. (value is ""<e type=\""")
      */
-    public static final char[] START_E_ELE_WITH_TYPE = "<e type=\"".toCharArray();
+    static final char[] START_E_ELE_WITH_TYPE = "<e type=\"".toCharArray();
     /**
      * Field START_MAP_ELE_WITH_TYPE. (value is ""<map type=\""")
      */
-    public static final char[] START_MAP_ELE_WITH_TYPE = "<map type=\"".toCharArray();
+    static final char[] START_MAP_ELE_WITH_TYPE = "<map type=\"".toCharArray();
     /**
      * Field START_KEY_ELE_WITH_TYPE. (value is ""<key type=\""")
      */
-    public static final char[] START_KEY_ELE_WITH_TYPE = "<key type=\"".toCharArray();
+    static final char[] START_KEY_ELE_WITH_TYPE = "<key type=\"".toCharArray();
     /**
      * Field START_KEY_ELE_WITH_STRING_TYPE. (value is ""<key type=\"String\">"")
      */
-    public static final char[] START_KEY_ELE_WITH_STRING_TYPE = "<key type=\"String\">".toCharArray();
+    static final char[] START_KEY_ELE_WITH_STRING_TYPE = "<key type=\"String\">".toCharArray();
     /**
      * Field START_VALUE_ELE_WITH_TYPE. (value is ""<value type=\""")
      */
-    public static final char[] START_VALUE_ELE_WITH_TYPE = "<value type=\"".toCharArray();
+    static final char[] START_VALUE_ELE_WITH_TYPE = "<value type=\"".toCharArray();
     /**
      * Field START_TYPE_ATTR. (value is "" type=\""")
      */
-    public static final String START_TYPE_ATTR = " type=\"";
+    static final char[] START_TYPE_ATTR = " type=\"".toCharArray();
     /**
      * Field CLOSE_ATTR_AND_ELE. (value is ""\">"")
      */
-    public static final char[] CLOSE_ATTR_AND_ELE = "\">".toCharArray();
+    static final char[] CLOSE_ATTR_AND_ELE = "\">".toCharArray();
     /**
      * Field END_ELEMENT. (value is "" />"")
      */
-    public static final char[] END_ELEMENT = " />".toCharArray();
+    static final char[] END_ELEMENT = " />".toCharArray();
 }

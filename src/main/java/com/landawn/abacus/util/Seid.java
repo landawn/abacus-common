@@ -39,7 +39,7 @@ import com.landawn.abacus.parser.ParserUtil.EntityInfo;
  */
 public class Seid implements EntityId, Cloneable {
 
-    private static final Comparator<String> keyComparator = (a, b) -> N.compare(a, b);
+    private static final Comparator<String> keyComparator = Comparators.NATURAL_ORDER;
 
     private final String entityName;
 

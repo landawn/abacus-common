@@ -34,10 +34,9 @@ import com.landawn.abacus.annotation.NullSafe;
  * @see com.landawn.abacus.util.N
  */
 public final class Array {
-    static volatile int CPU_CORES = Runtime.getRuntime().availableProcessors();
+    static final int CPU_CORES = Runtime.getRuntime().availableProcessors();
 
-    static final Executor parallelSortExecutor = new ThreadPoolExecutor(Math.min(8, CPU_CORES), CPU_CORES, 180L, TimeUnit.SECONDS,
-            new LinkedBlockingQueue<Runnable>());
+    static final Executor parallelSortExecutor = new ThreadPoolExecutor(Math.min(8, CPU_CORES), CPU_CORES, 180L, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
     static final int MIN_ARRAY_SORT_GRAN = 8192;
 

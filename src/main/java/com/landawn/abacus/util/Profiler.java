@@ -676,7 +676,7 @@ public final class Profiler {
         /**
          * Instantiates a new abstract statistics.
          */
-        public AbstractStatistics() {
+        protected AbstractStatistics() {
             this(0, 0, 0, 0);
         }
 
@@ -688,7 +688,7 @@ public final class Profiler {
          * @param startTimeInNano
          * @param endTimeInNano
          */
-        public AbstractStatistics(final long startTimeInMillis, final long endTimeInMillis, final long startTimeInNano, final long endTimeInNano) {
+        protected AbstractStatistics(final long startTimeInMillis, final long endTimeInMillis, final long startTimeInNano, final long endTimeInNano) {
             this.startTimeInMillis = startTimeInMillis;
             this.endTimeInMillis = endTimeInMillis;
             this.startTimeInNano = startTimeInNano;

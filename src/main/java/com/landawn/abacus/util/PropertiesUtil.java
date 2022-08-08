@@ -585,9 +585,7 @@ public final class PropertiesUtil {
     public static void store(Properties<?, ?> properties, Writer writer, String comments) {
         final java.util.Properties tmp = new java.util.Properties();
 
-        for (Object key : properties.keySet()) {
-            tmp.put(key, properties.get(key));
-        }
+        tmp.putAll(properties);
 
         try {
             tmp.store(writer, comments);
@@ -693,7 +691,7 @@ public final class PropertiesUtil {
                 if (propValue instanceof List && properties.containsKey(elementPropName)) {
                     for (Object e : ((List<?>) propValue)) {
                         if (e == null) {
-                            continue;
+                            // continue;
                         } else if (e instanceof Properties) {
                             bw.flush();
 

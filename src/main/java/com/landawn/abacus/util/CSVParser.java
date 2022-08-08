@@ -355,9 +355,10 @@ public class CSVParser {
                 if (isNextCharacterEscapedQuote(nextLine, inQuotes(inQuotes), i)) {
                     i = appendNextCharacterAndAdvanceLoop(nextLine, sb, i);
                 } else {
-
                     inQuotes = !inQuotes;
+
                     if (atStartOfField(sb)) {
+                        // continue?
                     }
 
                     // the tricky case of an embedded quote in the middle: a,bc"d"ef,g
@@ -400,6 +401,7 @@ public class CSVParser {
                 throw new ParseException("Un-terminated quoted field at end of CSV line");
             }
             if (inField) {
+                // continue?
             }
         } else {
             inField = false;

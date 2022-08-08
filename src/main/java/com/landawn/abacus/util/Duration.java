@@ -323,7 +323,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
         long hours = milliseconds / MILLIS_PER_HOUR;
         int minutes = (int) ((milliseconds % MILLIS_PER_HOUR) / MILLIS_PER_MINUTE);
         int seconds = (int) ((milliseconds % MILLIS_PER_MINUTE) / MILLIS_PER_SECOND);
-        int millis = (int) ((milliseconds % MILLIS_PER_SECOND));
+        int millis = (int) (milliseconds % MILLIS_PER_SECOND);
 
         final StringBuilder sb = Objectory.createStringBuilder(24);
 

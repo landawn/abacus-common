@@ -248,7 +248,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
                     }
                 }));
 
-        mapOfCreatorAndConvertorForTargetType.put(Object.class, Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> N.newInstance(t), t -> t));
+        mapOfCreatorAndConvertorForTargetType.put(Object.class, Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(N::newInstance, t -> t));
     }
 
     protected static Class<?> choosePropClass(Class<?> propClass, Class<?> attribeTypeClass) {
@@ -334,6 +334,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
         final Type<?> targetType = N.typeOf(targetClass);
 
         if (targetType.isPrimitiveArray()) {
+            // continue
         } else {
             // looking for the right array class.
             for (Object e : c) {

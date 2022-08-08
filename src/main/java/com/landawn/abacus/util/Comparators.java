@@ -54,7 +54,7 @@ public abstract class Comparators {
     @SuppressWarnings("rawtypes")
     static final Comparator REVERSED_ORDER = Collections.reverseOrder(NATURAL_ORDER);
 
-    static final Comparator<String> COMPARING_IGNORE_CASE = (a, b) -> N.compareIgnoreCase(a, b);
+    static final Comparator<String> COMPARING_IGNORE_CASE = N::compareIgnoreCase;
 
     static final Comparator<CharSequence> COMPARING_BY_LENGTH = (a, b) -> (a == null ? 0 : a.length()) - (b == null ? 0 : b.length());
 

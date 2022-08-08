@@ -2984,7 +2984,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <K, V> Map<K, V> toMap(final String keyColumnName, final String valueColumnName, final int fromRowIndex, final int toRowIndex) {
-        return toMap(keyColumnName, valueColumnName, fromRowIndex, toRowIndex, (IntFunction<Map<K, V>>) len -> N.newLinkedHashMap(len));
+        return toMap(keyColumnName, valueColumnName, fromRowIndex, toRowIndex, (IntFunction<Map<K, V>>) CommonUtil::newLinkedHashMap);
     }
 
     /**
@@ -3044,7 +3044,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public <K, V> Map<K, V> toMap(final Class<? extends V> rowClass, final String keyColumnName, final Collection<String> valueColumnNames,
             final int fromRowIndex, final int toRowIndex) {
-        return toMap(rowClass, keyColumnName, valueColumnNames, fromRowIndex, toRowIndex, (IntFunction<Map<K, V>>) len -> N.newLinkedHashMap(len));
+        return toMap(rowClass, keyColumnName, valueColumnNames, fromRowIndex, toRowIndex, (IntFunction<Map<K, V>>) CommonUtil::newLinkedHashMap);
     }
 
     /**
@@ -3171,7 +3171,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public <K, V> Map<K, V> toMap(String keyColumnName, Collection<String> valueColumnNames, int fromRowIndex, int toRowIndex,
             IntFunction<? extends V> rowSupplier) {
-        return toMap(keyColumnName, valueColumnNames, fromRowIndex, toRowIndex, rowSupplier, (IntFunction<Map<K, V>>) len -> N.newLinkedHashMap(len));
+        return toMap(keyColumnName, valueColumnNames, fromRowIndex, toRowIndex, rowSupplier, (IntFunction<Map<K, V>>) CommonUtil::newLinkedHashMap);
     }
 
     /**
@@ -5730,7 +5730,7 @@ public class RowDataSet implements DataSet, Cloneable {
         return new RowDataSet(newColumnNameList, newColumnList);
     }
 
-    private static final com.landawn.abacus.util.function.Predicate<Collection<String>> NOT_EMPTY_FILTER = t -> N.notNullOrEmpty(t);
+    private static final com.landawn.abacus.util.function.Predicate<Collection<String>> NOT_EMPTY_FILTER = CommonUtil::notNullOrEmpty;
 
     /**
      *
@@ -5739,7 +5739,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public Stream<DataSet> rollup(final Collection<String> columnNames) {
-        return Stream.of(Iterables.rollup(columnNames)).reversed().filter(NOT_EMPTY_FILTER).map(columnNames1 -> groupBy(columnNames1));
+        return Stream.of(Iterables.rollup(columnNames)).reversed().filter(NOT_EMPTY_FILTER).map(this::groupBy);
     }
 
     /**
@@ -5945,7 +5945,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public Stream<DataSet> cube(final Collection<String> columnNames) {
-        return cubeSet(columnNames).filter(NOT_EMPTY_FILTER).map(columnNames1 -> groupBy(columnNames1));
+        return cubeSet(columnNames).filter(NOT_EMPTY_FILTER).map(this::groupBy);
     }
 
     /**
@@ -6125,9 +6125,9 @@ public class RowDataSet implements DataSet, Cloneable {
                         (Callable<DataSet>) () -> groupBy(columnNames1, keyMapper, aggregateResultColumnName, aggregateOnColumnNames, rowMapper, collector)));
     }
 
-    private static final com.landawn.abacus.util.function.Function<Set<String>, Integer> TO_SIZE_FUNC = t -> t.size();
+    private static final com.landawn.abacus.util.function.Function<Set<String>, Integer> TO_SIZE_FUNC = Set::size;
 
-    private static final com.landawn.abacus.util.function.Consumer<List<Set<String>>> REVERSE_ACTION = t -> N.reverse(t);
+    private static final com.landawn.abacus.util.function.Consumer<List<Set<String>>> REVERSE_ACTION = CommonUtil::reverse;
 
     /**
      *
@@ -6379,7 +6379,7 @@ public class RowDataSet implements DataSet, Cloneable {
             arrayOfPair[rowIndex] = Indexed.of((Comparable) keyMapper.apply(disposableArray), rowIndex);
         }
 
-        final Comparator<Indexed<Comparable>> pairCmp = Comparators.comparingBy(t -> t.value());
+        final Comparator<Indexed<Comparable>> pairCmp = Comparators.comparingBy(Indexed::value);
 
         sort(arrayOfPair, pairCmp, isParallelSort);
     }
@@ -6472,7 +6472,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
         final List<Object> orderByColumn = _columnList.get(columnIndex);
 
-        return top(n, pairCmp, rowIndex -> orderByColumn.get(rowIndex));
+        return top(n, pairCmp, orderByColumn::get);
     }
 
     /**
@@ -6550,7 +6550,7 @@ public class RowDataSet implements DataSet, Cloneable {
             return this.copy();
         }
 
-        final Comparator<Indexed<Comparable>> pairCmp = Comparators.comparingBy(t -> t.value());
+        final Comparator<Indexed<Comparable>> pairCmp = Comparators.comparingBy(Indexed::value);
 
         final int sortByColumnCount = columnIndexes.length;
         final Object[] keyRow = new Object[sortByColumnCount];
@@ -10584,7 +10584,7 @@ public class RowDataSet implements DataSet, Cloneable {
             rowSupplier = columnCount -> N.newArray(rowClass.getComponentType(), columnCount);
         } else if (rowType.isList() || rowType.isSet()) {
             if (isAbstractRowClass) {
-                rowSupplier = columnCount -> (T) ((rowType.isList() ? new ArrayList<>(columnCount) : N.newHashSet(columnCount)));
+                rowSupplier = columnCount -> (T) (rowType.isList() ? new ArrayList<>(columnCount) : N.newHashSet(columnCount));
             } else if (intConstructor == null) {
                 rowSupplier = columnCount -> (T) ClassUtil.invokeConstructor(constructor);
             } else {
@@ -10674,14 +10674,14 @@ public class RowDataSet implements DataSet, Cloneable {
 
             @Override
             public boolean hasNext() {
-                ConcurrentModification();
+                checkConcurrentModification();
 
                 return cursor < toRowIndex;
             }
 
             @Override
             public T next() {
-                ConcurrentModification();
+                checkConcurrentModification();
 
                 if (cursor >= toRowIndex) {
                     throw new NoSuchElementException();
@@ -10698,7 +10698,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
             @Override
             public long count() {
-                ConcurrentModification();
+                checkConcurrentModification();
 
                 return toRowIndex - cursor;
             }
@@ -10707,14 +10707,14 @@ public class RowDataSet implements DataSet, Cloneable {
             public void advance(long n) {
                 N.checkArgNotNegative(n, "n");
 
-                ConcurrentModification();
+                checkConcurrentModification();
 
                 cursor = n > toRowIndex - cursor ? toRowIndex : (int) n + cursor;
             }
 
             @Override
             public <A> A[] toArray(A[] a) {
-                ConcurrentModification();
+                checkConcurrentModification();
 
                 final List<T> rows = RowDataSet.this.toList(columnNames, cursor, toRowIndex, rowSupplier);
 
@@ -10725,7 +10725,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 return a;
             }
 
-            final void ConcurrentModification() {
+            final void checkConcurrentModification() {
                 if (modCount != expectedModCount) {
                     throw new ConcurrentModificationException();
                 }
@@ -10884,7 +10884,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
     @Override
     public Stream<ImmutableList<Object>> columns() {
-        return IntStream.range(0, this._columnNameList.size()).mapToObj(columnIndex -> getColumn(columnIndex));
+        return IntStream.range(0, this._columnNameList.size()).mapToObj(this::getColumn);
     }
 
     @Override
@@ -11353,7 +11353,7 @@ public class RowDataSet implements DataSet, Cloneable {
          */
         @Override
         public DataSet getPage(final int pageNum) {
-            ConcurrentModification();
+            checkConcurrentModification();
             checkPageNumber(pageNum);
 
             synchronized (pagePool) {
@@ -11430,7 +11430,7 @@ public class RowDataSet implements DataSet, Cloneable {
             return Stream.of(iterator());
         }
 
-        final void ConcurrentModification() {
+        final void checkConcurrentModification() {
             if (modCount != expectedModCount) {
                 throw new ConcurrentModificationException();
             }
@@ -11471,7 +11471,7 @@ public class RowDataSet implements DataSet, Cloneable {
              */
             @Override
             public DataSet next() {
-                ConcurrentModification();
+                checkConcurrentModification();
 
                 try {
                     DataSet next = getPage(cursor);
@@ -11479,7 +11479,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                     return next;
                 } catch (IndexOutOfBoundsException e) {
-                    ConcurrentModification();
+                    checkConcurrentModification();
                     throw new NoSuchElementException();
                 }
             }

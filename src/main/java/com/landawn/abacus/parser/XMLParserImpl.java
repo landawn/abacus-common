@@ -445,16 +445,19 @@ final class XMLParserImpl extends AbstractXMLParser {
         final String nextIndentation = propIndentation + config.getIndentation();
 
         String strKey = null;
-        Object value = null;
         Type<Object> valueType = null;
+        Object key = null;
+        Object value = null;
 
-        for (Object key : m.keySet()) {
+        for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) m).entrySet()) {
+            key = entry.getKey();
+
             if ((ignoredClassPropNames != null) && ignoredClassPropNames.contains(key)) {
                 continue;
             }
 
             strKey = key == null ? NULL_STRING : key.toString();
-            value = m.get(key);
+            value = entry.getValue();
 
             //    if (ignoreNullProperty && value == null) {
             //        continue;

@@ -32,9 +32,9 @@ import java.util.function.ToIntFunction;
 @com.landawn.abacus.annotation.Immutable
 public final class Wrapper<T> implements Immutable {
 
-    static final ToIntFunction<Object> arrayHashFunction = value -> N.deepHashCode(value);
+    static final ToIntFunction<Object> arrayHashFunction = N::deepHashCode;
 
-    static final BiPredicate<Object, Object> arrayEqualsFunction = (t, u) -> N.deepEquals(t, u);
+    static final BiPredicate<Object, Object> arrayEqualsFunction = N::deepEquals;
 
     private final T value;
 

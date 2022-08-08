@@ -1853,7 +1853,7 @@ public final class Iterables {
      */
     public static <T> List<List<T>> rollup(final Collection<? extends T> c) {
         final List<List<T>> res = new ArrayList<>();
-        res.add(new ArrayList<T>());
+        res.add(new ArrayList<>());
 
         if (N.notNullOrEmpty(c)) {
             for (T e : c) {

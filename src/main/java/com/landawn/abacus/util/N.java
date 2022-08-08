@@ -62,6 +62,7 @@ import com.landawn.abacus.parser.XMLDeserializationConfig.XDC;
 import com.landawn.abacus.parser.XMLSerializationConfig;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Fn.Factory;
+import com.landawn.abacus.util.Fn.IntFunctions;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
@@ -5430,7 +5431,6 @@ public final class N extends CommonUtil {
         if (lastIndex < a.length - 1) {
             len = a.length - lastIndex - 1;
             copy(a, lastIndex + 1, result, dest, len);
-            dest += len;
         }
 
         return result;
@@ -5501,7 +5501,6 @@ public final class N extends CommonUtil {
         if (lastIndex < a.length - 1) {
             len = a.length - lastIndex - 1;
             copy(a, lastIndex + 1, result, dest, len);
-            dest += len;
         }
 
         return result;
@@ -5572,7 +5571,6 @@ public final class N extends CommonUtil {
         if (lastIndex < a.length - 1) {
             len = a.length - lastIndex - 1;
             copy(a, lastIndex + 1, result, dest, len);
-            dest += len;
         }
 
         return result;
@@ -5643,7 +5641,6 @@ public final class N extends CommonUtil {
         if (lastIndex < a.length - 1) {
             len = a.length - lastIndex - 1;
             copy(a, lastIndex + 1, result, dest, len);
-            dest += len;
         }
 
         return result;
@@ -5716,7 +5713,6 @@ public final class N extends CommonUtil {
         if (lastIndex < a.length - 1) {
             len = a.length - lastIndex - 1;
             copy(a, lastIndex + 1, result, dest, len);
-            dest += len;
         }
 
         return result;
@@ -5789,7 +5785,6 @@ public final class N extends CommonUtil {
         if (lastIndex < a.length - 1) {
             len = a.length - lastIndex - 1;
             copy(a, lastIndex + 1, result, dest, len);
-            dest += len;
         }
 
         return result;
@@ -5860,7 +5855,6 @@ public final class N extends CommonUtil {
         if (lastIndex < a.length - 1) {
             len = a.length - lastIndex - 1;
             copy(a, lastIndex + 1, result, dest, len);
-            dest += len;
         }
 
         return result;
@@ -5931,7 +5925,6 @@ public final class N extends CommonUtil {
         if (lastIndex < a.length - 1) {
             len = a.length - lastIndex - 1;
             copy(a, lastIndex + 1, result, dest, len);
-            dest += len;
         }
 
         return result;
@@ -6028,7 +6021,6 @@ public final class N extends CommonUtil {
         if (lastIndex < a.length - 1) {
             len = a.length - lastIndex - 1;
             copy(a, lastIndex + 1, result, dest, len);
-            dest += len;
         }
 
         return result;
@@ -7793,6 +7785,51 @@ public final class N extends CommonUtil {
             throw new IndexOutOfBoundsException("newPositionStartIndex " + newPositionStartIndex + " is out-of-bounds: [0, " + (len - (toIndex - fromIndex))
                     + "=(array.length - (toIndex - fromIndex))]");
         }
+    }
+
+    public static <T> List<T> skipRange(final Collection<T> c, final int startInclusive, final int endExclusive) {
+        return skipRange(c, startInclusive, endExclusive, IntFunctions.ofList());
+    }
+
+    public static <T, C extends Collection<T>> C skipRange(final Collection<T> c, final int startInclusive, final int endExclusive,
+            final IntFunction<C> supplier) {
+        final int size = size(c);
+
+        N.checkFromToIndex(startInclusive, endExclusive, size);
+
+        final C result = supplier.apply(size - (endExclusive - startInclusive));
+
+        if (c instanceof List) {
+            final List<T> list = (List<T>) c;
+
+            if (startInclusive > 0) {
+                result.addAll(list.subList(0, startInclusive));
+            }
+
+            if (endExclusive < size) {
+                result.addAll(list.subList(endExclusive, size));
+            }
+        } else {
+            final Iterator<T> iter = c.iterator();
+
+            for (int i = 0; i < startInclusive; i++) {
+                result.add(iter.next());
+            }
+
+            if (endExclusive < size) {
+                int idx = startInclusive;
+
+                while (idx++ < endExclusive) {
+                    iter.next();
+                }
+
+                while (iter.hasNext()) {
+                    result.add(iter.next());
+                }
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -11802,7 +11839,6 @@ public final class N extends CommonUtil {
             for (int i = 0; i < toIndex; i++) {
                 if (i < fromIndex) {
                     it.next();
-                    continue;
                 } else if (i == fromIndex) {
                     candidate = it.next();
                 } else {

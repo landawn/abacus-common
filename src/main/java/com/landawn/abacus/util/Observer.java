@@ -62,7 +62,7 @@ public abstract class Observer<T> implements Immutable {
             asyncExecutor = AndroidUtil.getThreadPoolExecutor();
         } else {
             asyncExecutor = new ThreadPoolExecutor(Math.max(64, Math.min(IOUtil.CPU_CORES * 8, IOUtil.MAX_MEMORY_IN_MB / 1024) * 32),
-                    Math.max(256, (IOUtil.MAX_MEMORY_IN_MB / 1024) * 64), 180L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+                    Math.max(256, (IOUtil.MAX_MEMORY_IN_MB / 1024) * 64), 180L, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
         }
     }
 
@@ -851,10 +851,10 @@ public abstract class Observer<T> implements Immutable {
     protected static class Node<T> {
 
         /** The value. */
-        public final T value;
+        protected final T value;
 
         /** The next. */
-        public Node<T> next;
+        protected Node<T> next;
 
         /**
          * Instantiates a new node.

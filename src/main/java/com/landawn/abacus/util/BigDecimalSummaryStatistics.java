@@ -112,12 +112,22 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
         return count == 0L ? BigDecimal.ZERO : getSum().divide(BigDecimal.valueOf(this.count), MathContext.DECIMAL128);
     }
 
+    /**
+     *
+     * @return
+     * @deprecated
+     */
     @Deprecated
     @Beta
     public final BigDecimal sum() {
         return sum;
     }
 
+    /**
+     *
+     * @return
+     * @deprecated
+     */
     @Deprecated
     @Beta
     public final Optional<BigDecimal> average() {

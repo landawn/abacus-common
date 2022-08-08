@@ -306,6 +306,7 @@ public final class CSVUtil {
             final String[] strs = new String[titles.length];
 
             while (offset-- > 0 && br.readLine() != null) {
+                // continue;
             }
 
             while (count > 0 && (line = br.readLine()) != null) {
@@ -561,6 +562,7 @@ public final class CSVUtil {
             final String[] strs = new String[titles.length];
 
             while (offset-- > 0 && br.readLine() != null) {
+                // continue
             }
 
             while (count > 0 && (line = br.readLine()) != null) {
@@ -775,6 +777,7 @@ public final class CSVUtil {
             final String[] strs = new String[titles.length];
 
             while (offset-- > 0 && br.readLine() != null) {
+                // continue
             }
 
             while (count > 0 && (line = br.readLine()) != null) {
@@ -978,6 +981,7 @@ public final class CSVUtil {
             final String[] strs = new String[titles.length];
 
             while (offset-- > 0 && br.readLine() != null) {
+                // continue
             }
 
             while (count > 0 && (line = br.readLine()) != null) {
@@ -1104,6 +1108,7 @@ public final class CSVUtil {
                 long offsetTmp = offset;
 
                 while (offsetTmp-- > 0 && br.readLine() != null) {
+                    // continue
                 }
 
                 final Type<T> type = Type.of(targetType);
@@ -1179,9 +1184,7 @@ public final class CSVUtil {
 
                     final int finalTargetColumnIndex = targetColumnIndex;
 
-                    mapper = values -> {
-                        return type.valueOf(values[finalTargetColumnIndex]);
-                    };
+                    mapper = values -> type.valueOf(values[finalTargetColumnIndex]);
 
                 } else {
                     throw new IllegalArgumentException("Unsupported target type: " + targetType);

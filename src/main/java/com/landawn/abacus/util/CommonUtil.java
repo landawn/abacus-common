@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.nio.charset.Charset;
@@ -1930,7 +1931,7 @@ class CommonUtil {
      * @return
      */
     public static <K extends Comparable<? super K>, E> ListMultimap<K, E> newSortedListMultimap() {
-        return new ListMultimap<>(new TreeMap<K, List<E>>(), ArrayList.class);
+        return new ListMultimap<>(new TreeMap<>(), ArrayList.class);
     }
 
     /**
@@ -1942,7 +1943,7 @@ class CommonUtil {
      * @return
      */
     public static <K extends Comparable<? super K>, E> ListMultimap<K, E> newSortedListMultimap(final Map<? extends K, ? extends E> m) {
-        final ListMultimap<K, E> multiMap = new ListMultimap<>(new TreeMap<K, List<E>>(), ArrayList.class);
+        final ListMultimap<K, E> multiMap = new ListMultimap<>(new TreeMap<>(), ArrayList.class);
 
         multiMap.putAll(m);
 
@@ -2077,7 +2078,7 @@ class CommonUtil {
      * @return
      */
     public static <K extends Comparable<? super K>, E> SetMultimap<K, E> newSortedSetMultimap() {
-        return new SetMultimap<>(new TreeMap<K, Set<E>>(), HashSet.class);
+        return new SetMultimap<>(new TreeMap<>(), HashSet.class);
     }
 
     /**
@@ -2089,7 +2090,7 @@ class CommonUtil {
      * @return
      */
     public static <K extends Comparable<? super K>, E> SetMultimap<K, E> newSortedSetMultimap(final Map<? extends K, ? extends E> m) {
-        final SetMultimap<K, E> multiMap = new SetMultimap<>(new TreeMap<K, Set<E>>(), HashSet.class);
+        final SetMultimap<K, E> multiMap = new SetMultimap<>(new TreeMap<>(), HashSet.class);
 
         multiMap.putAll(m);
 
@@ -2106,7 +2107,7 @@ class CommonUtil {
      * @return
      */
     public static DataSet newEmptyDataSet() {
-        return new RowDataSet(new ArrayList<String>(), new ArrayList<List<Object>>());
+        return new RowDataSet(new ArrayList<>(), new ArrayList<>());
     }
 
     /**
@@ -7012,10 +7013,10 @@ class CommonUtil {
                 targetPropInfo = targetEntityInfo.getPropInfo(propInfo.name);
 
                 if (targetPropInfo == null) {
-                    if (!ignoreUnmatchedProperty) {
-                        throw new IllegalArgumentException(
-                                "No property found by name: " + propInfo.name + " in target entity class: " + targetEntity.getClass());
-                    }
+                    //    if (!ignoreUnmatchedProperty) {
+                    //        throw new IllegalArgumentException(
+                    //                "No property found by name: " + propInfo.name + " in target entity class: " + targetEntity.getClass());
+                    //    }
                 } else {
                     propValue = propInfo.getPropValue(sourceEntity);
                     targetPropInfo.setPropValue(targetEntity, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
@@ -7704,6 +7705,20 @@ class CommonUtil {
         } else if (c instanceof Deque) {
             return Nullable.of(((Deque<T>) c).descendingIterator().next());
         } else {
+            try {
+                Method m = null;
+
+                if ((m = ClassUtil.getDeclaredMethod(c.getClass(), "descendingIterator")) != null && Modifier.isPublic(m.getModifiers())
+                        && Iterator.class.isAssignableFrom(m.getReturnType())) {
+
+                    final Iterator<T> iter = ClassUtil.invokeMethod(c, m);
+
+                    return Nullable.of(iter.next());
+                }
+            } catch (Exception e2) {
+                // continue
+            }
+
             return last(c.iterator());
         }
     }
@@ -7907,6 +7922,26 @@ class CommonUtil {
                 }
             }
         } else {
+            try {
+                Method m = null;
+
+                if ((m = ClassUtil.getDeclaredMethod(c.getClass(), "descendingIterator")) != null && Modifier.isPublic(m.getModifiers())
+                        && Iterator.class.isAssignableFrom(m.getReturnType())) {
+
+                    final Iterator<T> iter = ClassUtil.invokeMethod(c, m);
+
+                    T next = null;
+
+                    while (iter.hasNext()) {
+                        if ((next = iter.next()) != null) {
+                            return Optional.of(next);
+                        }
+                    }
+                }
+            } catch (Exception e2) {
+                // continue
+            }
+
             lastNonNull(c.iterator());
         }
 
@@ -8212,6 +8247,20 @@ class CommonUtil {
         } else if (c instanceof Deque) {
             return ((Deque<T>) c).descendingIterator().next();
         } else {
+            try {
+                Method m = null;
+
+                if ((m = ClassUtil.getDeclaredMethod(c.getClass(), "descendingIterator")) != null && Modifier.isPublic(m.getModifiers())
+                        && Iterator.class.isAssignableFrom(m.getReturnType())) {
+
+                    final Iterator<T> iter = ClassUtil.invokeMethod(c, m);
+
+                    return iter.next();
+                }
+            } catch (Exception e2) {
+                // continue
+            }
+
             final Iterator<T> iter = c.iterator();
             T e = null;
 
@@ -8410,6 +8459,28 @@ class CommonUtil {
 
             return isForNonNull ? Optional.empty() : Nullable.empty();
         } else {
+            try {
+                Method m = null;
+
+                if ((m = ClassUtil.getDeclaredMethod(c.getClass(), "descendingIterator")) != null && Modifier.isPublic(m.getModifiers())
+                        && Iterator.class.isAssignableFrom(m.getReturnType())) {
+
+                    final Iterator<T> iter = ClassUtil.invokeMethod(c, m);
+
+                    while (iter.hasNext()) {
+                        e = iter.next();
+
+                        if ((!isForNonNull || e != null) && predicate.test(e)) {
+                            return isForNonNull ? Optional.of(e) : Nullable.of(e);
+                        }
+                    }
+
+                    return isForNonNull ? Optional.empty() : Nullable.empty();
+                }
+            } catch (Exception e2) {
+                // continue
+            }
+
             final T[] a = (T[]) c.toArray();
 
             for (int i = a.length - 1; i >= 0; i--) {
@@ -8613,7 +8684,7 @@ class CommonUtil {
      * @param toIndex
      * @return the immutable collection<? extends t>
      */
-    public static <T> ImmutableList<? extends T> slice(final T[] a, final int fromIndex, final int toIndex) {
+    public static <T> ImmutableList<T> slice(final T[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (N.isNullOrEmpty(a)) {
@@ -8632,7 +8703,7 @@ class CommonUtil {
      * @param toIndex
      * @return the immutable collection<? extends t>
      */
-    public static <T> ImmutableList<? extends T> slice(final List<? extends T> c, final int fromIndex, final int toIndex) {
+    public static <T> ImmutableList<T> slice(final List<? extends T> c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
         if (N.isNullOrEmpty(c)) {
@@ -8651,7 +8722,7 @@ class CommonUtil {
      * @param toIndex
      * @return the immutable collection<? extends t>
      */
-    public static <T> ImmutableCollection<? extends T> slice(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
+    public static <T> ImmutableCollection<T> slice(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
         if (N.isNullOrEmpty(c)) {
@@ -20816,6 +20887,28 @@ class CommonUtil {
 
             return INDEX_NOT_FOUND;
         } else {
+            try {
+                Method m = null;
+
+                if ((m = ClassUtil.getDeclaredMethod(c.getClass(), "descendingIterator")) != null && Modifier.isPublic(m.getModifiers())
+                        && Iterator.class.isAssignableFrom(m.getReturnType())) {
+
+                    final Iterator<Object> iter = ClassUtil.invokeMethod(c, m);
+
+                    for (int i = size - 1; iter.hasNext(); i--) {
+                        if (i > startIndexFromBack) {
+                            iter.next();
+                        } else if (N.equals(iter.next(), valueToFind)) {
+                            return i;
+                        }
+                    }
+
+                    return INDEX_NOT_FOUND;
+                }
+            } catch (Exception e2) {
+                // continue
+            }
+
             final Object[] a = c.toArray();
 
             return lastIndexOf(a, startIndexFromBack, valueToFind);
@@ -20964,6 +21057,26 @@ class CommonUtil {
 
             return OptionalInt.empty();
         } else {
+            try {
+                Method m = null;
+
+                if ((m = ClassUtil.getDeclaredMethod(c.getClass(), "descendingIterator")) != null && Modifier.isPublic(m.getModifiers())
+                        && Iterator.class.isAssignableFrom(m.getReturnType())) {
+
+                    final Iterator<T> iter = ClassUtil.invokeMethod(c, m);
+
+                    for (int i = size - 1; iter.hasNext(); i--) {
+                        if (predicate.test(iter.next())) {
+                            return OptionalInt.of(i);
+                        }
+                    }
+
+                    return OptionalInt.empty();
+                }
+            } catch (Exception e) {
+                // continue
+            }
+
             final T[] a = (T[]) c.toArray();
 
             for (int i = a.length - 1; i >= 0; i--) {

@@ -436,7 +436,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             return TriIterator.empty();
         }
 
-        final BooleanSupplier hasNext = () -> iter.hasNext();
+        final BooleanSupplier hasNext = iter::hasNext;
 
         final Consumer<Triple<A, B, C>> output = out -> unzip.accept(iter.next(), out);
 

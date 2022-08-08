@@ -17,7 +17,6 @@
 package com.landawn.abacus.util;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Stack;
@@ -510,12 +509,10 @@ public final class FilenameUtil {
      * @param canonicalChild
      *            the file to consider as the child.
      * @return true is the candidate leaf is under by the specified composite. False otherwise.
-     * @throws IOException
-     *             if an IO error occurs while checking the files.
      * @since 2.2
      * @see FileUtils#directoryContains(File, File)
      */
-    public static boolean directoryContains(final String canonicalParent, final String canonicalChild) throws IOException {
+    public static boolean directoryContains(final String canonicalParent, final String canonicalChild) {
 
         // Fail fast against NullPointerException
         if (canonicalParent == null) {

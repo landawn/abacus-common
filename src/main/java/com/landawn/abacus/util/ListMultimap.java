@@ -492,7 +492,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
         N.checkArgNotNull(map, "map");
         N.checkArgNotNull(valueSupplier, "valueSupplier");
 
-        return new ListMultimap<K, E>((Map) map, valueSupplier);
+        return new ListMultimap<>((Map) map, valueSupplier);
     }
 
     /**

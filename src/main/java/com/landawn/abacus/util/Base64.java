@@ -123,6 +123,9 @@ final class Base64 {
     /** Mask used to extract 6 bits, used when encoding */
     private static final int MASK_6BITS = 0x3f;
 
+    // Only one decode table currently; keep for consistency with Base32 code
+    private static final byte[] decodeTable = DECODE_TABLE;
+
     // The static final fields above are used for the original static byte[] methods on Base64.
     // The private member fields below are used with the new streaming approach, which requires
     // some state be preserved between calls of encode() and decode().
@@ -133,9 +136,6 @@ final class Base64 {
      * between the two modes.
      */
     private final byte[] encodeTable;
-
-    // Only one decode table currently; keep for consistency with Base32 code
-    private final byte[] decodeTable = DECODE_TABLE;
 
     /**
      * Line separator for encoding. Not used when decoding. Only used if lineLength &gt; 0.

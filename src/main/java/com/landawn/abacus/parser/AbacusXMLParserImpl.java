@@ -487,16 +487,19 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         final String nextIndentation = keyValueIndentation + config.getIndentation();
 
         final Type<Object> stringType = N.typeOf(String.class);
-        Object value = null;
         Type<Object> keyType = null;
         Type<Object> valueType = null;
+        Object key = null;
+        Object value = null;
 
-        for (Object key : m.keySet()) {
+        for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) m).entrySet()) {
+            key = entry.getKey();
+
             if ((ignoredClassPropNames != null) && ignoredClassPropNames.contains(key)) {
                 continue;
             }
 
-            value = m.get(key);
+            value = entry.getValue();
 
             //    if (ignoreNullProperty && value == null) {
             //        continue;
@@ -1105,7 +1108,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
      * @return
      * @throws XMLStreamException the XML stream exception
      */
-    @SuppressWarnings({ "null", "incomplete-switch", "fallthrough", "unused" })
+    @SuppressWarnings({ "null", "fallthrough", "unused" })
     protected <T> T readByStreamParser(Class<?> inputClass, Class<?> targetClass, XMLStreamReader xmlReader, final XMLDeserializationConfig config,
             Type<?> propType, PropInfo propInfo, boolean checkedAttr, boolean isTagByPropertyName, boolean ignoreTypeInfo, boolean isFirstCall)
             throws XMLStreamException {
@@ -1451,6 +1454,9 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                                     break;
                                 }
+
+                                default:
+                                    // continue;
                             }
 
                             // move to value element;
@@ -1512,6 +1518,9 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                                     break;
                                 }
+
+                                default:
+                                    // continue;
                             }
 
                             // end of entry.
@@ -1532,6 +1541,9 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                         case XMLStreamConstants.END_ELEMENT: {
                             return (T) mResult;
                         }
+
+                        default:
+                            // continue;
                     }
                 }
             }
@@ -1613,6 +1625,9 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                                         break;
                                     }
+
+                                    default:
+                                        // continue;
                                 }
 
                                 break;
@@ -1760,6 +1775,9 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                                     break;
                                 }
+
+                                default:
+                                    // continue;
                             }
 
                             break;

@@ -26,7 +26,7 @@ public interface IntSupplier extends Throwables.IntSupplier<RuntimeException>, j
 
     IntSupplier ZERO = () -> 0;
 
-    IntSupplier RANDOM = () -> Util.RAND_INT.nextInt();
+    IntSupplier RANDOM = Util.RAND_INT::nextInt;
 
     @Override
     int getAsInt();

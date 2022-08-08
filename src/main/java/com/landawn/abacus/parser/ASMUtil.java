@@ -14,12 +14,24 @@
 
 package com.landawn.abacus.parser;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+
+import com.google.common.base.Objects;
+import com.landawn.abacus.logging.Logger;
+import com.landawn.abacus.logging.LoggerFactory;
+
+import lombok.Data;
+
 /**
  *
  * @author Haiyang Li
  * @since 0.8
  */
 final class ASMUtil {
+
+    private static final Logger logger = LoggerFactory.getLogger(ASMUtil.class);
 
     private static final boolean isASMAvailable;
 
@@ -29,12 +41,40 @@ final class ASMUtil {
         try {
             Class.forName("com.esotericsoftware.reflectasm.MethodAccess");
             Class.forName("org.objectweb.asm.ClassWriter");
-            tmp = true;
+
+            final Method getMethod = TestEntityA.class.getMethod("getName");
+            final Method setMethod = TestEntityA.class.getMethod("setName", String.class);
+            final Field field = TestEntityA.class.getDeclaredField("name");
+
+            final com.esotericsoftware.reflectasm.MethodAccess getMethodAccess = com.esotericsoftware.reflectasm.MethodAccess
+                    .get(getMethod.getDeclaringClass());
+            final com.esotericsoftware.reflectasm.MethodAccess setMethodAccess = com.esotericsoftware.reflectasm.MethodAccess
+                    .get(setMethod.getDeclaringClass());
+            final com.esotericsoftware.reflectasm.FieldAccess fieldAccess = com.esotericsoftware.reflectasm.FieldAccess.get(field.getDeclaringClass());
+
+            final int getMethodAccessIndex = getMethodAccess.getIndex(getMethod.getName(), 0);
+            final int setMethodAccessIndex = setMethodAccess.getIndex(setMethod.getName(), setMethod.getParameterTypes());
+            final int fieldAccessIndex = (Modifier.isPrivate(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) ? -1
+                    : fieldAccess.getIndex(field.getName());
+
+            TestEntityA entity = new TestEntityA();
+
+            setMethodAccess.invoke(entity, setMethodAccessIndex, "Tom");
+            tmp = Objects.equal(fieldAccess.get(entity, fieldAccessIndex), getMethodAccess.invoke(entity, getMethodAccessIndex));
+
         } catch (Throwable e) {
             // ignore.
+
+            logger.warn("ASM is not avaiable by com.esotericsoftware.reflectasm due to exception: ", e);
         }
 
         isASMAvailable = tmp;
+
+        if (isASMAvailable) {
+            logger.info("ASM is avaiable by com.esotericsoftware.reflectasm");
+        } else {
+            logger.info("ASM is not avaiable by com.esotericsoftware.reflectasm");
+        }
     }
 
     /**
@@ -48,5 +88,11 @@ final class ASMUtil {
 
     private ASMUtil() {
         // Singleton.
+    }
+
+    @Data
+    public static final class TestEntityA {
+        private int id;
+        public String name;
     }
 }

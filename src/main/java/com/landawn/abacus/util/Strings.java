@@ -5810,9 +5810,9 @@ public abstract class Strings {
         }
 
         if (p == a.length()) {
-            return a.toString();
+            return a;
         } else if (p == b.length()) {
-            return b.toString();
+            return b;
         } else {
             return a.subSequence(0, p).toString();
         }
@@ -5881,9 +5881,9 @@ public abstract class Strings {
         }
 
         if (s == aLength) {
-            return a.toString();
+            return a;
         } else if (s == bLength) {
-            return b.toString();
+            return b;
         } else {
             return a.subSequence(aLength - s, aLength).toString();
         }

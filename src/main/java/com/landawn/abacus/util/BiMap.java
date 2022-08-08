@@ -71,7 +71,7 @@ public final class BiMap<K, V> implements Map<K, V> {
 
     @SuppressWarnings("deprecation")
     public BiMap(int initialCapacity, float loadFactor) {
-        this(new HashMap<K, V>(N.initHashCapacity(initialCapacity), loadFactor), new HashMap<V, K>(N.initHashCapacity(initialCapacity), loadFactor));
+        this(new HashMap<>(N.initHashCapacity(initialCapacity), loadFactor), new HashMap<>(N.initHashCapacity(initialCapacity), loadFactor));
     }
 
     @SuppressWarnings("rawtypes")

@@ -75,6 +75,7 @@ public abstract class CharacterWriter extends BufferedWriter {
             ch = cbuf[i];
 
             if ((ch > lengthOfReplacementsForChars) || (replacementsForChars[ch] == null)) {
+                // continue
             } else {
                 if (i > from) {
                     write(cbuf, from, i - from);
@@ -110,6 +111,7 @@ public abstract class CharacterWriter extends BufferedWriter {
             ch = cbuf[i];
 
             if ((ch > lengthOfReplacementsForChars) || (replacementsForChars[ch] == null)) {
+                // continue
             } else {
                 if (i > from) {
                     write(cbuf, from, i - from);

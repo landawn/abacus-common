@@ -28,7 +28,7 @@ public interface BooleanSupplier extends Throwables.BooleanSupplier<RuntimeExcep
 
     BooleanSupplier FALSE = () -> false;
 
-    BooleanSupplier RANDOM = () -> Util.RAND_BOOLEAN.nextInt() / 2 == 0 ? false : true;
+    BooleanSupplier RANDOM = () -> Util.RAND_BOOLEAN.nextInt() / 2 == 0;
 
     @Override
     boolean getAsBoolean();

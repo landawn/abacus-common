@@ -1746,7 +1746,7 @@ public final class LongMultiset<T> implements Iterable<T> {
         return Stream.of(flatIterator());
     }
 
-    private static final com.landawn.abacus.util.function.Function<MutableLong, Long> TO_LONG = t -> t.value();
+    private static final com.landawn.abacus.util.function.Function<MutableLong, Long> TO_LONG = MutableLong::value;
 
     public EntryStream<T, Long> entryStream() {
         return EntryStream.of(valueMap).mapValue(TO_LONG);

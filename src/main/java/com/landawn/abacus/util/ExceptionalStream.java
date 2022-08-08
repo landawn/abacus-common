@@ -406,7 +406,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             return empty();
         }
 
-        return ExceptionalStream.<T, E> of(stream.iterator()).onClose(() -> stream.close());
+        return ExceptionalStream.<T, E> of(stream.iterator()).onClose(stream::close);
     }
 
     /**
@@ -865,7 +865,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     public static <T, E extends Exception> ExceptionalStream<T, E> from(final Throwables.Supplier<? extends Collection<? extends T>, ? extends E> supplier) {
         N.checkArgNotNull(supplier, "supplier");
 
-        return ExceptionalStream.<Throwables.Supplier<? extends Collection<? extends T>, ? extends E>, E> just(supplier).flattMap(t -> t.get());
+        return ExceptionalStream.<Throwables.Supplier<? extends Collection<? extends T>, ? extends E>, E> just(supplier)
+                .flattMap(com.landawn.abacus.util.Throwables.Supplier::get);
     }
 
     /**
@@ -882,7 +883,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         N.checkArgNotNull(supplier, "supplier");
 
         return ExceptionalStream.<Throwables.Supplier<? extends ExceptionalStream<? extends T, ? extends E>, ? extends E>, E> just(supplier)
-                .flatMap(t -> t.get());
+                .flatMap(com.landawn.abacus.util.Throwables.Supplier::get);
     }
 
     /**
@@ -1756,9 +1757,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         final Deque<Throwables.Runnable<? extends E>> newCloseHandlers = new ArrayDeque<>(count);
 
         for (ExceptionalStream<?, E> s : closeHandlersList) {
-            if (N.notNullOrEmpty(s.closeHandlers)) {
-                newCloseHandlers.addAll(s.closeHandlers);
+            if (s.isClosed || isEmptyCloseHandlers(s.closeHandlers)) {
+                continue;
             }
+
+            newCloseHandlers.addAll(s.closeHandlers);
         }
 
         return newCloseHandlers;
@@ -3264,7 +3267,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     public <R> ExceptionalStream<R, E> mapMulti(final Throwables.BiConsumer<? super T, ? super Consumer<R>, ? extends E> mapper) {
         final Deque<R> queue = new ArrayDeque<>();
 
-        final Consumer<R> consumer = r -> queue.offer(r);
+        final Consumer<R> consumer = queue::offer;
 
         final ExceptionalIterator<T, E> iter = iteratorEx();
 
@@ -5241,7 +5244,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     public ExceptionalStream<Stream<T>, E> split(final int chunkSize) {
         assertNotClosed();
 
-        return splitToList(chunkSize).map(t -> Stream.of(t));
+        return splitToList(chunkSize).map(Stream::of);
     }
 
     /**
@@ -5562,7 +5565,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     public ExceptionalStream<Stream<T>, E> sliding(final int windowSize, final int increment) {
         assertNotClosed();
 
-        return slidingToList(windowSize, increment).map(t -> Stream.of(t));
+        return slidingToList(windowSize, increment).map(Stream::of);
     }
 
     /**
@@ -8034,6 +8037,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * Returns the first element matched by {@code predicateForFirst} if found or the first element if this stream is not empty
+     * Otherwise an empty {@code Optional<T>} will be returned.
      *
      * @param <E2>
      * @param predicateForFirst
@@ -8066,6 +8071,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * Returns the first element matched by {@code predicateForFirst} if found or the first element matched by {@code predicateForAny}.
+     * Otherwise an empty {@code Optional<T>} will be returned.
      *
      * @param <E2>
      * @param <E3>
@@ -8104,6 +8111,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * Returns the first element matched by {@code predicateForFirst} if found or the last element if this stream is not empty
+     * Otherwise an empty {@code Optional<T>} will be returned.
      *
      * @param <E2>
      * @param predicateForFirst
@@ -8223,7 +8232,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 final Set<T> set = c instanceof Set ? (Set<T>) c : N.newHashSet(c);
                 final int distinctCount = set.size();
 
-                return filter(t -> set.contains(t)).distinct().limit(distinctCount).count() == distinctCount;
+                return filter(set::contains).distinct().limit(distinctCount).count() == distinctCount;
             }
         } finally {
             close();
@@ -8253,7 +8262,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             } else {
                 final Set<T> set = N.asSet(a);
 
-                return anyMatch(t -> set.contains(t));
+                return anyMatch(set::contains);
             }
         } finally {
             close();
@@ -8273,7 +8282,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             } else {
                 final Set<T> set = c instanceof Set ? (Set<T>) c : N.newHashSet(c);
 
-                return anyMatch(t -> set.contains(t));
+                return anyMatch(set::contains);
             }
         } finally {
             close();
@@ -8932,7 +8941,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 key = keyMapper.apply(next);
 
                 if (!result.containsKey(key)) {
-                    result.put(key, new ArrayList<V>());
+                    result.put(key, new ArrayList<>());
                 }
 
                 result.get(key).add(valueMapper.apply(next));
@@ -9648,7 +9657,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
-    private static final Throwables.Function<Object, String, IOException> TO_LINE_OF_STRING = t -> N.stringOf(t);
+    private static final Throwables.Function<Object, String, IOException> TO_LINE_OF_STRING = N::stringOf;
 
     @TerminalOp
     public long persist(final File file) throws E, IOException {
@@ -10366,7 +10375,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         final Spliterator<T> spliterator = Spliterators.spliteratorUnknownSize(newObjIteratorEx(elements), Spliterator.ORDERED);
 
-        if (N.isNullOrEmpty(closeHandlers)) {
+        if (isEmptyCloseHandlers(closeHandlers)) {
             return StreamSupport.stream(() -> spliterator, Spliterator.ORDERED | Spliterator.IMMUTABLE | Spliterator.NONNULL, false);
         } else {
             return StreamSupport.stream(() -> spliterator, Spliterator.ORDERED | Spliterator.IMMUTABLE | Spliterator.NONNULL, false).onClose(() -> {
@@ -11422,6 +11431,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return ContinuableFuture.call(() -> terminalAction.apply(ExceptionalStream.this), executor);
     }
 
+    // #################################################################################################################################
+    // #################################################################################################################################
+
     /**
      *
      * @param closeHandler
@@ -11456,6 +11468,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return newStream(elements, newCloseHandlers);
     }
 
+    static boolean isEmptyCloseHandlers(final Collection<? extends Throwables.Runnable<?>> closeHandlers) {
+        return N.isNullOrEmpty(closeHandlers) || (closeHandlers.size() == 1 && N.firstOrNullIfEmpty(closeHandlers) == EMPTY_CLOSE_HANDLER);
+    }
+
     /**
      *
      * It will be called by terminal operations in final.
@@ -11469,13 +11485,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             return;
         }
 
-        if (N.isNullOrEmpty(closeHandlers)) {
+        if (isEmptyCloseHandlers(closeHandlers)) {
+            if (N.notNullOrEmpty(closeHandlers)) {
+                closeHandlers.clear();
+            }
+
             isClosed = true;
             return;
         }
 
         //    // Only mark the stream closed if closeHandlers are not empty.
-        //    if (isClosed || N.isNullOrEmpty(closeHandlers)) {
+        //    if (isClosed || isEmptyCloseHandlers(closeHandlers)) {
         //        return;
         //    }
 
@@ -11484,6 +11504,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         logger.debug("Closing ExceptionalStream");
 
         close(closeHandlers);
+
+        if (N.notNullOrEmpty(closeHandlers)) {
+            closeHandlers.clear();
+        }
     }
 
     @SuppressWarnings("rawtypes")
@@ -11496,7 +11520,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             return EMPTY_CLOSE_HANDLER;
         }
 
-        return () -> iter.close();
+        return iter::close;
     }
 
     static <E extends Exception> void close(final Deque<? extends Throwables.Runnable<? extends E>> closeHandlers) {

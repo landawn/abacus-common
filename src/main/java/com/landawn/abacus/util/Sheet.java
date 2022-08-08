@@ -153,7 +153,7 @@ public final class Sheet<R, C, E> implements Cloneable {
             instance._columnList = new ArrayList<>(columnLength);
 
             for (int i = 0; i < columnLength; i++) {
-                instance._columnList.add(new ArrayList<E>(rowLength));
+                instance._columnList.add(new ArrayList<>(rowLength));
             }
 
             for (Collection<? extends E> row : rows) {
@@ -2501,7 +2501,7 @@ public final class Sheet<R, C, E> implements Cloneable {
 
         if (_initialized) {
             for (List<E> column : _columnList) {
-                dataSetColumnList.add(new ArrayList<Object>(column));
+                dataSetColumnList.add(new ArrayList<>(column));
             }
         } else {
             for (int i = 0; i < columnLength; i++) {

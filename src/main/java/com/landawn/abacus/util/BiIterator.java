@@ -482,7 +482,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             return BiIterator.empty();
         }
 
-        final BooleanSupplier hasNext = () -> iter.hasNext();
+        final BooleanSupplier hasNext = iter::hasNext;
 
         final Consumer<Pair<A, B>> output = out -> unzip.accept(iter.next(), out);
 

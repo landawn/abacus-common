@@ -219,8 +219,8 @@ public class XMLSerializationConfig extends SerializationConfig<XMLSerialization
                     && N.equals(getExclusion(), other.getExclusion()) && N.equals(isSkipTransientField(), other.isSkipTransientField())
                     && N.equals(isPrettyFormat(), other.isPrettyFormat()) && N.equals(supportCircularReference(), other.supportCircularReference())
                     && N.equals(writeBigDecimalAsPlain(), other.writeBigDecimalAsPlain()) && N.equals(getIndentation(), other.getIndentation())
-                    && N.equals(getPropNamingPolicy(), other.getPropNamingPolicy()) && N.equals(getIgnoredPropNames(), other.getIgnoredPropNames())
-                    && N.equals(tagByPropertyName, other.tagByPropertyName) && N.equals(ignoreTypeInfo, other.ignoreTypeInfo)) {
+                    && N.equals(getPropNamingPolicy(), other.getPropNamingPolicy()) && N.equals(tagByPropertyName, other.tagByPropertyName)
+                    && N.equals(ignoreTypeInfo, other.ignoreTypeInfo)) {
 
                 return true;
             }

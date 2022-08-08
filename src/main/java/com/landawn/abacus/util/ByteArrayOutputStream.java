@@ -16,7 +16,6 @@ package com.landawn.abacus.util;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
@@ -127,9 +126,8 @@ public final class ByteArrayOutputStream extends OutputStream {
      *
      * @param charset
      * @return
-     * @throws UnsupportedEncodingException the unsupported encoding exception
      */
-    public String toString(Charset charset) throws UnsupportedEncodingException {
+    public String toString(Charset charset) {
         return new String(buf, 0, count, charset);
     }
 

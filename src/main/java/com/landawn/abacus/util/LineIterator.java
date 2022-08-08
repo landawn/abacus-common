@@ -200,11 +200,7 @@ public final class LineIterator extends ObjIterator<String> implements Closeable
      * @throws UncheckedIOException if an I/O error occurs, such as if the encoding is invalid
      */
     public static LineIterator of(final InputStream input, final Charset encoding) throws UncheckedIOException {
-        try {
-            return new LineIterator(IOUtil.createReader(input, encoding));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        return new LineIterator(IOUtil.createReader(input, encoding));
     }
 
     /**

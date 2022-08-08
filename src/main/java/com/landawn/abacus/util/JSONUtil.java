@@ -237,7 +237,6 @@ public final class JSONUtil {
                 value = jsonObject.get(key);
 
                 propInfo = entityInfo.getPropInfo(key);
-                value = jsonObject.get(key);
 
                 if (value == JSONObject.NULL) {
                     value = null;

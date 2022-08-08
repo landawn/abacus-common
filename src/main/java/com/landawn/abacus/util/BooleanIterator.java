@@ -237,6 +237,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      *
      * @return
      * @deprecated use <code>nextBoolean()</code> instead.
+     * @throws NoSuchElementException if the iteration has no more elements
      */
     @Deprecated
     @Override

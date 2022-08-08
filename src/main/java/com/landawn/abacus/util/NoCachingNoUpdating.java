@@ -1707,7 +1707,7 @@ public interface NoCachingNoUpdating {
         }
 
         public static <T> DisposableDeque<T> create(final int len) {
-            return new DisposableDeque<>(new ArrayDeque<T>(len));
+            return new DisposableDeque<>(new ArrayDeque<>(len));
         }
 
         /**

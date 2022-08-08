@@ -439,13 +439,13 @@ public class u {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> Optional<T> or(final Throwables.Supplier<Optional<? extends T>, E> supplier) throws E {
+        public <E extends Exception> Optional<T> or(final Throwables.Supplier<Optional<T>, E> supplier) throws E {
             N.checkArgNotNull(supplier, "supplier");
 
             if (isPresent()) {
                 return this;
             } else {
-                return Objects.requireNonNull((Optional<T>) supplier.get());
+                return Objects.requireNonNull(supplier.get());
             }
         }
 

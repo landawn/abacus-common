@@ -304,8 +304,7 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
 
         if (obj instanceof AvroSerializationConfig other) {
             if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getExclusion(), other.getExclusion())
-                    && N.equals(isSkipTransientField(), other.isSkipTransientField()) && N.equals(getIgnoredPropNames(), other.getIgnoredPropNames())
-                    && N.equals(schema, other.schema)) {
+                    && N.equals(isSkipTransientField(), other.isSkipTransientField()) && N.equals(schema, other.schema)) {
 
                 return true;
             }

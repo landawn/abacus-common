@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
+import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
@@ -58,9 +59,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
@@ -208,9 +211,9 @@ public final class Fn extends Comparators {
         // do nothing.
     };
 
-    private static final Consumer<AutoCloseable> CLOSE = closeable -> IOUtil.close(closeable);
+    private static final Consumer<AutoCloseable> CLOSE = IOUtil::close;
 
-    private static final Consumer<AutoCloseable> CLOSE_QUIETLY = closeable -> IOUtil.closeQuietly(closeable);
+    private static final Consumer<AutoCloseable> CLOSE_QUIETLY = IOUtil::closeQuietly;
 
     @SuppressWarnings("rawtypes")
     private static final BiConsumer PRINTLN_EQUAL = (key, value) -> N.println(Strings.concat(N.toString(key), "=", N.toString(value)));
@@ -237,25 +240,25 @@ public final class Fn extends Comparators {
     private static final BiConsumer PRINTLN_EMPTY = (key, value) -> N.println(Strings.concat(N.toString(key), N.toString(value)));
 
     @SuppressWarnings("rawtypes")
-    private static final Consumer PRINTLN = value -> N.println(value);
+    private static final Consumer PRINTLN = N::println;
 
     @SuppressWarnings("rawtypes")
-    private static final Function TO_STRING = t -> N.toString(t);
+    private static final Function TO_STRING = N::toString;
 
-    private static final Function<String, String> TO_CAMEL_CASE = t -> Strings.toCamelCase(t);
+    private static final Function<String, String> TO_CAMEL_CASE = Strings::toCamelCase;
 
-    private static final Function<String, String> TO_LOWER_CASE = t -> Strings.toLowerCase(t);
+    private static final Function<String, String> TO_LOWER_CASE = Strings::toLowerCase;
 
-    private static final Function<String, String> TO_LOWER_CASE_WITH_UNDERSCORE = t -> Strings.toLowerCaseWithUnderscore(t);
+    private static final Function<String, String> TO_LOWER_CASE_WITH_UNDERSCORE = Strings::toLowerCaseWithUnderscore;
 
-    private static final Function<String, String> TO_UPPER_CASE = t -> Strings.toUpperCase(t);
+    private static final Function<String, String> TO_UPPER_CASE = Strings::toUpperCase;
 
-    private static final Function<String, String> TO_UPPER_CASE_WITH_UNDERSCORE = t -> Strings.toUpperCaseWithUnderscore(t);
+    private static final Function<String, String> TO_UPPER_CASE_WITH_UNDERSCORE = Strings::toUpperCaseWithUnderscore;
 
-    private static final Function<Throwable, RuntimeException> TO_RUNTIME_EXCEPTION = e -> ExceptionUtil.toRuntimeException(e);
+    private static final Function<Throwable, RuntimeException> TO_RUNTIME_EXCEPTION = ExceptionUtil::toRuntimeException;
 
     @SuppressWarnings("rawtypes")
-    private static final BiFunction<Comparable, Comparable, Integer> COMPARE = (a, b) -> N.compare(a, b);
+    private static final BiFunction<Comparable, Comparable, Integer> COMPARE = N::compare;
 
     @SuppressWarnings("rawtypes")
     private static final Function IDENTITY = t -> t;
@@ -272,11 +275,11 @@ public final class Fn extends Comparators {
         return t;
     };
 
-    private static final Function<String, String> STRIP = t -> Strings.strip(t);
+    private static final Function<String, String> STRIP = Strings::strip;
 
-    private static final Function<String, String> STRIP_TO_EMPTY = t -> Strings.stripToEmpty(t);
+    private static final Function<String, String> STRIP_TO_EMPTY = Strings::stripToEmpty;
 
-    private static final Function<String, String> STRIP_TO_NULL = t -> Strings.stripToNull(t);
+    private static final Function<String, String> STRIP_TO_NULL = Strings::stripToNull;
 
     private static final Function<String, String> NULL_TO_EMPTY = t -> t == null ? N.EMPTY_STRING : t;
 
@@ -299,29 +302,29 @@ public final class Fn extends Comparators {
     @SuppressWarnings("rawtypes")
     private static final Function<Map, Integer> SIZE_MAP = t -> t == null ? 0 : t.size();
 
-    private static final Function<Map.Entry<Object, Object>, Object> KEY = t -> t.getKey();
+    private static final Function<Map.Entry<Object, Object>, Object> KEY = Entry::getKey;
 
-    private static final Function<Map.Entry<Object, Object>, Object> VALUE = t -> t.getValue();
+    private static final Function<Map.Entry<Object, Object>, Object> VALUE = Entry::getValue;
 
-    private static final Function<Pair<Object, Object>, Object> LEFT = t -> t.getLeft();
+    private static final Function<Pair<Object, Object>, Object> LEFT = Pair::getLeft;
 
-    private static final Function<Pair<Object, Object>, Object> RIGHT = t -> t.getRight();
+    private static final Function<Pair<Object, Object>, Object> RIGHT = Pair::getRight;
 
     private static final Function<Map.Entry<Object, Object>, Map.Entry<Object, Object>> INVERSE = t -> new ImmutableEntry<>(t.getValue(), t.getKey());
 
-    private static final BiFunction<Object, Object, Map.Entry<Object, Object>> ENTRY = (key, value) -> new ImmutableEntry<>(key, value);
+    private static final BiFunction<Object, Object, Map.Entry<Object, Object>> ENTRY = ImmutableEntry::new;
 
-    private static final BiFunction<Object, Object, Pair<Object, Object>> PAIR = (key, value) -> Pair.of(key, value);
+    private static final BiFunction<Object, Object, Pair<Object, Object>> PAIR = Pair::of;
 
-    private static final TriFunction<Object, Object, Object, Triple<Object, Object, Object>> TRIPLE = (a, b, c) -> Triple.of(a, b, c);
+    private static final TriFunction<Object, Object, Object, Triple<Object, Object, Object>> TRIPLE = Triple::of;
 
-    private static final Function<Object, Tuple1<Object>> TUPLE_1 = t -> Tuple.of(t);
+    private static final Function<Object, Tuple1<Object>> TUPLE_1 = Tuple::of;
 
-    private static final BiFunction<Object, Object, Tuple2<Object, Object>> TUPLE_2 = (t, u) -> Tuple.of(t, u);
+    private static final BiFunction<Object, Object, Tuple2<Object, Object>> TUPLE_2 = Tuple::of;
 
-    private static final TriFunction<Object, Object, Object, Tuple3<Object, Object, Object>> TUPLE_3 = (a, b, c) -> Tuple.of(a, b, c);
+    private static final TriFunction<Object, Object, Object, Tuple3<Object, Object, Object>> TUPLE_3 = Tuple::of;
 
-    private static final QuadFunction<Object, Object, Object, Object, Tuple4<Object, Object, Object, Object>> TUPLE_4 = (a, b, c, d) -> Tuple.of(a, b, c, d);
+    private static final QuadFunction<Object, Object, Object, Object, Tuple4<Object, Object, Object, Object>> TUPLE_4 = Tuple::of;
 
     @SuppressWarnings("rawtypes")
     private static final Predicate ALWAYS_TRUE = value -> true;
@@ -330,18 +333,18 @@ public final class Fn extends Comparators {
     private static final Predicate ALWAYS_FALSE = value -> false;
 
     @SuppressWarnings("rawtypes")
-    private static final Predicate IS_NULL = value -> value == null;
+    private static final Predicate IS_NULL = Objects::isNull;
 
-    private static final Predicate<CharSequence> IS_NULL_OR_EMPTY = value -> value == null || value.length() == 0;
+    private static final Predicate<CharSequence> IS_NULL_OR_EMPTY = N::isNullOrEmpty;
 
-    private static final Predicate<CharSequence> IS_NULL_OR_EMPTY_OR_BLANK = value -> N.isNullOrEmptyOrBlank(value);
+    private static final Predicate<CharSequence> IS_NULL_OR_EMPTY_OR_BLANK = N::isNullOrEmptyOrBlank;
 
     @SuppressWarnings("rawtypes")
-    private static final Predicate NOT_NULL = value -> value != null;
+    private static final Predicate NOT_NULL = Objects::nonNull;
 
-    private static final Predicate<CharSequence> NOT_NULL_OR_EMPTY = value -> value != null && value.length() > 0;
+    private static final Predicate<CharSequence> NOT_NULL_OR_EMPTY = N::notNullOrEmpty;
 
-    private static final Predicate<CharSequence> NOT_NULL_OR_EMPTY_OR_BLANK = value -> N.notNullOrEmptyOrBlank(value);
+    private static final Predicate<CharSequence> NOT_NULL_OR_EMPTY_OR_BLANK = N::notNullOrEmptyOrBlank;
 
     private static final Predicate<File> IS_FILE = file -> file != null && file.isFile();
 
@@ -703,6 +706,43 @@ public final class Fn extends Comparators {
         return EMPTY_ACTION;
     }
 
+    public static Runnable shutDown(final ExecutorService service) {
+        return new Runnable() {
+            private volatile boolean isClosed = false;
+
+            @Override
+            public void run() {
+                if (isClosed) {
+                    return;
+                }
+
+                isClosed = true;
+                service.shutdown();
+            }
+        };
+    }
+
+    public static Runnable shutDown(final ExecutorService service, final long terminationTimeout, final TimeUnit timeUnit) {
+        return new Runnable() {
+            private volatile boolean isClosed = false;
+
+            @Override
+            public void run() {
+                if (isClosed) {
+                    return;
+                }
+
+                isClosed = true;
+                try {
+                    service.shutdown();
+                    service.awaitTermination(terminationTimeout, timeUnit);
+                } catch (InterruptedException e) {
+                    // ignore.
+                }
+            }
+        };
+    }
+
     /**
      *
      * @param <T>
@@ -930,7 +970,7 @@ public final class Fn extends Comparators {
         return t -> Keyed.of(keyMapper.apply(t), t);
     }
 
-    private static final Function<Keyed<?, Object>, Object> VAL = t -> t.val();
+    private static final Function<Keyed<?, Object>, Object> VAL = Keyed::val;
 
     private static final Function<Map.Entry<Keyed<Object, Object>, Object>, Object> KK_VAL = t -> t.getKey().val();
 
@@ -957,7 +997,7 @@ public final class Fn extends Comparators {
         return (Function) KK_VAL;
     }
 
-    private static final Function<Object, Wrapper<Object>> WRAP = t -> Wrapper.of(t);
+    private static final Function<Object, Wrapper<Object>> WRAP = Wrapper::of;
 
     /**
      *
@@ -984,7 +1024,7 @@ public final class Fn extends Comparators {
         return t -> Wrapper.of(t, hashFunction, equalsFunction);
     }
 
-    private static final Function<Wrapper<Object>, Object> UNWRAP = t -> t.value();
+    private static final Function<Wrapper<Object>, Object> UNWRAP = Wrapper::value;
 
     /**
      *
@@ -1745,7 +1785,7 @@ public final class Fn extends Comparators {
     public static Predicate<Class> subtypeOf(final Class<?> clazz) {
         N.checkArgNotNull(clazz);
 
-        return value -> clazz.isAssignableFrom(value);
+        return clazz::isAssignableFrom;
     }
 
     /**
@@ -2654,7 +2694,7 @@ public final class Fn extends Comparators {
         return entry -> func.apply(entry.getKey(), entry.getValue());
     }
 
-    private static Function<Map<Object, Collection<Object>>, List<Map<Object, Object>>> FLAT_TO_MAP_FUNC = map -> Maps.flatToMap(map);
+    private static final Function<Map<Object, Collection<Object>>, List<Map<Object, Object>>> FLAT_TO_MAP_FUNC = Maps::flatToMap;
 
     /**
      * {a=[1, 2, 3], b=[4, 5, 6], c=[7, 8]} -> [{a=1, b=4, c=7}, {a=2, b=5, c=8}, {a=3, b=6}]
@@ -2669,7 +2709,7 @@ public final class Fn extends Comparators {
         return (Function) FLAT_TO_MAP_FUNC;
     }
 
-    private static Function<String, Byte> PARSE_BYTE_FUNC = t -> Numbers.toByte(t);
+    private static final Function<String, Byte> PARSE_BYTE_FUNC = Numbers::toByte;
 
     /**
      * Parses the byte.
@@ -2680,7 +2720,7 @@ public final class Fn extends Comparators {
         return PARSE_BYTE_FUNC;
     }
 
-    private static Function<String, Short> PARSE_SHORT_FUNC = t -> Numbers.toShort(t);
+    private static final Function<String, Short> PARSE_SHORT_FUNC = Numbers::toShort;
 
     /**
      * Parses the short.
@@ -2691,7 +2731,7 @@ public final class Fn extends Comparators {
         return PARSE_SHORT_FUNC;
     }
 
-    private static Function<String, Integer> PARSE_INT_FUNC = t -> Numbers.toInt(t);
+    private static final Function<String, Integer> PARSE_INT_FUNC = Numbers::toInt;
 
     /**
      * Parses the int.
@@ -2702,7 +2742,7 @@ public final class Fn extends Comparators {
         return PARSE_INT_FUNC;
     }
 
-    private static Function<String, Long> PARSE_LONG_FUNC = t -> Numbers.toLong(t);
+    private static final Function<String, Long> PARSE_LONG_FUNC = Numbers::toLong;
 
     /**
      * Parses the long.
@@ -2713,7 +2753,7 @@ public final class Fn extends Comparators {
         return PARSE_LONG_FUNC;
     }
 
-    private static Function<String, Float> PARSE_FLOAT_FUNC = t -> Numbers.toFloat(t);
+    private static final Function<String, Float> PARSE_FLOAT_FUNC = Numbers::toFloat;
 
     /**
      * Parses the float.
@@ -2724,7 +2764,7 @@ public final class Fn extends Comparators {
         return PARSE_FLOAT_FUNC;
     }
 
-    private static Function<String, Double> PARSE_DOUBLE_FUNC = t -> Numbers.toDouble(t);
+    private static final Function<String, Double> PARSE_DOUBLE_FUNC = Numbers::toDouble;
 
     /**
      * Parses the double.
@@ -2735,7 +2775,7 @@ public final class Fn extends Comparators {
         return PARSE_DOUBLE_FUNC;
     }
 
-    private static Function<String, Number> CREATE_NUMBER_FUNC = t -> N.isNullOrEmpty(t) ? null
+    private static final Function<String, Number> CREATE_NUMBER_FUNC = t -> N.isNullOrEmpty(t) ? null
             : Numbers.createNumber(t).orElseThrow(() -> new NumberFormatException("Invalid number: " + t));
 
     /**
@@ -4344,19 +4384,19 @@ public final class Fn extends Comparators {
     public static <T> Consumer<T> f2c(final java.util.function.Function<? super T, ?> func) {
         N.checkArgNotNull(func);
 
-        return t -> func.apply(t);
+        return func::apply;
     }
 
     public static <T, U> BiConsumer<T, U> f2c(final java.util.function.BiFunction<? super T, ? super U, ?> func) {
         N.checkArgNotNull(func);
 
-        return (t, u) -> func.apply(t, u);
+        return func::apply;
     }
 
     public static <A, B, C> TriConsumer<A, B, C> f2c(final TriFunction<? super A, ? super B, ? super C, ?> func) {
         N.checkArgNotNull(func);
 
-        return (a, b, c) -> func.apply(a, b, c);
+        return func::apply;
     }
 
     public static <E extends Exception> Runnable rr(final Throwables.Runnable<E> runnbale) {
@@ -4417,7 +4457,7 @@ public final class Fn extends Comparators {
     public static <R> Runnable c2r(final Callable<R> callable) {
         N.checkArgNotNull(callable);
 
-        return () -> callable.call();
+        return callable::call;
     }
 
     /**
@@ -4450,7 +4490,7 @@ public final class Fn extends Comparators {
             return (Runnable) runnable;
         }
 
-        return () -> runnable.run();
+        return runnable::run;
     }
 
     public static Callable<Void> jr2c(final java.lang.Runnable runnable) {
@@ -4489,6 +4529,9 @@ public final class Fn extends Comparators {
             }
         };
     }
+
+    // #################################################################################################################################
+    // #################################################################################################################################
 
     /**
      *
@@ -4584,10 +4627,10 @@ public final class Fn extends Comparators {
     public static final class Suppliers {
 
         /** The Constant UUID. */
-        private static final Supplier<String> UUID = () -> N.uuid();
+        private static final Supplier<String> UUID = N::uuid;
 
         /** The Constant GUID. */
-        private static final Supplier<String> GUID = () -> N.guid();
+        private static final Supplier<String> GUID = N::guid;
 
         /** The Constant EMPTY_BOOLEAN_ARRAY. */
         private static final Supplier<boolean[]> EMPTY_BOOLEAN_ARRAY = () -> N.EMPTY_BOOLEAN_ARRAY;
@@ -4620,64 +4663,64 @@ public final class Fn extends Comparators {
         private static final Supplier<Object[]> EMPTY_OBJECT_ARRAY = () -> N.EMPTY_OBJECT_ARRAY;
 
         /** The Constant BOOLEAN_LIST. */
-        private static final Supplier<BooleanList> BOOLEAN_LIST = () -> new BooleanList();
+        private static final Supplier<BooleanList> BOOLEAN_LIST = BooleanList::new;
 
         /** The Constant CHAR_LIST. */
-        private static final Supplier<CharList> CHAR_LIST = () -> new CharList();
+        private static final Supplier<CharList> CHAR_LIST = CharList::new;
 
         /** The Constant BYTE_LIST. */
-        private static final Supplier<ByteList> BYTE_LIST = () -> new ByteList();
+        private static final Supplier<ByteList> BYTE_LIST = ByteList::new;
 
         /** The Constant SHORT_LIST. */
-        private static final Supplier<ShortList> SHORT_LIST = () -> new ShortList();
+        private static final Supplier<ShortList> SHORT_LIST = ShortList::new;
 
         /** The Constant INT_LIST. */
-        private static final Supplier<IntList> INT_LIST = () -> new IntList();
+        private static final Supplier<IntList> INT_LIST = IntList::new;
 
         /** The Constant LONG_LIST. */
-        private static final Supplier<LongList> LONG_LIST = () -> new LongList();
+        private static final Supplier<LongList> LONG_LIST = LongList::new;
 
         /** The Constant FLOAT_LIST. */
-        private static final Supplier<FloatList> FLOAT_LIST = () -> new FloatList();
+        private static final Supplier<FloatList> FLOAT_LIST = FloatList::new;
 
         /** The Constant DOUBLE_LIST. */
-        private static final Supplier<DoubleList> DOUBLE_LIST = () -> new DoubleList();
+        private static final Supplier<DoubleList> DOUBLE_LIST = DoubleList::new;
 
         /** The Constant LIST. */
         @SuppressWarnings("rawtypes")
-        private static final Supplier<? super List> LIST = () -> new ArrayList();
+        private static final Supplier<? super List> LIST = ArrayList::new;
 
         /** The Constant LINKED_LIST. */
         @SuppressWarnings("rawtypes")
-        private static final Supplier<? super LinkedList> LINKED_LIST = () -> new LinkedList();
+        private static final Supplier<? super LinkedList> LINKED_LIST = LinkedList::new;
 
         /** The Constant SET. */
         @SuppressWarnings("rawtypes")
-        private static final Supplier<? super Set> SET = () -> N.newHashSet();
+        private static final Supplier<? super Set> SET = N::newHashSet;
 
         /** The Constant LINKED_HASH_SET. */
         @SuppressWarnings("rawtypes")
-        private static final Supplier<? super Set> LINKED_HASH_SET = () -> N.newLinkedHashSet();
+        private static final Supplier<? super Set> LINKED_HASH_SET = N::newLinkedHashSet;
 
         /** The Constant TREE_SET. */
         @SuppressWarnings("rawtypes")
-        private static final Supplier<? super TreeSet> TREE_SET = () -> new TreeSet();
+        private static final Supplier<? super TreeSet> TREE_SET = TreeSet::new;
 
         /** The Constant QUEUE. */
         @SuppressWarnings("rawtypes")
-        private static final Supplier<? super Queue> QUEUE = () -> new LinkedList();
+        private static final Supplier<? super Queue> QUEUE = LinkedList::new;
 
         /** The Constant DEQUE. */
         @SuppressWarnings("rawtypes")
-        private static final Supplier<? super Deque> DEQUE = () -> new LinkedList();
+        private static final Supplier<? super Deque> DEQUE = LinkedList::new;
 
         /** The Constant ARRAY_DEQUE. */
         @SuppressWarnings("rawtypes")
-        private static final Supplier<? super ArrayDeque> ARRAY_DEQUE = () -> new ArrayDeque();
+        private static final Supplier<? super ArrayDeque> ARRAY_DEQUE = ArrayDeque::new;
 
         /** The Constant LINKED_BLOCKING_QUEUE. */
         @SuppressWarnings("rawtypes")
-        private static final Supplier<? super LinkedBlockingQueue> LINKED_BLOCKING_QUEUE = () -> new LinkedBlockingQueue();
+        private static final Supplier<? super LinkedBlockingQueue> LINKED_BLOCKING_QUEUE = LinkedBlockingQueue::new;
 
         /** The Constant ARRAY_BLOCKING_QUEUE. */
         @SuppressWarnings("rawtypes")
@@ -4685,62 +4728,62 @@ public final class Fn extends Comparators {
 
         /** The Constant LINKED_BLOCKING_DEQUE. */
         @SuppressWarnings("rawtypes")
-        private static final Supplier<? super LinkedBlockingDeque> LINKED_BLOCKING_DEQUE = () -> new LinkedBlockingDeque();
+        private static final Supplier<? super LinkedBlockingDeque> LINKED_BLOCKING_DEQUE = LinkedBlockingDeque::new;
 
         /** The Constant CONCURRENT_LINKED_QUEUE. */
         @SuppressWarnings("rawtypes")
-        private static final Supplier<? super ConcurrentLinkedQueue> CONCURRENT_LINKED_QUEUE = () -> new ConcurrentLinkedQueue();
+        private static final Supplier<? super ConcurrentLinkedQueue> CONCURRENT_LINKED_QUEUE = ConcurrentLinkedQueue::new;
 
         /** The Constant PRIORITY_QUEUE. */
         @SuppressWarnings("rawtypes")
-        private static final Supplier<? super PriorityQueue> PRIORITY_QUEUE = () -> new PriorityQueue();
+        private static final Supplier<? super PriorityQueue> PRIORITY_QUEUE = PriorityQueue::new;
 
         /** The Constant MAP. */
         @SuppressWarnings("rawtypes")
-        private static final Supplier<? super Map> MAP = () -> N.newHashMap();
+        private static final Supplier<? super Map> MAP = N::newHashMap;
 
         /** The Constant LINKED_HASH_MAP. */
         @SuppressWarnings("rawtypes")
-        private static final Supplier<? super Map> LINKED_HASH_MAP = () -> N.newLinkedHashMap();
+        private static final Supplier<? super Map> LINKED_HASH_MAP = N::newLinkedHashMap;
 
         /** The Constant IDENTITY_HASH_MAP. */
         @SuppressWarnings("rawtypes")
-        private static final Supplier<? super IdentityHashMap> IDENTITY_HASH_MAP = () -> new IdentityHashMap();
+        private static final Supplier<? super IdentityHashMap> IDENTITY_HASH_MAP = IdentityHashMap::new;
 
         /** The Constant TREE_MAP. */
         @SuppressWarnings("rawtypes")
-        private static final Supplier<? super TreeMap> TREE_MAP = () -> new TreeMap();
+        private static final Supplier<? super TreeMap> TREE_MAP = TreeMap::new;
 
         /** The Constant CONCURRENT_HASH_MAP. */
         @SuppressWarnings("rawtypes")
-        private static final Supplier<? super ConcurrentHashMap> CONCURRENT_HASH_MAP = () -> new ConcurrentHashMap();
+        private static final Supplier<? super ConcurrentHashMap> CONCURRENT_HASH_MAP = ConcurrentHashMap::new;
 
         /** The Constant CONCURRENT_HASH_SET. */
         @SuppressWarnings("rawtypes")
-        private static final Supplier<? super Set> CONCURRENT_HASH_SET = () -> ConcurrentHashMap.newKeySet();
+        private static final Supplier<? super Set> CONCURRENT_HASH_SET = ConcurrentHashMap::newKeySet;
 
         /** The Constant BI_MAP. */
         @SuppressWarnings("rawtypes")
-        private static final Supplier<? super BiMap> BI_MAP = () -> new BiMap();
+        private static final Supplier<? super BiMap> BI_MAP = BiMap::new;
 
         /** The Constant MULTISET. */
         @SuppressWarnings("rawtypes")
-        private static final Supplier<? super Multiset> MULTISET = () -> new Multiset();
+        private static final Supplier<? super Multiset> MULTISET = Multiset::new;
 
         /** The Constant LONG_MULTISET. */
         @SuppressWarnings("rawtypes")
-        private static final Supplier<? super LongMultiset> LONG_MULTISET = () -> new LongMultiset();
+        private static final Supplier<? super LongMultiset> LONG_MULTISET = LongMultiset::new;
 
         /** The Constant LIST_MULTIMAP. */
         @SuppressWarnings("rawtypes")
-        private static final Supplier<? super ListMultimap> LIST_MULTIMAP = () -> N.newListMultimap();
+        private static final Supplier<? super ListMultimap> LIST_MULTIMAP = N::newListMultimap;
 
         /** The Constant SET_MULTIMAP. */
         @SuppressWarnings("rawtypes")
-        private static final Supplier<? super SetMultimap> SET_MULTIMAP = () -> N.newSetMultimap();
+        private static final Supplier<? super SetMultimap> SET_MULTIMAP = N::newSetMultimap;
 
         /** The Constant STRING_BUILDER. */
-        private static final Supplier<StringBuilder> STRING_BUILDER = () -> new StringBuilder();
+        private static final Supplier<StringBuilder> STRING_BUILDER = StringBuilder::new;
 
         private Suppliers() {
         }
@@ -5518,32 +5561,32 @@ public final class Fn extends Comparators {
         private static final IntFunction<Object[]> OBJECT_ARRAY = len -> new Object[len];
 
         /** The Constant BOOLEAN_LIST. */
-        private static final IntFunction<BooleanList> BOOLEAN_LIST = len -> new BooleanList(len);
+        private static final IntFunction<BooleanList> BOOLEAN_LIST = BooleanList::new;
 
         /** The Constant CHAR_LIST. */
-        private static final IntFunction<CharList> CHAR_LIST = len -> new CharList(len);
+        private static final IntFunction<CharList> CHAR_LIST = CharList::new;
 
         /** The Constant BYTE_LIST. */
-        private static final IntFunction<ByteList> BYTE_LIST = len -> new ByteList(len);
+        private static final IntFunction<ByteList> BYTE_LIST = ByteList::new;
 
         /** The Constant SHORT_LIST. */
-        private static final IntFunction<ShortList> SHORT_LIST = len -> new ShortList(len);
+        private static final IntFunction<ShortList> SHORT_LIST = ShortList::new;
 
         /** The Constant INT_LIST. */
-        private static final IntFunction<IntList> INT_LIST = len -> new IntList(len);
+        private static final IntFunction<IntList> INT_LIST = IntList::new;
 
         /** The Constant LONG_LIST. */
-        private static final IntFunction<LongList> LONG_LIST = len -> new LongList(len);
+        private static final IntFunction<LongList> LONG_LIST = LongList::new;
 
         /** The Constant FLOAT_LIST. */
-        private static final IntFunction<FloatList> FLOAT_LIST = len -> new FloatList(len);
+        private static final IntFunction<FloatList> FLOAT_LIST = FloatList::new;
 
         /** The Constant DOUBLE_LIST. */
-        private static final IntFunction<DoubleList> DOUBLE_LIST = len -> new DoubleList(len);
+        private static final IntFunction<DoubleList> DOUBLE_LIST = DoubleList::new;
 
         /** The Constant LIST_FACTORY. */
         @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super List> LIST_FACTORY = len -> new ArrayList<>(len);
+        private static final IntFunction<? super List> LIST_FACTORY = ArrayList::new;
 
         /** The Constant LINKED_LIST_FACTORY. */
         @SuppressWarnings("rawtypes")
@@ -5551,11 +5594,11 @@ public final class Fn extends Comparators {
 
         /** The Constant SET_FACTORY. */
         @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super Set> SET_FACTORY = len -> N.newHashSet(len);
+        private static final IntFunction<? super Set> SET_FACTORY = N::newHashSet;
 
         /** The Constant LINKED_HASH_SET_FACTORY. */
         @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super Set> LINKED_HASH_SET_FACTORY = len -> N.newLinkedHashSet(len);
+        private static final IntFunction<? super Set> LINKED_HASH_SET_FACTORY = N::newLinkedHashSet;
 
         /** The Constant TREE_SET_FACTORY. */
         @SuppressWarnings("rawtypes")
@@ -5571,19 +5614,19 @@ public final class Fn extends Comparators {
 
         /** The Constant ARRAY_DEQUE_FACTORY. */
         @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super ArrayDeque> ARRAY_DEQUE_FACTORY = numElements -> new ArrayDeque(numElements);
+        private static final IntFunction<? super ArrayDeque> ARRAY_DEQUE_FACTORY = ArrayDeque::new;
 
         /** The Constant LINKED_BLOCKING_QUEUE_FACTORY. */
         @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super LinkedBlockingQueue> LINKED_BLOCKING_QUEUE_FACTORY = capacity -> new LinkedBlockingQueue(capacity);
+        private static final IntFunction<? super LinkedBlockingQueue> LINKED_BLOCKING_QUEUE_FACTORY = LinkedBlockingQueue::new;
 
         /** The Constant ARRAY_BLOCKING_QUEUE_FACTORY. */
         @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super ArrayBlockingQueue> ARRAY_BLOCKING_QUEUE_FACTORY = capacity -> new ArrayBlockingQueue(capacity);
+        private static final IntFunction<? super ArrayBlockingQueue> ARRAY_BLOCKING_QUEUE_FACTORY = ArrayBlockingQueue::new;
 
         /** The Constant LINKED_BLOCKING_DEQUE_FACTORY. */
         @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super LinkedBlockingDeque> LINKED_BLOCKING_DEQUE_FACTORY = capacity -> new LinkedBlockingDeque(capacity);
+        private static final IntFunction<? super LinkedBlockingDeque> LINKED_BLOCKING_DEQUE_FACTORY = LinkedBlockingDeque::new;
 
         /** The Constant CONCURRENT_LINKED_QUEUE_FACTORY. */
         @SuppressWarnings("rawtypes")
@@ -5591,19 +5634,19 @@ public final class Fn extends Comparators {
 
         /** The Constant PRIORITY_QUEUE_FACTORY. */
         @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super PriorityQueue> PRIORITY_QUEUE_FACTORY = len -> new PriorityQueue(len);
+        private static final IntFunction<? super PriorityQueue> PRIORITY_QUEUE_FACTORY = PriorityQueue::new;
 
         /** The Constant MAP_FACTORY. */
         @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super Map> MAP_FACTORY = len -> N.newHashMap(len);
+        private static final IntFunction<? super Map> MAP_FACTORY = N::newHashMap;
 
         /** The Constant LINKED_HASH_MAP_FACTORY. */
         @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super Map> LINKED_HASH_MAP_FACTORY = len -> N.newLinkedHashMap(len);
+        private static final IntFunction<? super Map> LINKED_HASH_MAP_FACTORY = N::newLinkedHashMap;
 
         /** The Constant IDENTITY_HASH_MAP_FACTORY. */
         @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super IdentityHashMap> IDENTITY_HASH_MAP_FACTORY = len -> N.newIdentityHashMap(len);
+        private static final IntFunction<? super IdentityHashMap> IDENTITY_HASH_MAP_FACTORY = N::newIdentityHashMap;
 
         /** The Constant TREE_MAP_FACTORY. */
         @SuppressWarnings("rawtypes")
@@ -5611,27 +5654,27 @@ public final class Fn extends Comparators {
 
         /** The Constant CONCURRENT_HASH_MAP_FACTORY. */
         @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super ConcurrentHashMap> CONCURRENT_HASH_MAP_FACTORY = len -> N.newConcurrentHashMap(len);
+        private static final IntFunction<? super ConcurrentHashMap> CONCURRENT_HASH_MAP_FACTORY = N::newConcurrentHashMap;
 
         /** The Constant BI_MAP_FACTORY. */
         @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super BiMap> BI_MAP_FACTORY = len -> N.newBiMap(len);
+        private static final IntFunction<? super BiMap> BI_MAP_FACTORY = N::newBiMap;
 
         /** The Constant MULTISET_FACTORY. */
         @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super Multiset> MULTISET_FACTORY = len -> N.newMultiset(len);
+        private static final IntFunction<? super Multiset> MULTISET_FACTORY = N::newMultiset;
 
         /** The Constant LONG_MULTISET_FACTORY. */
         @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super LongMultiset> LONG_MULTISET_FACTORY = len -> N.newLongMultiset(len);
+        private static final IntFunction<? super LongMultiset> LONG_MULTISET_FACTORY = N::newLongMultiset;
 
         /** The Constant LIST_MULTIMAP_FACTORY. */
         @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super ListMultimap> LIST_MULTIMAP_FACTORY = len -> N.newLinkedListMultimap(len);
+        private static final IntFunction<? super ListMultimap> LIST_MULTIMAP_FACTORY = N::newLinkedListMultimap;
 
         /** The Constant SET_MULTIMAP_FACTORY. */
         @SuppressWarnings("rawtypes")
-        private static final IntFunction<? super SetMultimap> SET_MULTIMAP_FACTORY = len -> N.newSetMultimap(len);
+        private static final IntFunction<? super SetMultimap> SET_MULTIMAP_FACTORY = N::newSetMultimap;
 
         protected Factory() {
             // for extention
@@ -6566,7 +6609,7 @@ public final class Fn extends Comparators {
 
         /** The Constant EQUAL. */
         @SuppressWarnings("rawtypes")
-        private static final BiPredicate EQUAL = (t, u) -> N.equals(t, u);
+        private static final BiPredicate EQUAL = N::equals;
 
         /** The Constant NOT_EQUAL. */
         @SuppressWarnings("rawtypes")
@@ -6720,39 +6763,39 @@ public final class Fn extends Comparators {
         };
 
         /** The Constant ADD. */
-        private static final BiConsumer<Collection<Object>, Object> ADD = (t, u) -> t.add(u);
+        private static final BiConsumer<Collection<Object>, Object> ADD = Collection::add;
 
         /** The Constant ADD_ALL. */
-        private static final BiConsumer<Collection<Object>, Collection<Object>> ADD_ALL = (t, u) -> t.addAll(u);
+        private static final BiConsumer<Collection<Object>, Collection<Object>> ADD_ALL = Collection::addAll;
 
         /** The Constant ADD_ALL_2. */
         @SuppressWarnings("rawtypes")
-        private static final BiConsumer<PrimitiveList, PrimitiveList> ADD_ALL_2 = (t, u) -> t.addAll(u);
+        private static final BiConsumer<PrimitiveList, PrimitiveList> ADD_ALL_2 = PrimitiveList::addAll;
 
         /** The Constant REMOVE. */
-        private static final BiConsumer<Collection<Object>, Object> REMOVE = (t, u) -> t.remove(u);
+        private static final BiConsumer<Collection<Object>, Object> REMOVE = Collection::remove;
 
         /** The Constant REMOVE_ALL. */
-        private static final BiConsumer<Collection<Object>, Collection<Object>> REMOVE_ALL = (t, u) -> t.removeAll(u);
+        private static final BiConsumer<Collection<Object>, Collection<Object>> REMOVE_ALL = Collection::removeAll;
 
         /** The Constant REMOVE_ALL_2. */
         @SuppressWarnings("rawtypes")
-        private static final BiConsumer<PrimitiveList, PrimitiveList> REMOVE_ALL_2 = (t, u) -> t.removeAll(u);
+        private static final BiConsumer<PrimitiveList, PrimitiveList> REMOVE_ALL_2 = PrimitiveList::removeAll;
 
         /** The Constant PUT. */
         private static final BiConsumer<Map<Object, Object>, Map.Entry<Object, Object>> PUT = (t, u) -> t.put(u.getKey(), u.getValue());
 
         /** The Constant PUT_ALL. */
-        private static final BiConsumer<Map<Object, Object>, Map<Object, Object>> PUT_ALL = (t, u) -> t.putAll(u);
+        private static final BiConsumer<Map<Object, Object>, Map<Object, Object>> PUT_ALL = Map::putAll;
 
         /** The Constant REMOVE_BY_KEY. */
-        private static final BiConsumer<Map<Object, Object>, Object> REMOVE_BY_KEY = (t, u) -> t.remove(u);
+        private static final BiConsumer<Map<Object, Object>, Object> REMOVE_BY_KEY = Map::remove;
 
         /** The Constant MERGE. */
-        private static final BiConsumer<Joiner, Joiner> MERGE = (t, u) -> t.merge(u);
+        private static final BiConsumer<Joiner, Joiner> MERGE = Joiner::merge;
 
         /** The Constant APPEND. */
-        private static final BiConsumer<StringBuilder, Object> APPEND = (t, u) -> t.append(u);
+        private static final BiConsumer<StringBuilder, Object> APPEND = StringBuilder::append;
 
         private BiConsumers() {
         }
@@ -7020,10 +7063,10 @@ public final class Fn extends Comparators {
         };
 
         /** The Constant MERGE. */
-        private static final BiFunction<Joiner, Joiner, Joiner> MERGE = (t, u) -> t.merge(u);
+        private static final BiFunction<Joiner, Joiner, Joiner> MERGE = Joiner::merge;
 
         /** The Constant APPEND. */
-        private static final BiFunction<StringBuilder, Object, StringBuilder> APPEND = (t, u) -> t.append(u);
+        private static final BiFunction<StringBuilder, Object, StringBuilder> APPEND = StringBuilder::append;
 
         private BiFunctions() {
         }
@@ -7261,7 +7304,7 @@ public final class Fn extends Comparators {
         };
 
         /** The Constant MERGE_TO_FIRST. */
-        private static final BinaryOperator<Joiner> MERGE_TO_FIRST = (t, u) -> t.merge(u);
+        private static final BinaryOperator<Joiner> MERGE_TO_FIRST = Joiner::merge;
 
         /** The Constant MERGE_TO_BIGGER. */
         private static final BinaryOperator<Joiner> MERGE_TO_BIGGER = (t, u) -> {
@@ -7273,7 +7316,7 @@ public final class Fn extends Comparators {
         };
 
         /** The Constant APPEND_TO_FIRST. */
-        private static final BinaryOperator<StringBuilder> APPEND_TO_FIRST = (t, u) -> t.append(u);
+        private static final BinaryOperator<StringBuilder> APPEND_TO_FIRST = StringBuilder::append;
 
         /** The Constant APPEND_TO_BIGGER. */
         private static final BinaryOperator<StringBuilder> APPEND_TO_BIGGER = (t, u) -> {
@@ -7297,10 +7340,10 @@ public final class Fn extends Comparators {
         private static final BinaryOperator<Double> ADD_DOUBLE = (t, u) -> t.doubleValue() + u.doubleValue();
 
         /** The Constant ADD_BIG_INTEGER. */
-        private static final BinaryOperator<BigInteger> ADD_BIG_INTEGER = (t, u) -> t.add(u);
+        private static final BinaryOperator<BigInteger> ADD_BIG_INTEGER = BigInteger::add;
 
         /** The Constant ADD_BIG_DECIMAL. */
-        private static final BinaryOperator<BigDecimal> ADD_BIG_DECIMAL = (t, u) -> t.add(u);
+        private static final BinaryOperator<BigDecimal> ADD_BIG_DECIMAL = BigDecimal::add;
 
         private BinaryOperators() {
         }
@@ -7781,11 +7824,11 @@ public final class Fn extends Comparators {
 
         /** The Constant CLONE. */
         @SuppressWarnings("rawtypes")
-        private static final Function<DisposableArray, Object[]> CLONE = t -> t.clone();
+        private static final Function<DisposableArray, Object[]> CLONE = DisposableArray::clone;
 
         /** The Constant TO_STRING. */
         @SuppressWarnings("rawtypes")
-        private static final Function<DisposableArray, String> TO_STRING = t -> t.toString();
+        private static final Function<DisposableArray, String> TO_STRING = DisposableArray::toString;
 
         private Disposables() {
         }
@@ -7835,7 +7878,7 @@ public final class Fn extends Comparators {
         private static final CharPredicate IS_ZERO = t -> t == 0;
 
         /** The Constant IS_WHITE_SPACE. */
-        private static final CharPredicate IS_WHITESPACE = t -> Character.isWhitespace(t);
+        private static final CharPredicate IS_WHITESPACE = Character::isWhitespace;
 
         /** The Constant EQUAL. */
         private static final CharBiPredicate EQUAL = (t, u) -> t == u;
@@ -8160,7 +8203,7 @@ public final class Fn extends Comparators {
         }
 
         /** The Constant SUM. */
-        private static final Function<byte[], Integer> SUM = t -> N.sum(t);
+        private static final Function<byte[], Integer> SUM = N::sum;
 
         /**
          *
@@ -8171,7 +8214,7 @@ public final class Fn extends Comparators {
         }
 
         /** The Constant AVERAGE. */
-        private static final Function<byte[], Double> AVERAGE = t -> N.average(t);
+        private static final Function<byte[], Double> AVERAGE = N::average;
 
         /**
          *
@@ -8366,7 +8409,7 @@ public final class Fn extends Comparators {
         }
 
         /** The Constant SUM. */
-        private static final Function<short[], Integer> SUM = t -> N.sum(t);
+        private static final Function<short[], Integer> SUM = N::sum;
 
         /**
          *
@@ -8377,7 +8420,7 @@ public final class Fn extends Comparators {
         }
 
         /** The Constant AVERAGE. */
-        private static final Function<short[], Double> AVERAGE = t -> N.average(t);
+        private static final Function<short[], Double> AVERAGE = N::average;
 
         /**
          *
@@ -8572,7 +8615,7 @@ public final class Fn extends Comparators {
         }
 
         /** The Constant SUM. */
-        private static final Function<int[], Integer> SUM = t -> N.sum(t);
+        private static final Function<int[], Integer> SUM = N::sum;
 
         /**
          *
@@ -8583,7 +8626,7 @@ public final class Fn extends Comparators {
         }
 
         /** The Constant AVERAGE. */
-        private static final Function<int[], Double> AVERAGE = t -> N.average(t);
+        private static final Function<int[], Double> AVERAGE = N::average;
 
         /**
          *
@@ -8778,7 +8821,7 @@ public final class Fn extends Comparators {
         }
 
         /** The Constant SUM. */
-        private static final Function<long[], Long> SUM = t -> N.sum(t);
+        private static final Function<long[], Long> SUM = N::sum;
 
         /**
          *
@@ -8789,7 +8832,7 @@ public final class Fn extends Comparators {
         }
 
         /** The Constant AVERAGE. */
-        private static final Function<long[], Double> AVERAGE = t -> N.average(t);
+        private static final Function<long[], Double> AVERAGE = N::average;
 
         /**
          *
@@ -8984,7 +9027,7 @@ public final class Fn extends Comparators {
         }
 
         /** The Constant SUM. */
-        private static final Function<float[], Float> SUM = t -> N.sum(t);
+        private static final Function<float[], Float> SUM = N::sum;
 
         /**
          *
@@ -8995,7 +9038,7 @@ public final class Fn extends Comparators {
         }
 
         /** The Constant AVERAGE. */
-        private static final Function<float[], Double> AVERAGE = t -> N.average(t);
+        private static final Function<float[], Double> AVERAGE = N::average;
 
         /**
          *
@@ -9052,7 +9095,7 @@ public final class Fn extends Comparators {
         private static final DoublePredicate NOT_NEGATIVE = t -> t >= 0;
 
         /** The Constant EQUAL. */
-        private static final DoubleBiPredicate EQUAL = (t, u) -> N.equals(t, u);
+        private static final DoubleBiPredicate EQUAL = N::equals;
 
         /** The Constant NOT_EQUAL. */
         private static final DoubleBiPredicate NOT_EQUAL = (t, u) -> N.compare(t, u) != 0;
@@ -9190,7 +9233,7 @@ public final class Fn extends Comparators {
         }
 
         /** The Constant SUM. */
-        private static final Function<double[], Double> SUM = t -> N.sum(t);
+        private static final Function<double[], Double> SUM = N::sum;
 
         /**
          *
@@ -9201,7 +9244,7 @@ public final class Fn extends Comparators {
         }
 
         /** The Constant AVERAGE. */
-        private static final Function<double[], Double> AVERAGE = t -> N.average(t);
+        private static final Function<double[], Double> AVERAGE = N::average;
 
         /**
          *
@@ -10322,19 +10365,19 @@ public final class Fn extends Comparators {
         public static <T, R, E extends Throwable> Throwables.Consumer<T, E> f2c(final Throwables.Function<T, R, E> func) {
             N.checkArgNotNull(func);
 
-            return t -> func.apply(t);
+            return func::apply;
         }
 
         public static <T, U, R, E extends Throwable> Throwables.BiConsumer<T, U, E> f2c(final Throwables.BiFunction<T, U, R, E> func) {
             N.checkArgNotNull(func);
 
-            return (t, u) -> func.apply(t, u);
+            return func::apply;
         }
 
         public static <A, B, C, R, E extends Throwable> Throwables.TriConsumer<A, B, C, E> f2c(final Throwables.TriFunction<A, B, C, R, E> func) {
             N.checkArgNotNull(func);
 
-            return (a, b, c) -> func.apply(a, b, c);
+            return func::apply;
         }
 
         public static <E extends Throwable> Throwables.Callable<Void, E> r2c(final Throwables.Runnable<E> runnable) {
@@ -10358,7 +10401,7 @@ public final class Fn extends Comparators {
         public static <R, E extends Throwable> Throwables.Runnable<E> c2r(final Throwables.Callable<R, E> callable) {
             N.checkArgNotNull(callable);
 
-            return () -> callable.call();
+            return callable::call;
         }
 
         public static <E extends Throwable> Throwables.Runnable<E> rr(final Runnable runnable) {
@@ -10388,7 +10431,7 @@ public final class Fn extends Comparators {
                 return (Throwables.Runnable<E>) runnable;
             }
 
-            return () -> runnable.run();
+            return runnable::run;
         }
 
         public static <E extends Throwable> java.lang.Runnable r2jr(final Throwables.Runnable<E> runnable) {
@@ -10414,7 +10457,7 @@ public final class Fn extends Comparators {
                 return (Throwables.Callable<R, Exception>) callable;
             }
 
-            return () -> callable.call();
+            return callable::call;
         }
 
         public static <R, E extends Exception> java.util.concurrent.Callable<R> c2jc(final Throwables.Callable<R, E> callable) {
@@ -10424,7 +10467,7 @@ public final class Fn extends Comparators {
                 return (java.util.concurrent.Callable<R>) callable;
             }
 
-            return () -> callable.call();
+            return callable::call;
         }
     }
 }

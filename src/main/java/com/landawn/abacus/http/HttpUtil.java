@@ -805,13 +805,15 @@ public final class HttpUtil {
          * Most websites serve cookies in the blessed format. Eagerly create the parser to ensure such
          * cookies are on the fast path.
          */
-        private static final ThreadLocal<DateFormat> STANDARD_DATE_FORMAT = ThreadLocal.withInitial(() -> {
+        private static final DateFormat STANDARD_DATE_FORMAT;
+
+        static {
             // Date format specified by RFC 7231 section 7.1.1.1.
             DateFormat rfc1123 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
             rfc1123.setLenient(false);
             rfc1123.setTimeZone(UTC);
-            return rfc1123;
-        });
+            STANDARD_DATE_FORMAT = rfc1123;
+        }
 
         /** If we fail to parse a date in a non-standard format, try each of these formats in sequence. */
         private static final String[] BROWSER_COMPATIBLE_DATE_FORMAT_STRINGS = {
@@ -836,7 +838,7 @@ public final class HttpUtil {
             }
 
             ParsePosition position = new ParsePosition(0);
-            Date result = STANDARD_DATE_FORMAT.get().parse(value, position);
+            Date result = STANDARD_DATE_FORMAT.parse(value, position);
             if (position.getIndex() == value.length()) {
                 // STANDARD_DATE_FORMAT must match exactly; all text must be consumed, e.g. no ignored
                 // non-standard trailing "+01:00". Those cases are covered below.
@@ -869,7 +871,7 @@ public final class HttpUtil {
 
         /** Returns the string for {@code value}. */
         public static String format(Date value) {
-            return STANDARD_DATE_FORMAT.get().format(value);
+            return STANDARD_DATE_FORMAT.format(value);
         }
 
         private HttpDate() {

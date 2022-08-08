@@ -296,7 +296,7 @@ public class AsyncExecutor {
             synchronized (this) {
                 if (executor == null) {
                     final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(coreThreadPoolSize, maxThreadPoolSize, keepAliveTime, unit,
-                            new LinkedBlockingQueue<Runnable>());
+                            new LinkedBlockingQueue<>());
                     threadPoolExecutor.allowCoreThreadTimeOut(true);
                     executor = threadPoolExecutor;
                 }
@@ -334,10 +334,5 @@ public class AsyncExecutor {
             logger.warn("Completed to shutdown task in AsyncExecutor");
         }
 
-    }
-
-    @Override
-    public void finalize() {
-        shutdown();
     }
 }

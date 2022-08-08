@@ -96,7 +96,7 @@ public class EventBus {
             DEFAULT_EXECUTOR = AndroidUtil.getThreadPoolExecutor();
         } else {
             DEFAULT_EXECUTOR = new ThreadPoolExecutor(Math.max(8, IOUtil.CPU_CORES), Math.max(64, IOUtil.CPU_CORES), 180L, TimeUnit.SECONDS,
-                    new LinkedBlockingQueue<Runnable>());
+                    new LinkedBlockingQueue<>());
         }
     }
 

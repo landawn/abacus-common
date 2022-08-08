@@ -1216,6 +1216,7 @@ public final class IOUtil {
                 return br.readLine();
             } else {
                 while (lineIndex-- > 0 && br.readLine() != null) {
+                    // continue
                 }
 
                 return br.readLine();
@@ -1339,9 +1340,8 @@ public final class IOUtil {
      * @param is
      * @param encoding
      * @return
-     * @throws IOException
      */
-    static InputStreamReader createReader(final InputStream is, final Charset encoding) throws IOException {
+    static InputStreamReader createReader(final InputStream is, final Charset encoding) {
         return encoding == null ? new InputStreamReader(is, Charsets.UTF_8) : new InputStreamReader(is, encoding);
     }
 
@@ -1370,6 +1370,7 @@ public final class IOUtil {
 
         try {
             while (offset-- > 0 && br.readLine() != null) {
+                // continue
             }
 
             String line = null;
@@ -4874,9 +4875,8 @@ public final class IOUtil {
      * @param zos
      * @param targetFile
      * @throws IOException Signals that an I/O exception has occurred.
-     * @throws FileNotFoundException the file not found exception
      */
-    private static void zipFile(final File sourceFile, final ZipOutputStream zos, final File targetFile) throws IOException, FileNotFoundException {
+    private static void zipFile(final File sourceFile, final ZipOutputStream zos, final File targetFile) throws IOException {
         if (sourceFile.isFile()) {
             zipFile(sourceFile, null, zos, targetFile);
         } else {
@@ -4896,10 +4896,8 @@ public final class IOUtil {
      * @param zos
      * @param targetFile
      * @throws IOException Signals that an I/O exception has occurred.
-     * @throws FileNotFoundException the file not found exception
      */
-    private static void zipFile(final File file, final File sourceDir, final ZipOutputStream zos, final File targetFile)
-            throws IOException, FileNotFoundException {
+    private static void zipFile(final File file, final File sourceDir, final ZipOutputStream zos, final File targetFile) throws IOException {
         if (file.equals(targetFile)) {
             return;
         }
@@ -5258,9 +5256,8 @@ public final class IOUtil {
      * @param parentDir
      * @param relativeFilePath
      * @return
-     * @throws IOException Signals that an I/O exception has occurred.
      */
-    private static String getAbsolutePath(final File parentDir, String relativeFilePath) throws IOException {
+    private static String getAbsolutePath(final File parentDir, String relativeFilePath) {
         String newRelativePath = "";
 
         for (int i = 0; i < relativeFilePath.length(); i++) {

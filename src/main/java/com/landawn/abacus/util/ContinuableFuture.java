@@ -105,7 +105,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @return
      */
     public static <T> ContinuableFuture<T> call(final Callable<T> action, final Executor executor) {
-        final FutureTask<T> futureTask = new FutureTask<>(() -> action.call());
+        final FutureTask<T> futureTask = new FutureTask<>(action::call);
 
         executor.execute(futureTask);
 

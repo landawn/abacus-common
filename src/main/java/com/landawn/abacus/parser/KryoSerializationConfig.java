@@ -304,8 +304,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
 
         if (obj instanceof KryoSerializationConfig other) {
             if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getExclusion(), other.getExclusion())
-                    && N.equals(isSkipTransientField(), other.isSkipTransientField()) && N.equals(getIgnoredPropNames(), other.getIgnoredPropNames())
-                    && N.equals(writeClass, other.writeClass)) {
+                    && N.equals(isSkipTransientField(), other.isSkipTransientField()) && N.equals(writeClass, other.writeClass)) {
 
                 return true;
             }

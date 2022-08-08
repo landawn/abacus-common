@@ -798,7 +798,7 @@ public abstract class AbstractType<T> implements Type<T> {
             case 1: {
                 char ch = cbuf[offset];
                 if (ch < '0' || ch > '9') {
-                    throw new NumberFormatException("Invalid numeric String: \"" + String.valueOf(ch) + "\"");
+                    throw new NumberFormatException("Invalid numeric String: \"" + ch + "\"");
                 }
 
                 return ch - '0';
@@ -858,7 +858,7 @@ public abstract class AbstractType<T> implements Type<T> {
             case 1: {
                 char ch = cbuf[offset];
                 if (ch < '0' || ch > '9') {
-                    throw new NumberFormatException("Invalid numeric String: \"" + String.valueOf(ch) + "\"");
+                    throw new NumberFormatException("Invalid numeric String: \"" + ch + "\"");
                 }
 
                 return ch - '0';

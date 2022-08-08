@@ -211,10 +211,12 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
     protected static String getAttribute(XMLStreamReader xmlReader, String attrName) {
         int attrCount = xmlReader.getAttributeCount();
         if (attrCount == 0) {
+            // continue;
         } else if (attrCount == 1) {
             if (attrName.equals(xmlReader.getAttributeLocalName(0))) {
                 return xmlReader.getAttributeValue(0);
             } else {
+                // continue
             }
         } else {
             for (int i = 0; i < attrCount; i++) {

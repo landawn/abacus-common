@@ -18,7 +18,7 @@ public abstract class AbstractOptionalType<T> extends AbstractType<T> {
 
     protected static final String VALUE = "value";
 
-    private static Type<Map<?, ?>> mapType = null;
+    private static Type<Map<Object, Object>> mapType = null;
 
     protected AbstractOptionalType(String typeName) {
         super(typeName);
@@ -29,7 +29,7 @@ public abstract class AbstractOptionalType<T> extends AbstractType<T> {
      *
      * @return
      */
-    protected static synchronized Type<Map<?, ?>> getMapType() {
+    protected static synchronized Type<Map<Object, Object>> getMapType() {
         if (mapType == null) {
             mapType = TypeFactory.getType("Map<Object, Object>");
         }

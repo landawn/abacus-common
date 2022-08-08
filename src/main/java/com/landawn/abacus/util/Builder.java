@@ -1695,8 +1695,8 @@ public class Builder<T> {
         public MapBuilder<K, V, M> putIfAbsent(K key, V value) {
             V v = val.get(key);
 
-            if (v == null) {
-                v = val.put(key, value);
+            if (v == null && val.containsKey(key) == false) {
+                val.put(key, value);
             }
 
             return this;
@@ -1712,8 +1712,8 @@ public class Builder<T> {
         public MapBuilder<K, V, M> putIfAbsent(K key, Supplier<V> supplier) {
             V v = val.get(key);
 
-            if (v == null) {
-                v = val.put(key, supplier.get());
+            if (v == null && val.containsKey(key) == false) {
+                val.put(key, supplier.get());
             }
 
             return this;

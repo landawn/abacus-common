@@ -382,7 +382,7 @@ public final class ClassUtil {
         // }
     }
 
-    private static Map<String, String> SYMBOL_OF_PRIMITIVE_ARRAY_CLASS_NAME = new HashMap<>();
+    private static final Map<String, String> SYMBOL_OF_PRIMITIVE_ARRAY_CLASS_NAME = new HashMap<>();
 
     static {
         SYMBOL_OF_PRIMITIVE_ARRAY_CLASS_NAME.put(boolean.class.getName(), "Z");
@@ -942,6 +942,7 @@ public final class ClassUtil {
                     int j = i;
                     char x = 0;
                     while (--i >= 0 && (Character.isLetterOrDigit(x = res.charAt(i)) || x == '_' || x == '.')) {
+                        // continue
                     }
 
                     final String tmp = res.substring(i + 1, j);
@@ -3039,7 +3040,7 @@ public final class ClassUtil {
 
             // for Double-Checked Locking is Broke initialize it before
             final ImmutableMap<String, Field> unmodifiableFieldMap = ImmutableMap.of(propFieldMap);
-            unmodifiableFieldMap.keySet();
+            unmodifiableFieldMap.keySet(); // initialize?
             entityDeclaredPropFieldPool.put(cls, unmodifiableFieldMap);
 
             // put it into map.
@@ -3048,7 +3049,7 @@ public final class ClassUtil {
             entityPropFieldPool.put(cls, tempFieldMap);
 
             final ImmutableMap<String, Method> unmodifiableGetMethodMap = ImmutableMap.of(propGetMethodMap);
-            unmodifiableGetMethodMap.keySet();
+            unmodifiableGetMethodMap.keySet(); // initialize?
             entityDeclaredPropGetMethodPool.put(cls, unmodifiableGetMethodMap);
 
             if (entityPropGetMethodPool.get(cls) == null) {
@@ -3062,7 +3063,7 @@ public final class ClassUtil {
             // for Double-Checked Locking is Broke initialize it before
             // put it into map.
             final ImmutableMap<String, Method> unmodifiableSetMethodMap = ImmutableMap.of(propSetMethodMap);
-            unmodifiableSetMethodMap.keySet();
+            unmodifiableSetMethodMap.keySet(); // initialize?
             entityDeclaredPropSetMethodPool.put(cls, unmodifiableSetMethodMap);
 
             if (entityPropSetMethodPool.get(cls) == null) {
@@ -3096,7 +3097,7 @@ public final class ClassUtil {
                     }
 
                     final ImmutableMap<String, Method> unmodifiableBuilderPropSetMethodMap = ImmutableMap.of(builderPropSetMethodMap);
-                    unmodifiableBuilderPropSetMethodMap.keySet();
+                    unmodifiableBuilderPropSetMethodMap.keySet(); // initialize?
                     entityDeclaredPropSetMethodPool.put(builderClass, unmodifiableBuilderPropSetMethodMap);
 
                     Map<String, Method> tmp = new ObjectPool<>(N.max(64, builderPropSetMethodMap.size()));

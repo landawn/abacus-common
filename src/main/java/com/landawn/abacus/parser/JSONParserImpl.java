@@ -773,7 +773,6 @@ final class JSONParserImpl extends AbstractJSONParser {
         final boolean isQuoteMapKey = config.isQuoteMapKey();
         final boolean isPrettyFormat = config.isPrettyFormat();
 
-        Object value = null;
         Type<Object> keyType = null;
         int i = 0;
 
@@ -783,12 +782,17 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         final String nextIndentation = isPrettyFormat ? ((indentation == null ? N.EMPTY_STRING : indentation) + config.getIndentation()) : null;
 
-        for (Object key : m.keySet()) {
+        Object key = null;
+        Object value = null;
+
+        for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) m).entrySet()) {
+            key = entry.getKey();
+
             if (key != null && (ignoredClassPropNames != null) && ignoredClassPropNames.contains(key.toString())) {
                 continue;
             }
 
-            value = m.get(key);
+            value = entry.getValue();
 
             // ignoreNullProperty only for
             //    if (ignoreNullProperty && value == null) {
@@ -2180,7 +2184,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                         propType = valueType;
                     } else {
                         if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
-                            value = readMap(null, Map.class, jr, defaultJSONDeserializationConfig, null, false);
+                            readMap(null, Map.class, jr, defaultJSONDeserializationConfig, null, false);
                         } else {
                             value = readBracedValue(propType, jr, config);
 
@@ -2199,7 +2203,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                         propType = valueType;
                     } else {
                         if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
-                            value = readCollection(null, List.class, jr, defaultJSONDeserializationConfig, null, false);
+                            readCollection(null, List.class, jr, defaultJSONDeserializationConfig, null, false);
                         } else {
                             value = readBracketedValue(propType, jr, config);
 
@@ -2644,9 +2648,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                 case START_BRACE:
                     Map<String, Object> props = readMap(null, Map.class, jr, config, null, false);
 
-                    for (String propName : props.keySet()) {
-                        mapEntity.set(propName, props.get(propName));
-                    }
+                    mapEntity.set(props);
 
                     break;
 
@@ -2719,9 +2721,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                 case START_BRACE:
                     Map<String, Object> props = readMap(null, Map.class, jr, config, null, false);
 
-                    for (String propName : props.keySet()) {
-                        entityId.set(propName, props.get(propName));
-                    }
+                    entityId.set(props);
 
                     break;
 

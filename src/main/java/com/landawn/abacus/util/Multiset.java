@@ -1700,7 +1700,7 @@ public final class Multiset<T> implements Iterable<T> {
         return Stream.of(flatIterator());
     }
 
-    private static final com.landawn.abacus.util.function.Function<MutableInt, Integer> TO_INT = t -> t.value();
+    private static final com.landawn.abacus.util.function.Function<MutableInt, Integer> TO_INT = MutableInt::value;
 
     public EntryStream<T, Integer> entryStream() {
         return EntryStream.of(valueMap).mapValue(TO_INT);

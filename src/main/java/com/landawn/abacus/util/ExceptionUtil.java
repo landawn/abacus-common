@@ -63,7 +63,7 @@ public final class ExceptionUtil {
 
     private static final Function<Throwable, RuntimeException> RUNTIME_FUNC = e -> (RuntimeException) e;
 
-    private static final Function<Throwable, RuntimeException> CHECKED_FUNC = e -> new UncheckedException(e);
+    private static final Function<Throwable, RuntimeException> CHECKED_FUNC = UncheckedException::new;
 
     private static final String UncheckedSQLExceptionClassName = UncheckedSQLException.class.getSimpleName();
 

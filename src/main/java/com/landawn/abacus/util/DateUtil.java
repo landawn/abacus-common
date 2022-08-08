@@ -213,25 +213,25 @@ public abstract class DateUtil {
                     cbufOfSTDInt[i][k] = String.valueOf(k).toCharArray();
                 } else if (i == 2) {
                     if (k < 10) {
-                        cbufOfSTDInt[i][k] = ("0" + String.valueOf(k)).toCharArray();
+                        cbufOfSTDInt[i][k] = ("0" + k).toCharArray();
                     } else {
                         cbufOfSTDInt[i][k] = String.valueOf(k).toCharArray();
                     }
                 } else if (i == 3) {
                     if (k < 10) {
-                        cbufOfSTDInt[i][k] = ("00" + String.valueOf(k)).toCharArray();
+                        cbufOfSTDInt[i][k] = ("00" + k).toCharArray();
                     } else if (k < 100) {
-                        cbufOfSTDInt[i][k] = ("0" + String.valueOf(k)).toCharArray();
+                        cbufOfSTDInt[i][k] = ("0" + k).toCharArray();
                     } else {
                         cbufOfSTDInt[i][k] = String.valueOf(k).toCharArray();
                     }
                 } else if (i == 4) {
                     if (k < 10) {
-                        cbufOfSTDInt[i][k] = ("000" + String.valueOf(k)).toCharArray();
+                        cbufOfSTDInt[i][k] = ("000" + k).toCharArray();
                     } else if (k < 100) {
-                        cbufOfSTDInt[i][k] = ("00" + String.valueOf(k)).toCharArray();
+                        cbufOfSTDInt[i][k] = ("00" + k).toCharArray();
                     } else if (k < 1000) {
-                        cbufOfSTDInt[i][k] = ("0" + String.valueOf(k)).toCharArray();
+                        cbufOfSTDInt[i][k] = ("0" + k).toCharArray();
                     } else {
                         cbufOfSTDInt[i][k] = String.valueOf(k).toCharArray();
                     }
@@ -2077,7 +2077,7 @@ public abstract class DateUtil {
         DateFormat sdf = null;
 
         if (timeZone == UTC_TIME_ZONE) {
-            if ((format.length() == 28) && (format == ISO_8601_TIMESTAMP_FORMAT)) {
+            if ((format.length() == 28) && format.equals(ISO_8601_TIMESTAMP_FORMAT)) {
                 sdf = utcTimestampDFPool.poll();
 
                 if (sdf == null) {
@@ -2086,7 +2086,7 @@ public abstract class DateUtil {
                 }
 
                 return sdf;
-            } else if ((format.length() == 24) && (format == ISO_8601_DATETIME_FORMAT)) {
+            } else if ((format.length() == 24) && format.equals(ISO_8601_DATETIME_FORMAT)) {
                 sdf = utcDateTimeDFPool.poll();
 
                 if (sdf == null) {
@@ -2124,9 +2124,9 @@ public abstract class DateUtil {
      */
     private static void recycleSDF(final String format, final TimeZone timeZone, final DateFormat sdf) {
         if (timeZone == UTC_TIME_ZONE) {
-            if ((format.length() == 28) && (format == ISO_8601_TIMESTAMP_FORMAT)) {
+            if ((format.length() == 28) && format.equals(ISO_8601_TIMESTAMP_FORMAT)) {
                 utcTimestampDFPool.add(sdf);
-            } else if ((format.length() == 24) && (format == ISO_8601_DATETIME_FORMAT)) {
+            } else if ((format.length() == 24) && format.equals(ISO_8601_DATETIME_FORMAT)) {
                 utcDateTimeDFPool.add(sdf);
             } else {
                 dfPool.get(format).add(sdf);

@@ -32,7 +32,7 @@ public class Properties<K, V> implements Map<K, V> {
     protected final Map<K, V> values;
 
     public Properties() {
-        this(new ConcurrentHashMap<K, V>());
+        this(new ConcurrentHashMap<>());
     }
 
     Properties(final ConcurrentHashMap<? extends K, ? extends V> valueMap) {
@@ -47,7 +47,7 @@ public class Properties<K, V> implements Map<K, V> {
      * @return
      */
     public static <K, V> Properties<K, V> from(final Map<? extends K, ? extends V> map) {
-        return new Properties<>(new ConcurrentHashMap<K, V>(map));
+        return new Properties<>(new ConcurrentHashMap<>(map));
     }
 
     /**

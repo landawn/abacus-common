@@ -1938,12 +1938,12 @@ public final class ParserUtil {
                 if (N.notNullOrEmpty(jsonXmlFieldAnno.type())) {
                     return jsonXmlFieldAnno.type();
                 } else if (propClass.isEnum()) {
-                    return ClassUtil.getCanonicalClassName(propClass) + "(" + String.valueOf(getEnumerated(field, jsonXmlConfig) == EnumBy.ORDINAL) + ")";
+                    return ClassUtil.getCanonicalClassName(propClass) + "(" + (getEnumerated(field, jsonXmlConfig) == EnumBy.ORDINAL) + ")";
                 }
             }
 
             if (jsonXmlConfig != null && propClass.isEnum()) {
-                return ClassUtil.getCanonicalClassName(propClass) + "(" + String.valueOf(getEnumerated(field, jsonXmlConfig) == EnumBy.ORDINAL) + ")";
+                return ClassUtil.getCanonicalClassName(propClass) + "(" + (getEnumerated(field, jsonXmlConfig) == EnumBy.ORDINAL) + ")";
             }
 
             return null;
@@ -1958,12 +1958,12 @@ public final class ParserUtil {
                 if (N.notNullOrEmpty(jsonXmlFieldAnno.type())) {
                     return jsonXmlFieldAnno.type();
                 } else if (propClass.isEnum()) {
-                    return ClassUtil.getCanonicalClassName(propClass) + "(" + String.valueOf(getEnumerated(field, jsonXmlConfig) == EnumBy.ORDINAL) + ")";
+                    return ClassUtil.getCanonicalClassName(propClass) + "(" + (getEnumerated(field, jsonXmlConfig) == EnumBy.ORDINAL) + ")";
                 }
             }
 
             if (jsonXmlConfig != null && propClass.isEnum()) {
-                return ClassUtil.getCanonicalClassName(propClass) + "(" + String.valueOf(getEnumerated(field, jsonXmlConfig) == EnumBy.ORDINAL) + ")";
+                return ClassUtil.getCanonicalClassName(propClass) + "(" + (getEnumerated(field, jsonXmlConfig) == EnumBy.ORDINAL) + ")";
             }
 
             final com.landawn.abacus.annotation.Type typeAnno = getAnnotation(com.landawn.abacus.annotation.Type.class);
@@ -2057,7 +2057,7 @@ public final class ParserUtil {
             } else if (typeName.isPresent()) {
                 return typeName.get();
             } else if (propClass.isEnum()) {
-                return ClassUtil.getCanonicalClassName(propClass) + "(" + String.valueOf(typeAnno.enumerated() == EnumBy.ORDINAL) + ")";
+                return ClassUtil.getCanonicalClassName(propClass) + "(" + (typeAnno.enumerated() == EnumBy.ORDINAL) + ")";
             }
 
             return null;
@@ -2163,13 +2163,10 @@ public final class ParserUtil {
     static class ASMPropInfo extends PropInfo {
         final com.esotericsoftware.reflectasm.MethodAccess getMethodAccess;
         final com.esotericsoftware.reflectasm.MethodAccess setMethodAccess;
-
-        final int getMethodAccessIndex;
-
-        final int setMethodAccessIndex;
-
         final com.esotericsoftware.reflectasm.FieldAccess fieldAccess;
 
+        final int getMethodAccessIndex;
+        final int setMethodAccessIndex;
         final int fieldAccessIndex;
 
         ASMPropInfo(final String name, final Field field, final Method getMethod, final Method setMethod, final JsonXmlConfig jsonXmlConfig,
@@ -2180,10 +2177,11 @@ public final class ParserUtil {
 
             getMethodAccess = getMethod == null ? null : com.esotericsoftware.reflectasm.MethodAccess.get(getMethod.getDeclaringClass());
             setMethodAccess = setMethod == null ? null : com.esotericsoftware.reflectasm.MethodAccess.get(setMethod.getDeclaringClass());
+            fieldAccess = field == null ? null : com.esotericsoftware.reflectasm.FieldAccess.get(field.getDeclaringClass());
+
             getMethodAccessIndex = getMethod == null ? -1 : getMethodAccess.getIndex(getMethod.getName(), 0);
             setMethodAccessIndex = setMethod == null ? -1 : setMethodAccess.getIndex(setMethod.getName(), setMethod.getParameterTypes());
-            fieldAccess = field == null ? null : com.esotericsoftware.reflectasm.FieldAccess.get(field.getDeclaringClass());
-            fieldAccessIndex = (field == null || !this.isFieldAccessible || Modifier.isPrivate(field.getModifiers()) || Modifier.isFinal(field.getModifiers()))
+            fieldAccessIndex = (field == null || !this.isFieldAccessible || !Modifier.isPublic(field.getModifiers()) || Modifier.isFinal(field.getModifiers()))
                     ? -1
                     : fieldAccess.getIndex(field.getName());
         }

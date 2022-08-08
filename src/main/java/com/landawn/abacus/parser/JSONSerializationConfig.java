@@ -271,8 +271,8 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
                     && N.equals(getExclusion(), other.getExclusion()) && N.equals(isSkipTransientField(), other.isSkipTransientField())
                     && N.equals(isPrettyFormat(), other.isPrettyFormat()) && N.equals(supportCircularReference(), other.supportCircularReference())
                     && N.equals(writeBigDecimalAsPlain(), other.writeBigDecimalAsPlain()) && N.equals(getIndentation(), other.getIndentation())
-                    && N.equals(getPropNamingPolicy(), other.getPropNamingPolicy()) && N.equals(getIgnoredPropNames(), other.getIgnoredPropNames())
-                    && N.equals(quotePropName, other.quotePropName) && N.equals(quoteMapKey, other.quoteMapKey) && N.equals(wrapRootValue, other.wrapRootValue)
+                    && N.equals(getPropNamingPolicy(), other.getPropNamingPolicy()) && N.equals(quotePropName, other.quotePropName)
+                    && N.equals(quoteMapKey, other.quoteMapKey) && N.equals(wrapRootValue, other.wrapRootValue)
                     && N.equals(bracketRootValue, other.bracketRootValue)) {
 
                 return true;

@@ -125,13 +125,9 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      */
     @Override
     public void putAll(Map<? extends K, ? extends V> m) {
-        V value = null;
-
-        for (K key : m.keySet()) {
-            value = m.get(key);
-
-            if (value != null) {
-                put(key, value);
+        for (Map.Entry<? extends K, ? extends V> entry : m.entrySet()) {
+            if (entry.getValue() != null) {
+                put(entry.getKey(), entry.getValue());
             }
         }
     }
