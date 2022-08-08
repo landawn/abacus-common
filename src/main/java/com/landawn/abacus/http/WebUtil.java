@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package com.landawn.abacus.util;
+package com.landawn.abacus.http;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import com.landawn.abacus.http.HttpHeaders;
-import com.landawn.abacus.http.HttpMethod;
-import com.landawn.abacus.http.HttpUtil;
-import com.landawn.abacus.http.okhttp.OkHttpRequest;
+import com.landawn.abacus.util.EscapeUtil;
+import com.landawn.abacus.util.IOUtil;
+import com.landawn.abacus.util.ImmutableBiMap;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings.StringUtil;
 
 public class WebUtil {

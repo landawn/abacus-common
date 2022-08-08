@@ -70,13 +70,6 @@ public class AsyncExecutor {
         this.maxThreadPoolSize = Math.max(coreThreadPoolSize, maxThreadPoolSize);
         this.keepAliveTime = keepAliveTime;
         this.unit = unit;
-
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                shutdown();
-            }
-        });
     }
 
     public AsyncExecutor(final Executor executor) {
@@ -299,19 +292,18 @@ public class AsyncExecutor {
                             new LinkedBlockingQueue<>());
                     threadPoolExecutor.allowCoreThreadTimeOut(true);
                     executor = threadPoolExecutor;
+
+                    Runtime.getRuntime().addShutdownHook(new Thread() {
+                        @Override
+                        public void run() {
+                            shutdown();
+                        }
+                    });
                 }
             }
         }
 
         return executor;
-    }
-
-    @Override
-    public String toString() {
-        final String activeCount = executor instanceof ThreadPoolExecutor ? "" + ((ThreadPoolExecutor) executor).getActiveCount() : "?";
-
-        return "{coreThreadPoolSize: " + coreThreadPoolSize + ", maxThreadPoolSize: " + maxThreadPoolSize + ", activeCount: " + activeCount
-                + ", keepAliveTime: " + unit.toMillis(keepAliveTime) + "ms, Executor: " + N.toString(executor) + "}";
     }
 
     public synchronized void shutdown() {
@@ -334,5 +326,13 @@ public class AsyncExecutor {
             logger.warn("Completed to shutdown task in AsyncExecutor");
         }
 
+    }
+
+    @Override
+    public String toString() {
+        final String activeCount = executor instanceof ThreadPoolExecutor ? "" + ((ThreadPoolExecutor) executor).getActiveCount() : "?";
+
+        return "{coreThreadPoolSize: " + coreThreadPoolSize + ", maxThreadPoolSize: " + maxThreadPoolSize + ", activeCount: " + activeCount
+                + ", keepAliveTime: " + unit.toMillis(keepAliveTime) + "ms, Executor: " + N.toString(executor) + "}";
     }
 }

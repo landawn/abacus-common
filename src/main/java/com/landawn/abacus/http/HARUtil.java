@@ -1,4 +1,4 @@
-package com.landawn.abacus.util;
+package com.landawn.abacus.http;
 
 import java.io.File;
 import java.util.List;
@@ -7,13 +7,13 @@ import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import com.landawn.abacus.http.HttpHeaders;
-import com.landawn.abacus.http.HttpMethod;
-import com.landawn.abacus.http.HttpRequest;
-import com.landawn.abacus.http.HttpResponse;
-import com.landawn.abacus.http.HttpUtil;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
+import com.landawn.abacus.util.Fn;
+import com.landawn.abacus.util.IOUtil;
+import com.landawn.abacus.util.Maps;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.u.Optional;
