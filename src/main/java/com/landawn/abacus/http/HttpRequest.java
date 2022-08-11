@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.util.ContinuableFuture;
@@ -37,6 +38,8 @@ public final class HttpRequest {
     HttpSettings settings;
 
     Object request;
+
+    boolean closeHttpClientAfterExecution = false;
 
     HttpRequest(HttpClient httpClient) {
         this.httpClient = httpClient;
@@ -68,7 +71,13 @@ public final class HttpRequest {
      * @return
      */
     public static HttpRequest url(final String url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
-        return new HttpRequest(HttpClient.create(url, 1, connectionTimeoutInMillis, readTimeoutInMillis));
+        return new HttpRequest(HttpClient.create(url, 1, connectionTimeoutInMillis, readTimeoutInMillis)).closeHttpClientAfterExecution(true);
+    }
+
+    protected HttpRequest closeHttpClientAfterExecution(boolean b) {
+        this.closeHttpClientAfterExecution = b;
+
+        return this;
     }
 
     /**
@@ -411,13 +420,39 @@ public final class HttpRequest {
         return execute(resultClass);
     }
 
+    /**
+     *
+     * @param <T>
+     * @param resultClass
+     * @return
+     */
+    protected <T> T execute(final Class<T> resultClass) {
+        if (httpMethod == null) {
+            throw new RuntimeException("HTTP method is not set");
+        }
+
+        try {
+            return httpClient.execute(resultClass, httpMethod, request, settings);
+        } finally {
+            if (closeHttpClientAfterExecution) {
+                httpClient.close();
+            }
+        }
+    }
+
     public void execute(final File output, final HttpMethod httpMethod, final Object body) throws UncheckedIOException {
         N.checkArgNotNull(httpMethod, "httpMethod");
 
         this.httpMethod = httpMethod;
         this.request = body;
 
-        httpClient.execute(output, this.httpMethod, this.request, settings);
+        try {
+            httpClient.execute(output, this.httpMethod, this.request, settings);
+        } finally {
+            if (closeHttpClientAfterExecution) {
+                httpClient.close();
+            }
+        }
     }
 
     public void execute(final OutputStream output, final HttpMethod httpMethod, final Object body) throws UncheckedIOException {
@@ -426,7 +461,13 @@ public final class HttpRequest {
         this.httpMethod = httpMethod;
         this.request = body;
 
-        httpClient.execute(output, this.httpMethod, this.request, settings);
+        try {
+            httpClient.execute(output, this.httpMethod, this.request, settings);
+        } finally {
+            if (closeHttpClientAfterExecution) {
+                httpClient.close();
+            }
+        }
     }
 
     public void execute(final Writer output, final HttpMethod httpMethod, final Object body) throws UncheckedIOException {
@@ -435,7 +476,13 @@ public final class HttpRequest {
         this.httpMethod = httpMethod;
         this.request = body;
 
-        httpClient.execute(output, this.httpMethod, this.request, settings);
+        try {
+            httpClient.execute(output, this.httpMethod, this.request, settings);
+        } finally {
+            if (closeHttpClientAfterExecution) {
+                httpClient.close();
+            }
+        }
     }
 
     public ContinuableFuture<String> asyncGet() {
@@ -618,68 +665,42 @@ public final class HttpRequest {
         return asyncExecute(resultClass);
     }
 
-    public ContinuableFuture<Void> asyncExecute(final File output, final HttpMethod httpMethod, final Object body) {
-        this.httpMethod = httpMethod;
-        this.request = body;
-
-        return httpClient.asyncExecute(output, this.httpMethod, this.request, settings);
-    }
-
-    public ContinuableFuture<Void> asyncExecute(final OutputStream output, final HttpMethod httpMethod, final Object body) {
-        this.httpMethod = httpMethod;
-        this.request = body;
-
-        return httpClient.asyncExecute(output, this.httpMethod, this.request, settings);
-    }
-
-    public ContinuableFuture<Void> asyncExecute(final Writer output, final HttpMethod httpMethod, final Object body) {
-        this.httpMethod = httpMethod;
-        this.request = body;
-
-        return httpClient.asyncExecute(output, this.httpMethod, this.request, settings);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param resultClass
-     * @return
-     */
-    protected <T> T execute(final Class<T> resultClass) {
-        if (httpMethod == null) {
-            throw new RuntimeException("HTTP method is not set");
-        }
-
-        return httpClient.execute(resultClass, httpMethod, request, settings);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param resultClass
-     * @return
-     */
     protected <T> ContinuableFuture<T> asyncExecute(final Class<T> resultClass) {
         if (httpMethod == null) {
             throw new RuntimeException("HTTP method is not set");
         }
 
-        switch (httpMethod) {
-            case GET:
-                return httpClient.asyncGet(resultClass, request, settings);
+        return httpClient._asyncExecutor.execute(() -> execute(resultClass));
+    }
 
-            case POST:
-                return httpClient.asyncPost(resultClass, request, settings);
+    public ContinuableFuture<Void> asyncExecute(final File output, final HttpMethod httpMethod, final Object body) {
+        final Callable<Void> cmd = () -> {
+            execute(output, httpMethod, body);
 
-            case PUT:
-                return httpClient.asyncPut(resultClass, request, settings);
+            return null;
+        };
 
-            case DELETE:
-                return httpClient.asyncDelete(resultClass, request, settings);
+        return httpClient._asyncExecutor.execute(cmd);
+    }
 
-            default:
-                return httpClient.asyncExecute(resultClass, httpMethod, request, settings);
-        }
+    public ContinuableFuture<Void> asyncExecute(final OutputStream output, final HttpMethod httpMethod, final Object body) {
+        final Callable<Void> cmd = () -> {
+            execute(output, httpMethod, body);
+
+            return null;
+        };
+
+        return httpClient._asyncExecutor.execute(cmd);
+    }
+
+    public ContinuableFuture<Void> asyncExecute(final Writer output, final HttpMethod httpMethod, final Object body) {
+        final Callable<Void> cmd = () -> {
+            execute(output, httpMethod, body);
+
+            return null;
+        };
+
+        return httpClient._asyncExecutor.execute(cmd);
     }
 
     /**

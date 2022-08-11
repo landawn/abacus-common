@@ -20,6 +20,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
@@ -123,7 +124,11 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      */
     @Override
     public void set(PreparedStatement stmt, int columnIndex, Number x) throws SQLException {
-        stmt.setInt(columnIndex, (x == null) ? 0 : x.intValue());
+        if (x == null) {
+            stmt.setNull(columnIndex, Types.INTEGER);
+        } else {
+            stmt.setInt(columnIndex, x.intValue());
+        }
     }
 
     /**
@@ -135,7 +140,11 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      */
     @Override
     public void set(CallableStatement stmt, String parameterName, Number x) throws SQLException {
-        stmt.setInt(parameterName, (x == null) ? 0 : x.intValue());
+        if (x == null) {
+            stmt.setNull(parameterName, Types.INTEGER);
+        } else {
+            stmt.setInt(parameterName, x.intValue());
+        }
     }
 
     /**

@@ -61,16 +61,18 @@ public abstract class Observer<T> implements Immutable {
         if (IOUtil.IS_PLATFORM_ANDROID) {
             asyncExecutor = AndroidUtil.getThreadPoolExecutor();
         } else {
-            asyncExecutor = new ThreadPoolExecutor(Math.max(64, Math.min(IOUtil.CPU_CORES * 8, IOUtil.MAX_MEMORY_IN_MB / 1024) * 32),
-                    Math.max(256, (IOUtil.MAX_MEMORY_IN_MB / 1024) * 64), 180L, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+            asyncExecutor = new ThreadPoolExecutor(//
+                    N.max(64, IOUtil.CPU_CORES * 8, (IOUtil.MAX_MEMORY_IN_MB / 1024) * 8), // coreThreadPoolSize
+                    N.max(128, IOUtil.CPU_CORES * 16, (IOUtil.MAX_MEMORY_IN_MB / 1024) * 16), // // maxThreadPoolSize
+                    180L, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
         }
     }
 
     protected static final ScheduledThreadPoolExecutor schedulerForIntermediateOp = new ScheduledThreadPoolExecutor(
-            IOUtil.IS_PLATFORM_ANDROID ? Math.max(8, IOUtil.CPU_CORES) : Math.max(64, Math.min(IOUtil.CPU_CORES * 8, IOUtil.MAX_MEMORY_IN_MB / 1024) * 32));
+            IOUtil.IS_PLATFORM_ANDROID ? Math.max(8, IOUtil.CPU_CORES) : N.max(64, IOUtil.CPU_CORES * 8, (IOUtil.MAX_MEMORY_IN_MB / 1024) * 8));
 
     protected static final ScheduledThreadPoolExecutor schedulerForObserveOp = new ScheduledThreadPoolExecutor(
-            IOUtil.IS_PLATFORM_ANDROID ? Math.max(8, IOUtil.CPU_CORES) : Math.max(64, Math.min(IOUtil.CPU_CORES * 8, IOUtil.MAX_MEMORY_IN_MB / 1024) * 32));
+            IOUtil.IS_PLATFORM_ANDROID ? Math.max(8, IOUtil.CPU_CORES) : N.max(64, IOUtil.CPU_CORES * 8, (IOUtil.MAX_MEMORY_IN_MB / 1024) * 8));
 
     static {
         schedulerForIntermediateOp.setRemoveOnCancelPolicy(true);

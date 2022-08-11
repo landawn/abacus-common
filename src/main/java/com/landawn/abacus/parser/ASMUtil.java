@@ -65,7 +65,7 @@ final class ASMUtil {
         } catch (Throwable e) {
             // ignore.
 
-            logger.warn("ASM is not avaiable by com.esotericsoftware.reflectasm due to exception: ", e);
+            logger.warn("ASM is not avaiable by com.esotericsoftware.reflectasm due to exception: ", e.getClass().getName());
         }
 
         isASMAvailable = tmp;

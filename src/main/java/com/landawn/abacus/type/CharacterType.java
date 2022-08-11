@@ -14,6 +14,9 @@
 
 package com.landawn.abacus.type;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 /**
  *
  * @author Haiyang Li
@@ -40,5 +43,41 @@ public final class CharacterType extends AbstractCharacterType {
     @Override
     public boolean isPrimitiveWrapper() {
         return true;
+    }
+
+    /**
+     *
+     * @param rs
+     * @param columnIndex
+     * @return
+     * @throws SQLException the SQL exception
+     */
+    @Override
+    public Character get(ResultSet rs, int columnIndex) throws SQLException {
+        final String ret = rs.getString(columnIndex);
+
+        if (ret == null) {
+            return null;
+        } else {
+            return ret.charAt(0);
+        }
+    }
+
+    /**
+     *
+     * @param rs
+     * @param columnLabel
+     * @return
+     * @throws SQLException the SQL exception
+     */
+    @Override
+    public Character get(ResultSet rs, String columnLabel) throws SQLException {
+        final String ret = rs.getString(columnLabel);
+
+        if (ret == null) {
+            return null;
+        } else {
+            return ret.charAt(0);
+        }
     }
 }

@@ -93,14 +93,12 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
      */
     @Override
     public Character get(ResultSet rs, int columnIndex) throws SQLException {
-        final Object x = rs.getObject(columnIndex);
+        final String ret = rs.getString(columnIndex);
 
-        if (x == null) {
+        if (ret == null) {
             return (char) 0;
-        } else if (x instanceof Number) {
-            return (char) (((Number) x).intValue());
         } else {
-            return x.toString().charAt(0);
+            return ret.charAt(0);
         }
     }
 
@@ -113,14 +111,12 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
      */
     @Override
     public Character get(ResultSet rs, String columnLabel) throws SQLException {
-        final Object x = rs.getObject(columnLabel);
+        final String ret = rs.getString(columnLabel);
 
-        if (x == null) {
+        if (ret == null) {
             return (char) 0;
-        } else if (x instanceof Number) {
-            return (char) (((Number) x).intValue());
         } else {
-            return x.toString().charAt(0);
+            return ret.charAt(0);
         }
     }
 
@@ -134,9 +130,9 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
     @Override
     public void set(PreparedStatement stmt, int columnIndex, Character x) throws SQLException {
         if (x == null) {
-            stmt.setNull(columnIndex, Types.INTEGER);
+            stmt.setNull(columnIndex, Types.VARCHAR);
         } else {
-            stmt.setInt(columnIndex, x.charValue());
+            stmt.setString(columnIndex, x.toString());
         }
     }
 
@@ -150,9 +146,9 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
     @Override
     public void set(CallableStatement stmt, String parameterName, Character x) throws SQLException {
         if (x == null) {
-            stmt.setNull(parameterName, Types.INTEGER);
+            stmt.setNull(parameterName, Types.VARCHAR);
         } else {
-            stmt.setInt(parameterName, x.charValue());
+            stmt.setString(parameterName, x.toString());
         }
     }
 

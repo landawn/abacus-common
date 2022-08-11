@@ -14,6 +14,11 @@
 
 package com.landawn.abacus.type;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import com.landawn.abacus.util.Numbers;
+
 /**
  *
  * @author Haiyang Li
@@ -41,5 +46,45 @@ public final class ByteType extends AbstractByteType {
     @Override
     public boolean isPrimitiveWrapper() {
         return true;
+    }
+
+    /**
+     *
+     * @param rs
+     * @param columnIndex
+     * @return
+     * @throws SQLException the SQL exception
+     */
+    @Override
+    public Byte get(ResultSet rs, int columnIndex) throws SQLException {
+        final Object ret = rs.getObject(columnIndex);
+
+        if (ret == null) {
+            return null;
+        } else if (ret instanceof Number) {
+            return ((Number) ret).byteValue();
+        } else {
+            return Numbers.toByte(ret.toString());
+        }
+    }
+
+    /**
+     *
+     * @param rs
+     * @param columnLabel
+     * @return
+     * @throws SQLException the SQL exception
+     */
+    @Override
+    public Byte get(ResultSet rs, String columnLabel) throws SQLException {
+        final Object ret = rs.getObject(columnLabel);
+
+        if (ret == null) {
+            return null;
+        } else if (ret instanceof Number) {
+            return ((Number) ret).byteValue();
+        } else {
+            return Numbers.toByte(ret.toString());
+        }
     }
 }

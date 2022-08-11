@@ -20,6 +20,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
@@ -106,7 +107,11 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      */
     @Override
     public void set(PreparedStatement stmt, int columnIndex, Number x) throws SQLException {
-        stmt.setDouble(columnIndex, (x == null) ? 0 : x.doubleValue());
+        if (x == null) {
+            stmt.setNull(columnIndex, Types.DOUBLE);
+        } else {
+            stmt.setDouble(columnIndex, x.doubleValue());
+        }
     }
 
     /**
@@ -118,7 +123,11 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      */
     @Override
     public void set(CallableStatement stmt, String parameterName, Number x) throws SQLException {
-        stmt.setDouble(parameterName, (x == null) ? 0 : x.doubleValue());
+        if (x == null) {
+            stmt.setNull(parameterName, Types.DOUBLE);
+        } else {
+            stmt.setDouble(parameterName, x.doubleValue());
+        }
     }
 
     /**

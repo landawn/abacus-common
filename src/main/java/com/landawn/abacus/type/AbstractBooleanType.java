@@ -114,7 +114,11 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      */
     @Override
     public void set(PreparedStatement stmt, int columnIndex, Boolean x) throws SQLException {
-        stmt.setBoolean(columnIndex, (x == null) ? false : x);
+        if (x == null) {
+            stmt.setNull(columnIndex, java.sql.Types.BOOLEAN);
+        } else {
+            stmt.setBoolean(columnIndex, x);
+        }
     }
 
     /**
@@ -126,7 +130,11 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      */
     @Override
     public void set(CallableStatement stmt, String parameterName, Boolean x) throws SQLException {
-        stmt.setBoolean(parameterName, (x == null) ? false : x);
+        if (x == null) {
+            stmt.setNull(parameterName, java.sql.Types.BOOLEAN);
+        } else {
+            stmt.setBoolean(parameterName, x);
+        }
     }
 
     /**
