@@ -549,9 +549,7 @@ public final class XMLUtil {
         OutputStream os = null;
 
         try {
-            if (!xmlFile.exists()) {
-                xmlFile.createNewFile();
-            }
+            IOUtil.createNewFileIfNotExists(xmlFile);
 
             os = IOUtil.newFileOutputStream(xmlFile);
 

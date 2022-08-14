@@ -58,9 +58,7 @@ public final class BooleanType extends AbstractBooleanType {
     public Boolean get(ResultSet rs, int columnIndex) throws SQLException {
         final Object ret = rs.getObject(columnIndex);
 
-        if (ret == null) {
-            return null;
-        } else if (ret instanceof Boolean) {
+        if (ret == null || ret instanceof Boolean) {
             return (Boolean) ret;
         } else {
             return N.convert(ret, Boolean.class);
@@ -78,9 +76,7 @@ public final class BooleanType extends AbstractBooleanType {
     public Boolean get(ResultSet rs, String columnLabel) throws SQLException {
         final Object ret = rs.getObject(columnLabel);
 
-        if (ret == null) {
-            return null;
-        } else if (ret instanceof Boolean) {
+        if (ret == null || ret instanceof Boolean) {
             return (Boolean) ret;
         } else {
             return N.convert(ret, Boolean.class);

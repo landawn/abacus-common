@@ -356,6 +356,10 @@ public final class Throwables {
          * @throws E the e
          */
         boolean test(T t) throws E;
+
+        default Predicate<T, E> negate() {
+            return t -> !test(t);
+        }
     }
 
     /**

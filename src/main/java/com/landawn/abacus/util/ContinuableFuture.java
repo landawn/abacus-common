@@ -280,14 +280,13 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param defaultValue
      * @return
+     * @return
+     * @throws InterruptedException the interrupted exception
+     * @throws ExecutionException the execution exception
      */
-    public T getNow(T defaultValue) {
+    public T getNow(T defaultValue) throws InterruptedException, ExecutionException {
         if (isDone()) {
-            try {
-                return get();
-            } catch (InterruptedException | ExecutionException e) {
-                throw ExceptionUtil.toRuntimeException(e);
-            }
+            return get();
         }
 
         return defaultValue;
@@ -462,10 +461,10 @@ public class ContinuableFuture<T> implements Future<T> {
 
             @Override
             public U get() throws InterruptedException, ExecutionException {
+                final T ret = ContinuableFuture.this.get();
+
                 try {
-                    return func.apply(ContinuableFuture.this.get());
-                } catch (InterruptedException | ExecutionException e) {
-                    throw e;
+                    return func.apply(ret);
                 } catch (Exception e) {
                     throw ExceptionUtil.toRuntimeException(e);
                 }
@@ -473,10 +472,10 @@ public class ContinuableFuture<T> implements Future<T> {
 
             @Override
             public U get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+                final T ret = ContinuableFuture.this.get(timeout, unit);
+
                 try {
-                    return func.apply(ContinuableFuture.this.get(timeout, unit));
-                } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                    throw e;
+                    return func.apply(ret);
                 } catch (Exception e) {
                     throw ExceptionUtil.toRuntimeException(e);
                 }

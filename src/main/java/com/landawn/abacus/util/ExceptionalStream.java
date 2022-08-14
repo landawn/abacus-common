@@ -2136,7 +2136,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             final Throwables.Consumer<? super T, ? extends E> actionOnDroppedItem) {
         assertNotClosed();
 
-        return filter(value -> {
+        return dropWhile(value -> {
             if (!predicate.test(value)) {
                 actionOnDroppedItem.accept(value);
                 return false;
@@ -7455,6 +7455,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * Iterate and execute {@code action} until the flag is set true.
+     * Flag can only be set after at least one element is iterated and executed by {@code action}.
      *
      * @param <E2>
      * @param action the second parameter is a flag to break the for-each loop.
@@ -7462,6 +7464,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      *        Iteration on this stream will also be stopped when this flag is set to {@code true}.
      * @throws E
      * @throws E2
+     * @see #forEachUntil(MutableBoolean, com.landawn.abacus.util.Throwables.Consumer)
      */
     @Beta
     @TerminalOp
@@ -7476,6 +7479,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * Iterate and execute {@code action} until {@code flagToBreak} is set true.
+     * If {@code flagToBreak} is set to true at the begin, there will be no element iterated from stream before this stream is stopped and closed.
      *
      * @param <E2>
      * @param flagToBreak a flag to break the for-each loop.
@@ -7484,7 +7489,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param action
      * @throws E
      * @throws E2
-     * @see Stream#forEachUntil(MutableBoolean, com.landawn.abacus.util.Throwables.Consumer)
+     * @see #forEachUntil(com.landawn.abacus.util.Throwables.BiConsumer)
      */
     @Beta
     @TerminalOp
@@ -9312,10 +9317,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             long sum = 0;
             long count = 0;
 
-            while (elements.hasNext()) {
+            do {
                 sum += func.applyAsInt(elements.next());
                 count++;
-            }
+            } while (elements.hasNext());
 
             return OptionalDouble.of(((double) sum) / count);
         } finally {
@@ -9341,10 +9346,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             long sum = 0;
             long count = 0;
 
-            while (elements.hasNext()) {
+            do {
                 sum += func.applyAsLong(elements.next());
                 count++;
-            }
+            } while (elements.hasNext());
 
             return OptionalDouble.of(((double) sum) / count);
         } finally {

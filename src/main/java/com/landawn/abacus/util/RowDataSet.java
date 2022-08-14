@@ -3927,9 +3927,7 @@ public class RowDataSet implements DataSet, Cloneable {
         OutputStream os = null;
 
         try {
-            if (!output.exists()) {
-                output.createNewFile();
-            }
+            IOUtil.createNewFileIfNotExists(output);
 
             os = IOUtil.newFileOutputStream(output);
 
@@ -4238,9 +4236,7 @@ public class RowDataSet implements DataSet, Cloneable {
         OutputStream os = null;
 
         try {
-            if (!output.exists()) {
-                output.createNewFile();
-            }
+            IOUtil.createNewFileIfNotExists(output);
 
             os = IOUtil.newFileOutputStream(output);
 
@@ -4580,9 +4576,7 @@ public class RowDataSet implements DataSet, Cloneable {
         OutputStream os = null;
 
         try {
-            if (!output.exists()) {
-                output.createNewFile();
-            }
+            IOUtil.createNewFileIfNotExists(output);
 
             os = IOUtil.newFileOutputStream(output);
 

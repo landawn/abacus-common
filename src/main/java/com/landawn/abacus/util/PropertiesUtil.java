@@ -544,9 +544,7 @@ public final class PropertiesUtil {
         OutputStream os = null;
 
         try {
-            if (!file.exists()) {
-                file.createNewFile();
-            }
+            IOUtil.createNewFileIfNotExists(file);
 
             os = IOUtil.newFileOutputStream(file);
 
@@ -607,9 +605,7 @@ public final class PropertiesUtil {
         OutputStream os = null;
 
         try {
-            if (!file.exists()) {
-                file.createNewFile();
-            }
+            IOUtil.createNewFileIfNotExists(file);
 
             os = IOUtil.newFileOutputStream(file);
 
@@ -812,11 +808,10 @@ public final class PropertiesUtil {
             String classFilePath = ClassUtil.makePackageFolder(srcPath, packageName);
             File classFile = new File(classFilePath + className + ".java");
 
-            if (classFile.exists()) {
-                classFile.delete();
-            }
+            IOUtil.deleteIfExists(classFile);
 
-            classFile.createNewFile();
+            IOUtil.createNewFileIfNotExists(classFile);
+
             writer = new OutputStreamWriter(IOUtil.newFileOutputStream(classFile), Charsets.UTF_8);
             writer.write("package " + packageName + ";" + IOUtil.LINE_SEPARATOR);
 

@@ -206,8 +206,6 @@ public final class Futures {
             public R get() throws InterruptedException, ExecutionException {
                 try {
                     return zipFunctionForGet.apply(cfs);
-                } catch (InterruptedException | ExecutionException e) {
-                    throw e;
                 } catch (Exception e) {
                     throw ExceptionUtil.toRuntimeException(e);
                 }
@@ -219,8 +217,6 @@ public final class Futures {
 
                 try {
                     return zipFunctionTimeoutGet.apply(t);
-                } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                    throw e;
                 } catch (Exception e) {
                     throw ExceptionUtil.toRuntimeException(e);
                 }

@@ -15,6 +15,7 @@
 package com.landawn.abacus.parser;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
@@ -349,5 +350,13 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
         }
 
         return (T) targetType.collection2Array(c);
+    }
+
+    protected static void createNewFileIfNotExists(final File file) throws IOException {
+        if (!file.exists()) {
+            if (file.createNewFile() == false) {
+                throw new IOException("Failed to create new file: " + file.getName());
+            }
+        }
     }
 }

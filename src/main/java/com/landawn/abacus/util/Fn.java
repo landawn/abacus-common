@@ -4424,6 +4424,29 @@ public final class Fn extends Comparators {
      * @param runnable
      * @return
      */
+    public static Runnable r(final Runnable runnable) {
+        N.checkArgNotNull(runnable);
+
+        return runnable;
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param callable
+     * @return
+     */
+    public static <R> Callable<R> c(final Callable<R> callable) {
+        N.checkArgNotNull(callable);
+
+        return callable;
+    }
+
+    /**
+     *
+     * @param runnable
+     * @return
+     */
     public static Callable<Void> r2c(final java.lang.Runnable runnable) {
         N.checkArgNotNull(runnable);
 
@@ -4460,29 +4483,6 @@ public final class Fn extends Comparators {
         return callable::call;
     }
 
-    /**
-     *
-     * @param runnable
-     * @return
-     */
-    public static Runnable r(final Runnable runnable) {
-        N.checkArgNotNull(runnable);
-
-        return runnable;
-    }
-
-    /**
-     *
-     * @param <R>
-     * @param callable
-     * @return
-     */
-    public static <R> Callable<R> c(final Callable<R> callable) {
-        N.checkArgNotNull(callable);
-
-        return callable;
-    }
-
     public static Runnable jr2r(final java.lang.Runnable runnable) {
         N.checkArgNotNull(runnable);
 
@@ -4491,15 +4491,6 @@ public final class Fn extends Comparators {
         }
 
         return runnable::run;
-    }
-
-    public static Callable<Void> jr2c(final java.lang.Runnable runnable) {
-        N.checkArgNotNull(runnable);
-
-        return () -> {
-            runnable.run();
-            return null;
-        };
     }
 
     public static <R> Callable<R> jc2c(final java.util.concurrent.Callable<R> callable) {

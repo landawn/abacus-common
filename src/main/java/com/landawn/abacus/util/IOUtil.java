@@ -82,7 +82,7 @@ public final class IOUtil {
     private static final String GZ = ".gz";
 
     /** The file copy buffer size (32 MB). */
-    private static final long FILE_COPY_BUFFER_SIZE = (1024 * 1024) * 32;
+    private static final int FILE_COPY_BUFFER_SIZE = (1024 * 1024) * 32;
 
     static final Method stringEncodeMethod;
 
@@ -2601,9 +2601,7 @@ public final class IOUtil {
         OutputStream os = null;
 
         try {
-            if (!output.exists()) {
-                output.createNewFile();
-            }
+            createNewFileIfNotExists(output);
 
             os = IOUtil.newFileOutputStream(output);
 
@@ -2706,9 +2704,7 @@ public final class IOUtil {
         OutputStream os = null;
 
         try {
-            if (!output.exists()) {
-                output.createNewFile();
-            }
+            createNewFileIfNotExists(output);
 
             os = IOUtil.newFileOutputStream(output);
 
@@ -3119,9 +3115,7 @@ public final class IOUtil {
         OutputStream os = null;
 
         try {
-            if (!output.exists()) {
-                output.createNewFile();
-            }
+            createNewFileIfNotExists(output);
 
             os = new FileOutputStream(output, true);
 
@@ -3242,9 +3236,7 @@ public final class IOUtil {
         OutputStream os = null;
 
         try {
-            if (!output.exists()) {
-                output.createNewFile();
-            }
+            createNewFileIfNotExists(output);
 
             os = new FileOutputStream(output, true);
 
@@ -4596,6 +4588,14 @@ public final class IOUtil {
         }
 
         return deleteFiles(directory);
+    }
+
+    static void createNewFileIfNotExists(final File file) throws IOException {
+        if (!file.exists()) {
+            if (file.createNewFile() == false) {
+                throw new IOException("Failed to create new file: " + file.getName());
+            }
+        }
     }
 
     /**

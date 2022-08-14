@@ -91,9 +91,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
         OutputStream os = null;
 
         try {
-            if (!file.exists()) {
-                file.createNewFile();
-            }
+            createNewFileIfNotExists(file);
 
             os = IOUtil.newFileOutputStream(file);
 

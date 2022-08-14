@@ -212,9 +212,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         OutputStream os = null;
 
         try {
-            if (!file.exists()) {
-                file.createNewFile();
-            }
+            createNewFileIfNotExists(file);
 
             os = IOUtil.newFileOutputStream(file);
 

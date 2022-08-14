@@ -151,15 +151,15 @@ abstract class SingleValueType<T> extends AbstractType<T> {
         this.jsonCreatorMethod = localJsonCreatorMethod;
 
         if (this.jsonValueField != null) {
-            this.jsonValueField.setAccessible(true);
+            ClassUtil.setAccessibleQuietly(jsonValueField, true);
         }
 
         if (this.jsonValueMethod != null) {
-            this.jsonValueMethod.setAccessible(true);
+            ClassUtil.setAccessibleQuietly(jsonValueMethod, true);
         }
 
         if (this.jsonCreatorMethod != null) {
-            this.jsonCreatorMethod.setAccessible(true);
+            ClassUtil.setAccessibleQuietly(jsonCreatorMethod, true);
         }
 
         this.jsonValueType = localJsonValueType != null ? TypeFactory.getType(localJsonValueType) : null;

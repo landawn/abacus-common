@@ -112,9 +112,7 @@ final class XMLParserImpl extends AbstractXMLParser {
         OutputStream os = null;
 
         try {
-            if (!file.exists()) {
-                file.createNewFile();
-            }
+            createNewFileIfNotExists(file);
 
             os = IOUtil.newFileOutputStream(file);
 
