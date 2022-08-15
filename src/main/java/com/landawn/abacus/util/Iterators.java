@@ -2276,7 +2276,7 @@ public final class Iterators {
         };
     }
 
-    public static <T, U> ObjIterator<U> flattMap(final Iterator<? extends T> iter, final Function<? super T, ? extends U[]> mapper) {
+    public static <T, U> ObjIterator<U> flatmap(final Iterator<? extends T> iter, final Function<? super T, ? extends U[]> mapper) {
         N.checkArgNotNull(mapper, "mapper");
 
         if (iter == null) {

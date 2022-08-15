@@ -856,7 +856,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * Lazy evaluation.
      * <br />
      *
-     * This is equal to: {@code ExceptionalStream.just(supplier).flattMap(it -> it.get())}.
+     * This is equal to: {@code ExceptionalStream.just(supplier).flatmap(it -> it.get())}.
      *
      * @param supplier
      * @return
@@ -866,7 +866,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         N.checkArgNotNull(supplier, "supplier");
 
         return ExceptionalStream.<Throwables.Supplier<? extends Collection<? extends T>, ? extends E>, E> just(supplier)
-                .flattMap(com.landawn.abacus.util.Throwables.Supplier::get);
+                .flatmap(com.landawn.abacus.util.Throwables.Supplier::get);
     }
 
     /**
@@ -2454,9 +2454,86 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param mapper
      * @return
      */
+    @IntermediateOp
+    public <R> ExceptionalStream<R, E> flatmap(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends E> mapper) {
+        assertNotClosed();
+
+        return newStream(new ExceptionalIterator<R, E>() {
+            private Collection<? extends R> c = null;
+            private Iterator<? extends R> cur = null;
+
+            @Override
+            public boolean hasNext() throws E {
+                while ((cur == null || !cur.hasNext()) && elements.hasNext()) {
+                    c = mapper.apply(elements.next());
+                    cur = N.isNullOrEmpty(c) ? null : c.iterator();
+                }
+
+                return cur != null && cur.hasNext();
+            }
+
+            @Override
+            public R next() throws E {
+                if ((cur == null || !cur.hasNext()) && !hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                return cur.next();
+            }
+        }, closeHandlers);
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param mapper
+     * @return
+     */
+    @IntermediateOp
+    public <R> ExceptionalStream<R, E> flattMap(final Throwables.Function<? super T, R[], ? extends E> mapper) {
+        assertNotClosed();
+
+        return newStream(new ExceptionalIterator<R, E>() {
+            private R[] cur = null;
+            private int len = 0;
+            private int idx = 0;
+
+            @Override
+            public boolean hasNext() throws E {
+                while (idx >= len) {
+                    if (elements.hasNext()) {
+                        cur = mapper.apply(elements.next());
+                        len = N.len(cur);
+                        idx = 0;
+                    } else {
+                        cur = null;
+                        break;
+                    }
+                }
+
+                return idx < len;
+            }
+
+            @Override
+            public R next() throws E {
+                if (idx >= len && !hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                return cur[idx++];
+            }
+        }, closeHandlers);
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param mapper
+     * @return
+     */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> flatmap(final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends E> mapper) {
+    public <R> ExceptionalStream<R, E> flatMapp(final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends E> mapper) {
         assertNotClosed();
 
         final ExceptionalIterator<R, E> iter = new ExceptionalIterator<>() {
@@ -2516,82 +2593,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return newStream(iter, newCloseHandlers);
     }
 
-    /**
-     *
-     * @param <R>
-     * @param mapper
-     * @return
-     */
-    @IntermediateOp
-    public <R> ExceptionalStream<R, E> flattMap(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends E> mapper) {
-        assertNotClosed();
 
-        return newStream(new ExceptionalIterator<R, E>() {
-            private Collection<? extends R> c = null;
-            private Iterator<? extends R> cur = null;
-
-            @Override
-            public boolean hasNext() throws E {
-                while ((cur == null || !cur.hasNext()) && elements.hasNext()) {
-                    c = mapper.apply(elements.next());
-                    cur = N.isNullOrEmpty(c) ? null : c.iterator();
-                }
-
-                return cur != null && cur.hasNext();
-            }
-
-            @Override
-            public R next() throws E {
-                if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                    throw new NoSuchElementException();
-                }
-
-                return cur.next();
-            }
-        }, closeHandlers);
-    }
-
-    /**
-     *
-     * @param <R>
-     * @param mapper
-     * @return
-     */
-    @IntermediateOp
-    public <R> ExceptionalStream<R, E> flatMapp(final Throwables.Function<? super T, R[], ? extends E> mapper) {
-        assertNotClosed();
-
-        return newStream(new ExceptionalIterator<R, E>() {
-            private R[] cur = null;
-            private int len = 0;
-            private int idx = 0;
-
-            @Override
-            public boolean hasNext() throws E {
-                while (idx >= len) {
-                    if (elements.hasNext()) {
-                        cur = mapper.apply(elements.next());
-                        len = N.len(cur);
-                        idx = 0;
-                    } else {
-                        cur = null;
-                        break;
-                    }
-                }
-
-                return idx < len;
-            }
-
-            @Override
-            public R next() throws E {
-                if (idx >= len && !hasNext()) {
-                    throw new NoSuchElementException();
-                }
-
-                return cur[idx++];
-            }
-        }, closeHandlers);
-    }
 
     //    /**
     //     *
@@ -2731,7 +2733,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      * @implNote same as ====>
      * <pre>
-     * skipNull().flattMap(mapper)
+     * skipNull().flatmap(mapper)
      * </pre>
      *
      * @param <R>
@@ -2740,14 +2742,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> flattMapIfNotNull(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends E> mapper) {
-        return skipNull().flattMap(mapper);
+    public <R> ExceptionalStream<R, E> flatMapIfNotNull(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends E> mapper) {
+        return skipNull().flatmap(mapper);
     }
 
     /**
      * @implNote same as ====>
      * <pre>
-     * skipNull().flattMap(mapper).skipNull().flattMap(mapper2)
+     * skipNull().flatmap(mapper).skipNull().flatmap(mapper2)
      * </pre>
      *
      * @param <U>
@@ -2758,9 +2760,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <U, R> ExceptionalStream<R, E> flattMapIfNotNull(final Throwables.Function<? super T, ? extends Collection<? extends U>, ? extends E> mapper,
+    public <U, R> ExceptionalStream<R, E> flatMapIfNotNull(final Throwables.Function<? super T, ? extends Collection<? extends U>, ? extends E> mapper,
             final Throwables.Function<? super U, ? extends Collection<? extends R>, ? extends E> mapper2) {
-        return skipNull().flattMap(mapper).skipNull().flattMap(mapper2);
+        return skipNull().flatmap(mapper).skipNull().flatmap(mapper2);
     }
 
     /**
@@ -3113,7 +3115,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     * @return
     //     */
     //    @IntermediateOp
-    //    public ExceptionalStream<Integer, E> flattMapToInt(final Throwables.Function<? super T, ? extends int[], ? extends E> mapper) {
+    //    public ExceptionalStream<Integer, E> flatmapToInt(final Throwables.Function<? super T, ? extends int[], ? extends E> mapper) {
     //        final Throwables.Function<T, ExceptionalStream<Integer, E>, E> mapper2 = new Throwables.Function<T, ExceptionalStream<Integer, E>, E>() {
     //            @Override
     //            public ExceptionalStream<Integer, E> apply(T t) throws E {
@@ -3130,7 +3132,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     * @return
     //     */
     //    @IntermediateOp
-    //    public ExceptionalStream<Long, E> flattMapToLong(final Throwables.Function<? super T, ? extends long[], ? extends E> mapper) {
+    //    public ExceptionalStream<Long, E> flatmapToLong(final Throwables.Function<? super T, ? extends long[], ? extends E> mapper) {
     //        final Throwables.Function<T, ExceptionalStream<Long, E>, E> mapper2 = new Throwables.Function<T, ExceptionalStream<Long, E>, E>() {
     //            @Override
     //            public ExceptionalStream<Long, E> apply(T t) throws E {
@@ -3147,7 +3149,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     * @return
     //     */
     //    @IntermediateOp
-    //    public ExceptionalStream<Double, E> flattMapToDouble(final Throwables.Function<? super T, ? extends double[], ? extends E> mapper) {
+    //    public ExceptionalStream<Double, E> flatmapToDouble(final Throwables.Function<? super T, ? extends double[], ? extends E> mapper) {
     //        final Throwables.Function<T, ExceptionalStream<Double, E>, E> mapper2 = new Throwables.Function<T, ExceptionalStream<Double, E>, E>() {
     //            @Override
     //            public ExceptionalStream<Double, E> apply(T t) throws E {
@@ -10671,7 +10673,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param <R>
      * @param mapper
      * @return
-     * @see Stream#spsFlattMap(Function)
+     * @see Stream#spsFlatmap(Function)
      * @see ExceptionUtil#toRuntimeException(Throwable)
      * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
      * @see ExceptionUtil#hasCause(Throwable, Class)
@@ -10679,8 +10681,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> spsFlattMap(final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) {
-        final Function<Stream<T>, Stream<R>> ops = s -> s.flattMap(Fn.ff(mapper));
+    public <R> ExceptionalStream<R, E> spsFlatmap(final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) {
+        final Function<Stream<T>, Stream<R>> ops = s -> s.flatmap(Fn.ff(mapper));
 
         return sps(ops);
     }
@@ -10779,7 +10781,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param <R>
      * @param mapper
      * @return
-     * @see Stream#spsFlattMap(int, Function)
+     * @see Stream#spsFlatmap(int, Function)
      * @see ExceptionUtil#toRuntimeException(Throwable)
      * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
      * @see ExceptionUtil#hasCause(Throwable, Class)
@@ -10787,8 +10789,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> spsFlattMap(final int maxThreadNum, final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) {
-        final Function<Stream<T>, Stream<R>> ops = s -> s.flattMap(Fn.ff(mapper));
+    public <R> ExceptionalStream<R, E> spsFlatmap(final int maxThreadNum, final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) {
+        final Function<Stream<T>, Stream<R>> ops = s -> s.flatmap(Fn.ff(mapper));
 
         return sps(maxThreadNum, ops);
     }
@@ -10881,7 +10883,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param <R>
      * @param mapper
      * @return
-     * @see Stream#spsFlattMap(Function)
+     * @see Stream#spsFlatmap(Function)
      * @see ExceptionUtil#toRuntimeException(Throwable)
      * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
      * @see ExceptionUtil#hasCause(Throwable, Class)
@@ -10889,9 +10891,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, Exception> spsFlattMapE(
+    public <R> ExceptionalStream<R, Exception> spsFlatmapE(
             final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) {
-        return checked(unchecked().<R> spsFlattMapE(mapper), true);
+        return checked(unchecked().<R> spsFlatmapE(mapper), true);
     }
 
     /**
@@ -10985,7 +10987,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param maxThreadNum
      * @param mapper
      * @return
-     * @see Stream#spsFlattMap(Function)
+     * @see Stream#spsFlatmap(Function)
      * @see ExceptionUtil#toRuntimeException(Throwable)
      * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
      * @see ExceptionUtil#hasCause(Throwable, Class)
@@ -10993,9 +10995,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, Exception> spsFlattMapE(final int maxThreadNum,
+    public <R> ExceptionalStream<R, Exception> spsFlatmapE(final int maxThreadNum,
             final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) {
-        return checked(unchecked().<R> spsFlattMapE(maxThreadNum, mapper), true);
+        return checked(unchecked().<R> spsFlatmapE(maxThreadNum, mapper), true);
     }
 
     /**
@@ -11313,7 +11315,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @SuppressWarnings("rawtypes")
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, Exception> flattMapE(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) {
+    public <R> ExceptionalStream<R, Exception> flatmapE(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) {
         assertNotClosed();
 
         return newStream(new ExceptionalIterator<R, Exception>() {

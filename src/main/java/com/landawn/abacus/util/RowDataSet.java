@@ -6133,7 +6133,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 .groupByToEntry(TO_SIZE_FUNC)
                 .values()
                 .onEach(REVERSE_ACTION)
-                .flattMap(Fn.<List<Set<String>>> identity())
+                .flatmap(Fn.<List<Set<String>>> identity())
                 .reversed();
     }
 

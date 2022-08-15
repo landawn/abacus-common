@@ -453,10 +453,10 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     //     * @param <U>
     //     * @param mapper
     //     * @return
-    //     * @see Iterators#flattMap(Iterator, Function)
+    //     * @see Iterators#flatmap(Iterator, Function)
     //     */
-    //    public <U> ObjIterator<U> flattMap(final Function<? super T, ? extends U[]> mapper) {
-    //        return Iterators.flattMap(this, mapper);
+    //    public <U> ObjIterator<U> flatmap(final Function<? super T, ? extends U[]> mapper) {
+    //        return Iterators.flatmap(this, mapper);
     //    }
 
     public Object[] toArray() {

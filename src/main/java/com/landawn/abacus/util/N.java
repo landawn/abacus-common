@@ -19795,14 +19795,14 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R, E extends Exception> List<R> flattMap(final T[] a, final Throwables.Function<? super T, ? extends R[], E> func) throws E {
+    public static <T, R, E extends Exception> List<R> flatmap(final T[] a, final Throwables.Function<? super T, ? extends R[], E> func) throws E {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
             return new ArrayList<>();
         }
 
-        return flattMap(a, 0, a.length, func);
+        return flatmap(a, 0, a.length, func);
     }
 
     /**
@@ -19817,7 +19817,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R, C extends Collection<R>, E extends Exception> C flattMap(final T[] a, final Throwables.Function<? super T, ? extends R[], E> func,
+    public static <T, R, C extends Collection<R>, E extends Exception> C flatmap(final T[] a, final Throwables.Function<? super T, ? extends R[], E> func,
             final IntFunction<? extends C> supplier) throws E {
         checkArgNotNull(func);
 
@@ -19825,7 +19825,7 @@ public final class N extends CommonUtil {
             return supplier.apply(0);
         }
 
-        return flattMap(a, 0, a.length, func, supplier);
+        return flatmap(a, 0, a.length, func, supplier);
     }
 
     /**
@@ -19842,9 +19842,9 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R, E extends Exception> List<R> flattMap(final T[] a, final int fromIndex, final int toIndex,
+    public static <T, R, E extends Exception> List<R> flatmap(final T[] a, final int fromIndex, final int toIndex,
             final Throwables.Function<? super T, ? extends R[], E> func) throws E {
-        return flattMap(a, fromIndex, toIndex, func, Factory.ofList());
+        return flatmap(a, fromIndex, toIndex, func, Factory.ofList());
     }
 
     /**
@@ -19863,7 +19863,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R, C extends Collection<R>, E extends Exception> C flattMap(final T[] a, final int fromIndex, final int toIndex,
+    public static <T, R, C extends Collection<R>, E extends Exception> C flatmap(final T[] a, final int fromIndex, final int toIndex,
             final Throwables.Function<? super T, ? extends R[], E> func, final IntFunction<? extends C> supplier) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(func);
@@ -19895,9 +19895,9 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R, E extends Exception> List<R> flattMap(final Iterable<? extends T> c, final Throwables.Function<? super T, ? extends R[], E> func)
+    public static <T, R, E extends Exception> List<R> flatmap(final Iterable<? extends T> c, final Throwables.Function<? super T, ? extends R[], E> func)
             throws E {
-        return flattMap(c, func, Factory.<R> ofList());
+        return flatmap(c, func, Factory.<R> ofList());
     }
 
     /**
@@ -19912,7 +19912,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R, C extends Collection<R>, E extends Exception> C flattMap(final Iterable<? extends T> c,
+    public static <T, R, C extends Collection<R>, E extends Exception> C flatmap(final Iterable<? extends T> c,
             final Throwables.Function<? super T, ? extends R[], E> func, final IntFunction<? extends C> supplier) throws E {
         checkArgNotNull(func);
 
@@ -19946,9 +19946,9 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R, E extends Exception> List<R> flattMap(final Collection<? extends T> c, final int fromIndex, final int toIndex,
+    public static <T, R, E extends Exception> List<R> flatmap(final Collection<? extends T> c, final int fromIndex, final int toIndex,
             final Throwables.Function<? super T, ? extends R[], E> func) throws E {
-        return flattMap(c, fromIndex, toIndex, func, Factory.ofList());
+        return flatmap(c, fromIndex, toIndex, func, Factory.ofList());
     }
 
     /**
@@ -19967,7 +19967,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R, C extends Collection<R>, E extends Exception> C flattMap(final Collection<? extends T> c, final int fromIndex, final int toIndex,
+    public static <T, R, C extends Collection<R>, E extends Exception> C flatmap(final Collection<? extends T> c, final int fromIndex, final int toIndex,
             final Throwables.Function<? super T, ? extends R[], E> func, final IntFunction<? extends C> supplier) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(func);
