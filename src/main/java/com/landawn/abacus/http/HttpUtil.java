@@ -33,7 +33,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -46,8 +45,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import com.landawn.abacus.annotation.Internal;
-import com.landawn.abacus.logging.Logger;
-import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.DeserializationConfig;
 import com.landawn.abacus.parser.JSONParser;
 import com.landawn.abacus.parser.KryoParser;
@@ -60,6 +57,7 @@ import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.LZ4BlockOutputStream;
+import com.landawn.abacus.util.MoreExecutors;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.ObjectPool;
 import com.landawn.abacus.util.Strings;
@@ -71,40 +69,21 @@ import com.landawn.abacus.util.Strings;
  */
 @Internal
 public final class HttpUtil {
-    private static final Logger logger = LoggerFactory.getLogger(HttpUtil.class);
-
     static final Executor DEFAULT_EXECUTOR;
 
     static {
         if (IOUtil.IS_PLATFORM_ANDROID) {
             DEFAULT_EXECUTOR = AndroidUtil.getThreadPoolExecutor();
         } else {
-            DEFAULT_EXECUTOR = new ThreadPoolExecutor(//
-                    N.max(64, IOUtil.CPU_CORES * 8, (IOUtil.MAX_MEMORY_IN_MB / 1024) * 8), // coreThreadPoolSize
-                    N.max(128, IOUtil.CPU_CORES * 16, (IOUtil.MAX_MEMORY_IN_MB / 1024) * 16), // // maxThreadPoolSize
+            final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(//
+                    N.max(64, IOUtil.CPU_CORES * 8), // coreThreadPoolSize
+                    N.max(128, IOUtil.CPU_CORES * 16), // maxThreadPoolSize
                     180L, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+
+            DEFAULT_EXECUTOR = threadPoolExecutor;
+
+            MoreExecutors.addDelayedShutdownHook(threadPoolExecutor, 120, TimeUnit.SECONDS);
         }
-
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                if (DEFAULT_EXECUTOR instanceof ExecutorService) {
-                    final ExecutorService executorService = (ExecutorService) DEFAULT_EXECUTOR;
-
-                    logger.warn("Starting to shutdown tasks for Http Request");
-
-                    try {
-                        executorService.shutdown();
-
-                        executorService.awaitTermination(60, TimeUnit.SECONDS);
-                    } catch (InterruptedException e) {
-                        logger.warn("Not all the requests/tasks for Http Request are completed successfully before shutdown.");
-                    } finally {
-                        logger.warn("Completed to shutdown tasks for Http Request");
-                    }
-                }
-            }
-        });
     }
 
     static final AsyncExecutor DEFAULT_ASYNC_EXECUTOR = new AsyncExecutor(DEFAULT_EXECUTOR);

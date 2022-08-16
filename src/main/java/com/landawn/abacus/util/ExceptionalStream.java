@@ -46,7 +46,6 @@ import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -2592,8 +2591,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         return newStream(iter, newCloseHandlers);
     }
-
-
 
     //    /**
     //     *
@@ -6861,554 +6858,557 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     }
 
-    /**
-     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-     *
-     * @param errorConsumer
-     * @return
-     */
-    @Beta
-    @IntermediateOp
-    public ExceptionalStream<T, E> onErrorContinue(final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
-        assertNotClosed();
-
-        return newStream(new ExceptionalIterator<T, E>() {
-            private final ExceptionalIterator<T, E> iter = iteratorEx();
-            private final T none = (T) NONE;
-            private T next = none;
-            private T ret = null;
-
-            @Override
-            public boolean hasNext() throws E {
-                if (next == none) {
-                    while (true) {
-                        try {
-                            if (iter.hasNext()) {
-                                next = iter.next();
-                            }
-
-                            break;
-                        } catch (Throwable e) {
-                            logger.warn("ignoring error in onErrorContinue", e);
-
-                            errorConsumer.accept(e);
-                        }
-                    }
-                }
-
-                return next != none;
-            }
-
-            @Override
-            public T next() throws E {
-                if (!hasNext()) {
-                    throw new NoSuchElementException();
-                }
-
-                ret = next;
-                next = none;
-                return ret;
-            }
-        }, sorted, cmp, closeHandlers);
-    }
-
-    /**
-     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-     *
-     * @param type
-     * @param errorConsumer
-     * @return
-     */
-    @Beta
-    @IntermediateOp
-    public ExceptionalStream<T, E> onErrorContinue(final Class<? extends Throwable> type,
-            final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
-        assertNotClosed();
-
-        return newStream(new ExceptionalIterator<T, E>() {
-            private final ExceptionalIterator<T, E> iter = iteratorEx();
-            private final T none = (T) NONE;
-            private T next = none;
-            private T ret = null;
-
-            @Override
-            public boolean hasNext() throws E {
-                if (next == none) {
-                    while (true) {
-                        try {
-                            if (iter.hasNext()) {
-                                next = iter.next();
-                            }
-
-                            break;
-                        } catch (Throwable e) {
-                            if (type.isAssignableFrom(e.getClass())) {
-                                logger.warn("ignoring error in onErrorContinue", e);
-
-                                errorConsumer.accept(e);
-                            } else {
-                                throwThrowable(e);
-                            }
-                        }
-                    }
-                }
-
-                return next != none;
-            }
-
-            @Override
-            public T next() throws E {
-                if (!hasNext()) {
-                    throw new NoSuchElementException();
-                }
-
-                ret = next;
-                next = none;
-                return ret;
-            }
-        }, sorted, cmp, closeHandlers);
-    }
-
-    /**
-     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-     *
-     * @param errorPredicate
-     * @param errorConsumer
-     * @return
-     */
-    @Beta
-    @IntermediateOp
-    public ExceptionalStream<T, E> onErrorContinue(final Throwables.Predicate<? super Throwable, ? extends E> errorPredicate,
-            final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
-        assertNotClosed();
-
-        return newStream(new ExceptionalIterator<T, E>() {
-            private final ExceptionalIterator<T, E> iter = iteratorEx();
-            private final T none = (T) NONE;
-            private T next = none;
-            private T ret = null;
-
-            @Override
-            public boolean hasNext() throws E {
-                if (next == none) {
-                    while (true) {
-                        try {
-                            if (iter.hasNext()) {
-                                next = iter.next();
-                            }
-
-                            break;
-                        } catch (Throwable e) {
-                            if (errorPredicate.test(e)) {
-                                logger.warn("ignoring error in onErrorContinue", e);
-
-                                errorConsumer.accept(e);
-                            } else {
-                                throwThrowable(e);
-                            }
-                        }
-                    }
-                }
-
-                return next != none;
-            }
-
-            @Override
-            public T next() throws E {
-                if (!hasNext()) {
-                    throw new NoSuchElementException();
-                }
-
-                ret = next;
-                next = none;
-                return ret;
-            }
-        }, sorted, cmp, closeHandlers);
-    }
-
-    /**
-     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-     *
-     * @param errorPredicate
-     * @param errorConsumer
-     * @param maxErrorCountToStop
-     * @return
-     */
-    @Beta
-    @IntermediateOp
-    public ExceptionalStream<T, E> onErrorContinue(final Throwables.Predicate<? super Throwable, ? extends E> errorPredicate,
-            final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer, final int maxErrorCountToStop) {
-        assertNotClosed();
-        checkArgNotNegative(maxErrorCountToStop, "maxErrorCountToStop");
-
-        return newStream(new ExceptionalIterator<T, E>() {
-            private final AtomicInteger errorCounter = new AtomicInteger(maxErrorCountToStop);
-            private final ExceptionalIterator<T, E> iter = iteratorEx();
-            private final T none = (T) NONE;
-            private T next = none;
-            private T ret = null;
-
-            @Override
-            public boolean hasNext() throws E {
-                if (next == none) {
-                    while (true) {
-                        try {
-                            if (iter.hasNext()) {
-                                next = iter.next();
-                            }
-
-                            break;
-                        } catch (Throwable e) {
-                            if (errorCounter.decrementAndGet() >= 0) {
-                                if (errorPredicate.test(e)) {
-                                    logger.warn("ignoring error in onErrorContinue", e);
-
-                                    errorConsumer.accept(e);
-                                } else {
-                                    throwThrowable(e);
-                                }
-                            } else {
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                return next != none;
-            }
-
-            @Override
-            public T next() throws E {
-                if (!hasNext()) {
-                    throw new NoSuchElementException();
-                }
-
-                ret = next;
-                next = none;
-                return ret;
-            }
-        }, sorted, cmp, closeHandlers);
-    }
-
-    /**
-     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-     *
-     * @param fallbackValue
-     * @return
-     */
-    @Beta
-    @IntermediateOp
-    public ExceptionalStream<T, E> onErrorReturn(final T fallbackValue) {
-        assertNotClosed();
-
-        return newStream(new ExceptionalIterator<T, E>() {
-            private final ExceptionalIterator<T, E> iter = iteratorEx();
-            private final T none = (T) NONE;
-            private T next = none;
-            private T ret = null;
-
-            @Override
-            public boolean hasNext() {
-                if (next == none) {
-                    try {
-                        if (iter.hasNext()) {
-                            next = iter.next();
-                        }
-                    } catch (Throwable e) {
-                        logger.warn("ignoring error in onErrorReturn", e);
-
-                        next = fallbackValue;
-                    }
-                }
-
-                return next != none;
-            }
-
-            @Override
-            public T next() {
-                if (!hasNext()) {
-                    throw new NoSuchElementException();
-                }
-
-                ret = next;
-                next = none;
-                return ret;
-            }
-        }, closeHandlers);
-    }
-
-    /**
-     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-     *
-     * @param type
-     * @param fallbackValue
-     * @return
-     */
-    @Beta
-    @IntermediateOp
-    public ExceptionalStream<T, E> onErrorReturn(final Class<? extends Throwable> type, final T fallbackValue) {
-        assertNotClosed();
-
-        return newStream(new ExceptionalIterator<T, E>() {
-            private final ExceptionalIterator<T, E> iter = iteratorEx();
-            private final T none = (T) NONE;
-            private T next = none;
-            private T ret = null;
-
-            @Override
-            public boolean hasNext() throws E {
-                if (next == none) {
-                    try {
-                        if (iter.hasNext()) {
-                            next = iter.next();
-                        }
-                    } catch (Throwable e) {
-                        if (type.isAssignableFrom(e.getClass())) {
-                            logger.warn("ignoring error in onErrorReturn", e);
-
-                            next = fallbackValue;
-                        } else {
-                            throwThrowable(e);
-                        }
-                    }
-                }
-
-                return next != none;
-            }
-
-            @Override
-            public T next() throws E {
-                if (!hasNext()) {
-                    throw new NoSuchElementException();
-                }
-
-                ret = next;
-                next = none;
-                return ret;
-            }
-        }, closeHandlers);
-    }
-
-    /**
-     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-     *
-     * @param predicate
-     * @param fallbackValue
-     * @return
-     */
-    @Beta
-    @IntermediateOp
-    public ExceptionalStream<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate, final T fallbackValue) {
-        assertNotClosed();
-
-        return newStream(new ExceptionalIterator<T, E>() {
-            private final ExceptionalIterator<T, E> iter = iteratorEx();
-            private final T none = (T) NONE;
-            private T next = none;
-            private T ret = null;
-
-            @Override
-            public boolean hasNext() throws E {
-                if (next == none) {
-                    try {
-                        if (iter.hasNext()) {
-                            next = iter.next();
-                        }
-                    } catch (Throwable e) {
-                        if (predicate.test(e)) {
-                            logger.warn("ignoring error in onErrorReturn", e);
-
-                            next = fallbackValue;
-                        } else {
-                            throwThrowable(e);
-                        }
-                    }
-                }
-
-                return next != none;
-            }
-
-            @Override
-            public T next() throws E {
-                if (!hasNext()) {
-                    throw new NoSuchElementException();
-                }
-
-                ret = next;
-                next = none;
-                return ret;
-            }
-        }, closeHandlers);
-    }
-
-    /**
-     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-     *
-     * @param predicate
-     * @param supplierForFallbackValue
-     * @return
-     */
-    @Beta
-    @IntermediateOp
-    public ExceptionalStream<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate,
-            final Throwables.Supplier<? extends T, ? extends E> supplierForFallbackValue) {
-        assertNotClosed();
-
-        return newStream(new ExceptionalIterator<T, E>() {
-            private final ExceptionalIterator<T, E> iter = iteratorEx();
-            private final T none = (T) NONE;
-            private T next = none;
-            private T ret = null;
-
-            @Override
-            public boolean hasNext() throws E {
-                if (next == none) {
-                    try {
-                        if (iter.hasNext()) {
-                            next = iter.next();
-                        }
-                    } catch (Throwable e) {
-                        if (predicate.test(e)) {
-                            logger.warn("ignoring error in onErrorReturn", e);
-
-                            next = supplierForFallbackValue.get();
-                        } else {
-                            throwThrowable(e);
-                        }
-                    }
-                }
-
-                return next != none;
-            }
-
-            @Override
-            public T next() throws E {
-                if (!hasNext()) {
-                    throw new NoSuchElementException();
-                }
-
-                ret = next;
-                next = none;
-                return ret;
-            }
-        }, closeHandlers);
-    }
-
-    /**
-     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
-     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
-     *
-     * @param predicate
-     * @param mapperForFallbackValue
-     * @param maxErrorCountToStop
-     * @return
-     */
-    @Beta
-    @IntermediateOp
-    public ExceptionalStream<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate,
-            final Throwables.Function<? super Throwable, ? extends T, ? extends E> mapperForFallbackValue, final int maxErrorCountToStop) {
-        assertNotClosed();
-        checkArgNotNegative(maxErrorCountToStop, "maxErrorCountToStop");
-
-        return newStream(new ExceptionalIterator<T, E>() {
-            private final AtomicInteger errorCounter = new AtomicInteger(maxErrorCountToStop);
-            private final ExceptionalIterator<T, E> iter = iteratorEx();
-            private final T none = (T) NONE;
-            private T next = none;
-            private T ret = null;
-
-            @Override
-            public boolean hasNext() throws E {
-                if (next == none) {
-                    try {
-                        if (iter.hasNext()) {
-                            next = iter.next();
-                        }
-                    } catch (Throwable e) {
-                        if (errorCounter.decrementAndGet() >= 0) {
-                            if (predicate.test(e)) {
-                                logger.warn("ignoring error in onErrorReturn", e);
-
-                                next = mapperForFallbackValue.apply(e);
-                            } else {
-                                throwThrowable(e);
-                            }
-                        } else {
-                            // break;
-                        }
-                    }
-                }
-
-                return next != none;
-            }
-
-            @Override
-            public T next() throws E {
-                if (!hasNext()) {
-                    throw new NoSuchElementException();
-                }
-
-                ret = next;
-                next = none;
-                return ret;
-            }
-        }, closeHandlers);
-    }
-
-    @Beta
-    @IntermediateOp
-    public ExceptionalStream<T, E> onErrorStop() {
-        assertNotClosed();
-
-        return newStream(new ExceptionalIterator<T, E>() {
-            private final ExceptionalIterator<T, E> iter = iteratorEx();
-            private final T none = (T) NONE;
-            private T next = none;
-            private T ret = null;
-
-            @Override
-            public boolean hasNext() {
-                if (next == none) {
-                    try {
-                        if (iter.hasNext()) {
-                            next = iter.next();
-                        }
-                    } catch (Throwable e) {
-                        logger.warn("ignoring error in onErrorStop", e);
-                    }
-                }
-
-                return next != none;
-            }
-
-            @Override
-            public T next() {
-                if (!hasNext()) {
-                    throw new NoSuchElementException();
-                }
-
-                ret = next;
-                next = none;
-                return ret;
-            }
-        }, sorted, cmp, closeHandlers);
-    }
-
-    private void throwThrowable(Throwable e) throws E {
-        if (e instanceof Error) {
-            throw (Error) e;
-        } else {
-            throw (E) e;
-        }
-    }
+    //    // TODO First of all, it only works in sequential Stream, not parallel stream (and maybe not work in some other scenarios as well).
+    //    // Secondly, these onErrorXXX methods make it more difficult and complicated to use Stream.
+    //    // So, remove them.
+    //    /**
+    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
+    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
+    //     *
+    //     * @param errorConsumer
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public ExceptionalStream<T, E> onErrorContinue(final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
+    //        assertNotClosed();
+    //
+    //        return newStream(new ExceptionalIterator<T, E>() {
+    //            private final ExceptionalIterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //            @Override
+    //            public boolean hasNext() throws E {
+    //                if (next == none) {
+    //                    while (true) {
+    //                        try {
+    //                            if (iter.hasNext()) {
+    //                                next = iter.next();
+    //                            }
+    //
+    //                            break;
+    //                        } catch (Throwable e) {
+    //                            logger.warn("ignoring error in onErrorContinue", e);
+    //
+    //                            errorConsumer.accept(e);
+    //                        }
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //            @Override
+    //            public T next() throws E {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException();
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, sorted, cmp, closeHandlers);
+    //    }
+    //
+    //    /**
+    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
+    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
+    //     *
+    //     * @param type
+    //     * @param errorConsumer
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public ExceptionalStream<T, E> onErrorContinue(final Class<? extends Throwable> type,
+    //            final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
+    //        assertNotClosed();
+    //
+    //        return newStream(new ExceptionalIterator<T, E>() {
+    //            private final ExceptionalIterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //            @Override
+    //            public boolean hasNext() throws E {
+    //                if (next == none) {
+    //                    while (true) {
+    //                        try {
+    //                            if (iter.hasNext()) {
+    //                                next = iter.next();
+    //                            }
+    //
+    //                            break;
+    //                        } catch (Throwable e) {
+    //                            if (type.isAssignableFrom(e.getClass())) {
+    //                                logger.warn("ignoring error in onErrorContinue", e);
+    //
+    //                                errorConsumer.accept(e);
+    //                            } else {
+    //                                throwThrowable(e);
+    //                            }
+    //                        }
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //            @Override
+    //            public T next() throws E {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException();
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, sorted, cmp, closeHandlers);
+    //    }
+    //
+    //    /**
+    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
+    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
+    //     *
+    //     * @param errorPredicate
+    //     * @param errorConsumer
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public ExceptionalStream<T, E> onErrorContinue(final Throwables.Predicate<? super Throwable, ? extends E> errorPredicate,
+    //            final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer) {
+    //        assertNotClosed();
+    //
+    //        return newStream(new ExceptionalIterator<T, E>() {
+    //            private final ExceptionalIterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //            @Override
+    //            public boolean hasNext() throws E {
+    //                if (next == none) {
+    //                    while (true) {
+    //                        try {
+    //                            if (iter.hasNext()) {
+    //                                next = iter.next();
+    //                            }
+    //
+    //                            break;
+    //                        } catch (Throwable e) {
+    //                            if (errorPredicate.test(e)) {
+    //                                logger.warn("ignoring error in onErrorContinue", e);
+    //
+    //                                errorConsumer.accept(e);
+    //                            } else {
+    //                                throwThrowable(e);
+    //                            }
+    //                        }
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //            @Override
+    //            public T next() throws E {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException();
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, sorted, cmp, closeHandlers);
+    //    }
+    //
+    //    /**
+    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
+    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
+    //     *
+    //     * @param errorPredicate
+    //     * @param errorConsumer
+    //     * @param maxErrorCountToStop
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public ExceptionalStream<T, E> onErrorContinue(final Throwables.Predicate<? super Throwable, ? extends E> errorPredicate,
+    //            final Throwables.Consumer<? super Throwable, ? extends E> errorConsumer, final int maxErrorCountToStop) {
+    //        assertNotClosed();
+    //        checkArgNotNegative(maxErrorCountToStop, "maxErrorCountToStop");
+    //
+    //        return newStream(new ExceptionalIterator<T, E>() {
+    //            private final AtomicInteger errorCounter = new AtomicInteger(maxErrorCountToStop);
+    //            private final ExceptionalIterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //            @Override
+    //            public boolean hasNext() throws E {
+    //                if (next == none) {
+    //                    while (true) {
+    //                        try {
+    //                            if (iter.hasNext()) {
+    //                                next = iter.next();
+    //                            }
+    //
+    //                            break;
+    //                        } catch (Throwable e) {
+    //                            if (errorCounter.decrementAndGet() >= 0) {
+    //                                if (errorPredicate.test(e)) {
+    //                                    logger.warn("ignoring error in onErrorContinue", e);
+    //
+    //                                    errorConsumer.accept(e);
+    //                                } else {
+    //                                    throwThrowable(e);
+    //                                }
+    //                            } else {
+    //                                break;
+    //                            }
+    //                        }
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //            @Override
+    //            public T next() throws E {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException();
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, sorted, cmp, closeHandlers);
+    //    }
+    //
+    //    /**
+    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
+    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
+    //     *
+    //     * @param fallbackValue
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public ExceptionalStream<T, E> onErrorReturn(final T fallbackValue) {
+    //        assertNotClosed();
+    //
+    //        return newStream(new ExceptionalIterator<T, E>() {
+    //            private final ExceptionalIterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //            @Override
+    //            public boolean hasNext() {
+    //                if (next == none) {
+    //                    try {
+    //                        if (iter.hasNext()) {
+    //                            next = iter.next();
+    //                        }
+    //                    } catch (Throwable e) {
+    //                        logger.warn("ignoring error in onErrorReturn", e);
+    //
+    //                        next = fallbackValue;
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //            @Override
+    //            public T next() {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException();
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, closeHandlers);
+    //    }
+    //
+    //    /**
+    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
+    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
+    //     *
+    //     * @param type
+    //     * @param fallbackValue
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public ExceptionalStream<T, E> onErrorReturn(final Class<? extends Throwable> type, final T fallbackValue) {
+    //        assertNotClosed();
+    //
+    //        return newStream(new ExceptionalIterator<T, E>() {
+    //            private final ExceptionalIterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //            @Override
+    //            public boolean hasNext() throws E {
+    //                if (next == none) {
+    //                    try {
+    //                        if (iter.hasNext()) {
+    //                            next = iter.next();
+    //                        }
+    //                    } catch (Throwable e) {
+    //                        if (type.isAssignableFrom(e.getClass())) {
+    //                            logger.warn("ignoring error in onErrorReturn", e);
+    //
+    //                            next = fallbackValue;
+    //                        } else {
+    //                            throwThrowable(e);
+    //                        }
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //            @Override
+    //            public T next() throws E {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException();
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, closeHandlers);
+    //    }
+    //
+    //    /**
+    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
+    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
+    //     *
+    //     * @param predicate
+    //     * @param fallbackValue
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public ExceptionalStream<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate, final T fallbackValue) {
+    //        assertNotClosed();
+    //
+    //        return newStream(new ExceptionalIterator<T, E>() {
+    //            private final ExceptionalIterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //            @Override
+    //            public boolean hasNext() throws E {
+    //                if (next == none) {
+    //                    try {
+    //                        if (iter.hasNext()) {
+    //                            next = iter.next();
+    //                        }
+    //                    } catch (Throwable e) {
+    //                        if (predicate.test(e)) {
+    //                            logger.warn("ignoring error in onErrorReturn", e);
+    //
+    //                            next = fallbackValue;
+    //                        } else {
+    //                            throwThrowable(e);
+    //                        }
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //            @Override
+    //            public T next() throws E {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException();
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, closeHandlers);
+    //    }
+    //
+    //    /**
+    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
+    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
+    //     *
+    //     * @param predicate
+    //     * @param supplierForFallbackValue
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public ExceptionalStream<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate,
+    //            final Throwables.Supplier<? extends T, ? extends E> supplierForFallbackValue) {
+    //        assertNotClosed();
+    //
+    //        return newStream(new ExceptionalIterator<T, E>() {
+    //            private final ExceptionalIterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //            @Override
+    //            public boolean hasNext() throws E {
+    //                if (next == none) {
+    //                    try {
+    //                        if (iter.hasNext()) {
+    //                            next = iter.next();
+    //                        }
+    //                    } catch (Throwable e) {
+    //                        if (predicate.test(e)) {
+    //                            logger.warn("ignoring error in onErrorReturn", e);
+    //
+    //                            next = supplierForFallbackValue.get();
+    //                        } else {
+    //                            throwThrowable(e);
+    //                        }
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //            @Override
+    //            public T next() throws E {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException();
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, closeHandlers);
+    //    }
+    //
+    //    /**
+    //     * This method should be only applied sequential {@code Stream} and whose up-streams are sequential {@code Streams} as well.
+    //     * Because error happening in the operations executed by parallel stream will stop iteration on that {@Stream}, so the down-streams won't be able to continue.
+    //     *
+    //     * @param predicate
+    //     * @param mapperForFallbackValue
+    //     * @param maxErrorCountToStop
+    //     * @return
+    //     */
+    //    @Beta
+    //    @IntermediateOp
+    //    public ExceptionalStream<T, E> onErrorReturn(final Throwables.Predicate<? super Throwable, ? extends E> predicate,
+    //            final Throwables.Function<? super Throwable, ? extends T, ? extends E> mapperForFallbackValue, final int maxErrorCountToStop) {
+    //        assertNotClosed();
+    //        checkArgNotNegative(maxErrorCountToStop, "maxErrorCountToStop");
+    //
+    //        return newStream(new ExceptionalIterator<T, E>() {
+    //            private final AtomicInteger errorCounter = new AtomicInteger(maxErrorCountToStop);
+    //            private final ExceptionalIterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //            @Override
+    //            public boolean hasNext() throws E {
+    //                if (next == none) {
+    //                    try {
+    //                        if (iter.hasNext()) {
+    //                            next = iter.next();
+    //                        }
+    //                    } catch (Throwable e) {
+    //                        if (errorCounter.decrementAndGet() >= 0) {
+    //                            if (predicate.test(e)) {
+    //                                logger.warn("ignoring error in onErrorReturn", e);
+    //
+    //                                next = mapperForFallbackValue.apply(e);
+    //                            } else {
+    //                                throwThrowable(e);
+    //                            }
+    //                        } else {
+    //                            // break;
+    //                        }
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //            @Override
+    //            public T next() throws E {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException();
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, closeHandlers);
+    //    }
+    //
+    //    @Beta
+    //    @IntermediateOp
+    //    public ExceptionalStream<T, E> onErrorStop() {
+    //        assertNotClosed();
+    //
+    //        return newStream(new ExceptionalIterator<T, E>() {
+    //            private final ExceptionalIterator<T, E> iter = iteratorEx();
+    //            private final T none = (T) NONE;
+    //            private T next = none;
+    //            private T ret = null;
+    //
+    //            @Override
+    //            public boolean hasNext() {
+    //                if (next == none) {
+    //                    try {
+    //                        if (iter.hasNext()) {
+    //                            next = iter.next();
+    //                        }
+    //                    } catch (Throwable e) {
+    //                        logger.warn("ignoring error in onErrorStop", e);
+    //                    }
+    //                }
+    //
+    //                return next != none;
+    //            }
+    //
+    //            @Override
+    //            public T next() {
+    //                if (!hasNext()) {
+    //                    throw new NoSuchElementException();
+    //                }
+    //
+    //                ret = next;
+    //                next = none;
+    //                return ret;
+    //            }
+    //        }, sorted, cmp, closeHandlers);
+    //    }
+    //
+    //    private void throwThrowable(Throwable e) throws E {
+    //        if (e instanceof Error) {
+    //            throw (Error) e;
+    //        } else {
+    //            throw (E) e;
+    //        }
+    //    }
 
     /**
      *

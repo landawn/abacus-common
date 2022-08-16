@@ -37,6 +37,7 @@ import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.AndroidUtil;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
+import com.landawn.abacus.util.MoreExecutors;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.ThreadMode;
 
@@ -95,32 +96,15 @@ public class EventBus {
         if (IOUtil.IS_PLATFORM_ANDROID) {
             DEFAULT_EXECUTOR = AndroidUtil.getThreadPoolExecutor();
         } else {
-            DEFAULT_EXECUTOR = new ThreadPoolExecutor(Math.max(8, IOUtil.CPU_CORES), Math.max(64, IOUtil.CPU_CORES), 180L, TimeUnit.SECONDS,
-                    new LinkedBlockingQueue<>());
+            final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(//
+                    N.max(8, IOUtil.CPU_CORES), // coreThreadPoolSize
+                    N.max(64, IOUtil.CPU_CORES), // maxThreadPoolSize
+                    180L, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+
+            DEFAULT_EXECUTOR = threadPoolExecutor;
+
+            MoreExecutors.addDelayedShutdownHook(threadPoolExecutor, 120, TimeUnit.SECONDS);
         }
-    }
-
-    static {
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                if (DEFAULT_EXECUTOR instanceof ExecutorService) {
-                    logger.warn("Starting to shutdown task in EventBus");
-
-                    final ExecutorService executorService = (ExecutorService) DEFAULT_EXECUTOR;
-
-                    try {
-                        executorService.shutdown();
-
-                        executorService.awaitTermination(60, TimeUnit.SECONDS);
-                    } catch (InterruptedException e) {
-                        logger.warn("Not all the requests/tasks executed in Evenbus are completed successfully before shutdown.");
-                    } finally {
-                        logger.warn("Completed to shutdown task in EventBus");
-                    }
-                }
-            }
-        });
     }
 
     private final Map<Object, List<SubIdentifier>> registeredSubMap = new LinkedHashMap<>();

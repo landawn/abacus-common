@@ -270,7 +270,7 @@ public class AsyncExecutor {
      * @param futureTask
      * @return
      */
-    <R> ContinuableFuture<R> execute(final FutureTask<R> futureTask) {
+    protected <R> ContinuableFuture<R> execute(final FutureTask<R> futureTask) {
         final Executor executor = getExecutor();
 
         executor.execute(futureTask);
@@ -296,7 +296,7 @@ public class AsyncExecutor {
                     Runtime.getRuntime().addShutdownHook(new Thread() {
                         @Override
                         public void run() {
-                            shutdown();
+                            shutdown(120, TimeUnit.SECONDS);
                         }
                     });
                 }
@@ -307,6 +307,10 @@ public class AsyncExecutor {
     }
 
     public synchronized void shutdown() {
+        shutdown(0, TimeUnit.SECONDS);
+    }
+
+    public synchronized void shutdown(final long terminationTimeout, final TimeUnit timeUnit) {
         if (executor == null || !(executor instanceof ExecutorService executorService)) {
             return;
         }
@@ -316,8 +320,10 @@ public class AsyncExecutor {
         try {
             executorService.shutdown();
 
-            if (!executorService.isTerminated()) {
-                executorService.awaitTermination(60, TimeUnit.SECONDS);
+            if (terminationTimeout > 0) {
+                if (!executorService.isTerminated()) {
+                    executorService.awaitTermination(terminationTimeout, timeUnit);
+                }
             }
         } catch (InterruptedException e) {
             logger.warn("Not all the requests/tasks executed in AsyncExecutor are completed successfully before shutdown.");
@@ -325,7 +331,6 @@ public class AsyncExecutor {
             executor = null;
             logger.warn("Completed to shutdown task in AsyncExecutor");
         }
-
     }
 
     @Override

@@ -106,17 +106,17 @@ public final class N extends CommonUtil {
     private static final int LOAD_FACTOR_FOR_TWO_FLAT_MAP = 2;
 
     static final AsyncExecutor asyncExecutor = new AsyncExecutor(//
-            N.max(64, IOUtil.CPU_CORES * 8, (IOUtil.MAX_MEMORY_IN_MB / 1024) * 8), // coreThreadPoolSize
-            N.max(128, IOUtil.CPU_CORES * 16, (IOUtil.MAX_MEMORY_IN_MB / 1024) * 16), // maxThreadPoolSize
+            N.max(64, IOUtil.CPU_CORES * 8), // coreThreadPoolSize
+            N.max(128, IOUtil.CPU_CORES * 16), // maxThreadPoolSize
             180L, TimeUnit.SECONDS);
 
     static final ScheduledExecutorService SCHEDULED_EXECUTOR;
 
     static {
         final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(Math.max(64, CPU_CORES));
-        executor.setKeepAliveTime(180, TimeUnit.SECONDS);
-        executor.allowCoreThreadTimeOut(true);
-        executor.setRemoveOnCancelPolicy(true);
+        //    executor.setKeepAliveTime(180, TimeUnit.SECONDS);
+        //    executor.allowCoreThreadTimeOut(true);
+        //    executor.setRemoveOnCancelPolicy(true);
         SCHEDULED_EXECUTOR = MoreExecutors.getExitingScheduledExecutorService(executor);
     }
 
