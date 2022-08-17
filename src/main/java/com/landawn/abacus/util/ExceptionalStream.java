@@ -11369,6 +11369,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }, sorted, cmp, (Deque) closeHandlers);
     }
 
+    // #################################################################################################################################
+    // #################################################################################################################################
+
     /**
      *
      *
@@ -11438,9 +11441,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return ContinuableFuture.call(() -> terminalAction.apply(ExceptionalStream.this), executor);
     }
 
-    // #################################################################################################################################
-    // #################################################################################################################################
-
     /**
      *
      * @param closeHandler
@@ -11473,10 +11473,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
 
         return newStream(elements, newCloseHandlers);
-    }
-
-    static boolean isEmptyCloseHandlers(final Collection<? extends Throwables.Runnable<?>> closeHandlers) {
-        return N.isNullOrEmpty(closeHandlers) || (closeHandlers.size() == 1 && N.firstOrNullIfEmpty(closeHandlers) == EMPTY_CLOSE_HANDLER);
     }
 
     /**
@@ -11515,6 +11511,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         if (N.notNullOrEmpty(closeHandlers)) {
             closeHandlers.clear();
         }
+    }
+
+    static boolean isEmptyCloseHandlers(final Collection<? extends Throwables.Runnable<?>> closeHandlers) {
+        return N.isNullOrEmpty(closeHandlers) || (closeHandlers.size() == 1 && N.firstOrNullIfEmpty(closeHandlers) == EMPTY_CLOSE_HANDLER);
     }
 
     @SuppressWarnings("rawtypes")
