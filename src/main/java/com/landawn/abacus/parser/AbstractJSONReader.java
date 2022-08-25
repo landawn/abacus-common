@@ -14,12 +14,23 @@
 
 package com.landawn.abacus.parser;
 
+import com.landawn.abacus.util.Strings;
+
 /**
  *
  * @author Haiyang Li
  * @since 0.8
  */
 abstract class AbstractJSONReader implements JSONReader {
+    static final int MAX_PARSABLE_NUM_LEN = Long.toString(Long.MAX_VALUE, 10).length() - 1;
+
+    static final long[] POWERS_OF_TEN = { 1L, 10L, 100L, 1_000L, 10_000L, 100_000L, 1_000_000L, 10_000_000L, 100_000_000L, 1_000_000_000L, 10_000_000_000L,
+            100_000_000_000L, 1_000_000_000_000L, 10_000_000_000_000L, 100_000_000_000_000L, 1_000_000_000_000_000L, 10_000_000_000_000_000L,
+            100_000_000_000_000_000L, 1000_000_000_000_000_000L, 1_000_000_000_000_000_000L };
+
+    static final String NULL = Strings.NULL_STRING;
+    static final String FALSE = Boolean.FALSE.toString().intern();
+    static final String TRUE = Boolean.TRUE.toString().intern();
 
     protected static final int[] charEvents = new int[128];
 
@@ -32,6 +43,53 @@ abstract class AbstractJSONReader implements JSONReader {
         charEvents['}'] = END_BRACE;
         charEvents['['] = START_BRACKET;
         charEvents[']'] = END_BRACKET;
+        charEvents['n'] = 'n';
+        charEvents['N'] = 'N';
+        charEvents['f'] = 'f';
+        charEvents['F'] = 'F';
+        charEvents['t'] = 't';
+        charEvents['T'] = 'T';
+        charEvents['-'] = '-';
+        charEvents['+'] = '+';
+        charEvents['0'] = '0';
+        charEvents['1'] = '1';
+        charEvents['2'] = '2';
+        charEvents['3'] = '3';
+        charEvents['4'] = '4';
+        charEvents['5'] = '5';
+        charEvents['6'] = '6';
+        charEvents['7'] = '7';
+        charEvents['8'] = '8';
+        charEvents['9'] = '9';
+    }
+
+    static int[] alphanumerics = charEvents.clone();
+
+    static {
+        alphanumerics['+'] = '+';
+        alphanumerics['-'] = '-';
+        alphanumerics['.'] = '.';
+        alphanumerics['#'] = '#';
+
+        alphanumerics['x'] = 'x';
+        alphanumerics['X'] = 'X';
+
+        alphanumerics['e'] = 'e';
+        alphanumerics['E'] = 'E';
+
+        alphanumerics['a'] = 'a';
+        alphanumerics['b'] = 'b';
+        alphanumerics['c'] = 'c';
+        alphanumerics['d'] = 'd';
+        alphanumerics['e'] = 'e';
+        alphanumerics['f'] = 'f';
+
+        alphanumerics['l'] = 'l';
+        alphanumerics['L'] = 'L';
+        alphanumerics['f'] = 'f';
+        alphanumerics['F'] = 'F';
+        alphanumerics['d'] = 'd';
+        alphanumerics['D'] = 'D';
     }
 
     protected static final char[] eventChars = new char[11];

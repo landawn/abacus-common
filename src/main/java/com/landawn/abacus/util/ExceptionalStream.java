@@ -62,7 +62,7 @@ import com.landawn.abacus.annotation.LazyEvaluation;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.annotation.TerminalOp;
 import com.landawn.abacus.annotation.TerminalOpTriggered;
-import com.landawn.abacus.exception.DuplicatedResultException;
+import com.landawn.abacus.exception.TooManyElementsException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.JSONParser;
@@ -8446,11 +8446,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      *
      * @return
-     * @throws DuplicatedResultException if there are more than one elements.
+     * @throws TooManyElementsException if there are more than one elements.
      * @throws E the e
      */
     @TerminalOp
-    public Optional<T> onlyOne() throws DuplicatedResultException, E {
+    public Optional<T> onlyOne() throws TooManyElementsException, E {
         assertNotClosed();
 
         try {
@@ -8460,7 +8460,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 result = Optional.of(elements.next());
 
                 if (elements.hasNext()) {
-                    throw new DuplicatedResultException("There are at least two elements: " + StringUtil.concat(result.get(), ", ", elements.next()));
+                    throw new TooManyElementsException("There are at least two elements: " + StringUtil.concat(result.get(), ", ", elements.next()));
                 }
             }
 
@@ -10380,12 +10380,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     public java.util.stream.Stream<T> toJdkStream() {
         assertNotClosed();
 
-        final Spliterator<T> spliterator = Spliterators.spliteratorUnknownSize(newObjIteratorEx(elements), Spliterator.ORDERED);
+        final Spliterator<T> spliterator = Spliterators.spliteratorUnknownSize(newObjIteratorEx(elements), Spliterator.ORDERED | Spliterator.IMMUTABLE);
 
         if (isEmptyCloseHandlers(closeHandlers)) {
-            return StreamSupport.stream(() -> spliterator, Spliterator.ORDERED | Spliterator.IMMUTABLE | Spliterator.NONNULL, false);
+            return StreamSupport.stream(spliterator, false);
         } else {
-            return StreamSupport.stream(() -> spliterator, Spliterator.ORDERED | Spliterator.IMMUTABLE | Spliterator.NONNULL, false).onClose(() -> {
+            return StreamSupport.stream(spliterator, false).onClose(() -> {
                 try {
                     ExceptionalStream.this.close();
                 } catch (Exception e) {

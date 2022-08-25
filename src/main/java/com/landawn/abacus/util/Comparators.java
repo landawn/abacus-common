@@ -687,6 +687,12 @@ public abstract class Comparators {
         N.checkArgNotNull(cmp);
 
         return (a, b) -> {
+            if (N.isNullOrEmpty(a)) {
+                return N.isNullOrEmpty(b) ? 0 : -1;
+            } else if (N.isNullOrEmpty(b)) {
+                return 1;
+            }
+
             final int lenA = N.len(a);
             final int lenB = N.len(b);
             int result = 0;
@@ -716,11 +722,11 @@ public abstract class Comparators {
             final Iterator<T> iterA = a.iterator();
             final Iterator<T> iterB = b.iterator();
 
-            final int lenA = N.size(a);
-            final int lenB = N.size(b);
+            final int sizeA = N.size(a);
+            final int sizeB = N.size(b);
             int result = 0;
 
-            for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
+            for (int i = 0, minLen = N.min(sizeA, sizeB); i < minLen; i++) {
                 result = cmp.compare(iterA.next(), iterB.next());
 
                 if (result != 0) {
@@ -728,7 +734,7 @@ public abstract class Comparators {
                 }
             }
 
-            return N.compare(lenA, lenB);
+            return N.compare(sizeA, sizeB);
         };
     }
 

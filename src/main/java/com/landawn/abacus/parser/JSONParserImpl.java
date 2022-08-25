@@ -2053,10 +2053,9 @@ final class JSONParserImpl extends AbstractJSONParser {
             Type<?> propType, boolean isFirstCall) throws IOException {
         Type<?> keyType = defaultKeyType;
 
-        if (propType != null && propType.isMap() && !Object.class.equals(propType.getParameterTypes()[0].clazz())) {
+        if (propType != null && propType.isMap() && !propType.getParameterTypes()[0].isObjectType()) {
             keyType = propType.getParameterTypes()[0];
-        } else if ((propType == null || !Object.class.equals(propType.clazz()))
-                && (config.getMapKeyType() != null && !Object.class.equals(config.getMapKeyType().clazz()))) {
+        } else if ((propType == null || !propType.isObjectType()) && (config.getMapKeyType() != null && !config.getMapKeyType().isObjectType())) {
             keyType = config.getMapKeyType();
         }
 
@@ -2064,10 +2063,9 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         Type<?> valueType = defaultValueType;
 
-        if (propType != null && propType.isMap() && !Object.class.equals(propType.getParameterTypes()[1].clazz())) {
+        if (propType != null && propType.isMap() && !propType.getParameterTypes()[1].isObjectType()) {
             valueType = propType.getParameterTypes()[1];
-        } else if ((propType == null || !Object.class.equals(propType.clazz()))
-                && (config.getMapValueType() != null && !Object.class.equals(config.getMapValueType().clazz()))) {
+        } else if ((propType == null || !propType.isObjectType()) && (config.getMapValueType() != null && !config.getMapValueType().isObjectType())) {
             valueType = config.getMapValueType();
         }
 
@@ -2079,7 +2077,8 @@ final class JSONParserImpl extends AbstractJSONParser {
         final Tuple2<Function<Class<?>, Object>, Function<Object, Object>> creatorAndConvertor = getCreatorAndConvertorForTargetType(targetClass, null);
 
         final Map<Object, Object> result = outResult == null
-                ? (Map.class.isAssignableFrom(targetClass) ? (Map<Object, Object>) creatorAndConvertor._1.apply(targetClass) : new HashMap<>())
+                ? (Map.class.isAssignableFrom(targetClass) ? (Map<Object, Object>) creatorAndConvertor._1.apply(targetClass)
+                        : N.newMap(Map.class.equals(targetClass) ? config.getMapInstanceType() : targetClass))
                 : outResult;
 
         String propName = null;
@@ -2259,10 +2258,10 @@ final class JSONParserImpl extends AbstractJSONParser {
             final boolean isFirstCall) throws IOException {
         Type<?> eleType = defaultValueType;
 
-        if (propType != null && (propType.isArray() || propType.isCollection()) && !Object.class.equals(propType.getElementType().clazz())) {
+        if (propType != null && (propType.isArray() || propType.isCollection()) && !propType.getElementType().isObjectType()) {
             eleType = propType.getElementType();
-        } else if (propType == null || !Object.class.equals(propType.clazz())) {
-            if (config.getElementType() != null && !Object.class.equals(config.getElementType().clazz())) {
+        } else if (propType == null || !propType.isObjectType()) {
+            if (config.getElementType() != null && !config.getElementType().isObjectType()) {
                 eleType = config.getElementType();
             } else {
                 eleType = N
@@ -2479,10 +2478,9 @@ final class JSONParserImpl extends AbstractJSONParser {
             Type<?> propType, boolean isFirstCall) throws IOException {
         Type<?> eleType = defaultValueType;
 
-        if (propType != null && (propType.isCollection() || propType.isArray()) && !Object.class.equals(propType.getElementType().clazz())) {
+        if (propType != null && (propType.isCollection() || propType.isArray()) && !propType.getElementType().isObjectType()) {
             eleType = propType.getElementType();
-        } else if ((propType == null || !Object.class.equals(propType.clazz()))
-                && (config.getElementType() != null && !Object.class.equals(config.getElementType().clazz()))) {
+        } else if ((propType == null || !propType.isObjectType()) && (config.getElementType() != null && !config.getElementType().isObjectType())) {
             eleType = config.getElementType();
         }
 
@@ -3426,7 +3424,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                 return "Error on parsing at ',' with " + jr.getText();
 
             default:
-                return "Unknown error on event : " + token + " with " + jr.getText();
+                return "Unknown error on event : " + ((char) token) + " with " + jr.getText();
         }
     }
 }

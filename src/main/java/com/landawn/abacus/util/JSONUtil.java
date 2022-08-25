@@ -194,7 +194,7 @@ public final class JSONUtil {
      */
     @SuppressWarnings("unchecked")
     public static <T> T unwrap(Type<? extends T> type, final JSONObject jsonObject) throws JSONException {
-        type = type.clazz().equals(Object.class) ? N.<T> typeOf("Map<String, Object>") : type;
+        type = type.isObjectType() ? N.<T> typeOf("Map<String, Object>") : type;
         final Class<?> cls = type.clazz();
 
         if (type.clazz().isAssignableFrom(JSONObject.class)) {
@@ -335,7 +335,7 @@ public final class JSONUtil {
      */
     @SuppressWarnings("unchecked")
     public static <T> T unwrap(Type<? extends T> type, final JSONArray jsonArray) throws JSONException {
-        type = type.clazz().equals(Object.class) ? N.<T> typeOf("List<Object>") : type;
+        type = type.isObjectType() ? N.<T> typeOf("List<Object>") : type;
         final int len = jsonArray.length();
 
         if (type.clazz().isAssignableFrom(JSONArray.class)) {

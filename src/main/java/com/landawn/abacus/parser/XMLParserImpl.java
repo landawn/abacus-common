@@ -1261,10 +1261,9 @@ final class XMLParserImpl extends AbstractXMLParser {
                                         }
                                     }
                                 } else {
-                                    if (Map.class.isAssignableFrom(propType.clazz()) || ClassUtil.isEntity(propType.clazz())
-                                            || MapEntity.class.equals(propType.clazz()) || Object.class.equals(propType.clazz())) {
-                                        propValue = readByStreamParser(Object.class.equals(propType.clazz()) ? Map.class : propType.clazz(), xmlReader,
-                                                configToUse, propType, propInfo);
+                                    if (propType.isMap() || propType.isEntity() || propType.isMapEntity() || propType.isObjectType()) {
+                                        propValue = readByStreamParser(propType.isObjectType() ? Map.class : propType.clazz(), xmlReader, configToUse, propType,
+                                                propInfo);
 
                                         for (int startCount = 0, e = xmlReader.next();; e = xmlReader.next()) {
                                             startCount += (e == XMLStreamConstants.START_ELEMENT) ? 1 : (e == XMLStreamConstants.END_ELEMENT ? -1 : 0);
@@ -1386,14 +1385,13 @@ final class XMLParserImpl extends AbstractXMLParser {
                 final Collection<String> ignoredClassPropNames = configToUse.getIgnoredPropNames(Map.class);
                 Type<?> keyType = defaultKeyType;
 
-                if (propInfo != null && propInfo.jsonXmlType.getParameterTypes().length == 2
-                        && !Object.class.equals(propInfo.jsonXmlType.getParameterTypes()[0].clazz())) {
+                if (propInfo != null && propInfo.jsonXmlType.getParameterTypes().length == 2 && !propInfo.jsonXmlType.getParameterTypes()[0].isObjectType()) {
                     keyType = propInfo.jsonXmlType.getParameterTypes()[0];
-                } else if (propType != null && propType.getParameterTypes().length == 2 && Map.class.isAssignableFrom(propType.clazz())
-                        && !Object.class.equals(propType.getParameterTypes()[0].clazz())) {
+                } else if (propType != null && propType.getParameterTypes().length == 2 && propType.isMap()
+                        && !propType.getParameterTypes()[0].isObjectType()) {
                     keyType = propType.getParameterTypes()[0];
                 } else {
-                    if (configToUse.getMapKeyType() != null && !Object.class.equals(configToUse.getMapKeyType().clazz())) {
+                    if (configToUse.getMapKeyType() != null && !configToUse.getMapKeyType().isObjectType()) {
                         keyType = configToUse.getMapKeyType();
                     }
                 }
@@ -1401,14 +1399,13 @@ final class XMLParserImpl extends AbstractXMLParser {
                 final boolean isStringKey = keyType.clazz() == String.class;
                 Type<?> valueType = defaultValueType;
 
-                if (propInfo != null && propInfo.jsonXmlType.getParameterTypes().length == 2
-                        && !Object.class.equals(propInfo.jsonXmlType.getParameterTypes()[1].clazz())) {
+                if (propInfo != null && propInfo.jsonXmlType.getParameterTypes().length == 2 && !propInfo.jsonXmlType.getParameterTypes()[1].isObjectType()) {
                     valueType = propInfo.jsonXmlType.getParameterTypes()[1];
-                } else if (propType != null && propType.getParameterTypes().length == 2 && Map.class.isAssignableFrom(propType.clazz())
-                        && !Object.class.equals(propType.getParameterTypes()[1].clazz())) {
+                } else if (propType != null && propType.getParameterTypes().length == 2 && propType.isMap()
+                        && !propType.getParameterTypes()[1].isObjectType()) {
                     valueType = propType.getParameterTypes()[1];
                 } else {
-                    if (configToUse.getMapValueType() != null && !Object.class.equals(configToUse.getMapValueType().clazz())) {
+                    if (configToUse.getMapValueType() != null && !configToUse.getMapValueType().isObjectType()) {
                         valueType = configToUse.getMapValueType();
                     }
                 }
@@ -1456,10 +1453,9 @@ final class XMLParserImpl extends AbstractXMLParser {
                                         }
                                     }
                                 } else {
-                                    if (Map.class.isAssignableFrom(propType.clazz()) || ClassUtil.isEntity(propType.clazz())
-                                            || MapEntity.class.equals(propType.clazz()) || Object.class.equals(propType.clazz())) {
-                                        propValue = readByStreamParser(Object.class.equals(propType.clazz()) ? Map.class : propType.clazz(), xmlReader,
-                                                configToUse, propType, null);
+                                    if (propType.isMap() || propType.isEntity() || propType.isMapEntity() || propType.isObjectType()) {
+                                        propValue = readByStreamParser(propType.isObjectType() ? Map.class : propType.clazz(), xmlReader, configToUse, propType,
+                                                null);
 
                                         for (int startCount = 0, e = xmlReader.next();; e = xmlReader.next()) {
                                             startCount += (e == XMLStreamConstants.START_ELEMENT) ? 1 : (e == XMLStreamConstants.END_ELEMENT ? -1 : 0);
@@ -1574,14 +1570,13 @@ final class XMLParserImpl extends AbstractXMLParser {
                 final Collection<String> ignoredClassPropNames = configToUse.getIgnoredPropNames(Map.class);
                 Type<?> valueType = defaultValueType;
 
-                if (propInfo != null && propInfo.jsonXmlType.getParameterTypes().length == 2
-                        && !Object.class.equals(propInfo.jsonXmlType.getParameterTypes()[1].clazz())) {
+                if (propInfo != null && propInfo.jsonXmlType.getParameterTypes().length == 2 && !propInfo.jsonXmlType.getParameterTypes()[1].isObjectType()) {
                     valueType = propInfo.jsonXmlType.getParameterTypes()[1];
-                } else if (propType != null && propType.getParameterTypes().length == 2 && Map.class.isAssignableFrom(propType.clazz())
-                        && !Object.class.equals(propType.getParameterTypes()[1].clazz())) {
+                } else if (propType != null && propType.getParameterTypes().length == 2 && propType.isMap()
+                        && !propType.getParameterTypes()[1].isObjectType()) {
                     valueType = propType.getParameterTypes()[1];
                 } else {
-                    if (configToUse.getMapValueType() != null && !Object.class.equals(configToUse.getMapValueType().clazz())) {
+                    if (configToUse.getMapValueType() != null && !configToUse.getMapValueType().isObjectType()) {
                         valueType = configToUse.getMapValueType();
                     }
                 }
@@ -1629,10 +1624,9 @@ final class XMLParserImpl extends AbstractXMLParser {
                                         }
                                     }
                                 } else {
-                                    if (Map.class.isAssignableFrom(propType.clazz()) || ClassUtil.isEntity(propType.clazz())
-                                            || MapEntity.class.equals(propType.clazz()) || Object.class.equals(propType.clazz())) {
-                                        propValue = readByStreamParser(Object.class.equals(propType.clazz()) ? MapEntity.class : propType.clazz(), xmlReader,
-                                                configToUse, propType, null);
+                                    if (propType.isMap() || propType.isEntity() || propType.isMapEntity() || propType.isObjectType()) {
+                                        propValue = readByStreamParser(propType.isObjectType() ? MapEntity.class : propType.clazz(), xmlReader, configToUse,
+                                                propType, null);
 
                                         for (int startCount = 0, e = xmlReader.next();; e = xmlReader.next()) {
                                             startCount += (e == XMLStreamConstants.START_ELEMENT) ? 1 : (e == XMLStreamConstants.END_ELEMENT ? -1 : 0);
@@ -1754,7 +1748,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                 if (propInfo != null && propInfo.clazz.isArray() && !Object.class.equals(propInfo.clazz.getComponentType())) {
                     eleType = N.typeOf(propInfo.clazz.getComponentType());
                 } else {
-                    if (configToUse.getElementType() != null && !Object.class.equals(configToUse.getElementType().clazz())) {
+                    if (configToUse.getElementType() != null && !configToUse.getElementType().isObjectType()) {
                         eleType = configToUse.getElementType();
                     } else {
                         eleType = N.typeOf(targetClass.isArray() ? targetClass.getComponentType() : String.class);
@@ -1842,10 +1836,10 @@ final class XMLParserImpl extends AbstractXMLParser {
                 if (propInfo != null && propInfo.clazz.isArray() && !Object.class.equals(propInfo.clazz.getComponentType())) {
                     eleType = N.typeOf(propInfo.clazz.getComponentType());
                 } else if (propType != null && propType.getParameterTypes().length == 1 && Collection.class.isAssignableFrom(propType.clazz())
-                        && !Object.class.equals(propType.getParameterTypes()[0].clazz())) {
+                        && !propType.getParameterTypes()[0].isObjectType()) {
                     eleType = propType.getParameterTypes()[0];
                 } else {
-                    if (configToUse.getElementType() != null && !Object.class.equals(configToUse.getElementType().clazz())) {
+                    if (configToUse.getElementType() != null && !configToUse.getElementType().isObjectType()) {
                         eleType = configToUse.getElementType();
                     }
                 }
@@ -1974,7 +1968,7 @@ final class XMLParserImpl extends AbstractXMLParser {
         if (isFirstCall) {
             targetClass = inputClass;
         } else {
-            if (propType == null || String.class.equals(propType.clazz()) || Object.class.equals(propType.clazz())) {
+            if (propType == null || String.class.equals(propType.clazz()) || propType.isObjectType()) {
                 String nodeName = null;
                 if (checkedAttr) {
                     nodeName = isTagByPropertyName ? node.getNodeName() : XMLUtil.getAttribute(node, XMLConstants.NAME);
@@ -2069,10 +2063,10 @@ final class XMLParserImpl extends AbstractXMLParser {
                 final Collection<String> ignoredClassPropNames = configToUse.getIgnoredPropNames(Map.class);
                 Type<?> keyType = defaultKeyType;
 
-                if (propType != null && propType.isMap() && !Object.class.equals(propType.getParameterTypes()[0].clazz())) {
+                if (propType != null && propType.isMap() && !propType.getParameterTypes()[0].isObjectType()) {
                     keyType = propType.getParameterTypes()[0];
                 } else {
-                    if (configToUse.getMapKeyType() != null && !Object.class.equals(configToUse.getMapKeyType().clazz())) {
+                    if (configToUse.getMapKeyType() != null && !configToUse.getMapKeyType().isObjectType()) {
                         keyType = configToUse.getMapKeyType();
                     }
                 }
@@ -2081,10 +2075,10 @@ final class XMLParserImpl extends AbstractXMLParser {
 
                 Type<?> valueType = defaultValueType;
 
-                if (propType != null && propType.isMap() && !Object.class.equals(propType.getParameterTypes()[1].clazz())) {
+                if (propType != null && propType.isMap() && !propType.getParameterTypes()[1].isObjectType()) {
                     valueType = propType.getParameterTypes()[1];
                 } else {
-                    if (configToUse.getMapValueType() != null && !Object.class.equals(configToUse.getMapValueType().clazz())) {
+                    if (configToUse.getMapValueType() != null && !configToUse.getMapValueType().isObjectType()) {
                         valueType = configToUse.getMapValueType();
                     }
                 }
@@ -2139,10 +2133,10 @@ final class XMLParserImpl extends AbstractXMLParser {
                 final Collection<String> ignoredClassPropNames = configToUse.getIgnoredPropNames(Map.class);
                 Type<?> valueType = null;
 
-                if (propType != null && propType.isMap() && !Object.class.equals(propType.getParameterTypes()[1].clazz())) {
+                if (propType != null && propType.isMap() && !propType.getParameterTypes()[1].isObjectType()) {
                     valueType = propType.getParameterTypes()[1];
                 } else {
-                    if (configToUse.getMapValueType() != null && !Object.class.equals(configToUse.getMapValueType().clazz())) {
+                    if (configToUse.getMapValueType() != null && !configToUse.getMapValueType().isObjectType()) {
                         valueType = configToUse.getMapValueType();
                     } else {
                         valueType = objType;
@@ -2199,10 +2193,10 @@ final class XMLParserImpl extends AbstractXMLParser {
                 Type<?> eleType = null;
 
                 if (propType != null && (propType.isArray() || propType.isCollection()) && propType.getElementType() != null
-                        && !Object.class.equals(propType.getElementType().clazz())) {
+                        && !propType.getElementType().isObjectType()) {
                     eleType = propType.getElementType();
                 } else {
-                    if (configToUse.getElementType() != null && !Object.class.equals(configToUse.getElementType().clazz())) {
+                    if (configToUse.getElementType() != null && !configToUse.getElementType().isObjectType()) {
                         eleType = configToUse.getElementType();
                     } else {
                         eleType = N.typeOf(typeClass.isArray() ? typeClass.getComponentType() : Object.class);
@@ -2264,10 +2258,10 @@ final class XMLParserImpl extends AbstractXMLParser {
             case COLLECTION: {
                 Type<?> eleType = null;
 
-                if (propType != null && (propType.isCollection() || propType.isArray()) && !Object.class.equals(propType.getElementType().clazz())) {
+                if (propType != null && (propType.isCollection() || propType.isArray()) && !propType.getElementType().isObjectType()) {
                     eleType = propType.getElementType();
                 } else {
-                    if (configToUse.getElementType() != null && !Object.class.equals(configToUse.getElementType().clazz())) {
+                    if (configToUse.getElementType() != null && !configToUse.getElementType().isObjectType()) {
                         eleType = configToUse.getElementType();
                     } else {
                         eleType = objType;
@@ -2372,13 +2366,12 @@ final class XMLParserImpl extends AbstractXMLParser {
         if (XMLUtil.isTextElement(propNode)) {
             propValue = getPropValue(propName, propType, propInfo, propNode);
         } else {
-            if (Map.class.isAssignableFrom(propType.clazz()) || ClassUtil.isEntity(propType.clazz()) || MapEntity.class.equals(propType.clazz())) {
+            if (propType.isMap() || propType.isEntity() || propType.isMapEntity()) {
                 if (isProp) {
                     propNode = checkOneNode(propNode);
                 }
 
-                propType = Object.class.equals(propType.clazz()) ? (MapEntity.class.equals(inputClass) ? N.typeOf(MapEntity.class) : N.typeOf(Map.class))
-                        : propType;
+                propType = propType.isObjectType() ? (MapEntity.class.equals(inputClass) ? N.typeOf(MapEntity.class) : N.typeOf(Map.class)) : propType;
 
                 propValue = readByDOMParser(inputClass, propNode, config, propName, propType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false);
             } else {

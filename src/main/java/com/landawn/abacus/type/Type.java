@@ -616,6 +616,12 @@ public interface Type<T> {
     boolean isGenericType();
 
     /**
+     *
+     * @return
+     */
+    boolean isObjectType();
+
+    /**
      * Checks if is immutable.
      *
      * @return true, if is immutable
@@ -665,6 +671,10 @@ public interface Type<T> {
      */
     Type<?>[] getParameterTypes();
 
+    /**
+     *
+     * @return
+     */
     T defaultValue();
 
     /**

@@ -2103,7 +2103,7 @@ public final class ParserUtil {
                         if (ch == '<' || ch == '>' || ch == ' ' || ch == ',') {
                             String str = annoType.substring(start, i);
 
-                            if (str.length() > 0 && N.typeOf(str).clazz().equals(Object.class) && !N.typeOf(pkgName + "." + str).clazz().equals(Object.class)) {
+                            if (str.length() > 0 && N.typeOf(str).isObjectType() && !N.typeOf(pkgName + "." + str).isObjectType()) {
                                 sb.append(pkgName + "." + str);
                             } else {
                                 sb.append(str);
@@ -2117,7 +2117,7 @@ public final class ParserUtil {
                     if (start < annoType.length()) {
                         String str = annoType.substring(start);
 
-                        if (N.typeOf(str).clazz().equals(Object.class) && !N.typeOf(pkgName + "." + str).clazz().equals(Object.class)) {
+                        if (N.typeOf(str).isObjectType() && !N.typeOf(pkgName + "." + str).isObjectType()) {
                             sb.append(pkgName + "." + str);
                         } else {
                             sb.append(str);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 HaiYang Li
+ * Copyright (C) 2022 HaiYang Li
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -17,18 +17,19 @@ package com.landawn.abacus.exception;
 /**
  *
  * @author Haiyang Li
- * @since 1.3.29
+ * @since 0.8
  */
-public class DuplicatedRecordException extends IllegalStateException {
+public class TooManyElementsException extends IllegalStateException {
+
     /**
      * Field serialVersionUID.
      */
-    private static final long serialVersionUID = 2868212639367859255L;
+    private static final long serialVersionUID = 4230938963102900489L;
 
     /**
      * Constructor for EntityNotFoundException.
      */
-    public DuplicatedRecordException() {
+    public TooManyElementsException() {
     }
 
     /**
@@ -36,7 +37,7 @@ public class DuplicatedRecordException extends IllegalStateException {
      *
      * @param message
      */
-    public DuplicatedRecordException(String message) {
+    public TooManyElementsException(String message) {
         super(message);
     }
 
@@ -46,7 +47,7 @@ public class DuplicatedRecordException extends IllegalStateException {
      * @param message
      * @param cause
      */
-    public DuplicatedRecordException(String message, Throwable cause) {
+    public TooManyElementsException(String message, Throwable cause) {
         super(message, cause);
     }
 
@@ -55,7 +56,7 @@ public class DuplicatedRecordException extends IllegalStateException {
      *
      * @param cause
      */
-    public DuplicatedRecordException(Throwable cause) {
+    public TooManyElementsException(Throwable cause) {
         super(cause);
     }
 }

@@ -25,6 +25,7 @@ import com.landawn.abacus.type.Type;
  * @since 0.8
  */
 interface JSONReader {
+    // < 32 = ' ' (Space) White space
     int EOR = -1;
 
     int START_BRACE = 1;
@@ -46,6 +47,8 @@ interface JSONReader {
     int COLON = 9;
 
     int COMMA = 10;
+
+    // > 32 = ' ' (Space)
 
     /**
      * Checks for text.

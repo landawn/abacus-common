@@ -70,7 +70,6 @@ import java.util.regex.Pattern;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SequentialOnly;
 import com.landawn.abacus.annotation.Stateful;
-import com.landawn.abacus.exception.DuplicatedResultException;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableArray;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 import com.landawn.abacus.util.Tuple.Tuple1;
@@ -7243,7 +7242,7 @@ public final class Fn extends Comparators {
         /** The Constant THROWING_MERGER. */
         @SuppressWarnings("rawtypes")
         private static final BinaryOperator THROWING_MERGER = (t, u) -> {
-            throw new DuplicatedResultException(String.format("Duplicate key (attempted merging values %s and %s)", t, u));
+            throw new IllegalStateException(String.format("Duplicate key (attempted merging values %s and %s)", t, u));
         };
 
         /** The Constant IGNORING_MERGER. */

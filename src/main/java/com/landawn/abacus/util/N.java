@@ -51,7 +51,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.exception.DuplicatedResultException;
+import com.landawn.abacus.exception.TooManyElementsException;
 import com.landawn.abacus.exception.UncheckedException;
 import com.landawn.abacus.parser.DeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
@@ -734,9 +734,9 @@ public final class N extends CommonUtil {
      *
      * @param <T>
      * @param iterable
-     * @return throws DuplicatedResultException if there are more than one elements in the specified {@code iterable}.
+     * @return throws TooManyElementsException if there are more than one elements in the specified {@code iterable}.
      */
-    public static <T> Nullable<T> getOnlyElement(Iterable<? extends T> iterable) throws DuplicatedResultException {
+    public static <T> Nullable<T> getOnlyElement(Iterable<? extends T> iterable) throws TooManyElementsException {
         if (iterable == null) {
             return Nullable.empty();
         }
@@ -749,10 +749,10 @@ public final class N extends CommonUtil {
      *
      * @param <T>
      * @param iter
-     * @return throws DuplicatedResultException if there are more than one elements in the specified {@code iter}.
-     * @throws DuplicatedResultException the duplicated result exception
+     * @return throws TooManyElementsException if there are more than one elements in the specified {@code iter}.
+     * @throws TooManyElementsException the duplicated result exception
      */
-    public static <T> Nullable<T> getOnlyElement(final Iterator<? extends T> iter) throws DuplicatedResultException {
+    public static <T> Nullable<T> getOnlyElement(final Iterator<? extends T> iter) throws TooManyElementsException {
         if (iter == null) {
             return Nullable.empty();
         }
@@ -760,7 +760,7 @@ public final class N extends CommonUtil {
         final T first = iter.next();
 
         if (iter.hasNext()) {
-            throw new DuplicatedResultException("Expected at most one element but was: [" + Strings.concat(first, ", ", iter.next(), "...]"));
+            throw new TooManyElementsException("Expected at most one element but was: [" + Strings.concat(first, ", ", iter.next(), "...]"));
         }
 
         return Nullable.of(first);

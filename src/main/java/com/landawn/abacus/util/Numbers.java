@@ -32,8 +32,12 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
+import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalFloat;
@@ -240,6 +244,440 @@ public final class Numbers {
     static final double F_1_2 = 1d / 2d;
     /** Constant: {@value}. */
     static final double F_1_4 = 1d / 4d;
+
+    static final BigDecimal BIG_DECIMAL_WITH_MIN_BYTE_VALUE = BigDecimal.valueOf(Byte.MIN_VALUE);
+    static final BigDecimal BIG_DECIMAL_WITH_MIN_SHORT_VALUE = BigDecimal.valueOf(Short.MIN_VALUE);
+    static final BigDecimal BIG_DECIMAL_WITH_MIN_INT_VALUE = BigDecimal.valueOf(Integer.MIN_VALUE);
+    static final BigDecimal BIG_DECIMAL_WITH_MIN_LONG_VALUE = BigDecimal.valueOf(Long.MIN_VALUE);
+    static final BigDecimal BIG_DECIMAL_WITH_MIN_FLOAT_VALUE = BigDecimal.valueOf(-Float.MAX_VALUE);
+    static final BigDecimal BIG_DECIMAL_WITH_MIN_DOUBLE_VALUE = BigDecimal.valueOf(-Double.MAX_VALUE);
+
+    static final BigDecimal BIG_DECIMAL_WITH_MAX_BYTE_VALUE = BigDecimal.valueOf(Byte.MAX_VALUE);
+    static final BigDecimal BIG_DECIMAL_WITH_MAX_SHORT_VALUE = BigDecimal.valueOf(Short.MAX_VALUE);
+    static final BigDecimal BIG_DECIMAL_WITH_MAX_INT_VALUE = BigDecimal.valueOf(Integer.MAX_VALUE);
+    static final BigDecimal BIG_DECIMAL_WITH_MAX_LONG_VALUE = BigDecimal.valueOf(Long.MAX_VALUE);
+    static final BigDecimal BIG_DECIMAL_WITH_MAX_FLOAT_VALUE = BigDecimal.valueOf(Float.MAX_VALUE);
+    static final BigDecimal BIG_DECIMAL_WITH_MAX_DOUBLE_VALUE = BigDecimal.valueOf(Double.MAX_VALUE);
+
+    static final BigInteger BIG_INTEGER_WITH_MIN_BYTE_VALUE = BigInteger.valueOf(Byte.MIN_VALUE);
+    static final BigInteger BIG_INTEGER_WITH_MIN_SHORT_VALUE = BigInteger.valueOf(Short.MIN_VALUE);
+    static final BigInteger BIG_INTEGER_WITH_MIN_INT_VALUE = BigInteger.valueOf(Integer.MIN_VALUE);
+    static final BigInteger BIG_INTEGER_WITH_MIN_LONG_VALUE = BigInteger.valueOf(Long.MIN_VALUE);
+    static final BigInteger BIG_INTEGER_WITH_MIN_FLOAT_VALUE = BIG_DECIMAL_WITH_MIN_FLOAT_VALUE.toBigInteger();
+    static final BigInteger BIG_INTEGER_WITH_MIN_DOUBLE_VALUE = BIG_DECIMAL_WITH_MIN_DOUBLE_VALUE.toBigInteger();
+
+    static final BigInteger BIG_INTEGER_WITH_MAX_BYTE_VALUE = BigInteger.valueOf(Byte.MAX_VALUE);
+    static final BigInteger BIG_INTEGER_WITH_MAX_SHORT_VALUE = BigInteger.valueOf(Short.MAX_VALUE);
+    static final BigInteger BIG_INTEGER_WITH_MAX_INT_VALUE = BigInteger.valueOf(Integer.MAX_VALUE);
+    static final BigInteger BIG_INTEGER_WITH_MAX_LONG_VALUE = BigInteger.valueOf(Long.MAX_VALUE);
+    static final BigInteger BIG_INTEGER_WITH_MAX_FLOAT_VALUE = BIG_DECIMAL_WITH_MAX_FLOAT_VALUE.toBigInteger();
+    static final BigInteger BIG_INTEGER_WITH_MAX_DOUBLE_VALUE = BIG_DECIMAL_WITH_MAX_DOUBLE_VALUE.toBigInteger();
+
+    private static final Map<Class<?>, Map<Class<?>, Function<Number, Number>>> numberConverterFuncMap = new HashMap<>();
+
+    static {
+        Map<Class<?>, Function<Number, Number>> temp = new HashMap<>();
+        temp.put(byte.class, Fn.identity());
+
+        temp.put(short.class, it -> {
+            final short value = it.shortValue();
+
+            if (value > Byte.MAX_VALUE || value < Byte.MIN_VALUE) {
+                throw new ArithmeticException("byte overflow");
+            }
+
+            return Byte.valueOf(it.byteValue());
+        });
+
+        temp.put(int.class, it -> {
+            final int value = it.intValue();
+
+            if (value > Byte.MAX_VALUE || value < Byte.MIN_VALUE) {
+                throw new ArithmeticException("byte overflow");
+            }
+
+            return Byte.valueOf(it.byteValue());
+        });
+
+        temp.put(long.class, it -> {
+            final long value = it.longValue();
+
+            if (value > Byte.MAX_VALUE || value < Byte.MIN_VALUE) {
+                throw new ArithmeticException("byte overflow");
+            }
+
+            return Byte.valueOf(it.byteValue());
+        });
+
+        temp.put(float.class, it -> {
+            if (Float.compare(it.floatValue(), Byte.MAX_VALUE) > 0 || Float.compare(it.floatValue(), Byte.MIN_VALUE) < 0) {
+                throw new ArithmeticException("byte overflow");
+            }
+
+            return Byte.valueOf(it.byteValue());
+        });
+
+        temp.put(double.class, it -> {
+            if (Double.compare(it.doubleValue(), Byte.MAX_VALUE) > 0 || Double.compare(it.doubleValue(), Byte.MIN_VALUE) < 0) {
+                throw new ArithmeticException("byte overflow");
+            }
+
+            return Byte.valueOf(it.byteValue());
+        });
+
+        temp.put(BigInteger.class, it -> {
+            final BigInteger bigInteger = (BigInteger) it;
+
+            if (bigInteger.compareTo(BIG_INTEGER_WITH_MAX_BYTE_VALUE) > 0 || bigInteger.compareTo(BIG_INTEGER_WITH_MIN_BYTE_VALUE) < 0) {
+                throw new ArithmeticException("byte overflow");
+            }
+
+            return Byte.valueOf(it.byteValue());
+        });
+
+        temp.put(BigDecimal.class, it -> {
+            final BigDecimal bigDecimal = (BigDecimal) it;
+
+            if (bigDecimal.compareTo(BIG_DECIMAL_WITH_MAX_BYTE_VALUE) > 0 || bigDecimal.compareTo(BIG_DECIMAL_WITH_MIN_BYTE_VALUE) < 0) {
+                throw new ArithmeticException("byte overflow");
+            }
+
+            return Byte.valueOf(it.byteValue());
+        });
+
+        numberConverterFuncMap.put(byte.class, temp);
+
+        // ================ for short.class
+
+        temp = new HashMap<>();
+        temp.put(byte.class, Number::shortValue);
+        temp.put(short.class, Fn.identity());
+
+        temp.put(int.class, it -> {
+            final int value = it.intValue();
+
+            if (value > Short.MAX_VALUE || value < Short.MIN_VALUE) {
+                throw new ArithmeticException("short overflow");
+            }
+
+            return Short.valueOf(it.shortValue());
+        });
+
+        temp.put(long.class, it -> {
+            final long value = it.longValue();
+
+            if (value > Short.MAX_VALUE || value < Short.MIN_VALUE) {
+                throw new ArithmeticException("short overflow");
+            }
+
+            return Short.valueOf(it.shortValue());
+        });
+
+        temp.put(float.class, it -> {
+            if (Float.compare(it.floatValue(), Short.MAX_VALUE) > 0 || Float.compare(it.floatValue(), Short.MIN_VALUE) < 0) {
+                throw new ArithmeticException("short overflow");
+            }
+
+            return Short.valueOf(it.shortValue());
+        });
+
+        temp.put(double.class, it -> {
+            if (Double.compare(it.doubleValue(), Short.MAX_VALUE) > 0 || Double.compare(it.doubleValue(), Short.MIN_VALUE) < 0) {
+                throw new ArithmeticException("short overflow");
+            }
+
+            return Short.valueOf(it.shortValue());
+        });
+
+        temp.put(BigInteger.class, it -> {
+            final BigInteger bigInteger = (BigInteger) it;
+
+            if (bigInteger.compareTo(BIG_INTEGER_WITH_MAX_SHORT_VALUE) > 0 || bigInteger.compareTo(BIG_INTEGER_WITH_MIN_SHORT_VALUE) < 0) {
+                throw new ArithmeticException("short overflow");
+            }
+
+            return Short.valueOf(it.shortValue());
+        });
+
+        temp.put(BigDecimal.class, it -> {
+            final BigDecimal bigDecimal = (BigDecimal) it;
+
+            if (bigDecimal.compareTo(BIG_DECIMAL_WITH_MAX_SHORT_VALUE) > 0 || bigDecimal.compareTo(BIG_DECIMAL_WITH_MIN_SHORT_VALUE) < 0) {
+                throw new ArithmeticException("short overflow");
+            }
+
+            return Short.valueOf(it.shortValue());
+        });
+
+        numberConverterFuncMap.put(short.class, temp);
+
+        // ================ for int.class
+        temp = new HashMap<>();
+
+        temp.put(byte.class, Number::intValue);
+        temp.put(short.class, Number::intValue);
+        temp.put(int.class, Fn.identity());
+
+        temp.put(long.class, it -> {
+            final long value = it.longValue();
+
+            if (value > Integer.MAX_VALUE || value < Integer.MIN_VALUE) {
+                throw new ArithmeticException("integer overflow");
+            }
+
+            return Integer.valueOf(it.intValue());
+        });
+
+        temp.put(float.class, it -> {
+            if (Float.compare(it.floatValue(), Integer.MAX_VALUE) > 0 || Float.compare(it.floatValue(), Integer.MIN_VALUE) < 0) {
+                throw new ArithmeticException("integer overflow");
+            }
+
+            return Integer.valueOf(it.intValue());
+        });
+
+        temp.put(double.class, it -> {
+            if (Double.compare(it.doubleValue(), Integer.MAX_VALUE) > 0 || Double.compare(it.doubleValue(), Integer.MIN_VALUE) < 0) {
+                throw new ArithmeticException("integer overflow");
+            }
+
+            return Integer.valueOf(it.intValue());
+        });
+
+        temp.put(BigInteger.class, it -> {
+            final BigInteger bigInteger = (BigInteger) it;
+
+            if (bigInteger.compareTo(BIG_INTEGER_WITH_MAX_INT_VALUE) > 0 || bigInteger.compareTo(BIG_INTEGER_WITH_MIN_INT_VALUE) < 0) {
+                throw new ArithmeticException("integer overflow");
+            }
+
+            return Integer.valueOf(it.intValue());
+        });
+
+        temp.put(BigDecimal.class, it -> {
+            final BigDecimal bigDecimal = (BigDecimal) it;
+
+            if (bigDecimal.compareTo(BIG_DECIMAL_WITH_MAX_INT_VALUE) > 0 || bigDecimal.compareTo(BIG_DECIMAL_WITH_MIN_INT_VALUE) < 0) {
+                throw new ArithmeticException("integer overflow");
+            }
+
+            return Integer.valueOf(it.intValue());
+        });
+
+        numberConverterFuncMap.put(int.class, temp);
+
+        // ============================for long
+        temp = new HashMap<>();
+
+        temp.put(byte.class, Number::longValue);
+        temp.put(short.class, Number::longValue);
+        temp.put(int.class, Number::longValue);
+        temp.put(long.class, Fn.identity());
+
+        temp.put(float.class, it -> {
+            if (Float.compare(it.floatValue(), Long.MAX_VALUE) > 0 || Float.compare(it.floatValue(), Long.MIN_VALUE) < 0) {
+                throw new ArithmeticException("long overflow");
+            }
+
+            return Long.valueOf(it.longValue());
+        });
+
+        temp.put(double.class, it -> {
+            if (Double.compare(it.doubleValue(), Long.MAX_VALUE) > 0 || Double.compare(it.doubleValue(), Long.MIN_VALUE) < 0) {
+                throw new ArithmeticException("long overflow");
+            }
+
+            return Long.valueOf(it.longValue());
+        });
+
+        temp.put(BigInteger.class, it -> {
+            final BigInteger bigInteger = (BigInteger) it;
+
+            if (bigInteger.compareTo(BIG_INTEGER_WITH_MAX_LONG_VALUE) > 0 || bigInteger.compareTo(BIG_INTEGER_WITH_MIN_LONG_VALUE) < 0) {
+                throw new ArithmeticException("long overflow");
+            }
+
+            return Long.valueOf(it.longValue());
+        });
+
+        temp.put(BigDecimal.class, it -> {
+            final BigDecimal bigDecimal = (BigDecimal) it;
+
+            if (bigDecimal.compareTo(BIG_DECIMAL_WITH_MAX_LONG_VALUE) > 0 || bigDecimal.compareTo(BIG_DECIMAL_WITH_MIN_LONG_VALUE) < 0) {
+                throw new ArithmeticException("long overflow");
+            }
+
+            return Long.valueOf(it.longValue());
+        });
+
+        numberConverterFuncMap.put(long.class, temp);
+
+        // ============================for float
+        temp = new HashMap<>();
+
+        temp.put(byte.class, Number::floatValue);
+        temp.put(short.class, Number::floatValue);
+        temp.put(int.class, Number::floatValue);
+        temp.put(long.class, Number::floatValue);
+
+        temp.put(float.class, Fn.identity());
+
+        temp.put(double.class, it -> {
+            final Double num = (Double) it;
+
+            if (num.isNaN()) {
+                return Float.NaN;
+            } else if (num.isInfinite() && Double.compare(it.doubleValue(), Double.POSITIVE_INFINITY) == 0) {
+                return Float.POSITIVE_INFINITY;
+            } else if (num.isInfinite() && Double.compare(it.doubleValue(), Double.NEGATIVE_INFINITY) == 0) {
+                return Float.NEGATIVE_INFINITY;
+            } else if (Double.compare(it.doubleValue(), Float.MAX_VALUE) > 0 || Double.compare(it.doubleValue(), -Float.MIN_VALUE) < 0) {
+                throw new ArithmeticException("float overflow");
+            }
+
+            return Float.valueOf(it.floatValue());
+        });
+
+        temp.put(BigInteger.class, it -> {
+            final BigInteger bigInteger = (BigInteger) it;
+
+            if (bigInteger.compareTo(BIG_INTEGER_WITH_MAX_FLOAT_VALUE) > 0 || bigInteger.compareTo(BIG_INTEGER_WITH_MIN_FLOAT_VALUE) < 0) {
+                throw new ArithmeticException("float overflow");
+            }
+
+            return Float.valueOf(it.floatValue());
+        });
+
+        temp.put(BigDecimal.class, it -> {
+            final BigDecimal bigDecimal = (BigDecimal) it;
+
+            if (bigDecimal.compareTo(BIG_DECIMAL_WITH_MAX_FLOAT_VALUE) > 0 || bigDecimal.compareTo(BIG_DECIMAL_WITH_MIN_FLOAT_VALUE) < 0) {
+                throw new ArithmeticException("float overflow");
+            }
+
+            return Float.valueOf(it.floatValue());
+        });
+
+        numberConverterFuncMap.put(float.class, temp);
+
+        // ============================for double
+        temp = new HashMap<>();
+
+        temp.put(byte.class, Number::doubleValue);
+        temp.put(short.class, Number::doubleValue);
+        temp.put(int.class, Number::doubleValue);
+        temp.put(long.class, Number::doubleValue);
+        temp.put(float.class, Number::doubleValue);
+        temp.put(double.class, Fn.identity());
+
+        temp.put(BigInteger.class, it -> {
+            final BigInteger bigInteger = (BigInteger) it;
+
+            if (bigInteger.compareTo(BIG_INTEGER_WITH_MAX_DOUBLE_VALUE) > 0 || bigInteger.compareTo(BIG_INTEGER_WITH_MIN_DOUBLE_VALUE) < 0) {
+                throw new ArithmeticException("double overflow");
+            }
+
+            return Double.valueOf(it.doubleValue());
+        });
+
+        temp.put(BigDecimal.class, it -> {
+            final BigDecimal bigDecimal = (BigDecimal) it;
+
+            if (bigDecimal.compareTo(BIG_DECIMAL_WITH_MAX_DOUBLE_VALUE) > 0 || bigDecimal.compareTo(BIG_DECIMAL_WITH_MIN_DOUBLE_VALUE) < 0) {
+                throw new ArithmeticException("double overflow");
+            }
+
+            return Double.valueOf(it.doubleValue());
+        });
+
+        numberConverterFuncMap.put(double.class, temp);
+
+        // ============================for BigInteger
+        temp = new HashMap<>();
+
+        temp.put(byte.class, it -> BigInteger.valueOf(it.byteValue()));
+        temp.put(short.class, it -> BigInteger.valueOf(it.shortValue()));
+        temp.put(int.class, it -> BigInteger.valueOf(it.intValue()));
+        temp.put(long.class, it -> BigInteger.valueOf(it.longValue()));
+        temp.put(float.class, it -> BigDecimal.valueOf(it.floatValue()).toBigInteger());
+        temp.put(double.class, it -> BigDecimal.valueOf(it.doubleValue()).toBigInteger());
+        temp.put(BigInteger.class, Fn.identity());
+        temp.put(BigDecimal.class, it -> ((BigDecimal) it).toBigInteger());
+
+        numberConverterFuncMap.put(BigInteger.class, temp);
+
+        // ============================for BigDecimal
+        temp = new HashMap<>();
+
+        temp.put(byte.class, it -> BigDecimal.valueOf(it.byteValue()));
+        temp.put(short.class, it -> BigDecimal.valueOf(it.shortValue()));
+        temp.put(int.class, it -> BigDecimal.valueOf(it.intValue()));
+        temp.put(long.class, it -> BigDecimal.valueOf(it.longValue()));
+        temp.put(float.class, it -> BigDecimal.valueOf(it.floatValue()));
+        temp.put(double.class, it -> BigDecimal.valueOf(it.doubleValue()));
+        temp.put(BigInteger.class, it -> new BigDecimal((BigInteger) it));
+        temp.put(BigDecimal.class, Fn.identity());
+
+        numberConverterFuncMap.put(BigDecimal.class, temp);
+
+        // =================================================================
+        final BiMap<Class<?>, Class<?>> p2w = new BiMap<>();
+
+        p2w.put(byte.class, Byte.class);
+        p2w.put(short.class, Short.class);
+        p2w.put(int.class, Integer.class);
+        p2w.put(long.class, Long.class);
+        p2w.put(float.class, Float.class);
+        p2w.put(double.class, Double.class);
+
+        final List<Class<?>> keys = new ArrayList<>(numberConverterFuncMap.keySet());
+
+        for (Class<?> cls : keys) {
+            temp = numberConverterFuncMap.get(cls);
+
+            final List<Class<?>> keys2 = new ArrayList<>(temp.keySet());
+
+            for (Class<?> cls2 : keys2) {
+                if (p2w.containsKey(cls2)) {
+                    temp.put(p2w.get(cls2), temp.get(cls2));
+                }
+            }
+
+            if (p2w.containsKey(cls)) {
+                numberConverterFuncMap.put(p2w.get(cls), temp);
+            }
+        }
+    }
+
+    public static <T extends Number> T convert(final Number value, final Class<T> targetType) {
+        if (value == null) {
+            return N.defaultValueOf(targetType);
+        }
+
+        final Map<Class<?>, Function<Number, Number>> temp = numberConverterFuncMap.get(targetType);
+        final Function<Number, Number> func = temp == null ? null : temp.get(value.getClass());
+
+        if (func != null) {
+            return (T) func.apply(value);
+        } else {
+            return N.valueOf(targetType, N.stringOf(value));
+        }
+    }
+
+    public static <T extends Number> T convert(final Number value, final Type<T> targetType) {
+        if (value == null) {
+            return targetType.defaultValue();
+        }
+
+        final Map<Class<?>, Function<Number, Number>> temp = numberConverterFuncMap.get(targetType.clazz());
+        final Function<Number, Number> func = temp == null ? null : temp.get(value.getClass());
+
+        if (func != null) {
+            return (T) func.apply(value);
+        } else {
+            return targetType.valueOf(N.stringOf(value));
+        }
+    }
 
     /**
      *
@@ -1239,41 +1677,56 @@ public final class Numbers {
 
         if (dec == null && exp == null) { // no decimal point and no exponent
             //Must be an Integer, Long, Biginteger
-            op = createInteger(str).boxed();
 
-            if (op.isPresent()) {
-                return (Optional) op;
-            } else {
+            // 17777777777 N.println(Integer.toString(Integer.MAX_VALUE, 8));
+            // -20000000000  N.println(Integer.toString(Integer.MIN_VALUE, 8));
+            if (str.length() < 13) {
+                op = createInteger(str).boxed();
+
+                if (op.isPresent()) {
+                    return (Optional) op;
+                }
+            }
+
+            // 777777777777777777777 N.println(Long.toString(Long.MAX_VALUE, 8));
+            // -1000000000000000000000 N.println(Long.toString(Long.MIN_VALUE, 8));
+            if (str.length() < 23 || (str.charAt(0) == '-' && str.length() < 24)) {
                 op = createLong(str).boxed();
 
                 if (op.isPresent()) {
                     return (Optional) op;
-                } else {
-                    return (Optional) createBigInteger(str);
                 }
             }
+
+            return (Optional) createBigInteger(str);
         }
 
-        //Must be a Float, Double, BigDecimal
-        final boolean allZeros = isAllZeros(mant) && isAllZeros(exp);
+        //    //Must be a Float, Double, BigDecimal
+        //    final boolean allZeros = isAllZeros(mant) && isAllZeros(exp);
+        //
+        //    try {
+        //        final Float f = Float.valueOf(str);
+        //        final Double d = Double.valueOf(str);
+        //
+        //        if (!f.isInfinite() && !(f.floatValue() == 0.0F && !allZeros) && f.toString().equals(d.toString())) {
+        //            return (Optional) Optional.of(f);
+        //        }
+        //
+        //        if (!d.isInfinite() && !(d.doubleValue() == 0.0D && !allZeros)) {
+        //            final Optional<BigDecimal> b = createBigDecimal(str);
+        //
+        //            if (b.isPresent() && b.get().compareTo(BigDecimal.valueOf(d)) == 0) {
+        //                return (Optional) Optional.of(d);
+        //            } else {
+        //                return (Optional) b;
+        //            }
+        //        }
+        //    } catch (final NumberFormatException nfe) { // NOPMD
+        //        // ignore the bad number
+        //    }
 
         try {
-            final Float f = Float.valueOf(str);
-            final Double d = Double.valueOf(str);
-
-            if (!f.isInfinite() && !(f.floatValue() == 0.0F && !allZeros) && f.toString().equals(d.toString())) {
-                return (Optional) Optional.of(f);
-            }
-
-            if (!d.isInfinite() && !(d.doubleValue() == 0.0D && !allZeros)) {
-                final Optional<BigDecimal> b = createBigDecimal(str);
-
-                if (b.isPresent() && b.get().compareTo(BigDecimal.valueOf(d)) == 0) {
-                    return (Optional) Optional.of(d);
-                } else {
-                    return (Optional) b;
-                }
-            }
+            return Optional.of(Double.parseDouble(str));
         } catch (final NumberFormatException nfe) { // NOPMD
             // ignore the bad number
         }

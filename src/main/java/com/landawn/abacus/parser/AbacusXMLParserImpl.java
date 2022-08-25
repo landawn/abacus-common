@@ -1154,7 +1154,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         switch (nodeType) {
             case ENTITY: {
                 if ((targetClass == null) || !ClassUtil.isEntity(targetClass)) {
-                    if ((propType != null) && ClassUtil.isEntity(propType.clazz())) {
+                    if ((propType != null) && propType.isEntity()) {
                         targetClass = propType.clazz();
                     } else {
                         if (ClassUtil.getSimpleClassName(inputClass).equalsIgnoreCase(nodeName)) {
@@ -1352,7 +1352,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
             case MAP: {
                 if ((targetClass == null) || !Map.class.isAssignableFrom(targetClass)) {
-                    if ((propType != null) && Map.class.isAssignableFrom(propType.clazz())) {
+                    if ((propType != null) && propType.isMap()) {
                         targetClass = propType.clazz();
                     } else {
                         targetClass = LinkedHashMap.class;
@@ -1362,28 +1362,26 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(Map.class);
                 Type<?> keyType = defaultKeyType;
 
-                if (propInfo != null && propInfo.jsonXmlType.getParameterTypes().length == 2
-                        && !Object.class.equals(propInfo.jsonXmlType.getParameterTypes()[0].clazz())) {
+                if (propInfo != null && propInfo.jsonXmlType.getParameterTypes().length == 2 && !propInfo.jsonXmlType.getParameterTypes()[0].isObjectType()) {
                     keyType = propInfo.jsonXmlType.getParameterTypes()[0];
-                } else if (propType != null && propType.getParameterTypes().length == 2 && Map.class.isAssignableFrom(propType.clazz())
-                        && !Object.class.equals(propType.getParameterTypes()[0].clazz())) {
+                } else if (propType != null && propType.getParameterTypes().length == 2 && propType.isMap()
+                        && !propType.getParameterTypes()[0].isObjectType()) {
                     keyType = propType.getParameterTypes()[0];
                 } else {
-                    if (config.getMapKeyType() != null && !Object.class.equals(config.getMapKeyType().clazz())) {
+                    if (config.getMapKeyType() != null && !config.getMapKeyType().isObjectType()) {
                         keyType = config.getMapKeyType();
                     }
                 }
 
                 Type<?> valueType = defaultValueType;
 
-                if (propInfo != null && propInfo.jsonXmlType.getParameterTypes().length == 2
-                        && !Object.class.equals(propInfo.jsonXmlType.getParameterTypes()[1].clazz())) {
+                if (propInfo != null && propInfo.jsonXmlType.getParameterTypes().length == 2 && !propInfo.jsonXmlType.getParameterTypes()[1].isObjectType()) {
                     valueType = propInfo.jsonXmlType.getParameterTypes()[1];
-                } else if (propType != null && propType.getParameterTypes().length == 2 && Map.class.isAssignableFrom(propType.clazz())
-                        && !Object.class.equals(propType.getParameterTypes()[1].clazz())) {
+                } else if (propType != null && propType.getParameterTypes().length == 2 && propType.isMap()
+                        && !propType.getParameterTypes()[1].isObjectType()) {
                     valueType = propType.getParameterTypes()[1];
                 } else {
-                    if (config.getMapValueType() != null && !Object.class.equals(config.getMapValueType().clazz())) {
+                    if (config.getMapValueType() != null && !config.getMapValueType().isObjectType()) {
                         valueType = config.getMapValueType();
                     }
                 }
@@ -1560,7 +1558,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 if (propInfo != null && propInfo.clazz.isArray() && !Object.class.equals(propInfo.clazz.getComponentType())) {
                     eleType = N.typeOf(propInfo.clazz.getComponentType());
                 } else {
-                    if (config.getElementType() != null && !Object.class.equals(config.getElementType().clazz())) {
+                    if (config.getElementType() != null && !config.getElementType().isObjectType()) {
                         eleType = config.getElementType();
                     } else {
                         eleType = N.typeOf(targetClass.isArray() ? targetClass.getComponentType() : String.class);
@@ -1707,10 +1705,10 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 if (propInfo != null && propInfo.clazz.isArray() && !Object.class.equals(propInfo.clazz.getComponentType())) {
                     eleType = N.typeOf(propInfo.clazz.getComponentType());
                 } else if (propType != null && propType.getParameterTypes().length == 1 && Collection.class.isAssignableFrom(propType.clazz())
-                        && !Object.class.equals(propType.getParameterTypes()[0].clazz())) {
+                        && !propType.getParameterTypes()[0].isObjectType()) {
                     eleType = propType.getParameterTypes()[0];
                 } else {
-                    if (config.getElementType() != null && !Object.class.equals(config.getElementType().clazz())) {
+                    if (config.getElementType() != null && !config.getElementType().isObjectType()) {
                         eleType = config.getElementType();
                     }
                 }
@@ -1890,7 +1888,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         if (isFirstCall) {
             targetClass = inputClass;
         } else {
-            if (propType == null || String.class.equals(propType.clazz()) || Object.class.equals(propType.clazz())) {
+            if (propType == null || String.class.equals(propType.clazz()) || propType.isObjectType()) {
                 targetClass = hasPropTypes && config.hasPropType(nodeName) ? config.getPropType(nodeName).clazz() : null;
             } else {
                 targetClass = propType.clazz();
@@ -1919,7 +1917,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         switch (nodeType) {
             case ENTITY: {
                 if ((typeClass == null) || !ClassUtil.isEntity(typeClass)) {
-                    if ((propType != null) && ClassUtil.isEntity(propType.clazz())) {
+                    if ((propType != null) && propType.isEntity()) {
                         typeClass = propType.clazz();
                     } else {
                         if (ClassUtil.getSimpleClassName(inputClass).equalsIgnoreCase(nodeName)) {
@@ -2001,7 +1999,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
             case MAP: {
                 if ((typeClass == null) || !Map.class.isAssignableFrom(typeClass)) {
-                    if ((propType != null) && Map.class.isAssignableFrom(propType.clazz())) {
+                    if ((propType != null) && propType.isMap()) {
                         typeClass = propType.clazz();
                     } else {
                         typeClass = LinkedHashMap.class;
@@ -2011,10 +2009,10 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(Map.class);
                 Type<?> keyType = defaultKeyType;
 
-                if (propType != null && propType.isMap() && !Object.class.equals(propType.getParameterTypes()[0].clazz())) {
+                if (propType != null && propType.isMap() && !propType.getParameterTypes()[0].isObjectType()) {
                     keyType = propType.getParameterTypes()[0];
                 } else {
-                    if (config.getMapKeyType() != null && !Object.class.equals(config.getMapKeyType().clazz())) {
+                    if (config.getMapKeyType() != null && !config.getMapKeyType().isObjectType()) {
                         keyType = config.getMapKeyType();
                     }
                 }
@@ -2023,10 +2021,10 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                 Type<?> valueType = defaultValueType;
 
-                if (propType != null && propType.isMap() && !Object.class.equals(propType.getParameterTypes()[1].clazz())) {
+                if (propType != null && propType.isMap() && !propType.getParameterTypes()[1].isObjectType()) {
                     valueType = propType.getParameterTypes()[1];
                 } else {
-                    if (config.getMapValueType() != null && !Object.class.equals(config.getMapValueType().clazz())) {
+                    if (config.getMapValueType() != null && !config.getMapValueType().isObjectType()) {
                         valueType = config.getMapValueType();
                     }
                 }
@@ -2134,10 +2132,10 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 Class<?> propClass = null;
 
                 if (propType != null && (propType.isArray() || propType.isCollection()) && propType.getElementType() != null
-                        && !Object.class.equals(propType.getElementType().clazz())) {
+                        && !propType.getElementType().isObjectType()) {
                     eleType = propType.getElementType();
                 } else {
-                    if (config.getElementType() != null && !Object.class.equals(config.getElementType().clazz())) {
+                    if (config.getElementType() != null && !config.getElementType().isObjectType()) {
                         eleType = config.getElementType();
                     } else {
                         eleType = N.typeOf(typeClass.isArray() ? typeClass.getComponentType() : Object.class);
@@ -2203,10 +2201,10 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 Type<?> eleType = null;
                 Class<?> propClass = null;
 
-                if (propType != null && (propType.isCollection() || propType.isArray()) && !Object.class.equals(propType.getElementType().clazz())) {
+                if (propType != null && (propType.isCollection() || propType.isArray()) && !propType.getElementType().isObjectType()) {
                     eleType = propType.getElementType();
                 } else {
-                    if (config.getElementType() != null && !Object.class.equals(config.getElementType().clazz())) {
+                    if (config.getElementType() != null && !config.getElementType().isObjectType()) {
                         eleType = config.getElementType();
                     } else {
                         eleType = objType;
@@ -2533,7 +2531,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                 targetClass = inputClass;
             } else {
-                if (propType == null || String.class.equals(propType.clazz()) || Object.class.equals(propType.clazz())) {
+                if (propType == null || String.class.equals(propType.clazz()) || propType.isObjectType()) {
                     targetClass = hasPropTypes && config.hasPropType(nodeName) ? config.getPropType(nodeName).clazz() : null;
                 } else {
                     targetClass = propType.clazz();
@@ -2629,13 +2627,13 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     }
 
                     if (propInfo != null && propInfo.jsonXmlType.getParameterTypes().length == 2
-                            && !Object.class.equals(propInfo.jsonXmlType.getParameterTypes()[0].clazz())) {
+                            && !propInfo.jsonXmlType.getParameterTypes()[0].isObjectType()) {
                         keyType = propInfo.jsonXmlType.getParameterTypes()[0];
-                    } else if (propType != null && propType.getParameterTypes().length == 2 && Map.class.isAssignableFrom(propType.clazz())
-                            && !Object.class.equals(propType.getParameterTypes()[0].clazz())) {
+                    } else if (propType != null && propType.getParameterTypes().length == 2 && propType.isMap()
+                            && !propType.getParameterTypes()[0].isObjectType()) {
                         keyType = propType.getParameterTypes()[0];
                     } else {
-                        if (config.getMapKeyType() != null && !Object.class.equals(config.getMapKeyType().clazz())) {
+                        if (config.getMapKeyType() != null && !config.getMapKeyType().isObjectType()) {
                             keyType = config.getMapKeyType();
                         } else {
                             keyType = defaultKeyType;
@@ -2643,13 +2641,13 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     }
 
                     if (propInfo != null && propInfo.jsonXmlType.getParameterTypes().length == 2
-                            && !Object.class.equals(propInfo.jsonXmlType.getParameterTypes()[1].clazz())) {
+                            && !propInfo.jsonXmlType.getParameterTypes()[1].isObjectType()) {
                         valueType = propInfo.jsonXmlType.getParameterTypes()[1];
-                    } else if (propType != null && propType.getParameterTypes().length == 2 && Map.class.isAssignableFrom(propType.clazz())
-                            && !Object.class.equals(propType.getParameterTypes()[1].clazz())) {
+                    } else if (propType != null && propType.getParameterTypes().length == 2 && propType.isMap()
+                            && !propType.getParameterTypes()[1].isObjectType()) {
                         valueType = propType.getParameterTypes()[1];
                     } else {
-                        if (config.getMapValueType() != null && !Object.class.equals(config.getMapValueType().clazz())) {
+                        if (config.getMapValueType() != null && !config.getMapValueType().isObjectType()) {
                             valueType = config.getMapValueType();
                         } else {
                             valueType = defaultValueType;
@@ -2691,7 +2689,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     if (propInfo != null && propInfo.clazz.isArray() && !Object.class.equals(propInfo.clazz.getComponentType())) {
                         eleType = N.typeOf(propInfo.clazz.getComponentType());
                     } else {
-                        if (config.getElementType() != null && !Object.class.equals(config.getElementType().clazz())) {
+                        if (config.getElementType() != null && !config.getElementType().isObjectType()) {
                             eleType = config.getElementType();
                         } else {
                             eleType = N.typeOf(
@@ -2734,13 +2732,13 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     }
 
                     if (propInfo != null && propInfo.jsonXmlType.getParameterTypes().length == 1
-                            && !Object.class.equals(propInfo.jsonXmlType.getParameterTypes()[0].clazz())) {
+                            && !propInfo.jsonXmlType.getParameterTypes()[0].isObjectType()) {
                         eleType = propInfo.jsonXmlType.getParameterTypes()[0];
                     } else if (propType != null && propType.getParameterTypes().length == 1 && Collection.class.isAssignableFrom(propType.clazz())
-                            && !Object.class.equals(propType.getParameterTypes()[0].clazz())) {
+                            && !propType.getParameterTypes()[0].isObjectType()) {
                         eleType = propType.getParameterTypes()[0];
                     } else {
-                        if (config.getElementType() != null && !Object.class.equals(config.getElementType().clazz())) {
+                        if (config.getElementType() != null && !config.getElementType().isObjectType()) {
                             eleType = config.getElementType();
                         } else {
                             eleType = defaultValueType;

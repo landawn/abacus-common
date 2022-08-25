@@ -35,4 +35,9 @@ public final class ObjectType<T> extends SingleValueType<T> {
     protected ObjectType(final String typeName, final Class<T> cls) {
         super(typeName, cls);
     }
+
+    @Override
+    public boolean isObjectType() {
+        return true;
+    }
 }

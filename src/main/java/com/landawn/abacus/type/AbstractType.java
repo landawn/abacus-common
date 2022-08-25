@@ -445,6 +445,11 @@ public abstract class AbstractType<T> implements Type<T> {
         return false;
     }
 
+    @Override
+    public boolean isObjectType() {
+        return false;
+    }
+
     /**
      * Gets the element type.
      *

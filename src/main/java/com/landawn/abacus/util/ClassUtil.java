@@ -835,7 +835,7 @@ public final class ClassUtil {
                                     try {
                                         final Type<?> componentType = N.typeOf(componentTypeName);
 
-                                        if (componentType.clazz().equals(Object.class) && !componentType.name().equals(ObjectType.OBJECT)) {
+                                        if (componentType.isObjectType() && !componentType.name().equals(ObjectType.OBJECT)) {
                                             throw new IllegalArgumentException("No Class found by name: " + clsName);
                                         }
 

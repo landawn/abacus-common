@@ -15,6 +15,7 @@
 package com.landawn.abacus.parser;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
@@ -30,6 +31,9 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     boolean ignoreNullOrEmpty = false;
 
     boolean nullToEmpty = false;
+
+    @SuppressWarnings("rawtypes")
+    Class<? extends Map> mapInstanceType = HashMap.class;
 
     public boolean isIgnoreNullOrEmpty() {
         return ignoreNullOrEmpty;
@@ -59,6 +63,20 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      */
     public JSONDeserializationConfig setNullToEmpty(boolean nullToEmpty) {
         this.nullToEmpty = nullToEmpty;
+
+        return this;
+    }
+
+    @SuppressWarnings("rawtypes")
+    public Class<? extends Map> getMapInstanceType() {
+        return mapInstanceType;
+    }
+
+    @SuppressWarnings("rawtypes")
+    public JSONDeserializationConfig setMapInstanceType(Class<? extends Map> mapInstanceType) {
+        N.checkArgNotNull(mapInstanceType, "mapInstanceType");
+
+        this.mapInstanceType = mapInstanceType;
 
         return this;
     }
@@ -93,7 +111,8 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
         h = 31 * h + N.hashCode(elementType);
         h = 31 * h + N.hashCode(keyType);
         h = 31 * h + N.hashCode(valueType);
-        return 31 * h + N.hashCode(propTypes);
+        h = 31 * h + N.hashCode(propTypes);
+        return 31 * h + N.hashCode(mapInstanceType);
     }
 
     /**
@@ -112,7 +131,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
             if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(ignoreUnmatchedProperty, other.ignoreUnmatchedProperty)
                     && N.equals(ignoreNullOrEmpty, other.ignoreNullOrEmpty) && N.equals(nullToEmpty, other.nullToEmpty)
                     && N.equals(elementType, other.elementType) && N.equals(keyType, other.keyType) && N.equals(valueType, other.valueType)
-                    && N.equals(propTypes, other.propTypes)) {
+                    && N.equals(propTypes, other.propTypes) && N.equals(mapInstanceType, other.mapInstanceType)) {
 
                 return true;
             }
@@ -126,7 +145,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", ignoreUnmatchedProperty=" + N.toString(ignoreUnmatchedProperty)
                 + ", ignoreNullOrEmpty=" + N.toString(ignoreNullOrEmpty) + ", nullToEmpty=" + N.toString(nullToEmpty) + ", elementType="
                 + N.toString(elementType) + ", keyType=" + N.toString(keyType) + ", valueType=" + N.toString(valueType) + ", propTypes=" + N.toString(propTypes)
-                + "}";
+                + ", mapInstanceType=" + N.toString(mapInstanceType) + "}";
     }
 
     /**

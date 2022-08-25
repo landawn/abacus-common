@@ -66,9 +66,9 @@ class JSONStringReader extends AbstractJSONReader {
 
     int strBeginIndex = 0;
 
-    int strStart = 0;
+    int startIndexForText = 0;
 
-    int strEnd = 0;
+    int endIndexForText = 0;
 
     char[] cbuf;
 
@@ -77,6 +77,10 @@ class JSONStringReader extends AbstractJSONReader {
     int nextEvent = -1;
 
     int nextChar = 0;
+
+    String text = null;
+
+    Number numValue = null;
 
     JSONStringReader(final String str, final char[] cbuf) {
         this(str, 0, str.length(), cbuf);
@@ -173,6 +177,7 @@ class JSONStringReader extends AbstractJSONReader {
     //
     //        return nextEvent;
     //    }
+
     /**
      * Checks for text.
      *
@@ -182,7 +187,7 @@ class JSONStringReader extends AbstractJSONReader {
     //
     @Override
     public boolean hasText() throws IOException {
-        return (nextChar > 0) || (strEnd > strStart);
+        return text != null || numValue != null || (nextChar > 0) || (endIndexForText > startIndexForText);
     }
 
     /**
@@ -194,8 +199,10 @@ class JSONStringReader extends AbstractJSONReader {
      */
     @Override
     public int nextToken() throws IOException {
+        text = null;
+        numValue = null;
         nextChar = 0;
-        strStart = strBeginIndex;
+        startIndexForText = strBeginIndex;
 
         if (nextEvent == START_QUOTATION_D || nextEvent == START_QUOTATION_S) {
             final char quoteChar = nextEvent == START_QUOTATION_D ? WD._QUOTATION_D : WD._QUOTATION_S;
@@ -204,7 +211,7 @@ class JSONStringReader extends AbstractJSONReader {
                 ch = strValue[strBeginIndex++];
 
                 if (ch == quoteChar) {
-                    strEnd = strBeginIndex - 1;
+                    endIndexForText = strBeginIndex - 1;
                     nextEvent = quoteChar == WD._QUOTATION_D ? END_QUOTATION_D : END_QUOTATION_S;
 
                     return nextEvent;
@@ -218,15 +225,8 @@ class JSONStringReader extends AbstractJSONReader {
                     cbuf[nextChar++] = (ch == WD._BACKSLASH) ? readEscapeCharacter() : (char) ch;
                 } else {
                     if (ch == WD._BACKSLASH) {
-                        strEnd = strBeginIndex - 1;
+                        saveToBuffer();
 
-                        if (strEnd - strStart + 1 >= cbufLen) {
-                            enlargeCharBuffer();
-                        }
-
-                        N.copy(strValue, strStart, cbuf, 0, strEnd - strStart);
-
-                        nextChar = strEnd - strStart;
                         // strStart++;
                         cbuf[nextChar++] = readEscapeCharacter();
                     }
@@ -236,80 +236,248 @@ class JSONStringReader extends AbstractJSONReader {
             for (int ch = 0; strBeginIndex < strEndIndex;) {
                 ch = strValue[strBeginIndex++];
 
-                if (ch < 128) {
-                    nextEvent = charEvents[ch];
-
-                    if (nextEvent > 0) {
-                        strEnd = strBeginIndex - 1;
+                if (ch < 128 && (nextEvent = charEvents[ch]) > 0) {
+                    if (nextEvent < 32) { //
+                        endIndexForText = strBeginIndex - 1;
 
                         return nextEvent;
                     }
-                }
 
-                if (nextChar > 0) {
-                    if (ch == WD._BACKSLASH) {
-                        ch = readEscapeCharacter();
-                    }
+                    saveChar(ch);
 
-                    if (ch < 33) {
-                        // skip whitespace char.
-                    } else {
-                        if (nextChar >= cbufLen) {
-                            enlargeCharBuffer();
+                    if (nextChar == 0 && strBeginIndex - startIndexForText == 1) {
+                        boolean isNumber = false;
+
+                        if (nextEvent == 'f' && strEndIndex - strBeginIndex > 3) { // false
+                            if (saveChar(strValue[strBeginIndex++]) == 'a' && saveChar(strValue[strBeginIndex++]) == 'l'
+                                    && saveChar(strValue[strBeginIndex++]) == 's' && saveChar(strValue[strBeginIndex++]) == 'e') {
+                                text = FALSE;
+                            }
+                        } else if (nextEvent == 't' && strEndIndex - strBeginIndex > 2) { // true
+                            if (saveChar(strValue[strBeginIndex++]) == 'r' && saveChar(strValue[strBeginIndex++]) == 'u'
+                                    && saveChar(strValue[strBeginIndex++]) == 'e') {
+                                text = TRUE;
+                            }
+                        } else if (nextEvent == 'n' && strEndIndex - strBeginIndex > 2) { // null
+                            if (saveChar(strValue[strBeginIndex++]) == 'u' && saveChar(strValue[strBeginIndex++]) == 'l'
+                                    && saveChar(strValue[strBeginIndex++]) == 'l') {
+                                text = NULL;
+                            }
+                        } else if ((nextEvent >= '0' && nextEvent <= '9') || nextEvent == '-' || nextEvent == '+') { // number.
+                            isNumber = true;
+                            readNumber(ch);
                         }
 
-                        cbuf[nextChar++] = (char) ch;
-                    }
-                } else {
-                    if (ch < 33) {
-                        if (strStart == (strBeginIndex - 1)) {
-                            strStart++;
+                        //    } else if (nextEvent == 'F') { // "False", "FALSE" // possible? TODO
+                        //    } else if (nextEvent == 'T') { // "True", "TRUE" // possible? TODO
+                        //    } else if (nextEvent == 'N') { // "Null", "NULL" // possible? TODO
+                        //    }
+
+                        if (isNumber) {
+                            // done in readNumber...
                         } else {
-                            // skip whitespace char.
+                            while (strBeginIndex < strEndIndex) {
+                                ch = strValue[strBeginIndex++];
 
-                            strEnd = strBeginIndex - 1;
+                                if (ch < 128) {
+                                    nextEvent = charEvents[ch];
 
-                            if (strEnd - strStart + 1 >= cbufLen) {
-                                enlargeCharBuffer();
+                                    if (nextEvent > 0 && nextEvent < 32) {
+                                        endIndexForText = strBeginIndex - 1;
+                                        return nextEvent;
+                                    }
+                                }
+
+                                if (saveChar(ch) > 32) {
+                                    text = null;
+                                }
                             }
 
-                            N.copy(strValue, strStart, cbuf, 0, strEnd - strStart);
-
-                            nextChar = strEnd - strStart;
-                        }
-                    } else if (ch == WD._BACKSLASH) {
-                        strEnd = strBeginIndex - 1;
-
-                        if (strEnd - strStart + 1 >= cbufLen) {
-                            enlargeCharBuffer();
+                            endIndexForText = strBeginIndex;
+                            nextEvent = -1;
                         }
 
-                        N.copy(strValue, strStart, cbuf, 0, strEnd - strStart);
-
-                        nextChar = strEnd - strStart;
-                        // strStart++;
-                        ch = readEscapeCharacter();
-
-                        if (ch < 33) {
-                            // skip whitespace char.
-                        } else {
-                            cbuf[nextChar++] = (char) ch;
-                        }
+                        return nextEvent;
                     }
+                } else {
+                    saveChar(ch);
                 }
-
-                //                if ((nextChar == 0) && (ch < 33)) {
-                //                    // skip the starting white characters.
-                //                } else {
-                //                    cbuf[nextChar++] = (ch == '\\') ? readEscapeCharacter() : (char) ch;
-                //                }
             }
         }
 
-        strEnd = strBeginIndex;
+        endIndexForText = strBeginIndex;
         nextEvent = -1;
 
         return nextEvent;
+    }
+
+    protected void readNumber(final int firstChar) throws IOException {
+        final boolean negative = firstChar == '-';
+        long ret = firstChar == '-' || firstChar == '+' ? 0 : (firstChar - '0');
+
+        int pointPositoin = -1;
+        int cnt = ret == 0 ? 0 : 1;
+        int ch = 0;
+        int typeFlag = 0;
+
+        while (strBeginIndex < strEndIndex) {
+            ch = strValue[strBeginIndex++];
+
+            if (ch >= '0' && ch <= '9') {
+                if (cnt < MAX_PARSABLE_NUM_LEN || ((cnt == MAX_PARSABLE_NUM_LEN && ret <= (Long.MAX_VALUE - (ch - '0')) / 10))) {
+                    ret = ret * 10 + (ch - '0');
+
+                    if (ret > 0 || pointPositoin > 0) {
+                        cnt++;
+                    }
+                } else {
+                    cnt += 2; // So cnt will > MAX_PARSABLE_NUM_LEN + 1 to skip result.
+                }
+            } else if (ch == '.' && pointPositoin < 0) {
+                if (cnt == 0) {
+                    cnt = 1;
+                }
+
+                pointPositoin = cnt;
+            } else {
+                if (ch < 128) {
+                    nextEvent = charEvents[ch];
+
+                    if (nextEvent > 0 && nextEvent < 32) {
+                        break;
+                    }
+                }
+
+                ch = saveChar(ch);
+
+                if (nextEvent > 0 && typeFlag == 0 && (ch == 'l' || ch == 'L' || ch == 'f' || ch == 'F' || ch == 'd' || ch == 'D')) {
+                    typeFlag = ch;
+                } else if (ch > 32) { // ignore <= 32 whitespace chars.
+                    cnt = -1; // TODO can't parse here. leave it Numbers.createNumber(...).
+                }
+
+                while (strBeginIndex < strEndIndex) {
+                    ch = strValue[strBeginIndex++];
+
+                    if (ch < 128) {
+                        nextEvent = charEvents[ch];
+
+                        if (nextEvent > 0 && nextEvent < 32) {
+                            break;
+                        }
+                    }
+
+                    ch = saveChar(ch);
+
+                    if (nextEvent > 0 && typeFlag == 0 && (ch == 'l' || ch == 'L' || ch == 'f' || ch == 'F' || ch == 'd' || ch == 'D')) {
+                        typeFlag = ch;
+                    } else if (ch > 32) { // ignore <= 32 whitespace chars.
+                        cnt = -1; // TODO can't parse here. leave it Numbers.createNumber(...).
+                    }
+                }
+
+                break;
+            }
+        }
+
+        if (nextEvent > 0 && nextEvent < 32) {
+            endIndexForText = strBeginIndex - 1;
+        } else {
+            endIndexForText = strBeginIndex;
+            nextEvent = -1;
+        }
+
+        if (cnt >= 0 && cnt <= MAX_PARSABLE_NUM_LEN + 1 && pointPositoin != cnt) {
+            if (negative) {
+                ret = -ret;
+            }
+
+            if (typeFlag > 0) {
+                if (pointPositoin > 0) {
+                    if (typeFlag == 'f' || typeFlag == 'F') {
+                        numValue = (float) (((double) ret) / POWERS_OF_TEN[cnt - pointPositoin]);
+                    } else { // ignore 'l' or 'L' if it's specified.
+                        numValue = ((double) ret) / POWERS_OF_TEN[cnt - pointPositoin];
+                    }
+                } else if (typeFlag == 'f' || typeFlag == 'F') {
+                    numValue = (float) ret;
+                } else if (typeFlag == 'd' || typeFlag == 'D') {
+                    numValue = (double) ret;
+                } else { // typeFlag == 'l' or 'L'.
+                    numValue = ret;
+                }
+            } else {
+                if (pointPositoin > 0) {
+                    numValue = ((double) ret) / POWERS_OF_TEN[cnt - pointPositoin];
+                } else if (ret >= Integer.MIN_VALUE && ret <= Integer.MAX_VALUE) {
+                    numValue = (int) ret;
+                } else {
+                    numValue = ret;
+                }
+            }
+        }
+        //    else { // for debug
+        //        logger.warn("#######: " + getText());
+        //        System.out.println("#######: " + getText());
+        //    }
+    }
+
+    protected int saveChar(int ch) throws IOException {
+        if (nextChar > 0) {
+            if (ch == WD._BACKSLASH) {
+                ch = readEscapeCharacter();
+            }
+
+            if (ch < 33) {
+                // skip whitespace char.
+            } else {
+                if (nextChar >= cbufLen) {
+                    enlargeCharBuffer();
+                }
+
+                cbuf[nextChar++] = (char) ch;
+            }
+        } else {
+            if (ch < 33) {
+                if (startIndexForText == (strBeginIndex - 1)) {
+                    startIndexForText++;
+                } else {
+                    // skip whitespace char.
+
+                    saveToBuffer();
+                }
+            } else if (ch == WD._BACKSLASH) {
+                saveToBuffer();
+                // strStart++;
+                ch = readEscapeCharacter();
+
+                if (ch < 33) {
+                    // skip whitespace char.
+                } else {
+                    cbuf[nextChar++] = (char) ch;
+                }
+            }
+        }
+
+        return ch;
+    }
+
+    protected void saveToBuffer() {
+        endIndexForText = strBeginIndex - 1;
+
+        if (endIndexForText - startIndexForText + 1 >= cbufLen) {
+            enlargeCharBuffer();
+        }
+
+        N.copy(strValue, startIndexForText, cbuf, 0, endIndexForText - startIndexForText);
+
+        nextChar = endIndexForText - startIndexForText;
+    }
+
+    protected void throwExceptionDueToUnexpectedNonStringToken() {
+        throw new ParseException(
+                "\"false\", \"true\", \"null\" or a number is expected in or before \"" + (nextChar > 0 ? String.valueOf(cbuf, 0, N.min(32, nextChar))
+                        : String.valueOf(strValue, strBeginIndex - 1, N.min(32, strEndIndex - strBeginIndex + 1))));
     }
 
     /**
@@ -320,7 +488,11 @@ class JSONStringReader extends AbstractJSONReader {
      */
     @Override
     public String getText() throws IOException {
-        return (nextChar > 0) ? String.valueOf(cbuf, 0, nextChar) : String.valueOf(strValue, strStart, strEnd - strStart);
+        if (text != null) {
+            return text;
+        }
+
+        return (nextChar > 0) ? String.valueOf(cbuf, 0, nextChar) : String.valueOf(strValue, startIndexForText, endIndexForText - startIndexForText);
     }
 
     /**
@@ -333,77 +505,70 @@ class JSONStringReader extends AbstractJSONReader {
     @SuppressWarnings("unchecked")
     @Override
     public <T> T readValue(Type<T> type) throws IOException {
-        //        if (((nextEvent != END_QUOTATION_D) && (nextEvent != END_QUOTATION_S))
-        //                && (((nextChar >= 4) && (cbuf[0] == 'n') && (cbuf[1] == 'u') && (cbuf[2] == 'l') && (cbuf[3] == 'l')) || (((strEnd - strStart) >= 4)
-        //                        && (strValue[strStart] == 'n') && (strValue[strStart + 1] == 'u') && (strValue[strStart + 2] == 'l') && (strValue[strStart + 3] == 'l')))) {
-        //
-        //            if (nextChar == 4 || (strEnd - strStart) == 4) {
-        //                return null;
-        //            } else {
-        //                boolean isNull = true;
-        //                if (nextChar > 4) {
-        //                    for (int i = 4; i < nextChar; i++) {
-        //                        if (cbuf[i] > 32) {
-        //                            isNull = false;
-        //                            break;
-        //                        }
-        //                    }
-        //                } else {
-        //                    for (int i = strStart + 4; i < strEnd; i++) {
-        //                        if (strValue[i] > 32) {
-        //                            isNull = false;
-        //                            break;
-        //                        }
-        //                    }
-        //                }
-        //
-        //                if (isNull) {
-        //                    return null;
-        //                }
-        //            }
-        //
-        //        }
-        //
-
         if (nextEvent != END_QUOTATION_D && nextEvent != END_QUOTATION_S) {
-            if (((nextChar == 4) && (cbuf[0] == 'n') && (cbuf[1] == 'u') && (cbuf[2] == 'l') && (cbuf[3] == 'l')) || (((strEnd - strStart) == 4)
-                    && (strValue[strStart] == 'n') && (strValue[strStart + 1] == 'u') && (strValue[strStart + 2] == 'l') && (strValue[strStart + 3] == 'l'))) {
-                return type.isOptionalOrNullable() ? (T) defaultOptionals.get(type.clazz()) : null;
-            }
-
-            if (type.clazz().equals(Object.class)) {
-                if (((nextChar == 4) && (cbuf[0] == 't') && (cbuf[1] == 'r') && (cbuf[2] == 'u') && (cbuf[3] == 'e'))
-                        || (((strEnd - strStart) == 4) && (strValue[strStart] == 't') && (strValue[strStart + 1] == 'r') && (strValue[strStart + 2] == 'u')
-                                && (strValue[strStart + 3] == 'e'))) {
-                    return (T) Boolean.TRUE;
-                } else if (((nextChar == 5) && (cbuf[0] == 'f') && (cbuf[1] == 'a') && (cbuf[2] == 'l') && (cbuf[3] == 's') && (cbuf[4] == 'e'))
-                        || (((strEnd - strStart) == 5) && (strValue[strStart] == 'f') && (strValue[strStart + 1] == 'a') && (strValue[strStart + 2] == 'l')
-                                && (strValue[strStart + 3] == 's') && (strValue[strStart + 4] == 'e'))) {
-                    return (T) Boolean.FALSE;
+            if (numValue != null) {
+                if (type.isObjectType() || type.clazz().equals(numValue.getClass())) {
+                    return (T) numValue;
+                } else if (type.isNumber()) {
+                    return (T) Numbers.convert(numValue, (Type<Number>) type);
                 } else {
-                    final String str = new String(nextChar > 0 ? N.copyOfRange(cbuf, 0, nextChar) : N.copyOfRange(strValue, strStart, strEnd));
-
-                    try {
-                        return (T) Numbers.createNumber(str).get();
-                    } catch (Exception e) {
-                        // ignore;
+                    if (text != null) {
+                        return type.valueOf(text);
+                    } else {
+                        return N.convert(numValue, type);
                     }
-
-                    return type.valueOf(str);
+                }
+            } else if (text != null) {
+                if (text == NULL) {
+                    return type.isOptionalOrNullable() ? (T) defaultOptionals.get(type.clazz()) : null;
+                } else if (text == FALSE || text == TRUE) {
+                    if (type.isBoolean() || type.isObjectType()) {
+                        return (T) (text == FALSE ? Boolean.FALSE : Boolean.TRUE);
+                    } else {
+                        return type.valueOf(text);
+                    }
+                } else {
+                    return type.valueOf(text);
                 }
             }
-        }
 
-        //        if (type == null) {
-        //            return (T) (((nextChar > 0) || (str == null)) ? String.valueOf(cbuf, 0, nextChar) : str.substring(strStart, strEnd));
-        //        } else {
-        //            return ((nextChar > 0) || (str == null)) ? type.valueOf(cbuf, 0, nextChar) : type.valueOf(strValue, strStart, strEnd - strStart);
-        //        }
+            if (type.isObjectType()) {
+                final String str = new String(nextChar > 0 ? N.copyOfRange(cbuf, 0, nextChar) : N.copyOfRange(strValue, startIndexForText, endIndexForText));
+
+                if (N.isNullOrEmpty(str)) {
+                    return (T) str;
+                }
+
+                try {
+                    final Optional<Number> op = Numbers.createNumber(str);
+
+                    if (op.isPresent()) {
+                        final Number num = op.get();
+
+                        if (num instanceof Float) {
+                            final char lastChar = str.charAt(str.length() - 1);
+
+                            if (lastChar == 'f' || lastChar == 'F') {
+                                return (T) num;
+                            } else {
+                                return (T) Double.valueOf(num.doubleValue());
+                            }
+                        }
+
+                        return (T) num;
+                    }
+                } catch (Exception e) {
+                    // ignore;
+                }
+
+                return (T) str;
+            }
+        }
 
         if (nextChar > 0) {
             return type.valueOf(cbuf, 0, nextChar);
         } else {
-            return type.valueOf(strValue, strStart, strEnd - strStart);
+            return type.valueOf(strValue, startIndexForText, endIndexForText - startIndexForText);
         }
     }
 
@@ -415,7 +580,7 @@ class JSONStringReader extends AbstractJSONReader {
      */
     @Override
     public PropInfo readPropInfo(SymbolReader symbolReader) {
-        return (nextChar > 0) ? symbolReader.readPropInfo(cbuf, 0, nextChar) : symbolReader.readPropInfo(strValue, strStart, strEnd);
+        return (nextChar > 0) ? symbolReader.readPropInfo(cbuf, 0, nextChar) : symbolReader.readPropInfo(strValue, startIndexForText, endIndexForText);
     }
 
     /**

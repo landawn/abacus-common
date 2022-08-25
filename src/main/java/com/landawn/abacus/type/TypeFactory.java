@@ -918,7 +918,7 @@ public final class TypeFactory {
                     for (Map.Entry<String, Type<?>> entry : typePool.entrySet()) {
                         val = entry.getValue();
 
-                        if (!(val.clazz().equals(Object.class) || val.clazz().equals(Object[].class)) && val.clazz().isAssignableFrom(cls)) {
+                        if (!(val.isObjectType() || val.clazz().equals(Object[].class)) && val.clazz().isAssignableFrom(cls)) {
                             try {
                                 if ((val.isGenericType() || N.notNullOrEmpty(typeParameters) || N.notNullOrEmpty(parameters)) && N.notNullOrEmpty(typeName)) {
                                     final Constructor<? extends Type> constructor = ClassUtil.getDeclaredConstructor(val.getClass(), String.class);

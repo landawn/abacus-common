@@ -65,21 +65,16 @@ class JSONStreamReader extends JSONStringReader {
         return new JSONStreamReader(reader, rbuf, cbuf);
     }
 
-    /**
-     * TODO performance improvement: Refer to the test above. TODO limitation: the maximum length of property value is
-     * the buffer size.
-     *
-     * @return
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
     @Override
     public int nextToken() throws IOException {
         if (strBeginIndex >= strEndIndex) {
             refill();
         }
 
+        text = null;
+        numValue = null;
         nextChar = 0;
-        strStart = strBeginIndex;
+        startIndexForText = strBeginIndex;
 
         if (nextEvent == START_QUOTATION_D || nextEvent == START_QUOTATION_S) {
             final char quoteChar = nextEvent == START_QUOTATION_D ? WD._QUOTATION_D : WD._QUOTATION_S;
@@ -88,7 +83,7 @@ class JSONStreamReader extends JSONStringReader {
                 ch = strValue[strBeginIndex++];
 
                 if (ch == quoteChar) {
-                    strEnd = strBeginIndex - 1;
+                    endIndexForText = strBeginIndex - 1;
                     nextEvent = quoteChar == WD._QUOTATION_D ? END_QUOTATION_D : END_QUOTATION_S;
 
                     return nextEvent;
@@ -102,15 +97,8 @@ class JSONStreamReader extends JSONStringReader {
                     cbuf[nextChar++] = (ch == WD._BACKSLASH) ? readEscapeCharacter() : (char) ch;
                 } else {
                     if (ch == WD._BACKSLASH) {
-                        strEnd = strBeginIndex - 1;
+                        saveToBuffer();
 
-                        if (strEnd - strStart + 1 >= cbufLen) {
-                            enlargeCharBuffer();
-                        }
-
-                        N.copy(strValue, strStart, cbuf, 0, strEnd - strStart);
-
-                        nextChar = strEnd - strStart;
                         // strStart++;
                         cbuf[nextChar++] = readEscapeCharacter();
                     }
@@ -124,73 +112,77 @@ class JSONStreamReader extends JSONStringReader {
             for (int ch = 0; strBeginIndex < strEndIndex;) {
                 ch = strValue[strBeginIndex++];
 
-                if (ch < 128) {
-                    nextEvent = charEvents[ch];
-
-                    if (nextEvent > 0) {
-                        strEnd = strBeginIndex - 1;
+                if (ch < 128 && (nextEvent = charEvents[ch]) > 0) {
+                    if (nextEvent < 32) { //
+                        endIndexForText = strBeginIndex - 1;
 
                         return nextEvent;
                     }
-                }
 
-                if (nextChar > 0) {
-                    if (ch == WD._BACKSLASH) {
-                        ch = readEscapeCharacter();
-                    }
+                    saveChar(ch);
 
-                    if (ch < 33) {
-                        // skip whitespace char.
-                    } else {
-                        if (nextChar >= cbufLen) {
-                            enlargeCharBuffer();
+                    if (nextChar == 0 && strBeginIndex - startIndexForText == 1) {
+                        boolean isNumber = false;
+
+                        if (nextEvent == 'f') { // false
+                            if (saveChar(nextChar()) == 'a' && saveChar(nextChar()) == 'l' && saveChar(nextChar()) == 's' && saveChar(nextChar()) == 'e') {
+                                text = FALSE;
+                            }
+                        } else if (nextEvent == 't') { // true
+                            if (saveChar(nextChar()) == 'r' && saveChar(nextChar()) == 'u' && saveChar(nextChar()) == 'e') {
+                                text = TRUE;
+                            }
+                        } else if (nextEvent == 'n') { // null
+                            if (saveChar(nextChar()) == 'u' && saveChar(nextChar()) == 'l' && saveChar(nextChar()) == 'l') {
+                                text = NULL;
+                            }
+                        } else if ((nextEvent >= '0' && nextEvent <= '9') || nextEvent == '-' || nextEvent == '+') { // number.
+                            isNumber = true;
+                            readNumber(ch);
                         }
 
-                        cbuf[nextChar++] = (char) ch;
-                    }
-                } else {
-                    if (ch < 33) {
-                        if (strStart == (strBeginIndex - 1)) {
-                            strStart++;
+                        //    } else if (nextEvent == 'F') { // "False", "FALSE" // possible? TODO
+                        //    } else if (nextEvent == 'T') { // "True", "TRUE" // possible? TODO
+                        //    } else if (nextEvent == 'N') { // "Null", "NULL" // possible? TODO
+                        //    }
+
+                        if (isNumber) {
+                            // done in readNumber...
                         } else {
-                            // skip whitespace char.
-
-                            strEnd = strBeginIndex - 1;
-
-                            if (strEnd - strStart + 1 >= cbufLen) {
-                                enlargeCharBuffer();
+                            if (strBeginIndex >= strEndIndex) {
+                                refill();
                             }
 
-                            N.copy(strValue, strStart, cbuf, 0, strEnd - strStart);
+                            while (strBeginIndex < strEndIndex) {
+                                ch = strValue[strBeginIndex++];
 
-                            nextChar = strEnd - strStart;
+                                if (ch < 128) {
+                                    nextEvent = charEvents[ch];
+
+                                    if (nextEvent > 0 && nextEvent < 32) {
+                                        endIndexForText = strBeginIndex - 1;
+                                        return nextEvent;
+                                    }
+                                }
+
+                                if (saveChar(ch) > 32) {
+                                    text = null;
+                                }
+
+                                if (strBeginIndex >= strEndIndex) {
+                                    refill();
+                                }
+                            }
+
+                            endIndexForText = strBeginIndex;
+                            nextEvent = -1;
                         }
-                    } else if (ch == WD._BACKSLASH) {
-                        strEnd = strBeginIndex - 1;
 
-                        if (strEnd - strStart + 1 >= cbufLen) {
-                            enlargeCharBuffer();
-                        }
-
-                        N.copy(strValue, strStart, cbuf, 0, strEnd - strStart);
-
-                        nextChar = strEnd - strStart;
-                        // strStart++;
-                        ch = readEscapeCharacter();
-
-                        if (ch < 33) {
-                            // skip whitespace char.
-                        } else {
-                            cbuf[nextChar++] = (char) ch;
-                        }
+                        return nextEvent;
                     }
+                } else {
+                    saveChar(ch);
                 }
-
-                //                if ((nextChar == 0) && (ch < 33)) {
-                //                    // skip the starting white characters.
-                //                } else {
-                //                    cbuf[nextChar++] = (ch == '\\') ? readEscapeCharacter() : (char) ch;
-                //                }
 
                 if (strBeginIndex >= strEndIndex) {
                     refill();
@@ -198,117 +190,155 @@ class JSONStreamReader extends JSONStringReader {
             }
         }
 
-        strEnd = strBeginIndex;
+        endIndexForText = strBeginIndex;
         nextEvent = -1;
 
         return nextEvent;
     }
 
-    //
-    //    @Override
-    //    public int nextNameToken() throws IOException {
-    //        if (strPosition >= strLength) {
-    //            refill();
-    //        }
-    //
-    //        nextChar = 0;
-    //        strStart = strPosition;
-    //
-    //        if (nextEvent == START_QUOTATION_D) {
-    //            for (int ch = 0; strPosition < strLength;) {
-    //                ch = strValue[strPosition++];
-    //
-    //                if (ch == '"') {
-    //                    strEnd = strPosition - 1;
-    //                    nextEvent = END_QUOTATION_D;
-    //
-    //                    return nextEvent;
-    //                }
-    //
-    //                if (nextChar > 0) {
-    //                    cbuf[nextChar++] = (char) ch;
-    //                }
-    //
-    //                if (strPosition >= strLength) {
-    //                    refill();
-    //                }
-    //            }
-    //        } else if (nextEvent == START_QUOTATION_S) {
-    //            for (int ch = 0; strPosition < strLength;) {
-    //                ch = strValue[strPosition++];
-    //
-    //                if (ch == '\'') {
-    //                    strEnd = strPosition - 1;
-    //                    nextEvent = END_QUOTATION_S;
-    //
-    //                    return nextEvent;
-    //                }
-    //
-    //                if (nextChar > 0) {
-    //                    cbuf[nextChar++] = (char) ch;
-    //                }
-    //
-    //                if (strPosition >= strLength) {
-    //                    refill();
-    //                }
-    //            }
-    //        } else {
-    //            for (int ch = 0; strPosition < strLength;) {
-    //                ch = strValue[strPosition++];
-    //
-    //                if (ch < 128) {
-    //                    nextEvent = charEvents[ch];
-    //
-    //                    if (nextEvent > 0) {
-    //                        strEnd = strPosition - 1;
-    //
-    //                        return nextEvent;
-    //                    }
-    //                }
-    //
-    //                if (nextChar > 0) {
-    //                    cbuf[nextChar++] = (char) ch;
-    //
-    //                    // skip whitespace char.
-    //                } else if ((ch < 33) && (strStart == (strPosition - 1))) {
-    //                    strStart++;
-    //                }
-    //
-    //                if (strPosition >= strLength) {
-    //                    refill();
-    //                }
-    //            }
-    //        }
-    //
-    //        strEnd = strPosition - 1;
-    //        nextEvent = -1;
-    //
-    //        return nextEvent;
-    //    }
-    //
+    @Override
+    protected void readNumber(final int firstChar) throws IOException {
+        if (strBeginIndex >= strEndIndex) {
+            refill();
+        }
 
-    /*
-     * Copyright (C) 2010 Google Inc.
-     *
-     * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
-     * with the License. You may obtain a copy of the License at
-     *
-     * http://www.apache.org/licenses/LICENSE-2.0
-     *
-     * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
-     * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for
-     * the specific language governing permissions and limitations under the License.
-     */
+        final boolean negative = firstChar == '-';
+        long ret = firstChar == '-' || firstChar == '+' ? 0 : (firstChar - '0');
 
-    /**
-     * Unescapes the character identified by the character or characters that immediately follow a backslash. The
-     * backslash '\' should have already been read. This supports both unicode escapes "u000A" and two-character escapes
-     * "\n".
-     *
-     * @return
-     * @throws IOException Signals that an I/O exception has occurred.
-     * @throws NumberFormatException             if any unicode escape sequences are malformed.
-     */
+        int pointPositoin = -1;
+        int cnt = ret == 0 ? 0 : 1;
+        int ch = 0;
+        int typeFlag = 0;
+
+        while ((ch = nextChar()) >= 0) {
+            if (ch >= '0' && ch <= '9') {
+                if (cnt < MAX_PARSABLE_NUM_LEN || ((cnt == MAX_PARSABLE_NUM_LEN && ret <= (Long.MAX_VALUE - (ch - '0')) / 10))) {
+                    ret = ret * 10 + (ch - '0');
+
+                    if (ret > 0 || pointPositoin > 0) {
+                        cnt++;
+                    }
+                } else {
+                    cnt += 2; // So cnt will > MAX_PARSABLE_NUM_LEN + 1 to skip result.
+                }
+
+                // why need this? For example: "1233993E323" or "8888..." (a very long big integer with 100_000 digits, longer than buffer size),
+                // what will happen to prefix "1233993" before "E"? They won't be saved if nextChar > 0
+                if (nextChar > 0) {
+                    // saveChar(ch);
+
+                    // for better performance
+                    if (nextChar >= cbufLen) {
+                        enlargeCharBuffer();
+                    }
+
+                    cbuf[nextChar++] = (char) ch;
+                }
+            } else if (ch == '.' && pointPositoin < 0) {
+                if (cnt == 0) {
+                    cnt = 1;
+                }
+
+                pointPositoin = cnt;
+
+                // why need this? For example: "1233993E323" or "8888..." (a very long big integer with 100_000 digits, longer than buffer size),
+                // what will happen to prefix "1233993" before "E"? They won't be saved if nextChar > 0
+                if (nextChar > 0) {
+                    // saveChar(ch);
+
+                    // for better performance
+                    if (nextChar >= cbufLen) {
+                        enlargeCharBuffer();
+                    }
+
+                    cbuf[nextChar++] = (char) ch;
+                }
+            } else {
+                do {
+                    if (ch < 128) {
+                        nextEvent = charEvents[ch];
+
+                        if (nextEvent > 0 && nextEvent < 32) {
+                            break;
+                        }
+                    }
+
+                    ch = saveChar(ch);
+
+                    if (nextEvent > 0 && typeFlag == 0 && (ch == 'l' || ch == 'L' || ch == 'f' || ch == 'F' || ch == 'd' || ch == 'D')) {
+                        typeFlag = ch;
+                    } else if (ch > 32) { // ignore <= 32 whitespace chars.
+                        cnt = -1; // TODO can't parse here. leave it Numbers.createNumber(...).
+                    }
+                } while ((ch = nextChar()) >= 0);
+
+                break;
+            }
+        }
+
+        if (nextEvent > 0 && nextEvent < 32) {
+            endIndexForText = strBeginIndex - 1;
+        } else {
+            endIndexForText = strBeginIndex;
+            nextEvent = -1;
+        }
+
+        if (cnt >= 0 && cnt <= MAX_PARSABLE_NUM_LEN + 1 && pointPositoin != cnt) {
+            if (negative) {
+                ret = -ret;
+            }
+
+            if (typeFlag > 0) {
+                if (pointPositoin > 0) {
+                    if (typeFlag == 'f' || typeFlag == 'F') {
+                        numValue = (float) (((double) ret) / POWERS_OF_TEN[cnt - pointPositoin]);
+                    } else { // ignore 'l' or 'L' if it's specified.
+                        numValue = ((double) ret) / POWERS_OF_TEN[cnt - pointPositoin];
+                    }
+                } else if (typeFlag == 'f' || typeFlag == 'F') {
+                    numValue = (float) ret;
+                } else if (typeFlag == 'd' || typeFlag == 'D') {
+                    numValue = (double) ret;
+                } else { // typeFlag == 'l' or 'L'.
+                    numValue = ret;
+                }
+            } else {
+                if (pointPositoin > 0) {
+                    numValue = ((double) ret) / POWERS_OF_TEN[cnt - pointPositoin];
+                } else if (ret >= Integer.MIN_VALUE && ret <= Integer.MAX_VALUE) {
+                    numValue = (int) ret;
+                } else {
+                    numValue = ret;
+                }
+            }
+        }
+        //    else { // for debug
+        //        logger.warn("#######: " + getText());
+        //        System.out.println("#######: " + getText());
+        //    }
+    }
+
+    @Override
+    protected int saveChar(int ch) throws IOException {
+        if (ch < 0) {
+            return ch;
+        }
+
+        return super.saveChar(ch);
+    }
+
+    protected int nextChar() throws IOException {
+        if (strBeginIndex >= strEndIndex) {
+            refill();
+        }
+
+        if (strBeginIndex >= strEndIndex) {
+            return -1;
+        }
+
+        return strValue[strBeginIndex++];
+    }
+
     @Override
     protected char readEscapeCharacter() throws IOException {
         if (strBeginIndex >= strEndIndex) {
@@ -374,16 +404,16 @@ class JSONStreamReader extends JSONStringReader {
      *
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    void refill() throws IOException {
+    protected void refill() throws IOException {
         if (strBeginIndex >= strEndIndex) {
             if (nextChar == 0) {
-                strEnd = strBeginIndex;
+                endIndexForText = strBeginIndex;
 
-                if (strEnd > strStart) {
-                    N.copy(strValue, strStart, cbuf, 0, strEnd - strStart);
-                    nextChar = strEnd - strStart;
+                if (endIndexForText > startIndexForText) {
+                    N.copy(strValue, startIndexForText, cbuf, 0, endIndexForText - startIndexForText);
+                    nextChar = endIndexForText - startIndexForText;
                 } else {
-                    strStart = 0;
+                    startIndexForText = 0;
                 }
             }
 
