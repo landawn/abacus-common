@@ -201,6 +201,11 @@ public final class TypeFactory {
             classes.add(com.landawn.abacus.type.NumberType.class);
             classes.add(com.landawn.abacus.type.ObjectArrayType.class);
             classes.add(com.landawn.abacus.type.ObjectType.class);
+            classes.add(com.landawn.abacus.type.JdkOptionalIntType.class);
+            classes.add(com.landawn.abacus.type.JdkOptionalLongType.class);
+            classes.add(com.landawn.abacus.type.JdkOptionalDoubleType.class);
+            classes.add(com.landawn.abacus.type.JdkOptionalType.class);
+            // DO NOT change the order. keep JdkOptional above.
             classes.add(com.landawn.abacus.type.OptionalBooleanType.class);
             classes.add(com.landawn.abacus.type.OptionalCharType.class);
             classes.add(com.landawn.abacus.type.OptionalByteType.class);
@@ -507,6 +512,15 @@ public final class TypeFactory {
                     } else {
                         throw new IllegalArgumentException("Not supported paramters " + typeName + " for EnumType.");
                     }
+                } else if (java.util.Optional.class.isAssignableFrom(cls)) {
+                    if (typeParameters.length > 1) {
+                        throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". Optional has one and only has one type parameter.");
+                    }
+                    if (parameters.length > 0) {
+                        throw new IllegalArgumentException("Incorrect parameters: " + typeName + ". Optional Type can only have zero parameter.");
+                    }
+
+                    type = new JdkOptionalType(typeParameters.length == 0 ? "Object" : typeParameters[0]);
                 } else if (Optional.class.isAssignableFrom(cls)) {
                     if (typeParameters.length > 1) {
                         throw new IllegalArgumentException("Incorrect type parameters: " + typeName + ". Optional has one and only has one type parameter.");

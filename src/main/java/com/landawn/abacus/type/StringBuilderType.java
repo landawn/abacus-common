@@ -41,4 +41,9 @@ public class StringBuilderType extends AbstractCharSequenceType<StringBuilder> {
     public StringBuilder valueOf(String str) {
         return str == null ? null : new StringBuilder(str);
     }
+
+    @Override
+    public boolean isImmutable() {
+        return false;
+    }
 }

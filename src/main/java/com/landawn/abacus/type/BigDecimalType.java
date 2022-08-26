@@ -16,6 +16,7 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -60,7 +61,12 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      */
     @Override
     public BigDecimal valueOf(String str) {
-        return N.isNullOrEmpty(str) ? null : new BigDecimal(str);
+        return N.isNullOrEmpty(str) ? null : new BigDecimal(str, MathContext.UNLIMITED);
+    }
+
+    @Override
+    public BigDecimal valueOf(char[] cbuf, int offset, int len) {
+        return len == 0 ? null : new BigDecimal(cbuf, offset, len, MathContext.UNLIMITED);
     }
 
     /**

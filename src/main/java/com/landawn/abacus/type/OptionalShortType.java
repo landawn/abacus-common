@@ -47,16 +47,6 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
     }
 
     /**
-     * Checks if is optional or nullable.
-     *
-     * @return true, if is optional or nullable
-     */
-    @Override
-    public boolean isOptionalOrNullable() {
-        return true;
-    }
-
-    /**
      *
      * @param x
      * @return

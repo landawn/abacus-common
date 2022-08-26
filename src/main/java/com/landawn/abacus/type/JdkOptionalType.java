@@ -10,12 +10,12 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.WD;
-import com.landawn.abacus.util.u.Nullable;
 
 /**
  *
@@ -23,9 +23,9 @@ import com.landawn.abacus.util.u.Nullable;
  * @param <T>
  * @since 0.8
  */
-public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
+public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
 
-    public static final String NULLABLE = Nullable.class.getSimpleName();
+    public static final String OPTIONAL = "JdkOptional";
 
     private final String declaringName;
 
@@ -33,10 +33,10 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
 
     private final Type<T> elementType;
 
-    protected NullableType(String parameterTypeName) {
-        super(NULLABLE + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).name() + WD.GREATER_THAN);
+    protected JdkOptionalType(String parameterTypeName) {
+        super(OPTIONAL + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).name() + WD.GREATER_THAN);
 
-        this.declaringName = NULLABLE + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + WD.GREATER_THAN;
+        this.declaringName = OPTIONAL + WD.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + WD.GREATER_THAN;
         this.parameterTypes = new Type[] { TypeFactory.getType(parameterTypeName) };
         this.elementType = parameterTypes[0];
     }
@@ -48,8 +48,8 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public Class<Nullable<T>> clazz() {
-        return (Class) Nullable.class;
+    public Class<Optional<T>> clazz() {
+        return (Class) Optional.class;
     }
 
     /**
@@ -88,8 +88,8 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * @return
      */
     @Override
-    public String stringOf(Nullable<T> x) {
-        return (x == null || !x.isPresent() || x.get() == null) ? null : N.stringOf(x.get()); // elementType.stringOf(x.get());
+    public String stringOf(Optional<T> x) {
+        return (x == null || !x.isPresent()) ? null : N.stringOf(x.get()); // elementType.stringOf(x.get());
     }
 
     /**
@@ -98,8 +98,8 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * @return
      */
     @Override
-    public Nullable<T> valueOf(String str) {
-        return str == null ? (Nullable<T>) Nullable.empty() : Nullable.of(elementType.valueOf(str));
+    public Optional<T> valueOf(String str) {
+        return str == null ? (Optional<T>) Optional.empty() : Optional.ofNullable(elementType.valueOf(str));
     }
 
     /**
@@ -110,11 +110,11 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Nullable<T> get(ResultSet rs, int columnIndex) throws SQLException {
+    public Optional<T> get(ResultSet rs, int columnIndex) throws SQLException {
         final Object obj = getColumnValue(elementType.clazz(), rs, columnIndex);
 
-        return obj == null ? (Nullable<T>) Nullable.empty()
-                : Nullable.of(elementType.clazz().isAssignableFrom(obj.getClass()) ? (T) obj : N.convert(obj, elementType));
+        return obj == null ? (Optional<T>) Optional.empty()
+                : Optional.of(elementType.clazz().isAssignableFrom(obj.getClass()) ? (T) obj : N.convert(obj, elementType));
     }
 
     /**
@@ -125,11 +125,11 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public Nullable<T> get(ResultSet rs, String columnLabel) throws SQLException {
+    public Optional<T> get(ResultSet rs, String columnLabel) throws SQLException {
         final Object obj = getColumnValue(elementType.clazz(), rs, columnLabel);
 
-        return obj == null ? (Nullable<T>) Nullable.empty()
-                : Nullable.of(elementType.clazz().isAssignableFrom(obj.getClass()) ? (T) obj : N.convert(obj, elementType));
+        return obj == null ? (Optional<T>) Optional.empty()
+                : Optional.of(elementType.clazz().isAssignableFrom(obj.getClass()) ? (T) obj : N.convert(obj, elementType));
     }
 
     /**
@@ -140,8 +140,8 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, Nullable<T> x) throws SQLException {
-        stmt.setObject(columnIndex, (x == null || !x.isPresent() || x.get() == null) ? null : x.get());
+    public void set(PreparedStatement stmt, int columnIndex, Optional<T> x) throws SQLException {
+        stmt.setObject(columnIndex, (x == null || !x.isPresent()) ? null : x.get());
     }
 
     /**
@@ -152,8 +152,8 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, Nullable<T> x) throws SQLException {
-        stmt.setObject(parameterName, (x == null || !x.isPresent() || x.get() == null) ? null : x.get());
+    public void set(CallableStatement stmt, String parameterName, Optional<T> x) throws SQLException {
+        stmt.setObject(parameterName, (x == null || !x.isPresent()) ? null : x.get());
     }
 
     /**
@@ -163,8 +163,8 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, Nullable<T> x) throws IOException {
-        if (x == null || !x.isPresent() || x.get() == null) {
+    public void write(Writer writer, Optional<T> x) throws IOException {
+        if (x == null || !x.isPresent()) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
             // elementType.write(writer, x.get());
@@ -180,8 +180,8 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Nullable<T> x, SerializationConfig<?> config) throws IOException {
-        if (x == null || !x.isPresent() || x.get() == null) {
+    public void writeCharacter(CharacterWriter writer, Optional<T> x, SerializationConfig<?> config) throws IOException {
+        if (x == null || !x.isPresent()) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
             // elementType.writeCharacter(writer, x.get(), config);

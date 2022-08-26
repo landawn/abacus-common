@@ -36,4 +36,14 @@ public abstract class AbstractOptionalType<T> extends AbstractType<T> {
 
         return mapType;
     }
+
+    /**
+     * Checks if is optional or nullable.
+     *
+     * @return true, if is optional or nullable
+     */
+    @Override
+    public boolean isOptionalOrNullable() {
+        return true;
+    }
 }

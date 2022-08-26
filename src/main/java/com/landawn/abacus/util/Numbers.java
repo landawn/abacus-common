@@ -30,6 +30,7 @@ import static java.math.RoundingMode.HALF_UP;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1441,7 +1442,7 @@ public final class Numbers {
         }
 
         try {
-            return Optional.of(new BigDecimal(str));
+            return Optional.of(new BigDecimal(str, MathContext.UNLIMITED));
         } catch (NumberFormatException e) {
             return Optional.empty();
         }
@@ -1726,7 +1727,17 @@ public final class Numbers {
         //    }
 
         try {
-            return Optional.of(Double.parseDouble(str));
+            if (str.length() > 308 && (decPos < 0 || decPos > 308)) { // MAX_VALUE = 0x1.fffffffffffffP+1023; // 1.7976931348623157e+308
+                return (Optional) createBigDecimal(str);
+            }
+
+            final Double d = Double.valueOf(str);
+
+            if (d.isInfinite() && str.indexOf("Infinity") < 0) {
+                return (Optional) createBigDecimal(str);
+            }
+
+            return Optional.of(d);
         } catch (final NumberFormatException nfe) { // NOPMD
             // ignore the bad number
         }

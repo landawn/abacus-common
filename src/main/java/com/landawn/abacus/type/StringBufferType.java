@@ -41,4 +41,9 @@ public class StringBufferType extends AbstractCharSequenceType<StringBuffer> {
     public StringBuffer valueOf(String str) {
         return str == null ? null : new StringBuffer(str);
     }
+
+    @Override
+    public boolean isImmutable() {
+        return false;
+    }
 }

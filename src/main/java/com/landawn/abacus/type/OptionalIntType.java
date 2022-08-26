@@ -47,16 +47,6 @@ public class OptionalIntType extends AbstractOptionalType<OptionalInt> {
     }
 
     /**
-     * Checks if is optional or nullable.
-     *
-     * @return true, if is optional or nullable
-     */
-    @Override
-    public boolean isOptionalOrNullable() {
-        return true;
-    }
-
-    /**
      *
      * @param x
      * @return

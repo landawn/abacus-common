@@ -10,28 +10,30 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.OptionalLong;
 
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.u.OptionalBoolean;
+import com.landawn.abacus.util.Numbers;
 
 /**
  *
  * @author Haiyang Li
  * @since 0.8
  */
-public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
+public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
 
-    public static final String OPTIONAL_BOOLEAN = OptionalBoolean.class.getSimpleName();
+    public static final String OPTIONAL_LONG = "JdkOptionalLong";
 
-    protected OptionalBooleanType() {
-        super(OPTIONAL_BOOLEAN);
+    protected JdkOptionalLongType() {
+        super(OPTIONAL_LONG);
     }
 
     @Override
-    public Class<OptionalBoolean> clazz() {
-        return OptionalBoolean.class;
+    public Class<OptionalLong> clazz() {
+        return OptionalLong.class;
     }
 
     /**
@@ -50,8 +52,8 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * @return
      */
     @Override
-    public String stringOf(OptionalBoolean x) {
-        return x == null || !x.isPresent() ? null : String.valueOf(x.get());
+    public String stringOf(OptionalLong x) {
+        return x == null || !x.isPresent() ? null : String.valueOf(x.getAsLong());
     }
 
     /**
@@ -60,8 +62,8 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * @return
      */
     @Override
-    public OptionalBoolean valueOf(String str) {
-        return N.isNullOrEmpty(str) ? OptionalBoolean.empty() : OptionalBoolean.of(N.parseBoolean(str));
+    public OptionalLong valueOf(String str) {
+        return N.isNullOrEmpty(str) ? OptionalLong.empty() : OptionalLong.of(Numbers.toLong(str));
     }
 
     /**
@@ -72,10 +74,10 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public OptionalBoolean get(ResultSet rs, int columnIndex) throws SQLException {
+    public OptionalLong get(ResultSet rs, int columnIndex) throws SQLException {
         final Object obj = rs.getObject(columnIndex);
 
-        return obj == null ? OptionalBoolean.empty() : OptionalBoolean.of(obj instanceof Boolean ? (Boolean) obj : N.parseBoolean(obj.toString()));
+        return obj == null ? OptionalLong.empty() : OptionalLong.of(obj instanceof Long ? (Long) obj : Numbers.toLong(obj.toString()));
     }
 
     /**
@@ -86,10 +88,10 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public OptionalBoolean get(ResultSet rs, String columnLabel) throws SQLException {
+    public OptionalLong get(ResultSet rs, String columnLabel) throws SQLException {
         final Object obj = rs.getObject(columnLabel);
 
-        return obj == null ? OptionalBoolean.empty() : OptionalBoolean.of(obj instanceof Boolean ? (Boolean) obj : N.parseBoolean(obj.toString()));
+        return obj == null ? OptionalLong.empty() : OptionalLong.of(obj instanceof Long ? (Long) obj : Numbers.toLong(obj.toString()));
     }
 
     /**
@@ -100,11 +102,11 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, OptionalBoolean x) throws SQLException {
+    public void set(PreparedStatement stmt, int columnIndex, OptionalLong x) throws SQLException {
         if (x == null || !x.isPresent()) {
-            stmt.setNull(columnIndex, java.sql.Types.BOOLEAN);
+            stmt.setNull(columnIndex, java.sql.Types.BIGINT);
         } else {
-            stmt.setBoolean(columnIndex, x.get());
+            stmt.setLong(columnIndex, x.getAsLong());
         }
     }
 
@@ -116,11 +118,11 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, OptionalBoolean x) throws SQLException {
+    public void set(CallableStatement stmt, String parameterName, OptionalLong x) throws SQLException {
         if (x == null || !x.isPresent()) {
-            stmt.setNull(parameterName, java.sql.Types.BOOLEAN);
+            stmt.setNull(parameterName, java.sql.Types.BIGINT);
         } else {
-            stmt.setBoolean(parameterName, x.get());
+            stmt.setLong(parameterName, x.getAsLong());
         }
     }
 
@@ -131,8 +133,12 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, OptionalBoolean x) throws IOException {
-        writer.write((x == null || !x.isPresent()) ? NULL_CHAR_ARRAY : (x.get() ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY));
+    public void write(Writer writer, OptionalLong x) throws IOException {
+        if (x == null) {
+            writer.write(NULL_CHAR_ARRAY);
+        } else {
+            IOUtil.write(writer, x.getAsLong());
+        }
     }
 
     /**
@@ -143,7 +149,11 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, OptionalBoolean x, SerializationConfig<?> config) throws IOException {
-        writer.write((x == null || !x.isPresent()) ? NULL_CHAR_ARRAY : (x.get() ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY));
+    public void writeCharacter(CharacterWriter writer, OptionalLong x, SerializationConfig<?> config) throws IOException {
+        if (x == null) {
+            writer.write(NULL_CHAR_ARRAY);
+        } else {
+            writer.write(x.getAsLong());
+        }
     }
 }

@@ -10,30 +10,30 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.OptionalDouble;
 
 import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
-import com.landawn.abacus.util.u.OptionalLong;
 
 /**
  *
  * @author Haiyang Li
  * @since 0.8
  */
-public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
+public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
 
-    public static final String OPTIONAL_LONG = OptionalLong.class.getSimpleName();
+    public static final String OPTIONAL_DOUBLE = "JdkOptionalDouble";
 
-    protected OptionalLongType() {
-        super(OPTIONAL_LONG);
+    protected JdkOptionalDoubleType() {
+        super(OPTIONAL_DOUBLE);
     }
 
     @Override
-    public Class<OptionalLong> clazz() {
-        return OptionalLong.class;
+    public Class<OptionalDouble> clazz() {
+        return OptionalDouble.class;
     }
 
     /**
@@ -52,8 +52,8 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
      * @return
      */
     @Override
-    public String stringOf(OptionalLong x) {
-        return x == null || !x.isPresent() ? null : String.valueOf(x.get());
+    public String stringOf(OptionalDouble x) {
+        return x == null || !x.isPresent() ? null : String.valueOf(x.getAsDouble());
     }
 
     /**
@@ -62,8 +62,8 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
      * @return
      */
     @Override
-    public OptionalLong valueOf(String str) {
-        return N.isNullOrEmpty(str) ? OptionalLong.empty() : OptionalLong.of(Numbers.toLong(str));
+    public OptionalDouble valueOf(String str) {
+        return N.isNullOrEmpty(str) ? OptionalDouble.empty() : OptionalDouble.of(Numbers.toDouble(str));
     }
 
     /**
@@ -74,10 +74,10 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public OptionalLong get(ResultSet rs, int columnIndex) throws SQLException {
+    public OptionalDouble get(ResultSet rs, int columnIndex) throws SQLException {
         final Object obj = rs.getObject(columnIndex);
 
-        return obj == null ? OptionalLong.empty() : OptionalLong.of(obj instanceof Long ? (Long) obj : Numbers.toLong(obj.toString()));
+        return obj == null ? OptionalDouble.empty() : OptionalDouble.of(obj instanceof Double ? (Double) obj : Numbers.toDouble(obj.toString()));
     }
 
     /**
@@ -88,10 +88,10 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public OptionalLong get(ResultSet rs, String columnLabel) throws SQLException {
+    public OptionalDouble get(ResultSet rs, String columnLabel) throws SQLException {
         final Object obj = rs.getObject(columnLabel);
 
-        return obj == null ? OptionalLong.empty() : OptionalLong.of(obj instanceof Long ? (Long) obj : Numbers.toLong(obj.toString()));
+        return obj == null ? OptionalDouble.empty() : OptionalDouble.of(obj instanceof Double ? (Double) obj : Numbers.toDouble(obj.toString()));
     }
 
     /**
@@ -102,11 +102,11 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(PreparedStatement stmt, int columnIndex, OptionalLong x) throws SQLException {
+    public void set(PreparedStatement stmt, int columnIndex, OptionalDouble x) throws SQLException {
         if (x == null || !x.isPresent()) {
-            stmt.setNull(columnIndex, java.sql.Types.BIGINT);
+            stmt.setNull(columnIndex, java.sql.Types.DOUBLE);
         } else {
-            stmt.setLong(columnIndex, x.get());
+            stmt.setDouble(columnIndex, x.getAsDouble());
         }
     }
 
@@ -118,11 +118,11 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
      * @throws SQLException the SQL exception
      */
     @Override
-    public void set(CallableStatement stmt, String parameterName, OptionalLong x) throws SQLException {
+    public void set(CallableStatement stmt, String parameterName, OptionalDouble x) throws SQLException {
         if (x == null || !x.isPresent()) {
-            stmt.setNull(parameterName, java.sql.Types.BIGINT);
+            stmt.setNull(parameterName, java.sql.Types.DOUBLE);
         } else {
-            stmt.setLong(parameterName, x.get());
+            stmt.setDouble(parameterName, x.getAsDouble());
         }
     }
 
@@ -133,11 +133,11 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void write(Writer writer, OptionalLong x) throws IOException {
+    public void write(Writer writer, OptionalDouble x) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            IOUtil.write(writer, x.get());
+            IOUtil.write(writer, x.getAsDouble());
         }
     }
 
@@ -149,11 +149,11 @@ public class OptionalLongType extends AbstractOptionalType<OptionalLong> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, OptionalLong x, SerializationConfig<?> config) throws IOException {
+    public void writeCharacter(CharacterWriter writer, OptionalDouble x, SerializationConfig<?> config) throws IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            writer.write(x.get());
+            writer.write(x.getAsDouble());
         }
     }
 }

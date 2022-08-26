@@ -1,3 +1,8 @@
+### 3.3.9
+
+* Improvements and bug fix.
+
+
 ### 3.3.8
 
 * Improve the performance of JSON parser.
