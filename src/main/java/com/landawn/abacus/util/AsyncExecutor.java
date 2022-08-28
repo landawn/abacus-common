@@ -290,7 +290,10 @@ public class AsyncExecutor {
                 if (executor == null) {
                     final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(coreThreadPoolSize, maxThreadPoolSize, keepAliveTime, unit,
                             new LinkedBlockingQueue<>());
-                    threadPoolExecutor.allowCoreThreadTimeOut(true);
+                    //    if (keepAliveTime > 0) {
+                    //        threadPoolExecutor.allowCoreThreadTimeOut(true);
+                    //    }
+
                     executor = threadPoolExecutor;
 
                     Runtime.getRuntime().addShutdownHook(new Thread() {

@@ -138,6 +138,27 @@ public enum JavaVersion {
     JAVA_17(17.0f, "17"),
 
     /**
+     * Java 18.
+     *
+     */
+    JAVA_18(18.0f, "18"),
+
+    /**
+     * Java 19.
+     */
+    JAVA_19(19.0f, "19"),
+
+    /**
+     * Java 20.
+     */
+    JAVA_20(20.0f, "20"),
+
+    /**
+     * Java 21.
+     */
+    JAVA_21(21.0f, "21"),
+
+    /**
      * The most recent java version. Mainly introduced to avoid to break when a new version of Java is used.
      */
     JAVA_RECENT(maxVersion(), Float.toString(maxVersion()));

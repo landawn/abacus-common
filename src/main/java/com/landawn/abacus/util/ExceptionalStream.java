@@ -10601,6 +10601,40 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     *
+     * @param <R>
+     * @param maxThreadNum
+     * @param withVirtualThread
+     * @param ops
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <R> ExceptionalStream<R, E> sps(final int maxThreadNum, final boolean withVirtualThread,
+            final Function<? super Stream<T>, ? extends Stream<? extends R>> ops) {
+        assertNotClosed();
+
+        return checked(((Stream<R>) ops.apply(this.unchecked().parallel(maxThreadNum, withVirtualThread))), true);
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param maxThreadNum
+     * @param executorNumForVirtualThread
+     * @param ops
+     * @return
+     */
+    @Beta
+    @IntermediateOp
+    public <R> ExceptionalStream<R, E> sps(final int maxThreadNum, final int executorNumForVirtualThread,
+            final Function<? super Stream<T>, ? extends Stream<? extends R>> ops) {
+        assertNotClosed();
+
+        return checked(((Stream<R>) ops.apply(this.unchecked().parallel(maxThreadNum, executorNumForVirtualThread))), true);
+    }
+
+    /**
      * Temporarily switch the stream to parallel stream for operation {@code filter} and then switch back to sequence stream.
      * <br />
      *
