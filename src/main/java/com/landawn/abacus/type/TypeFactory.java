@@ -205,7 +205,6 @@ public final class TypeFactory {
             classes.add(com.landawn.abacus.type.JdkOptionalLongType.class);
             classes.add(com.landawn.abacus.type.JdkOptionalDoubleType.class);
             classes.add(com.landawn.abacus.type.JdkOptionalType.class);
-            // DO NOT change the order. keep JdkOptional above.
             classes.add(com.landawn.abacus.type.OptionalBooleanType.class);
             classes.add(com.landawn.abacus.type.OptionalCharType.class);
             classes.add(com.landawn.abacus.type.OptionalByteType.class);
@@ -333,7 +332,8 @@ public final class TypeFactory {
                             || type instanceof MillisTimestampType || type instanceof BytesType || type instanceof BooleanCharType)
                             || (StringType.class.equals(type.getClass()) || InputStreamType.class.equals(type.getClass())
                                     || CharacterStreamType.class.equals(type.getClass()))) {
-                        if (!(type instanceof JUDateType)) { // conflict with DateType.
+                        if (!(type instanceof JUDateType || type instanceof JdkOptionalIntType || type instanceof JdkOptionalLongType
+                                || type instanceof JdkOptionalDoubleType || type instanceof JdkOptionalType)) { // conflict with DateType.
                             typePool.put(type.clazz().getSimpleName(), type);
                         }
 
