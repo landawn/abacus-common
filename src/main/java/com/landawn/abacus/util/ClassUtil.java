@@ -2153,7 +2153,8 @@ public final class ClassUtil {
                 propSetMethod.invoke(entity, propValue);
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                 if (logger.isWarnEnabled()) {
-                    logger.warn(e, "Failed to set property value by method: " + propSetMethod);
+                    logger.warn("Failed to set value for field by method: {} in class: {} with value type {}", propSetMethod.getName(),
+                            propSetMethod.getDeclaringClass().getName(), propValue.getClass().getName());
                 }
 
                 propValue = N.convert(propValue, ParserUtil.getEntityInfo(entity.getClass()).getPropInfo(propSetMethod.getName()).jsonXmlType);

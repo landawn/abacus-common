@@ -1551,7 +1551,7 @@ public final class Sheet<R, C, E> implements Cloneable {
                 }
             }
 
-            return N.toIntExact(count);
+            return Numbers.toIntExact(count);
         } else {
             return 0;
         }

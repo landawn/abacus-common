@@ -48,6 +48,22 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
 
     /**
      *
+     * @param obj
+     * @return
+     */
+    @Override
+    public MutableDateTime valueOf(final Object obj) {
+        if (obj instanceof Number) {
+            return new MutableDateTime(((Number) obj).longValue());
+        } else if (obj instanceof java.util.Date) {
+            return new MutableDateTime(((java.util.Date) obj).getTime());
+        }
+
+        return obj == null ? null : valueOf(N.stringOf(obj));
+    }
+
+    /**
+     *
      * @param str
      * @return
      */

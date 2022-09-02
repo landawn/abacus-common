@@ -1272,6 +1272,21 @@ public final class Numbers {
     }
 
     /**
+     * Returns the value of the {@code long} argument; throwing an exception if the value overflows an {@code int}.
+     *
+     * @param value the long value
+     * @return
+     * @throws ArithmeticException if the {@code argument} overflows an int
+     */
+    public static int toIntExact(long value) {
+        if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
+            throw new ArithmeticException("integer overflow");
+        }
+
+        return (int) value;
+    }
+
+    /**
      * <p>
      * Convert a <code>String</code> to a <code>Integer</code>, handling hex
      * (0xhhhh) and octal (0dddd) notations. N.B. a leading zero means octal;

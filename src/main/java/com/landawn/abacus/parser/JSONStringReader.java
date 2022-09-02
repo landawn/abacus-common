@@ -511,6 +511,8 @@ class JSONStringReader extends AbstractJSONReader {
                     return (T) numValue;
                 } else if (type.isNumber()) {
                     return (T) Numbers.convert(numValue, (Type<Number>) type);
+                } else if (type.isDate() || type.isCalendar() || type.isJodaDateTime()) {
+                    return type.valueOf(numValue);
                 } else {
                     if (text != null) {
                         return type.valueOf(text);

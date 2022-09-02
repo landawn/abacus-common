@@ -5944,7 +5944,6 @@ class CommonUtil {
 
     @SuppressWarnings({ "rawtypes" })
     private static <T> T convert(final Object obj, Class<?> srcClass, final Type<? extends T> targetType) {
-
         if (targetType.clazz().isAssignableFrom(srcClass)) {
             return (T) obj;
         }
@@ -20164,7 +20163,7 @@ class CommonUtil {
 
             while (iter.hasNext()) {
                 if (N.equals(iter.hasNext(), valueToFind)) {
-                    return N.toIntExact(index);
+                    return Numbers.toIntExact(index);
                 }
 
                 index++;
@@ -20172,7 +20171,7 @@ class CommonUtil {
         } else {
             while (iter.hasNext()) {
                 if (N.equals(iter.next(), valueToFind)) {
-                    return N.toIntExact(index);
+                    return Numbers.toIntExact(index);
                 }
 
                 index++;

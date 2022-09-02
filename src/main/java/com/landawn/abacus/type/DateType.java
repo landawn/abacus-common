@@ -47,6 +47,22 @@ public class DateType extends AbstractDateType<Date> {
 
     /**
      *
+     * @param obj
+     * @return
+     */
+    @Override
+    public Date valueOf(final Object obj) {
+        if (obj instanceof Number) {
+            return new Date(((Number) obj).longValue());
+        } else if (obj instanceof java.util.Date) {
+            return new Date(((java.util.Date) obj).getTime());
+        }
+
+        return obj == null ? null : valueOf(N.stringOf(obj));
+    }
+
+    /**
+     *
      * @param str
      * @return
      */

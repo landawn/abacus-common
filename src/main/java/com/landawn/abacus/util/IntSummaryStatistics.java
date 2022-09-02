@@ -111,7 +111,7 @@ public class IntSummaryStatistics implements IntConsumer {
     @Deprecated
     @Beta
     public final int sum() {
-        return N.toIntExact(sum);
+        return Numbers.toIntExact(sum);
     }
 
     @Deprecated

@@ -61,9 +61,33 @@ public final class CSVUtil {
 
     public static final BiConsumer<String[], String> CSV_LINE_PARSER = csvParser::parseLineToArray;
 
-    public static final Function<String, String[]> CSV_HEADER_PARSER_BY_SPLITTER = lineSplitter::splitToArray;
+    public static final Function<String, String[]> CSV_HEADER_PARSER_BY_SPLITTER = it -> {
+        final String[] strs = lineSplitter.splitToArray(it);
+        int subStrLen = 0;
 
-    public static final BiConsumer<String[], String> CSV_LINE_PARSER_BY_SPLITTER = lineSplitter::splitToArray;
+        for (int i = 0, len = strs.length; i < len; i++) {
+            subStrLen = N.len(strs[i]);
+
+            if (subStrLen > 1 && strs[i].charAt(0) == '"' && strs[i].charAt(subStrLen - 1) == '"') {
+                strs[i] = strs[i].substring(0, subStrLen - 1);
+            }
+        }
+
+        return strs;
+    };
+
+    public static final BiConsumer<String[], String> CSV_LINE_PARSER_BY_SPLITTER = (strs, it) -> {
+        lineSplitter.splitToArray(strs, it);
+        int subStrLen = 0;
+
+        for (int i = 0, len = strs.length; i < len; i++) {
+            subStrLen = N.len(strs[i]);
+
+            if (subStrLen > 1 && strs[i].charAt(0) == '"' && strs[i].charAt(subStrLen - 1) == '"') {
+                strs[i] = strs[i].substring(0, subStrLen - 1);
+            }
+        }
+    };
 
     static final Function<String, String[]> CSV_HEADER_PARSER_IN_JSON = line -> jsonParser.readString(String[].class, line, jdc);
 

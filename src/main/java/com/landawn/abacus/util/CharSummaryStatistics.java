@@ -108,7 +108,7 @@ public class CharSummaryStatistics implements CharConsumer {
     @Deprecated
     @Beta
     public final int sum() {
-        return N.toIntExact(sum);
+        return Numbers.toIntExact(sum);
     }
 
     @Deprecated

@@ -46,6 +46,24 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
 
     /**
      *
+     * @param obj
+     * @return
+     */
+    @Override
+    public Calendar valueOf(final Object obj) {
+        if (obj instanceof Number) {
+            return DateUtil.createCalendar(((Number) obj).longValue());
+        } else if (obj instanceof java.util.Date) {
+            return DateUtil.createCalendar((java.util.Date) obj);
+        } else if (obj instanceof Calendar) {
+            return DateUtil.createCalendar((Calendar) obj);
+        }
+
+        return obj == null ? null : valueOf(N.stringOf(obj));
+    }
+
+    /**
+     *
      * @param str
      * @return
      */

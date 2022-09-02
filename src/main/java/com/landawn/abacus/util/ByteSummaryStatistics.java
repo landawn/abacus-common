@@ -111,7 +111,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
     @Deprecated
     @Beta
     public final int sum() {
-        return N.toIntExact(sum);
+        return Numbers.toIntExact(sum);
     }
 
     @Deprecated

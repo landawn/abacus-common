@@ -1540,9 +1540,11 @@ public final class ParserUtil {
                 } else {
                     field.set(obj, propValue);
                 }
+
             } catch (Exception e) {
                 if (logger.isWarnEnabled()) {
-                    logger.warn(e, "Failed to set value for field: {} in class: {}", field, declaringClass);
+                    logger.warn("Failed to set value for field: {} in class: {} with value type {}", field == null ? name : field.getName(),
+                            declaringClass.getName(), propValue == null ? "null" : propValue.getClass().getName());
                 }
 
                 propValue = N.convert(propValue, jsonXmlType);
@@ -2225,9 +2227,11 @@ public final class ParserUtil {
                 } else {
                     field.set(obj, propValue);
                 }
+
             } catch (Exception e) {
                 if (logger.isWarnEnabled()) {
-                    logger.warn(e, "Failed to set value for field: {} in class: {}", field, declaringClass);
+                    logger.warn("Failed to set value for field: {} in class: {} with value type {}", field == null ? name : field.getName(),
+                            declaringClass.getName(), propValue == null ? "null" : propValue.getClass().getName());
                 }
 
                 propValue = N.convert(propValue, jsonXmlType);

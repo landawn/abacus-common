@@ -48,6 +48,22 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
 
     /**
      *
+     * @param obj
+     * @return
+     */
+    @Override
+    public DateTime valueOf(final Object obj) {
+        if (obj instanceof Number) {
+            return new DateTime(((Number) obj).longValue());
+        } else if (obj instanceof java.util.Date) {
+            return new DateTime(((java.util.Date) obj).getTime());
+        }
+
+        return obj == null ? null : valueOf(N.stringOf(obj));
+    }
+
+    /**
+     *
      * @param str
      * @return
      */

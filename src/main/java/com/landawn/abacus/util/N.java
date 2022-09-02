@@ -358,7 +358,7 @@ public final class N extends CommonUtil {
             }
         }
 
-        return N.toIntExact(occurrences);
+        return Numbers.toIntExact(occurrences);
     }
 
     public static long occurrencesOf(final Iterator<?> iter, final Object valueToFind) {
@@ -2155,7 +2155,7 @@ public final class N extends CommonUtil {
             count += getSizeOrDefault(e, 0);
         }
 
-        final C result = supplier.apply(N.toIntExact(count));
+        final C result = supplier.apply(Numbers.toIntExact(count));
 
         for (Iterable<? extends T> e : c) {
             if (e != null) {
@@ -9846,7 +9846,7 @@ public final class N extends CommonUtil {
             sum += a[i];
         }
 
-        return N.toIntExact(sum);
+        return Numbers.toIntExact(sum);
     }
 
     /**
@@ -10273,7 +10273,7 @@ public final class N extends CommonUtil {
             sum += func.applyAsInt(a[i]);
         }
 
-        return N.toIntExact(sum);
+        return Numbers.toIntExact(sum);
     }
 
     /**
@@ -10306,7 +10306,7 @@ public final class N extends CommonUtil {
             sum += func.applyAsInt(e);
         }
 
-        return N.toIntExact(sum);
+        return Numbers.toIntExact(sum);
     }
 
     /**
@@ -10364,7 +10364,7 @@ public final class N extends CommonUtil {
             }
         }
 
-        return N.toIntExact(sum);
+        return Numbers.toIntExact(sum);
     }
 
     /**
@@ -21735,7 +21735,7 @@ public final class N extends CommonUtil {
             res++;
         }
 
-        return N.toIntExact(res);
+        return Numbers.toIntExact(res);
     }
 
     /**
@@ -21763,7 +21763,7 @@ public final class N extends CommonUtil {
             }
         }
 
-        return N.toIntExact(res);
+        return Numbers.toIntExact(res);
     }
 
     /**
@@ -24513,21 +24513,6 @@ public final class N extends CommonUtil {
         System.out.printf(format, args);
         System.out.println();
         return args;
-    }
-
-    /**
-     * Returns the value of the {@code long} argument; throwing an exception if the value overflows an {@code int}.
-     *
-     * @param value the long value
-     * @return
-     * @throws ArithmeticException if the {@code argument} overflows an int
-     */
-    public static int toIntExact(long value) {
-        if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
-            throw new ArithmeticException("integer overflow");
-        }
-
-        return (int) value;
     }
 
     /**

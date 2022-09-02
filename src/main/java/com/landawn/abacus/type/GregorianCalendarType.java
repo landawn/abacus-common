@@ -17,6 +17,7 @@ package com.landawn.abacus.type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import com.landawn.abacus.util.DateUtil;
@@ -38,6 +39,24 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
     @Override
     public Class<GregorianCalendar> clazz() {
         return GregorianCalendar.class;
+    }
+
+    /**
+     *
+     * @param obj
+     * @return
+     */
+    @Override
+    public GregorianCalendar valueOf(final Object obj) {
+        if (obj instanceof Number) {
+            return DateUtil.createGregorianCalendar(((Number) obj).longValue());
+        } else if (obj instanceof java.util.Date) {
+            return DateUtil.createGregorianCalendar((java.util.Date) obj);
+        } else if (obj instanceof Calendar) {
+            return DateUtil.createGregorianCalendar((Calendar) obj);
+        }
+
+        return obj == null ? null : valueOf(N.stringOf(obj));
     }
 
     /**

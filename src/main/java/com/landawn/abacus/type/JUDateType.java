@@ -55,6 +55,22 @@ public class JUDateType extends AbstractDateType<Date> {
 
     /**
      *
+     * @param obj
+     * @return
+     */
+    @Override
+    public Date valueOf(final Object obj) {
+        if (obj instanceof Number) {
+            return new Date(((Number) obj).longValue());
+        } else if (obj instanceof Date) {
+            return new Date(((Date) obj).getTime());
+        }
+
+        return obj == null ? null : valueOf(N.stringOf(obj));
+    }
+
+    /**
+     *
      * @param str
      * @return
      */

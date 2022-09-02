@@ -47,6 +47,22 @@ public class TimeType extends AbstractDateType<Time> {
 
     /**
      *
+     * @param obj
+     * @return
+     */
+    @Override
+    public Time valueOf(final Object obj) {
+        if (obj instanceof Number) {
+            return new Time(((Number) obj).longValue());
+        } else if (obj instanceof java.util.Date) {
+            return new Time(((java.util.Date) obj).getTime());
+        }
+
+        return obj == null ? null : valueOf(N.stringOf(obj));
+    }
+
+    /**
+     *
      * @param str
      * @return
      */

@@ -47,6 +47,22 @@ public class TimestampType extends AbstractDateType<Timestamp> {
 
     /**
      *
+     * @param obj
+     * @return
+     */
+    @Override
+    public Timestamp valueOf(final Object obj) {
+        if (obj instanceof Number) {
+            return new Timestamp(((Number) obj).longValue());
+        } else if (obj instanceof java.util.Date) {
+            return new Timestamp(((java.util.Date) obj).getTime());
+        }
+
+        return obj == null ? null : valueOf(N.stringOf(obj));
+    }
+
+    /**
+     *
      * @param str
      * @return
      */
