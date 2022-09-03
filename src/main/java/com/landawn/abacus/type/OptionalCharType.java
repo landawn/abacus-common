@@ -52,7 +52,7 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      */
     @Override
     public String stringOf(OptionalChar x) {
-        return x == null || !x.isPresent() ? null : String.valueOf(x.get());
+        return x == null || x.isEmpty() ? null : String.valueOf(x.get());
     }
 
     /**
@@ -106,7 +106,7 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      */
     @Override
     public void set(PreparedStatement stmt, int columnIndex, OptionalChar x) throws SQLException {
-        if (x == null || !x.isPresent()) {
+        if (x == null || x.isEmpty()) {
             stmt.setNull(columnIndex, java.sql.Types.CHAR);
         } else {
             stmt.setInt(columnIndex, x.get());
@@ -122,7 +122,7 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      */
     @Override
     public void set(CallableStatement stmt, String parameterName, OptionalChar x) throws SQLException {
-        if (x == null || !x.isPresent()) {
+        if (x == null || x.isEmpty()) {
             stmt.setNull(parameterName, java.sql.Types.CHAR);
         } else {
             stmt.setInt(parameterName, x.get());

@@ -53,7 +53,7 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
      */
     @Override
     public String stringOf(OptionalLong x) {
-        return x == null || !x.isPresent() ? null : String.valueOf(x.getAsLong());
+        return x == null || x.isEmpty() ? null : String.valueOf(x.getAsLong());
     }
 
     /**
@@ -77,7 +77,7 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
     public OptionalLong get(ResultSet rs, int columnIndex) throws SQLException {
         final Object obj = rs.getObject(columnIndex);
 
-        return obj == null ? OptionalLong.empty() : OptionalLong.of(obj instanceof Long ? (Long) obj : Numbers.toLong(obj.toString()));
+        return obj == null ? OptionalLong.empty() : OptionalLong.of(obj instanceof Long ? (Long) obj : Numbers.toLong(obj));
     }
 
     /**
@@ -91,7 +91,7 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
     public OptionalLong get(ResultSet rs, String columnLabel) throws SQLException {
         final Object obj = rs.getObject(columnLabel);
 
-        return obj == null ? OptionalLong.empty() : OptionalLong.of(obj instanceof Long ? (Long) obj : Numbers.toLong(obj.toString()));
+        return obj == null ? OptionalLong.empty() : OptionalLong.of(obj instanceof Long ? (Long) obj : Numbers.toLong(obj));
     }
 
     /**
@@ -103,7 +103,7 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
      */
     @Override
     public void set(PreparedStatement stmt, int columnIndex, OptionalLong x) throws SQLException {
-        if (x == null || !x.isPresent()) {
+        if (x == null || x.isEmpty()) {
             stmt.setNull(columnIndex, java.sql.Types.BIGINT);
         } else {
             stmt.setLong(columnIndex, x.getAsLong());
@@ -119,7 +119,7 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
      */
     @Override
     public void set(CallableStatement stmt, String parameterName, OptionalLong x) throws SQLException {
-        if (x == null || !x.isPresent()) {
+        if (x == null || x.isEmpty()) {
             stmt.setNull(parameterName, java.sql.Types.BIGINT);
         } else {
             stmt.setLong(parameterName, x.getAsLong());

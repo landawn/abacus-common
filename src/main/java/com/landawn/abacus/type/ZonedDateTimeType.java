@@ -40,11 +40,11 @@ import com.landawn.abacus.util.Numbers;
  */
 public class ZonedDateTimeType extends AbstractType<ZonedDateTime> {
 
-    static final ZoneId UTC_ZONE_ID = ZoneId.of("UTC");
+    static final ZoneId DEFAULT_TIME_ZONE = ZoneId.systemDefault();
 
-    static final DateTimeFormatter iso8601DateTimeFT = DateTimeFormatter.ofPattern(DateUtil.ISO_8601_DATETIME_FORMAT).withZone(UTC_ZONE_ID);
+    static final DateTimeFormatter iso8601DateTimeFT = DateTimeFormatter.ofPattern(DateUtil.ISO_8601_DATETIME_FORMAT).withZone(DEFAULT_TIME_ZONE);
 
-    static final DateTimeFormatter iso8601TimestampFT = DateTimeFormatter.ofPattern(DateUtil.ISO_8601_TIMESTAMP_FORMAT).withZone(UTC_ZONE_ID);
+    static final DateTimeFormatter iso8601TimestampFT = DateTimeFormatter.ofPattern(DateUtil.ISO_8601_TIMESTAMP_FORMAT).withZone(DEFAULT_TIME_ZONE);
 
     public static final String ZONED_DATE_TIME = ZonedDateTime.class.getSimpleName();
 
@@ -84,7 +84,7 @@ public class ZonedDateTimeType extends AbstractType<ZonedDateTime> {
 
         if (str.charAt(4) != '-') {
             try {
-                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(str)), UTC_ZONE_ID);
+                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(str)), DEFAULT_TIME_ZONE);
             } catch (NumberFormatException e) {
                 // ignore;
             }
@@ -109,7 +109,7 @@ public class ZonedDateTimeType extends AbstractType<ZonedDateTime> {
 
         if (cbuf[offset + 4] != '-') {
             try {
-                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(AbstractType.parseLong(cbuf, offset, len)), UTC_ZONE_ID);
+                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(AbstractType.parseLong(cbuf, offset, len)), DEFAULT_TIME_ZONE);
             } catch (NumberFormatException e) {
                 // ignore;
             }
@@ -129,7 +129,7 @@ public class ZonedDateTimeType extends AbstractType<ZonedDateTime> {
     public ZonedDateTime get(ResultSet rs, int columnIndex) throws SQLException {
         Timestamp ts = rs.getTimestamp(columnIndex);
 
-        return ts == null ? null : ZonedDateTime.ofInstant(ts.toInstant(), UTC_ZONE_ID);
+        return ts == null ? null : ZonedDateTime.ofInstant(ts.toInstant(), DEFAULT_TIME_ZONE);
     }
 
     /**
@@ -143,7 +143,7 @@ public class ZonedDateTimeType extends AbstractType<ZonedDateTime> {
     public ZonedDateTime get(ResultSet rs, String columnName) throws SQLException {
         Timestamp ts = rs.getTimestamp(columnName);
 
-        return ts == null ? null : ZonedDateTime.ofInstant(ts.toInstant(), UTC_ZONE_ID);
+        return ts == null ? null : ZonedDateTime.ofInstant(ts.toInstant(), DEFAULT_TIME_ZONE);
     }
 
     /**

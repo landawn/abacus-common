@@ -53,7 +53,7 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      */
     @Override
     public String stringOf(OptionalDouble x) {
-        return x == null || !x.isPresent() ? null : String.valueOf(x.get());
+        return x == null || x.isEmpty() ? null : String.valueOf(x.get());
     }
 
     /**
@@ -77,7 +77,7 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
     public OptionalDouble get(ResultSet rs, int columnIndex) throws SQLException {
         final Object obj = rs.getObject(columnIndex);
 
-        return obj == null ? OptionalDouble.empty() : OptionalDouble.of(obj instanceof Double ? (Double) obj : Numbers.toDouble(obj.toString()));
+        return obj == null ? OptionalDouble.empty() : OptionalDouble.of(obj instanceof Double ? (Double) obj : Numbers.toDouble(obj));
     }
 
     /**
@@ -91,7 +91,7 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
     public OptionalDouble get(ResultSet rs, String columnLabel) throws SQLException {
         final Object obj = rs.getObject(columnLabel);
 
-        return obj == null ? OptionalDouble.empty() : OptionalDouble.of(obj instanceof Double ? (Double) obj : Numbers.toDouble(obj.toString()));
+        return obj == null ? OptionalDouble.empty() : OptionalDouble.of(obj instanceof Double ? (Double) obj : Numbers.toDouble(obj));
     }
 
     /**
@@ -103,7 +103,7 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      */
     @Override
     public void set(PreparedStatement stmt, int columnIndex, OptionalDouble x) throws SQLException {
-        if (x == null || !x.isPresent()) {
+        if (x == null || x.isEmpty()) {
             stmt.setNull(columnIndex, java.sql.Types.DOUBLE);
         } else {
             stmt.setDouble(columnIndex, x.get());
@@ -119,7 +119,7 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      */
     @Override
     public void set(CallableStatement stmt, String parameterName, OptionalDouble x) throws SQLException {
-        if (x == null || !x.isPresent()) {
+        if (x == null || x.isEmpty()) {
             stmt.setNull(parameterName, java.sql.Types.DOUBLE);
         } else {
             stmt.setDouble(parameterName, x.get());

@@ -53,7 +53,7 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      */
     @Override
     public String stringOf(OptionalFloat x) {
-        return x == null || !x.isPresent() ? null : String.valueOf(x.get());
+        return x == null || x.isEmpty() ? null : String.valueOf(x.get());
     }
 
     /**
@@ -77,7 +77,7 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
     public OptionalFloat get(ResultSet rs, int columnIndex) throws SQLException {
         final Object obj = rs.getObject(columnIndex);
 
-        return obj == null ? OptionalFloat.empty() : OptionalFloat.of(obj instanceof Float ? (Float) obj : Numbers.toFloat(obj.toString()));
+        return obj == null ? OptionalFloat.empty() : OptionalFloat.of(obj instanceof Float ? (Float) obj : Numbers.toFloat(obj));
     }
 
     /**
@@ -91,7 +91,7 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
     public OptionalFloat get(ResultSet rs, String columnLabel) throws SQLException {
         final Object obj = rs.getObject(columnLabel);
 
-        return obj == null ? OptionalFloat.empty() : OptionalFloat.of(obj instanceof Float ? (Float) obj : Numbers.toFloat(obj.toString()));
+        return obj == null ? OptionalFloat.empty() : OptionalFloat.of(obj instanceof Float ? (Float) obj : Numbers.toFloat(obj));
     }
 
     /**
@@ -103,7 +103,7 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      */
     @Override
     public void set(PreparedStatement stmt, int columnIndex, OptionalFloat x) throws SQLException {
-        if (x == null || !x.isPresent()) {
+        if (x == null || x.isEmpty()) {
             stmt.setNull(columnIndex, java.sql.Types.FLOAT);
         } else {
             stmt.setFloat(columnIndex, x.get());
@@ -119,7 +119,7 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      */
     @Override
     public void set(CallableStatement stmt, String parameterName, OptionalFloat x) throws SQLException {
-        if (x == null || !x.isPresent()) {
+        if (x == null || x.isEmpty()) {
             stmt.setNull(parameterName, java.sql.Types.FLOAT);
         } else {
             stmt.setFloat(parameterName, x.get());

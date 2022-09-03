@@ -53,7 +53,7 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
      */
     @Override
     public String stringOf(OptionalShort x) {
-        return x == null || !x.isPresent() ? null : String.valueOf(x.get());
+        return x == null || x.isEmpty() ? null : String.valueOf(x.get());
     }
 
     /**
@@ -77,7 +77,7 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
     public OptionalShort get(ResultSet rs, int columnIndex) throws SQLException {
         final Object obj = rs.getObject(columnIndex);
 
-        return obj == null ? OptionalShort.empty() : OptionalShort.of(obj instanceof Short ? (Short) obj : Numbers.toShort(obj.toString()));
+        return obj == null ? OptionalShort.empty() : OptionalShort.of(obj instanceof Short ? (Short) obj : Numbers.toShort(obj));
     }
 
     /**
@@ -91,7 +91,7 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
     public OptionalShort get(ResultSet rs, String columnLabel) throws SQLException {
         final Object obj = rs.getObject(columnLabel);
 
-        return obj == null ? OptionalShort.empty() : OptionalShort.of(obj instanceof Short ? (Short) obj : Numbers.toShort(obj.toString()));
+        return obj == null ? OptionalShort.empty() : OptionalShort.of(obj instanceof Short ? (Short) obj : Numbers.toShort(obj));
     }
 
     /**
@@ -103,7 +103,7 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
      */
     @Override
     public void set(PreparedStatement stmt, int columnIndex, OptionalShort x) throws SQLException {
-        if (x == null || !x.isPresent()) {
+        if (x == null || x.isEmpty()) {
             stmt.setNull(columnIndex, java.sql.Types.SMALLINT);
         } else {
             stmt.setShort(columnIndex, x.get());
@@ -119,7 +119,7 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
      */
     @Override
     public void set(CallableStatement stmt, String parameterName, OptionalShort x) throws SQLException {
-        if (x == null || !x.isPresent()) {
+        if (x == null || x.isEmpty()) {
             stmt.setNull(parameterName, java.sql.Types.SMALLINT);
         } else {
             stmt.setShort(parameterName, x.get());

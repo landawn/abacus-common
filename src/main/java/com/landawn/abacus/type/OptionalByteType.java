@@ -53,7 +53,7 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      */
     @Override
     public String stringOf(OptionalByte x) {
-        return x == null || !x.isPresent() ? null : String.valueOf(x.get());
+        return x == null || x.isEmpty() ? null : String.valueOf(x.get());
     }
 
     /**
@@ -77,7 +77,7 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
     public OptionalByte get(ResultSet rs, int columnIndex) throws SQLException {
         final Object obj = rs.getObject(columnIndex);
 
-        return obj == null ? OptionalByte.empty() : OptionalByte.of(obj instanceof Byte ? (Byte) obj : Numbers.toByte(obj.toString()));
+        return obj == null ? OptionalByte.empty() : OptionalByte.of(obj instanceof Byte ? (Byte) obj : Numbers.toByte(obj));
     }
 
     /**
@@ -91,7 +91,7 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
     public OptionalByte get(ResultSet rs, String columnLabel) throws SQLException {
         final Object obj = rs.getObject(columnLabel);
 
-        return obj == null ? OptionalByte.empty() : OptionalByte.of(obj instanceof Byte ? (Byte) obj : Numbers.toByte(obj.toString()));
+        return obj == null ? OptionalByte.empty() : OptionalByte.of(obj instanceof Byte ? (Byte) obj : Numbers.toByte(obj));
     }
 
     /**
@@ -103,7 +103,7 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      */
     @Override
     public void set(PreparedStatement stmt, int columnIndex, OptionalByte x) throws SQLException {
-        if (x == null || !x.isPresent()) {
+        if (x == null || x.isEmpty()) {
             stmt.setNull(columnIndex, java.sql.Types.TINYINT);
         } else {
             stmt.setByte(columnIndex, x.get());
@@ -119,7 +119,7 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      */
     @Override
     public void set(CallableStatement stmt, String parameterName, OptionalByte x) throws SQLException {
-        if (x == null || !x.isPresent()) {
+        if (x == null || x.isEmpty()) {
             stmt.setNull(parameterName, java.sql.Types.TINYINT);
         } else {
             stmt.setByte(parameterName, x.get());

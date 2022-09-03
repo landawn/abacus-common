@@ -53,7 +53,7 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
      */
     @Override
     public String stringOf(OptionalInt x) {
-        return x == null || !x.isPresent() ? null : String.valueOf(x.getAsInt());
+        return x == null || x.isEmpty() ? null : String.valueOf(x.getAsInt());
     }
 
     /**
@@ -77,7 +77,7 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
     public OptionalInt get(ResultSet rs, int columnIndex) throws SQLException {
         final Object obj = rs.getObject(columnIndex);
 
-        return obj == null ? OptionalInt.empty() : OptionalInt.of(obj instanceof Integer ? (Integer) obj : Numbers.toInt(obj.toString()));
+        return obj == null ? OptionalInt.empty() : OptionalInt.of(obj instanceof Integer ? (Integer) obj : Numbers.toInt(obj));
     }
 
     /**
@@ -91,7 +91,7 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
     public OptionalInt get(ResultSet rs, String columnLabel) throws SQLException {
         final Object obj = rs.getObject(columnLabel);
 
-        return obj == null ? OptionalInt.empty() : OptionalInt.of(obj instanceof Integer ? (Integer) obj : Numbers.toInt(obj.toString()));
+        return obj == null ? OptionalInt.empty() : OptionalInt.of(obj instanceof Integer ? (Integer) obj : Numbers.toInt(obj));
     }
 
     /**
@@ -103,7 +103,7 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
      */
     @Override
     public void set(PreparedStatement stmt, int columnIndex, OptionalInt x) throws SQLException {
-        if (x == null || !x.isPresent()) {
+        if (x == null || x.isEmpty()) {
             stmt.setNull(columnIndex, java.sql.Types.INTEGER);
         } else {
             stmt.setInt(columnIndex, x.getAsInt());
@@ -119,7 +119,7 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
      */
     @Override
     public void set(CallableStatement stmt, String parameterName, OptionalInt x) throws SQLException {
-        if (x == null || !x.isPresent()) {
+        if (x == null || x.isEmpty()) {
             stmt.setNull(parameterName, java.sql.Types.INTEGER);
         } else {
             stmt.setInt(parameterName, x.getAsInt());

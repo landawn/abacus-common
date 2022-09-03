@@ -51,7 +51,7 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      */
     @Override
     public String stringOf(OptionalBoolean x) {
-        return x == null || !x.isPresent() ? null : String.valueOf(x.get());
+        return x == null || x.isEmpty() ? null : String.valueOf(x.get());
     }
 
     /**
@@ -75,7 +75,7 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
     public OptionalBoolean get(ResultSet rs, int columnIndex) throws SQLException {
         final Object obj = rs.getObject(columnIndex);
 
-        return obj == null ? OptionalBoolean.empty() : OptionalBoolean.of(obj instanceof Boolean ? (Boolean) obj : N.parseBoolean(obj.toString()));
+        return obj == null ? OptionalBoolean.empty() : OptionalBoolean.of(obj instanceof Boolean ? (Boolean) obj : N.convert(obj, Boolean.class));
     }
 
     /**
@@ -89,7 +89,7 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
     public OptionalBoolean get(ResultSet rs, String columnLabel) throws SQLException {
         final Object obj = rs.getObject(columnLabel);
 
-        return obj == null ? OptionalBoolean.empty() : OptionalBoolean.of(obj instanceof Boolean ? (Boolean) obj : N.parseBoolean(obj.toString()));
+        return obj == null ? OptionalBoolean.empty() : OptionalBoolean.of(obj instanceof Boolean ? (Boolean) obj : N.convert(obj, Boolean.class));
     }
 
     /**
@@ -101,7 +101,7 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      */
     @Override
     public void set(PreparedStatement stmt, int columnIndex, OptionalBoolean x) throws SQLException {
-        if (x == null || !x.isPresent()) {
+        if (x == null || x.isEmpty()) {
             stmt.setNull(columnIndex, java.sql.Types.BOOLEAN);
         } else {
             stmt.setBoolean(columnIndex, x.get());
@@ -117,7 +117,7 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      */
     @Override
     public void set(CallableStatement stmt, String parameterName, OptionalBoolean x) throws SQLException {
-        if (x == null || !x.isPresent()) {
+        if (x == null || x.isEmpty()) {
             stmt.setNull(parameterName, java.sql.Types.BOOLEAN);
         } else {
             stmt.setBoolean(parameterName, x.get());
@@ -132,7 +132,7 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      */
     @Override
     public void write(Writer writer, OptionalBoolean x) throws IOException {
-        writer.write((x == null || !x.isPresent()) ? NULL_CHAR_ARRAY : (x.get() ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY));
+        writer.write((x == null || x.isEmpty()) ? NULL_CHAR_ARRAY : (x.get() ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY));
     }
 
     /**
@@ -144,6 +144,6 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      */
     @Override
     public void writeCharacter(CharacterWriter writer, OptionalBoolean x, SerializationConfig<?> config) throws IOException {
-        writer.write((x == null || !x.isPresent()) ? NULL_CHAR_ARRAY : (x.get() ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY));
+        writer.write((x == null || x.isEmpty()) ? NULL_CHAR_ARRAY : (x.get() ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY));
     }
 }

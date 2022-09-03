@@ -89,7 +89,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      */
     @Override
     public String stringOf(Nullable<T> x) {
-        return (x == null || !x.isPresent() || x.get() == null) ? null : N.stringOf(x.get()); // elementType.stringOf(x.get());
+        return (x == null || x.isNull()) ? null : N.stringOf(x.get()); // elementType.stringOf(x.get());
     }
 
     /**
@@ -141,7 +141,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      */
     @Override
     public void set(PreparedStatement stmt, int columnIndex, Nullable<T> x) throws SQLException {
-        stmt.setObject(columnIndex, (x == null || !x.isPresent() || x.get() == null) ? null : x.get());
+        stmt.setObject(columnIndex, (x == null || x.isNull()) ? null : x.get());
     }
 
     /**
@@ -153,7 +153,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      */
     @Override
     public void set(CallableStatement stmt, String parameterName, Nullable<T> x) throws SQLException {
-        stmt.setObject(parameterName, (x == null || !x.isPresent() || x.get() == null) ? null : x.get());
+        stmt.setObject(parameterName, (x == null || x.isNull()) ? null : x.get());
     }
 
     /**
@@ -164,7 +164,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      */
     @Override
     public void write(Writer writer, Nullable<T> x) throws IOException {
-        if (x == null || !x.isPresent() || x.get() == null) {
+        if (x == null || x.isNull()) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
             // elementType.write(writer, x.get());
@@ -181,7 +181,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      */
     @Override
     public void writeCharacter(CharacterWriter writer, Nullable<T> x, SerializationConfig<?> config) throws IOException {
-        if (x == null || !x.isPresent() || x.get() == null) {
+        if (x == null || x.isNull()) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
             // elementType.writeCharacter(writer, x.get(), config);
