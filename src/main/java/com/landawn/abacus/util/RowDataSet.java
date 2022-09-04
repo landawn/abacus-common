@@ -3750,8 +3750,28 @@ public class RowDataSet implements DataSet, Cloneable {
                         }
                         throw new IllegalArgumentException("Property " + propName + " is not found in class: " + entityClass);
                     }
+
                     final String realPropName = propName.substring(0, idx);
                     propInfo = entityInfo.getPropInfo(realPropName);
+
+                    if (propInfo == null) {
+                        propInfo = entityInfo.getPropInfo(realPropName + "s"); // Trying to do something smart?
+
+                        if (propInfo != null && (propInfo.type.isEntity() || (propInfo.type.isCollection() && propInfo.type.getElementType().isEntity()))
+                                && N.noneMatch(this._columnNameList, Fn.startsWith(realPropName + "s."))) {
+                            // good
+                        } else {
+                            propInfo = entityInfo.getPropInfo(realPropName + "es"); // Trying to do something smart?
+
+                            if (propInfo != null && (propInfo.type.isEntity() || (propInfo.type.isCollection() && propInfo.type.getElementType().isEntity()))
+                                    && N.noneMatch(this._columnNameList, Fn.startsWith(realPropName + "es."))) {
+                                // good
+                            } else {
+                                // Sorry, have done all I can do.
+                                propInfo = null;
+                            }
+                        }
+                    }
 
                     if (propInfo == null) {
                         if (ignoreUnmatchedProperty) {
@@ -3760,6 +3780,7 @@ public class RowDataSet implements DataSet, Cloneable {
                             throw new IllegalArgumentException("Property " + propName + " is not found in class: " + entityClass);
                         }
                     }
+
                     final Type<?> propEntityType = propInfo.type.isCollection() ? propInfo.type.getElementType() : propInfo.type;
 
                     if (!propEntityType.isEntity()) {

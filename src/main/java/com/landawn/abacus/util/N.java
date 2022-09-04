@@ -22,6 +22,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -10684,6 +10686,84 @@ public final class N extends CommonUtil {
     }
 
     /**
+     *
+     * @param c
+     * @return
+     */
+    public static BigInteger sumBigInteger(final Iterable<? extends BigInteger> c) {
+        return sumBigInteger(c, Fn.identity());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> BigInteger sumBigInteger(final Iterable<? extends T> c, final Throwables.Function<? super T, BigInteger, E> func)
+            throws E {
+        if (c == null) {
+            return BigInteger.ZERO;
+        }
+
+        final Iterator<? extends T> iter = c.iterator();
+        BigInteger result = BigInteger.ZERO;
+        BigInteger next = null;
+
+        while (iter.hasNext()) {
+            next = func.apply(iter.next());
+
+            if (next != null) {
+                result = result.add(next);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param c
+     * @return
+     */
+    public static BigDecimal sumBigDecimal(final Iterable<? extends BigDecimal> c) {
+        return sumBigDecimal(c, Fn.identity());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> BigDecimal sumBigDecimal(final Iterable<? extends T> c, final Throwables.Function<? super T, BigDecimal, E> func)
+            throws E {
+        if (c == null) {
+            return BigDecimal.ZERO;
+        }
+
+        final Iterator<? extends T> iter = c.iterator();
+        BigDecimal result = BigDecimal.ZERO;
+        BigDecimal next = null;
+
+        while (iter.hasNext()) {
+            next = func.apply(iter.next());
+
+            if (next != null) {
+                result = result.add(next);
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Returns {@code 0} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
      * @param <T>
@@ -11123,6 +11203,88 @@ public final class N extends CommonUtil {
         }
 
         return Iterables.averageDouble(c, fromIndex, toIndex, func).orElseZero();
+    }
+
+    /**
+     *
+     * @param c
+     * @return
+     */
+    public static BigDecimal averageBigInteger(final Iterable<? extends BigInteger> c) {
+        return averageBigInteger(c, Fn.identity());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> BigDecimal averageBigInteger(final Iterable<? extends T> c, final Throwables.Function<? super T, BigInteger, E> func)
+            throws E {
+        if (c == null) {
+            return BigDecimal.ZERO;
+        }
+
+        final Iterator<? extends T> iter = c.iterator();
+        BigInteger sum = BigInteger.ZERO;
+        long cnt = 0;
+        BigInteger next = null;
+
+        while (iter.hasNext()) {
+            next = func.apply(iter.next());
+
+            if (next != null) {
+                sum = sum.add(next);
+                cnt++;
+            }
+        }
+
+        return cnt == 0 ? BigDecimal.ZERO : new BigDecimal(sum).divide(BigDecimal.valueOf(cnt));
+    }
+
+    /**
+     *
+     * @param c
+     * @return
+     */
+    public static BigDecimal averageBigDecimal(final Iterable<? extends BigDecimal> c) {
+        return averageBigDecimal(c, Fn.identity());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> BigDecimal averageBigDecimal(final Iterable<? extends T> c, final Throwables.Function<? super T, BigDecimal, E> func)
+            throws E {
+        if (c == null) {
+            return BigDecimal.ZERO;
+        }
+
+        final Iterator<? extends T> iter = c.iterator();
+        BigDecimal sum = BigDecimal.ZERO;
+        long cnt = 0;
+        BigDecimal next = null;
+
+        while (iter.hasNext()) {
+            next = func.apply(iter.next());
+
+            if (next != null) {
+                sum = sum.add(next);
+                cnt++;
+            }
+        }
+
+        return cnt == 0 ? BigDecimal.ZERO : sum.divide(BigDecimal.valueOf(cnt));
     }
 
     /**

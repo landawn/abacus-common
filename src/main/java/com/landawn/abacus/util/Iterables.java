@@ -16,6 +16,8 @@
 
 package com.landawn.abacus.util;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.AbstractCollection;
 import java.util.AbstractList;
 import java.util.AbstractSet;
@@ -643,6 +645,218 @@ public final class Iterables {
     }
 
     /**
+     * Returns {@code OptionalLong.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     *
+     * @param <T>
+     * @param c
+     * @return
+     */
+    public static <T extends Number> OptionalLong sumInt(final Iterable<? extends T> c) {
+        return sumInt(c, Fn.numToInt());
+    }
+
+    /**
+     * Returns {@code OptionalLong.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> OptionalLong sumInt(final Iterable<? extends T> c, final Throwables.ToIntFunction<? super T, E> func) throws E {
+        if (c == null) {
+            return OptionalLong.empty();
+        }
+
+        final Iterator<? extends T> iter = c.iterator();
+
+        if (iter.hasNext() == false) {
+            return OptionalLong.empty();
+        }
+
+        long result = 0;
+
+        do {
+            result += func.applyAsInt(iter.next());
+        } while (iter.hasNext());
+
+        return OptionalLong.of(result);
+    }
+
+    /**
+     * Returns {@code OptionalLong.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     *
+     * @param <T>
+     * @param c
+     * @return
+     */
+    public static <T extends Number> OptionalLong sumLong(final Iterable<? extends T> c) {
+        return sumLong(c, Fn.numToLong());
+    }
+
+    /**
+     * Returns {@code OptionalLong.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> OptionalLong sumLong(final Iterable<? extends T> c, final Throwables.ToLongFunction<? super T, E> func) throws E {
+        if (c == null) {
+            return OptionalLong.empty();
+        }
+
+        final Iterator<? extends T> iter = c.iterator();
+
+        if (iter.hasNext() == false) {
+            return OptionalLong.empty();
+        }
+
+        long result = 0;
+
+        do {
+            result += func.applyAsLong(iter.next());
+        } while (iter.hasNext());
+
+        return OptionalLong.of(result);
+    }
+
+    /**
+     * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     *
+     * @param <T>
+     * @param c
+     * @return
+     */
+    public static <T extends Number> OptionalDouble sumDouble(final Iterable<? extends T> c) {
+        return sumDouble(c, Fn.numToDouble());
+    }
+
+    /**
+     * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> OptionalDouble sumDouble(final Iterable<? extends T> c, final Throwables.ToDoubleFunction<? super T, E> func)
+            throws E {
+        if (c == null) {
+            return OptionalDouble.empty();
+        }
+
+        final Iterator<? extends T> iter = c.iterator();
+
+        if (iter.hasNext() == false) {
+            return OptionalDouble.empty();
+        }
+
+        double result = 0;
+
+        do {
+            result += func.applyAsDouble(iter.next());
+        } while (iter.hasNext());
+
+        return OptionalDouble.of(result);
+    }
+
+    /**
+     *
+     * @param c
+     * @return
+     */
+    public static Optional<BigInteger> sumBigInteger(final Iterable<? extends BigInteger> c) {
+        return sumBigInteger(c, Fn.identity());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> Optional<BigInteger> sumBigInteger(final Iterable<? extends T> c,
+            final Throwables.Function<? super T, BigInteger, E> func) throws E {
+        if (c == null) {
+            return Optional.empty();
+        }
+
+        final Iterator<? extends T> iter = c.iterator();
+
+        if (iter.hasNext() == false) {
+            return Optional.empty();
+        }
+
+        BigInteger result = BigInteger.ZERO;
+        BigInteger next = null;
+
+        do {
+            next = func.apply(iter.next());
+
+            if (next != null) {
+                result = result.add(next);
+            }
+        } while (iter.hasNext());
+
+        return Optional.of(result);
+    }
+
+    /**
+     *
+     * @param c
+     * @return
+     */
+    public static Optional<BigDecimal> sumBigDecimal(final Iterable<? extends BigDecimal> c) {
+        return sumBigDecimal(c, Fn.identity());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> Optional<BigDecimal> sumBigDecimal(final Iterable<? extends T> c,
+            final Throwables.Function<? super T, BigDecimal, E> func) throws E {
+        if (c == null) {
+            return Optional.empty();
+        }
+
+        final Iterator<? extends T> iter = c.iterator();
+
+        if (iter.hasNext() == false) {
+            return Optional.empty();
+        }
+
+        BigDecimal result = BigDecimal.ZERO;
+        BigDecimal next = null;
+
+        do {
+            next = func.apply(iter.next());
+
+            if (next != null) {
+                result = result.add(next);
+            }
+        } while (iter.hasNext());
+
+        return Optional.of(result);
+    }
+
+    /**
      * Returns {@code OptionalDouble.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or {@code fromIndex == toIndex}.
      *
      * @param <T>
@@ -1085,6 +1299,98 @@ public final class Iterables {
         }
 
         return summation.average();
+    }
+
+    /**
+     *
+     * @param c
+     * @return
+     */
+    public static Optional<BigDecimal> averageBigInteger(final Iterable<? extends BigInteger> c) {
+        return averageBigInteger(c, Fn.identity());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> Optional<BigDecimal> averageBigInteger(final Iterable<? extends T> c,
+            final Throwables.Function<? super T, BigInteger, E> func) throws E {
+        if (c == null) {
+            return Optional.empty();
+        }
+
+        final Iterator<? extends T> iter = c.iterator();
+
+        if (iter.hasNext() == false) {
+            return Optional.empty();
+        }
+
+        BigInteger sum = BigInteger.ZERO;
+        long cnt = 0;
+        BigInteger next = null;
+
+        do {
+            next = func.apply(iter.next());
+
+            if (next != null) {
+                sum = sum.add(next);
+                cnt++;
+            }
+        } while (iter.hasNext());
+
+        return cnt == 0 ? Optional.of(BigDecimal.ZERO) : Optional.of(new BigDecimal(sum).divide(BigDecimal.valueOf(cnt)));
+    }
+
+    /**
+     *
+     * @param c
+     * @return
+     */
+    public static Optional<BigDecimal> averageBigDecimal(final Iterable<? extends BigDecimal> c) {
+        return averageBigDecimal(c, Fn.identity());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param func
+     * @return
+     * @throws E the e
+     */
+    public static <T, E extends Exception> Optional<BigDecimal> averageBigDecimal(final Iterable<? extends T> c,
+            final Throwables.Function<? super T, BigDecimal, E> func) throws E {
+        if (c == null) {
+            return Optional.empty();
+        }
+
+        final Iterator<? extends T> iter = c.iterator();
+
+        if (iter.hasNext() == false) {
+            return Optional.empty();
+        }
+
+        BigDecimal sum = BigDecimal.ZERO;
+        long cnt = 0;
+        BigDecimal next = null;
+
+        do {
+            next = func.apply(iter.next());
+
+            if (next != null) {
+                sum = sum.add(next);
+                cnt++;
+            }
+        } while (iter.hasNext());
+
+        return cnt == 0 ? Optional.of(BigDecimal.ZERO) : Optional.of(sum.divide(BigDecimal.valueOf(cnt)));
     }
 
     public static OptionalInt indexOf(final Object[] a, final Object objToFind) {
