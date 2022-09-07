@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util;
 
+import com.landawn.abacus.annotation.Beta;
+
 /**
  * Catch checked exception and convert it to <code>RuntimeException</code>.
  *
@@ -179,6 +181,17 @@ public final class Throwables {
          * @throws E the e
          */
         void run() throws E;
+
+        @Beta
+        default com.landawn.abacus.util.function.Runnable unchecked() {
+            return () -> {
+                try {
+                    run();
+                } catch (Throwable e) {
+                    throw ExceptionUtil.toRuntimeException(e);
+                }
+            };
+        }
     }
 
     /**
@@ -195,6 +208,17 @@ public final class Throwables {
          * @throws E the e
          */
         R call() throws E;
+
+        @Beta
+        default com.landawn.abacus.util.function.Callable<R> unchecked() {
+            return () -> {
+                try {
+                    return call();
+                } catch (Throwable e) {
+                    throw ExceptionUtil.toRuntimeException(e);
+                }
+            };
+        }
     }
 
     /**
@@ -211,6 +235,17 @@ public final class Throwables {
          * @throws E the e
          */
         T get() throws E;
+
+        @Beta
+        default com.landawn.abacus.util.function.Supplier<T> unchecked() {
+            return () -> {
+                try {
+                    return get();
+                } catch (Throwable e) {
+                    throw ExceptionUtil.toRuntimeException(e);
+                }
+            };
+        }
     }
 
     /**
@@ -360,6 +395,17 @@ public final class Throwables {
         default Predicate<T, E> negate() {
             return t -> !test(t);
         }
+
+        @Beta
+        default com.landawn.abacus.util.function.Predicate<T> unchecked() {
+            return t -> {
+                try {
+                    return test(t);
+                } catch (Throwable e) {
+                    throw ExceptionUtil.toRuntimeException(e);
+                }
+            };
+        }
     }
 
     /**
@@ -379,6 +425,17 @@ public final class Throwables {
          * @throws E the e
          */
         boolean test(T t, U u) throws E;
+
+        @Beta
+        default com.landawn.abacus.util.function.BiPredicate<T, U> unchecked() {
+            return (t, u) -> {
+                try {
+                    return test(t, u);
+                } catch (Throwable e) {
+                    throw ExceptionUtil.toRuntimeException(e);
+                }
+            };
+        }
     }
 
     /**
@@ -441,6 +498,17 @@ public final class Throwables {
          * @throws E the e
          */
         R apply(T t) throws E;
+
+        @Beta
+        default com.landawn.abacus.util.function.Function<T, R> unchecked() {
+            return t -> {
+                try {
+                    return apply(t);
+                } catch (Throwable e) {
+                    throw ExceptionUtil.toRuntimeException(e);
+                }
+            };
+        }
     }
 
     /**
@@ -461,6 +529,17 @@ public final class Throwables {
          * @throws E the e
          */
         R apply(T t, U u) throws E;
+
+        @Beta
+        default com.landawn.abacus.util.function.BiFunction<T, U, R> unchecked() {
+            return (t, u) -> {
+                try {
+                    return apply(t, u);
+                } catch (Throwable e) {
+                    throw ExceptionUtil.toRuntimeException(e);
+                }
+            };
+        }
     }
 
     /**
@@ -523,6 +602,17 @@ public final class Throwables {
          * @throws E the e
          */
         void accept(T t) throws E;
+
+        @Beta
+        default com.landawn.abacus.util.function.Consumer<T> unchecked() {
+            return t -> {
+                try {
+                    accept(t);
+                } catch (Throwable e) {
+                    throw ExceptionUtil.toRuntimeException(e);
+                }
+            };
+        }
     }
 
     /**
@@ -541,6 +631,17 @@ public final class Throwables {
          * @throws E the e
          */
         void accept(T t, U u) throws E;
+
+        @Beta
+        default com.landawn.abacus.util.function.BiConsumer<T, U> unchecked() {
+            return (t, u) -> {
+                try {
+                    accept(t, u);
+                } catch (Throwable e) {
+                    throw ExceptionUtil.toRuntimeException(e);
+                }
+            };
+        }
     }
 
     /**

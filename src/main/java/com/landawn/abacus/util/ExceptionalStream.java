@@ -232,11 +232,28 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * Returns an empty {@code Stream} if the specified {@code t} is null.
+     *
+     * @param <T>
+     * @param <E>
+     * @param e
+     * @return
+     */
+    public static <T, E extends Exception> ExceptionalStream<T, E> ofNullable(final T e, @SuppressWarnings("unused") final Class<E> exceptionType) {
+        if (e == null) {
+            return empty();
+        }
+
+        return of(e);
+    }
+
+    /**
      *
      * @param <T>
      * @param <E>
      * @param a
      * @return
+     * @see Stream.of(T[]).checked(SomeCheckedException.class)...
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> of(final T... a) {
         if (N.isNullOrEmpty(a)) {
@@ -12221,9 +12238,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param <T>
      * @param <E>
      */
-    public static final class StreamE<T, E extends Exception> extends ExceptionalStream<T, E> {
+    public static final class CheckedStream<T, E extends Exception> extends ExceptionalStream<T, E> {
 
-        StreamE(ExceptionalIterator<T, E> iter, boolean sorted, Comparator<? super T> comparator, Deque<Throwables.Runnable<? extends E>> closeHandlers) {
+        CheckedStream(ExceptionalIterator<T, E> iter, boolean sorted, Comparator<? super T> comparator, Deque<Throwables.Runnable<? extends E>> closeHandlers) {
             super(iter, sorted, comparator, closeHandlers);
         }
     }
