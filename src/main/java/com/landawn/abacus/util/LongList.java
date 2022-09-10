@@ -2230,7 +2230,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @throws E the e
      */
     @Override
-    public <R, E extends Exception> R apply(Throwables.Function<? super LongList, R, E> func) throws E {
+    public <R, E extends Exception> R apply(Throwables.Function<? super LongList, ? extends R, E> func) throws E {
         return func.apply(this);
     }
 
@@ -2244,7 +2244,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @throws E the e
      */
     @Override
-    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Function<? super LongList, R, E> func) throws E {
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Function<? super LongList, ? extends R, E> func) throws E {
         return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
     }
 

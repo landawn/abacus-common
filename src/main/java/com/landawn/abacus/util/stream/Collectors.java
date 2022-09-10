@@ -3426,7 +3426,7 @@ public abstract class Collectors {
         }
     }
 
-    public static abstract class MoreCollectors extends Collectors {
+    public abstract static class MoreCollectors extends Collectors {
         protected MoreCollectors() {
             // for extension.
         }
@@ -3930,9 +3930,9 @@ public abstract class Collectors {
         public static <T> Collector<T, ?, DataSet> toDataSet(final List<String> columnNames) {
             @SuppressWarnings("rawtypes")
             final Collector<T, List<T>, List<T>> collector = (Collector) Collectors.toList();
-        
+
             final Function<List<T>, DataSet> finisher = t -> N.newDataSet(columnNames, t);
-        
+
             return new Collectors.CollectorImpl<>(collector.supplier(), collector.accumulator(), collector.combiner(), finisher, Collectors.CH_NOID);
         }
     }

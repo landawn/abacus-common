@@ -141,7 +141,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, String st) {
+    public <T> T deserialize(Class<? extends T> targetClass, String st) {
         return deserialize(targetClass, st, null);
     }
 
@@ -153,7 +153,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, File file) {
+    public <T> T deserialize(Class<? extends T> targetClass, File file) {
         return deserialize(targetClass, file, null);
     }
 
@@ -165,7 +165,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, InputStream is) {
+    public <T> T deserialize(Class<? extends T> targetClass, InputStream is) {
         return deserialize(targetClass, is, null);
     }
 
@@ -177,7 +177,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, Reader reader) {
+    public <T> T deserialize(Class<? extends T> targetClass, Reader reader) {
         return deserialize(targetClass, reader, null);
     }
 

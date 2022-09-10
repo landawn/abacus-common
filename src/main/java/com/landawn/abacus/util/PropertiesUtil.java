@@ -326,7 +326,7 @@ public final class PropertiesUtil {
      * @param file
      * @return
      */
-    public static <T extends Properties<String, Object>> T loadFromXML(Class<T> targetClass, File file) {
+    public static <T extends Properties<String, Object>> T loadFromXML(Class<? extends T> targetClass, File file) {
         return loadFromXML(targetClass, file, false);
     }
 
@@ -339,7 +339,7 @@ public final class PropertiesUtil {
      * @param autoRefresh
      * @return
      */
-    public static <T extends Properties<String, Object>> T loadFromXML(Class<T> targetClass, File file, boolean autoRefresh) {
+    public static <T extends Properties<String, Object>> T loadFromXML(Class<? extends T> targetClass, File file, boolean autoRefresh) {
         T properties = null;
         InputStream is = null;
 
@@ -377,7 +377,7 @@ public final class PropertiesUtil {
      * @param is
      * @return
      */
-    public static <T extends Properties<String, Object>> T loadFromXML(Class<T> targetClass, InputStream is) {
+    public static <T extends Properties<String, Object>> T loadFromXML(Class<? extends T> targetClass, InputStream is) {
         return loadFromXML(null, targetClass, is);
     }
 
@@ -390,7 +390,7 @@ public final class PropertiesUtil {
      * @param is
      * @return
      */
-    private static <T extends Properties<String, Object>> T loadFromXML(Object targetProperties, Class<T> targetClass, InputStream is) {
+    private static <T extends Properties<String, Object>> T loadFromXML(Object targetProperties, Class<? extends T> targetClass, InputStream is) {
         DocumentBuilder docBuilder = XMLUtil.createDOMParser(true, true);
 
         Document doc;

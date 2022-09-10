@@ -82,7 +82,7 @@ interface JSONReader {
      * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    <T> T readValue(Type<T> type) throws IOException;
+    <T> T readValue(Type<? extends T> type) throws IOException;
 
     /**
      * Read prop info.

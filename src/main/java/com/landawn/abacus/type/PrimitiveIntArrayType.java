@@ -34,7 +34,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
 
     public static final String INT_ARRAY = int[].class.getSimpleName();
 
-    private static Type<Integer> elementType;
+    private Type<Integer> elementType;
 
     PrimitiveIntArrayType() {
         super(INT_ARRAY);

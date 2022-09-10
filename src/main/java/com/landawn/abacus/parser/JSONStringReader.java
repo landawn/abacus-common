@@ -504,7 +504,7 @@ class JSONStringReader extends AbstractJSONReader {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T readValue(Type<T> type) throws IOException {
+    public <T> T readValue(Type<? extends T> type) throws IOException {
         if (nextEvent != END_QUOTATION_D && nextEvent != END_QUOTATION_S) {
             if (numValue != null) {
                 if (type.isObjectType() || type.clazz().equals(numValue.getClass())) {

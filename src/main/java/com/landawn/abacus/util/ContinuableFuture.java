@@ -442,7 +442,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param func
      * @return
      */
-    public <U, E extends Exception> ContinuableFuture<U> map(final Throwables.Function<? super T, U, E> func) {
+    public <U, E extends Exception> ContinuableFuture<U> map(final Throwables.Function<? super T, ? extends U, E> func) {
         return new ContinuableFuture<>(new Future<U>() {
             @Override
             public boolean cancel(boolean mayInterruptIfRunning) {
@@ -554,7 +554,7 @@ public class ContinuableFuture<T> implements Future<T> {
     //        });
     //    }
     //
-    //    public <U, R> ContinuableFuture<R> thenCombine(final ContinuableFuture<U> other, final BiFunction<? super T, ? super U, R> action) {
+    //    public <U, R> ContinuableFuture<R> thenCombine(final ContinuableFuture<U> other, final BiFunction<? super T, ? super U, ? extends R> action) {
     //        return new ContinuableFuture<R>(new Future<R>() {
     //            @Override
     //            public boolean cancel(boolean mayInterruptIfRunning) {
@@ -600,7 +600,7 @@ public class ContinuableFuture<T> implements Future<T> {
     //        };
     //    }
     //
-    //    public <U, R> ContinuableFuture<R> thenCombine(final ContinuableFuture<U> other, final Function<? super Tuple4<T, ? super Exception, U, ? super Exception>, R> action) {
+    //    public <U, R> ContinuableFuture<R> thenCombine(final ContinuableFuture<U> other, final Function<? super Tuple4<T, ? super Exception, U, ? super Exception>, ? extends R> action) {
     //        return new ContinuableFuture<R>(new Future<R>() {
     //            @Override
     //            public boolean cancel(boolean mayInterruptIfRunning) {
@@ -731,7 +731,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action
      * @return
      */
-    public <R, E extends Exception> ContinuableFuture<R> thenCall(final Throwables.Function<? super T, R, E> action) {
+    public <R, E extends Exception> ContinuableFuture<R> thenCall(final Throwables.Function<? super T, ? extends R, E> action) {
         return execute(() -> action.apply(get()));
     }
 
@@ -742,7 +742,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action
      * @return
      */
-    public <R, E extends Exception> ContinuableFuture<R> thenCall(final Throwables.BiFunction<? super T, ? super Exception, R, E> action) {
+    public <R, E extends Exception> ContinuableFuture<R> thenCall(final Throwables.BiFunction<? super T, ? super Exception, ? extends R, E> action) {
         return execute(() -> {
             final Result<T, Exception> result = gett();
             return action.apply(result.orElseIfFailure(null), result.getExceptionIfPresent());
@@ -852,7 +852,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @return
      */
     public <U, R, E extends Exception> ContinuableFuture<R> callAfterBoth(final ContinuableFuture<U> other,
-            final Throwables.BiFunction<? super T, ? super U, R, E> action) {
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, E> action) {
         return execute(() -> action.apply(get(), other.get()), other);
     }
 
@@ -867,7 +867,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @return
      */
     public <U, R, E extends Exception> ContinuableFuture<R> callAfterBoth(final ContinuableFuture<U> other,
-            final Throwables.Function<? super Tuple4<T, ? super Exception, U, ? super Exception>, R, E> action) {
+            final Throwables.Function<? super Tuple4<T, ? super Exception, U, ? super Exception>, ? extends R, E> action) {
         return execute(() -> {
             final Result<T, Exception> result = gett();
             final Result<U, Exception> result2 = other.gett();
@@ -888,7 +888,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @return
      */
     public <U, R, E extends Exception> ContinuableFuture<R> callAfterBoth(final ContinuableFuture<U> other,
-            final Throwables.QuadFunction<T, ? super Exception, U, ? super Exception, R, E> action) {
+            final Throwables.QuadFunction<T, ? super Exception, U, ? super Exception, ? extends R, E> action) {
         return execute(() -> {
             final Result<T, Exception> result = gett();
             final Result<U, Exception> result2 = other.gett();
@@ -977,7 +977,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @return
      */
     public <R, E extends Exception> ContinuableFuture<R> callAfterEither(final ContinuableFuture<? extends T> other,
-            final Throwables.Function<? super T, R, E> action) {
+            final Throwables.Function<? super T, ? extends R, E> action) {
         return execute(() -> {
             final T result = Futures.anyOf(Array.asList(ContinuableFuture.this, other)).get();
 
@@ -995,7 +995,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @return
      */
     public <R, E extends Exception> ContinuableFuture<R> callAfterEither(final ContinuableFuture<? extends T> other,
-            final Throwables.BiFunction<? super T, ? super Exception, R, E> action) {
+            final Throwables.BiFunction<? super T, ? super Exception, ? extends R, E> action) {
         return execute(() -> {
             final Result<T, Exception> result = Futures.anyOf(Array.asList(ContinuableFuture.this, other)).gett();
 

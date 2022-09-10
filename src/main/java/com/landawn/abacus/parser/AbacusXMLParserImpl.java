@@ -847,7 +847,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, String st, final XMLDeserializationConfig config) {
+    public <T> T deserialize(Class<? extends T> targetClass, String st, final XMLDeserializationConfig config) {
         if (N.isNullOrEmpty(st)) {
             return N.defaultValueOf(targetClass);
         }
@@ -870,7 +870,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, File file, final XMLDeserializationConfig config) {
+    public <T> T deserialize(Class<? extends T> targetClass, File file, final XMLDeserializationConfig config) {
         InputStream is = null;
 
         try {
@@ -891,7 +891,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, InputStream is, final XMLDeserializationConfig config) {
+    public <T> T deserialize(Class<? extends T> targetClass, InputStream is, final XMLDeserializationConfig config) {
         final BufferedReader br = Objectory.createBufferedReader(is);
 
         try {
@@ -910,7 +910,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, Reader reader, final XMLDeserializationConfig config) {
+    public <T> T deserialize(Class<? extends T> targetClass, Reader reader, final XMLDeserializationConfig config) {
         // BufferedReader? will the target parser create the BufferedReader
         // internally.
         return read(null, targetClass, reader, config);
@@ -925,7 +925,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, Node node, final XMLDeserializationConfig config) {
+    public <T> T deserialize(Class<? extends T> targetClass, Node node, final XMLDeserializationConfig config) {
         return readByDOMParser(targetClass, node, config);
     }
 
@@ -985,7 +985,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
      * @return
      */
     @SuppressWarnings("unchecked")
-    protected <T> T read(Map<String, Class<?>> nodeClasses, Class<T> targetClass, Reader br, final XMLDeserializationConfig config) {
+    protected <T> T read(Map<String, Class<?>> nodeClasses, Class<? extends T> targetClass, Reader br, final XMLDeserializationConfig config) {
         final XMLDeserializationConfig configToUse = check(config);
 
         switch (parserType) {
@@ -1849,7 +1849,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
      * @param config
      * @return
      */
-    protected <T> T readByDOMParser(Class<T> targetClass, Node node, final XMLDeserializationConfig config) {
+    protected <T> T readByDOMParser(Class<? extends T> targetClass, Node node, final XMLDeserializationConfig config) {
         final XMLDeserializationConfig configToUse = check(config);
 
         return readByDOMParser(targetClass, node, configToUse, null, configToUse.getElementType(), false, false, false, true);
@@ -2374,7 +2374,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
      * @return
      */
     @SuppressWarnings("unchecked")
-    private static <T> XmlSAXHandler<T> getXmlSAXHandler(Map<String, Class<?>> nodeClasses, Class<T> targetClass, final XMLDeserializationConfig config) {
+    private static <T> XmlSAXHandler<T> getXmlSAXHandler(Map<String, Class<?>> nodeClasses, Class<? extends T> targetClass,
+            final XMLDeserializationConfig config) {
         XmlSAXHandler<T> xmlSAXHandler = (XmlSAXHandler<T>) xmlSAXHandlerPool.poll();
 
         if (xmlSAXHandler == null) {
@@ -2382,7 +2383,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
 
         xmlSAXHandler.nodeClasses = nodeClasses;
-        xmlSAXHandler.inputClass = targetClass;
+        xmlSAXHandler.inputClass = (Class<T>) targetClass;
         xmlSAXHandler.setConfig(config);
 
         return xmlSAXHandler;

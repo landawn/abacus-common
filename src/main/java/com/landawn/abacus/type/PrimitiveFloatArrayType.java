@@ -34,7 +34,7 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
 
     public static final String FLOAT_ARRAY = float[].class.getSimpleName();
 
-    private static Type<Float> elementType;
+    private Type<Float> elementType;
 
     PrimitiveFloatArrayType() {
         super(FLOAT_ARRAY);

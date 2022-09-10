@@ -37,7 +37,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
 
     public static final String CHAR_ARRAY = char[].class.getSimpleName();
 
-    private static Type<Character> elementType;
+    private Type<Character> elementType;
 
     PrimitiveCharArrayType() {
         super(CHAR_ARRAY);

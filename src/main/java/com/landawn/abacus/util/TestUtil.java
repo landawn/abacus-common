@@ -104,7 +104,7 @@ public final class TestUtil {
      * @param entityClass entity class with getter/setter methods
      * @return
      */
-    public static <T> T fill(final Class<T> entityClass) {
+    public static <T> T fill(final Class<? extends T> entityClass) {
         N.checkArgument(ClassUtil.isEntity(entityClass), "{} is not a valid entity class with property getter/setter method", entityClass);
 
         return fill(entityClass, ClassUtil.getPropNameList(entityClass));
@@ -118,7 +118,7 @@ public final class TestUtil {
      * @param count
      * @return
      */
-    public static <T> List<T> fill(final Class<T> entityClass, final int count) {
+    public static <T> List<T> fill(final Class<? extends T> entityClass, final int count) {
         N.checkArgument(ClassUtil.isEntity(entityClass), "{} is not a valid entity class with property getter/setter method", entityClass);
 
         return fill(entityClass, ClassUtil.getPropNameList(entityClass), count);
@@ -132,7 +132,7 @@ public final class TestUtil {
      * @param propNamesToFill
      * @return
      */
-    public static <T> T fill(final Class<T> entityClass, final Collection<String> propNamesToFill) {
+    public static <T> T fill(final Class<? extends T> entityClass, final Collection<String> propNamesToFill) {
         N.checkArgument(ClassUtil.isEntity(entityClass), "{} is not a valid entity class with property getter/setter method", entityClass);
 
         final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
@@ -152,7 +152,7 @@ public final class TestUtil {
      * @param count
      * @return
      */
-    public static <T> List<T> fill(final Class<T> entityClass, final Collection<String> propNamesToFill, final int count) {
+    public static <T> List<T> fill(final Class<? extends T> entityClass, final Collection<String> propNamesToFill, final int count) {
         N.checkArgument(ClassUtil.isEntity(entityClass), "{} is not a valid entity class with property getter/setter method", entityClass);
         N.checkArgNotNegative(count, "count");
 

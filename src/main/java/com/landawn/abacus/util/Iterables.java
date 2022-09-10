@@ -1684,7 +1684,7 @@ public final class Iterables {
         return false;
     }
 
-    public static abstract class SetView<E> extends ImmutableSet<E> {
+    public abstract static class SetView<E> extends ImmutableSet<E> {
         SetView(final Set<? extends E> set) {
             super(set);
         }

@@ -111,7 +111,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param source
      * @return
      */
-    <T> T deserialize(Class<T> targetClass, String source);
+    <T> T deserialize(Class<? extends T> targetClass, String source);
 
     /**
      *
@@ -121,7 +121,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param config
      * @return
      */
-    <T> T deserialize(Class<T> targetClass, String source, DC config);
+    <T> T deserialize(Class<? extends T> targetClass, String source, DC config);
 
     /**
      *
@@ -131,28 +131,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    <T> T deserialize(Class<T> targetClass, File source) throws UncheckedIOException;
-
-    /**
-     *
-     * @param <T>
-     * @param targetClass
-     * @param source
-     * @param config
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    <T> T deserialize(Class<T> targetClass, File source, DC config) throws UncheckedIOException;
-
-    /**
-     *
-     * @param <T>
-     * @param targetClass
-     * @param source
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    <T> T deserialize(Class<T> targetClass, InputStream source) throws UncheckedIOException;
+    <T> T deserialize(Class<? extends T> targetClass, File source) throws UncheckedIOException;
 
     /**
      *
@@ -163,7 +142,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    <T> T deserialize(Class<T> targetClass, InputStream source, DC config) throws UncheckedIOException;
+    <T> T deserialize(Class<? extends T> targetClass, File source, DC config) throws UncheckedIOException;
 
     /**
      *
@@ -173,7 +152,7 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    <T> T deserialize(Class<T> targetClass, Reader source) throws UncheckedIOException;
+    <T> T deserialize(Class<? extends T> targetClass, InputStream source) throws UncheckedIOException;
 
     /**
      *
@@ -184,5 +163,26 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    <T> T deserialize(Class<T> targetClass, Reader source, DC config) throws UncheckedIOException;
+    <T> T deserialize(Class<? extends T> targetClass, InputStream source, DC config) throws UncheckedIOException;
+
+    /**
+     *
+     * @param <T>
+     * @param targetClass
+     * @param source
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    <T> T deserialize(Class<? extends T> targetClass, Reader source) throws UncheckedIOException;
+
+    /**
+     *
+     * @param <T>
+     * @param targetClass
+     * @param source
+     * @param config
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    <T> T deserialize(Class<? extends T> targetClass, Reader source, DC config) throws UncheckedIOException;
 }

@@ -237,7 +237,7 @@ public final class URLEncodedUtil {
      * @param urlQuery
      * @return
      */
-    public static <T> T decode(final Class<T> targetClass, final String urlQuery) {
+    public static <T> T decode(final Class<? extends T> targetClass, final String urlQuery) {
         return decode(targetClass, urlQuery, Charsets.UTF_8);
     }
 
@@ -249,7 +249,7 @@ public final class URLEncodedUtil {
      * @param charset
      * @return
      */
-    public static <T> T decode(final Class<T> targetClass, final String urlQuery, final Charset charset) {
+    public static <T> T decode(final Class<? extends T> targetClass, final String urlQuery, final Charset charset) {
         final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
         final Object result = entityInfo.createEntityResult();
 
@@ -300,7 +300,7 @@ public final class URLEncodedUtil {
      * @param parameters
      * @return
      */
-    public static <T> T parameters2Entity(final Class<T> targetClass, final Map<String, String[]> parameters) {
+    public static <T> T parameters2Entity(final Class<? extends T> targetClass, final Map<String, String[]> parameters) {
         final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
         final Object result = entityInfo.createEntityResult();
 

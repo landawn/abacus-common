@@ -187,7 +187,7 @@ final class JAXBParser extends AbstractXMLParser {
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, String st, XMLDeserializationConfig config) {
+    public <T> T deserialize(Class<? extends T> targetClass, String st, XMLDeserializationConfig config) {
         if (N.isNullOrEmpty(st)) {
             return N.defaultValueOf(targetClass);
         }
@@ -210,7 +210,7 @@ final class JAXBParser extends AbstractXMLParser {
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, File file, XMLDeserializationConfig config) {
+    public <T> T deserialize(Class<? extends T> targetClass, File file, XMLDeserializationConfig config) {
         InputStream is = null;
 
         try {
@@ -231,7 +231,7 @@ final class JAXBParser extends AbstractXMLParser {
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, InputStream is, XMLDeserializationConfig config) {
+    public <T> T deserialize(Class<? extends T> targetClass, InputStream is, XMLDeserializationConfig config) {
         final BufferedReader br = Objectory.createBufferedReader(is);
 
         try {
@@ -250,7 +250,7 @@ final class JAXBParser extends AbstractXMLParser {
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, Reader reader, XMLDeserializationConfig config) {
+    public <T> T deserialize(Class<? extends T> targetClass, Reader reader, XMLDeserializationConfig config) {
         //
         // BufferedReader br = ObjectFactory.createBufferedReader(reader);
         //
@@ -272,7 +272,7 @@ final class JAXBParser extends AbstractXMLParser {
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, Node node, XMLDeserializationConfig config) throws UnsupportedOperationException {
+    public <T> T deserialize(Class<? extends T> targetClass, Node node, XMLDeserializationConfig config) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -324,7 +324,7 @@ final class JAXBParser extends AbstractXMLParser {
      * @return
      */
     @SuppressWarnings("unchecked")
-    protected <T> T read(Class<T> targetClass, Reader reader, XMLDeserializationConfig config) {
+    protected <T> T read(Class<? extends T> targetClass, Reader reader, XMLDeserializationConfig config) {
         if (config != null && N.notNullOrEmpty(config.getIgnoredPropNames())) {
             throw new ParseException("'ignoredPropNames' is not supported");
         }

@@ -215,7 +215,7 @@ public interface DataSet {
      * @deprecated may be misused because it implies there is an underline auto-conversion from column values to target return type but actually there is not.
      */
     @Deprecated
-    <T> T get(Class<T> targetType, int rowIndex, int columnIndex);
+    <T> T get(Class<? extends T> targetType, int rowIndex, int columnIndex);
 
     /**
      *
@@ -271,7 +271,7 @@ public interface DataSet {
      * @deprecated may be misused because it implies there is an underline auto-conversion from column values to target return type but actually there is not.
      */
     @Deprecated
-    <T> T get(Class<T> targetType, int columnIndex);
+    <T> T get(Class<? extends T> targetType, int columnIndex);
 
     /**
      *
@@ -289,7 +289,7 @@ public interface DataSet {
      * @deprecated may be misused because it implies there is an underline auto-conversion from column values to target return type but actually there is not.
      */
     @Deprecated
-    <T> T get(Class<T> targetType, String columnName);
+    <T> T get(Class<? extends T> targetType, String columnName);
 
     /**
      * Returns the value from the current row and specified column if the specified {@code columnIndex} is equal or bigger than zero,
@@ -1529,7 +1529,7 @@ public interface DataSet {
      * @param entityClass
      * @return
      */
-    <T> List<T> toMergedEntities(Class<T> entityClass);
+    <T> List<T> toMergedEntities(Class<? extends T> entityClass);
 
     /**
      *
@@ -1538,7 +1538,7 @@ public interface DataSet {
      * @param selectPropNames
      * @return
      */
-    <T> List<T> toMergedEntities(Class<T> entityClass, Collection<String> selectPropNames);
+    <T> List<T> toMergedEntities(Class<? extends T> entityClass, Collection<String> selectPropNames);
 
     /**
      *
@@ -1547,7 +1547,7 @@ public interface DataSet {
      * @param idPropName
      * @return
      */
-    <T> List<T> toMergedEntities(Class<T> entityClass, String idPropName);
+    <T> List<T> toMergedEntities(Class<? extends T> entityClass, String idPropName);
 
     /**
      *
@@ -1557,7 +1557,7 @@ public interface DataSet {
      * @param selectPropNames
      * @return
      */
-    <T> List<T> toMergedEntities(Class<T> entityClass, String idPropName, Collection<String> selectPropNames);
+    <T> List<T> toMergedEntities(Class<? extends T> entityClass, String idPropName, Collection<String> selectPropNames);
 
     /**
      *
@@ -1567,7 +1567,7 @@ public interface DataSet {
      * @param selectPropNames
      * @return
      */
-    <T> List<T> toMergedEntities(Class<T> entityClass, Collection<String> idPropNames, Collection<String> selectPropNames);
+    <T> List<T> toMergedEntities(Class<? extends T> entityClass, Collection<String> idPropNames, Collection<String> selectPropNames);
 
     String toJSON();
 
@@ -3891,7 +3891,7 @@ public interface DataSet {
      * @return
      * @throws E the e
      */
-    <R, E extends Exception> R apply(Throwables.Function<? super DataSet, R, E> func) throws E;
+    <R, E extends Exception> R apply(Throwables.Function<? super DataSet, ? extends R, E> func) throws E;
 
     /**
      *

@@ -1546,7 +1546,7 @@ public final class Array {
      * @deprecated {@link #repeat(Object, int, Class)}
      */
     @Deprecated
-    public static <T> T[] repeat(final Class<T> elementClass, final T element, final int n) throws NullPointerException {
+    public static <T> T[] repeat(final Class<? extends T> elementClass, final T element, final int n) throws NullPointerException {
         final T[] a = N.newArray(elementClass, n);
         N.fill(a, element);
         return a;
@@ -1561,7 +1561,7 @@ public final class Array {
      * @return
      * @throws NullPointerException
      */
-    public static <T> T[] repeat(final T element, final int n, final Class<T> elementClass) throws NullPointerException {
+    public static <T> T[] repeat(final T element, final int n, final Class<? extends T> elementClass) throws NullPointerException {
         final T[] a = N.newArray(elementClass, n);
         N.fill(a, element);
         return a;

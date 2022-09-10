@@ -311,7 +311,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, String st, KryoDeserializationConfig config) {
+    public <T> T deserialize(Class<? extends T> targetClass, String st, KryoDeserializationConfig config) {
         Input input = createInput();
 
         try {
@@ -332,7 +332,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, File file, KryoDeserializationConfig config) {
+    public <T> T deserialize(Class<? extends T> targetClass, File file, KryoDeserializationConfig config) {
         InputStream is = null;
 
         try {
@@ -353,7 +353,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, InputStream is, KryoDeserializationConfig config) {
+    public <T> T deserialize(Class<? extends T> targetClass, InputStream is, KryoDeserializationConfig config) {
         return read(targetClass, is, config);
     }
 
@@ -366,7 +366,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, Reader reader, KryoDeserializationConfig config) {
+    public <T> T deserialize(Class<? extends T> targetClass, Reader reader, KryoDeserializationConfig config) {
         return deserialize(targetClass, IOUtil.readString(reader), config);
     }
 
@@ -378,7 +378,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @param config
      * @return
      */
-    protected <T> T read(Class<T> targetClass, InputStream is, KryoDeserializationConfig config) {
+    protected <T> T read(Class<? extends T> targetClass, InputStream is, KryoDeserializationConfig config) {
         Input input = createInput();
 
         try {
@@ -399,7 +399,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      * @return
      */
     @SuppressWarnings("unchecked")
-    protected <T> T read(Class<T> targetClass, Input input, KryoDeserializationConfig config) {
+    protected <T> T read(Class<? extends T> targetClass, Input input, KryoDeserializationConfig config) {
         check(config);
 
         Kryo kryo = createKryo();

@@ -119,7 +119,7 @@ public final class Try<T extends AutoCloseable> {
      * @param actionOnError
      * @return
      */
-    public static <R> R call(final java.util.concurrent.Callable<R> cmd, final Function<? super Exception, R> actionOnError) {
+    public static <R> R call(final java.util.concurrent.Callable<R> cmd, final Function<? super Exception, ? extends R> actionOnError) {
         try {
             return cmd.call();
         } catch (Exception e) {
@@ -265,7 +265,7 @@ public final class Try<T extends AutoCloseable> {
      * @param actionOnError
      * @return
      */
-    public <R> R call(final Throwables.Function<? super T, R, ? extends Exception> cmd, final Function<? super Exception, R> actionOnError) {
+    public <R> R call(final Throwables.Function<? super T, R, ? extends Exception> cmd, final Function<? super Exception, ? extends R> actionOnError) {
         try (final AutoCloseable c = targetResource == null ? (targetResourceSupplier == null ? EMPTY : targetResourceSupplier.get()) : targetResource) {
             return cmd.apply(targetResource);
         } catch (Exception e) {

@@ -53,7 +53,7 @@ public final class WSSecurityUtil {
     }
 
     /** A cached MessageDigest object. */
-    private final static MessageDigest digest;
+    private static final MessageDigest digest;
     static {
         try {
             digest = MessageDigest.getInstance(HASH_ALGORITHM);

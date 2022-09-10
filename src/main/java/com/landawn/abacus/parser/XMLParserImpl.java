@@ -922,7 +922,7 @@ final class XMLParserImpl extends AbstractXMLParser {
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, String st, final XMLDeserializationConfig config) {
+    public <T> T deserialize(Class<? extends T> targetClass, String st, final XMLDeserializationConfig config) {
         if (N.isNullOrEmpty(st)) {
             return N.defaultValueOf(targetClass);
         }
@@ -945,7 +945,7 @@ final class XMLParserImpl extends AbstractXMLParser {
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, File file, final XMLDeserializationConfig config) {
+    public <T> T deserialize(Class<? extends T> targetClass, File file, final XMLDeserializationConfig config) {
         InputStream is = null;
 
         try {
@@ -966,7 +966,7 @@ final class XMLParserImpl extends AbstractXMLParser {
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, InputStream is, final XMLDeserializationConfig config) {
+    public <T> T deserialize(Class<? extends T> targetClass, InputStream is, final XMLDeserializationConfig config) {
         final BufferedReader br = Objectory.createBufferedReader(is);
 
         try {
@@ -985,7 +985,7 @@ final class XMLParserImpl extends AbstractXMLParser {
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, Reader reader, final XMLDeserializationConfig config) {
+    public <T> T deserialize(Class<? extends T> targetClass, Reader reader, final XMLDeserializationConfig config) {
         // BufferedReader? will the target parser create the BufferedReader
         // internally.
         return read(null, targetClass, reader, config);
@@ -1000,7 +1000,7 @@ final class XMLParserImpl extends AbstractXMLParser {
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, Node node, final XMLDeserializationConfig config) {
+    public <T> T deserialize(Class<? extends T> targetClass, Node node, final XMLDeserializationConfig config) {
         return readByDOMParser(targetClass, node, config);
     }
 
@@ -1047,7 +1047,7 @@ final class XMLParserImpl extends AbstractXMLParser {
     @Override
     @SuppressWarnings("unchecked")
     public <T> T deserialize(Map<String, Class<?>> nodeClasses, Node node, final XMLDeserializationConfig config) {
-        Class<T> targetClass = null;
+        Class<? extends T> targetClass = null;
 
         if (N.notNullOrEmpty(nodeClasses)) {
             String nodeName = XMLUtil.getAttribute(node, XMLConstants.NAME);
@@ -1076,7 +1076,7 @@ final class XMLParserImpl extends AbstractXMLParser {
      * @return
      */
     @SuppressWarnings("unchecked")
-    protected <T> T read(Map<String, Class<?>> nodeClasses, Class<T> targetClass, Reader br, final XMLDeserializationConfig config) {
+    protected <T> T read(Map<String, Class<?>> nodeClasses, Class<? extends T> targetClass, Reader br, final XMLDeserializationConfig config) {
         final XMLDeserializationConfig configToUse = check(config);
 
         switch (parserType) {
@@ -1156,7 +1156,8 @@ final class XMLParserImpl extends AbstractXMLParser {
      * @return
      * @throws XMLStreamException the XML stream exception
      */
-    protected <T> T readByStreamParser(Class<T> targetClass, XMLStreamReader xmlReader, final XMLDeserializationConfig config) throws XMLStreamException {
+    protected <T> T readByStreamParser(Class<? extends T> targetClass, XMLStreamReader xmlReader, final XMLDeserializationConfig config)
+            throws XMLStreamException {
         return readByStreamParser(targetClass, xmlReader, config, null, null);
     }
 
@@ -1928,7 +1929,7 @@ final class XMLParserImpl extends AbstractXMLParser {
      * @param config
      * @return
      */
-    protected <T> T readByDOMParser(Class<T> targetClass, Node node, final XMLDeserializationConfig config) {
+    protected <T> T readByDOMParser(Class<? extends T> targetClass, Node node, final XMLDeserializationConfig config) {
         final XMLDeserializationConfig configToUse = check(config);
 
         return readByDOMParser(targetClass, node, configToUse, null, configToUse.getElementType(), false, false, false, true);

@@ -314,7 +314,7 @@ public class Builder<T> {
      * @return
      * @throws E the e
      */
-    public <R, E extends Exception> Builder<R> map(final Throwables.Function<? super T, R, E> mapper) throws E {
+    public <R, E extends Exception> Builder<R> map(final Throwables.Function<? super T, ? extends R, E> mapper) throws E {
         return of(mapper.apply(val));
     }
 
@@ -351,7 +351,7 @@ public class Builder<T> {
      * @return
      * @throws E the e
      */
-    public <R, E extends Exception> R apply(final Throwables.Function<? super T, R, E> func) throws E {
+    public <R, E extends Exception> R apply(final Throwables.Function<? super T, ? extends R, E> func) throws E {
         return func.apply(val);
     }
 

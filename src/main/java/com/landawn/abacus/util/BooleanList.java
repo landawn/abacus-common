@@ -1986,7 +1986,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @throws E the e
      */
     @Override
-    public <R, E extends Exception> R apply(Throwables.Function<? super BooleanList, R, E> func) throws E {
+    public <R, E extends Exception> R apply(Throwables.Function<? super BooleanList, ? extends R, E> func) throws E {
         return func.apply(this);
     }
 
@@ -2000,7 +2000,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @throws E the e
      */
     @Override
-    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Function<? super BooleanList, R, E> func) throws E {
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Function<? super BooleanList, ? extends R, E> func) throws E {
         return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
     }
 

@@ -301,7 +301,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, String st, AvroDeserializationConfig config) {
+    public <T> T deserialize(Class<? extends T> targetClass, String st, AvroDeserializationConfig config) {
         return deserialize(targetClass, new ByteArrayInputStream(N.base64Decode(st)), config);
     }
 
@@ -314,7 +314,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, File file, AvroDeserializationConfig config) {
+    public <T> T deserialize(Class<? extends T> targetClass, File file, AvroDeserializationConfig config) {
         InputStream is = null;
 
         try {
@@ -335,12 +335,12 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, InputStream is, AvroDeserializationConfig config) {
+    public <T> T deserialize(Class<? extends T> targetClass, InputStream is, AvroDeserializationConfig config) {
         final Type<T> targetType = N.typeOf(targetClass);
         final Type<Object> eleType = config == null ? null : config.getElementType();
 
         if (SpecificRecord.class.isAssignableFrom(targetClass)) {
-            final DatumReader<T> datumReader = new SpecificDatumReader<>(targetClass);
+            final DatumReader<T> datumReader = new SpecificDatumReader<>((Class<T>) targetClass);
             DataFileStream<T> dataFileReader = null;
             T entity = null;
 
@@ -437,7 +437,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, Reader reader, AvroDeserializationConfig config) throws UnsupportedOperationException {
+    public <T> T deserialize(Class<? extends T> targetClass, Reader reader, AvroDeserializationConfig config) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -449,7 +449,7 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
      * @param record
      * @return
      */
-    private <T> T fromGenericRecord(final Class<T> targetClass, final GenericRecord record) {
+    private <T> T fromGenericRecord(final Class<? extends T> targetClass, final GenericRecord record) {
         if (targetClass.isAssignableFrom(record.getClass())) {
             return (T) record;
         }

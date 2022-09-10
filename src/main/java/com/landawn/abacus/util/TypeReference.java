@@ -52,7 +52,7 @@ public abstract class TypeReference<T> {
         return type;
     }
 
-    public static abstract class TypeToken<T> extends TypeReference<T> {
+    public abstract static class TypeToken<T> extends TypeReference<T> {
 
     }
 }

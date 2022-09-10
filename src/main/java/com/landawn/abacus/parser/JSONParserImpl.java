@@ -133,7 +133,7 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @return
      */
     @Override
-    public <T> T readString(final Class<T> targetClass, final String str, final JSONDeserializationConfig config) {
+    public <T> T readString(final Class<? extends T> targetClass, final String str, final JSONDeserializationConfig config) {
         final JSONDeserializationConfig configToUse = check(config);
         final Type<T> type = N.typeOf(targetClass);
 
@@ -257,7 +257,7 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @SuppressWarnings("unchecked")
-    protected <T> T readString(final Object outResult, final Class<T> targetClass, final String str, final JSONReader jr,
+    protected <T> T readString(final Object outResult, final Class<? extends T> targetClass, final String str, final JSONReader jr,
             final JSONDeserializationConfig config) throws IOException {
         final Type<T> type = (Type<T>) (outResult == null ? N.typeOf(targetClass) : N.typeOf(outResult.getClass()));
         final Object[] a = (outResult instanceof Object[]) ? (Object[]) outResult : null;
@@ -1507,7 +1507,7 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @return
      */
     @Override
-    public <T> T deserialize(final Class<T> targetClass, final String str, final JSONDeserializationConfig config) {
+    public <T> T deserialize(final Class<? extends T> targetClass, final String str, final JSONDeserializationConfig config) {
         final JSONDeserializationConfig configToUse = check(config);
 
         final Type<T> type = N.typeOf(targetClass);
@@ -1542,7 +1542,8 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @return
      */
     @Override
-    public <T> T deserialize(final Class<T> targetClass, final String str, final int fromIndex, final int toIndex, final JSONDeserializationConfig config) {
+    public <T> T deserialize(final Class<? extends T> targetClass, final String str, final int fromIndex, final int toIndex,
+            final JSONDeserializationConfig config) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(str));
         final JSONDeserializationConfig configToUse = check(config);
         final Type<T> type = N.typeOf(targetClass);
@@ -1575,7 +1576,7 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @return
      */
     @Override
-    public <T> T deserialize(final Class<T> targetClass, final File file, final JSONDeserializationConfig config) {
+    public <T> T deserialize(final Class<? extends T> targetClass, final File file, final JSONDeserializationConfig config) {
         InputStream is = null;
 
         try {
@@ -1596,7 +1597,7 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @return
      */
     @Override
-    public <T> T deserialize(final Class<T> targetClass, final InputStream is, final JSONDeserializationConfig config) {
+    public <T> T deserialize(final Class<? extends T> targetClass, final InputStream is, final JSONDeserializationConfig config) {
         // BufferedReader br = ObjectFactory.createBufferedReader(is);
         //
         // try {
@@ -1622,7 +1623,7 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @return
      */
     @Override
-    public <T> T deserialize(final Class<T> targetClass, final Reader reader, final JSONDeserializationConfig config) {
+    public <T> T deserialize(final Class<? extends T> targetClass, final Reader reader, final JSONDeserializationConfig config) {
         // boolean isBufferedReader = reader instanceof BufferedReader;
         // BufferedReader br = isBufferedReader ? (BufferedReader) reader :
         // ObjectFactory.createBufferedReader(reader);
@@ -1646,7 +1647,7 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @param config
      * @return
      */
-    protected <T> T read(final Class<T> targetClass, final Reader reader, final JSONDeserializationConfig config) {
+    protected <T> T read(final Class<? extends T> targetClass, final Reader reader, final JSONDeserializationConfig config) {
         final JSONDeserializationConfig configToUse = check(config);
         final Type<T> type = N.typeOf(targetClass);
         final char[] rbuf = Objectory.createCharArrayBuffer();
@@ -1664,14 +1665,14 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
     }
 
-    protected <T> T read(final Type<T> type, Class<T> targetClass, Object source, final JSONReader jr, final JSONDeserializationConfig config)
-            throws IOException {
+    protected <T> T read(final Type<? extends T> type, Class<? extends T> targetClass, Object source, final JSONReader jr,
+            final JSONDeserializationConfig config) throws IOException {
         return read(type, targetClass, source, jr, config, true, 0);
     }
 
     @SuppressWarnings("unchecked")
-    protected <T> T read(final Type<T> type, Class<T> targetClass, final Object source, final JSONReader jr, final JSONDeserializationConfig config,
-            boolean isFirstCall, final int firstToken) throws IOException {
+    protected <T> T read(final Type<? extends T> type, Class<? extends T> targetClass, final Object source, final JSONReader jr,
+            final JSONDeserializationConfig config, boolean isFirstCall, final int firstToken) throws IOException {
         switch (type.getSerializationType()) {
             case SERIALIZABLE:
                 if (type.isArray()) {
@@ -1732,7 +1733,7 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @SuppressWarnings("unused")
-    protected <T> T readEntity(final Type<T> type, final Class<T> targetClass, final JSONReader jr, final JSONDeserializationConfig config,
+    protected <T> T readEntity(final Type<? extends T> type, final Class<? extends T> targetClass, final JSONReader jr, final JSONDeserializationConfig config,
             final boolean isFirstCall) throws IOException {
         final boolean hasPropTypes = N.notNullOrEmpty(config.getPropTypes());
         final boolean ignoreUnmatchedProperty = config.isIgnoreUnmatchedProperty();
@@ -2049,7 +2050,7 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @SuppressWarnings("unchecked")
-    protected <T> T readMap(Map<Object, Object> outResult, final Class<T> targetClass, final JSONReader jr, final JSONDeserializationConfig config,
+    protected <T> T readMap(Map<Object, Object> outResult, final Class<? extends T> targetClass, final JSONReader jr, final JSONDeserializationConfig config,
             Type<?> propType, boolean isFirstCall) throws IOException {
         Type<?> keyType = defaultKeyType;
 
@@ -2254,7 +2255,7 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @SuppressWarnings("unchecked")
-    protected <T> T readArray(Object[] a, final Class<T> targetClass, final JSONReader jr, final JSONDeserializationConfig config, Type<?> propType,
+    protected <T> T readArray(Object[] a, final Class<? extends T> targetClass, final JSONReader jr, final JSONDeserializationConfig config, Type<?> propType,
             final boolean isFirstCall) throws IOException {
         Type<?> eleType = defaultValueType;
 
@@ -2474,8 +2475,8 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @SuppressWarnings("unchecked")
-    protected <T> T readCollection(final Collection<Object> outResult, final Class<T> targetClass, final JSONReader jr, final JSONDeserializationConfig config,
-            Type<?> propType, boolean isFirstCall) throws IOException {
+    protected <T> T readCollection(final Collection<Object> outResult, final Class<? extends T> targetClass, final JSONReader jr,
+            final JSONDeserializationConfig config, Type<?> propType, boolean isFirstCall) throws IOException {
         Type<?> eleType = defaultValueType;
 
         if (propType != null && (propType.isCollection() || propType.isArray()) && !propType.getElementType().isObjectType()) {
@@ -2602,7 +2603,7 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @SuppressWarnings("unused")
-    protected <T> T readMapEntity(final Class<T> targetClass, final JSONReader jr, final JSONDeserializationConfig config, final boolean isFirstCall)
+    protected <T> T readMapEntity(final Class<? extends T> targetClass, final JSONReader jr, final JSONDeserializationConfig config, final boolean isFirstCall)
             throws IOException {
         int firstToken = isFirstCall ? jr.nextToken() : START_BRACKET;
 
@@ -2675,7 +2676,7 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @SuppressWarnings({ "deprecation", "unused" })
-    protected <T> T readEntityId(final Class<T> targetClass, final JSONReader jr, final JSONDeserializationConfig config, final boolean isFirstCall)
+    protected <T> T readEntityId(final Class<? extends T> targetClass, final JSONReader jr, final JSONDeserializationConfig config, final boolean isFirstCall)
             throws IOException {
         int firstToken = isFirstCall ? jr.nextToken() : START_BRACKET;
 
@@ -2748,7 +2749,7 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @SuppressWarnings("unused")
-    protected <T> T readDataSet(final Class<T> targetClass, final JSONReader jr, final JSONDeserializationConfig config, final boolean isFirstCall)
+    protected <T> T readDataSet(final Class<? extends T> targetClass, final JSONReader jr, final JSONDeserializationConfig config, final boolean isFirstCall)
             throws IOException {
         DataSet rs = null;
 
@@ -3092,7 +3093,7 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     @Override
-    public <T> ExceptionalStream<T, IOException> stream(final Class<T> elementClass, final String json, final JSONDeserializationConfig config) {
+    public <T> ExceptionalStream<T, IOException> stream(final Class<? extends T> elementClass, final String json, final JSONDeserializationConfig config) {
         final Type<T> eleType = checkStreamSupportedType(elementClass);
         final JSONDeserializationConfig configToUse = check(config);
 
@@ -3119,7 +3120,7 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     @Override
-    public <T> ExceptionalStream<T, IOException> stream(final Class<T> elementClass, final File file, final JSONDeserializationConfig config) {
+    public <T> ExceptionalStream<T, IOException> stream(final Class<? extends T> elementClass, final File file, final JSONDeserializationConfig config) {
         ExceptionalStream<T, IOException> result = null;
         InputStream is = null;
 
@@ -3137,15 +3138,15 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     @Override
-    public <T> ExceptionalStream<T, IOException> stream(final Class<T> elementClass, final InputStream is, final boolean closeInputStreamWhenStreamIsClosed,
-            final JSONDeserializationConfig config) {
+    public <T> ExceptionalStream<T, IOException> stream(final Class<? extends T> elementClass, final InputStream is,
+            final boolean closeInputStreamWhenStreamIsClosed, final JSONDeserializationConfig config) {
         final Reader reader = new InputStreamReader(is);
 
         return stream(elementClass, reader, closeInputStreamWhenStreamIsClosed, config);
     }
 
     @Override
-    public <T> ExceptionalStream<T, IOException> stream(final Class<T> elementClass, final Reader reader, final boolean closeReaderWhenStreamIsClosed,
+    public <T> ExceptionalStream<T, IOException> stream(final Class<? extends T> elementClass, final Reader reader, final boolean closeReaderWhenStreamIsClosed,
             final JSONDeserializationConfig config) {
         N.checkArgNotNull(reader, "reader");
         ExceptionalStream<T, IOException> result = null;
@@ -3182,7 +3183,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         return result;
     }
 
-    private <T> Type<T> checkStreamSupportedType(final Class<T> elementClass) {
+    private <T> Type<T> checkStreamSupportedType(final Class<? extends T> elementClass) {
         final Type<T> eleType = N.typeOf(elementClass);
 
         switch (eleType.getSerializationType()) {
@@ -3204,8 +3205,8 @@ final class JSONParserImpl extends AbstractJSONParser {
         return eleType;
     }
 
-    private <T> ExceptionalStream<T, IOException> stream(final Type<T> eleType, final Class<T> elementClass, final Object source, final JSONReader jr,
-            final JSONDeserializationConfig configToUse) throws IOException {
+    private <T> ExceptionalStream<T, IOException> stream(final Type<? extends T> eleType, final Class<? extends T> elementClass, final Object source,
+            final JSONReader jr, final JSONDeserializationConfig configToUse) throws IOException {
         final int firstToken = jr.nextToken();
 
         if (firstToken == EOR) {
@@ -3256,7 +3257,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         return ExceptionalStream.<T, IOException> iterate(hasNext, next);
     }
 
-    <T> T emptyOrDefault(final Type<T> type) {
+    <T> T emptyOrDefault(final Type<? extends T> type) {
         if (type.isArray() || type.isCollection()) {
             return type.valueOf("[]");
         } else if (type.isMap()) {

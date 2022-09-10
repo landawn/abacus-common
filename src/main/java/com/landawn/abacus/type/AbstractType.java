@@ -919,7 +919,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return
      * @throws SQLException the SQL exception
      */
-    static <T> T getColumnValue(final Class<T> targetClass, final ResultSet rs, final int columnIndex) throws SQLException {
+    static <T> T getColumnValue(final Class<? extends T> targetClass, final ResultSet rs, final int columnIndex) throws SQLException {
         return N.<T> typeOf(targetClass).get(rs, columnIndex);
     }
 
@@ -933,7 +933,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return
      * @throws SQLException the SQL exception
      */
-    static <T> T getColumnValue(final Class<T> targetClass, final ResultSet rs, final String columnLabel) throws SQLException {
+    static <T> T getColumnValue(final Class<? extends T> targetClass, final ResultSet rs, final String columnLabel) throws SQLException {
         return N.<T> typeOf(targetClass).get(rs, columnLabel);
     }
 }

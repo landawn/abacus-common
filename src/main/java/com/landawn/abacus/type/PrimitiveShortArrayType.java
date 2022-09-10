@@ -34,7 +34,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
 
     public static final String SHORT_ARRAY = short[].class.getSimpleName();
 
-    private static Type<Short> elementType;
+    private Type<Short> elementType;
 
     PrimitiveShortArrayType() {
         super(SHORT_ARRAY);

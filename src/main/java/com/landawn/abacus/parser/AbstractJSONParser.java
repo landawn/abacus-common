@@ -96,7 +96,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @return
      */
     @Override
-    public <T> T readString(Class<T> targetClass, String str) {
+    public <T> T readString(Class<? extends T> targetClass, String str) {
         return readString(targetClass, str, null);
     }
 
@@ -109,7 +109,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @return
      */
     @Override
-    public <T> T readString(Class<T> targetClass, String str, JSONDeserializationConfig config) throws UnsupportedOperationException {
+    public <T> T readString(Class<? extends T> targetClass, String str, JSONDeserializationConfig config) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -186,7 +186,7 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, String str, int fromIndex, int toIndex) {
+    public <T> T deserialize(Class<? extends T> targetClass, String str, int fromIndex, int toIndex) {
         return deserialize(targetClass, str, fromIndex, toIndex, null);
     }
 
@@ -201,27 +201,27 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
      * @return
      */
     @Override
-    public <T> T deserialize(Class<T> targetClass, String str, int fromIndex, int toIndex, JSONDeserializationConfig config) {
+    public <T> T deserialize(Class<? extends T> targetClass, String str, int fromIndex, int toIndex, JSONDeserializationConfig config) {
         return deserialize(targetClass, str.substring(fromIndex, toIndex), config);
     }
 
     @Override
-    public <T> ExceptionalStream<T, IOException> stream(Class<T> elementClass, String json) {
+    public <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, String json) {
         return stream(elementClass, json, null);
     }
 
     @Override
-    public <T> ExceptionalStream<T, IOException> stream(Class<T> elementClass, File file) {
+    public <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, File file) {
         return stream(elementClass, file, null);
     }
 
     @Override
-    public <T> ExceptionalStream<T, IOException> stream(Class<T> elementClass, InputStream is, boolean closeInputStreamWhenStreamIsClosed) {
+    public <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, InputStream is, boolean closeInputStreamWhenStreamIsClosed) {
         return stream(elementClass, is, closeInputStreamWhenStreamIsClosed, null);
     }
 
     @Override
-    public <T> ExceptionalStream<T, IOException> stream(Class<T> elementClass, Reader reader, boolean closeReaderWhenStreamIsClosed) {
+    public <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, Reader reader, boolean closeReaderWhenStreamIsClosed) {
         return stream(elementClass, reader, closeReaderWhenStreamIsClosed, null);
     }
 

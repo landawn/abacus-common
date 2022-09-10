@@ -1415,7 +1415,7 @@ public final class N extends CommonUtil {
      * @param func
      * @return the stream
      */
-    public static <T> Stream<T> splitByCount(final int maxCount, final int totalSize, final boolean smallerFirst, final IntBiFunction<T> func) {
+    public static <T> Stream<T> splitByCount(final int maxCount, final int totalSize, final boolean smallerFirst, final IntBiFunction<? extends T> func) {
         if (smallerFirst) {
             return splitByCountSmallerFirst(maxCount, totalSize, func);
         } else {
@@ -1438,7 +1438,7 @@ public final class N extends CommonUtil {
      * @param func
      * @return the stream
      */
-    static <T> Stream<T> splitByCountSmallerFirst(final int maxCount, final int totalSize, final IntBiFunction<T> func) {
+    static <T> Stream<T> splitByCountSmallerFirst(final int maxCount, final int totalSize, final IntBiFunction<? extends T> func) {
         N.checkArgPositive(maxCount, "maxCount");
         N.checkArgNotNegative(totalSize, "totalSize");
         N.checkArgNotNull(func, "func");
@@ -1503,7 +1503,7 @@ public final class N extends CommonUtil {
      * @param func
      * @return the stream
      */
-    static <T> Stream<T> splitByCountSmallerLast(final int maxCount, final int totalSize, final IntBiFunction<T> func) {
+    static <T> Stream<T> splitByCountSmallerLast(final int maxCount, final int totalSize, final IntBiFunction<? extends T> func) {
         N.checkArgPositive(maxCount, "maxCount");
         N.checkArgNotNegative(totalSize, "totalSize");
         N.checkArgNotNull(func, "func");
@@ -22149,8 +22149,8 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <A, B, R, E extends Exception> List<R> zip(final A[] a, final B[] b, final Throwables.BiFunction<? super A, ? super B, R, E> zipFunction)
-            throws E {
+    public static <A, B, R, E extends Exception> List<R> zip(final A[] a, final B[] b,
+            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws E {
         checkArgNotNull(zipFunction);
 
         if (isNullOrEmpty(a) || isNullOrEmpty(b)) {
@@ -22180,7 +22180,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <A, B, R, E extends Exception> List<R> zip(final Iterable<A> a, final Iterable<B> b,
-            final Throwables.BiFunction<? super A, ? super B, R, E> zipFunction) throws E {
+            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws E {
         checkArgNotNull(zipFunction);
 
         if (a == null || b == null) {
@@ -22214,7 +22214,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <A, B, C, R, E extends Exception> List<R> zip(final A[] a, final B[] b, final C[] c,
-            final Throwables.TriFunction<? super A, ? super B, ? super C, R, E> zipFunction) throws E {
+            final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws E {
         checkArgNotNull(zipFunction);
 
         if (isNullOrEmpty(a) || isNullOrEmpty(b) || isNullOrEmpty(c)) {
@@ -22246,7 +22246,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <A, B, C, R, E extends Exception> List<R> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c,
-            final Throwables.TriFunction<? super A, ? super B, ? super C, R, E> zipFunction) throws E {
+            final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws E {
         checkArgNotNull(zipFunction);
 
         if (a == null || b == null || c == null) {
@@ -22281,7 +22281,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <A, B, R, E extends Exception> List<R> zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
-            final Throwables.BiFunction<? super A, ? super B, R, E> zipFunction) throws E {
+            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws E {
         checkArgNotNull(zipFunction);
 
         final int lenA = len(a);
@@ -22311,7 +22311,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <A, B, R, E extends Exception> List<R> zip(final Iterable<A> a, final Iterable<B> b, final A valueForNoneA, final B valueForNoneB,
-            final Throwables.BiFunction<? super A, ? super B, R, E> zipFunction) throws E {
+            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws E {
         checkArgNotNull(zipFunction);
 
         final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a.iterator();
@@ -22362,7 +22362,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <A, B, C, R, E extends Exception> List<R> zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA, final B valueForNoneB,
-            final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, R, E> zipFunction) throws E {
+            final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws E {
         checkArgNotNull(zipFunction);
 
         final int lenA = len(a);
@@ -22396,7 +22396,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <A, B, C, R, E extends Exception> List<R> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c, final A valueForNoneA,
-            final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, R, E> zipFunction) throws E {
+            final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws E {
         checkArgNotNull(zipFunction);
 
         final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a.iterator();
@@ -22475,7 +22475,7 @@ public final class N extends CommonUtil {
     //     * @see {@code Iterators.zip(Iterator, Iterator, BiFunction)}
     //     */
     //    public static <A, B, R, E extends Exception> List<R> zip(final Iterator<A> a, final Iterator<B> b,
-    //            final Throwables.BiFunction<? super A, ? super B, R, E> zipFunction) throws E {
+    //            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws E {
     //        checkArgNotNull(zipFunction);
     //
     //        if (a == null || b == null) {
@@ -22507,7 +22507,7 @@ public final class N extends CommonUtil {
     //     * @see {@code Iterators.zip(Iterator, Iterator, Iterator, TriFunction)}
     //     */
     //    public static <A, B, C, R, E extends Exception> List<R> zip(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c,
-    //            final Throwables.TriFunction<? super A, ? super B, ? super C, R, E> zipFunction) throws E {
+    //            final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws E {
     //        checkArgNotNull(zipFunction);
     //
     //        if (a == null || b == null || c == null) {
@@ -22540,7 +22540,7 @@ public final class N extends CommonUtil {
     //     * @see {@code Iterators.zip(Iterator, Iterator, Object, Object, BiFunction)}
     //     */
     //    public static <A, B, R, E extends Exception> List<R> zip(final Iterator<A> a, final Iterator<B> b, final A valueForNoneA, final B valueForNoneB,
-    //            final Throwables.BiFunction<? super A, ? super B, R, E> zipFunction) throws E {
+    //            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws E {
     //        checkArgNotNull(zipFunction);
     //
     //        final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
@@ -22579,7 +22579,7 @@ public final class N extends CommonUtil {
     //     * @see {@code Iterators.zip(Iterator, Iterator, Iterator, Object, Object, Object, TriFunction)}
     //     */
     //    public static <A, B, C, R, E extends Exception> List<R> zip(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c, final A valueForNoneA,
-    //            final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, R, E> zipFunction) throws E {
+    //            final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws E {
     //        checkArgNotNull(zipFunction);
     //
     //        final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
@@ -22619,7 +22619,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <A, B, R, E extends Exception> R[] zip(final Class<R> targetElementType, final A[] a, final B[] b,
-            final Throwables.BiFunction<? super A, ? super B, R, E> zipFunction) throws E {
+            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws E {
         checkArgNotNull(zipFunction);
 
         final int lenA = N.len(a);
@@ -22651,7 +22651,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <A, B, R, E extends Exception> R[] zip(final Class<R> targetElementType, final A[] a, final B[] b, final A valueForNoneA,
-            final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, R, E> zipFunction) throws E {
+            final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws E {
         checkArgNotNull(zipFunction);
 
         final int lenA = N.len(a);
@@ -22694,7 +22694,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <A, B, C, R, E extends Exception> R[] zip(final Class<R> targetElementType, final A[] a, final B[] b, final C[] c,
-            final Throwables.TriFunction<? super A, ? super B, ? super C, R, E> zipFunction) throws E {
+            final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws E {
         checkArgNotNull(zipFunction);
 
         final int lenA = N.len(a);
@@ -22730,7 +22730,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <A, B, C, R, E extends Exception> R[] zip(final Class<R> targetElementType, final A[] a, final B[] b, final C[] c, final A valueForNoneA,
-            final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, R, E> zipFunction) throws E {
+            final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws E {
         checkArgNotNull(zipFunction);
 
         final int lenA = N.len(a);
@@ -23354,7 +23354,7 @@ public final class N extends CommonUtil {
      * @param source
      * @return
      */
-    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<T> elementClass, String source) {
+    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<? extends T> elementClass, String source) {
         return Utils.jsonParser.stream(elementClass, source);
     }
 
@@ -23366,7 +23366,7 @@ public final class N extends CommonUtil {
      * @param config
      * @return
      */
-    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<T> elementClass, String source, JSONDeserializationConfig config) {
+    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<? extends T> elementClass, String source, JSONDeserializationConfig config) {
         return Utils.jsonParser.stream(elementClass, source, config);
     }
 
@@ -23377,7 +23377,7 @@ public final class N extends CommonUtil {
      * @param source
      * @return
      */
-    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<T> elementClass, File source) {
+    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<? extends T> elementClass, File source) {
         return Utils.jsonParser.stream(elementClass, source);
     }
 
@@ -23389,7 +23389,7 @@ public final class N extends CommonUtil {
      * @param config
      * @return
      */
-    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<T> elementClass, File source, JSONDeserializationConfig config) {
+    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<? extends T> elementClass, File source, JSONDeserializationConfig config) {
         return Utils.jsonParser.stream(elementClass, source, config);
     }
 
@@ -23401,7 +23401,8 @@ public final class N extends CommonUtil {
      * @param closeInputStreamWhenStreamIsClosed
      * @return
      */
-    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<T> elementClass, InputStream source, boolean closeInputStreamWhenStreamIsClosed) {
+    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<? extends T> elementClass, InputStream source,
+            boolean closeInputStreamWhenStreamIsClosed) {
         return Utils.jsonParser.stream(elementClass, source, closeInputStreamWhenStreamIsClosed);
     }
 
@@ -23414,8 +23415,8 @@ public final class N extends CommonUtil {
      * @param config
      * @return
      */
-    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<T> elementClass, InputStream source, boolean closeInputStreamWhenStreamIsClosed,
-            JSONDeserializationConfig config) {
+    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<? extends T> elementClass, InputStream source,
+            boolean closeInputStreamWhenStreamIsClosed, JSONDeserializationConfig config) {
         return Utils.jsonParser.stream(elementClass, source, closeInputStreamWhenStreamIsClosed, config);
     }
 
@@ -23427,7 +23428,7 @@ public final class N extends CommonUtil {
      * @param closeReaderWhenStreamIsClosed
      * @return
      */
-    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<T> elementClass, Reader source, boolean closeReaderWhenStreamIsClosed) {
+    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<? extends T> elementClass, Reader source, boolean closeReaderWhenStreamIsClosed) {
         return Utils.jsonParser.stream(elementClass, source, closeReaderWhenStreamIsClosed);
     }
 
@@ -23440,7 +23441,7 @@ public final class N extends CommonUtil {
      * @param config
      * @return
      */
-    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<T> elementClass, Reader source, boolean closeReaderWhenStreamIsClosed,
+    public static <T> ExceptionalStream<T, IOException> streamJSON(Class<? extends T> elementClass, Reader source, boolean closeReaderWhenStreamIsClosed,
             JSONDeserializationConfig config) {
         return Utils.jsonParser.stream(elementClass, source, closeReaderWhenStreamIsClosed, config);
     }
@@ -24688,7 +24689,7 @@ public final class N extends CommonUtil {
      */
     @SuppressWarnings("unchecked")
     @Beta
-    public static <T> Nullable<T> castIfAssignable(final Object val, final Class<T> targetType) {
+    public static <T> Nullable<T> castIfAssignable(final Object val, final Class<? extends T> targetType) {
         if (N.isPrimitiveType(targetType)) {
             return val != null && N.wrap(targetType).isAssignableFrom(val.getClass()) ? Nullable.of((T) val) : Nullable.<T> empty();
         }
@@ -24727,7 +24728,7 @@ public final class N extends CommonUtil {
      * @see Try#call(com.landawn.abacus.util.Throwables.Function, Object)
      */
     @Beta
-    public static <T, R, E extends Exception> Nullable<R> tryOrEmptyIfNotSucceed(final T init, final Throwables.Function<? super T, R, E> func) {
+    public static <T, R, E extends Exception> Nullable<R> tryOrEmptyIfNotSucceed(final T init, final Throwables.Function<? super T, ? extends R, E> func) {
         try {
             return Nullable.of(func.apply(init));
         } catch (Exception e) {
@@ -24768,7 +24769,7 @@ public final class N extends CommonUtil {
      * @see Try#call(com.landawn.abacus.util.Throwables.Function, Object)
      */
     @Beta
-    public static <T, R, E extends Exception> R tryOrDefaultIfNotSucceed(final T init, final Throwables.Function<? super T, R, E> func,
+    public static <T, R, E extends Exception> R tryOrDefaultIfNotSucceed(final T init, final Throwables.Function<? super T, ? extends R, E> func,
             final R defaultIfNotSucceed) {
         try {
             return func.apply(init);
@@ -24812,7 +24813,7 @@ public final class N extends CommonUtil {
      * @see Try#call(com.landawn.abacus.util.Throwables.Function, Supplier)
      */
     @Beta
-    public static <T, R, E extends Exception> R tryOrDefaultIfNotSucceed(final T init, final Throwables.Function<? super T, R, E> func,
+    public static <T, R, E extends Exception> R tryOrDefaultIfNotSucceed(final T init, final Throwables.Function<? super T, ? extends R, E> func,
             final Supplier<R> supplierForDefaultIfNotSucceed) {
         try {
             return func.apply(init);
@@ -24855,7 +24856,8 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     @Beta
-    public static <T, R, E extends Exception> Nullable<R> ifOrEmpty(final boolean b, final T init, final Throwables.Function<? super T, R, E> func) throws E {
+    public static <T, R, E extends Exception> Nullable<R> ifOrEmpty(final boolean b, final T init, final Throwables.Function<? super T, ? extends R, E> func)
+            throws E {
         if (b) {
             return Nullable.of(func.apply(init));
         } else {
@@ -25010,7 +25012,7 @@ public final class N extends CommonUtil {
     //     * @see {@code Iterators.zip(Iterator, Iterator, BiFunction)}
     //     */
     //    public static <A, B, R, E extends Exception> List<R> zip(final Iterator<A> a, final Iterator<B> b,
-    //            final Throwables.BiFunction<? super A, ? super B, R, E> zipFunction) throws E {
+    //            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws E {
     //        checkArgNotNull(zipFunction);
     //
     //        if (a == null || b == null) {
@@ -25042,7 +25044,7 @@ public final class N extends CommonUtil {
     //     * @see {@code Iterators.zip(Iterator, Iterator, Iterator, TriFunction)}
     //     */
     //    public static <A, B, C, R, E extends Exception> List<R> zip(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c,
-    //            final Throwables.TriFunction<? super A, ? super B, ? super C, R, E> zipFunction) throws E {
+    //            final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws E {
     //        checkArgNotNull(zipFunction);
     //
     //        if (a == null || b == null || c == null) {
@@ -25075,7 +25077,7 @@ public final class N extends CommonUtil {
     //     * @see {@code Iterators.zip(Iterator, Iterator, Object, Object, BiFunction)}
     //     */
     //    public static <A, B, R, E extends Exception> List<R> zip(final Iterator<A> a, final Iterator<B> b, final A valueForNoneA, final B valueForNoneB,
-    //            final Throwables.BiFunction<? super A, ? super B, R, E> zipFunction) throws E {
+    //            final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws E {
     //        checkArgNotNull(zipFunction);
     //
     //        final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
@@ -25114,7 +25116,7 @@ public final class N extends CommonUtil {
     //     * @see {@code Iterators.zip(Iterator, Iterator, Iterator, Object, Object, Object, TriFunction)}
     //     */
     //    public static <A, B, C, R, E extends Exception> List<R> zip(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c, final A valueForNoneA,
-    //            final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, R, E> zipFunction) throws E {
+    //            final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws E {
     //        checkArgNotNull(zipFunction);
     //
     //        final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;

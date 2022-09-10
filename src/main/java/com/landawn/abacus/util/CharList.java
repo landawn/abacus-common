@@ -2214,7 +2214,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @throws E the e
      */
     @Override
-    public <R, E extends Exception> R apply(Throwables.Function<? super CharList, R, E> func) throws E {
+    public <R, E extends Exception> R apply(Throwables.Function<? super CharList, ? extends R, E> func) throws E {
         return func.apply(this);
     }
 
@@ -2228,7 +2228,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @throws E the e
      */
     @Override
-    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Function<? super CharList, R, E> func) throws E {
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Function<? super CharList, ? extends R, E> func) throws E {
         return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
     }
 

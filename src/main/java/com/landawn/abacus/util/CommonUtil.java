@@ -15275,7 +15275,7 @@ class CommonUtil {
      * @param entityClass entity class with getter/setter methods
      * @return
      */
-    public static <T> T fill(Class<T> entityClass) {
+    public static <T> T fill(Class<? extends T> entityClass) {
         return TestUtil.fill(entityClass);
     }
 
@@ -15287,7 +15287,7 @@ class CommonUtil {
      * @param count
      * @return
      */
-    public static <T> List<T> fill(Class<T> entityClass, int count) {
+    public static <T> List<T> fill(Class<? extends T> entityClass, int count) {
         return TestUtil.fill(entityClass, count);
     }
 

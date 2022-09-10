@@ -429,7 +429,7 @@ public final class Splitter {
      * @param mapper
      * @return
      */
-    public <R, E extends Exception> List<R> split(final CharSequence source, final Throwables.Function<? super String, R, E> mapper) throws E {
+    public <R, E extends Exception> List<R> split(final CharSequence source, final Throwables.Function<? super String, ? extends R, E> mapper) throws E {
         final List<String> tmp = new ArrayList<>();
         split(tmp, source);
 
@@ -450,7 +450,7 @@ public final class Splitter {
      * @param source
      * @return
      */
-    public <T> List<T> split(final Class<T> targetType, final CharSequence source) {
+    public <T> List<T> split(final Class<? extends T> targetType, final CharSequence source) {
         N.checkArgNotNull(targetType, "targetType");
 
         final Type<T> type = N.typeOf(targetType);
@@ -465,7 +465,7 @@ public final class Splitter {
      * @param source
      * @return
      */
-    public <T> List<T> split(final Type<T> targetType, final CharSequence source) {
+    public <T> List<T> split(final Type<? extends T> targetType, final CharSequence source) {
         N.checkArgNotNull(targetType, "targetType");
 
         final List<T> result = new ArrayList<>();
@@ -501,7 +501,7 @@ public final class Splitter {
      * @param source
      * @return
      */
-    public <T, C extends Collection<T>> C split(final C output, final Class<T> targetType, final CharSequence source) {
+    public <T, C extends Collection<T>> C split(final C output, final Class<? extends T> targetType, final CharSequence source) {
         N.checkArgNotNull(output, "output");
         N.checkArgNotNull(targetType, "targetType");
 
@@ -519,7 +519,7 @@ public final class Splitter {
      * @param source
      * @return
      */
-    public <T, C extends Collection<T>> C split(final C output, final Type<T> targetType, final CharSequence source) {
+    public <T, C extends Collection<T>> C split(final C output, final Type<? extends T> targetType, final CharSequence source) {
         N.checkArgNotNull(output, "output");
         N.checkArgNotNull(targetType, "targetType");
 
@@ -552,7 +552,7 @@ public final class Splitter {
      * @param supplier
      * @return
      */
-    public <T, C extends Collection<T>> C split(final Class<T> targetType, final CharSequence source, final Supplier<? extends C> supplier) {
+    public <T, C extends Collection<T>> C split(final Class<? extends T> targetType, final CharSequence source, final Supplier<? extends C> supplier) {
         return split(supplier.get(), targetType, source);
     }
 
@@ -565,7 +565,7 @@ public final class Splitter {
      * @param supplier
      * @return
      */
-    public <T, C extends Collection<T>> C split(final Type<T> targetType, final CharSequence source, final Supplier<? extends C> supplier) {
+    public <T, C extends Collection<T>> C split(final Type<? extends T> targetType, final CharSequence source, final Supplier<? extends C> supplier) {
         return split(supplier.get(), targetType, source);
     }
 
@@ -587,7 +587,7 @@ public final class Splitter {
      * @param source
      * @return
      */
-    public <T> ImmutableList<T> splitToImmutableList(final Class<T> targetType, final CharSequence source) {
+    public <T> ImmutableList<T> splitToImmutableList(final Class<? extends T> targetType, final CharSequence source) {
         return ImmutableList.of(split(targetType, source));
     }
 

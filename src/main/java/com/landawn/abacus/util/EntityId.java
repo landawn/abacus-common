@@ -183,7 +183,7 @@ public interface EntityId {
      * @param <T>
      * @return T
      */
-    <T> T get(String propName, Class<T> targetType);
+    <T> T get(String propName, Class<? extends T> targetType);
 
     /**
      *

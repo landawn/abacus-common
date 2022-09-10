@@ -125,7 +125,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             }
 
             @Override
-            public <R> ObjIterator<R> map(final BiFunction<? super K, ? super V, R> mapper) {
+            public <R> ObjIterator<R> map(final BiFunction<? super K, ? super V, ? extends R> mapper) {
                 N.checkArgNotNull(mapper);
 
                 return new ObjIterator<>() {
@@ -202,7 +202,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             }
 
             @Override
-            public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, R> mapper) {
+            public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) {
                 N.checkArgNotNull(mapper);
 
                 return new ObjIterator<>() {
@@ -271,7 +271,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             }
 
             @Override
-            public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, R> mapper) {
+            public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) {
                 N.checkArgNotNull(mapper);
 
                 return new ObjIterator<>() {
@@ -385,7 +385,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             }
 
             @Override
-            public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, R> mapper) {
+            public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) {
                 N.checkArgNotNull(mapper);
 
                 return new ObjIterator<>() {
@@ -446,7 +446,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             }
 
             @Override
-            public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, R> mapper) {
+            public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) {
                 N.checkArgNotNull(mapper);
 
                 return new ObjIterator<>() {
@@ -516,7 +516,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @param mapper
      * @return
      */
-    public abstract <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, R> mapper);
+    public abstract <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper);
 
     /**
      *
@@ -524,7 +524,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @param mapper
      * @return
      */
-    public <R> Stream<R> stream(final BiFunction<? super A, ? super B, R> mapper) {
+    public <R> Stream<R> stream(final BiFunction<? super A, ? super B, ? extends R> mapper) {
         N.checkArgNotNull(mapper);
 
         return Stream.of(map(mapper));

@@ -131,7 +131,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             }
 
             @Override
-            public <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, R> mapper) {
+            public <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper) {
                 N.checkArgNotNull(mapper);
 
                 return new ObjIterator<>() {
@@ -201,7 +201,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             }
 
             @Override
-            public <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, R> mapper) {
+            public <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper) {
                 N.checkArgNotNull(mapper);
 
                 return new ObjIterator<>() {
@@ -330,7 +330,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             }
 
             @Override
-            public <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, R> mapper) {
+            public <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper) {
                 N.checkArgNotNull(mapper);
 
                 return new ObjIterator<>() {
@@ -398,7 +398,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             }
 
             @Override
-            public <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, R> mapper) {
+            public <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper) {
                 N.checkArgNotNull(mapper);
 
                 return new ObjIterator<>() {
@@ -470,7 +470,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param mapper
      * @return
      */
-    public abstract <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, R> mapper);
+    public abstract <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper);
 
     /**
      *
@@ -478,7 +478,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param mapper
      * @return
      */
-    public <R> Stream<R> stream(final TriFunction<? super A, ? super B, ? super C, R> mapper) {
+    public <R> Stream<R> stream(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper) {
         N.checkArgNotNull(mapper);
 
         return Stream.of(map(mapper));

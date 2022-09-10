@@ -34,7 +34,7 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
 
     public static final String LONG_ARRAY = long[].class.getSimpleName();
 
-    private static Type<Long> elementType;
+    private Type<Long> elementType;
 
     PrimitiveLongArrayType() {
         super(LONG_ARRAY);

@@ -105,7 +105,7 @@ public final class MapEntity implements Serializable {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public <T> T get(String propName, Class<T> targetType) {
+    public <T> T get(String propName, Class<? extends T> targetType) {
         Object propValue = get(propName);
 
         if (propValue == null) {

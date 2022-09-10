@@ -78,7 +78,8 @@ public final class Throwables {
      * @param actionOnError
      * @return
      */
-    public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd, final java.util.function.Function<? super Throwable, R> actionOnError) {
+    public static <R> R call(final Throwables.Callable<R, ? extends Throwable> cmd,
+            final java.util.function.Function<? super Throwable, ? extends R> actionOnError) {
         N.checkArgNotNull(actionOnError);
 
         try {

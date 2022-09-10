@@ -631,38 +631,38 @@ public abstract class Observer<T> implements Immutable {
 
     /**
      *
-     * @param <U>
-     * @param map
+     * @param <R>
+     * @param mapper
      * @return
      */
-    public <U> Observer<U> map(final Function<? super T, U> map) {
+    public <R> Observer<R> map(final Function<? super T, R> mapper) {
         dispatcher.append(new Dispatcher<>() {
             @Override
             public void onNext(final Object param) {
                 if (downDispatcher != null) {
-                    downDispatcher.onNext(map.apply((T) param)); // onError if map.apply throws exception?
+                    downDispatcher.onNext(mapper.apply((T) param)); // onError if map.apply throws exception?
                 }
             }
         });
 
-        return (Observer<U>) this;
+        return (Observer<R>) this;
     }
 
     /**
      *
-     * @param <U>
-     * @param map
+     * @param <R>
+     * @param mapper
      * @return
      */
-    public <U> Observer<U> flatMap(final Function<? super T, Collection<U>> map) {
+    public <R> Observer<R> flatMap(final Function<? super T, ? extends Collection<? extends R>> mapper) {
         dispatcher.append(new Dispatcher<>() {
             @Override
             public void onNext(final Object param) {
                 if (downDispatcher != null) {
-                    final Collection<U> c = map.apply((T) param); // onError if map.apply throws exception?
+                    final Collection<? extends R> c = mapper.apply((T) param); // onError if map.apply throws exception?
 
                     if (N.notNullOrEmpty(c)) {
-                        for (U u : c) {
+                        for (R u : c) {
                             downDispatcher.onNext(u);
                         }
                     }
@@ -670,7 +670,7 @@ public abstract class Observer<T> implements Immutable {
             }
         });
 
-        return (Observer<U>) this;
+        return (Observer<R>) this;
     }
 
     /**

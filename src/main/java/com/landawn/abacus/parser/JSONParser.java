@@ -37,7 +37,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param str
      * @return
      */
-    <T> T readString(Class<T> targetClass, String str);
+    <T> T readString(Class<? extends T> targetClass, String str);
 
     /**
      *
@@ -47,7 +47,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param config
      * @return
      */
-    <T> T readString(Class<T> targetClass, String str, JSONDeserializationConfig config);
+    <T> T readString(Class<? extends T> targetClass, String str, JSONDeserializationConfig config);
 
     /**
      *
@@ -103,7 +103,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param toIndex
      * @return
      */
-    <T> T deserialize(Class<T> targetClass, String str, int fromIndex, int toIndex);
+    <T> T deserialize(Class<? extends T> targetClass, String str, int fromIndex, int toIndex);
 
     /**
      *
@@ -115,7 +115,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param config
      * @return
      */
-    <T> T deserialize(Class<T> targetClass, String str, int fromIndex, int toIndex, JSONDeserializationConfig config);
+    <T> T deserialize(Class<? extends T> targetClass, String str, int fromIndex, int toIndex, JSONDeserializationConfig config);
 
     /**
      *
@@ -124,26 +124,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param source
      * @return
      */
-    <T> ExceptionalStream<T, IOException> stream(Class<T> elementClass, String source);
-
-    /**
-     *
-     * @param <T>
-     * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
-     * @param source
-     * @param config
-     * @return
-     */
-    <T> ExceptionalStream<T, IOException> stream(Class<T> elementClass, String source, JSONDeserializationConfig config);
-
-    /**
-     *
-     * @param <T>
-     * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
-     * @param source
-     * @return
-     */
-    <T> ExceptionalStream<T, IOException> stream(Class<T> elementClass, File source);
+    <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, String source);
 
     /**
      *
@@ -153,7 +134,26 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param config
      * @return
      */
-    <T> ExceptionalStream<T, IOException> stream(Class<T> elementClass, File source, JSONDeserializationConfig config);
+    <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, String source, JSONDeserializationConfig config);
+
+    /**
+     *
+     * @param <T>
+     * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
+     * @param source
+     * @return
+     */
+    <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, File source);
+
+    /**
+     *
+     * @param <T>
+     * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
+     * @param source
+     * @param config
+     * @return
+     */
+    <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, File source, JSONDeserializationConfig config);
 
     /**
      *
@@ -163,7 +163,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param closeInputStreamWhenStreamIsClosed
      * @return
      */
-    <T> ExceptionalStream<T, IOException> stream(Class<T> elementClass, InputStream source, boolean closeInputStreamWhenStreamIsClosed);
+    <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, InputStream source, boolean closeInputStreamWhenStreamIsClosed);
 
     /**
      *
@@ -174,7 +174,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param config
      * @return
      */
-    <T> ExceptionalStream<T, IOException> stream(Class<T> elementClass, InputStream source, boolean closeInputStreamWhenStreamIsClosed,
+    <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, InputStream source, boolean closeInputStreamWhenStreamIsClosed,
             JSONDeserializationConfig config);
 
     /**
@@ -185,7 +185,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param closeReaderWhenStreamIsClosed
      * @return
      */
-    <T> ExceptionalStream<T, IOException> stream(Class<T> elementClass, Reader source, boolean closeReaderWhenStreamIsClosed);
+    <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, Reader source, boolean closeReaderWhenStreamIsClosed);
 
     /**
      *
@@ -196,5 +196,6 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
      * @param config
      * @return
      */
-    <T> ExceptionalStream<T, IOException> stream(Class<T> elementClass, Reader source, boolean closeReaderWhenStreamIsClosed, JSONDeserializationConfig config);
+    <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, Reader source, boolean closeReaderWhenStreamIsClosed,
+            JSONDeserializationConfig config);
 }

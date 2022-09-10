@@ -650,7 +650,7 @@ public final class Numbers {
         }
     }
 
-    public static <T extends Number> T convert(final Number value, final Class<T> targetType) {
+    public static <T extends Number> T convert(final Number value, final Class<? extends T> targetType) {
         if (value == null) {
             return N.defaultValueOf(targetType);
         }
@@ -665,7 +665,7 @@ public final class Numbers {
         }
     }
 
-    public static <T extends Number> T convert(final Number value, final Type<T> targetType) {
+    public static <T extends Number> T convert(final Number value, final Type<? extends T> targetType) {
         if (value == null) {
             return targetType.defaultValue();
         }
@@ -5119,7 +5119,7 @@ public final class Numbers {
         }
     }
 
-    //    public static abstract class NumberUtil extends Numbers {
+    //    public abstract static class NumberUtil extends Numbers {
     //
     //        private NumberUtil() {
     //            // utility class.

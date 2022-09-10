@@ -1714,7 +1714,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @return
      * @throws E the e
      */
-    public <R, E extends Exception> R apply(Throwables.Function<? super Multiset<T>, R, E> func) throws E {
+    public <R, E extends Exception> R apply(Throwables.Function<? super Multiset<T>, ? extends R, E> func) throws E {
         return func.apply(this);
     }
 
@@ -1727,7 +1727,7 @@ public final class Multiset<T> implements Iterable<T> {
      * @return
      * @throws E the e
      */
-    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Throwables.Function<? super Multiset<T>, R, E> func) throws E {
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Throwables.Function<? super Multiset<T>, ? extends R, E> func) throws E {
         return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
     }
 

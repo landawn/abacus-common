@@ -537,7 +537,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @return
      */
     @Override
-    public <T> T get(final Class<T> targetType, final int rowIndex, final int columnIndex) {
+    public <T> T get(final Class<? extends T> targetType, final int rowIndex, final int columnIndex) {
         T rt = (T) _columnList.get(columnIndex).get(rowIndex);
 
         return (rt == null) ? N.defaultValueOf(targetType) : rt;
@@ -590,7 +590,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @return
      */
     @Override
-    public <T> T get(final Class<T> targetType, final int columnIndex) {
+    public <T> T get(final Class<? extends T> targetType, final int columnIndex) {
         T rt = get(columnIndex);
 
         return (rt == null) ? N.defaultValueOf(targetType) : rt;
@@ -616,7 +616,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @return
      */
     @Override
-    public <T> T get(final Class<T> targetType, final String columnName) {
+    public <T> T get(final Class<? extends T> targetType, final String columnName) {
         return get(targetType, checkColumnName(columnName));
     }
 
@@ -3569,12 +3569,12 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     @Override
-    public <T> List<T> toMergedEntities(final Class<T> entityClass) {
+    public <T> List<T> toMergedEntities(final Class<? extends T> entityClass) {
         return toMergedEntities(entityClass, this._columnNameList);
     }
 
     @Override
-    public <T> List<T> toMergedEntities(final Class<T> entityClass, final Collection<String> selectPropNames) {
+    public <T> List<T> toMergedEntities(final Class<? extends T> entityClass, final Collection<String> selectPropNames) {
         N.checkArgNotNull(entityClass, "entityClass");
 
         @SuppressWarnings("deprecation")
@@ -3588,22 +3588,22 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     @Override
-    public <T> List<T> toMergedEntities(final Class<T> entityClass, final String idPropName) {
+    public <T> List<T> toMergedEntities(final Class<? extends T> entityClass, final String idPropName) {
         return toMergedEntities(entityClass, idPropName, this._columnNameList);
     }
 
     @Override
-    public <T> List<T> toMergedEntities(final Class<T> entityClass, final String idPropName, final Collection<String> selectPropNames) {
+    public <T> List<T> toMergedEntities(final Class<? extends T> entityClass, final String idPropName, final Collection<String> selectPropNames) {
         return toMergedEntities(entityClass, N.asList(idPropName), selectPropNames);
     }
 
     @Override
-    public <T> List<T> toMergedEntities(final Class<T> entityClass, final Collection<String> idPropNames, final Collection<String> selectPropNames) {
+    public <T> List<T> toMergedEntities(final Class<? extends T> entityClass, final Collection<String> idPropNames, final Collection<String> selectPropNames) {
         return toMergedEntities(entityClass, idPropNames, selectPropNames, false);
     }
 
     @SuppressWarnings("rawtypes")
-    private <T> List<T> toMergedEntities(final Class<T> entityClass, final Collection<String> idPropNames, Collection<String> selectPropNames,
+    private <T> List<T> toMergedEntities(final Class<? extends T> entityClass, final Collection<String> idPropNames, Collection<String> selectPropNames,
             final boolean returnAllList) {
         N.checkArgNotNull(entityClass, "entityClass");
         N.checkArgNotNull(idPropNames, "idPropNames");
@@ -10780,7 +10780,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @throws E the e
      */
     @Override
-    public <R, E extends Exception> R apply(Throwables.Function<? super DataSet, R, E> func) throws E {
+    public <R, E extends Exception> R apply(Throwables.Function<? super DataSet, ? extends R, E> func) throws E {
         return func.apply(this);
     }
 

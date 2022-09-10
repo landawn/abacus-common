@@ -34,7 +34,7 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
 
     public static final String DOUBLE_ARRAY = double[].class.getSimpleName();
 
-    private static Type<Double> elementType;
+    private Type<Double> elementType;
 
     PrimitiveDoubleArrayType() {
         super(DOUBLE_ARRAY);

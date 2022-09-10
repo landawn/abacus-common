@@ -225,7 +225,7 @@ public class Seid implements EntityId, Cloneable {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T get(String propName, Class<T> targetType) {
+    public <T> T get(String propName, Class<? extends T> targetType) {
         Object propValue = get(propName);
 
         if (propValue == null) {

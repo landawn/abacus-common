@@ -2239,7 +2239,7 @@ public final class Maps {
      * @param m
      * @return
      */
-    public static <T> T map2Entity(final Class<T> targetClass, final Map<String, Object> m) {
+    public static <T> T map2Entity(final Class<? extends T> targetClass, final Map<String, Object> m) {
         return map2Entity(targetClass, m, false, true);
     }
 
@@ -2254,7 +2254,7 @@ public final class Maps {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static <T> T map2Entity(final Class<T> targetClass, final Map<String, Object> m, final boolean ignoreNullProperty,
+    public static <T> T map2Entity(final Class<? extends T> targetClass, final Map<String, Object> m, final boolean ignoreNullProperty,
             final boolean ignoreUnmatchedProperty) {
         checkEntityClass(targetClass);
 
@@ -2302,7 +2302,7 @@ public final class Maps {
      * @param selectPropNames
      * @return
      */
-    public static <T> T map2Entity(final Class<T> targetClass, final Map<String, Object> m, final Collection<String> selectPropNames) {
+    public static <T> T map2Entity(final Class<? extends T> targetClass, final Map<String, Object> m, final Collection<String> selectPropNames) {
         checkEntityClass(targetClass);
 
         if (m == null) {
@@ -2345,7 +2345,7 @@ public final class Maps {
      * @param mList
      * @return
      */
-    public static <T> List<T> map2Entity(final Class<T> targetClass, final Collection<Map<String, Object>> mList) {
+    public static <T> List<T> map2Entity(final Class<? extends T> targetClass, final Collection<Map<String, Object>> mList) {
         return map2Entity(targetClass, mList, false, true);
     }
 
@@ -2359,7 +2359,7 @@ public final class Maps {
      * @param ignoreUnmatchedProperty
      * @return
      */
-    public static <T> List<T> map2Entity(final Class<T> targetClass, final Collection<Map<String, Object>> mList, final boolean igoreNullProperty,
+    public static <T> List<T> map2Entity(final Class<? extends T> targetClass, final Collection<Map<String, Object>> mList, final boolean igoreNullProperty,
             final boolean ignoreUnmatchedProperty) {
         checkEntityClass(targetClass);
 
@@ -2381,7 +2381,8 @@ public final class Maps {
      * @param selectPropNames
      * @return
      */
-    public static <T> List<T> map2Entity(final Class<T> targetClass, final Collection<Map<String, Object>> mList, final Collection<String> selectPropNames) {
+    public static <T> List<T> map2Entity(final Class<? extends T> targetClass, final Collection<Map<String, Object>> mList,
+            final Collection<String> selectPropNames) {
         checkEntityClass(targetClass);
 
         final List<T> entityList = new ArrayList<>(mList.size());
@@ -3516,7 +3517,7 @@ public final class Maps {
          * @param targetType
          * @return
          */
-        public <T> T get(Object key, Class<T> targetType) {
+        public <T> T get(Object key, Class<? extends T> targetType) {
             final V val = map.get(key);
 
             if (val == null || targetType.isAssignableFrom(val.getClass())) {
@@ -3538,7 +3539,7 @@ public final class Maps {
          * @param targetType
          * @return
          */
-        public <T> T get(Object key, Type<T> targetType) {
+        public <T> T get(Object key, Type<? extends T> targetType) {
             final V val = map.get(key);
 
             if (val == null || targetType.clazz().isAssignableFrom(val.getClass())) {

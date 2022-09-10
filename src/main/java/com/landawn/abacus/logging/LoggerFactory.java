@@ -39,6 +39,10 @@ public final class LoggerFactory {
 
     private static volatile boolean initialized = false;
 
+    private LoggerFactory() {
+        // singleton.
+    }
+
     /**
      * Gets the logger.
      *

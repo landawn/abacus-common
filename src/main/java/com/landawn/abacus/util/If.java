@@ -428,7 +428,7 @@ public final class If {
     //        return b ? Nullable.of(callable.call()) : Nullable.<T> empty();
     //    }
     //
-    //    public <T, R, E extends Throwable> Nullable<R> thenCall(final T init, final Try.Function<? super T, R, E> func) throws E {
+    //    public <T, R, E extends Throwable> Nullable<R> thenCall(final T init, final Try.Function<? super T, ? extends R, E> func) throws E {
     //        return b ? Nullable.of(func.apply(init)) : Nullable.<R> empty();
     //    }
 
@@ -498,7 +498,7 @@ public final class If {
     //        return b ? Nullable.of(callable.call()) : Nullable.<T> empty();
     //    }
     //
-    //    public <T, R, E extends Throwable> Nullable<R> then(final T init, final Try.Function<? super T, R, E> func) throws E {
+    //    public <T, R, E extends Throwable> Nullable<R> then(final T init, final Try.Function<? super T, ? extends R, E> func) throws E {
     //        return b ? Nullable.of(func.apply(init)) : Nullable.<R> empty();
     //    }
 
@@ -792,7 +792,7 @@ public final class If {
     //            return b ? new TrueOr<>(func.apply(init)) : FALSE_OR;
     //        }
     //
-    //        public static abstract class Or<T> {
+    //        public abstract static class Or<T> {
     //            Or() {
     //            }
     //

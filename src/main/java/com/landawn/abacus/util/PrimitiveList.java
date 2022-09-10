@@ -384,7 +384,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @return
      * @throws E the e
      */
-    public abstract <R, E extends Exception> R apply(Throwables.Function<? super L, R, E> func) throws E;
+    public abstract <R, E extends Exception> R apply(Throwables.Function<? super L, ? extends R, E> func) throws E;
 
     /**
      * Apply if not empty.
@@ -395,7 +395,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @return
      * @throws E the e
      */
-    public abstract <R, E extends Exception> Optional<R> applyIfNotEmpty(Throwables.Function<? super L, R, E> func) throws E;
+    public abstract <R, E extends Exception> Optional<R> applyIfNotEmpty(Throwables.Function<? super L, ? extends R, E> func) throws E;
 
     /**
      *

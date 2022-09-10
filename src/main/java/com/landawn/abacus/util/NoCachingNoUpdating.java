@@ -168,7 +168,7 @@ public interface NoCachingNoUpdating {
          * @param func
          * @return
          */
-        public <R, E extends Exception> R apply(final Throwables.Function<? super T[], R, E> func) throws E {
+        public <R, E extends Exception> R apply(final Throwables.Function<? super T[], ? extends R, E> func) throws E {
             return func.apply(a);
         }
 
@@ -375,7 +375,7 @@ public interface NoCachingNoUpdating {
          * @param func
          * @return
          */
-        public <R, E extends Exception> R apply(final Throwables.Function<? super boolean[], R, E> func) throws E {
+        public <R, E extends Exception> R apply(final Throwables.Function<? super boolean[], ? extends R, E> func) throws E {
             return func.apply(a);
         }
 
@@ -556,7 +556,7 @@ public interface NoCachingNoUpdating {
          * @param func
          * @return
          */
-        public <R, E extends Exception> R apply(final Throwables.Function<? super char[], R, E> func) throws E {
+        public <R, E extends Exception> R apply(final Throwables.Function<? super char[], ? extends R, E> func) throws E {
             return func.apply(a);
         }
 
@@ -737,7 +737,7 @@ public interface NoCachingNoUpdating {
          * @param func
          * @return
          */
-        public <R, E extends Exception> R apply(final Throwables.Function<? super byte[], R, E> func) throws E {
+        public <R, E extends Exception> R apply(final Throwables.Function<? super byte[], ? extends R, E> func) throws E {
             return func.apply(a);
         }
 
@@ -918,7 +918,7 @@ public interface NoCachingNoUpdating {
          * @param func
          * @return
          */
-        public <R, E extends Exception> R apply(final Throwables.Function<? super short[], R, E> func) throws E {
+        public <R, E extends Exception> R apply(final Throwables.Function<? super short[], ? extends R, E> func) throws E {
             return func.apply(a);
         }
 
@@ -1099,7 +1099,7 @@ public interface NoCachingNoUpdating {
          * @param func
          * @return
          */
-        public <R, E extends Exception> R apply(final Throwables.Function<? super int[], R, E> func) throws E {
+        public <R, E extends Exception> R apply(final Throwables.Function<? super int[], ? extends R, E> func) throws E {
             return func.apply(a);
         }
 
@@ -1280,7 +1280,7 @@ public interface NoCachingNoUpdating {
          * @param func
          * @return
          */
-        public <R, E extends Exception> R apply(final Throwables.Function<? super long[], R, E> func) throws E {
+        public <R, E extends Exception> R apply(final Throwables.Function<? super long[], ? extends R, E> func) throws E {
             return func.apply(a);
         }
 
@@ -1461,7 +1461,7 @@ public interface NoCachingNoUpdating {
          * @param func
          * @return
          */
-        public <R, E extends Exception> R apply(final Throwables.Function<? super float[], R, E> func) throws E {
+        public <R, E extends Exception> R apply(final Throwables.Function<? super float[], ? extends R, E> func) throws E {
             return func.apply(a);
         }
 
@@ -1642,7 +1642,7 @@ public interface NoCachingNoUpdating {
          * @param func
          * @return
          */
-        public <R, E extends Exception> R apply(final Throwables.Function<? super double[], R, E> func) throws E {
+        public <R, E extends Exception> R apply(final Throwables.Function<? super double[], ? extends R, E> func) throws E {
             return func.apply(a);
         }
 
@@ -1800,7 +1800,7 @@ public interface NoCachingNoUpdating {
          * @param func
          * @return
          */
-        public <R, E extends Exception> R apply(final Throwables.Function<? super Deque<T>, R, E> func) throws E {
+        public <R, E extends Exception> R apply(final Throwables.Function<? super Deque<T>, ? extends R, E> func) throws E {
             return func.apply(deque);
         }
 
@@ -1842,7 +1842,7 @@ public interface NoCachingNoUpdating {
     @Beta
     @SequentialOnly
     @Stateful
-    public static abstract class DisposableEntry<K, V> implements Map.Entry<K, V>, NoCachingNoUpdating {
+    public abstract static class DisposableEntry<K, V> implements Map.Entry<K, V>, NoCachingNoUpdating {
 
         /**
          *
@@ -1887,11 +1887,11 @@ public interface NoCachingNoUpdating {
             return new AbstractMap.SimpleEntry<>(getKey(), getValue());
         }
 
-        public <R, E extends Exception> R apply(final Throwables.Function<? super DisposableEntry<K, V>, R, E> func) throws E {
+        public <R, E extends Exception> R apply(final Throwables.Function<? super DisposableEntry<K, V>, ? extends R, E> func) throws E {
             return func.apply(this);
         }
 
-        public <R, E extends Exception> R apply(final Throwables.BiFunction<? super K, ? super V, R, E> func) throws E {
+        public <R, E extends Exception> R apply(final Throwables.BiFunction<? super K, ? super V, ? extends R, E> func) throws E {
             return func.apply(this.getKey(), this.getValue());
         }
 
@@ -1924,7 +1924,7 @@ public interface NoCachingNoUpdating {
     @Beta
     @SequentialOnly
     @Stateful
-    public static abstract class DisposablePair<L, R> implements NoCachingNoUpdating {
+    public abstract static class DisposablePair<L, R> implements NoCachingNoUpdating {
 
         /**
          *
@@ -1959,7 +1959,7 @@ public interface NoCachingNoUpdating {
             return Pair.of(left(), right());
         }
 
-        public <U, E extends Exception> U apply(final Throwables.BiFunction<? super L, ? super R, U, E> func) throws E {
+        public <U, E extends Exception> U apply(final Throwables.BiFunction<? super L, ? super R, ? extends U, E> func) throws E {
             return func.apply(left(), right());
         }
 
@@ -1986,7 +1986,7 @@ public interface NoCachingNoUpdating {
     @Beta
     @SequentialOnly
     @Stateful
-    public static abstract class DisposableTriple<L, M, R> implements NoCachingNoUpdating {
+    public abstract static class DisposableTriple<L, M, R> implements NoCachingNoUpdating {
 
         /**
          *
@@ -2029,7 +2029,7 @@ public interface NoCachingNoUpdating {
             return Triple.of(left(), middle(), right());
         }
 
-        public <U, E extends Exception> U apply(final Throwables.TriFunction<? super L, ? super M, ? super R, U, E> func) throws E {
+        public <U, E extends Exception> U apply(final Throwables.TriFunction<? super L, ? super M, ? super R, ? extends U, E> func) throws E {
             return func.apply(left(), middle(), right());
         }
 

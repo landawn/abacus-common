@@ -276,7 +276,7 @@ public final class JSONUtil {
      * @return
      * @throws JSONException the JSON exception
      */
-    public static <T> List<T> unwrap(final JSONArray jsonArray, Class<T> elementClass) throws JSONException {
+    public static <T> List<T> unwrap(final JSONArray jsonArray, Class<? extends T> elementClass) throws JSONException {
         return unwrap(jsonArray, Type.of(elementClass));
     }
 

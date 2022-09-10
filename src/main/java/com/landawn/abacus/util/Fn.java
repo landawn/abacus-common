@@ -2328,7 +2328,7 @@ public final class Fn extends Comparators {
      * @param func
      * @return
      */
-    public static <K, V, R> Function<Map.Entry<K, V>, R> applyByKey(final java.util.function.Function<? super K, R> func) {
+    public static <K, V, R> Function<Map.Entry<K, V>, R> applyByKey(final java.util.function.Function<? super K, ? extends R> func) {
         N.checkArgNotNull(func);
 
         return entry -> func.apply(entry.getKey());
@@ -2343,7 +2343,7 @@ public final class Fn extends Comparators {
      * @param func
      * @return
      */
-    public static <K, V, R> Function<Map.Entry<K, V>, R> applyByValue(final java.util.function.Function<? super V, R> func) {
+    public static <K, V, R> Function<Map.Entry<K, V>, R> applyByValue(final java.util.function.Function<? super V, ? extends R> func) {
         N.checkArgNotNull(func);
 
         return entry -> func.apply(entry.getValue());
@@ -2351,7 +2351,7 @@ public final class Fn extends Comparators {
 
     @Beta
     public static <T, R> Function<T, R> applyIfOrElseDefault(final java.util.function.Predicate<? super T> predicate,
-            final java.util.function.Function<? super T, R> func, final R defaultValue) {
+            final java.util.function.Function<? super T, ? extends R> func, final R defaultValue) {
         N.checkArgNotNull(predicate);
         N.checkArgNotNull(func);
 
@@ -2366,7 +2366,7 @@ public final class Fn extends Comparators {
 
     @Beta
     public static <T, R> Function<T, R> applyIfOrElseGet(final java.util.function.Predicate<? super T> predicate,
-            final java.util.function.Function<? super T, R> func, final java.util.function.Supplier<? extends R> supplier) {
+            final java.util.function.Function<? super T, ? extends R> func, final java.util.function.Supplier<? extends R> supplier) {
         N.checkArgNotNull(predicate);
         N.checkArgNotNull(func);
         N.checkArgNotNull(supplier);
@@ -2392,7 +2392,7 @@ public final class Fn extends Comparators {
      * @return
      */
     public static <A, B, R> Function<A, R> applyIfNotNullOrDefault(final java.util.function.Function<A, B> mapperA,
-            final java.util.function.Function<B, R> mapperB, final R defaultValue) {
+            final java.util.function.Function<B, ? extends R> mapperB, final R defaultValue) {
         N.checkArgNotNull(mapperA);
         N.checkArgNotNull(mapperB);
 
@@ -2425,7 +2425,7 @@ public final class Fn extends Comparators {
      * @return
      */
     public static <A, B, C, R> Function<A, R> applyIfNotNullOrDefault(final java.util.function.Function<A, B> mapperA,
-            final java.util.function.Function<B, C> mapperB, final java.util.function.Function<C, R> mapperC, final R defaultValue) {
+            final java.util.function.Function<B, C> mapperB, final java.util.function.Function<C, ? extends R> mapperC, final R defaultValue) {
         N.checkArgNotNull(mapperA);
         N.checkArgNotNull(mapperB);
         N.checkArgNotNull(mapperC);
@@ -2467,8 +2467,8 @@ public final class Fn extends Comparators {
      * @return
      */
     public static <A, B, C, D, R> Function<A, R> applyIfNotNullOrDefault(final java.util.function.Function<A, B> mapperA,
-            final java.util.function.Function<B, C> mapperB, final java.util.function.Function<C, D> mapperC, final java.util.function.Function<D, R> mapperD,
-            final R defaultValue) {
+            final java.util.function.Function<B, C> mapperB, final java.util.function.Function<C, D> mapperC,
+            final java.util.function.Function<D, ? extends R> mapperD, final R defaultValue) {
         N.checkArgNotNull(mapperA);
         N.checkArgNotNull(mapperB);
         N.checkArgNotNull(mapperC);
@@ -2512,8 +2512,8 @@ public final class Fn extends Comparators {
      * @param supplier
      * @return
      */
-    public static <A, B, R> Function<A, R> applyIfNotNullOrGet(final java.util.function.Function<A, B> mapperA, final java.util.function.Function<B, R> mapperB,
-            final java.util.function.Supplier<R> supplier) {
+    public static <A, B, R> Function<A, R> applyIfNotNullOrGet(final java.util.function.Function<A, B> mapperA,
+            final java.util.function.Function<B, ? extends R> mapperB, final java.util.function.Supplier<R> supplier) {
         N.checkArgNotNull(mapperA);
         N.checkArgNotNull(mapperB);
 
@@ -2546,7 +2546,8 @@ public final class Fn extends Comparators {
      * @return
      */
     public static <A, B, C, R> Function<A, R> applyIfNotNullOrGet(final java.util.function.Function<A, B> mapperA,
-            final java.util.function.Function<B, C> mapperB, final java.util.function.Function<C, R> mapperC, final java.util.function.Supplier<R> supplier) {
+            final java.util.function.Function<B, C> mapperB, final java.util.function.Function<C, ? extends R> mapperC,
+            final java.util.function.Supplier<R> supplier) {
         N.checkArgNotNull(mapperA);
         N.checkArgNotNull(mapperB);
         N.checkArgNotNull(mapperC);
@@ -2588,8 +2589,8 @@ public final class Fn extends Comparators {
      * @return
      */
     public static <A, B, C, D, R> Function<A, R> applyIfNotNullOrGet(final java.util.function.Function<A, B> mapperA,
-            final java.util.function.Function<B, C> mapperB, final java.util.function.Function<C, D> mapperC, final java.util.function.Function<D, R> mapperD,
-            final java.util.function.Supplier<R> supplier) {
+            final java.util.function.Function<B, C> mapperB, final java.util.function.Function<C, D> mapperC,
+            final java.util.function.Function<D, ? extends R> mapperD, final java.util.function.Supplier<R> supplier) {
         N.checkArgNotNull(mapperA);
         N.checkArgNotNull(mapperB);
         N.checkArgNotNull(mapperC);
@@ -2687,7 +2688,7 @@ public final class Fn extends Comparators {
      * @param func
      * @return
      */
-    public static <K, V, R> Function<Map.Entry<K, V>, R> applyKeyVal(final java.util.function.BiFunction<? super K, ? super V, R> func) {
+    public static <K, V, R> Function<Map.Entry<K, V>, R> applyKeyVal(final java.util.function.BiFunction<? super K, ? super V, ? extends R> func) {
         N.checkArgNotNull(func);
 
         return entry -> func.apply(entry.getKey(), entry.getValue());
@@ -3269,7 +3270,7 @@ public final class Fn extends Comparators {
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <T> IntFunction<T> from(final java.util.function.IntFunction<T> func) {
+    public static <T> IntFunction<T> from(final java.util.function.IntFunction<? extends T> func) {
         return func instanceof IntFunction ? ((IntFunction) func) : func::apply;
     }
 
@@ -3332,7 +3333,7 @@ public final class Fn extends Comparators {
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <T, R> Function<T, R> from(final java.util.function.Function<T, R> function) {
+    public static <T, R> Function<T, R> from(final java.util.function.Function<T, ? extends R> function) {
         return function instanceof Function ? ((Function) function) : function::apply;
     }
 
@@ -3346,7 +3347,7 @@ public final class Fn extends Comparators {
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <T, U, R> BiFunction<T, U, R> from(final java.util.function.BiFunction<T, U, R> function) {
+    public static <T, U, R> BiFunction<T, U, R> from(final java.util.function.BiFunction<T, U, ? extends R> function) {
         return function instanceof BiFunction ? ((BiFunction) function) : function::apply;
     }
 
@@ -3905,7 +3906,7 @@ public final class Fn extends Comparators {
      * @return
      */
     @Beta
-    public static <T, R, E extends Exception> Function<T, R> ff(final Throwables.Function<T, R, E> function) {
+    public static <T, R, E extends Exception> Function<T, R> ff(final Throwables.Function<T, ? extends R, E> function) {
         N.checkArgNotNull(function);
 
         return t -> {
@@ -3927,7 +3928,7 @@ public final class Fn extends Comparators {
      * @return
      */
     @Beta
-    public static <T, R, E extends Exception> Function<T, R> ff(final Throwables.Function<T, R, E> function, final R defaultOnError) {
+    public static <T, R, E extends Exception> Function<T, R> ff(final Throwables.Function<T, ? extends R, E> function, final R defaultOnError) {
         N.checkArgNotNull(function);
 
         return t -> {
@@ -4263,7 +4264,7 @@ public final class Fn extends Comparators {
      * @return
      */
     @Beta
-    public static <T, R> Function<T, R> sf(final Object mutex, final java.util.function.Function<T, R> function) {
+    public static <T, R> Function<T, R> sf(final Object mutex, final java.util.function.Function<T, ? extends R> function) {
         N.checkArgNotNull(mutex, "mutex");
         N.checkArgNotNull(function, "function");
 
@@ -5518,7 +5519,7 @@ public final class Fn extends Comparators {
     /**
      * The Class Factory.
      */
-    public static abstract class Factory {
+    public abstract static class Factory {
 
         /** The Constant BOOLEAN_ARRAY. */
         private static final IntFunction<boolean[]> BOOLEAN_ARRAY = len -> new boolean[len];
@@ -6971,7 +6972,7 @@ public final class Fn extends Comparators {
         @Beta
         @SequentialOnly
         @Stateful
-        public static <T, R> Function<T, R> indexed(final IndexedFunction<T, R> func) {
+        public static <T, R> Function<T, R> indexed(final IndexedFunction<T, ? extends R> func) {
             N.checkArgNotNull(func);
 
             return new Function<>() {
@@ -7211,7 +7212,7 @@ public final class Fn extends Comparators {
         @Beta
         @SequentialOnly
         @Stateful
-        public static <U, T, R> BiFunction<U, T, R> indexed(final IndexedBiFunction<U, T, R> func) {
+        public static <U, T, R> BiFunction<U, T, R> indexed(final IndexedBiFunction<U, T, ? extends R> func) {
             N.checkArgNotNull(func);
 
             return new BiFunction<>() {
@@ -9566,13 +9567,15 @@ public final class Fn extends Comparators {
             return entry -> consumer.accept(entry.getValue());
         }
 
-        public static <K, V, R, E extends Throwable> Throwables.Function<Map.Entry<K, V>, R, E> applyByKey(final Throwables.Function<? super K, R, E> func) {
+        public static <K, V, R, E extends Throwable> Throwables.Function<Map.Entry<K, V>, R, E> applyByKey(
+                final Throwables.Function<? super K, ? extends R, E> func) {
             N.checkArgNotNull(func);
 
             return entry -> func.apply(entry.getKey());
         }
 
-        public static <K, V, R, E extends Throwable> Throwables.Function<Map.Entry<K, V>, R, E> applyByValue(final Throwables.Function<? super V, R, E> func) {
+        public static <K, V, R, E extends Throwable> Throwables.Function<Map.Entry<K, V>, R, E> applyByValue(
+                final Throwables.Function<? super V, ? extends R, E> func) {
             N.checkArgNotNull(func);
 
             return entry -> func.apply(entry.getValue());
@@ -9772,7 +9775,7 @@ public final class Fn extends Comparators {
 
         @Beta
         @SuppressWarnings("rawtypes")
-        public static <T, E extends Throwable> Throwables.IntFunction<T, E> from(final java.util.function.IntFunction<T> func) {
+        public static <T, E extends Throwable> Throwables.IntFunction<T, E> from(final java.util.function.IntFunction<? extends T> func) {
             return func instanceof Throwables.IntFunction ? ((Throwables.IntFunction) func) : func::apply;
         }
 
@@ -9802,13 +9805,13 @@ public final class Fn extends Comparators {
 
         @Beta
         @SuppressWarnings("rawtypes")
-        public static <T, R, E extends Throwable> Throwables.Function<T, R, E> from(final java.util.function.Function<T, R> function) {
+        public static <T, R, E extends Throwable> Throwables.Function<T, R, E> from(final java.util.function.Function<T, ? extends R> function) {
             return function instanceof Throwables.Function ? ((Throwables.Function) function) : function::apply;
         }
 
         @Beta
         @SuppressWarnings("rawtypes")
-        public static <T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> from(final java.util.function.BiFunction<T, U, R> function) {
+        public static <T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> from(final java.util.function.BiFunction<T, U, ? extends R> function) {
             return function instanceof Throwables.BiFunction ? ((Throwables.BiFunction) function) : function::apply;
         }
 
@@ -10020,7 +10023,7 @@ public final class Fn extends Comparators {
         }
 
         @Beta
-        public static <T, R, E extends Throwable> Throwables.Function<T, R, E> ff(final Function<T, R> function) {
+        public static <T, R, E extends Throwable> Throwables.Function<T, R, E> ff(final Function<T, ? extends R> function) {
             N.checkArgNotNull(function);
 
             return (Throwables.Function<T, R, E>) function;
@@ -10230,7 +10233,7 @@ public final class Fn extends Comparators {
          * @return
          */
         @Beta
-        public static <T, R, E extends Throwable> Throwables.Function<T, R, E> sf(final Object mutex, final Throwables.Function<T, R, E> function) {
+        public static <T, R, E extends Throwable> Throwables.Function<T, R, E> sf(final Object mutex, final Throwables.Function<T, ? extends R, E> function) {
             N.checkArgNotNull(mutex, "mutex");
             N.checkArgNotNull(function, "function");
 
@@ -10352,19 +10355,19 @@ public final class Fn extends Comparators {
             };
         }
 
-        public static <T, R, E extends Throwable> Throwables.Consumer<T, E> f2c(final Throwables.Function<T, R, E> func) {
+        public static <T, R, E extends Throwable> Throwables.Consumer<T, E> f2c(final Throwables.Function<T, ? extends R, E> func) {
             N.checkArgNotNull(func);
 
             return func::apply;
         }
 
-        public static <T, U, R, E extends Throwable> Throwables.BiConsumer<T, U, E> f2c(final Throwables.BiFunction<T, U, R, E> func) {
+        public static <T, U, R, E extends Throwable> Throwables.BiConsumer<T, U, E> f2c(final Throwables.BiFunction<T, U, ? extends R, E> func) {
             N.checkArgNotNull(func);
 
             return func::apply;
         }
 
-        public static <A, B, C, R, E extends Throwable> Throwables.TriConsumer<A, B, C, E> f2c(final Throwables.TriFunction<A, B, C, R, E> func) {
+        public static <A, B, C, R, E extends Throwable> Throwables.TriConsumer<A, B, C, E> f2c(final Throwables.TriFunction<A, B, C, ? extends R, E> func) {
             N.checkArgNotNull(func);
 
             return func::apply;

@@ -1034,15 +1034,15 @@ public final class CSVUtil {
         }
     }
 
-    public static <T> Stream<T> stream(final Class<T> targetType, final File csvFile) {
+    public static <T> Stream<T> stream(final Class<? extends T> targetType, final File csvFile) {
         return stream(targetType, csvFile, (Collection<String>) null);
     }
 
-    public static <T> Stream<T> stream(final Class<T> targetType, final File csvFile, final Collection<String> selectColumnNames) {
+    public static <T> Stream<T> stream(final Class<? extends T> targetType, final File csvFile, final Collection<String> selectColumnNames) {
         return stream(targetType, csvFile, selectColumnNames, 0, Long.MAX_VALUE, Fn.alwaysTrue());
     }
 
-    public static <T> Stream<T> stream(final Class<T> targetType, final File csvFile, final Collection<String> selectColumnNames, final long offset,
+    public static <T> Stream<T> stream(final Class<? extends T> targetType, final File csvFile, final Collection<String> selectColumnNames, final long offset,
             final long count, final Predicate<String[]> filter) {
         FileReader csvReader = null;
 
@@ -1059,17 +1059,17 @@ public final class CSVUtil {
         }
     }
 
-    public static <T> Stream<T> stream(final Class<T> targetType, final Reader csvReader, final boolean closeReaderWhenStreamIsClosed) {
+    public static <T> Stream<T> stream(final Class<? extends T> targetType, final Reader csvReader, final boolean closeReaderWhenStreamIsClosed) {
         return stream(targetType, csvReader, (Collection<String>) null, closeReaderWhenStreamIsClosed);
     }
 
-    public static <T> Stream<T> stream(final Class<T> targetType, final Reader csvReader, final Collection<String> selectColumnNames,
+    public static <T> Stream<T> stream(final Class<? extends T> targetType, final Reader csvReader, final Collection<String> selectColumnNames,
             final boolean closeReaderWhenStreamIsClosed) {
         return stream(targetType, csvReader, selectColumnNames, 0, Long.MAX_VALUE, closeReaderWhenStreamIsClosed, Fn.alwaysTrue());
     }
 
-    public static <T> Stream<T> stream(final Class<T> targetType, final Reader csvReader, final Collection<String> selectColumnNames, final long offset,
-            final long count, final boolean closeReaderWhenStreamIsClosed, final Predicate<String[]> filter) {
+    public static <T> Stream<T> stream(final Class<? extends T> targetType, final Reader csvReader, final Collection<String> selectColumnNames,
+            final long offset, final long count, final boolean closeReaderWhenStreamIsClosed, final Predicate<String[]> filter) {
 
         return Stream.defer(() -> {
             N.checkArgNotNull(targetType, "targetType");

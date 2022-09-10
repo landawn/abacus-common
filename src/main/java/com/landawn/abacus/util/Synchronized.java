@@ -162,7 +162,7 @@ public final class Synchronized<T> {
      * @return
      * @throws E the e
      */
-    public static <T, R, E extends Throwable> R apply(final T mutex, final Throwables.Function<? super T, R, E> funciton) throws E {
+    public static <T, R, E extends Throwable> R apply(final T mutex, final Throwables.Function<? super T, ? extends R, E> funciton) throws E {
         N.checkArgNotNull(mutex);
         N.checkArgNotNull(funciton);
 
@@ -183,7 +183,8 @@ public final class Synchronized<T> {
      * @return
      * @throws E the e
      */
-    public static <T, U, R, E extends Throwable> R apply(final T mutex, final U u, final Throwables.BiFunction<? super T, ? super U, R, E> funciton) throws E {
+    public static <T, U, R, E extends Throwable> R apply(final T mutex, final U u, final Throwables.BiFunction<? super T, ? super U, ? extends R, E> funciton)
+            throws E {
         N.checkArgNotNull(mutex);
         N.checkArgNotNull(funciton);
 
@@ -259,7 +260,7 @@ public final class Synchronized<T> {
      * @return
      * @throws E the e
      */
-    public <R, E extends Throwable> R apply(final Throwables.Function<? super T, R, E> function) throws E {
+    public <R, E extends Throwable> R apply(final Throwables.Function<? super T, ? extends R, E> function) throws E {
         N.checkArgNotNull(function);
 
         synchronized (mutex) {

@@ -213,22 +213,22 @@ class JDKLogger extends AbstractLogger {
      */
     private void log(String callerFQCN, Level level, String msg, Throwable t) {
         // millis and thread are filled by the constructor
-        LogRecord record = new LogRecord(level, msg);
-        record.setLoggerName(getName());
-        record.setThrown(t);
+        LogRecord logRecord = new LogRecord(level, msg);
+        logRecord.setLoggerName(getName());
+        logRecord.setThrown(t);
         // Note: parameters in record are not set because SLF4J only
         // supports a single formatting style
-        fillCallerData(callerFQCN, record);
-        loggerImpl.log(record);
+        fillCallerData(callerFQCN, logRecord);
+        loggerImpl.log(logRecord);
     }
 
     /**
      * Fill in caller data if possible.
      *
      * @param callerFQCN
-     * @param record The record to update
+     * @param logRecord The record to update
      */
-    private static void fillCallerData(String callerFQCN, LogRecord record) {
+    private static void fillCallerData(String callerFQCN, LogRecord logRecord) {
         StackTraceElement[] steArray = new Throwable().getStackTrace();
 
         int selfIndex = -1;
@@ -253,8 +253,8 @@ class JDKLogger extends AbstractLogger {
             StackTraceElement ste = steArray[found];
             // setting the class name has the side effect of setting
             // the needToInferCaller variable to false.
-            record.setSourceClassName(ste.getClassName());
-            record.setSourceMethodName(ste.getMethodName());
+            logRecord.setSourceClassName(ste.getClassName());
+            logRecord.setSourceMethodName(ste.getMethodName());
         }
     }
 }
