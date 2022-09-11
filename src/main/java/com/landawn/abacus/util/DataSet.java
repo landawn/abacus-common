@@ -947,28 +947,28 @@ public interface DataSet {
     /**
      * Move the cursor to the specified row.
      *
-     * @param rowNum
+     * @param rowIndex
      * @return this object itself.
      */
-    DataSet absolute(int rowNum);
+    DataSet absolute(int rowIndex);
 
     /**
      * Gets the row.
      *
-     * @param rowNum
+     * @param rowIndex
      * @return
      */
-    Object[] getRow(int rowNum);
+    Object[] getRow(int rowIndex);
 
     /**
      * Gets the row.
      *
      * @param <T>
      * @param rowClass it can be Object[]/List/Set/Map/Entity
-     * @param rowNum
+     * @param rowIndex
      * @return
      */
-    <T> T getRow(Class<? extends T> rowClass, int rowNum);
+    <T> T getRow(Class<? extends T> rowClass, int rowIndex);
 
     /**
      * Gets the row.
@@ -976,31 +976,31 @@ public interface DataSet {
      * @param <T>
      * @param rowClass it can be Object[]/List/Set/Map/Entity
      * @param columnNames
-     * @param rowNum
+     * @param rowIndex
      * @return
      */
-    <T> T getRow(Class<? extends T> rowClass, Collection<String> columnNames, int rowNum);
+    <T> T getRow(Class<? extends T> rowClass, Collection<String> columnNames, int rowIndex);
 
     /**
      * Gets the row.
-     * @param rowNum
+     * @param rowIndex
      * @param rowSupplier it can be Object[]/List/Set/Map/Entity
      *
      * @param <T>
      * @return
      */
-    <T> T getRow(int rowNum, IntFunction<? extends T> rowSupplier);
+    <T> T getRow(int rowIndex, IntFunction<? extends T> rowSupplier);
 
     /**
      * Gets the row.
      * @param columnNames
-     * @param rowNum
+     * @param rowIndex
      * @param rowSupplier it can be Object[]/List/Set/Map/Entity
      *
      * @param <T>
      * @return
      */
-    <T> T getRow(Collection<String> columnNames, int rowNum, IntFunction<? extends T> rowSupplier);
+    <T> T getRow(Collection<String> columnNames, int rowIndex, IntFunction<? extends T> rowSupplier);
 
     /**
      *
@@ -1226,30 +1226,6 @@ public interface DataSet {
     /**
      *
      * @param <T>
-     * @param rowClass it can be Object[]/List/Set/Map/Entity
-     * @param columnFilter
-     * @param columnConverter
-     * @return
-     */
-    <T, E extends Exception, E2 extends Exception> List<T> toList(Class<? extends T> rowClass, Throwables.Predicate<? super String, E> columnFilter,
-            Throwables.Function<? super String, String, E2> columnConverter) throws E, E2;
-
-    /**
-     *
-     * @param <T>
-     * @param rowClass it can be Object[]/List/Set/Map/Entity
-     * @param columnFilter
-     * @param columnConverter
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @return
-     */
-    <T, E extends Exception, E2 extends Exception> List<T> toList(Class<? extends T> rowClass, Throwables.Predicate<? super String, E> columnFilter,
-            Throwables.Function<? super String, String, E2> columnConverter, int fromRowIndex, int toRowIndex) throws E, E2;
-
-    /**
-     *
-     * @param <T>
      * @param rowSupplier it can be Object[]/List/Set/Map/Entity
      * @return
      */
@@ -1284,6 +1260,157 @@ public interface DataSet {
      * @return
      */
     <T> List<T> toList(Collection<String> columnNames, int fromRowIndex, int toRowIndex, IntFunction<? extends T> rowSupplier);
+
+    /**
+     *
+     * @param <T>
+     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param columnNameFilter
+     * @param columnNameConverter
+     * @return
+     */
+    <T, E extends Exception, E2 extends Exception> List<T> toList(Class<? extends T> rowClass, Throwables.Predicate<? super String, E> columnNameFilter,
+            Throwables.Function<? super String, String, E2> columnNameConverter) throws E, E2;
+
+    /**
+     *
+     * @param <T>
+     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNameFilter
+     * @param columnNameConverter
+     * @return
+     */
+    <T, E extends Exception, E2 extends Exception> List<T> toList(Class<? extends T> rowClass, int fromRowIndex, int toRowIndex,
+            Throwables.Predicate<? super String, E> columnNameFilter, Throwables.Function<? super String, String, E2> columnNameConverter) throws E, E2;
+
+    /**
+     *
+     * @param <T>
+     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param columnNameFilter
+     * @param columnNameConverter
+     * @param rowSupplier it can be Object[]/List/Set/Map/Entity
+     * @return
+     */
+    <T, E extends Exception, E2 extends Exception> List<T> toList(Throwables.Predicate<? super String, E> columnNameFilter,
+            Throwables.Function<? super String, String, E2> columnNameConverter, IntFunction<? extends T> rowSupplier) throws E, E2;
+
+    /**
+     *
+     * @param <T>
+     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param columnNameFilter
+     * @param columnNameConverter
+     * @param rowSupplier it can be Object[]/List/Set/Map/Entity
+     * @return
+     */
+    <T, E extends Exception, E2 extends Exception> List<T> toList(int fromRowIndex, int toRowIndex, Throwables.Predicate<? super String, E> columnNameFilter,
+            Throwables.Function<? super String, String, E2> columnNameConverter, IntFunction<? extends T> rowSupplier) throws E, E2;
+
+    /**
+     *
+     * @param <T>
+     * @param entityClass
+     * @param prefixAndFieldNameMap
+     * @return
+     */
+    <T> List<T> toEntities(Class<? extends T> entityClass, Map<String, String> prefixAndFieldNameMap);
+
+    /**
+     *
+     * @param <T>
+     * @param entityClass
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param prefixAndFieldNameMap
+     * @return
+     */
+    <T> List<T> toEntities(Class<? extends T> entityClass, int fromRowIndex, int toRowIndex, Map<String, String> prefixAndFieldNameMap);
+
+    /**
+     *
+     * @param <T>
+     * @param entityClass
+     * @param columnNames
+     * @param prefixAndFieldNameMap
+     * @return
+     */
+    <T> List<T> toEntities(Class<? extends T> entityClass, Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap);
+
+    /**
+     *
+     * @param <T>
+     * @param entityClass
+     * @param columnNames
+     * @param fromRowIndex
+     * @param toRowIndex
+     * @param prefixAndFieldNameMap
+     * @return
+     */
+    <T> List<T> toEntities(Class<? extends T> entityClass, Collection<String> columnNames, int fromRowIndex, int toRowIndex,
+            Map<String, String> prefixAndFieldNameMap);
+
+    /**
+     *
+     * @param <T>
+     * @param entityClass
+     * @return
+     */
+    <T> List<T> toMergedEntities(Class<? extends T> entityClass);
+
+    /**
+     *
+     * @param <T>
+     * @param entityClass
+     * @param selectPropNames
+     * @return
+     */
+    <T> List<T> toMergedEntities(Class<? extends T> entityClass, Collection<String> selectPropNames);
+
+    /**
+     *
+     * @param <T>
+     * @param entityClass
+     * @param idPropName
+     * @return
+     */
+    <T> List<T> toMergedEntities(Class<? extends T> entityClass, String idPropName);
+
+    /**
+     *
+     * @param <T>
+     * @param entityClass
+     * @param idPropName
+     * @param selectPropNames
+     * @return
+     */
+    <T> List<T> toMergedEntities(Class<? extends T> entityClass, String idPropName, Collection<String> selectPropNames);
+
+    /**
+     *
+     * @param <T>
+     * @param entityClass
+     * @param idPropNames
+     * @param selectPropNames
+     * @return
+     */
+    <T> List<T> toMergedEntities(Class<? extends T> entityClass, Collection<String> idPropNames, Collection<String> selectPropNames);
+
+    /**
+     *
+     * @param <T>
+     * @param entityClass
+     * @param idPropNames
+     * @param selectPropNames
+     * @param prefixAndFieldNameMap
+     * @return
+     */
+    <T> List<T> toMergedEntities(Class<? extends T> entityClass, Collection<String> idPropNames, Collection<String> selectPropNames,
+            Map<String, String> prefixAndFieldNameMap);
 
     /**
      *
@@ -1522,52 +1649,6 @@ public interface DataSet {
      */
     <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(String keyColumnName, Collection<String> valueColumnNames, int fromRowIndex,
             int toRowIndex, IntFunction<? extends E> rowSupplier, IntFunction<? extends M> supplier);
-
-    /**
-     *
-     * @param <T>
-     * @param entityClass
-     * @return
-     */
-    <T> List<T> toMergedEntities(Class<? extends T> entityClass);
-
-    /**
-     *
-     * @param <T>
-     * @param entityClass
-     * @param selectPropNames
-     * @return
-     */
-    <T> List<T> toMergedEntities(Class<? extends T> entityClass, Collection<String> selectPropNames);
-
-    /**
-     *
-     * @param <T>
-     * @param entityClass
-     * @param idPropName
-     * @return
-     */
-    <T> List<T> toMergedEntities(Class<? extends T> entityClass, String idPropName);
-
-    /**
-     *
-     * @param <T>
-     * @param entityClass
-     * @param idPropName
-     * @param selectPropNames
-     * @return
-     */
-    <T> List<T> toMergedEntities(Class<? extends T> entityClass, String idPropName, Collection<String> selectPropNames);
-
-    /**
-     *
-     * @param <T>
-     * @param entityClass
-     * @param idPropNames
-     * @param selectPropNames
-     * @return
-     */
-    <T> List<T> toMergedEntities(Class<? extends T> entityClass, Collection<String> idPropNames, Collection<String> selectPropNames);
 
     String toJSON();
 
@@ -3882,6 +3963,49 @@ public interface DataSet {
      * @return
      */
     <T> Stream<T> stream(Collection<String> columnNames, int fromRowIndex, int toRowIndex, IntFunction<? extends T> rowSupplier);
+
+    /**
+    *
+    * @param <T>
+    * @param entityClass
+    * @param prefixAndFieldNameMap
+    * @return
+    */
+    <T> Stream<T> stream(Class<? extends T> entityClass, Map<String, String> prefixAndFieldNameMap);
+
+    /**
+    *
+    * @param <T>
+    * @param entityClass
+    * @param fromRowIndex
+    * @param toRowIndex
+    * @param prefixAndFieldNameMap
+    * @return
+    */
+    <T> Stream<T> stream(Class<? extends T> entityClass, int fromRowIndex, int toRowIndex, Map<String, String> prefixAndFieldNameMap);
+
+    /**
+    *
+    * @param <T>
+    * @param entityClass
+    * @param columnNames
+    * @param prefixAndFieldNameMap
+    * @return
+    */
+    <T> Stream<T> stream(Class<? extends T> entityClass, Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap);
+
+    /**
+    *
+    * @param <T>
+    * @param entityClass
+    * @param columnNames
+    * @param fromRowIndex
+    * @param toRowIndex
+    * @param prefixAndFieldNameMap
+    * @return
+    */
+    <T> Stream<T> stream(Class<? extends T> entityClass, Collection<String> columnNames, int fromRowIndex, int toRowIndex,
+            Map<String, String> prefixAndFieldNameMap);
 
     /**
      *

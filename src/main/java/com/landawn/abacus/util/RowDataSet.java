@@ -62,6 +62,7 @@ import com.landawn.abacus.parser.XMLParser;
 import com.landawn.abacus.parser.XMLSerializationConfig;
 import com.landawn.abacus.parser.XMLSerializationConfig.XSC;
 import com.landawn.abacus.type.Type;
+import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.Fn.Fnn;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 import com.landawn.abacus.util.Throwables.BiFunction;
@@ -235,6 +236,10 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public int[] getColumnIndexes(final Collection<String> columnNames) {
+        if (N.isNullOrEmpty(columnNames)) {
+            return N.EMPTY_INT_ARRAY;
+        }
+
         int[] columnIndexes = new int[columnNames.size()];
         int i = 0;
 
@@ -1978,13 +1983,13 @@ public class RowDataSet implements DataSet, Cloneable {
     /**
      * Gets the row.
      *
-     * @param rowNum
+     * @param rowIndex
      * @return
      */
     @SuppressWarnings("unchecked")
     @Override
-    public Object[] getRow(final int rowNum) {
-        return getRow(Object[].class, rowNum);
+    public Object[] getRow(final int rowIndex) {
+        return getRow(Object[].class, rowIndex);
     }
 
     /**
@@ -1992,12 +1997,12 @@ public class RowDataSet implements DataSet, Cloneable {
      *
      * @param <T>
      * @param rowClass
-     * @param rowNum
+     * @param rowIndex
      * @return
      */
     @Override
-    public <T> T getRow(final Class<? extends T> rowClass, final int rowNum) {
-        return getRow(rowClass, _columnNameList, rowNum);
+    public <T> T getRow(final Class<? extends T> rowClass, final int rowIndex) {
+        return getRow(rowClass, _columnNameList, rowIndex);
     }
 
     /**
@@ -2006,85 +2011,185 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param <T>
      * @param rowClass
      * @param columnNames
-     * @param rowNum
+     * @param rowIndex
      * @return
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T getRow(final Class<? extends T> rowClass, final Collection<String> columnNames, final int rowNum) {
-        checkRowNum(rowNum);
+    public <T> T getRow(final Class<? extends T> rowClass, final Collection<String> columnNames, final int rowIndex) {
+        return getRow(rowClass, columnNames, rowIndex, null);
+    }
 
-        final Type<?> rowType = N.typeOf(rowClass);
+    /**
+     * Gets the row.
+     * @param rowIndex
+     * @param rowSupplier
+     *
+     * @param <T>
+     * @return
+     */
+    @Override
+    public <T> T getRow(int rowIndex, IntFunction<? extends T> rowSupplier) {
+        return getRow(_columnNameList, rowIndex, rowSupplier);
+    }
+
+    /**
+     * Gets the row.
+     * @param columnNames
+     * @param rowIndex
+     * @param rowSupplier
+     *
+     * @param <T>
+     * @return
+     */
+    @Override
+    public <T> T getRow(Collection<String> columnNames, int rowIndex, IntFunction<? extends T> rowSupplier) {
+        return getRow(null, columnNames, rowIndex, rowSupplier);
+    }
+
+    private <T> T getRow(Class<? extends T> rowClass, Collection<String> columnNames, int rowIndex, IntFunction<? extends T> rowSupplier) {
+        checkRowNum(rowIndex);
+
+        columnNames = N.isNullOrEmpty(columnNames) ? this._columnNameList : columnNames;
+        final int[] columnIndexes = checkColumnName(columnNames);
+        final int columnCount = columnIndexes.length;
+
+        rowClass = rowClass == null ? (Class<T>) rowSupplier.apply(0).getClass() : rowClass;
+        final Type<T> rowType = N.typeOf(rowClass);
         final EntityInfo entityInfo = rowType.isEntity() ? ParserUtil.getEntityInfo(rowClass) : null;
-        final boolean isAbstractRowClass = Modifier.isAbstract(rowClass.getModifiers());
-        final Constructor<?> intConstructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowClass, int.class);
-        final Constructor<?> constructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowClass);
-        final int columnCount = columnNames.size();
 
-        Object result = null;
+        rowSupplier = rowSupplier == null && !rowType.isEntity() ? this.createRowSupplier(rowType, rowClass) : rowSupplier;
+
+        return getRow(rowType, rowClass, entityInfo, columnNames, columnIndexes, columnCount, rowIndex, null, rowSupplier);
+    }
+
+    private <T> T getRow(final Type<T> rowType, final Class<? extends T> rowClass, final EntityInfo entityInfo, final Collection<String> columnNames,
+            final int[] columnIndexes, final int columnCount, final int rowIndex, final Map<String, String> prefixAndFieldNameMap,
+            final IntFunction<? extends T> rowSupplier) {
+
         if (rowType.isObjectArray()) {
-            result = N.newArray(rowClass.getComponentType(), columnCount);
+            final Object[] result = (Object[]) rowSupplier.apply(columnCount);
 
-        } else if (rowType.isList() || rowType.isSet()) {
-            if (isAbstractRowClass) {
-                result = (rowType.isList() ? new ArrayList<>(columnCount) : N.newHashSet(columnCount));
-            } else if (intConstructor == null) {
-                result = ClassUtil.invokeConstructor(constructor);
-            } else {
-                result = ClassUtil.invokeConstructor(intConstructor, columnCount);
+            for (int i = 0; i < columnCount; i++) {
+                result[i] = _columnList.get(columnIndexes[i]).get(rowIndex);
             }
 
+            return (T) result;
+        } else if (rowType.isCollection()) {
+            final Collection<Object> result = (Collection<Object>) rowSupplier.apply(columnCount);
+
+            for (int columnIndex : columnIndexes) {
+                result.add(_columnList.get(columnIndex).get(rowIndex));
+            }
+
+            return (T) result;
         } else if (rowType.isMap()) {
-            if (isAbstractRowClass) {
-                result = N.newHashMap(columnCount);
-            } else if (intConstructor == null) {
-                result = ClassUtil.invokeConstructor(constructor);
-            } else {
-                result = ClassUtil.invokeConstructor(intConstructor, columnCount);
+            final Map<String, Object> result = (Map<String, Object>) rowSupplier.apply(columnCount);
+
+            for (int columnIndex : columnIndexes) {
+                result.put(_columnNameList.get(columnIndex), _columnList.get(columnIndex).get(rowIndex));
             }
+
+            return (T) result;
         } else if (rowType.isEntity()) {
-            result = entityInfo.createEntityResult();
+            final boolean ignoreUnmatchedProperty = columnNames == this._columnNameList;
+            Object result = rowSupplier == null ? entityInfo.createEntityResult() : rowSupplier.apply(columnCount);
+
+            Set<String> mergedPropNames = null;
+            String propName = null;
+            PropInfo propInfo = null;
+
+            for (int i = 0; i < columnCount; i++) {
+                propName = _columnNameList.get(columnIndexes[i]);
+
+                if (mergedPropNames != null && mergedPropNames.contains(propName)) {
+                    continue;
+                }
+
+                propInfo = entityInfo.getPropInfo(propName);
+
+                if (propInfo != null) {
+                    propInfo.setPropValue(result, _columnList.get(columnIndexes[i]).get(rowIndex));
+                } else {
+                    final int idx = propName.indexOf(PROP_NAME_SEPARATOR);
+
+                    if (idx <= 0) {
+                        if (ignoreUnmatchedProperty) {
+                            continue;
+                        }
+
+                        throw new IllegalArgumentException("Property " + propName + " is not found in class: " + rowClass);
+                    }
+
+                    final String realPropName = propName.substring(0, idx);
+                    propInfo = getPropInfoByPrefix(entityInfo, realPropName, prefixAndFieldNameMap);
+
+                    if (propInfo == null) {
+                        if (ignoreUnmatchedProperty) {
+                            continue;
+                        } else {
+                            throw new IllegalArgumentException("Property " + propName + " is not found in class: " + rowClass);
+                        }
+                    }
+
+                    final Type<Object> propEntityType = propInfo.type.isCollection() ? (Type<Object>) propInfo.type.getElementType() : propInfo.type;
+
+                    if (!propEntityType.isEntity()) {
+                        throw new UnsupportedOperationException("Property: " + propInfo.name + " in class: " + rowClass + " is not an entity type");
+                    }
+
+                    final Class<Object> propEntityClass = propEntityType.clazz();
+                    final EntityInfo propEntityInfo = ParserUtil.getEntityInfo(propEntityClass);
+                    final List<String> newTmpColumnNameList = new ArrayList<>();
+                    final List<List<Object>> newTmpColumnList = new ArrayList<>();
+
+                    if (mergedPropNames == null) {
+                        mergedPropNames = new HashSet<>();
+                    }
+
+                    String columnName = null;
+                    String newColumnName = null;
+
+                    for (int j = i; j < columnCount; j++) {
+                        columnName = this._columnNameList.get(columnIndexes[j]);
+
+                        if (mergedPropNames.contains(columnName)) {
+                            continue;
+                        }
+
+                        if (columnName.length() > idx && columnName.charAt(idx) == PROP_NAME_SEPARATOR && columnName.startsWith(realPropName)) {
+                            newColumnName = columnName.substring(idx + 1);
+                            newTmpColumnNameList.add(newColumnName);
+                            newTmpColumnList.add(_columnList.get(columnIndexes[j]));
+
+                            mergedPropNames.add(columnName);
+                        }
+                    }
+
+                    final RowDataSet tmp = new RowDataSet(newTmpColumnNameList, newTmpColumnList);
+
+                    final Object propValue = tmp.getRow(propEntityType, propEntityClass, propEntityInfo, newTmpColumnNameList,
+                            tmp.checkColumnName(newTmpColumnNameList), newTmpColumnNameList.size(), rowIndex, prefixAndFieldNameMap, null);
+
+                    if (propInfo.type.isCollection()) {
+                        Collection<Object> c = N.newCollection(propInfo.clazz);
+                        c.add(propValue);
+                        propInfo.setPropValue(result, c);
+                    } else {
+                        propInfo.setPropValue(result, propValue);
+                    }
+                }
+            }
+
+            if (rowSupplier == null) {
+                result = entityInfo.finishEntityResult(result);
+            }
+
+            return (T) result;
         } else {
             throw new IllegalArgumentException(
-                    "Unsupported row type: " + ClassUtil.getCanonicalClassName(rowClass) + ". Only Array, List/Set, Map and entity class are supported");
+                    "Unsupported row type: " + rowType.clazz().getCanonicalName() + ". Only Array, Collection, Map and entity class are supported");
         }
-
-        getRow(rowType, entityInfo, result, checkColumnName(columnNames), columnNames, rowNum);
-
-        return entityInfo == null ? (T) result : entityInfo.finishEntityResult(result);
-    }
-
-    /**
-     * Gets the row.
-     * @param rowNum
-     * @param rowSupplier
-     *
-     * @param <T>
-     * @return
-     */
-    @Override
-    public <T> T getRow(int rowNum, IntFunction<? extends T> rowSupplier) {
-        return getRow(_columnNameList, rowNum, rowSupplier);
-    }
-
-    /**
-     * Gets the row.
-     * @param columnNames
-     * @param rowNum
-     * @param rowSupplier
-     *
-     * @param <T>
-     * @return
-     */
-    @Override
-    public <T> T getRow(Collection<String> columnNames, int rowNum, IntFunction<? extends T> rowSupplier) {
-        checkRowNum(rowNum);
-
-        final T row = rowSupplier.apply(columnNames.size());
-
-        getRow(N.typeOf(row.getClass()), null, row, checkColumnName(columnNames), columnNames, rowNum);
-
-        return row;
     }
 
     @Override
@@ -2173,64 +2278,6 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     /**
-     * Gets the row.
-     *
-     * @param rowType
-     * @param output
-     * @param columnIndexes
-     * @param columnNames
-     * @param rowNum
-     * @return
-     */
-    private void getRow(final Type<?> rowType, final EntityInfo entityInfo, final Object output, int[] columnIndexes, final Collection<String> columnNames,
-            final int rowNum) {
-        checkRowNum(rowNum);
-
-        if (columnIndexes == null) {
-            columnIndexes = checkColumnName(columnNames);
-        }
-
-        final int columnCount = columnIndexes.length;
-
-        if (rowType.isObjectArray()) {
-            final Object[] result = (Object[]) output;
-
-            for (int i = 0; i < columnCount; i++) {
-                result[i] = _columnList.get(columnIndexes[i]).get(rowNum);
-            }
-        } else if (rowType.isCollection()) {
-            final Collection<Object> result = (Collection<Object>) output;
-
-            for (int i = 0; i < columnCount; i++) {
-                result.add(_columnList.get(columnIndexes[i]).get(rowNum));
-            }
-
-        } else if (rowType.isMap()) {
-            final Map<String, Object> result = (Map<String, Object>) output;
-
-            for (int i = 0; i < columnCount; i++) {
-                result.put(_columnNameList.get(columnIndexes[i]), _columnList.get(columnIndexes[i]).get(rowNum));
-            }
-
-        } else if (rowType.isEntity()) {
-            final boolean ignoreUnmatchedProperty = columnNames == _columnNameList;
-            Object result = output;
-            String propName = null;
-            Object propValue = null;
-
-            for (int i = 0; i < columnCount; i++) {
-                propName = _columnNameList.get(columnIndexes[i]);
-                propValue = _columnList.get(columnIndexes[i]).get(rowNum);
-
-                entityInfo.setPropValue(result, propName, propValue, ignoreUnmatchedProperty);
-            }
-        } else {
-            throw new IllegalArgumentException(
-                    "Unsupported row type: " + rowType.clazz().getCanonicalName() + ". Only Array, Collection, Map and entity class are supported");
-        }
-    }
-
-    /**
      *
      * @param <T>
      * @param rowSupplier
@@ -2253,6 +2300,7 @@ public class RowDataSet implements DataSet, Cloneable {
         if (size() == 0) {
             return Optional.empty();
         }
+
         final T row = getRow(columnNames, size() - 1, rowSupplier);
 
         return Optional.of(row);
@@ -2595,230 +2643,9 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param toRowIndex
      * @return
      */
-    @SuppressWarnings({ "unchecked" })
     @Override
-    public <T> List<T> toList(final Class<? extends T> rowClass, final Collection<String> columnNames, final int fromRowIndex, final int toRowIndex) {
-        checkRowIndex(fromRowIndex, toRowIndex);
-
-        final int[] columnIndexes = checkColumnName(columnNames);
-        final int columnCount = columnIndexes.length;
-
-        final List<Object> rowList = new ArrayList<>(toRowIndex - fromRowIndex);
-
-        if (fromRowIndex == toRowIndex) {
-            return (List<T>) rowList;
-        }
-
-        final Type<?> rowType = N.typeOf(rowClass);
-
-        if (rowType.isObjectArray()) {
-            final Class<?> componentType = rowClass.getComponentType();
-            Object[] row = null;
-
-            for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                row = N.newArray(componentType, columnCount);
-
-                for (int i = 0; i < columnCount; i++) {
-                    row[i] = _columnList.get(columnIndexes[i]).get(rowIndex);
-                }
-
-                rowList.add(row);
-            }
-        } else if (rowType.isList() || rowType.isSet()) {
-            final boolean isAbstractRowClass = Modifier.isAbstract(rowClass.getModifiers());
-            final Constructor<?> intConstructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowClass, int.class);
-            final Constructor<?> constructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowClass);
-
-            Collection<Object> row = null;
-
-            for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                row = (Collection<Object>) (isAbstractRowClass ? (rowType.isList() ? new ArrayList<>(columnCount) : N.newHashSet(columnCount))
-                        : ((intConstructor == null) ? ClassUtil.invokeConstructor(constructor) : ClassUtil.invokeConstructor(intConstructor, columnCount)));
-
-                for (int i = 0; i < columnCount; i++) {
-                    row.add(_columnList.get(columnIndexes[i]).get(rowIndex));
-                }
-
-                rowList.add(row);
-            }
-        } else if (rowType.isMap()) {
-            final String[] mapKeyNames = new String[columnCount];
-
-            for (int i = 0; i < columnCount; i++) {
-                mapKeyNames[i] = _columnNameList.get(columnIndexes[i]);
-            }
-
-            final boolean isAbstractRowClass = Modifier.isAbstract(rowClass.getModifiers());
-            final Constructor<?> intConstructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowClass, int.class);
-            final Constructor<?> constructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowClass);
-
-            Map<String, Object> row = null;
-
-            for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                row = (Map<String, Object>) (isAbstractRowClass ? N.newHashMap(columnCount)
-                        : (intConstructor == null ? ClassUtil.invokeConstructor(constructor) : ClassUtil.invokeConstructor(intConstructor, columnCount)));
-
-                for (int i = 0; i < columnCount; i++) {
-                    row.put(mapKeyNames[i], _columnList.get(columnIndexes[i]).get(rowIndex));
-                }
-
-                rowList.add(row);
-            }
-        } else if (rowType.isEntity()) {
-            final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
-
-            for (int rowNum = fromRowIndex; rowNum < toRowIndex; rowNum++) {
-                rowList.add(entityInfo.createEntityResult());
-            }
-
-            final boolean ignoreUnmatchedProperty = columnNames == _columnNameList;
-            List<Object> column = null;
-            String propName = null;
-            PropInfo propInfo = null;
-
-            for (int columnIndex : columnIndexes) {
-                column = _columnList.get(columnIndex);
-                propName = _columnNameList.get(columnIndex);
-                propInfo = entityInfo.getPropInfo(propName);
-
-                if (propInfo == null) {
-                    for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                        if (!entityInfo.setPropValue(rowList.get(rowIndex - fromRowIndex), propName, column.get(rowIndex), ignoreUnmatchedProperty)) {
-                            break;
-                        }
-                    }
-                } else {
-                    for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                        propInfo.setPropValue(rowList.get(rowIndex - fromRowIndex), column.get(rowIndex));
-                    }
-                }
-            }
-
-            for (int i = 0, size = rowList.size(); i < size; i++) {
-                rowList.set(i, entityInfo.finishEntityResult(rowList.get(i)));
-            }
-        } else {
-            throw new IllegalArgumentException(
-                    "Unsupported row type: " + ClassUtil.getCanonicalClassName(rowClass) + ". Only Array, List/Set, Map and entity class are supported");
-        }
-
-        return (List<T>) rowList;
-    }
-
-    @Override
-    public <T, E extends Exception, E2 extends Exception> List<T> toList(final Class<? extends T> rowClass,
-            final Throwables.Predicate<? super String, E> columnNameFilter, final Throwables.Function<? super String, String, E2> columnNameConverter)
-            throws E, E2 {
-        return toList(rowClass, columnNameFilter, columnNameConverter, 0, size());
-    }
-
-    @Override
-    public <T, E extends Exception, E2 extends Exception> List<T> toList(final Class<? extends T> rowClass,
-            final Throwables.Predicate<? super String, E> columnNameFilter, final Throwables.Function<? super String, String, E2> columnNameConverter,
-            final int fromRowIndex, final int toRowIndex) throws E, E2 {
-        checkRowIndex(fromRowIndex, toRowIndex);
-
-        if ((columnNameFilter == null || Objects.equals(columnNameFilter, Fnn.alwaysTrue()))
-                && (columnNameConverter == null && Objects.equals(columnNameConverter, Fnn.identity()))) {
-            return toList(rowClass, this._columnNameList, fromRowIndex, toRowIndex);
-        }
-
-        final List<Object> rowList = new ArrayList<>(toRowIndex - fromRowIndex);
-
-        if (fromRowIndex == toRowIndex) {
-            return (List<T>) rowList;
-        }
-
-        final Type<?> rowType = N.typeOf(rowClass);
-
-        if (rowType.isObjectArray() || rowType.isList() || rowType.isSet()
-                || (columnNameConverter == null && Objects.equals(columnNameConverter, Fnn.identity()))) {
-            return toList(rowClass, columnNameFilter == null ? this._columnNameList : N.filter(this._columnNameList, columnNameFilter), fromRowIndex,
-                    toRowIndex);
-        }
-
-        @SuppressWarnings("rawtypes")
-        final Throwables.Predicate<? super String, E> columnNameFilterToBeUsed = columnNameFilter == null ? (Throwables.Predicate) Fnn.alwaysTrue()
-                : columnNameFilter;
-        @SuppressWarnings("rawtypes")
-        final Throwables.Function<? super String, String, E2> columnNameConverterToBeUsed = columnNameConverter == null ? (Throwables.Function) Fnn.identity()
-                : columnNameConverter;
-
-        final List<Integer> columnIndexList = new ArrayList<>();
-
-        for (int i = 0, len = this._columnNameList.size(); i < len; i++) {
-            if (columnNameFilterToBeUsed.test(_columnNameList.get(i))) {
-                columnIndexList.add(i);
-            }
-        }
-
-        final int columnCount = columnIndexList.size();
-        final int[] columnIndexes = new int[columnCount];
-        final String[] newColumnNames = new String[columnCount];
-
-        for (int i = 0; i < columnCount; i++) {
-            columnIndexes[i] = columnIndexList.get(i);
-            newColumnNames[i] = columnNameConverterToBeUsed.apply(_columnNameList.get(columnIndexes[i]));
-        }
-
-        if (rowType.isMap()) {
-            final boolean isAbstractRowClass = Modifier.isAbstract(rowClass.getModifiers());
-            final Constructor<?> intConstructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowClass, int.class);
-            final Constructor<?> constructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowClass);
-
-            Map<String, Object> row = null;
-
-            for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                row = (Map<String, Object>) (isAbstractRowClass ? N.newHashMap(columnCount)
-                        : (intConstructor == null ? ClassUtil.invokeConstructor(constructor) : ClassUtil.invokeConstructor(intConstructor, columnCount)));
-
-                for (int i = 0; i < columnCount; i++) {
-                    row.put(newColumnNames[i], _columnList.get(columnIndexes[i]).get(rowIndex));
-                }
-
-                rowList.add(row);
-            }
-        } else if (rowType.isEntity()) {
-            final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
-
-            for (int rowNum = fromRowIndex; rowNum < toRowIndex; rowNum++) {
-                rowList.add(entityInfo.createEntityResult());
-            }
-
-            final boolean ignoreUnmatchedProperty = false;
-            int columnIndex = -1;
-            String propName = null;
-            List<Object> column = null;
-            PropInfo propInfo = null;
-
-            for (int i = 0; i < columnCount; i++) {
-                columnIndex = columnIndexes[i];
-                propName = newColumnNames[i];
-                column = _columnList.get(columnIndex);
-                propInfo = entityInfo.getPropInfo(propName);
-
-                if (propInfo == null) {
-                    for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                        if (!entityInfo.setPropValue(rowList.get(rowIndex - fromRowIndex), propName, column.get(rowIndex), ignoreUnmatchedProperty)) {
-                            break;
-                        }
-                    }
-                } else {
-                    for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                        propInfo.setPropValue(rowList.get(rowIndex - fromRowIndex), column.get(rowIndex));
-                    }
-                }
-            }
-
-            for (int i = 0, size = rowList.size(); i < size; i++) {
-                rowList.set(i, entityInfo.finishEntityResult(rowList.get(i)));
-            }
-        } else {
-            throw new IllegalArgumentException(
-                    "Unsupported row type: " + ClassUtil.getCanonicalClassName(rowClass) + ". Only Array, List/Set, Map and entity class are supported");
-        }
-
-        return (List<T>) rowList;
+    public <T> List<T> toList(final Class<? extends T> rowClass, Collection<String> columnNames, final int fromRowIndex, final int toRowIndex) {
+        return toList(rowClass, columnNames, fromRowIndex, toRowIndex, null, null);
     }
 
     /**
@@ -2868,18 +2695,29 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <T> List<T> toList(Collection<String> columnNames, int fromRowIndex, int toRowIndex, IntFunction<? extends T> rowSupplier) {
+        return toList(null, columnNames, fromRowIndex, toRowIndex, null, rowSupplier);
+    }
+
+    private <T> List<T> toList(Class<? extends T> rowClass, Collection<String> columnNames, int fromRowIndex, int toRowIndex,
+            final Map<String, String> prefixAndFieldNameMap, IntFunction<? extends T> rowSupplier) {
         checkRowIndex(fromRowIndex, toRowIndex);
+        columnNames = N.isNullOrEmpty(columnNames) ? this._columnNameList : columnNames;
 
-        final List<Object> rowList = new ArrayList<>(toRowIndex - fromRowIndex);
-        final int[] columnIndexes = checkColumnName(columnNames);
-        final int columnCount = columnIndexes.length;
+        rowClass = rowClass == null ? (Class<T>) rowSupplier.apply(0).getClass() : rowClass;
+        final Type<?> rowType = N.typeOf(rowClass);
 
-        if (fromRowIndex == toRowIndex) {
-            return (List<T>) rowList;
+        if (rowType.isEntity()) {
+            return toEntities(rowClass, ParserUtil.getEntityInfo(rowClass), null, columnNames, fromRowIndex, toRowIndex, prefixAndFieldNameMap, rowSupplier,
+                    false, true);
         }
 
-        final Class<T> rowClass = (Class<T>) rowSupplier.apply(0).getClass();
-        final Type<?> rowType = N.typeOf(rowClass);
+        rowSupplier = rowSupplier == null && !rowType.isEntity() ? this.createRowSupplier(rowType, rowClass) : rowSupplier;
+
+        final int[] columnIndexes = checkColumnName(columnNames);
+        final int columnCount = columnIndexes.length;
+        final int rowCount = toRowIndex - fromRowIndex;
+
+        final List<Object> rowList = new ArrayList<>(rowCount);
 
         if (rowType.isObjectArray()) {
             Object[] row = null;
@@ -2923,40 +2761,508 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 rowList.add(row);
             }
-        } else if (rowType.isEntity()) {
-            for (int rowNum = fromRowIndex; rowNum < toRowIndex; rowNum++) {
-                rowList.add(rowSupplier.apply(columnCount));
-            }
-
-            final boolean ignoreUnmatchedProperty = columnNames == _columnNameList;
-            final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
-            List<Object> column = null;
-            String propName = null;
-            PropInfo propInfo = null;
-
-            for (int columnIndex : columnIndexes) {
-                column = _columnList.get(columnIndex);
-                propName = _columnNameList.get(columnIndex);
-                propInfo = entityInfo.getPropInfo(propName);
-
-                if (propInfo == null) {
-                    for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                        if (!entityInfo.setPropValue(rowList.get(rowIndex - fromRowIndex), propName, column.get(rowIndex), ignoreUnmatchedProperty)) {
-                            break;
-                        }
-                    }
-                } else {
-                    for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                        propInfo.setPropValue(rowList.get(rowIndex - fromRowIndex), column.get(rowIndex));
-                    }
-                }
-            }
         } else {
             throw new IllegalArgumentException(
                     "Unsupported row type: " + ClassUtil.getCanonicalClassName(rowClass) + ". Only Array, List/Set, Map and entity class are supported");
         }
 
         return (List<T>) rowList;
+    }
+
+    private <T> IntFunction<? extends T> createRowSupplier(final Type<?> rowType, final Class<? extends T> rowClass) {
+        if (rowType.isObjectArray()) {
+            final Class<?> componentType = rowClass.getComponentType();
+            return cc -> N.newArray(componentType, cc);
+        } else if (rowType.isList() || rowType.isSet()) {
+            return (IntFunction<T>) Factory.ofCollection(rowClass);
+
+        } else if (rowType.isMap()) {
+            return (IntFunction<T>) Factory.ofMap(rowClass);
+        } else {
+            throw new IllegalArgumentException(
+                    "Unsupported row type: " + ClassUtil.getCanonicalClassName(rowClass) + ". Only Array, List/Set, Map and entity class are supported");
+        }
+    }
+
+    @Override
+    public <T, E extends Exception, E2 extends Exception> List<T> toList(final Class<? extends T> rowClass,
+            final Throwables.Predicate<? super String, E> columnNameFilter, final Throwables.Function<? super String, String, E2> columnNameConverter)
+            throws E, E2 {
+        return toList(rowClass, 0, size(), columnNameFilter, columnNameConverter);
+    }
+
+    @Override
+    public <T, E extends Exception, E2 extends Exception> List<T> toList(final Class<? extends T> rowClass, final int fromRowIndex, final int toRowIndex,
+            final Throwables.Predicate<? super String, E> columnNameFilter, final Throwables.Function<? super String, String, E2> columnNameConverter)
+            throws E, E2 {
+        checkRowIndex(fromRowIndex, toRowIndex);
+
+        if ((columnNameFilter == null || Objects.equals(columnNameFilter, Fnn.alwaysTrue()))
+                && (columnNameConverter == null && Objects.equals(columnNameConverter, Fnn.identity()))) {
+            return toList(rowClass, this._columnNameList, fromRowIndex, toRowIndex);
+        }
+
+        @SuppressWarnings("rawtypes")
+        final Throwables.Predicate<? super String, E> columnNameFilterToBeUsed = columnNameFilter == null ? (Throwables.Predicate) Fnn.alwaysTrue()
+                : columnNameFilter;
+        @SuppressWarnings("rawtypes")
+        final Throwables.Function<? super String, String, E2> columnNameConverterToBeUsed = columnNameConverter == null ? (Throwables.Function) Fnn.identity()
+                : columnNameConverter;
+
+        final List<String> newColumnNameList = new ArrayList<>();
+        final List<List<Object>> newColumnList = new ArrayList<>();
+        String columnName = null;
+
+        for (int i = 0, columnCount = this._columnNameList.size(); i < columnCount; i++) {
+            columnName = _columnNameList.get(i);
+
+            if (columnNameFilterToBeUsed.test(columnName)) {
+                newColumnNameList.add(columnNameConverterToBeUsed.apply(columnName));
+                newColumnList.add(_columnList.get(i));
+            }
+        }
+
+        final RowDataSet tmp = new RowDataSet(newColumnNameList, newColumnList);
+
+        return tmp.toList(rowClass, fromRowIndex, toRowIndex);
+    }
+
+    @Override
+    public <T, E extends Exception, E2 extends Exception> List<T> toList(final Throwables.Predicate<? super String, E> columnNameFilter,
+            final Throwables.Function<? super String, String, E2> columnNameConverter, IntFunction<? extends T> rowSupplier) throws E, E2 {
+        return toList(0, size(), columnNameFilter, columnNameConverter, rowSupplier);
+    }
+
+    @Override
+    public <T, E extends Exception, E2 extends Exception> List<T> toList(final int fromRowIndex, final int toRowIndex,
+            final Throwables.Predicate<? super String, E> columnNameFilter, final Throwables.Function<? super String, String, E2> columnNameConverter,
+            IntFunction<? extends T> rowSupplier) throws E, E2 {
+        checkRowIndex(fromRowIndex, toRowIndex);
+
+        if ((columnNameFilter == null || Objects.equals(columnNameFilter, Fnn.alwaysTrue()))
+                && (columnNameConverter == null && Objects.equals(columnNameConverter, Fnn.identity()))) {
+            return toList(this._columnNameList, fromRowIndex, toRowIndex, rowSupplier);
+        }
+
+        @SuppressWarnings("rawtypes")
+        final Throwables.Predicate<? super String, E> columnNameFilterToBeUsed = columnNameFilter == null ? (Throwables.Predicate) Fnn.alwaysTrue()
+                : columnNameFilter;
+        @SuppressWarnings("rawtypes")
+        final Throwables.Function<? super String, String, E2> columnNameConverterToBeUsed = columnNameConverter == null ? (Throwables.Function) Fnn.identity()
+                : columnNameConverter;
+
+        final List<String> newColumnNameList = new ArrayList<>();
+        final List<List<Object>> newColumnList = new ArrayList<>();
+        String columnName = null;
+
+        for (int i = 0, columnCount = this._columnNameList.size(); i < columnCount; i++) {
+            columnName = _columnNameList.get(i);
+
+            if (columnNameFilterToBeUsed.test(columnName)) {
+                newColumnNameList.add(columnNameConverterToBeUsed.apply(columnName));
+                newColumnList.add(_columnList.get(i));
+            }
+        }
+
+        final RowDataSet tmp = new RowDataSet(newColumnNameList, newColumnList);
+
+        return tmp.toList(fromRowIndex, toRowIndex, rowSupplier);
+    }
+
+    @Override
+    public <T> List<T> toEntities(Class<? extends T> entityClass, Map<String, String> prefixAndFieldNameMap) {
+        return toEntities(entityClass, this._columnNameList, 0, size(), prefixAndFieldNameMap);
+    }
+
+    @Override
+    public <T> List<T> toEntities(Class<? extends T> entityClass, int fromRowIndex, int toRowIndex, Map<String, String> prefixAndFieldNameMap) {
+        return toEntities(entityClass, this._columnNameList, fromRowIndex, toRowIndex, prefixAndFieldNameMap);
+    }
+
+    @Override
+    public <T> List<T> toEntities(Class<? extends T> entityClass, Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap) {
+        return toEntities(entityClass, columnNames, 0, size(), prefixAndFieldNameMap);
+    }
+
+    @Override
+    public <T> List<T> toEntities(Class<? extends T> entityClass, Collection<String> columnNames, int fromRowIndex, int toRowIndex,
+            Map<String, String> prefixAndFieldNameMap) {
+        N.checkArgument(ClassUtil.isEntity(entityClass), "{} is not an entity class", entityClass);
+
+        return toList(entityClass, columnNames, fromRowIndex, toRowIndex, prefixAndFieldNameMap, null);
+    }
+
+    @Override
+    public <T> List<T> toMergedEntities(final Class<? extends T> entityClass) {
+        return toMergedEntities(entityClass, this._columnNameList);
+    }
+
+    @Override
+    public <T> List<T> toMergedEntities(final Class<? extends T> entityClass, final Collection<String> selectPropNames) {
+        return toMergedEntities(entityClass, (Collection<String>) null, selectPropNames);
+    }
+
+    @Override
+    public <T> List<T> toMergedEntities(final Class<? extends T> entityClass, final String idPropName) {
+        return toMergedEntities(entityClass, idPropName, this._columnNameList);
+    }
+
+    @Override
+    public <T> List<T> toMergedEntities(final Class<? extends T> entityClass, final String idPropName, final Collection<String> selectPropNames) {
+        return toMergedEntities(entityClass, N.asList(idPropName), selectPropNames);
+    }
+
+    @Override
+    public <T> List<T> toMergedEntities(final Class<? extends T> entityClass, final Collection<String> idPropNames, final Collection<String> selectPropNames) {
+        return toMergedEntities(entityClass, idPropNames, selectPropNames, null);
+    }
+
+    @Override
+    public <T> List<T> toMergedEntities(final Class<? extends T> entityClass, final Collection<String> idPropNames, Collection<String> selectPropNames,
+            final Map<String, String> prefixAndFieldNameMap) {
+        N.checkArgument(ClassUtil.isEntity(entityClass), "{} is not an entity class", entityClass);
+
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
+
+        Collection<String> idPropNamesToUse = idPropNames;
+
+        if (idPropNames == null) {
+            idPropNamesToUse = entityInfo.idPropNameList;
+
+            if (N.isNullOrEmpty(idPropNamesToUse)) {
+                throw new IllegalArgumentException("No id property defined in class: " + entityClass);
+            }
+        }
+
+        N.checkArgNotNull(idPropNamesToUse, "idPropNames");
+
+        if (!this._columnNameList.containsAll(idPropNamesToUse)) {
+            final List<String> tmp = new ArrayList<>(idPropNamesToUse.size());
+            PropInfo propInfo = null;
+
+            for (String idPropName : idPropNamesToUse) {
+                if (this._columnNameList.contains(idPropName)) {
+                    tmp.add(idPropName);
+                } else {
+                    propInfo = entityInfo.getPropInfo(idPropName);
+
+                    if (propInfo != null && propInfo.columnName.isPresent() && this._columnNameList.contains(propInfo.columnName.get())) {
+                        tmp.add(propInfo.columnName.get());
+                    } else {
+                        tmp.add(idPropName);
+                    }
+                }
+            }
+
+            if (this._columnNameList.containsAll(tmp)) {
+                idPropNamesToUse = tmp;
+            }
+        }
+
+        N.checkArgument(this._columnNameList.containsAll(idPropNamesToUse), "Some id properties {} are not found in DataSet: {} for entity {}",
+                idPropNamesToUse, this._columnNameList, ClassUtil.getSimpleClassName(entityClass));
+
+        selectPropNames = N.isNullOrEmpty(selectPropNames) ? this._columnNameList : selectPropNames;
+
+        N.checkArgument(N.isNullOrEmpty(selectPropNames) || selectPropNames == this._columnNameList || this._columnNameList.containsAll(selectPropNames),
+                "Some select properties {} are not found in DataSet: {} for entity {}", selectPropNames, this._columnNameList,
+                ClassUtil.getSimpleClassName(entityClass));
+
+        return toEntities(entityClass, entityInfo, idPropNamesToUse, selectPropNames, 0, size(), prefixAndFieldNameMap, null, true, false);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private <T> List<T> toEntities(final Class<? extends T> entityClass, final EntityInfo entityInfo, final Collection<String> idPropNames,
+            final Collection<String> columnNames, final int fromRowIndex, final int toRowIndex, final Map<String, String> prefixAndFieldNameMap,
+            final IntFunction<? extends T> rowSupplier, boolean mergeResult, final boolean returnAllList) {
+        N.checkArgNotNull(entityClass, "entityClass");
+        checkRowIndex(fromRowIndex, toRowIndex);
+
+        final int rowCount = toRowIndex - fromRowIndex;
+        final int columnCount = columnNames.size();
+        final int[] idColumnIndexes = N.isNullOrEmpty(idPropNames) ? N.EMPTY_INT_ARRAY : getColumnIndexes(idPropNames);
+        final boolean ignoreUnmatchedProperty = columnNames == this._columnNameList;
+
+        final Object[] resultEntities = new Object[rowCount];
+        final Map<Object, Object> idEntityMap = mergeResult ? N.newLinkedHashMap(N.min(64, rowCount)) : N.emptyMap();
+        Object entity = null;
+
+        if (N.isNullOrEmpty(idColumnIndexes)) {
+            for (int rowIndex = fromRowIndex, i = 0; rowIndex < toRowIndex; rowIndex++, i++) {
+                resultEntities[i] = rowSupplier == null ? entityInfo.createEntityResult() : rowSupplier.apply(columnCount);
+            }
+        } else if (idColumnIndexes.length == 1) {
+            final List<Object> idColumn = _columnList.get(idColumnIndexes[0]);
+            Object rowKey = null;
+            Object key = null;
+
+            for (int rowIndex = fromRowIndex, i = 0; rowIndex < toRowIndex; rowIndex++, i++) {
+                key = idColumn.get(rowIndex);
+
+                if (key == null) {
+                    continue;
+                }
+
+                rowKey = getHashKey(key);
+                entity = idEntityMap.get(rowKey);
+
+                if (entity == null) {
+                    entity = rowSupplier == null ? entityInfo.createEntityResult() : rowSupplier.apply(columnCount);
+                    idEntityMap.put(rowKey, entity);
+                }
+
+                resultEntities[i] = entity;
+            }
+        } else {
+            final int idColumnCount = idColumnIndexes.length;
+
+            Object[] keyRow = Objectory.createObjectArray(idColumnCount);
+            Wrapper<Object[]> rowKey = null;
+            boolean isAllKeyNull = true;
+
+            for (int rowIndex = fromRowIndex, i = 0; rowIndex < toRowIndex; rowIndex++, i++) {
+                isAllKeyNull = true;
+
+                for (int j = 0; j < idColumnCount; j++) {
+                    keyRow[j] = _columnList.get(idColumnIndexes[j]).get(rowIndex);
+
+                    if (keyRow[j] != null) {
+                        isAllKeyNull = false;
+                    }
+                }
+
+                if (isAllKeyNull) {
+                    continue;
+                }
+
+                rowKey = Wrapper.of(keyRow);
+                entity = idEntityMap.get(rowKey);
+
+                if (entity == null) {
+                    entity = rowSupplier == null ? entityInfo.createEntityResult() : rowSupplier.apply(columnCount);
+                    idEntityMap.put(rowKey, entity);
+
+                    keyRow = Objectory.createObjectArray(idColumnCount);
+                }
+
+                resultEntities[i] = entity;
+            }
+
+            if (keyRow != null) {
+                Objectory.recycle(keyRow);
+                keyRow = null;
+            }
+        }
+
+        List<Collection<Object>> listPropValuesToDeduplicate = null;
+
+        try {
+            final Set<String> mergedPropNames = new HashSet<>();
+            List<Object> curColumn = null;
+            int curColumnIndex = 0;
+            PropInfo propInfo = null;
+
+            for (String propName : columnNames) {
+                if (mergedPropNames.contains(propName)) {
+                    continue;
+                }
+
+                curColumnIndex = checkColumnName(propName);
+                curColumn = _columnList.get(curColumnIndex);
+
+                propInfo = entityInfo.getPropInfo(propName);
+
+                if (propInfo != null) {
+                    boolean isPropValueChecked = false;
+                    boolean isPropValueAssignable = false;
+                    Object value = null;
+
+                    for (int rowIndex = fromRowIndex, i = 0; rowIndex < toRowIndex; rowIndex++, i++) {
+                        if (resultEntities[i] != null) {
+                            if (isPropValueChecked) {
+                                if (isPropValueAssignable) {
+                                    propInfo.setPropValue(resultEntities[i], curColumn.get(rowIndex));
+                                } else {
+                                    propInfo.setPropValue(resultEntities[i], N.convert(curColumn.get(rowIndex), propInfo.jsonXmlType));
+                                }
+                            } else {
+                                value = curColumn.get(rowIndex);
+
+                                if (value == null) {
+                                    propInfo.setPropValue(resultEntities[i], propInfo.jsonXmlType.defaultValue());
+                                } else {
+                                    if (propInfo.clazz.isAssignableFrom(value.getClass())) {
+                                        propInfo.setPropValue(resultEntities[i], value);
+                                        isPropValueAssignable = true;
+                                    } else {
+                                        propInfo.setPropValue(resultEntities[i], N.convert(value, propInfo.jsonXmlType));
+                                        isPropValueAssignable = false;
+                                    }
+
+                                    isPropValueChecked = true;
+                                }
+                            }
+                        }
+                    }
+
+                    mergedPropNames.add(propName);
+                } else {
+                    final int idx = propName.indexOf(PROP_NAME_SEPARATOR);
+
+                    if (idx <= 0) {
+                        if (ignoreUnmatchedProperty) {
+                            continue;
+                        }
+
+                        throw new IllegalArgumentException("Property " + propName + " is not found in class: " + entityClass);
+                    }
+
+                    final String realPropName = propName.substring(0, idx);
+                    propInfo = getPropInfoByPrefix(entityInfo, realPropName, prefixAndFieldNameMap);
+
+                    if (propInfo == null) {
+                        if (ignoreUnmatchedProperty) {
+                            continue;
+                        } else {
+                            throw new IllegalArgumentException("Property " + propName + " is not found in class: " + entityClass);
+                        }
+                    }
+
+                    final Type<?> propEntityType = propInfo.type.isCollection() ? propInfo.type.getElementType() : propInfo.type;
+
+                    if (!propEntityType.isEntity()) {
+                        throw new UnsupportedOperationException("Property: " + propInfo.name + " in class: " + entityClass + " is not an entity type");
+                    }
+
+                    final Class<?> propEntityClass = propEntityType.clazz();
+                    final EntityInfo propEntityInfo = ParserUtil.getEntityInfo(propEntityClass);
+                    final List<String> propEntityIdPropNames = mergeResult ? propEntityInfo.idPropNameList : null;
+                    final List<String> newPropEntityIdNames = mergeResult && N.isNullOrEmpty(propEntityIdPropNames) ? new ArrayList<>() : propEntityIdPropNames;
+                    final List<String> newTmpColumnNameList = new ArrayList<>();
+                    final List<List<Object>> newTmpColumnList = new ArrayList<>();
+
+                    String newColumnName = null;
+                    int columnIndex = 0;
+
+                    for (String columnName : columnNames) {
+                        if (mergedPropNames.contains(columnName)) {
+                            continue;
+                        }
+
+                        columnIndex = checkColumnName(columnName);
+
+                        if (columnName.length() > idx && columnName.charAt(idx) == PROP_NAME_SEPARATOR && columnName.startsWith(realPropName)) {
+                            newColumnName = columnName.substring(idx + 1);
+                            newTmpColumnNameList.add(newColumnName);
+                            newTmpColumnList.add(_columnList.get(columnIndex));
+
+                            mergedPropNames.add(columnName);
+
+                            if (mergeResult && N.isNullOrEmpty(propEntityIdPropNames) && newColumnName.indexOf(PROP_NAME_SEPARATOR) < 0) {
+                                newPropEntityIdNames.add(newColumnName);
+                            }
+                        }
+                    }
+
+                    final RowDataSet tmp = new RowDataSet(newTmpColumnNameList, newTmpColumnList);
+
+                    final boolean isToMerge = mergeResult && N.notNullOrEmpty(newPropEntityIdNames) && tmp._columnNameList.containsAll(newPropEntityIdNames);
+
+                    final List<?> propValueList = tmp.toEntities(propEntityClass, propEntityInfo, newPropEntityIdNames, tmp._columnNameList, fromRowIndex,
+                            toRowIndex, prefixAndFieldNameMap, null, isToMerge, true);
+
+                    if (propInfo.type.isCollection()) {
+                        Collection<Object> c = null;
+
+                        for (int rowIndex = fromRowIndex, i = 0; rowIndex < toRowIndex; rowIndex++, i++) {
+                            if (resultEntities[i] == null || propValueList.get(i) == null) {
+                                continue;
+                            }
+
+                            c = propInfo.getPropValue(resultEntities[i]);
+
+                            if (c == null) {
+                                c = N.newCollection(propInfo.clazz);
+                                propInfo.setPropValue(resultEntities[i], c);
+
+                                if (isToMerge && !(c instanceof Set)) {
+                                    if (listPropValuesToDeduplicate == null) {
+                                        listPropValuesToDeduplicate = new ArrayList<>();
+                                    }
+
+                                    listPropValuesToDeduplicate.add(c);
+                                }
+                            }
+
+                            c.add(propValueList.get(i));
+                        }
+                    } else {
+                        for (int rowIndex = fromRowIndex, i = 0; rowIndex < toRowIndex; rowIndex++, i++) {
+                            if (resultEntities[i] == null || propValueList.get(i) == null) {
+                                continue;
+                            }
+
+                            propInfo.setPropValue(resultEntities[i], propValueList.get(i));
+                        }
+                    }
+                }
+            }
+
+            if (N.notNullOrEmpty(listPropValuesToDeduplicate)) {
+                for (Collection<Object> list : listPropValuesToDeduplicate) {
+                    N.removeDuplicates(list);
+                }
+            }
+
+            final List<T> result = returnAllList || N.isNullOrEmpty(idEntityMap) ? (List<T>) N.asList(resultEntities)
+                    : new ArrayList<>((Collection<T>) idEntityMap.values());
+
+            if (rowSupplier == null && N.notNullOrEmpty(result)) {
+                for (int i = 0, size = result.size(); i < size; i++) {
+                    result.set(i, entityInfo.finishEntityResult(result.get(i)));
+                }
+            }
+
+            return result;
+        } finally {
+            if (N.len(idColumnIndexes) > 1 && N.notNullOrEmpty(idEntityMap)) {
+                for (Wrapper<Object[]> e : ((Map<Wrapper<Object[]>, Object>) ((Map) idEntityMap)).keySet()) {
+                    Objectory.recycle(e.value());
+                }
+            }
+        }
+    }
+
+    private PropInfo getPropInfoByPrefix(final EntityInfo entityInfo, final String prefix, final Map<String, String> prefixAndFieldNameMap) {
+        PropInfo propInfo = entityInfo.getPropInfo(prefix);
+
+        if (propInfo == null && N.notNullOrEmpty(prefixAndFieldNameMap) && prefixAndFieldNameMap.containsKey(prefix)) {
+            propInfo = entityInfo.getPropInfo(prefixAndFieldNameMap.get(prefix));
+        }
+
+        if (propInfo == null) {
+            propInfo = entityInfo.getPropInfo(prefix + "s"); // Trying to do something smart?
+            final int len = prefix.length() + 1;
+
+            if (propInfo != null && (propInfo.type.isEntity() || (propInfo.type.isCollection() && propInfo.type.getElementType().isEntity()))
+                    && N.noneMatch(this._columnNameList, it -> it.length() > len && it.charAt(len) == '.' && Strings.startsWithIgnoreCase(it, prefix + "s."))) {
+                // good
+            } else {
+                propInfo = entityInfo.getPropInfo(prefix + "es"); // Trying to do something smart?
+                final int len2 = prefix.length() + 2;
+
+                if (propInfo != null && (propInfo.type.isEntity() || (propInfo.type.isCollection() && propInfo.type.getElementType().isEntity()))
+                        && N.noneMatch(this._columnNameList,
+                                it -> it.length() > len2 && it.charAt(len2) == '.' && Strings.startsWithIgnoreCase(it, prefix + "es."))) {
+                    // good
+                } else {
+                    // Sorry, have done all I can do.
+                    propInfo = null;
+                }
+            }
+        }
+
+        return propInfo;
     }
 
     /**
@@ -3566,317 +3872,6 @@ public class RowDataSet implements DataSet, Cloneable {
         }
 
         return resultMap;
-    }
-
-    @Override
-    public <T> List<T> toMergedEntities(final Class<? extends T> entityClass) {
-        return toMergedEntities(entityClass, this._columnNameList);
-    }
-
-    @Override
-    public <T> List<T> toMergedEntities(final Class<? extends T> entityClass, final Collection<String> selectPropNames) {
-        N.checkArgNotNull(entityClass, "entityClass");
-
-        @SuppressWarnings("deprecation")
-        final List<String> idPropNames = Seid.getIdFieldNames(entityClass);
-
-        if (N.isNullOrEmpty(idPropNames)) {
-            throw new IllegalArgumentException("No id property defined in class: " + entityClass);
-        }
-
-        return toMergedEntities(entityClass, idPropNames, selectPropNames);
-    }
-
-    @Override
-    public <T> List<T> toMergedEntities(final Class<? extends T> entityClass, final String idPropName) {
-        return toMergedEntities(entityClass, idPropName, this._columnNameList);
-    }
-
-    @Override
-    public <T> List<T> toMergedEntities(final Class<? extends T> entityClass, final String idPropName, final Collection<String> selectPropNames) {
-        return toMergedEntities(entityClass, N.asList(idPropName), selectPropNames);
-    }
-
-    @Override
-    public <T> List<T> toMergedEntities(final Class<? extends T> entityClass, final Collection<String> idPropNames, final Collection<String> selectPropNames) {
-        return toMergedEntities(entityClass, idPropNames, selectPropNames, false);
-    }
-
-    @SuppressWarnings("rawtypes")
-    private <T> List<T> toMergedEntities(final Class<? extends T> entityClass, final Collection<String> idPropNames, Collection<String> selectPropNames,
-            final boolean returnAllList) {
-        N.checkArgNotNull(entityClass, "entityClass");
-        N.checkArgNotNull(idPropNames, "idPropNames");
-
-        Collection<String> idPropNamesToUse = idPropNames;
-
-        if (!this._columnNameList.containsAll(idPropNamesToUse)) {
-            final List<String> tmp = new ArrayList<>(idPropNamesToUse.size());
-            final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
-            PropInfo propInfo = null;
-
-            for (String idPropName : idPropNamesToUse) {
-                if (this._columnNameList.contains(idPropName)) {
-                    tmp.add(idPropName);
-                } else {
-                    propInfo = entityInfo.getPropInfo(idPropName);
-
-                    if (propInfo != null && propInfo.columnName.isPresent() && this._columnNameList.contains(propInfo.columnName.get())) {
-                        tmp.add(propInfo.columnName.get());
-                    } else {
-                        tmp.add(idPropName);
-                    }
-                }
-            }
-
-            if (this._columnNameList.containsAll(tmp)) {
-                idPropNamesToUse = tmp;
-            }
-        }
-
-        N.checkArgument(this._columnNameList.containsAll(idPropNamesToUse), "Some id properties {} are not found in DataSet: {} for entity {}",
-                idPropNamesToUse, this._columnNameList, ClassUtil.getSimpleClassName(entityClass));
-
-        N.checkArgument(N.isNullOrEmpty(selectPropNames) || selectPropNames == this._columnNameList || this._columnNameList.containsAll(selectPropNames),
-                "Some select properties {} are not found in DataSet: {} for entity {}", selectPropNames, this._columnNameList,
-                ClassUtil.getSimpleClassName(entityClass));
-
-        selectPropNames = N.isNullOrEmpty(selectPropNames) ? this._columnNameList : selectPropNames;
-
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
-
-        final int rowCount = size();
-        final int columnCount = _columnList.size();
-        final int[] idColumnIndexes = getColumnIndexes(idPropNamesToUse);
-        final boolean ignoreUnmatchedProperty = selectPropNames == this._columnNameList;
-
-        final Object[] resultEntities = new Object[rowCount];
-        final Map<Object, Object> idEntityMap = N.newLinkedHashMap(N.min(64, rowCount));
-        Object entity = null;
-
-        if (idColumnIndexes.length == 1) {
-            final List<Object> idColumn = _columnList.get(idColumnIndexes[0]);
-            Object rowKey = null;
-            Object key = null;
-
-            for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-                key = idColumn.get(rowIndex);
-
-                if (key == null) {
-                    continue;
-                }
-
-                rowKey = getHashKey(key);
-                entity = idEntityMap.get(rowKey);
-
-                if (entity == null) {
-                    entity = entityInfo.createEntityResult();
-                    idEntityMap.put(rowKey, entity);
-                }
-
-                resultEntities[rowIndex] = entity;
-            }
-        } else {
-            final int idColumnCount = idColumnIndexes.length;
-
-            Object[] keyRow = Objectory.createObjectArray(idColumnCount);
-            Wrapper<Object[]> rowKey = null;
-            boolean isAllKeyNull = true;
-
-            for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-                isAllKeyNull = true;
-
-                for (int i = 0; i < idColumnCount; i++) {
-                    keyRow[i] = _columnList.get(idColumnIndexes[i]).get(rowIndex);
-
-                    if (keyRow[i] != null) {
-                        isAllKeyNull = false;
-                    }
-                }
-
-                if (isAllKeyNull) {
-                    continue;
-                }
-
-                rowKey = Wrapper.of(keyRow);
-                entity = idEntityMap.get(rowKey);
-
-                if (entity == null) {
-                    entity = entityInfo.createEntityResult();
-                    idEntityMap.put(rowKey, entity);
-
-                    keyRow = Objectory.createObjectArray(idColumnCount);
-                }
-
-                resultEntities[rowIndex] = entity;
-            }
-
-            if (keyRow != null) {
-                Objectory.recycle(keyRow);
-                keyRow = null;
-            }
-        }
-
-        final List<Collection<Object>> listPropValuesToDeduplicate = new ArrayList<>();
-
-        try {
-            final Set<String> mergedPropNames = new HashSet<>();
-            List<Object> curColumn = null;
-            int curColumnIndex = 0;
-            PropInfo propInfo = null;
-
-            for (String propName : selectPropNames) {
-                if (mergedPropNames.contains(propName)) {
-                    continue;
-                }
-
-                curColumnIndex = checkColumnName(propName);
-                curColumn = _columnList.get(curColumnIndex);
-
-                propInfo = entityInfo.getPropInfo(propName);
-
-                if (propInfo != null) {
-                    for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-                        if (resultEntities[rowIndex] != null) {
-                            propInfo.setPropValue(resultEntities[rowIndex], curColumn.get(rowIndex));
-                        }
-                    }
-                } else {
-                    final int idx = propName.indexOf(PROP_NAME_SEPARATOR);
-
-                    if (idx <= 0) {
-                        if (ignoreUnmatchedProperty) {
-                            continue;
-                        }
-                        throw new IllegalArgumentException("Property " + propName + " is not found in class: " + entityClass);
-                    }
-
-                    final String realPropName = propName.substring(0, idx);
-                    propInfo = entityInfo.getPropInfo(realPropName);
-
-                    if (propInfo == null) {
-                        propInfo = entityInfo.getPropInfo(realPropName + "s"); // Trying to do something smart?
-
-                        if (propInfo != null && (propInfo.type.isEntity() || (propInfo.type.isCollection() && propInfo.type.getElementType().isEntity()))
-                                && N.noneMatch(this._columnNameList, Fn.startsWith(realPropName + "s."))) {
-                            // good
-                        } else {
-                            propInfo = entityInfo.getPropInfo(realPropName + "es"); // Trying to do something smart?
-
-                            if (propInfo != null && (propInfo.type.isEntity() || (propInfo.type.isCollection() && propInfo.type.getElementType().isEntity()))
-                                    && N.noneMatch(this._columnNameList, Fn.startsWith(realPropName + "es."))) {
-                                // good
-                            } else {
-                                // Sorry, have done all I can do.
-                                propInfo = null;
-                            }
-                        }
-                    }
-
-                    if (propInfo == null) {
-                        if (ignoreUnmatchedProperty) {
-                            continue;
-                        } else {
-                            throw new IllegalArgumentException("Property " + propName + " is not found in class: " + entityClass);
-                        }
-                    }
-
-                    final Type<?> propEntityType = propInfo.type.isCollection() ? propInfo.type.getElementType() : propInfo.type;
-
-                    if (!propEntityType.isEntity()) {
-                        throw new UnsupportedOperationException("Property: " + propInfo.name + " in class: " + entityClass + " is not an entity type");
-                    }
-
-                    final Class<?> propEntityClass = propEntityType.clazz();
-                    @SuppressWarnings("deprecation")
-                    final List<String> propEntityIdPropNames = Seid.getIdFieldNames(propEntityClass);
-                    final List<String> newPropEntityIdNames = N.isNullOrEmpty(propEntityIdPropNames) ? new ArrayList<>() : propEntityIdPropNames;
-                    final List<String> newTmpColumnNameList = new ArrayList<>();
-                    final List<List<Object>> newTmpColumnList = new ArrayList<>();
-
-                    String columnName = null;
-                    String newColumnName = null;
-
-                    for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
-                        columnName = this._columnNameList.get(columnIndex);
-
-                        if (mergedPropNames.contains(columnName)) {
-                            continue;
-                        }
-
-                        if (columnName.length() > idx && columnName.charAt(idx) == PROP_NAME_SEPARATOR && columnName.startsWith(realPropName)) {
-                            newColumnName = columnName.substring(idx + 1);
-                            newTmpColumnNameList.add(newColumnName);
-                            newTmpColumnList.add(_columnList.get(columnIndex));
-
-                            mergedPropNames.add(columnName);
-
-                            if (N.isNullOrEmpty(propEntityIdPropNames) && newColumnName.indexOf(PROP_NAME_SEPARATOR) < 0) {
-                                newPropEntityIdNames.add(newColumnName);
-                            }
-                        }
-                    }
-
-                    final RowDataSet tmp = new RowDataSet(newTmpColumnNameList, newTmpColumnList);
-
-                    final boolean isToMerge = N.notNullOrEmpty(newPropEntityIdNames) && tmp._columnNameList.containsAll(newPropEntityIdNames);
-
-                    final List<?> propValueList = isToMerge ? tmp.toMergedEntities(propEntityClass, newPropEntityIdNames, tmp._columnNameList, true)
-                            : tmp.toList(propEntityClass);
-
-                    if (propInfo.type.isCollection()) {
-                        Collection<Object> c = null;
-
-                        for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-                            if (resultEntities[rowIndex] == null || propValueList.get(rowIndex) == null) {
-                                continue;
-                            }
-
-                            c = propInfo.getPropValue(resultEntities[rowIndex]);
-
-                            if (c == null) {
-                                c = N.newCollection(propInfo.clazz);
-                                propInfo.setPropValue(resultEntities[rowIndex], c);
-
-                                if (isToMerge && !(c instanceof Set)) {
-                                    listPropValuesToDeduplicate.add(c);
-                                }
-                            }
-
-                            c.add(propValueList.get(rowIndex));
-                        }
-                    } else {
-                        for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-                            if (resultEntities[rowIndex] == null || propValueList.get(rowIndex) == null) {
-                                continue;
-                            }
-
-                            propInfo.setPropValue(resultEntities[rowIndex], propValueList.get(rowIndex));
-                        }
-                    }
-                }
-            }
-
-            if (N.notNullOrEmpty(listPropValuesToDeduplicate)) {
-                for (Collection<Object> list : listPropValuesToDeduplicate) {
-                    N.removeDuplicates(list);
-                }
-            }
-
-            final List<T> result = returnAllList ? (List<T>) N.asList(resultEntities) : new ArrayList<>((Collection<T>) idEntityMap.values());
-
-            for (int i = 0, size = result.size(); i < size; i++) {
-                result.set(i, entityInfo.finishEntityResult(result.get(i)));
-            }
-
-            return result;
-        } finally {
-            if (idColumnIndexes.length > 1) {
-                for (Wrapper<Object[]> e : ((Map<Wrapper<Object[]>, Object>) ((Map) idEntityMap)).keySet()) {
-                    Objectory.recycle(e.value());
-                }
-            }
-        }
     }
 
     @Override
@@ -10588,41 +10583,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public <T> Stream<T> stream(final Class<? extends T> rowClass, final Collection<String> columnNames, final int fromRowIndex, final int toRowIndex) {
-        final Type<?> rowType = N.typeOf(rowClass);
-        final boolean isAbstractRowClass = Modifier.isAbstract(rowClass.getModifiers());
-        final Constructor<?> intConstructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowClass, int.class);
-        final Constructor<?> constructor = isAbstractRowClass ? null : ClassUtil.getDeclaredConstructor(rowClass);
-
-        IntFunction<T> rowSupplier = null;
-
-        if (rowType.isObjectArray()) {
-            rowSupplier = columnCount -> N.newArray(rowClass.getComponentType(), columnCount);
-        } else if (rowType.isList() || rowType.isSet()) {
-            if (isAbstractRowClass) {
-                rowSupplier = columnCount -> (T) (rowType.isList() ? new ArrayList<>(columnCount) : N.newHashSet(columnCount));
-            } else if (intConstructor == null) {
-                rowSupplier = columnCount -> (T) ClassUtil.invokeConstructor(constructor);
-            } else {
-                rowSupplier = columnCount -> (T) ClassUtil.invokeConstructor(intConstructor, columnCount);
-            }
-
-        } else if (rowType.isMap()) {
-            if (isAbstractRowClass) {
-                rowSupplier = columnCount -> (T) N.newHashMap(columnCount);
-            } else if (intConstructor == null) {
-                rowSupplier = columnCount -> (T) ClassUtil.invokeConstructor(constructor);
-            } else {
-                rowSupplier = columnCount -> (T) ClassUtil.invokeConstructor(intConstructor, columnCount);
-            }
-        } else if (rowType.isEntity()) {
-            final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
-            rowSupplier = len -> (T) entityInfo.createEntityResult();
-        } else {
-            throw new IllegalArgumentException(
-                    "Unsupported row type: " + ClassUtil.getCanonicalClassName(rowClass) + ". Only Array, List/Set, Map and entity class are supported");
-        }
-
-        return stream(columnNames, fromRowIndex, toRowIndex, rowSupplier);
+        return stream(rowClass, columnNames, fromRowIndex, toRowIndex, null, null);
     }
 
     /**
@@ -10673,15 +10634,50 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public <T> Stream<T> stream(final Collection<String> columnNames, final int fromRowIndex, final int toRowIndex,
             final IntFunction<? extends T> rowSupplier) {
-        // return Stream.of(toArray(rowClass, columnNames, fromRowIndex, toRowIndex));
+        return stream(null, columnNames, fromRowIndex, toRowIndex, null, rowSupplier);
+    }
 
-        final int[] columnIndexes = this.checkColumnName(columnNames);
-        this.checkRowIndex(fromRowIndex, toRowIndex);
+    @Override
+    public <T> Stream<T> stream(Class<? extends T> entityClass, Map<String, String> prefixAndFieldNameMap) {
+        return stream(entityClass, this._columnNameList, 0, size(), prefixAndFieldNameMap);
+    }
 
-        final Class<?> rowClass = rowSupplier.apply(0).getClass();
-        final Type<?> rowType = N.typeOf(rowClass);
+    @Override
+    public <T> Stream<T> stream(Class<? extends T> entityClass, int fromRowIndex, int toRowIndex, Map<String, String> prefixAndFieldNameMap) {
+        return stream(entityClass, this._columnNameList, fromRowIndex, toRowIndex, prefixAndFieldNameMap);
+    }
+
+    @Override
+    public <T> Stream<T> stream(Class<? extends T> entityClass, Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap) {
+        return stream(entityClass, columnNames, 0, size(), prefixAndFieldNameMap);
+    }
+
+    @Override
+    public <T> Stream<T> stream(Class<? extends T> entityClass, Collection<String> columnNames, int fromRowIndex, int toRowIndex,
+            final Map<String, String> prefixAndFieldNameMap) {
+        N.checkArgument(ClassUtil.isEntity(entityClass), "{} is not an entity class", entityClass);
+
+        return stream(entityClass, columnNames, fromRowIndex, toRowIndex, prefixAndFieldNameMap, null);
+    }
+
+    private <T> Stream<T> stream(final Class<? extends T> inputRowClass, final Collection<String> inputColumnNames, final int fromRowIndex,
+            final int toRowIndex, final Map<String, String> prefixAndFieldNameMap, final IntFunction<? extends T> inputRowSupplier) {
+        checkRowIndex(fromRowIndex, toRowIndex);
+
+        final Collection<String> columnNames = N.isNullOrEmpty(inputColumnNames) ? this._columnNameList : inputColumnNames;
+
+        N.checkArgument(N.isNullOrEmpty(columnNames) || columnNames == this._columnNameList || this._columnNameList.containsAll(columnNames),
+                "Some select properties {} are not found in DataSet: {}", columnNames, this._columnNameList);
+
+        final int[] columnIndexes = checkColumnName(columnNames);
+        final int columnCount = columnIndexes.length;
+
+        final Class<? extends T> rowClass = inputRowClass == null ? (Class<T>) inputRowSupplier.apply(0).getClass() : inputRowClass;
+        final Type<T> rowType = N.typeOf(rowClass);
         final EntityInfo entityInfo = rowType.isEntity() ? ParserUtil.getEntityInfo(rowClass) : null;
-        final int columnCount = columnNames.size();
+
+        final IntFunction<? extends T> rowSupplier = inputRowSupplier == null && !rowType.isEntity() ? this.createRowSupplier(rowType, rowClass)
+                : inputRowSupplier;
 
         return Stream.of(new ObjIteratorEx<T>() {
             private final int expectedModCount = modCount;
@@ -10702,13 +10698,7 @@ public class RowDataSet implements DataSet, Cloneable {
                     throw new NoSuchElementException();
                 }
 
-                final Object row = rowSupplier.apply(columnCount);
-
-                getRow(rowType, entityInfo, row, columnIndexes, columnNames, cursor);
-
-                cursor++;
-
-                return (T) row;
+                return getRow(rowType, rowClass, entityInfo, columnNames, columnIndexes, columnCount, cursor++, prefixAndFieldNameMap, rowSupplier);
             }
 
             @Override
@@ -10731,7 +10721,7 @@ public class RowDataSet implements DataSet, Cloneable {
             public <A> A[] toArray(A[] a) {
                 checkConcurrentModification();
 
-                final List<T> rows = RowDataSet.this.toList(columnNames, cursor, toRowIndex, rowSupplier);
+                final List<T> rows = RowDataSet.this.toList(rowClass, columnNames, cursor, toRowIndex, prefixAndFieldNameMap, rowSupplier);
 
                 a = a.length >= rows.size() ? a : (A[]) N.newArray(a.getClass().getComponentType(), rows.size());
 
@@ -11201,6 +11191,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
             return columnNameIndexes;
         }
+
         if (this._columnIndexes == null) {
             int count = columnNames.size();
             this._columnIndexes = new int[count];
