@@ -2940,7 +2940,7 @@ public class RowDataSet implements DataSet, Cloneable {
             final List<String> tmp = new ArrayList<>(idPropNamesToUse.size());
             PropInfo propInfo = null;
 
-            for (String idPropName : idPropNamesToUse) {
+            outer: for (String idPropName : idPropNamesToUse) {
                 if (this._columnNameList.contains(idPropName)) {
                     tmp.add(idPropName);
                 } else {
@@ -2949,7 +2949,26 @@ public class RowDataSet implements DataSet, Cloneable {
                     if (propInfo != null && propInfo.columnName.isPresent() && this._columnNameList.contains(propInfo.columnName.get())) {
                         tmp.add(propInfo.columnName.get());
                     } else {
+                        for (String columnName : this._columnNameList) {
+                            if (columnName.equalsIgnoreCase(idPropName)) {
+                                tmp.add(columnName);
+
+                                continue outer;
+                            }
+                        }
+
+                        if (propInfo != null) {
+                            for (String columnName : this._columnNameList) {
+                                if (propInfo.equals(entityInfo.getPropInfo(columnName))) {
+                                    tmp.add(columnName);
+
+                                    continue outer;
+                                }
+                            }
+                        }
+
                         tmp.add(idPropName);
+                        break;
                     }
                 }
             }
@@ -2978,9 +2997,13 @@ public class RowDataSet implements DataSet, Cloneable {
         N.checkArgNotNull(entityClass, "entityClass");
         checkRowIndex(fromRowIndex, toRowIndex);
 
+        if (mergeResult && N.isNullOrEmpty(idPropNames)) {
+            throw new IllegalArgumentException("\"idPropNames\" can't be null or empty when \"mergeResult\" is true");
+        }
+
         final int rowCount = toRowIndex - fromRowIndex;
         final int columnCount = columnNames.size();
-        final int[] idColumnIndexes = N.isNullOrEmpty(idPropNames) ? N.EMPTY_INT_ARRAY : getColumnIndexes(idPropNames);
+        final int[] idColumnIndexes = N.isNullOrEmpty(idPropNames) ? N.EMPTY_INT_ARRAY : checkColumnName(idPropNames);
         final boolean ignoreUnmatchedProperty = columnNames == this._columnNameList;
 
         final Object[] resultEntities = new Object[rowCount];
@@ -3168,8 +3191,8 @@ public class RowDataSet implements DataSet, Cloneable {
 
                     final boolean isToMerge = mergeResult && N.notNullOrEmpty(newPropEntityIdNames) && tmp._columnNameList.containsAll(newPropEntityIdNames);
 
-                    final List<?> propValueList = tmp.toEntities(propEntityClass, propEntityInfo, newPropEntityIdNames, tmp._columnNameList, fromRowIndex,
-                            toRowIndex, prefixAndFieldNameMap, null, isToMerge, true);
+                    final List<?> propValueList = tmp.toEntities(propEntityClass, propEntityInfo, isToMerge ? newPropEntityIdNames : null, tmp._columnNameList,
+                            fromRowIndex, toRowIndex, prefixAndFieldNameMap, null, isToMerge, true);
 
                     if (propInfo.type.isCollection()) {
                         Collection<Object> c = null;
