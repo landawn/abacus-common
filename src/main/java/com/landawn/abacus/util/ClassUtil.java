@@ -668,7 +668,7 @@ public final class ClassUtil {
         }
 
         synchronized (entityDeclaredPropGetMethodPool) {
-            registeredXMLBindingClassList.put(cls, false);
+            registeredXMLBindingClassList.put(cls, true);
 
             if (entityDeclaredPropGetMethodPool.containsKey(cls)) {
                 entityDeclaredPropGetMethodPool.remove(cls);
@@ -2802,9 +2802,14 @@ public final class ClassUtil {
      * @param method
      * @return true, if is JAXB get method
      */
-    static boolean isJAXBGetMethod(final Object instance, final Method method) {
+    static boolean isJAXBGetMethod(final Class<?> cls, final Object instance, final Method method, final Field field) {
         try {
-            return (instance != null) && (Collection.class.isAssignableFrom(method.getReturnType()) || Map.class.isAssignableFrom(method.getReturnType()))
+            return (instance != null)
+                    && ((registeredXMLBindingClassList.getOrDefault(cls, false)
+                            || N.anyMatch(cls.getAnnotations(), it -> it.annotationType().getSimpleName().equals("XmlRootElement")))
+                            || (N.anyMatch(method.getAnnotations(), it -> it.annotationType().getSimpleName().equals("XmlElement"))
+                                    || (field != null && N.anyMatch(field.getAnnotations(), it -> it.annotationType().getSimpleName().equals("XmlElement")))))
+                    && (Collection.class.isAssignableFrom(method.getReturnType()) || Map.class.isAssignableFrom(method.getReturnType()))
                     && (invokeMethod(instance, method) != null);
         } catch (Exception e) {
             return false;
@@ -2855,16 +2860,18 @@ public final class ClassUtil {
 
             Object instance = null;
 
-            if (registeredXMLBindingClassList.containsKey(cls)) {
+            if (!registeredNonEntityClass.containsKey(cls)) {
                 try {
                     instance = cls.getDeclaredConstructor().newInstance();
                 } catch (Exception e) {
                     if (logger.isWarnEnabled()) {
                         logger.warn("Failed to new instance of class: " + cls.getCanonicalName() + " to check setter method by getter method");
                     }
-                }
 
-                registeredXMLBindingClassList.put(cls, true);
+                    if (registeredXMLBindingClassList.containsKey(cls)) {
+                        registeredXMLBindingClassList.put(cls, false);
+                    }
+                }
             }
 
             final List<Class<?>> allClasses = new ArrayList<>();
@@ -2964,7 +2971,8 @@ public final class ClassUtil {
                                 continue;
                             }
 
-                            if (isJAXBGetMethod(instance, method) || annotatedWithEntity(cls) || isRecordClass(clazz) || builderClass != null || isImmutable) {
+                            if (isJAXBGetMethod(cls, instance, method, field) || annotatedWithEntity(cls) || isRecordClass(clazz) || builderClass != null
+                                    || isImmutable) {
                                 // ClassUtil.setAccessibleQuietly(field, true);
                                 ClassUtil.setAccessibleQuietly(method, true);
 
@@ -3008,7 +3016,7 @@ public final class ClassUtil {
                             continue;
                         }
 
-                        if ((isJAXBGetMethod(instance, method) || annotatedWithEntity(cls) || isRecordClass(clazz))
+                        if ((isJAXBGetMethod(cls, instance, method, null) || annotatedWithEntity(cls) || isRecordClass(clazz))
                                 && !propGetMethodMap.containsValue(method)) {
                             ClassUtil.setAccessibleQuietly(method, true);
 

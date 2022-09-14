@@ -106,7 +106,7 @@ public final class Traverser<T> {
      *     one path between any two nodes
      * @return
      */
-    public static <T> Traverser<T> forTree(final Function<? super T, Iterable<? extends T>> tree) {
+    public static <T> Traverser<T> forTree(final Function<? super T, ? extends Iterable<? extends T>> tree) {
         return new Traverser<>(com.google.common.graph.Traverser.forGraph(tree::apply));
     }
 
@@ -131,7 +131,7 @@ public final class Traverser<T> {
      * @param graph {@link SuccessorsFunction} representing a general graph that may have cycles.
      * @return
      */
-    public static <T> Traverser<T> forGraph(final Function<? super T, Iterable<? extends T>> graph) {
+    public static <T> Traverser<T> forGraph(final Function<? super T, ? extends Iterable<? extends T>> graph) {
         return new Traverser<>(com.google.common.graph.Traverser.forGraph(graph::apply));
     }
 
