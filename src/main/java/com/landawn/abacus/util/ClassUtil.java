@@ -2805,15 +2805,26 @@ public final class ClassUtil {
     static boolean isJAXBGetMethod(final Class<?> cls, final Object instance, final Method method, final Field field) {
         try {
             return (instance != null)
-                    && ((registeredXMLBindingClassList.getOrDefault(cls, false)
-                            || N.anyMatch(cls.getAnnotations(), it -> it.annotationType().getSimpleName().equals("XmlRootElement")))
-                            || (N.anyMatch(method.getAnnotations(), it -> it.annotationType().getSimpleName().equals("XmlElement"))
-                                    || (field != null && N.anyMatch(field.getAnnotations(), it -> it.annotationType().getSimpleName().equals("XmlElement")))))
+                    && ((registeredXMLBindingClassList.getOrDefault(cls, false) || N.anyMatch(cls.getAnnotations(), ClassUtil::isXmlTypeAnno))
+                            || (N.anyMatch(method.getAnnotations(), ClassUtil::isXmlElementAnno)
+                                    || (field != null && N.anyMatch(field.getAnnotations(), ClassUtil::isXmlElementAnno))))
                     && (Collection.class.isAssignableFrom(method.getReturnType()) || Map.class.isAssignableFrom(method.getReturnType()))
                     && (invokeMethod(instance, method) != null);
         } catch (Exception e) {
             return false;
         }
+    }
+
+    private static boolean isXmlTypeAnno(Annotation it) {
+        final String simpleTypeName = it.annotationType().getSimpleName();
+
+        return simpleTypeName.equals("XmlRootElement") || simpleTypeName.equals("XmlType");
+    }
+
+    private static boolean isXmlElementAnno(Annotation it) {
+        final String simpleTypeName = it.annotationType().getSimpleName();
+
+        return simpleTypeName.equals("XmlElement") || simpleTypeName.equals("XmlElements");
     }
 
     /**
