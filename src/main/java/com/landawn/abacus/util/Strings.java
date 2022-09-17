@@ -6042,23 +6042,6 @@ public abstract class Strings {
     }
 
     /**
-     * Returns {@code null} if {@code inclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || inclusiveBeginIndex > exclusiveEndIndex},
-     * otherwise the {@code substring} with String value: {@code str.substring(exclusiveBeginIndex, exclusiveEndIndex)} is returned.
-     *
-     * @param str
-     * @param inclusiveBeginIndex
-     * @param exclusiveEndIndex
-     * @return
-     */
-    public static String substring(String str, int inclusiveBeginIndex, int exclusiveEndIndex) {
-        if (str == null || inclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || inclusiveBeginIndex > exclusiveEndIndex) {
-            return null;
-        }
-
-        return str.substring(inclusiveBeginIndex, exclusiveEndIndex);
-    }
-
-    /**
      * Returns {@code null} if {@code inclusiveBeginIndex < 0},
      * otherwise the {@code substring} with String value: {@code str.substring(inclusiveBeginIndex)} is returned.
      *
@@ -6110,10 +6093,28 @@ public abstract class Strings {
     }
 
     /**
+     * Returns {@code null} if {@code inclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || inclusiveBeginIndex > exclusiveEndIndex},
+     * otherwise the {@code substring} with String value: {@code str.substring(exclusiveBeginIndex, exclusiveEndIndex)} is returned.
      *
      * @param str
      * @param inclusiveBeginIndex
-     * @param delimiterOfExclusiveEndIndex {@code exclusiveEndIndex <- str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1) if inclusiveBeginIndex >= 0}
+     * @param exclusiveEndIndex
+     * @return
+     */
+    public static String substring(String str, int inclusiveBeginIndex, int exclusiveEndIndex) {
+        if (str == null || inclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || inclusiveBeginIndex > exclusiveEndIndex) {
+            return null;
+        }
+
+        return str.substring(inclusiveBeginIndex, exclusiveEndIndex);
+    }
+
+    /**
+     * Returns {@code null} if {@code str == null || str.length() == 0 || inclusiveBeginIndex < 0}.
+     *
+     * @param str
+     * @param inclusiveBeginIndex
+     * @param delimiterOfExclusiveEndIndex {@code exclusiveEndIndex <- str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1) if inclusiveBeginIndex >= 0}, or {@code str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1) < 0}
      * @return
      * @see #substring(String, int, int)
      */
@@ -6126,6 +6127,7 @@ public abstract class Strings {
     }
 
     /**
+     * Returns {@code null} if {@code (str == null || inclusiveBeginIndex < 0 || delimiterOfExclusiveEndIndex == null)}, or {@code str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1) < 0}.
      *
      * @param str
      * @param inclusiveBeginIndex
@@ -6146,6 +6148,7 @@ public abstract class Strings {
     }
 
     /**
+     * Returns {@code null} if {@code (str == null || inclusiveBeginIndex < 0)}, or {@code funcOfExclusiveEndIndex.applyAsInt(inclusiveBeginIndex) < 0}.
      *
      * @param str
      * @param inclusiveBeginIndex
@@ -6162,6 +6165,7 @@ public abstract class Strings {
     }
 
     /**
+     * Returns {@code null} if {@code (str == null || str.length() == 0 || exclusiveEndIndex <= 0)}, or {@code str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) < 0}.
      *
      * @param str
      * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) if exclusiveEndIndex > 0}
@@ -6178,6 +6182,8 @@ public abstract class Strings {
     }
 
     /**
+     * Returns {@code null} if {@code (str == null || delimiterOfInclusiveBeginIndex == null || exclusiveEndIndex < 0)}, or {@code str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) < 0}.
+     *
      *
      * @param str
      * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) if exclusiveEndIndex > 0}
@@ -6200,6 +6206,8 @@ public abstract class Strings {
     }
 
     /**
+     * Returns {@code null} if {@code (str == null || exclusiveEndIndex < 0)}, or {@code funcOfInclusiveBeginIndex.applyAsInt(exclusiveEndIndex) < 0}.
+     *
      *
      * @param str
      * @param funcOfInclusiveBeginIndex {@code inclusiveBeginIndex <- funcOfInclusiveBeginIndex.applyAsInt(exclusiveEndIndex)) if exclusiveEndIndex > 0}
@@ -9111,6 +9119,7 @@ public abstract class Strings {
         return str.substring(0, start) + overlay + str.substring(end);
     }
 
+    @Beta
     public static final class StringUtil extends Strings {
         private StringUtil() {
             // Utility class.
@@ -9120,20 +9129,6 @@ public abstract class Strings {
     public static final class MoreStringUtil {
         private MoreStringUtil() {
             // Utility class.
-        }
-
-        /**
-         * Returns an empty <code>Optional</code> if {@code inclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || inclusiveBeginIndex > exclusiveEndIndex},
-         * otherwise an {@code Optional} with String value: {@code str.substring(exclusiveBeginIndex, exclusiveEndIndex)} is returned.
-         *
-         * @param str
-         * @param inclusiveBeginIndex
-         * @param exclusiveEndIndex
-         * @return
-         * @see Strings#substring(String, int, int)
-         */
-        public static Optional<String> substring(String str, int inclusiveBeginIndex, int exclusiveEndIndex) {
-            return Optional.ofNullable(Strings.substring(str, inclusiveBeginIndex, exclusiveEndIndex));
         }
 
         /**
@@ -9173,6 +9168,20 @@ public abstract class Strings {
          */
         public static Optional<String> substring(String str, String delimiterOfInclusiveBeginIndex) {
             return Optional.ofNullable(Strings.substring(str, delimiterOfInclusiveBeginIndex));
+        }
+
+        /**
+         * Returns an empty <code>Optional</code> if {@code inclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || inclusiveBeginIndex > exclusiveEndIndex},
+         * otherwise an {@code Optional} with String value: {@code str.substring(exclusiveBeginIndex, exclusiveEndIndex)} is returned.
+         *
+         * @param str
+         * @param inclusiveBeginIndex
+         * @param exclusiveEndIndex
+         * @return
+         * @see Strings#substring(String, int, int)
+         */
+        public static Optional<String> substring(String str, int inclusiveBeginIndex, int exclusiveEndIndex) {
+            return Optional.ofNullable(Strings.substring(str, inclusiveBeginIndex, exclusiveEndIndex));
         }
 
         /**
@@ -9248,6 +9257,336 @@ public abstract class Strings {
         }
 
         /**
+         * Returns {@code defaultStr} if {@code inclusiveBeginIndex < 0},
+         * otherwise an {@code Optional} with String value: {@code str.substring(inclusiveBeginIndex)} is returned.
+         *
+         * @param str
+         * @param inclusiveBeginIndex
+         * @param defaultStr
+         * @return
+         * @see Strings#substring(String, int)
+         */
+        @Beta
+        public static String substringOrElse(String str, int inclusiveBeginIndex, final String defaultStr) {
+            final String ret = Strings.substring(str, inclusiveBeginIndex);
+
+            return ret == null ? defaultStr : ret;
+        }
+
+        /**
+         * Returns {@code defaultStr} if {@code N.isNullOrEmpty(str) || str.indexOf(delimiterOfInclusiveBeginIndex) < 0},
+         * otherwise an {@code Optional} with String value: {@code str.substring(str.indexOf(delimiterOfInclusiveBeginIndex))} is returned.
+         *
+         * @param str
+         * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.indexOf(delimiterOfInclusiveBeginIndex)}
+         * @param defaultStr
+         * @return
+         * @see Strings#substring(String, char)
+         */
+        @Beta
+        public static String substringOrElse(String str, char delimiterOfInclusiveBeginIndex, final String defaultStr) {
+            final String ret = Strings.substring(str, delimiterOfInclusiveBeginIndex);
+
+            return ret == null ? defaultStr : ret;
+        }
+
+        /**
+         * Returns {@code defaultStr} if {@code N.isNullOrEmpty(str) || str.indexOf(delimiterOfInclusiveBeginIndex) < 0},
+         * otherwise an {@code Optional} with String value: {@code str.substring(str.indexOf(delimiterOfInclusiveBeginIndex))} is returned.
+         *
+         * @param str
+         * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.indexOf(delimiterOfInclusiveBeginIndex)}
+         * @param defaultStr
+         * @return
+         * @see Strings#substring(String, String)
+         */
+        @Beta
+        public static String substringOrElse(String str, String delimiterOfInclusiveBeginIndex, final String defaultStr) {
+            final String ret = Strings.substring(str, delimiterOfInclusiveBeginIndex);
+
+            return ret == null ? defaultStr : ret;
+        }
+
+        /**
+         * Returns {@code defaultStr} if {@code inclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || inclusiveBeginIndex > exclusiveEndIndex},
+         * otherwise an {@code Optional} with String value: {@code str.substring(exclusiveBeginIndex, exclusiveEndIndex)} is returned.
+         *
+         * @param str
+         * @param inclusiveBeginIndex
+         * @param exclusiveEndIndex
+         * @param defaultStr
+         * @return
+         * @see Strings#substring(String, int, int)
+         */
+        @Beta
+        public static String substringOrElse(String str, int inclusiveBeginIndex, int exclusiveEndIndex, final String defaultStr) {
+            final String ret = Strings.substring(str, inclusiveBeginIndex, exclusiveEndIndex);
+
+            return ret == null ? defaultStr : ret;
+        }
+
+        /**
+         *
+         * @param str
+         * @param inclusiveBeginIndex
+         * @param delimiterOfExclusiveEndIndex {@code exclusiveEndIndex <- str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1) if inclusiveBeginIndex >= 0}
+         * @param defaultStr
+         * @return
+         * @see Strings#substring(String, int, char)
+         */
+        @Beta
+        public static String substringOrElse(String str, int inclusiveBeginIndex, char delimiterOfExclusiveEndIndex, final String defaultStr) {
+            final String ret = Strings.substring(str, inclusiveBeginIndex, delimiterOfExclusiveEndIndex);
+
+            return ret == null ? defaultStr : ret;
+        }
+
+        /**
+         *
+         * @param str
+         * @param inclusiveBeginIndex
+         * @param delimiterOfExclusiveEndIndex {@code exclusiveEndIndex <- str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1) if inclusiveBeginIndex >= 0}
+         * @param defaultStr
+         * @return
+         * @see Strings#substring(String, int, String)
+         */
+        @Beta
+        public static String substringOrElse(String str, int inclusiveBeginIndex, String delimiterOfExclusiveEndIndex, final String defaultStr) {
+            final String ret = Strings.substring(str, inclusiveBeginIndex, delimiterOfExclusiveEndIndex);
+
+            return ret == null ? defaultStr : ret;
+        }
+
+        /**
+         *
+         * @param str
+         * @param inclusiveBeginIndex
+         * @param funcOfExclusiveEndIndex {@code exclusiveEndIndex <- funcOfExclusiveEndIndex.applyAsInt(inclusiveBeginIndex) if inclusiveBeginIndex >= 0}
+         * @param defaultStr
+         * @return
+         * @see Strings#substring(String, int, IntUnaryOperator)
+         */
+        @Beta
+        public static String substringOrElse(String str, int inclusiveBeginIndex, IntUnaryOperator funcOfExclusiveEndIndex, final String defaultStr) {
+            final String ret = Strings.substring(str, inclusiveBeginIndex, funcOfExclusiveEndIndex);
+
+            return ret == null ? defaultStr : ret;
+        }
+
+        /**
+         *
+         * @param str
+         * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) if exclusiveEndIndex > 0}
+         * @param exclusiveEndIndex
+         * @param defaultStr
+         * @return
+         * @see Strings#substring(String, char, int)
+         */
+        @Beta
+        public static String substringOrElse(String str, char delimiterOfInclusiveBeginIndex, int exclusiveEndIndex, final String defaultStr) {
+            final String ret = Strings.substring(str, delimiterOfInclusiveBeginIndex, exclusiveEndIndex);
+
+            return ret == null ? defaultStr : ret;
+        }
+
+        /**
+         *
+         * @param str
+         * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) if exclusiveEndIndex > 0}
+         * @param exclusiveEndIndex
+         * @param defaultStr
+         * @return
+         * @see Strings#substring(String, String, int)
+         */
+        @Beta
+        public static String substringOrElse(String str, String delimiterOfInclusiveBeginIndex, int exclusiveEndIndex, final String defaultStr) {
+            final String ret = Strings.substring(str, delimiterOfInclusiveBeginIndex, exclusiveEndIndex);
+
+            return ret == null ? defaultStr : ret;
+        }
+
+        /**
+         *
+         * @param str
+         * @param funcOfInclusiveBeginIndex {@code inclusiveBeginIndex <- funcOfInclusiveBeginIndex.applyAsInt(exclusiveEndIndex)) if exclusiveEndIndex > 0}
+         * @param exclusiveEndIndex
+         * @param defaultStr
+         * @return
+         * @see Strings#substring(String, IntUnaryOperator, int)
+         */
+        @Beta
+        public static String substringOrElse(String str, IntUnaryOperator funcOfInclusiveBeginIndex, int exclusiveEndIndex, final String defaultStr) {
+            final String ret = Strings.substring(str, funcOfInclusiveBeginIndex, exclusiveEndIndex);
+
+            return ret == null ? defaultStr : ret;
+        }
+
+        /**
+         * Returns the input {@code str} if {@code inclusiveBeginIndex < 0},
+         * otherwise an {@code Optional} with String value: {@code str.substring(inclusiveBeginIndex)} is returned.
+         *
+         * @param str
+         * @param inclusiveBeginIndex
+         * @param defaultStr
+         * @return
+         * @see Strings#substring(String, int)
+         */
+        @Beta
+        public static String substringOrElseItself(String str, int inclusiveBeginIndex) {
+            final String ret = Strings.substring(str, inclusiveBeginIndex);
+
+            return ret == null ? str : ret;
+        }
+
+        /**
+         * Returns the input {@code str} if {@code N.isNullOrEmpty(str) || str.indexOf(delimiterOfInclusiveBeginIndex) < 0},
+         * otherwise an {@code Optional} with String value: {@code str.substring(str.indexOf(delimiterOfInclusiveBeginIndex))} is returned.
+         *
+         * @param str
+         * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.indexOf(delimiterOfInclusiveBeginIndex)}
+         * @param defaultStr
+         * @return
+         * @see Strings#substring(String, char)
+         */
+        @Beta
+        public static String substringOrElseItself(String str, char delimiterOfInclusiveBeginIndex) {
+            final String ret = Strings.substring(str, delimiterOfInclusiveBeginIndex);
+
+            return ret == null ? str : ret;
+        }
+
+        /**
+         * Returns the input {@code str} if {@code N.isNullOrEmpty(str) || str.indexOf(delimiterOfInclusiveBeginIndex) < 0},
+         * otherwise an {@code Optional} with String value: {@code str.substring(str.indexOf(delimiterOfInclusiveBeginIndex))} is returned.
+         *
+         * @param str
+         * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.indexOf(delimiterOfInclusiveBeginIndex)}
+         * @param defaultStr
+         * @return
+         * @see Strings#substring(String, String)
+         */
+        @Beta
+        public static String substringOrElseItself(String str, String delimiterOfInclusiveBeginIndex) {
+            final String ret = Strings.substring(str, delimiterOfInclusiveBeginIndex);
+
+            return ret == null ? str : ret;
+        }
+
+        /**
+         * Returns the input {@code str} if {@code inclusiveBeginIndex < 0 || exclusiveEndIndex < 0 || inclusiveBeginIndex > exclusiveEndIndex},
+         * otherwise an {@code Optional} with String value: {@code str.substring(exclusiveBeginIndex, exclusiveEndIndex)} is returned.
+         *
+         * @param str
+         * @param inclusiveBeginIndex
+         * @param exclusiveEndIndex
+         * @param defaultStr
+         * @return
+         * @see Strings#substring(String, int, int)
+         */
+        @Beta
+        public static String substringOrElseItself(String str, int inclusiveBeginIndex, int exclusiveEndIndex) {
+            final String ret = Strings.substring(str, inclusiveBeginIndex, exclusiveEndIndex);
+
+            return ret == null ? str : ret;
+        }
+
+        /**
+         *
+         * @param str
+         * @param inclusiveBeginIndex
+         * @param delimiterOfExclusiveEndIndex {@code exclusiveEndIndex <- str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1) if inclusiveBeginIndex >= 0}
+         * @param defaultStr
+         * @return
+         * @see Strings#substring(String, int, char)
+         */
+        @Beta
+        public static String substringOrElseItself(String str, int inclusiveBeginIndex, char delimiterOfExclusiveEndIndex) {
+            final String ret = Strings.substring(str, inclusiveBeginIndex, delimiterOfExclusiveEndIndex);
+
+            return ret == null ? str : ret;
+        }
+
+        /**
+         *
+         * @param str
+         * @param inclusiveBeginIndex
+         * @param delimiterOfExclusiveEndIndex {@code exclusiveEndIndex <- str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1) if inclusiveBeginIndex >= 0}
+         * @param defaultStr
+         * @return
+         * @see Strings#substring(String, int, String)
+         */
+        @Beta
+        public static String substringOrElseItself(String str, int inclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
+            final String ret = Strings.substring(str, inclusiveBeginIndex, delimiterOfExclusiveEndIndex);
+
+            return ret == null ? str : ret;
+        }
+
+        /**
+         *
+         * @param str
+         * @param inclusiveBeginIndex
+         * @param funcOfExclusiveEndIndex {@code exclusiveEndIndex <- funcOfExclusiveEndIndex.applyAsInt(inclusiveBeginIndex) if inclusiveBeginIndex >= 0}
+         * @param defaultStr
+         * @return
+         * @see Strings#substring(String, int, IntUnaryOperator)
+         */
+        @Beta
+        public static String substringOrElseItself(String str, int inclusiveBeginIndex, IntUnaryOperator funcOfExclusiveEndIndex) {
+            final String ret = Strings.substring(str, inclusiveBeginIndex, funcOfExclusiveEndIndex);
+
+            return ret == null ? str : ret;
+        }
+
+        /**
+         *
+         * @param str
+         * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) if exclusiveEndIndex > 0}
+         * @param exclusiveEndIndex
+         * @param defaultStr
+         * @return
+         * @see Strings#substring(String, char, int)
+         */
+        @Beta
+        public static String substringOrElseItself(String str, char delimiterOfInclusiveBeginIndex, int exclusiveEndIndex) {
+            final String ret = Strings.substring(str, delimiterOfInclusiveBeginIndex, exclusiveEndIndex);
+
+            return ret == null ? str : ret;
+        }
+
+        /**
+         *
+         * @param str
+         * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) if exclusiveEndIndex > 0}
+         * @param exclusiveEndIndex
+         * @param defaultStr
+         * @return
+         * @see Strings#substring(String, String, int)
+         */
+        @Beta
+        public static String substringOrElseItself(String str, String delimiterOfInclusiveBeginIndex, int exclusiveEndIndex) {
+            final String ret = Strings.substring(str, delimiterOfInclusiveBeginIndex, exclusiveEndIndex);
+
+            return ret == null ? str : ret;
+        }
+
+        /**
+         *
+         * @param str
+         * @param funcOfInclusiveBeginIndex {@code inclusiveBeginIndex <- funcOfInclusiveBeginIndex.applyAsInt(exclusiveEndIndex)) if exclusiveEndIndex > 0}
+         * @param exclusiveEndIndex
+         * @param defaultStr
+         * @return
+         * @see Strings#substring(String, IntUnaryOperator, int)
+         */
+        @Beta
+        public static String substringOrElseItself(String str, IntUnaryOperator funcOfInclusiveBeginIndex, int exclusiveEndIndex) {
+            final String ret = Strings.substring(str, funcOfInclusiveBeginIndex, exclusiveEndIndex);
+
+            return ret == null ? str : ret;
+        }
+
+        /**
          * Returns the substring after first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code null} String.
          *
          * @param str
@@ -9293,6 +9632,130 @@ public abstract class Strings {
          */
         public static Optional<String> substringBeforeLast(String str, String delimiterOfExclusiveEndIndex) {
             return Optional.ofNullable(Strings.substringBeforeLast(str, delimiterOfExclusiveEndIndex));
+        }
+
+        /**
+         * Returns the substring after first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code defaultStr}.
+         *
+         * @param str
+         * @param delimiterOfExclusiveBeginIndex
+         * @param defaultStr
+         * @return
+         * @see Strings#substringAfter(String, String)
+         */
+        @Beta
+        public static String substringAfterOrElse(String str, String delimiterOfExclusiveBeginIndex, String defaultStr) {
+            final String ret = Strings.substringAfter(str, delimiterOfExclusiveBeginIndex);
+
+            return ret == null ? defaultStr : ret;
+        }
+
+        /**
+         * Returns the substring after last {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code defaultStr}.
+         *
+         * @param str
+         * @param delimiterOfExclusiveBeginIndex
+         * @param defaultStr
+         * @return
+         * @see Strings#substringAfterLast(String, String)
+         */
+        @Beta
+        public static String substringAfterLastOrElse(String str, String delimiterOfExclusiveBeginIndex, String defaultStr) {
+            final String ret = Strings.substringAfterLast(str, delimiterOfExclusiveBeginIndex);
+
+            return ret == null ? defaultStr : ret;
+        }
+
+        /**
+         * Returns the substring before first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code defaultStr}.
+         *
+         * @param str
+         * @param delimiterOfExclusiveEndIndex
+         * @param defaultStr
+         * @return
+         * @see Strings#substringBefore(String, String)
+         */
+        @Beta
+        public static String substringBeforeOrElse(String str, String delimiterOfExclusiveEndIndex, String defaultStr) {
+            final String ret = Strings.substringBefore(str, delimiterOfExclusiveEndIndex);
+
+            return ret == null ? defaultStr : ret;
+        }
+
+        /**
+         * Returns the substring last first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return {@code defaultStr}.
+         *
+         * @param str
+         * @param delimiterOfExclusiveEndIndex
+         * @param defaultStr
+         * @return
+         * @see Strings#substringBeforeLast(String, String)
+         */
+        @Beta
+        public static String substringBeforeLastOrElse(String str, String delimiterOfExclusiveEndIndex, String defaultStr) {
+            final String ret = Strings.substringBeforeLast(str, delimiterOfExclusiveEndIndex);
+
+            return ret == null ? defaultStr : ret;
+        }
+
+        /**
+         * Returns the substring after first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return the input {@code str}.
+         *
+         * @param str
+         * @param delimiterOfExclusiveBeginIndex
+         * @return
+         * @see Strings#substringAfter(String, String)
+         */
+        @Beta
+        public static String substringAfterOrElseItself(String str, String delimiterOfExclusiveBeginIndex) {
+            final String ret = Strings.substringAfter(str, delimiterOfExclusiveBeginIndex);
+
+            return ret == null ? str : ret;
+        }
+
+        /**
+         * Returns the substring after last {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return the input {@code str}.
+         *
+         * @param str
+         * @param delimiterOfExclusiveBeginIndex
+         * @return
+         * @see Strings#substringAfterLast(String, String)
+         */
+        @Beta
+        public static String substringAfterLastOrElseItself(String str, String delimiterOfExclusiveBeginIndex) {
+            final String ret = Strings.substringAfterLast(str, delimiterOfExclusiveBeginIndex);
+
+            return ret == null ? str : ret;
+        }
+
+        /**
+         * Returns the substring before first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return the input {@code str}.
+         *
+         * @param str
+         * @param delimiterOfExclusiveEndIndex
+         * @return
+         * @see Strings#substringBefore(String, String)
+         */
+        @Beta
+        public static String substringBeforeOrElseItself(String str, String delimiterOfExclusiveEndIndex) {
+            final String ret = Strings.substringBefore(str, delimiterOfExclusiveEndIndex);
+
+            return ret == null ? str : ret;
+        }
+
+        /**
+         * Returns the substring last first {@code delimiterOfExclusiveBeginIndex} if it exists, otherwise return the input {@code str}.
+         *
+         * @param str
+         * @param delimiterOfExclusiveEndIndex
+         * @return
+         * @see Strings#substringBeforeLast(String, String)
+         */
+        @Beta
+        public static String substringBeforeLastOrElseItself(String str, String delimiterOfExclusiveEndIndex) {
+            final String ret = Strings.substringBeforeLast(str, delimiterOfExclusiveEndIndex);
+
+            return ret == null ? str : ret;
         }
 
         /**

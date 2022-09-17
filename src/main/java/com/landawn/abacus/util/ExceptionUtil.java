@@ -48,6 +48,8 @@ public final class ExceptionUtil {
     static {
         toRuntimeExceptionFuncMap.put(RuntimeException.class, e -> (RuntimeException) e);
 
+        toRuntimeExceptionFuncMap.put(Error.class, RuntimeException::new); // right or not?
+
         toRuntimeExceptionFuncMap.put(IOException.class, e -> new UncheckedIOException((IOException) e));
 
         toRuntimeExceptionFuncMap.put(SQLException.class, e -> new UncheckedSQLException((SQLException) e));
@@ -107,8 +109,34 @@ public final class ExceptionUtil {
      * @return
      * @see #registerRuntimeExceptionMapper(Class, Function)
      */
-    public static RuntimeException toRuntimeException(Throwable e) {
+    public static RuntimeException toRuntimeException(final Throwable e) {
         final Class<Throwable> cls = (Class<Throwable>) e.getClass();
+        Function<Throwable, RuntimeException> func = toRuntimeExceptionFuncMap.get(cls);
+
+        if (func == null) {
+            for (Class<?> key : toRuntimeExceptionFuncMap.keySet()) {
+                if (key.isAssignableFrom(cls)) {
+                    func = toRuntimeExceptionFuncMap.get(key);
+                    break;
+                }
+            }
+
+            if (func == null) {
+                if (e instanceof RuntimeException) {
+                    func = RUNTIME_FUNC;
+                } else {
+                    func = CHECKED_FUNC;
+                }
+            }
+
+            toRuntimeExceptionFuncMap.put(cls, func);
+        }
+
+        return func.apply(e);
+    }
+
+    public static RuntimeException toRuntimeException(final Exception e) {
+        final Class<Exception> cls = (Class<Exception>) e.getClass();
         Function<Throwable, RuntimeException> func = toRuntimeExceptionFuncMap.get(cls);
 
         if (func == null) {

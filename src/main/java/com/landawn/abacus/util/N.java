@@ -23913,7 +23913,7 @@ public final class N extends CommonUtil {
         try {
             Retry.of(retryTimes, retryInterval, retryCondition).run(cmd);
         } catch (Exception e) {
-            throw toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -23932,7 +23932,7 @@ public final class N extends CommonUtil {
             final Retry<R> retry = Retry.of(retryTimes, retryInterval, retryCondition);
             return retry.call(cmd);
         } catch (Exception e) {
-            throw toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -24087,7 +24087,7 @@ public final class N extends CommonUtil {
             command.run();
             f.get();
         } catch (Exception e) {
-            throw toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -24110,7 +24110,7 @@ public final class N extends CommonUtil {
             f2.get();
             f3.get();
         } catch (Exception e) {
-            throw toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -24136,7 +24136,7 @@ public final class N extends CommonUtil {
             f3.get();
             f4.get();
         } catch (Exception e) {
-            throw toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -24166,7 +24166,7 @@ public final class N extends CommonUtil {
             f4.get();
             f5.get();
         } catch (Exception e) {
-            throw toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -24187,7 +24187,7 @@ public final class N extends CommonUtil {
 
             return Tuple.of(r, r2);
         } catch (Exception e) {
-            throw toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -24211,7 +24211,7 @@ public final class N extends CommonUtil {
 
             return Tuple.of(r, r2, r3);
         } catch (Exception e) {
-            throw toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -24239,7 +24239,7 @@ public final class N extends CommonUtil {
 
             return Tuple.of(r, r2, r3, r4);
         } catch (Exception e) {
-            throw toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -24270,7 +24270,7 @@ public final class N extends CommonUtil {
 
             return Tuple.of(r, r2, r3, r4, r5);
         } catch (Exception e) {
-            throw toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
@@ -24619,7 +24619,20 @@ public final class N extends CommonUtil {
      * @see ExceptionUtil#toRuntimeException(Throwable)
      * @see ExceptionUtil#registerRuntimeExceptionMapper(Class,Function)
      */
+    @Beta
     public static RuntimeException toRuntimeException(final Throwable e) {
+        return ExceptionUtil.toRuntimeException(e);
+    }
+
+    /**
+     *
+     * @param e
+     * @return
+     * @see ExceptionUtil#toRuntimeException(Throwable)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class,Function)
+     */
+    @Beta
+    public static RuntimeException toRuntimeException(final Exception e) {
         return ExceptionUtil.toRuntimeException(e);
     }
 
@@ -24630,6 +24643,7 @@ public final class N extends CommonUtil {
      * @return
      * @see ExceptionUtil#hasCause(Throwable, Class)
      */
+    @Beta
     public static boolean hasCause(final Throwable e, final Class<? extends Throwable> type) {
         return ExceptionUtil.hasCause(e, type);
     }
@@ -24641,6 +24655,7 @@ public final class N extends CommonUtil {
      * @return
      * @see ExceptionUtil#firstCause(Throwable)
      */
+    @Beta
     public static Throwable firstCause(final Throwable e) {
         return ExceptionUtil.firstCause(e);
     }

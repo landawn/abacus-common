@@ -1055,7 +1055,7 @@ public final class CSVUtil {
                 IOUtil.closeQuietly(csvReader);
             }
 
-            throw N.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e);
         }
     }
 
