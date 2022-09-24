@@ -311,7 +311,7 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
          * @param quotePropName
          * @param quoteMapKey
          * @return
-         * @deprecated
+         * @deprecated to be removed in future version.
          */
         @Deprecated
         public static JSONSerializationConfig of(boolean quotePropName, boolean quoteMapKey) {
@@ -322,7 +322,7 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
          *
          * @param dateTimeFormat
          * @return
-         * @deprecated
+         * @deprecated to be removed in future version.
          */
         @Deprecated
         public static JSONSerializationConfig of(DateTimeFormat dateTimeFormat) {
@@ -334,7 +334,7 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
          * @param exclusion
          * @param ignoredPropNames
          * @return
-         * @deprecated
+         * @deprecated to be removed in future version.
          */
         @Deprecated
         public static JSONSerializationConfig of(Exclusion exclusion, Map<Class<?>, Collection<String>> ignoredPropNames) {
@@ -349,7 +349,7 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
          * @param exclusion
          * @param ignoredPropNames
          * @return
-         * @deprecated
+         * @deprecated to be removed in future version.
          */
         @Deprecated
         public static JSONSerializationConfig of(boolean quotePropName, boolean quoteMapKey, DateTimeFormat dateTimeFormat, Exclusion exclusion,

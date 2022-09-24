@@ -7429,6 +7429,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //        }
     //    }
 
+    //    @Beta
+    //    @TerminalOp
+    //    public void foreach(java.util.function.Consumer<? super T> action) throws E {
+    //        assertNotClosed();
+    //
+    //        forEach(Fnn.from(action));
+    //    }
+
     /**
      *
      * @param <E2>

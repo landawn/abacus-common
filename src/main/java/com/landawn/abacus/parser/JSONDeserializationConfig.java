@@ -165,7 +165,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
          *
          * @param elementClass
          * @return
-         * @deprecated
+         * @deprecated to be removed in future version.
          */
         @Deprecated
         public static JSONDeserializationConfig of(Class<?> elementClass) {
@@ -177,7 +177,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
          * @param keyClass
          * @param valueClass
          * @return
-         * @deprecated
+         * @deprecated to be removed in future version.
          */
         @Deprecated
         public static JSONDeserializationConfig of(Class<?> keyClass, Class<?> valueClass) {
@@ -189,7 +189,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
          * @param ignoreUnmatchedProperty
          * @param ignoredPropNames
          * @return
-         * @deprecated
+         * @deprecated to be removed in future version.
          */
         @Deprecated
         public static JSONDeserializationConfig of(boolean ignoreUnmatchedProperty, Map<Class<?>, Collection<String>> ignoredPropNames) {
@@ -202,7 +202,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
          * @param ignoreUnmatchedProperty
          * @param ignoredPropNames
          * @return
-         * @deprecated
+         * @deprecated to be removed in future version.
          */
         @Deprecated
         public static JSONDeserializationConfig of(Class<?> elementClass, boolean ignoreUnmatchedProperty, Map<Class<?>, Collection<String>> ignoredPropNames) {
@@ -216,7 +216,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
          * @param ignoreUnmatchedProperty
          * @param ignoredPropNames
          * @return
-         * @deprecated
+         * @deprecated to be removed in future version.
          */
         @Deprecated
         public static JSONDeserializationConfig of(Class<?> keyClass, Class<?> valueClass, boolean ignoreUnmatchedProperty,
@@ -235,7 +235,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
          * @param ignoreUnmatchedProperty
          * @param ignoredPropNames
          * @return
-         * @deprecated
+         * @deprecated to be removed in future version.
          */
         @Deprecated
         public static JSONDeserializationConfig of(Class<?> elementClass, Class<?> keyClass, Class<?> valueClass, boolean ignoreUnmatchedProperty,

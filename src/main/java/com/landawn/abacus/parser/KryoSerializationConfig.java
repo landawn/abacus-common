@@ -337,7 +337,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
          *
          * @param writeClass
          * @return
-         * @deprecated
+         * @deprecated to be removed in future version.
          */
         @Deprecated
         public static KryoSerializationConfig of(boolean writeClass) {
@@ -349,7 +349,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
          * @param exclusion
          * @param ignoredPropNames
          * @return
-         * @deprecated
+         * @deprecated to be removed in future version.
          */
         @Deprecated
         public static KryoSerializationConfig of(Exclusion exclusion, Map<Class<?>, Collection<String>> ignoredPropNames) {
@@ -362,7 +362,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
          * @param exclusion
          * @param ignoredPropNames
          * @return
-         * @deprecated
+         * @deprecated to be removed in future version.
          */
         @Deprecated
         public static KryoSerializationConfig of(boolean writeClass, Exclusion exclusion, Map<Class<?>, Collection<String>> ignoredPropNames) {

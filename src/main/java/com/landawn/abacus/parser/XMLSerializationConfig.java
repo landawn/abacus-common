@@ -258,7 +258,7 @@ public class XMLSerializationConfig extends SerializationConfig<XMLSerialization
          * @param tagByPropertyName
          * @param ignoreTypeInfo
          * @return
-         * @deprecated
+         * @deprecated to be removed in future version.
          */
         @Deprecated
         public static XMLSerializationConfig of(boolean tagByPropertyName, boolean ignoreTypeInfo) {
@@ -269,7 +269,7 @@ public class XMLSerializationConfig extends SerializationConfig<XMLSerialization
          *
          * @param dateTimeFormat
          * @return
-         * @deprecated
+         * @deprecated to be removed in future version.
          */
         @Deprecated
         public static XMLSerializationConfig of(DateTimeFormat dateTimeFormat) {
@@ -281,7 +281,7 @@ public class XMLSerializationConfig extends SerializationConfig<XMLSerialization
          * @param exclusion
          * @param ignoredPropNames
          * @return
-         * @deprecated
+         * @deprecated to be removed in future version.
          */
         @Deprecated
         public static XMLSerializationConfig of(Exclusion exclusion, Map<Class<?>, Collection<String>> ignoredPropNames) {
@@ -296,7 +296,7 @@ public class XMLSerializationConfig extends SerializationConfig<XMLSerialization
          * @param exclusion
          * @param ignoredPropNames
          * @return
-         * @deprecated
+         * @deprecated to be removed in future version.
          */
         @Deprecated
         public static XMLSerializationConfig of(boolean tagByPropertyName, boolean ignoreTypeInfo, DateTimeFormat dateTimeFormat, Exclusion exclusion,

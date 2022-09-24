@@ -1684,6 +1684,28 @@ public final class Iterables {
         return false;
     }
 
+    public static List<?> flatten(Iterable<?> c) {
+        if (c == null) {
+            return new ArrayList<>();
+        }
+
+        final List<Object> result = new ArrayList<>();
+
+        flatten((Iterable<Object>) c, result);
+
+        return result;
+    }
+
+    private static void flatten(Iterable<Object> c, List<Object> output) {
+        for (Object next : c) {
+            if (next instanceof Iterable) {
+                flatten((Iterable<Object>) next, output);
+            } else {
+                output.add(next);
+            }
+        }
+    }
+
     public abstract static class SetView<E> extends ImmutableSet<E> {
         SetView(final Set<? extends E> set) {
             super(set);

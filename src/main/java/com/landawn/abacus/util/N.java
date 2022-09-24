@@ -2201,6 +2201,321 @@ public final class N extends CommonUtil {
     /**
      *
      * @param a
+     * @return an empty {@code boolean[]} if {@code a} is null.
+     */
+    public static boolean[] flatten(final boolean[][] a) {
+        if (N.isNullOrEmpty(a)) {
+            return N.EMPTY_BOOLEAN_ARRAY;
+        }
+
+        int count = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            count += (a[i] == null ? 0 : a[i].length);
+        }
+
+        final boolean[] ret = new boolean[count];
+        int from = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            if (N.notNullOrEmpty(a[i])) {
+                N.copy(a[i], 0, ret, from, a[i].length);
+                from += a[i].length;
+            }
+        }
+
+        return ret;
+    }
+
+    /**
+     *
+     * @param a
+     * @return an empty {@code char[]} if {@code a} is null.
+     */
+    public static char[] flatten(final char[][] a) {
+        if (N.isNullOrEmpty(a)) {
+            return N.EMPTY_CHAR_ARRAY;
+        }
+
+        int count = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            count += (a[i] == null ? 0 : a[i].length);
+        }
+
+        final char[] ret = new char[count];
+        int from = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            if (N.notNullOrEmpty(a[i])) {
+                N.copy(a[i], 0, ret, from, a[i].length);
+                from += a[i].length;
+            }
+        }
+
+        return ret;
+    }
+
+    /**
+     *
+     * @param a
+     * @return an empty {@code byte[]} if {@code a} is null.
+     */
+    public static byte[] flatten(final byte[][] a) {
+        if (N.isNullOrEmpty(a)) {
+            return N.EMPTY_BYTE_ARRAY;
+        }
+
+        int count = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            count += (a[i] == null ? 0 : a[i].length);
+        }
+
+        final byte[] ret = new byte[count];
+        int from = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            if (N.notNullOrEmpty(a[i])) {
+                N.copy(a[i], 0, ret, from, a[i].length);
+                from += a[i].length;
+            }
+        }
+
+        return ret;
+    }
+
+    /**
+     *
+     * @param a
+     * @return an empty {@code short[]} if {@code a} is null.
+     */
+    public static short[] flatten(final short[][] a) {
+        if (N.isNullOrEmpty(a)) {
+            return N.EMPTY_SHORT_ARRAY;
+        }
+
+        int count = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            count += (a[i] == null ? 0 : a[i].length);
+        }
+
+        final short[] ret = new short[count];
+        int from = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            if (N.notNullOrEmpty(a[i])) {
+                N.copy(a[i], 0, ret, from, a[i].length);
+                from += a[i].length;
+            }
+        }
+
+        return ret;
+    }
+
+    /**
+     *
+     * @param a
+     * @return an empty {@code int[]} if {@code a} is null.
+     */
+    public static int[] flatten(final int[][] a) {
+        if (N.isNullOrEmpty(a)) {
+            return N.EMPTY_INT_ARRAY;
+        }
+
+        int count = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            count += (a[i] == null ? 0 : a[i].length);
+        }
+
+        final int[] ret = new int[count];
+        int from = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            if (N.notNullOrEmpty(a[i])) {
+                N.copy(a[i], 0, ret, from, a[i].length);
+                from += a[i].length;
+            }
+        }
+
+        return ret;
+    }
+
+    /**
+     *
+     * @param a
+     * @return an empty {@code long[]} if {@code a} is null.
+     */
+    public static long[] flatten(final long[][] a) {
+        if (N.isNullOrEmpty(a)) {
+            return N.EMPTY_LONG_ARRAY;
+        }
+
+        int count = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            count += (a[i] == null ? 0 : a[i].length);
+        }
+
+        final long[] ret = new long[count];
+        int from = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            if (N.notNullOrEmpty(a[i])) {
+                N.copy(a[i], 0, ret, from, a[i].length);
+                from += a[i].length;
+            }
+        }
+
+        return ret;
+    }
+
+    /**
+     *
+     * @param a
+     * @return an empty {@code float[]} if {@code a} is null.
+     */
+    public static float[] flatten(final float[][] a) {
+        if (N.isNullOrEmpty(a)) {
+            return N.EMPTY_FLOAT_ARRAY;
+        }
+
+        int count = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            count += (a[i] == null ? 0 : a[i].length);
+        }
+
+        final float[] ret = new float[count];
+        int from = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            if (N.notNullOrEmpty(a[i])) {
+                N.copy(a[i], 0, ret, from, a[i].length);
+                from += a[i].length;
+            }
+        }
+
+        return ret;
+    }
+
+    /**
+     *
+     * @param a
+     * @return an empty {@code double[]} if {@code a} is null.
+     */
+    public static double[] flatten(final double[][] a) {
+        if (N.isNullOrEmpty(a)) {
+            return N.EMPTY_DOUBLE_ARRAY;
+        }
+
+        int count = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            count += (a[i] == null ? 0 : a[i].length);
+        }
+
+        final double[] ret = new double[count];
+        int from = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            if (N.notNullOrEmpty(a[i])) {
+                N.copy(a[i], 0, ret, from, a[i].length);
+                from += a[i].length;
+            }
+        }
+
+        return ret;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @return {@code null} if {@code a} is null.
+     */
+    public static <T> T[] flatten(final T[][] a) {
+        if (a == null) {
+            return null;
+        }
+
+        return flatten(a, (Class<T>) a.getClass().getComponentType().getComponentType());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @return
+     * @return an empty {@code T[]} if {@code a} is null.
+     */
+    public static <T> T[] flatten(final T[][] a, final Class<T> componentType) {
+        if (N.isNullOrEmpty(a)) {
+            return N.newArray(componentType, 0);
+        }
+
+        int count = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            count += (a[i] == null ? 0 : a[i].length);
+        }
+
+        final T[] ret = N.newArray(componentType, count);
+        int from = 0;
+
+        for (int i = 0, n = a.length; i < n; i++) {
+            if (N.notNullOrEmpty(a[i])) {
+                N.copy(a[i], 0, ret, from, a[i].length);
+                from += a[i].length;
+            }
+        }
+
+        return ret;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param c
+     * @return
+     */
+    public static <T> List<T> flatten(final Collection<? extends Collection<? extends T>> c) {
+        return flatten(c, IntFunctions.ofList());
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param c
+     * @return
+     */
+    public static <T, C extends Collection<T>> C flatten(final Collection<? extends Collection<? extends T>> c, IntFunction<? extends C> supplier) {
+        if (N.isNullOrEmpty(c)) {
+            return supplier.apply(0);
+        }
+
+        int count = 0;
+
+        for (Collection<? extends T> e : c) {
+            count += (e == null ? 0 : e.size());
+        }
+
+        final C ret = supplier.apply(count);
+
+        for (Collection<? extends T> e : c) {
+            if (N.notNullOrEmpty(e)) {
+                ret.addAll(e);
+            }
+        }
+
+        return ret;
+    }
+
+    /**
+     *
+     * @param a
      * @param b
      * @return
      * @see IntList#intersection(IntList)

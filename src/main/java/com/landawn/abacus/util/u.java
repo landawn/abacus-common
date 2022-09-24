@@ -592,12 +592,22 @@ public class u {
          *
          * @return
          */
-        public java.util.Optional<T> __() {
+        public java.util.Optional<T> toJdkOptional() {
             if (isPresent()) {
                 return java.util.Optional.of(value);
             } else {
                 return java.util.Optional.empty();
             }
+        }
+
+        /**
+         *
+         * @return
+         * @deprecated to be removed in future version.
+         */
+        @Deprecated
+        public java.util.Optional<T> __() {
+            return toJdkOptional();
         }
 
         /**
@@ -2908,12 +2918,22 @@ public class u {
          *
          * @return
          */
-        public java.util.OptionalInt __() {
+        public java.util.OptionalInt toJdkOptional() {
             if (isPresent) {
                 return java.util.OptionalInt.of(value);
             } else {
                 return java.util.OptionalInt.empty();
             }
+        }
+
+        /**
+         *
+         * @return
+         * @deprecated to be removed in future version.
+         */
+        @Deprecated
+        public java.util.OptionalInt __() {
+            return toJdkOptional();
         }
 
         /**
@@ -3408,12 +3428,22 @@ public class u {
          *
          * @return
          */
-        public java.util.OptionalLong __() {
+        public java.util.OptionalLong toJdkOptional() {
             if (isPresent) {
                 return java.util.OptionalLong.of(value);
             } else {
                 return java.util.OptionalLong.empty();
             }
+        }
+
+        /**
+         *
+         * @return
+         * @deprecated to be removed in future version.
+         */
+        @Deprecated
+        public java.util.OptionalLong __() {
+            return toJdkOptional();
         }
 
         /**
@@ -4353,12 +4383,22 @@ public class u {
          *
          * @return
          */
-        public java.util.OptionalDouble __() {
+        public java.util.OptionalDouble toJdkOptional() {
             if (isPresent) {
                 return java.util.OptionalDouble.of(value);
             } else {
                 return java.util.OptionalDouble.empty();
             }
+        }
+
+        /**
+         *
+         * @return
+         * @deprecated to be removed in future version.
+         */
+        @Deprecated
+        public java.util.OptionalDouble __() {
+            return toJdkOptional();
         }
 
         /**
