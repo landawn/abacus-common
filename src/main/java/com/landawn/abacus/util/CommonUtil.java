@@ -9120,6 +9120,34 @@ class CommonUtil {
     }
 
     /**
+     * Not null or empty.
+     *
+     * @param iter
+     * @return
+     */
+    public static boolean isNullOrEmpty(final Iterable<?> iter) {
+        if (iter == null) {
+            return true;
+        }
+
+        if (iter instanceof Collection) {
+            return isNullOrEmpty((Collection<?>) iter);
+        } else {
+            return isNullOrEmpty(iter.iterator());
+        }
+    }
+
+    /**
+     * Not null or empty.
+     *
+     * @param iter
+     * @return
+     */
+    public static boolean isNullOrEmpty(final Iterator<?> iter) {
+        return iter == null || (iter.hasNext() == false);
+    }
+
+    /**
      * Checks if is null or empty.
      *
      * @param m
@@ -9309,6 +9337,34 @@ class CommonUtil {
      */
     public static boolean notNullOrEmpty(final Collection<?> c) {
         return (c != null) && (c.size() > 0);
+    }
+
+    /**
+     * Not null or empty.
+     *
+     * @param iter
+     * @return
+     */
+    public static boolean notNullOrEmpty(final Iterable<?> iter) {
+        if (iter == null) {
+            return false;
+        }
+
+        if (iter instanceof Collection) {
+            return notNullOrEmpty((Collection<?>) iter);
+        } else {
+            return notNullOrEmpty(iter.iterator());
+        }
+    }
+
+    /**
+     * Not null or empty.
+     *
+     * @param iter
+     * @return
+     */
+    public static boolean notNullOrEmpty(final Iterator<?> iter) {
+        return (iter != null) && (iter.hasNext());
     }
 
     /**
@@ -10054,6 +10110,48 @@ class CommonUtil {
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
     public static <T extends Collection<?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
+        if (CommonUtil.isNullOrEmpty(arg)) {
+            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
+            } else {
+                throw new IllegalArgumentException(argNameOrErrorMsg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param <T>
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     */
+    public static <T extends Iterable<?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
+        if (CommonUtil.isNullOrEmpty(arg)) {
+            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
+            } else {
+                throw new IllegalArgumentException(argNameOrErrorMsg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param <T>
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     */
+    public static <T extends Iterator<?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
         if (CommonUtil.isNullOrEmpty(arg)) {
             if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");

@@ -1411,6 +1411,27 @@ public abstract class Collectors {
         return new CollectorImpl<>(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
     }
 
+    public static <T, U> Collector<T, ?, List<U>> flatMaping(final Function<? super T, ? extends java.util.stream.Stream<? extends U>> mapper) {
+        return flatMaping(mapper, Collectors.<U> toList());
+    }
+
+    public static <T, U, A, R> Collector<T, ?, R> flatMaping(final Function<? super T, ? extends java.util.stream.Stream<? extends U>> mapper,
+            final Collector<? super U, A, R> downstream) {
+        final BiConsumer<A, ? super U> downstreamAccumulator = downstream.accumulator();
+
+        final BiConsumer<A, T> accumulator = (a, t) -> {
+            try (java.util.stream.Stream<? extends U> stream = mapper.apply(t)) {
+                final Iterator<? extends U> iter = stream.iterator();
+
+                while (iter.hasNext()) {
+                    downstreamAccumulator.accept(a, iter.next());
+                }
+            }
+        };
+
+        return new CollectorImpl<>(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
+    }
+
     public static <T, U> Collector<T, ?, List<U>> flattMaping(final Function<? super T, ? extends Stream<? extends U>> mapper) {
         return flattMaping(mapper, Collectors.<U> toList());
     }
@@ -1446,6 +1467,28 @@ public abstract class Collectors {
             if (N.notNullOrEmpty(c)) {
                 for (U u : c) {
                     downstreamAccumulator.accept(a, u);
+                }
+            }
+        };
+
+        return new CollectorImpl<>(downstream.supplier(), accumulator, downstream.combiner(), downstream.finisher(), downstream.characteristics());
+    }
+
+    public static <T, T2, U> Collector<T, ?, List<U>> flatMaping(final Function<? super T, ? extends java.util.stream.Stream<? extends T2>> flatMapper,
+            final BiFunction<? super T, ? super T2, ? extends U> mapper) {
+        return flatMaping(flatMapper, mapper, Collectors.<U> toList());
+    }
+
+    public static <T, T2, U, A, R> Collector<T, ?, R> flatMaping(final Function<? super T, ? extends java.util.stream.Stream<? extends T2>> flatMapper,
+            final BiFunction<? super T, ? super T2, ? extends U> mapper, final Collector<? super U, A, R> downstream) {
+        final BiConsumer<A, ? super U> downstreamAccumulator = downstream.accumulator();
+
+        final BiConsumer<A, T> accumulator = (a, t) -> {
+            try (java.util.stream.Stream<? extends T2> stream = flatMapper.apply(t)) {
+                final Iterator<? extends T2> iter = stream.iterator();
+
+                while (iter.hasNext()) {
+                    downstreamAccumulator.accept(a, mapper.apply(t, iter.next()));
                 }
             }
         };
@@ -3174,6 +3217,47 @@ public abstract class Collectors {
      * @return
      * @see Collectors#toMultimap(Function, Function)
      */
+    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatMapingValueToMultimap(final Function<? super T, K> keyMapper,
+            final Function<? super T, ? extends java.util.stream.Stream<? extends V>> flatValueMapper) {
+        return flatMapingValueToMultimap(keyMapper, flatValueMapper, Suppliers.<K, V> ofListMultimap());
+    }
+
+    /**
+     *
+     * @param keyMapper
+     * @param flatValueMapper
+     * @param mapFactory
+     * @return
+     * @see Collectors#toMultimap(Function, Function, Supplier)
+     */
+    public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatMapingValueToMultimap(
+            final Function<? super T, K> keyMapper, final Function<? super T, ? extends java.util.stream.Stream<? extends V>> flatValueMapper,
+            final Supplier<? extends M> mapFactory) {
+
+        final BiConsumer<M, T> accumulator = (map, element) -> {
+            final K key = keyMapper.apply(element);
+
+            try (java.util.stream.Stream<? extends V> stream = flatValueMapper.apply(element)) {
+                if (stream.isParallel()) {
+                    stream.sequential().forEach(value -> map.put(key, value));
+                } else {
+                    stream.forEach(value -> map.put(key, value));
+                }
+            }
+        };
+
+        final BinaryOperator<M> combiner = Collectors.<K, V, C, M> multimapMerger();
+
+        return new CollectorImpl<>(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
+    }
+
+    /**
+     *
+     * @param keyMapper
+     * @param flatValueMapper
+     * @return
+     * @see Collectors#toMultimap(Function, Function)
+     */
     public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flattMapingValueToMultimap(final Function<? super T, K> keyMapper,
             final Function<? super T, ? extends Stream<? extends V>> flatValueMapper) {
         return flattMapingValueToMultimap(keyMapper, flatValueMapper, Suppliers.<K, V> ofListMultimap());
@@ -3194,7 +3278,13 @@ public abstract class Collectors {
         final BiConsumer<M, T> accumulator = (map, element) -> {
             final K key = keyMapper.apply(element);
 
-            flatValueMapper.apply(element).sequential().forEach(value -> map.put(key, value));
+            try (Stream<? extends V> stream = flatValueMapper.apply(element)) {
+                if (stream.isParallel()) {
+                    stream.sequential().forEach(value -> map.put(key, value));
+                } else {
+                    stream.forEach(value -> map.put(key, value));
+                }
+            }
         };
 
         final BinaryOperator<M> combiner = Collectors.<K, V, C, M> multimapMerger();
@@ -3249,6 +3339,47 @@ public abstract class Collectors {
      * @return
      * @see Collectors#toMultimap(Function, Function)
      */
+    public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatMapingKeyToMultimap(
+            final Function<? super T, java.util.stream.Stream<? extends K>> flatKeyMapper, final Function<? super T, V> valueMapper) {
+        return flatMapingKeyToMultimap(flatKeyMapper, valueMapper, Suppliers.<K, V> ofListMultimap());
+    }
+
+    /**
+     *
+     * @param flatKeyMapper
+     * @param valueMapper
+     * @param mapFactory
+     * @return
+     * @see Collectors#toMultimap(Function, Function, Supplier)
+     */
+    public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatMapingKeyToMultimap(
+            final Function<? super T, java.util.stream.Stream<? extends K>> flatKeyMapper, final Function<? super T, V> valueMapper,
+            final Supplier<? extends M> mapFactory) {
+
+        final BiConsumer<M, T> accumulator = (map, element) -> {
+            final V value = valueMapper.apply(element);
+
+            try (java.util.stream.Stream<? extends K> stream = flatKeyMapper.apply(element)) {
+                if (stream.isParallel()) {
+                    stream.sequential().forEach(key -> map.put(key, value));
+                } else {
+                    stream.forEach(key -> map.put(key, value));
+                }
+            }
+        };
+
+        final BinaryOperator<M> combiner = Collectors.<K, V, C, M> multimapMerger();
+
+        return new CollectorImpl<>(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
+    }
+
+    /**
+     *
+     * @param flatKeyMapper
+     * @param valueMapper
+     * @return
+     * @see Collectors#toMultimap(Function, Function)
+     */
     public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flattMapingKeyToMultimap(final Function<? super T, Stream<? extends K>> flatKeyMapper,
             final Function<? super T, V> valueMapper) {
         return flattMapingKeyToMultimap(flatKeyMapper, valueMapper, Suppliers.<K, V> ofListMultimap());
@@ -3268,7 +3399,13 @@ public abstract class Collectors {
         final BiConsumer<M, T> accumulator = (map, element) -> {
             final V value = valueMapper.apply(element);
 
-            flatKeyMapper.apply(element).sequential().forEach(key -> map.put(key, value));
+            try (Stream<? extends K> stream = flatKeyMapper.apply(element)) {
+                if (stream.isParallel()) {
+                    stream.sequential().forEach(key -> map.put(key, value));
+                } else {
+                    stream.forEach(key -> map.put(key, value));
+                }
+            }
         };
 
         final BinaryOperator<M> combiner = Collectors.<K, V, C, M> multimapMerger();

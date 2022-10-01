@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Function;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.Range.BoundType;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
@@ -1684,6 +1685,12 @@ public final class Iterables {
         return false;
     }
 
+    /**
+     *
+     * @param c
+     * @return
+     */
+    @Beta
     public static List<?> flatten(Iterable<?> c) {
         if (c == null) {
             return new ArrayList<>();

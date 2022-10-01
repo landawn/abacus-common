@@ -1230,28 +1230,28 @@ public final class Maps {
      * <code>
         Map map = N.asMap("key1", "val1");
         assertEquals("val1", Maps.getByPath(map, "key1"));
-    
+
         map = N.asMap("key1", N.asList("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-    
+
         map = N.asMap("key1", N.asSet("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", "val2")));
         assertEquals("val2", Maps.getByPath(map, "key1[0][1]"));
-    
+
         map = N.asMap("key1", N.asSet(N.asList(N.asSet("val1"))));
         assertEquals("val1", Maps.getByPath(map, "key1[0][0][0]"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", "val22"))));
         assertEquals("val22", Maps.getByPath(map, "key1[0][1].key2"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertEquals("val33", Maps.getByPath(map, "key1[0][1].key2[1].key3"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertNull(Maps.getByPath(map, "key1[0][2].key2[1].key3"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
      * </code>
      * </pre>
@@ -1259,30 +1259,38 @@ public final class Maps {
      * @param <T>
      * @param map
      * @param path
-     * @return
+     * @return {@code null} if there is no value found by the specified path.
      */
     public static <T> T getByPath(final Map<?, ?> map, final String path) {
-        return getOrDefaultByPath(map, path, null);
+        final Object val = getByPathOrDefault(map, path, N.NULL_MASK);
+
+        if (val == N.NULL_MASK) {
+            return null;
+        }
+
+        return (T) val;
     }
 
+    /**
+     *
+     * @param <T>
+     * @param map
+     * @param path
+     * @param targetType
+     * @return {@code null} if there is no value found by the specified path.
+     */
     public static <T> T getByPath(final Map<?, ?> map, final String path, final Class<? extends T> targetType) {
-        final Object val = getOrDefaultByPath(map, path, null);
+        final Object val = getByPathOrDefault(map, path, N.NULL_MASK);
+
+        if (val == N.NULL_MASK) {
+            return null;
+        }
 
         if (val == null || targetType.isAssignableFrom(val.getClass())) {
             return (T) val;
+        } else {
+            return N.convert(val, targetType);
         }
-
-        return N.convert(val, targetType);
-    }
-
-    public static <T> T getByPath(final Map<?, ?> map, final String path, final Type<? extends T> targetType) {
-        final Object val = getOrDefaultByPath(map, path, null);
-
-        if (val == null || targetType.clazz().isAssignableFrom(val.getClass())) {
-            return (T) val;
-        }
-
-        return N.convert(val, targetType);
     }
 
     /**
@@ -1291,14 +1299,18 @@ public final class Maps {
      * @param map
      * @param path
      * @param defaultValue
-     * @return
+     * @return {@code defaultValue} if there is no value found by the specified path.
      * @see #getByPath(Map, String)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> T getOrDefaultByPath(final Map<?, ?> map, final String path, final T defaultValue) {
+    public static <T> T getByPathOrDefault(final Map<?, ?> map, final String path, final T defaultValue) {
+        N.checkArgNotNull(defaultValue, "defaultValue");
+
         if (N.isNullOrEmpty(map)) {
             return defaultValue;
         }
+
+        final Class<?> targetType = defaultValue == null || defaultValue == N.NULL_MASK ? null : defaultValue.getClass();
 
         final String[] keys = Strings.split(path, '.');
         Map intermediateMap = map;
@@ -1323,7 +1335,13 @@ public final class Maps {
                     } else {
                         if (j == idxLen - 1) {
                             if (i == len - 1) {
-                                return (T) N.getElement(intermediateColl, indexes[j]);
+                                final Object ret = N.getElement(intermediateColl, indexes[j]);
+
+                                if (ret == null || targetType == null || targetType.isAssignableFrom(ret.getClass())) {
+                                    return (T) ret;
+                                } else {
+                                    return (T) N.convert(ret, targetType);
+                                }
                             } else {
                                 intermediateMap = (Map) N.getElement(intermediateColl, indexes[j]);
                             }
@@ -1334,7 +1352,13 @@ public final class Maps {
                 }
             } else {
                 if (i == len - 1) {
-                    return (T) intermediateMap.get(key);
+                    final Object ret = intermediateMap.getOrDefault(key, defaultValue);
+
+                    if (ret == null || targetType == null || targetType.isAssignableFrom(ret.getClass())) {
+                        return (T) ret;
+                    } else {
+                        return (T) N.convert(ret, targetType);
+                    }
                 } else {
                     intermediateMap = (Map) intermediateMap.get(key);
                 }
@@ -1342,6 +1366,45 @@ public final class Maps {
         }
 
         return defaultValue;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param map
+     * @param path
+     * @return an empty {@code Nullable} if there is no value found by the specified path.
+     */
+    public static <T> Nullable<T> getByPathIfPresent(final Map<?, ?> map, final String path) {
+        final Object val = getByPathOrDefault(map, path, N.NULL_MASK);
+
+        if (val == N.NULL_MASK) {
+            return Nullable.<T> empty();
+        }
+
+        return Nullable.of((T) val);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param map
+     * @param path
+     * @param targetType
+     * @return an empty {@code Nullable} if there is no value found by the specified path.
+     */
+    public static <T> Nullable<T> getByPathIfPresent(final Map<?, ?> map, final String path, final Class<? extends T> targetType) {
+        final Object val = getByPathOrDefault(map, path, N.NULL_MASK);
+
+        if (val == N.NULL_MASK) {
+            return Nullable.<T> empty();
+        }
+
+        if (val == null || targetType.isAssignableFrom(val.getClass())) {
+            return Nullable.of((T) val);
+        } else {
+            return Nullable.of(N.convert(val, targetType));
+        }
     }
 
     /**

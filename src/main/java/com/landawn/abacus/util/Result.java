@@ -19,8 +19,10 @@ package com.landawn.abacus.util;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.Tuple.Tuple2;
+import com.landawn.abacus.util.u.Optional;
 
 /**
  *
@@ -255,8 +257,21 @@ public final class Result<T, E extends Throwable> implements Immutable {
      *
      * @return
      */
-    public E getExceptionIfPresent() {
+    @Beta
+    public E getException() {
         return exception;
+    }
+
+    /**
+     * Returns the {@code Exception} if occurred, otherwise an empty {@code Optional} is returned.
+     *
+     * @return
+     * @deprecated replaced by {@code getException}
+     */
+    @Deprecated
+    @Beta
+    public Optional<E> getExceptionIfPresent() {
+        return Optional.ofNullable(exception);
     }
 
     //    /**
