@@ -661,8 +661,20 @@ public abstract class Comparators {
         return (Comparator<T>) COMPARING_BY_LENGTH;
     }
 
+    static final Comparator<Object> COMPARING_BY_ARRAY_LENGTH = (a, b) -> (a == null ? 0 : Array.getLength(a)) - (b == null ? 0 : Array.getLength(b));
+
     /**
-     * Comparing by size.
+     * Comparing by array length.
+     *
+     * @param <T>
+     * @return
+     */
+    public static <T> Comparator<T> comparingByArrayLength() {
+        return (Comparator<T>) COMPARING_BY_ARRAY_LENGTH;
+    }
+
+    /**
+     * Comparing by collection size.
      *
      * @param <T>
      * @return
@@ -673,7 +685,7 @@ public abstract class Comparators {
     }
 
     /**
-     * Comparing by sizee.
+     * Comparing by map size.
      *
      * @param <T>
      * @return
@@ -738,4 +750,30 @@ public abstract class Comparators {
         };
     }
 
+    public static <T, C extends Iterator<T>> Comparator<C> comparingIterator(final Comparator<T> cmp) {
+        N.checkArgNotNull(cmp);
+
+        return (a, b) -> {
+            if (N.isNullOrEmpty(a)) {
+                return N.isNullOrEmpty(b) ? 0 : -1;
+            } else if (N.isNullOrEmpty(b)) {
+                return 1;
+            }
+
+            final Iterator<T> iterA = a;
+            final Iterator<T> iterB = b;
+
+            int result = 0;
+
+            while (iterA.hasNext() && iterB.hasNext()) {
+                result = cmp.compare(iterA.next(), iterB.next());
+
+                if (result != 0) {
+                    return result;
+                }
+            }
+
+            return iterA.hasNext() ? 1 : (iterB.hasNext() ? -1 : 0);
+        };
+    }
 }
