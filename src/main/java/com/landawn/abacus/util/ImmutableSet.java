@@ -50,43 +50,46 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @param e
      * @return
      */
-    public static <E> ImmutableSet<E> just(E e) {
+    public static <T> ImmutableSet<T> just(T e) {
         return new ImmutableSet<>(Collections.singleton(e));
     }
 
-    /**
-     *
-     * @param <E>
-     * @param e
-     * @return
-     */
-    public static <E> ImmutableSet<E> of(E e) {
-        return new ImmutableSet<>(Collections.singleton(e));
+    public static <T> ImmutableSet<T> of(final T e1) {
+        return new ImmutableSet<>(N.asSet(e1));
+    }
+
+    public static <T> ImmutableSet<T> of(final T e1, final T e2) {
+        return new ImmutableSet<>(N.asSet(e1, e2));
+    }
+
+    public static <T> ImmutableSet<T> of(final T e1, final T e2, final T e3) {
+        return new ImmutableSet<>(N.asSet(e1, e2, e3));
+    }
+
+    public static <T> ImmutableSet<T> of(final T e1, final T e2, final T e3, final T e4) {
+        return new ImmutableSet<>(N.asSet(e1, e2, e3, e4));
+    }
+
+    public static <T> ImmutableSet<T> of(final T e1, final T e2, final T e3, final T e4, final T e5) {
+        return new ImmutableSet<>(N.asSet(e1, e2, e3, e4, e5));
+    }
+
+    public static <T> ImmutableSet<T> of(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
+        return new ImmutableSet<>(N.asSet(e1, e2, e3, e4, e5, e6));
+    }
+
+    public static <T> ImmutableSet<T> of(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) {
+        return new ImmutableSet<>(N.asSet(e1, e2, e3, e4, e5, e6, e7));
     }
 
     /**
      *
      * @param <E>
-     * @param a
-     * @return
+     * @param set
+     * @return an {@code ImmutableSet} backed by the specified {@code set}
+     * @deprecated the ImmutableSet may be modified through the specified {@code set}
      */
-    @SafeVarargs
-    public static <E> ImmutableSet<E> of(E... a) {
-        if (N.isNullOrEmpty(a)) {
-            return empty();
-        } else if (a.length == 1) {
-            return new ImmutableSet<>(Collections.singleton(a[0]));
-        } else {
-            return new ImmutableSet<>(N.asLinkedHashSet(a));
-        }
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param set the elements in this <code>Set</code> are shared by the returned ImmutableSet.
-     * @return
-     */
+    @Deprecated
     public static <E> ImmutableSet<E> of(final Set<? extends E> set) {
         if (set == null) {
             return empty();

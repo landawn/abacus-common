@@ -159,6 +159,7 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * @param str
      * @return
      */
+    @SuppressWarnings("deprecation")
     @Override
     public ImmutableSet<E> valueOf(String str) {
         return ImmutableSet.of(setType.valueOf(str));

@@ -17,6 +17,7 @@ package com.landawn.abacus.util;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.u.Optional;
+import com.landawn.abacus.util.stream.IntStream;
 
 /**
  *
@@ -111,6 +112,10 @@ public final class IntPair implements Immutable {
      */
     public <E extends Exception> Optional<IntPair> filter(final Throwables.IntBiPredicate<E> predicate) throws E {
         return predicate.test(_1, _2) ? Optional.of(this) : Optional.<IntPair> empty();
+    }
+
+    public IntStream stream() {
+        return IntStream.of(_1, _2);
     }
 
     @Override

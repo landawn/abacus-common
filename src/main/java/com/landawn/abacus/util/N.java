@@ -4608,6 +4608,24 @@ public final class N extends CommonUtil {
      *
      * @param <T>
      * @param c
+     * @param elements
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static <T> boolean addAll(final Collection<T> c, final T[] elementsToAdd) throws IllegalArgumentException {
+        checkArgNotNull(c, "c");
+
+        if (N.isNullOrEmpty(elementsToAdd)) {
+            return false;
+        }
+
+        return Collections.addAll(c, elementsToAdd);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param c
      * @param elementsToAdd
      * @return {@code true} if the specified Collection {@code c} has been modified.
      * @throws IllegalArgumentException

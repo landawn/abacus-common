@@ -56,7 +56,7 @@ public final class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry
      * @param entry
      * @return
      */
-    public static <K, V> ImmutableEntry<K, V> from(Map.Entry<? extends K, ? extends V> entry) {
+    public static <K, V> ImmutableEntry<K, V> copyOf(Map.Entry<? extends K, ? extends V> entry) {
         return new ImmutableEntry<>(entry.getKey(), entry.getValue());
     }
 

@@ -747,6 +747,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      *
      * @return
      */
+    @SuppressWarnings("deprecation")
     public ImmutableMap<K, ImmutableList<E>> toImmutableMap() {
         final Map<K, ImmutableList<E>> map = Maps.newOrderingMap(valueMap);
 
@@ -763,6 +764,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param mapSupplier
      * @return
      */
+    @SuppressWarnings("deprecation")
     public ImmutableMap<K, ImmutableList<E>> toImmutableMap(final IntFunction<? extends Map<K, ImmutableList<E>>> mapSupplier) {
         final Map<K, ImmutableList<E>> map = mapSupplier.apply(valueMap.size());
 

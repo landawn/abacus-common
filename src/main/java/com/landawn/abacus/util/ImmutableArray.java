@@ -19,23 +19,67 @@ import com.landawn.abacus.util.stream.Stream;
 @com.landawn.abacus.annotation.Immutable
 public final class ImmutableArray<T> implements Immutable {
     private final T[] elements;
-    public final int length;
+    private final int length;
 
     ImmutableArray(final T[] elements) {
         this.elements = elements == null ? (T[]) N.EMPTY_OBJECT_ARRAY : elements;
         this.length = N.len(this.elements);
     }
 
-    public static <T> ImmutableArray<T> of(final T[] elements) {
-        return new ImmutableArray<>(elements);
+    public static <T> ImmutableArray<T> of(final T e1) {
+        return new ImmutableArray<>(N.asArray(e1));
+    }
+
+    public static <T> ImmutableArray<T> of(final T e1, final T e2) {
+        return new ImmutableArray<>(N.asArray(e1, e2));
+    }
+
+    public static <T> ImmutableArray<T> of(final T e1, final T e2, final T e3) {
+        return new ImmutableArray<>(N.asArray(e1, e2, e3));
+    }
+
+    public static <T> ImmutableArray<T> of(final T e1, final T e2, final T e3, final T e4) {
+        return new ImmutableArray<>(N.asArray(e1, e2, e3, e4));
+    }
+
+    public static <T> ImmutableArray<T> of(final T e1, final T e2, final T e3, final T e4, final T e5) {
+        return new ImmutableArray<>(N.asArray(e1, e2, e3, e4, e5));
+    }
+
+    public static <T> ImmutableArray<T> of(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
+        return new ImmutableArray<>(N.asArray(e1, e2, e3, e4, e5, e6));
+    }
+
+    public static <T> ImmutableArray<T> of(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) {
+        return new ImmutableArray<>(N.asArray(e1, e2, e3, e4, e5, e6, e7));
     }
 
     public static <T> ImmutableArray<T> copyOf(final T[] elements) {
         return new ImmutableArray<>(elements == null ? null : elements.clone());
     }
 
+    public int length() {
+        return length;
+    }
+
+    public boolean isEmpty() {
+        return length == 0;
+    }
+
     public T get(int index) {
         return elements[index];
+    }
+
+    public int indexOf(T valueToFind) {
+        return N.indexOf(elements, valueToFind);
+    }
+
+    public int lastIndexOf(T valueToFind) {
+        return N.lastIndexOf(elements, valueToFind);
+    }
+
+    public boolean contains(T valueToFind) {
+        return N.contains(elements, valueToFind);
     }
 
     public <E extends Exception> void forEach(final Throwables.Consumer<T, E> consumer) throws E {
@@ -61,7 +105,12 @@ public final class ImmutableArray<T> implements Immutable {
     public ImmutableArray<T> copy(final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, length);
 
-        return ImmutableArray.of(N.copyOfRange(elements, fromIndex, toIndex));
+        return new ImmutableArray<>(N.copyOfRange(elements, fromIndex, toIndex));
+    }
+
+    @SuppressWarnings("deprecation")
+    public ImmutableList<T> asList() {
+        return ImmutableList.of(N.asList(elements));
     }
 
     @Override

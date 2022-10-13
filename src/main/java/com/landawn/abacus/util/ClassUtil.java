@@ -2863,6 +2863,7 @@ public final class ClassUtil {
      *
      * @param cls
      */
+    @SuppressWarnings("deprecation")
     private static void loadPropGetSetMethodList(final Class<?> cls) {
         synchronized (entityDeclaredPropGetMethodPool) {
             if (entityDeclaredPropGetMethodPool.containsKey(cls)) {

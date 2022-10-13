@@ -20,7 +20,6 @@ import java.util.AbstractSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Internal;
@@ -474,6 +473,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * @return
      */
+    @SuppressWarnings("deprecation")
     @Override
     public ImmutableSet<K> keySet() {
         return ImmutableSet.of(keyMap.keySet());
@@ -484,6 +484,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * @return
      */
+    @SuppressWarnings("deprecation")
     @Override
     public ImmutableSet<V> values() {
         return ImmutableSet.of(valueMap.keySet());
@@ -494,9 +495,10 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * @return
      */
+    @SuppressWarnings("deprecation")
     @Override
-    public Set<Map.Entry<K, V>> entrySet() {
-        return new AbstractSet<>() {
+    public ImmutableSet<Map.Entry<K, V>> entrySet() {
+        return ImmutableSet.of(new AbstractSet<>() {
             @Override
             public Iterator<Map.Entry<K, V>> iterator() {
                 return new ObjIterator<>() {
@@ -508,37 +510,8 @@ public final class BiMap<K, V> implements Map<K, V> {
                     }
 
                     @Override
-                    public Map.Entry<K, V> next() {
-                        final Map.Entry<K, V> entry = keyValueEntryIter.next();
-
-                        return new Map.Entry<>() {
-                            @Override
-                            public K getKey() {
-                                return entry.getKey();
-                            }
-
-                            @Override
-                            public V getValue() {
-                                return entry.getValue();
-                            }
-
-                            @Override
-                            public V setValue(V value) {
-                                //    if (N.equals(entry.getValue(), value)) {
-                                //        return entry.getValue();
-                                //    }
-                                //
-                                //    //    if (valueMap.containsKey(value)) {
-                                //    //        throw new IllegalStateException("Value: " + N.toString(value) + " already existed.");
-                                //    //    }
-                                //
-                                //    valueMap.remove(entry.getValue());
-                                //    valueMap.put(value, entry.getKey());
-                                //    return entry.setValue(value);
-
-                                throw new UnsupportedOperationException();
-                            }
-                        };
+                    public ImmutableEntry<K, V> next() {
+                        return ImmutableEntry.copyOf(keyValueEntryIter.next());
                     }
                 };
             }
@@ -547,7 +520,7 @@ public final class BiMap<K, V> implements Map<K, V> {
             public int size() {
                 return keyMap.size();
             }
-        };
+        });
     }
 
     /**

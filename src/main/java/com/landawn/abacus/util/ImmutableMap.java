@@ -208,9 +208,11 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the elements in this <code>map</code> are shared by the returned ImmutableMap.
-     * @return
+     * @param map
+     * @return an {@code ImmutableMap} backed by the specified {@code map}
+     * @deprecated the ImmutableMap may be modified through the specified {@code map}
      */
+    @Deprecated
     public static <K, V> ImmutableMap<K, V> of(final Map<? extends K, ? extends V> map) {
         if (map == null) {
             return empty();

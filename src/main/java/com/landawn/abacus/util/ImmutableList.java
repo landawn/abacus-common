@@ -15,12 +15,10 @@
 package com.landawn.abacus.util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.function.UnaryOperator;
 
 /**
@@ -52,45 +50,50 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
 
     /**
      *
-     * @param <E>
+     * @param <T>
      * @param e
      * @return
      */
-    public static <E> ImmutableList<E> just(E e) {
+    public static <T> ImmutableList<T> just(T e) {
         return new ImmutableList<>(Collections.singletonList(e));
     }
 
-    /**
-     *
-     * @param <E>
-     * @param e
-     * @return
-     */
-    public static <E> ImmutableList<E> of(E e) {
-        return new ImmutableList<>(Collections.singletonList(e));
+    public static <T> ImmutableList<T> of(final T e1) {
+        return new ImmutableList<>(N.asList(e1));
+    }
+
+    public static <T> ImmutableList<T> of(final T e1, final T e2) {
+        return new ImmutableList<>(N.asList(e1, e2));
+    }
+
+    public static <T> ImmutableList<T> of(final T e1, final T e2, final T e3) {
+        return new ImmutableList<>(N.asList(e1, e2, e3));
+    }
+
+    public static <T> ImmutableList<T> of(final T e1, final T e2, final T e3, final T e4) {
+        return new ImmutableList<>(N.asList(e1, e2, e3, e4));
+    }
+
+    public static <T> ImmutableList<T> of(final T e1, final T e2, final T e3, final T e4, final T e5) {
+        return new ImmutableList<>(N.asList(e1, e2, e3, e4, e5));
+    }
+
+    public static <T> ImmutableList<T> of(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
+        return new ImmutableList<>(N.asList(e1, e2, e3, e4, e5, e6));
+    }
+
+    public static <T> ImmutableList<T> of(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) {
+        return new ImmutableList<>(N.asList(e1, e2, e3, e4, e5, e6, e7));
     }
 
     /**
      *
      * @param <E>
-     * @param a the elements in this <code>array</code> are shared by the returned ImmutableList.
-     * @return
+     * @param list
+     * @return an {@code ImmutableList} backed by the specified {@code list}
+     * @deprecated the ImmutableList may be modified through the specified {@code list}
      */
-    @SafeVarargs
-    public static <E> ImmutableList<E> of(E... a) {
-        if (N.isNullOrEmpty(a)) {
-            return empty();
-        }
-
-        return new ImmutableList<>(Arrays.asList(a));
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param list the elements in this <code>list</code> are shared by the returned ImmutableList.
-     * @return
-     */
+    @Deprecated
     public static <E> ImmutableList<E> of(final List<? extends E> list) {
         if (list == null) {
             return empty();
@@ -107,14 +110,13 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @param a
      * @return
      */
-    @SafeVarargs
-    public static <E> ImmutableList<E> copyOf(final E... a) {
+    public static <E> ImmutableList<E> copyOf(final E[] a) {
         if (N.isNullOrEmpty(a)) {
             return empty();
         } else if (a.length == 1) {
             return new ImmutableList<>(Collections.singletonList(a[0]));
         } else {
-            return new ImmutableList<>(Arrays.asList(N.clone(a)));
+            return new ImmutableList<>(N.asList(N.clone(a)));
         }
     }
 
@@ -179,8 +181,8 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     @Override
-    public ListIterator<E> listIterator() {
-        return list.listIterator();
+    public ImmutableListIterator<E> listIterator() {
+        return ImmutableListIterator.of(list.listIterator());
     }
 
     /**
@@ -189,8 +191,8 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @return
      */
     @Override
-    public ListIterator<E> listIterator(int index) {
-        return list.listIterator(index);
+    public ImmutableListIterator<E> listIterator(int index) {
+        return ImmutableListIterator.of(list.listIterator(index));
     }
 
     /**
@@ -200,8 +202,8 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      * @return
      */
     @Override
-    public List<E> subList(int fromIndex, int toIndex) {
-        return list.subList(fromIndex, toIndex);
+    public ImmutableList<E> subList(int fromIndex, int toIndex) {
+        return ImmutableList.of(list.subList(fromIndex, toIndex));
     }
 
     /**

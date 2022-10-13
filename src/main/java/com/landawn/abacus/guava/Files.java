@@ -400,6 +400,7 @@ public abstract class Files {
      * @return
      * @throws IOException Signals that an I/O exception has occurred.
      */
+    @SuppressWarnings("deprecation")
     public static ImmutableList<Path> listFiles(Path dir) throws IOException {
         return ImmutableList.of(com.google.common.io.MoreFiles.listFiles(dir));
     }

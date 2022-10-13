@@ -398,6 +398,17 @@ public interface NoCachingNoUpdating {
 
         /**
          *
+         * @param delimiter
+         * @param prefix
+         * @param suffix
+         * @return
+         */
+        public String join(String delimiter, String prefix, String suffix) {
+            return Strings.join(a, 0, length(), delimiter, prefix, suffix);
+        }
+
+        /**
+         *
          * @return
          */
         @Override
@@ -575,6 +586,17 @@ public interface NoCachingNoUpdating {
          */
         public String join(String delimiter) {
             return Strings.join(a, delimiter);
+        }
+
+        /**
+         *
+         * @param delimiter
+         * @param prefix
+         * @param suffix
+         * @return
+         */
+        public String join(String delimiter, String prefix, String suffix) {
+            return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
         /**
@@ -760,6 +782,17 @@ public interface NoCachingNoUpdating {
 
         /**
          *
+         * @param delimiter
+         * @param prefix
+         * @param suffix
+         * @return
+         */
+        public String join(String delimiter, String prefix, String suffix) {
+            return Strings.join(a, 0, length(), delimiter, prefix, suffix);
+        }
+
+        /**
+         *
          * @return
          */
         @Override
@@ -937,6 +970,17 @@ public interface NoCachingNoUpdating {
          */
         public String join(String delimiter) {
             return Strings.join(a, delimiter);
+        }
+
+        /**
+         *
+         * @param delimiter
+         * @param prefix
+         * @param suffix
+         * @return
+         */
+        public String join(String delimiter, String prefix, String suffix) {
+            return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
         /**
@@ -1122,6 +1166,17 @@ public interface NoCachingNoUpdating {
 
         /**
          *
+         * @param delimiter
+         * @param prefix
+         * @param suffix
+         * @return
+         */
+        public String join(String delimiter, String prefix, String suffix) {
+            return Strings.join(a, 0, length(), delimiter, prefix, suffix);
+        }
+
+        /**
+         *
          * @return
          */
         @Override
@@ -1299,6 +1354,17 @@ public interface NoCachingNoUpdating {
          */
         public String join(String delimiter) {
             return Strings.join(a, delimiter);
+        }
+
+        /**
+         *
+         * @param delimiter
+         * @param prefix
+         * @param suffix
+         * @return
+         */
+        public String join(String delimiter, String prefix, String suffix) {
+            return Strings.join(a, 0, length(), delimiter, prefix, suffix);
         }
 
         /**
@@ -1484,6 +1550,17 @@ public interface NoCachingNoUpdating {
 
         /**
          *
+         * @param delimiter
+         * @param prefix
+         * @param suffix
+         * @return
+         */
+        public String join(String delimiter, String prefix, String suffix) {
+            return Strings.join(a, 0, length(), delimiter, prefix, suffix);
+        }
+
+        /**
+         *
          * @return
          */
         @Override
@@ -1665,6 +1742,17 @@ public interface NoCachingNoUpdating {
 
         /**
          *
+         * @param delimiter
+         * @param prefix
+         * @param suffix
+         * @return
+         */
+        public String join(String delimiter, String prefix, String suffix) {
+            return Strings.join(a, 0, length(), delimiter, prefix, suffix);
+        }
+
+        /**
+         *
          * @return
          */
         @Override
@@ -1819,6 +1907,17 @@ public interface NoCachingNoUpdating {
          */
         public String join(String delimiter) {
             return Strings.join(deque, delimiter);
+        }
+
+        /**
+         *
+         * @param delimiter
+         * @param prefix
+         * @param suffix
+         * @return
+         */
+        public String join(String delimiter, String prefix, String suffix) {
+            return Strings.join(deque, delimiter, prefix, suffix);
         }
 
         /**

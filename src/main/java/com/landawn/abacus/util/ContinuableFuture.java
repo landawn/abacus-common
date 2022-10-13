@@ -798,8 +798,7 @@ public class ContinuableFuture<T> implements Future<T> {
             final Result<T, Exception> result = gett();
             final Result<U, Exception> result2 = other.gett();
 
-            action.accept(
-                    Tuple.of(result.orElseIfFailure(null), result.getException(), result2.orElseIfFailure(null), result2.getException()));
+            action.accept(Tuple.of(result.orElseIfFailure(null), result.getException(), result2.orElseIfFailure(null), result2.getException()));
             return null;
         }, other);
     }
@@ -872,8 +871,7 @@ public class ContinuableFuture<T> implements Future<T> {
             final Result<T, Exception> result = gett();
             final Result<U, Exception> result2 = other.gett();
 
-            return action.apply(
-                    Tuple.of(result.orElseIfFailure(null), result.getException(), result2.orElseIfFailure(null), result2.getException()));
+            return action.apply(Tuple.of(result.orElseIfFailure(null), result.getException(), result2.orElseIfFailure(null), result2.getException()));
         }, other);
     }
 

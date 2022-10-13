@@ -6897,6 +6897,54 @@ public abstract class Strings {
         }
     }
 
+    public static String join(final boolean[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+            if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+                return N.EMPTY_STRING;
+            } else if (N.isNullOrEmpty(prefix)) {
+                return suffix;
+            } else if (N.isNullOrEmpty(suffix)) {
+                return prefix;
+            } else {
+                return prefix + suffix;
+            }
+        } else if (toIndex - fromIndex == 1 && N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+            return N.toString(a[fromIndex]);
+        }
+
+        final StringBuilder sb = Objectory.createStringBuilder();
+
+        try {
+            if (N.notNullOrEmpty(prefix)) {
+                sb.append(prefix);
+            }
+
+            if (N.isNullOrEmpty(delimiter)) {
+                for (int i = fromIndex; i < toIndex; i++) {
+                    sb.append(a[i]);
+                }
+            } else {
+                for (int i = fromIndex; i < toIndex; i++) {
+                    if (i > fromIndex) {
+                        sb.append(delimiter);
+                    }
+
+                    sb.append(a[i]);
+                }
+            }
+
+            if (N.notNullOrEmpty(suffix)) {
+                sb.append(suffix);
+            }
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
+        }
+    }
+
     /**
      *
      * @param a
@@ -7000,6 +7048,54 @@ public abstract class Strings {
 
                     sb.append(a[i]);
                 }
+            }
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
+        }
+    }
+
+    public static String join(final char[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+            if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+                return N.EMPTY_STRING;
+            } else if (N.isNullOrEmpty(prefix)) {
+                return suffix;
+            } else if (N.isNullOrEmpty(suffix)) {
+                return prefix;
+            } else {
+                return prefix + suffix;
+            }
+        } else if (toIndex - fromIndex == 1 && N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+            return N.toString(a[fromIndex]);
+        }
+
+        final StringBuilder sb = Objectory.createStringBuilder();
+
+        try {
+            if (N.notNullOrEmpty(prefix)) {
+                sb.append(prefix);
+            }
+
+            if (N.isNullOrEmpty(delimiter)) {
+                for (int i = fromIndex; i < toIndex; i++) {
+                    sb.append(a[i]);
+                }
+            } else {
+                for (int i = fromIndex; i < toIndex; i++) {
+                    if (i > fromIndex) {
+                        sb.append(delimiter);
+                    }
+
+                    sb.append(a[i]);
+                }
+            }
+
+            if (N.notNullOrEmpty(suffix)) {
+                sb.append(suffix);
             }
 
             return sb.toString();
@@ -7119,6 +7215,54 @@ public abstract class Strings {
         }
     }
 
+    public static String join(final byte[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+            if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+                return N.EMPTY_STRING;
+            } else if (N.isNullOrEmpty(prefix)) {
+                return suffix;
+            } else if (N.isNullOrEmpty(suffix)) {
+                return prefix;
+            } else {
+                return prefix + suffix;
+            }
+        } else if (toIndex - fromIndex == 1 && N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+            return N.toString(a[fromIndex]);
+        }
+
+        final StringBuilder sb = Objectory.createStringBuilder();
+
+        try {
+            if (N.notNullOrEmpty(prefix)) {
+                sb.append(prefix);
+            }
+
+            if (N.isNullOrEmpty(delimiter)) {
+                for (int i = fromIndex; i < toIndex; i++) {
+                    sb.append(a[i]);
+                }
+            } else {
+                for (int i = fromIndex; i < toIndex; i++) {
+                    if (i > fromIndex) {
+                        sb.append(delimiter);
+                    }
+
+                    sb.append(a[i]);
+                }
+            }
+
+            if (N.notNullOrEmpty(suffix)) {
+                sb.append(suffix);
+            }
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
+        }
+    }
+
     /**
      *
      * @param a
@@ -7222,6 +7366,54 @@ public abstract class Strings {
 
                     sb.append(a[i]);
                 }
+            }
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
+        }
+    }
+
+    public static String join(final short[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+            if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+                return N.EMPTY_STRING;
+            } else if (N.isNullOrEmpty(prefix)) {
+                return suffix;
+            } else if (N.isNullOrEmpty(suffix)) {
+                return prefix;
+            } else {
+                return prefix + suffix;
+            }
+        } else if (toIndex - fromIndex == 1 && N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+            return N.toString(a[fromIndex]);
+        }
+
+        final StringBuilder sb = Objectory.createStringBuilder();
+
+        try {
+            if (N.notNullOrEmpty(prefix)) {
+                sb.append(prefix);
+            }
+
+            if (N.isNullOrEmpty(delimiter)) {
+                for (int i = fromIndex; i < toIndex; i++) {
+                    sb.append(a[i]);
+                }
+            } else {
+                for (int i = fromIndex; i < toIndex; i++) {
+                    if (i > fromIndex) {
+                        sb.append(delimiter);
+                    }
+
+                    sb.append(a[i]);
+                }
+            }
+
+            if (N.notNullOrEmpty(suffix)) {
+                sb.append(suffix);
             }
 
             return sb.toString();
@@ -7341,6 +7533,54 @@ public abstract class Strings {
         }
     }
 
+    public static String join(final int[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+            if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+                return N.EMPTY_STRING;
+            } else if (N.isNullOrEmpty(prefix)) {
+                return suffix;
+            } else if (N.isNullOrEmpty(suffix)) {
+                return prefix;
+            } else {
+                return prefix + suffix;
+            }
+        } else if (toIndex - fromIndex == 1 && N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+            return N.toString(a[fromIndex]);
+        }
+
+        final StringBuilder sb = Objectory.createStringBuilder();
+
+        try {
+            if (N.notNullOrEmpty(prefix)) {
+                sb.append(prefix);
+            }
+
+            if (N.isNullOrEmpty(delimiter)) {
+                for (int i = fromIndex; i < toIndex; i++) {
+                    sb.append(a[i]);
+                }
+            } else {
+                for (int i = fromIndex; i < toIndex; i++) {
+                    if (i > fromIndex) {
+                        sb.append(delimiter);
+                    }
+
+                    sb.append(a[i]);
+                }
+            }
+
+            if (N.notNullOrEmpty(suffix)) {
+                sb.append(suffix);
+            }
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
+        }
+    }
+
     /**
      *
      * @param a
@@ -7444,6 +7684,54 @@ public abstract class Strings {
 
                     sb.append(a[i]);
                 }
+            }
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
+        }
+    }
+
+    public static String join(final long[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+            if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+                return N.EMPTY_STRING;
+            } else if (N.isNullOrEmpty(prefix)) {
+                return suffix;
+            } else if (N.isNullOrEmpty(suffix)) {
+                return prefix;
+            } else {
+                return prefix + suffix;
+            }
+        } else if (toIndex - fromIndex == 1 && N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+            return N.toString(a[fromIndex]);
+        }
+
+        final StringBuilder sb = Objectory.createStringBuilder();
+
+        try {
+            if (N.notNullOrEmpty(prefix)) {
+                sb.append(prefix);
+            }
+
+            if (N.isNullOrEmpty(delimiter)) {
+                for (int i = fromIndex; i < toIndex; i++) {
+                    sb.append(a[i]);
+                }
+            } else {
+                for (int i = fromIndex; i < toIndex; i++) {
+                    if (i > fromIndex) {
+                        sb.append(delimiter);
+                    }
+
+                    sb.append(a[i]);
+                }
+            }
+
+            if (N.notNullOrEmpty(suffix)) {
+                sb.append(suffix);
             }
 
             return sb.toString();
@@ -7563,6 +7851,54 @@ public abstract class Strings {
         }
     }
 
+    public static String join(final float[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+            if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+                return N.EMPTY_STRING;
+            } else if (N.isNullOrEmpty(prefix)) {
+                return suffix;
+            } else if (N.isNullOrEmpty(suffix)) {
+                return prefix;
+            } else {
+                return prefix + suffix;
+            }
+        } else if (toIndex - fromIndex == 1 && N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+            return N.toString(a[fromIndex]);
+        }
+
+        final StringBuilder sb = Objectory.createStringBuilder();
+
+        try {
+            if (N.notNullOrEmpty(prefix)) {
+                sb.append(prefix);
+            }
+
+            if (N.isNullOrEmpty(delimiter)) {
+                for (int i = fromIndex; i < toIndex; i++) {
+                    sb.append(a[i]);
+                }
+            } else {
+                for (int i = fromIndex; i < toIndex; i++) {
+                    if (i > fromIndex) {
+                        sb.append(delimiter);
+                    }
+
+                    sb.append(a[i]);
+                }
+            }
+
+            if (N.notNullOrEmpty(suffix)) {
+                sb.append(suffix);
+            }
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
+        }
+    }
+
     /**
      *
      * @param a
@@ -7666,6 +8002,54 @@ public abstract class Strings {
 
                     sb.append(a[i]);
                 }
+            }
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
+        }
+    }
+
+    public static String join(final double[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+
+        if (N.isNullOrEmpty(a) || fromIndex == toIndex) {
+            if (N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+                return N.EMPTY_STRING;
+            } else if (N.isNullOrEmpty(prefix)) {
+                return suffix;
+            } else if (N.isNullOrEmpty(suffix)) {
+                return prefix;
+            } else {
+                return prefix + suffix;
+            }
+        } else if (toIndex - fromIndex == 1 && N.isNullOrEmpty(prefix) && N.isNullOrEmpty(suffix)) {
+            return N.toString(a[fromIndex]);
+        }
+
+        final StringBuilder sb = Objectory.createStringBuilder();
+
+        try {
+            if (N.notNullOrEmpty(prefix)) {
+                sb.append(prefix);
+            }
+
+            if (N.isNullOrEmpty(delimiter)) {
+                for (int i = fromIndex; i < toIndex; i++) {
+                    sb.append(a[i]);
+                }
+            } else {
+                for (int i = fromIndex; i < toIndex; i++) {
+                    if (i > fromIndex) {
+                        sb.append(delimiter);
+                    }
+
+                    sb.append(a[i]);
+                }
+            }
+
+            if (N.notNullOrEmpty(suffix)) {
+                sb.append(suffix);
             }
 
             return sb.toString();

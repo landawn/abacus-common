@@ -728,7 +728,7 @@ public final class ParserUtil {
                 }
             }
 
-            this.propInfoList = ImmutableList.of(propInfos);
+            this.propInfoList = ImmutableList.of(N.asList(propInfos));
 
             final List<PropInfo> tmpIdPropInfoList = N.filter(propInfos, it -> it.isMarkedToId);
 
@@ -1004,6 +1004,7 @@ public final class ParserUtil {
          * @param propName
          * @return
          */
+        @SuppressWarnings("deprecation")
         public List<PropInfo> getPropInfoQueue(String propName) {
             List<PropInfo> propInfoQueue = propInfoQueueMap.get(propName);
 

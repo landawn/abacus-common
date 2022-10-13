@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Set;
@@ -50,25 +49,51 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
 
     /**
      *
-     * @param <E>
-     * @param a
+     * @param <T>
+     * @param e
      * @return
      */
-    @SafeVarargs
-    public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E... a) {
-        if (N.isNullOrEmpty(a)) {
-            return empty();
-        }
+    public static <T extends Comparable<? super T>> ImmutableSortedSet<T> just(T e) {
+        return new ImmutableSortedSet<>(new TreeSet<>(N.asList(e)));
+    }
 
-        return new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(a)));
+    public static <T extends Comparable<? super T>> ImmutableSortedSet<T> of(final T e1) {
+        return new ImmutableSortedSet<>(new TreeSet<>(N.asList(e1)));
+    }
+
+    public static <T extends Comparable<? super T>> ImmutableSortedSet<T> of(final T e1, final T e2) {
+        return new ImmutableSortedSet<>(new TreeSet<>(N.asList(e1, e2)));
+    }
+
+    public static <T extends Comparable<? super T>> ImmutableSortedSet<T> of(final T e1, final T e2, final T e3) {
+        return new ImmutableSortedSet<>(new TreeSet<>(N.asList(e1, e2, e3)));
+    }
+
+    public static <T extends Comparable<? super T>> ImmutableSortedSet<T> of(final T e1, final T e2, final T e3, final T e4) {
+        return new ImmutableSortedSet<>(new TreeSet<>(N.asList(e1, e2, e3, e4)));
+    }
+
+    public static <T extends Comparable<? super T>> ImmutableSortedSet<T> of(final T e1, final T e2, final T e3, final T e4, final T e5) {
+        return new ImmutableSortedSet<>(new TreeSet<>(N.asList(e1, e2, e3, e4, e5)));
+    }
+
+    public static <T extends Comparable<? super T>> ImmutableSortedSet<T> of(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
+        return new ImmutableSortedSet<>(new TreeSet<>(N.asList(e1, e2, e3, e4, e5, e6)));
+    }
+
+    public static <T extends Comparable<? super T>> ImmutableSortedSet<T> of(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6,
+            final T e7) {
+        return new ImmutableSortedSet<>(new TreeSet<>(N.asList(e1, e2, e3, e4, e5, e6, e7)));
     }
 
     /**
      *
      * @param <E>
-     * @param sortedSet the elements in this <code>Set</code> are shared by the returned ImmutableSortedSet.
-     * @return
+     * @param sortedSet
+     * @return an {@code ImmutableSortedSet} backed by the specified {@code sortedSet}
+     * @deprecated the ImmutableSortedSet may be modified through the specified {@code sortedSet}
      */
+    @Deprecated
     public static <E> ImmutableSortedSet<E> of(final SortedSet<? extends E> sortedSet) {
         if (sortedSet == null) {
             return empty();
@@ -131,7 +156,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @return
      */
     @Override
-    public SortedSet<E> subSet(E fromElement, E toElement) {
+    public ImmutableSortedSet<E> subSet(E fromElement, E toElement) {
         return of(sortedSet.subSet(fromElement, toElement));
     }
 
@@ -141,7 +166,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @return
      */
     @Override
-    public SortedSet<E> headSet(E toElement) {
+    public ImmutableSortedSet<E> headSet(E toElement) {
         return of(sortedSet.headSet(toElement));
     }
 
@@ -151,7 +176,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @return
      */
     @Override
-    public SortedSet<E> tailSet(E fromElement) {
+    public ImmutableSortedSet<E> tailSet(E fromElement) {
         return of(sortedSet.tailSet(fromElement));
     }
 

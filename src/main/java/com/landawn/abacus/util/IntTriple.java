@@ -17,6 +17,7 @@ package com.landawn.abacus.util;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.u.Optional;
+import com.landawn.abacus.util.stream.IntStream;
 
 /**
  *
@@ -115,6 +116,10 @@ public final class IntTriple implements Immutable {
      */
     public <E extends Exception> Optional<IntTriple> filter(final Throwables.IntTriPredicate<E> predicate) throws E {
         return predicate.test(_1, _2, _3) ? Optional.of(this) : Optional.<IntTriple> empty();
+    }
+
+    public IntStream stream() {
+        return IntStream.of(_1, _2, _3);
     }
 
     @Override

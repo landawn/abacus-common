@@ -902,6 +902,7 @@ class CommonUtil {
      * @param enumClass
      * @return
      */
+    @SuppressWarnings("deprecation")
     public static <E extends Enum<E>> ImmutableList<E> enumListOf(final Class<E> enumClass) {
         ImmutableList<E> enumList = (ImmutableList<E>) enumListPool.get(enumClass);
 
@@ -921,6 +922,7 @@ class CommonUtil {
      * @param enumClass
      * @return
      */
+    @SuppressWarnings("deprecation")
     public static <E extends Enum<E>> ImmutableSet<E> enumSetOf(final Class<E> enumClass) {
         ImmutableSet<E> enumSet = (ImmutableSet<E>) enumSetPool.get(enumClass);
 
@@ -940,6 +942,7 @@ class CommonUtil {
      * @param enumClass
      * @return
      */
+    @SuppressWarnings("deprecation")
     public static <E extends Enum<E>> ImmutableBiMap<E, String> enumMapOf(final Class<E> enumClass) {
         ImmutableBiMap<E, String> enumMap = (ImmutableBiMap<E, String>) enumMapPool.get(enumClass);
 
@@ -8479,6 +8482,7 @@ class CommonUtil {
      * @param toIndex
      * @return the immutable collection<? extends t>
      */
+    @SuppressWarnings("deprecation")
     public static <T> ImmutableList<T> slice(final List<? extends T> c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
@@ -10324,6 +10328,141 @@ class CommonUtil {
         }
 
         return arg;
+    }
+
+    /**
+     * Check if the specified {@code Collection} contains any {@code null} element.
+     *
+     * @param <T>
+     * @param c
+     * @return
+     * @throws IllegalArgumentException if {@code null} element found in {@code c}
+     */
+    public static void checkElementNotNull(final Collection<?> c) {
+        if (N.isNullOrEmpty(c)) {
+            return;
+        }
+
+        for (Object e : c) {
+            if (e == null) {
+                throw new IllegalArgumentException("null element is found in collection");
+            }
+        }
+    }
+
+    /**
+     * Check if the specified {@code Collection} contains any {@code null} element.
+     *
+     * @param <T>
+     * @param c
+     * @param errorMessage
+     * @return
+     * @throws IllegalArgumentException if {@code null} element found in {@code c}
+     */
+    public static void checkElementNotNull(final Collection<?> c, final String errorMessage) {
+        if (N.isNullOrEmpty(c)) {
+            return;
+        }
+
+        for (Object e : c) {
+            if (e == null) {
+                if (isNullErrorMsg(errorMessage)) {
+                    throw new IllegalArgumentException(errorMessage);
+                } else {
+                    throw new IllegalArgumentException("null element is found in " + errorMessage);
+                }
+            }
+        }
+    }
+
+    /**
+     * Check if the specified {@code Map} contains any {@code null} key.
+     *
+     * @param <T>
+     * @param m
+     * @return
+     * @throws IllegalArgumentException if {@code null} key found in {@code m}
+     */
+    public static void checkKeyNotNull(final Map<?, ?> m) {
+        if (N.isNullOrEmpty(m)) {
+            return;
+        }
+
+        for (Object e : m.keySet()) {
+            if (e == null) {
+                throw new IllegalArgumentException("null key is found in Map");
+            }
+        }
+    }
+
+    /**
+     * Check if the specified {@code Map} contains any {@code null} key.
+     *
+     * @param <T>
+     * @param m
+     * @param errorMessage
+     * @return
+     * @throws IllegalArgumentException if {@code null} key found in {@code m}
+     */
+    public static void checkKeyNotNull(final Map<?, ?> m, final String errorMessage) {
+        if (N.isNullOrEmpty(m)) {
+            return;
+        }
+
+        for (Object e : m.keySet()) {
+            if (e == null) {
+                if (isNullErrorMsg(errorMessage)) {
+                    throw new IllegalArgumentException(errorMessage);
+                } else {
+                    throw new IllegalArgumentException("null key is found in " + errorMessage);
+                }
+            }
+        }
+    }
+
+    /**
+     * Check if the specified {@code Map} contains any {@code null} value.
+     *
+     * @param <T>
+     * @param m
+     * @return
+     * @throws IllegalArgumentException if {@code null} value found in {@code m}
+     */
+    public static void checkValueNotNull(final Map<?, ?> m) {
+        if (N.isNullOrEmpty(m)) {
+            return;
+        }
+
+        for (Object e : m.values()) {
+            if (e == null) {
+                throw new IllegalArgumentException("null value is found in Map");
+            }
+        }
+    }
+
+    /**
+     * Check if the specified {@code Map} contains any {@code null} value.
+     *
+     * @param <T>
+     * @param m
+     * @param errorMessage
+     * @return
+     * @throws IllegalArgumentException if {@code null} value found in {@code m}
+     */
+    public static void checkValueNotNull(final Map<?, ?> m, final String errorMessage) {
+        if (N.isNullOrEmpty(m)) {
+            return;
+        }
+
+        for (Object e : m.values()) {
+            if (e == null) {
+                if (isNullErrorMsg(errorMessage)) {
+                    throw new IllegalArgumentException(errorMessage);
+                } else {
+                    throw new IllegalArgumentException("null value is found in " + errorMessage);
+                }
+            }
+        }
     }
 
     /**

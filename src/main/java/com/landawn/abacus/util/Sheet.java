@@ -499,6 +499,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param rowKey
      * @return
      */
+    @SuppressWarnings("deprecation")
     public ImmutableList<E> getRow(Object rowKey) {
         final int columnLength = columnLength();
         final List<E> row = new ArrayList<>(columnLength);
@@ -839,6 +840,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param columnKey
      * @return
      */
+    @SuppressWarnings("deprecation")
     public ImmutableList<E> getColumn(Object columnKey) {
         final int rowLength = rowLength();
         List<E> column = null;

@@ -123,6 +123,7 @@ public enum Percentage {
      * @param endExclusive
      * @return
      */
+    @SuppressWarnings("deprecation")
     public static ImmutableSet<Percentage> range(Percentage startInclusive, Percentage endExclusive) {
         final String key = "(" + startInclusive.str + ", " + endExclusive.str + ")";
         ImmutableSet<Percentage> result = rangePool.get(key);
@@ -150,6 +151,7 @@ public enum Percentage {
      * @param by
      * @return
      */
+    @SuppressWarnings("deprecation")
     public static ImmutableSet<Percentage> range(Percentage startInclusive, Percentage endExclusive, Percentage by) {
         final String key = "(" + startInclusive.str + ", " + endExclusive.str + ", " + by.str + ")";
         ImmutableSet<Percentage> result = rangePool.get(key);
@@ -181,6 +183,7 @@ public enum Percentage {
      * @param endInclusive
      * @return
      */
+    @SuppressWarnings("deprecation")
     public static ImmutableSet<Percentage> rangeClosed(Percentage startInclusive, Percentage endInclusive) {
         final String key = "(" + startInclusive.str + ", " + endInclusive.str + "]";
         ImmutableSet<Percentage> result = rangePool.get(key);
@@ -208,6 +211,7 @@ public enum Percentage {
      * @param by
      * @return
      */
+    @SuppressWarnings("deprecation")
     public static ImmutableSet<Percentage> rangeClosed(Percentage startInclusive, Percentage endInclusive, Percentage by) {
         final String key = "(" + startInclusive.str + ", " + endInclusive.str + ", " + by.str + "]";
         ImmutableSet<Percentage> result = rangePool.get(key);

@@ -123,10 +123,13 @@ public abstract class Collectors {
 
     // ============================================================================================================
 
+    @SuppressWarnings("deprecation")
     static final Function<List<Object>, ImmutableList<Object>> ImmutableList_Finisher = ImmutableList::of;
 
+    @SuppressWarnings("deprecation")
     static final Function<Set<Object>, ImmutableSet<Object>> ImmutableSet_Finisher = ImmutableSet::of;
 
+    @SuppressWarnings("deprecation")
     static final Function<Map<Object, Object>, ImmutableMap<Object, Object>> ImmutableMap_Finisher = ImmutableMap::of;
 
     static final BiConsumer<Multiset<Object>, Object> Multiset_Accumulator = Multiset::add;

@@ -2588,6 +2588,7 @@ public final class Iterables {
          * @param c
          * @return the immutable map
          */
+        @SuppressWarnings("deprecation")
         private static <E> ImmutableMap<E, Integer> indexMap(final Collection<E> c) {
             final Map<E, Integer> map = new LinkedHashMap<>();
 
@@ -2625,7 +2626,7 @@ public final class Iterables {
          */
         SubSet(ImmutableMap<E, Integer> inputSet, int mask) {
             this.inputSet = inputSet;
-            this.elements = ImmutableList.of((E[]) inputSet.keySet().toArray());
+            this.elements = ImmutableList.copyOf(inputSet.keySet());
             this.mask = mask;
         }
 

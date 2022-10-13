@@ -201,9 +201,11 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param map the elements in this <code>map</code> are shared by the returned ImmutableBiMap.
-     * @return
+     * @param map
+     * @return an {@code ImmutableBiMap} backed by the specified {@code map}
+     * @deprecated the ImmutableBiMap may be modified through the specified {@code map}
      */
+    @Deprecated
     public static <K, V> ImmutableBiMap<K, V> of(final BiMap<? extends K, ? extends V> map) {
         if (map == null) {
             return empty();

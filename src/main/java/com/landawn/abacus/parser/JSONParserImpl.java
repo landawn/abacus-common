@@ -3294,7 +3294,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         map2TargetTypeConverterMap.put(AbstractMap.SimpleImmutableEntry.class,
                 t -> N.isNullOrEmpty(t) ? null : new AbstractMap.SimpleImmutableEntry<>(t.entrySet().iterator().next()));
 
-        map2TargetTypeConverterMap.put(ImmutableEntry.class, t -> N.isNullOrEmpty(t) ? null : ImmutableEntry.from(t.entrySet().iterator().next()));
+        map2TargetTypeConverterMap.put(ImmutableEntry.class, t -> N.isNullOrEmpty(t) ? null : ImmutableEntry.copyOf(t.entrySet().iterator().next()));
     }
 
     private static final Map<Class<?>, BiFunction<List<?>, Type<?>, Object>> list2PairTripleConverterMap = new HashMap<>();

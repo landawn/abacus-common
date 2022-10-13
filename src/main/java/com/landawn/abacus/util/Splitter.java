@@ -575,6 +575,7 @@ public final class Splitter {
      * @param source
      * @return
      */
+    @SuppressWarnings("deprecation")
     public ImmutableList<String> splitToImmutableList(final CharSequence source) {
         return ImmutableList.of(split(source));
     }
@@ -587,6 +588,7 @@ public final class Splitter {
      * @param source
      * @return
      */
+    @SuppressWarnings("deprecation")
     public <T> ImmutableList<T> splitToImmutableList(final Class<? extends T> targetType, final CharSequence source) {
         return ImmutableList.of(split(targetType, source));
     }
@@ -1056,6 +1058,7 @@ public final class Splitter {
          * @param source
          * @return
          */
+        @SuppressWarnings("deprecation")
         public ImmutableMap<String, String> splitToImmutableMap(final CharSequence source) {
             return ImmutableMap.of(split(source));
         }
@@ -1069,6 +1072,7 @@ public final class Splitter {
          * @param source
          * @return
          */
+        @SuppressWarnings("deprecation")
         public <K, V> ImmutableMap<K, V> splitToImmutableMap(final Class<K> keyType, final Class<V> valueType, final CharSequence source) {
             return ImmutableMap.of(split(keyType, valueType, source));
         }

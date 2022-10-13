@@ -184,6 +184,7 @@ public class RowDataSet implements DataSet, Cloneable {
      *
      * @return
      */
+    @SuppressWarnings("deprecation")
     @Override
     public ImmutableList<String> columnNameList() {
         // return _columnNameList;
@@ -896,7 +897,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @param columnIndex
      * @return
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({ "unchecked", "rawtypes", "deprecation" })
     @Override
     public <T> ImmutableList<T> getColumn(final int columnIndex) {
         // return (List<T>) _columnList.get(columnIndex);

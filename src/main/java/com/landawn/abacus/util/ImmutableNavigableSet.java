@@ -14,8 +14,6 @@
 
 package com.landawn.abacus.util;
 
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.NavigableSet;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -49,25 +47,51 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
 
     /**
      *
-     * @param <E>
-     * @param a
+     * @param <T>
+     * @param e
      * @return
      */
-    @SafeVarargs
-    public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E... a) {
-        if (N.isNullOrEmpty(a)) {
-            return empty();
-        }
+    public static <T extends Comparable<? super T>> ImmutableNavigableSet<T> just(T e) {
+        return new ImmutableNavigableSet<>(new TreeSet<>(N.asList(e)));
+    }
 
-        return new ImmutableNavigableSet<>(new TreeSet<>(Arrays.asList(a)));
+    public static <T extends Comparable<? super T>> ImmutableNavigableSet<T> of(final T e1) {
+        return new ImmutableNavigableSet<>(new TreeSet<>(N.asList(e1)));
+    }
+
+    public static <T extends Comparable<? super T>> ImmutableNavigableSet<T> of(final T e1, final T e2) {
+        return new ImmutableNavigableSet<>(new TreeSet<>(N.asList(e1, e2)));
+    }
+
+    public static <T extends Comparable<? super T>> ImmutableNavigableSet<T> of(final T e1, final T e2, final T e3) {
+        return new ImmutableNavigableSet<>(new TreeSet<>(N.asList(e1, e2, e3)));
+    }
+
+    public static <T extends Comparable<? super T>> ImmutableNavigableSet<T> of(final T e1, final T e2, final T e3, final T e4) {
+        return new ImmutableNavigableSet<>(new TreeSet<>(N.asList(e1, e2, e3, e4)));
+    }
+
+    public static <T extends Comparable<? super T>> ImmutableNavigableSet<T> of(final T e1, final T e2, final T e3, final T e4, final T e5) {
+        return new ImmutableNavigableSet<>(new TreeSet<>(N.asList(e1, e2, e3, e4, e5)));
+    }
+
+    public static <T extends Comparable<? super T>> ImmutableNavigableSet<T> of(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
+        return new ImmutableNavigableSet<>(new TreeSet<>(N.asList(e1, e2, e3, e4, e5, e6)));
+    }
+
+    public static <T extends Comparable<? super T>> ImmutableNavigableSet<T> of(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6,
+            final T e7) {
+        return new ImmutableNavigableSet<>(new TreeSet<>(N.asList(e1, e2, e3, e4, e5, e6, e7)));
     }
 
     /**
      *
      * @param <E>
-     * @param navigableSet the elements in this <code>Set</code> are shared by the returned ImmutableNavigableSet.
-     * @return
+     * @param navigableSet
+     * @return an {@code ImmutableNavigableSet} backed by the specified {@code navigableSet}
+     * @deprecated the ImmutableNavigableSet may be modified through the specified {@code navigableSet}
      */
+    @Deprecated
     public static <E> ImmutableNavigableSet<E> of(final NavigableSet<? extends E> navigableSet) {
         if (navigableSet == null) {
             return empty();
@@ -145,23 +169,33 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
         return navigableSet.higher(e);
     }
 
+    /**
+     *
+     * @deprecated - UnsupportedOperationException
+     */
+    @Deprecated
     @Override
-    public E pollFirst() {
-        return navigableSet.pollFirst();
+    public E pollFirst() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     *
+     * @deprecated - UnsupportedOperationException
+     */
+    @Deprecated
+    @Override
+    public E pollLast() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public E pollLast() {
-        return navigableSet.pollLast();
-    }
-
-    @Override
-    public NavigableSet<E> descendingSet() {
+    public ImmutableNavigableSet<E> descendingSet() {
         return of(navigableSet.descendingSet());
     }
 
     @Override
-    public Iterator<E> descendingIterator() {
+    public ObjIterator<E> descendingIterator() {
         return ObjIterator.of(navigableSet.descendingIterator());
     }
 
@@ -174,7 +208,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @return
      */
     @Override
-    public NavigableSet<E> subSet(E fromElement, boolean fromInclusive, E toElement, boolean toInclusive) {
+    public ImmutableNavigableSet<E> subSet(E fromElement, boolean fromInclusive, E toElement, boolean toInclusive) {
         return of(navigableSet.subSet(fromElement, fromInclusive, toElement, toInclusive));
     }
 
@@ -185,7 +219,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @return
      */
     @Override
-    public NavigableSet<E> headSet(E toElement, boolean inclusive) {
+    public ImmutableNavigableSet<E> headSet(E toElement, boolean inclusive) {
         return of(navigableSet.headSet(toElement, inclusive));
     }
 
@@ -196,7 +230,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @return
      */
     @Override
-    public NavigableSet<E> tailSet(E fromElement, boolean inclusive) {
+    public ImmutableNavigableSet<E> tailSet(E fromElement, boolean inclusive) {
         return of(navigableSet.tailSet(fromElement, inclusive));
     }
 }

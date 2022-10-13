@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedMap;
@@ -44,6 +45,7 @@ import com.landawn.abacus.util.ImmutableBiMap;
 import com.landawn.abacus.util.ImmutableCollection;
 import com.landawn.abacus.util.ImmutableList;
 import com.landawn.abacus.util.ImmutableMap;
+import com.landawn.abacus.util.ImmutableNavigableMap;
 import com.landawn.abacus.util.ImmutableNavigableSet;
 import com.landawn.abacus.util.ImmutableSet;
 import com.landawn.abacus.util.ImmutableSortedMap;
@@ -186,7 +188,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     static {
         mapOfCreatorAndConvertorForTargetType.put(ImmutableList.class,
                 Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new ArrayList<>(), new Function<Object, Object>() {
-                    @SuppressWarnings("rawtypes")
+                    @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
                         return ImmutableList.of((List) t);
@@ -195,7 +197,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableSet.class,
                 Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new HashSet<>(), new Function<Object, Object>() {
-                    @SuppressWarnings("rawtypes")
+                    @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
                         return ImmutableSet.of((Set) t);
@@ -204,7 +206,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableSortedSet.class,
                 Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeSet<>(), new Function<Object, Object>() {
-                    @SuppressWarnings("rawtypes")
+                    @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
                         return ImmutableSortedSet.of((SortedSet) t);
@@ -213,7 +215,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableNavigableSet.class,
                 Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeSet<>(), new Function<Object, Object>() {
-                    @SuppressWarnings("rawtypes")
+                    @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
                         return ImmutableNavigableSet.of((NavigableSet) t);
@@ -224,7 +226,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableMap.class,
                 Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new HashMap<>(), new Function<Object, Object>() {
-                    @SuppressWarnings("rawtypes")
+                    @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
                         return ImmutableMap.of((Map) t);
@@ -233,7 +235,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableBiMap.class,
                 Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new BiMap<>(), new Function<Object, Object>() {
-                    @SuppressWarnings("rawtypes")
+                    @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
                         return ImmutableBiMap.of((BiMap) t);
@@ -242,10 +244,19 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
 
         mapOfCreatorAndConvertorForTargetType.put(ImmutableSortedMap.class,
                 Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeMap<>(), new Function<Object, Object>() {
-                    @SuppressWarnings("rawtypes")
+                    @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
                         return ImmutableSortedMap.of((SortedMap) t);
+                    }
+                }));
+
+        mapOfCreatorAndConvertorForTargetType.put(ImmutableNavigableMap.class,
+                Tuple.<Function<Class<?>, Object>, Function<Object, Object>> of(t -> new TreeMap<>(), new Function<Object, Object>() {
+                    @SuppressWarnings({ "rawtypes", "deprecation" })
+                    @Override
+                    public Object apply(Object t) {
+                        return ImmutableNavigableMap.of((NavigableMap) t);
                     }
                 }));
 

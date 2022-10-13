@@ -61,10 +61,12 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
         return c;
     }
 
+    @SuppressWarnings("deprecation")
     public ImmutableList<T> toImmutableList() {
         return ImmutableList.of(toCollection(Suppliers.<T> ofList()));
     }
 
+    @SuppressWarnings("deprecation")
     public ImmutableSet<T> toImmutableSet() {
         return ImmutableSet.of(toSet());
     }

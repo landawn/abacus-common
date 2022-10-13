@@ -15,7 +15,6 @@ package com.landawn.abacus.util;
 
 import java.util.Map;
 import java.util.NavigableMap;
-import java.util.NavigableSet;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -245,9 +244,11 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param navigableMap the elements in this <code>map</code> are shared by the returned ImmutableNavigableMap.
-     * @return
+     * @param navigableMap
+     * @return an {@code ImmutableNavigableMap} backed by the specified {@code navigableMap}
+     * @deprecated the ImmutableNavigableMap may be modified through the specified {@code navigableMap}
      */
+    @Deprecated
     public static <K, V> ImmutableNavigableMap<K, V> of(final NavigableMap<? extends K, ? extends V> navigableMap) {
         if (navigableMap == null) {
             return empty();
@@ -293,8 +294,8 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @return
      */
     @Override
-    public Map.Entry<K, V> lowerEntry(K key) {
-        return navigableMap.lowerEntry(key);
+    public ImmutableEntry<K, V> lowerEntry(K key) {
+        return ImmutableEntry.copyOf(navigableMap.lowerEntry(key));
     }
 
     /**
@@ -313,8 +314,8 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @return
      */
     @Override
-    public Map.Entry<K, V> floorEntry(K key) {
-        return navigableMap.floorEntry(key);
+    public ImmutableEntry<K, V> floorEntry(K key) {
+        return ImmutableEntry.copyOf(navigableMap.floorEntry(key));
     }
 
     /**
@@ -333,8 +334,8 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @return
      */
     @Override
-    public Map.Entry<K, V> ceilingEntry(K key) {
-        return navigableMap.ceilingEntry(key);
+    public ImmutableEntry<K, V> ceilingEntry(K key) {
+        return ImmutableEntry.copyOf(navigableMap.ceilingEntry(key));
     }
 
     /**
@@ -353,8 +354,8 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @return
      */
     @Override
-    public Map.Entry<K, V> higherEntry(K key) {
-        return navigableMap.higherEntry(key);
+    public ImmutableEntry<K, V> higherEntry(K key) {
+        return ImmutableEntry.copyOf(navigableMap.higherEntry(key));
     }
 
     /**
@@ -368,37 +369,43 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     }
 
     @Override
-    public Map.Entry<K, V> firstEntry() {
-        return navigableMap.firstEntry();
+    public ImmutableEntry<K, V> firstEntry() {
+        return ImmutableEntry.copyOf(navigableMap.firstEntry());
     }
 
     @Override
-    public Map.Entry<K, V> lastEntry() {
-        return navigableMap.lastEntry();
+    public ImmutableEntry<K, V> lastEntry() {
+        return ImmutableEntry.copyOf(navigableMap.lastEntry());
     }
 
     /**
      * Poll first entry.
      *
      * @return
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
+    @Deprecated
     @Override
-    public Map.Entry<K, V> pollFirstEntry() {
-        return navigableMap.pollFirstEntry();
+    public Map.Entry<K, V> pollFirstEntry() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
     }
 
     /**
      * Poll last entry.
      *
      * @return
+     * @deprecated throws {@code UnsupportedOperationException}
+     * @throws UnsupportedOperationException
      */
+    @Deprecated
     @Override
-    public Map.Entry<K, V> pollLastEntry() {
-        return navigableMap.pollLastEntry();
+    public Map.Entry<K, V> pollLastEntry() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public NavigableMap<K, V> descendingMap() {
+    public ImmutableNavigableMap<K, V> descendingMap() {
         return of(navigableMap.descendingMap());
     }
 
@@ -407,8 +414,9 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *
      * @return
      */
+    @SuppressWarnings("deprecation")
     @Override
-    public NavigableSet<K> navigableKeySet() {
+    public ImmutableNavigableSet<K> navigableKeySet() {
         return ImmutableNavigableSet.of(navigableMap.navigableKeySet());
     }
 
@@ -417,8 +425,9 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *
      * @return
      */
+    @SuppressWarnings("deprecation")
     @Override
-    public NavigableSet<K> descendingKeySet() {
+    public ImmutableNavigableSet<K> descendingKeySet() {
         return ImmutableNavigableSet.of(navigableMap.descendingKeySet());
     }
 
@@ -431,7 +440,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @return
      */
     @Override
-    public NavigableMap<K, V> subMap(K fromKey, boolean fromInclusive, K toKey, boolean toInclusive) {
+    public ImmutableNavigableMap<K, V> subMap(K fromKey, boolean fromInclusive, K toKey, boolean toInclusive) {
         return of(navigableMap.subMap(fromKey, fromInclusive, toKey, toInclusive));
     }
 
@@ -442,7 +451,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @return
      */
     @Override
-    public NavigableMap<K, V> headMap(K toKey, boolean inclusive) {
+    public ImmutableNavigableMap<K, V> headMap(K toKey, boolean inclusive) {
         return of(navigableMap.headMap(toKey, inclusive));
     }
 
@@ -453,7 +462,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @return
      */
     @Override
-    public NavigableMap<K, V> tailMap(K fromKey, boolean inclusive) {
+    public ImmutableNavigableMap<K, V> tailMap(K fromKey, boolean inclusive) {
         return of(navigableMap.tailMap(fromKey, inclusive));
     }
 }
