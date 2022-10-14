@@ -85,19 +85,18 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
     /**
      *
      * @param <E>
-     * @param set
-     * @return an {@code ImmutableSet} backed by the specified {@code set}
-     * @deprecated the ImmutableSet may be modified through the specified {@code set}
+     * @param a
+     * @return
      */
-    @Deprecated
-    public static <E> ImmutableSet<E> of(final Set<? extends E> set) {
-        if (set == null) {
+    @SafeVarargs
+    public static <E> ImmutableSet<E> of(final E... a) {
+        if (N.isNullOrEmpty(a)) {
             return empty();
-        } else if (set instanceof ImmutableSet) {
-            return (ImmutableSet<E>) set;
+        } else if (a.length == 1) {
+            return new ImmutableSet<>(N.asSet(a[0]));
+        } else {
+            return new ImmutableSet<>(N.asSet(N.clone(a)));
         }
-
-        return new ImmutableSet<>(set);
     }
 
     /**
@@ -117,13 +116,31 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
     /**
      *
      * @param <E>
+     * @param set
+     * @return an {@code ImmutableSet} backed by the specified {@code set}
+     * @deprecated the ImmutableSet may be modified through the specified {@code set}
+     */
+    @Deprecated
+    public static <E> ImmutableSet<E> wrap(final Set<? extends E> set) {
+        if (set == null) {
+            return empty();
+        } else if (set instanceof ImmutableSet) {
+            return (ImmutableSet<E>) set;
+        }
+
+        return new ImmutableSet<>(set);
+    }
+
+    /**
+     *
+     * @param <E>
      * @param c
      * @return
      * @deprecated throws {@code UnsupportedOperationException}
      * @throws UnsupportedOperationException
      */
     @Deprecated
-    public static <E> ImmutableCollection<E> of(final Collection<? extends E> c) throws UnsupportedOperationException {
+    public static <E> ImmutableCollection<E> wrap(final Collection<? extends E> c) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 }

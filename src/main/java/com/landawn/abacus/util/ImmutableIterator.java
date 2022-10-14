@@ -63,12 +63,12 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
 
     @SuppressWarnings("deprecation")
     public ImmutableList<T> toImmutableList() {
-        return ImmutableList.of(toCollection(Suppliers.<T> ofList()));
+        return ImmutableList.wrap(toCollection(Suppliers.<T> ofList()));
     }
 
     @SuppressWarnings("deprecation")
     public ImmutableSet<T> toImmutableSet() {
-        return ImmutableSet.of(toSet());
+        return ImmutableSet.wrap(toSet());
     }
 
     // Not efficient for primitive iterators because function is not for primitives.

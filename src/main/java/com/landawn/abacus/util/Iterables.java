@@ -2598,7 +2598,7 @@ public final class Iterables {
                 map.put(e, i++);
             }
 
-            return ImmutableMap.of(map);
+            return ImmutableMap.wrap(map);
         }
     }
 

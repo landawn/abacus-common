@@ -202,23 +202,6 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      * @param <K> the key type
      * @param <V> the value type
      * @param map
-     * @return an {@code ImmutableBiMap} backed by the specified {@code map}
-     * @deprecated the ImmutableBiMap may be modified through the specified {@code map}
-     */
-    @Deprecated
-    public static <K, V> ImmutableBiMap<K, V> of(final BiMap<? extends K, ? extends V> map) {
-        if (map == null) {
-            return empty();
-        }
-
-        return new ImmutableBiMap<>(map);
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
      * @return
      */
     public static <K, V> ImmutableBiMap<K, V> copyOf(final BiMap<? extends K, ? extends V> map) {
@@ -239,8 +222,25 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      * @throws UnsupportedOperationException
      */
     @Deprecated
-    public static <K, V> ImmutableMap<K, V> of(final Map<? extends K, ? extends V> map) throws UnsupportedOperationException {
+    public static <K, V> ImmutableMap<K, V> copyOf(final Map<? extends K, ? extends V> map) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param map
+     * @return an {@code ImmutableBiMap} backed by the specified {@code map}
+     * @deprecated the ImmutableBiMap may be modified through the specified {@code map}
+     */
+    @Deprecated
+    public static <K, V> ImmutableBiMap<K, V> wrap(final BiMap<? extends K, ? extends V> map) {
+        if (map == null) {
+            return empty();
+        }
+
+        return new ImmutableBiMap<>(map);
     }
 
     /**
@@ -253,7 +253,7 @@ public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
      * @throws UnsupportedOperationException
      */
     @Deprecated
-    public static <K, V> ImmutableMap<K, V> copyOf(final Map<? extends K, ? extends V> map) throws UnsupportedOperationException {
+    public static <K, V> ImmutableMap<K, V> wrap(final Map<? extends K, ? extends V> map) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 

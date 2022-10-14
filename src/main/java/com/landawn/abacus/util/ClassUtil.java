@@ -3060,7 +3060,7 @@ public final class ClassUtil {
             }
 
             // for Double-Checked Locking is Broke initialize it before
-            final ImmutableMap<String, Field> unmodifiableFieldMap = ImmutableMap.of(propFieldMap);
+            final ImmutableMap<String, Field> unmodifiableFieldMap = ImmutableMap.wrap(propFieldMap);
             unmodifiableFieldMap.keySet(); // initialize?
             entityDeclaredPropFieldPool.put(cls, unmodifiableFieldMap);
 
@@ -3069,7 +3069,7 @@ public final class ClassUtil {
             tempFieldMap.putAll(propFieldMap);
             entityPropFieldPool.put(cls, tempFieldMap);
 
-            final ImmutableMap<String, Method> unmodifiableGetMethodMap = ImmutableMap.of(propGetMethodMap);
+            final ImmutableMap<String, Method> unmodifiableGetMethodMap = ImmutableMap.wrap(propGetMethodMap);
             unmodifiableGetMethodMap.keySet(); // initialize?
             entityDeclaredPropGetMethodPool.put(cls, unmodifiableGetMethodMap);
 
@@ -3083,7 +3083,7 @@ public final class ClassUtil {
 
             // for Double-Checked Locking is Broke initialize it before
             // put it into map.
-            final ImmutableMap<String, Method> unmodifiableSetMethodMap = ImmutableMap.of(propSetMethodMap);
+            final ImmutableMap<String, Method> unmodifiableSetMethodMap = ImmutableMap.wrap(propSetMethodMap);
             unmodifiableSetMethodMap.keySet(); // initialize?
             entityDeclaredPropSetMethodPool.put(cls, unmodifiableSetMethodMap);
 
@@ -3103,7 +3103,7 @@ public final class ClassUtil {
                 }
             }
 
-            entityDeclaredPropNameListPool.put(cls, ImmutableList.of(propNameList));
+            entityDeclaredPropNameListPool.put(cls, ImmutableList.wrap(propNameList));
 
             if (builderClass != null) {
                 String propName = null;
@@ -3117,7 +3117,7 @@ public final class ClassUtil {
                         builderPropSetMethodMap.put(propName, method);
                     }
 
-                    final ImmutableMap<String, Method> unmodifiableBuilderPropSetMethodMap = ImmutableMap.of(builderPropSetMethodMap);
+                    final ImmutableMap<String, Method> unmodifiableBuilderPropSetMethodMap = ImmutableMap.wrap(builderPropSetMethodMap);
                     unmodifiableBuilderPropSetMethodMap.keySet(); // initialize?
                     entityDeclaredPropSetMethodPool.put(builderClass, unmodifiableBuilderPropSetMethodMap);
 

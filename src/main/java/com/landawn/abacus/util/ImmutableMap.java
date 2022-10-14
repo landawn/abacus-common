@@ -209,25 +209,6 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
      * @param <K> the key type
      * @param <V> the value type
      * @param map
-     * @return an {@code ImmutableMap} backed by the specified {@code map}
-     * @deprecated the ImmutableMap may be modified through the specified {@code map}
-     */
-    @Deprecated
-    public static <K, V> ImmutableMap<K, V> of(final Map<? extends K, ? extends V> map) {
-        if (map == null) {
-            return empty();
-        } else if (map instanceof ImmutableMap) {
-            return (ImmutableMap<K, V>) map;
-        }
-
-        return new ImmutableMap<>(map);
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
      * @return
      */
     public static <K, V> ImmutableMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
@@ -239,6 +220,25 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
                 : ((map instanceof LinkedHashMap || map instanceof SortedMap) ? new LinkedHashMap<>(map) : new HashMap<>(map));
 
         return new ImmutableMap<>(tmp);
+    }
+
+    /**
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param map
+     * @return an {@code ImmutableMap} backed by the specified {@code map}
+     * @deprecated the ImmutableMap may be modified through the specified {@code map}
+     */
+    @Deprecated
+    public static <K, V> ImmutableMap<K, V> wrap(final Map<? extends K, ? extends V> map) {
+        if (map == null) {
+            return empty();
+        } else if (map instanceof ImmutableMap) {
+            return (ImmutableMap<K, V>) map;
+        }
+
+        return new ImmutableMap<>(map);
     }
 
     /**
@@ -516,7 +516,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
         }
 
         public ImmutableMap<K, V> build() {
-            return ImmutableMap.of(map);
+            return ImmutableMap.wrap(map);
         }
     }
 }

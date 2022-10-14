@@ -516,7 +516,7 @@ public final class Sheet<R, C, E> implements Cloneable {
             N.fill(row, 0, columnLength, null);
         }
 
-        return ImmutableList.of(row);
+        return ImmutableList.wrap(row);
     }
 
     /**
@@ -853,7 +853,7 @@ public final class Sheet<R, C, E> implements Cloneable {
             N.fill(column, 0, rowLength, null);
         }
 
-        return ImmutableList.of(column);
+        return ImmutableList.wrap(column);
     }
 
     /**

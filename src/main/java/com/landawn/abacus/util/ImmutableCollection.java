@@ -36,10 +36,12 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     /**
      *
      * @param <E>
-     * @param c the elements in this <code>Collection</code> are shared by the returned ImmutableCollection.
-     * @return
+     * @param c
+     * @return an {@code ImmutableCollection} backed by the specified {@code Collection}
+     * @deprecated the ImmutableCollection may be modified through the specified {@code Collection}
      */
-    public static <E> ImmutableCollection<E> of(final Collection<? extends E> c) {
+    @Deprecated
+    public static <E> ImmutableCollection<E> wrap(final Collection<? extends E> c) {
         if (c == null) {
             return ImmutableList.empty();
         } else if (c instanceof ImmutableCollection) {

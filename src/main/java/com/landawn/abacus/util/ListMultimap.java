@@ -755,7 +755,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
             map.put(entry.getKey(), ImmutableList.copyOf(entry.getValue()));
         }
 
-        return ImmutableMap.of(map);
+        return ImmutableMap.wrap(map);
     }
 
     /**
@@ -772,7 +772,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
             map.put(entry.getKey(), ImmutableList.copyOf(entry.getValue()));
         }
 
-        return ImmutableMap.of(map);
+        return ImmutableMap.wrap(map);
     }
 
     // It won't work.

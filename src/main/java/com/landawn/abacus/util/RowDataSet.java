@@ -189,7 +189,7 @@ public class RowDataSet implements DataSet, Cloneable {
     public ImmutableList<String> columnNameList() {
         // return _columnNameList;
 
-        return ImmutableList.of(_columnNameList);
+        return ImmutableList.wrap(_columnNameList);
     }
 
     /**
@@ -901,7 +901,7 @@ public class RowDataSet implements DataSet, Cloneable {
     @Override
     public <T> ImmutableList<T> getColumn(final int columnIndex) {
         // return (List<T>) _columnList.get(columnIndex);
-        return ImmutableList.of((List) _columnList.get(columnIndex));
+        return ImmutableList.wrap((List) _columnList.get(columnIndex));
     }
 
     /**

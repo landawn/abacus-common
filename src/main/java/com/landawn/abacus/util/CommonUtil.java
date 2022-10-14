@@ -907,7 +907,7 @@ class CommonUtil {
         ImmutableList<E> enumList = (ImmutableList<E>) enumListPool.get(enumClass);
 
         if (enumList == null) {
-            enumList = ImmutableList.of(CommonUtil.asList(enumClass.getEnumConstants()));
+            enumList = ImmutableList.wrap(CommonUtil.asList(enumClass.getEnumConstants()));
 
             enumListPool.put(enumClass, enumList);
         }
@@ -927,7 +927,7 @@ class CommonUtil {
         ImmutableSet<E> enumSet = (ImmutableSet<E>) enumSetPool.get(enumClass);
 
         if (enumSet == null) {
-            enumSet = ImmutableSet.of(EnumSet.allOf(enumClass));
+            enumSet = ImmutableSet.wrap(EnumSet.allOf(enumClass));
 
             enumSetPool.put(enumClass, enumSet);
         }
@@ -955,7 +955,7 @@ class CommonUtil {
                 valueMap.put(e.name(), e);
             }
 
-            enumMap = ImmutableBiMap.of(new BiMap<>(keyMap, valueMap));
+            enumMap = ImmutableBiMap.wrap(new BiMap<>(keyMap, valueMap));
 
             enumMapPool.put(enumClass, enumMap);
         }
@@ -8490,7 +8490,7 @@ class CommonUtil {
             return ImmutableList.empty();
         }
 
-        return ImmutableList.of(((List<T>) c).subList(fromIndex, toIndex));
+        return ImmutableList.wrap(((List<T>) c).subList(fromIndex, toIndex));
     }
 
     /**

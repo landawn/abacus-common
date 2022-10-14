@@ -548,7 +548,7 @@ public final class ParserUtil {
 
         @SuppressWarnings("deprecation")
         EntityInfo(final Class<?> cls) {
-            this.annotations = ImmutableMap.of(getAnnotations(cls));
+            this.annotations = ImmutableMap.wrap(getAnnotations(cls));
             simpleClassName = ClassUtil.getSimpleClassName(cls);
             canonicalClassName = ClassUtil.getCanonicalClassName(cls);
             name = ClassUtil.formalizePropName(simpleClassName);
@@ -728,7 +728,7 @@ public final class ParserUtil {
                 }
             }
 
-            this.propInfoList = ImmutableList.of(N.asList(propInfos));
+            this.propInfoList = ImmutableList.wrap(N.asList(propInfos));
 
             final List<PropInfo> tmpIdPropInfoList = N.filter(propInfos, it -> it.isMarkedToId);
 
@@ -736,11 +736,11 @@ public final class ParserUtil {
                 tmpIdPropInfoList.addAll(N.filter(propInfos, it -> "id".equals(it.name) && idTypeSet.contains(it.clazz)));
             }
 
-            this.idPropInfoList = ImmutableList.of(tmpIdPropInfoList);
-            this.idPropNameList = ImmutableList.of(N.map(idPropInfoList, it -> it.name));
+            this.idPropInfoList = ImmutableList.wrap(tmpIdPropInfoList);
+            this.idPropNameList = ImmutableList.wrap(N.map(idPropInfoList, it -> it.name));
 
-            this.readOnlyIdPropInfoList = ImmutableList.of(N.filter(propInfos, it -> it.isMarkedToReadOnlyId));
-            this.readOnlyIdPropNameList = ImmutableList.of(N.map(readOnlyIdPropInfoList, it -> it.name));
+            this.readOnlyIdPropInfoList = ImmutableList.wrap(N.filter(propInfos, it -> it.isMarkedToReadOnlyId));
+            this.readOnlyIdPropNameList = ImmutableList.wrap(N.map(readOnlyIdPropInfoList, it -> it.name));
 
             String tmpTableName = null;
 
@@ -1042,7 +1042,7 @@ public final class ParserUtil {
                     }
                 }
 
-                propInfoQueue = N.isNullOrEmpty(propInfoQueue) ? N.<PropInfo> emptyList() : ImmutableList.of(propInfoQueue);
+                propInfoQueue = N.isNullOrEmpty(propInfoQueue) ? N.<PropInfo> emptyList() : ImmutableList.wrap(propInfoQueue);
 
                 propInfoQueueMap.put(propName, propInfoQueue);
             }
@@ -1383,7 +1383,7 @@ public final class ParserUtil {
             this.name = propName;
             this.getMethod = getMethod;
             this.setMethod = setMethod; // ClassUtil.getPropSetMethod(declaringClass, propName);
-            this.annotations = ImmutableMap.of(getAnnotations());
+            this.annotations = ImmutableMap.wrap(getAnnotations());
             this.isTransient = annotations.containsKey(Transient.class) || annotations.keySet().stream().anyMatch(it -> it.getSimpleName().equals("Transient"))
                     || (field != null && Modifier.isTransient(field.getModifiers()));
 

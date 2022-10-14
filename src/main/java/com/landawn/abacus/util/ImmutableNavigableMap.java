@@ -244,25 +244,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param navigableMap
-     * @return an {@code ImmutableNavigableMap} backed by the specified {@code navigableMap}
-     * @deprecated the ImmutableNavigableMap may be modified through the specified {@code navigableMap}
-     */
-    @Deprecated
-    public static <K, V> ImmutableNavigableMap<K, V> of(final NavigableMap<? extends K, ? extends V> navigableMap) {
-        if (navigableMap == null) {
-            return empty();
-        } else if (navigableMap instanceof ImmutableNavigableMap) {
-            return (ImmutableNavigableMap<K, V>) navigableMap;
-        }
-
-        return new ImmutableNavigableMap<>(navigableMap);
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <V> the value type
      * @param sortedMap
      * @return
      */
@@ -278,13 +259,32 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *
      * @param <K> the key type
      * @param <V> the value type
+     * @param navigableMap
+     * @return an {@code ImmutableNavigableMap} backed by the specified {@code navigableMap}
+     * @deprecated the ImmutableNavigableMap may be modified through the specified {@code navigableMap}
+     */
+    @Deprecated
+    public static <K, V> ImmutableNavigableMap<K, V> wrap(final NavigableMap<? extends K, ? extends V> navigableMap) {
+        if (navigableMap == null) {
+            return empty();
+        } else if (navigableMap instanceof ImmutableNavigableMap) {
+            return (ImmutableNavigableMap<K, V>) navigableMap;
+        }
+
+        return new ImmutableNavigableMap<>(navigableMap);
+    }
+
+    /**
+     *
+     * @param <K> the key type
+     * @param <V> the value type
      * @param sortedMap
      * @return
      * @deprecated throws {@code UnsupportedOperationException}
      * @throws UnsupportedOperationException
      */
     @Deprecated
-    public static <K, V> ImmutableSortedMap<K, V> of(final SortedMap<? extends K, ? extends V> sortedMap) throws UnsupportedOperationException {
+    public static <K, V> ImmutableSortedMap<K, V> wrap(final SortedMap<? extends K, ? extends V> sortedMap) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -406,7 +406,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
 
     @Override
     public ImmutableNavigableMap<K, V> descendingMap() {
-        return of(navigableMap.descendingMap());
+        return wrap(navigableMap.descendingMap());
     }
 
     /**
@@ -417,7 +417,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     @SuppressWarnings("deprecation")
     @Override
     public ImmutableNavigableSet<K> navigableKeySet() {
-        return ImmutableNavigableSet.of(navigableMap.navigableKeySet());
+        return ImmutableNavigableSet.wrap(navigableMap.navigableKeySet());
     }
 
     /**
@@ -428,7 +428,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
     @SuppressWarnings("deprecation")
     @Override
     public ImmutableNavigableSet<K> descendingKeySet() {
-        return ImmutableNavigableSet.of(navigableMap.descendingKeySet());
+        return ImmutableNavigableSet.wrap(navigableMap.descendingKeySet());
     }
 
     /**
@@ -441,7 +441,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      */
     @Override
     public ImmutableNavigableMap<K, V> subMap(K fromKey, boolean fromInclusive, K toKey, boolean toInclusive) {
-        return of(navigableMap.subMap(fromKey, fromInclusive, toKey, toInclusive));
+        return wrap(navigableMap.subMap(fromKey, fromInclusive, toKey, toInclusive));
     }
 
     /**
@@ -452,7 +452,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      */
     @Override
     public ImmutableNavigableMap<K, V> headMap(K toKey, boolean inclusive) {
-        return of(navigableMap.headMap(toKey, inclusive));
+        return wrap(navigableMap.headMap(toKey, inclusive));
     }
 
     /**
@@ -463,6 +463,6 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      */
     @Override
     public ImmutableNavigableMap<K, V> tailMap(K fromKey, boolean inclusive) {
-        return of(navigableMap.tailMap(fromKey, inclusive));
+        return wrap(navigableMap.tailMap(fromKey, inclusive));
     }
 }

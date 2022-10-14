@@ -58,6 +58,18 @@ public final class ImmutableArray<T> implements Immutable {
         return new ImmutableArray<>(elements == null ? null : elements.clone());
     }
 
+    /**
+     *
+     * @param <T>
+     * @param elements
+     * @return an {@code ImmutableArray} backed by the specified {@code elements}
+     * @deprecated the ImmutableArray may be modified through the specified {@code elements}
+     */
+    @Deprecated
+    public static <T> ImmutableArray<T> wrap(final T[] elements) {
+        return new ImmutableArray<>(elements);
+    }
+
     public int length() {
         return length;
     }
@@ -110,7 +122,7 @@ public final class ImmutableArray<T> implements Immutable {
 
     @SuppressWarnings("deprecation")
     public ImmutableList<T> asList() {
-        return ImmutableList.of(N.asList(elements));
+        return ImmutableList.wrap(N.asList(elements));
     }
 
     @Override

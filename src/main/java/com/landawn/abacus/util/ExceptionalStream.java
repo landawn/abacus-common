@@ -8633,7 +8633,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @SuppressWarnings("deprecation")
     @TerminalOp
     public ImmutableList<T> toImmutableList() throws E {
-        return ImmutableList.of(toList());
+        return ImmutableList.wrap(toList());
     }
 
     /**
@@ -8644,7 +8644,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @SuppressWarnings("deprecation")
     @TerminalOp
     public ImmutableSet<T> toImmutableSet() throws E {
-        return ImmutableSet.of(toSet());
+        return ImmutableSet.wrap(toSet());
     }
 
     /**
@@ -8712,7 +8712,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @TerminalOp
     public <K, V, E2 extends Exception, E3 extends Exception> ImmutableMap<K, V> toImmutableMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
             final Throwables.Function<? super T, ? extends V, E3> valueMapper) throws E, E2, E3, IllegalStateException {
-        return ImmutableMap.of(toMap(keyMapper, valueMapper));
+        return ImmutableMap.wrap(toMap(keyMapper, valueMapper));
     }
 
     /**
@@ -8733,7 +8733,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     public <K, V, E2 extends Exception, E3 extends Exception, E4 extends Exception> ImmutableMap<K, V> toImmutableMap(
             final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
             final Throwables.BinaryOperator<V, E4> mergeFunction) throws E, E2, E3, E4 {
-        return ImmutableMap.of(toMap(keyMapper, valueMapper, mergeFunction));
+        return ImmutableMap.wrap(toMap(keyMapper, valueMapper, mergeFunction));
     }
 
     /**

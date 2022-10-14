@@ -402,7 +402,7 @@ public abstract class Files {
      */
     @SuppressWarnings("deprecation")
     public static ImmutableList<Path> listFiles(Path dir) throws IOException {
-        return ImmutableList.of(com.google.common.io.MoreFiles.listFiles(dir));
+        return ImmutableList.wrap(com.google.common.io.MoreFiles.listFiles(dir));
     }
 
     /**

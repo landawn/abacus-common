@@ -245,25 +245,6 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @param <K> the key type
      * @param <V> the value type
      * @param sortedMap
-     * @return an {@code ImmutableSortedMap} backed by the specified {@code sortedMap}
-     * @deprecated the ImmutableSortedMap may be modified through the specified {@code sortedMap}
-     */
-    @Deprecated
-    public static <K, V> ImmutableSortedMap<K, V> of(final SortedMap<? extends K, ? extends V> sortedMap) {
-        if (sortedMap == null) {
-            return empty();
-        } else if (sortedMap instanceof ImmutableSortedMap) {
-            return (ImmutableSortedMap<K, V>) sortedMap;
-        }
-
-        return new ImmutableSortedMap<>(sortedMap);
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param sortedMap
      * @return
      */
     public static <K, V> ImmutableSortedMap<K, V> copyOf(final SortedMap<? extends K, ? extends V> sortedMap) {
@@ -284,8 +265,27 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @throws UnsupportedOperationException
      */
     @Deprecated
-    public static <K, V> ImmutableMap<K, V> of(final Map<? extends K, ? extends V> map) throws UnsupportedOperationException {
+    public static <K, V> ImmutableMap<K, V> copyOf(final Map<? extends K, ? extends V> map) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param sortedMap
+     * @return an {@code ImmutableSortedMap} backed by the specified {@code sortedMap}
+     * @deprecated the ImmutableSortedMap may be modified through the specified {@code sortedMap}
+     */
+    @Deprecated
+    public static <K, V> ImmutableSortedMap<K, V> wrap(final SortedMap<? extends K, ? extends V> sortedMap) {
+        if (sortedMap == null) {
+            return empty();
+        } else if (sortedMap instanceof ImmutableSortedMap) {
+            return (ImmutableSortedMap<K, V>) sortedMap;
+        }
+
+        return new ImmutableSortedMap<>(sortedMap);
     }
 
     /**
@@ -298,7 +298,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @throws UnsupportedOperationException
      */
     @Deprecated
-    public static <K, V> ImmutableMap<K, V> copyOf(final Map<? extends K, ? extends V> map) throws UnsupportedOperationException {
+    public static <K, V> ImmutableMap<K, V> wrap(final Map<? extends K, ? extends V> map) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -315,7 +315,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      */
     @Override
     public ImmutableSortedMap<K, V> subMap(K fromKey, K toKey) {
-        return of(sortedMap.subMap(fromKey, toKey));
+        return wrap(sortedMap.subMap(fromKey, toKey));
     }
 
     /**
@@ -325,7 +325,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      */
     @Override
     public ImmutableSortedMap<K, V> headMap(K toKey) {
-        return of(sortedMap.headMap(toKey));
+        return wrap(sortedMap.headMap(toKey));
     }
 
     /**
@@ -335,7 +335,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      */
     @Override
     public ImmutableSortedMap<K, V> tailMap(K fromKey) {
-        return of(sortedMap.tailMap(fromKey));
+        return wrap(sortedMap.tailMap(fromKey));
     }
 
     @Override

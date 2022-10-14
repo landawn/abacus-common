@@ -191,7 +191,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
                     @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
-                        return ImmutableList.of((List) t);
+                        return ImmutableList.wrap((List) t);
                     }
                 }));
 
@@ -200,7 +200,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
                     @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
-                        return ImmutableSet.of((Set) t);
+                        return ImmutableSet.wrap((Set) t);
                     }
                 }));
 
@@ -209,7 +209,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
                     @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
-                        return ImmutableSortedSet.of((SortedSet) t);
+                        return ImmutableSortedSet.wrap((SortedSet) t);
                     }
                 }));
 
@@ -218,7 +218,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
                     @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
-                        return ImmutableNavigableSet.of((NavigableSet) t);
+                        return ImmutableNavigableSet.wrap((NavigableSet) t);
                     }
                 }));
 
@@ -229,7 +229,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
                     @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
-                        return ImmutableMap.of((Map) t);
+                        return ImmutableMap.wrap((Map) t);
                     }
                 }));
 
@@ -238,7 +238,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
                     @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
-                        return ImmutableBiMap.of((BiMap) t);
+                        return ImmutableBiMap.wrap((BiMap) t);
                     }
                 }));
 
@@ -247,7 +247,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
                     @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
-                        return ImmutableSortedMap.of((SortedMap) t);
+                        return ImmutableSortedMap.wrap((SortedMap) t);
                     }
                 }));
 
@@ -256,7 +256,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
                     @SuppressWarnings({ "rawtypes", "deprecation" })
                     @Override
                     public Object apply(Object t) {
-                        return ImmutableNavigableMap.of((NavigableMap) t);
+                        return ImmutableNavigableMap.wrap((NavigableMap) t);
                     }
                 }));
 

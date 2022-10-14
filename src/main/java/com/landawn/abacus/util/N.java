@@ -4612,7 +4612,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws IllegalArgumentException
      */
-    public static <T> boolean addAll(final Collection<T> c, final T[] elementsToAdd) throws IllegalArgumentException {
+    public static <T> boolean addAll(final Collection<T> c, final T... elementsToAdd) throws IllegalArgumentException {
         checkArgNotNull(c, "c");
 
         if (N.isNullOrEmpty(elementsToAdd)) {

@@ -89,28 +89,11 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     /**
      *
      * @param <E>
-     * @param list
-     * @return an {@code ImmutableList} backed by the specified {@code list}
-     * @deprecated the ImmutableList may be modified through the specified {@code list}
-     */
-    @Deprecated
-    public static <E> ImmutableList<E> of(final List<? extends E> list) {
-        if (list == null) {
-            return empty();
-        } else if (list instanceof ImmutableList) {
-            return (ImmutableList<E>) list;
-        }
-
-        return new ImmutableList<>(list);
-    }
-
-    /**
-     *
-     * @param <E>
      * @param a
      * @return
      */
-    public static <E> ImmutableList<E> copyOf(final E[] a) {
+    @SafeVarargs
+    public static <E> ImmutableList<E> of(final E... a) {
         if (N.isNullOrEmpty(a)) {
             return empty();
         } else if (a.length == 1) {
@@ -139,13 +122,31 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     /**
      *
      * @param <E>
+     * @param list
+     * @return an {@code ImmutableList} backed by the specified {@code list}
+     * @deprecated the ImmutableList may be modified through the specified {@code list}
+     */
+    @Deprecated
+    public static <E> ImmutableList<E> wrap(final List<? extends E> list) {
+        if (list == null) {
+            return empty();
+        } else if (list instanceof ImmutableList) {
+            return (ImmutableList<E>) list;
+        }
+
+        return new ImmutableList<>(list);
+    }
+
+    /**
+     *
+     * @param <E>
      * @param c
      * @return
      * @deprecated throws {@code UnsupportedOperationException}
      * @throws UnsupportedOperationException
      */
     @Deprecated
-    public static <E> ImmutableCollection<E> of(final Collection<? extends E> c) throws UnsupportedOperationException {
+    public static <E> ImmutableCollection<E> wrap(final Collection<? extends E> c) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -203,7 +204,7 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
      */
     @Override
     public ImmutableList<E> subList(int fromIndex, int toIndex) {
-        return ImmutableList.of(list.subList(fromIndex, toIndex));
+        return ImmutableList.wrap(list.subList(fromIndex, toIndex));
     }
 
     /**

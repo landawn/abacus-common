@@ -87,24 +87,6 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      *
      * @param <E>
-     * @param navigableSet
-     * @return an {@code ImmutableNavigableSet} backed by the specified {@code navigableSet}
-     * @deprecated the ImmutableNavigableSet may be modified through the specified {@code navigableSet}
-     */
-    @Deprecated
-    public static <E> ImmutableNavigableSet<E> of(final NavigableSet<? extends E> navigableSet) {
-        if (navigableSet == null) {
-            return empty();
-        } else if (navigableSet instanceof ImmutableNavigableSet) {
-            return (ImmutableNavigableSet<E>) navigableSet;
-        }
-
-        return new ImmutableNavigableSet<>(navigableSet);
-    }
-
-    /**
-     *
-     * @param <E>
      * @param sortedSet
      * @return
      */
@@ -119,13 +101,31 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     /**
      *
      * @param <E>
+     * @param navigableSet
+     * @return an {@code ImmutableNavigableSet} backed by the specified {@code navigableSet}
+     * @deprecated the ImmutableNavigableSet may be modified through the specified {@code navigableSet}
+     */
+    @Deprecated
+    public static <E> ImmutableNavigableSet<E> wrap(final NavigableSet<? extends E> navigableSet) {
+        if (navigableSet == null) {
+            return empty();
+        } else if (navigableSet instanceof ImmutableNavigableSet) {
+            return (ImmutableNavigableSet<E>) navigableSet;
+        }
+
+        return new ImmutableNavigableSet<>(navigableSet);
+    }
+
+    /**
+     *
+     * @param <E>
      * @param sortedSet
      * @return
      * @deprecated throws {@code UnsupportedOperationException}
      * @throws UnsupportedOperationException
      */
     @Deprecated
-    public static <E> ImmutableSortedSet<E> of(final SortedSet<? extends E> sortedSet) throws UnsupportedOperationException {
+    public static <E> ImmutableSortedSet<E> wrap(final SortedSet<? extends E> sortedSet) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -191,7 +191,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
 
     @Override
     public ImmutableNavigableSet<E> descendingSet() {
-        return of(navigableSet.descendingSet());
+        return wrap(navigableSet.descendingSet());
     }
 
     @Override
@@ -209,7 +209,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      */
     @Override
     public ImmutableNavigableSet<E> subSet(E fromElement, boolean fromInclusive, E toElement, boolean toInclusive) {
-        return of(navigableSet.subSet(fromElement, fromInclusive, toElement, toInclusive));
+        return wrap(navigableSet.subSet(fromElement, fromInclusive, toElement, toInclusive));
     }
 
     /**
@@ -220,7 +220,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      */
     @Override
     public ImmutableNavigableSet<E> headSet(E toElement, boolean inclusive) {
-        return of(navigableSet.headSet(toElement, inclusive));
+        return wrap(navigableSet.headSet(toElement, inclusive));
     }
 
     /**
@@ -231,6 +231,6 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      */
     @Override
     public ImmutableNavigableSet<E> tailSet(E fromElement, boolean inclusive) {
-        return of(navigableSet.tailSet(fromElement, inclusive));
+        return wrap(navigableSet.tailSet(fromElement, inclusive));
     }
 }

@@ -754,7 +754,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
             map.put(entry.getKey(), ImmutableSet.copyOf(entry.getValue()));
         }
 
-        return ImmutableMap.of(map);
+        return ImmutableMap.wrap(map);
     }
 
     /**
@@ -771,7 +771,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
             map.put(entry.getKey(), ImmutableSet.copyOf(entry.getValue()));
         }
 
-        return ImmutableMap.of(map);
+        return ImmutableMap.wrap(map);
     }
 
     // It won't work.

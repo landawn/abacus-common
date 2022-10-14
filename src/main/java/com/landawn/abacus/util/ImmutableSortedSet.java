@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util;
 
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.SortedSet;
@@ -90,24 +89,6 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      *
      * @param <E>
      * @param sortedSet
-     * @return an {@code ImmutableSortedSet} backed by the specified {@code sortedSet}
-     * @deprecated the ImmutableSortedSet may be modified through the specified {@code sortedSet}
-     */
-    @Deprecated
-    public static <E> ImmutableSortedSet<E> of(final SortedSet<? extends E> sortedSet) {
-        if (sortedSet == null) {
-            return empty();
-        } else if (sortedSet instanceof ImmutableSortedSet) {
-            return (ImmutableSortedSet<E>) sortedSet;
-        }
-
-        return new ImmutableSortedSet<>(sortedSet);
-    }
-
-    /**
-     *
-     * @param <E>
-     * @param sortedSet
      * @return
      */
     public static <E> ImmutableSortedSet<E> copyOf(final SortedSet<? extends E> sortedSet) {
@@ -121,14 +102,19 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
     /**
      *
      * @param <E>
-     * @param set
-     * @return
-     * @deprecated throws {@code UnsupportedOperationException}
-     * @throws UnsupportedOperationException
+     * @param sortedSet
+     * @return an {@code ImmutableSortedSet} backed by the specified {@code sortedSet}
+     * @deprecated the ImmutableSortedSet may be modified through the specified {@code sortedSet}
      */
     @Deprecated
-    public static <E> ImmutableSet<E> of(final Set<? extends E> set) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
+    public static <E> ImmutableSortedSet<E> wrap(final SortedSet<? extends E> sortedSet) {
+        if (sortedSet == null) {
+            return empty();
+        } else if (sortedSet instanceof ImmutableSortedSet) {
+            return (ImmutableSortedSet<E>) sortedSet;
+        }
+
+        return new ImmutableSortedSet<>(sortedSet);
     }
 
     /**
@@ -140,7 +126,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @throws UnsupportedOperationException
      */
     @Deprecated
-    public static <E> ImmutableSet<E> copyOf(final Collection<? extends E> set) throws UnsupportedOperationException {
+    public static <E> ImmutableSet<E> wrap(final Set<? extends E> set) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -157,7 +143,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      */
     @Override
     public ImmutableSortedSet<E> subSet(E fromElement, E toElement) {
-        return of(sortedSet.subSet(fromElement, toElement));
+        return wrap(sortedSet.subSet(fromElement, toElement));
     }
 
     /**
@@ -167,7 +153,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      */
     @Override
     public ImmutableSortedSet<E> headSet(E toElement) {
-        return of(sortedSet.headSet(toElement));
+        return wrap(sortedSet.headSet(toElement));
     }
 
     /**
@@ -177,7 +163,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      */
     @Override
     public ImmutableSortedSet<E> tailSet(E fromElement) {
-        return of(sortedSet.tailSet(fromElement));
+        return wrap(sortedSet.tailSet(fromElement));
     }
 
     @Override

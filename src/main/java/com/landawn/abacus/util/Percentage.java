@@ -137,7 +137,7 @@ public enum Percentage {
                 }
             }
 
-            result = ImmutableSet.of(set);
+            result = ImmutableSet.wrap(set);
             rangePool.put(key, result);
         }
 
@@ -170,7 +170,7 @@ public enum Percentage {
                 }
             }
 
-            result = ImmutableSet.of(set);
+            result = ImmutableSet.wrap(set);
             rangePool.put(key, result);
         }
 
@@ -197,7 +197,7 @@ public enum Percentage {
                 }
             }
 
-            result = ImmutableSet.of(set);
+            result = ImmutableSet.wrap(set);
             rangePool.put(key, result);
         }
 
@@ -230,7 +230,7 @@ public enum Percentage {
                 }
             }
 
-            result = ImmutableSet.of(set);
+            result = ImmutableSet.wrap(set);
             rangePool.put(key, result);
         }
 
