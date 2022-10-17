@@ -492,7 +492,7 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
         return new Builder<>(backedMap);
     }
 
-    public static class Builder<K, V> {
+    public static final class Builder<K, V> {
         private final Map<K, V> map;
 
         Builder() {
@@ -510,7 +510,9 @@ public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
         }
 
         public Builder<K, V> putAll(final Map<? extends K, ? extends V> m) {
-            map.putAll(m);
+            if (N.notNullOrEmpty(m)) {
+                map.putAll(m);
+            }
 
             return this;
         }

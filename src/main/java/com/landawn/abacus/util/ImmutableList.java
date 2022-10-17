@@ -15,9 +15,11 @@
 package com.landawn.abacus.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
@@ -284,5 +286,49 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     @Override
     public void sort(Comparator<? super E> c) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
+    }
+
+    public static <E> Builder<E> builder() {
+        return new Builder<>();
+    }
+
+    public static final class Builder<E> {
+        private final List<E> ret = new ArrayList<>();
+
+        public Builder<E> add(final E element) {
+            ret.add(element);
+
+            return this;
+        }
+
+        public Builder<E> add(final E... elements) {
+            if (N.notNullOrEmpty(elements)) {
+                ret.addAll(Arrays.asList(elements));
+            }
+
+            return this;
+        }
+
+        public Builder<E> addAll(final Collection<? extends E> c) {
+            if (N.notNullOrEmpty(c)) {
+                ret.addAll(c);
+            }
+
+            return this;
+        }
+
+        public Builder<E> addAll(final Iterator<? extends E> iter) {
+            if (iter != null) {
+                while (iter.hasNext()) {
+                    ret.add(iter.next());
+                }
+            }
+
+            return this;
+        }
+
+        public ImmutableList<E> build() {
+            return new ImmutableList<>(ret);
+        }
     }
 }

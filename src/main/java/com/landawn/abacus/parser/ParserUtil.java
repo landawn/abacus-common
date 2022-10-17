@@ -376,7 +376,7 @@ public final class ParserUtil {
         return result;
     }
 
-    static String[] getAlias(final Field field) {
+    static String[] getAliases(final Field field) {
         String[] alias = null;
 
         if (field != null) {
@@ -673,10 +673,10 @@ public final class ParserUtil {
                     }
                 }
 
-                final String[] alias = getAlias(propInfo.field);
+                final ImmutableList<String> aliases = propInfo.aliases;
 
-                if (N.notNullOrEmpty(alias)) {
-                    for (String str : alias) {
+                if (N.notNullOrEmpty(aliases)) {
+                    for (String str : aliases) {
                         if (propInfoMap.containsKey(str)) {
                             throw new IllegalArgumentException("Can't set alias: " + str + " for property/field: " + propInfo.field + " because " + str
                                     + " is a property/field name in class: " + cls);
@@ -868,6 +868,30 @@ public final class ParserUtil {
         }
 
         /**
+         * Gets the prop info.
+         *
+         * @param propInfoFromOtherEntity
+         * @return
+         */
+        public PropInfo getPropInfo(PropInfo propInfoFromOtherEntity) {
+            if (propInfoFromOtherEntity.aliases.isEmpty()) {
+                return getPropInfo(propInfoFromOtherEntity.name);
+            } else {
+                PropInfo ret = getPropInfo(propInfoFromOtherEntity.name);
+
+                if (ret == null) {
+                    for (String alias : propInfoFromOtherEntity.aliases) {
+                        ret = getPropInfo(alias);
+
+                        break;
+                    }
+                }
+
+                return ret;
+            }
+        }
+
+        /**
          * Gets the prop value.
          *
          * @param <T>
@@ -973,6 +997,31 @@ public final class ParserUtil {
             }
 
             return true;
+        }
+
+        public void setPropValue(final Object obj, final PropInfo propInfoFromOtherEntity, final Object propValue) {
+            setPropValue(obj, propInfoFromOtherEntity, propValue, false);
+        }
+
+        public boolean setPropValue(final Object obj, final PropInfo propInfoFromOtherEntity, final Object propValue, final boolean ignoreUnmatchedProperty) {
+            if (propInfoFromOtherEntity.aliases.isEmpty()) {
+                return setPropValue(obj, propInfoFromOtherEntity.name, propValue, ignoreUnmatchedProperty);
+            } else {
+                if (!setPropValue(obj, propInfoFromOtherEntity.name, propValue, true)) {
+                    for (String alias : propInfoFromOtherEntity.aliases) {
+                        if (setPropValue(obj, alias, propValue, true)) {
+                            return true;
+                        }
+                    }
+                }
+
+                if (!ignoreUnmatchedProperty) {
+                    throw new RuntimeException(
+                            "No property method found with property name: " + propInfoFromOtherEntity.name + " in class: " + clazz.getCanonicalName());
+                }
+
+                return false;
+            }
         }
 
         /**
@@ -1271,6 +1320,8 @@ public final class ParserUtil {
 
         public final String name;
 
+        public final ImmutableList<String> aliases;
+
         public final Class<Object> clazz;
 
         public final Type<Object> type;
@@ -1337,6 +1388,7 @@ public final class ParserUtil {
         PropInfo(String propName) {
             this.declaringClass = null;
             this.name = propName;
+            this.aliases = ImmutableList.empty();
             field = null;
             getMethod = null;
             setMethod = null;
@@ -1381,6 +1433,7 @@ public final class ParserUtil {
             this.declaringClass = (Class<Object>) (field != null ? field.getDeclaringClass() : getMethod.getDeclaringClass());
             this.field = field;
             this.name = propName;
+            this.aliases = ImmutableList.of(getAliases(field));
             this.getMethod = getMethod;
             this.setMethod = setMethod; // ClassUtil.getPropSetMethod(declaringClass, propName);
             this.annotations = ImmutableMap.wrap(getAnnotations());
@@ -2409,7 +2462,7 @@ public final class ParserUtil {
     //                }
     //            };
     //
-    //            recordInfo = new RecordInfo<>(recordClass, entityInfo, creator, ImmutableList.copyOf(map.keySet()), ImmutableMap.of(map));
+    //            recordInfo = new RecordInfo<>(recordClass, entityInfo, creator, ImmutableList.copyOf(map.keySet()), ImmutableMap.wrap(map));
     //
     //            recordInfoMap.put(recordClass, recordInfo);
     //        }

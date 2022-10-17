@@ -24,7 +24,7 @@ import java.util.Map;
  * @author Haiyang Li
  * @since 0.8
  */
-public enum CalendarUnit {
+public enum CalendarField {
     /**
      * it has the same int value as {@code Calendar.MILLISECOND}
      *
@@ -50,7 +50,7 @@ public enum CalendarUnit {
      */
     HOUR(Calendar.HOUR_OF_DAY),
     /**
-     * it has the same int value as {@code Calendar.DAY_OF_MONTH}
+     * it has the same int value (5) as {@code Calendar.DATE} and  {@code Calendar.DAY_OF_MONTH}
      *
      * @see Calendar#DAY_OF_MONTH
      */
@@ -74,18 +74,18 @@ public enum CalendarUnit {
      */
     YEAR(Calendar.YEAR);
 
-    private static Map<Integer, CalendarUnit> m = new HashMap<>();
+    private static Map<Integer, CalendarField> m = new HashMap<>();
 
     static {
-        for (CalendarUnit value : CalendarUnit.values()) {
-            m.put(value.intValue, value);
+        for (CalendarField value : CalendarField.values()) {
+            m.put(value.value, value);
         }
     }
 
-    private int intValue;
+    private int value;
 
-    CalendarUnit(int intValue) {
-        this.intValue = intValue;
+    CalendarField(int value) {
+        this.value = value;
     }
 
     /**
@@ -93,8 +93,8 @@ public enum CalendarUnit {
      * @param intValue
      * @return
      */
-    public static CalendarUnit valueOf(int intValue) {
-        CalendarUnit result = m.get(intValue);
+    public static CalendarField valueOf(int intValue) {
+        CalendarField result = m.get(intValue);
 
         if (result == null) {
             throw new IllegalArgumentException("No defined CalendarUnit mapping to value: " + intValue);
@@ -103,37 +103,7 @@ public enum CalendarUnit {
         return result;
     }
 
-    public int intValue() {
-        return intValue;
-    }
-
-    /**
-     *
-     * @param amount
-     * @return
-     */
-    public long toMillis(long amount) {
-        switch (this) {
-            case MILLISECOND:
-                return amount;
-
-            case SECOND:
-                return amount * 1000L;
-
-            case MINUTE:
-                return amount * 60 * 1000L;
-
-            case HOUR:
-                return amount * 60 * 60 * 1000L;
-
-            case DAY:
-                return amount * 24 * 60 * 60 * 1000L;
-
-            case WEEK:
-                return amount * 7 * 24 * 60 * 60 * 1000L;
-
-            default:
-                throw new IllegalArgumentException("Unsupported unit: " + this);
-        }
+    public int value() {
+        return value;
     }
 }

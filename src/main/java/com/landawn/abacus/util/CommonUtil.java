@@ -5959,7 +5959,7 @@ class CommonUtil {
 
         if (targetType.isEntity()) {
             if (srcType.isEntity()) {
-                return copy(targetType.clazz(), obj);
+                return copy(obj, targetType.clazz());
             } else if (srcType.isMap()) {
                 return Maps.map2Entity(targetType.clazz(), (Map<String, Object>) obj);
             }
@@ -6438,7 +6438,7 @@ class CommonUtil {
 
         if (obj == null) {
             if (ClassUtil.isEntity(targetClass)) {
-                return copy(targetClass, obj);
+                return copy(obj, targetClass);
             } else {
                 return newInstance(targetClass);
             }
@@ -6480,7 +6480,7 @@ class CommonUtil {
             return null;
         }
 
-        return copy((Class<T>) entity.getClass(), entity);
+        return copy(entity, (Class<T>) entity.getClass());
     }
 
     /**
@@ -6495,37 +6495,37 @@ class CommonUtil {
             return null;
         }
 
-        return copy((Class<T>) entity.getClass(), entity, selectPropNames);
+        return copy(entity, selectPropNames, (Class<T>) entity.getClass());
     }
 
     /**
      *
-     * @param <T>
-     * @param targetClass
      * @param entity
+     * @param targetClass
+     * @param <T>
      * @return a new instance of {@code targetClass} even if {@code entity} is {@code null}.
      * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
-    public static <T> T copy(final Class<? extends T> targetClass, final Object entity) throws IllegalArgumentException {
-        return copy(targetClass, entity, null);
+    public static <T> T copy(final Object entity, final Class<? extends T> targetClass) throws IllegalArgumentException {
+        return copy(entity, null, targetClass);
     }
 
     /**
      * Returns a new created instance of the specified {@code cls} and set with
      * same properties retrieved by 'getXXX' method in the specified
      * {@code entity}.
-     *
-     * @param <T>
-     * @param targetClass a Java Object what allows access to properties using getter
-     *            and setter methods.
      * @param entity a Java Object what allows access to properties using getter
      *            and setter methods.
      * @param selectPropNames
+     * @param targetClass a Java Object what allows access to properties using getter
+     *            and setter methods.
+     *
+     * @param <T>
      * @return a new instance of {@code targetClass} even if {@code entity} is {@code null}.
      * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
     @SuppressWarnings({ "unchecked" })
-    public static <T> T copy(final Class<? extends T> targetClass, final Object entity, final Collection<String> selectPropNames)
+    public static <T> T copy(final Object entity, final Collection<String> selectPropNames, final Class<? extends T> targetClass)
             throws IllegalArgumentException {
         N.checkArgNotNull(targetClass, "targetClass");
 
@@ -6561,17 +6561,17 @@ class CommonUtil {
 
     /**
      *
-     * @param <T>
-     * @param targetClass
      * @param entity
      * @param ignoreUnmatchedProperty
      * @param ignorePropNames
+     * @param targetClass
+     * @param <T>
      * @return a new instance of {@code targetClass} even if {@code entity} is {@code null}.
      * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
     @SuppressWarnings({ "unchecked" })
-    public static <T> T copy(final Class<? extends T> targetClass, final Object entity, final boolean ignoreUnmatchedProperty,
-            final Set<String> ignorePropNames) throws IllegalArgumentException {
+    public static <T> T copy(final Object entity, final boolean ignoreUnmatchedProperty, final Set<String> ignorePropNames,
+            final Class<? extends T> targetClass) throws IllegalArgumentException {
         N.checkArgNotNull(targetClass, "targetClass");
 
         if (entity != null) {
@@ -6649,15 +6649,21 @@ class CommonUtil {
             Object propValue = null;
 
             for (PropInfo propInfo : srcEntityInfo.propInfoList) {
-                propValue = srcEntityInfo.getPropValue(sourceEntity, propInfo.name);
+                propValue = propInfo.getPropValue(sourceEntity);
 
                 if (InternalUtil.notNullOrDefault(propValue)) {
-                    targetEntityInfo.setPropValue(targetEntity, propInfo.name, propValue, ignoreUnmatchedProperty);
+                    targetEntityInfo.setPropValue(targetEntity, propInfo, propValue, ignoreUnmatchedProperty);
                 }
             }
         } else {
+            PropInfo propInfo = null;
+            Object propValue = null;
+
             for (String propName : selectPropNames) {
-                targetEntityInfo.setPropValue(targetEntity, propName, srcEntityInfo.getPropValue(sourceEntity, propName), ignoreUnmatchedProperty);
+                propInfo = srcEntityInfo.getPropInfo(propName);
+                propValue = propInfo.getPropValue(sourceEntity);
+
+                targetEntityInfo.setPropValue(targetEntity, propInfo, propValue, ignoreUnmatchedProperty);
             }
         }
 
@@ -6693,7 +6699,7 @@ class CommonUtil {
             propValue = propInfo.getPropValue(sourceEntity);
 
             if (objFilter.test(propInfo.name, propValue)) {
-                targetEntityInfo.setPropValue(targetEntity, propInfo.name, propValue, false);
+                targetEntityInfo.setPropValue(targetEntity, propInfo, propValue, false);
             }
         }
 
@@ -6738,7 +6744,7 @@ class CommonUtil {
                 propValue = propInfo.getPropValue(sourceEntity);
 
                 if (InternalUtil.notNullOrDefault(propValue)) {
-                    targetEntityInfo.setPropValue(targetEntity, propInfo.name, propValue, ignoreUnmatchedProperty);
+                    targetEntityInfo.setPropValue(targetEntity, propInfo, propValue, ignoreUnmatchedProperty);
                 }
             }
         }
@@ -6785,11 +6791,11 @@ class CommonUtil {
         final boolean ignoreUnmatchedProperty = selectPropNames == null;
 
         if (selectPropNames == null) {
-            Object propValue = null;
             PropInfo targetPropInfo = null;
+            Object propValue = null;
 
             for (PropInfo propInfo : srcEntityInfo.propInfoList) {
-                targetPropInfo = targetEntityInfo.getPropInfo(propInfo.name);
+                targetPropInfo = targetEntityInfo.getPropInfo(propInfo);
 
                 if (targetPropInfo == null) {
                     //    if (!ignoreUnmatchedProperty) {
@@ -6802,11 +6808,13 @@ class CommonUtil {
                 }
             }
         } else {
-            Object propValue = null;
             PropInfo targetPropInfo = null;
+            PropInfo propInfo = null;
+            Object propValue = null;
 
             for (String propName : selectPropNames) {
-                targetPropInfo = targetEntityInfo.getPropInfo(propName);
+                propInfo = srcEntityInfo.getPropInfo(propName);
+                targetPropInfo = targetEntityInfo.getPropInfo(propInfo);
 
                 if (targetPropInfo == null) {
                     if (!ignoreUnmatchedProperty) {
@@ -6855,7 +6863,7 @@ class CommonUtil {
             propValue = propInfo.getPropValue(sourceEntity);
 
             if (objFilter.test(propInfo.name, propValue)) {
-                targetPropInfo = targetEntityInfo.getPropInfo(propInfo.name);
+                targetPropInfo = targetEntityInfo.getPropInfo(propInfo);
 
                 if (targetPropInfo == null) {
                     throw new IllegalArgumentException("No property found by name: " + propInfo.name + " in target entity class: " + targetEntity.getClass());
@@ -6890,12 +6898,12 @@ class CommonUtil {
         final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
         final BinaryOperator<Object> objMergeFunc = (BinaryOperator<Object>) mergeFunc;
 
-        Object propValue = null;
         PropInfo targetPropInfo = null;
+        Object propValue = null;
 
         for (PropInfo propInfo : srcEntityInfo.propInfoList) {
             if (ignorePropNames == null || !ignorePropNames.contains(propInfo.name)) {
-                targetPropInfo = targetEntityInfo.getPropInfo(propInfo.name);
+                targetPropInfo = targetEntityInfo.getPropInfo(propInfo);
 
                 if (targetPropInfo == null) {
                     if (!ignoreUnmatchedProperty) {

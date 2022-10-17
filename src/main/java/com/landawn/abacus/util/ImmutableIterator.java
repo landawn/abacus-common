@@ -129,7 +129,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
     //     * @throws E the e
     //     */
     //    public <K, E extends Exception> ImmutableMap<K, T> toImmutableMap(final Try.Function<? super T, K, E> keyMapper) throws E {
-    //        return ImmutableMap.of(toMap(keyMapper));
+    //        return ImmutableMap.wrap(toMap(keyMapper));
     //    }
     //
     //    /**
@@ -146,7 +146,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
     //     */
     //    public <K, V, E extends Exception, E2 extends Exception> ImmutableMap<K, V> toImmutableMap(final Try.Function<? super T, K, E> keyMapper,
     //            final Try.Function<? super T, ? extends V, E2> valueExtractor) throws E, E2 {
-    //        return ImmutableMap.of(toMap(keyMapper, valueExtractor));
+    //        return ImmutableMap.wrap(toMap(keyMapper, valueExtractor));
     //    }
     //
     //    /**
@@ -166,6 +166,6 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
     //    public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> ImmutableMap<K, V> toImmutableMap(
     //            final Try.Function<? super T, K, E> keyMapper, final Try.Function<? super T, ? extends V, E2> valueExtractor,
     //            final Supplier<? extends M> mapSupplier) throws E, E2 {
-    //        return ImmutableMap.of(toMap(keyMapper, valueExtractor, mapSupplier));
+    //        return ImmutableMap.wrap(toMap(keyMapper, valueExtractor, mapSupplier));
     //    }
 }

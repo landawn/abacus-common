@@ -14,8 +14,11 @@
 
 package com.landawn.abacus.util;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.SortedSet;
@@ -142,5 +145,49 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
     @Deprecated
     public static <E> ImmutableCollection<E> wrap(final Collection<? extends E> c) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
+    }
+
+    public static <E> Builder<E> builder() {
+        return new Builder<>();
+    }
+
+    public static final class Builder<E> {
+        private final Set<E> ret = new HashSet<>();
+
+        public Builder<E> add(final E element) {
+            ret.add(element);
+
+            return this;
+        }
+
+        public Builder<E> add(final E... elements) {
+            if (N.notNullOrEmpty(elements)) {
+                ret.addAll(Arrays.asList(elements));
+            }
+
+            return this;
+        }
+
+        public Builder<E> addAll(final Collection<? extends E> c) {
+            if (N.notNullOrEmpty(c)) {
+                ret.addAll(c);
+            }
+
+            return this;
+        }
+
+        public Builder<E> addAll(final Iterator<? extends E> iter) {
+            if (iter != null) {
+                while (iter.hasNext()) {
+                    ret.add(iter.next());
+                }
+            }
+
+            return this;
+        }
+
+        public ImmutableSet<E> build() {
+            return new ImmutableSet<>(ret);
+        }
     }
 }
