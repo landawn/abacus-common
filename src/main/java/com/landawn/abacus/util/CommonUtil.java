@@ -11172,8 +11172,8 @@ class CommonUtil {
      * @param a4
      * @param b4
      * @return
-     * @deprecated please use {@code Chain.ComparisonChain}
-     * @see Chain#compare(Comparable, Comparable)
+     * @deprecated please use {@code Builder.ComparisonBuilder}
+     * @see Builder#compare(Comparable, Comparable)
      */
     @Deprecated
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>> int compare(T1 a1, T1 b1, T2 a2,
@@ -11211,8 +11211,8 @@ class CommonUtil {
      * @param a5
      * @param b5
      * @return
-     * @deprecated please use {@code Chain.ComparisonChain}
-     * @see Chain#compare(Comparable, Comparable)
+     * @deprecated please use {@code Builder.ComparisonBuilder}
+     * @see Builder#compare(Comparable, Comparable)
      */
     @Deprecated
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>, T5 extends Comparable<T5>> int compare(
@@ -11255,8 +11255,8 @@ class CommonUtil {
      * @param a6
      * @param b6
      * @return
-     * @deprecated please use {@code Chain.ComparisonChain}
-     * @see Chain#compare(Comparable, Comparable)
+     * @deprecated please use {@code Builder.ComparisonBuilder}
+     * @see Builder#compare(Comparable, Comparable)
      */
     @Deprecated
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>, T5 extends Comparable<T5>, T6 extends Comparable<T6>> int compare(
@@ -11304,8 +11304,8 @@ class CommonUtil {
      * @param a7
      * @param b7
      * @return
-     * @deprecated please use {@code Chain.ComparisonChain}
-     * @see Chain#compare(Comparable, Comparable)
+     * @deprecated please use {@code Builder.ComparisonBuilder}
+     * @see Builder#compare(Comparable, Comparable)
      */
     @Deprecated
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>, T5 extends Comparable<T5>, T6 extends Comparable<T6>, T7 extends Comparable<T7>> int compare(
@@ -12631,6 +12631,96 @@ class CommonUtil {
 
         for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
             if (((a[i] == null || b[j] == null) ? (a != b) : !a[i].equalsIgnoreCase(b[j]))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     *
+     * @param entity1
+     * @param entity2
+     * @return
+     * @see MapDifference#of(Object, Object)
+     */
+    public static boolean equalsByCommonProps(final Object entity1, final Object entity2) {
+        N.checkArgNotNull(entity1);
+        N.checkArgNotNull(entity2);
+        N.checkArgument(ClassUtil.isEntity(entity1.getClass()), "{} is not an entity class", entity1.getClass());
+        N.checkArgument(ClassUtil.isEntity(entity2.getClass()), "{} is not an entity class", entity2.getClass());
+
+        EntityInfo entityInfo1 = ParserUtil.getEntityInfo(entity1.getClass());
+        EntityInfo entityInfo2 = ParserUtil.getEntityInfo(entity2.getClass());
+
+        PropInfo propInfo2 = null;
+        Object propValue1 = null;
+
+        for (PropInfo propInfo1 : entityInfo1.propInfoList) {
+            propInfo2 = entityInfo2.getPropInfo(propInfo1);
+
+            if (propInfo2 != null) {
+                propValue1 = propInfo1.getPropValue(entity1);
+
+                if (!equals(propValue1, propInfo2.getPropValue(entity2))) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     *
+     * @param entity1
+     * @param entity2
+     * @param propNamesToCompare
+     * @return
+     * @see MapDifference#of(Object, Object)
+     */
+    public static boolean equalsByCommonProps(final Object entity1, final Object entity2, final Collection<String> propNamesToCompare) {
+        N.checkArgNotNull(entity1);
+        N.checkArgNotNull(entity2);
+        N.checkArgument(ClassUtil.isEntity(entity1.getClass()), "{} is not an entity class", entity1.getClass());
+        N.checkArgument(ClassUtil.isEntity(entity2.getClass()), "{} is not an entity class", entity2.getClass());
+
+        if (N.isNullOrEmpty(propNamesToCompare)) {
+            return true;
+        }
+
+        EntityInfo entityInfo1 = ParserUtil.getEntityInfo(entity1.getClass());
+        EntityInfo entityInfo2 = ParserUtil.getEntityInfo(entity2.getClass());
+
+        PropInfo propInfo1 = null;
+        PropInfo propInfo2 = null;
+        Object propValue1 = null;
+
+        for (String propName : propNamesToCompare) {
+            propInfo1 = entityInfo1.getPropInfo(propName);
+
+            if (propInfo1 != null) {
+                propInfo2 = entityInfo2.getPropInfo(propInfo1);
+
+                if (propInfo2 == null) {
+                    throw new IllegalArgumentException("No field found in class: " + entity2.getClass() + " by name: " + propName);
+                }
+            } else {
+                propInfo2 = entityInfo2.getPropInfo(propName);
+
+                if (propInfo2 != null) {
+                    propInfo1 = entityInfo1.getPropInfo(propInfo2);
+                }
+
+                if (propInfo1 == null) {
+                    throw new IllegalArgumentException("No field found in class: " + entity1.getClass() + " by name: " + propName);
+                }
+            }
+
+            propValue1 = propInfo1.getPropValue(entity1);
+
+            if (!equals(propValue1, propInfo2.getPropValue(entity2))) {
                 return false;
             }
         }

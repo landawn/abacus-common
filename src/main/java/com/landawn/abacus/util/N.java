@@ -23235,6 +23235,217 @@ public final class N extends CommonUtil {
 
     /**
      *
+     * @param <K>
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param keyExtractor
+     * @param mapSupplier
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <K, T, E extends Exception> Map<K, List<T>> groupBy(final T[] a, final Throwables.Function<? super T, ? extends K, E> keyExtractor) throws E {
+        return groupBy(a, keyExtractor, Suppliers.ofMap());
+    }
+
+    /**
+     *
+     * @param <K>
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param keyExtractor
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <K, T, M extends Map<K, List<T>>, E extends Exception> M groupBy(final T[] a,
+            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier) throws E {
+        return groupBy(a, 0, N.len(a), keyExtractor, mapSupplier);
+    }
+
+    /**
+     *
+     * @param <K>
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param keyExtractor
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <K, T, E extends Exception> Map<K, List<T>> groupBy(final T[] a, final int fromIndex, final int toIndex,
+            final Throwables.Function<? super T, ? extends K, E> keyExtractor) throws E {
+        return groupBy(a, fromIndex, toIndex, keyExtractor, Suppliers.ofMap());
+    }
+
+    /**
+     *
+     * @param <K>
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param keyExtractor
+     * @param mapSupplier
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <K, T, M extends Map<K, List<T>>, E extends Exception> M groupBy(final T[] a, final int fromIndex, final int toIndex,
+            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier) throws E {
+        final int length = len(a);
+
+        N.checkFromToIndex(fromIndex, toIndex, length);
+        N.checkArgNotNull(keyExtractor, "keyExtractor");
+        N.checkArgNotNull(mapSupplier, "mapSupplier");
+
+        final M ret = mapSupplier.get();
+        K key = null;
+        List<T> val = null;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            key = keyExtractor.apply(a[i]);
+            val = ret.get(key);
+
+            if (val == null) {
+                val = new ArrayList<>();
+
+                ret.put(key, val);
+            }
+
+            val.add(a[i]);
+        }
+
+        return ret;
+    }
+
+    /**
+     *
+     * @param <K>
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param keyExtractor
+     * @param mapSupplier
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <K, T, E extends Exception> Map<K, List<T>> groupBy(final Iterable<? extends T> iter,
+            final Throwables.Function<? super T, ? extends K, E> keyExtractor) throws E {
+        return groupBy(iter, keyExtractor, Suppliers.ofMap());
+    }
+
+    /**
+     *
+     * @param <K>
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param keyExtractor
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <K, T, M extends Map<K, List<T>>, E extends Exception> M groupBy(final Iterable<? extends T> iter,
+            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier) throws E {
+        N.checkArgNotNull(keyExtractor, "keyExtractor");
+        N.checkArgNotNull(mapSupplier, "mapSupplier");
+
+        final M ret = mapSupplier.get();
+
+        if (iter == null) {
+            return ret;
+        }
+
+        K key = null;
+        List<T> val = null;
+
+        for (T e : iter) {
+            key = keyExtractor.apply(e);
+            val = ret.get(key);
+
+            if (val == null) {
+                val = new ArrayList<>();
+
+                ret.put(key, val);
+            }
+
+            val.add(e);
+        }
+
+        return ret;
+    }
+
+    /**
+     *
+     * @param <K>
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param keyExtractor
+     * @param mapSupplier
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <K, T, E extends Exception> Map<K, List<T>> groupBy(final Iterator<? extends T> iter,
+            final Throwables.Function<? super T, ? extends K, E> keyExtractor) throws E {
+        return groupBy(iter, keyExtractor, Suppliers.ofMap());
+    }
+
+    /**
+     *
+     * @param <K>
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param keyExtractor
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <K, T, M extends Map<K, List<T>>, E extends Exception> M groupBy(final Iterator<? extends T> iter,
+            final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier) throws E {
+        N.checkArgNotNull(keyExtractor, "keyExtractor");
+        N.checkArgNotNull(mapSupplier, "mapSupplier");
+
+        final M ret = mapSupplier.get();
+
+        if (iter == null) {
+            return ret;
+        }
+
+        K key = null;
+        List<T> val = null;
+        T e = null;
+
+        while (iter.hasNext()) {
+            e = iter.next();
+
+            key = keyExtractor.apply(e);
+            val = ret.get(key);
+
+            if (val == null) {
+                val = new ArrayList<>();
+
+                ret.put(key, val);
+            }
+
+            val.add(e);
+        }
+
+        return ret;
+    }
+
+    /**
+     *
      * @param <T>
      * @param a
      * @return

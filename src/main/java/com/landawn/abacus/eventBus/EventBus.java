@@ -41,6 +41,7 @@ import com.landawn.abacus.util.MoreExecutors;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.ThreadMode;
 
+// DO NOT try to move me out of this project. Somebody tried and gave up then. I'm small. I'm stay here.
 /**
  * <pre>
  * <code>

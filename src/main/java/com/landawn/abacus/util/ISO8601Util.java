@@ -35,13 +35,13 @@ import java.util.TimeZone;
  */
 public final class ISO8601Util {
 
-    protected static final int DEF_8601_LEN = "yyyy-MM-ddThh:mm:ss.SSS+00:00".length();
+    static final int DEF_8601_LEN = "yyyy-MM-ddThh:mm:ss.SSS+00:00".length();
 
     /**
      * Timezone we use for 'Z' in ISO-8601 date/time values: since 2.7
      * {@link #TIMEZONE_UTC}; with earlier versions up to 2.7 was {@link #TIMEZONE_GMT}.
      */
-    private static final TimeZone TIMEZONE_Z = TimeZone.getTimeZone("UTC");
+    static final TimeZone TIMEZONE_Z = TimeZone.getTimeZone("UTC");
 
     private ISO8601Util() {
         // singleton

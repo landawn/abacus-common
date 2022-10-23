@@ -820,7 +820,7 @@ public abstract class DateUtil {
         format = checkDateFormat(date, format);
 
         if (N.isNullOrEmpty(format)) {
-            if (timeZone == null) {
+            if (timeZone == null || timeZone.equals(ISO8601Util.TIMEZONE_Z)) {
                 return ISO8601Util.parse(date).getTime();
             } else {
                 throw new RuntimeException("Unsupported date format: " + format + " with time zone: " + timeZone);
@@ -845,6 +845,99 @@ public abstract class DateUtil {
             recycleSDF(format, timeZone, sdf);
         }
     }
+
+    //    /**
+    //     * Parses the ZonedDateTime.
+    //     *
+    //     * @param dateTime
+    //     * @return
+    //     */
+    //    public static ZonedDateTime parseZonedDateTime(final String dateTime) {
+    //        return parseZonedDateTime(dateTime, null);
+    //    }
+    //
+    //    /**
+    //     * Parses the ZonedDateTime.
+    //     *
+    //     * @param dateTime
+    //     * @param format
+    //     * @return
+    //     */
+    //    public static ZonedDateTime parseZonedDateTime(final String dateTime, final String format) {
+    //        return parseZonedDateTime(dateTime, format, null);
+    //    }
+    //
+    //    /**
+    //     * Converts the specified <code>date</code> with the specified {@code format} to a new instance of ZonedDateTime.
+    //     * <code>null</code> is returned if the specified <code>date</code> is null or empty.
+    //     *
+    //     * @param dateTime
+    //     * @param format
+    //     * @param timeZone
+    //     * @return
+    //     */
+    //    public static ZonedDateTime parseZonedDateTime(final String dateTime, String format, TimeZone timeZone) {
+    //        if (N.isNullOrEmpty(dateTime) || (dateTime.length() == 4 && "null".equalsIgnoreCase(dateTime))) {
+    //            return null;
+    //        }
+    //
+    //        if ((format == null) && dateTime.length() > 4 && (dateTime.charAt(2) >= '0' && dateTime.charAt(2) <= '9' && dateTime.charAt(4) >= '0' && dateTime.charAt(4) <= '9')
+    //                && Strings.isAsciiDigtalInteger(dateTime)) {
+    //
+    //            if (timeZone == null) {
+    //                timeZone = LOCAL_TIME_ZONE;
+    //            }
+    //
+    //            return Instant.ofEpochMilli(Numbers.toLong(dateTime)).atZone(timeZone.toZoneId());
+    //        }
+    //
+    //        format = checkDateFormat(dateTime, format);
+    //
+    //        if (N.isNullOrEmpty(format)) {
+    //            if (dateTime.charAt(dateTime.length() - 1) == ']' && dateTime.lastIndexOf('[') > 0) {
+    //                ZonedDateTime ret = ZonedDateTime.parse(dateTime);
+    //
+    //                if (!(timeZone == null || timeZone.toZoneId().equals(ret.getZone()))) {
+    //                    ret = ret.withZoneSameInstant(timeZone.toZoneId());
+    //                }
+    //
+    //                return ret;
+    //            } else {
+    //                if (timeZone == null) {
+    //                    timeZone = LOCAL_TIME_ZONE;
+    //                }
+    //
+    //                return ISO8601Util.parse(dateTime).toInstant().atZone(timeZone.toZoneId());
+    //            }
+    //        }
+    //
+    //        timeZone = checkTimeZone(format, timeZone);
+    //
+    //        final DateTimeFormatter dtf = getDateTimeFormatter(format, timeZone.toZoneId());
+    //
+    //        return ZonedDateTime.parse(dateTime, dtf);
+    //    }
+    //
+    //    private static final Map<String, Map<ZoneId, DateTimeFormatter>> dateTimeFormatterMap = new ConcurrentHashMap<>();
+    //
+    //    private static DateTimeFormatter getDateTimeFormatter(final String format, final ZoneId zoneId) {
+    //        DateTimeFormatter dtf = null;
+    //        Map<ZoneId, DateTimeFormatter> tzdftMap = dateTimeFormatterMap.get(format);
+    //
+    //        if (tzdftMap == null) {
+    //            tzdftMap = new ConcurrentHashMap<>();
+    //            dateTimeFormatterMap.put(format, tzdftMap);
+    //        } else {
+    //            dtf = tzdftMap.get(zoneId);
+    //        }
+    //
+    //        if (dtf == null) {
+    //            dtf = DateTimeFormatter.ofPattern(format).withZone(zoneId);
+    //            tzdftMap.put(zoneId, dtf);
+    //        }
+    //
+    //        return dtf;
+    //    }
 
     /**
      *
@@ -1057,6 +1150,98 @@ public abstract class DateUtil {
             format(writer, createJUDate(c.toGregorianCalendar()), format, timeZone);
         }
     }
+
+    //    /**
+    //     *
+    //     * @param zonedDateTime
+    //     * @return
+    //     */
+    //    public static String format(final ZonedDateTime zonedDateTime) {
+    //        return format(zonedDateTime, null, null);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param zonedDateTime
+    //     * @param format
+    //     * @return
+    //     */
+    //    public static String format(final ZonedDateTime zonedDateTime, final String format) {
+    //        return format(zonedDateTime, format, null);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param zonedDateTime
+    //     * @param format
+    //     * @param timeZone
+    //     * @return
+    //     */
+    //    public static String format(final ZonedDateTime zonedDateTime, final String format, final TimeZone timeZone) {
+    //        return formatZonedDateTime(null, zonedDateTime, format, timeZone);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param writer
+    //     * @param zonedDateTime
+    //     */
+    //    public static void format(final Writer writer, final ZonedDateTime zonedDateTime) {
+    //        format(writer, zonedDateTime, null, null);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param writer
+    //     * @param zonedDateTime
+    //     * @param format
+    //     */
+    //    public static void format(final Writer writer, final ZonedDateTime zonedDateTime, final String format) {
+    //        formatZonedDateTime(writer, zonedDateTime, format, null);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param writer
+    //     * @param zonedDateTime
+    //     * @param format
+    //     * @param timeZone
+    //     */
+    //    public static void format(final Writer writer, final ZonedDateTime zonedDateTime, final String format, final TimeZone timeZone) {
+    //        formatZonedDateTime(writer, zonedDateTime, format, timeZone);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param writer
+    //     * @param date
+    //     * @param format
+    //     * @param timeZone
+    //     * @return
+    //     */
+    //    private static String formatZonedDateTime(final Writer writer, final ZonedDateTime zonedDateTime, String format, TimeZone timeZone) {
+    //        String ret = null;
+    //
+    //        if (format == null) {
+    //            final ZoneId zoneId = timeZone == null ? zonedDateTime.getZone() : timeZone.toZoneId();
+    //            ret = zonedDateTime.getZone().equals(zoneId) ? zonedDateTime.toString() : zonedDateTime.withZoneSameInstant(zoneId).toString();
+    //        } else {
+    //            final ZoneId zoneId = timeZone == null ? (format.endsWith("'Z'") ? UTC_TIME_ZONE.toZoneId() : zonedDateTime.getZone()) : timeZone.toZoneId();
+    //            final DateTimeFormatter dtf = getDateTimeFormatter(format, zoneId);
+    //
+    //            ret = zonedDateTime.format(dtf);
+    //        }
+    //
+    //        if (writer != null) {
+    //            try {
+    //                writer.write(ret);
+    //            } catch (IOException e) {
+    //                throw new UncheckedIOException(e);
+    //            }
+    //        }
+    //
+    //        return ret;
+    //    }
 
     //-----------------------------------------------------------------------
     /**
@@ -2863,7 +3048,7 @@ public abstract class DateUtil {
      */
     private static TimeZone checkTimeZone(final String format, TimeZone timeZone) {
         if (timeZone == null) {
-            timeZone = format.endsWith("'Z'") ? UTC_TIME_ZONE : LOCAL_TIME_ZONE;
+            timeZone = format != null && format.endsWith("'Z'") ? UTC_TIME_ZONE : LOCAL_TIME_ZONE;
         }
 
         return timeZone;

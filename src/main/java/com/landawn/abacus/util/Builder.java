@@ -15,6 +15,7 @@
 package com.landawn.abacus.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -26,11 +27,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.ToIntFunction;
 
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
-import com.landawn.abacus.util.Throwables.Predicate;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.u.Optional;
@@ -1395,6 +1397,20 @@ public class Builder<T> {
         }
 
         /**
+         * Adds the all.
+         *
+         * @param a
+         * @return
+         */
+        public CollectionBuilder<T, C> addAll(final T... a) {
+            if (N.notNullOrEmpty(a)) {
+                val.addAll(Arrays.asList(a));
+            }
+
+            return this;
+        }
+
+        /**
          *
          * @param e
          * @return
@@ -1414,6 +1430,20 @@ public class Builder<T> {
         public CollectionBuilder<T, C> removeAll(Collection<?> c) {
             if (N.notNullOrEmpty(c)) {
                 val.removeAll(c);
+            }
+
+            return this;
+        }
+
+        /**
+         * Removes the all.
+         *
+         * @param a
+         * @return
+         */
+        public CollectionBuilder<T, C> removeAll(final T... a) {
+            if (N.notNullOrEmpty(a)) {
+                val.removeAll(Arrays.asList(a));
             }
 
             return this;
@@ -2152,7 +2182,7 @@ public class Builder<T> {
          * @return
          * @throws E the e
          */
-        public <E extends Exception> DataSetBuilder removeColumns(Predicate<String, E> filter) throws E {
+        public <E extends Exception> DataSetBuilder removeColumns(Throwables.Predicate<String, E> filter) throws E {
             val.removeColumns(filter);
 
             return this;
@@ -2574,14 +2604,12 @@ public class Builder<T> {
     /**
      *
      * @param <T>
-     * @param <E>
      * @param left
      * @param right
      * @param func
      * @return
-     * @throws E the e
      */
-    public static <T, E extends Exception> ComparisonBuilder compare(T left, T right, Throwables.BiFunction<? super T, ? super T, Integer, E> func) throws E {
+    public static <T> ComparisonBuilder compare(T left, T right, BiFunction<? super T, ? super T, Integer> func) {
         return new ComparisonBuilder().compare(left, right, func);
     }
 
@@ -2742,14 +2770,12 @@ public class Builder<T> {
     /**
      *
      * @param <T>
-     * @param <E>
      * @param left
      * @param right
      * @param func
      * @return
-     * @throws E the e
      */
-    public static <T, E extends Exception> EquivalenceBuilder equals(T left, T right, Throwables.BiFunction<? super T, ? super T, Boolean, E> func) throws E {
+    public static <T> EquivalenceBuilder equals(T left, T right, BiFunction<? super T, ? super T, Boolean> func) {
         return new EquivalenceBuilder().equals(left, right, func);
     }
 
@@ -2870,13 +2896,11 @@ public class Builder<T> {
     /**
      *
      * @param <T>
-     * @param <E>
      * @param value
      * @param func
      * @return
-     * @throws E the e
      */
-    public static <T, E extends Exception> HashCodeBuilder hash(T value, Throwables.ToIntFunction<? super T, E> func) throws E {
+    public static <T> HashCodeBuilder hash(T value, ToIntFunction<? super T> func) {
         return new HashCodeBuilder().hash(value, func);
     }
 
@@ -3014,14 +3038,12 @@ public class Builder<T> {
         /**
          *
          * @param <T>
-         * @param <E>
          * @param left
          * @param right
          * @param func
          * @return
-         * @throws E the e
          */
-        public <T, E extends Exception> ComparisonBuilder compare(T left, T right, Throwables.BiFunction<? super T, ? super T, Integer, E> func) throws E {
+        public <T> ComparisonBuilder compare(T left, T right, BiFunction<? super T, ? super T, Integer> func) {
             N.checkArgNotNull(func, "func");
 
             if (result == 0) {
@@ -3260,14 +3282,12 @@ public class Builder<T> {
         /**
          *
          * @param <T>
-         * @param <E>
          * @param left
          * @param right
          * @param func
          * @return
-         * @throws E the e
          */
-        public <T, E extends Exception> EquivalenceBuilder equals(T left, T right, Throwables.BiFunction<? super T, ? super T, Boolean, E> func) throws E {
+        public <T> EquivalenceBuilder equals(T left, T right, BiFunction<? super T, ? super T, Boolean> func) {
             N.checkArgNotNull(func, "func");
 
             if (result) {
@@ -3452,13 +3472,11 @@ public class Builder<T> {
         /**
          *
          * @param <T>
-         * @param <E>
          * @param value
          * @param func
          * @return
-         * @throws E the e
          */
-        public <T, E extends Exception> HashCodeBuilder hash(T value, Throwables.ToIntFunction<? super T, E> func) throws E {
+        public <T> HashCodeBuilder hash(T value, ToIntFunction<? super T> func) {
             N.checkArgNotNull(func, "func");
 
             result = result * 31 + func.applyAsInt(value);
