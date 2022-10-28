@@ -294,6 +294,10 @@ class CommonUtil {
      */
     public static final String[] EMPTY_STRING_ARRAY = {};
     /**
+     * An empty immutable {@code Date} array.
+     */
+    public static final java.util.Date[] EMPTY_DATE_ARRAY = {};
+    /**
      * An empty immutable {@code Object} array.
      */
     public static final Object[] EMPTY_OBJECT_ARRAY = {};
@@ -784,6 +788,22 @@ class CommonUtil {
      */
     public static <T> T defaultIfNull(final T obj, final T defaultForNull) {
         return obj == null ? defaultForNull : obj;
+    }
+
+    /**
+     * Default if null.
+     *
+     * @param <T>
+     * @param obj
+     * @param defaultForNull
+     * @return
+     */
+    public static <T> T defaultIfNull(final T obj, final Supplier<? extends T> supplierForDefault) {
+        if (obj == null) {
+            return supplierForDefault.get();
+        }
+
+        return obj;
     }
 
     public static <T extends CharSequence> T defaultIfNullOrEmpty(final T str, final T defaultStr) {
@@ -6411,7 +6431,7 @@ class CommonUtil {
     /**
      *
      * @param <T>
-     * @param obj a Java object which must be serializable and deserialiable through {@code Kryo} or {@code JSON}.
+     * @param obj a Java object which must be serializable and deserializable through {@code Kryo} or {@code JSON}.
      * @return {@code null} if {@code entity} is {@code null}
      */
     @SuppressWarnings("unchecked")
@@ -6420,20 +6440,20 @@ class CommonUtil {
             return null;
         }
 
-        return (T) clone(obj.getClass(), obj);
+        return (T) clone(obj, obj.getClass());
     }
 
     /**
      * Deeply copy by: obj -> serialize -> kryo/Json -> deserialize -> new object.
+     * @param obj a Java object which must be serializable and deserialiable through {@code Kryo} or {@code JSON}.
+     * @param targetClass
      *
      * @param <T>
-     * @param targetClass
-     * @param obj a Java object which must be serializable and deserialiable through {@code Kryo} or {@code JSON}.
      * @return a new instance of {@code targetClass} even if {@code entity} is {@code null}.
      * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
     @SuppressWarnings("unchecked")
-    public static <T> T clone(final Class<? extends T> targetClass, final Object obj) throws IllegalArgumentException {
+    public static <T> T clone(final Object obj, final Class<? extends T> targetClass) throws IllegalArgumentException {
         N.checkArgNotNull(targetClass, "targetClass");
 
         if (obj == null) {
@@ -20483,6 +20503,20 @@ class CommonUtil {
         return indexOf(iter, 0, valueToFind);
     }
 
+    public static int indexOfIgnoreCase(final String[] a, final String valueToFind) {
+        if (N.isNullOrEmpty(a)) {
+            return N.INDEX_NOT_FOUND;
+        }
+
+        for (int i = 0, len = a.length; i < len; i++) {
+            if (N.equalsIgnoreCase(a[i], valueToFind)) {
+                return i;
+            }
+        }
+
+        return N.INDEX_NOT_FOUND;
+    }
+
     public static int indexOf(final Iterator<?> iter, final int startIndex, final Object valueToFind) {
         if (iter == null) {
             return INDEX_NOT_FOUND;
@@ -21026,6 +21060,20 @@ class CommonUtil {
         }
     }
 
+    public static int lastIndexOfIgnoreCase(final String[] a, final String valueToFind) {
+        if (N.isNullOrEmpty(a)) {
+            return N.INDEX_NOT_FOUND;
+        }
+
+        for (int i = a.length - 1; i >= 0; i--) {
+            if (N.equalsIgnoreCase(a[i], valueToFind)) {
+                return i;
+            }
+        }
+
+        return N.INDEX_NOT_FOUND;
+    }
+
     /**
      * Last index of sub list.
      *
@@ -21070,6 +21118,33 @@ class CommonUtil {
      * Find first index.
      *
      * @param <T>
+     * @param <U>
+     * @param <E>
+     * @param a
+     * @param predicate
+     * @param valueToFind
+     * @return the optional int
+     * @throws E the e
+     */
+    public static <T, U, E extends Exception> OptionalInt findFirstIndex(final T[] a, final U valueToFind,
+            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return OptionalInt.empty();
+        }
+
+        for (int len = a.length, i = 0; i < len; i++) {
+            if (predicate.test(a[i], valueToFind)) {
+                return OptionalInt.of(i);
+            }
+        }
+
+        return OptionalInt.empty();
+    }
+
+    /**
+     * Find first index.
+     *
+     * @param <T>
      * @param <E>
      * @param c
      * @param predicate
@@ -21096,6 +21171,37 @@ class CommonUtil {
     }
 
     /**
+     * Find first index.
+     *
+     * @param <T>
+     * @param <U>
+     * @param <E>
+     * @param c
+     * @param valueToFind
+     * @param predicate
+     * @return the optional int
+     * @throws E the e
+     */
+    public static <T, U, E extends Exception> OptionalInt findFirstIndex(final Collection<? extends T> c, final U valueToFind,
+            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
+        if (N.isNullOrEmpty(c)) {
+            return OptionalInt.empty();
+        }
+
+        int idx = 0;
+
+        for (T e : c) {
+            if (predicate.test(e, valueToFind)) {
+                return OptionalInt.of(idx);
+            }
+
+            idx++;
+        }
+
+        return OptionalInt.empty();
+    }
+
+    /**
      * Find last index.
      *
      * @param <T>
@@ -21110,8 +21216,35 @@ class CommonUtil {
             return OptionalInt.empty();
         }
 
-        for (int len = a.length, i = len - 1; i >= 0; i--) {
+        for (int i = a.length - 1; i >= 0; i--) {
             if (predicate.test(a[i])) {
+                return OptionalInt.of(i);
+            }
+        }
+
+        return OptionalInt.empty();
+    }
+
+    /**
+     * Find last index.
+     *
+     * @param <T>
+     * @param <U>
+     * @param <E>
+     * @param a
+     * @param valueToFind
+     * @param predicate
+     * @return the optional int
+     * @throws E the e
+     */
+    public static <T, U, E extends Exception> OptionalInt findLastIndex(final T[] a, final U valueToFind,
+            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return OptionalInt.empty();
+        }
+
+        for (int i = a.length - 1; i >= 0; i--) {
+            if (predicate.test(a[i], valueToFind)) {
                 return OptionalInt.of(i);
             }
         }
@@ -21198,6 +21331,28 @@ class CommonUtil {
 
             return OptionalInt.empty();
         }
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <U>
+     * @param <E>
+     * @param c
+     * @param valueToFind
+     * @param predicate
+     * @return
+     * @throws E
+     */
+    public static <T, U, E extends Exception> OptionalInt findLastIndex(final Collection<? extends T> c, final U valueToFind,
+            final Throwables.BiPredicate<? super T, ? super U, E> predicate) throws E {
+        if (N.isNullOrEmpty(c)) {
+            return OptionalInt.empty();
+        }
+
+        final Throwables.Predicate<? super T, E> predicate2 = t -> predicate.test(t, valueToFind);
+
+        return findLastIndex(c, predicate2);
     }
 
     /**

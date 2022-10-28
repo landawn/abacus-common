@@ -1296,7 +1296,7 @@ public final class N extends CommonUtil {
             final List<T> list = (List<T>) c;
 
             for (int i = fromIndex; i < toIndex; i = i <= toIndex - chunkSize ? i + chunkSize : toIndex) {
-                res.add(new ArrayList<>(list.subList(i, i <= toIndex - chunkSize ? i + chunkSize : toIndex)));
+                res.add(list.subList(i, i <= toIndex - chunkSize ? i + chunkSize : toIndex));
             }
         } else {
             final Iterator<? extends T> iter = c.iterator();

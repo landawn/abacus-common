@@ -3030,10 +3030,23 @@ public final class Iterables {
          * @param fromIndex
          * @param toIndex
          */
+        Slice(final List<? extends T> c, final int fromIndex, final int toIndex) {
+            super(fromIndex == 0 && toIndex == c.size() ? c : c.subList(fromIndex, toIndex));
+            this.fromIndex = 0;
+            this.toIndex = toIndex - fromIndex;
+        }
+
+        /**
+         * Instantiates a new sub collection.
+         *
+         * @param c
+         * @param fromIndex
+         * @param toIndex
+         */
         Slice(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
-            super(c);
-            this.fromIndex = fromIndex;
-            this.toIndex = toIndex;
+            super(c instanceof List ? ((List<T>) c).subList(fromIndex, toIndex) : c);
+            this.fromIndex = c instanceof List ? 0 : fromIndex;
+            this.toIndex = c instanceof List ? toIndex - fromIndex : toIndex;
         }
 
         /**

@@ -2200,6 +2200,18 @@ public abstract class DateUtil {
     }
 
     /**
+     *
+     * @param cal1
+     * @param cal2
+     * @param field
+     * @return
+     * @see #truncatedEquals(java.util.Calendar, java.util.Calendar, int)
+     */
+    public static boolean truncatedEquals(final Calendar cal1, final Calendar cal2, final CalendarField field) {
+        return truncatedCompareTo(cal1, cal2, field) == 0;
+    }
+
+    /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
      *
@@ -2217,6 +2229,18 @@ public abstract class DateUtil {
      */
     public static boolean truncatedEquals(final Calendar cal1, final Calendar cal2, final int field) {
         return truncatedCompareTo(cal1, cal2, field) == 0;
+    }
+
+    /**
+     *
+     * @param date1
+     * @param date2
+     * @param field
+     * @return
+     * @see #truncatedEquals(java.util.Date, java.util.Date, int)
+     */
+    public static boolean truncatedEquals(final java.util.Date date1, final java.util.Date date2, final CalendarField field) {
+        return truncatedCompareTo(date1, date2, field) == 0;
     }
 
     /**
@@ -2240,6 +2264,18 @@ public abstract class DateUtil {
     }
 
     /**
+     *
+     * @param cal1
+     * @param cal2
+     * @param field
+     * @return
+     * @see #truncatedCompareTo(Calendar, Calendar, int)
+     */
+    public static int truncatedCompareTo(final Calendar cal1, final Calendar cal2, final CalendarField field) {
+        return truncate(cal1, field).compareTo(truncate(cal2, field));
+    }
+
+    /**
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
      *
@@ -2258,6 +2294,18 @@ public abstract class DateUtil {
      */
     public static int truncatedCompareTo(final Calendar cal1, final Calendar cal2, final int field) {
         return truncate(cal1, field).compareTo(truncate(cal2, field));
+    }
+
+    /**
+     *
+     * @param date1
+     * @param date2
+     * @param field
+     * @return
+     * @see #truncatedCompareTo(java.util.Date, java.util.Date, int)
+     */
+    public static int truncatedCompareTo(final java.util.Date date1, final java.util.Date date2, final CalendarField field) {
+        return truncate(date1, field).compareTo(truncate(date2, field));
     }
 
     /**
