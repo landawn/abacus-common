@@ -544,6 +544,7 @@ public final class IOUtil {
     }
 
     /**
+     * Note: It should not be used to read {@code File/InputStream} with size closed to {@code Integer.MAX_VALUE}.
      *
      * @param file
      * @return
@@ -558,6 +559,7 @@ public final class IOUtil {
     }
 
     /**
+     * Note: It should not be used to read {@code File/InputStream} with size closed to {@code Integer.MAX_VALUE}.
      *
      * @param is
      * @return
@@ -657,6 +659,7 @@ public final class IOUtil {
     }
 
     /**
+     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
      *
      * @param file
      * @return
@@ -671,6 +674,7 @@ public final class IOUtil {
     }
 
     /**
+     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
      *
      * @param file
      * @param encoding
@@ -686,6 +690,7 @@ public final class IOUtil {
     }
 
     /**
+     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
      *
      * @param is
      * @return
@@ -700,6 +705,7 @@ public final class IOUtil {
     }
 
     /**
+     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
      *
      * @param is
      * @param encoding
@@ -715,6 +721,7 @@ public final class IOUtil {
     }
 
     /**
+     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
      *
      * @param reader
      * @return
@@ -904,25 +911,69 @@ public final class IOUtil {
 
     /**
      * Read all content into one {@code String}.
+     * <br />
+     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
      *
      * @param file
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static String readString(final File file) throws UncheckedIOException {
-        return readString(file, 0, Integer.MAX_VALUE);
+    public static String readAllToString(final File file) throws UncheckedIOException {
+        return readToString(file, 0, Integer.MAX_VALUE);
     }
 
     /**
      * Read all content into one {@code String}.
+     * <br />
+     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
      *
      * @param file
      * @param encoding
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static String readString(final File file, final Charset encoding) throws UncheckedIOException {
-        return readString(file, 0, Integer.MAX_VALUE, encoding);
+    public static String readAllToString(final File file, final Charset encoding) throws UncheckedIOException {
+        return readToString(file, 0, Integer.MAX_VALUE, encoding);
+    }
+
+    /**
+     * Read all content into one {@code String}.
+     * <br />
+     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     *
+     * @param is
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public static String readAllToString(final InputStream is) throws UncheckedIOException {
+        return readToString(is, 0, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Read all content into one {@code String}.
+     * <br />
+     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     *
+     * @param is
+     * @param encoding
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public static String readAllToString(final InputStream is, final Charset encoding) throws UncheckedIOException {
+        return readToString(is, 0, Integer.MAX_VALUE, encoding);
+    }
+
+    /**
+     * Read all content into one {@code String}.
+     * <br />
+     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     *
+     * @param reader
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     */
+    public static String readAllToString(final Reader reader) throws UncheckedIOException {
+        return readToString(reader, 0, Integer.MAX_VALUE);
     }
 
     /**
@@ -933,8 +984,8 @@ public final class IOUtil {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static String readString(final File file, final long offset, final int maxLen) throws UncheckedIOException {
-        return readString(file, offset, maxLen, Charsets.UTF_8);
+    public static String readToString(final File file, final long offset, final int maxLen) throws UncheckedIOException {
+        return readToString(file, offset, maxLen, Charsets.UTF_8);
     }
 
     /**
@@ -947,7 +998,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     @SuppressWarnings("deprecation")
-    public static String readString(final File file, final long offset, final int maxLen, final Charset encoding) throws UncheckedIOException {
+    public static String readToString(final File file, final long offset, final int maxLen, final Charset encoding) throws UncheckedIOException {
 
         try {
             final char[] chs = readChars(file, offset, maxLen, encoding);
@@ -959,29 +1010,6 @@ public final class IOUtil {
     }
 
     /**
-     * Read all content into one {@code String}.
-     *
-     * @param is
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public static String readString(final InputStream is) throws UncheckedIOException {
-        return readString(is, 0, Integer.MAX_VALUE);
-    }
-
-    /**
-     * Read all content into one {@code String}.
-     *
-     * @param is
-     * @param encoding
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public static String readString(final InputStream is, final Charset encoding) throws UncheckedIOException {
-        return readString(is, 0, Integer.MAX_VALUE, encoding);
-    }
-
-    /**
      *
      * @param is
      * @param offset
@@ -989,8 +1017,8 @@ public final class IOUtil {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static String readString(final InputStream is, final long offset, final int maxLen) throws UncheckedIOException {
-        return readString(is, offset, maxLen, Charsets.UTF_8);
+    public static String readToString(final InputStream is, final long offset, final int maxLen) throws UncheckedIOException {
+        return readToString(is, offset, maxLen, Charsets.UTF_8);
     }
 
     /**
@@ -1003,7 +1031,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     @SuppressWarnings("deprecation")
-    public static String readString(final InputStream is, final long offset, final int maxLen, final Charset encoding) throws UncheckedIOException {
+    public static String readToString(final InputStream is, final long offset, final int maxLen, final Charset encoding) throws UncheckedIOException {
         try {
             final char[] chs = readChars(is, offset, maxLen, encoding);
 
@@ -1014,17 +1042,6 @@ public final class IOUtil {
     }
 
     /**
-     * Read all content into one {@code String}.
-     *
-     * @param reader
-     * @return
-     * @throws UncheckedIOException the unchecked IO exception
-     */
-    public static String readString(final Reader reader) throws UncheckedIOException {
-        return readString(reader, 0, Integer.MAX_VALUE);
-    }
-
-    /**
      *
      * @param reader
      * @param offset
@@ -1033,7 +1050,7 @@ public final class IOUtil {
      * @throws UncheckedIOException the unchecked IO exception
      */
     @SuppressWarnings("deprecation")
-    public static String readString(final Reader reader, final long offset, final int maxLen) throws UncheckedIOException {
+    public static String readToString(final Reader reader, final long offset, final int maxLen) throws UncheckedIOException {
         try {
             final char[] chs = readChars(reader, offset, maxLen);
 
@@ -1044,6 +1061,8 @@ public final class IOUtil {
     }
 
     /**
+     * <br />
+     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
      *
      * @param file
      * @return
@@ -1058,6 +1077,8 @@ public final class IOUtil {
     }
 
     /**
+     * <br />
+     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
      *
      * @param file
      * @param encoding
@@ -1073,6 +1094,8 @@ public final class IOUtil {
     }
 
     /**
+     * <br />
+     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
      *
      * @param is
      * @return
@@ -1087,6 +1110,8 @@ public final class IOUtil {
     }
 
     /**
+     * <br />
+     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
      *
      * @param is
      * @param encoding
@@ -1102,6 +1127,8 @@ public final class IOUtil {
     }
 
     /**
+     * <br />
+     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
      *
      * @param reader
      * @return
@@ -1121,8 +1148,137 @@ public final class IOUtil {
      * @return
      * @throws IOException
      */
-    public static String readLine(final File file) throws IOException {
-        return readLine(file, 0);
+    public static String readFirstLine(final File file) throws IOException {
+        return readFirstLine(file, Charsets.UTF_8);
+    }
+
+    /**
+     *
+     * @param file
+     * @param encoding
+     * @return
+     * @throws IOException
+     */
+    public static String readFirstLine(final File file, final Charset encoding) throws IOException {
+        final Holder<ZipFile> outputZipFile = new Holder<>();
+        InputStream is = null;
+
+        try {
+            is = openFile(outputZipFile, file);
+
+            return readFirstLine(is, encoding);
+        } finally {
+            close(is);
+            close(outputZipFile.value());
+        }
+    }
+
+    /**
+     *
+     * @param is
+     * @return
+     * @throws IOException
+     */
+    public static String readFirstLine(final InputStream is) throws IOException {
+        return readFirstLine(is, Charsets.UTF_8);
+    }
+
+    /**
+     *
+     * @param is
+     * @param encoding
+     * @return
+     * @throws IOException
+     */
+    public static String readFirstLine(final InputStream is, final Charset encoding) throws IOException {
+        return readFirstLine(createReader(is, encoding));
+    }
+
+    /**
+     *
+     * @param reader
+     * @return
+     * @throws IOException
+     */
+    public static String readFirstLine(final Reader reader) throws IOException {
+        return readLine(reader, 0);
+    }
+
+    /**
+     *
+     * @param file
+     * @return
+     * @throws IOException
+     */
+    public static String readLastLine(final File file) throws IOException {
+        return readLastLine(file, Charsets.UTF_8);
+    }
+
+    /**
+     *
+     * @param file
+     * @param encoding
+     * @return
+     * @throws IOException
+     */
+    public static String readLastLine(final File file, final Charset encoding) throws IOException {
+        final Holder<ZipFile> outputZipFile = new Holder<>();
+        InputStream is = null;
+
+        try {
+            is = openFile(outputZipFile, file);
+
+            return readLastLine(is, encoding);
+        } finally {
+            close(is);
+            close(outputZipFile.value());
+        }
+    }
+
+    /**
+     *
+     * @param is
+     * @return
+     * @throws IOException
+     */
+    public static String readLastLine(final InputStream is) throws IOException {
+        return readLastLine(is, Charsets.UTF_8);
+    }
+
+    /**
+     *
+     * @param is
+     * @param encoding
+     * @return
+     * @throws IOException
+     */
+    public static String readLastLine(final InputStream is, final Charset encoding) throws IOException {
+        return readLastLine(createReader(is, encoding));
+    }
+
+    /**
+     *
+     * @param reader
+     * @return
+     * @throws IOException
+     */
+    public static String readLastLine(final Reader reader) throws IOException {
+        final BufferedReader br = reader instanceof BufferedReader ? (BufferedReader) reader : Objectory.createBufferedReader(reader);
+
+        try {
+            String ret = null;
+            String line = null;
+
+            while ((line = br.readLine()) != null) {
+                ret = line;
+            }
+
+            return ret;
+        } finally {
+            if (br != reader) {
+                Objectory.recycle(br);
+            }
+        }
     }
 
     /**
@@ -1161,16 +1317,6 @@ public final class IOUtil {
     /**
      *
      * @param is
-     * @return
-     * @throws IOException
-     */
-    public static String readLine(final InputStream is) throws IOException {
-        return readLine(is, 0);
-    }
-
-    /**
-     *
-     * @param is
      * @param lineIndex
      * @return
      * @throws IOException
@@ -1189,16 +1335,6 @@ public final class IOUtil {
      */
     public static String readLine(final InputStream is, final int lineIndex, final Charset encoding) throws IOException {
         return readLine(createReader(is, encoding), lineIndex);
-    }
-
-    /**
-     *
-     * @param reader
-     * @return
-     * @throws IOException
-     */
-    public static String readLine(final Reader reader) throws IOException {
-        return readLine(reader, 0);
     }
 
     /**
@@ -1226,29 +1362,6 @@ public final class IOUtil {
                 Objectory.recycle(br);
             }
         }
-    }
-
-    /**
-     *
-     * @param file
-     * @return
-     * @throws IOException
-     * @see #readAllLines(File)
-     */
-    public static List<String> readLines(final File file) throws IOException {
-        return readLines(file, 0, Integer.MAX_VALUE);
-    }
-
-    /**
-     *
-     * @param file
-     * @param encoding
-     * @return
-     * @throws IOException
-     * @see #readAllLines(File, Charset)
-     */
-    public static List<String> readLines(final File file, final Charset encoding) throws IOException {
-        return readLines(file, 0, Integer.MAX_VALUE, encoding);
     }
 
     /**
@@ -1289,29 +1402,6 @@ public final class IOUtil {
     /**
      *
      * @param is
-     * @return
-     * @throws IOException
-     * @see #readAllLines(is)
-     */
-    public static List<String> readLines(final InputStream is) throws IOException {
-        return readLines(is, 0, Integer.MAX_VALUE);
-    }
-
-    /**
-     *
-     * @param is
-     * @param encoding
-     * @return
-     * @throws IOException
-     * @see #readAllLines(is, Charset)
-     */
-    public static List<String> readLines(final InputStream is, final Charset encoding) throws IOException {
-        return readLines(is, 0, Integer.MAX_VALUE, encoding);
-    }
-
-    /**
-     *
-     * @param is
      * @param offset
      * @param count
      * @return
@@ -1343,17 +1433,6 @@ public final class IOUtil {
      */
     static InputStreamReader createReader(final InputStream is, final Charset encoding) {
         return encoding == null ? new InputStreamReader(is, Charsets.UTF_8) : new InputStreamReader(is, encoding);
-    }
-
-    /**
-     *
-     * @param reader
-     * @return
-     * @throws IOException
-     * @see #readAllLines(Reader)
-     */
-    public static List<String> readLines(final Reader reader) throws IOException {
-        return readLines(reader, 0, Integer.MAX_VALUE);
     }
 
     /**
@@ -3543,6 +3622,8 @@ public final class IOUtil {
     public static MappedByteBuffer map(File file, MapMode mode, long offset, long len) throws IOException {
         N.checkArgNotNull(file);
         N.checkArgNotNull(mode);
+        N.checkArgNotNegative(offset, "offset");
+        N.checkArgNotNegative(len, "len");
 
         RandomAccessFile raf = null;
 

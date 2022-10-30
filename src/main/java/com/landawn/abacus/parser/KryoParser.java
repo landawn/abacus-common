@@ -367,7 +367,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
      */
     @Override
     public <T> T deserialize(Class<? extends T> targetClass, Reader reader, KryoDeserializationConfig config) {
-        return deserialize(targetClass, IOUtil.readString(reader), config);
+        return deserialize(targetClass, IOUtil.readAllToString(reader), config);
     }
 
     /**

@@ -1680,7 +1680,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                 } else if (type.isCollection()) {
                     return readCollection(null, targetClass, jr, config, null, isFirstCall);
                 } else {
-                    return (T) nullToEmpty(type, type.valueOf(source instanceof String ? (String) source : IOUtil.readString(((Reader) source))),
+                    return (T) nullToEmpty(type, type.valueOf(source instanceof String ? (String) source : IOUtil.readAllToString(((Reader) source))),
                             config.nullToEmpty);
                 }
 

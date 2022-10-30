@@ -82,7 +82,7 @@ public class HARUtil {
      * @return
      */
     public static String sendRequstByHAR(final File har, final Predicate<String> filterForTargetUrl) {
-        return sendRequstByHAR(IOUtil.readString(har), filterForTargetUrl);
+        return sendRequstByHAR(IOUtil.readAllToString(har), filterForTargetUrl);
     }
 
     /**
@@ -132,7 +132,7 @@ public class HARUtil {
      * @return
      */
     public static List<String> sendMultiRequstsByHAR(final File har, final Predicate<String> filterForTargetUrl) {
-        return sendMultiRequstsByHAR(IOUtil.readString(har), filterForTargetUrl);
+        return sendMultiRequstsByHAR(IOUtil.readAllToString(har), filterForTargetUrl);
     }
 
     /**
@@ -168,7 +168,7 @@ public class HARUtil {
      * @return first element in the returned {@code Tuple2} is {@code url}. The second element is HttpResponse.
      */
     public static Stream<Tuple2<Map<String, Object>, HttpResponse>> streamMultiRequstsByHAR(final File har, final Predicate<String> filterForTargetUrl) {
-        return streamMultiRequstsByHAR(IOUtil.readString(har), filterForTargetUrl);
+        return streamMultiRequstsByHAR(IOUtil.readAllToString(har), filterForTargetUrl);
     }
 
     /**
@@ -216,7 +216,7 @@ public class HARUtil {
     }
 
     public static Optional<Map<String, Object>> getRequestEntryByUrlFromHAR(final File har, final Predicate<String> filterForTargetUrl) {
-        return getRequestEntryByUrlFromHAR(IOUtil.readString(har), filterForTargetUrl);
+        return getRequestEntryByUrlFromHAR(IOUtil.readAllToString(har), filterForTargetUrl);
     }
 
     @SuppressWarnings("rawtypes")

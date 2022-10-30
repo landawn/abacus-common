@@ -100,7 +100,7 @@ public class ReaderType extends AbstractType<Reader> {
      */
     @Override
     public String stringOf(Reader x) {
-        return x == null ? null : IOUtil.readString(x);
+        return x == null ? null : IOUtil.readAllToString(x);
     }
 
     /**

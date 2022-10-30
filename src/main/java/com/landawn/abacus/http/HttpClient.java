@@ -1014,7 +1014,7 @@ public final class HttpClient {
             is = HttpUtil.getInputStream(connection, respContentFormat);
 
             if (!HttpUtil.isSuccessfulResponseCode(code) && (resultClass == null || !resultClass.equals(HttpResponse.class))) {
-                throw new UncheckedIOException(new IOException(code + ": " + connection.getResponseMessage() + ". " + IOUtil.readString(is, respCharset)));
+                throw new UncheckedIOException(new IOException(code + ": " + connection.getResponseMessage() + ". " + IOUtil.readAllToString(is, respCharset)));
             }
 
             if (isOneWayRequest(settings)) {
@@ -1040,14 +1040,14 @@ public final class HttpClient {
                                 IOUtil.readAllBytes(is), respContentFormat, respCharset);
                     } else {
                         if (resultClass == null || resultClass.equals(String.class)) {
-                            return (T) IOUtil.readString(is, respCharset);
+                            return (T) IOUtil.readAllToString(is, respCharset);
                         } else if (byte[].class.equals(resultClass)) {
                             return (T) IOUtil.readAllBytes(is);
                         } else {
                             if (respContentFormat == ContentFormat.KRYO && HttpUtil.kryoParser != null) {
                                 return HttpUtil.kryoParser.deserialize(resultClass, is);
                             } else if (respContentFormat == ContentFormat.FormUrlEncoded) {
-                                return URLEncodedUtil.decode(resultClass, IOUtil.readString(is, respCharset));
+                                return URLEncodedUtil.decode(resultClass, IOUtil.readAllToString(is, respCharset));
                             } else {
                                 final BufferedReader br = Objectory.createBufferedReader(new InputStreamReader(is, respCharset));
 

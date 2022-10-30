@@ -531,14 +531,14 @@ public final class OkHttpRequest {
                 final InputStream is = HttpUtil.wrapInputStream(resp.body().byteStream(), respContentFormat);
 
                 if (resultClass == null || resultClass.equals(String.class)) {
-                    return (T) IOUtil.readString(is, respCharset);
+                    return (T) IOUtil.readAllToString(is, respCharset);
                 } else if (byte[].class.equals(resultClass)) {
                     return (T) IOUtil.readAllBytes(is);
                 } else {
                     if (respContentFormat == ContentFormat.KRYO && kryoParser != null) {
                         return kryoParser.deserialize(resultClass, is);
                     } else if (respContentFormat == ContentFormat.FormUrlEncoded) {
-                        return URLEncodedUtil.decode(resultClass, IOUtil.readString(is, respCharset));
+                        return URLEncodedUtil.decode(resultClass, IOUtil.readAllToString(is, respCharset));
                     } else {
                         final BufferedReader br = Objectory.createBufferedReader(new InputStreamReader(is, respCharset));
 
