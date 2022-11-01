@@ -53,7 +53,6 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.exception.TooManyElementsException;
 import com.landawn.abacus.exception.UncheckedException;
 import com.landawn.abacus.parser.DeserializationConfig;
 import com.landawn.abacus.parser.JSONDeserializationConfig;
@@ -108,8 +107,8 @@ public final class N extends CommonUtil {
     private static final int LOAD_FACTOR_FOR_TWO_FLAT_MAP = 2;
 
     static final AsyncExecutor asyncExecutor = new AsyncExecutor(//
-            N.max(64, IOUtil.CPU_CORES * 8), // coreThreadPoolSize
-            N.max(128, IOUtil.CPU_CORES * 16), // maxThreadPoolSize
+            max(64, IOUtil.CPU_CORES * 8), // coreThreadPoolSize
+            max(128, IOUtil.CPU_CORES * 16), // maxThreadPoolSize
             180L, TimeUnit.SECONDS);
 
     static final ScheduledExecutorService SCHEDULED_EXECUTOR;
@@ -354,7 +353,7 @@ public final class N extends CommonUtil {
             }
         } else {
             for (Object e : c) {
-                if (N.equals(e, valueToFind)) {
+                if (equals(e, valueToFind)) {
                     occurrences++;
                 }
             }
@@ -378,13 +377,24 @@ public final class N extends CommonUtil {
             }
         } else {
             while (iter.hasNext()) {
-                if (N.equals(iter.next(), valueToFind)) {
+                if (equals(iter.next(), valueToFind)) {
                     occurrences++;
                 }
             }
         }
 
         return occurrences;
+    }
+
+    /**
+     *
+     * @param str
+     * @param ch
+     * @return
+     * @see Strings#occurrencesOf(String, char)
+     */
+    public static int occurrencesOf(final String str, final char ch) {
+        return Strings.occurrencesOf(str, ch);
     }
 
     /**
@@ -418,7 +428,7 @@ public final class N extends CommonUtil {
      * @see Multiset#from(Collection)
      */
     public static <T> Map<T, Integer> occurrencesMap(final T[] a, final Supplier<Map<T, Integer>> mapSupplier) {
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return mapSupplier.get();
         }
 
@@ -438,7 +448,7 @@ public final class N extends CommonUtil {
      * @return
      * @see Multiset#from(Collection)
      */
-    public static <T> Map<T, Integer> occurrencesMap(final Iterable<T> c) {
+    public static <T> Map<T, Integer> occurrencesMap(final Iterable<? extends T> c) {
         return occurrencesMap(c, Suppliers.<T, Integer> ofMap());
     }
 
@@ -450,7 +460,7 @@ public final class N extends CommonUtil {
      * @return
      * @see Multiset#from(Collection)
      */
-    public static <T> Map<T, Integer> occurrencesMap(final Iterable<T> c, final Supplier<Map<T, Integer>> mapSupplier) {
+    public static <T> Map<T, Integer> occurrencesMap(final Iterable<? extends T> c, final Supplier<Map<T, Integer>> mapSupplier) {
         if (c == null) {
             return mapSupplier.get();
         }
@@ -471,7 +481,7 @@ public final class N extends CommonUtil {
      * @return
      * @see Multiset#from(Iterator)
      */
-    public static <T> Map<T, Integer> occurrencesMap(final Iterator<T> iter) {
+    public static <T> Map<T, Integer> occurrencesMap(final Iterator<? extends T> iter) {
         return occurrencesMap(iter, Suppliers.<T, Integer> ofMap());
     }
 
@@ -483,7 +493,7 @@ public final class N extends CommonUtil {
      * @return
      * @see Multiset#from(Iterator)
      */
-    public static <T> Map<T, Integer> occurrencesMap(final Iterator<T> iter, final Supplier<Map<T, Integer>> mapSupplier) {
+    public static <T> Map<T, Integer> occurrencesMap(final Iterator<? extends T> iter, final Supplier<Map<T, Integer>> mapSupplier) {
         if (iter == null) {
             return mapSupplier.get();
         }
@@ -607,7 +617,7 @@ public final class N extends CommonUtil {
         }
 
         while (iter.hasNext()) {
-            if (N.equals(iter.next(), valueToFind)) {
+            if (equals(iter.next(), valueToFind)) {
                 return true;
             }
         }
@@ -622,9 +632,9 @@ public final class N extends CommonUtil {
      * @return
      */
     public static boolean containsAll(final Collection<?> c, final Collection<?> valuesToFind) {
-        if (N.isNullOrEmpty(valuesToFind)) {
+        if (isNullOrEmpty(valuesToFind)) {
             return true;
-        } else if (N.isNullOrEmpty(c)) {
+        } else if (isNullOrEmpty(c)) {
             return false;
         }
 
@@ -638,9 +648,9 @@ public final class N extends CommonUtil {
      * @return
      */
     public static boolean containsAll(final Collection<?> c, final Object[] valuesToFind) {
-        if (N.isNullOrEmpty(valuesToFind)) {
+        if (isNullOrEmpty(valuesToFind)) {
             return true;
-        } else if (N.isNullOrEmpty(c)) {
+        } else if (isNullOrEmpty(c)) {
             return false;
         }
 
@@ -648,7 +658,7 @@ public final class N extends CommonUtil {
     }
 
     public static boolean containsAll(final Iterator<?> iter, final Collection<?> valuesToFind) {
-        if (N.isNullOrEmpty(valuesToFind)) {
+        if (isNullOrEmpty(valuesToFind)) {
             return true;
         } else if (iter == null) {
             return false;
@@ -672,11 +682,11 @@ public final class N extends CommonUtil {
      * @return
      */
     public static boolean containsAny(final Collection<?> c, final Collection<?> valuesToFind) {
-        if (N.isNullOrEmpty(c) || N.isNullOrEmpty(valuesToFind)) {
+        if (isNullOrEmpty(c) || isNullOrEmpty(valuesToFind)) {
             return false;
         }
 
-        return !N.disjoint(c, valuesToFind);
+        return !disjoint(c, valuesToFind);
     }
 
     /**
@@ -686,15 +696,15 @@ public final class N extends CommonUtil {
      * @return
      */
     public static boolean containsAny(final Collection<?> c, final Object[] valuesToFind) {
-        if (N.isNullOrEmpty(c) || N.isNullOrEmpty(valuesToFind)) {
+        if (isNullOrEmpty(c) || isNullOrEmpty(valuesToFind)) {
             return false;
         }
 
-        return !N.disjoint(c, Array.asList(valuesToFind));
+        return !disjoint(c, Array.asList(valuesToFind));
     }
 
     public static boolean containsAny(final Iterator<?> iter, final Set<?> valuesToFind) {
-        if (iter == null || N.isNullOrEmpty(valuesToFind)) {
+        if (iter == null || isNullOrEmpty(valuesToFind)) {
             return false;
         }
 
@@ -705,67 +715,6 @@ public final class N extends CommonUtil {
         }
 
         return false;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param c
-     * @param index
-     * @return
-     * @throws IndexOutOfBoundsException the index out of bounds exception
-     */
-    public static <T> T getElement(final Collection<? extends T> c, int index) throws IndexOutOfBoundsException {
-        N.checkIndex(index, N.size(c));
-
-        if (c instanceof List) {
-            return ((List<T>) c).get(index);
-        }
-
-        final Iterator<? extends T> iter = c.iterator();
-
-        while (index-- > 0) {
-            iter.next();
-        }
-
-        return iter.next();
-    }
-
-    /**
-     * Gets the only element.
-     *
-     * @param <T>
-     * @param iterable
-     * @return throws TooManyElementsException if there are more than one elements in the specified {@code iterable}.
-     */
-    public static <T> Nullable<T> getOnlyElement(Iterable<? extends T> iterable) throws TooManyElementsException {
-        if (iterable == null) {
-            return Nullable.empty();
-        }
-
-        return getOnlyElement(iterable.iterator());
-    }
-
-    /**
-     * Gets the only element.
-     *
-     * @param <T>
-     * @param iter
-     * @return throws TooManyElementsException if there are more than one elements in the specified {@code iter}.
-     * @throws TooManyElementsException the duplicated result exception
-     */
-    public static <T> Nullable<T> getOnlyElement(final Iterator<? extends T> iter) throws TooManyElementsException {
-        if (iter == null) {
-            return Nullable.empty();
-        }
-
-        final T first = iter.next();
-
-        if (iter.hasNext()) {
-            throw new TooManyElementsException("Expected at most one element but was: [" + Strings.concat(first, ", ", iter.next(), "...]"));
-        }
-
-        return Nullable.of(first);
     }
 
     /**
@@ -1266,7 +1215,7 @@ public final class N extends CommonUtil {
 
             return split(coll, 0, coll.size(), chunkSize);
         } else {
-            return N.toList(split(c.iterator(), chunkSize));
+            return toList(split(c.iterator(), chunkSize));
         }
     }
 
@@ -1322,7 +1271,7 @@ public final class N extends CommonUtil {
     }
 
     public static <T> ObjIterator<List<T>> split(final Iterator<? extends T> iter, final int chunkSize) {
-        N.checkArgument(chunkSize > 0, "'chunkSize' must be greater than 0, can't be: %s", chunkSize);
+        checkArgument(chunkSize > 0, "'chunkSize' must be greater than 0, can't be: %s", chunkSize);
 
         if (iter == null) {
             return ObjIterator.empty();
@@ -1403,20 +1352,20 @@ public final class N extends CommonUtil {
      * <pre>
      * <code>
      * final int[] a = Array.rangeClosed(1, 7);
-     * splitByCount(5, 7, true, (fromIndex, toIndex) ->  N.copyOfRange(a, fromIndex, toIndex)).forEach(Fn.println()); // [[1], [2], [3], [4, 5], [6, 7]]
-     * splitByCount(5, 7, false, (fromIndex, toIndex) ->  N.copyOfRange(a, fromIndex, toIndex)).forEach(Fn.println()); // [[1, 2], [3, 4], [5], [6], [7]]
+     * splitByCount(5, 7, true, (fromIndex, toIndex) ->  copyOfRange(a, fromIndex, toIndex)).forEach(Fn.println()); // [[1], [2], [3], [4, 5], [6, 7]]
+     * splitByCount(5, 7, false, (fromIndex, toIndex) ->  copyOfRange(a, fromIndex, toIndex)).forEach(Fn.println()); // [[1, 2], [3, 4], [5], [6], [7]]
      * </code>
      * </pre>
      *
      * @param <T>
      * @param maxCount max count of chunk want to split {@code totalSize} into.
      * @param totalSize
-     * @param smallerFirst
+     * @param sizeSmallerFirst
      * @param func
      * @return the stream
      */
-    public static <T> Stream<T> splitByCount(final int maxCount, final int totalSize, final boolean smallerFirst, final IntBiFunction<? extends T> func) {
-        if (smallerFirst) {
+    public static <T> Stream<T> splitByCount(final int maxCount, final int totalSize, final boolean sizeSmallerFirst, final IntBiFunction<? extends T> func) {
+        if (sizeSmallerFirst) {
             return splitByCountSmallerFirst(maxCount, totalSize, func);
         } else {
             return splitByCountSmallerLast(maxCount, totalSize, func);
@@ -1427,8 +1376,8 @@ public final class N extends CommonUtil {
      * <pre>
      * <code>
      * final int[] a = Array.rangeClosed(1, 7);
-     * splitByCountSmallerFirst(5, 7, (fromIndex, toIndex) ->  N.copyOfRange(a, fromIndex, toIndex)).forEach(Fn.println()); // [[1], [2], [3], [4, 5], [6, 7]]
-     * splitByCountSmallerLast(5, 7, (fromIndex, toIndex) ->  N.copyOfRange(a, fromIndex, toIndex)).forEach(Fn.println()); // [[1, 2], [3, 4], [5], [6], [7]]
+     * splitByCountSmallerFirst(5, 7, (fromIndex, toIndex) ->  copyOfRange(a, fromIndex, toIndex)).forEach(Fn.println()); // [[1], [2], [3], [4, 5], [6, 7]]
+     * splitByCountSmallerLast(5, 7, (fromIndex, toIndex) ->  copyOfRange(a, fromIndex, toIndex)).forEach(Fn.println()); // [[1, 2], [3, 4], [5], [6], [7]]
      * </code>
      * </pre>
      *
@@ -1439,9 +1388,9 @@ public final class N extends CommonUtil {
      * @return the stream
      */
     static <T> Stream<T> splitByCountSmallerFirst(final int maxCount, final int totalSize, final IntBiFunction<? extends T> func) {
-        N.checkArgPositive(maxCount, "maxCount");
-        N.checkArgNotNegative(totalSize, "totalSize");
-        N.checkArgNotNull(func, "func");
+        checkArgPositive(maxCount, "maxCount");
+        checkArgNotNegative(totalSize, "totalSize");
+        checkArgNotNull(func, "func");
 
         if (totalSize == 0) {
             return Stream.empty();
@@ -1470,7 +1419,7 @@ public final class N extends CommonUtil {
 
             @Override
             public void advance(long n) {
-                N.checkArgNotNegative(n, "n");
+                checkArgNotNegative(n, "n");
 
                 if (n > 0) {
                     while (n-- > 0 && cursor < totalSize) {
@@ -1492,8 +1441,8 @@ public final class N extends CommonUtil {
      * <pre>
      * <code>
      * final int[] a = Array.rangeClosed(1, 7);
-     * splitByCountSmallerFirst(5, 7, (fromIndex, toIndex) ->  N.copyOfRange(a, fromIndex, toIndex)).forEach(Fn.println()); // [[1], [2], [3], [4, 5], [6, 7]]
-     * splitByCountSmallerLast(5, 7, (fromIndex, toIndex) ->  N.copyOfRange(a, fromIndex, toIndex)).forEach(Fn.println()); // [[1, 2], [3, 4], [5], [6], [7]]
+     * splitByCountSmallerFirst(5, 7, (fromIndex, toIndex) ->  copyOfRange(a, fromIndex, toIndex)).forEach(Fn.println()); // [[1], [2], [3], [4, 5], [6, 7]]
+     * splitByCountSmallerLast(5, 7, (fromIndex, toIndex) ->  copyOfRange(a, fromIndex, toIndex)).forEach(Fn.println()); // [[1, 2], [3, 4], [5], [6], [7]]
      * </code>
      * </pre>
      *
@@ -1504,9 +1453,9 @@ public final class N extends CommonUtil {
      * @return the stream
      */
     static <T> Stream<T> splitByCountSmallerLast(final int maxCount, final int totalSize, final IntBiFunction<? extends T> func) {
-        N.checkArgPositive(maxCount, "maxCount");
-        N.checkArgNotNegative(totalSize, "totalSize");
-        N.checkArgNotNull(func, "func");
+        checkArgPositive(maxCount, "maxCount");
+        checkArgNotNegative(totalSize, "totalSize");
+        checkArgNotNull(func, "func");
 
         if (totalSize == 0) {
             return Stream.empty();
@@ -1535,7 +1484,7 @@ public final class N extends CommonUtil {
 
             @Override
             public void advance(long n) {
-                N.checkArgNotNegative(n, "n");
+                checkArgNotNegative(n, "n");
 
                 if (n > 0) {
                     while (n-- > 0 && cursor < totalSize) {
@@ -2204,8 +2153,8 @@ public final class N extends CommonUtil {
      * @return an empty {@code boolean[]} if {@code a} is null.
      */
     public static boolean[] flatten(final boolean[][] a) {
-        if (N.isNullOrEmpty(a)) {
-            return N.EMPTY_BOOLEAN_ARRAY;
+        if (isNullOrEmpty(a)) {
+            return EMPTY_BOOLEAN_ARRAY;
         }
 
         int count = 0;
@@ -2218,8 +2167,8 @@ public final class N extends CommonUtil {
         int from = 0;
 
         for (int i = 0, n = a.length; i < n; i++) {
-            if (N.notNullOrEmpty(a[i])) {
-                N.copy(a[i], 0, ret, from, a[i].length);
+            if (notNullOrEmpty(a[i])) {
+                copy(a[i], 0, ret, from, a[i].length);
                 from += a[i].length;
             }
         }
@@ -2233,8 +2182,8 @@ public final class N extends CommonUtil {
      * @return an empty {@code char[]} if {@code a} is null.
      */
     public static char[] flatten(final char[][] a) {
-        if (N.isNullOrEmpty(a)) {
-            return N.EMPTY_CHAR_ARRAY;
+        if (isNullOrEmpty(a)) {
+            return EMPTY_CHAR_ARRAY;
         }
 
         int count = 0;
@@ -2247,8 +2196,8 @@ public final class N extends CommonUtil {
         int from = 0;
 
         for (int i = 0, n = a.length; i < n; i++) {
-            if (N.notNullOrEmpty(a[i])) {
-                N.copy(a[i], 0, ret, from, a[i].length);
+            if (notNullOrEmpty(a[i])) {
+                copy(a[i], 0, ret, from, a[i].length);
                 from += a[i].length;
             }
         }
@@ -2262,8 +2211,8 @@ public final class N extends CommonUtil {
      * @return an empty {@code byte[]} if {@code a} is null.
      */
     public static byte[] flatten(final byte[][] a) {
-        if (N.isNullOrEmpty(a)) {
-            return N.EMPTY_BYTE_ARRAY;
+        if (isNullOrEmpty(a)) {
+            return EMPTY_BYTE_ARRAY;
         }
 
         int count = 0;
@@ -2276,8 +2225,8 @@ public final class N extends CommonUtil {
         int from = 0;
 
         for (int i = 0, n = a.length; i < n; i++) {
-            if (N.notNullOrEmpty(a[i])) {
-                N.copy(a[i], 0, ret, from, a[i].length);
+            if (notNullOrEmpty(a[i])) {
+                copy(a[i], 0, ret, from, a[i].length);
                 from += a[i].length;
             }
         }
@@ -2291,8 +2240,8 @@ public final class N extends CommonUtil {
      * @return an empty {@code short[]} if {@code a} is null.
      */
     public static short[] flatten(final short[][] a) {
-        if (N.isNullOrEmpty(a)) {
-            return N.EMPTY_SHORT_ARRAY;
+        if (isNullOrEmpty(a)) {
+            return EMPTY_SHORT_ARRAY;
         }
 
         int count = 0;
@@ -2305,8 +2254,8 @@ public final class N extends CommonUtil {
         int from = 0;
 
         for (int i = 0, n = a.length; i < n; i++) {
-            if (N.notNullOrEmpty(a[i])) {
-                N.copy(a[i], 0, ret, from, a[i].length);
+            if (notNullOrEmpty(a[i])) {
+                copy(a[i], 0, ret, from, a[i].length);
                 from += a[i].length;
             }
         }
@@ -2320,8 +2269,8 @@ public final class N extends CommonUtil {
      * @return an empty {@code int[]} if {@code a} is null.
      */
     public static int[] flatten(final int[][] a) {
-        if (N.isNullOrEmpty(a)) {
-            return N.EMPTY_INT_ARRAY;
+        if (isNullOrEmpty(a)) {
+            return EMPTY_INT_ARRAY;
         }
 
         int count = 0;
@@ -2334,8 +2283,8 @@ public final class N extends CommonUtil {
         int from = 0;
 
         for (int i = 0, n = a.length; i < n; i++) {
-            if (N.notNullOrEmpty(a[i])) {
-                N.copy(a[i], 0, ret, from, a[i].length);
+            if (notNullOrEmpty(a[i])) {
+                copy(a[i], 0, ret, from, a[i].length);
                 from += a[i].length;
             }
         }
@@ -2349,8 +2298,8 @@ public final class N extends CommonUtil {
      * @return an empty {@code long[]} if {@code a} is null.
      */
     public static long[] flatten(final long[][] a) {
-        if (N.isNullOrEmpty(a)) {
-            return N.EMPTY_LONG_ARRAY;
+        if (isNullOrEmpty(a)) {
+            return EMPTY_LONG_ARRAY;
         }
 
         int count = 0;
@@ -2363,8 +2312,8 @@ public final class N extends CommonUtil {
         int from = 0;
 
         for (int i = 0, n = a.length; i < n; i++) {
-            if (N.notNullOrEmpty(a[i])) {
-                N.copy(a[i], 0, ret, from, a[i].length);
+            if (notNullOrEmpty(a[i])) {
+                copy(a[i], 0, ret, from, a[i].length);
                 from += a[i].length;
             }
         }
@@ -2378,8 +2327,8 @@ public final class N extends CommonUtil {
      * @return an empty {@code float[]} if {@code a} is null.
      */
     public static float[] flatten(final float[][] a) {
-        if (N.isNullOrEmpty(a)) {
-            return N.EMPTY_FLOAT_ARRAY;
+        if (isNullOrEmpty(a)) {
+            return EMPTY_FLOAT_ARRAY;
         }
 
         int count = 0;
@@ -2392,8 +2341,8 @@ public final class N extends CommonUtil {
         int from = 0;
 
         for (int i = 0, n = a.length; i < n; i++) {
-            if (N.notNullOrEmpty(a[i])) {
-                N.copy(a[i], 0, ret, from, a[i].length);
+            if (notNullOrEmpty(a[i])) {
+                copy(a[i], 0, ret, from, a[i].length);
                 from += a[i].length;
             }
         }
@@ -2407,8 +2356,8 @@ public final class N extends CommonUtil {
      * @return an empty {@code double[]} if {@code a} is null.
      */
     public static double[] flatten(final double[][] a) {
-        if (N.isNullOrEmpty(a)) {
-            return N.EMPTY_DOUBLE_ARRAY;
+        if (isNullOrEmpty(a)) {
+            return EMPTY_DOUBLE_ARRAY;
         }
 
         int count = 0;
@@ -2421,8 +2370,8 @@ public final class N extends CommonUtil {
         int from = 0;
 
         for (int i = 0, n = a.length; i < n; i++) {
-            if (N.notNullOrEmpty(a[i])) {
-                N.copy(a[i], 0, ret, from, a[i].length);
+            if (notNullOrEmpty(a[i])) {
+                copy(a[i], 0, ret, from, a[i].length);
                 from += a[i].length;
             }
         }
@@ -2452,8 +2401,8 @@ public final class N extends CommonUtil {
      * @return an empty {@code T[]} if {@code a} is null.
      */
     public static <T> T[] flatten(final T[][] a, final Class<T> componentType) {
-        if (N.isNullOrEmpty(a)) {
-            return N.newArray(componentType, 0);
+        if (isNullOrEmpty(a)) {
+            return newArray(componentType, 0);
         }
 
         int count = 0;
@@ -2462,12 +2411,12 @@ public final class N extends CommonUtil {
             count += (a[i] == null ? 0 : a[i].length);
         }
 
-        final T[] ret = N.newArray(componentType, count);
+        final T[] ret = newArray(componentType, count);
         int from = 0;
 
         for (int i = 0, n = a.length; i < n; i++) {
-            if (N.notNullOrEmpty(a[i])) {
-                N.copy(a[i], 0, ret, from, a[i].length);
+            if (notNullOrEmpty(a[i])) {
+                copy(a[i], 0, ret, from, a[i].length);
                 from += a[i].length;
             }
         }
@@ -2481,7 +2430,7 @@ public final class N extends CommonUtil {
      * @param c
      * @return
      */
-    public static <T> List<T> flatten(final Collection<? extends Collection<? extends T>> c) {
+    public static <T> List<T> flatten(final Collection<? extends Iterable<? extends T>> c) {
         return flatten(c, IntFunctions.ofList());
     }
 
@@ -2491,26 +2440,78 @@ public final class N extends CommonUtil {
      * @param c
      * @return
      */
-    public static <T, C extends Collection<T>> C flatten(final Collection<? extends Collection<? extends T>> c, IntFunction<? extends C> supplier) {
-        if (N.isNullOrEmpty(c)) {
+    @SuppressWarnings("rawtypes")
+    public static <T, C extends Collection<T>> C flatten(final Collection<? extends Iterable<? extends T>> c, IntFunction<? extends C> supplier) {
+        if (isNullOrEmpty(c)) {
             return supplier.apply(0);
         }
 
         int count = 0;
 
-        for (Collection<? extends T> e : c) {
-            count += (e == null ? 0 : e.size());
+        for (Iterable<? extends T> e : c) {
+            count += ((e == null || !(e instanceof Collection)) ? 0 : ((Collection) e).size());
         }
 
         final C ret = supplier.apply(count);
 
-        for (Collection<? extends T> e : c) {
-            if (N.notNullOrEmpty(e)) {
-                ret.addAll(e);
+        for (Iterable<? extends T> e : c) {
+            if (e == null) {
+                continue;
+            } else if (e instanceof Collection) {
+                ret.addAll((Collection) e);
+            } else {
+                for (T ee : e) {
+                    ret.add(ee);
+                }
             }
         }
 
         return ret;
+    }
+
+    /**
+     * Flatten each element if it's a {@code Iterable}, otherwise just add it to result Collection.
+     *
+     * @param iter
+     * @return
+     */
+    @Beta
+    public static List<?> flattenEachElement(final Iterable<?> iter) {
+        return flattenEachElement(iter, IntFunctions.ofList());
+    }
+
+    /**
+     * Flatten each element if it's a {@code Iterable}, otherwise just add it to result Collection.
+     *
+     *
+     * @param <T>
+     * @param <C>
+     * @param iter
+     * @param supplier
+     * @return
+     */
+    @Beta
+    @SuppressWarnings("rawtypes")
+    public static <T, C extends Collection<T>> C flattenEachElement(final Iterable<?> iter, final IntFunction<? extends C> supplier) {
+        if (iter == null) {
+            return supplier.apply(0);
+        }
+
+        final C result = supplier.apply(iter instanceof Collection ? ((Collection) iter).size() : 0);
+
+        flattenEachElement((Iterable<Object>) iter, (Collection<Object>) result);
+
+        return result;
+    }
+
+    private static void flattenEachElement(final Iterable<Object> c, final Collection<Object> output) {
+        for (Object next : c) {
+            if (next instanceof Iterable) {
+                flattenEachElement((Iterable<Object>) next, output);
+            } else {
+                output.add(next);
+            }
+        }
     }
 
     /**
@@ -3192,15 +3193,15 @@ public final class N extends CommonUtil {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Set<T> differentSet(final Collection<? extends T> a, final Collection<?> b) {
-        if (N.isNullOrEmpty(a)) {
-            return N.newHashSet();
-        } else if (N.isNullOrEmpty(b)) {
-            return N.newHashSet(a);
+        if (isNullOrEmpty(a)) {
+            return newHashSet();
+        } else if (isNullOrEmpty(b)) {
+            return newHashSet(a);
         }
 
-        final Set<T> result = N.newHashSet(a);
+        final Set<T> result = newHashSet(a);
 
-        N.removeAll(result, (Collection) b);
+        removeAll(result, (Collection) b);
 
         return result;
     }
@@ -3218,14 +3219,14 @@ public final class N extends CommonUtil {
      * @see Difference#of(Collection, Collection)
      */
     public static <T> Set<T> symmetricDifferentSet(final Collection<? extends T> a, final Collection<? extends T> b) {
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(b) ? N.<T> newHashSet() : N.<T> newHashSet(b);
-        } else if (N.isNullOrEmpty(b)) {
-            return N.isNullOrEmpty(a) ? N.<T> newHashSet() : N.<T> newHashSet(a);
+        if (isNullOrEmpty(a)) {
+            return isNullOrEmpty(b) ? newHashSet() : newHashSet(b);
+        } else if (isNullOrEmpty(b)) {
+            return isNullOrEmpty(a) ? newHashSet() : newHashSet(a);
         }
 
         final Set<T> commonSet = commonSet(a, b);
-        final Set<T> result = N.newHashSet();
+        final Set<T> result = newHashSet();
 
         for (T e : a) {
             if (!commonSet.contains(e)) {
@@ -3252,8 +3253,8 @@ public final class N extends CommonUtil {
      * @see Collection#retainAll(Collection)
      */
     public static <T> Set<T> commonSet(final Collection<? extends T> a, final Collection<?> b) {
-        if (N.isNullOrEmpty(a) || N.isNullOrEmpty(b)) {
-            return N.newHashSet();
+        if (isNullOrEmpty(a) || isNullOrEmpty(b)) {
+            return newHashSet();
         }
 
         return commonSet(Array.asList(a, (Collection<? extends T>) b));
@@ -3268,17 +3269,17 @@ public final class N extends CommonUtil {
      * @see Collection#retainAll(Collection)
      */
     public static <T> Set<T> commonSet(final Collection<? extends Collection<? extends T>> c) {
-        if (N.isNullOrEmpty(c)) {
-            return N.newHashSet();
+        if (isNullOrEmpty(c)) {
+            return newHashSet();
         } else if (c.size() == 1) {
-            return N.newHashSet(c.iterator().next());
+            return newHashSet(c.iterator().next());
         }
 
         Collection<? extends T> smallest = null;
 
         for (final Collection<? extends T> e : c) {
-            if (N.isNullOrEmpty(e)) {
-                return N.newHashSet();
+            if (isNullOrEmpty(e)) {
+                return newHashSet();
             }
 
             if (smallest == null || e.size() < smallest.size()) {
@@ -3315,7 +3316,7 @@ public final class N extends CommonUtil {
             cnt++;
         }
 
-        final Set<T> result = N.newHashSet(map.size());
+        final Set<T> result = newHashSet(map.size());
 
         for (Map.Entry<T, MutableInt> entry : map.entrySet()) {
             if (entry.getValue().intValue() == cnt) {
@@ -3338,15 +3339,15 @@ public final class N extends CommonUtil {
      * @see #removeAll(Collection, Collection)
      * @see Difference#of(Collection, Collection)
      */
-    public static <T> List<T> exclude(final Collection<T> c, final Object objToExclude) {
-        if (N.isNullOrEmpty(c)) {
+    public static <T> List<T> exclude(final Collection<? extends T> c, final Object objToExclude) {
+        if (isNullOrEmpty(c)) {
             return new ArrayList<>();
         }
 
         final List<T> result = new ArrayList<>(c.size() - 1);
 
         for (T e : c) {
-            if (!N.equals(e, objToExclude)) {
+            if (!equals(e, objToExclude)) {
                 result.add(e);
             }
         }
@@ -3366,12 +3367,12 @@ public final class N extends CommonUtil {
      * @see #removeAll(Collection, Collection)
      * @see Difference#of(Collection, Collection)
      */
-    public static <T> Set<T> excludeToSet(final Collection<T> c, final Object objToExclude) {
-        if (N.isNullOrEmpty(c)) {
+    public static <T> Set<T> excludeToSet(final Collection<? extends T> c, final Object objToExclude) {
+        if (isNullOrEmpty(c)) {
             return new HashSet<>();
         }
 
-        final Set<T> result = N.newHashSet(c);
+        final Set<T> result = newHashSet(c);
 
         result.remove(objToExclude);
 
@@ -3389,17 +3390,17 @@ public final class N extends CommonUtil {
      * @see #removeAll(Collection, Collection)
      * @see Difference#of(Collection, Collection)
      */
-    public static <T> List<T> excludeAll(final Collection<T> c, final Collection<?> objsToExclude) {
-        if (N.isNullOrEmpty(c)) {
+    public static <T> List<T> excludeAll(final Collection<? extends T> c, final Collection<?> objsToExclude) {
+        if (isNullOrEmpty(c)) {
             return new ArrayList<>();
-        } else if (N.isNullOrEmpty(objsToExclude)) {
+        } else if (isNullOrEmpty(objsToExclude)) {
             return new ArrayList<>(c);
         } else if (objsToExclude.size() == 1) {
-            return exclude(c, N.firstOrNullIfEmpty(objsToExclude));
+            return exclude(c, firstOrNullIfEmpty(objsToExclude));
         }
 
         final Set<Object> set = objsToExclude instanceof Set ? ((Set<Object>) objsToExclude) : new HashSet<>(objsToExclude);
-        final List<T> result = new ArrayList<>(N.max(0, c.size() - set.size()));
+        final List<T> result = new ArrayList<>(max(0, c.size() - set.size()));
 
         for (T e : c) {
             if (!set.contains(e)) {
@@ -3421,17 +3422,17 @@ public final class N extends CommonUtil {
      * @see #removeAll(Collection, Collection)
      * @see Difference#of(Collection, Collection)
      */
-    public static <T> Set<T> excludeAllToSet(final Collection<T> c, final Collection<?> objsToExclude) {
-        if (N.isNullOrEmpty(c)) {
+    public static <T> Set<T> excludeAllToSet(final Collection<? extends T> c, final Collection<?> objsToExclude) {
+        if (isNullOrEmpty(c)) {
             return new HashSet<>();
-        } else if (N.isNullOrEmpty(objsToExclude)) {
+        } else if (isNullOrEmpty(objsToExclude)) {
             return new HashSet<>(c);
         } else if (objsToExclude.size() == 1) {
-            return excludeToSet(c, N.firstOrNullIfEmpty(objsToExclude));
+            return excludeToSet(c, firstOrNullIfEmpty(objsToExclude));
         }
 
         final Set<Object> set = objsToExclude instanceof Set ? ((Set<Object>) objsToExclude) : new HashSet<>(objsToExclude);
-        final Set<T> result = N.newHashSet(N.max(0, c.size() - set.size()));
+        final Set<T> result = newHashSet(max(0, c.size() - set.size()));
 
         for (T e : c) {
             if (!set.contains(e)) {
@@ -3455,12 +3456,12 @@ public final class N extends CommonUtil {
      * @see Collection#containsAll
      */
     public static boolean isSubCollection(final Collection<?> subColl, final Collection<?> coll) {
-        N.checkArgNotNull(subColl, "a");
-        N.checkArgNotNull(coll, "b");
+        checkArgNotNull(subColl, "a");
+        checkArgNotNull(coll, "b");
 
-        if (N.isNullOrEmpty(coll)) {
+        if (isNullOrEmpty(coll)) {
             return true;
-        } else if (N.isNullOrEmpty(subColl)) {
+        } else if (isNullOrEmpty(subColl)) {
             return false;
         }
 
@@ -3499,8 +3500,8 @@ public final class N extends CommonUtil {
      * @see Collection#containsAll
      */
     public static boolean isProperSubCollection(final Collection<?> subColl, final Collection<?> coll) {
-        N.checkArgNotNull(subColl, "a");
-        N.checkArgNotNull(coll, "b");
+        checkArgNotNull(subColl, "a");
+        checkArgNotNull(coll, "b");
 
         return subColl.size() < coll.size() && isSubCollection(subColl, coll);
     }
@@ -3525,8 +3526,8 @@ public final class N extends CommonUtil {
             return false;
         }
 
-        final int sizeA = N.size(a);
-        final int sizeB = N.size(b);
+        final int sizeA = size(a);
+        final int sizeB = size(b);
 
         if (sizeA != sizeB) {
             return false;
@@ -3845,7 +3846,7 @@ public final class N extends CommonUtil {
     }
 
     public static <E extends Exception> void replaceAll(final boolean[] a, final Throwables.BooleanUnaryOperator<E> operator) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return;
         }
 
@@ -3855,7 +3856,7 @@ public final class N extends CommonUtil {
     }
 
     public static <E extends Exception> void replaceAll(final char[] a, final Throwables.CharUnaryOperator<E> operator) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return;
         }
 
@@ -3865,7 +3866,7 @@ public final class N extends CommonUtil {
     }
 
     public static <E extends Exception> void replaceAll(final byte[] a, final Throwables.ByteUnaryOperator<E> operator) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return;
         }
 
@@ -3875,7 +3876,7 @@ public final class N extends CommonUtil {
     }
 
     public static <E extends Exception> void replaceAll(final short[] a, final Throwables.ShortUnaryOperator<E> operator) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return;
         }
 
@@ -3885,7 +3886,7 @@ public final class N extends CommonUtil {
     }
 
     public static <E extends Exception> void replaceAll(final int[] a, final Throwables.IntUnaryOperator<E> operator) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return;
         }
 
@@ -3895,7 +3896,7 @@ public final class N extends CommonUtil {
     }
 
     public static <E extends Exception> void replaceAll(final long[] a, final Throwables.LongUnaryOperator<E> operator) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return;
         }
 
@@ -3905,7 +3906,7 @@ public final class N extends CommonUtil {
     }
 
     public static <E extends Exception> void replaceAll(final float[] a, final Throwables.FloatUnaryOperator<E> operator) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return;
         }
 
@@ -3915,7 +3916,7 @@ public final class N extends CommonUtil {
     }
 
     public static <E extends Exception> void replaceAll(final double[] a, final Throwables.DoubleUnaryOperator<E> operator) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return;
         }
 
@@ -3925,7 +3926,7 @@ public final class N extends CommonUtil {
     }
 
     public static <T, E extends Exception> void replaceAll(final T[] a, final Throwables.UnaryOperator<T, E> operator) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return;
         }
 
@@ -3934,12 +3935,10 @@ public final class N extends CommonUtil {
         }
     }
 
-    public static <T, E extends Exception> int replaceAll(final List<T> list, final Throwables.UnaryOperator<T, E> operator) throws E {
+    public static <T, E extends Exception> void replaceAll(final List<T> list, final Throwables.UnaryOperator<T, E> operator) throws E {
         if (isNullOrEmpty(list)) {
-            return 0;
+            return;
         }
-
-        int result = 0;
 
         final int size = list.size();
 
@@ -3954,12 +3953,10 @@ public final class N extends CommonUtil {
                 itr.set(operator.apply(itr.next()));
             }
         }
-
-        return result;
     }
 
     public static <E extends Exception> int replaceIf(final boolean[] a, final Throwables.BooleanPredicate<E> predicate, final boolean newValue) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return 0;
         }
 
@@ -3976,7 +3973,7 @@ public final class N extends CommonUtil {
     }
 
     public static <E extends Exception> int replaceIf(final char[] a, final Throwables.CharPredicate<E> predicate, final char newValue) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return 0;
         }
 
@@ -3993,7 +3990,7 @@ public final class N extends CommonUtil {
     }
 
     public static <E extends Exception> int replaceIf(final byte[] a, final Throwables.BytePredicate<E> predicate, final byte newValue) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return 0;
         }
 
@@ -4010,7 +4007,7 @@ public final class N extends CommonUtil {
     }
 
     public static <E extends Exception> int replaceIf(final short[] a, final Throwables.ShortPredicate<E> predicate, final short newValue) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return 0;
         }
 
@@ -4027,7 +4024,7 @@ public final class N extends CommonUtil {
     }
 
     public static <E extends Exception> int replaceIf(final int[] a, final Throwables.IntPredicate<E> predicate, final int newValue) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return 0;
         }
 
@@ -4044,7 +4041,7 @@ public final class N extends CommonUtil {
     }
 
     public static <E extends Exception> int replaceIf(final long[] a, final Throwables.LongPredicate<E> predicate, final long newValue) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return 0;
         }
 
@@ -4061,7 +4058,7 @@ public final class N extends CommonUtil {
     }
 
     public static <E extends Exception> int replaceIf(final float[] a, final Throwables.FloatPredicate<E> predicate, final float newValue) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return 0;
         }
 
@@ -4078,7 +4075,7 @@ public final class N extends CommonUtil {
     }
 
     public static <E extends Exception> int replaceIf(final double[] a, final Throwables.DoublePredicate<E> predicate, final double newValue) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return 0;
         }
 
@@ -4095,7 +4092,7 @@ public final class N extends CommonUtil {
     }
 
     public static <T, E extends Exception> int replaceIf(final T[] a, final Throwables.Predicate<? super T, E> predicate, final T newValue) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return 0;
         }
 
@@ -4112,7 +4109,7 @@ public final class N extends CommonUtil {
     }
 
     public static <T, E extends Exception> int replaceIf(final List<T> c, final Throwables.Predicate<? super T, E> predicate, final T newValue) throws E {
-        if (N.isNullOrEmpty(c)) {
+        if (isNullOrEmpty(c)) {
             return 0;
         }
 
@@ -4615,7 +4612,7 @@ public final class N extends CommonUtil {
     public static <T> boolean addAll(final Collection<T> c, final T... elementsToAdd) throws IllegalArgumentException {
         checkArgNotNull(c, "c");
 
-        if (N.isNullOrEmpty(elementsToAdd)) {
+        if (isNullOrEmpty(elementsToAdd)) {
             return false;
         }
 
@@ -4639,14 +4636,8 @@ public final class N extends CommonUtil {
 
         boolean modified = false;
 
-        if (elementsToAdd.hasNext()) {
-            c.add(elementsToAdd.next());
-
-            modified = true;
-        }
-
         while (elementsToAdd.hasNext()) {
-            c.add(elementsToAdd.next());
+            modified = c.add(elementsToAdd.next()) || modified;
         }
 
         return modified;
@@ -5021,6 +5012,20 @@ public final class N extends CommonUtil {
         return newArray;
     }
 
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param list
+    //     * @param index
+    //     * @param elementToInsert
+    //     * @throws IllegalArgumentException
+    //     */
+    //    public static <T> void insert(final List<T> list, final int index, final T elementToInsert) throws IllegalArgumentException {
+    //        checkArgNotNull(list, "list");
+    //
+    //        list.add(index, elementToInsert);
+    //    }
+
     /**
      * Returns a new String
      *
@@ -5030,7 +5035,7 @@ public final class N extends CommonUtil {
      * @return a new String
      */
     public static String insert(final String str, final int index, final String strToInsert) {
-        N.checkIndex(index, len(str));
+        checkIndex(index, len(str));
 
         if (isNullOrEmpty(strToInsert)) {
             return nullToEmpty(str);
@@ -5393,6 +5398,28 @@ public final class N extends CommonUtil {
     }
 
     /**
+     *
+     * @param <T>
+     * @param list
+     * @param index
+     * @param elementsToInsert
+     * @return
+     * @throws IllegalArgumentException
+     */
+    @SafeVarargs
+    public static <T> boolean insertAll(final List<T> list, final int index, final T... elementsToInsert) throws IllegalArgumentException {
+        checkArgNotNull(list, "list");
+
+        if (isNullOrEmpty(elementsToInsert)) {
+            return false;
+        }
+
+        list.addAll(index, N.asList(elementsToInsert));
+
+        return true;
+    }
+
+    /**
      * <p>
      * Removes the element at the specified position from the specified array.
      * All subsequent elements are shifted to the left (subtracts one from their
@@ -5700,6 +5727,20 @@ public final class N extends CommonUtil {
         return result;
     }
 
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param list
+    //     * @param index
+    //     * @return
+    //     * @throws IllegalArgumentException
+    //     */
+    //    public static <T> T delete(final List<T> list, final int index) throws IllegalArgumentException {
+    //        checkArgNotNull(list, "list");
+    //
+    //        return list.remove(index);
+    //    }
+
     /**
      * <p>
      * Removes the elements at the specified positions from the specified array.
@@ -5718,8 +5759,8 @@ public final class N extends CommonUtil {
      * </p>
      *
      * <pre>
-     * N.deleteAll([true, false, true], 0, 2) = [false]
-     * N.removeAll([true, false, true], 1, 2) = [true]
+     * deleteAll([true, false, true], 0, 2) = [false]
+     * removeAll([true, false, true], 1, 2) = [true]
      * </pre>
      *
      * @param a
@@ -5732,7 +5773,7 @@ public final class N extends CommonUtil {
     @SafeVarargs
     public static boolean[] deleteAll(final boolean[] a, int... indices) {
         if (isNullOrEmpty(indices)) {
-            return a == null ? N.EMPTY_BOOLEAN_ARRAY : a.clone();
+            return a == null ? EMPTY_BOOLEAN_ARRAY : a.clone();
         } else if (indices.length == 1) {
             return delete(a, indices[0]);
         }
@@ -5786,12 +5827,12 @@ public final class N extends CommonUtil {
      * </p>
      *
      * <pre>
-     * N.deleteAll([1], 0)             = []
-     * N.deleteAll([2, 6], 0)          = [6]
-     * N.deleteAll([2, 6], 0, 1)       = []
-     * N.deleteAll([2, 6, 3], 1, 2)    = [2]
-     * N.deleteAll([2, 6, 3], 0, 2)    = [6]
-     * N.deleteAll([2, 6, 3], 0, 1, 2) = []
+     * deleteAll([1], 0)             = []
+     * deleteAll([2, 6], 0)          = [6]
+     * deleteAll([2, 6], 0, 1)       = []
+     * deleteAll([2, 6, 3], 1, 2)    = [2]
+     * deleteAll([2, 6, 3], 0, 2)    = [6]
+     * deleteAll([2, 6, 3], 0, 1, 2) = []
      * </pre>
      *
      * @param a
@@ -5802,7 +5843,7 @@ public final class N extends CommonUtil {
     @SafeVarargs
     public static char[] deleteAll(final char[] a, int... indices) {
         if (isNullOrEmpty(indices)) {
-            return a == null ? N.EMPTY_CHAR_ARRAY : a.clone();
+            return a == null ? EMPTY_CHAR_ARRAY : a.clone();
         } else if (indices.length == 1) {
             return delete(a, indices[0]);
         }
@@ -5856,12 +5897,12 @@ public final class N extends CommonUtil {
      * </p>
      *
      * <pre>
-     * N.deleteAll([1], 0)             = []
-     * N.deleteAll([2, 6], 0)          = [6]
-     * N.deleteAll([2, 6], 0, 1)       = []
-     * N.deleteAll([2, 6, 3], 1, 2)    = [2]
-     * N.deleteAll([2, 6, 3], 0, 2)    = [6]
-     * N.deleteAll([2, 6, 3], 0, 1, 2) = []
+     * deleteAll([1], 0)             = []
+     * deleteAll([2, 6], 0)          = [6]
+     * deleteAll([2, 6], 0, 1)       = []
+     * deleteAll([2, 6, 3], 1, 2)    = [2]
+     * deleteAll([2, 6, 3], 0, 2)    = [6]
+     * deleteAll([2, 6, 3], 0, 1, 2) = []
      * </pre>
      *
      * @param a
@@ -5872,7 +5913,7 @@ public final class N extends CommonUtil {
     @SafeVarargs
     public static byte[] deleteAll(final byte[] a, int... indices) {
         if (isNullOrEmpty(indices)) {
-            return a == null ? N.EMPTY_BYTE_ARRAY : a.clone();
+            return a == null ? EMPTY_BYTE_ARRAY : a.clone();
         } else if (indices.length == 1) {
             return delete(a, indices[0]);
         }
@@ -5926,12 +5967,12 @@ public final class N extends CommonUtil {
      * </p>
      *
      * <pre>
-     * N.deleteAll([1], 0)             = []
-     * N.deleteAll([2, 6], 0)          = [6]
-     * N.deleteAll([2, 6], 0, 1)       = []
-     * N.deleteAll([2, 6, 3], 1, 2)    = [2]
-     * N.deleteAll([2, 6, 3], 0, 2)    = [6]
-     * N.deleteAll([2, 6, 3], 0, 1, 2) = []
+     * deleteAll([1], 0)             = []
+     * deleteAll([2, 6], 0)          = [6]
+     * deleteAll([2, 6], 0, 1)       = []
+     * deleteAll([2, 6, 3], 1, 2)    = [2]
+     * deleteAll([2, 6, 3], 0, 2)    = [6]
+     * deleteAll([2, 6, 3], 0, 1, 2) = []
      * </pre>
      *
      * @param a
@@ -5942,7 +5983,7 @@ public final class N extends CommonUtil {
     @SafeVarargs
     public static short[] deleteAll(final short[] a, int... indices) {
         if (isNullOrEmpty(indices)) {
-            return a == null ? N.EMPTY_SHORT_ARRAY : a.clone();
+            return a == null ? EMPTY_SHORT_ARRAY : a.clone();
         } else if (indices.length == 1) {
             return delete(a, indices[0]);
         }
@@ -5996,12 +6037,12 @@ public final class N extends CommonUtil {
      * </p>
      *
      * <pre>
-     * N.deleteAll([1], 0)             = []
-     * N.deleteAll([2, 6], 0)          = [6]
-     * N.deleteAll([2, 6], 0, 1)       = []
-     * N.deleteAll([2, 6, 3], 1, 2)    = [2]
-     * N.deleteAll([2, 6, 3], 0, 2)    = [6]
-     * N.deleteAll([2, 6, 3], 0, 1, 2) = []
+     * deleteAll([1], 0)             = []
+     * deleteAll([2, 6], 0)          = [6]
+     * deleteAll([2, 6], 0, 1)       = []
+     * deleteAll([2, 6, 3], 1, 2)    = [2]
+     * deleteAll([2, 6, 3], 0, 2)    = [6]
+     * deleteAll([2, 6, 3], 0, 1, 2) = []
      * </pre>
      *
      * @param a
@@ -6014,7 +6055,7 @@ public final class N extends CommonUtil {
     @SafeVarargs
     public static int[] deleteAll(final int[] a, int... indices) {
         if (isNullOrEmpty(indices)) {
-            return a == null ? N.EMPTY_INT_ARRAY : a.clone();
+            return a == null ? EMPTY_INT_ARRAY : a.clone();
         } else if (indices.length == 1) {
             return delete(a, indices[0]);
         }
@@ -6068,12 +6109,12 @@ public final class N extends CommonUtil {
      * </p>
      *
      * <pre>
-     * N.deleteAll([1], 0)             = []
-     * N.deleteAll([2, 6], 0)          = [6]
-     * N.deleteAll([2, 6], 0, 1)       = []
-     * N.deleteAll([2, 6, 3], 1, 2)    = [2]
-     * N.deleteAll([2, 6, 3], 0, 2)    = [6]
-     * N.deleteAll([2, 6, 3], 0, 1, 2) = []
+     * deleteAll([1], 0)             = []
+     * deleteAll([2, 6], 0)          = [6]
+     * deleteAll([2, 6], 0, 1)       = []
+     * deleteAll([2, 6, 3], 1, 2)    = [2]
+     * deleteAll([2, 6, 3], 0, 2)    = [6]
+     * deleteAll([2, 6, 3], 0, 1, 2) = []
      * </pre>
      *
      * @param a
@@ -6086,7 +6127,7 @@ public final class N extends CommonUtil {
     @SafeVarargs
     public static long[] deleteAll(final long[] a, int... indices) {
         if (isNullOrEmpty(indices)) {
-            return a == null ? N.EMPTY_LONG_ARRAY : a.clone();
+            return a == null ? EMPTY_LONG_ARRAY : a.clone();
         } else if (indices.length == 1) {
             return delete(a, indices[0]);
         }
@@ -6140,12 +6181,12 @@ public final class N extends CommonUtil {
      * </p>
      *
      * <pre>
-     * N.deleteAll([1], 0)             = []
-     * N.deleteAll([2, 6], 0)          = [6]
-     * N.deleteAll([2, 6], 0, 1)       = []
-     * N.deleteAll([2, 6, 3], 1, 2)    = [2]
-     * N.deleteAll([2, 6, 3], 0, 2)    = [6]
-     * N.deleteAll([2, 6, 3], 0, 1, 2) = []
+     * deleteAll([1], 0)             = []
+     * deleteAll([2, 6], 0)          = [6]
+     * deleteAll([2, 6], 0, 1)       = []
+     * deleteAll([2, 6, 3], 1, 2)    = [2]
+     * deleteAll([2, 6, 3], 0, 2)    = [6]
+     * deleteAll([2, 6, 3], 0, 1, 2) = []
      * </pre>
      *
      * @param a
@@ -6156,7 +6197,7 @@ public final class N extends CommonUtil {
     @SafeVarargs
     public static float[] deleteAll(final float[] a, int... indices) {
         if (isNullOrEmpty(indices)) {
-            return a == null ? N.EMPTY_FLOAT_ARRAY : a.clone();
+            return a == null ? EMPTY_FLOAT_ARRAY : a.clone();
         } else if (indices.length == 1) {
             return delete(a, indices[0]);
         }
@@ -6210,12 +6251,12 @@ public final class N extends CommonUtil {
      * </p>
      *
      * <pre>
-     * N.deleteAll([1], 0)             = []
-     * N.deleteAll([2, 6], 0)          = [6]
-     * N.deleteAll([2, 6], 0, 1)       = []
-     * N.deleteAll([2, 6, 3], 1, 2)    = [2]
-     * N.deleteAll([2, 6, 3], 0, 2)    = [6]
-     * N.deleteAll([2, 6, 3], 0, 1, 2) = []
+     * deleteAll([1], 0)             = []
+     * deleteAll([2, 6], 0)          = [6]
+     * deleteAll([2, 6], 0, 1)       = []
+     * deleteAll([2, 6, 3], 1, 2)    = [2]
+     * deleteAll([2, 6, 3], 0, 2)    = [6]
+     * deleteAll([2, 6, 3], 0, 1, 2) = []
      * </pre>
      *
      * @param a
@@ -6226,7 +6267,7 @@ public final class N extends CommonUtil {
     @SafeVarargs
     public static double[] deleteAll(final double[] a, int... indices) {
         if (isNullOrEmpty(indices)) {
-            return a == null ? N.EMPTY_DOUBLE_ARRAY : a.clone();
+            return a == null ? EMPTY_DOUBLE_ARRAY : a.clone();
         } else if (indices.length == 1) {
             return delete(a, indices[0]);
         }
@@ -6270,7 +6311,7 @@ public final class N extends CommonUtil {
     @SafeVarargs
     public static String[] deleteAll(final String[] a, int... indices) throws IllegalArgumentException {
         if (isNullOrEmpty(indices)) {
-            return a == null ? N.EMPTY_STRING_ARRAY : a.clone();
+            return a == null ? EMPTY_STRING_ARRAY : a.clone();
         } else if (indices.length == 1) {
             return delete(a, indices[0]);
         }
@@ -6294,8 +6335,8 @@ public final class N extends CommonUtil {
      *
      *
      * <pre>
-     * N.deleteAll(["a", "b", "c"], 0, 2) = ["b"]
-     * N.deleteAll(["a", "b", "c"], 1, 2) = ["a"]
+     * deleteAll(["a", "b", "c"], 0, 2) = ["b"]
+     * deleteAll(["a", "b", "c"], 1, 2) = ["a"]
      * </pre>
      *
      * @param <T> the component type of the array
@@ -6708,6 +6749,327 @@ public final class N extends CommonUtil {
     }
 
     /**
+     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
+     *
+     * @param a
+     * @param elementsToRemove
+     * @return
+     * @see Collection#removeAll(Collection)
+     * @see N#difference(boolean[], boolean[])
+     */
+    @SafeVarargs
+    public static boolean[] removeAll(final boolean[] a, final boolean... elementsToRemove) {
+        if (isNullOrEmpty(a)) {
+            return EMPTY_BOOLEAN_ARRAY;
+        } else if (isNullOrEmpty(elementsToRemove)) {
+            return a.clone();
+        } else if (elementsToRemove.length == 1) {
+            return removeAllOccurrences(a, elementsToRemove[0]);
+        }
+
+        final BooleanList list = BooleanList.of(a.clone());
+        list.removeAll(BooleanList.of(elementsToRemove));
+        return list.trimToSize().array();
+    }
+
+    /**
+     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
+     *
+     * @param a
+     * @param elementsToRemove
+     * @return
+     * @see Collection#removeAll(Collection)
+     * @see N#difference(char[], char[])
+     */
+    @SafeVarargs
+    public static char[] removeAll(final char[] a, final char... elementsToRemove) {
+        if (isNullOrEmpty(a)) {
+            return EMPTY_CHAR_ARRAY;
+        } else if (isNullOrEmpty(elementsToRemove)) {
+            return a.clone();
+        } else if (elementsToRemove.length == 1) {
+            return removeAllOccurrences(a, elementsToRemove[0]);
+        }
+
+        final CharList list = CharList.of(a.clone());
+        list.removeAll(CharList.of(elementsToRemove));
+        return list.trimToSize().array();
+    }
+
+    /**
+     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
+     *
+     * @param a
+     * @param elementsToRemove
+     * @return
+     * @see Collection#removeAll(Collection)
+     * @see N#difference(byte[], byte[])
+     */
+    @SafeVarargs
+    public static byte[] removeAll(final byte[] a, final byte... elementsToRemove) {
+        if (isNullOrEmpty(a)) {
+            return EMPTY_BYTE_ARRAY;
+        } else if (isNullOrEmpty(elementsToRemove)) {
+            return a.clone();
+        } else if (elementsToRemove.length == 1) {
+            return removeAllOccurrences(a, elementsToRemove[0]);
+        }
+
+        final ByteList list = ByteList.of(a.clone());
+        list.removeAll(ByteList.of(elementsToRemove));
+        return list.trimToSize().array();
+    }
+
+    /**
+     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
+     *
+     * @param a
+     * @param elementsToRemove
+     * @return
+     * @see Collection#removeAll(Collection)
+     * @see N#difference(short[], short[])
+     */
+    @SafeVarargs
+    public static short[] removeAll(final short[] a, final short... elementsToRemove) {
+        if (isNullOrEmpty(a)) {
+            return EMPTY_SHORT_ARRAY;
+        } else if (isNullOrEmpty(elementsToRemove)) {
+            return a.clone();
+        } else if (elementsToRemove.length == 1) {
+            return removeAllOccurrences(a, elementsToRemove[0]);
+        }
+
+        final ShortList list = ShortList.of(a.clone());
+        list.removeAll(ShortList.of(elementsToRemove));
+        return list.trimToSize().array();
+    }
+
+    /**
+     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
+     *
+     * @param a
+     * @param elementsToRemove
+     * @return
+     * @see Collection#removeAll(Collection)
+     * @see N#difference(int[], int[])
+     */
+    @SafeVarargs
+    public static int[] removeAll(final int[] a, final int... elementsToRemove) {
+        if (isNullOrEmpty(a)) {
+            return EMPTY_INT_ARRAY;
+        } else if (isNullOrEmpty(elementsToRemove)) {
+            return a.clone();
+        } else if (elementsToRemove.length == 1) {
+            return removeAllOccurrences(a, elementsToRemove[0]);
+        }
+
+        final IntList list = IntList.of(a.clone());
+        list.removeAll(IntList.of(elementsToRemove));
+        return list.trimToSize().array();
+    }
+
+    /**
+     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
+     *
+     * @param a
+     * @param elementsToRemove
+     * @return
+     * @see Collection#removeAll(Collection)
+     * @see N#difference(long[], long[])
+     */
+    @SafeVarargs
+    public static long[] removeAll(final long[] a, final long... elementsToRemove) {
+        if (isNullOrEmpty(a)) {
+            return EMPTY_LONG_ARRAY;
+        } else if (isNullOrEmpty(elementsToRemove)) {
+            return a.clone();
+        } else if (elementsToRemove.length == 1) {
+            return removeAllOccurrences(a, elementsToRemove[0]);
+        }
+
+        final LongList list = LongList.of(a.clone());
+        list.removeAll(LongList.of(elementsToRemove));
+        return list.trimToSize().array();
+    }
+
+    /**
+     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
+     *
+     * @param a
+     * @param elementsToRemove
+     * @return
+     * @see Collection#removeAll(Collection)
+     * @see N#difference(float[], float[])
+     */
+    @SafeVarargs
+    public static float[] removeAll(final float[] a, final float... elementsToRemove) {
+        if (isNullOrEmpty(a)) {
+            return EMPTY_FLOAT_ARRAY;
+        } else if (isNullOrEmpty(elementsToRemove)) {
+            return a.clone();
+        } else if (elementsToRemove.length == 1) {
+            return removeAllOccurrences(a, elementsToRemove[0]);
+        }
+
+        final FloatList list = FloatList.of(a.clone());
+        list.removeAll(FloatList.of(elementsToRemove));
+        return list.trimToSize().array();
+    }
+
+    /**
+     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
+     *
+     * @param a
+     * @param elementsToRemove
+     * @return
+     * @see Collection#removeAll(Collection)
+     * @see N#difference(double[], double[])
+     */
+    @SafeVarargs
+    public static double[] removeAll(final double[] a, final double... elementsToRemove) {
+        if (isNullOrEmpty(a)) {
+            return EMPTY_DOUBLE_ARRAY;
+        } else if (isNullOrEmpty(elementsToRemove)) {
+            return a.clone();
+        } else if (elementsToRemove.length == 1) {
+            return removeAllOccurrences(a, elementsToRemove[0]);
+        }
+
+        final DoubleList list = DoubleList.of(a.clone());
+        list.removeAll(DoubleList.of(elementsToRemove));
+        return list.trimToSize().array();
+    }
+
+    /**
+     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
+     *
+     * @param a
+     * @param elementsToRemove
+     * @return
+     * @see Collection#removeAll(Collection)
+     * @see N#difference(double[], double[])
+     */
+    @SafeVarargs
+    public static String[] removeAll(final String[] a, final String... elementsToRemove) {
+        if (isNullOrEmpty(a)) {
+            return EMPTY_STRING_ARRAY;
+        } else if (isNullOrEmpty(elementsToRemove)) {
+            return a.clone();
+        } else if (elementsToRemove.length == 1) {
+            return removeAllOccurrences(a, elementsToRemove[0]);
+        }
+
+        final Set<String> set = asSet(elementsToRemove);
+        final List<String> result = new ArrayList<>();
+
+        for (String e : a) {
+            if (!set.contains(e)) {
+                result.add(e);
+            }
+        }
+
+        return result.toArray(new String[result.size()]);
+    }
+
+    /**
+     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
+     *
+     * @param <T>
+     * @param a
+     * @param elementsToRemove
+     * @return
+     * @see Collection#removeAll(Collection)
+     * @see N#difference(Object[], Object[])
+     */
+    @SafeVarargs
+    public static <T> T[] removeAll(final T[] a, final T... elementsToRemove) {
+        if (isNullOrEmpty(a)) {
+            return a;
+        } else if (isNullOrEmpty(elementsToRemove)) {
+            return a.clone();
+        } else if (elementsToRemove.length == 1) {
+            return removeAllOccurrences(a, elementsToRemove[0]);
+        }
+
+        final Set<Object> set = asSet(elementsToRemove);
+        final List<T> result = new ArrayList<>();
+
+        for (T e : a) {
+            if (!set.contains(e)) {
+                result.add(e);
+            }
+        }
+
+        return result.toArray((T[]) newArray(a.getClass().getComponentType(), result.size()));
+    }
+
+    /**
+     * Removes the all.
+     *
+     * @param c
+     * @param elementsToRemove
+     * @return
+     * @see N#differentSet(Collection, Collection)
+     */
+    @SafeVarargs
+    public static <T> boolean removeAll(final Collection<T> c, final T... elementsToRemove) {
+        if (isNullOrEmpty(c) || isNullOrEmpty(elementsToRemove)) {
+            return false;
+        } else {
+            return removeAll(c, asSet(elementsToRemove));
+        }
+    }
+
+    /**
+     * Removes the all.
+     *
+     * @param c
+     * @param elementsToRemove
+     * @return
+     * @see N#differentSet(Collection, Collection)
+     */
+    public static <T> boolean removeAll(final Collection<T> c, final Collection<?> elementsToRemove) {
+        if (isNullOrEmpty(c) || isNullOrEmpty(elementsToRemove)) {
+            return false;
+        }
+
+        if (c instanceof HashSet && !(elementsToRemove instanceof Set)) {
+            boolean result = false;
+
+            for (Object e : elementsToRemove) {
+                result |= c.remove(e);
+
+                if (c.size() == 0) {
+                    break;
+                }
+            }
+
+            return result;
+        } else {
+            return c.removeAll(elementsToRemove);
+        }
+    }
+
+    public static <T> boolean removeAll(final Collection<T> c, final Iterator<?> elementsToRemove) {
+        if (isNullOrEmpty(c) || elementsToRemove == null) {
+            return false;
+        }
+
+        if (c instanceof Set) {
+            final Set<T> set = (Set<T>) c;
+            final int originalSize = set.size();
+
+            while (elementsToRemove.hasNext()) {
+                set.remove(elementsToRemove.next());
+            }
+
+            return set.size() != originalSize;
+        } else {
+            return removeAll(c, toSet(elementsToRemove));
+        }
+    }
+
+    /**
      * Removes all the occurrences of the specified elementToRemove from the specified
      * array. All subsequent elementsToRemove are shifted to the left (subtracts one
      * from their indices). If the array doesn't contains such an elementToRemove, no
@@ -7013,1163 +7375,6 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
-     *
-     * @param a
-     * @param elementsToRemove
-     * @return
-     * @see Collection#removeAll(Collection)
-     * @see N#difference(boolean[], boolean[])
-     */
-    @SafeVarargs
-    public static boolean[] removeAll(final boolean[] a, final boolean... elementsToRemove) {
-        if (isNullOrEmpty(a)) {
-            return EMPTY_BOOLEAN_ARRAY;
-        } else if (isNullOrEmpty(elementsToRemove)) {
-            return a.clone();
-        } else if (elementsToRemove.length == 1) {
-            return removeAllOccurrences(a, elementsToRemove[0]);
-        }
-
-        final BooleanList list = BooleanList.of(a.clone());
-        list.removeAll(BooleanList.of(elementsToRemove));
-        return list.trimToSize().array();
-    }
-
-    /**
-     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
-     *
-     * @param a
-     * @param elementsToRemove
-     * @return
-     * @see Collection#removeAll(Collection)
-     * @see N#difference(char[], char[])
-     */
-    @SafeVarargs
-    public static char[] removeAll(final char[] a, final char... elementsToRemove) {
-        if (isNullOrEmpty(a)) {
-            return EMPTY_CHAR_ARRAY;
-        } else if (isNullOrEmpty(elementsToRemove)) {
-            return a.clone();
-        } else if (elementsToRemove.length == 1) {
-            return removeAllOccurrences(a, elementsToRemove[0]);
-        }
-
-        final CharList list = CharList.of(a.clone());
-        list.removeAll(CharList.of(elementsToRemove));
-        return list.trimToSize().array();
-    }
-
-    /**
-     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
-     *
-     * @param a
-     * @param elementsToRemove
-     * @return
-     * @see Collection#removeAll(Collection)
-     * @see N#difference(byte[], byte[])
-     */
-    @SafeVarargs
-    public static byte[] removeAll(final byte[] a, final byte... elementsToRemove) {
-        if (isNullOrEmpty(a)) {
-            return EMPTY_BYTE_ARRAY;
-        } else if (isNullOrEmpty(elementsToRemove)) {
-            return a.clone();
-        } else if (elementsToRemove.length == 1) {
-            return removeAllOccurrences(a, elementsToRemove[0]);
-        }
-
-        final ByteList list = ByteList.of(a.clone());
-        list.removeAll(ByteList.of(elementsToRemove));
-        return list.trimToSize().array();
-    }
-
-    /**
-     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
-     *
-     * @param a
-     * @param elementsToRemove
-     * @return
-     * @see Collection#removeAll(Collection)
-     * @see N#difference(short[], short[])
-     */
-    @SafeVarargs
-    public static short[] removeAll(final short[] a, final short... elementsToRemove) {
-        if (isNullOrEmpty(a)) {
-            return EMPTY_SHORT_ARRAY;
-        } else if (isNullOrEmpty(elementsToRemove)) {
-            return a.clone();
-        } else if (elementsToRemove.length == 1) {
-            return removeAllOccurrences(a, elementsToRemove[0]);
-        }
-
-        final ShortList list = ShortList.of(a.clone());
-        list.removeAll(ShortList.of(elementsToRemove));
-        return list.trimToSize().array();
-    }
-
-    /**
-     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
-     *
-     * @param a
-     * @param elementsToRemove
-     * @return
-     * @see Collection#removeAll(Collection)
-     * @see N#difference(int[], int[])
-     */
-    @SafeVarargs
-    public static int[] removeAll(final int[] a, final int... elementsToRemove) {
-        if (isNullOrEmpty(a)) {
-            return EMPTY_INT_ARRAY;
-        } else if (isNullOrEmpty(elementsToRemove)) {
-            return a.clone();
-        } else if (elementsToRemove.length == 1) {
-            return removeAllOccurrences(a, elementsToRemove[0]);
-        }
-
-        final IntList list = IntList.of(a.clone());
-        list.removeAll(IntList.of(elementsToRemove));
-        return list.trimToSize().array();
-    }
-
-    /**
-     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
-     *
-     * @param a
-     * @param elementsToRemove
-     * @return
-     * @see Collection#removeAll(Collection)
-     * @see N#difference(long[], long[])
-     */
-    @SafeVarargs
-    public static long[] removeAll(final long[] a, final long... elementsToRemove) {
-        if (isNullOrEmpty(a)) {
-            return EMPTY_LONG_ARRAY;
-        } else if (isNullOrEmpty(elementsToRemove)) {
-            return a.clone();
-        } else if (elementsToRemove.length == 1) {
-            return removeAllOccurrences(a, elementsToRemove[0]);
-        }
-
-        final LongList list = LongList.of(a.clone());
-        list.removeAll(LongList.of(elementsToRemove));
-        return list.trimToSize().array();
-    }
-
-    /**
-     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
-     *
-     * @param a
-     * @param elementsToRemove
-     * @return
-     * @see Collection#removeAll(Collection)
-     * @see N#difference(float[], float[])
-     */
-    @SafeVarargs
-    public static float[] removeAll(final float[] a, final float... elementsToRemove) {
-        if (isNullOrEmpty(a)) {
-            return EMPTY_FLOAT_ARRAY;
-        } else if (isNullOrEmpty(elementsToRemove)) {
-            return a.clone();
-        } else if (elementsToRemove.length == 1) {
-            return removeAllOccurrences(a, elementsToRemove[0]);
-        }
-
-        final FloatList list = FloatList.of(a.clone());
-        list.removeAll(FloatList.of(elementsToRemove));
-        return list.trimToSize().array();
-    }
-
-    /**
-     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
-     *
-     * @param a
-     * @param elementsToRemove
-     * @return
-     * @see Collection#removeAll(Collection)
-     * @see N#difference(double[], double[])
-     */
-    @SafeVarargs
-    public static double[] removeAll(final double[] a, final double... elementsToRemove) {
-        if (isNullOrEmpty(a)) {
-            return EMPTY_DOUBLE_ARRAY;
-        } else if (isNullOrEmpty(elementsToRemove)) {
-            return a.clone();
-        } else if (elementsToRemove.length == 1) {
-            return removeAllOccurrences(a, elementsToRemove[0]);
-        }
-
-        final DoubleList list = DoubleList.of(a.clone());
-        list.removeAll(DoubleList.of(elementsToRemove));
-        return list.trimToSize().array();
-    }
-
-    /**
-     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
-     *
-     * @param a
-     * @param elementsToRemove
-     * @return
-     * @see Collection#removeAll(Collection)
-     * @see N#difference(double[], double[])
-     */
-    @SafeVarargs
-    public static String[] removeAll(final String[] a, final String... elementsToRemove) {
-        if (isNullOrEmpty(a)) {
-            return EMPTY_STRING_ARRAY;
-        } else if (isNullOrEmpty(elementsToRemove)) {
-            return a.clone();
-        } else if (elementsToRemove.length == 1) {
-            return removeAllOccurrences(a, elementsToRemove[0]);
-        }
-
-        final Set<String> set = asSet(elementsToRemove);
-        final List<String> result = new ArrayList<>();
-
-        for (String e : a) {
-            if (!set.contains(e)) {
-                result.add(e);
-            }
-        }
-
-        return result.toArray(new String[result.size()]);
-    }
-
-    /**
-     * Returns a new array with removes all the occurrences of specified elementsToRemove from <code>a</code>.
-     *
-     * @param <T>
-     * @param a
-     * @param elementsToRemove
-     * @return
-     * @see Collection#removeAll(Collection)
-     * @see N#difference(Object[], Object[])
-     */
-    @SafeVarargs
-    public static <T> T[] removeAll(final T[] a, final T... elementsToRemove) {
-        if (isNullOrEmpty(a)) {
-            return a;
-        } else if (isNullOrEmpty(elementsToRemove)) {
-            return a.clone();
-        } else if (elementsToRemove.length == 1) {
-            return removeAllOccurrences(a, elementsToRemove[0]);
-        }
-
-        final Set<Object> set = asSet(elementsToRemove);
-        final List<T> result = new ArrayList<>();
-
-        for (T e : a) {
-            if (!set.contains(e)) {
-                result.add(e);
-            }
-        }
-
-        return result.toArray((T[]) newArray(a.getClass().getComponentType(), result.size()));
-    }
-
-    /**
-     * Removes the all.
-     *
-     * @param c
-     * @param elementsToRemove
-     * @return
-     * @see N#differentSet(Collection, Collection)
-     */
-    @SafeVarargs
-    public static <T> boolean removeAll(final Collection<T> c, final T... elementsToRemove) {
-        if (isNullOrEmpty(c) || isNullOrEmpty(elementsToRemove)) {
-            return false;
-        } else {
-            return removeAll(c, asSet(elementsToRemove));
-        }
-    }
-
-    /**
-     * Removes the all.
-     *
-     * @param c
-     * @param elementsToRemove
-     * @return
-     * @see N#differentSet(Collection, Collection)
-     */
-    public static <T> boolean removeAll(final Collection<T> c, final Collection<?> elementsToRemove) {
-        if (N.isNullOrEmpty(c) || N.isNullOrEmpty(elementsToRemove)) {
-            return false;
-        }
-
-        if (c instanceof HashSet && !(elementsToRemove instanceof Set)) {
-            boolean result = false;
-
-            for (Object e : elementsToRemove) {
-                result |= c.remove(e);
-
-                if (c.size() == 0) {
-                    break;
-                }
-            }
-
-            return result;
-        } else {
-            return c.removeAll(elementsToRemove);
-        }
-    }
-
-    public static <T> boolean removeAll(final Collection<T> c, final Iterator<?> elementsToRemove) {
-        if (N.isNullOrEmpty(c) || elementsToRemove == null) {
-            return false;
-        }
-
-        if (c instanceof Set) {
-            final Set<T> set = (Set<T>) c;
-            final int originalSize = set.size();
-
-            while (elementsToRemove.hasNext()) {
-                set.remove(elementsToRemove.next());
-            }
-
-            return set.size() != originalSize;
-        } else {
-            return removeAll(c, N.toSet(elementsToRemove));
-        }
-    }
-
-    /**
-     * Deletes the values from {@code fromIndex} to {@code toIndex}.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return a new array
-     */
-    public static boolean[] deleteRange(final boolean[] a, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-
-        if (fromIndex == toIndex) {
-            return a == null ? N.EMPTY_BOOLEAN_ARRAY : a.clone();
-        }
-
-        final int len = len(a);
-        final boolean[] b = new boolean[len - (toIndex - fromIndex)];
-
-        if (fromIndex > 0) {
-            copy(a, 0, b, 0, fromIndex);
-        }
-
-        if (toIndex < len) {
-            copy(a, toIndex, b, fromIndex, len - toIndex);
-        }
-
-        return b;
-    }
-
-    /**
-     * Deletes the values from {@code fromIndex} to {@code toIndex}.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return a new array
-     */
-    public static char[] deleteRange(final char[] a, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-
-        if (fromIndex == toIndex) {
-            return a == null ? N.EMPTY_CHAR_ARRAY : a.clone();
-        }
-
-        final int len = len(a);
-        final char[] b = new char[len - (toIndex - fromIndex)];
-
-        if (fromIndex > 0) {
-            copy(a, 0, b, 0, fromIndex);
-        }
-
-        if (toIndex < len) {
-            copy(a, toIndex, b, fromIndex, len - toIndex);
-        }
-
-        return b;
-    }
-
-    /**
-     * Deletes the values from {@code fromIndex} to {@code toIndex}.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return a new array
-     */
-    public static byte[] deleteRange(final byte[] a, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-
-        if (fromIndex == toIndex) {
-            return a == null ? N.EMPTY_BYTE_ARRAY : a.clone();
-        }
-
-        final int len = len(a);
-        final byte[] b = new byte[len - (toIndex - fromIndex)];
-
-        if (fromIndex > 0) {
-            copy(a, 0, b, 0, fromIndex);
-        }
-
-        if (toIndex < len) {
-            copy(a, toIndex, b, fromIndex, len - toIndex);
-        }
-
-        return b;
-    }
-
-    /**
-     * Deletes the values from {@code fromIndex} to {@code toIndex}.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return a new array
-     */
-    public static short[] deleteRange(final short[] a, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-
-        if (fromIndex == toIndex) {
-            return a == null ? N.EMPTY_SHORT_ARRAY : a.clone();
-        }
-
-        final int len = len(a);
-        final short[] b = new short[len - (toIndex - fromIndex)];
-
-        if (fromIndex > 0) {
-            copy(a, 0, b, 0, fromIndex);
-        }
-
-        if (toIndex < len) {
-            copy(a, toIndex, b, fromIndex, len - toIndex);
-        }
-
-        return b;
-    }
-
-    /**
-     * Deletes the values from {@code fromIndex} to {@code toIndex}.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return a new array
-     */
-    public static int[] deleteRange(final int[] a, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-
-        if (fromIndex == toIndex) {
-            return a == null ? N.EMPTY_INT_ARRAY : a.clone();
-        }
-
-        final int len = len(a);
-        final int[] b = new int[len - (toIndex - fromIndex)];
-
-        if (fromIndex > 0) {
-            copy(a, 0, b, 0, fromIndex);
-        }
-
-        if (toIndex < len) {
-            copy(a, toIndex, b, fromIndex, len - toIndex);
-        }
-
-        return b;
-    }
-
-    /**
-     * Deletes the values from {@code fromIndex} to {@code toIndex}.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return a new array
-     */
-    public static long[] deleteRange(final long[] a, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-
-        if (fromIndex == toIndex) {
-            return a == null ? N.EMPTY_LONG_ARRAY : a.clone();
-        }
-
-        final int len = len(a);
-        final long[] b = new long[len - (toIndex - fromIndex)];
-
-        if (fromIndex > 0) {
-            copy(a, 0, b, 0, fromIndex);
-        }
-
-        if (toIndex < len) {
-            copy(a, toIndex, b, fromIndex, len - toIndex);
-        }
-
-        return b;
-    }
-
-    /**
-     * Deletes the values from {@code fromIndex} to {@code toIndex}.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return a new array
-     */
-    public static float[] deleteRange(final float[] a, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-
-        if (fromIndex == toIndex) {
-            return a == null ? N.EMPTY_FLOAT_ARRAY : a.clone();
-        }
-
-        final int len = len(a);
-        final float[] b = new float[len - (toIndex - fromIndex)];
-
-        if (fromIndex > 0) {
-            copy(a, 0, b, 0, fromIndex);
-        }
-
-        if (toIndex < len) {
-            copy(a, toIndex, b, fromIndex, len - toIndex);
-        }
-
-        return b;
-    }
-
-    /**
-     * Deletes the values from {@code fromIndex} to {@code toIndex}.
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return a new array
-     */
-    public static double[] deleteRange(final double[] a, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-
-        if (fromIndex == toIndex) {
-            return a == null ? N.EMPTY_DOUBLE_ARRAY : a.clone();
-        }
-
-        final int len = len(a);
-        final double[] b = new double[len - (toIndex - fromIndex)];
-
-        if (fromIndex > 0) {
-            copy(a, 0, b, 0, fromIndex);
-        }
-
-        if (toIndex < len) {
-            copy(a, toIndex, b, fromIndex, len - toIndex);
-        }
-
-        return b;
-    }
-
-    public static String[] deleteRange(final String[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-
-        if (fromIndex == toIndex) {
-            return a == null ? N.EMPTY_STRING_ARRAY : a.clone();
-        }
-
-        final int len = len(a);
-        final String[] b = new String[len - (toIndex - fromIndex)];
-
-        if (fromIndex > 0) {
-            copy(a, 0, b, 0, fromIndex);
-        }
-
-        if (toIndex < len) {
-            copy(a, toIndex, b, fromIndex, len - toIndex);
-        }
-
-        return b;
-    }
-
-    /**
-     * Deletes the values from {@code fromIndex} to {@code toIndex}.
-     *
-     * @param <T>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return a new array
-     * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
-     */
-    public static <T> T[] deleteRange(final T[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
-        checkArgNotNull(a, "a");
-
-        checkFromToIndex(fromIndex, toIndex, len(a));
-
-        if (fromIndex == toIndex) {
-            return a.clone();
-        }
-
-        final int len = len(a);
-        final T[] b = Array.newInstance(a.getClass().getComponentType(), len - (toIndex - fromIndex));
-
-        if (fromIndex > 0) {
-            copy(a, 0, b, 0, fromIndex);
-        }
-
-        if (toIndex < len) {
-            copy(a, toIndex, b, fromIndex, len - toIndex);
-        }
-
-        return b;
-    }
-
-    /**
-     * Returns {@code true} if the {@code List} is updated when {@code fromIndex < toIndex}, otherwise {@code false} is returned when {@code fromIndex == toIndex}.
-     *
-     * @param <T>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     */
-    @SuppressWarnings({ "unchecked" })
-    public static <T> boolean deleteRange(final List<T> c, final int fromIndex, final int toIndex) {
-        checkFromToIndex(fromIndex, toIndex, size(c));
-
-        if (fromIndex == toIndex) {
-            return false;
-        }
-
-        final int size = size(c);
-
-        if (c instanceof LinkedList || toIndex - fromIndex <= 3) {
-            c.subList(fromIndex, toIndex).clear();
-        } else {
-            final List<T> tmp = new ArrayList<>(size - (toIndex - fromIndex));
-
-            if (fromIndex > 0) {
-                tmp.addAll(c.subList(0, fromIndex));
-            }
-
-            if (toIndex < size) {
-                tmp.addAll(c.subList(toIndex, size));
-            }
-
-            c.clear();
-            c.addAll(tmp);
-        }
-
-        return true;
-    }
-
-    public static String deleteRange(String str, final int fromIndex, final int toIndex) {
-        final int len = len(str);
-
-        checkFromToIndex(fromIndex, toIndex, len);
-
-        if (fromIndex == toIndex || fromIndex >= len) {
-            return str == null ? N.EMPTY_STRING : str;
-        } else if (toIndex - fromIndex >= len) {
-            return N.EMPTY_STRING;
-        }
-
-        return Strings.concat(str.substring(0, fromIndex) + str.subSequence(toIndex, len));
-    }
-
-    /**
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-     */
-    public static void moveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-        final int len = len(a);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
-
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
-            return;
-        }
-
-        final boolean[] rangeTmp = N.copyOfRange(a, fromIndex, toIndex);
-
-        // move ahead
-        if (newPositionStartIndex < fromIndex) {
-            N.copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
-        } else {
-            N.copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
-        }
-
-        N.copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
-    }
-
-    /**
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-     */
-    public static void moveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-        final int len = len(a);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
-
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
-            return;
-        }
-
-        final char[] rangeTmp = N.copyOfRange(a, fromIndex, toIndex);
-
-        // move ahead
-        if (newPositionStartIndex < fromIndex) {
-            N.copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
-        } else {
-            N.copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
-        }
-
-        N.copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
-    }
-
-    /**
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-     */
-    public static void moveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-        final int len = len(a);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
-
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
-            return;
-        }
-
-        final byte[] rangeTmp = N.copyOfRange(a, fromIndex, toIndex);
-
-        // move ahead
-        if (newPositionStartIndex < fromIndex) {
-            N.copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
-        } else {
-            N.copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
-        }
-
-        N.copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
-    }
-
-    /**
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-     */
-    public static void moveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-        final int len = len(a);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
-
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
-            return;
-        }
-
-        final short[] rangeTmp = N.copyOfRange(a, fromIndex, toIndex);
-
-        // move ahead
-        if (newPositionStartIndex < fromIndex) {
-            N.copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
-        } else {
-            N.copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
-        }
-
-        N.copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
-    }
-
-    /**
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-     */
-    public static void moveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-        final int len = len(a);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
-
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
-            return;
-        }
-
-        final int[] rangeTmp = N.copyOfRange(a, fromIndex, toIndex);
-
-        // move ahead
-        if (newPositionStartIndex < fromIndex) {
-            N.copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
-        } else {
-            N.copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
-        }
-
-        N.copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
-    }
-
-    /**
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-     */
-    public static void moveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-        final int len = len(a);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
-
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
-            return;
-        }
-
-        final long[] rangeTmp = N.copyOfRange(a, fromIndex, toIndex);
-
-        // move ahead
-        if (newPositionStartIndex < fromIndex) {
-            N.copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
-        } else {
-            N.copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
-        }
-
-        N.copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
-    }
-
-    /**
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-     */
-    public static void moveRange(final float[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-        final int len = len(a);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
-
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
-            return;
-        }
-
-        final float[] rangeTmp = N.copyOfRange(a, fromIndex, toIndex);
-
-        // move ahead
-        if (newPositionStartIndex < fromIndex) {
-            N.copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
-        } else {
-            N.copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
-        }
-
-        N.copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
-    }
-
-    /**
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-     */
-    public static void moveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-        final int len = len(a);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
-
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
-            return;
-        }
-
-        final double[] rangeTmp = N.copyOfRange(a, fromIndex, toIndex);
-
-        // move ahead
-        if (newPositionStartIndex < fromIndex) {
-            N.copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
-        } else {
-            N.copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
-        }
-
-        N.copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
-    }
-
-    /**
-     *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-     */
-    public static <T> void moveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-        final int len = len(a);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
-
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
-            return;
-        }
-
-        final T[] rangeTmp = N.copyOfRange(a, fromIndex, toIndex);
-
-        // move ahead
-        if (newPositionStartIndex < fromIndex) {
-            N.copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
-        } else {
-            N.copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
-        }
-
-        N.copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
-    }
-
-    /**
-     *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param newPositionStartIndex must in the range: [0, list.size() - (toIndex - fromIndex)]
-     * @return {@code true} if the specified {@code List} is updated.
-     */
-    public static <T> boolean moveRange(final List<T> c, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-        final int size = size(c);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, size);
-
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
-            return false;
-        }
-
-        final T[] tmp = (T[]) c.toArray();
-
-        moveRange(tmp, fromIndex, toIndex, newPositionStartIndex);
-        c.clear();
-        c.addAll(Arrays.asList(tmp));
-
-        return true;
-    }
-
-    /**
-     *
-     * @param str
-     * @param fromIndex
-     * @param toIndex
-     * @param newPositionStartIndex must in the range: [0, String.length - (toIndex - fromIndex)]
-     */
-    @SuppressWarnings("deprecation")
-    public static String moveRange(final String str, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-        final int len = len(str);
-        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
-
-        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
-            return str;
-        }
-
-        final char[] a = str.toCharArray();
-
-        moveRange(a, fromIndex, toIndex, newPositionStartIndex);
-
-        return InternalUtil.newString(a, true);
-    }
-
-    //    /**
-    //     * Return a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static boolean[] copyThenMoveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
-    //
-    //        final boolean[] copy = N.isNullOrEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Return a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static char[] copyThenMoveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
-    //
-    //        final char[] copy = N.isNullOrEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Return a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static byte[] copyThenMoveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
-    //
-    //        final byte[] copy = N.isNullOrEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Return a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static short[] copyThenMoveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
-    //
-    //        final short[] copy = N.isNullOrEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Return a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static int[] copyThenMoveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
-    //
-    //        final int[] copy = N.isNullOrEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Return a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static long[] copyThenMoveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
-    //
-    //        final long[] copy = N.isNullOrEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Return a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static double[] copyThenMoveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
-    //
-    //        final double[] copy = N.isNullOrEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
-    //
-    //        return copy;
-    //    }
-    //
-    //    /**
-    //     * Return a new array copy.
-    //     *
-    //     * @param a
-    //     * @param fromIndex
-    //     * @param toIndex
-    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
-    //     * @return a new array.
-    //     */
-    //    public static <T> T[] copyThenMoveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
-    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
-    //
-    //        final T[] copy = N.isNullOrEmpty(a) ? a : a.clone();
-    //
-    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
-    //
-    //        return copy;
-    //    }
-
-    private static void checkIndexAndStartPositionForMoveRange(final int fromIndex, final int toIndex, final int newPositionStartIndex, final int len) {
-        checkFromToIndex(fromIndex, toIndex, len);
-
-        if (newPositionStartIndex < 0 || newPositionStartIndex > (len - (toIndex - fromIndex))) {
-            throw new IndexOutOfBoundsException("newPositionStartIndex " + newPositionStartIndex + " is out-of-bounds: [0, " + (len - (toIndex - fromIndex))
-                    + "=(array.length - (toIndex - fromIndex))]");
-        }
-    }
-
-    public static <T> List<T> skipRange(final Collection<T> c, final int startInclusive, final int endExclusive) {
-        return skipRange(c, startInclusive, endExclusive, IntFunctions.ofList());
-    }
-
-    public static <T, C extends Collection<T>> C skipRange(final Collection<T> c, final int startInclusive, final int endExclusive,
-            final IntFunction<C> supplier) {
-        final int size = size(c);
-
-        N.checkFromToIndex(startInclusive, endExclusive, size);
-
-        final C result = supplier.apply(size - (endExclusive - startInclusive));
-
-        if (c instanceof List) {
-            final List<T> list = (List<T>) c;
-
-            if (startInclusive > 0) {
-                result.addAll(list.subList(0, startInclusive));
-            }
-
-            if (endExclusive < size) {
-                result.addAll(list.subList(endExclusive, size));
-            }
-        } else {
-            final Iterator<T> iter = c.iterator();
-
-            for (int i = 0; i < startInclusive; i++) {
-                result.add(iter.next());
-            }
-
-            if (endExclusive < size) {
-                int idx = startInclusive;
-
-                while (idx++ < endExclusive) {
-                    iter.next();
-                }
-
-                while (iter.hasNext()) {
-                    result.add(iter.next());
-                }
-            }
-        }
-
-        return result;
-    }
-
-    /**
      * Removes the duplicates.
      *
      * @param a
@@ -8275,7 +7480,7 @@ public final class N extends CommonUtil {
 
             return idx == b.length ? b : copyOfRange(b, 0, idx);
         } else {
-            final Set<Character> set = N.newLinkedHashSet(a.length);
+            final Set<Character> set = newLinkedHashSet(a.length);
 
             for (int i = fromIndex; i < toIndex; i++) {
                 set.add(a[i]);
@@ -8357,7 +7562,7 @@ public final class N extends CommonUtil {
 
             return idx == b.length ? b : copyOfRange(b, 0, idx);
         } else {
-            final Set<Byte> set = N.newLinkedHashSet(a.length);
+            final Set<Byte> set = newLinkedHashSet(a.length);
 
             for (int i = fromIndex; i < toIndex; i++) {
                 set.add(a[i]);
@@ -8439,7 +7644,7 @@ public final class N extends CommonUtil {
 
             return idx == b.length ? b : copyOfRange(b, 0, idx);
         } else {
-            final Set<Short> set = N.newLinkedHashSet(a.length);
+            final Set<Short> set = newLinkedHashSet(a.length);
 
             for (int i = fromIndex; i < toIndex; i++) {
                 set.add(a[i]);
@@ -8521,7 +7726,7 @@ public final class N extends CommonUtil {
 
             return idx == b.length ? b : copyOfRange(b, 0, idx);
         } else {
-            final Set<Integer> set = N.newLinkedHashSet(a.length);
+            final Set<Integer> set = newLinkedHashSet(a.length);
 
             for (int i = fromIndex; i < toIndex; i++) {
                 set.add(a[i]);
@@ -8603,7 +7808,7 @@ public final class N extends CommonUtil {
 
             return idx == b.length ? b : copyOfRange(b, 0, idx);
         } else {
-            final Set<Long> set = N.newLinkedHashSet(a.length);
+            final Set<Long> set = newLinkedHashSet(a.length);
 
             for (int i = fromIndex; i < toIndex; i++) {
                 set.add(a[i]);
@@ -8686,7 +7891,7 @@ public final class N extends CommonUtil {
             return idx == b.length ? b : copyOfRange(b, 0, idx);
         } else {
 
-            final Set<Float> set = N.newLinkedHashSet(a.length);
+            final Set<Float> set = newLinkedHashSet(a.length);
 
             for (int i = fromIndex; i < toIndex; i++) {
                 set.add(a[i]);
@@ -8768,7 +7973,7 @@ public final class N extends CommonUtil {
 
             return idx == b.length ? b : copyOfRange(b, 0, idx);
         } else {
-            final Set<Double> set = N.newLinkedHashSet(a.length);
+            final Set<Double> set = newLinkedHashSet(a.length);
 
             for (int i = fromIndex; i < toIndex; i++) {
                 set.add(a[i]);
@@ -8850,7 +8055,7 @@ public final class N extends CommonUtil {
 
             return idx == b.length ? b : copyOfRange(b, 0, idx);
         } else {
-            final Set<String> set = N.newLinkedHashSet(a.length);
+            final Set<String> set = newLinkedHashSet(a.length);
 
             for (int i = fromIndex; i < toIndex; i++) {
                 set.add(a[i]);
@@ -8877,7 +8082,7 @@ public final class N extends CommonUtil {
      * </p>
      *
      * <pre>
-     * N.removeElements(["a", "b", "a"]) = ["a", "b"]
+     * removeElements(["a", "b", "a"]) = ["a", "b"]
      * </pre>
      *
      * @param <T> the component type of the array
@@ -8972,7 +8177,7 @@ public final class N extends CommonUtil {
             final Iterator<?> iter = c.iterator();
             final Object first = iter.next();
 
-            if (N.equals(first, iter.next())) {
+            if (equals(first, iter.next())) {
                 iter.remove();
                 return true;
             } else {
@@ -9011,6 +8216,345 @@ public final class N extends CommonUtil {
     }
 
     /**
+     * Deletes the values from {@code fromIndex} to {@code toIndex}.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return a new array
+     */
+    public static boolean[] deleteRange(final boolean[] a, final int fromIndex, final int toIndex) {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (fromIndex == toIndex) {
+            return a == null ? EMPTY_BOOLEAN_ARRAY : a.clone();
+        }
+
+        final int len = len(a);
+        final boolean[] b = new boolean[len - (toIndex - fromIndex)];
+
+        if (fromIndex > 0) {
+            copy(a, 0, b, 0, fromIndex);
+        }
+
+        if (toIndex < len) {
+            copy(a, toIndex, b, fromIndex, len - toIndex);
+        }
+
+        return b;
+    }
+
+    /**
+     * Deletes the values from {@code fromIndex} to {@code toIndex}.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return a new array
+     */
+    public static char[] deleteRange(final char[] a, final int fromIndex, final int toIndex) {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (fromIndex == toIndex) {
+            return a == null ? EMPTY_CHAR_ARRAY : a.clone();
+        }
+
+        final int len = len(a);
+        final char[] b = new char[len - (toIndex - fromIndex)];
+
+        if (fromIndex > 0) {
+            copy(a, 0, b, 0, fromIndex);
+        }
+
+        if (toIndex < len) {
+            copy(a, toIndex, b, fromIndex, len - toIndex);
+        }
+
+        return b;
+    }
+
+    /**
+     * Deletes the values from {@code fromIndex} to {@code toIndex}.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return a new array
+     */
+    public static byte[] deleteRange(final byte[] a, final int fromIndex, final int toIndex) {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (fromIndex == toIndex) {
+            return a == null ? EMPTY_BYTE_ARRAY : a.clone();
+        }
+
+        final int len = len(a);
+        final byte[] b = new byte[len - (toIndex - fromIndex)];
+
+        if (fromIndex > 0) {
+            copy(a, 0, b, 0, fromIndex);
+        }
+
+        if (toIndex < len) {
+            copy(a, toIndex, b, fromIndex, len - toIndex);
+        }
+
+        return b;
+    }
+
+    /**
+     * Deletes the values from {@code fromIndex} to {@code toIndex}.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return a new array
+     */
+    public static short[] deleteRange(final short[] a, final int fromIndex, final int toIndex) {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (fromIndex == toIndex) {
+            return a == null ? EMPTY_SHORT_ARRAY : a.clone();
+        }
+
+        final int len = len(a);
+        final short[] b = new short[len - (toIndex - fromIndex)];
+
+        if (fromIndex > 0) {
+            copy(a, 0, b, 0, fromIndex);
+        }
+
+        if (toIndex < len) {
+            copy(a, toIndex, b, fromIndex, len - toIndex);
+        }
+
+        return b;
+    }
+
+    /**
+     * Deletes the values from {@code fromIndex} to {@code toIndex}.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return a new array
+     */
+    public static int[] deleteRange(final int[] a, final int fromIndex, final int toIndex) {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (fromIndex == toIndex) {
+            return a == null ? EMPTY_INT_ARRAY : a.clone();
+        }
+
+        final int len = len(a);
+        final int[] b = new int[len - (toIndex - fromIndex)];
+
+        if (fromIndex > 0) {
+            copy(a, 0, b, 0, fromIndex);
+        }
+
+        if (toIndex < len) {
+            copy(a, toIndex, b, fromIndex, len - toIndex);
+        }
+
+        return b;
+    }
+
+    /**
+     * Deletes the values from {@code fromIndex} to {@code toIndex}.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return a new array
+     */
+    public static long[] deleteRange(final long[] a, final int fromIndex, final int toIndex) {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (fromIndex == toIndex) {
+            return a == null ? EMPTY_LONG_ARRAY : a.clone();
+        }
+
+        final int len = len(a);
+        final long[] b = new long[len - (toIndex - fromIndex)];
+
+        if (fromIndex > 0) {
+            copy(a, 0, b, 0, fromIndex);
+        }
+
+        if (toIndex < len) {
+            copy(a, toIndex, b, fromIndex, len - toIndex);
+        }
+
+        return b;
+    }
+
+    /**
+     * Deletes the values from {@code fromIndex} to {@code toIndex}.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return a new array
+     */
+    public static float[] deleteRange(final float[] a, final int fromIndex, final int toIndex) {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (fromIndex == toIndex) {
+            return a == null ? EMPTY_FLOAT_ARRAY : a.clone();
+        }
+
+        final int len = len(a);
+        final float[] b = new float[len - (toIndex - fromIndex)];
+
+        if (fromIndex > 0) {
+            copy(a, 0, b, 0, fromIndex);
+        }
+
+        if (toIndex < len) {
+            copy(a, toIndex, b, fromIndex, len - toIndex);
+        }
+
+        return b;
+    }
+
+    /**
+     * Deletes the values from {@code fromIndex} to {@code toIndex}.
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return a new array
+     */
+    public static double[] deleteRange(final double[] a, final int fromIndex, final int toIndex) {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (fromIndex == toIndex) {
+            return a == null ? EMPTY_DOUBLE_ARRAY : a.clone();
+        }
+
+        final int len = len(a);
+        final double[] b = new double[len - (toIndex - fromIndex)];
+
+        if (fromIndex > 0) {
+            copy(a, 0, b, 0, fromIndex);
+        }
+
+        if (toIndex < len) {
+            copy(a, toIndex, b, fromIndex, len - toIndex);
+        }
+
+        return b;
+    }
+
+    public static String[] deleteRange(final String[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (fromIndex == toIndex) {
+            return a == null ? EMPTY_STRING_ARRAY : a.clone();
+        }
+
+        final int len = len(a);
+        final String[] b = new String[len - (toIndex - fromIndex)];
+
+        if (fromIndex > 0) {
+            copy(a, 0, b, 0, fromIndex);
+        }
+
+        if (toIndex < len) {
+            copy(a, toIndex, b, fromIndex, len - toIndex);
+        }
+
+        return b;
+    }
+
+    /**
+     * Deletes the values from {@code fromIndex} to {@code toIndex}.
+     *
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return a new array
+     * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
+     */
+    public static <T> T[] deleteRange(final T[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
+        checkArgNotNull(a, "a");
+
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (fromIndex == toIndex) {
+            return a.clone();
+        }
+
+        final int len = len(a);
+        final T[] b = Array.newInstance(a.getClass().getComponentType(), len - (toIndex - fromIndex));
+
+        if (fromIndex > 0) {
+            copy(a, 0, b, 0, fromIndex);
+        }
+
+        if (toIndex < len) {
+            copy(a, toIndex, b, fromIndex, len - toIndex);
+        }
+
+        return b;
+    }
+
+    /**
+     * Returns {@code true} if the {@code List} is updated when {@code fromIndex < toIndex}, otherwise {@code false} is returned when {@code fromIndex == toIndex}.
+     *
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     */
+    @SuppressWarnings({ "unchecked" })
+    public static <T> boolean deleteRange(final List<T> c, final int fromIndex, final int toIndex) {
+        checkFromToIndex(fromIndex, toIndex, size(c));
+
+        if (fromIndex == toIndex) {
+            return false;
+        }
+
+        final int size = size(c);
+
+        if (c instanceof LinkedList || toIndex - fromIndex <= 3) {
+            c.subList(fromIndex, toIndex).clear();
+        } else {
+            final List<T> tmp = new ArrayList<>(size - (toIndex - fromIndex));
+
+            if (fromIndex > 0) {
+                tmp.addAll(c.subList(0, fromIndex));
+            }
+
+            if (toIndex < size) {
+                tmp.addAll(c.subList(toIndex, size));
+            }
+
+            c.clear();
+            c.addAll(tmp);
+        }
+
+        return true;
+    }
+
+    public static String deleteRange(String str, final int fromIndex, final int toIndex) {
+        final int len = len(str);
+
+        checkFromToIndex(fromIndex, toIndex, len);
+
+        if (fromIndex == toIndex || fromIndex >= len) {
+            return str == null ? EMPTY_STRING : str;
+        } else if (toIndex - fromIndex >= len) {
+            return EMPTY_STRING;
+        }
+
+        return Strings.concat(str.substring(0, fromIndex) + str.subSequence(toIndex, len));
+    }
+
+    /**
      * Return a new array.
      *
      * @param a
@@ -9024,22 +8568,22 @@ public final class N extends CommonUtil {
 
         checkFromToIndex(fromIndex, toIndex, len);
 
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(replacement) ? N.EMPTY_BOOLEAN_ARRAY : replacement.clone();
-        } else if (N.isNullOrEmpty(replacement)) {
-            return N.deleteRange(a, fromIndex, toIndex);
+        if (isNullOrEmpty(a)) {
+            return isNullOrEmpty(replacement) ? EMPTY_BOOLEAN_ARRAY : replacement.clone();
+        } else if (isNullOrEmpty(replacement)) {
+            return deleteRange(a, fromIndex, toIndex);
         }
 
         final boolean[] result = new boolean[len - (toIndex - fromIndex) + replacement.length];
 
         if (fromIndex > 0) {
-            N.copy(a, 0, result, 0, fromIndex);
+            copy(a, 0, result, 0, fromIndex);
         }
 
-        N.copy(replacement, 0, result, fromIndex, replacement.length);
+        copy(replacement, 0, result, fromIndex, replacement.length);
 
         if (toIndex < len) {
-            N.copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
+            copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
         }
 
         return result;
@@ -9059,22 +8603,22 @@ public final class N extends CommonUtil {
 
         checkFromToIndex(fromIndex, toIndex, len);
 
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(replacement) ? N.EMPTY_CHAR_ARRAY : replacement.clone();
-        } else if (N.isNullOrEmpty(replacement)) {
-            return N.deleteRange(a, fromIndex, toIndex);
+        if (isNullOrEmpty(a)) {
+            return isNullOrEmpty(replacement) ? EMPTY_CHAR_ARRAY : replacement.clone();
+        } else if (isNullOrEmpty(replacement)) {
+            return deleteRange(a, fromIndex, toIndex);
         }
 
         final char[] result = new char[len - (toIndex - fromIndex) + replacement.length];
 
         if (fromIndex > 0) {
-            N.copy(a, 0, result, 0, fromIndex);
+            copy(a, 0, result, 0, fromIndex);
         }
 
-        N.copy(replacement, 0, result, fromIndex, replacement.length);
+        copy(replacement, 0, result, fromIndex, replacement.length);
 
         if (toIndex < len) {
-            N.copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
+            copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
         }
 
         return result;
@@ -9094,22 +8638,22 @@ public final class N extends CommonUtil {
 
         checkFromToIndex(fromIndex, toIndex, len);
 
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(replacement) ? N.EMPTY_BYTE_ARRAY : replacement.clone();
-        } else if (N.isNullOrEmpty(replacement)) {
-            return N.deleteRange(a, fromIndex, toIndex);
+        if (isNullOrEmpty(a)) {
+            return isNullOrEmpty(replacement) ? EMPTY_BYTE_ARRAY : replacement.clone();
+        } else if (isNullOrEmpty(replacement)) {
+            return deleteRange(a, fromIndex, toIndex);
         }
 
         final byte[] result = new byte[len - (toIndex - fromIndex) + replacement.length];
 
         if (fromIndex > 0) {
-            N.copy(a, 0, result, 0, fromIndex);
+            copy(a, 0, result, 0, fromIndex);
         }
 
-        N.copy(replacement, 0, result, fromIndex, replacement.length);
+        copy(replacement, 0, result, fromIndex, replacement.length);
 
         if (toIndex < len) {
-            N.copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
+            copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
         }
 
         return result;
@@ -9129,22 +8673,22 @@ public final class N extends CommonUtil {
 
         checkFromToIndex(fromIndex, toIndex, len);
 
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(replacement) ? N.EMPTY_SHORT_ARRAY : replacement.clone();
-        } else if (N.isNullOrEmpty(replacement)) {
-            return N.deleteRange(a, fromIndex, toIndex);
+        if (isNullOrEmpty(a)) {
+            return isNullOrEmpty(replacement) ? EMPTY_SHORT_ARRAY : replacement.clone();
+        } else if (isNullOrEmpty(replacement)) {
+            return deleteRange(a, fromIndex, toIndex);
         }
 
         final short[] result = new short[len - (toIndex - fromIndex) + replacement.length];
 
         if (fromIndex > 0) {
-            N.copy(a, 0, result, 0, fromIndex);
+            copy(a, 0, result, 0, fromIndex);
         }
 
-        N.copy(replacement, 0, result, fromIndex, replacement.length);
+        copy(replacement, 0, result, fromIndex, replacement.length);
 
         if (toIndex < len) {
-            N.copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
+            copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
         }
 
         return result;
@@ -9164,22 +8708,22 @@ public final class N extends CommonUtil {
 
         checkFromToIndex(fromIndex, toIndex, len);
 
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(replacement) ? N.EMPTY_INT_ARRAY : replacement.clone();
-        } else if (N.isNullOrEmpty(replacement)) {
-            return N.deleteRange(a, fromIndex, toIndex);
+        if (isNullOrEmpty(a)) {
+            return isNullOrEmpty(replacement) ? EMPTY_INT_ARRAY : replacement.clone();
+        } else if (isNullOrEmpty(replacement)) {
+            return deleteRange(a, fromIndex, toIndex);
         }
 
         final int[] result = new int[len - (toIndex - fromIndex) + replacement.length];
 
         if (fromIndex > 0) {
-            N.copy(a, 0, result, 0, fromIndex);
+            copy(a, 0, result, 0, fromIndex);
         }
 
-        N.copy(replacement, 0, result, fromIndex, replacement.length);
+        copy(replacement, 0, result, fromIndex, replacement.length);
 
         if (toIndex < len) {
-            N.copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
+            copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
         }
 
         return result;
@@ -9199,22 +8743,22 @@ public final class N extends CommonUtil {
 
         checkFromToIndex(fromIndex, toIndex, len);
 
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(replacement) ? N.EMPTY_LONG_ARRAY : replacement.clone();
-        } else if (N.isNullOrEmpty(replacement)) {
-            return N.deleteRange(a, fromIndex, toIndex);
+        if (isNullOrEmpty(a)) {
+            return isNullOrEmpty(replacement) ? EMPTY_LONG_ARRAY : replacement.clone();
+        } else if (isNullOrEmpty(replacement)) {
+            return deleteRange(a, fromIndex, toIndex);
         }
 
         final long[] result = new long[len - (toIndex - fromIndex) + replacement.length];
 
         if (fromIndex > 0) {
-            N.copy(a, 0, result, 0, fromIndex);
+            copy(a, 0, result, 0, fromIndex);
         }
 
-        N.copy(replacement, 0, result, fromIndex, replacement.length);
+        copy(replacement, 0, result, fromIndex, replacement.length);
 
         if (toIndex < len) {
-            N.copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
+            copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
         }
 
         return result;
@@ -9234,22 +8778,22 @@ public final class N extends CommonUtil {
 
         checkFromToIndex(fromIndex, toIndex, len);
 
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(replacement) ? N.EMPTY_FLOAT_ARRAY : replacement.clone();
-        } else if (N.isNullOrEmpty(replacement)) {
-            return N.deleteRange(a, fromIndex, toIndex);
+        if (isNullOrEmpty(a)) {
+            return isNullOrEmpty(replacement) ? EMPTY_FLOAT_ARRAY : replacement.clone();
+        } else if (isNullOrEmpty(replacement)) {
+            return deleteRange(a, fromIndex, toIndex);
         }
 
         final float[] result = new float[len - (toIndex - fromIndex) + replacement.length];
 
         if (fromIndex > 0) {
-            N.copy(a, 0, result, 0, fromIndex);
+            copy(a, 0, result, 0, fromIndex);
         }
 
-        N.copy(replacement, 0, result, fromIndex, replacement.length);
+        copy(replacement, 0, result, fromIndex, replacement.length);
 
         if (toIndex < len) {
-            N.copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
+            copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
         }
 
         return result;
@@ -9269,22 +8813,22 @@ public final class N extends CommonUtil {
 
         checkFromToIndex(fromIndex, toIndex, len);
 
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(replacement) ? N.EMPTY_DOUBLE_ARRAY : replacement.clone();
-        } else if (N.isNullOrEmpty(replacement)) {
-            return N.deleteRange(a, fromIndex, toIndex);
+        if (isNullOrEmpty(a)) {
+            return isNullOrEmpty(replacement) ? EMPTY_DOUBLE_ARRAY : replacement.clone();
+        } else if (isNullOrEmpty(replacement)) {
+            return deleteRange(a, fromIndex, toIndex);
         }
 
         final double[] result = new double[len - (toIndex - fromIndex) + replacement.length];
 
         if (fromIndex > 0) {
-            N.copy(a, 0, result, 0, fromIndex);
+            copy(a, 0, result, 0, fromIndex);
         }
 
-        N.copy(replacement, 0, result, fromIndex, replacement.length);
+        copy(replacement, 0, result, fromIndex, replacement.length);
 
         if (toIndex < len) {
-            N.copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
+            copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
         }
 
         return result;
@@ -9295,22 +8839,22 @@ public final class N extends CommonUtil {
 
         checkFromToIndex(fromIndex, toIndex, len);
 
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(replacement) ? N.EMPTY_STRING_ARRAY : replacement.clone();
-        } else if (N.isNullOrEmpty(replacement)) {
-            return N.deleteRange(a, fromIndex, toIndex);
+        if (isNullOrEmpty(a)) {
+            return isNullOrEmpty(replacement) ? EMPTY_STRING_ARRAY : replacement.clone();
+        } else if (isNullOrEmpty(replacement)) {
+            return deleteRange(a, fromIndex, toIndex);
         }
 
         final String[] result = new String[len - (toIndex - fromIndex) + replacement.length];
 
         if (fromIndex > 0) {
-            N.copy(a, 0, result, 0, fromIndex);
+            copy(a, 0, result, 0, fromIndex);
         }
 
-        N.copy(replacement, 0, result, fromIndex, replacement.length);
+        copy(replacement, 0, result, fromIndex, replacement.length);
 
         if (toIndex < len) {
-            N.copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
+            copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
         }
 
         return result;
@@ -9333,22 +8877,22 @@ public final class N extends CommonUtil {
 
         checkFromToIndex(fromIndex, toIndex, len);
 
-        if (N.isNullOrEmpty(a)) {
-            return N.isNullOrEmpty(replacement) ? a : replacement.clone();
-        } else if (N.isNullOrEmpty(replacement)) {
-            return N.deleteRange(a, fromIndex, toIndex);
+        if (isNullOrEmpty(a)) {
+            return isNullOrEmpty(replacement) ? a : replacement.clone();
+        } else if (isNullOrEmpty(replacement)) {
+            return deleteRange(a, fromIndex, toIndex);
         }
 
-        final T[] result = (T[]) CommonUtil.newArray(a.getClass().getComponentType(), len - (toIndex - fromIndex) + replacement.length);
+        final T[] result = (T[]) newArray(a.getClass().getComponentType(), len - (toIndex - fromIndex) + replacement.length);
 
         if (fromIndex > 0) {
-            N.copy(a, 0, result, 0, fromIndex);
+            copy(a, 0, result, 0, fromIndex);
         }
 
-        N.copy(replacement, 0, result, fromIndex, replacement.length);
+        copy(replacement, 0, result, fromIndex, replacement.length);
 
         if (toIndex < len) {
-            N.copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
+            copy(a, toIndex, result, fromIndex + replacement.length, len - toIndex);
         }
 
         return result;
@@ -9372,23 +8916,23 @@ public final class N extends CommonUtil {
 
         checkFromToIndex(fromIndex, toIndex, size);
 
-        if (N.isNullOrEmpty(replacement)) {
+        if (isNullOrEmpty(replacement)) {
             if (fromIndex == toIndex) {
                 return false;
             }
 
-            return N.deleteRange(c, fromIndex, toIndex);
+            return deleteRange(c, fromIndex, toIndex);
         }
 
         final List<T> endList = toIndex < size ? new ArrayList<>(c.subList(toIndex, size)) : null;
 
         if (fromIndex < size) {
-            N.deleteRange(c, fromIndex, size);
+            deleteRange(c, fromIndex, size);
         }
 
         c.addAll(replacement);
 
-        if (N.notNullOrEmpty(endList)) {
+        if (notNullOrEmpty(endList)) {
             c.addAll(endList);
         }
 
@@ -9410,16 +8954,860 @@ public final class N extends CommonUtil {
 
         checkFromToIndex(fromIndex, toIndex, len);
 
-        if (N.isNullOrEmpty(str)) {
-            return N.isNullOrEmpty(replacement) ? str : replacement;
-        } else if (N.isNullOrEmpty(replacement)) {
-            return N.deleteRange(str, fromIndex, toIndex);
+        if (isNullOrEmpty(str)) {
+            return isNullOrEmpty(replacement) ? str : replacement;
+        } else if (isNullOrEmpty(replacement)) {
+            return deleteRange(str, fromIndex, toIndex);
         }
 
         final char[] a = InternalUtil.getCharsForReadOnly(str);
-        final char[] tmp = N.replaceRange(a, fromIndex, toIndex, InternalUtil.getCharsForReadOnly(replacement));
+        final char[] tmp = replaceRange(a, fromIndex, toIndex, InternalUtil.getCharsForReadOnly(replacement));
 
         return InternalUtil.newString(tmp, true);
+    }
+
+    /**
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+     */
+    public static void moveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        final int len = len(a);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+            return;
+        }
+
+        final boolean[] rangeTmp = copyOfRange(a, fromIndex, toIndex);
+
+        // move ahead
+        if (newPositionStartIndex < fromIndex) {
+            copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
+        } else {
+            copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
+        }
+
+        copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
+    }
+
+    /**
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+     */
+    public static void moveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        final int len = len(a);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+            return;
+        }
+
+        final char[] rangeTmp = copyOfRange(a, fromIndex, toIndex);
+
+        // move ahead
+        if (newPositionStartIndex < fromIndex) {
+            copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
+        } else {
+            copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
+        }
+
+        copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
+    }
+
+    /**
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+     */
+    public static void moveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        final int len = len(a);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+            return;
+        }
+
+        final byte[] rangeTmp = copyOfRange(a, fromIndex, toIndex);
+
+        // move ahead
+        if (newPositionStartIndex < fromIndex) {
+            copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
+        } else {
+            copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
+        }
+
+        copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
+    }
+
+    /**
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+     */
+    public static void moveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        final int len = len(a);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+            return;
+        }
+
+        final short[] rangeTmp = copyOfRange(a, fromIndex, toIndex);
+
+        // move ahead
+        if (newPositionStartIndex < fromIndex) {
+            copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
+        } else {
+            copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
+        }
+
+        copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
+    }
+
+    /**
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+     */
+    public static void moveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        final int len = len(a);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+            return;
+        }
+
+        final int[] rangeTmp = copyOfRange(a, fromIndex, toIndex);
+
+        // move ahead
+        if (newPositionStartIndex < fromIndex) {
+            copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
+        } else {
+            copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
+        }
+
+        copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
+    }
+
+    /**
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+     */
+    public static void moveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        final int len = len(a);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+            return;
+        }
+
+        final long[] rangeTmp = copyOfRange(a, fromIndex, toIndex);
+
+        // move ahead
+        if (newPositionStartIndex < fromIndex) {
+            copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
+        } else {
+            copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
+        }
+
+        copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
+    }
+
+    /**
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+     */
+    public static void moveRange(final float[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        final int len = len(a);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+            return;
+        }
+
+        final float[] rangeTmp = copyOfRange(a, fromIndex, toIndex);
+
+        // move ahead
+        if (newPositionStartIndex < fromIndex) {
+            copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
+        } else {
+            copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
+        }
+
+        copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
+    }
+
+    /**
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+     */
+    public static void moveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        final int len = len(a);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+            return;
+        }
+
+        final double[] rangeTmp = copyOfRange(a, fromIndex, toIndex);
+
+        // move ahead
+        if (newPositionStartIndex < fromIndex) {
+            copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
+        } else {
+            copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
+        }
+
+        copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
+    }
+
+    /**
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+     */
+    public static <T> void moveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        final int len = len(a);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+            return;
+        }
+
+        final T[] rangeTmp = copyOfRange(a, fromIndex, toIndex);
+
+        // move ahead
+        if (newPositionStartIndex < fromIndex) {
+            copy(a, newPositionStartIndex, a, toIndex - (fromIndex - newPositionStartIndex), fromIndex - newPositionStartIndex);
+        } else {
+            copy(a, toIndex, a, fromIndex, newPositionStartIndex - fromIndex);
+        }
+
+        copy(rangeTmp, 0, a, newPositionStartIndex, rangeTmp.length);
+    }
+
+    /**
+     *
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, list.size() - (toIndex - fromIndex)]
+     * @return {@code true} if the specified {@code List} is updated.
+     */
+    public static <T> boolean moveRange(final List<T> c, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        final int size = size(c);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, size);
+
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+            return false;
+        }
+
+        final T[] tmp = (T[]) c.toArray();
+
+        moveRange(tmp, fromIndex, toIndex, newPositionStartIndex);
+        c.clear();
+        c.addAll(Arrays.asList(tmp));
+
+        return true;
+    }
+
+    /**
+     *
+     * @param str
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex must in the range: [0, String.length - (toIndex - fromIndex)]
+     */
+    @SuppressWarnings("deprecation")
+    public static String moveRange(final String str, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+        final int len = len(str);
+        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len);
+
+        if (fromIndex == toIndex || fromIndex == newPositionStartIndex) {
+            return str;
+        }
+
+        final char[] a = str.toCharArray();
+
+        moveRange(a, fromIndex, toIndex, newPositionStartIndex);
+
+        return InternalUtil.newString(a, true);
+    }
+
+    private static void checkIndexAndStartPositionForMoveRange(final int fromIndex, final int toIndex, final int newPositionStartIndex, final int len) {
+        checkFromToIndex(fromIndex, toIndex, len);
+
+        if (newPositionStartIndex < 0 || newPositionStartIndex > (len - (toIndex - fromIndex))) {
+            throw new IndexOutOfBoundsException("newPositionStartIndex " + newPositionStartIndex + " is out-of-bounds: [0, " + (len - (toIndex - fromIndex))
+                    + "=(array.length - (toIndex - fromIndex))]");
+        }
+    }
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static boolean[] copyThenMoveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final boolean[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static char[] copyThenMoveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final char[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static byte[] copyThenMoveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final byte[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static short[] copyThenMoveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final short[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static int[] copyThenMoveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final int[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static long[] copyThenMoveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final long[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static double[] copyThenMoveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final double[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static <T> T[] copyThenMoveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final T[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static boolean[] copyThenMoveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final boolean[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static char[] copyThenMoveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final char[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static byte[] copyThenMoveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final byte[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static short[] copyThenMoveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final short[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static int[] copyThenMoveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final int[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static long[] copyThenMoveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final long[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static double[] copyThenMoveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final double[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static <T> T[] copyThenMoveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final T[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static boolean[] copyThenMoveRange(final boolean[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final boolean[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static char[] copyThenMoveRange(final char[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final char[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static byte[] copyThenMoveRange(final byte[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final byte[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static short[] copyThenMoveRange(final short[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final short[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static int[] copyThenMoveRange(final int[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final int[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static long[] copyThenMoveRange(final long[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final long[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static double[] copyThenMoveRange(final double[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final double[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+    //
+    //    /**
+    //     * Return a new array copy.
+    //     *
+    //     * @param a
+    //     * @param fromIndex
+    //     * @param toIndex
+    //     * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
+    //     * @return a new array.
+    //     */
+    //    public static <T> T[] copyThenMoveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
+    //        checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionStartIndex, len(a));
+    //
+    //        final T[] copy = isNullOrEmpty(a) ? a : a.clone();
+    //
+    //        moveRange(copy, fromIndex, toIndex, newPositionStartIndex);
+    //
+    //        return copy;
+    //    }
+
+    public static <T> List<T> skipRange(final Collection<T> c, final int startInclusive, final int endExclusive) {
+        return skipRange(c, startInclusive, endExclusive, IntFunctions.ofList());
+    }
+
+    public static <T, C extends Collection<T>> C skipRange(final Collection<T> c, final int startInclusive, final int endExclusive,
+            final IntFunction<C> supplier) {
+        final int size = size(c);
+
+        checkFromToIndex(startInclusive, endExclusive, size);
+
+        final C result = supplier.apply(size - (endExclusive - startInclusive));
+
+        if (c instanceof List) {
+            final List<T> list = (List<T>) c;
+
+            if (startInclusive > 0) {
+                result.addAll(list.subList(0, startInclusive));
+            }
+
+            if (endExclusive < size) {
+                result.addAll(list.subList(endExclusive, size));
+            }
+        } else {
+            final Iterator<T> iter = c.iterator();
+
+            for (int i = 0; i < startInclusive; i++) {
+                result.add(iter.next());
+            }
+
+            if (endExclusive < size) {
+                int idx = startInclusive;
+
+                while (idx++ < endExclusive) {
+                    iter.next();
+                }
+
+                while (iter.hasNext()) {
+                    result.add(iter.next());
+                }
+            }
+        }
+
+        return result;
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static <T> boolean padLeft(final List<T> list, final int minLen, final T objToAdd) {
+        N.checkArgNotNegative(minLen, "minLen");
+
+        final int size = N.size(list);
+
+        if (size < minLen) {
+            final int elementCountToAdd = minLen - size;
+            final Object[] a = new Object[elementCountToAdd];
+
+            if (objToAdd != null) {
+                N.fill(a, objToAdd);
+
+                list.addAll(0, (List) Arrays.asList(a));
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static <T> boolean padRight(final Collection<T> c, final int minLen, final T objToAdd) {
+        N.checkArgNotNegative(minLen, "minLen");
+
+        final int size = N.size(c);
+
+        if (size < minLen) {
+            final int elementCountToAdd = minLen - size;
+            final Object[] a = new Object[elementCountToAdd];
+
+            if (objToAdd != null) {
+                N.fill(a, objToAdd);
+
+                c.addAll((Collection) Arrays.asList(a));
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     // Primitive/Object array converters
@@ -9479,7 +9867,7 @@ public final class N extends CommonUtil {
 
             return false;
         } else {
-            final Set<Character> set = N.newHashSet(toIndex - fromIndex);
+            final Set<Character> set = newHashSet(toIndex - fromIndex);
 
             for (int i = fromIndex; i < toIndex; i++) {
                 if (!set.add(a[i])) {
@@ -9545,7 +9933,7 @@ public final class N extends CommonUtil {
 
             return false;
         } else {
-            final Set<Byte> set = N.newHashSet(toIndex - fromIndex);
+            final Set<Byte> set = newHashSet(toIndex - fromIndex);
 
             for (int i = fromIndex; i < toIndex; i++) {
                 if (!set.add(a[i])) {
@@ -9611,7 +9999,7 @@ public final class N extends CommonUtil {
 
             return false;
         } else {
-            final Set<Short> set = N.newHashSet(toIndex - fromIndex);
+            final Set<Short> set = newHashSet(toIndex - fromIndex);
 
             for (int i = fromIndex; i < toIndex; i++) {
                 if (!set.add(a[i])) {
@@ -9677,7 +10065,7 @@ public final class N extends CommonUtil {
 
             return false;
         } else {
-            final Set<Integer> set = N.newHashSet(toIndex - fromIndex);
+            final Set<Integer> set = newHashSet(toIndex - fromIndex);
 
             for (int i = fromIndex; i < toIndex; i++) {
                 if (!set.add(a[i])) {
@@ -9743,7 +10131,7 @@ public final class N extends CommonUtil {
 
             return false;
         } else {
-            final Set<Long> set = N.newHashSet(toIndex - fromIndex);
+            final Set<Long> set = newHashSet(toIndex - fromIndex);
 
             for (int i = fromIndex; i < toIndex; i++) {
                 if (!set.add(a[i])) {
@@ -9809,7 +10197,7 @@ public final class N extends CommonUtil {
 
             return false;
         } else {
-            final Set<Float> set = N.newHashSet(toIndex - fromIndex);
+            final Set<Float> set = newHashSet(toIndex - fromIndex);
 
             for (int i = fromIndex; i < toIndex; i++) {
                 if (!set.add(a[i])) {
@@ -9875,7 +10263,7 @@ public final class N extends CommonUtil {
 
             return false;
         } else {
-            final Set<Double> set = N.newHashSet(toIndex - fromIndex);
+            final Set<Double> set = newHashSet(toIndex - fromIndex);
 
             for (int i = fromIndex; i < toIndex; i++) {
                 if (!set.add(a[i])) {
@@ -9944,7 +10332,7 @@ public final class N extends CommonUtil {
 
             return false;
         } else {
-            final Set<Object> set = N.newHashSet(toIndex - fromIndex);
+            final Set<Object> set = newHashSet(toIndex - fromIndex);
 
             for (int i = fromIndex; i < toIndex; i++) {
                 if (!set.add(hashKey(a[i]))) {
@@ -9994,7 +10382,7 @@ public final class N extends CommonUtil {
 
             return false;
         } else {
-            final Set<Object> set = N.newHashSet(c.size());
+            final Set<Object> set = newHashSet(c.size());
 
             for (Object e : c) {
                 if (!set.add(hashKey(e))) {
@@ -10013,15 +10401,15 @@ public final class N extends CommonUtil {
      * @return
      */
     public static <T> boolean retainAll(final Collection<T> c, final Collection<? extends T> objsToKeep) {
-        if (N.isNullOrEmpty(c)) {
+        if (isNullOrEmpty(c)) {
             return false;
-        } else if (N.isNullOrEmpty(objsToKeep)) {
+        } else if (isNullOrEmpty(objsToKeep)) {
             c.clear();
             return true;
         }
 
         if (c instanceof HashSet && !(objsToKeep instanceof Set) && (c.size() > 9 || objsToKeep.size() > 9)) {
-            return c.retainAll(N.newHashSet(objsToKeep));
+            return c.retainAll(newHashSet(objsToKeep));
         } else {
             return c.retainAll(objsToKeep);
         }
@@ -11131,7 +11519,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> double averageInt(final T[] a, final Throwables.ToIntFunction<? super T, E> func) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return 0d;
         }
 
@@ -11152,7 +11540,7 @@ public final class N extends CommonUtil {
      */
     public static <T, E extends Exception> double averageInt(final T[] a, final int fromIndex, final int toIndex,
             final Throwables.ToIntFunction<? super T, E> func) throws E {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
             return 0d;
@@ -11231,7 +11619,7 @@ public final class N extends CommonUtil {
      */
     public static <T, E extends Exception> double averageInt(final Collection<? extends T> c, final int fromIndex, final int toIndex,
             final Throwables.ToIntFunction<? super T, E> func) throws E {
-        N.checkFromToIndex(fromIndex, toIndex, N.size(c));
+        checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
             return 0;
@@ -11299,7 +11687,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> double averageLong(final T[] a, final Throwables.ToLongFunction<? super T, E> func) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return 0d;
         }
 
@@ -11320,13 +11708,13 @@ public final class N extends CommonUtil {
      */
     public static <T, E extends Exception> double averageLong(final T[] a, final int fromIndex, final int toIndex,
             final Throwables.ToLongFunction<? super T, E> func) throws E {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
             return 0d;
         }
 
-        return ((double) N.sumLong(a, fromIndex, toIndex, func)) / (toIndex - fromIndex);
+        return ((double) sumLong(a, fromIndex, toIndex, func)) / (toIndex - fromIndex);
     }
 
     /**
@@ -11393,13 +11781,13 @@ public final class N extends CommonUtil {
      */
     public static <T, E extends Exception> double averageLong(final Collection<? extends T> c, final int fromIndex, final int toIndex,
             final Throwables.ToLongFunction<? super T, E> func) throws E {
-        N.checkFromToIndex(fromIndex, toIndex, N.size(c));
+        checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
             return 0d;
         }
 
-        return ((double) N.sumLong(c, fromIndex, toIndex, func)) / (toIndex - fromIndex);
+        return ((double) sumLong(c, fromIndex, toIndex, func)) / (toIndex - fromIndex);
     }
 
     /**
@@ -11439,7 +11827,7 @@ public final class N extends CommonUtil {
      * @see Iterables#averageDouble(Object[], com.landawn.abacus.util.Throwables.ToDoubleFunction)
      */
     public static <T, E extends Exception> double averageDouble(final T[] a, final Throwables.ToDoubleFunction<? super T, E> func) throws E {
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return 0d;
         }
 
@@ -11461,7 +11849,7 @@ public final class N extends CommonUtil {
      */
     public static <T, E extends Exception> double averageDouble(final T[] a, final int fromIndex, final int toIndex,
             final Throwables.ToDoubleFunction<? super T, E> func) throws E {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
             return 0d;
@@ -11529,7 +11917,7 @@ public final class N extends CommonUtil {
      */
     public static <T, E extends Exception> double averageDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex,
             final Throwables.ToDoubleFunction<? super T, E> func) throws E {
-        N.checkFromToIndex(fromIndex, toIndex, N.size(c));
+        checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
             return 0d;
@@ -13322,7 +13710,7 @@ public final class N extends CommonUtil {
      * @throws IllegalArgumentException if {@code a} is null or empty.
      */
     public static <T> Pair<T, T> minMax(final T[] a, Comparator<? super T> cmp) throws IllegalArgumentException {
-        N.checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
 
         if (a.length == 1) {
             return Pair.of(a[0], a[0]);
@@ -13367,7 +13755,7 @@ public final class N extends CommonUtil {
      * @throws IllegalArgumentException if {@code c} is null or empty.
      */
     public static <T> Pair<T, T> minMax(final Iterable<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(c, "The spcified iterable can not be null or empty");
+        checkArgNotNull(c, "The spcified iterable can not be null or empty");
 
         return minMax(c.iterator(), cmp);
     }
@@ -13394,7 +13782,7 @@ public final class N extends CommonUtil {
      * @see Iterables#minMax(Iterator, Comparator)
      */
     public static <T> Pair<T, T> minMax(final Iterator<? extends T> iter, Comparator<? super T> cmp) throws IllegalArgumentException {
-        N.checkArgument(iter != null && iter.hasNext(), "The spcified iterator can not be null or empty");
+        checkArgument(iter != null && iter.hasNext(), "The spcified iterator can not be null or empty");
 
         cmp = cmp == null ? NULL_MIN_COMPARATOR : cmp;
 
@@ -14070,15 +14458,15 @@ public final class N extends CommonUtil {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-        N.checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
 
         final int len = toIndex - fromIndex;
 
         if (k == 1) {
-            return N.max(a, fromIndex, toIndex);
+            return max(a, fromIndex, toIndex);
         } else if (k == len) {
-            return N.min(a, fromIndex, toIndex);
+            return min(a, fromIndex, toIndex);
         }
 
         Queue<Character> queue = null;
@@ -14143,15 +14531,15 @@ public final class N extends CommonUtil {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-        N.checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
 
         final int len = toIndex - fromIndex;
 
         if (k == 1) {
-            return N.max(a, fromIndex, toIndex);
+            return max(a, fromIndex, toIndex);
         } else if (k == len) {
-            return N.min(a, fromIndex, toIndex);
+            return min(a, fromIndex, toIndex);
         }
 
         Queue<Byte> queue = null;
@@ -14216,15 +14604,15 @@ public final class N extends CommonUtil {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-        N.checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
 
         final int len = toIndex - fromIndex;
 
         if (k == 1) {
-            return N.max(a, fromIndex, toIndex);
+            return max(a, fromIndex, toIndex);
         } else if (k == len) {
-            return N.min(a, fromIndex, toIndex);
+            return min(a, fromIndex, toIndex);
         }
 
         Queue<Short> queue = null;
@@ -14289,15 +14677,15 @@ public final class N extends CommonUtil {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-        N.checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
 
         final int len = toIndex - fromIndex;
 
         if (k == 1) {
-            return N.max(a, fromIndex, toIndex);
+            return max(a, fromIndex, toIndex);
         } else if (k == len) {
-            return N.min(a, fromIndex, toIndex);
+            return min(a, fromIndex, toIndex);
         }
 
         Queue<Integer> queue = null;
@@ -14362,15 +14750,15 @@ public final class N extends CommonUtil {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-        N.checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
 
         final int len = toIndex - fromIndex;
 
         if (k == 1) {
-            return N.max(a, fromIndex, toIndex);
+            return max(a, fromIndex, toIndex);
         } else if (k == len) {
-            return N.min(a, fromIndex, toIndex);
+            return min(a, fromIndex, toIndex);
         }
 
         Queue<Long> queue = null;
@@ -14435,15 +14823,15 @@ public final class N extends CommonUtil {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-        N.checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
 
         final int len = toIndex - fromIndex;
 
         if (k == 1) {
-            return N.max(a, fromIndex, toIndex);
+            return max(a, fromIndex, toIndex);
         } else if (k == len) {
-            return N.min(a, fromIndex, toIndex);
+            return min(a, fromIndex, toIndex);
         }
 
         Queue<Float> queue = null;
@@ -14508,15 +14896,15 @@ public final class N extends CommonUtil {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-        N.checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
 
         final int len = toIndex - fromIndex;
 
         if (k == 1) {
-            return N.max(a, fromIndex, toIndex);
+            return max(a, fromIndex, toIndex);
         } else if (k == len) {
-            return N.min(a, fromIndex, toIndex);
+            return min(a, fromIndex, toIndex);
         }
 
         Queue<Double> queue = null;
@@ -14619,16 +15007,16 @@ public final class N extends CommonUtil {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
         }
 
-        N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-        N.checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
+        checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
 
         final Comparator<? super T> comparator = cmp == null ? Comparators.NATURAL_ORDER : cmp;
         final int len = toIndex - fromIndex;
 
         if (k == 1) {
-            return N.max(a, fromIndex, toIndex, comparator);
+            return max(a, fromIndex, toIndex, comparator);
         } else if (k == len) {
-            return N.min(a, fromIndex, toIndex, comparator);
+            return min(a, fromIndex, toIndex, comparator);
         }
 
         Queue<T> queue = null;
@@ -14731,16 +15119,16 @@ public final class N extends CommonUtil {
             throw new IllegalArgumentException("The length of collection can not be null or empty");
         }
 
-        N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
-        N.checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
+        checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
+        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
 
         final Comparator<? super T> comparator = cmp == null ? Comparators.NATURAL_ORDER : cmp;
         final int len = toIndex - fromIndex;
 
         if (k == 1) {
-            return N.max(c, fromIndex, toIndex, comparator);
+            return max(c, fromIndex, toIndex, comparator);
         } else if (k == len) {
-            return N.min(c, fromIndex, toIndex, comparator);
+            return min(c, fromIndex, toIndex, comparator);
         }
 
         final Iterator<? extends T> iter = c.iterator();
@@ -15477,7 +15865,7 @@ public final class N extends CommonUtil {
             final Comparator<? super T> cmp2 = cmp;
             pairCmp = (a, b) -> cmp2.compare(a.value(), b.value());
         } else {
-            final Comparator<Indexed<Comparable>> tmp = (a, b) -> N.compare(a.value(), b.value());
+            final Comparator<Indexed<Comparable>> tmp = (a, b) -> compare(a.value(), b.value());
             pairCmp = (Comparator) tmp;
         }
 
@@ -15638,7 +16026,7 @@ public final class N extends CommonUtil {
         checkArgNotNullOrEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
 
         final int len = sortedArray.length;
-        final Map<Percentage, Character> m = N.newLinkedHashMap(Percentage.values().length);
+        final Map<Percentage, Character> m = newLinkedHashMap(Percentage.values().length);
 
         for (Percentage p : Percentage.values()) {
             m.put(p, sortedArray[(int) (len * p.doubleValue())]);
@@ -15658,7 +16046,7 @@ public final class N extends CommonUtil {
         checkArgNotNullOrEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
 
         final int len = sortedArray.length;
-        final Map<Percentage, Byte> m = N.newLinkedHashMap(Percentage.values().length);
+        final Map<Percentage, Byte> m = newLinkedHashMap(Percentage.values().length);
 
         for (Percentage p : Percentage.values()) {
             m.put(p, sortedArray[(int) (len * p.doubleValue())]);
@@ -15678,7 +16066,7 @@ public final class N extends CommonUtil {
         checkArgNotNullOrEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
 
         final int len = sortedArray.length;
-        final Map<Percentage, Short> m = N.newLinkedHashMap(Percentage.values().length);
+        final Map<Percentage, Short> m = newLinkedHashMap(Percentage.values().length);
 
         for (Percentage p : Percentage.values()) {
             m.put(p, sortedArray[(int) (len * p.doubleValue())]);
@@ -15698,7 +16086,7 @@ public final class N extends CommonUtil {
         checkArgNotNullOrEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
 
         final int len = sortedArray.length;
-        final Map<Percentage, Integer> m = N.newLinkedHashMap(Percentage.values().length);
+        final Map<Percentage, Integer> m = newLinkedHashMap(Percentage.values().length);
 
         for (Percentage p : Percentage.values()) {
             m.put(p, sortedArray[(int) (len * p.doubleValue())]);
@@ -15718,7 +16106,7 @@ public final class N extends CommonUtil {
         checkArgNotNullOrEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
 
         final int len = sortedArray.length;
-        final Map<Percentage, Long> m = N.newLinkedHashMap(Percentage.values().length);
+        final Map<Percentage, Long> m = newLinkedHashMap(Percentage.values().length);
 
         for (Percentage p : Percentage.values()) {
             m.put(p, sortedArray[(int) (len * p.doubleValue())]);
@@ -15738,7 +16126,7 @@ public final class N extends CommonUtil {
         checkArgNotNullOrEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
 
         final int len = sortedArray.length;
-        final Map<Percentage, Float> m = N.newLinkedHashMap(Percentage.values().length);
+        final Map<Percentage, Float> m = newLinkedHashMap(Percentage.values().length);
 
         for (Percentage p : Percentage.values()) {
             m.put(p, sortedArray[(int) (len * p.doubleValue())]);
@@ -15758,7 +16146,7 @@ public final class N extends CommonUtil {
         checkArgNotNullOrEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
 
         final int len = sortedArray.length;
-        final Map<Percentage, Double> m = N.newLinkedHashMap(Percentage.values().length);
+        final Map<Percentage, Double> m = newLinkedHashMap(Percentage.values().length);
 
         for (Percentage p : Percentage.values()) {
             m.put(p, sortedArray[(int) (len * p.doubleValue())]);
@@ -15779,7 +16167,7 @@ public final class N extends CommonUtil {
         checkArgNotNullOrEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
 
         final int len = sortedArray.length;
-        final Map<Percentage, T> m = N.newLinkedHashMap(Percentage.values().length);
+        final Map<Percentage, T> m = newLinkedHashMap(Percentage.values().length);
 
         for (Percentage p : Percentage.values()) {
             m.put(p, sortedArray[(int) (len * p.doubleValue())]);
@@ -15800,7 +16188,7 @@ public final class N extends CommonUtil {
         checkArgNotNullOrEmpty(sortedList, "The spcified 'sortedList' can not be null or empty");
 
         final int size = sortedList.size();
-        final Map<Percentage, T> m = N.newLinkedHashMap(Percentage.values().length);
+        final Map<Percentage, T> m = newLinkedHashMap(Percentage.values().length);
 
         for (Percentage p : Percentage.values()) {
             m.put(p, sortedList.get((int) (size * p.doubleValue())));
@@ -16008,7 +16396,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final Throwables.Consumer<? super T, E> action) throws E {
-        N.checkArgNotNull(action);
+        checkArgNotNull(action);
 
         if (iter == null) {
             return;
@@ -16118,6 +16506,27 @@ public final class N extends CommonUtil {
 
     /**
      *
+     * @param <K>
+     * @param <V>
+     * @param <E>
+     * @param map
+     * @param action
+     * @throws E the e
+     */
+    public static <K, V, E extends Exception> void forEach(final Map<K, V> map, final Throwables.BiConsumer<? super K, ? super V, E> action) throws E {
+        checkArgNotNull(action);
+
+        if (isNullOrEmpty(map)) {
+            return;
+        }
+
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            action.accept(entry.getKey(), entry.getValue());
+        }
+    }
+
+    /**
+     *
      * @param <T>
      * @param <E>
      * @param a
@@ -16180,6 +16589,7 @@ public final class N extends CommonUtil {
         }
 
         int idx = 0;
+
         for (T e : c) {
             action.accept(idx++, e);
         }
@@ -16195,7 +16605,7 @@ public final class N extends CommonUtil {
      */
     public static <T, E extends Exception> void forEachIndexed(final Iterator<? extends T> iter, final Throwables.IndexedConsumer<? super T, E> action)
             throws E {
-        N.checkArgNotNull(action);
+        checkArgNotNull(action);
 
         if (iter == null) {
             return;
@@ -16308,6 +16718,30 @@ public final class N extends CommonUtil {
 
     /**
      *
+     * @param <K>
+     * @param <V>
+     * @param <E>
+     * @param map
+     * @param action
+     * @throws E the e
+     */
+    public static <K, V, E extends Exception> void forEachIndexed(final Map<K, V> map, final Throwables.IndexedBiConsumer<? super K, ? super V, E> action)
+            throws E {
+        checkArgNotNull(action);
+
+        if (isNullOrEmpty(map)) {
+            return;
+        }
+
+        int idx = 0;
+
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            action.accept(idx++, entry.getKey(), entry.getValue());
+        }
+    }
+
+    /**
+     *
      * @param <T>
      * @param <U>
      * @param <E>
@@ -16387,8 +16821,8 @@ public final class N extends CommonUtil {
     public static <T, U, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iter,
             final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
             throws E, E2 {
-        N.checkArgNotNull(flatMapper);
-        N.checkArgNotNull(action);
+        checkArgNotNull(flatMapper);
+        checkArgNotNull(action);
 
         if (iter == null) {
             return;
@@ -16401,7 +16835,7 @@ public final class N extends CommonUtil {
 
             final Collection<U> c2 = flatMapper.apply(t);
 
-            if (N.notNullOrEmpty(c2)) {
+            if (notNullOrEmpty(c2)) {
                 for (U u : c2) {
                     action.accept(t, u);
                 }
@@ -16519,9 +16953,9 @@ public final class N extends CommonUtil {
             final Throwables.Function<? super T, ? extends Collection<T2>, E> flatMapper,
             final Throwables.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
             final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
-        N.checkArgNotNull(flatMapper);
-        N.checkArgNotNull(flatMapper2);
-        N.checkArgNotNull(action);
+        checkArgNotNull(flatMapper);
+        checkArgNotNull(flatMapper2);
+        checkArgNotNull(action);
 
         if (iter == null) {
             return;
@@ -16534,11 +16968,11 @@ public final class N extends CommonUtil {
 
             final Collection<T2> c2 = flatMapper.apply(t);
 
-            if (N.notNullOrEmpty(c2)) {
+            if (notNullOrEmpty(c2)) {
                 for (T2 t2 : c2) {
                     final Collection<T3> c3 = flatMapper2.apply(t2);
 
-                    if (N.notNullOrEmpty(c3)) {
+                    if (notNullOrEmpty(c3)) {
                         for (T3 t3 : c3) {
                             action.accept(t, t2, t3);
                         }
@@ -16606,7 +17040,7 @@ public final class N extends CommonUtil {
      */
     public static <A, B, E extends Exception> void forEach(final Iterator<A> a, final Iterator<B> b,
             final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
-        N.checkArgNotNull(action);
+        checkArgNotNull(action);
 
         if (a == null || b == null) {
             return;
@@ -16683,7 +17117,7 @@ public final class N extends CommonUtil {
      */
     public static <A, B, C, E extends Exception> void forEach(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c,
             final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
-        N.checkArgNotNull(action);
+        checkArgNotNull(action);
 
         if (a == null || b == null || c == null) {
             return;
@@ -16754,7 +17188,7 @@ public final class N extends CommonUtil {
      */
     public static <A, B, E extends Exception> void forEach(final Iterator<A> a, final Iterator<B> b, final A valueForNoneA, final B valueForNoneB,
             final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
-        N.checkArgNotNull(action);
+        checkArgNotNull(action);
 
         final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
         final Iterator<B> iterB = b == null ? ObjIterator.<B> empty() : b;
@@ -16841,7 +17275,7 @@ public final class N extends CommonUtil {
      */
     public static <A, B, C, E extends Exception> void forEach(final Iterator<A> a, final Iterator<B> b, final Iterator<C> c, final A valueForNoneA,
             final B valueForNoneB, final C valueForNoneC, final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
-        N.checkArgNotNull(action);
+        checkArgNotNull(action);
 
         final Iterator<A> iterA = a == null ? ObjIterator.<A> empty() : a;
         final Iterator<B> iterB = b == null ? ObjIterator.<B> empty() : b;
@@ -16998,8 +17432,8 @@ public final class N extends CommonUtil {
     public static <T, U, E extends Exception, E2 extends Exception> void forEachNonNull(final Iterator<? extends T> iter,
             final Throwables.Function<? super T, ? extends Collection<U>, E> flatMapper, final Throwables.BiConsumer<? super T, ? super U, E2> action)
             throws E, E2 {
-        N.checkArgNotNull(flatMapper);
-        N.checkArgNotNull(action);
+        checkArgNotNull(flatMapper);
+        checkArgNotNull(action);
 
         if (iter == null) {
             return;
@@ -17013,7 +17447,7 @@ public final class N extends CommonUtil {
             if (e != null) {
                 final Collection<U> c2 = flatMapper.apply(e);
 
-                if (N.notNullOrEmpty(c2)) {
+                if (notNullOrEmpty(c2)) {
                     for (U u : c2) {
                         if (u != null) {
                             action.accept(e, u);
@@ -17149,9 +17583,9 @@ public final class N extends CommonUtil {
             final Throwables.Function<? super T, ? extends Collection<T2>, E> flatMapper,
             final Throwables.Function<? super T2, ? extends Collection<T3>, E2> flatMapper2,
             final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
-        N.checkArgNotNull(flatMapper);
-        N.checkArgNotNull(flatMapper2);
-        N.checkArgNotNull(action);
+        checkArgNotNull(flatMapper);
+        checkArgNotNull(flatMapper2);
+        checkArgNotNull(action);
 
         if (iter == null) {
             return;
@@ -17165,12 +17599,12 @@ public final class N extends CommonUtil {
             if (e != null) {
                 final Collection<T2> c2 = flatMapper.apply(e);
 
-                if (N.notNullOrEmpty(c2)) {
+                if (notNullOrEmpty(c2)) {
                     for (T2 t2 : c2) {
                         if (t2 != null) {
                             final Collection<T3> c3 = flatMapper2.apply(t2);
 
-                            if (N.notNullOrEmpty(c3)) {
+                            if (notNullOrEmpty(c3)) {
                                 for (T3 t3 : c3) {
                                     if (t3 != null) {
                                         action.accept(e, t2, t3);
@@ -17209,11 +17643,11 @@ public final class N extends CommonUtil {
      */
     public static <T, E extends Exception> void forEachPair(final T[] a, final Throwables.BiConsumer<? super T, ? super T, E> action, final int increment)
             throws E {
-        N.checkArgNotNull(action);
+        checkArgNotNull(action);
         final int windowSize = 2;
-        N.checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
+        checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
 
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return;
         }
 
@@ -17247,9 +17681,9 @@ public final class N extends CommonUtil {
      */
     public static <T, E extends Exception> void forEachPair(final Iterable<? extends T> c, final Throwables.BiConsumer<? super T, ? super T, E> action,
             final int increment) throws E {
-        N.checkArgNotNull(action);
+        checkArgNotNull(action);
         final int windowSize = 2;
-        N.checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
+        checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
 
         if (c == null) {
             return;
@@ -17285,9 +17719,9 @@ public final class N extends CommonUtil {
      */
     public static <T, E extends Exception> void forEachPair(final Iterator<? extends T> iter, final Throwables.BiConsumer<? super T, ? super T, E> action,
             final int increment) throws E {
-        N.checkArgNotNull(action);
+        checkArgNotNull(action);
         final int windowSize = 2;
-        N.checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
+        checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
 
         if (iter == null) {
             return;
@@ -17344,11 +17778,11 @@ public final class N extends CommonUtil {
      */
     public static <T, E extends Exception> void forEachTriple(final T[] a, final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action,
             final int increment) throws E {
-        N.checkArgNotNull(action);
+        checkArgNotNull(action);
         final int windowSize = 3;
-        N.checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
+        checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
 
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return;
         }
 
@@ -17382,9 +17816,9 @@ public final class N extends CommonUtil {
      */
     public static <T, E extends Exception> void forEachTriple(final Iterable<? extends T> c,
             final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action, final int increment) throws E {
-        N.checkArgNotNull(action);
+        checkArgNotNull(action);
         final int windowSize = 3;
-        N.checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
+        checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
 
         if (c == null) {
             return;
@@ -17420,9 +17854,9 @@ public final class N extends CommonUtil {
      */
     public static <T, E extends Exception> void forEachTriple(final Iterator<? extends T> iter,
             final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action, final int increment) throws E {
-        N.checkArgNotNull(action);
+        checkArgNotNull(action);
         final int windowSize = 3;
-        N.checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
+        checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
 
         if (iter == null) {
             return;
@@ -17470,7 +17904,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(filter, "filter");
 
         if (isNullOrEmpty(a)) {
-            return N.EMPTY_BOOLEAN_ARRAY;
+            return EMPTY_BOOLEAN_ARRAY;
         }
 
         return filter(a, 0, a.length, filter);
@@ -17489,7 +17923,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(filter, "filter");
 
         if (isNullOrEmpty(a)) {
-            return N.EMPTY_BOOLEAN_ARRAY;
+            return EMPTY_BOOLEAN_ARRAY;
         }
 
         return filter(a, 0, a.length, filter, max);
@@ -17529,7 +17963,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(filter, "filter");
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_BOOLEAN_ARRAY;
+            return EMPTY_BOOLEAN_ARRAY;
         }
 
         boolean[] result = new boolean[(toIndex - fromIndex) / 2];
@@ -17539,7 +17973,7 @@ public final class N extends CommonUtil {
         for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
             if (filter.test(a[i])) {
                 if (count == len) {
-                    result = N.copyOf(result, toIndex - fromIndex);
+                    result = copyOf(result, toIndex - fromIndex);
                     len = result.length;
                 }
 
@@ -17547,7 +17981,7 @@ public final class N extends CommonUtil {
             }
         }
 
-        return result.length == count ? result : N.copyOfRange(result, 0, count);
+        return result.length == count ? result : copyOfRange(result, 0, count);
     }
 
     /**
@@ -17562,7 +17996,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(filter, "filter");
 
         if (isNullOrEmpty(a)) {
-            return N.EMPTY_CHAR_ARRAY;
+            return EMPTY_CHAR_ARRAY;
         }
 
         return filter(a, 0, a.length, filter);
@@ -17581,7 +18015,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(filter, "filter");
 
         if (isNullOrEmpty(a)) {
-            return N.EMPTY_CHAR_ARRAY;
+            return EMPTY_CHAR_ARRAY;
         }
 
         return filter(a, 0, a.length, filter, max);
@@ -17621,7 +18055,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(filter, "filter");
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_CHAR_ARRAY;
+            return EMPTY_CHAR_ARRAY;
         }
 
         char[] result = new char[(toIndex - fromIndex) / 2];
@@ -17631,7 +18065,7 @@ public final class N extends CommonUtil {
         for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
             if (filter.test(a[i])) {
                 if (count == len) {
-                    result = N.copyOf(result, toIndex - fromIndex);
+                    result = copyOf(result, toIndex - fromIndex);
                     len = result.length;
                 }
 
@@ -17639,7 +18073,7 @@ public final class N extends CommonUtil {
             }
         }
 
-        return result.length == count ? result : N.copyOfRange(result, 0, count);
+        return result.length == count ? result : copyOfRange(result, 0, count);
     }
 
     /**
@@ -17654,7 +18088,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(filter, "filter");
 
         if (isNullOrEmpty(a)) {
-            return N.EMPTY_BYTE_ARRAY;
+            return EMPTY_BYTE_ARRAY;
         }
 
         return filter(a, 0, a.length, filter);
@@ -17673,7 +18107,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(filter, "filter");
 
         if (isNullOrEmpty(a)) {
-            return N.EMPTY_BYTE_ARRAY;
+            return EMPTY_BYTE_ARRAY;
         }
 
         return filter(a, 0, a.length, filter, max);
@@ -17713,7 +18147,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(filter, "filter");
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_BYTE_ARRAY;
+            return EMPTY_BYTE_ARRAY;
         }
 
         byte[] result = new byte[(toIndex - fromIndex) / 2];
@@ -17723,7 +18157,7 @@ public final class N extends CommonUtil {
         for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
             if (filter.test(a[i])) {
                 if (count == len) {
-                    result = N.copyOf(result, toIndex - fromIndex);
+                    result = copyOf(result, toIndex - fromIndex);
                     len = result.length;
                 }
 
@@ -17731,7 +18165,7 @@ public final class N extends CommonUtil {
             }
         }
 
-        return result.length == count ? result : N.copyOfRange(result, 0, count);
+        return result.length == count ? result : copyOfRange(result, 0, count);
     }
 
     /**
@@ -17746,7 +18180,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(filter, "filter");
 
         if (isNullOrEmpty(a)) {
-            return N.EMPTY_SHORT_ARRAY;
+            return EMPTY_SHORT_ARRAY;
         }
 
         return filter(a, 0, a.length, filter);
@@ -17765,7 +18199,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(filter, "filter");
 
         if (isNullOrEmpty(a)) {
-            return N.EMPTY_SHORT_ARRAY;
+            return EMPTY_SHORT_ARRAY;
         }
 
         return filter(a, 0, a.length, filter, max);
@@ -17805,7 +18239,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(filter, "filter");
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_SHORT_ARRAY;
+            return EMPTY_SHORT_ARRAY;
         }
 
         short[] result = new short[(toIndex - fromIndex) / 2];
@@ -17815,7 +18249,7 @@ public final class N extends CommonUtil {
         for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
             if (filter.test(a[i])) {
                 if (count == len) {
-                    result = N.copyOf(result, toIndex - fromIndex);
+                    result = copyOf(result, toIndex - fromIndex);
                     len = result.length;
                 }
 
@@ -17823,7 +18257,7 @@ public final class N extends CommonUtil {
             }
         }
 
-        return result.length == count ? result : N.copyOfRange(result, 0, count);
+        return result.length == count ? result : copyOfRange(result, 0, count);
     }
 
     /**
@@ -17838,7 +18272,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(filter, "filter");
 
         if (isNullOrEmpty(a)) {
-            return N.EMPTY_INT_ARRAY;
+            return EMPTY_INT_ARRAY;
         }
 
         return filter(a, 0, a.length, filter);
@@ -17857,7 +18291,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(filter, "filter");
 
         if (isNullOrEmpty(a)) {
-            return N.EMPTY_INT_ARRAY;
+            return EMPTY_INT_ARRAY;
         }
 
         return filter(a, 0, a.length, filter, max);
@@ -17896,7 +18330,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(filter, "filter");
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_INT_ARRAY;
+            return EMPTY_INT_ARRAY;
         }
 
         int[] result = new int[(toIndex - fromIndex) / 2];
@@ -17906,7 +18340,7 @@ public final class N extends CommonUtil {
         for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
             if (filter.test(a[i])) {
                 if (count == len) {
-                    result = N.copyOf(result, toIndex - fromIndex);
+                    result = copyOf(result, toIndex - fromIndex);
                     len = result.length;
                 }
 
@@ -17914,7 +18348,7 @@ public final class N extends CommonUtil {
             }
         }
 
-        return result.length == count ? result : N.copyOfRange(result, 0, count);
+        return result.length == count ? result : copyOfRange(result, 0, count);
     }
 
     /**
@@ -17929,7 +18363,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(filter, "filter");
 
         if (isNullOrEmpty(a)) {
-            return N.EMPTY_LONG_ARRAY;
+            return EMPTY_LONG_ARRAY;
         }
 
         return filter(a, 0, a.length, filter);
@@ -17948,7 +18382,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(filter, "filter");
 
         if (isNullOrEmpty(a)) {
-            return N.EMPTY_LONG_ARRAY;
+            return EMPTY_LONG_ARRAY;
         }
 
         return filter(a, 0, a.length, filter, max);
@@ -17988,7 +18422,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(filter, "filter");
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_LONG_ARRAY;
+            return EMPTY_LONG_ARRAY;
         }
 
         long[] result = new long[(toIndex - fromIndex) / 2];
@@ -17998,7 +18432,7 @@ public final class N extends CommonUtil {
         for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
             if (filter.test(a[i])) {
                 if (count == len) {
-                    result = N.copyOf(result, toIndex - fromIndex);
+                    result = copyOf(result, toIndex - fromIndex);
                     len = result.length;
                 }
 
@@ -18006,7 +18440,7 @@ public final class N extends CommonUtil {
             }
         }
 
-        return result.length == count ? result : N.copyOfRange(result, 0, count);
+        return result.length == count ? result : copyOfRange(result, 0, count);
     }
 
     /**
@@ -18021,7 +18455,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(filter, "filter");
 
         if (isNullOrEmpty(a)) {
-            return N.EMPTY_FLOAT_ARRAY;
+            return EMPTY_FLOAT_ARRAY;
         }
 
         return filter(a, 0, a.length, filter);
@@ -18040,7 +18474,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(filter, "filter");
 
         if (isNullOrEmpty(a)) {
-            return N.EMPTY_FLOAT_ARRAY;
+            return EMPTY_FLOAT_ARRAY;
         }
 
         return filter(a, 0, a.length, filter, max);
@@ -18080,7 +18514,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(filter, "filter");
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_FLOAT_ARRAY;
+            return EMPTY_FLOAT_ARRAY;
         }
 
         float[] result = new float[(toIndex - fromIndex) / 2];
@@ -18090,7 +18524,7 @@ public final class N extends CommonUtil {
         for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
             if (filter.test(a[i])) {
                 if (count == len) {
-                    result = N.copyOf(result, toIndex - fromIndex);
+                    result = copyOf(result, toIndex - fromIndex);
                     len = result.length;
                 }
 
@@ -18098,7 +18532,7 @@ public final class N extends CommonUtil {
             }
         }
 
-        return result.length == count ? result : N.copyOfRange(result, 0, count);
+        return result.length == count ? result : copyOfRange(result, 0, count);
     }
 
     /**
@@ -18113,7 +18547,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(filter, "filter");
 
         if (isNullOrEmpty(a)) {
-            return N.EMPTY_DOUBLE_ARRAY;
+            return EMPTY_DOUBLE_ARRAY;
         }
 
         return filter(a, 0, a.length, filter);
@@ -18132,7 +18566,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(filter, "filter");
 
         if (isNullOrEmpty(a)) {
-            return N.EMPTY_DOUBLE_ARRAY;
+            return EMPTY_DOUBLE_ARRAY;
         }
 
         return filter(a, 0, a.length, filter, max);
@@ -18172,7 +18606,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(filter, "filter");
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_DOUBLE_ARRAY;
+            return EMPTY_DOUBLE_ARRAY;
         }
 
         double[] result = new double[(toIndex - fromIndex) / 2];
@@ -18182,7 +18616,7 @@ public final class N extends CommonUtil {
         for (int i = fromIndex, cnt = 0; i < toIndex && cnt < max; i++) {
             if (filter.test(a[i])) {
                 if (count == len) {
-                    result = N.copyOf(result, toIndex - fromIndex);
+                    result = copyOf(result, toIndex - fromIndex);
                     len = result.length;
                 }
 
@@ -18190,7 +18624,7 @@ public final class N extends CommonUtil {
             }
         }
 
-        return result.length == count ? result : N.copyOfRange(result, 0, count);
+        return result.length == count ? result : copyOfRange(result, 0, count);
     }
 
     /**
@@ -18665,7 +19099,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
-            return N.EMPTY_BOOLEAN_ARRAY;
+            return EMPTY_BOOLEAN_ARRAY;
         }
 
         return mapToBoolean(a, 0, a.length, func);
@@ -18690,7 +19124,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_BOOLEAN_ARRAY;
+            return EMPTY_BOOLEAN_ARRAY;
         }
 
         final boolean[] result = new boolean[toIndex - fromIndex];
@@ -18717,7 +19151,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
-            return N.EMPTY_BOOLEAN_ARRAY;
+            return EMPTY_BOOLEAN_ARRAY;
         }
 
         return mapToBoolean(c, 0, c.size(), func);
@@ -18742,7 +19176,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
-            return N.EMPTY_BOOLEAN_ARRAY;
+            return EMPTY_BOOLEAN_ARRAY;
         }
 
         final boolean[] result = new boolean[toIndex - fromIndex];
@@ -18786,7 +19220,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
-            return N.EMPTY_CHAR_ARRAY;
+            return EMPTY_CHAR_ARRAY;
         }
 
         return mapToChar(a, 0, a.length, func);
@@ -18811,7 +19245,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_CHAR_ARRAY;
+            return EMPTY_CHAR_ARRAY;
         }
 
         final char[] result = new char[toIndex - fromIndex];
@@ -18837,7 +19271,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
-            return N.EMPTY_CHAR_ARRAY;
+            return EMPTY_CHAR_ARRAY;
         }
 
         return mapToChar(c, 0, c.size(), func);
@@ -18862,7 +19296,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
-            return N.EMPTY_CHAR_ARRAY;
+            return EMPTY_CHAR_ARRAY;
         }
 
         final char[] result = new char[toIndex - fromIndex];
@@ -18906,7 +19340,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
-            return N.EMPTY_BYTE_ARRAY;
+            return EMPTY_BYTE_ARRAY;
         }
 
         return mapToByte(a, 0, a.length, func);
@@ -18931,7 +19365,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_BYTE_ARRAY;
+            return EMPTY_BYTE_ARRAY;
         }
 
         final byte[] result = new byte[toIndex - fromIndex];
@@ -18957,7 +19391,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
-            return N.EMPTY_BYTE_ARRAY;
+            return EMPTY_BYTE_ARRAY;
         }
 
         return mapToByte(c, 0, c.size(), func);
@@ -18982,7 +19416,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
-            return N.EMPTY_BYTE_ARRAY;
+            return EMPTY_BYTE_ARRAY;
         }
 
         final byte[] result = new byte[toIndex - fromIndex];
@@ -19026,7 +19460,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
-            return N.EMPTY_SHORT_ARRAY;
+            return EMPTY_SHORT_ARRAY;
         }
 
         return mapToShort(a, 0, a.length, func);
@@ -19051,7 +19485,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_SHORT_ARRAY;
+            return EMPTY_SHORT_ARRAY;
         }
 
         final short[] result = new short[toIndex - fromIndex];
@@ -19077,7 +19511,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
-            return N.EMPTY_SHORT_ARRAY;
+            return EMPTY_SHORT_ARRAY;
         }
 
         return mapToShort(c, 0, c.size(), func);
@@ -19102,7 +19536,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
-            return N.EMPTY_SHORT_ARRAY;
+            return EMPTY_SHORT_ARRAY;
         }
 
         final short[] result = new short[toIndex - fromIndex];
@@ -19146,7 +19580,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
-            return N.EMPTY_INT_ARRAY;
+            return EMPTY_INT_ARRAY;
         }
 
         return mapToInt(a, 0, a.length, func);
@@ -19171,7 +19605,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_INT_ARRAY;
+            return EMPTY_INT_ARRAY;
         }
 
         final int[] result = new int[toIndex - fromIndex];
@@ -19197,7 +19631,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
-            return N.EMPTY_INT_ARRAY;
+            return EMPTY_INT_ARRAY;
         }
 
         return mapToInt(c, 0, c.size(), func);
@@ -19222,7 +19656,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
-            return N.EMPTY_INT_ARRAY;
+            return EMPTY_INT_ARRAY;
         }
 
         final int[] result = new int[toIndex - fromIndex];
@@ -19266,7 +19700,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
-            return N.EMPTY_LONG_ARRAY;
+            return EMPTY_LONG_ARRAY;
         }
 
         return mapToLong(a, 0, a.length, func);
@@ -19291,7 +19725,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_LONG_ARRAY;
+            return EMPTY_LONG_ARRAY;
         }
 
         final long[] result = new long[toIndex - fromIndex];
@@ -19317,7 +19751,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
-            return N.EMPTY_LONG_ARRAY;
+            return EMPTY_LONG_ARRAY;
         }
 
         return mapToLong(c, 0, c.size(), func);
@@ -19342,7 +19776,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
-            return N.EMPTY_LONG_ARRAY;
+            return EMPTY_LONG_ARRAY;
         }
 
         final long[] result = new long[toIndex - fromIndex];
@@ -19386,7 +19820,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
-            return N.EMPTY_FLOAT_ARRAY;
+            return EMPTY_FLOAT_ARRAY;
         }
 
         return mapToFloat(a, 0, a.length, func);
@@ -19411,7 +19845,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_FLOAT_ARRAY;
+            return EMPTY_FLOAT_ARRAY;
         }
 
         final float[] result = new float[toIndex - fromIndex];
@@ -19437,7 +19871,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
-            return N.EMPTY_FLOAT_ARRAY;
+            return EMPTY_FLOAT_ARRAY;
         }
 
         return mapToFloat(c, 0, c.size(), func);
@@ -19462,7 +19896,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
-            return N.EMPTY_FLOAT_ARRAY;
+            return EMPTY_FLOAT_ARRAY;
         }
 
         final float[] result = new float[toIndex - fromIndex];
@@ -19506,7 +19940,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
-            return N.EMPTY_DOUBLE_ARRAY;
+            return EMPTY_DOUBLE_ARRAY;
         }
 
         return mapToDouble(a, 0, a.length, func);
@@ -19531,7 +19965,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a) || fromIndex == toIndex) {
-            return N.EMPTY_DOUBLE_ARRAY;
+            return EMPTY_DOUBLE_ARRAY;
         }
 
         final double[] result = new double[toIndex - fromIndex];
@@ -19558,7 +19992,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if (isNullOrEmpty(c)) {
-            return N.EMPTY_DOUBLE_ARRAY;
+            return EMPTY_DOUBLE_ARRAY;
         }
 
         return mapToDouble(c, 0, c.size(), func);
@@ -19583,7 +20017,7 @@ public final class N extends CommonUtil {
         checkArgNotNull(func);
 
         if ((isNullOrEmpty(c) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
-            return N.EMPTY_DOUBLE_ARRAY;
+            return EMPTY_DOUBLE_ARRAY;
         }
 
         final double[] result = new double[toIndex - fromIndex];
@@ -20191,7 +20625,7 @@ public final class N extends CommonUtil {
             return supplier.apply(0);
         }
 
-        final int len = a.length > N.MAX_ARRAY_SIZE / LOAD_FACTOR_FOR_TWO_FLAT_MAP ? N.MAX_ARRAY_SIZE : a.length * LOAD_FACTOR_FOR_TWO_FLAT_MAP;
+        final int len = a.length > MAX_ARRAY_SIZE / LOAD_FACTOR_FOR_TWO_FLAT_MAP ? MAX_ARRAY_SIZE : a.length * LOAD_FACTOR_FOR_TWO_FLAT_MAP;
         final C result = supplier.apply(len);
 
         for (T e : a) {
@@ -20514,11 +20948,11 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> takeWhile(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
-        N.checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, "filter");
 
-        final List<T> result = new ArrayList<>(N.min(9, N.len(a)));
+        final List<T> result = new ArrayList<>(min(9, len(a)));
 
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return result;
         }
 
@@ -20543,9 +20977,9 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> takeWhile(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
-        N.checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, "filter");
 
-        final List<T> result = new ArrayList<>(N.min(9, getSizeOrDefault(c, 0)));
+        final List<T> result = new ArrayList<>(min(9, getSizeOrDefault(c, 0)));
 
         if (c == null) {
             return result;
@@ -20573,11 +21007,11 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> takeWhileInclusive(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
-        N.checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, "filter");
 
-        final List<T> result = new ArrayList<>(N.min(9, N.len(a)));
+        final List<T> result = new ArrayList<>(min(9, len(a)));
 
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return result;
         }
 
@@ -20603,9 +21037,9 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> takeWhileInclusive(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
-        N.checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, "filter");
 
-        final List<T> result = new ArrayList<>(N.min(9, getSizeOrDefault(c, 0)));
+        final List<T> result = new ArrayList<>(min(9, getSizeOrDefault(c, 0)));
 
         if (c == null) {
             return result;
@@ -20632,11 +21066,11 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> dropWhile(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
-        N.checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, "filter");
 
-        final List<T> result = new ArrayList<>(N.min(9, N.len(a)));
+        final List<T> result = new ArrayList<>(min(9, len(a)));
 
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return result;
         }
 
@@ -20664,9 +21098,9 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> dropWhile(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
-        N.checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, "filter");
 
-        final List<T> result = new ArrayList<>(N.min(9, getSizeOrDefault(c, 0)));
+        final List<T> result = new ArrayList<>(min(9, getSizeOrDefault(c, 0)));
 
         if (c == null) {
             return result;
@@ -20701,11 +21135,11 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> skipUntil(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
-        N.checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, "filter");
 
-        final List<T> result = new ArrayList<>(N.min(9, N.len(a)));
+        final List<T> result = new ArrayList<>(min(9, len(a)));
 
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return result;
         }
 
@@ -20733,7 +21167,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <T, E extends Exception> List<T> skipUntil(final Iterable<? extends T> c, final Throwables.Predicate<? super T, E> filter) throws E {
-        N.checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, "filter");
 
         final List<T> result = new ArrayList<>(getMinSize(c));
 
@@ -20765,7 +21199,7 @@ public final class N extends CommonUtil {
     }
 
     private static int getMinSize(final Iterable<?> c) {
-        return N.min(9, getSizeOrDefault(c, 0));
+        return min(9, getSizeOrDefault(c, 0));
     }
 
     private static int initSizeForFlatMap(final Iterable<?> c) {
@@ -20773,7 +21207,7 @@ public final class N extends CommonUtil {
     }
 
     private static int initSizeForFlatMap(final int size) {
-        return size > N.MAX_ARRAY_SIZE / LOAD_FACTOR_FOR_FLAT_MAP ? N.MAX_ARRAY_SIZE : (int) (size * LOAD_FACTOR_FOR_FLAT_MAP);
+        return size > MAX_ARRAY_SIZE / LOAD_FACTOR_FOR_FLAT_MAP ? MAX_ARRAY_SIZE : (int) (size * LOAD_FACTOR_FOR_FLAT_MAP);
     }
 
     /**
@@ -21171,7 +21605,7 @@ public final class N extends CommonUtil {
         }
 
         final C result = supplier.get();
-        final Set<Object> set = newHashSet(N.len(a) / 2 + 1);
+        final Set<Object> set = newHashSet(len(a) / 2 + 1);
 
         for (T e : a) {
             if (set.add(hashKey(keyMapper.apply(e)))) {
@@ -21300,7 +21734,7 @@ public final class N extends CommonUtil {
     public static <T, E extends Exception> boolean allMatch(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return true;
         }
 
@@ -21375,7 +21809,7 @@ public final class N extends CommonUtil {
     public static <T, E extends Exception> boolean anyMatch(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return false;
         }
 
@@ -21450,7 +21884,7 @@ public final class N extends CommonUtil {
     public static <T, E extends Exception> boolean noneMatch(final T[] a, final Throwables.Predicate<? super T, E> filter) throws E {
         checkArgNotNull(filter, "filter");
 
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return true;
         }
 
@@ -21526,12 +21960,12 @@ public final class N extends CommonUtil {
      */
     public static <T, E extends Exception> boolean nMatch(final T[] a, final int atLeast, final int atMost, final Throwables.Predicate<? super T, E> filter)
             throws E {
-        N.checkArgNotNegative(atLeast, "atLeast");
-        N.checkArgNotNegative(atMost, "atMost");
-        N.checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
+        checkArgNotNegative(atLeast, "atLeast");
+        checkArgNotNegative(atMost, "atMost");
+        checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
         checkArgNotNull(filter, "filter");
 
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return atLeast == 0;
         }
 
@@ -21565,9 +21999,9 @@ public final class N extends CommonUtil {
      */
     public static <T, E extends Exception> boolean nMatch(final Iterable<? extends T> c, final int atLeast, final int atMost,
             final Throwables.Predicate<? super T, E> filter) throws E {
-        N.checkArgNotNegative(atLeast, "atLeast");
-        N.checkArgNotNegative(atMost, "atMost");
-        N.checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
+        checkArgNotNegative(atLeast, "atLeast");
+        checkArgNotNegative(atMost, "atMost");
+        checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
         checkArgNotNull(filter, "filter");
 
         if (c == null) {
@@ -21590,9 +22024,9 @@ public final class N extends CommonUtil {
      */
     public static <T, E extends Exception> boolean nMatch(final Iterator<? extends T> iter, final int atLeast, final int atMost,
             final Throwables.Predicate<? super T, E> filter) throws E {
-        N.checkArgNotNegative(atLeast, "atLeast");
-        N.checkArgNotNegative(atMost, "atMost");
-        N.checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
+        checkArgNotNegative(atLeast, "atLeast");
+        checkArgNotNegative(atMost, "atMost");
+        checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
         checkArgNotNull(filter, "filter");
 
         if (iter == null) {
@@ -21611,7 +22045,7 @@ public final class N extends CommonUtil {
     }
 
     public static boolean allTrue(final boolean[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return true;
         }
 
@@ -21625,7 +22059,7 @@ public final class N extends CommonUtil {
     }
 
     public static boolean allFalse(final boolean[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return true;
         }
 
@@ -21639,7 +22073,7 @@ public final class N extends CommonUtil {
     }
 
     public static boolean anyTrue(final boolean[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return false;
         }
 
@@ -21653,7 +22087,7 @@ public final class N extends CommonUtil {
     }
 
     public static boolean anyFalse(final boolean[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return false;
         }
 
@@ -22244,7 +22678,7 @@ public final class N extends CommonUtil {
      */
     public static <T, E extends Exception> int count(final Iterator<? extends T> iter, final Throwables.Predicate<? super T, E> filter)
             throws ArithmeticException, E {
-        N.checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, "filter");
 
         if (iter == null) {
             return 0;
@@ -22317,9 +22751,9 @@ public final class N extends CommonUtil {
     public static <T, E extends Exception> List<T> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) throws E {
         if (a == null) {
-            return b == null ? new ArrayList<>() : (b instanceof Collection ? new ArrayList<>((Collection<T>) b) : N.toList(b.iterator()));
+            return b == null ? new ArrayList<>() : (b instanceof Collection ? new ArrayList<>((Collection<T>) b) : toList(b.iterator()));
         } else if (b == null) {
-            return (a instanceof Collection ? new ArrayList<>((Collection<T>) a) : N.toList(a.iterator()));
+            return (a instanceof Collection ? new ArrayList<>((Collection<T>) a) : toList(a.iterator()));
         }
 
         final List<T> result = new ArrayList<>(getSizeOrDefault(a, 0) + getSizeOrDefault(b, 0));
@@ -22394,7 +22828,7 @@ public final class N extends CommonUtil {
 
         final Supplier<? extends C> tmp = () -> supplier.apply(totalCount);
 
-        return N.toCollection(Iterators.mergeIterables(c, nextSelector), tmp);
+        return toCollection(Iterators.mergeIterables(c, nextSelector), tmp);
     }
 
     //    /**
@@ -22409,9 +22843,9 @@ public final class N extends CommonUtil {
     //    public static <T, E extends Exception> List<T> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
     //            final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) throws E {
     //        if (a == null) {
-    //            return b == null ? new ArrayList<>() : N.toList(b);
+    //            return b == null ? new ArrayList<>() : toList(b);
     //        } else if (b == null) {
-    //            return N.toList(a);
+    //            return toList(a);
     //        }
     //
     //        final List<T> result = new ArrayList<>(9);
@@ -22955,11 +23389,11 @@ public final class N extends CommonUtil {
             final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws E {
         checkArgNotNull(zipFunction);
 
-        final int lenA = N.len(a);
-        final int lenB = N.len(b);
-        final int minLen = N.min(lenA, lenB);
+        final int lenA = len(a);
+        final int lenB = len(b);
+        final int minLen = min(lenA, lenB);
 
-        final R[] result = N.newArray(targetElementType, minLen);
+        final R[] result = newArray(targetElementType, minLen);
 
         for (int i = 0; i < minLen; i++) {
             result[i] = zipFunction.apply(a[i], b[i]);
@@ -22987,12 +23421,12 @@ public final class N extends CommonUtil {
             final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, ? extends R, E> zipFunction) throws E {
         checkArgNotNull(zipFunction);
 
-        final int lenA = N.len(a);
-        final int lenB = N.len(b);
-        final int minLen = N.min(lenA, lenB);
-        final int maxLen = N.max(lenA, lenB);
+        final int lenA = len(a);
+        final int lenB = len(b);
+        final int minLen = min(lenA, lenB);
+        final int maxLen = max(lenA, lenB);
 
-        final R[] result = N.newArray(targetElementType, maxLen);
+        final R[] result = newArray(targetElementType, maxLen);
 
         for (int i = 0; i < minLen; i++) {
             result[i] = zipFunction.apply(a[i], b[i]);
@@ -23030,12 +23464,12 @@ public final class N extends CommonUtil {
             final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws E {
         checkArgNotNull(zipFunction);
 
-        final int lenA = N.len(a);
-        final int lenB = N.len(b);
-        final int lenC = N.len(c);
-        final int minLen = N.min(lenA, lenB, lenC);
+        final int lenA = len(a);
+        final int lenB = len(b);
+        final int lenC = len(c);
+        final int minLen = min(lenA, lenB, lenC);
 
-        final R[] result = N.newArray(targetElementType, minLen);
+        final R[] result = newArray(targetElementType, minLen);
 
         for (int i = 0; i < minLen; i++) {
             result[i] = zipFunction.apply(a[i], b[i], c[i]);
@@ -23066,13 +23500,13 @@ public final class N extends CommonUtil {
             final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, E> zipFunction) throws E {
         checkArgNotNull(zipFunction);
 
-        final int lenA = N.len(a);
-        final int lenB = N.len(b);
-        final int lenC = N.len(c);
-        final int minLen = N.min(lenA, lenB, lenC);
-        final int maxLen = N.max(lenA, lenB, lenC);
+        final int lenA = len(a);
+        final int lenB = len(b);
+        final int lenC = len(c);
+        final int minLen = min(lenA, lenB, lenC);
+        final int maxLen = max(lenA, lenB, lenC);
 
-        final R[] result = N.newArray(targetElementType, maxLen);
+        final R[] result = newArray(targetElementType, maxLen);
 
         for (int i = 0; i < minLen; i++) {
             result[i] = zipFunction.apply(a[i], b[i], c[i]);
@@ -23262,7 +23696,7 @@ public final class N extends CommonUtil {
     @Beta
     public static <K, T, M extends Map<K, List<T>>, E extends Exception> M groupBy(final T[] a,
             final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier) throws E {
-        return groupBy(a, 0, N.len(a), keyExtractor, mapSupplier);
+        return groupBy(a, 0, len(a), keyExtractor, mapSupplier);
     }
 
     /**
@@ -23301,9 +23735,9 @@ public final class N extends CommonUtil {
             final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier) throws E {
         final int length = len(a);
 
-        N.checkFromToIndex(fromIndex, toIndex, length);
-        N.checkArgNotNull(keyExtractor, "keyExtractor");
-        N.checkArgNotNull(mapSupplier, "mapSupplier");
+        checkFromToIndex(fromIndex, toIndex, length);
+        checkArgNotNull(keyExtractor, "keyExtractor");
+        checkArgNotNull(mapSupplier, "mapSupplier");
 
         final M ret = mapSupplier.get();
         K key = null;
@@ -23355,8 +23789,8 @@ public final class N extends CommonUtil {
     @Beta
     public static <K, T, M extends Map<K, List<T>>, E extends Exception> M groupBy(final Iterable<? extends T> iter,
             final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier) throws E {
-        N.checkArgNotNull(keyExtractor, "keyExtractor");
-        N.checkArgNotNull(mapSupplier, "mapSupplier");
+        checkArgNotNull(keyExtractor, "keyExtractor");
+        checkArgNotNull(mapSupplier, "mapSupplier");
 
         final M ret = mapSupplier.get();
 
@@ -23413,8 +23847,8 @@ public final class N extends CommonUtil {
     @Beta
     public static <K, T, M extends Map<K, List<T>>, E extends Exception> M groupBy(final Iterator<? extends T> iter,
             final Throwables.Function<? super T, ? extends K, E> keyExtractor, final Supplier<M> mapSupplier) throws E {
-        N.checkArgNotNull(keyExtractor, "keyExtractor");
-        N.checkArgNotNull(mapSupplier, "mapSupplier");
+        checkArgNotNull(keyExtractor, "keyExtractor");
+        checkArgNotNull(mapSupplier, "mapSupplier");
 
         final M ret = mapSupplier.get();
 
@@ -24396,7 +24830,7 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Xml 2 JSON.
+     * Xml 2 JSO
      *
      * @param xml
      * @return
@@ -24408,7 +24842,7 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Xml 2 JSON.
+     * Xml 2 JSO
      *
      * @param cls
      * @param xml
@@ -25249,8 +25683,8 @@ public final class N extends CommonUtil {
     @SuppressWarnings("unchecked")
     @Beta
     public static <T> Nullable<T> castIfAssignable(final Object val, final Class<? extends T> targetType) {
-        if (N.isPrimitiveType(targetType)) {
-            return val != null && N.wrap(targetType).isAssignableFrom(val.getClass()) ? Nullable.of((T) val) : Nullable.<T> empty();
+        if (isPrimitiveType(targetType)) {
+            return val != null && wrap(targetType).isAssignableFrom(val.getClass()) ? Nullable.of((T) val) : Nullable.<T> empty();
         }
 
         return val == null || targetType.isAssignableFrom(val.getClass()) ? Nullable.of((T) val) : Nullable.<T> empty();
@@ -25498,9 +25932,9 @@ public final class N extends CommonUtil {
     //    public static <T, E extends Exception> List<T> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
     //            final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) throws E {
     //        if (a == null) {
-    //            return b == null ? new ArrayList<>() : N.toList(b);
+    //            return b == null ? new ArrayList<>() : toList(b);
     //        } else if (b == null) {
-    //            return N.toList(a);
+    //            return toList(a);
     //        }
     //
     //        final List<T> result = new ArrayList<>(9);
@@ -25744,9 +26178,9 @@ public final class N extends CommonUtil {
      * @return true, if is primitive type
      */
     public static boolean isPrimitiveType(final Class<?> cls) {
-        N.checkArgNotNull(cls, "cls");
+        checkArgNotNull(cls, "cls");
 
-        return N.typeOf(cls).isPrimitiveType();
+        return typeOf(cls).isPrimitiveType();
     }
 
     /**
@@ -25756,9 +26190,9 @@ public final class N extends CommonUtil {
      * @return true, if is wrapper type
      */
     public static boolean isWrapperType(final Class<?> cls) {
-        N.checkArgNotNull(cls, "cls");
+        checkArgNotNull(cls, "cls");
 
-        return N.typeOf(cls).isPrimitiveWrapper();
+        return typeOf(cls).isPrimitiveWrapper();
     }
 
     /**
@@ -25768,9 +26202,9 @@ public final class N extends CommonUtil {
      * @return true, if is primitive array type
      */
     public static boolean isPrimitiveArrayType(final Class<?> cls) {
-        N.checkArgNotNull(cls, "cls");
+        checkArgNotNull(cls, "cls");
 
-        return N.typeOf(cls).isPrimitiveArray();
+        return typeOf(cls).isPrimitiveArray();
     }
 
     /**
@@ -25787,7 +26221,7 @@ public final class N extends CommonUtil {
      * @return
      */
     public static Class<?> wrap(final Class<?> cls) {
-        N.checkArgNotNull(cls, "cls");
+        checkArgNotNull(cls, "cls");
 
         final Class<?> wrapped = PRIMITIVE_2_WRAPPER.get(cls);
 
@@ -25808,7 +26242,7 @@ public final class N extends CommonUtil {
      * @return
      */
     public static Class<?> unwrap(final Class<?> cls) {
-        N.checkArgNotNull(cls, "cls");
+        checkArgNotNull(cls, "cls");
 
         Class<?> unwrapped = PRIMITIVE_2_WRAPPER.getByValue(cls);
 
@@ -25822,7 +26256,7 @@ public final class N extends CommonUtil {
      */
     @Beta
     public static void invert(final boolean[] a) {
-        if (N.isNullOrEmpty(a)) {
+        if (isNullOrEmpty(a)) {
             return;
         }
 
@@ -25838,7 +26272,7 @@ public final class N extends CommonUtil {
      */
     @Beta
     public static void invert(final boolean[] a, final int fromIndex, final int toIndex) {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+        checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (fromIndex == toIndex) {
             return;

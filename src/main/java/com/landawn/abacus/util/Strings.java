@@ -189,14 +189,14 @@ public abstract class Strings {
     }
 
     /**
-     * Same as {@code N.isNullOrEmptyOrBlank(CharSequence)}.
+     * Same as {@code N.isBlank(CharSequence)}.
      *
      * @param cs
      * @return
-     * @see N#isNullOrEmptyOrBlank(CharSequence)
+     * @see N#isBlank(CharSequence)
      */
     public static boolean isBlank(final CharSequence cs) {
-        return N.isNullOrEmptyOrBlank(cs);
+        return N.isBlank(cs);
     }
 
     /**
@@ -211,14 +211,14 @@ public abstract class Strings {
     }
 
     /**
-     * Same as {@code N.notNullOrEmptyOrBlank(CharSequence)}.
+     * Same as {@code N.notBlank(CharSequence)}.
      *
      * @param cs
      * @return
-     * @see N#notNullOrEmptyOrBlank(CharSequence)
+     * @see N#notBlank(CharSequence)
      */
     public static boolean isNotBlank(final CharSequence cs) {
-        return N.notNullOrEmptyOrBlank(cs);
+        return N.notBlank(cs);
     }
 
     /**
@@ -239,6 +239,7 @@ public abstract class Strings {
      * @param css the CharSequences to check, may be null or empty
      * @return {@code true} if all of the CharSequences are empty or null
      * @since 3.6
+     * @see N#allNullOrEmpty(CharSequence...)
      */
     public static boolean isAllEmpty(final CharSequence... css) {
         if (N.isNullOrEmpty(css)) {
@@ -254,6 +255,12 @@ public abstract class Strings {
         return true;
     }
 
+    /**
+     *
+     * @param css
+     * @return
+     * @see N#allNullOrEmpty(Collection)
+     */
     public static boolean isAllEmpty(final Collection<? extends CharSequence> css) {
         if (N.isNullOrEmpty(css)) {
             return true;
@@ -288,6 +295,7 @@ public abstract class Strings {
      * @param css the CharSequences to check, may be null or empty
      * @return {@code true} if all of the CharSequences are empty or null or whitespace only
      * @since 3.6
+     * @see N#allBlank(CharSequence...)
      */
     public static boolean isAllBlank(final CharSequence... css) {
         if (N.isNullOrEmpty(css)) {
@@ -303,6 +311,12 @@ public abstract class Strings {
         return true;
     }
 
+    /**
+     *
+     * @param css
+     * @return
+     * @see N#allBlank(Collection)
+     */
     public static boolean isAllBlank(final Collection<? extends CharSequence> css) {
         if (N.isNullOrEmpty(css)) {
             return true;
@@ -336,6 +350,7 @@ public abstract class Strings {
      * @param css the CharSequences to check, may be null or empty
      * @return {@code true} if any of the CharSequences are empty or null
      * @since 3.2
+     * @see N#anyNullOrEmpty(CharSequence...)
      */
     public static boolean isAnyEmpty(final CharSequence... css) {
         if (N.isNullOrEmpty(css)) {
@@ -351,6 +366,12 @@ public abstract class Strings {
         return false;
     }
 
+    /**
+     *
+     * @param css
+     * @return
+     * @see N#anyNullOrEmpty(CharSequence...)
+     */
     public static boolean isAnyEmpty(final Collection<? extends CharSequence> css) {
         if (N.isNullOrEmpty(css)) {
             return false;
@@ -387,6 +408,7 @@ public abstract class Strings {
      * @param css the CharSequences to check, may be null or empty
      * @return {@code true} if any of the CharSequences are empty or null or whitespace only
      * @since 3.2
+     * @see N#anyBlank(CharSequence...)
      */
     public static boolean isAnyBlank(final CharSequence... css) {
         if (N.isNullOrEmpty(css)) {
@@ -402,6 +424,12 @@ public abstract class Strings {
         return false;
     }
 
+    /**
+     *
+     * @param css
+     * @return
+     * @see N#anyBlank(Collection)
+     */
     public static boolean isAnyBlank(final Collection<? extends CharSequence> css) {
         if (N.isNullOrEmpty(css)) {
             return false;
@@ -445,13 +473,13 @@ public abstract class Strings {
     }
 
     /**
-     * Same as {@code N.defaultIfNullOrEmptyOrBlank(CharSequence, CharSequence)}.
+     * Same as {@code N.defaultIfBlank(CharSequence, CharSequence)}.
      *
      * @param <T>
      * @param str
      * @param defaultStr
      * @return
-     * @see N#defaultIfNullOrEmptyOrBlank(CharSequence, CharSequence)
+     * @see N#defaultIfBlank(CharSequence, CharSequence)
      */
     public static <T extends CharSequence> T defaultIfBlank(final T str, final T defaultStr) {
         return isBlank(str) ? defaultStr : str;
@@ -472,17 +500,29 @@ public abstract class Strings {
         return str;
     }
 
-    @SafeVarargs
-    public static <T extends CharSequence> T firstNonBlank(final T... values) {
-        if (values != null) {
-            for (final T val : values) {
-                if (isNotBlank(val)) {
-                    return val;
-                }
-            }
-        }
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
+     * @see #firstNonEmpty(CharSequence...)
+     */
+    public static <T extends CharSequence> T firstNonEmpty(final T a, final T b) {
+        return isEmpty(a) ? (isEmpty(b) ? null : b) : a;
+    }
 
-        return null;
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     * @see #firstNonEmpty(CharSequence...)
+     */
+    public static <T extends CharSequence> T firstNonEmpty(final T a, final T b, final T c) {
+        return isEmpty(a) ? (isEmpty(b) ? (isEmpty(c) ? null : c) : b) : a;
     }
 
     /**
@@ -504,9 +544,9 @@ public abstract class Strings {
      *
      * @param <T> the specific kind of CharSequence
      * @param values the values to test, may be {@code null} or empty
-     * @return the first value from {@code values} which is not empty,
-     *  or {@code null} if there are no non-empty values
+     * @return the first value from {@code values} which is not empty, or {@code null} if there are no non-empty values
      * @since 3.8
+     * @see N#firstNonEmpty(CharSequence...)
      */
     @SafeVarargs
     public static <T extends CharSequence> T firstNonEmpty(final T... values) {
@@ -517,6 +557,51 @@ public abstract class Strings {
                 }
             }
         }
+        return null;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @return
+     * @see #firstNonBlank(CharSequence...)
+     */
+    public static <T extends CharSequence> T firstNonBlank(final T a, final T b) {
+        return isBlank(a) ? (isBlank(b) ? null : b) : a;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     * @see #firstNonBlank(CharSequence...)
+     */
+    public static <T extends CharSequence> T firstNonBlank(final T a, final T b, final T c) {
+        return isBlank(a) ? (isBlank(b) ? (isBlank(c) ? null : c) : b) : a;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param values
+     * @return the first value from {@code values} which is not blank, or {@code null} if there are no non-blank values
+     * @see N#firstNonBlank(CharSequence...)
+     */
+    @SafeVarargs
+    public static <T extends CharSequence> T firstNonBlank(final T... values) {
+        if (values != null) {
+            for (final T val : values) {
+                if (isNotBlank(val)) {
+                    return val;
+                }
+            }
+        }
+
         return null;
     }
 
@@ -5225,6 +5310,30 @@ public abstract class Strings {
      * @return
      * @see N#occurrencesOf(String, String)
      */
+    @SuppressWarnings("deprecation")
+    public static int occurrencesOf(final String str, final char ch) {
+        if (N.isNullOrEmpty(str)) {
+            return 0;
+        }
+
+        int occurrences = 0;
+
+        for (char e : InternalUtil.getCharsForReadOnly(str)) {
+            if (e == ch) {
+                occurrences++;
+            }
+        }
+
+        return occurrences;
+    }
+
+    /**
+     *
+     * @param str
+     * @param substr
+     * @return
+     * @see N#occurrencesOf(String, String)
+     */
     public static int occurrencesOf(final String str, final String substr) {
         if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substr)) {
             return 0;
@@ -6747,13 +6856,14 @@ public abstract class Strings {
     }
 
     /**
-     * Returns the first {@code n} chars of the specified {@code String} if its length is bigger than {@code n},
+     * Returns at most first {@code n} chars of the specified {@code String} if its length is bigger than {@code n},
      * or an empty String {@code ""} if {@code str} is empty or null, or itself it's length equal to or less than {@code n}.
      *
      * @param str
      * @param n
      * @return
      */
+    @Beta
     public static String firstChars(final String str, final int n) {
         N.checkArgNotNegative(n, "n");
 
@@ -6767,13 +6877,14 @@ public abstract class Strings {
     }
 
     /**
-     * Returns the last {@code n} chars of the specified {@code String} if its length is bigger than {@code n},
+     * Returns at most last {@code n} chars of the specified {@code String} if its length is bigger than {@code n},
      * or an empty String {@code ""} if {@code str} is empty or null, or itself it's length equal to or less than {@code n}.
      *
      * @param str
      * @param n
      * @return
      */
+    @Beta
     public static String lastChars(final String str, final int n) {
         N.checkArgNotNegative(n, "n");
 

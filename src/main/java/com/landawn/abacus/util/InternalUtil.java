@@ -102,11 +102,11 @@ public final class InternalUtil {
     @Beta
     @SafeVarargs
     static <T> List<T> createList(final T... a) {
-        if (CommonUtil.isNullOrEmpty(a)) {
+        if (N.isNullOrEmpty(a)) {
             return new ArrayList<>();
         }
 
-        return CommonUtil.asList(a);
+        return N.asList(a);
     }
 
     static volatile boolean isStringCharsGettable = true;
@@ -232,7 +232,7 @@ public final class InternalUtil {
      */
     @Deprecated
     static boolean notNullOrDefault(final Object value) {
-        return (value != null) && !CommonUtil.equals(value, CommonUtil.defaultValueOf(value.getClass()));
+        return (value != null) && !N.equals(value, N.defaultValueOf(value.getClass()));
     }
 
     /**

@@ -425,6 +425,17 @@ public final class Splitter {
 
     /**
      *
+     * @param <C>
+     * @param source
+     * @param supplier
+     * @return
+     */
+    public <C extends Collection<String>> C split(final CharSequence source, final Supplier<? extends C> supplier) {
+        return split(supplier.get(), source);
+    }
+
+    /**
+     *
      * @param source
      * @param mapper
      * @return
@@ -461,6 +472,19 @@ public final class Splitter {
     /**
      *
      * @param <T>
+     * @param <C>
+     * @param targetType
+     * @param source
+     * @param supplier
+     * @return
+     */
+    public <T, C extends Collection<T>> C split(final Class<? extends T> targetType, final CharSequence source, final Supplier<? extends C> supplier) {
+        return split(supplier.get(), targetType, source);
+    }
+
+    /**
+     *
+     * @param <T>
      * @param targetType
      * @param source
      * @return
@@ -471,6 +495,19 @@ public final class Splitter {
         final List<T> result = new ArrayList<>();
         split(result, targetType, source);
         return result;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <C>
+     * @param targetType
+     * @param source
+     * @param supplier
+     * @return
+     */
+    public <T, C extends Collection<T>> C split(final Type<? extends T> targetType, final CharSequence source, final Supplier<? extends C> supplier) {
+        return split(supplier.get(), targetType, source);
     }
 
     /**
@@ -533,43 +570,6 @@ public final class Splitter {
     }
 
     /**
-     *
-     * @param <C>
-     * @param source
-     * @param supplier
-     * @return
-     */
-    public <C extends Collection<String>> C split(final CharSequence source, final Supplier<? extends C> supplier) {
-        return split(supplier.get(), source);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <C>
-     * @param targetType
-     * @param source
-     * @param supplier
-     * @return
-     */
-    public <T, C extends Collection<T>> C split(final Class<? extends T> targetType, final CharSequence source, final Supplier<? extends C> supplier) {
-        return split(supplier.get(), targetType, source);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <C>
-     * @param targetType
-     * @param source
-     * @param supplier
-     * @return
-     */
-    public <T, C extends Collection<T>> C split(final Type<? extends T> targetType, final CharSequence source, final Supplier<? extends C> supplier) {
-        return split(supplier.get(), targetType, source);
-    }
-
-    /**
      * Split to array.
      *
      * @param source
@@ -591,25 +591,6 @@ public final class Splitter {
     @SuppressWarnings("deprecation")
     public <T> ImmutableList<T> splitToImmutableList(final Class<? extends T> targetType, final CharSequence source) {
         return ImmutableList.wrap(split(targetType, source));
-    }
-
-    /**
-     * Split to array.
-     *
-     * @param output
-     * @param source
-     * @return
-     */
-    public String[] splitToArray(final String[] output, final CharSequence source) {
-        N.checkArgNotNullOrEmpty(output, "output");
-
-        final ObjIterator<String> iter = iterate(source);
-
-        for (int i = 0, len = output.length; i < len && iter.hasNext(); i++) {
-            output[i] = iter.next();
-        }
-
-        return output;
     }
 
     /**
@@ -671,6 +652,25 @@ public final class Splitter {
 
             return (T) a;
         }
+    }
+
+    /**
+     * Split to array.
+     *
+     * @param output
+     * @param source
+     * @return
+     */
+    public String[] splitToArray(final String[] output, final CharSequence source) {
+        N.checkArgNotNullOrEmpty(output, "output");
+
+        final ObjIterator<String> iter = iterate(source);
+
+        for (int i = 0, len = output.length; i < len && iter.hasNext(); i++) {
+            output[i] = iter.next();
+        }
+
+        return output;
     }
 
     /**
@@ -863,6 +863,17 @@ public final class Splitter {
 
         /**
          *
+         * @param <M>
+         * @param source
+         * @param supplier
+         * @return
+         */
+        public <M extends Map<String, String>> M split(final CharSequence source, final Supplier<? extends M> supplier) {
+            return split(supplier.get(), source);
+        }
+
+        /**
+         *
          * @param <K> the key type
          * @param <V> the value type
          * @param keyType
@@ -894,6 +905,38 @@ public final class Splitter {
             N.checkArgNotNull(valueType, "valueType");
 
             return split(new LinkedHashMap<K, V>(), keyType, valueType, source);
+        }
+
+        /**
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param <M>
+         * @param keyType
+         * @param valueType
+         * @param source
+         * @param supplier
+         * @return
+         */
+        public <K, V, M extends Map<K, V>> M split(final Class<K> keyType, final Class<V> valueType, final CharSequence source,
+                final Supplier<? extends M> supplier) {
+            return split(supplier.get(), keyType, valueType, source);
+        }
+
+        /**
+         *
+         * @param <K> the key type
+         * @param <V> the value type
+         * @param <M>
+         * @param keyType
+         * @param valueType
+         * @param source
+         * @param supplier
+         * @return
+         */
+        public <K, V, M extends Map<K, V>> M split(final Type<K> keyType, final Type<V> valueType, final CharSequence source,
+                final Supplier<? extends M> supplier) {
+            return split(supplier.get(), keyType, valueType, source);
         }
 
         /**
@@ -1008,49 +1051,6 @@ public final class Splitter {
             }
 
             return output;
-        }
-
-        /**
-         *
-         * @param <M>
-         * @param source
-         * @param supplier
-         * @return
-         */
-        public <M extends Map<String, String>> M split(final CharSequence source, final Supplier<? extends M> supplier) {
-            return split(supplier.get(), source);
-        }
-
-        /**
-         *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @param <M>
-         * @param keyType
-         * @param valueType
-         * @param source
-         * @param supplier
-         * @return
-         */
-        public <K, V, M extends Map<K, V>> M split(final Class<K> keyType, final Class<V> valueType, final CharSequence source,
-                final Supplier<? extends M> supplier) {
-            return split(supplier.get(), keyType, valueType, source);
-        }
-
-        /**
-         *
-         * @param <K> the key type
-         * @param <V> the value type
-         * @param <M>
-         * @param keyType
-         * @param valueType
-         * @param source
-         * @param supplier
-         * @return
-         */
-        public <K, V, M extends Map<K, V>> M split(final Type<K> keyType, final Type<V> valueType, final CharSequence source,
-                final Supplier<? extends M> supplier) {
-            return split(supplier.get(), keyType, valueType, source);
         }
 
         /**

@@ -212,10 +212,14 @@ public interface DataSet {
      * @param rowIndex
      * @param columnIndex
      * @return
+     * @throws UnsupportedOperationException
      * @deprecated may be misused because it implies there is an underline auto-conversion from column values to target return type but actually there is not.
      */
+    @SuppressWarnings("unused")
     @Deprecated
-    <T> T get(Class<? extends T> targetType, int rowIndex, int columnIndex);
+    default <T> T get(Class<? extends T> targetType, int rowIndex, int columnIndex) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      *
@@ -268,10 +272,14 @@ public interface DataSet {
      * @param targetType
      * @param columnIndex
      * @return
+     * @throws UnsupportedOperationException
      * @deprecated may be misused because it implies there is an underline auto-conversion from column values to target return type but actually there is not.
      */
+    @SuppressWarnings("unused")
     @Deprecated
-    <T> T get(Class<? extends T> targetType, int columnIndex);
+    default <T> T get(Class<? extends T> targetType, int columnIndex) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      *
@@ -286,10 +294,14 @@ public interface DataSet {
      * @param targetType
      * @param columnName
      * @return
+     * @throws UnsupportedOperationException
      * @deprecated may be misused because it implies there is an underline auto-conversion from column values to target return type but actually there is not.
      */
+    @SuppressWarnings("unused")
     @Deprecated
-    <T> T get(Class<? extends T> targetType, String columnName);
+    default <T> T get(Class<? extends T> targetType, String columnName) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Returns the value from the current row and specified column if the specified {@code columnIndex} is equal or bigger than zero,
@@ -302,10 +314,14 @@ public interface DataSet {
      * @param columnIndex
      * @param defaultValue
      * @return
+     * @throws UnsupportedOperationException
      * @deprecated
      */
+    @SuppressWarnings("unused")
     @Deprecated
-    <T> T getOrDefault(int columnIndex, T defaultValue);
+    default <T> T getOrDefault(int columnIndex, T defaultValue) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Returns the value from the current row and specified column if the specified {@code columnName} exists,
@@ -318,10 +334,14 @@ public interface DataSet {
      * @param columnName
      * @param defaultValue
      * @return
+     * @throws UnsupportedOperationException
      * @deprecated
      */
+    @SuppressWarnings("unused")
     @Deprecated
-    <T> T getOrDefault(String columnName, T defaultValue);
+    default <T> T getOrDefault(String columnName, T defaultValue) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Return default value (false) if the property is null.

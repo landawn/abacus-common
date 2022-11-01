@@ -38,7 +38,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Function;
 
-import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.Range.BoundType;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
@@ -1641,78 +1640,6 @@ public final class Iterables {
         return Pair.of(N.findFirst(c, predicateForFirst), N.findLast(c, predicateForLast));
     }
 
-    @SuppressWarnings("rawtypes")
-    public static <T> boolean padLeft(final List<T> list, final int minLen, final T objToAdd) {
-        N.checkArgNotNegative(minLen, "minLen");
-
-        final int size = N.size(list);
-
-        if (size < minLen) {
-            final int elementCountToAdd = minLen - size;
-            final Object[] a = new Object[elementCountToAdd];
-
-            if (objToAdd != null) {
-                N.fill(a, objToAdd);
-
-                list.addAll(0, (List) Arrays.asList(a));
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    @SuppressWarnings("rawtypes")
-    public static <T> boolean padRight(final Collection<T> c, final int minLen, final T objToAdd) {
-        N.checkArgNotNegative(minLen, "minLen");
-
-        final int size = N.size(c);
-
-        if (size < minLen) {
-            final int elementCountToAdd = minLen - size;
-            final Object[] a = new Object[elementCountToAdd];
-
-            if (objToAdd != null) {
-                N.fill(a, objToAdd);
-
-                c.addAll((Collection) Arrays.asList(a));
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     *
-     * @param c
-     * @return
-     */
-    @Beta
-    public static List<?> flatten(Iterable<?> c) {
-        if (c == null) {
-            return new ArrayList<>();
-        }
-
-        final List<Object> result = new ArrayList<>();
-
-        flatten((Iterable<Object>) c, result);
-
-        return result;
-    }
-
-    private static void flatten(Iterable<Object> c, List<Object> output) {
-        for (Object next : c) {
-            if (next instanceof Iterable) {
-                flatten((Iterable<Object>) next, output);
-            } else {
-                output.add(next);
-            }
-        }
-    }
-
     public abstract static class SetView<E> extends ImmutableSet<E> {
         SetView(final Set<? extends E> set) {
             super(set);
@@ -3177,7 +3104,7 @@ public final class Iterables {
         boolean isNullOrEmpty = arg == null || (arg instanceof Collection ? ((Collection<T>) arg).size() == 0 : !iter.hasNext());
 
         if (isNullOrEmpty) {
-            if (argNameOrErrorMsg.indexOf(' ') == CommonUtil.INDEX_NOT_FOUND) {
+            if (argNameOrErrorMsg.indexOf(' ') == N.INDEX_NOT_FOUND) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);

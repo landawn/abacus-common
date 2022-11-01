@@ -661,7 +661,7 @@ public final class Numbers {
         if (func != null) {
             return (T) func.apply(value);
         } else {
-            return N.valueOf(targetType, N.stringOf(value));
+            return N.valueOf(N.stringOf(value), targetType);
         }
     }
 
@@ -720,7 +720,7 @@ public final class Numbers {
         }
 
         if (str.length() < 5) {
-            final Integer result = CommonUtil.stringIntCache.get(str);
+            final Integer result = N.stringIntCache.get(str);
 
             if (result != null) {
                 if (result.intValue() < Byte.MIN_VALUE || result.intValue() > Byte.MAX_VALUE) {
@@ -794,7 +794,7 @@ public final class Numbers {
         }
 
         if (str.length() < 5) {
-            final Integer result = CommonUtil.stringIntCache.get(str);
+            final Integer result = N.stringIntCache.get(str);
 
             if (result != null) {
                 return result.shortValue();
@@ -864,7 +864,7 @@ public final class Numbers {
         }
 
         if (str.length() < 5) {
-            final Integer result = CommonUtil.stringIntCache.get(str);
+            final Integer result = N.stringIntCache.get(str);
 
             if (result != null) {
                 return result;
@@ -934,7 +934,7 @@ public final class Numbers {
         }
 
         if (str.length() < 5) {
-            Integer result = CommonUtil.stringIntCache.get(str);
+            Integer result = N.stringIntCache.get(str);
             if (result != null) {
                 return result.intValue();
             }
@@ -1408,7 +1408,7 @@ public final class Numbers {
      * @see #isCreatable(String)
      */
     public static Optional<BigInteger> createBigInteger(final String str) {
-        if (N.isNullOrEmptyOrBlank(str)) {
+        if (N.isBlank(str)) {
             return Optional.empty();
         }
 
@@ -1452,7 +1452,7 @@ public final class Numbers {
      * @see #isCreatable(String)
      */
     public static Optional<BigDecimal> createBigDecimal(final String str) {
-        if (N.isNullOrEmptyOrBlank(str) || str.trim().startsWith("--")) {
+        if (N.isBlank(str) || str.trim().startsWith("--")) {
             return Optional.empty();
         }
 
@@ -1543,7 +1543,7 @@ public final class Numbers {
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static Optional<Number> createNumber(final String str) {
-        if (N.isNullOrEmptyOrBlank(str)) {
+        if (N.isBlank(str)) {
             return Optional.empty();
         }
 

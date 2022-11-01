@@ -534,20 +534,20 @@ public class RowDataSet implements DataSet, Cloneable {
         return (T) _columnList.get(columnIndex).get(rowIndex);
     }
 
-    /**
-     *
-     * @param <T>
-     * @param targetType
-     * @param rowIndex
-     * @param columnIndex
-     * @return
-     */
-    @Override
-    public <T> T get(final Class<? extends T> targetType, final int rowIndex, final int columnIndex) {
-        T rt = (T) _columnList.get(columnIndex).get(rowIndex);
-
-        return (rt == null) ? N.defaultValueOf(targetType) : rt;
-    }
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param targetType
+    //     * @param rowIndex
+    //     * @param columnIndex
+    //     * @return
+    //     */
+    //    @Override
+    //    public <T> T get(final Class<? extends T> targetType, final int rowIndex, final int columnIndex) {
+    //        T rt = (T) _columnList.get(columnIndex).get(rowIndex);
+    //
+    //        return (rt == null) ? N.defaultValueOf(targetType) : rt;
+    //    }
 
     /**
      *
@@ -588,19 +588,19 @@ public class RowDataSet implements DataSet, Cloneable {
         return (T) _columnList.get(columnIndex).get(_currentRowNum);
     }
 
-    /**
-     *
-     * @param <T>
-     * @param targetType
-     * @param columnIndex
-     * @return
-     */
-    @Override
-    public <T> T get(final Class<? extends T> targetType, final int columnIndex) {
-        T rt = get(columnIndex);
-
-        return (rt == null) ? N.defaultValueOf(targetType) : rt;
-    }
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param targetType
+    //     * @param columnIndex
+    //     * @return
+    //     */
+    //    @Override
+    //    public <T> T get(final Class<? extends T> targetType, final int columnIndex) {
+    //        T rt = get(columnIndex);
+    //
+    //        return (rt == null) ? N.defaultValueOf(targetType) : rt;
+    //    }
 
     /**
      *
@@ -614,43 +614,43 @@ public class RowDataSet implements DataSet, Cloneable {
         return (T) get(checkColumnName(columnName));
     }
 
-    /**
-     *
-     * @param <T>
-     * @param targetType
-     * @param columnName
-     * @return
-     */
-    @Override
-    public <T> T get(final Class<? extends T> targetType, final String columnName) {
-        return get(targetType, checkColumnName(columnName));
-    }
-
-    /**
-     * Gets the or default.
-     *
-     * @param <T>
-     * @param columnIndex
-     * @param defaultValue
-     * @return
-     */
-    @Override
-    public <T> T getOrDefault(int columnIndex, T defaultValue) {
-        return columnIndex < 0 ? defaultValue : (T) get(columnIndex);
-    }
-
-    /**
-     * Gets the or default.
-     *
-     * @param <T>
-     * @param columnName
-     * @param defaultValue
-     * @return
-     */
-    @Override
-    public <T> T getOrDefault(final String columnName, T defaultValue) {
-        return getOrDefault(getColumnIndex(columnName), defaultValue);
-    }
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param targetType
+    //     * @param columnName
+    //     * @return
+    //     */
+    //    @Override
+    //    public <T> T get(final Class<? extends T> targetType, final String columnName) {
+    //        return get(targetType, checkColumnName(columnName));
+    //    }
+    //
+    //    /**
+    //     * Gets the or default.
+    //     *
+    //     * @param <T>
+    //     * @param columnIndex
+    //     * @param defaultValue
+    //     * @return
+    //     */
+    //    @Override
+    //    public <T> T getOrDefault(int columnIndex, T defaultValue) {
+    //        return columnIndex < 0 ? defaultValue : (T) get(columnIndex);
+    //    }
+    //
+    //    /**
+    //     * Gets the or default.
+    //     *
+    //     * @param <T>
+    //     * @param columnName
+    //     * @param defaultValue
+    //     * @return
+    //     */
+    //    @Override
+    //    public <T> T getOrDefault(final String columnName, T defaultValue) {
+    //        return getOrDefault(getColumnIndex(columnName), defaultValue);
+    //    }
 
     /**
      * Gets the boolean.
@@ -660,7 +660,7 @@ public class RowDataSet implements DataSet, Cloneable {
      */
     @Override
     public boolean getBoolean(final int columnIndex) {
-        Boolean rt = get(boolean.class, columnIndex);
+        Boolean rt = get(columnIndex);
 
         return (rt == null) ? false : rt;
     }

@@ -29,9 +29,9 @@ public interface BiConsumer<T, U> extends Throwables.BiConsumer<T, U, RuntimeExc
     default BiConsumer<T, U> andThen(java.util.function.BiConsumer<? super T, ? super U> after) {
         N.checkArgNotNull(after);
 
-        return (l, r) -> {
-            accept(l, r);
-            after.accept(l, r);
+        return (t, u) -> {
+            accept(t, u);
+            after.accept(t, u);
         };
     }
 

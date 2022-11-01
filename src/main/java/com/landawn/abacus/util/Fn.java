@@ -336,14 +336,14 @@ public final class Fn extends Comparators {
 
     private static final Predicate<CharSequence> IS_NULL_OR_EMPTY = N::isNullOrEmpty;
 
-    private static final Predicate<CharSequence> IS_NULL_OR_EMPTY_OR_BLANK = N::isNullOrEmptyOrBlank;
+    private static final Predicate<CharSequence> IS_NULL_OR_EMPTY_OR_BLANK = N::isBlank;
 
     @SuppressWarnings("rawtypes")
     private static final Predicate NOT_NULL = Objects::nonNull;
 
     private static final Predicate<CharSequence> NOT_NULL_OR_EMPTY = N::notNullOrEmpty;
 
-    private static final Predicate<CharSequence> NOT_NULL_OR_EMPTY_OR_BLANK = N::notNullOrEmptyOrBlank;
+    private static final Predicate<CharSequence> NOT_NULL_OR_EMPTY_OR_BLANK = N::notBlank;
 
     private static final Predicate<File> IS_FILE = file -> file != null && file.isFile();
 
@@ -1446,7 +1446,7 @@ public final class Fn extends Comparators {
      * @param <T>
      * @return
      */
-    public static <T extends CharSequence> Predicate<T> isNullOrEmptyOrBlank() {
+    public static <T extends CharSequence> Predicate<T> isBlank() {
         return (Predicate<T>) IS_NULL_OR_EMPTY_OR_BLANK;
     }
 
@@ -1456,8 +1456,8 @@ public final class Fn extends Comparators {
      * @param valueExtractor
      * @return
      */
-    public static <T> Predicate<T> isNullOrEmptyOrBlank(final java.util.function.Function<T, ? extends CharSequence> valueExtractor) {
-        return t -> N.isNullOrEmptyOrBlank(valueExtractor.apply(t));
+    public static <T> Predicate<T> isBlank(final java.util.function.Function<T, ? extends CharSequence> valueExtractor) {
+        return t -> N.isBlank(valueExtractor.apply(t));
     }
 
     private static final Predicate<Object[]> IS_NULL_OR_EMPTY_A = value -> value == null || value.length == 0;
@@ -1532,7 +1532,7 @@ public final class Fn extends Comparators {
      * @param <T>
      * @return
      */
-    public static <T extends CharSequence> Predicate<T> notNullOrEmptyOrBlank() {
+    public static <T extends CharSequence> Predicate<T> notBlank() {
         return (Predicate<T>) NOT_NULL_OR_EMPTY_OR_BLANK;
     }
 
@@ -1542,8 +1542,8 @@ public final class Fn extends Comparators {
      * @param valueExtractor
      * @return
      */
-    public static <T> Predicate<T> notNullOrEmptyOrBlank(final java.util.function.Function<T, ? extends CharSequence> valueExtractor) {
-        return t -> N.notNullOrEmptyOrBlank(valueExtractor.apply(t));
+    public static <T> Predicate<T> notBlank(final java.util.function.Function<T, ? extends CharSequence> valueExtractor) {
+        return t -> N.notBlank(valueExtractor.apply(t));
     }
 
     private static final Predicate<Object[]> NOT_NULL_OR_EMPTY_A = value -> value != null && value.length > 0;
@@ -5305,7 +5305,7 @@ public final class Fn extends Comparators {
             Supplier ret = collectionSupplierPool.get(targetClass);
 
             if (ret == null) {
-                CommonUtil.checkArgument(Collection.class.isAssignableFrom(targetClass), "'targetClass': {} is not a Collection class", targetClass);
+                N.checkArgument(Collection.class.isAssignableFrom(targetClass), "'targetClass': {} is not a Collection class", targetClass);
 
                 if (Collection.class.equals(targetClass) || AbstractCollection.class.equals(targetClass) || List.class.equals(targetClass)
                         || AbstractList.class.equals(targetClass) || ArrayList.class.equals(targetClass)) {
@@ -5337,23 +5337,7 @@ public final class Fn extends Comparators {
                 } else {
                     try {
                         if (N.newInstance(targetClass) != null) {
-                            if (Set.class.isAssignableFrom(targetClass)) {
-                                ret = () -> {
-                                    try {
-                                        return N.newInstance(targetClass);
-                                    } catch (Exception e) {
-                                        return N.newHashSet();
-                                    }
-                                };
-                            } else {
-                                ret = () -> {
-                                    try {
-                                        return N.newInstance(targetClass);
-                                    } catch (Exception e) {
-                                        return N.newArrayList();
-                                    }
-                                };
-                            }
+                            ret = () -> N.newInstance(targetClass);
                         }
                     } catch (Throwable e) {
                         // ignore
@@ -5382,7 +5366,7 @@ public final class Fn extends Comparators {
             Supplier ret = mapSupplierPool.get(targetClass);
 
             if (ret == null) {
-                CommonUtil.checkArgument(Map.class.isAssignableFrom(targetClass), "'targetClass': {} is not a Map class", targetClass);
+                N.checkArgument(Map.class.isAssignableFrom(targetClass), "'targetClass': {} is not a Map class", targetClass);
 
                 if (Map.class.equals(targetClass) || AbstractMap.class.equals(targetClass) || HashMap.class.equals(targetClass)) {
                     ret = ofMap();
@@ -5402,14 +5386,8 @@ public final class Fn extends Comparators {
                     throw new IllegalArgumentException("Can't create instance for abstract class: " + targetClass);
                 } else {
                     try {
-                        if (CommonUtil.newInstance(targetClass) != null) {
-                            ret = () -> {
-                                try {
-                                    return CommonUtil.newInstance(targetClass);
-                                } catch (Exception e) {
-                                    return CommonUtil.newHashMap();
-                                }
-                            };
+                        if (N.newInstance(targetClass) != null) {
+                            ret = () -> N.newInstance(targetClass);
                         }
                     } catch (Throwable e) {
                         // ignore
@@ -5431,13 +5409,19 @@ public final class Fn extends Comparators {
             N.checkArgNotNull(targetClass, "targetClass");
             N.checkArgNotNull(supplier, "supplier");
 
-            if (collectionSupplierPool.containsKey(targetClass)) {
-                return false;
+            if (N.isBuiltinClass(targetClass)) {
+                throw new IllegalArgumentException("Can't register Supplier with builtin class: " + ClassUtil.getCanonicalClassName(targetClass));
             }
 
-            collectionSupplierPool.put(targetClass, Fn.from(supplier));
+            synchronized (collectionSupplierPool) {
+                if (collectionSupplierPool.containsKey(targetClass)) {
+                    return false;
+                }
 
-            return true;
+                collectionSupplierPool.put(targetClass, Fn.from(supplier));
+
+                return true;
+            }
         }
 
         @SuppressWarnings("rawtypes")
@@ -5445,13 +5429,19 @@ public final class Fn extends Comparators {
             N.checkArgNotNull(targetClass, "targetClass");
             N.checkArgNotNull(supplier, "supplier");
 
-            if (mapSupplierPool.containsKey(targetClass)) {
-                return false;
+            if (N.isBuiltinClass(targetClass)) {
+                throw new IllegalArgumentException("Can't register Supplier with builtin class: " + ClassUtil.getCanonicalClassName(targetClass));
             }
 
-            mapSupplierPool.put(targetClass, Fn.from(supplier));
+            synchronized (mapSupplierPool) {
+                if (mapSupplierPool.containsKey(targetClass)) {
+                    return false;
+                }
 
-            return true;
+                mapSupplierPool.put(targetClass, Fn.from(supplier));
+
+                return true;
+            }
         }
 
         /**
@@ -6174,7 +6164,7 @@ public final class Fn extends Comparators {
             IntFunction ret = collectionCreatorPool.get(targetClass);
 
             if (ret == null) {
-                CommonUtil.checkArgument(Collection.class.isAssignableFrom(targetClass), "'targetClass': {} is not a Collection class", targetClass);
+                N.checkArgument(Collection.class.isAssignableFrom(targetClass), "'targetClass': {} is not a Collection class", targetClass);
 
                 if (Collection.class.equals(targetClass) || AbstractCollection.class.equals(targetClass) || List.class.equals(targetClass)
                         || AbstractList.class.equals(targetClass) || ArrayList.class.equals(targetClass)) {
@@ -6286,7 +6276,7 @@ public final class Fn extends Comparators {
             IntFunction ret = mapCreatorPool.get(targetClass);
 
             if (ret == null) {
-                CommonUtil.checkArgument(Map.class.isAssignableFrom(targetClass), "'targetClass': {} is not a Map class", targetClass);
+                N.checkArgument(Map.class.isAssignableFrom(targetClass), "'targetClass': {} is not a Map class", targetClass);
 
                 if (Map.class.equals(targetClass) || AbstractMap.class.equals(targetClass) || HashMap.class.equals(targetClass)) {
                     ret = IntFunctions.ofMap();
@@ -6308,15 +6298,15 @@ public final class Fn extends Comparators {
                     try {
                         final Constructor<?> constructor = ClassUtil.getDeclaredConstructor(targetClass, int.class);
 
-                        if (constructor != null && CommonUtil.invoke(constructor, 9) != null) { // magic number?
+                        if (constructor != null && N.invoke(constructor, 9) != null) { // magic number?
                             ret = size -> {
                                 try {
-                                    return (Map<K, V>) CommonUtil.invoke(constructor, size);
+                                    return (Map<K, V>) N.invoke(constructor, size);
                                 } catch (Throwable e) {
                                     try {
-                                        return (Map<K, V>) CommonUtil.newInstance(targetClass);
+                                        return (Map<K, V>) N.newInstance(targetClass);
                                     } catch (Throwable e2) {
-                                        return (Map<K, V>) CommonUtil.newHashMap(size);
+                                        return (Map<K, V>) N.newHashMap(size);
                                     }
                                 }
                             };
@@ -6326,12 +6316,12 @@ public final class Fn extends Comparators {
                     }
 
                     try {
-                        if (ret == null && CommonUtil.newInstance(targetClass) != null) {
+                        if (ret == null && N.newInstance(targetClass) != null) {
                             ret = size -> {
                                 try {
-                                    return (Map<K, V>) CommonUtil.newInstance(targetClass);
+                                    return (Map<K, V>) N.newInstance(targetClass);
                                 } catch (Exception e2) {
-                                    return (Map<K, V>) CommonUtil.newHashMap(size);
+                                    return (Map<K, V>) N.newHashMap(size);
                                 }
                             };
                         }
@@ -6355,13 +6345,19 @@ public final class Fn extends Comparators {
             N.checkArgNotNull(targetClass, "targetClass");
             N.checkArgNotNull(creator, "creator");
 
-            if (collectionCreatorPool.containsKey(targetClass)) {
-                return false;
+            if (N.isBuiltinClass(targetClass)) {
+                throw new IllegalArgumentException("Can't register IntFunction with builtin class: " + ClassUtil.getCanonicalClassName(targetClass));
             }
 
-            collectionCreatorPool.put(targetClass, Fn.from(creator));
+            synchronized (collectionCreatorPool) {
+                if (collectionCreatorPool.containsKey(targetClass)) {
+                    return false;
+                }
 
-            return true;
+                collectionCreatorPool.put(targetClass, Fn.from(creator));
+
+                return true;
+            }
         }
 
         @SuppressWarnings("rawtypes")
@@ -6369,13 +6365,19 @@ public final class Fn extends Comparators {
             N.checkArgNotNull(targetClass, "targetClass");
             N.checkArgNotNull(creator, "creator");
 
-            if (mapCreatorPool.containsKey(targetClass)) {
-                return false;
+            if (N.isBuiltinClass(targetClass)) {
+                throw new IllegalArgumentException("Can't register IntFunction with builtin class: " + ClassUtil.getCanonicalClassName(targetClass));
             }
 
-            mapCreatorPool.put(targetClass, Fn.from(creator));
+            synchronized (mapCreatorPool) {
+                if (mapCreatorPool.containsKey(targetClass)) {
+                    return false;
+                }
 
-            return true;
+                mapCreatorPool.put(targetClass, Fn.from(creator));
+
+                return true;
+            }
         }
 
         /**
@@ -6665,7 +6667,7 @@ public final class Fn extends Comparators {
 
                 @Override
                 public boolean test(T t, U u) {
-                    return predicate.test(t, idx.getAndIncrement(), u);
+                    return predicate.test(idx.getAndIncrement(), t, u);
                 }
             };
         }
@@ -6922,23 +6924,23 @@ public final class Fn extends Comparators {
          * Returns a stateful <code>BiPredicate</code>. Don't save or cache for reuse or use it in parallel stream.
          *
          *
-         * @param <U>
          * @param <T>
+         * @param <U>
          * @param action
          * @return
          */
         @Beta
         @SequentialOnly
         @Stateful
-        public static <U, T> BiConsumer<U, T> indexed(final IndexedBiConsumer<U, T> action) {
+        public static <T, U> BiConsumer<T, U> indexed(final IndexedBiConsumer<T, U> action) {
             N.checkArgNotNull(action);
 
             return new BiConsumer<>() {
                 private final MutableInt idx = new MutableInt(0);
 
                 @Override
-                public void accept(U u, T t) {
-                    action.accept(u, idx.getAndIncrement(), t);
+                public void accept(T t, U u) {
+                    action.accept(idx.getAndIncrement(), t, u);
                 }
             };
         }
@@ -7203,8 +7205,8 @@ public final class Fn extends Comparators {
         /**
          * Returns a stateful <code>BiPredicate</code>. Don't save or cache for reuse or use it in parallel stream.
          *
-         * @param <U>
          * @param <T>
+         * @param <U>
          * @param <R>
          * @param func
          * @return
@@ -7212,15 +7214,15 @@ public final class Fn extends Comparators {
         @Beta
         @SequentialOnly
         @Stateful
-        public static <U, T, R> BiFunction<U, T, R> indexed(final IndexedBiFunction<U, T, ? extends R> func) {
+        public static <T, U, R> BiFunction<T, U, R> indexed(final IndexedBiFunction<T, U, ? extends R> func) {
             N.checkArgNotNull(func);
 
             return new BiFunction<>() {
                 private final MutableInt idx = new MutableInt(0);
 
                 @Override
-                public R apply(U u, T t) {
-                    return func.apply(u, idx.getAndIncrement(), t);
+                public R apply(T t, U u) {
+                    return func.apply(idx.getAndIncrement(), t, u);
                 }
             };
         }

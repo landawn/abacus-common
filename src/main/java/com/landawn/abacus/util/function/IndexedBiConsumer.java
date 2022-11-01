@@ -23,17 +23,17 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface IndexedBiConsumer<U, T> extends Throwables.IndexedBiConsumer<U, T, RuntimeException> {
+public interface IndexedBiConsumer<T, U> extends Throwables.IndexedBiConsumer<T, U, RuntimeException> {
 
     @Override
-    void accept(U u, int idx, T e);
+    void accept(int idx, T e, U u);
 
-    default IndexedBiConsumer<U, T> andThen(IndexedBiConsumer<? super U, ? super T> after) {
+    default IndexedBiConsumer<T, U> andThen(IndexedBiConsumer<? super T, ? super U> after) {
         N.checkArgNotNull(after);
 
-        return (u, idx, e) -> {
-            accept(u, idx, e);
-            after.accept(u, idx, e);
+        return (idx, e, u) -> {
+            accept(idx, e, u);
+            after.accept(idx, e, u);
         };
     }
 }

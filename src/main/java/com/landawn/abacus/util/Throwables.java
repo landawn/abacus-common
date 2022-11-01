@@ -707,20 +707,20 @@ public final class Throwables {
     /**
      * The Interface IndexedBiConsumer.
      *
-     * @param <U>
      * @param <T>
+     * @param <U>
      * @param <E>
      */
-    public interface IndexedBiConsumer<U, T, E extends Throwable> {
+    public interface IndexedBiConsumer<T, U, E extends Throwable> {
 
         /**
          *
-         * @param u
          * @param idx
          * @param e
+         * @param u
          * @throws E the e
          */
-        void accept(U u, int idx, T e) throws E;
+        void accept(int idx, T e, U u) throws E;
     }
 
     /**
@@ -745,22 +745,22 @@ public final class Throwables {
     /**
      * The Interface IndexedBiFunction.
      *
-     * @param <U>
      * @param <T>
+     * @param <U>
      * @param <R>
      * @param <E>
      */
-    public interface IndexedBiFunction<U, T, R, E extends Throwable> {
+    public interface IndexedBiFunction<T, U, R, E extends Throwable> {
 
         /**
          *
-         * @param u
          * @param idx
          * @param e
+         * @param u
          * @return
          * @throws E the e
          */
-        R apply(U u, int idx, T e) throws E;
+        R apply(int idx, T e, U u) throws E;
     }
 
     /**
@@ -784,21 +784,21 @@ public final class Throwables {
     /**
      * The Interface IndexedBiPredicate.
      *
-     * @param <U>
      * @param <T>
+     * @param <U>
      * @param <E>
      */
-    public interface IndexedBiPredicate<U, T, E extends Throwable> {
+    public interface IndexedBiPredicate<T, U, E extends Throwable> {
 
         /**
          *
-         * @param u
          * @param idx
          * @param e
+         * @param u
          * @return
          * @throws E the e
          */
-        boolean test(U u, int idx, T e) throws E;
+        boolean test(int idx, T e, U u) throws E;
     }
 
     /**

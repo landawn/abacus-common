@@ -236,8 +236,8 @@ public final class If {
      * @return
      */
     // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
-    public static If isNullOrEmptyOrBlank(final CharSequence s) {
-        return is(N.isNullOrEmptyOrBlank(s));
+    public static If isBlank(final CharSequence s) {
+        return is(N.isBlank(s));
     }
 
     /**
@@ -408,8 +408,8 @@ public final class If {
      * @return
      */
     // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
-    public static If notNullOrEmptyOrBlank(final CharSequence s) {
-        return is(N.notNullOrEmptyOrBlank(s));
+    public static If notBlank(final CharSequence s) {
+        return is(N.notBlank(s));
     }
 
     //    public <E extends Throwable> void thenRun(final Throwables.Runnable<E> cmd) throws E {
@@ -698,8 +698,8 @@ public final class If {
     //        }
     //
     //        // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
-    //        public static IF isNullOrEmptyOrBlank(final CharSequence s) {
-    //            return is(N.isNullOrEmptyOrBlank(s));
+    //        public static IF isBlank(final CharSequence s) {
+    //            return is(N.isBlank(s));
     //        }
     //
     //        public static IF notNullOrEmpty(final CharSequence s) {
@@ -768,8 +768,8 @@ public final class If {
     //        }
     //
     //        // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
-    //        public static IF notNullOrEmptyOrBlank(final CharSequence s) {
-    //            return is(N.notNullOrEmptyOrBlank(s));
+    //        public static IF notBlank(final CharSequence s) {
+    //            return is(N.notBlank(s));
     //        }
     //
     //        public <T, E extends Throwable> Nullable<T> thenGet(Try.Supplier<T, E> supplier) throws E {

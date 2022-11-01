@@ -1866,38 +1866,40 @@ public final class Maps {
         }
     }
 
-    public static <K, V, E extends Exception> void forEach(final Map<K, V> map, final Throwables.Consumer<? super Map.Entry<K, V>, E> action) throws E {
-        N.checkArgNotNull(action);
+    // Replaced with N.forEach(Map....)
 
-        if (N.isNullOrEmpty(map)) {
-            return;
-        }
-
-        for (Map.Entry<K, V> entry : map.entrySet()) {
-            action.accept(entry);
-        }
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <E>
-     * @param map
-     * @param action
-     * @throws E the e
-     */
-    public static <K, V, E extends Exception> void forEach(final Map<K, V> map, final Throwables.BiConsumer<? super K, ? super V, E> action) throws E {
-        N.checkArgNotNull(action);
-
-        if (N.isNullOrEmpty(map)) {
-            return;
-        }
-
-        for (Map.Entry<K, V> entry : map.entrySet()) {
-            action.accept(entry.getKey(), entry.getValue());
-        }
-    }
+    //    public static <K, V, E extends Exception> void forEach(final Map<K, V> map, final Throwables.Consumer<? super Map.Entry<K, V>, E> action) throws E {
+    //        N.checkArgNotNull(action);
+    //
+    //        if (N.isNullOrEmpty(map)) {
+    //            return;
+    //        }
+    //
+    //        for (Map.Entry<K, V> entry : map.entrySet()) {
+    //            action.accept(entry);
+    //        }
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <K> the key type
+    //     * @param <V> the value type
+    //     * @param <E>
+    //     * @param map
+    //     * @param action
+    //     * @throws E the e
+    //     */
+    //    public static <K, V, E extends Exception> void forEach(final Map<K, V> map, final Throwables.BiConsumer<? super K, ? super V, E> action) throws E {
+    //        N.checkArgNotNull(action);
+    //
+    //        if (N.isNullOrEmpty(map)) {
+    //            return;
+    //        }
+    //
+    //        for (Map.Entry<K, V> entry : map.entrySet()) {
+    //            action.accept(entry.getKey(), entry.getValue());
+    //        }
+    //    }
 
     /**
      *

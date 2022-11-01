@@ -2150,7 +2150,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     if (N.isNullOrEmpty(st)) {
                         return (T) N.newArray(eleType.clazz(), 0);
                     } else {
-                        return (T) N.valueOf(typeClass, st);
+                        return (T) N.valueOf(st, typeClass);
                     }
                 } else {
                     final List<Object> c = Objectory.createList();
@@ -2894,7 +2894,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     if (coll.size() > 0) {
                         array = collection2Array(nodeValueQueue.get(nodeValueQueue.size() - 2).getClass(), coll);
                     } else if (sb.length() > 0) {
-                        array = N.valueOf(typeClass, sb.toString());
+                        array = N.valueOf(sb.toString(), typeClass);
                     }
 
                     if (nodeTypeQueue.size() == 0) {

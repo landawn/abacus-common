@@ -330,6 +330,27 @@ public final class Index {
         return toOptionalInt(Strings.indexOf(str, startIndex, valueToFind));
     }
 
+    /**
+     *
+     * @param str
+     * @param valueToFind
+     * @return
+     */
+    public static OptionalInt ofIgnoreCase(final String str, final String valueToFind) {
+        return toOptionalInt(Strings.indexOfIgnoreCase(str, valueToFind));
+    }
+
+    /**
+     *
+     * @param str
+     * @param startIndex
+     * @param valueToFind
+     * @return
+     */
+    public static OptionalInt ofIgnoreCase(final String str, final int startIndex, final String valueToFind) {
+        return toOptionalInt(Strings.indexOfIgnoreCase(str, startIndex, valueToFind));
+    }
+
     public static OptionalInt ofSubArray(final boolean[] sourceArray, final boolean[] subArrayToFind) {
         return ofSubArray(sourceArray, 0, subArrayToFind, 0, N.len(subArrayToFind));
     }
@@ -1040,6 +1061,27 @@ public final class Index {
      */
     public static OptionalInt last(final String str, final int startIndexFromBack, final String valueToFind) {
         return toOptionalInt(Strings.lastIndexOf(str, startIndexFromBack, valueToFind));
+    }
+
+    /**
+     *
+     * @param str
+     * @param valueToFind
+     * @return
+     */
+    public static OptionalInt lastOfIgnoreCase(final String str, final String valueToFind) {
+        return toOptionalInt(Strings.lastIndexOfIgnoreCase(str, valueToFind));
+    }
+
+    /**
+     *
+     * @param str
+     * @param startIndexFromBack
+     * @param valueToFind
+     * @return
+     */
+    public static OptionalInt lastOfIgnoreCase(final String str, final int startIndexFromBack, final String valueToFind) {
+        return toOptionalInt(Strings.lastIndexOfIgnoreCase(str, startIndexFromBack, valueToFind));
     }
 
     public static OptionalInt lastOfSubArray(final boolean[] sourceArray, final boolean[] subArrayToFind) {
