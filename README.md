@@ -43,7 +43,7 @@ A general programming library in Java. It's easy to learn and simple to use with
 [Joiner](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Joiner_view.html), 
 [Builder](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Builder_view.html), 
 [Difference](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Difference_view.html), 
-[Comparators](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Comparators_view.html),  
+[Comparators](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Comparators_view.html), 
 [Hashing](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Hashing_view.html), 
 [Clazz](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Clazz_view.html), 
 [Hex](https://htmlpreview.github.io/?https://github.com/landawn/abacus-common/master/docs/Hex_view.html), 
