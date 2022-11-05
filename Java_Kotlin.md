@@ -9,8 +9,6 @@ List<String> list = people.stream().map(Person::getName).collect(Collectors.toLi
 // Kotlin:
 val list = people.map { it.name }  // toList() not needed
 
-// Java by abacus-common
-List<String> list = Seq.of(people).map(Person::getName);
 // Or:
 List<String> list = Stream.of(people).map(Person::getName).toList();
 ```
@@ -55,9 +53,9 @@ val count = items.filter { it.startsWith('t') }.size
 val count = items.count { it.startsWith('t') }
 
 // Java by abacus-common
-int count = Seq.of(items).count(item -> item.startsWith("t"));
+int count = Stream.of(items).count(item -> item.startsWith("t"));
 // Or:
-int count = Seq.of(items).count(Fn.startsWith("t"));
+int count = Stream.of(items).count(Fn.startsWith("t"));
 ```
 
 * **Collect example #6 - group people by age, print age and names together**
