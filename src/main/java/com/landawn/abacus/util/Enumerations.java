@@ -96,7 +96,7 @@ public final class Enumerations {
         };
     }
 
-    public static <T> Enumeration<T> of(final Collection<? extends T> c) {
+    public static <T> Enumeration<T> from(final Collection<? extends T> c) {
         if (N.isNullOrEmpty(c)) {
             return empty();
         }

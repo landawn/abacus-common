@@ -300,18 +300,18 @@ public final class BiMap<K, V> implements Map<K, V> {
         return biMap;
     }
 
-    /**
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map
-     * @return
-     * @deprecated replaced by {@code copyOf}
-     */
-    @Deprecated
-    public static <K, V> BiMap<K, V> from(final Map<? extends K, ? extends V> map) {
-        return copyOf(map);
-    }
+    //    /**
+    //     *
+    //     * @param <K> the key type
+    //     * @param <V> the value type
+    //     * @param map
+    //     * @return
+    //     * @deprecated replaced by {@code copyOf}
+    //     */
+    //    @Deprecated
+    //    public static <K, V> BiMap<K, V> from(final Map<? extends K, ? extends V> map) {
+    //        return copyOf(map);
+    //    }
 
     /**
      *

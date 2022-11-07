@@ -7715,12 +7715,16 @@ class CommonUtil {
      * @param iterable
      * @return throws TooManyElementsException if there are more than one elements in the specified {@code iterable}.
      */
-    public static <T> Nullable<T> getOnlyElement(Iterable<? extends T> iterable) throws TooManyElementsException {
-        if (iterable == null) {
+    public static <T> Nullable<T> getOnlyElement(Collection<? extends T> c) throws TooManyElementsException {
+        if (isNullOrEmpty(c)) {
             return Nullable.empty();
+        } else if (c.size() > 1) {
+            final Iterator<? extends T> iter = c.iterator();
+
+            throw new TooManyElementsException("Expected at most one element but was: [" + Strings.concat(iter.next(), ", ", iter.next(), "...]"));
         }
 
-        return getOnlyElement(iterable.iterator());
+        return firstElement(c);
     }
 
     /**
@@ -9481,6 +9485,7 @@ class CommonUtil {
      * @param iter
      * @return
      */
+    @Beta
     public static boolean isNullOrEmpty(final Iterable<?> iter) {
         if (iter == null) {
             return true;
@@ -9499,6 +9504,7 @@ class CommonUtil {
      * @param iter
      * @return
      */
+    @Beta
     public static boolean isNullOrEmpty(final Iterator<?> iter) {
         return iter == null || (iter.hasNext() == false);
     }
@@ -9715,6 +9721,7 @@ class CommonUtil {
      * @param iter
      * @return
      */
+    @Beta
     public static boolean notNullOrEmpty(final Iterable<?> iter) {
         if (iter == null) {
             return false;
@@ -9733,6 +9740,7 @@ class CommonUtil {
      * @param iter
      * @return
      */
+    @Beta
     public static boolean notNullOrEmpty(final Iterator<?> iter) {
         return (iter != null) && (iter.hasNext());
     }
@@ -10514,6 +10522,7 @@ class CommonUtil {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
+    @Beta
     public static <T extends Iterable<?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
         if (isNullOrEmpty(arg)) {
             if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
@@ -10535,6 +10544,7 @@ class CommonUtil {
      * @return
      * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
      */
+    @Beta
     public static <T extends Iterator<?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
         if (isNullOrEmpty(arg)) {
             if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {

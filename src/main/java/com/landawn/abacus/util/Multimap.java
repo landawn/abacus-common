@@ -109,253 +109,247 @@ public class Multimap<K, E, V extends Collection<E>> {
         return Suppliers.ofCollection(valueType);
     }
 
-    /**
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param <M>
-     * @param map
-     * @param multimapSupplier
-     * @return
-     */
-    public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M from(final Map<? extends K, ? extends E> map,
-            final IntFunction<? extends M> multimapSupplier) {
-        final M multimap = multimapSupplier.apply(map == null ? 0 : map.size());
-
-        if (N.notNullOrEmpty(map)) {
-            multimap.putAll(map);
-        }
-
-        return multimap;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <M>
-     * @param <X>
-     * @param c
-     * @param keyMapper
-     * @param multimapSupplier
-     * @return
-     * @throws X the x
-     */
-    public static <T, K, V extends Collection<T>, M extends Multimap<K, T, V>, X extends Exception> M from(final Collection<? extends T> c,
-            final Throwables.Function<? super T, ? extends K, X> keyMapper, final IntFunction<? extends M> multimapSupplier) throws X {
-        final M multimap = multimapSupplier.apply(c == null ? 0 : c.size());
-
-        if (N.notNullOrEmpty(c)) {
-            for (T e : c) {
-                multimap.put(keyMapper.apply(e), e);
-            }
-        }
-
-        return multimap;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param <M>
-     * @param <X>
-     * @param <X2>
-     * @param c
-     * @param keyMapper
-     * @param valueExtractor
-     * @param multimapSupplier
-     * @return
-     * @throws X the x
-     * @throws X2 the x2
-     */
-    public static <T, K, E, V extends Collection<E>, M extends Multimap<K, E, V>, X extends Exception, X2 extends Exception> M from(
-            final Collection<? extends T> c, final Throwables.Function<? super T, ? extends K, X> keyMapper,
-            final Throwables.Function<? super T, ? extends E, X2> valueExtractor, final IntFunction<? extends M> multimapSupplier) throws X, X2 {
-        final M multimap = multimapSupplier.apply(c == null ? 0 : c.size());
-
-        if (N.notNullOrEmpty(c)) {
-            for (T e : c) {
-                multimap.put(keyMapper.apply(e), valueExtractor.apply(e));
-            }
-        }
-
-        return multimap;
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param <M>
-     * @param map
-     * @param multimapSupplier
-     * @return
-     */
-    public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M fromm(final Map<? extends K, ? extends Collection<? extends E>> map,
-            final IntFunction<? extends M> multimapSupplier) {
-        final M multimap = multimapSupplier.apply(map == null ? 0 : map.size());
-
-        if (N.notNullOrEmpty(map)) {
-            for (Map.Entry<? extends K, ? extends Collection<? extends E>> entry : map.entrySet()) {
-                multimap.putAll(entry.getKey(), entry.getValue());
-            }
-        }
-
-        return multimap;
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param <M>
-     * @param map
-     * @param multimapSupplier
-     * @return
-     * @see ListMultimap#invertFrom(Map)
-     * @see SetMultimap#invertFrom(Map)
-     */
-    public static <K, E, V extends Collection<K>, M extends Multimap<E, K, V>> M invertFrom(final Map<K, E> map,
-            final IntFunction<? extends M> multimapSupplier) {
-        final M multimap = multimapSupplier.apply(map == null ? 0 : map.size());
-
-        if (N.notNullOrEmpty(map)) {
-            for (Map.Entry<K, E> entry : map.entrySet()) {
-                multimap.put(entry.getValue(), entry.getKey());
-            }
-        }
-
-        return multimap;
-    }
-
-    /**
-     * Flat invert from.
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param <M>
-     * @param map
-     * @param multimapSupplier
-     * @return
-     * @see ListMultimap#flatInvertFrom(Map)
-     * @see SetMultimap#flatInvertFrom(Map)
-     */
-    public static <K, E, V extends Collection<K>, M extends Multimap<E, K, V>> M flatInvertFrom(final Map<K, ? extends Collection<? extends E>> map,
-            final IntFunction<? extends M> multimapSupplier) {
-        final M multimap = multimapSupplier.apply(map == null ? 0 : map.size());
-
-        if (N.notNullOrEmpty(map)) {
-            for (Map.Entry<K, ? extends Collection<? extends E>> entry : map.entrySet()) {
-                final Collection<? extends E> c = entry.getValue();
-
-                if (N.notNullOrEmpty(c)) {
-                    for (E e : c) {
-                        multimap.put(e, entry.getKey());
-                    }
-                }
-            }
-        }
-
-        return multimap;
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param <VV>
-     * @param <M>
-     * @param multimap
-     * @param multimapSupplier
-     * @return
-     */
-    public static <K, E, V extends Collection<E>, VV extends Collection<K>, M extends Multimap<E, K, VV>> M invertFrom(final Multimap<K, E, V> multimap,
-            final IntFunction<? extends M> multimapSupplier) {
-        final M res = multimapSupplier.apply(multimap == null ? 0 : multimap.size());
-
-        if (N.notNullOrEmpty(multimap)) {
-            for (Map.Entry<K, V> entry : multimap.entrySet()) {
-                final V c = entry.getValue();
-
-                if (N.notNullOrEmpty(c)) {
-                    for (E e : c) {
-                        res.put(e, entry.getKey());
-                    }
-                }
-            }
-        }
-
-        return res;
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param <M>
-     * @param a
-     * @param b
-     * @param multimapSupplier
-     * @return
-     */
-    public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M concat(final Map<? extends K, ? extends E> a,
-            final Map<? extends K, ? extends E> b, final IntFunction<? extends M> multimapSupplier) {
-        final M res = multimapSupplier.apply((a == null ? 0 : a.size()) + (b == null ? 0 : b.size()));
-
-        res.putAll(a);
-        res.putAll(b);
-
-        return res;
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param <M>
-     * @param a
-     * @param b
-     * @param c
-     * @param multimapSupplier
-     * @return
-     */
-    public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M concat(final Map<? extends K, ? extends E> a,
-            final Map<? extends K, ? extends E> b, final Map<? extends K, ? extends E> c, final IntFunction<? extends M> multimapSupplier) {
-        final M res = multimapSupplier.apply((a == null ? 0 : a.size()) + (b == null ? 0 : b.size()) + (c == null ? 0 : c.size()));
-
-        res.putAll(a);
-        res.putAll(b);
-        res.putAll(c);
-
-        return res;
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param map
-     * @param valueSupplier
-     * @return
-     */
-    public static <K, E, V extends Collection<E>> Multimap<K, E, V> wrap(final Map<K, V> map, final Supplier<? extends V> valueSupplier) {
-        N.checkArgNotNull(map, "map");
-        N.checkArgNotNull(valueSupplier, "valueSupplier");
-
-        return new Multimap<>(map, valueSupplier);
-    }
+    //    /**
+    //     *
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param <V> the value type
+    //     * @param <M>
+    //     * @param map
+    //     * @param multimapSupplier
+    //     * @return
+    //     */
+    //    public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M from(final Map<? extends K, ? extends E> map,
+    //            final IntFunction<? extends M> multimapSupplier) {
+    //        final M multimap = multimapSupplier.apply(map == null ? 0 : map.size());
+    //
+    //        if (N.notNullOrEmpty(map)) {
+    //            multimap.putAll(map);
+    //        }
+    //
+    //        return multimap;
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param <K> the key type
+    //     * @param <V> the value type
+    //     * @param <M>
+    //     * @param c
+    //     * @param keyMapper
+    //     * @param multimapSupplier
+    //     * @return
+    //     */
+    //    public static <T, K, V extends Collection<T>, M extends Multimap<K, T, V>> M from(final Collection<? extends T> c,
+    //            final Function<? super T, ? extends K> keyMapper, final IntFunction<? extends M> multimapSupplier) {
+    //        final M multimap = multimapSupplier.apply(c == null ? 0 : c.size());
+    //
+    //        if (N.notNullOrEmpty(c)) {
+    //            for (T e : c) {
+    //                multimap.put(keyMapper.apply(e), e);
+    //            }
+    //        }
+    //
+    //        return multimap;
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param <V> the value type
+    //     * @param <M>
+    //     * @param c
+    //     * @param keyMapper
+    //     * @param valueExtractor
+    //     * @param multimapSupplier
+    //     * @return
+    //     */
+    //    public static <T, K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M from(final Collection<? extends T> c,
+    //            final Function<? super T, ? extends K> keyMapper, final Function<? super T, ? extends E> valueExtractor,
+    //            final IntFunction<? extends M> multimapSupplier) {
+    //        final M multimap = multimapSupplier.apply(c == null ? 0 : c.size());
+    //
+    //        if (N.notNullOrEmpty(c)) {
+    //            for (T e : c) {
+    //                multimap.put(keyMapper.apply(e), valueExtractor.apply(e));
+    //            }
+    //        }
+    //
+    //        return multimap;
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param <V> the value type
+    //     * @param <M>
+    //     * @param map
+    //     * @param multimapSupplier
+    //     * @return
+    //     */
+    //    public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M fromm(final Map<? extends K, ? extends Collection<? extends E>> map,
+    //            final IntFunction<? extends M> multimapSupplier) {
+    //        final M multimap = multimapSupplier.apply(map == null ? 0 : map.size());
+    //
+    //        if (N.notNullOrEmpty(map)) {
+    //            for (Map.Entry<? extends K, ? extends Collection<? extends E>> entry : map.entrySet()) {
+    //                multimap.putAll(entry.getKey(), entry.getValue());
+    //            }
+    //        }
+    //
+    //        return multimap;
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param <V> the value type
+    //     * @param <M>
+    //     * @param map
+    //     * @param multimapSupplier
+    //     * @return
+    //     * @see ListMultimap#invertFrom(Map)
+    //     * @see SetMultimap#invertFrom(Map)
+    //     */
+    //    public static <K, E, V extends Collection<K>, M extends Multimap<E, K, V>> M invertFrom(final Map<K, E> map,
+    //            final IntFunction<? extends M> multimapSupplier) {
+    //        final M multimap = multimapSupplier.apply(map == null ? 0 : map.size());
+    //
+    //        if (N.notNullOrEmpty(map)) {
+    //            for (Map.Entry<K, E> entry : map.entrySet()) {
+    //                multimap.put(entry.getValue(), entry.getKey());
+    //            }
+    //        }
+    //
+    //        return multimap;
+    //    }
+    //
+    //    /**
+    //     * Flat invert from.
+    //     *
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param <V> the value type
+    //     * @param <M>
+    //     * @param map
+    //     * @param multimapSupplier
+    //     * @return
+    //     * @see ListMultimap#flatInvertFrom(Map)
+    //     * @see SetMultimap#flatInvertFrom(Map)
+    //     */
+    //    public static <K, E, V extends Collection<K>, M extends Multimap<E, K, V>> M flatInvertFrom(final Map<K, ? extends Collection<? extends E>> map,
+    //            final IntFunction<? extends M> multimapSupplier) {
+    //        final M multimap = multimapSupplier.apply(map == null ? 0 : map.size());
+    //
+    //        if (N.notNullOrEmpty(map)) {
+    //            for (Map.Entry<K, ? extends Collection<? extends E>> entry : map.entrySet()) {
+    //                final Collection<? extends E> c = entry.getValue();
+    //
+    //                if (N.notNullOrEmpty(c)) {
+    //                    for (E e : c) {
+    //                        multimap.put(e, entry.getKey());
+    //                    }
+    //                }
+    //            }
+    //        }
+    //
+    //        return multimap;
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param <V> the value type
+    //     * @param <VV>
+    //     * @param <M>
+    //     * @param multimap
+    //     * @param multimapSupplier
+    //     * @return
+    //     */
+    //    public static <K, E, V extends Collection<E>, VV extends Collection<K>, M extends Multimap<E, K, VV>> M invertFrom(final Multimap<K, E, V> multimap,
+    //            final IntFunction<? extends M> multimapSupplier) {
+    //        final M res = multimapSupplier.apply(multimap == null ? 0 : multimap.size());
+    //
+    //        if (N.notNullOrEmpty(multimap)) {
+    //            for (Map.Entry<K, V> entry : multimap.entrySet()) {
+    //                final V c = entry.getValue();
+    //
+    //                if (N.notNullOrEmpty(c)) {
+    //                    for (E e : c) {
+    //                        res.put(e, entry.getKey());
+    //                    }
+    //                }
+    //            }
+    //        }
+    //
+    //        return res;
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param <V> the value type
+    //     * @param <M>
+    //     * @param a
+    //     * @param b
+    //     * @param multimapSupplier
+    //     * @return
+    //     */
+    //    public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M concat(final Map<? extends K, ? extends E> a,
+    //            final Map<? extends K, ? extends E> b, final IntFunction<? extends M> multimapSupplier) {
+    //        final M res = multimapSupplier.apply((a == null ? 0 : a.size()) + (b == null ? 0 : b.size()));
+    //
+    //        res.putAll(a);
+    //        res.putAll(b);
+    //
+    //        return res;
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param <V> the value type
+    //     * @param <M>
+    //     * @param a
+    //     * @param b
+    //     * @param c
+    //     * @param multimapSupplier
+    //     * @return
+    //     */
+    //    public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M concat(final Map<? extends K, ? extends E> a,
+    //            final Map<? extends K, ? extends E> b, final Map<? extends K, ? extends E> c, final IntFunction<? extends M> multimapSupplier) {
+    //        final M res = multimapSupplier.apply((a == null ? 0 : a.size()) + (b == null ? 0 : b.size()) + (c == null ? 0 : c.size()));
+    //
+    //        res.putAll(a);
+    //        res.putAll(b);
+    //        res.putAll(c);
+    //
+    //        return res;
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param <V> the value type
+    //     * @param map
+    //     * @param valueSupplier
+    //     * @return
+    //     */
+    //    public static <K, E, V extends Collection<E>> Multimap<K, E, V> wrap(final Map<K, V> map, final Supplier<? extends V> valueSupplier) {
+    //        N.checkArgNotNull(map, "map");
+    //        N.checkArgNotNull(valueSupplier, "valueSupplier");
+    //
+    //        return new Multimap<>(map, valueSupplier);
+    //    }
 
     /**
      *
@@ -1664,7 +1658,22 @@ public class Multimap<K, E, V extends Collection<E>> {
     }
 
     public <VV extends Collection<K>, M extends Multimap<E, K, VV>> M inverse(final IntFunction<? extends M> multimapSupplier) {
-        return Multimap.invertFrom(this, multimapSupplier);
+        final Multimap<K, E, V> multimap = this;
+        final M res = multimapSupplier.apply(multimap.size());
+
+        if (N.notNullOrEmpty(multimap)) {
+            for (Map.Entry<K, V> entry : multimap.entrySet()) {
+                final V c = entry.getValue();
+
+                if (N.notNullOrEmpty(c)) {
+                    for (E e : c) {
+                        res.put(e, entry.getKey());
+                    }
+                }
+            }
+        }
+
+        return res;
     }
 
     public Set<K> keySet() {

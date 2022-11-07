@@ -361,7 +361,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             return empty();
         }
 
-        return newStream(ExceptionalIterator.<T, E> wrap(iter));
+        return newStream(ExceptionalIterator.<T, E> of(iter));
     }
 
     /**
@@ -868,22 +868,22 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return ExceptionalStream.<K, V, E> of(map).filter(Fn.Entries.ep(filter)).map(Fnn.<K, V, E> value());
     }
 
-    /**
-     * Lazy evaluation.
-     * <br />
-     *
-     * This is equal to: {@code ExceptionalStream.just(supplier).flatmap(it -> it.get())}.
-     *
-     * @param supplier
-     * @return
-     */
-    @Beta
-    public static <T, E extends Exception> ExceptionalStream<T, E> from(final Throwables.Supplier<? extends Collection<? extends T>, ? extends E> supplier) {
-        N.checkArgNotNull(supplier, "supplier");
-
-        return ExceptionalStream.<Throwables.Supplier<? extends Collection<? extends T>, ? extends E>, E> just(supplier)
-                .flatmap(com.landawn.abacus.util.Throwables.Supplier::get);
-    }
+    //    /**
+    //     * Lazy evaluation.
+    //     * <br />
+    //     *
+    //     * This is equal to: {@code ExceptionalStream.just(supplier).flatmap(it -> it.get())}.
+    //     *
+    //     * @param supplier
+    //     * @return
+    //     */
+    //    @Beta
+    //    public static <T, E extends Exception> ExceptionalStream<T, E> from(final Throwables.Supplier<? extends Collection<? extends T>, ? extends E> supplier) {
+    //        N.checkArgNotNull(supplier, "supplier");
+    //
+    //        return ExceptionalStream.<Throwables.Supplier<? extends Collection<? extends T>, ? extends E>, E> just(supplier)
+    //                .flatmap(com.landawn.abacus.util.Throwables.Supplier::get);
+    //    }
 
     /**
      * Lazy evaluation.
@@ -1240,7 +1240,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     private static ExceptionalIterator<String, IOException> createLazyLineIterator(final File file, final Path path, final Charset charset, final Reader reader,
             final boolean closeReader) {
-        return ExceptionalIterator.from(new Throwables.Supplier<ExceptionalIterator<String, IOException>, IOException>() {
+        return ExceptionalIterator.defer(new Throwables.Supplier<ExceptionalIterator<String, IOException>, IOException>() {
             private ExceptionalIterator<String, IOException> lazyIter = null;
 
             @Override
@@ -1840,7 +1840,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> merge(final T[] a, final T[] b, final T[] c,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
-        return merge(merge(a, b, nextSelector).iteratorEx(), ExceptionalIterator.<T, E> wrap(N.iterate(c)), nextSelector);
+        return merge(merge(a, b, nextSelector).iteratorEx(), ExceptionalIterator.<T, E> of(N.iterate(c)), nextSelector);
     }
 
     /**
@@ -1877,7 +1877,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
-        return merge(ExceptionalIterator.<T, E> wrap(a), ExceptionalIterator.<T, E> wrap(b), nextSelector);
+        return merge(ExceptionalIterator.<T, E> of(a), ExceptionalIterator.<T, E> of(b), nextSelector);
     }
 
     /**
@@ -1890,7 +1890,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
             final Iterator<? extends T> c, final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
-        return merge(merge(a, b, nextSelector).iteratorEx(), ExceptionalIterator.<T, E> wrap(c), nextSelector);
+        return merge(merge(a, b, nextSelector).iteratorEx(), ExceptionalIterator.<T, E> of(c), nextSelector);
     }
 
     /**
@@ -4656,7 +4656,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     if (elements.hasNext()) {
                         iter = elements;
                     } else {
-                        iter = ExceptionalIterator.wrap(c.iterator());
+                        iter = ExceptionalIterator.of(c.iterator());
                     }
                 }
             }
@@ -5426,7 +5426,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                         list.add(iter.next());
                     }
 
-                    result = new ExceptionalStream<>(ExceptionalIterator.wrap(list.iterator()), sorted, cmp, null);
+                    result = new ExceptionalStream<>(ExceptionalIterator.of(list.iterator()), sorted, cmp, null);
                 } else {
                     result = new ExceptionalStream<>(iter, sorted, cmp, null);
                 }
@@ -5500,7 +5500,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                         }
                     }
 
-                    result = new ExceptionalStream<>(ExceptionalIterator.wrap(list.iterator()), sorted, cmp, null);
+                    result = new ExceptionalStream<>(ExceptionalIterator.of(list.iterator()), sorted, cmp, null);
                 } else {
                     ExceptionalIterator<T, E> iterEx = iter;
 
@@ -11989,79 +11989,98 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             };
         }
 
-        /**
-         * Lazy evaluation.
-         *
-         * @param <T>
-         * @param <E>
-         * @param arraySupplier
-         * @return
-         */
-        static <T, E extends Exception> ExceptionalIterator<T, E> of(final Throwables.Supplier<T[], E> arraySupplier) {
-            N.checkArgNotNull(arraySupplier, "arraySupplier");
+        public static <T, E extends Exception> ExceptionalIterator<T, E> of(final Iterator<? extends T> iter) {
+            if (iter == null) {
+                return EMPTY;
+            }
 
             return new ExceptionalIterator<>() {
-                private T[] a;
-                private int len;
-                private int position = 0;
-                private boolean isInitialized = false;
-
                 @Override
                 public boolean hasNext() throws E {
-                    if (!isInitialized) {
-                        init();
-                    }
-
-                    return position < len;
+                    return iter.hasNext();
                 }
 
                 @Override
                 public T next() throws E {
-                    if (!isInitialized) {
-                        init();
-                    }
-
-                    if (position >= len) {
-                        throw new NoSuchElementException();
-                    }
-
-                    return a[position++];
-                }
-
-                @Override
-                public long count() throws E {
-                    if (!isInitialized) {
-                        init();
-                    }
-
-                    return len - position;
-                }
-
-                @Override
-                public void advance(long n) throws E {
-                    N.checkArgNotNegative(n, "n");
-
-                    if (!isInitialized) {
-                        init();
-                    }
-
-                    if (n > len - position) {
-                        position = len;
-                    } else {
-                        position += n;
-                    }
-
-                }
-
-                private void init() throws E {
-                    if (!isInitialized) {
-                        isInitialized = true;
-                        a = arraySupplier.get();
-                        len = N.len(a);
-                    }
+                    return iter.next();
                 }
             };
         }
+
+        //        /**
+        //         * Lazy evaluation.
+        //         *
+        //         * @param <T>
+        //         * @param <E>
+        //         * @param arraySupplier
+        //         * @return
+        //         */
+        //        @Beta
+        //        static <T, E extends Exception> ExceptionalIterator<T, E> of(final Throwables.Supplier<T[], E> arraySupplier) {
+        //            N.checkArgNotNull(arraySupplier, "arraySupplier");
+        //
+        //            return new ExceptionalIterator<>() {
+        //                private T[] a;
+        //                private int len;
+        //                private int position = 0;
+        //                private boolean isInitialized = false;
+        //
+        //                @Override
+        //                public boolean hasNext() throws E {
+        //                    if (!isInitialized) {
+        //                        init();
+        //                    }
+        //
+        //                    return position < len;
+        //                }
+        //
+        //                @Override
+        //                public T next() throws E {
+        //                    if (!isInitialized) {
+        //                        init();
+        //                    }
+        //
+        //                    if (position >= len) {
+        //                        throw new NoSuchElementException();
+        //                    }
+        //
+        //                    return a[position++];
+        //                }
+        //
+        //                @Override
+        //                public long count() throws E {
+        //                    if (!isInitialized) {
+        //                        init();
+        //                    }
+        //
+        //                    return len - position;
+        //                }
+        //
+        //                @Override
+        //                public void advance(long n) throws E {
+        //                    N.checkArgNotNegative(n, "n");
+        //
+        //                    if (!isInitialized) {
+        //                        init();
+        //                    }
+        //
+        //                    if (n > len - position) {
+        //                        position = len;
+        //                    } else {
+        //                        position += n;
+        //                    }
+        //
+        //                }
+        //
+        //                private void init() throws E {
+        //                    if (!isInitialized) {
+        //                        isInitialized = true;
+        //                        a = arraySupplier.get();
+        //                        len = N.len(a);
+        //                    }
+        //                }
+        //            };
+        //        }
 
         /**
          * Lazy evaluation.
@@ -12071,7 +12090,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
          * @param iteratorSupplier
          * @return
          */
-        static <T, E extends Exception> ExceptionalIterator<T, E> from(final Throwables.Supplier<ExceptionalIterator<T, E>, E> iteratorSupplier) {
+        public static <T, E extends Exception> ExceptionalIterator<T, E> defer(final Throwables.Supplier<ExceptionalIterator<T, E>, E> iteratorSupplier) {
             N.checkArgNotNull(iteratorSupplier, "iteratorSupplier");
 
             return new ExceptionalIterator<>() {
@@ -12130,24 +12149,6 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                         isInitialized = true;
                         iter = iteratorSupplier.get();
                     }
-                }
-            };
-        }
-
-        public static <T, E extends Exception> ExceptionalIterator<T, E> wrap(final Iterator<? extends T> iter) {
-            if (iter == null) {
-                return EMPTY;
-            }
-
-            return new ExceptionalIterator<>() {
-                @Override
-                public boolean hasNext() throws E {
-                    return iter.hasNext();
-                }
-
-                @Override
-                public T next() throws E {
-                    return iter.next();
                 }
             };
         }
@@ -12396,10 +12397,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             return ExceptionalStream.ofValues(map, filter);
         }
 
-        @Beta
-        public static <T> ExceptionalStream<T, RuntimeException> from(final Throwables.Supplier<Collection<? extends T>, RuntimeException> supplier) {
-            return ExceptionalStream.<T, RuntimeException> from(supplier);
-        }
+        //    @Beta
+        //    public static <T> ExceptionalStream<T, RuntimeException> from(final Throwables.Supplier<Collection<? extends T>, RuntimeException> supplier) {
+        //        return ExceptionalStream.<T, RuntimeException> from(supplier);
+        //    }
 
         public static <T> ExceptionalStream<T, RuntimeException> defer(
                 final Throwables.Supplier<ExceptionalStream<? extends T, ? extends RuntimeException>, RuntimeException> supplier) {

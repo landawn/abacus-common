@@ -267,7 +267,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @return
      */
     @Beta
-    public static <K, E> SetMultimap<K, E> fromm(final Map<? extends K, ? extends Collection<? extends E>> map) {
+    public static <K, E> SetMultimap<K, E> flatFrom(final Map<? extends K, ? extends Collection<? extends E>> map) {
         final SetMultimap<K, E> multimap = new SetMultimap<>(Maps.newTargetMap(map), HashSet.class);
 
         if (N.notNullOrEmpty(map)) {
@@ -487,188 +487,192 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static <K, E, V extends Set<E>> SetMultimap<K, E> wrapp(final Map<K, V> map, final Supplier<? extends V> valueSupplier) {
+    public static <K, E, V extends Set<E>> SetMultimap<K, E> wrap(final Map<K, V> map, final Supplier<? extends V> valueSupplier) {
         N.checkArgNotNull(map, "map");
         N.checkArgNotNull(valueSupplier, "valueSupplier");
 
         return new SetMultimap<>((Map) map, valueSupplier);
     }
 
-    /**
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param <M>
-     * @param map
-     * @param multimapSupplier
-     * @return
-     */
-    @Deprecated
-    public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M from(final Map<? extends K, ? extends E> map,
-            final IntFunction<? extends M> multimapSupplier) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param <M>
-     * @param map
-     * @param multimapSupplier
-     * @return
-     */
-    @Deprecated
-    public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M fromm(final Map<? extends K, ? extends Collection<? extends E>> map,
-            final IntFunction<? extends M> multimapSupplier) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param <M>
-     * @param <X>
-     * @param c
-     * @param keyMapper
-     * @param multimapSupplier
-     * @return
-     * @throws X the x
-     */
-    @Deprecated
-    public static <T, K, V extends Collection<T>, M extends Multimap<K, T, V>, X extends Exception> M from(final Collection<? extends T> c,
-            final Throwables.Function<? super T, ? extends K, X> keyMapper, final IntFunction<? extends M> multimapSupplier) throws X {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param <M>
-     * @param <X>
-     * @param <X2>
-     * @param c
-     * @param keyMapper
-     * @param valueExtractor
-     * @param multimapSupplier
-     * @return
-     * @throws X the x
-     * @throws X2 the x2
-     */
-    @Deprecated
-    public static <T, K, E, V extends Collection<E>, M extends Multimap<K, E, V>, X extends Exception, X2 extends Exception> M from(
-            final Collection<? extends T> c, final Throwables.Function<? super T, ? extends K, X> keyMapper,
-            final Throwables.Function<? super T, ? extends E, X2> valueExtractor, final IntFunction<? extends M> multimapSupplier) throws X, X2 {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param <M>
-     * @param map
-     * @param multimapSupplier
-     * @return
-     */
-    @Deprecated
-    public static <K, E, V extends Collection<K>, M extends Multimap<E, K, V>> M invertFrom(final Map<K, E> map,
-            final IntFunction<? extends M> multimapSupplier) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Flat invert from.
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param <M>
-     * @param map
-     * @param multimapSupplier
-     * @return
-     */
-    @Deprecated
-    public static <K, E, V extends Collection<K>, M extends Multimap<E, K, V>> M flatInvertFrom(final Map<K, ? extends Collection<? extends E>> map,
-            final IntFunction<? extends M> multimapSupplier) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param <VV>
-     * @param <M>
-     * @param multimap
-     * @param multimapSupplier
-     * @return
-     */
-    @Deprecated
-    public static <K, E, V extends Collection<E>, VV extends Collection<K>, M extends Multimap<E, K, VV>> M invertFrom(final Multimap<K, E, V> multimap,
-            final IntFunction<? extends M> multimapSupplier) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param <M>
-     * @param a
-     * @param b
-     * @param multimapSupplier
-     * @return
-     */
-    @Deprecated
-    public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M concat(final Map<? extends K, ? extends E> a,
-            final Map<? extends K, ? extends E> b, final IntFunction<? extends M> multimapSupplier) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param <M>
-     * @param a
-     * @param b
-     * @param c
-     * @param multimapSupplier
-     * @return
-     */
-    @Deprecated
-    public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M concat(final Map<? extends K, ? extends E> a,
-            final Map<? extends K, ? extends E> b, final Map<? extends K, ? extends E> c, final IntFunction<? extends M> multimapSupplier)
-            throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     *
-     * @param <K> the key type
-     * @param <E>
-     * @param <V> the value type
-     * @param map
-     * @param valueSupplier
-     * @return
-     */
-    @Deprecated
-    public static <K, E, V extends Collection<E>> Multimap<K, E, V> wrap(final Map<K, V> map, final Supplier<? extends V> valueSupplier)
-            throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
-    }
+    //    /**
+    //     *
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param <V> the value type
+    //     * @param <M>
+    //     * @param map
+    //     * @param multimapSupplier
+    //     * @return
+    //     * @throws UnsupportedOperationException
+    //     */
+    //    @Deprecated
+    //    public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M from(final Map<? extends K, ? extends E> map,
+    //            final IntFunction<? extends M> multimapSupplier) throws UnsupportedOperationException {
+    //        throw new UnsupportedOperationException();
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param <V> the value type
+    //     * @param <M>
+    //     * @param map
+    //     * @param multimapSupplier
+    //     * @return
+    //     * @throws UnsupportedOperationException
+    //     */
+    //    @Deprecated
+    //    public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M fromm(final Map<? extends K, ? extends Collection<? extends E>> map,
+    //            final IntFunction<? extends M> multimapSupplier) throws UnsupportedOperationException {
+    //        throw new UnsupportedOperationException();
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param <K> the key type
+    //     * @param <V> the value type
+    //     * @param <M>
+    //     * @param c
+    //     * @param keyMapper
+    //     * @param multimapSupplier
+    //     * @return
+    //     * @throws UnsupportedOperationException
+    //     */
+    //    @Deprecated
+    //    public static <T, K, V extends Collection<T>, M extends Multimap<K, T, V>> M from(final Collection<? extends T> c,
+    //            final Function<? super T, ? extends K> keyMapper, final IntFunction<? extends M> multimapSupplier) throws UnsupportedOperationException {
+    //        throw new UnsupportedOperationException();
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param <V> the value type
+    //     * @param <M>
+    //     * @param c
+    //     * @param keyMapper
+    //     * @param valueExtractor
+    //     * @param multimapSupplier
+    //     * @return
+    //     * @throws UnsupportedOperationException
+    //     */
+    //    @Deprecated
+    //    public static <T, K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M from(final Collection<? extends T> c,
+    //            final Function<? super T, ? extends K> keyMapper, final Function<? super T, ? extends E> valueExtractor,
+    //            final IntFunction<? extends M> multimapSupplier) {
+    //        throw new UnsupportedOperationException();
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param <V> the value type
+    //     * @param <M>
+    //     * @param map
+    //     * @param multimapSupplier
+    //     * @return
+    //     * @throws UnsupportedOperationException
+    //     */
+    //    @Deprecated
+    //    public static <K, E, V extends Collection<K>, M extends Multimap<E, K, V>> M invertFrom(final Map<K, E> map,
+    //            final IntFunction<? extends M> multimapSupplier) throws UnsupportedOperationException {
+    //        throw new UnsupportedOperationException();
+    //    }
+    //
+    //    /**
+    //     * Flat invert from.
+    //     *
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param <V> the value type
+    //     * @param <M>
+    //     * @param map
+    //     * @param multimapSupplier
+    //     * @return
+    //     * @throws UnsupportedOperationException
+    //     */
+    //    @Deprecated
+    //    public static <K, E, V extends Collection<K>, M extends Multimap<E, K, V>> M flatInvertFrom(final Map<K, ? extends Collection<? extends E>> map,
+    //            final IntFunction<? extends M> multimapSupplier) throws UnsupportedOperationException {
+    //        throw new UnsupportedOperationException();
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param <V> the value type
+    //     * @param <VV>
+    //     * @param <M>
+    //     * @param multimap
+    //     * @param multimapSupplier
+    //     * @return
+    //     * @throws UnsupportedOperationException
+    //     */
+    //    @Deprecated
+    //    public static <K, E, V extends Collection<E>, VV extends Collection<K>, M extends Multimap<E, K, VV>> M invertFrom(final Multimap<K, E, V> multimap,
+    //            final IntFunction<? extends M> multimapSupplier) throws UnsupportedOperationException {
+    //        throw new UnsupportedOperationException();
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param <V> the value type
+    //     * @param <M>
+    //     * @param a
+    //     * @param b
+    //     * @param multimapSupplier
+    //     * @return
+    //     * @throws UnsupportedOperationException
+    //     */
+    //    @Deprecated
+    //    public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M concat(final Map<? extends K, ? extends E> a,
+    //            final Map<? extends K, ? extends E> b, final IntFunction<? extends M> multimapSupplier) throws UnsupportedOperationException {
+    //        throw new UnsupportedOperationException();
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param <V> the value type
+    //     * @param <M>
+    //     * @param a
+    //     * @param b
+    //     * @param c
+    //     * @param multimapSupplier
+    //     * @return
+    //     * @throws UnsupportedOperationException
+    //     */
+    //    @Deprecated
+    //    public static <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M concat(final Map<? extends K, ? extends E> a,
+    //            final Map<? extends K, ? extends E> b, final Map<? extends K, ? extends E> c, final IntFunction<? extends M> multimapSupplier)
+    //            throws UnsupportedOperationException {
+    //        throw new UnsupportedOperationException();
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <K> the key type
+    //     * @param <E>
+    //     * @param <V> the value type
+    //     * @param map
+    //     * @param valueSupplier
+    //     * @return
+    //     * @throws UnsupportedOperationException
+    //     */
+    //    @Deprecated
+    //    public static <K, E, V extends Collection<E>> Multimap<K, E, V> wrap(final Map<K, V> map, final Supplier<? extends V> valueSupplier)
+    //            throws UnsupportedOperationException {
+    //        throw new UnsupportedOperationException();
+    //    }
 
     /**
      * Filter by key.

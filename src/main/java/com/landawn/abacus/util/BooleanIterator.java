@@ -97,52 +97,53 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
         };
     }
 
-    /**
-     * Lazy evaluation.
-     *
-     * @param arraySupplier
-     * @return
-     */
-    public static BooleanIterator from(final Supplier<boolean[]> arraySupplier) {
-        N.checkArgNotNull(arraySupplier, "arraySupplier");
-
-        return new BooleanIterator() {
-            private boolean[] aar = null;
-            private int len = 0;
-            private int cur = 0;
-            private boolean isInitialized = false;
-
-            @Override
-            public boolean hasNext() {
-                if (!isInitialized) {
-                    init();
-                }
-
-                return cur < len;
-            }
-
-            @Override
-            public boolean nextBoolean() {
-                if (!isInitialized) {
-                    init();
-                }
-
-                if (cur >= len) {
-                    throw new NoSuchElementException();
-                }
-
-                return aar[cur++];
-            }
-
-            private void init() {
-                if (!isInitialized) {
-                    isInitialized = true;
-                    aar = arraySupplier.get();
-                    len = N.len(aar);
-                }
-            }
-        };
-    }
+    //    /**
+    //     * Lazy evaluation.
+    //     *
+    //     * @param arraySupplier
+    //     * @return
+    //     */
+    //    @Beta
+    //    public static BooleanIterator from(final Supplier<boolean[]> arraySupplier) {
+    //        N.checkArgNotNull(arraySupplier, "arraySupplier");
+    //
+    //        return new BooleanIterator() {
+    //            private boolean[] aar = null;
+    //            private int len = 0;
+    //            private int cur = 0;
+    //            private boolean isInitialized = false;
+    //
+    //            @Override
+    //            public boolean hasNext() {
+    //                if (!isInitialized) {
+    //                    init();
+    //                }
+    //
+    //                return cur < len;
+    //            }
+    //
+    //            @Override
+    //            public boolean nextBoolean() {
+    //                if (!isInitialized) {
+    //                    init();
+    //                }
+    //
+    //                if (cur >= len) {
+    //                    throw new NoSuchElementException();
+    //                }
+    //
+    //                return aar[cur++];
+    //            }
+    //
+    //            private void init() {
+    //                if (!isInitialized) {
+    //                    isInitialized = true;
+    //                    aar = arraySupplier.get();
+    //                    len = N.len(aar);
+    //                }
+    //            }
+    //        };
+    //    }
 
     /**
      * Lazy evaluation.

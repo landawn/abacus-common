@@ -29,6 +29,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
+import java.util.function.ToLongFunction;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
@@ -183,19 +184,15 @@ public final class LongMultiset<T> implements Iterable<T> {
      * @return
      */
     @Beta
-    public static <T> LongMultiset<T> fromm(final Map<? extends T, Integer> m) {
+    public static <T, V> LongMultiset<T> from(final Map<? extends T, ? extends V> m, final ToLongFunction<? super V> valueMapper) {
         if (N.isNullOrEmpty(m)) {
             return new LongMultiset<>();
         }
 
         final LongMultiset<T> multiset = new LongMultiset<>(Maps.newTargetMap(m));
 
-        for (Map.Entry<? extends T, Integer> entry : m.entrySet()) {
-            checkOccurrences(entry.getValue().intValue());
-        }
-
-        for (Map.Entry<? extends T, Integer> entry : m.entrySet()) {
-            multiset.set(entry.getKey(), entry.getValue().intValue());
+        for (Map.Entry<? extends T, ? extends V> entry : m.entrySet()) {
+            multiset.set(entry.getKey(), checkOccurrences(valueMapper.applyAsLong(entry.getValue())));
         }
 
         return multiset;
@@ -1825,9 +1822,11 @@ public final class LongMultiset<T> implements Iterable<T> {
      *
      * @param occurrences
      */
-    private static void checkOccurrences(final long occurrences) {
+    private static long checkOccurrences(final long occurrences) {
         if (occurrences < 0) {
             throw new IllegalArgumentException("The specified 'occurrences' can not be negative");
         }
+
+        return occurrences;
     }
 }

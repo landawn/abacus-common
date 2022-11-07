@@ -98,52 +98,52 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
         };
     }
 
-    /**
-     * Lazy evaluation.
-     *
-     * @param arraySupplier
-     * @return
-     */
-    public static ByteIterator from(final Supplier<byte[]> arraySupplier) {
-        N.checkArgNotNull(arraySupplier, "arraySupplier");
-
-        return new ByteIterator() {
-            private byte[] aar = null;
-            private int len = 0;
-            private int cur = 0;
-            private boolean isInitialized = false;
-
-            @Override
-            public boolean hasNext() {
-                if (!isInitialized) {
-                    init();
-                }
-
-                return cur < len;
-            }
-
-            @Override
-            public byte nextByte() {
-                if (!isInitialized) {
-                    init();
-                }
-
-                if (cur >= len) {
-                    throw new NoSuchElementException();
-                }
-
-                return aar[cur++];
-            }
-
-            private void init() {
-                if (!isInitialized) {
-                    isInitialized = true;
-                    aar = arraySupplier.get();
-                    len = N.len(aar);
-                }
-            }
-        };
-    }
+    //    /**
+    //     * Lazy evaluation.
+    //     *
+    //     * @param arraySupplier
+    //     * @return
+    //     */
+    //    public static ByteIterator from(final Supplier<byte[]> arraySupplier) {
+    //        N.checkArgNotNull(arraySupplier, "arraySupplier");
+    //
+    //        return new ByteIterator() {
+    //            private byte[] aar = null;
+    //            private int len = 0;
+    //            private int cur = 0;
+    //            private boolean isInitialized = false;
+    //
+    //            @Override
+    //            public boolean hasNext() {
+    //                if (!isInitialized) {
+    //                    init();
+    //                }
+    //
+    //                return cur < len;
+    //            }
+    //
+    //            @Override
+    //            public byte nextByte() {
+    //                if (!isInitialized) {
+    //                    init();
+    //                }
+    //
+    //                if (cur >= len) {
+    //                    throw new NoSuchElementException();
+    //                }
+    //
+    //                return aar[cur++];
+    //            }
+    //
+    //            private void init() {
+    //                if (!isInitialized) {
+    //                    isInitialized = true;
+    //                    aar = arraySupplier.get();
+    //                    len = N.len(aar);
+    //                }
+    //            }
+    //        };
+    //    }
 
     /**
      * Lazy evaluation.
