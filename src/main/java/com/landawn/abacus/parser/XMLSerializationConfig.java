@@ -14,8 +14,8 @@
 
 package com.landawn.abacus.parser;
 
-import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.DateTimeFormat;
@@ -284,7 +284,7 @@ public class XMLSerializationConfig extends SerializationConfig<XMLSerialization
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static XMLSerializationConfig of(Exclusion exclusion, Map<Class<?>, Collection<String>> ignoredPropNames) {
+        public static XMLSerializationConfig of(Exclusion exclusion, Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().setExclusion(exclusion).setIgnoredPropNames(ignoredPropNames);
         }
 
@@ -300,7 +300,7 @@ public class XMLSerializationConfig extends SerializationConfig<XMLSerialization
          */
         @Deprecated
         public static XMLSerializationConfig of(boolean tagByPropertyName, boolean ignoreTypeInfo, DateTimeFormat dateTimeFormat, Exclusion exclusion,
-                Map<Class<?>, Collection<String>> ignoredPropNames) {
+                Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().setTagByPropertyName(tagByPropertyName)
                     .setIgnoreTypeInfo(ignoreTypeInfo)
                     .setDateTimeFormat(dateTimeFormat)

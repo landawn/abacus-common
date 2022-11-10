@@ -17,6 +17,7 @@ package com.landawn.abacus.parser;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import com.landawn.abacus.annotation.JsonXmlField;
 
@@ -29,15 +30,15 @@ import com.landawn.abacus.annotation.JsonXmlField;
  */
 public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneable {
 
-    Map<Class<?>, Collection<String>> ignoredPropNames = null;
+    Map<Class<?>, Set<String>> entityIgnoredPropNameMap = null;
 
     /**
      * Gets the ignored prop names.
      *
      * @return
      */
-    public Map<Class<?>, Collection<String>> getIgnoredPropNames() {
-        return ignoredPropNames;
+    public Map<Class<?>, Set<String>> getIgnoredPropNames() {
+        return entityIgnoredPropNameMap;
     }
 
     /**
@@ -47,14 +48,14 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * @return
      */
     public Collection<String> getIgnoredPropNames(Class<?> cls) {
-        if (this.ignoredPropNames == null) {
+        if (this.entityIgnoredPropNameMap == null) {
             return null;
         }
 
-        Collection<String> result = this.ignoredPropNames.get(cls);
+        Collection<String> result = this.entityIgnoredPropNameMap.get(cls);
 
         if (result == null) {
-            result = this.ignoredPropNames.get(Object.class);
+            result = this.entityIgnoredPropNameMap.get(Object.class);
         }
 
         return result;
@@ -66,7 +67,7 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * @param ignoredPropNames
      * @return
      */
-    public C setIgnoredPropNames(Collection<String> ignoredPropNames) {
+    public C setIgnoredPropNames(Set<String> ignoredPropNames) {
         return setIgnoredPropNames(Object.class, ignoredPropNames);
     }
 
@@ -77,12 +78,12 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * @param ignoredPropNames
      * @return
      */
-    public C setIgnoredPropNames(Class<?> cls, Collection<String> ignoredPropNames) {
-        if (this.ignoredPropNames == null) {
-            this.ignoredPropNames = new HashMap<>();
+    public C setIgnoredPropNames(Class<?> cls, Set<String> ignoredPropNames) {
+        if (this.entityIgnoredPropNameMap == null) {
+            this.entityIgnoredPropNameMap = new HashMap<>();
         }
 
-        this.ignoredPropNames.put(cls, ignoredPropNames);
+        this.entityIgnoredPropNameMap.put(cls, ignoredPropNames);
 
         return (C) this;
     }
@@ -93,8 +94,8 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * @param ignoredPropNames
      * @return
      */
-    public C setIgnoredPropNames(Map<Class<?>, Collection<String>> ignoredPropNames) {
-        this.ignoredPropNames = ignoredPropNames;
+    public C setIgnoredPropNames(Map<Class<?>, Set<String>> ignoredPropNames) {
+        this.entityIgnoredPropNameMap = ignoredPropNames;
 
         return (C) this;
     }

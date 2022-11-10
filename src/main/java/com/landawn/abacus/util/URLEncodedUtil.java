@@ -232,24 +232,24 @@ public final class URLEncodedUtil {
 
     /**
      *
-     * @param <T>
-     * @param targetClass
      * @param urlQuery
+     * @param targetClass
+     * @param <T>
      * @return
      */
-    public static <T> T decode(final Class<? extends T> targetClass, final String urlQuery) {
-        return decode(targetClass, urlQuery, Charsets.UTF_8);
+    public static <T> T decode(final String urlQuery, final Class<? extends T> targetClass) {
+        return decode(urlQuery, Charsets.UTF_8, targetClass);
     }
 
     /**
      *
-     * @param <T>
-     * @param targetClass
      * @param urlQuery
      * @param charset
+     * @param targetClass
+     * @param <T>
      * @return
      */
-    public static <T> T decode(final Class<? extends T> targetClass, final String urlQuery, final Charset charset) {
+    public static <T> T decode(final String urlQuery, final Charset charset, final Class<? extends T> targetClass) {
         final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
         final Object result = entityInfo.createEntityResult();
 
@@ -294,13 +294,13 @@ public final class URLEncodedUtil {
 
     /**
      * Parameters 2 entity.
+     * @param parameters
+     * @param targetClass
      *
      * @param <T>
-     * @param targetClass
-     * @param parameters
      * @return
      */
-    public static <T> T parameters2Entity(final Class<? extends T> targetClass, final Map<String, String[]> parameters) {
+    public static <T> T parameters2Entity(final Map<String, String[]> parameters, final Class<? extends T> targetClass) {
         final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
         final Object result = entityInfo.createEntityResult();
 

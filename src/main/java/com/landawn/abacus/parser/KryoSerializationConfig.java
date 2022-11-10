@@ -14,8 +14,8 @@
 
 package com.landawn.abacus.parser;
 
-import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.DateTimeFormat;
@@ -352,7 +352,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static KryoSerializationConfig of(Exclusion exclusion, Map<Class<?>, Collection<String>> ignoredPropNames) {
+        public static KryoSerializationConfig of(Exclusion exclusion, Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().setExclusion(exclusion).setIgnoredPropNames(ignoredPropNames);
         }
 
@@ -365,7 +365,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static KryoSerializationConfig of(boolean writeClass, Exclusion exclusion, Map<Class<?>, Collection<String>> ignoredPropNames) {
+        public static KryoSerializationConfig of(boolean writeClass, Exclusion exclusion, Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().setWriteClass(writeClass).setExclusion(exclusion).setIgnoredPropNames(ignoredPropNames);
         }
     }

@@ -14,8 +14,8 @@
 
 package com.landawn.abacus.parser;
 
-import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.DateTimeFormat;
@@ -337,7 +337,7 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static JSONSerializationConfig of(Exclusion exclusion, Map<Class<?>, Collection<String>> ignoredPropNames) {
+        public static JSONSerializationConfig of(Exclusion exclusion, Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().setExclusion(exclusion).setIgnoredPropNames(ignoredPropNames);
         }
 
@@ -353,7 +353,7 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
          */
         @Deprecated
         public static JSONSerializationConfig of(boolean quotePropName, boolean quoteMapKey, DateTimeFormat dateTimeFormat, Exclusion exclusion,
-                Map<Class<?>, Collection<String>> ignoredPropNames) {
+                Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().setQuotePropName(quotePropName)
                     .setQuoteMapKey(quoteMapKey)
                     .setDateTimeFormat(dateTimeFormat)

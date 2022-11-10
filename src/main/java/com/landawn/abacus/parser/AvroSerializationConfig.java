@@ -14,8 +14,8 @@
 
 package com.landawn.abacus.parser;
 
-import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.avro.Schema;
 
@@ -352,7 +352,7 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
          * @deprecated
          */
         @Deprecated
-        public static AvroSerializationConfig of(Schema schema, Exclusion exclusion, Map<Class<?>, Collection<String>> ignoredPropNames) {
+        public static AvroSerializationConfig of(Schema schema, Exclusion exclusion, Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().setSchema(schema).setExclusion(exclusion).setIgnoredPropNames(ignoredPropNames);
         }
     }

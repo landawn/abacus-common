@@ -120,7 +120,7 @@ public class HttpResponse {
             if (bodyFormat == ContentFormat.KRYO && HttpUtil.kryoParser != null) {
                 return HttpUtil.kryoParser.deserialize(resultClass, new ByteArrayInputStream(body));
             } else if (bodyFormat == ContentFormat.FormUrlEncoded) {
-                return URLEncodedUtil.decode(resultClass, new String(body, respCharset));
+                return URLEncodedUtil.decode(new String(body, respCharset), resultClass);
             } else {
                 return HttpUtil.getParser(bodyFormat).deserialize(resultClass, new String(body, respCharset));
             }
@@ -144,7 +144,7 @@ public class HttpResponse {
             if (bodyFormat == ContentFormat.KRYO && HttpUtil.kryoParser != null) {
                 return HttpUtil.kryoParser.deserialize(resultType.clazz(), new ByteArrayInputStream(body));
             } else if (bodyFormat == ContentFormat.FormUrlEncoded) {
-                return URLEncodedUtil.decode(resultType.clazz(), new String(body, respCharset));
+                return URLEncodedUtil.decode(new String(body, respCharset), resultType.clazz());
             } else if (bodyFormat != null && bodyFormat.name().contains("JSON")) {
                 return N.fromJSON(resultType, new String(body, respCharset));
             } else if (bodyFormat != null && bodyFormat.name().contains("XML")) {

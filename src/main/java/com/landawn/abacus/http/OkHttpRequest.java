@@ -538,7 +538,7 @@ public final class OkHttpRequest {
                     if (respContentFormat == ContentFormat.KRYO && kryoParser != null) {
                         return kryoParser.deserialize(resultClass, is);
                     } else if (respContentFormat == ContentFormat.FormUrlEncoded) {
-                        return URLEncodedUtil.decode(resultClass, IOUtil.readAllToString(is, respCharset));
+                        return URLEncodedUtil.decode(IOUtil.readAllToString(is, respCharset), resultClass);
                     } else {
                         final BufferedReader br = Objectory.createBufferedReader(new InputStreamReader(is, respCharset));
 

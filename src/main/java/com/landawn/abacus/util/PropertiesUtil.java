@@ -69,7 +69,7 @@ public final class PropertiesUtil {
             .setIgnoreTypeInfo(true)
             .setDateTimeFormat(DateTimeFormat.ISO_8601_DATETIME)
             .setExclusion(Exclusion.NONE)
-            .setIgnoredPropNames((Map<Class<?>, Collection<String>>) null);
+            .setIgnoredPropNames((Map<Class<?>, Set<String>>) null);
 
     private static final ScheduledExecutorService scheduledExecutor;
     static {
@@ -111,7 +111,7 @@ public final class PropertiesUtil {
                                 if (resource.getType() == ResourceType.PROPERTIES) {
                                     load((Properties<String, String>) properties, is);
                                 } else {
-                                    loadFromXML(properties, properties.getClass(), is);
+                                    loadFromXML(properties, is, properties.getClass());
                                 }
 
                                 if (m == null) {
@@ -305,7 +305,7 @@ public final class PropertiesUtil {
      * @return
      */
     public static Properties<String, Object> loadFromXML(File file, boolean autoRefresh) {
-        return loadFromXML(Properties.class, file, autoRefresh);
+        return loadFromXML(file, autoRefresh, Properties.class);
     }
 
     /**
@@ -315,31 +315,31 @@ public final class PropertiesUtil {
      * @return
      */
     public static Properties<String, Object> loadFromXML(InputStream is) {
-        return loadFromXML(Properties.class, is);
+        return loadFromXML(is, Properties.class);
     }
 
     /**
      * Load from XML.
+     * @param file
+     * @param targetClass
      *
      * @param <T>
-     * @param targetClass
-     * @param file
      * @return
      */
-    public static <T extends Properties<String, Object>> T loadFromXML(Class<? extends T> targetClass, File file) {
-        return loadFromXML(targetClass, file, false);
+    public static <T extends Properties<String, Object>> T loadFromXML(File file, Class<? extends T> targetClass) {
+        return loadFromXML(file, false, targetClass);
     }
 
     /**
      * Load from XML.
-     *
-     * @param <T>
-     * @param targetClass
      * @param file
      * @param autoRefresh
+     * @param targetClass
+     *
+     * @param <T>
      * @return
      */
-    public static <T extends Properties<String, Object>> T loadFromXML(Class<? extends T> targetClass, File file, boolean autoRefresh) {
+    public static <T extends Properties<String, Object>> T loadFromXML(File file, boolean autoRefresh, Class<? extends T> targetClass) {
         T properties = null;
         InputStream is = null;
 
@@ -354,13 +354,13 @@ public final class PropertiesUtil {
                     properties = (T) registeredAutoRefreshProperties.get(resource);
 
                     if (properties == null) {
-                        properties = loadFromXML(targetClass, is);
+                        properties = loadFromXML(is, targetClass);
 
                         registeredAutoRefreshProperties.put(resource, properties);
                     }
                 }
             } else {
-                properties = loadFromXML(targetClass, is);
+                properties = loadFromXML(is, targetClass);
             }
 
             return properties;
@@ -371,14 +371,14 @@ public final class PropertiesUtil {
 
     /**
      * Load from XML.
+     * @param is
+     * @param targetClass
      *
      * @param <T>
-     * @param targetClass
-     * @param is
      * @return
      */
-    public static <T extends Properties<String, Object>> T loadFromXML(Class<? extends T> targetClass, InputStream is) {
-        return loadFromXML(null, targetClass, is);
+    public static <T extends Properties<String, Object>> T loadFromXML(InputStream is, Class<? extends T> targetClass) {
+        return loadFromXML(null, is, targetClass);
     }
 
     /**
@@ -386,11 +386,11 @@ public final class PropertiesUtil {
      *
      * @param <T>
      * @param targetProperties
-     * @param targetClass
      * @param is
+     * @param targetClass
      * @return
      */
-    private static <T extends Properties<String, Object>> T loadFromXML(Object targetProperties, Class<? extends T> targetClass, InputStream is) {
+    private static <T extends Properties<String, Object>> T loadFromXML(Object targetProperties, InputStream is, Class<? extends T> targetClass) {
         DocumentBuilder docBuilder = XMLUtil.createDOMParser(true, true);
 
         Document doc;

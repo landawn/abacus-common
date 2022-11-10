@@ -43,6 +43,7 @@ import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.EntityInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
+import com.landawn.abacus.util.Fn.IntFunctions;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
@@ -2298,29 +2299,29 @@ public final class Maps {
 
     /**
      * Map to entity.
+     * @param m
+     * @param targetClass
      *
      * @param <T>
-     * @param targetClass
-     * @param m
      * @return
      */
-    public static <T> T map2Entity(final Class<? extends T> targetClass, final Map<String, Object> m) {
-        return map2Entity(targetClass, m, false, true);
+    public static <T> T map2Entity(final Map<String, Object> m, final Class<? extends T> targetClass) {
+        return map2Entity(m, false, true, targetClass);
     }
 
     /**
      * Map to entity.
-     *
-     * @param <T>
-     * @param targetClass
      * @param m
      * @param ignoreNullProperty
      * @param ignoreUnmatchedProperty
+     * @param targetClass
+     *
+     * @param <T>
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static <T> T map2Entity(final Class<? extends T> targetClass, final Map<String, Object> m, final boolean ignoreNullProperty,
-            final boolean ignoreUnmatchedProperty) {
+    public static <T> T map2Entity(final Map<String, Object> m, final boolean ignoreNullProperty, final boolean ignoreUnmatchedProperty,
+            final Class<? extends T> targetClass) {
         checkEntityClass(targetClass);
 
         if (m == null) {
@@ -2348,7 +2349,7 @@ public final class Maps {
                 entityInfo.setPropValue(result, propName, propValue, ignoreUnmatchedProperty);
             } else {
                 if (propValue != null && N.typeOf(propValue.getClass()).isMap() && propInfo.type.isEntity()) {
-                    propInfo.setPropValue(result, map2Entity(propInfo.clazz, (Map<String, Object>) propValue, ignoreNullProperty, ignoreUnmatchedProperty));
+                    propInfo.setPropValue(result, map2Entity((Map<String, Object>) propValue, ignoreNullProperty, ignoreUnmatchedProperty, propInfo.clazz));
                 } else {
                     propInfo.setPropValue(result, propValue);
                 }
@@ -2360,14 +2361,14 @@ public final class Maps {
 
     /**
      * Map to entity.
-     *
-     * @param <T>
-     * @param targetClass
      * @param m
      * @param selectPropNames
+     * @param targetClass
+     *
+     * @param <T>
      * @return
      */
-    public static <T> T map2Entity(final Class<? extends T> targetClass, final Map<String, Object> m, final Collection<String> selectPropNames) {
+    public static <T> T map2Entity(final Map<String, Object> m, final Collection<String> selectPropNames, final Class<? extends T> targetClass) {
         checkEntityClass(targetClass);
 
         if (m == null) {
@@ -2392,7 +2393,7 @@ public final class Maps {
                 entityInfo.setPropValue(result, propName, propValue, false);
             } else {
                 if (propValue != null && N.typeOf(propValue.getClass()).isMap() && propInfo.type.isEntity()) {
-                    propInfo.setPropValue(result, map2Entity(propInfo.clazz, (Map<String, Object>) propValue));
+                    propInfo.setPropValue(result, map2Entity((Map<String, Object>) propValue, propInfo.clazz));
                 } else {
                     propInfo.setPropValue(result, propValue);
                 }
@@ -2404,34 +2405,34 @@ public final class Maps {
 
     /**
      * Map to entity.
+     * @param mList
+     * @param targetClass
      *
      * @param <T>
-     * @param targetClass
-     * @param mList
      * @return
      */
-    public static <T> List<T> map2Entity(final Class<? extends T> targetClass, final Collection<Map<String, Object>> mList) {
-        return map2Entity(targetClass, mList, false, true);
+    public static <T> List<T> map2Entity(final Collection<Map<String, Object>> mList, final Class<? extends T> targetClass) {
+        return map2Entity(mList, false, true, targetClass);
     }
 
     /**
      * Map to entity.
-     *
-     * @param <T>
-     * @param targetClass
      * @param mList
      * @param igoreNullProperty
      * @param ignoreUnmatchedProperty
+     * @param targetClass
+     *
+     * @param <T>
      * @return
      */
-    public static <T> List<T> map2Entity(final Class<? extends T> targetClass, final Collection<Map<String, Object>> mList, final boolean igoreNullProperty,
-            final boolean ignoreUnmatchedProperty) {
+    public static <T> List<T> map2Entity(final Collection<Map<String, Object>> mList, final boolean igoreNullProperty, final boolean ignoreUnmatchedProperty,
+            final Class<? extends T> targetClass) {
         checkEntityClass(targetClass);
 
         final List<T> entityList = new ArrayList<>(mList.size());
 
         for (Map<String, Object> m : mList) {
-            entityList.add(map2Entity(targetClass, m, igoreNullProperty, ignoreUnmatchedProperty));
+            entityList.add(map2Entity(m, igoreNullProperty, ignoreUnmatchedProperty, targetClass));
         }
 
         return entityList;
@@ -2439,21 +2440,21 @@ public final class Maps {
 
     /**
      * Map to entity.
-     *
-     * @param <T>
-     * @param targetClass
      * @param mList
      * @param selectPropNames
+     * @param targetClass
+     *
+     * @param <T>
      * @return
      */
-    public static <T> List<T> map2Entity(final Class<? extends T> targetClass, final Collection<Map<String, Object>> mList,
-            final Collection<String> selectPropNames) {
+    public static <T> List<T> map2Entity(final Collection<Map<String, Object>> mList, final Collection<String> selectPropNames,
+            final Class<? extends T> targetClass) {
         checkEntityClass(targetClass);
 
         final List<T> entityList = new ArrayList<>(mList.size());
 
         for (Map<String, Object> m : mList) {
-            entityList.add(map2Entity(targetClass, m, selectPropNames));
+            entityList.add(map2Entity(m, selectPropNames, targetClass));
         }
 
         return entityList;
@@ -2466,7 +2467,131 @@ public final class Maps {
      * @return
      */
     public static Map<String, Object> entity2Map(final Object entity) {
-        return entity2Map(entity, false);
+        return entity2Map(entity, IntFunctions.ofLinkedHashMap());
+    }
+
+    /**
+     * Entity to map.
+     *
+     * @param <M>
+     * @param entity
+     * @param mapSupplier
+     * @return
+     */
+    public static <M extends Map<String, Object>> M entity2Map(final Object entity, final IntFunction<? extends M> mapSupplier) {
+        return entity2Map(entity, null, mapSupplier);
+    }
+
+    /**
+     * Entity to map.
+     *
+     * @param entity
+     * @param selectPropNames
+     * @return
+     */
+    public static Map<String, Object> entity2Map(final Object entity, final Collection<String> selectPropNames) {
+        return entity2Map(entity, selectPropNames, IntFunctions.ofLinkedHashMap());
+    }
+
+    /**
+     * Entity to map.
+     *
+     * @param <M>
+     * @param entity
+     * @param selectPropNames
+     * @param mapSupplier
+     * @return
+     */
+    public static <M extends Map<String, Object>> M entity2Map(final Object entity, final Collection<String> selectPropNames,
+            final IntFunction<? extends M> mapSupplier) {
+        return entity2Map(entity, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, mapSupplier);
+    }
+
+    /**
+     * Entity to map.
+     *
+     * @param <M>
+     * @param entity
+     * @param selectPropNames
+     * @param keyNamingPolicy
+     * @param mapSupplier
+     * @return
+     */
+    public static <M extends Map<String, Object>> M entity2Map(final Object entity, final Collection<String> selectPropNames,
+            final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
+        final M resultMap = mapSupplier.apply(N.isNullOrEmpty(selectPropNames) ? ClassUtil.getPropNameList(entity.getClass()).size() : selectPropNames.size());
+
+        entity2Map(resultMap, entity, selectPropNames, keyNamingPolicy);
+
+        return resultMap;
+    }
+
+    /**
+     * Entity to map.
+     *
+     * @param <M>
+     * @param resultMap
+     * @param entity
+     * @return
+     */
+    public static <M extends Map<String, Object>> M entity2Map(final M resultMap, final Object entity) {
+        return entity2Map(resultMap, entity, null);
+    }
+
+    /**
+     * Entity to map.
+     *
+     * @param <M>
+     * @param resultMap
+     * @param entity
+     * @param selectPropNames
+     * @return
+     */
+    public static <M extends Map<String, Object>> M entity2Map(final M resultMap, final Object entity, final Collection<String> selectPropNames) {
+        return entity2Map(resultMap, entity, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE);
+    }
+
+    /**
+     * Entity to map.
+     *
+     * @param <M>
+     * @param resultMap
+     * @param entity
+     * @param selectPropNames
+     * @param keyNamingPolicy
+     * @return
+     */
+    public static <M extends Map<String, Object>> M entity2Map(final M resultMap, final Object entity, final Collection<String> selectPropNames,
+            NamingPolicy keyNamingPolicy) {
+        keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
+        final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy) || NamingPolicy.NO_CHANGE.equals(keyNamingPolicy);
+        final Class<?> entityClass = entity.getClass();
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
+
+        if (N.isNullOrEmpty(selectPropNames)) {
+            entity2Map(resultMap, entity, true, null, keyNamingPolicy);
+        } else {
+            PropInfo propInfo = null;
+            Object propValue = null;
+
+            for (String propName : selectPropNames) {
+                propInfo = entityInfo.getPropInfo(propName);
+
+                if (propInfo == null) {
+                    throw new IllegalArgumentException("Property: " + propName + " is not found in entity class: " + entityClass);
+                }
+
+                propValue = propInfo.getPropValue(entity);
+
+                if (isLowerCamelCaseOrNoChange) {
+                    resultMap.put(propName, propValue);
+                } else {
+                    resultMap.put(keyNamingPolicy.convert(propName), propValue);
+                }
+            }
+        }
+
+        return resultMap;
     }
 
     /**
@@ -2484,23 +2609,26 @@ public final class Maps {
      * Entity to map.
      *
      * @param entity
+     * @param ignoreNullProperty
      * @param ignoredPropNames
      * @return
      */
-    public static Map<String, Object> entity2Map(final Object entity, final Collection<String> ignoredPropNames) {
-        return entity2Map(entity, false, ignoredPropNames);
+    public static Map<String, Object> entity2Map(final Object entity, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) {
+        return entity2Map(entity, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
     }
 
     /**
      * Entity to map.
      *
+     * @param <M>
      * @param entity
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @return
      */
-    public static Map<String, Object> entity2Map(final Object entity, final boolean ignoreNullProperty, final Collection<String> ignoredPropNames) {
-        return entity2Map(entity, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
+    public static <M extends Map<String, Object>> M entity2Map(final Object entity, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+            final IntFunction<? extends M> mapSupplier) {
+        return entity2Map(entity, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE, mapSupplier);
     }
 
     /**
@@ -2512,46 +2640,35 @@ public final class Maps {
      * @param keyNamingPolicy
      * @return
      */
-    public static Map<String, Object> entity2Map(final Object entity, final boolean ignoreNullProperty, final Collection<String> ignoredPropNames,
+    public static Map<String, Object> entity2Map(final Object entity, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy) {
+        return entity2Map(entity, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, IntFunctions.ofLinkedHashMap());
+    }
+
+    /**
+     * Entity to map.
+     *
+     * @param <M>
+     * @param entity
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @param keyNamingPolicy
+     * @return
+     */
+    public static <M extends Map<String, Object>> M entity2Map(final Object entity, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+            final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
         if (entity == null) {
-            return null;
+            return mapSupplier.apply(0);
         }
 
-        final int initCapacity = ClassUtil.getPropNameList(entity.getClass()).size();
-        final Map<String, Object> resultMap = N.newLinkedHashMap(initCapacity);
+        final int entityPropNameSize = ClassUtil.getPropNameList(entity.getClass()).size();
+        final int initCapacity = entityPropNameSize - N.size(ignoredPropNames);
+
+        final M resultMap = mapSupplier.apply(initCapacity);
 
         entity2Map(resultMap, entity, ignoreNullProperty, ignoredPropNames, keyNamingPolicy);
 
         return resultMap;
-    }
-
-    /**
-     * Entity to map.
-     *
-     * @param <M>
-     * @param entity
-     * @param mapSupplier
-     * @return
-     */
-    public static <M extends Map<String, Object>> M entity2Map(final Object entity, final Supplier<? extends M> mapSupplier) {
-        if (entity == null) {
-            return null;
-        }
-
-        return entity2Map(mapSupplier.get(), entity);
-    }
-
-    /**
-     * Entity to map.
-     *
-     * @param <M>
-     * @param resultMap
-     * @param entity
-     * @return
-     */
-    public static <M extends Map<String, Object>> M entity2Map(final M resultMap, final Object entity) {
-        return entity2Map(resultMap, entity, false);
     }
 
     /**
@@ -2573,25 +2690,12 @@ public final class Maps {
      * @param <M>
      * @param resultMap
      * @param entity
-     * @param ignoredPropNames
-     * @return
-     */
-    public static <M extends Map<String, Object>> M entity2Map(final M resultMap, final Object entity, final Collection<String> ignoredPropNames) {
-        return entity2Map(resultMap, entity, false, ignoredPropNames);
-    }
-
-    /**
-     * Entity to map.
-     *
-     * @param <M>
-     * @param resultMap
-     * @param entity
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @return
      */
     public static <M extends Map<String, Object>> M entity2Map(final M resultMap, final Object entity, final boolean ignoreNullProperty,
-            final Collection<String> ignoredPropNames) {
+            final Set<String> ignoredPropNames) {
         return entity2Map(resultMap, entity, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
     }
 
@@ -2607,7 +2711,7 @@ public final class Maps {
      * @return
      */
     public static <M extends Map<String, Object>> M entity2Map(final M resultMap, final Object entity, final boolean ignoreNullProperty,
-            final Collection<String> ignoredPropNames, NamingPolicy keyNamingPolicy) {
+            final Set<String> ignoredPropNames, NamingPolicy keyNamingPolicy) {
         keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
         final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy) || NamingPolicy.NO_CHANGE.equals(keyNamingPolicy);
         final boolean hasIgnoredPropNames = N.notNullOrEmpty(ignoredPropNames);
@@ -2643,80 +2747,148 @@ public final class Maps {
     /**
      * Entity to map.
      *
-     * @param entityList
-     * @return
-     */
-    public static List<Map<String, Object>> entity2Map(final Collection<?> entityList) {
-        return entity2Map(entityList, false);
-    }
-
-    /**
-     * Entity to map.
-     *
-     * @param entityList
-     * @param ignoreNullProperty
-     * @return
-     */
-    public static List<Map<String, Object>> entity2Map(final Collection<?> entityList, final boolean ignoreNullProperty) {
-        return entity2Map(entityList, ignoreNullProperty, null);
-    }
-
-    /**
-     * Entity to map.
-     *
-     * @param entityList
-     * @param ignoredPropNames
-     * @return
-     */
-    public static List<Map<String, Object>> entity2Map(final Collection<?> entityList, final Collection<String> ignoredPropNames) {
-        return entity2Map(entityList, false, ignoredPropNames);
-    }
-
-    /**
-     * Entity to map.
-     *
-     * @param entityList
-     * @param ignoreNullProperty
-     * @param ignoredPropNames
-     * @return
-     */
-    public static List<Map<String, Object>> entity2Map(final Collection<?> entityList, final boolean ignoreNullProperty,
-            final Collection<String> ignoredPropNames) {
-        return entity2Map(entityList, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
-    }
-
-    /**
-     * Entity to map.
-     *
-     * @param entityList
-     * @param ignoreNullProperty
-     * @param ignoredPropNames
-     * @param keyNamingPolicy
-     * @return
-     */
-    public static List<Map<String, Object>> entity2Map(final Collection<?> entityList, final boolean ignoreNullProperty,
-            final Collection<String> ignoredPropNames, final NamingPolicy keyNamingPolicy) {
-        final List<Map<String, Object>> resultList = new ArrayList<>(entityList.size());
-
-        for (Object entity : entityList) {
-            resultList.add(entity2Map(entity, ignoreNullProperty, ignoredPropNames, keyNamingPolicy));
-        }
-
-        return resultList;
-    }
-
-    /**
-     * Deep entity to map.
-     *
      * @param entity
      * @return
      */
     public static Map<String, Object> deepEntity2Map(final Object entity) {
-        return deepEntity2Map(entity, false);
+        return deepEntity2Map(entity, IntFunctions.ofLinkedHashMap());
     }
 
     /**
-     * Deep entity to map.
+     * Entity to map.
+     *
+     * @param <M>
+     * @param entity
+     * @param mapSupplier
+     * @return
+     */
+    public static <M extends Map<String, Object>> M deepEntity2Map(final Object entity, final IntFunction<? extends M> mapSupplier) {
+        return deepEntity2Map(entity, null, mapSupplier);
+    }
+
+    /**
+     * Entity to map.
+     *
+     * @param entity
+     * @param selectPropNames
+     * @return
+     */
+    public static Map<String, Object> deepEntity2Map(final Object entity, final Collection<String> selectPropNames) {
+        return deepEntity2Map(entity, selectPropNames, IntFunctions.ofLinkedHashMap());
+    }
+
+    /**
+     * Entity to map.
+     *
+     * @param <M>
+     * @param entity
+     * @param selectPropNames
+     * @param mapSupplier
+     * @return
+     */
+    public static <M extends Map<String, Object>> M deepEntity2Map(final Object entity, final Collection<String> selectPropNames,
+            final IntFunction<? extends M> mapSupplier) {
+        return deepEntity2Map(entity, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, mapSupplier);
+    }
+
+    /**
+     * Entity to map.
+     *
+     * @param <M>
+     * @param entity
+     * @param selectPropNames
+     * @param keyNamingPolicy
+     * @param mapSupplier
+     * @return
+     */
+    public static <M extends Map<String, Object>> M deepEntity2Map(final Object entity, final Collection<String> selectPropNames,
+            final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
+        final M resultMap = mapSupplier.apply(N.isNullOrEmpty(selectPropNames) ? ClassUtil.getPropNameList(entity.getClass()).size() : selectPropNames.size());
+
+        deepEntity2Map(resultMap, entity, selectPropNames, keyNamingPolicy);
+
+        return resultMap;
+    }
+
+    /**
+     * Entity to map.
+     *
+     * @param <M>
+     * @param resultMap
+     * @param entity
+     * @return
+     */
+    public static <M extends Map<String, Object>> M deepEntity2Map(final M resultMap, final Object entity) {
+        return deepEntity2Map(resultMap, entity, null);
+    }
+
+    /**
+     * Entity to map.
+     *
+     * @param <M>
+     * @param resultMap
+     * @param entity
+     * @param selectPropNames
+     * @return
+     */
+    public static <M extends Map<String, Object>> M deepEntity2Map(final M resultMap, final Object entity, final Collection<String> selectPropNames) {
+        return deepEntity2Map(resultMap, entity, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE);
+    }
+
+    /**
+     * Entity to map.
+     *
+     * @param <M>
+     * @param resultMap
+     * @param entity
+     * @param selectPropNames
+     * @param keyNamingPolicy
+     * @return
+     */
+    public static <M extends Map<String, Object>> M deepEntity2Map(final M resultMap, final Object entity, final Collection<String> selectPropNames,
+            final NamingPolicy keyNamingPolicy) {
+        final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy)
+                || NamingPolicy.NO_CHANGE.equals(keyNamingPolicy);
+
+        final Class<?> entityClass = entity.getClass();
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
+
+        if (N.isNullOrEmpty(selectPropNames)) {
+            deepEntity2Map(resultMap, entity, true, null, keyNamingPolicy);
+        } else {
+            PropInfo propInfo = null;
+            Object propValue = null;
+
+            for (String propName : selectPropNames) {
+                propInfo = entityInfo.getPropInfo(propName);
+
+                if (propInfo == null) {
+                    throw new IllegalArgumentException("Property: " + propName + " is not found in entity class: " + entityClass);
+                }
+
+                propValue = propInfo.getPropValue(entity);
+
+                if ((propValue == null) || !propInfo.jsonXmlType.isEntity()) {
+                    if (isLowerCamelCaseOrNoChange) {
+                        resultMap.put(propName, propValue);
+                    } else {
+                        resultMap.put(keyNamingPolicy.convert(propName), propValue);
+                    }
+                } else {
+                    if (isLowerCamelCaseOrNoChange) {
+                        resultMap.put(propName, deepEntity2Map(propValue, true, null, keyNamingPolicy));
+                    } else {
+                        resultMap.put(keyNamingPolicy.convert(propName), deepEntity2Map(propValue, true, null, keyNamingPolicy));
+                    }
+                }
+            }
+        }
+
+        return resultMap;
+    }
+
+    /**
+     * Entity to map.
      *
      * @param entity
      * @param ignoreNullProperty
@@ -2727,30 +2899,33 @@ public final class Maps {
     }
 
     /**
-     * Deep entity to map.
-     *
-     * @param entity
-     * @param ignoredPropNames
-     * @return
-     */
-    public static Map<String, Object> deepEntity2Map(final Object entity, final Collection<String> ignoredPropNames) {
-        return deepEntity2Map(entity, false, ignoredPropNames);
-    }
-
-    /**
-     * Deep entity to map.
+     * Entity to map.
      *
      * @param entity
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @return
      */
-    public static Map<String, Object> deepEntity2Map(final Object entity, final boolean ignoreNullProperty, final Collection<String> ignoredPropNames) {
+    public static Map<String, Object> deepEntity2Map(final Object entity, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) {
         return deepEntity2Map(entity, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
     }
 
     /**
-     * Deep entity to map.
+     * Entity to map.
+     *
+     * @param <M>
+     * @param entity
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @return
+     */
+    public static <M extends Map<String, Object>> M deepEntity2Map(final Object entity, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+            final IntFunction<? extends M> mapSupplier) {
+        return deepEntity2Map(entity, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE, mapSupplier);
+    }
+
+    /**
+     * Entity to map.
      *
      * @param entity
      * @param ignoreNullProperty
@@ -2758,14 +2933,31 @@ public final class Maps {
      * @param keyNamingPolicy
      * @return
      */
-    public static Map<String, Object> deepEntity2Map(final Object entity, final boolean ignoreNullProperty, final Collection<String> ignoredPropNames,
+    public static Map<String, Object> deepEntity2Map(final Object entity, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy) {
+        return deepEntity2Map(entity, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, IntFunctions.ofLinkedHashMap());
+    }
+
+    /**
+     * Entity to map.
+     *
+     * @param <M>
+     * @param entity
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @param keyNamingPolicy
+     * @return
+     */
+    public static <M extends Map<String, Object>> M deepEntity2Map(final Object entity, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+            final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
         if (entity == null) {
-            return null;
+            return mapSupplier.apply(0);
         }
 
-        final int initCapacity = ClassUtil.getPropNameList(entity.getClass()).size();
-        final Map<String, Object> resultMap = N.newLinkedHashMap(initCapacity);
+        final int entityPropNameSize = ClassUtil.getPropNameList(entity.getClass()).size();
+        final int initCapacity = entityPropNameSize - N.size(ignoredPropNames);
+
+        final M resultMap = mapSupplier.apply(initCapacity);
 
         deepEntity2Map(resultMap, entity, ignoreNullProperty, ignoredPropNames, keyNamingPolicy);
 
@@ -2773,35 +2965,7 @@ public final class Maps {
     }
 
     /**
-     * Deep entity to map.
-     *
-     * @param <M>
-     * @param entity
-     * @param mapSupplier
-     * @return
-     */
-    public static <M extends Map<String, Object>> M deepEntity2Map(final Object entity, final Supplier<? extends M> mapSupplier) {
-        if (entity == null) {
-            return null;
-        }
-
-        return deepEntity2Map(mapSupplier.get(), entity);
-    }
-
-    /**
-     * Deep entity to map.
-     *
-     * @param <M>
-     * @param resultMap
-     * @param entity
-     * @return
-     */
-    public static <M extends Map<String, Object>> M deepEntity2Map(final M resultMap, final Object entity) {
-        return deepEntity2Map(resultMap, entity, false);
-    }
-
-    /**
-     * Deep entity to map.
+     * Entity to map.
      *
      * @param <M>
      * @param resultMap
@@ -2814,20 +2978,7 @@ public final class Maps {
     }
 
     /**
-     * Deep entity to map.
-     *
-     * @param <M>
-     * @param resultMap
-     * @param entity
-     * @param ignoredPropNames
-     * @return
-     */
-    public static <M extends Map<String, Object>> M deepEntity2Map(final M resultMap, final Object entity, final Collection<String> ignoredPropNames) {
-        return deepEntity2Map(resultMap, entity, false, ignoredPropNames);
-    }
-
-    /**
-     * Deep entity to map.
+     * Entity to map.
      *
      * @param <M>
      * @param resultMap
@@ -2837,12 +2988,12 @@ public final class Maps {
      * @return
      */
     public static <M extends Map<String, Object>> M deepEntity2Map(final M resultMap, final Object entity, final boolean ignoreNullProperty,
-            final Collection<String> ignoredPropNames) {
+            final Set<String> ignoredPropNames) {
         return deepEntity2Map(resultMap, entity, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
     }
 
     /**
-     * Deep entity to map.
+     * Entity to map.
      *
      * @param <M>
      * @param resultMap
@@ -2853,15 +3004,16 @@ public final class Maps {
      * @return
      */
     public static <M extends Map<String, Object>> M deepEntity2Map(final M resultMap, final Object entity, final boolean ignoreNullProperty,
-            final Collection<String> ignoredPropNames, NamingPolicy keyNamingPolicy) {
-        keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
-        final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy) || NamingPolicy.NO_CHANGE.equals(keyNamingPolicy);
+            final Set<String> ignoredPropNames, final NamingPolicy keyNamingPolicy) {
+        final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy)
+                || NamingPolicy.NO_CHANGE.equals(keyNamingPolicy);
+
         final boolean hasIgnoredPropNames = N.notNullOrEmpty(ignoredPropNames);
         final Class<?> entityClass = entity.getClass();
         final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
 
-        Object propValue = null;
         String propName = null;
+        Object propValue = null;
 
         for (PropInfo propInfo : entityInfo.propInfoList) {
             propName = propInfo.name;
@@ -2895,82 +3047,146 @@ public final class Maps {
     }
 
     /**
-     * Deep entity to map.
-     *
-     * @param entityList
-     * @return
-     */
-    public static List<Map<String, Object>> deepEntity2Map(final Collection<?> entityList) {
-        return deepEntity2Map(entityList, false);
-    }
-
-    /**
-     * Deep entity to map.
-     *
-     * @param entityList
-     * @param ignoreNullProperty
-     * @return
-     */
-    public static List<Map<String, Object>> deepEntity2Map(final Collection<?> entityList, final boolean ignoreNullProperty) {
-        return deepEntity2Map(entityList, ignoreNullProperty, null);
-    }
-
-    /**
-     * Deep entity to map.
-     *
-     * @param entityList
-     * @param ignoredPropNames
-     * @return
-     */
-    public static List<Map<String, Object>> deepEntity2Map(final Collection<?> entityList, final Collection<String> ignoredPropNames) {
-        return deepEntity2Map(entityList, true, ignoredPropNames);
-    }
-
-    /**
-     * Deep entity to map.
-     *
-     * @param entityList
-     * @param ignoreNullProperty
-     * @param ignoredPropNames
-     * @return
-     */
-    public static List<Map<String, Object>> deepEntity2Map(final Collection<?> entityList, final boolean ignoreNullProperty,
-            final Collection<String> ignoredPropNames) {
-        return deepEntity2Map(entityList, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
-    }
-
-    /**
-     * Deep entity to map.
-     *
-     * @param entityList
-     * @param ignoreNullProperty
-     * @param ignoredPropNames
-     * @param keyNamingPolicy
-     * @return
-     */
-    public static List<Map<String, Object>> deepEntity2Map(final Collection<?> entityList, final boolean ignoreNullProperty,
-            final Collection<String> ignoredPropNames, final NamingPolicy keyNamingPolicy) {
-        final List<Map<String, Object>> resultList = new ArrayList<>(entityList.size());
-
-        for (Object entity : entityList) {
-            resultList.add(deepEntity2Map(entity, ignoreNullProperty, ignoredPropNames, keyNamingPolicy));
-        }
-
-        return resultList;
-    }
-
-    /**
-     * Entity 2 flat map.
+     * Entity to map.
      *
      * @param entity
      * @return
      */
     public static Map<String, Object> entity2FlatMap(final Object entity) {
-        return entity2FlatMap(entity, false);
+        return entity2FlatMap(entity, IntFunctions.ofLinkedHashMap());
     }
 
     /**
-     * Entity 2 flat map.
+     * Entity to map.
+     *
+     * @param <M>
+     * @param entity
+     * @param mapSupplier
+     * @return
+     */
+    public static <M extends Map<String, Object>> M entity2FlatMap(final Object entity, final IntFunction<? extends M> mapSupplier) {
+        return entity2FlatMap(entity, null, mapSupplier);
+    }
+
+    /**
+     * Entity to map.
+     *
+     * @param entity
+     * @param selectPropNames
+     * @return
+     */
+    public static Map<String, Object> entity2FlatMap(final Object entity, final Collection<String> selectPropNames) {
+        return entity2FlatMap(entity, selectPropNames, IntFunctions.ofLinkedHashMap());
+    }
+
+    /**
+     * Entity to map.
+     *
+     * @param <M>
+     * @param entity
+     * @param selectPropNames
+     * @param mapSupplier
+     * @return
+     */
+    public static <M extends Map<String, Object>> M entity2FlatMap(final Object entity, final Collection<String> selectPropNames,
+            final IntFunction<? extends M> mapSupplier) {
+        return entity2FlatMap(entity, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, mapSupplier);
+    }
+
+    /**
+     * Entity to map.
+     *
+     * @param <M>
+     * @param entity
+     * @param selectPropNames
+     * @param keyNamingPolicy
+     * @param mapSupplier
+     * @return
+     */
+    public static <M extends Map<String, Object>> M entity2FlatMap(final Object entity, final Collection<String> selectPropNames,
+            final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
+        final M resultMap = mapSupplier.apply(N.isNullOrEmpty(selectPropNames) ? ClassUtil.getPropNameList(entity.getClass()).size() : selectPropNames.size());
+
+        entity2FlatMap(resultMap, entity, selectPropNames, keyNamingPolicy);
+
+        return resultMap;
+    }
+
+    /**
+     * Entity to map.
+     *
+     * @param <M>
+     * @param resultMap
+     * @param entity
+     * @return
+     */
+    public static <M extends Map<String, Object>> M entity2FlatMap(final M resultMap, final Object entity) {
+        return entity2FlatMap(resultMap, entity, null);
+    }
+
+    /**
+     * Entity to map.
+     *
+     * @param <M>
+     * @param resultMap
+     * @param entity
+     * @param selectPropNames
+     * @return
+     */
+    public static <M extends Map<String, Object>> M entity2FlatMap(final M resultMap, final Object entity, final Collection<String> selectPropNames) {
+        return entity2FlatMap(resultMap, entity, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE);
+    }
+
+    /**
+     * Entity to map.
+     *
+     * @param <M>
+     * @param resultMap
+     * @param entity
+     * @param selectPropNames
+     * @param keyNamingPolicy
+     * @return
+     */
+    public static <M extends Map<String, Object>> M entity2FlatMap(final M resultMap, final Object entity, final Collection<String> selectPropNames,
+            NamingPolicy keyNamingPolicy) {
+        keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
+        final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy) || NamingPolicy.NO_CHANGE.equals(keyNamingPolicy);
+        final Class<?> entityClass = entity.getClass();
+        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
+
+        if (N.isNullOrEmpty(selectPropNames)) {
+            entity2FlatMap(resultMap, entity, true, null, keyNamingPolicy);
+        } else {
+            PropInfo propInfo = null;
+            Object propValue = null;
+
+            for (String propName : selectPropNames) {
+                propInfo = entityInfo.getPropInfo(propName);
+
+                if (propInfo == null) {
+                    throw new IllegalArgumentException("Property: " + propName + " is not found in entity class: " + entityClass);
+                }
+
+                propValue = propInfo.getPropValue(entity);
+
+                if ((propValue == null) || !propInfo.jsonXmlType.isEntity()) {
+                    if (isLowerCamelCaseOrNoChange) {
+                        resultMap.put(propName, propValue);
+                    } else {
+                        resultMap.put(keyNamingPolicy.convert(propName), propValue);
+                    }
+                } else {
+                    entity2FlatMap(resultMap, propValue, true, null, keyNamingPolicy,
+                            isLowerCamelCaseOrNoChange ? propName : keyNamingPolicy.convert(propName));
+                }
+            }
+        }
+
+        return resultMap;
+    }
+
+    /**
+     * Entity to map.
      *
      * @param entity
      * @param ignoreNullProperty
@@ -2981,30 +3197,33 @@ public final class Maps {
     }
 
     /**
-     * Entity 2 flat map.
-     *
-     * @param entity
-     * @param ignoredPropNames
-     * @return
-     */
-    public static Map<String, Object> entity2FlatMap(final Object entity, final Collection<String> ignoredPropNames) {
-        return entity2FlatMap(entity, false, ignoredPropNames);
-    }
-
-    /**
-     * Entity 2 flat map.
+     * Entity to map.
      *
      * @param entity
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @return
      */
-    public static Map<String, Object> entity2FlatMap(final Object entity, final boolean ignoreNullProperty, final Collection<String> ignoredPropNames) {
+    public static Map<String, Object> entity2FlatMap(final Object entity, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) {
         return entity2FlatMap(entity, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
     }
 
     /**
-     * Entity 2 flat map.
+     * Entity to map.
+     *
+     * @param <M>
+     * @param entity
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @return
+     */
+    public static <M extends Map<String, Object>> M entity2FlatMap(final Object entity, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+            final IntFunction<? extends M> mapSupplier) {
+        return entity2FlatMap(entity, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE, mapSupplier);
+    }
+
+    /**
+     * Entity to map.
      *
      * @param entity
      * @param ignoreNullProperty
@@ -3012,14 +3231,31 @@ public final class Maps {
      * @param keyNamingPolicy
      * @return
      */
-    public static Map<String, Object> entity2FlatMap(final Object entity, final boolean ignoreNullProperty, final Collection<String> ignoredPropNames,
+    public static Map<String, Object> entity2FlatMap(final Object entity, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy) {
+        return entity2FlatMap(entity, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, IntFunctions.ofLinkedHashMap());
+    }
+
+    /**
+     * Entity to map.
+     *
+     * @param <M>
+     * @param entity
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @param keyNamingPolicy
+     * @return
+     */
+    public static <M extends Map<String, Object>> M entity2FlatMap(final Object entity, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+            final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
         if (entity == null) {
-            return null;
+            return mapSupplier.apply(0);
         }
 
-        final int initCapacity = ClassUtil.getPropNameList(entity.getClass()).size();
-        final Map<String, Object> resultMap = N.newLinkedHashMap(initCapacity);
+        final int entityPropNameSize = ClassUtil.getPropNameList(entity.getClass()).size();
+        final int initCapacity = entityPropNameSize - N.size(ignoredPropNames);
+
+        final M resultMap = mapSupplier.apply(initCapacity);
 
         entity2FlatMap(resultMap, entity, ignoreNullProperty, ignoredPropNames, keyNamingPolicy);
 
@@ -3027,35 +3263,7 @@ public final class Maps {
     }
 
     /**
-     * Entity 2 flat map.
-     *
-     * @param <M>
-     * @param entity
-     * @param mapSupplier
-     * @return
-     */
-    public static <M extends Map<String, Object>> M entity2FlatMap(final Object entity, final Supplier<? extends M> mapSupplier) {
-        if (entity == null) {
-            return null;
-        }
-
-        return entity2FlatMap(mapSupplier.get(), entity);
-    }
-
-    /**
-     * Entity 2 flat map.
-     *
-     * @param <M>
-     * @param resultMap
-     * @param entity
-     * @return
-     */
-    public static <M extends Map<String, Object>> M entity2FlatMap(final M resultMap, final Object entity) {
-        return entity2FlatMap(resultMap, entity, false);
-    }
-
-    /**
-     * Entity 2 flat map.
+     * Entity to map.
      *
      * @param <M>
      * @param resultMap
@@ -3068,20 +3276,7 @@ public final class Maps {
     }
 
     /**
-     * Entity 2 flat map.
-     *
-     * @param <M>
-     * @param resultMap
-     * @param entity
-     * @param ignoredPropNames
-     * @return
-     */
-    public static <M extends Map<String, Object>> M entity2FlatMap(final M resultMap, final Object entity, final Collection<String> ignoredPropNames) {
-        return entity2FlatMap(resultMap, entity, false, ignoredPropNames);
-    }
-
-    /**
-     * Entity 2 flat map.
+     * Entity to map.
      *
      * @param <M>
      * @param resultMap
@@ -3091,12 +3286,12 @@ public final class Maps {
      * @return
      */
     public static <M extends Map<String, Object>> M entity2FlatMap(final M resultMap, final Object entity, final boolean ignoreNullProperty,
-            final Collection<String> ignoredPropNames) {
+            final Set<String> ignoredPropNames) {
         return entity2FlatMap(resultMap, entity, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
     }
 
     /**
-     * Entity 2 flat map.
+     * Entity to map.
      *
      * @param <M>
      * @param resultMap
@@ -3107,29 +3302,19 @@ public final class Maps {
      * @return
      */
     public static <M extends Map<String, Object>> M entity2FlatMap(final M resultMap, final Object entity, final boolean ignoreNullProperty,
-            final Collection<String> ignoredPropNames, final NamingPolicy keyNamingPolicy) {
+            final Set<String> ignoredPropNames, final NamingPolicy keyNamingPolicy) {
         return entity2FlatMap(resultMap, entity, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, null);
     }
 
-    /**
-     * Entity 2 flat map.
-     *
-     * @param <T>
-     * @param resultMap
-     * @param entity
-     * @param ignoreNullProperty
-     * @param ignoredPropNames
-     * @param keyNamingPolicy
-     * @param parentPropName
-     * @return
-     */
     static <T extends Map<String, Object>> T entity2FlatMap(final T resultMap, final Object entity, final boolean ignoreNullProperty,
             final Collection<String> ignoredPropNames, final NamingPolicy keyNamingPolicy, final String parentPropName) {
+        final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy)
+                || NamingPolicy.NO_CHANGE.equals(keyNamingPolicy);
+
         final boolean hasIgnoredPropNames = N.notNullOrEmpty(ignoredPropNames);
         final boolean isNullParentPropName = (parentPropName == null);
         final Class<?> entityClass = entity.getClass();
 
-        final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy) || NamingPolicy.NO_CHANGE.equals(keyNamingPolicy);
         String propName = null;
         Object propValue = null;
 
@@ -3157,84 +3342,21 @@ public final class Maps {
                     if (isLowerCamelCaseOrNoChange) {
                         resultMap.put(parentPropName + WD.PERIOD + propName, propValue);
                     } else {
-                        resultMap.put(keyNamingPolicy.convert(parentPropName + WD.PERIOD + propName), propValue);
+                        resultMap.put(parentPropName + WD.PERIOD + keyNamingPolicy.convert(propName), propValue);
                     }
                 }
             } else {
                 if (isNullParentPropName) {
-                    entity2FlatMap(resultMap, propValue, ignoreNullProperty, null, keyNamingPolicy, propName);
+                    entity2FlatMap(resultMap, propValue, ignoreNullProperty, null, keyNamingPolicy,
+                            isLowerCamelCaseOrNoChange ? propName : keyNamingPolicy.convert(propName));
                 } else {
-                    entity2FlatMap(resultMap, propValue, ignoreNullProperty, null, keyNamingPolicy, parentPropName + WD.PERIOD + propName);
+                    entity2FlatMap(resultMap, propValue, ignoreNullProperty, null, keyNamingPolicy,
+                            parentPropName + WD.PERIOD + (isLowerCamelCaseOrNoChange ? propName : keyNamingPolicy.convert(propName)));
                 }
             }
         }
 
         return resultMap;
-    }
-
-    /**
-     * Entity 2 flat map.
-     *
-     * @param entityList
-     * @return
-     */
-    public static List<Map<String, Object>> entity2FlatMap(final Collection<?> entityList) {
-        return entity2FlatMap(entityList, false);
-    }
-
-    /**
-     * Entity 2 flat map.
-     *
-     * @param entityList
-     * @param ignoreNullProperty
-     * @return
-     */
-    public static List<Map<String, Object>> entity2FlatMap(final Collection<?> entityList, final boolean ignoreNullProperty) {
-        return entity2FlatMap(entityList, ignoreNullProperty, null);
-    }
-
-    /**
-     * Entity 2 flat map.
-     *
-     * @param entityList
-     * @param ignoredPropNames
-     * @return
-     */
-    public static List<Map<String, Object>> entity2FlatMap(final Collection<?> entityList, final Collection<String> ignoredPropNames) {
-        return entity2FlatMap(entityList, false, ignoredPropNames);
-    }
-
-    /**
-     * Entity 2 flat map.
-     *
-     * @param entityList
-     * @param ignoreNullProperty
-     * @param ignoredPropNames
-     * @return
-     */
-    public static List<Map<String, Object>> entity2FlatMap(final Collection<?> entityList, final boolean ignoreNullProperty,
-            final Collection<String> ignoredPropNames) {
-        return entity2FlatMap(entityList, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
-    }
-
-    /**
-     * Entity 2 flat map.
-     *
-     * @param entityList
-     * @param ignoreNullProperty
-     * @param ignoredPropNames
-     * @param keyNamingPolicy
-     * @return
-     */
-    public static List<Map<String, Object>> entity2FlatMap(final Collection<?> entityList, final boolean ignoreNullProperty,
-            final Collection<String> ignoredPropNames, final NamingPolicy keyNamingPolicy) {
-        final List<Map<String, Object>> resultList = new ArrayList<>(entityList.size());
-
-        for (Object entity : entityList) {
-            resultList.add(entity2FlatMap(entity, ignoreNullProperty, ignoredPropNames, keyNamingPolicy));
-        }
-
-        return resultList;
     }
 
     /**

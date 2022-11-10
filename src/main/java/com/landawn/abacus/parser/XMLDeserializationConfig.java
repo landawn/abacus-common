@@ -14,8 +14,8 @@
 
 package com.landawn.abacus.parser;
 
-import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -86,7 +86,7 @@ public class XMLDeserializationConfig extends DeserializationConfig<XMLDeseriali
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static XMLDeserializationConfig of(boolean ignoreUnmatchedProperty, Map<Class<?>, Collection<String>> ignoredPropNames) {
+        public static XMLDeserializationConfig of(boolean ignoreUnmatchedProperty, Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().setIgnoreUnmatchedProperty(ignoreUnmatchedProperty).setIgnoredPropNames(ignoredPropNames);
         }
 
@@ -99,7 +99,7 @@ public class XMLDeserializationConfig extends DeserializationConfig<XMLDeseriali
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static XMLDeserializationConfig of(Class<?> elementClass, boolean ignoreUnmatchedProperty, Map<Class<?>, Collection<String>> ignoredPropNames) {
+        public static XMLDeserializationConfig of(Class<?> elementClass, boolean ignoreUnmatchedProperty, Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().setElementType(elementClass).setIgnoreUnmatchedProperty(ignoreUnmatchedProperty).setIgnoredPropNames(ignoredPropNames);
         }
 
@@ -114,7 +114,7 @@ public class XMLDeserializationConfig extends DeserializationConfig<XMLDeseriali
          */
         @Deprecated
         public static XMLDeserializationConfig of(Class<?> keyClass, Class<?> valueClass, boolean ignoreUnmatchedProperty,
-                Map<Class<?>, Collection<String>> ignoredPropNames) {
+                Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().setMapKeyType(keyClass)
                     .setMapValueType(valueClass)
                     .setIgnoreUnmatchedProperty(ignoreUnmatchedProperty)
@@ -133,7 +133,7 @@ public class XMLDeserializationConfig extends DeserializationConfig<XMLDeseriali
          */
         @Deprecated
         public static XMLDeserializationConfig of(Class<?> elementClass, Class<?> keyClass, Class<?> valueClass, boolean ignoreUnmatchedProperty,
-                Map<Class<?>, Collection<String>> ignoredPropNames) {
+                Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().setElementType(elementClass)
                     .setMapKeyType(keyClass)
                     .setMapValueType(valueClass)

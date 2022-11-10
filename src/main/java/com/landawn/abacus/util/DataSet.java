@@ -206,18 +206,18 @@ public interface DataSet {
      * <br />
      * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
      * Otherwise, put the {@code targetTpye} to the first parameter of the method.
-     *
-     * @param <T>
-     * @param targetType
      * @param rowIndex
      * @param columnIndex
+     * @param targetType
+     *
+     * @param <T>
      * @return
      * @throws UnsupportedOperationException
      * @deprecated may be misused because it implies there is an underline auto-conversion from column values to target return type but actually there is not.
      */
     @SuppressWarnings("unused")
     @Deprecated
-    default <T> T get(Class<? extends T> targetType, int rowIndex, int columnIndex) throws UnsupportedOperationException {
+    default <T> T get(int rowIndex, int columnIndex, Class<? extends T> targetType) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -267,17 +267,17 @@ public interface DataSet {
      * <br />
      * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
      * Otherwise, put the {@code targetTpye} to the first parameter of the method.
+     * @param columnIndex
+     * @param targetType
      *
      * @param <T>
-     * @param targetType
-     * @param columnIndex
      * @return
      * @throws UnsupportedOperationException
      * @deprecated may be misused because it implies there is an underline auto-conversion from column values to target return type but actually there is not.
      */
     @SuppressWarnings("unused")
     @Deprecated
-    default <T> T get(Class<? extends T> targetType, int columnIndex) throws UnsupportedOperationException {
+    default <T> T get(int columnIndex, Class<? extends T> targetType) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -289,17 +289,17 @@ public interface DataSet {
      * <br />
      * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
      * Otherwise, put the {@code targetTpye} to the first parameter of the method.
+     * @param columnName
+     * @param targetType
      *
      * @param <T>
-     * @param targetType
-     * @param columnName
      * @return
      * @throws UnsupportedOperationException
      * @deprecated may be misused because it implies there is an underline auto-conversion from column values to target return type but actually there is not.
      */
     @SuppressWarnings("unused")
     @Deprecated
-    default <T> T get(Class<? extends T> targetType, String columnName) throws UnsupportedOperationException {
+    default <T> T get(String columnName, Class<? extends T> targetType) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 

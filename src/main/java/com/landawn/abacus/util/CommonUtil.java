@@ -2658,14 +2658,14 @@ class CommonUtil {
 
     /**
      *
+     * @param c
+     * @param targetClass
      * @param <A>
      * @param <T>
-     * @param targetClass
-     * @param c
      * @return
      * @throws IllegalArgumentException if the specified {@code Class} is <code>null</code>.
      */
-    public static <A, T extends A> A[] toArray(final Class<A[]> targetClass, final Collection<? extends T> c) throws IllegalArgumentException {
+    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final Class<A[]> targetClass) throws IllegalArgumentException {
         checkArgNotNull(targetClass);
 
         if (isNullOrEmpty(c)) {
@@ -2677,16 +2677,16 @@ class CommonUtil {
 
     /**
      *
-     * @param <A>
-     * @param <T>
-     * @param targetClass
      * @param c
      * @param fromIndex
      * @param toIndex
+     * @param targetClass
+     * @param <A>
+     * @param <T>
      * @return
      * @throws IllegalArgumentException if the specified {@code Class} is <code>null</code>.
      */
-    public static <A, T extends A> A[] toArray(final Class<A[]> targetClass, final Collection<? extends T> c, final int fromIndex, final int toIndex)
+    public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final int fromIndex, final int toIndex, final Class<A[]> targetClass)
             throws IllegalArgumentException {
         checkArgNotNull(targetClass);
         checkFromToIndex(fromIndex, toIndex, size(c));
@@ -6068,7 +6068,7 @@ class CommonUtil {
             if (srcType.isEntity()) {
                 return copy(obj, targetType.clazz());
             } else if (srcType.isMap()) {
-                return Maps.map2Entity(targetType.clazz(), (Map<String, Object>) obj);
+                return Maps.map2Entity((Map<String, Object>) obj, targetType.clazz());
             }
         } else if (targetType.isMap()) {
             if (srcType.isEntity() && targetType.getParameterTypes()[0].clazz().isAssignableFrom(String.class)
@@ -6451,33 +6451,33 @@ class CommonUtil {
 
     /**
      *
-     * @param <T>
-     * @param targetClass
      * @param urlQuery
+     * @param targetClass
+     * @param <T>
      * @return
      */
-    public static <T> T urlDecode(final Class<? extends T> targetClass, final String urlQuery) {
+    public static <T> T urlDecode(final String urlQuery, final Class<? extends T> targetClass) {
         if (isNullErrorMsg(urlQuery)) {
             return newInstance(targetClass);
         }
 
-        return URLEncodedUtil.decode(targetClass, urlQuery);
+        return URLEncodedUtil.decode(urlQuery, targetClass);
     }
 
     /**
      *
-     * @param <T>
-     * @param targetClass
      * @param urlQuery
      * @param charset
+     * @param targetClass
+     * @param <T>
      * @return
      */
-    public static <T> T urlDecode(final Class<? extends T> targetClass, final String urlQuery, final Charset charset) {
+    public static <T> T urlDecode(final String urlQuery, final Charset charset, final Class<? extends T> targetClass) {
         if (isNullOrEmpty(urlQuery)) {
             return newInstance(targetClass);
         }
 
-        return URLEncodedUtil.decode(targetClass, urlQuery, charset);
+        return URLEncodedUtil.decode(urlQuery, charset, targetClass);
     }
 
     /**
@@ -6670,21 +6670,21 @@ class CommonUtil {
      *
      * @param entity
      * @param ignoreUnmatchedProperty
-     * @param ignorePropNames
+     * @param ignoredPropNames
      * @param targetClass
      * @param <T>
      * @return a new instance of {@code targetClass} even if {@code entity} is {@code null}.
      * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
     @SuppressWarnings({ "unchecked" })
-    public static <T> T copy(final Object entity, final boolean ignoreUnmatchedProperty, final Set<String> ignorePropNames,
+    public static <T> T copy(final Object entity, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
             final Class<? extends T> targetClass) throws IllegalArgumentException {
         N.checkArgNotNull(targetClass, "targetClass");
 
         if (entity != null) {
             final Class<?> srcCls = entity.getClass();
 
-            if (ignorePropNames == null && Utils.kryoParser != null && targetClass.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
+            if (ignoredPropNames == null && Utils.kryoParser != null && targetClass.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
                 try {
                     final T copy = (T) Utils.kryoParser.copy(entity);
 
@@ -6703,7 +6703,7 @@ class CommonUtil {
         Object result = targetEntityInfo.createEntityResult();
 
         if (entity != null) {
-            merge(entity, result, ignoreUnmatchedProperty, ignorePropNames, targetEntityInfo);
+            merge(entity, result, ignoreUnmatchedProperty, ignoredPropNames, targetEntityInfo);
         }
 
         result = targetEntityInfo.finishEntityResult(result);
@@ -6818,11 +6818,11 @@ class CommonUtil {
      * @param sourceEntity
      * @param targetEntity
      * @param ignoreUnmatchedProperty
-     * @param ignorePropNames
+     * @param ignoredPropNames
      * @return {@code targetEntity}
      * @throws IllegalArgumentException if {@code targetEntity} is {@code null}.
      */
-    public static <T> T merge(final Object sourceEntity, final T targetEntity, final boolean ignoreUnmatchedProperty, final Set<String> ignorePropNames)
+    public static <T> T merge(final Object sourceEntity, final T targetEntity, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames)
             throws IllegalArgumentException {
         N.checkArgNotNull(targetEntity, "targetEntity");
 
@@ -6830,11 +6830,11 @@ class CommonUtil {
             return targetEntity;
         }
 
-        return merge(sourceEntity, targetEntity, ignoreUnmatchedProperty, ignorePropNames, ParserUtil.getEntityInfo(targetEntity.getClass()));
+        return merge(sourceEntity, targetEntity, ignoreUnmatchedProperty, ignoredPropNames, ParserUtil.getEntityInfo(targetEntity.getClass()));
     }
 
     @SuppressWarnings("deprecation")
-    private static <T> T merge(final Object sourceEntity, final T targetEntity, final boolean ignoreUnmatchedProperty, final Set<String> ignorePropNames,
+    private static <T> T merge(final Object sourceEntity, final T targetEntity, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
             final EntityInfo targetEntityInfo) throws IllegalArgumentException {
         N.checkArgNotNull(targetEntity, "targetEntity");
 
@@ -6847,7 +6847,7 @@ class CommonUtil {
         Object propValue = null;
 
         for (PropInfo propInfo : srcEntityInfo.propInfoList) {
-            if (ignorePropNames == null || !ignorePropNames.contains(propInfo.name)) {
+            if (ignoredPropNames == null || !ignoredPropNames.contains(propInfo.name)) {
                 propValue = propInfo.getPropValue(sourceEntity);
 
                 if (InternalUtil.notNullOrDefault(propValue)) {
@@ -6988,12 +6988,12 @@ class CommonUtil {
      * @param sourceEntity
      * @param targetEntity
      * @param ignoreUnmatchedProperty
-     * @param ignorePropNames
+     * @param ignoredPropNames
      * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
      * @return {@code targetEntity}
      * @throws IllegalArgumentException if {@code targetEntity} is {@code null}.
      */
-    public static <T> T merge(final Object sourceEntity, final T targetEntity, final boolean ignoreUnmatchedProperty, final Set<String> ignorePropNames,
+    public static <T> T merge(final Object sourceEntity, final T targetEntity, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
             final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
         N.checkArgNotNull(targetEntity, "targetEntity");
 
@@ -7009,7 +7009,7 @@ class CommonUtil {
         Object propValue = null;
 
         for (PropInfo propInfo : srcEntityInfo.propInfoList) {
-            if (ignorePropNames == null || !ignorePropNames.contains(propInfo.name)) {
+            if (ignoredPropNames == null || !ignoredPropNames.contains(propInfo.name)) {
                 targetPropInfo = targetEntityInfo.getPropInfo(propInfo);
 
                 if (targetPropInfo == null) {

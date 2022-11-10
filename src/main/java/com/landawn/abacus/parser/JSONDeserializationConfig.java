@@ -14,9 +14,9 @@
 
 package com.landawn.abacus.parser;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.N;
@@ -192,7 +192,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static JSONDeserializationConfig of(boolean ignoreUnmatchedProperty, Map<Class<?>, Collection<String>> ignoredPropNames) {
+        public static JSONDeserializationConfig of(boolean ignoreUnmatchedProperty, Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().setIgnoreUnmatchedProperty(ignoreUnmatchedProperty).setIgnoredPropNames(ignoredPropNames);
         }
 
@@ -205,7 +205,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public static JSONDeserializationConfig of(Class<?> elementClass, boolean ignoreUnmatchedProperty, Map<Class<?>, Collection<String>> ignoredPropNames) {
+        public static JSONDeserializationConfig of(Class<?> elementClass, boolean ignoreUnmatchedProperty, Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().setElementType(elementClass).setIgnoreUnmatchedProperty(ignoreUnmatchedProperty).setIgnoredPropNames(ignoredPropNames);
         }
 
@@ -220,7 +220,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
          */
         @Deprecated
         public static JSONDeserializationConfig of(Class<?> keyClass, Class<?> valueClass, boolean ignoreUnmatchedProperty,
-                Map<Class<?>, Collection<String>> ignoredPropNames) {
+                Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().setMapKeyType(keyClass)
                     .setMapValueType(valueClass)
                     .setIgnoreUnmatchedProperty(ignoreUnmatchedProperty)
@@ -239,7 +239,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
          */
         @Deprecated
         public static JSONDeserializationConfig of(Class<?> elementClass, Class<?> keyClass, Class<?> valueClass, boolean ignoreUnmatchedProperty,
-                Map<Class<?>, Collection<String>> ignoredPropNames) {
+                Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().setElementType(elementClass)
                     .setMapKeyType(keyClass)
                     .setMapValueType(valueClass)
