@@ -37,7 +37,7 @@ public final class Throwables {
         try {
             cmd.run();
         } catch (Throwable e) {
-            throw ExceptionUtil.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -67,7 +67,7 @@ public final class Throwables {
         try {
             return cmd.call();
         } catch (Throwable e) {
-            throw ExceptionUtil.toRuntimeException(e);
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
@@ -141,7 +141,7 @@ public final class Throwables {
             if (predicate.test(e)) {
                 return supplier.get();
             } else {
-                throw ExceptionUtil.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
     }
@@ -165,7 +165,7 @@ public final class Throwables {
             if (predicate.test(e)) {
                 return defaultValue;
             } else {
-                throw ExceptionUtil.toRuntimeException(e);
+                throw ExceptionUtil.toRuntimeException(e, true);
             }
         }
     }
@@ -189,7 +189,7 @@ public final class Throwables {
                 try {
                     run();
                 } catch (Throwable e) {
-                    throw ExceptionUtil.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
             };
         }
@@ -216,7 +216,7 @@ public final class Throwables {
                 try {
                     return call();
                 } catch (Throwable e) {
-                    throw ExceptionUtil.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
             };
         }
@@ -243,7 +243,7 @@ public final class Throwables {
                 try {
                     return get();
                 } catch (Throwable e) {
-                    throw ExceptionUtil.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
             };
         }
@@ -403,7 +403,7 @@ public final class Throwables {
                 try {
                     return test(t);
                 } catch (Throwable e) {
-                    throw ExceptionUtil.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
             };
         }
@@ -433,7 +433,7 @@ public final class Throwables {
                 try {
                     return test(t, u);
                 } catch (Throwable e) {
-                    throw ExceptionUtil.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
             };
         }
@@ -506,7 +506,7 @@ public final class Throwables {
                 try {
                     return apply(t);
                 } catch (Throwable e) {
-                    throw ExceptionUtil.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
             };
         }
@@ -537,7 +537,7 @@ public final class Throwables {
                 try {
                     return apply(t, u);
                 } catch (Throwable e) {
-                    throw ExceptionUtil.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
             };
         }
@@ -610,7 +610,7 @@ public final class Throwables {
                 try {
                     accept(t);
                 } catch (Throwable e) {
-                    throw ExceptionUtil.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
             };
         }
@@ -639,7 +639,7 @@ public final class Throwables {
                 try {
                     accept(t, u);
                 } catch (Throwable e) {
-                    throw ExceptionUtil.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
             };
         }

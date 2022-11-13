@@ -4132,7 +4132,7 @@ public final class IOUtil {
             return;
         }
 
-        Throwable ex = null;
+        Exception ex = null;
 
         for (AutoCloseable closeable : c) {
             try {

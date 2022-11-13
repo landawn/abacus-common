@@ -103,14 +103,12 @@ public final class ExceptionUtil {
     }
 
     /**
-     * To runtime exception.
      *
      * @param e
      * @return
-     * @see #registerRuntimeExceptionMapper(Class, Function)
      */
-    public static RuntimeException toRuntimeException(final Throwable e) {
-        final Class<Throwable> cls = (Class<Throwable>) e.getClass();
+    public static RuntimeException toRuntimeException(final Exception e) {
+        final Class<Exception> cls = (Class<Exception>) e.getClass();
         Function<Throwable, RuntimeException> func = toRuntimeExceptionFuncMap.get(cls);
 
         if (func == null) {
@@ -135,8 +133,30 @@ public final class ExceptionUtil {
         return func.apply(e);
     }
 
-    public static RuntimeException toRuntimeException(final Exception e) {
-        final Class<Exception> cls = (Class<Exception>) e.getClass();
+    /**
+     * Converts the specified {@code Throwable} to a {@code RuntimeException} if it's a checked {@code exception} or an {@code Error}, otherwise returns itself.
+     *
+     * @param e
+     * @return
+     * @see #registerRuntimeExceptionMapper(Class, Function)
+     */
+    public static RuntimeException toRuntimeException(final Throwable e) {
+        return toRuntimeException(e, false);
+    }
+
+    /**
+     * Converts the specified {@code Throwable} to a {@code RuntimeException} if it's a checked {@code exception}, or throw it if it's an {@code Error}. Otherwise returns itself.
+     *
+     * @param e
+     * @param throwIfItIsError
+     * @return
+     */
+    public static RuntimeException toRuntimeException(final Throwable e, final boolean throwIfItIsError) {
+        if (throwIfItIsError && e instanceof Error) {
+            throw (Error) e;
+        }
+
+        final Class<Throwable> cls = (Class<Throwable>) e.getClass();
         Function<Throwable, RuntimeException> func = toRuntimeExceptionFuncMap.get(cls);
 
         if (func == null) {

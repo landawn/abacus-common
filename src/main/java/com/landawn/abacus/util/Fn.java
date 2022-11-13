@@ -10440,7 +10440,7 @@ public final class Fn extends Comparators {
                 try {
                     runnable.run();
                 } catch (Throwable e) {
-                    throw ExceptionUtil.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e, true);
                 }
             };
         }

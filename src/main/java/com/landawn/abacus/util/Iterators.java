@@ -2578,7 +2578,7 @@ public final class Iterators {
             } else {
                 final AtomicInteger activeThreadNum = new AtomicInteger();
                 final ExecutorService executorService = Executors.newFixedThreadPool(processThreadNum);
-                final Holder<Throwable> errorHolder = new Holder<>();
+                final Holder<Exception> errorHolder = new Holder<>();
 
                 for (int i = 0; i < processThreadNum; i++) {
                     activeThreadNum.incrementAndGet();

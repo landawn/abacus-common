@@ -11596,7 +11596,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     static <E extends Exception> void close(final Deque<? extends Throwables.Runnable<? extends E>> closeHandlers) {
-        Throwable ex = null;
+        Exception ex = null;
 
         for (Throwables.Runnable<? extends E> closeHandler : closeHandlers) {
             try {

@@ -25598,11 +25598,12 @@ public final class N extends CommonUtil {
      * @see ExceptionUtil#registerRuntimeExceptionMapper(Class,Function)
      */
     @Beta
-    public static RuntimeException toRuntimeException(final Throwable e) {
+    public static RuntimeException toRuntimeException(final Exception e) {
         return ExceptionUtil.toRuntimeException(e);
     }
 
     /**
+     * Converts the specified {@code Throwable} to a {@code RuntimeException} if it's a checked {@code exception} or an {@code Error}, otherwise returns itself.
      *
      * @param e
      * @return
@@ -25610,8 +25611,22 @@ public final class N extends CommonUtil {
      * @see ExceptionUtil#registerRuntimeExceptionMapper(Class,Function)
      */
     @Beta
-    public static RuntimeException toRuntimeException(final Exception e) {
+    public static RuntimeException toRuntimeException(final Throwable e) {
         return ExceptionUtil.toRuntimeException(e);
+    }
+
+    /**
+     * Converts the specified {@code Throwable} to a {@code RuntimeException} if it's a checked {@code exception}, or throw it if it's an {@code Error}. Otherwise returns itself.
+     *
+     * @param e
+     * @param throwIfItIsError
+     * @return
+     * @see ExceptionUtil#toRuntimeException(Throwable, boolean)
+     * @see ExceptionUtil#registerRuntimeExceptionMapper(Class,Function)
+     */
+    @Beta
+    public static RuntimeException toRuntimeException(final Throwable e, final boolean throwIfItIsError) {
+        return ExceptionUtil.toRuntimeException(e, throwIfItIsError);
     }
 
     /**
