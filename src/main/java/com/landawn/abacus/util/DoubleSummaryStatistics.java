@@ -13,8 +13,6 @@
  */
 package com.landawn.abacus.util;
 
-import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.function.DoubleConsumer;
 
 /**
@@ -117,17 +115,17 @@ public class DoubleSummaryStatistics implements DoubleConsumer {
         return summation.average().orElse(0d);
     }
 
-    @Deprecated
-    @Beta
-    public final double sum() {
-        return summation.sum();
-    }
-
-    @Deprecated
-    @Beta
-    public final OptionalDouble average() {
-        return summation.average();
-    }
+    //    @Deprecated
+    //    @Beta
+    //    public final double sum() {
+    //        return summation.sum();
+    //    }
+    //
+    //    @Deprecated
+    //    @Beta
+    //    public final OptionalDouble average() {
+    //        return summation.average();
+    //    }
 
     @Override
     public String toString() {

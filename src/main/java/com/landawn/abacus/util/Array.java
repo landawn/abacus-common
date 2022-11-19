@@ -1535,22 +1535,22 @@ public final class Array {
         return a;
     }
 
-    /**
-     *
-     * @param <T>
-     * @param elementClass
-     * @param element
-     * @param n
-     * @return
-     * @throws NullPointerException
-     * @deprecated {@link #repeat(Object, int, Class)}
-     */
-    @Deprecated
-    public static <T> T[] repeat(final Class<? extends T> elementClass, final T element, final int n) throws NullPointerException {
-        final T[] a = N.newArray(elementClass, n);
-        N.fill(a, element);
-        return a;
-    }
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param elementClass
+    //     * @param element
+    //     * @param n
+    //     * @return
+    //     * @throws NullPointerException
+    //     * @deprecated {@link #repeat(Object, int, Class)}
+    //     */
+    //    @Deprecated
+    //    public static <T> T[] repeat(final Class<? extends T> elementClass, final T element, final int n) throws NullPointerException {
+    //        final T[] a = N.newArray(elementClass, n);
+    //        N.fill(a, element);
+    //        return a;
+    //    }
 
     /**
      *

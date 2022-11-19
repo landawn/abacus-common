@@ -9219,7 +9219,7 @@ class CommonUtil {
      *
      * @param a
      * @return
-     * @deprecated replaced by {@link CommonUtil#nullToEmpty(Object[], Class)}
+     * @deprecated replaced by {@link nullToEmpty(Object[], Class)}
      */
     @Deprecated
     public static Object[] nullToEmpty(final Object[] a) {
@@ -9233,7 +9233,7 @@ class CommonUtil {
      * @param arrayType
      * @param a
      * @return
-     * @deprecated replaced by {@link CommonUtil#nullToEmpty(Object[], Class)}
+     * @deprecated replaced by {@link nullToEmpty(Object[], Class)}
      */
     @Deprecated
     public static <T> T[] nullToEmpty(final Class<T[]> arrayType, final T[] a) {
@@ -16783,7 +16783,7 @@ class CommonUtil {
      * @param toIndex
      * @param step
      * @return
-     * @see CommonUtil#copyOfRange(int[], int, int, int)
+     * @see copyOfRange(int[], int, int, int)
      */
     public static boolean[] copyOfRange(final boolean[] original, int fromIndex, final int toIndex, final int step) {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
@@ -16839,7 +16839,7 @@ class CommonUtil {
      * @param toIndex
      * @param step
      * @return
-     * @see CommonUtil#copyOfRange(int[], int, int, int)
+     * @see copyOfRange(int[], int, int, int)
      */
     public static char[] copyOfRange(final char[] original, int fromIndex, final int toIndex, final int step) {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
@@ -16895,7 +16895,7 @@ class CommonUtil {
      * @param toIndex
      * @param step
      * @return
-     * @see CommonUtil#copyOfRange(int[], int, int, int)
+     * @see copyOfRange(int[], int, int, int)
      */
     public static byte[] copyOfRange(final byte[] original, int fromIndex, final int toIndex, final int step) {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
@@ -16951,7 +16951,7 @@ class CommonUtil {
      * @param toIndex
      * @param step
      * @return
-     * @see CommonUtil#copyOfRange(int[], int, int, int)
+     * @see copyOfRange(int[], int, int, int)
      */
     public static short[] copyOfRange(final short[] original, int fromIndex, final int toIndex, final int step) {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
@@ -17075,7 +17075,7 @@ class CommonUtil {
      * @param toIndex
      * @param step
      * @return
-     * @see CommonUtil#copyOfRange(int[], int, int, int)
+     * @see copyOfRange(int[], int, int, int)
      */
     public static long[] copyOfRange(final long[] original, int fromIndex, final int toIndex, final int step) {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
@@ -17131,7 +17131,7 @@ class CommonUtil {
      * @param toIndex
      * @param step
      * @return
-     * @see CommonUtil#copyOfRange(int[], int, int, int)
+     * @see copyOfRange(int[], int, int, int)
      */
     public static float[] copyOfRange(final float[] original, int fromIndex, final int toIndex, final int step) {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
@@ -17187,7 +17187,7 @@ class CommonUtil {
      * @param toIndex
      * @param step
      * @return
-     * @see CommonUtil#copyOfRange(int[], int, int, int)
+     * @see copyOfRange(int[], int, int, int)
      */
     public static double[] copyOfRange(final double[] original, int fromIndex, final int toIndex, final int step) {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
@@ -17275,7 +17275,7 @@ class CommonUtil {
      * @param step
      * @param newType
      * @return
-     * @see CommonUtil#copyOfRange(int[], int, int, int)
+     * @see copyOfRange(int[], int, int, int)
      */
     public static <T> T[] copyOfRange(final T[] original, int fromIndex, final int toIndex, final int step, final Class<? extends T[]> newType) {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), fromIndex < toIndex ? toIndex : fromIndex, original.length);
@@ -17385,7 +17385,7 @@ class CommonUtil {
      * @param toIndex
      * @param step
      * @return
-     * @see CommonUtil#copyOfRange(int[], int, int, int)
+     * @see copyOfRange(int[], int, int, int)
      */
     @SuppressWarnings("deprecation")
     public static String copyOfRange(final String str, int fromIndex, final int toIndex, final int step) {

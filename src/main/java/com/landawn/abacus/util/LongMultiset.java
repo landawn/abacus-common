@@ -85,7 +85,7 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     @SuppressWarnings("rawtypes")
-    public LongMultiset(final Supplier<? extends Map<T, ?>> mapSupplier) {
+    public LongMultiset(final Supplier<? extends Map<? extends T, ?>> mapSupplier) {
         this.mapSupplier = (Supplier) mapSupplier;
         this.valueMap = this.mapSupplier.get();
     }
@@ -954,8 +954,27 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Removes the if.
+     * Removes the all occurrences.
      *
+     * @param c
+     * @return
+     */
+    public boolean removeAllOccurrencesForEach(final Collection<?> c) {
+        if (N.isNullOrEmpty(c)) {
+            return false;
+        }
+
+        final int size = valueMap.size();
+
+        for (Object e : c) {
+            removeAllOccurrences(e);
+        }
+
+        return valueMap.size() < size;
+    }
+
+    /**
+     * Removes the if.
      * @param <E>
      * @param occurrences
      * @param predicate
@@ -988,7 +1007,6 @@ public final class LongMultiset<T> implements Iterable<T> {
 
     /**
      * Removes the if.
-     *
      * @param <E>
      * @param occurrences
      * @param predicate
@@ -1020,44 +1038,24 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
-     * Removes all of this Multiset's elements that are also contained in the
-     * specified collection (optional operation).  After this call returns,
-     * this Multiset will contain no elements in common with the specified
-     * collection. This method ignores how often any element might appear in
-     * {@code c}, and only cares whether or not an element appears at all.
+     * Remove one occurrence for each element in the specified Collection.
+     * The elements will be removed from this set if the occurrences equals to or less than 0 after the operation.
      *
      * @param c
      * @return <tt>true</tt> if this set changed as a result of the call
-     * @see Collection#removeAll(Collection)
      */
     public boolean removeAll(final Collection<?> c) {
-        if (N.isNullOrEmpty(c)) {
-            return false;
-        }
-
-        boolean result = false;
-
-        for (Object e : c) {
-            if (!result) {
-                result = valueMap.remove(e) != null;
-            } else {
-                valueMap.remove(e);
-            }
-        }
-
-        return result;
+        return removeAll(c, 1);
     }
 
     /**
-     * Remove the specified occurrences from the specified elements.
+     * Remove the specified occurrences for each element in the specified Collection.
      * The elements will be removed from this set if the occurrences equals to or less than 0 after the operation.
      *
      * @param c
      * @param occurrencesToRemove the occurrences to remove if the element is in the specified collection <code>c</code>.
-     * @deprecated
      * @return <tt>true</tt> if this set changed as a result of the call
      */
-    @Deprecated
     public boolean removeAll(final Collection<?> c, final long occurrencesToRemove) {
         checkOccurrences(occurrencesToRemove);
 

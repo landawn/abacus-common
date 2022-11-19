@@ -8837,70 +8837,70 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
-    /**
-     *
-     * @param keyMapper
-     * @param downstream
-     * @return
-     * @see #groupTo(com.landawn.abacus.util.Throwables.Function, Collector)
-     * @deprecated replaced by {@code groupTo}
-     */
-    @Deprecated
-    @TerminalOp
-    public final <K, A, D, E2 extends Exception> Map<K, D> toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-            final Collector<? super T, A, D> downstream) throws E, E2 {
-        return groupTo(keyMapper, downstream);
-    }
-
-    /**
-     *
-     * @param keyMapper
-     * @param downstream
-     * @param mapFactory
-     * @return
-     * @see #groupTo(com.landawn.abacus.util.Throwables.Function, Collector, Supplier)
-     * @deprecated replaced by {@code groupTo}
-     */
-    @Deprecated
-    @TerminalOp
-    public final <K, A, D, M extends Map<K, D>, E2 extends Exception> M toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-            final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) throws E, E2 {
-        return groupTo(keyMapper, downstream, mapFactory);
-    }
-
-    /**
-     *
-     * @param keyMapper
-     * @param valueMapper
-     * @param downstream
-     * @return
-     * @see #groupTo(com.landawn.abacus.util.Throwables.Function, com.landawn.abacus.util.Throwables.Function, Collector)
-     * @deprecated replaced by {@code groupTo}
-     */
-    @Deprecated
-    @TerminalOp
-    public final <K, V, A, D, E2 extends Exception, E3 extends Exception> Map<K, D> toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-            final Throwables.Function<? super T, ? extends V, E3> valueMapper, final Collector<? super V, A, D> downstream) throws E, E2, E3 {
-        return groupTo(keyMapper, valueMapper, downstream);
-    }
-
-    /**
-     *
-     * @param keyMapper
-     * @param valueMapper
-     * @param downstream
-     * @param mapFactory
-     * @return
-     * @see #groupTo(com.landawn.abacus.util.Throwables.Function, com.landawn.abacus.util.Throwables.Function, Collector, Supplier)
-     * @deprecated replaced by {@code groupTo}
-     */
-    @Deprecated
-    @TerminalOp
-    public final <K, V, A, D, M extends Map<K, D>, E2 extends Exception, E3 extends Exception> M toMap(
-            final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
-            final Collector<? super V, A, D> downstream, final Supplier<? extends M> mapFactory) throws E, E2, E3 {
-        return groupTo(keyMapper, valueMapper, downstream, mapFactory);
-    }
+    //    /**
+    //     *
+    //     * @param keyMapper
+    //     * @param downstream
+    //     * @return
+    //     * @see #groupTo(com.landawn.abacus.util.Throwables.Function, Collector)
+    //     * @deprecated replaced by {@code groupTo}
+    //     */
+    //    @Deprecated
+    //    @TerminalOp
+    //    public final <K, A, D, E2 extends Exception> Map<K, D> toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
+    //            final Collector<? super T, A, D> downstream) throws E, E2 {
+    //        return groupTo(keyMapper, downstream);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param keyMapper
+    //     * @param downstream
+    //     * @param mapFactory
+    //     * @return
+    //     * @see #groupTo(com.landawn.abacus.util.Throwables.Function, Collector, Supplier)
+    //     * @deprecated replaced by {@code groupTo}
+    //     */
+    //    @Deprecated
+    //    @TerminalOp
+    //    public final <K, A, D, M extends Map<K, D>, E2 extends Exception> M toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
+    //            final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) throws E, E2 {
+    //        return groupTo(keyMapper, downstream, mapFactory);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param keyMapper
+    //     * @param valueMapper
+    //     * @param downstream
+    //     * @return
+    //     * @see #groupTo(com.landawn.abacus.util.Throwables.Function, com.landawn.abacus.util.Throwables.Function, Collector)
+    //     * @deprecated replaced by {@code groupTo}
+    //     */
+    //    @Deprecated
+    //    @TerminalOp
+    //    public final <K, V, A, D, E2 extends Exception, E3 extends Exception> Map<K, D> toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
+    //            final Throwables.Function<? super T, ? extends V, E3> valueMapper, final Collector<? super V, A, D> downstream) throws E, E2, E3 {
+    //        return groupTo(keyMapper, valueMapper, downstream);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param keyMapper
+    //     * @param valueMapper
+    //     * @param downstream
+    //     * @param mapFactory
+    //     * @return
+    //     * @see #groupTo(com.landawn.abacus.util.Throwables.Function, com.landawn.abacus.util.Throwables.Function, Collector, Supplier)
+    //     * @deprecated replaced by {@code groupTo}
+    //     */
+    //    @Deprecated
+    //    @TerminalOp
+    //    public final <K, V, A, D, M extends Map<K, D>, E2 extends Exception, E3 extends Exception> M toMap(
+    //            final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
+    //            final Collector<? super V, A, D> downstream, final Supplier<? extends M> mapFactory) throws E, E2, E3 {
+    //        return groupTo(keyMapper, valueMapper, downstream, mapFactory);
+    //    }
 
     /**
      *

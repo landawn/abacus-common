@@ -28,11 +28,11 @@ public interface ToFloatFunction<T> extends Throwables.ToFloatFunction<T, Runtim
 
     ToFloatFunction<Number> FROM_NUM = value -> value == null ? 0 : value.floatValue();
 
-    /**
-     * @deprecated replaced by {@code FROM_NUM}.
-     */
-    @Deprecated
-    ToFloatFunction<Number> NUM = FROM_NUM;
+    //    /**
+    //     * @deprecated replaced by {@code FROM_NUM}.
+    //     */
+    //    @Deprecated
+    //    ToFloatFunction<Number> NUM = FROM_NUM;
 
     @Override
     float applyAsFloat(T value);

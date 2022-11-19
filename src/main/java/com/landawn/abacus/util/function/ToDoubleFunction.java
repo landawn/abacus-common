@@ -28,11 +28,11 @@ public interface ToDoubleFunction<T> extends Throwables.ToDoubleFunction<T, Runt
 
     ToDoubleFunction<Number> FROM_NUM = value -> value == null ? 0 : value.doubleValue();
 
-    /**
-     * @deprecated replaced by {@code FROM_NUM}.
-     */
-    @Deprecated
-    ToDoubleFunction<Number> NUM = FROM_NUM;
+    //    /**
+    //     * @deprecated replaced by {@code FROM_NUM}.
+    //     */
+    //    @Deprecated
+    //    ToDoubleFunction<Number> NUM = FROM_NUM;
 
     @Override
     double applyAsDouble(T value);

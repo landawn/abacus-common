@@ -28,11 +28,11 @@ public interface ToIntFunction<T> extends Throwables.ToIntFunction<T, RuntimeExc
 
     ToIntFunction<Number> FROM_NUM = value -> value == null ? 0 : value.intValue();
 
-    /**
-     * @deprecated replaced by {@code FROM_NUM}.
-     */
-    @Deprecated
-    ToIntFunction<Number> NUM = FROM_NUM;
+    //    /**
+    //     * @deprecated replaced by {@code FROM_NUM}.
+    //     */
+    //    @Deprecated
+    //    ToIntFunction<Number> NUM = FROM_NUM;
 
     @Override
     int applyAsInt(T value);

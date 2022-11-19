@@ -1038,16 +1038,16 @@ public final class TypeFactory {
      * Gets the type.
      *
      * @param <T>
-     * @param clazzes
+     * @param classes
      * @return
      * @deprecated please using {@code Type#ofAll(Collection)}
      */
     @Deprecated
     @SuppressWarnings("unchecked")
-    static <T> List<Type<T>> getType(final Collection<? extends Class<? extends T>> clazzes) {
-        final List<Type<T>> result = new ArrayList<>(clazzes.size());
+    static <T> List<Type<T>> getType(final Collection<? extends Class<? extends T>> classes) {
+        final List<Type<T>> result = new ArrayList<>(classes.size());
 
-        for (Class<?> cls : clazzes) {
+        for (Class<?> cls : classes) {
             result.add(cls == null ? null : (Type<T>) getType(cls));
         }
 

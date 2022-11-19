@@ -17,8 +17,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 
-import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.function.Consumer;
 
 /**
@@ -112,21 +110,21 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
         return count == 0L ? BigDecimal.ZERO : new BigDecimal(getSum()).divide(BigDecimal.valueOf(this.count), MathContext.DECIMAL128);
     }
 
-    @Deprecated
-    @Beta
-    public final BigInteger sum() {
-        return sum;
-    }
-
-    @Deprecated
-    @Beta
-    public final Optional<BigDecimal> average() {
-        if (count == 0) {
-            return Optional.<BigDecimal> empty();
-        }
-
-        return Optional.of(getAverage());
-    }
+    //    @Deprecated
+    //    @Beta
+    //    public final BigInteger sum() {
+    //        return sum;
+    //    }
+    //
+    //    @Deprecated
+    //    @Beta
+    //    public final Optional<BigDecimal> average() {
+    //        if (count == 0) {
+    //            return Optional.<BigDecimal> empty();
+    //        }
+    //
+    //        return Optional.of(getAverage());
+    //    }
 
     @Override
     public String toString() {

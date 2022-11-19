@@ -28,11 +28,11 @@ public interface ToLongFunction<T> extends Throwables.ToLongFunction<T, RuntimeE
 
     ToLongFunction<Number> FROM_NUM = value -> value == null ? 0 : value.longValue();
 
-    /**
-     * @deprecated replaced by {@code FROM_NUM}.
-     */
-    @Deprecated
-    ToLongFunction<Number> NUM = FROM_NUM;
+    //    /**
+    //     * @deprecated replaced by {@code FROM_NUM}.
+    //     */
+    //    @Deprecated
+    //    ToLongFunction<Number> NUM = FROM_NUM;
 
     @Override
     long applyAsLong(T value);

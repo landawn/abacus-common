@@ -28,11 +28,11 @@ public interface ToByteFunction<T> extends Throwables.ToByteFunction<T, RuntimeE
 
     ToByteFunction<Number> FROM_NUM = value -> value == null ? 0 : value.byteValue();
 
-    /**
-     * @deprecated replaced by {@code FROM_NUM}.
-     */
-    @Deprecated
-    ToByteFunction<Number> NUM = FROM_NUM;
+    //    /**
+    //     * @deprecated replaced by {@code FROM_NUM}.
+    //     */
+    //    @Deprecated
+    //    ToByteFunction<Number> NUM = FROM_NUM;
 
     @Override
     byte applyAsByte(T value);

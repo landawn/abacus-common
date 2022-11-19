@@ -13,8 +13,6 @@
  */
 package com.landawn.abacus.util;
 
-import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.function.CharConsumer;
 
 public class CharSummaryStatistics implements CharConsumer {
@@ -105,21 +103,21 @@ public class CharSummaryStatistics implements CharConsumer {
         return getCount() > 0 ? (double) getSum() / getCount() : 0.0d;
     }
 
-    @Deprecated
-    @Beta
-    public final int sum() {
-        return Numbers.toIntExact(sum);
-    }
-
-    @Deprecated
-    @Beta
-    public final OptionalDouble average() {
-        if (count == 0) {
-            return OptionalDouble.empty();
-        }
-
-        return OptionalDouble.of(getAverage());
-    }
+    //    @Deprecated
+    //    @Beta
+    //    public final int sum() {
+    //        return Numbers.toIntExact(sum);
+    //    }
+    //
+    //    @Deprecated
+    //    @Beta
+    //    public final OptionalDouble average() {
+    //        if (count == 0) {
+    //            return OptionalDouble.empty();
+    //        }
+    //
+    //        return OptionalDouble.of(getAverage());
+    //    }
 
     @Override
     public String toString() {

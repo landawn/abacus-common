@@ -28,7 +28,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.exception.UncheckedException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedSQLException;
@@ -306,18 +305,18 @@ public final class ExceptionUtil {
         return sw.getBuffer().toString();
     }
 
-    /**
-     * Gets the error msg.
-     *
-     * @param e
-     * @return
-     * @deprecated replaced by {@link #getErrorMessage(Throwable, true)}
-     */
-    @Deprecated
-    @Internal
-    public static String getMessage(Throwable e) {
-        return getErrorMessage(e, true);
-    }
+    //    /**
+    //     * Gets the error msg.
+    //     *
+    //     * @param e
+    //     * @return
+    //     * @deprecated replaced by {@link #getErrorMessage(Throwable, true)}
+    //     */
+    //    @Deprecated
+    //    @Internal
+    //    public static String getMessage(Throwable e) {
+    //        return getErrorMessage(e, true);
+    //    }
 
     public static String getErrorMessage(final Throwable e) {
         return getErrorMessage(e, false);

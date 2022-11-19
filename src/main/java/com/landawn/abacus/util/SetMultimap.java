@@ -16,6 +16,7 @@ package com.landawn.abacus.util;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.IntFunction;
@@ -450,6 +451,28 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
             res.putAll(c);
             return res;
         }
+    }
+
+    /**
+     *
+     * @param <K>
+     * @param <E>
+     * @param c
+     * @return
+     */
+    public static <K, E> SetMultimap<K, E> concat(final Collection<? extends Map<? extends K, ? extends E>> c) {
+        if (N.isNullOrEmpty(c)) {
+            return N.newSetMultimap();
+        }
+
+        final Iterator<? extends Map<? extends K, ? extends E>> iter = c.iterator();
+        final SetMultimap<K, E> res = from(iter.next());
+
+        while (iter.hasNext()) {
+            res.putAll(iter.next());
+        }
+
+        return res;
     }
 
     /**
