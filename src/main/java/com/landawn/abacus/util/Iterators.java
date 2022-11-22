@@ -31,7 +31,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
-import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -61,60 +60,6 @@ public final class Iterators {
 
     private Iterators() {
         // Utility class.
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <U>
-     * @param init
-     * @param hasNext
-     * @param supplier
-     * @return
-     */
-    public static <T, U> ObjIterator<T> generate(final U init, final Predicate<? super U> hasNext, final Function<? super U, T> supplier) {
-        N.checkArgNotNull(hasNext);
-        N.checkArgNotNull(supplier);
-
-        return new ObjIterator<>() {
-            @Override
-            public boolean hasNext() {
-                return hasNext.test(init);
-            }
-
-            @Override
-            public T next() {
-                return supplier.apply(init);
-            }
-        };
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param <U>
-     * @param init
-     * @param hasNext
-     * @param supplier
-     * @return
-     */
-    public static <T, U> ObjIterator<T> generate(final U init, final BiPredicate<? super U, T> hasNext, final BiFunction<? super U, T, T> supplier) {
-        N.checkArgNotNull(hasNext);
-        N.checkArgNotNull(supplier);
-
-        return new ObjIterator<>() {
-            private T prev = null;
-
-            @Override
-            public boolean hasNext() {
-                return hasNext.test(init, prev);
-            }
-
-            @Override
-            public T next() {
-                return (prev = supplier.apply(init, prev));
-            }
-        };
     }
 
     /**

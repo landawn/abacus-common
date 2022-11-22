@@ -21,6 +21,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -458,6 +460,60 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     //    public <U> ObjIterator<U> flatmap(final Function<? super T, ? extends U[]> mapper) {
     //        return Iterators.flatmap(this, mapper);
     //    }
+
+    /**
+     *
+     * @param <T>
+     * @param <U>
+     * @param init
+     * @param hasNext
+     * @param supplier
+     * @return
+     */
+    public static <T, U> ObjIterator<T> generate(final U init, final Predicate<? super U> hasNext, final Function<? super U, T> supplier) {
+        N.checkArgNotNull(hasNext);
+        N.checkArgNotNull(supplier);
+
+        return new ObjIterator<>() {
+            @Override
+            public boolean hasNext() {
+                return hasNext.test(init);
+            }
+
+            @Override
+            public T next() {
+                return supplier.apply(init);
+            }
+        };
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <U>
+     * @param init
+     * @param hasNext
+     * @param supplier
+     * @return
+     */
+    public static <T, U> ObjIterator<T> generate(final U init, final BiPredicate<? super U, T> hasNext, final BiFunction<? super U, T, T> supplier) {
+        N.checkArgNotNull(hasNext);
+        N.checkArgNotNull(supplier);
+
+        return new ObjIterator<>() {
+            private T prev = null;
+
+            @Override
+            public boolean hasNext() {
+                return hasNext.test(init, prev);
+            }
+
+            @Override
+            public T next() {
+                return (prev = supplier.apply(init, prev));
+            }
+        };
+    }
 
     public Object[] toArray() {
         return toArray(N.EMPTY_OBJECT_ARRAY);

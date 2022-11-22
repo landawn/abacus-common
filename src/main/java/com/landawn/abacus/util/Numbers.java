@@ -696,9 +696,9 @@ public final class Numbers {
     /**
      *
      * @param obj
-     * @return {@code 0} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code byte}.
-     * @see #toByte(String)
+     * @return {@code 0} if the specified {@code obj} is null.
+     * @throws NumberFormatException If the specified {@code obj} is not a {@code Number} and {@code obj.toString()} is not a parsable {@code byte}.
+     * @see #toByte(Object, byte)
      */
     public static byte toByte(final Object obj) throws NumberFormatException {
         return toByte(obj, (byte) 0);
@@ -707,16 +707,16 @@ public final class Numbers {
     /**
      *
      * @param str
-     * @param defaultValue
+     * @param defaultValueForNull
      * @return {@code defaultValue} if the specified {@code str} is null or empty.
      * @throws NumberFormatException If the string is not a parsable {@code byte}.
      * @see #isParsable(String)
      * @see Byte#parseByte(String)
      * @see Byte#decode(String)
      */
-    public static byte toByte(final String str, final byte defaultValue) throws NumberFormatException {
+    public static byte toByte(final String str, final byte defaultValueForNull) throws NumberFormatException {
         if (N.isNullOrEmpty(str)) {
-            return defaultValue;
+            return defaultValueForNull;
         }
 
         if (str.length() < 5) {
@@ -736,22 +736,30 @@ public final class Numbers {
 
     /**
      *
-     * @param str
-     * @param defaultValue
-     * @return {@code defaultValue} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code byte}.
+     * @param obj
+     * @param defaultValueForNull
+     * @return {@code defaultValueForNull} if the specified {@code obj} is null.
+     * @throws NumberFormatException If the specified {@code obj} is not a {@code Number} and {@code obj.toString()} is not a parsable {@code byte}.
      * @see #toByte(String, byte)
      */
-    public static byte toByte(final Object obj, final byte defaultValue) throws NumberFormatException {
+    public static byte toByte(final Object obj, final byte defaultValueForNull) throws NumberFormatException {
         if (obj == null) {
-            return defaultValue;
+            return defaultValueForNull;
         }
 
-        if (obj instanceof Number) {
-            return ((Number) obj).byteValue();
+        if (obj instanceof Byte) {
+            return ((Byte) obj);
+        } else if (obj instanceof Number) {
+            final long lng = ((Number) obj).longValue();
+
+            if (lng > Byte.MAX_VALUE || lng < Byte.MIN_VALUE) {
+                throw new NumberFormatException("Value out of range. Value:\"" + obj);
+            }
+
+            return (byte) lng;
         }
 
-        return toByte(obj.toString(), defaultValue);
+        return toByte(obj.toString(), defaultValueForNull);
     }
 
     /**
@@ -770,9 +778,9 @@ public final class Numbers {
     /**
      *
      * @param obj
-     * @return {@code 0} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code short}.
-     * @see #toShort(String)
+     * @return {@code 0} if the specified {@code obj} is null.
+     * @throws NumberFormatException If the specified {@code obj} is not a {@code Number} and {@code obj.toString()} is not a parsable {@code short}.
+     * @see #toShort(Object, short)
      */
     public static short toShort(final Object obj) throws NumberFormatException {
         return toShort(obj, (short) 0);
@@ -781,16 +789,16 @@ public final class Numbers {
     /**
      *
      * @param str
-     * @param defaultValue
+     * @param defaultValueForNull
      * @return {@code defaultValue} if the specified {@code str} is null or empty.
      * @throws NumberFormatException If the string is not a parsable {@code short}.
      * @see #isParsable(String)
      * @see Short#parseShort(String)
      * @see Short#decode(String)
      */
-    public static short toShort(final String str, final short defaultValue) throws NumberFormatException {
+    public static short toShort(final String str, final short defaultValueForNull) throws NumberFormatException {
         if (N.isNullOrEmpty(str)) {
-            return defaultValue;
+            return defaultValueForNull;
         }
 
         if (str.length() < 5) {
@@ -806,22 +814,30 @@ public final class Numbers {
 
     /**
      *
-     * @param str
-     * @param defaultValue
-     * @return {@code defaultValue} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code short}.
+     * @param obj
+     * @param defaultValueForNull
+     * @return {@code defaultValueForNull} if the specified {@code obj} is null.
+     * @throws NumberFormatException If the specified {@code obj} is not a {@code Number} and {@code obj.toString()} is not a parsable {@code short}.
      * @see #toShort(String, short)
      */
-    public static short toShort(final Object obj, final short defaultValue) throws NumberFormatException {
+    public static short toShort(final Object obj, final short defaultValueForNull) throws NumberFormatException {
         if (obj == null) {
-            return defaultValue;
+            return defaultValueForNull;
         }
 
-        if (obj instanceof Number) {
-            return ((Number) obj).shortValue();
+        if (obj instanceof Short) {
+            return ((Short) obj);
+        } else if (obj instanceof Number) {
+            final long lng = ((Number) obj).longValue();
+
+            if (lng > Short.MAX_VALUE || lng < Short.MIN_VALUE) {
+                throw new NumberFormatException("Value out of range. Value:\"" + obj);
+            }
+
+            return (short) lng;
         }
 
-        return toShort(obj.toString(), defaultValue);
+        return toShort(obj.toString(), defaultValueForNull);
     }
 
     /**
@@ -840,9 +856,9 @@ public final class Numbers {
     /**
      *
      * @param obj
-     * @return {@code 0} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code int}.
-     * @see #toInt(String)
+     * @return {@code 0} if the specified {@code obj} is null.
+     * @throws NumberFormatException If the specified {@code obj} is not a {@code Number} and {@code obj.toString()} is not a parsable {@code int}.
+     * @see #toInt(Object, int)
      */
     public static int toInt(final Object obj) throws NumberFormatException {
         return toInt(obj, 0);
@@ -851,16 +867,16 @@ public final class Numbers {
     /**
      *
      * @param str
-     * @param defaultValue
+     * @param defaultValueForNull
      * @return {@code defaultValue} if the specified {@code str} is null or empty.
      * @throws NumberFormatException If the string is not a parsable {@code int}.
      * @see #isParsable(String)
      * @see Integer#parseInt(String)
      * @see Integer#decode(String)
      */
-    public static int toInt(final String str, final int defaultValue) throws NumberFormatException {
+    public static int toInt(final String str, final int defaultValueForNull) throws NumberFormatException {
         if (N.isNullOrEmpty(str)) {
-            return defaultValue;
+            return defaultValueForNull;
         }
 
         if (str.length() < 5) {
@@ -876,22 +892,30 @@ public final class Numbers {
 
     /**
      *
-     * @param str
-     * @param defaultValue
-     * @return {@code defaultValue} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code int}.
-     * @see #toInt(String, int)
+     * @param obj
+     * @param defaultValueForNull
+     * @return {@code defaultValueForNull} if the specified {@code obj} is null.
+     * @throws NumberFormatException If the specified {@code obj} is not a {@code Number} and {@code obj.toString()} is not a parsable {@code int}.
+     * @see #toInteger(String, int)
      */
-    public static int toInt(final Object obj, final int defaultValue) throws NumberFormatException {
+    public static int toInt(final Object obj, final int defaultValueForNull) throws NumberFormatException {
         if (obj == null) {
-            return defaultValue;
+            return defaultValueForNull;
         }
 
-        if (obj instanceof Number) {
-            return ((Number) obj).intValue();
+        if (obj instanceof Integer) {
+            return ((Integer) obj);
+        } else if (obj instanceof Number) {
+            final long lng = ((Number) obj).longValue();
+
+            if (lng > Integer.MAX_VALUE || lng < Integer.MIN_VALUE) {
+                throw new NumberFormatException("Value out of range. Value:\"" + obj);
+            }
+
+            return (int) lng;
         }
 
-        return toInt(obj.toString(), defaultValue);
+        return toInt(obj.toString(), defaultValueForNull);
     }
 
     /**
@@ -910,9 +934,9 @@ public final class Numbers {
     /**
      *
      * @param obj
-     * @return {@code 0} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code long}.
-     * @see #toLong(String)
+     * @return {@code 0} if the specified {@code obj} is null.
+     * @throws NumberFormatException If the specified {@code obj} is not a {@code Number} and {@code obj.toString()} is not a parsable {@code long}.
+     * @see #toLong(Object, long)
      */
     public static long toLong(final Object obj) throws NumberFormatException {
         return toLong(obj, 0);
@@ -921,16 +945,16 @@ public final class Numbers {
     /**
      *
      * @param str
-     * @param defaultValue
+     * @param defaultValueForNull
      * @return {@code defaultValue} if the specified {@code str} is null or empty.
      * @throws NumberFormatException If the string is not a parsable {@code long}.
      * @see #isParsable(String)
      * @see Long#parseLong(String)
      * @see Long#decode(String)
      */
-    public static long toLong(final String str, final long defaultValue) throws NumberFormatException {
+    public static long toLong(final String str, final long defaultValueForNull) throws NumberFormatException {
         if (N.isNullOrEmpty(str)) {
-            return defaultValue;
+            return defaultValueForNull;
         }
 
         if (str.length() < 5) {
@@ -945,22 +969,24 @@ public final class Numbers {
 
     /**
      *
-     * @param str
-     * @param defaultValue
-     * @return {@code defaultValue} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code long}.
+     * @param obj
+     * @param defaultValueForNull
+     * @return {@code defaultValueForNull} if the specified {@code obj} is null.
+     * @throws NumberFormatException If the specified {@code obj} is not a {@code Number} and {@code obj.toString()} is not a parsable {@code long}.
      * @see #toLong(String, long)
      */
-    public static long toLong(final Object obj, final long defaultValue) throws NumberFormatException {
+    public static long toLong(final Object obj, final long defaultValueForNull) throws NumberFormatException {
         if (obj == null) {
-            return defaultValue;
+            return defaultValueForNull;
         }
 
-        if (obj instanceof Number) {
+        if (obj instanceof Long) {
+            return ((Long) obj);
+        } else if (obj instanceof Number) {
             return ((Number) obj).longValue();
         }
 
-        return toLong(obj.toString(), defaultValue);
+        return toLong(obj.toString(), defaultValueForNull);
     }
 
     /**
@@ -978,9 +1004,9 @@ public final class Numbers {
     /**
      *
      * @param obj
-     * @return {@code 0} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code float}.
-     * @see #toFloat(String)
+     * @return {@code 0} if the specified {@code obj} is null.
+     * @throws NumberFormatException If the specified {@code obj} is not a {@code Number} and {@code obj.toString()} is not a parsable {@code float}.
+     * @see #toFloat(Object, float)
      */
     public static float toFloat(final Object obj) throws NumberFormatException {
         return toFloat(obj, 0);
@@ -989,15 +1015,15 @@ public final class Numbers {
     /**
      *
      * @param str
-     * @param defaultValue
+     * @param defaultValueForNull
      * @return {@code defaultValue} if the specified {@code str} is null or empty.
      * @throws NumberFormatException If the string is not a parsable {@code float}.
      * @see #isParsable(String)
      * @see Float#parseFloat(String)
      */
-    public static float toFloat(final String str, final float defaultValue) throws NumberFormatException {
+    public static float toFloat(final String str, final float defaultValueForNull) throws NumberFormatException {
         if (N.isNullOrEmpty(str)) {
-            return defaultValue;
+            return defaultValueForNull;
         }
 
         return Float.parseFloat(str);
@@ -1005,22 +1031,24 @@ public final class Numbers {
 
     /**
      *
-     * @param str
-     * @param defaultValue
-     * @return {@code defaultValue} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code float}.
+     * @param obj
+     * @param defaultValueForNull
+     * @return {@code defaultValueForNull} if the specified {@code obj} is null.
+     * @throws NumberFormatException If the specified {@code obj} is not a {@code Number} and {@code obj.toString()} is not a parsable {@code float}.
      * @see #toFloat(String, float)
      */
-    public static float toFloat(final Object obj, final float defaultValue) throws NumberFormatException {
+    public static float toFloat(final Object obj, final float defaultValueForNull) throws NumberFormatException {
         if (obj == null) {
-            return defaultValue;
+            return defaultValueForNull;
         }
 
-        if (obj instanceof Number) {
+        if (obj instanceof Float) {
+            return ((Float) obj);
+        } else if (obj instanceof Number) {
             return ((Number) obj).floatValue();
         }
 
-        return toFloat(obj.toString(), defaultValue);
+        return toFloat(obj.toString(), defaultValueForNull);
     }
 
     /**
@@ -1038,9 +1066,9 @@ public final class Numbers {
     /**
      *
      * @param obj
-     * @return {@code 0} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code double}.
-     * @see #toDouble(String)
+     * @return {@code 0} if the specified {@code obj} is null.
+     * @throws NumberFormatException If the specified {@code obj} is not a {@code Number} and {@code obj.toString()} is not a parsable {@code double}.
+     * @see #toDouble(Object, double)
      */
     public static double toDouble(final Object obj) throws NumberFormatException {
         return toDouble(obj, 0);
@@ -1049,15 +1077,15 @@ public final class Numbers {
     /**
      *
      * @param str
-     * @param defaultValue
+     * @param defaultValueForNull
      * @return {@code defaultValue} if the specified {@code str} is null or empty.
      * @throws NumberFormatException If the string is not a parsable {@code double}.
      * @see #isParsable(String)
      * @see Double#parseDouble(String)
      */
-    public static double toDouble(final String str, final double defaultValue) throws NumberFormatException {
+    public static double toDouble(final String str, final double defaultValueForNull) throws NumberFormatException {
         if (N.isNullOrEmpty(str)) {
-            return defaultValue;
+            return defaultValueForNull;
         }
 
         return Double.parseDouble(str);
@@ -1065,22 +1093,24 @@ public final class Numbers {
 
     /**
      *
-     * @param str
-     * @param defaultValue
-     * @return {@code defaultValue} if the specified {@code str} is null or empty.
-     * @throws NumberFormatException If the string is not a parsable {@code double}.
+     * @param obj
+     * @param defaultValueForNull
+     * @return {@code defaultValueForNull} if the specified {@code obj} is null.
+     * @throws NumberFormatException If the specified {@code obj} is not a {@code Number} and {@code obj.toString()} is not a parsable {@code double}.
      * @see #toDouble(String, double)
      */
-    public static double toDouble(final Object obj, final double defaultValue) throws NumberFormatException {
+    public static double toDouble(final Object obj, final double defaultValueForNull) throws NumberFormatException {
         if (obj == null) {
-            return defaultValue;
+            return defaultValueForNull;
         }
 
-        if (obj instanceof Number) {
+        if (obj instanceof Double) {
+            return ((Double) obj);
+        } else if (obj instanceof Number) {
             return ((Number) obj).doubleValue();
         }
 
-        return toDouble(obj.toString(), defaultValue);
+        return toDouble(obj.toString(), defaultValueForNull);
     }
 
     /**
@@ -1115,13 +1145,13 @@ public final class Numbers {
      * </pre>
      *
      * @param value the {@code BigDecimal} to convert, may be {@code null}.
-     * @param defaultValue
+     * @param defaultValueForNull
      * @return the double represented by the {@code BigDecimal} or the
      *  defaultValue if the {@code BigDecimal} is {@code null}.
      * @since 3.8
      */
-    public static double toDouble(final BigDecimal value, final double defaultValue) {
-        return value == null ? defaultValue : value.doubleValue();
+    public static double toDouble(final BigDecimal value, final double defaultValueForNull) {
+        return value == null ? defaultValueForNull : value.doubleValue();
     }
 
     /**
