@@ -534,6 +534,14 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
         return toArray(new Pair[0]);
     }
 
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @return
+     * @deprecated
+     */
+    @Deprecated
     public <T> T[] toArray(final T[] a) {
         return toList().toArray(a);
     }

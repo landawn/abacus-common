@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.BiPredicate;
 
 /**
  *
@@ -678,6 +679,22 @@ public class Difference<L, R> {
 
         /**
          *
+         * @param <CK>
+         * @param <K1>
+         * @param <V1>
+         * @param <K2>
+         * @param <V2>
+         * @param map1
+         * @param map2
+         * @return
+         */
+        public static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> of(
+                final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2) {
+            return of(map1, map2, Fn.equal());
+        }
+
+        /**
+         *
          * @param <K1>
          * @param <V1>
          * @param <K2>
@@ -687,11 +704,15 @@ public class Difference<L, R> {
          * @param <D>
          * @param map1
          * @param map2
+         * @param valueEquivalence
          * @return
          */
         @SuppressWarnings("unlikely-arg-type")
         public static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> of(
-                final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2) {
+                final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2,
+                final BiPredicate<? super V1, ? super V2> valueEquivalence) {
+            N.checkArgNotNull(valueEquivalence, "valueEquivalence");
+
             final Map<K1, V1> common = new LinkedHashMap<>();
             final Map<K1, V1> leftOnly = new LinkedHashMap<>();
             final Map<K2, V2> rightOnly = new LinkedHashMap<>();
@@ -722,7 +743,7 @@ public class Difference<L, R> {
                         } else {
                             leftOnly.put(entry1.getKey(), entry1.getValue());
                         }
-                    } else if (N.equals(entry1.getValue(), val2)) {
+                    } else if (valueEquivalence.test(entry1.getValue(), val2)) {
                         common.put(entry1.getKey(), entry1.getValue());
                     } else {
                         withDifferentValues.put(entry1.getKey(), Pair.of(entry1.getValue(), val2));
@@ -747,13 +768,35 @@ public class Difference<L, R> {
          * @param entity2
          * @return
          */
-        public static MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(Object entity1, Object entity2) {
+        public static MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object entity1,
+                final Object entity2) {
             if (!ClassUtil.isEntity(entity1.getClass()) || !ClassUtil.isEntity(entity2.getClass())) {
                 throw new IllegalArgumentException(
                         entity1.getClass().getCanonicalName() + " or " + entity2.getClass().getCanonicalName() + " is not an entity class");
             }
 
             return of(Maps.entity2Map(entity1), Maps.entity2Map(entity2));
+        }
+
+        /**
+         *
+         * @param entity1
+         * @param entity2
+         * @param valueEquivalence
+         * @return
+         */
+        public static MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object entity1, final Object entity2,
+                final BiPredicate<?, ?> valueEquivalence) {
+            if (!ClassUtil.isEntity(entity1.getClass()) || !ClassUtil.isEntity(entity2.getClass())) {
+                throw new IllegalArgumentException(
+                        entity1.getClass().getCanonicalName() + " or " + entity2.getClass().getCanonicalName() + " is not an entity class");
+            }
+
+            final Map<String, Object> map1 = Maps.entity2Map(entity1);
+            final Map<String, Object> map2 = Maps.entity2Map(entity2);
+            final BiPredicate<Object, Object> valueEquivalenceToUse = (BiPredicate<Object, Object>) valueEquivalence;
+
+            return of(map1, map2, valueEquivalenceToUse);
         }
 
         /**

@@ -488,6 +488,14 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
         return toArray(new Triple[0]);
     }
 
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @return
+     * @deprecated
+     */
+    @Deprecated
     public <T> T[] toArray(final T[] a) {
         return toList().toArray(a);
     }

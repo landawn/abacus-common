@@ -171,6 +171,8 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      */
     @Override
     public void writeCharacter(CharacterWriter writer, Number x, SerializationConfig<?> config) throws IOException {
+        x = x == null && config != null && config.writeNullNumberAsZero() ? Numbers.INTEGER_ZERO : x;
+
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

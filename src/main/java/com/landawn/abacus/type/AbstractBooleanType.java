@@ -156,7 +156,9 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void writeCharacter(CharacterWriter writer, Boolean t, SerializationConfig<?> config) throws IOException {
-        writer.write((t == null) ? NULL_CHAR_ARRAY : (t ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY));
+    public void writeCharacter(CharacterWriter writer, Boolean x, SerializationConfig<?> config) throws IOException {
+        x = x == null && config != null && config.writeNullBooleanAsFalse() ? Boolean.FALSE : x;
+
+        writer.write((x == null) ? NULL_CHAR_ARRAY : (x ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY));
     }
 }

@@ -134,6 +134,15 @@ public final class ParserUtil {
         }
 
         try {
+            if (field.isAnnotationPresent(com.alibaba.fastjson2.annotation.JSONField.class)
+                    && !field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).serialize()) {
+                return false;
+            }
+        } catch (Throwable e) {
+            // ignore
+        }
+
+        try {
             if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonIgnore.class)
                     && field.getAnnotation(com.fasterxml.jackson.annotation.JsonIgnore.class).value()) {
                 return false;
@@ -165,6 +174,15 @@ public final class ParserUtil {
                 if (field.isAnnotationPresent(com.alibaba.fastjson.annotation.JSONField.class)
                         && N.notNullOrEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).format())) {
                     return field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).format();
+                }
+            } catch (Throwable e) {
+                // ignore
+            }
+
+            try {
+                if (field.isAnnotationPresent(com.alibaba.fastjson2.annotation.JSONField.class)
+                        && N.notNullOrEmpty(field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).format())) {
+                    return field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).format();
                 }
             } catch (Throwable e) {
                 // ignore
@@ -263,6 +281,17 @@ public final class ParserUtil {
             }
         }
 
+        if (!isJsonRawValue) {
+            try {
+                if (field != null && field.isAnnotationPresent(com.alibaba.fastjson2.annotation.JSONField.class)
+                        && field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).jsonDirect()) {
+                    isJsonRawValue = true;
+                }
+            } catch (Throwable e) {
+                // ignore.
+            }
+        }
+
         if (isJsonRawValue && !CharSequence.class.isAssignableFrom(field.getType())) {
             throw new IllegalArgumentException("'isJsonRawValue' can only be applied to CharSequence type field");
         }
@@ -304,6 +333,17 @@ public final class ParserUtil {
                     }
                 } catch (Throwable e) {
                     // ignore
+                }
+
+                if (N.isNullOrEmpty(jsonXmlFieldName)) {
+                    try {
+                        if (field.isAnnotationPresent(com.alibaba.fastjson2.annotation.JSONField.class)
+                                && N.notNullOrEmpty(field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name())) {
+                            jsonXmlFieldName = field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name();
+                        }
+                    } catch (Throwable e) {
+                        // ignore
+                    }
                 }
 
                 if (N.isNullOrEmpty(jsonXmlFieldName)) {
@@ -351,6 +391,17 @@ public final class ParserUtil {
 
                 if (N.isNullOrEmpty(jsonXmlFieldName)) {
                     try {
+                        if (field.isAnnotationPresent(com.alibaba.fastjson2.annotation.JSONField.class)
+                                && N.notNullOrEmpty(field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name())) {
+                            jsonXmlFieldName = field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name();
+                        }
+                    } catch (Throwable e) {
+                        // ignore
+                    }
+                }
+
+                if (N.isNullOrEmpty(jsonXmlFieldName)) {
+                    try {
                         if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonProperty.class)
                                 && N.notNullOrEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value())) {
                             jsonXmlFieldName = field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value();
@@ -390,6 +441,17 @@ public final class ParserUtil {
                     }
                 } catch (Throwable e) {
                     // ignore
+                }
+
+                if (N.isNullOrEmpty(alias)) {
+                    try {
+                        if (field.isAnnotationPresent(com.alibaba.fastjson2.annotation.JSONField.class)
+                                && N.notNullOrEmpty(field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).alternateNames())) {
+                            alias = field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).alternateNames();
+                        }
+                    } catch (Throwable e) {
+                        // ignore
+                    }
                 }
 
                 if (N.isNullOrEmpty(alias)) {

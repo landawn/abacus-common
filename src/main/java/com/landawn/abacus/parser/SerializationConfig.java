@@ -55,6 +55,10 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
 
     boolean supportCircularReference = defaultSupportCircularReference;
 
+    boolean writeLongAsString = false;
+    boolean writeNullNumberAsZero = false;
+    boolean writeNullBooleanAsFalse = false;
+
     boolean writeBigDecimalAsPlain = defaultWriteBigDecimalAsPlain;
 
     String indentation = defaultIndentation;
@@ -274,6 +278,63 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
      *
      * @return
      */
+    public boolean writeLongAsString() {
+        return writeLongAsString;
+    }
+
+    /**
+     *
+     * @param writeLongAsString
+     * @return
+     */
+    public C writeLongAsString(boolean writeLongAsString) {
+        this.writeLongAsString = writeLongAsString;
+
+        return (C) this;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public boolean writeNullNumberAsZero() {
+        return writeNullNumberAsZero;
+    }
+
+    /**
+     *
+     * @param writeNullNumberAsZero
+     * @return
+     */
+    public C writeNullNumberAsZero(boolean writeNullNumberAsZero) {
+        this.writeNullNumberAsZero = writeNullNumberAsZero;
+
+        return (C) this;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public boolean writeNullBooleanAsFalse() {
+        return writeNullBooleanAsFalse;
+    }
+
+    /**
+     *
+     * @param writeNullBooleanAsFalse
+     * @return
+     */
+    public C writeNullBooleanAsFalse(boolean writeNullBooleanAsFalse) {
+        this.writeNullBooleanAsFalse = writeNullBooleanAsFalse;
+
+        return (C) this;
+    }
+
+    /**
+     *
+     * @return
+     */
     public boolean writeBigDecimalAsPlain() {
         return writeBigDecimalAsPlain;
     }
@@ -300,6 +361,9 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
         h = 31 * h + N.hashCode(skipTransientField);
         h = 31 * h + N.hashCode(prettyFormat);
         h = 31 * h + N.hashCode(supportCircularReference);
+        h = 31 * h + N.hashCode(writeLongAsString);
+        h = 31 * h + N.hashCode(writeNullNumberAsZero);
+        h = 31 * h + N.hashCode(writeNullBooleanAsFalse);
         h = 31 * h + N.hashCode(writeBigDecimalAsPlain);
         h = 31 * h + N.hashCode(indentation);
         return 31 * h + N.hashCode(propNamingPolicy);
@@ -323,8 +387,9 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
                     && N.equals(stringQuotation, other.stringQuotation) && N.equals(dateTimeFormat, other.dateTimeFormat)
                     && N.equals(exclusion, other.exclusion) && N.equals(skipTransientField, other.skipTransientField)
                     && N.equals(prettyFormat, other.prettyFormat) && N.equals(supportCircularReference, other.supportCircularReference)
-                    && N.equals(writeBigDecimalAsPlain, other.writeBigDecimalAsPlain) && N.equals(indentation, other.indentation)
-                    && N.equals(propNamingPolicy, other.propNamingPolicy)) {
+                    && N.equals(writeLongAsString, other.writeLongAsString) && N.equals(writeNullNumberAsZero, other.writeNullNumberAsZero)
+                    && N.equals(writeNullBooleanAsFalse, other.writeNullBooleanAsFalse) && N.equals(writeBigDecimalAsPlain, other.writeBigDecimalAsPlain)
+                    && N.equals(indentation, other.indentation) && N.equals(propNamingPolicy, other.propNamingPolicy)) {
 
                 return true;
             }
@@ -338,7 +403,8 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", charQuotation=" + N.toString(charQuotation) + ", stringQuotation="
                 + N.toString(stringQuotation) + ", dateTimeFormat=" + N.toString(dateTimeFormat) + ", exclusion=" + N.toString(exclusion)
                 + ", skipTransientField=" + N.toString(skipTransientField) + ", prettyFormat=" + N.toString(prettyFormat) + ", supportCircularReference="
-                + N.toString(supportCircularReference) + ", writeBigDecimalAsPlain=" + N.toString(writeBigDecimalAsPlain) + ", indentation="
-                + N.toString(indentation) + ", propNamingPolicy=" + N.toString(propNamingPolicy) + "}";
+                + N.toString(supportCircularReference) + ", writeLongAsString=" + N.toString(writeLongAsString) + ", writeNullNumberAsZero="
+                + N.toString(writeNullNumberAsZero) + ", writeNullBooleanAsFalse=" + N.toString(writeNullBooleanAsFalse) + ", writeBigDecimalAsPlain="
+                + N.toString(writeBigDecimalAsPlain) + ", indentation=" + N.toString(indentation) + ", propNamingPolicy=" + N.toString(propNamingPolicy) + "}";
     }
 }

@@ -239,6 +239,75 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
      */
     @Deprecated
     @Override
+    public boolean writeLongAsString() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     *
+     * @param writeLongAsString
+     * @return
+     * @deprecated UnsupportedOperationException
+     */
+    @Deprecated
+    @Override
+    public AvroSerializationConfig writeLongAsString(boolean writeLongAsString) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     *
+     * @return
+     * @deprecated UnsupportedOperationException
+     */
+    @Deprecated
+    @Override
+    public boolean writeNullNumberAsZero() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     *
+     * @param writeNullNumberAsZero
+     * @return
+     * @deprecated UnsupportedOperationException
+     */
+    @Deprecated
+    @Override
+    public AvroSerializationConfig writeNullNumberAsZero(boolean writeNullNumberAsZero) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     *
+     * @return
+     * @deprecated UnsupportedOperationException
+     */
+    @Deprecated
+    @Override
+    public boolean writeNullBooleanAsFalse() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     *
+     * @param writeNullBooleanAsFalse
+     * @return
+     * @deprecated UnsupportedOperationException
+     */
+    @Deprecated
+    @Override
+    public AvroSerializationConfig writeNullBooleanAsFalse(boolean writeNullBooleanAsFalse) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     *
+     * @return
+     * @deprecated UnsupportedOperationException
+     */
+    @Deprecated
+    @Override
     public boolean writeBigDecimalAsPlain() {
         throw new UnsupportedOperationException();
     }

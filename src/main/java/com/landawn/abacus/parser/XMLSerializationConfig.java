@@ -193,6 +193,9 @@ public class XMLSerializationConfig extends SerializationConfig<XMLSerialization
         h = 31 * h + N.hashCode(isSkipTransientField());
         h = 31 * h + N.hashCode(isPrettyFormat());
         h = 31 * h + N.hashCode(supportCircularReference());
+        h = 31 * h + N.hashCode(writeLongAsString());
+        h = 31 * h + N.hashCode(writeNullNumberAsZero);
+        h = 31 * h + N.hashCode(writeNullBooleanAsFalse);
         h = 31 * h + N.hashCode(writeBigDecimalAsPlain());
         h = 31 * h + N.hashCode(getIndentation());
         h = 31 * h + N.hashCode(getPropNamingPolicy());
@@ -218,9 +221,10 @@ public class XMLSerializationConfig extends SerializationConfig<XMLSerialization
                     && N.equals(getStringQuotation(), other.getStringQuotation()) && N.equals(getDateTimeFormat(), other.getDateTimeFormat())
                     && N.equals(getExclusion(), other.getExclusion()) && N.equals(isSkipTransientField(), other.isSkipTransientField())
                     && N.equals(isPrettyFormat(), other.isPrettyFormat()) && N.equals(supportCircularReference(), other.supportCircularReference())
-                    && N.equals(writeBigDecimalAsPlain(), other.writeBigDecimalAsPlain()) && N.equals(getIndentation(), other.getIndentation())
-                    && N.equals(getPropNamingPolicy(), other.getPropNamingPolicy()) && N.equals(tagByPropertyName, other.tagByPropertyName)
-                    && N.equals(ignoreTypeInfo, other.ignoreTypeInfo)) {
+                    && N.equals(writeLongAsString(), other.writeLongAsString()) && N.equals(writeNullNumberAsZero, other.writeNullNumberAsZero)
+                    && N.equals(writeNullBooleanAsFalse, other.writeNullBooleanAsFalse) && N.equals(writeBigDecimalAsPlain(), other.writeBigDecimalAsPlain())
+                    && N.equals(getIndentation(), other.getIndentation()) && N.equals(getPropNamingPolicy(), other.getPropNamingPolicy())
+                    && N.equals(tagByPropertyName, other.tagByPropertyName) && N.equals(ignoreTypeInfo, other.ignoreTypeInfo)) {
 
                 return true;
             }
@@ -234,10 +238,11 @@ public class XMLSerializationConfig extends SerializationConfig<XMLSerialization
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", charQuotation=" + N.toString(getCharQuotation()) + ", stringQuotation="
                 + N.toString(getStringQuotation()) + ", dateTimeFormat=" + N.toString(getDateTimeFormat()) + ", exclusion=" + N.toString(getExclusion())
                 + ", skipTransientField=" + N.toString(isSkipTransientField()) + ", prettyFormat=" + N.toString(isPrettyFormat())
-                + ", supportCircularReference=" + N.toString(supportCircularReference()) + ", writeBigDecimalAsPlain=" + N.toString(writeBigDecimalAsPlain())
-                + ", indentation=" + N.toString(getIndentation()) + ", propNamingPolicy=" + N.toString(getPropNamingPolicy()) + ", ignoredPropNames="
-                + N.toString(getIgnoredPropNames()) + ", tagByPropertyName=" + N.toString(tagByPropertyName) + ", ignoreTypeInfo=" + N.toString(ignoreTypeInfo)
-                + "}";
+                + ", supportCircularReference=" + N.toString(supportCircularReference()) + ", writeLongAsString=" + N.toString(writeLongAsString())
+                + ", writeNullNumberAsZero=" + N.toString(writeNullNumberAsZero) + ", writeNullBooleanAsFalse=" + N.toString(writeNullBooleanAsFalse)
+                + ", writeBigDecimalAsPlain=" + N.toString(writeBigDecimalAsPlain()) + ", indentation=" + N.toString(getIndentation()) + ", propNamingPolicy="
+                + N.toString(getPropNamingPolicy()) + ", ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", tagByPropertyName="
+                + N.toString(tagByPropertyName) + ", ignoreTypeInfo=" + N.toString(ignoreTypeInfo) + "}";
     }
 
     /**

@@ -171,10 +171,20 @@ public abstract class AbstractLongType extends NumberType<Number> {
      */
     @Override
     public void writeCharacter(CharacterWriter writer, Number x, SerializationConfig<?> config) throws IOException {
+        x = x == null && config != null && config.writeNullNumberAsZero() ? Numbers.LONG_ZERO : x;
+
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            writer.write(x.longValue());
+            if (config != null && config.writeLongAsString() && config.getStringQuotation() != 0) {
+                final char ch = config.getStringQuotation();
+
+                writer.write(ch);
+                writer.write(x.longValue());
+                writer.write(ch);
+            } else {
+                writer.write(x.longValue());
+            }
         }
     }
 }

@@ -26,6 +26,7 @@ import com.landawn.abacus.parser.SerializationConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Numbers;
 
 /**
  *
@@ -154,6 +155,8 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      */
     @Override
     public void writeCharacter(CharacterWriter writer, Number x, SerializationConfig<?> config) throws IOException {
+        x = x == null && config != null && config.writeNullNumberAsZero() ? Numbers.FLOAT_ZERO : x;
+
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

@@ -753,7 +753,7 @@ public final class Numbers {
             final long lng = ((Number) obj).longValue();
 
             if (lng > Byte.MAX_VALUE || lng < Byte.MIN_VALUE) {
-                throw new NumberFormatException("Value out of range. Value:\"" + obj);
+                throw new NumberFormatException("Value out of range. Value:\"" + obj + "\"");
             }
 
             return (byte) lng;
@@ -831,7 +831,7 @@ public final class Numbers {
             final long lng = ((Number) obj).longValue();
 
             if (lng > Short.MAX_VALUE || lng < Short.MIN_VALUE) {
-                throw new NumberFormatException("Value out of range. Value:\"" + obj);
+                throw new NumberFormatException("Value out of range. Value:\"" + obj + "\"");
             }
 
             return (short) lng;
@@ -909,7 +909,7 @@ public final class Numbers {
             final long lng = ((Number) obj).longValue();
 
             if (lng > Integer.MAX_VALUE || lng < Integer.MIN_VALUE) {
-                throw new NumberFormatException("Value out of range. Value:\"" + obj);
+                throw new NumberFormatException("Value out of range. Value:\"" + obj + "\"");
             }
 
             return (int) lng;
@@ -982,7 +982,27 @@ public final class Numbers {
 
         if (obj instanceof Long) {
             return ((Long) obj);
-        } else if (obj instanceof Number) {
+        }
+
+        if (obj instanceof BigInteger) {
+            final BigInteger bigInt = (BigInteger) obj;
+
+            if (bigInt.compareTo(BIG_INTEGER_WITH_MIN_LONG_VALUE) < 0 || bigInt.compareTo(BIG_INTEGER_WITH_MAX_LONG_VALUE) > 0) {
+                throw new NumberFormatException("Value out of range. Value:\"" + obj + "\"");
+            }
+
+            return bigInt.longValue();
+        } else if (obj instanceof BigDecimal) {
+            final BigDecimal bigDecimal = (BigDecimal) obj;
+
+            if (bigDecimal.compareTo(BIG_DECIMAL_WITH_MIN_LONG_VALUE) < 0 || bigDecimal.compareTo(BIG_DECIMAL_WITH_MAX_LONG_VALUE) > 0) {
+                throw new NumberFormatException("Value out of range. Value:\"" + obj + "\"");
+            }
+
+            return bigDecimal.longValue();
+        }
+
+        if (obj instanceof Number) {
             return ((Number) obj).longValue();
         }
 
@@ -1042,9 +1062,7 @@ public final class Numbers {
             return defaultValueForNull;
         }
 
-        if (obj instanceof Float) {
-            return ((Float) obj);
-        } else if (obj instanceof Number) {
+        if (obj instanceof Number) {
             return ((Number) obj).floatValue();
         }
 
@@ -1104,9 +1122,7 @@ public final class Numbers {
             return defaultValueForNull;
         }
 
-        if (obj instanceof Double) {
-            return ((Double) obj);
-        } else if (obj instanceof Number) {
+        if (obj instanceof Number) {
             return ((Number) obj).doubleValue();
         }
 

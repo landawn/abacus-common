@@ -226,6 +226,15 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
             }
 
             try {
+                if (field.isAnnotationPresent(com.alibaba.fastjson2.annotation.JSONField.class)
+                        && N.notNullOrEmpty(field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name())) {
+                    return field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name();
+                }
+            } catch (Throwable e) {
+                // ignore
+            }
+
+            try {
                 if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonProperty.class)
                         && N.notNullOrEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value())) {
                     return field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value();

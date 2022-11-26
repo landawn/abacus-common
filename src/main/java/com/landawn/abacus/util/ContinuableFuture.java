@@ -201,15 +201,15 @@ public class ContinuableFuture<T> implements Future<T> {
      * @return true, if is all cancelled
      */
     public boolean isAllCancelled() {
-        boolean res = true;
-
         if (N.notNullOrEmpty(upFutures)) {
             for (ContinuableFuture<?> preFuture : upFutures) {
-                res = res & preFuture.isAllCancelled();
+                if (preFuture.isAllCancelled()) {
+                    return false;
+                }
             }
         }
 
-        return isCancelled() && res;
+        return isCancelled();
     }
 
     /**
