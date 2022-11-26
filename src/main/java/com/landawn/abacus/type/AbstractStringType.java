@@ -22,6 +22,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.apache.logging.log4j.util.Strings;
+
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.SerializationConfig;
@@ -195,6 +197,8 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      */
     @Override
     public void writeCharacter(CharacterWriter writer, String x, SerializationConfig<?> config) throws IOException {
+        x = x == null && config != null && config.writeNullStringAsEmpty() ? Strings.EMPTY : x;
+
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

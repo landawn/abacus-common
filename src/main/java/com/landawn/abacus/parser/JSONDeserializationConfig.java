@@ -35,7 +35,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     @SuppressWarnings("rawtypes")
     Class<? extends Map> mapInstanceType = HashMap.class;
 
-    public boolean isIgnoreNullOrEmpty() {
+    public boolean ignoreNullOrEmpty() {
         return ignoreNullOrEmpty;
     }
 
@@ -45,13 +45,13 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      * @param nullToEmpty
      * @return
      */
-    public JSONDeserializationConfig setIgnoreNullOrEmpty(boolean ignoreNullOrEmpty) {
+    public JSONDeserializationConfig ignoreNullOrEmpty(boolean ignoreNullOrEmpty) {
         this.ignoreNullOrEmpty = ignoreNullOrEmpty;
 
         return this;
     }
 
-    public boolean isNullToEmpty() {
+    public boolean nullToEmpty() {
         return nullToEmpty;
     }
 
@@ -61,7 +61,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      * @param nullToEmpty
      * @return
      */
-    public JSONDeserializationConfig setNullToEmpty(boolean nullToEmpty) {
+    public JSONDeserializationConfig nullToEmpty(boolean nullToEmpty) {
         this.nullToEmpty = nullToEmpty;
 
         return this;
@@ -193,7 +193,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
          */
         @Deprecated
         public static JSONDeserializationConfig of(boolean ignoreUnmatchedProperty, Map<Class<?>, Set<String>> ignoredPropNames) {
-            return create().setIgnoreUnmatchedProperty(ignoreUnmatchedProperty).setIgnoredPropNames(ignoredPropNames);
+            return create().ignoreUnmatchedProperty(ignoreUnmatchedProperty).setIgnoredPropNames(ignoredPropNames);
         }
 
         /**
@@ -206,7 +206,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
          */
         @Deprecated
         public static JSONDeserializationConfig of(Class<?> elementClass, boolean ignoreUnmatchedProperty, Map<Class<?>, Set<String>> ignoredPropNames) {
-            return create().setElementType(elementClass).setIgnoreUnmatchedProperty(ignoreUnmatchedProperty).setIgnoredPropNames(ignoredPropNames);
+            return create().setElementType(elementClass).ignoreUnmatchedProperty(ignoreUnmatchedProperty).setIgnoredPropNames(ignoredPropNames);
         }
 
         /**
@@ -223,7 +223,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
                 Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().setMapKeyType(keyClass)
                     .setMapValueType(valueClass)
-                    .setIgnoreUnmatchedProperty(ignoreUnmatchedProperty)
+                    .ignoreUnmatchedProperty(ignoreUnmatchedProperty)
                     .setIgnoredPropNames(ignoredPropNames);
         }
 
@@ -243,7 +243,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
             return create().setElementType(elementClass)
                     .setMapKeyType(keyClass)
                     .setMapValueType(valueClass)
-                    .setIgnoreUnmatchedProperty(ignoreUnmatchedProperty)
+                    .ignoreUnmatchedProperty(ignoreUnmatchedProperty)
                     .setIgnoredPropNames(ignoredPropNames);
         }
     }

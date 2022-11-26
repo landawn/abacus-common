@@ -56,6 +56,7 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
     boolean supportCircularReference = defaultSupportCircularReference;
 
     boolean writeLongAsString = false;
+    boolean writeNullStringAsEmpty = false;
     boolean writeNullNumberAsZero = false;
     boolean writeNullBooleanAsFalse = false;
 
@@ -91,7 +92,7 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
      *
      * @return true, if is skip transient field
      */
-    public boolean isSkipTransientField() {
+    public boolean skipTransientField() {
         return skipTransientField;
     }
 
@@ -101,7 +102,7 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
      * @param skipTransientField
      * @return
      */
-    public C setSkipTransientField(boolean skipTransientField) {
+    public C skipTransientField(boolean skipTransientField) {
         this.skipTransientField = skipTransientField;
 
         return (C) this;
@@ -195,7 +196,7 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
      *
      * @return true, if is pretty format
      */
-    public boolean isPrettyFormat() {
+    public boolean prettyFormat() {
         return prettyFormat;
     }
 
@@ -205,7 +206,7 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
      * @param prettyFormat
      * @return
      */
-    public C setPrettyFormat(boolean prettyFormat) {
+    public C prettyFormat(boolean prettyFormat) {
         this.prettyFormat = prettyFormat;
 
         return (C) this;
@@ -289,6 +290,25 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
      */
     public C writeLongAsString(boolean writeLongAsString) {
         this.writeLongAsString = writeLongAsString;
+
+        return (C) this;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public boolean writeNullStringAsEmpty() {
+        return writeNullStringAsEmpty;
+    }
+
+    /**
+     *
+     * @param writeNullStringAsEmpty
+     * @return
+     */
+    public C writeNullStringAsEmpty(boolean writeNullStringAsEmpty) {
+        this.writeNullStringAsEmpty = writeNullStringAsEmpty;
 
         return (C) this;
     }

@@ -41,7 +41,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
      *
      * @return true, if is write class
      */
-    public boolean isWriteClass() {
+    public boolean writeClass() {
         return writeClass;
     }
 
@@ -51,7 +51,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
      * @param writeClass
      * @return
      */
-    public KryoSerializationConfig setWriteClass(boolean writeClass) {
+    public KryoSerializationConfig writeClass(boolean writeClass) {
         this.writeClass = writeClass;
 
         return this;
@@ -140,7 +140,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
      */
     @Deprecated
     @Override
-    public boolean isPrettyFormat() {
+    public boolean prettyFormat() {
         throw new UnsupportedOperationException();
     }
 
@@ -153,7 +153,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
      */
     @Deprecated
     @Override
-    public KryoSerializationConfig setPrettyFormat(boolean prettyFormat) {
+    public KryoSerializationConfig prettyFormat(boolean prettyFormat) {
         throw new UnsupportedOperationException();
     }
 
@@ -262,6 +262,29 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
      */
     @Deprecated
     @Override
+    public boolean writeNullStringAsEmpty() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     *
+     * @param writeNullStringAsEmpty
+     * @return
+     * @deprecated UnsupportedOperationException
+     */
+    @Deprecated
+    @Override
+    public KryoSerializationConfig writeNullStringAsEmpty(boolean writeNullNumberAsZero) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     *
+     * @return
+     * @deprecated UnsupportedOperationException
+     */
+    @Deprecated
+    @Override
     public boolean writeNullNumberAsZero() {
         throw new UnsupportedOperationException();
     }
@@ -354,7 +377,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
         int h = 17;
         h = 31 * h + N.hashCode(getIgnoredPropNames());
         h = 31 * h + N.hashCode(getExclusion());
-        h = 31 * h + N.hashCode(isSkipTransientField());
+        h = 31 * h + N.hashCode(skipTransientField());
         h = 31 * h + N.hashCode(getIgnoredPropNames());
         return 31 * h + N.hashCode(writeClass);
     }
@@ -373,7 +396,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
 
         if (obj instanceof KryoSerializationConfig other) {
             if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getExclusion(), other.getExclusion())
-                    && N.equals(isSkipTransientField(), other.isSkipTransientField()) && N.equals(writeClass, other.writeClass)) {
+                    && N.equals(skipTransientField(), other.skipTransientField()) && N.equals(writeClass, other.writeClass)) {
 
                 return true;
             }
@@ -385,8 +408,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
     @Override
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", exclusion=" + N.toString(getExclusion()) + ", skipTransientField="
-                + N.toString(isSkipTransientField()) + ", ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", writeClass=" + N.toString(writeClass)
-                + "}";
+                + N.toString(skipTransientField()) + ", ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", writeClass=" + N.toString(writeClass) + "}";
     }
 
     /**
@@ -410,7 +432,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
          */
         @Deprecated
         public static KryoSerializationConfig of(boolean writeClass) {
-            return create().setWriteClass(writeClass);
+            return create().writeClass(writeClass);
         }
 
         /**
@@ -435,7 +457,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
          */
         @Deprecated
         public static KryoSerializationConfig of(boolean writeClass, Exclusion exclusion, Map<Class<?>, Set<String>> ignoredPropNames) {
-            return create().setWriteClass(writeClass).setExclusion(exclusion).setIgnoredPropNames(ignoredPropNames);
+            return create().writeClass(writeClass).setExclusion(exclusion).setIgnoredPropNames(ignoredPropNames);
         }
     }
 }

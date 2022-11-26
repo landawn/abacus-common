@@ -137,7 +137,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         final JSONDeserializationConfig configToUse = check(config);
         final Type<T> type = N.typeOf(targetClass);
 
-        if ((N.isNullOrEmpty(str) && configToUse.nullToEmpty) || (str != null && str.length() == 0)) {
+        if ((N.isNullOrEmpty(str) && configToUse.nullToEmpty()) || (str != null && str.length() == 0)) {
             return emptyOrDefault(type);
         } else if (str == null) {
             return type.defaultValue();
@@ -271,7 +271,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                 } else if (type.isCollection()) {
                     return readCollection(c, targetClass, jr, config, null, true);
                 } else {
-                    return (T) nullToEmpty(type, type.valueOf(str), config.nullToEmpty);
+                    return (T) nullToEmpty(type, type.valueOf(str), config.nullToEmpty());
                 }
 
             case ENTITY:
@@ -497,7 +497,7 @@ final class JSONParserImpl extends AbstractJSONParser {
      */
     protected void write(final BufferedJSONWriter bw, final Type<Object> type, final Object obj, final JSONSerializationConfig config, final boolean flush,
             final IdentityHashSet<Object> serializedObjects) throws IOException {
-        if (config.isBracketRootValue()) {
+        if (config.bracketRootValue()) {
             write(bw, type, obj, config, flush, true, null, serializedObjects);
         } else {
             if (type.isSerializable()) {
@@ -630,23 +630,23 @@ final class JSONParserImpl extends AbstractJSONParser {
         final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(cls);
         final boolean ignoreNullProperty = (config.getExclusion() == Exclusion.NULL) || (config.getExclusion() == Exclusion.DEFAULT);
         final boolean ignoreDefaultProperty = config.getExclusion() == Exclusion.DEFAULT;
-        final boolean quotePropName = config.isQuotePropName();
-        final boolean isPrettyFormat = config.isPrettyFormat();
+        final boolean quotePropName = config.quotePropName();
+        final boolean isPrettyFormat = config.prettyFormat();
         final NamingPolicy jsonXmlNamingPolicy = config.getPropNamingPolicy() == null ? entityInfo.jsonXmlNamingPolicy : config.getPropNamingPolicy();
         final int nameTagIdx = jsonXmlNamingPolicy.ordinal();
 
-        final PropInfo[] propInfoList = config.isSkipTransientField() ? entityInfo.nonTransientSeriPropInfos : entityInfo.jsonXmlSerializablePropInfos;
+        final PropInfo[] propInfoList = config.skipTransientField() ? entityInfo.nonTransientSeriPropInfos : entityInfo.jsonXmlSerializablePropInfos;
         PropInfo propInfo = null;
         String propName = null;
         Object propValue = null;
 
-        if (config.isBracketRootValue() || !isFirstCall) {
+        if (config.bracketRootValue() || !isFirstCall) {
             bw.write(_BRACE_L);
         }
 
         String nextIndentation = isPrettyFormat ? ((indentation == null ? N.EMPTY_STRING : indentation) + config.getIndentation()) : null;
 
-        if (config.isWrapRootValue()) {
+        if (config.wrapRootValue()) {
             if (isPrettyFormat) {
                 bw.write(IOUtil.LINE_SEPARATOR);
 
@@ -657,7 +657,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                 bw.write(config.getIndentation());
             }
 
-            if (config.isQuotePropName()) {
+            if (config.quotePropName()) {
                 bw.write(_D_QUOTATION);
                 bw.write(ClassUtil.getSimpleClassName(cls));
                 bw.write(_D_QUOTATION);
@@ -721,7 +721,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             }
         }
 
-        if (config.isWrapRootValue()) {
+        if (config.wrapRootValue()) {
             if (isPrettyFormat) {
                 bw.write(IOUtil.LINE_SEPARATOR);
 
@@ -735,7 +735,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             bw.write(_BRACE_R);
         }
 
-        if (config.isBracketRootValue() || !isFirstCall) {
+        if (config.bracketRootValue() || !isFirstCall) {
             if (isPrettyFormat) {
                 bw.write(IOUtil.LINE_SEPARATOR);
 
@@ -768,13 +768,13 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(Map.class);
         // final boolean ignoreNullProperty = (config.getExclusion() == Exclusion.NULL) || (config.getExclusion() == Exclusion.DEFAULT);
-        final boolean isQuoteMapKey = config.isQuoteMapKey();
-        final boolean isPrettyFormat = config.isPrettyFormat();
+        final boolean isQuoteMapKey = config.quoteMapKey();
+        final boolean isPrettyFormat = config.prettyFormat();
 
         Type<Object> keyType = null;
         int i = 0;
 
-        if (config.isBracketRootValue() || !isFirstCall) {
+        if (config.bracketRootValue() || !isFirstCall) {
             bw.write(_BRACE_L);
         }
 
@@ -837,7 +837,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             }
         }
 
-        if (config.isBracketRootValue() || !isFirstCall) {
+        if (config.bracketRootValue() || !isFirstCall) {
             if (isPrettyFormat) {
                 bw.write(IOUtil.LINE_SEPARATOR);
 
@@ -868,10 +868,10 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
 
         final boolean isPrimitiveArray = type.isPrimitiveArray();
-        final boolean isPrettyFormat = config.isPrettyFormat();
+        final boolean isPrettyFormat = config.prettyFormat();
 
         // TODO what to do if it's primitive array(e.g: int[]...)
-        if (config.isBracketRootValue() || !isFirstCall) {
+        if (config.bracketRootValue() || !isFirstCall) {
             bw.write(_BRACKET_L);
         }
 
@@ -903,7 +903,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             }
         }
 
-        if (config.isBracketRootValue() || !isFirstCall) {
+        if (config.bracketRootValue() || !isFirstCall) {
             if (isPrettyFormat) {
                 bw.write(IOUtil.LINE_SEPARATOR);
 
@@ -934,9 +934,9 @@ final class JSONParserImpl extends AbstractJSONParser {
             return;
         }
 
-        final boolean isPrettyFormat = config.isPrettyFormat();
+        final boolean isPrettyFormat = config.prettyFormat();
 
-        if (config.isBracketRootValue() || !isFirstCall) {
+        if (config.bracketRootValue() || !isFirstCall) {
             bw.write(_BRACKET_L);
         }
 
@@ -964,7 +964,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             }
         }
 
-        if (config.isBracketRootValue() || !isFirstCall) {
+        if (config.bracketRootValue() || !isFirstCall) {
             if (isPrettyFormat) {
                 bw.write(IOUtil.LINE_SEPARATOR);
 
@@ -997,10 +997,10 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
 
         final NamingPolicy jsonXmlNamingPolicy = config.getPropNamingPolicy();
-        final boolean quotePropName = config.isQuotePropName();
-        final boolean isPrettyFormat = config.isPrettyFormat();
+        final boolean quotePropName = config.quotePropName();
+        final boolean isPrettyFormat = config.prettyFormat();
 
-        if (config.isBracketRootValue() || !isFirstCall) {
+        if (config.bracketRootValue() || !isFirstCall) {
             bw.write(_BRACE_L);
         }
 
@@ -1076,7 +1076,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         bw.write(_BRACE_R);
 
-        if (config.isBracketRootValue() || !isFirstCall) {
+        if (config.bracketRootValue() || !isFirstCall) {
             if (isPrettyFormat) {
                 bw.write(IOUtil.LINE_SEPARATOR);
 
@@ -1109,10 +1109,10 @@ final class JSONParserImpl extends AbstractJSONParser {
         }
 
         final NamingPolicy jsonXmlNamingPolicy = config.getPropNamingPolicy();
-        final boolean quotePropName = config.isQuotePropName();
-        final boolean isPrettyFormat = config.isPrettyFormat();
+        final boolean quotePropName = config.quotePropName();
+        final boolean isPrettyFormat = config.prettyFormat();
 
-        if (config.isBracketRootValue() || !isFirstCall) {
+        if (config.bracketRootValue() || !isFirstCall) {
             bw.write(_BRACE_L);
         }
 
@@ -1188,7 +1188,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         bw.write(_BRACE_R);
 
-        if (config.isBracketRootValue() || !isFirstCall) {
+        if (config.bracketRootValue() || !isFirstCall) {
             if (isPrettyFormat) {
                 bw.write(IOUtil.LINE_SEPARATOR);
 
@@ -1220,12 +1220,12 @@ final class JSONParserImpl extends AbstractJSONParser {
             return;
         }
 
-        final boolean quotePropName = config.isQuotePropName();
-        final boolean isPrettyFormat = config.isPrettyFormat();
+        final boolean quotePropName = config.quotePropName();
+        final boolean isPrettyFormat = config.prettyFormat();
 
         final String nextIndentation = isPrettyFormat ? ((indentation == null ? N.EMPTY_STRING : indentation) + config.getIndentation()) : null;
 
-        if (config.isBracketRootValue() || !isFirstCall) {
+        if (config.bracketRootValue() || !isFirstCall) {
             bw.write(_BRACE_L);
         }
 
@@ -1463,7 +1463,7 @@ final class JSONParserImpl extends AbstractJSONParser {
             }
         }
 
-        if (config.isBracketRootValue() || !isFirstCall) {
+        if (config.bracketRootValue() || !isFirstCall) {
             if (isPrettyFormat) {
                 bw.write(IOUtil.LINE_SEPARATOR);
 
@@ -1512,7 +1512,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         final Type<T> type = N.typeOf(targetClass);
 
-        if ((N.isNullOrEmpty(str) && configToUse.nullToEmpty) || (str != null && str.length() == 0)) {
+        if ((N.isNullOrEmpty(str) && configToUse.nullToEmpty()) || (str != null && str.length() == 0)) {
             return emptyOrDefault(type);
         } else if (str == null) {
             return type.defaultValue();
@@ -1548,7 +1548,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         final JSONDeserializationConfig configToUse = check(config);
         final Type<T> type = N.typeOf(targetClass);
 
-        if ((N.isNullOrEmpty(str) && configToUse.nullToEmpty) || (str != null && fromIndex == toIndex)) {
+        if ((N.isNullOrEmpty(str) && configToUse.nullToEmpty()) || (str != null && fromIndex == toIndex)) {
             return emptyOrDefault(type);
         } else if (str == null) {
             return type.defaultValue();
@@ -1681,7 +1681,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                     return readCollection(null, targetClass, jr, config, null, isFirstCall);
                 } else {
                     return (T) nullToEmpty(type, type.valueOf(source instanceof String ? (String) source : IOUtil.readAllToString(((Reader) source))),
-                            config.nullToEmpty);
+                            config.nullToEmpty());
                 }
 
             case ENTITY:
@@ -1736,9 +1736,9 @@ final class JSONParserImpl extends AbstractJSONParser {
     protected <T> T readEntity(final Type<? extends T> type, final Class<? extends T> targetClass, final JSONReader jr, final JSONDeserializationConfig config,
             final boolean isFirstCall) throws IOException {
         final boolean hasPropTypes = N.notNullOrEmpty(config.getPropTypes());
-        final boolean ignoreUnmatchedProperty = config.isIgnoreUnmatchedProperty();
-        final boolean ignoreNullOrEmpty = config.ignoreNullOrEmpty;
-        final boolean nullToEmpty = config.nullToEmpty;
+        final boolean ignoreUnmatchedProperty = config.ignoreUnmatchedProperty();
+        final boolean ignoreNullOrEmpty = config.ignoreNullOrEmpty();
+        final boolean nullToEmpty = config.nullToEmpty();
         final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(targetClass);
         final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
         final Object result = entityInfo.createEntityResult();
@@ -2072,8 +2072,8 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         final boolean hasPropTypes = N.notNullOrEmpty(config.getPropTypes());
         final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(Map.class);
-        final boolean ignoreNullOrEmpty = config.ignoreNullOrEmpty;
-        final boolean nullToEmpty = config.nullToEmpty;
+        final boolean ignoreNullOrEmpty = config.ignoreNullOrEmpty();
+        final boolean nullToEmpty = config.nullToEmpty();
 
         final Tuple2<Function<Class<?>, Object>, Function<Object, Object>> creatorAndConvertor = getCreatorAndConvertorForTargetType(targetClass, null);
 
@@ -2270,8 +2270,8 @@ final class JSONParserImpl extends AbstractJSONParser {
             }
         }
 
-        final boolean ignoreNullOrEmpty = config.ignoreNullOrEmpty;
-        final boolean nullToEmpty = config.nullToEmpty;
+        final boolean ignoreNullOrEmpty = config.ignoreNullOrEmpty();
+        final boolean nullToEmpty = config.nullToEmpty();
 
         int firstToken = isFirstCall ? jr.nextToken() : START_BRACKET;
 
@@ -2485,8 +2485,8 @@ final class JSONParserImpl extends AbstractJSONParser {
             eleType = config.getElementType();
         }
 
-        final boolean ignoreNullOrEmpty = config.ignoreNullOrEmpty;
-        final boolean nullToEmpty = config.nullToEmpty;
+        final boolean ignoreNullOrEmpty = config.ignoreNullOrEmpty();
+        final boolean nullToEmpty = config.nullToEmpty();
 
         final Tuple2<Function<Class<?>, Object>, Function<Object, Object>> creatorAndConvertor = getCreatorAndConvertorForTargetType(targetClass, null);
 

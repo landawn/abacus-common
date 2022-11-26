@@ -4747,13 +4747,13 @@ public class RowDataSet implements DataSet, Cloneable {
         config.setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP);
 
         if (quoted) {
-            config.setQuoteMapKey(true);
-            config.setQuotePropName(true);
+            config.quoteMapKey(true);
+            config.quotePropName(true);
             config.setCharQuotation(WD._QUOTATION_D);
             config.setStringQuotation(WD._QUOTATION_D);
         } else {
-            config.setQuoteMapKey(false);
-            config.setQuotePropName(false);
+            config.quoteMapKey(false);
+            config.quotePropName(false);
             config.noCharQuotation();
         }
 

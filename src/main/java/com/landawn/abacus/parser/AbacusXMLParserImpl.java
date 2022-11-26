@@ -287,9 +287,9 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             throw new ParseException("No serializable property is found in class: " + ClassUtil.getCanonicalClassName(cls));
         }
 
-        final boolean tagByPropertyName = config.isTagByPropertyName();
-        final boolean ignoreTypeInfo = config.isIgnoreTypeInfo();
-        final boolean isPrettyFormat = config.isPrettyFormat();
+        final boolean tagByPropertyName = config.tagByPropertyName();
+        final boolean ignoreTypeInfo = config.ignoreTypeInfo();
+        final boolean isPrettyFormat = config.prettyFormat();
         final NamingPolicy jsonXmlNamingPolicy = config.getPropNamingPolicy() == null ? entityInfo.jsonXmlNamingPolicy : config.getPropNamingPolicy();
         final int nameTagIdx = jsonXmlNamingPolicy.ordinal();
 
@@ -353,12 +353,12 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(cls);
         final boolean ignoreNullProperty = (config.getExclusion() == Exclusion.NULL) || (config.getExclusion() == Exclusion.DEFAULT);
         final boolean ignoreDefaultProperty = (config.getExclusion() == Exclusion.DEFAULT);
-        final boolean tagByPropertyName = config.isTagByPropertyName();
-        final boolean ignoreTypeInfo = config.isIgnoreTypeInfo();
-        final boolean isPrettyFormat = config.isPrettyFormat();
+        final boolean tagByPropertyName = config.tagByPropertyName();
+        final boolean ignoreTypeInfo = config.ignoreTypeInfo();
+        final boolean isPrettyFormat = config.prettyFormat();
 
         final String nextIndentation = isPrettyFormat ? ((propIndentation == null ? N.EMPTY_STRING : propIndentation) + config.getIndentation()) : null;
-        final PropInfo[] propInfoList = config.isSkipTransientField() ? entityInfo.nonTransientSeriPropInfos : entityInfo.jsonXmlSerializablePropInfos;
+        final PropInfo[] propInfoList = config.skipTransientField() ? entityInfo.nonTransientSeriPropInfos : entityInfo.jsonXmlSerializablePropInfos;
         final NamingPolicy jsonXmlNamingPolicy = config.getPropNamingPolicy() == null ? entityInfo.jsonXmlNamingPolicy : config.getPropNamingPolicy();
         final int nameTagIdx = jsonXmlNamingPolicy.ordinal();
         PropInfo propInfo = null;
@@ -464,8 +464,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         final Class<?> cls = type.clazz();
         final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(Map.class);
         // final boolean ignoreNullProperty = (config.getExclusion() == Exclusion.NULL) || (config.getExclusion() == Exclusion.DEFAULT);
-        final boolean ignoreTypeInfo = config.isIgnoreTypeInfo();
-        final boolean isPrettyFormat = config.isPrettyFormat();
+        final boolean ignoreTypeInfo = config.ignoreTypeInfo();
+        final boolean isPrettyFormat = config.prettyFormat();
 
         if (isPrettyFormat && indentation != null) {
             bw.write(IOUtil.LINE_SEPARATOR);
@@ -632,8 +632,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
 
         final Class<?> cls = type.clazz();
-        final boolean ignoreTypeInfo = config.isIgnoreTypeInfo();
-        final boolean isPrettyFormat = config.isPrettyFormat();
+        final boolean ignoreTypeInfo = config.ignoreTypeInfo();
+        final boolean isPrettyFormat = config.prettyFormat();
 
         if (isPrettyFormat && indentation != null) {
             bw.write(IOUtil.LINE_SEPARATOR);
@@ -720,8 +720,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             return;
         }
 
-        final boolean ignoreTypeInfo = config.isIgnoreTypeInfo();
-        final boolean isPrettyFormat = config.isPrettyFormat();
+        final boolean ignoreTypeInfo = config.ignoreTypeInfo();
+        final boolean isPrettyFormat = config.prettyFormat();
 
         if (isPrettyFormat && indentation != null) {
             bw.write(IOUtil.LINE_SEPARATOR);
@@ -1184,7 +1184,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                 isNullValue = Boolean.parseBoolean(getAttribute(xmlReader, XMLConstants.IS_NULL));
 
-                final boolean ignoreUnmatchedProperty = config.isIgnoreUnmatchedProperty();
+                final boolean ignoreUnmatchedProperty = config.ignoreUnmatchedProperty();
                 final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(targetClass);
                 final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
                 final Object result = isNullValue ? null : entityInfo.createEntityResult();
@@ -1945,7 +1945,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     checkedAttr = true;
                 }
 
-                final boolean ignoreUnmatchedProperty = config.isIgnoreUnmatchedProperty();
+                final boolean ignoreUnmatchedProperty = config.ignoreUnmatchedProperty();
                 final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(typeClass);
                 final EntityInfo entityInfo = ParserUtil.getEntityInfo(typeClass);
                 final Object result = entityInfo.createEntityResult();
@@ -3102,7 +3102,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             this.config = config;
             propTypes = config.getPropTypes();
             hasPropTypes = N.notNullOrEmpty(propTypes);
-            ignoreUnmatchedProperty = config.isIgnoreUnmatchedProperty();
+            ignoreUnmatchedProperty = config.ignoreUnmatchedProperty();
             mapIgnoredPropNames = config.getIgnoredPropNames(Map.class);
         }
 

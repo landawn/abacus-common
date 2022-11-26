@@ -140,7 +140,7 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
      */
     @Deprecated
     @Override
-    public boolean isPrettyFormat() {
+    public boolean prettyFormat() {
         throw new UnsupportedOperationException();
     }
 
@@ -153,7 +153,7 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
      */
     @Deprecated
     @Override
-    public AvroSerializationConfig setPrettyFormat(boolean prettyFormat) {
+    public AvroSerializationConfig prettyFormat(boolean prettyFormat) {
         throw new UnsupportedOperationException();
     }
 
@@ -262,6 +262,29 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
      */
     @Deprecated
     @Override
+    public boolean writeNullStringAsEmpty() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     *
+     * @param writeNullStringAsEmpty
+     * @return
+     * @deprecated UnsupportedOperationException
+     */
+    @Deprecated
+    @Override
+    public AvroSerializationConfig writeNullStringAsEmpty(boolean writeNullNumberAsZero) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     *
+     * @return
+     * @deprecated UnsupportedOperationException
+     */
+    @Deprecated
+    @Override
     public boolean writeNullNumberAsZero() {
         throw new UnsupportedOperationException();
     }
@@ -354,7 +377,7 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
         int h = 17;
         h = 31 * h + N.hashCode(getIgnoredPropNames());
         h = 31 * h + N.hashCode(getExclusion());
-        h = 31 * h + N.hashCode(isSkipTransientField());
+        h = 31 * h + N.hashCode(skipTransientField());
         h = 31 * h + N.hashCode(getIgnoredPropNames());
         return 31 * h + N.hashCode(schema);
     }
@@ -373,7 +396,7 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
 
         if (obj instanceof AvroSerializationConfig other) {
             if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getExclusion(), other.getExclusion())
-                    && N.equals(isSkipTransientField(), other.isSkipTransientField()) && N.equals(schema, other.schema)) {
+                    && N.equals(skipTransientField(), other.skipTransientField()) && N.equals(schema, other.schema)) {
 
                 return true;
             }
@@ -385,7 +408,7 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
     @Override
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", exclusion=" + N.toString(getExclusion()) + ", skipTransientField="
-                + N.toString(isSkipTransientField()) + ", ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", schema=" + N.toString(schema) + "}";
+                + N.toString(skipTransientField()) + ", ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", schema=" + N.toString(schema) + "}";
     }
 
     /**

@@ -73,7 +73,7 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
     public int hashCode() {
         int h = 17;
         h = 31 * h + N.hashCode(getIgnoredPropNames());
-        h = 31 * h + N.hashCode(isIgnoreUnmatchedProperty());
+        h = 31 * h + N.hashCode(ignoreUnmatchedProperty());
         h = 31 * h + N.hashCode(getElementType());
         h = 31 * h + N.hashCode(getPropTypes());
         h = 31 * h + N.hashCode(getMapKeyType());
@@ -95,7 +95,7 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
         }
 
         if (obj instanceof AvroDeserializationConfig other) {
-            if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(isIgnoreUnmatchedProperty(), other.isIgnoreUnmatchedProperty())
+            if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(ignoreUnmatchedProperty(), other.ignoreUnmatchedProperty())
                     && N.equals(getElementType(), other.getElementType()) && N.equals(getPropTypes(), other.getPropTypes())
                     && N.equals(getMapKeyType(), other.getMapKeyType()) && N.equals(getMapValueType(), other.getMapValueType())
                     && N.equals(schema, other.schema)) {
@@ -109,7 +109,7 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
 
     @Override
     public String toString() {
-        return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", ignoreUnmatchedProperty=" + N.toString(isIgnoreUnmatchedProperty())
+        return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", ignoreUnmatchedProperty=" + N.toString(ignoreUnmatchedProperty())
                 + ", elementType=" + N.toString(getElementType()) + ", propTypes=" + N.toString(getPropTypes()) + ", mapKeyType=" + N.toString(getMapKeyType())
                 + ", mapValueType=" + N.toString(getMapValueType()) + ", ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", schema="
                 + N.toString(schema) + "}";

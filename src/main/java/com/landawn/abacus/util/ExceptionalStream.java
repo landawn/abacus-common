@@ -10033,8 +10033,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         final Type<Object> strType = N.typeOf(String.class);
         final JSONSerializationConfig config = JSC.create();
         config.setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP);
-        config.setQuoteMapKey(true);
-        config.setQuotePropName(true);
+        config.quoteMapKey(true);
+        config.quotePropName(true);
 
         WRITE_CSV_ELEMENT_WITH_TYPE = (type, element, bw) -> {
             if (element == null) {

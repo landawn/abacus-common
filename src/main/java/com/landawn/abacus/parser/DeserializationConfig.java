@@ -43,7 +43,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      *
      * @return true, if is ignore unknown property
      */
-    public boolean isIgnoreUnmatchedProperty() {
+    public boolean ignoreUnmatchedProperty() {
         return ignoreUnmatchedProperty;
     }
 
@@ -53,7 +53,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * @param ignoreUnmatchedProperty
      * @return
      */
-    public C setIgnoreUnmatchedProperty(boolean ignoreUnmatchedProperty) {
+    public C ignoreUnmatchedProperty(boolean ignoreUnmatchedProperty) {
         this.ignoreUnmatchedProperty = ignoreUnmatchedProperty;
 
         return (C) this;

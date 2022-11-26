@@ -40,15 +40,15 @@ final class Utils {
 
     static final KryoParser kryoParser = ParserFactory.isKryoAvailable() ? ParserFactory.createKryoParser() : null;
 
-    static final JSONSerializationConfig jsc = JSC.create().setQuotePropName(true).setQuoteMapKey(true);
+    static final JSONSerializationConfig jsc = JSC.create().quotePropName(true).quoteMapKey(true);
 
-    static final JSONSerializationConfig jscPrettyFormat = JSC.create().setQuotePropName(true).setQuoteMapKey(true).setPrettyFormat(true);
+    static final JSONSerializationConfig jscPrettyFormat = JSC.create().quotePropName(true).quoteMapKey(true).prettyFormat(true);
 
     static final XMLSerializationConfig xsc = XSC.create();
 
-    static final XMLSerializationConfig xscPrettyFormat = XSC.create().setPrettyFormat(true);
+    static final XMLSerializationConfig xscPrettyFormat = XSC.create().prettyFormat(true);
 
-    static final XMLSerializationConfig xscForClone = XSC.create().setIgnoreTypeInfo(false);
+    static final XMLSerializationConfig xscForClone = XSC.create().ignoreTypeInfo(false);
 
     static final Type<Boolean> booleanType = N.typeOf(boolean.class);
 

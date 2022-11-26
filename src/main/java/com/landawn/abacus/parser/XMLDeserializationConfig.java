@@ -87,7 +87,7 @@ public class XMLDeserializationConfig extends DeserializationConfig<XMLDeseriali
          */
         @Deprecated
         public static XMLDeserializationConfig of(boolean ignoreUnmatchedProperty, Map<Class<?>, Set<String>> ignoredPropNames) {
-            return create().setIgnoreUnmatchedProperty(ignoreUnmatchedProperty).setIgnoredPropNames(ignoredPropNames);
+            return create().ignoreUnmatchedProperty(ignoreUnmatchedProperty).setIgnoredPropNames(ignoredPropNames);
         }
 
         /**
@@ -100,7 +100,7 @@ public class XMLDeserializationConfig extends DeserializationConfig<XMLDeseriali
          */
         @Deprecated
         public static XMLDeserializationConfig of(Class<?> elementClass, boolean ignoreUnmatchedProperty, Map<Class<?>, Set<String>> ignoredPropNames) {
-            return create().setElementType(elementClass).setIgnoreUnmatchedProperty(ignoreUnmatchedProperty).setIgnoredPropNames(ignoredPropNames);
+            return create().setElementType(elementClass).ignoreUnmatchedProperty(ignoreUnmatchedProperty).setIgnoredPropNames(ignoredPropNames);
         }
 
         /**
@@ -117,7 +117,7 @@ public class XMLDeserializationConfig extends DeserializationConfig<XMLDeseriali
                 Map<Class<?>, Set<String>> ignoredPropNames) {
             return create().setMapKeyType(keyClass)
                     .setMapValueType(valueClass)
-                    .setIgnoreUnmatchedProperty(ignoreUnmatchedProperty)
+                    .ignoreUnmatchedProperty(ignoreUnmatchedProperty)
                     .setIgnoredPropNames(ignoredPropNames);
         }
 
@@ -137,7 +137,7 @@ public class XMLDeserializationConfig extends DeserializationConfig<XMLDeseriali
             return create().setElementType(elementClass)
                     .setMapKeyType(keyClass)
                     .setMapValueType(valueClass)
-                    .setIgnoreUnmatchedProperty(ignoreUnmatchedProperty)
+                    .ignoreUnmatchedProperty(ignoreUnmatchedProperty)
                     .setIgnoredPropNames(ignoredPropNames);
         }
     }

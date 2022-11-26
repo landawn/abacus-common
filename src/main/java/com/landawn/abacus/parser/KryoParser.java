@@ -290,7 +290,7 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         Kryo kryo = createKryo();
 
         try {
-            if (config != null && config.isWriteClass()) {
+            if (config != null && config.writeClass()) {
                 kryo.writeClassAndObject(output, obj);
             } else {
                 kryo.writeObject(output, obj);

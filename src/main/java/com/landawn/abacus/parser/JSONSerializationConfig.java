@@ -124,7 +124,7 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
      *
      * @return true, if is quote prop name
      */
-    public boolean isQuotePropName() {
+    public boolean quotePropName() {
         return quotePropName;
     }
 
@@ -134,7 +134,7 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
      * @param quotePropName
      * @return
      */
-    public JSONSerializationConfig setQuotePropName(boolean quotePropName) {
+    public JSONSerializationConfig quotePropName(boolean quotePropName) {
         this.quotePropName = quotePropName;
 
         return this;
@@ -145,7 +145,7 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
      *
      * @return true, if is quote map key
      */
-    public boolean isQuoteMapKey() {
+    public boolean quoteMapKey() {
         return quoteMapKey;
     }
 
@@ -155,7 +155,7 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
      * @param quoteMapKey
      * @return
      */
-    public JSONSerializationConfig setQuoteMapKey(boolean quoteMapKey) {
+    public JSONSerializationConfig quoteMapKey(boolean quoteMapKey) {
         this.quoteMapKey = quoteMapKey;
 
         return this;
@@ -166,7 +166,7 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
      *
      * @return true, if is wrap root value
      */
-    public boolean isWrapRootValue() {
+    public boolean wrapRootValue() {
         return wrapRootValue;
     }
 
@@ -176,7 +176,7 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
      * @param wrapRootValue
      * @return
      */
-    public JSONSerializationConfig setWrapRootValue(boolean wrapRootValue) {
+    public JSONSerializationConfig wrapRootValue(boolean wrapRootValue) {
         this.wrapRootValue = wrapRootValue;
 
         return this;
@@ -187,7 +187,7 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
      *
      * @return true, if is bracket root value
      */
-    public boolean isBracketRootValue() {
+    public boolean bracketRootValue() {
         return bracketRootValue;
     }
 
@@ -198,7 +198,7 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
      * @param bracketRootValue
      * @return
      */
-    public JSONSerializationConfig setBracketRootValue(boolean bracketRootValue) {
+    public JSONSerializationConfig bracketRootValue(boolean bracketRootValue) {
         this.bracketRootValue = bracketRootValue;
 
         return this;
@@ -240,10 +240,11 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
         h = 31 * h + N.hashCode(getStringQuotation());
         h = 31 * h + N.hashCode(getDateTimeFormat());
         h = 31 * h + N.hashCode(getExclusion());
-        h = 31 * h + N.hashCode(isSkipTransientField());
-        h = 31 * h + N.hashCode(isPrettyFormat());
+        h = 31 * h + N.hashCode(skipTransientField());
+        h = 31 * h + N.hashCode(prettyFormat());
         h = 31 * h + N.hashCode(supportCircularReference());
         h = 31 * h + N.hashCode(writeLongAsString());
+        h = 31 * h + N.hashCode(writeNullStringAsEmpty);
         h = 31 * h + N.hashCode(writeNullNumberAsZero);
         h = 31 * h + N.hashCode(writeNullBooleanAsFalse);
         h = 31 * h + N.hashCode(writeBigDecimalAsPlain());
@@ -271,12 +272,13 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
         if (obj instanceof JSONSerializationConfig other) {
             if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getCharQuotation(), other.getCharQuotation())
                     && N.equals(getStringQuotation(), other.getStringQuotation()) && N.equals(getDateTimeFormat(), other.getDateTimeFormat())
-                    && N.equals(getExclusion(), other.getExclusion()) && N.equals(isSkipTransientField(), other.isSkipTransientField())
-                    && N.equals(isPrettyFormat(), other.isPrettyFormat()) && N.equals(supportCircularReference(), other.supportCircularReference())
-                    && N.equals(writeLongAsString(), other.writeLongAsString()) && N.equals(writeNullNumberAsZero, other.writeNullNumberAsZero)
-                    && N.equals(writeNullBooleanAsFalse, other.writeNullBooleanAsFalse) && N.equals(writeBigDecimalAsPlain(), other.writeBigDecimalAsPlain())
-                    && N.equals(getIndentation(), other.getIndentation()) && N.equals(getPropNamingPolicy(), other.getPropNamingPolicy())
-                    && N.equals(quotePropName, other.quotePropName) && N.equals(quoteMapKey, other.quoteMapKey) && N.equals(wrapRootValue, other.wrapRootValue)
+                    && N.equals(getExclusion(), other.getExclusion()) && N.equals(skipTransientField(), other.skipTransientField())
+                    && N.equals(prettyFormat(), other.prettyFormat()) && N.equals(supportCircularReference(), other.supportCircularReference())
+                    && N.equals(writeLongAsString(), other.writeLongAsString()) && N.equals(writeNullStringAsEmpty, other.writeNullStringAsEmpty)
+                    && N.equals(writeNullNumberAsZero, other.writeNullNumberAsZero) && N.equals(writeNullBooleanAsFalse, other.writeNullBooleanAsFalse)
+                    && N.equals(writeBigDecimalAsPlain(), other.writeBigDecimalAsPlain()) && N.equals(getIndentation(), other.getIndentation())
+                    && N.equals(getPropNamingPolicy(), other.getPropNamingPolicy()) && N.equals(quotePropName, other.quotePropName)
+                    && N.equals(quoteMapKey, other.quoteMapKey) && N.equals(wrapRootValue, other.wrapRootValue)
                     && N.equals(bracketRootValue, other.bracketRootValue)) {
 
                 return true;
@@ -290,13 +292,13 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", charQuotation=" + N.toString(getCharQuotation()) + ", stringQuotation="
                 + N.toString(getStringQuotation()) + ", dateTimeFormat=" + N.toString(getDateTimeFormat()) + ", exclusion=" + N.toString(getExclusion())
-                + ", skipTransientField=" + N.toString(isSkipTransientField()) + ", prettyFormat=" + N.toString(isPrettyFormat())
-                + ", supportCircularReference=" + N.toString(supportCircularReference()) + ", writeLongAsString=" + N.toString(writeLongAsString())
-                + ", writeNullNumberAsZero=" + N.toString(writeNullNumberAsZero) + ", writeNullBooleanAsFalse=" + N.toString(writeNullBooleanAsFalse)
-                + ", writeBigDecimalAsPlain=" + N.toString(writeBigDecimalAsPlain()) + ", indentation=" + N.toString(getIndentation()) + ", propNamingPolicy="
-                + N.toString(getPropNamingPolicy()) + ", ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", quotePropName=" + N.toString(quotePropName)
-                + ", quoteMapKey=" + N.toString(quoteMapKey) + ", wrapRootValue=" + N.toString(wrapRootValue) + ", bracketRootValue="
-                + N.toString(bracketRootValue) + "}";
+                + ", skipTransientField=" + N.toString(skipTransientField()) + ", prettyFormat=" + N.toString(prettyFormat()) + ", supportCircularReference="
+                + N.toString(supportCircularReference()) + ", writeLongAsString=" + N.toString(writeLongAsString()) + ", writeNullStringAsEmpty="
+                + N.toString(writeNullStringAsEmpty) + ", writeNullNumberAsZero=" + N.toString(writeNullNumberAsZero) + ", writeNullBooleanAsFalse="
+                + N.toString(writeNullBooleanAsFalse) + ", writeBigDecimalAsPlain=" + N.toString(writeBigDecimalAsPlain()) + ", indentation="
+                + N.toString(getIndentation()) + ", propNamingPolicy=" + N.toString(getPropNamingPolicy()) + ", ignoredPropNames="
+                + N.toString(getIgnoredPropNames()) + ", quotePropName=" + N.toString(quotePropName) + ", quoteMapKey=" + N.toString(quoteMapKey)
+                + ", wrapRootValue=" + N.toString(wrapRootValue) + ", bracketRootValue=" + N.toString(bracketRootValue) + "}";
     }
 
     /**
@@ -321,7 +323,7 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
          */
         @Deprecated
         public static JSONSerializationConfig of(boolean quotePropName, boolean quoteMapKey) {
-            return create().setQuotePropName(quotePropName).setQuoteMapKey(quoteMapKey);
+            return create().quotePropName(quotePropName).quoteMapKey(quoteMapKey);
         }
 
         /**
@@ -360,8 +362,8 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
         @Deprecated
         public static JSONSerializationConfig of(boolean quotePropName, boolean quoteMapKey, DateTimeFormat dateTimeFormat, Exclusion exclusion,
                 Map<Class<?>, Set<String>> ignoredPropNames) {
-            return create().setQuotePropName(quotePropName)
-                    .setQuoteMapKey(quoteMapKey)
+            return create().quotePropName(quotePropName)
+                    .quoteMapKey(quoteMapKey)
                     .setDateTimeFormat(dateTimeFormat)
                     .setExclusion(exclusion)
                     .setIgnoredPropNames(ignoredPropNames);

@@ -65,8 +65,8 @@ public final class PropertiesUtil {
     private static final String TYPE = "type";
 
     private static final XMLSerializationConfig xsc = XSC.create()
-            .setTagByPropertyName(true)
-            .setIgnoreTypeInfo(true)
+            .tagByPropertyName(true)
+            .ignoreTypeInfo(true)
             .setDateTimeFormat(DateTimeFormat.ISO_8601_DATETIME)
             .setExclusion(Exclusion.NONE)
             .setIgnoredPropNames((Map<Class<?>, Set<String>>) null);
