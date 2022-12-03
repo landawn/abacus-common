@@ -36,6 +36,8 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
 
     protected static final boolean defaultBracketRootValue = true;
 
+    boolean writeNullToEmpty = false;
+
     boolean quotePropName = defaultQuotePropName;
 
     boolean quoteMapKey = defaultQuoteMapKey;
@@ -45,6 +47,25 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
     boolean bracketRootValue = defaultBracketRootValue;
 
     public JSONSerializationConfig() {
+    }
+
+    /**
+     *
+     * @return
+     */
+    public boolean writeNullToEmpty() {
+        return writeNullToEmpty;
+    }
+
+    /**
+     *
+     * @param writeNullToEmpty
+     * @return
+     */
+    public JSONSerializationConfig writeNullToEmpty(boolean writeNullToEmpty) {
+        this.writeNullToEmpty = writeNullToEmpty;
+
+        return this;
     }
 
     /**
@@ -247,6 +268,7 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
         h = 31 * h + N.hashCode(writeNullStringAsEmpty);
         h = 31 * h + N.hashCode(writeNullNumberAsZero);
         h = 31 * h + N.hashCode(writeNullBooleanAsFalse);
+        h = 31 * h + N.hashCode(writeNullToEmpty);
         h = 31 * h + N.hashCode(writeBigDecimalAsPlain());
         h = 31 * h + N.hashCode(getIndentation());
         h = 31 * h + N.hashCode(getPropNamingPolicy());
@@ -295,10 +317,11 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
                 + ", skipTransientField=" + N.toString(skipTransientField()) + ", prettyFormat=" + N.toString(prettyFormat()) + ", supportCircularReference="
                 + N.toString(supportCircularReference()) + ", writeLongAsString=" + N.toString(writeLongAsString()) + ", writeNullStringAsEmpty="
                 + N.toString(writeNullStringAsEmpty) + ", writeNullNumberAsZero=" + N.toString(writeNullNumberAsZero) + ", writeNullBooleanAsFalse="
-                + N.toString(writeNullBooleanAsFalse) + ", writeBigDecimalAsPlain=" + N.toString(writeBigDecimalAsPlain()) + ", indentation="
-                + N.toString(getIndentation()) + ", propNamingPolicy=" + N.toString(getPropNamingPolicy()) + ", ignoredPropNames="
-                + N.toString(getIgnoredPropNames()) + ", quotePropName=" + N.toString(quotePropName) + ", quoteMapKey=" + N.toString(quoteMapKey)
-                + ", wrapRootValue=" + N.toString(wrapRootValue) + ", bracketRootValue=" + N.toString(bracketRootValue) + "}";
+                + N.toString(writeNullBooleanAsFalse) + ", writeNullToEmpty=" + N.toString(writeNullToEmpty) + ", writeBigDecimalAsPlain="
+                + N.toString(writeBigDecimalAsPlain()) + ", indentation=" + N.toString(getIndentation()) + ", propNamingPolicy="
+                + N.toString(getPropNamingPolicy()) + ", ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", quotePropName=" + N.toString(quotePropName)
+                + ", quoteMapKey=" + N.toString(quoteMapKey) + ", wrapRootValue=" + N.toString(wrapRootValue) + ", bracketRootValue="
+                + N.toString(bracketRootValue) + "}";
     }
 
     /**

@@ -76,7 +76,7 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
     }
 
     /**
-     * Sets the exclusion.
+     * Sets the exclusion for field in entity.
      *
      * @param exclusion
      * @return

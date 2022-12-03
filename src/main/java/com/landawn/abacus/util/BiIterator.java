@@ -15,7 +15,6 @@
  */
 package com.landawn.abacus.util;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -329,7 +328,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @param b
      * @return
      */
-    public static <A, B> BiIterator<A, B> zip(final Collection<A> a, final Collection<B> b) {
+    public static <A, B> BiIterator<A, B> zip(final Iterable<A> a, final Iterable<B> b) {
         return zip(a == null ? null : a.iterator(), b == null ? null : b.iterator());
     }
 
@@ -343,7 +342,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @param valueForNoneB
      * @return
      */
-    public static <A, B> BiIterator<A, B> zip(final Collection<A> a, final Collection<B> b, final A valueForNoneA, final B valueForNoneB) {
+    public static <A, B> BiIterator<A, B> zip(final Iterable<A> a, final Iterable<B> b, final A valueForNoneA, final B valueForNoneB) {
         return zip(a == null ? null : a.iterator(), b == null ? null : b.iterator(), valueForNoneA, valueForNoneB);
     }
 
@@ -474,17 +473,34 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @param <A>
      * @param <B>
      * @param iter
-     * @param unzip output parameter.
+     * @param unzipFunc output parameter.
      * @return
      */
-    public static <T, A, B> BiIterator<A, B> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Pair<A, B>> unzip) {
+    public static <T, A, B> BiIterator<A, B> unzip(final Iterable<? extends T> iter, final BiConsumer<? super T, Pair<A, B>> unzipFunc) {
+        if (iter == null) {
+            return BiIterator.empty();
+        }
+
+        return unzip(iter.iterator(), unzipFunc);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <A>
+     * @param <B>
+     * @param iter
+     * @param unzipFunc output parameter.
+     * @return
+     */
+    public static <T, A, B> BiIterator<A, B> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Pair<A, B>> unzipFunc) {
         if (iter == null) {
             return BiIterator.empty();
         }
 
         final BooleanSupplier hasNext = iter::hasNext;
 
-        final Consumer<Pair<A, B>> output = out -> unzip.accept(iter.next(), out);
+        final Consumer<Pair<A, B>> output = out -> unzipFunc.accept(iter.next(), out);
 
         return BiIterator.generate(hasNext, output);
     }

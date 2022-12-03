@@ -30,7 +30,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
 
     boolean ignoreNullOrEmpty = false;
 
-    boolean nullToEmpty = false;
+    boolean readNullToEmpty = false;
 
     @SuppressWarnings("rawtypes")
     Class<? extends Map> mapInstanceType = HashMap.class;
@@ -42,7 +42,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     /**
      * Won't set/add/put the value to entity/array/list/map if it's null or empty {@code CharSequence/Array/Collection/Map}.
      *
-     * @param nullToEmpty
+     * @param readNullToEmpty
      * @return
      */
     public JSONDeserializationConfig ignoreNullOrEmpty(boolean ignoreNullOrEmpty) {
@@ -51,8 +51,12 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
         return this;
     }
 
+    /**
+     * @deprecated Use {@link #readNullToEmpty()} instead
+     */
+    @Deprecated
     public boolean nullToEmpty() {
-        return nullToEmpty;
+        return readNullToEmpty();
     }
 
     /**
@@ -60,9 +64,25 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
      *
      * @param nullToEmpty
      * @return
+     * @deprecated Use {@link #readNullToEmpty(boolean)} instead
      */
+    @Deprecated
     public JSONDeserializationConfig nullToEmpty(boolean nullToEmpty) {
-        this.nullToEmpty = nullToEmpty;
+        return readNullToEmpty(nullToEmpty);
+    }
+
+    public boolean readNullToEmpty() {
+        return readNullToEmpty;
+    }
+
+    /**
+     * Deserialize the values to empty {@code CharSequence/Array/Collection/Map}, instead of null.
+     *
+     * @param readNullToEmpty
+     * @return
+     */
+    public JSONDeserializationConfig readNullToEmpty(boolean readNullToEmpty) {
+        this.readNullToEmpty = readNullToEmpty;
 
         return this;
     }
@@ -107,7 +127,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
         h = 31 * h + N.hashCode(getIgnoredPropNames());
         h = 31 * h + N.hashCode(ignoreUnmatchedProperty);
         h = 31 * h + N.hashCode(ignoreNullOrEmpty);
-        h = 31 * h + N.hashCode(nullToEmpty);
+        h = 31 * h + N.hashCode(readNullToEmpty);
         h = 31 * h + N.hashCode(elementType);
         h = 31 * h + N.hashCode(keyType);
         h = 31 * h + N.hashCode(valueType);
@@ -129,7 +149,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
 
         if (obj instanceof JSONDeserializationConfig other) {
             if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(ignoreUnmatchedProperty, other.ignoreUnmatchedProperty)
-                    && N.equals(ignoreNullOrEmpty, other.ignoreNullOrEmpty) && N.equals(nullToEmpty, other.nullToEmpty)
+                    && N.equals(ignoreNullOrEmpty, other.ignoreNullOrEmpty) && N.equals(readNullToEmpty, other.readNullToEmpty)
                     && N.equals(elementType, other.elementType) && N.equals(keyType, other.keyType) && N.equals(valueType, other.valueType)
                     && N.equals(propTypes, other.propTypes) && N.equals(mapInstanceType, other.mapInstanceType)) {
 
@@ -143,7 +163,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     @Override
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", ignoreUnmatchedProperty=" + N.toString(ignoreUnmatchedProperty)
-                + ", ignoreNullOrEmpty=" + N.toString(ignoreNullOrEmpty) + ", nullToEmpty=" + N.toString(nullToEmpty) + ", elementType="
+                + ", ignoreNullOrEmpty=" + N.toString(ignoreNullOrEmpty) + ", readNullToEmpty=" + N.toString(readNullToEmpty) + ", elementType="
                 + N.toString(elementType) + ", keyType=" + N.toString(keyType) + ", valueType=" + N.toString(valueType) + ", propTypes=" + N.toString(propTypes)
                 + ", mapInstanceType=" + N.toString(mapInstanceType) + "}";
     }

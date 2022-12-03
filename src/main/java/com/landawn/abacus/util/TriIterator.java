@@ -15,7 +15,6 @@
  */
 package com.landawn.abacus.util;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -267,7 +266,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param c
      * @return
      */
-    public static <A, B, C> TriIterator<A, B, C> zip(final Collection<A> a, final Collection<B> b, final Collection<C> c) {
+    public static <A, B, C> TriIterator<A, B, C> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c) {
         return zip(a == null ? null : a.iterator(), b == null ? null : b.iterator(), c == null ? null : c.iterator());
     }
 
@@ -284,7 +283,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param valueForNoneC
      * @return
      */
-    public static <A, B, C> TriIterator<A, B, C> zip(final Collection<A> a, final Collection<B> b, final Collection<C> c, final A valueForNoneA,
+    public static <A, B, C> TriIterator<A, B, C> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c, final A valueForNoneA,
             final B valueForNoneB, final C valueForNoneC) {
         return zip(a == null ? null : a.iterator(), b == null ? null : b.iterator(), c == null ? null : c.iterator(), valueForNoneA, valueForNoneB,
                 valueForNoneC);
@@ -428,17 +427,35 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param <B>
      * @param <C>
      * @param iter
-     * @param unzip output parameter.
+     * @param unzipFunc output parameter.
      * @return
      */
-    public static <T, A, B, C> TriIterator<A, B, C> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzip) {
+    public static <T, A, B, C> TriIterator<A, B, C> unzip(final Iterable<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzipFunc) {
+        if (iter == null) {
+            return TriIterator.empty();
+        }
+
+        return unzip(iter.iterator(), unzipFunc);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <A>
+     * @param <B>
+     * @param <C>
+     * @param iter
+     * @param unzipFunc output parameter.
+     * @return
+     */
+    public static <T, A, B, C> TriIterator<A, B, C> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzipFunc) {
         if (iter == null) {
             return TriIterator.empty();
         }
 
         final BooleanSupplier hasNext = iter::hasNext;
 
-        final Consumer<Triple<A, B, C>> output = out -> unzip.accept(iter.next(), out);
+        final Consumer<Triple<A, B, C>> output = out -> unzipFunc.accept(iter.next(), out);
 
         return TriIterator.generate(hasNext, output);
     }
