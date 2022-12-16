@@ -2877,7 +2877,11 @@ public final class ClassUtil {
                     instance = cls.getDeclaredConstructor().newInstance();
                 } catch (Exception e) {
                     if (logger.isWarnEnabled()) {
-                        logger.warn("Failed to new instance of class: " + cls.getCanonicalName() + " to check setter method by getter method");
+                        if (Strings.isNotEmpty(cls.getPackageName()) && cls.getPackageName().startsWith("java.")) {
+                            // ignore
+                        } else {
+                            logger.warn("Failed to new instance of class: " + cls.getCanonicalName() + " to check setter method by getter method");
+                        }
                     }
 
                     if (registeredXMLBindingClassList.containsKey(cls)) {

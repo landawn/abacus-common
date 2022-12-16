@@ -199,27 +199,27 @@ public interface DataSet {
      */
     <T> T get(int rowIndex, int columnIndex);
 
-    /**
-     * There is NO underline auto-conversion from column value to target type: {@code T}.
-     * So the column values must be the type which is assignable to target type.
-     *
-     * <br />
-     * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
-     * Otherwise, put the {@code targetTpye} to the first parameter of the method.
-     * @param rowIndex
-     * @param columnIndex
-     * @param targetType
-     *
-     * @param <T>
-     * @return
-     * @throws UnsupportedOperationException
-     * @deprecated may be misused because it implies there is an underline auto-conversion from column values to target return type but actually there is not.
-     */
-    @SuppressWarnings("unused")
-    @Deprecated
-    default <T> T get(int rowIndex, int columnIndex, Class<? extends T> targetType) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
-    }
+    //    /**
+    //     * There is NO underline auto-conversion from column value to target type: {@code T}.
+    //     * So the column values must be the type which is assignable to target type.
+    //     *
+    //     * <br />
+    //     * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
+    //     * Otherwise, put the {@code targetTpye} to the first parameter of the method.
+    //     * @param rowIndex
+    //     * @param columnIndex
+    //     * @param targetType
+    //     *
+    //     * @param <T>
+    //     * @return
+    //     * @throws UnsupportedOperationException
+    //     * @deprecated may be misused because it implies there is an underline auto-conversion from column values to target return type but actually there is not.
+    //     */
+    //    @SuppressWarnings("unused")
+    //    @Deprecated
+    //    default <T> T get(int rowIndex, int columnIndex, Class<? extends T> targetType) throws UnsupportedOperationException {
+    //        throw new UnsupportedOperationException();
+    //    }
 
     /**
      *
@@ -260,88 +260,88 @@ public interface DataSet {
      */
     <T> T get(String columnName);
 
-    /**
-     * There is NO underline auto-conversion from column value to target type: {@code T}.
-     * So the column values must be the type which is assignable to target type.
-     *
-     * <br />
-     * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
-     * Otherwise, put the {@code targetTpye} to the first parameter of the method.
-     * @param columnIndex
-     * @param targetType
-     *
-     * @param <T>
-     * @return
-     * @throws UnsupportedOperationException
-     * @deprecated may be misused because it implies there is an underline auto-conversion from column values to target return type but actually there is not.
-     */
-    @SuppressWarnings("unused")
-    @Deprecated
-    default <T> T get(int columnIndex, Class<? extends T> targetType) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     *
-     * There is NO underline auto-conversion from column value to target type: {@code T}.
-     * So the column values must be the type which is assignable to target type.
-     *
-     * <br />
-     * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
-     * Otherwise, put the {@code targetTpye} to the first parameter of the method.
-     * @param columnName
-     * @param targetType
-     *
-     * @param <T>
-     * @return
-     * @throws UnsupportedOperationException
-     * @deprecated may be misused because it implies there is an underline auto-conversion from column values to target return type but actually there is not.
-     */
-    @SuppressWarnings("unused")
-    @Deprecated
-    default <T> T get(String columnName, Class<? extends T> targetType) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Returns the value from the current row and specified column if the specified {@code columnIndex} is equal or bigger than zero,
-     * or the specified {@code defaultValue} otherwise.
-     * <br />
-     * There is NO underline auto-conversion from column value to target type: {@code T}.
-     * So the column values must be the type which is assignable to target type.
-     *
-     * @param <T>
-     * @param columnIndex
-     * @param defaultValue
-     * @return
-     * @throws UnsupportedOperationException
-     * @deprecated
-     */
-    @SuppressWarnings("unused")
-    @Deprecated
-    default <T> T getOrDefault(int columnIndex, T defaultValue) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Returns the value from the current row and specified column if the specified {@code columnName} exists,
-     * or the specified {@code defaultValue} otherwise.
-     * <br />
-     * There is NO underline auto-conversion from column value to target type: {@code T}.
-     * So the column values must be the type which is assignable to target type.
-     *
-     * @param <T>
-     * @param columnName
-     * @param defaultValue
-     * @return
-     * @throws UnsupportedOperationException
-     * @deprecated
-     */
-    @SuppressWarnings("unused")
-    @Deprecated
-    default <T> T getOrDefault(String columnName, T defaultValue) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
-    }
+    //    /**
+    //     * There is NO underline auto-conversion from column value to target type: {@code T}.
+    //     * So the column values must be the type which is assignable to target type.
+    //     *
+    //     * <br />
+    //     * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
+    //     * Otherwise, put the {@code targetTpye} to the first parameter of the method.
+    //     * @param columnIndex
+    //     * @param targetType
+    //     *
+    //     * @param <T>
+    //     * @return
+    //     * @throws UnsupportedOperationException
+    //     * @deprecated may be misused because it implies there is an underline auto-conversion from column values to target return type but actually there is not.
+    //     */
+    //    @SuppressWarnings("unused")
+    //    @Deprecated
+    //    default <T> T get(int columnIndex, Class<? extends T> targetType) throws UnsupportedOperationException {
+    //        throw new UnsupportedOperationException();
+    //    }
+    //
+    //    /**
+    //     *
+    //     * There is NO underline auto-conversion from column value to target type: {@code T}.
+    //     * So the column values must be the type which is assignable to target type.
+    //     *
+    //     * <br />
+    //     * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
+    //     * Otherwise, put the {@code targetTpye} to the first parameter of the method.
+    //     * @param columnName
+    //     * @param targetType
+    //     *
+    //     * @param <T>
+    //     * @return
+    //     * @throws UnsupportedOperationException
+    //     * @deprecated may be misused because it implies there is an underline auto-conversion from column values to target return type but actually there is not.
+    //     */
+    //    @SuppressWarnings("unused")
+    //    @Deprecated
+    //    default <T> T get(String columnName, Class<? extends T> targetType) throws UnsupportedOperationException {
+    //        throw new UnsupportedOperationException();
+    //    }
+    //
+    //    /**
+    //     * Returns the value from the current row and specified column if the specified {@code columnIndex} is equal or bigger than zero,
+    //     * or the specified {@code defaultValue} otherwise.
+    //     * <br />
+    //     * There is NO underline auto-conversion from column value to target type: {@code T}.
+    //     * So the column values must be the type which is assignable to target type.
+    //     *
+    //     * @param <T>
+    //     * @param columnIndex
+    //     * @param defaultValue
+    //     * @return
+    //     * @throws UnsupportedOperationException
+    //     * @deprecated
+    //     */
+    //    @SuppressWarnings("unused")
+    //    @Deprecated
+    //    default <T> T getOrDefault(int columnIndex, T defaultValue) throws UnsupportedOperationException {
+    //        throw new UnsupportedOperationException();
+    //    }
+    //
+    //    /**
+    //     * Returns the value from the current row and specified column if the specified {@code columnName} exists,
+    //     * or the specified {@code defaultValue} otherwise.
+    //     * <br />
+    //     * There is NO underline auto-conversion from column value to target type: {@code T}.
+    //     * So the column values must be the type which is assignable to target type.
+    //     *
+    //     * @param <T>
+    //     * @param columnName
+    //     * @param defaultValue
+    //     * @return
+    //     * @throws UnsupportedOperationException
+    //     * @deprecated
+    //     */
+    //    @SuppressWarnings("unused")
+    //    @Deprecated
+    //    default <T> T getOrDefault(String columnName, T defaultValue) throws UnsupportedOperationException {
+    //        throw new UnsupportedOperationException();
+    //    }
 
     /**
      * Return default value (false) if the property is null.

@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.exception.UncheckedIOException;
 
 /**
@@ -693,6 +694,7 @@ public abstract class DateUtil {
      * @param calendar
      * @return
      */
+    @Beta
     public static Calendar parseCalendar(final String calendar) {
         return parseCalendar(calendar, null);
     }
@@ -704,6 +706,7 @@ public abstract class DateUtil {
      * @param format
      * @return
      */
+    @Beta
     public static Calendar parseCalendar(final String calendar, final String format) {
         return parseCalendar(calendar, format, null);
     }
@@ -717,6 +720,7 @@ public abstract class DateUtil {
      * @param timeZone
      * @return
      */
+    @Beta
     public static Calendar parseCalendar(final String calendar, final String format, final TimeZone timeZone) {
         if (N.isNullOrEmpty(calendar) || (calendar.length() == 4 && "null".equalsIgnoreCase(calendar))) {
             return null;
@@ -731,6 +735,7 @@ public abstract class DateUtil {
      * @param calendar
      * @return
      */
+    @Beta
     public static GregorianCalendar parseGregorianCalendar(final String calendar) {
         return parseGregorianCalendar(calendar, null);
     }
@@ -742,6 +747,7 @@ public abstract class DateUtil {
      * @param format
      * @return
      */
+    @Beta
     public static GregorianCalendar parseGregorianCalendar(final String calendar, final String format) {
         return parseGregorianCalendar(calendar, format, null);
     }
@@ -755,6 +761,7 @@ public abstract class DateUtil {
      * @param timeZone
      * @return
      */
+    @Beta
     public static GregorianCalendar parseGregorianCalendar(final String calendar, final String format, final TimeZone timeZone) {
         if (N.isNullOrEmpty(calendar) || (calendar.length() == 4 && "null".equalsIgnoreCase(calendar))) {
             return null;
@@ -769,6 +776,7 @@ public abstract class DateUtil {
      * @param calendar
      * @return
      */
+    @Beta
     public static XMLGregorianCalendar parseXMLGregorianCalendar(final String calendar) {
         return parseXMLGregorianCalendar(calendar, null);
     }
@@ -780,6 +788,7 @@ public abstract class DateUtil {
      * @param format
      * @return
      */
+    @Beta
     public static XMLGregorianCalendar parseXMLGregorianCalendar(final String calendar, final String format) {
         return parseXMLGregorianCalendar(calendar, format, null);
     }
@@ -793,6 +802,7 @@ public abstract class DateUtil {
      * @param timeZone
      * @return
      */
+    @Beta
     public static XMLGregorianCalendar parseXMLGregorianCalendar(final String calendar, final String format, final TimeZone timeZone) {
         if (N.isNullOrEmpty(calendar) || (calendar.length() == 4 && "null".equalsIgnoreCase(calendar))) {
             return null;

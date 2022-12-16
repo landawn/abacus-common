@@ -9226,19 +9226,19 @@ class CommonUtil {
         return a == null ? EMPTY_OBJECT_ARRAY : a;
     }
 
-    /**
-     * Null to empty.
-     *
-     * @param <T>
-     * @param arrayType
-     * @param a
-     * @return
-     * @deprecated replaced by {@link nullToEmpty(Object[], Class)}
-     */
-    @Deprecated
-    public static <T> T[] nullToEmpty(final Class<T[]> arrayType, final T[] a) {
-        return a == null ? (T[]) newArray(arrayType.getComponentType(), 0) : a;
-    }
+    //    /**
+    //     * Null to empty.
+    //     *
+    //     * @param <T>
+    //     * @param arrayType
+    //     * @param a
+    //     * @return
+    //     * @deprecated replaced by {@link nullToEmpty(Object[], Class)}
+    //     */
+    //    @Deprecated
+    //    public static <T> T[] nullToEmpty(final Class<T[]> arrayType, final T[] a) {
+    //        return a == null ? (T[]) newArray(arrayType.getComponentType(), 0) : a;
+    //    }
 
     /**
      * Null to empty.

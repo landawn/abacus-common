@@ -1001,6 +1001,187 @@ public class ContinuableFuture<T> implements Future<T> {
         }, other);
     }
 
+    /**
+     * Run after either.
+     *
+     * @param <E>
+     * @param other
+     * @param action
+     * @return
+     */
+    public <E extends Exception> ContinuableFuture<Void> runAfterFirstSucceed(final ContinuableFuture<?> other, final Throwables.Runnable<E> action) {
+        return execute(() -> {
+            final ObjIterator<Result<Object, Exception>> iter = Futures.iteratte(ContinuableFuture.this, other);
+            final Result<Object, Exception> firstResult = iter.next();
+
+            if (firstResult.isFailure()) {
+                final Result<Object, Exception> secondResult = iter.next();
+
+                if (secondResult.isFailure()) {
+                    throw firstResult.getException();
+                }
+            }
+
+            action.run();
+            return null;
+        }, other);
+    }
+
+    /**
+     * Run after either.
+     *
+     * @param <E>
+     * @param other
+     * @param action
+     * @return
+     */
+    public <E extends Exception> ContinuableFuture<Void> runAfterFirstSucceed(final ContinuableFuture<? extends T> other,
+            final Throwables.Consumer<? super T, E> action) {
+        return execute(() -> {
+            final ObjIterator<Result<T, Exception>> iter = Futures.iteratte(ContinuableFuture.this, other);
+            final Result<T, Exception> firstResult = iter.next();
+            T ret = null;
+
+            if (firstResult.isFailure()) {
+                final Result<T, Exception> secondResult = iter.next();
+
+                if (secondResult.isFailure()) {
+                    throw firstResult.getException();
+                } else {
+                    ret = secondResult.orElseIfFailure(null);
+                }
+            } else {
+                ret = firstResult.orElseIfFailure(null);
+            }
+
+            action.accept(ret);
+
+            return null;
+        }, other);
+    }
+
+    /**
+     * Run after either.
+     *
+     * @param <E>
+     * @param other
+     * @param action
+     * @return
+     */
+    public <E extends Exception> ContinuableFuture<Void> runAfterFirstSucceed(final ContinuableFuture<? extends T> other,
+            final Throwables.BiConsumer<? super T, ? super Exception, E> action) {
+        return execute(() -> {
+            final ObjIterator<Result<T, Exception>> iter = Futures.iteratte(ContinuableFuture.this, other);
+            final Result<T, Exception> firstResult = iter.next();
+            Result<T, Exception> ret = null;
+
+            if (firstResult.isFailure()) {
+                final Result<T, Exception> secondResult = iter.next();
+
+                if (secondResult.isSuccess()) {
+                    ret = secondResult;
+                }
+            }
+
+            if (ret == null) {
+                ret = firstResult;
+            }
+
+            action.accept(ret.orElseIfFailure(null), ret.getException());
+            return null;
+        }, other);
+    }
+
+    /**
+     * Call after either.
+     *
+     * @param <R>
+     * @param <E>
+     * @param other
+     * @param action
+     * @return
+     */
+    public <R> ContinuableFuture<R> callAfterFirstSucceed(final ContinuableFuture<?> other, final Callable<R> action) {
+        return execute(() -> {
+            final ObjIterator<Result<Object, Exception>> iter = Futures.iteratte(ContinuableFuture.this, other);
+            final Result<Object, Exception> firstResult = iter.next();
+
+            if (firstResult.isFailure()) {
+                final Result<Object, Exception> secondResult = iter.next();
+
+                if (secondResult.isFailure()) {
+                    throw firstResult.getException();
+                }
+            }
+
+            return action.call();
+        }, other);
+    }
+
+    /**
+     * Call after either.
+     *
+     * @param <R>
+     * @param <E>
+     * @param other
+     * @param action
+     * @return
+     */
+    public <R, E extends Exception> ContinuableFuture<R> callAfterFirstSucceed(final ContinuableFuture<? extends T> other,
+            final Throwables.Function<? super T, ? extends R, E> action) {
+        return execute(() -> {
+            final ObjIterator<Result<T, Exception>> iter = Futures.iteratte(ContinuableFuture.this, other);
+            final Result<T, Exception> firstResult = iter.next();
+            T ret = null;
+
+            if (firstResult.isFailure()) {
+                final Result<T, Exception> secondResult = iter.next();
+
+                if (secondResult.isFailure()) {
+                    throw firstResult.getException();
+                } else {
+                    ret = secondResult.orElseIfFailure(null);
+                }
+            } else {
+                ret = firstResult.orElseIfFailure(null);
+            }
+
+            return action.apply(ret);
+        }, other);
+    }
+
+    /**
+     * Call after either.
+     *
+     * @param <R>
+     * @param <E>
+     * @param other
+     * @param action
+     * @return
+     */
+    public <R, E extends Exception> ContinuableFuture<R> callAfterFirstSucceed(final ContinuableFuture<? extends T> other,
+            final Throwables.BiFunction<? super T, ? super Exception, ? extends R, E> action) {
+        return execute(() -> {
+            final ObjIterator<Result<T, Exception>> iter = Futures.iteratte(ContinuableFuture.this, other);
+            final Result<T, Exception> firstResult = iter.next();
+            Result<T, Exception> ret = null;
+
+            if (firstResult.isFailure()) {
+                final Result<T, Exception> secondResult = iter.next();
+
+                if (secondResult.isSuccess()) {
+                    ret = secondResult;
+                }
+            }
+
+            if (ret == null) {
+                ret = firstResult;
+            }
+
+            return action.apply(ret.orElseIfFailure(null), ret.getException());
+        }, other);
+    }
+
     //    /**
     //     * Returns a new ContinuableFuture that, when either this or the
     //     * other given ContinuableFuture complete normally. If both of the given

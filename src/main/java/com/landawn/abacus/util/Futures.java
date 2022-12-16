@@ -593,14 +593,14 @@ public final class Futures {
 
             @Override
             public T get() throws InterruptedException, ExecutionException {
-                final Iterator<Pair<T, Exception>> iter = iteratte(cfs);
-                Pair<T, Exception> result = null;
+                final Iterator<Result<T, Exception>> iter = iteratte(cfs);
+                Result<T, Exception> result = null;
 
                 while (iter.hasNext()) {
                     result = iter.next();
 
-                    if (result.right == null) {
-                        return result.left;
+                    if (result.isSuccess()) {
+                        return result.orElseIfFailure(null);
                     }
                 }
 
@@ -609,14 +609,14 @@ public final class Futures {
 
             @Override
             public T get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-                final Iterator<Pair<T, Exception>> iter = iteratte(cfs, timeout, unit);
-                Pair<T, Exception> result = null;
+                final Iterator<Result<T, Exception>> iter = iteratte(cfs, timeout, unit);
+                Result<T, Exception> result = null;
 
                 while (iter.hasNext()) {
                     result = iter.next();
 
-                    if (result.right == null) {
-                        return result.left;
+                    if (result.isSuccess()) {
+                        return result.orElseIfFailure(null);
                     }
                 }
 
@@ -679,7 +679,7 @@ public final class Futures {
      */
     private static <T> ObjIterator<T> iterate02(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll, final TimeUnit unit) {
         return new ObjIterator<>() {
-            private final Iterator<Pair<T, Exception>> iter = iterate22(cfs, totalTimeoutForAll, unit);
+            private final Iterator<Result<T, Exception>> iter = iterate22(cfs, totalTimeoutForAll, unit);
 
             @Override
             public boolean hasNext() {
@@ -688,13 +688,9 @@ public final class Futures {
 
             @Override
             public T next() {
-                final Pair<T, Exception> result = iter.next();
+                final Result<T, Exception> result = iter.next();
 
-                if (result.right != null) {
-                    throw ExceptionUtil.toRuntimeException(result.right);
-                }
-
-                return result.left;
+                return result.orElseThrow(Fn.toRuntimeException());
             }
         };
     }
@@ -706,7 +702,7 @@ public final class Futures {
      * @return
      */
     @SafeVarargs
-    public static <T> ObjIterator<Pair<T, Exception>> iteratte(final Future<? extends T>... cfs) {
+    public static <T> ObjIterator<Result<T, Exception>> iteratte(final Future<? extends T>... cfs) {
         return iterate22(Arrays.asList(cfs));
     }
 
@@ -716,7 +712,7 @@ public final class Futures {
      * @param cfs
      * @return
      */
-    public static <T> ObjIterator<Pair<T, Exception>> iteratte(final Collection<? extends Future<? extends T>> cfs) {
+    public static <T> ObjIterator<Result<T, Exception>> iteratte(final Collection<? extends Future<? extends T>> cfs) {
         return iterate22(cfs);
     }
 
@@ -729,7 +725,7 @@ public final class Futures {
      * @return
      * @see {@code ExecutorCompletionService}
      */
-    public static <T> ObjIterator<Pair<T, Exception>> iteratte(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll,
+    public static <T> ObjIterator<Result<T, Exception>> iteratte(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll,
             final TimeUnit unit) {
         return iterate22(cfs, totalTimeoutForAll, unit);
     }
@@ -740,7 +736,7 @@ public final class Futures {
      * @param cfs
      * @return
      */
-    private static <T> ObjIterator<Pair<T, Exception>> iterate22(final Collection<? extends Future<? extends T>> cfs) {
+    private static <T> ObjIterator<Result<T, Exception>> iterate22(final Collection<? extends Future<? extends T>> cfs) {
         return iterate22(cfs, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
     }
 
@@ -752,7 +748,7 @@ public final class Futures {
      * @param unit
      * @return
      */
-    private static <T> ObjIterator<Pair<T, Exception>> iterate22(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll,
+    private static <T> ObjIterator<Result<T, Exception>> iterate22(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll,
             final TimeUnit unit) {
         N.checkArgPositive(totalTimeoutForAll, "totalTimeoutForAll");
         N.checkArgNotNull(unit, "unit");
@@ -772,7 +768,7 @@ public final class Futures {
             }
 
             @Override
-            public Pair<T, Exception> next() {
+            public Result<T, Exception> next() {
                 if (!hasNext()) {
                     throw new NoSuchElementException();
                 }
@@ -781,9 +777,9 @@ public final class Futures {
                     for (Future<? extends T> cf : activeFutures) {
                         if (cf.isDone()) {
                             try {
-                                return Pair.<T, Exception> of(cf.get(), null);
+                                return Result.<T, Exception> of(cf.get(), null);
                             } catch (Exception e) {
-                                return Pair.of(null, e);
+                                return Result.of(null, e);
                             } finally {
                                 activeFutures.remove(cf);
                             }
@@ -791,7 +787,7 @@ public final class Futures {
                     }
 
                     if (System.currentTimeMillis() - now >= totalTimeoutForAllInMillis) {
-                        return Pair.<T, Exception> of(null, new TimeoutException());
+                        return Result.<T, Exception> of(null, new TimeoutException());
                     }
 
                     N.sleepUninterruptibly(1);
@@ -808,17 +804,17 @@ public final class Futures {
      * @throws InterruptedException the interrupted exception
      * @throws ExecutionException the execution exception
      */
-    private static <R> R handle(final Pair<R, Exception> result) throws InterruptedException, ExecutionException {
-        if (result.right != null) {
-            if (result.right instanceof InterruptedException) {
-                throw ((InterruptedException) result.right);
-            } else if (result.right instanceof ExecutionException) {
-                throw ((ExecutionException) result.right);
+    private static <R> R handle(final Result<R, Exception> result) throws InterruptedException, ExecutionException {
+        if (result.isFailure()) {
+            if (result.getException() instanceof InterruptedException) {
+                throw ((InterruptedException) result.getException());
+            } else if (result.getException() instanceof ExecutionException) {
+                throw ((ExecutionException) result.getException());
             } else {
-                throw ExceptionUtil.toRuntimeException(result.right);
+                throw ExceptionUtil.toRuntimeException(result.getException());
             }
         }
 
-        return result.left;
+        return result.orElseIfFailure(null);
     }
 }

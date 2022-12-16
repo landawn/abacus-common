@@ -34,6 +34,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.u.Nullable;
@@ -1302,19 +1303,19 @@ public final class Iterators {
 
     }
 
-    /**
-     *
-     * @param <T>
-     * @param collections
-     * @param nextSelector
-     * @return
-     * @deprecated replaced by {@link #mergeIterables(Collection, BiFunction)}
-     */
-    @Deprecated
-    public static <T> ObjIterator<T> mergeCollections(final Collection<? extends Collection<? extends T>> collections,
-            final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
-        return mergeIterables(collections, nextSelector);
-    }
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param collections
+    //     * @param nextSelector
+    //     * @return
+    //     * @deprecated replaced by {@link #mergeIterables(Collection, BiFunction)}
+    //     */
+    //    @Deprecated
+    //    public static <T> ObjIterator<T> mergeCollections(final Collection<? extends Collection<? extends T>> collections,
+    //            final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
+    //        return mergeIterables(collections, nextSelector);
+    //    }
 
     public static <T> ObjIterator<T> mergeIterables(final Collection<? extends Iterable<? extends T>> iterables,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
@@ -1619,6 +1620,7 @@ public final class Iterators {
      * @param iter
      * @param unzip the second parameter is an output parameter.
      * @return
+     * @see BiIterator#unzip(Iterator, BiConsumer)
      */
     public static <T, A, B> BiIterator<A, B> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Pair<A, B>> unzip) {
         return BiIterator.unzip(iter, unzip);
@@ -1632,6 +1634,7 @@ public final class Iterators {
      * @param c
      * @param unzip the second parameter is an output parameter.
      * @return
+     * @see BiIterator#unzip(Iterable, BiConsumer)
      */
     public static <T, A, B> BiIterator<A, B> unzip(final Iterable<? extends T> c, final BiConsumer<? super T, Pair<A, B>> unzip) {
         return BiIterator.unzip(N.iterate(c), unzip);
@@ -1646,7 +1649,9 @@ public final class Iterators {
      * @param iter
      * @param unzip the second parameter is an output parameter.
      * @return
+     * @see TriIterator#unzip(Iterator, BiConsumer)
      */
+    @Beta
     public static <T, A, B, C> TriIterator<A, B, C> unzipp(final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzip) {
         return TriIterator.unzip(iter, unzip);
     }
@@ -1660,7 +1665,9 @@ public final class Iterators {
      * @param c
      * @param unzip the second parameter is an output parameter.
      * @return
+     * @see TriIterator#unzip(Iterable, BiConsumer)
      */
+    @Beta
     public static <T, A, B, C> TriIterator<A, B, C> unzipp(final Iterable<? extends T> c, final BiConsumer<? super T, Triple<A, B, C>> unzip) {
         return TriIterator.unzip(N.iterate(c), unzip);
     }
