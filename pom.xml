@@ -28,7 +28,7 @@
 		<dependency>
 			<groupId>com.landawn</groupId>
 			<artifactId>abacus-common</artifactId>
-			<version>3.6.0</version>
+			<version>3.6.1</version>
 			<scope>provided</scope>
 		</dependency>
 
