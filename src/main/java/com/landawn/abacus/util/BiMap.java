@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Internal;
+import com.landawn.abacus.util.Fn.Suppliers;
 
 /**
  * A BiMap (or "bidirectional map") is a map that preserves the uniqueness of its values as well as that of its keys.
@@ -75,7 +76,7 @@ public final class BiMap<K, V> implements Map<K, V> {
 
     @SuppressWarnings("rawtypes")
     public BiMap(final Class<? extends Map> keyMapType, final Class<? extends Map> valueMapType) {
-        this(Maps.mapType2Supplier(keyMapType), Maps.mapType2Supplier(valueMapType));
+        this(Suppliers.ofMap(keyMapType), Suppliers.ofMap(valueMapType));
     }
 
     public BiMap(final Supplier<? extends Map<K, V>> keyMapSupplier, final Supplier<? extends Map<V, K>> valueMapSupplier) {
@@ -87,8 +88,8 @@ public final class BiMap<K, V> implements Map<K, V> {
 
     @Internal
     BiMap(final Map<K, V> keyMap, final Map<V, K> valueMap) {
-        this.keyMapSupplier = Maps.mapType2Supplier(keyMap.getClass());
-        this.valueMapSupplier = Maps.mapType2Supplier(valueMap.getClass());
+        this.keyMapSupplier = Suppliers.ofMap(keyMap.getClass());
+        this.valueMapSupplier = Suppliers.ofMap(valueMap.getClass());
         this.keyMap = keyMap;
         this.valueMap = valueMap;
     }

@@ -79,7 +79,7 @@ public final class Multiset<T> implements Iterable<T> {
 
     @SuppressWarnings("rawtypes")
     public Multiset(final Class<? extends Map> valueMapType) {
-        this(Maps.mapType2Supplier(valueMapType));
+        this(Suppliers.ofMap(valueMapType));
     }
 
     @SuppressWarnings("rawtypes")
@@ -88,9 +88,10 @@ public final class Multiset<T> implements Iterable<T> {
         this.valueMap = this.mapSupplier.get();
     }
 
+    @SuppressWarnings("rawtypes")
     @Internal
     Multiset(final Map<T, MutableInt> valueMap) {
-        this.mapSupplier = Maps.mapType2Supplier(valueMap.getClass());
+        this.mapSupplier = (Supplier) Suppliers.ofMap(valueMap.getClass());
         this.valueMap = valueMap;
     }
 
@@ -346,7 +347,7 @@ public final class Multiset<T> implements Iterable<T> {
         return get(e);
     }
 
-    public Optional<Pair<T, Integer>> minOccurrences() {
+    public Optional<Pair<Integer, T>> minOccurrences() {
         if (size() == 0) {
             return Optional.empty();
         }
@@ -365,10 +366,10 @@ public final class Multiset<T> implements Iterable<T> {
             }
         }
 
-        return Optional.of(Pair.of(minCountElement, minCount));
+        return Optional.of(Pair.of(minCount, minCountElement));
     }
 
-    public Optional<Pair<T, Integer>> maxOccurrences() {
+    public Optional<Pair<Integer, T>> maxOccurrences() {
         if (size() == 0) {
             return Optional.empty();
         }
@@ -387,7 +388,7 @@ public final class Multiset<T> implements Iterable<T> {
             }
         }
 
-        return Optional.of(Pair.of(maxCountElement, maxCount));
+        return Optional.of(Pair.of(maxCount, maxCountElement));
     }
 
     /**
@@ -395,7 +396,7 @@ public final class Multiset<T> implements Iterable<T> {
      *
      * @return
      */
-    public Optional<Pair<List<T>, Integer>> allMinOccurrences() {
+    public Optional<Pair<Integer, List<T>>> allMinOccurrences() {
         if (size() == 0) {
             return Optional.empty();
         }
@@ -416,7 +417,7 @@ public final class Multiset<T> implements Iterable<T> {
             }
         }
 
-        return Optional.of(Pair.of(res, min));
+        return Optional.of(Pair.of(min, res));
     }
 
     /**
@@ -424,7 +425,7 @@ public final class Multiset<T> implements Iterable<T> {
      *
      * @return
      */
-    public Optional<Pair<List<T>, Integer>> allMaxOccurrences() {
+    public Optional<Pair<Integer, List<T>>> allMaxOccurrences() {
         if (size() == 0) {
             return Optional.empty();
         }
@@ -445,7 +446,7 @@ public final class Multiset<T> implements Iterable<T> {
             }
         }
 
-        return Optional.of(Pair.of(res, max));
+        return Optional.of(Pair.of(max, res));
     }
 
     /**

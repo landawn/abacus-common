@@ -81,7 +81,7 @@ public final class LongMultiset<T> implements Iterable<T> {
 
     @SuppressWarnings("rawtypes")
     public LongMultiset(final Class<? extends Map> valueMapType) {
-        this(Maps.mapType2Supplier(valueMapType));
+        this(Suppliers.ofMap(valueMapType));
     }
 
     @SuppressWarnings("rawtypes")
@@ -90,9 +90,10 @@ public final class LongMultiset<T> implements Iterable<T> {
         this.valueMap = this.mapSupplier.get();
     }
 
+    @SuppressWarnings("rawtypes")
     @Internal
     LongMultiset(final Map<T, MutableLong> valueMap) {
-        this.mapSupplier = Maps.mapType2Supplier(valueMap.getClass());
+        this.mapSupplier = (Supplier) Suppliers.ofMap(valueMap.getClass());
         this.valueMap = valueMap;
     }
 
@@ -389,7 +390,7 @@ public final class LongMultiset<T> implements Iterable<T> {
         return get(e);
     }
 
-    public Optional<Pair<T, Long>> minOccurrences() {
+    public Optional<Pair<Long, T>> minOccurrences() {
         if (size() == 0) {
             return Optional.empty();
         }
@@ -408,10 +409,10 @@ public final class LongMultiset<T> implements Iterable<T> {
             }
         }
 
-        return Optional.of(Pair.of(minCountElement, minCount));
+        return Optional.of(Pair.of(minCount, minCountElement));
     }
 
-    public Optional<Pair<T, Long>> maxOccurrences() {
+    public Optional<Pair<Long, T>> maxOccurrences() {
         if (size() == 0) {
             return Optional.empty();
         }
@@ -430,7 +431,7 @@ public final class LongMultiset<T> implements Iterable<T> {
             }
         }
 
-        return Optional.of(Pair.of(maxCountElement, maxCount));
+        return Optional.of(Pair.of(maxCount, maxCountElement));
     }
 
     /**
@@ -438,7 +439,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      *
      * @return
      */
-    public Optional<Pair<List<T>, Long>> allMinOccurrences() {
+    public Optional<Pair<Long, List<T>>> allMinOccurrences() {
         if (size() == 0) {
             return Optional.empty();
         }
@@ -459,7 +460,7 @@ public final class LongMultiset<T> implements Iterable<T> {
             }
         }
 
-        return Optional.of(Pair.of(res, min));
+        return Optional.of(Pair.of(min, res));
     }
 
     /**
@@ -467,7 +468,7 @@ public final class LongMultiset<T> implements Iterable<T> {
      *
      * @return
      */
-    public Optional<Pair<List<T>, Long>> allMaxOccurrences() {
+    public Optional<Pair<Long, List<T>>> allMaxOccurrences() {
         if (size() == 0) {
             return Optional.empty();
         }
@@ -488,7 +489,7 @@ public final class LongMultiset<T> implements Iterable<T> {
             }
         }
 
-        return Optional.of(Pair.of(res, max));
+        return Optional.of(Pair.of(max, res));
     }
 
     /**

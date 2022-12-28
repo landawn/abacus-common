@@ -83,7 +83,7 @@ public class Multimap<K, E, V extends Collection<E>> {
 
     @SuppressWarnings("rawtypes")
     Multimap(final Class<? extends Map> mapType, final Class<? extends Collection> valueType) {
-        this(Maps.mapType2Supplier(mapType), valueType2Supplier(valueType));
+        this(Suppliers.ofMap(mapType), valueType2Supplier(valueType));
     }
 
     Multimap(final Supplier<? extends Map<K, V>> mapSupplier, final Supplier<? extends V> valueSupplier) {
@@ -94,7 +94,7 @@ public class Multimap<K, E, V extends Collection<E>> {
 
     @Internal
     Multimap(final Map<K, V> valueMap, final Supplier<? extends V> valueSupplier) {
-        this.mapSupplier = Maps.mapType2Supplier(valueMap.getClass());
+        this.mapSupplier = Suppliers.ofMap(valueMap.getClass());
         this.valueSupplier = valueSupplier;
         this.valueMap = valueMap;
     }
