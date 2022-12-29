@@ -120,7 +120,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
     /**
      *
      * @param <T>
-     * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
      * @return
      */
@@ -129,7 +129,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
     /**
      *
      * @param <T>
-     * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
      * @param config
      * @return
@@ -139,7 +139,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
     /**
      *
      * @param <T>
-     * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
      * @return
      */
@@ -148,7 +148,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
     /**
      *
      * @param <T>
-     * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
      * @param config
      * @return
@@ -158,7 +158,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
     /**
      *
      * @param <T>
-     * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
      * @param closeInputStreamWhenStreamIsClosed
      * @return
@@ -168,7 +168,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
     /**
      *
      * @param <T>
-     * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
      * @param closeInputStreamWhenStreamIsClosed
      * @param config
@@ -180,7 +180,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
     /**
      *
      * @param <T>
-     * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
      * @param closeReaderWhenStreamIsClosed
      * @return
@@ -190,7 +190,7 @@ public interface JSONParser extends Parser<JSONSerializationConfig, JSONDeserial
     /**
      *
      * @param <T>
-     * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
      * @param closeReaderWhenStreamIsClosed
      * @param config

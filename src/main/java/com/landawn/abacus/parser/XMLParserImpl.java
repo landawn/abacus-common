@@ -40,7 +40,7 @@ import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.exception.ParseException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
-import com.landawn.abacus.parser.ParserUtil.EntityInfo;
+import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.Type.SerializationType;
@@ -204,7 +204,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                 break;
 
             case ENTITY:
-                writeEntity(bw, type, obj, configToUse, indentation, serializedObjects);
+                writeBean(bw, type, obj, configToUse, indentation, serializedObjects);
 
                 break;
 
@@ -230,7 +230,7 @@ final class XMLParserImpl extends AbstractXMLParser {
 
             default:
                 throw new ParseException("Unsupported class: " + ClassUtil.getCanonicalClassName(cls)
-                        + ". Only Array/List/Map and Entity class with getter/setter methods are supported");
+                        + ". Only Array/List/Map and Bean class with getter/setter methods are supported");
         }
 
         if (flush) {
@@ -248,23 +248,23 @@ final class XMLParserImpl extends AbstractXMLParser {
      * @param serializedObjects
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    protected void writeEntity(final BufferedXMLWriter bw, final Type<Object> type, final Object obj, final XMLSerializationConfig config,
+    protected void writeBean(final BufferedXMLWriter bw, final Type<Object> type, final Object obj, final XMLSerializationConfig config,
             final String indentation, final IdentityHashSet<Object> serializedObjects) throws IOException {
         if (hasCircularReference(bw, obj, serializedObjects)) {
             return;
         }
 
         final Class<?> cls = type.clazz();
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
 
-        if (N.isNullOrEmpty(entityInfo.jsonXmlSerializablePropInfos)) {
+        if (N.isNullOrEmpty(beanInfo.jsonXmlSerializablePropInfos)) {
             throw new ParseException("No serializable property is found in class: " + ClassUtil.getCanonicalClassName(cls));
         }
 
         final boolean tagByPropertyName = config.tagByPropertyName();
         final boolean ignoreTypeInfo = config.ignoreTypeInfo();
         final boolean isPrettyFormat = config.prettyFormat();
-        final NamingPolicy jsonXmlNamingPolicy = config.getPropNamingPolicy() == null ? entityInfo.jsonXmlNamingPolicy : config.getPropNamingPolicy();
+        final NamingPolicy jsonXmlNamingPolicy = config.getPropNamingPolicy() == null ? beanInfo.jsonXmlNamingPolicy : config.getPropNamingPolicy();
         final int nameTagIdx = jsonXmlNamingPolicy.ordinal();
 
         if (isPrettyFormat && indentation != null) {
@@ -274,15 +274,15 @@ final class XMLParserImpl extends AbstractXMLParser {
 
         if (tagByPropertyName) {
             if (ignoreTypeInfo) {
-                bw.write(entityInfo.xmlNameTags[nameTagIdx].namedStart);
+                bw.write(beanInfo.xmlNameTags[nameTagIdx].namedStart);
             } else {
-                bw.write(entityInfo.xmlNameTags[nameTagIdx].namedStartWithType);
+                bw.write(beanInfo.xmlNameTags[nameTagIdx].namedStartWithType);
             }
         } else {
             if (ignoreTypeInfo) {
-                bw.write(entityInfo.xmlNameTags[nameTagIdx].epStart);
+                bw.write(beanInfo.xmlNameTags[nameTagIdx].epStart);
             } else {
-                bw.write(entityInfo.xmlNameTags[nameTagIdx].epStartWithType);
+                bw.write(beanInfo.xmlNameTags[nameTagIdx].epStartWithType);
             }
         }
 
@@ -299,9 +299,9 @@ final class XMLParserImpl extends AbstractXMLParser {
         }
 
         if (tagByPropertyName) {
-            bw.write(entityInfo.xmlNameTags[nameTagIdx].namedEnd);
+            bw.write(beanInfo.xmlNameTags[nameTagIdx].namedEnd);
         } else {
-            bw.write(entityInfo.xmlNameTags[nameTagIdx].epEnd);
+            bw.write(beanInfo.xmlNameTags[nameTagIdx].epEnd);
         }
     }
 
@@ -322,7 +322,7 @@ final class XMLParserImpl extends AbstractXMLParser {
         }
 
         final Class<?> cls = type.clazz();
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
 
         final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(cls);
         final boolean ignoreNullProperty = (config.getExclusion() == Exclusion.NULL) || (config.getExclusion() == Exclusion.DEFAULT);
@@ -330,11 +330,11 @@ final class XMLParserImpl extends AbstractXMLParser {
         final boolean tagByPropertyName = config.tagByPropertyName();
         final boolean ignoreTypeInfo = config.ignoreTypeInfo();
         final boolean isPrettyFormat = config.prettyFormat();
-        final NamingPolicy jsonXmlNamingPolicy = config.getPropNamingPolicy() == null ? entityInfo.jsonXmlNamingPolicy : config.getPropNamingPolicy();
+        final NamingPolicy jsonXmlNamingPolicy = config.getPropNamingPolicy() == null ? beanInfo.jsonXmlNamingPolicy : config.getPropNamingPolicy();
         final int nameTagIdx = jsonXmlNamingPolicy.ordinal();
 
         final String nextIndentation = isPrettyFormat ? ((propIndentation == null ? N.EMPTY_STRING : propIndentation) + config.getIndentation()) : null;
-        final PropInfo[] propInfoList = config.skipTransientField() ? entityInfo.nonTransientSeriPropInfos : entityInfo.jsonXmlSerializablePropInfos;
+        final PropInfo[] propInfoList = config.skipTransientField() ? beanInfo.nonTransientSeriPropInfos : beanInfo.jsonXmlSerializablePropInfos;
         PropInfo propInfo = null;
         String propName = null;
         Object propValue = null;
@@ -506,7 +506,7 @@ final class XMLParserImpl extends AbstractXMLParser {
     }
 
     /**
-     * Write map entity.
+     * Write map bean.
      *
      * @param bw
      * @param type TODO
@@ -1199,8 +1199,8 @@ final class XMLParserImpl extends AbstractXMLParser {
             case ENTITY: {
                 final boolean ignoreUnmatchedProperty = configToUse.ignoreUnmatchedProperty();
                 final Collection<String> ignoredClassPropNames = configToUse.getIgnoredPropNames(targetClass);
-                EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
-                final Object result = entityInfo.createEntityResult();
+                BeanInfo beanInfo = ParserUtil.getBeanInfo(targetClass);
+                final Object result = beanInfo.createBeanResult();
                 int attrCount = 0;
 
                 for (int event = xmlReader.next(); xmlReader.hasNext(); event = xmlReader.next()) {
@@ -1210,7 +1210,7 @@ final class XMLParserImpl extends AbstractXMLParser {
 
                             if (propName == null) {
                                 propName = xmlReader.getLocalName();
-                                propInfo = entityInfo.getPropInfo(propName);
+                                propInfo = beanInfo.getPropInfo(propName);
 
                                 if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
                                     continue;
@@ -1262,7 +1262,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                                         }
                                     }
                                 } else {
-                                    if (propType.isMap() || propType.isEntity() || propType.isMapEntity() || propType.isObjectType()) {
+                                    if (propType.isMap() || propType.isBean() || propType.isMapEntity() || propType.isObjectType()) {
                                         propValue = readByStreamParser(propType.isObjectType() ? Map.class : propType.clazz(), xmlReader, configToUse, propType,
                                                 propInfo);
 
@@ -1357,7 +1357,7 @@ final class XMLParserImpl extends AbstractXMLParser {
 
                         case XMLStreamConstants.END_ELEMENT: {
                             if (propName == null) {
-                                return entityInfo.finishEntityResult(result);
+                                return beanInfo.finishBeanResult(result);
                             } else {
                                 if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
                                         || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
@@ -1454,7 +1454,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                                         }
                                     }
                                 } else {
-                                    if (propType.isMap() || propType.isEntity() || propType.isMapEntity() || propType.isObjectType()) {
+                                    if (propType.isMap() || propType.isBean() || propType.isMapEntity() || propType.isObjectType()) {
                                         propValue = readByStreamParser(propType.isObjectType() ? Map.class : propType.clazz(), xmlReader, configToUse, propType,
                                                 null);
 
@@ -1582,7 +1582,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                     }
                 }
 
-                final MapEntity mapEntity = N.newEntity(MapEntity.class, xmlReader.getLocalName());
+                final MapEntity mapEntity = N.newBean(MapEntity.class, xmlReader.getLocalName());
                 int attrCount = 0;
 
                 for (int event = xmlReader.next(); xmlReader.hasNext(); event = xmlReader.next()) {
@@ -1625,7 +1625,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                                         }
                                     }
                                 } else {
-                                    if (propType.isMap() || propType.isEntity() || propType.isMapEntity() || propType.isObjectType()) {
+                                    if (propType.isMap() || propType.isBean() || propType.isMapEntity() || propType.isObjectType()) {
                                         propValue = readByStreamParser(propType.isObjectType() ? MapEntity.class : propType.clazz(), xmlReader, configToUse,
                                                 propType, null);
 
@@ -1916,7 +1916,7 @@ final class XMLParserImpl extends AbstractXMLParser {
 
             default:
                 throw new ParseException("Unsupported class type: " + ClassUtil.getCanonicalClassName(targetClass)
-                        + ". Only array, collection, map and entity types are supported");
+                        + ". Only array, collection, map and bean types are supported");
         }
     }
 
@@ -2008,8 +2008,8 @@ final class XMLParserImpl extends AbstractXMLParser {
             case ENTITY: {
                 final boolean ignoreUnmatchedProperty = configToUse.ignoreUnmatchedProperty();
                 final Collection<String> ignoredClassPropNames = configToUse.getIgnoredPropNames(typeClass);
-                final EntityInfo entityInfo = ParserUtil.getEntityInfo(typeClass);
-                final Object result = entityInfo.createEntityResult();
+                final BeanInfo beanInfo = ParserUtil.getBeanInfo(typeClass);
+                final Object result = beanInfo.createBeanResult();
 
                 for (int i = 0; i < propNodeLength; i++) {
                     propNode = propNodes.item(i);
@@ -2025,7 +2025,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                     }
 
                     propName = isTagByPropertyName ? propNode.getNodeName() : XMLUtil.getAttribute(propNode, XMLConstants.NAME);
-                    propInfo = entityInfo.getPropInfo(propName);
+                    propInfo = beanInfo.getPropInfo(propName);
 
                     if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
                         continue;
@@ -2057,7 +2057,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                     }
                 }
 
-                return entityInfo.finishEntityResult(result);
+                return beanInfo.finishBeanResult(result);
             }
 
             case MAP: {
@@ -2144,7 +2144,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                     }
                 }
 
-                MapEntity mResult = N.newEntity(MapEntity.class, node.getNodeName());
+                MapEntity mResult = N.newBean(MapEntity.class, node.getNodeName());
 
                 propNodes = node.getChildNodes();
                 propNodeLength = (propNodes == null) ? 0 : propNodes.getLength();
@@ -2318,7 +2318,7 @@ final class XMLParserImpl extends AbstractXMLParser {
 
             default:
                 throw new ParseException("Unsupported class type: " + ClassUtil.getCanonicalClassName(targetClass)
-                        + ". Only array, collection, map and entity types are supported");
+                        + ". Only array, collection, map and bean types are supported");
         }
     }
 
@@ -2367,7 +2367,7 @@ final class XMLParserImpl extends AbstractXMLParser {
         if (XMLUtil.isTextElement(propNode)) {
             propValue = getPropValue(propName, propType, propInfo, propNode);
         } else {
-            if (propType.isMap() || propType.isEntity() || propType.isMapEntity()) {
+            if (propType.isMap() || propType.isBean() || propType.isMapEntity()) {
                 if (isProp) {
                     propNode = checkOneNode(propNode);
                 }
@@ -2410,10 +2410,10 @@ final class XMLParserImpl extends AbstractXMLParser {
         Type<?> propEleType = null;
 
         if (propType.clazz().isArray()
-                && (ClassUtil.isEntity(propType.getElementType().clazz()) || Map.class.isAssignableFrom(propType.getElementType().clazz()))) {
+                && (ClassUtil.isBeanClass(propType.getElementType().clazz()) || Map.class.isAssignableFrom(propType.getElementType().clazz()))) {
             propEleType = propType.getElementType();
         } else if (propType.getParameterTypes().length == 1
-                && (ClassUtil.isEntity(propType.getParameterTypes()[0].clazz()) || Map.class.isAssignableFrom(propType.getParameterTypes()[0].clazz()))) {
+                && (ClassUtil.isBeanClass(propType.getParameterTypes()[0].clazz()) || Map.class.isAssignableFrom(propType.getParameterTypes()[0].clazz()))) {
             propEleType = propType.getParameterTypes()[0];
         } else {
             propEleType = N.typeOf(Map.class);

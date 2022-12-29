@@ -66,7 +66,7 @@ public final class EscapeUtil {
      * @since 3.0
      */
     public static final CharSequenceTranslator ESCAPE_JAVA = new LookupTranslator(new String[][] { { "\"", "\\\"" }, { "\\", "\\\\" }, })
-            .with(new LookupTranslator(EntityArrays.JAVA_CTRL_CHARS_ESCAPE()))
+            .with(new LookupTranslator(BeanArrays.JAVA_CTRL_CHARS_ESCAPE()))
             .with(JavaUnicodeEscaper.outsideOf(32, 0x7f));
 
     /**
@@ -80,7 +80,7 @@ public final class EscapeUtil {
      */
     public static final CharSequenceTranslator ESCAPE_ECMASCRIPT = new AggregateTranslator(
             new LookupTranslator(new String[][] { { "'", "\\'" }, { "\"", "\\\"" }, { "\\", "\\\\" }, { "/", "\\/" } }),
-            new LookupTranslator(EntityArrays.JAVA_CTRL_CHARS_ESCAPE()), JavaUnicodeEscaper.outsideOf(32, 0x7f));
+            new LookupTranslator(BeanArrays.JAVA_CTRL_CHARS_ESCAPE()), JavaUnicodeEscaper.outsideOf(32, 0x7f));
 
     /**
      * Translator object for escaping Json.
@@ -93,7 +93,7 @@ public final class EscapeUtil {
      */
     public static final CharSequenceTranslator ESCAPE_JSON = new AggregateTranslator(
             new LookupTranslator(new String[][] { { "\"", "\\\"" }, { "\\", "\\\\" }, { "/", "\\/" } }),
-            new LookupTranslator(EntityArrays.JAVA_CTRL_CHARS_ESCAPE()), JavaUnicodeEscaper.outsideOf(32, 0x7f));
+            new LookupTranslator(BeanArrays.JAVA_CTRL_CHARS_ESCAPE()), JavaUnicodeEscaper.outsideOf(32, 0x7f));
 
     /**
      * Translator object for escaping XML 1.0.
@@ -104,8 +104,8 @@ public final class EscapeUtil {
      *
      * @since 3.3
      */
-    public static final CharSequenceTranslator ESCAPE_XML10 = new AggregateTranslator(new LookupTranslator(EntityArrays.BASIC_ESCAPE()),
-            new LookupTranslator(EntityArrays.APOS_ESCAPE()),
+    public static final CharSequenceTranslator ESCAPE_XML10 = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_ESCAPE()),
+            new LookupTranslator(BeanArrays.APOS_ESCAPE()),
             new LookupTranslator(new String[][] { { "\u0000", N.EMPTY_STRING }, { "\u0001", N.EMPTY_STRING }, { "\u0002", N.EMPTY_STRING },
                     { "\u0003", N.EMPTY_STRING }, { "\u0004", N.EMPTY_STRING }, { "\u0005", N.EMPTY_STRING }, { "\u0006", N.EMPTY_STRING },
                     { "\u0007", N.EMPTY_STRING }, { "\u0008", N.EMPTY_STRING }, { "\u000b", N.EMPTY_STRING }, { "\u000c", N.EMPTY_STRING },
@@ -114,7 +114,7 @@ public final class EscapeUtil {
                     { "\u0016", N.EMPTY_STRING }, { "\u0017", N.EMPTY_STRING }, { "\u0018", N.EMPTY_STRING }, { "\u0019", N.EMPTY_STRING },
                     { "\u001a", N.EMPTY_STRING }, { "\u001b", N.EMPTY_STRING }, { "\u001c", N.EMPTY_STRING }, { "\u001d", N.EMPTY_STRING },
                     { "\u001e", N.EMPTY_STRING }, { "\u001f", N.EMPTY_STRING }, { "\ufffe", N.EMPTY_STRING }, { "\uffff", N.EMPTY_STRING } }),
-            NumericEntityEscaper.between(0x7f, 0x84), NumericEntityEscaper.between(0x86, 0x9f), new UnicodeUnpairedSurrogateRemover());
+            NumericBeanEscaper.between(0x7f, 0x84), NumericBeanEscaper.between(0x86, 0x9f), new UnicodeUnpairedSurrogateRemover());
 
     /**
      * Translator object for escaping XML 1.1.
@@ -125,12 +125,12 @@ public final class EscapeUtil {
      *
      * @since 3.3
      */
-    public static final CharSequenceTranslator ESCAPE_XML11 = new AggregateTranslator(new LookupTranslator(EntityArrays.BASIC_ESCAPE()),
-            new LookupTranslator(EntityArrays.APOS_ESCAPE()),
+    public static final CharSequenceTranslator ESCAPE_XML11 = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_ESCAPE()),
+            new LookupTranslator(BeanArrays.APOS_ESCAPE()),
             new LookupTranslator(new String[][] { { "\u0000", N.EMPTY_STRING }, { "\u000b", "&#11;" }, { "\u000c", "&#12;" }, { "\ufffe", N.EMPTY_STRING },
                     { "\uffff", N.EMPTY_STRING } }),
-            NumericEntityEscaper.between(0x1, 0x8), NumericEntityEscaper.between(0xe, 0x1f), NumericEntityEscaper.between(0x7f, 0x84),
-            NumericEntityEscaper.between(0x86, 0x9f), new UnicodeUnpairedSurrogateRemover());
+            NumericBeanEscaper.between(0x1, 0x8), NumericBeanEscaper.between(0xe, 0x1f), NumericBeanEscaper.between(0x7f, 0x84),
+            NumericBeanEscaper.between(0x86, 0x9f), new UnicodeUnpairedSurrogateRemover());
 
     /**
      * Translator object for escaping HTML version 3.0.
@@ -141,8 +141,8 @@ public final class EscapeUtil {
      *
      * @since 3.0
      */
-    public static final CharSequenceTranslator ESCAPE_HTML3 = new AggregateTranslator(new LookupTranslator(EntityArrays.BASIC_ESCAPE()),
-            new LookupTranslator(EntityArrays.ISO8859_1_ESCAPE()));
+    public static final CharSequenceTranslator ESCAPE_HTML3 = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_ESCAPE()),
+            new LookupTranslator(BeanArrays.ISO8859_1_ESCAPE()));
 
     /**
      * Translator object for escaping HTML version 4.0.
@@ -153,8 +153,8 @@ public final class EscapeUtil {
      *
      * @since 3.0
      */
-    public static final CharSequenceTranslator ESCAPE_HTML4 = new AggregateTranslator(new LookupTranslator(EntityArrays.BASIC_ESCAPE()),
-            new LookupTranslator(EntityArrays.ISO8859_1_ESCAPE()), new LookupTranslator(EntityArrays.HTML40_EXTENDED_ESCAPE()));
+    public static final CharSequenceTranslator ESCAPE_HTML4 = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_ESCAPE()),
+            new LookupTranslator(BeanArrays.ISO8859_1_ESCAPE()), new LookupTranslator(BeanArrays.HTML40_EXTENDED_ESCAPE()));
 
     /**
      * Translator object for escaping individual Comma Separated Values.
@@ -180,7 +180,7 @@ public final class EscapeUtil {
      */
     // TODO: throw "illegal character: \92" as an Exception if a \ on the end of the Java (as per the compiler)?
     public static final CharSequenceTranslator UNESCAPE_JAVA = new AggregateTranslator(new OctalUnescaper(), // .between('\1', '\377'),
-            new UnicodeUnescaper(), new LookupTranslator(EntityArrays.JAVA_CTRL_CHARS_UNESCAPE()),
+            new UnicodeUnescaper(), new LookupTranslator(BeanArrays.JAVA_CTRL_CHARS_UNESCAPE()),
             new LookupTranslator(new String[][] { { "\\\\", "\\" }, { "\\\"", "\"" }, { "\\'", "'" }, { "\\", "" } }));
 
     /**
@@ -214,8 +214,8 @@ public final class EscapeUtil {
      *
      * @since 3.0
      */
-    public static final CharSequenceTranslator UNESCAPE_HTML3 = new AggregateTranslator(new LookupTranslator(EntityArrays.BASIC_UNESCAPE()),
-            new LookupTranslator(EntityArrays.ISO8859_1_UNESCAPE()), new NumericEntityUnescaper());
+    public static final CharSequenceTranslator UNESCAPE_HTML3 = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_UNESCAPE()),
+            new LookupTranslator(BeanArrays.ISO8859_1_UNESCAPE()), new NumericBeanUnescaper());
 
     /**
      * Translator object for unescaping escaped HTML 4.0.
@@ -226,9 +226,8 @@ public final class EscapeUtil {
      *
      * @since 3.0
      */
-    public static final CharSequenceTranslator UNESCAPE_HTML4 = new AggregateTranslator(new LookupTranslator(EntityArrays.BASIC_UNESCAPE()),
-            new LookupTranslator(EntityArrays.ISO8859_1_UNESCAPE()), new LookupTranslator(EntityArrays.HTML40_EXTENDED_UNESCAPE()),
-            new NumericEntityUnescaper());
+    public static final CharSequenceTranslator UNESCAPE_HTML4 = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_UNESCAPE()),
+            new LookupTranslator(BeanArrays.ISO8859_1_UNESCAPE()), new LookupTranslator(BeanArrays.HTML40_EXTENDED_UNESCAPE()), new NumericBeanUnescaper());
 
     /**
      * Translator object for unescaping escaped XML.
@@ -239,8 +238,8 @@ public final class EscapeUtil {
      *
      * @since 3.0
      */
-    public static final CharSequenceTranslator UNESCAPE_XML = new AggregateTranslator(new LookupTranslator(EntityArrays.BASIC_UNESCAPE()),
-            new LookupTranslator(EntityArrays.APOS_UNESCAPE()), new NumericEntityUnescaper());
+    public static final CharSequenceTranslator UNESCAPE_XML = new AggregateTranslator(new LookupTranslator(BeanArrays.BASIC_UNESCAPE()),
+            new LookupTranslator(BeanArrays.APOS_UNESCAPE()), new NumericBeanUnescaper());
 
     /**
      * Translator object for unescaping escaped Comma Separated Value entries.
@@ -412,14 +411,14 @@ public final class EscapeUtil {
      *
      * <p>Supports all known HTML 4.0 entities, including funky accents.
      * Note that the commonly used apostrophe escape character (&amp;apos;)
-     * is not a legal entity and so is not supported). </p>
+     * is not a legal bean and so is not supported). </p>
      *
      * @param input the {@code String} to escape, may be null
      * @return a new escaped {@code String}, {@code null} if null string input
      *
      * @see <a href="http://hotwired.lycos.com/webmonkey/reference/special_characters/">ISO Entities</a>
      * @see <a href="http://www.w3.org/TR/REC-html32#latin1">HTML 3.2 Character Entities for ISO Latin-1</a>
-     * @see <a href="http://www.w3.org/TR/REC-html40/sgml/entities.html">HTML 4.0 Character entity references</a>
+     * @see <a href="http://www.w3.org/TR/REC-html40/sgml/entities.html">HTML 4.0 Character bean references</a>
      * @see <a href="http://www.w3.org/TR/html401/charset.html#h-5.3">HTML 4.01 Character References</a>
      * @see <a href="http://www.w3.org/TR/html401/charset.html#code-position">HTML 4.01 Code positions</a>
      *
@@ -444,14 +443,14 @@ public final class EscapeUtil {
 
     //-----------------------------------------------------------------------
     /**
-     * <p>Unescapes a string containing entity escapes to a string
+     * <p>Unescapes a string containing bean escapes to a string
      * containing the actual Unicode characters corresponding to the
      * escapes. Supports HTML 4.0 entities.</p>
      *
      * <p>For example, the string {@code "&lt;Fran&ccedil;ais&gt;"}
      * will become {@code "<Français>"}</p>
      *
-     * <p>If an entity is unrecognized, it is left alone, and inserted
+     * <p>If a bean is unrecognized, it is left alone, and inserted
      * verbatim into the result string. e.g. {@code "&gt;&zzzz;x"} will
      * become {@code ">&zzzz;x"}.</p>
      *
@@ -465,7 +464,7 @@ public final class EscapeUtil {
     }
 
     /**
-     * <p>Unescapes a string containing entity escapes to a string
+     * <p>Unescapes a string containing bean escapes to a string
      * containing the actual Unicode characters corresponding to the
      * escapes. Supports only HTML 3.0 entities.</p>
      *
@@ -542,7 +541,7 @@ public final class EscapeUtil {
 
     //-----------------------------------------------------------------------
     /**
-     * <p>Unescapes a string containing XML entity escapes to a string
+     * <p>Unescapes a string containing XML bean escapes to a string
      * containing the actual Unicode characters corresponding to the
      * escapes.</p>
      *
@@ -860,11 +859,11 @@ public final class EscapeUtil {
     }
 
     /**
-     * Translates codepoints to their XML numeric entity escaped value.
+     * Translates codepoints to their XML numeric bean escaped value.
      *
      * @since 3.0
      */
-    static class NumericEntityEscaper extends CodePointTranslator {
+    static class NumericBeanEscaper extends CodePointTranslator {
 
         /** The below. */
         private final int below;
@@ -876,7 +875,7 @@ public final class EscapeUtil {
         private final boolean between;
 
         /**
-         * <p>Constructs a <code>NumericEntityEscaper</code> for the specified range. This is
+         * <p>Constructs a <code>NumericBeanEscaper</code> for the specified range. This is
          * the underlying method for the other constructors/builders. The <code>below</code>
          * and <code>above</code> boundaries are inclusive when <code>between</code> is
          * <code>true</code> and exclusive when it is <code>false</code>. </p>
@@ -885,59 +884,59 @@ public final class EscapeUtil {
          * @param above int value representing the highest codepoint boundary
          * @param between whether to escape between the boundaries or outside them
          */
-        private NumericEntityEscaper(final int below, final int above, final boolean between) {
+        private NumericBeanEscaper(final int below, final int above, final boolean between) {
             this.below = below;
             this.above = above;
             this.between = between;
         }
 
         /**
-         * <p>Constructs a <code>NumericEntityEscaper</code> for all characters. </p>
+         * <p>Constructs a <code>NumericBeanEscaper</code> for all characters. </p>
          */
-        public NumericEntityEscaper() {
+        public NumericBeanEscaper() {
             this(0, Integer.MAX_VALUE, true);
         }
 
         /**
-         * <p>Constructs a <code>NumericEntityEscaper</code> below the specified value (exclusive). </p>
+         * <p>Constructs a <code>NumericBeanEscaper</code> below the specified value (exclusive). </p>
          *
          * @param codepoint below which to escape
          * @return
          */
-        public static NumericEntityEscaper below(final int codepoint) {
+        public static NumericBeanEscaper below(final int codepoint) {
             return outsideOf(codepoint, Integer.MAX_VALUE);
         }
 
         /**
-         * <p>Constructs a <code>NumericEntityEscaper</code> above the specified value (exclusive). </p>
+         * <p>Constructs a <code>NumericBeanEscaper</code> above the specified value (exclusive). </p>
          *
          * @param codepoint above which to escape
          * @return
          */
-        public static NumericEntityEscaper above(final int codepoint) {
+        public static NumericBeanEscaper above(final int codepoint) {
             return outsideOf(0, codepoint);
         }
 
         /**
-         * <p>Constructs a <code>NumericEntityEscaper</code> between the specified values (inclusive). </p>
+         * <p>Constructs a <code>NumericBeanEscaper</code> between the specified values (inclusive). </p>
          *
          * @param codepointLow above which to escape
          * @param codepointHigh below which to escape
          * @return
          */
-        public static NumericEntityEscaper between(final int codepointLow, final int codepointHigh) {
-            return new NumericEntityEscaper(codepointLow, codepointHigh, true);
+        public static NumericBeanEscaper between(final int codepointLow, final int codepointHigh) {
+            return new NumericBeanEscaper(codepointLow, codepointHigh, true);
         }
 
         /**
-         * <p>Constructs a <code>NumericEntityEscaper</code> outside of the specified values (exclusive). </p>
+         * <p>Constructs a <code>NumericBeanEscaper</code> outside of the specified values (exclusive). </p>
          *
          * @param codepointLow below which to escape
          * @param codepointHigh above which to escape
          * @return
          */
-        public static NumericEntityEscaper outsideOf(final int codepointLow, final int codepointHigh) {
-            return new NumericEntityEscaper(codepointLow, codepointHigh, false);
+        public static NumericBeanEscaper outsideOf(final int codepointLow, final int codepointHigh) {
+            return new NumericBeanEscaper(codepointLow, codepointHigh, false);
         }
 
         /**
@@ -1213,7 +1212,7 @@ public final class EscapeUtil {
      *
      * @since 3.0
      */
-    static class NumericEntityUnescaper extends CharSequenceTranslator {
+    static class NumericBeanUnescaper extends CharSequenceTranslator {
 
         /**
          * The Enum OPTION.
@@ -1237,19 +1236,19 @@ public final class EscapeUtil {
          *
          * The constructor takes a list of options, only one type of which is currently
          * available (whether to allow, error or ignore the semi-colon on the end of a
-         * numeric entity to being missing).
+         * numeric bean to being missing).
          *
          * For example, to support numeric entities without a ';':
-         *    new NumericEntityUnescaper(NumericEntityUnescaper.OPTION.semiColonOptional)
+         *    new NumericBeanUnescaper(NumericBeanUnescaper.OPTION.semiColonOptional)
          * and to throw an IllegalArgumentException when they're missing:
-         *    new NumericEntityUnescaper(NumericEntityUnescaper.OPTION.errorIfNoSemiColon)
+         *    new NumericBeanUnescaper(NumericBeanUnescaper.OPTION.errorIfNoSemiColon)
          *
          * Note that the default behaviour is to ignore them.
          *
          * @param options to apply to this unescaper
          */
         @SafeVarargs
-        public NumericEntityUnescaper(final OPTION... options) {
+        public NumericBeanUnescaper(final OPTION... options) {
             if (options.length > 0) {
                 this.options = EnumSet.copyOf(Arrays.asList(options));
             } else {
@@ -1302,27 +1301,27 @@ public final class EscapeUtil {
                     if (isSet(OPTION.semiColonRequired)) {
                         return 0;
                     } else if (isSet(OPTION.errorIfNoSemiColon)) {
-                        throw new IllegalArgumentException("Semi-colon required at end of numeric entity");
+                        throw new IllegalArgumentException("Semi-colon required at end of numeric bean");
                     }
                 }
 
-                int entityValue;
+                int beanValue;
                 try {
                     if (isHex) {
-                        entityValue = Integer.parseInt(input.subSequence(start, end).toString(), 16);
+                        beanValue = Integer.parseInt(input.subSequence(start, end).toString(), 16);
                     } else {
-                        entityValue = Integer.parseInt(input.subSequence(start, end).toString(), 10);
+                        beanValue = Integer.parseInt(input.subSequence(start, end).toString(), 10);
                     }
                 } catch (final NumberFormatException nfe) {
                     return 0;
                 }
 
-                if (entityValue > 0xFFFF) {
-                    final char[] chrs = Character.toChars(entityValue);
+                if (beanValue > 0xFFFF) {
+                    final char[] chrs = Character.toChars(beanValue);
                     out.write(chrs[0]);
                     out.write(chrs[1]);
                 } else {
-                    out.write(entityValue);
+                    out.write(beanValue);
                 }
 
                 return 2 + end - start + (isHex ? 1 : 0) + (semiNext ? 1 : 0);
@@ -1536,13 +1535,13 @@ public final class EscapeUtil {
     }
 
     /**
-     * Class holding various entity data for HTML and XML - generally for use with
+     * Class holding various bean data for HTML and XML - generally for use with
      * the LookupTranslator.
      * All arrays are of length [*][2].
      *
      * @since 3.0
      */
-    static class EntityArrays {
+    static class BeanArrays {
 
         /**
          * Mapping to escape <a href="https://secure.wikimedia.org/wikipedia/en/wiki/ISO/IEC_8859-1">ISO-8859-1</a>
@@ -1664,7 +1663,7 @@ public final class EscapeUtil {
         private static final String[][] ISO8859_1_UNESCAPE = invert(ISO8859_1_ESCAPE);
 
         /**
-         * Mapping to escape additional <a href="http://www.w3.org/TR/REC-html40/sgml/entities.html">character entity
+         * Mapping to escape additional <a href="http://www.w3.org/TR/REC-html40/sgml/entities.html">character bean
          * references</a>. Note that this must be used with {@link #ISO8859_1_ESCAPE()} to get the full list of
          * HTML 4.0 character entities.
          * @return
@@ -1911,7 +1910,7 @@ public final class EscapeUtil {
         private static final String[][] BASIC_UNESCAPE = invert(BASIC_ESCAPE);
 
         /**
-         * Mapping to escape the apostrophe character to its XML character entity.
+         * Mapping to escape the apostrophe character to its XML character bean.
          * @return
          */
         public static String[][] APOS_ESCAPE() {

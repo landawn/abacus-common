@@ -764,36 +764,35 @@ public class Difference<L, R> {
 
         /**
          *
-         * @param entity1
-         * @param entity2
+         * @param bean1
+         * @param bean2
          * @return
          */
-        public static MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object entity1,
-                final Object entity2) {
-            if (!ClassUtil.isEntity(entity1.getClass()) || !ClassUtil.isEntity(entity2.getClass())) {
+        public static MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object bean1, final Object bean2) {
+            if (!ClassUtil.isBeanClass(bean1.getClass()) || !ClassUtil.isBeanClass(bean2.getClass())) {
                 throw new IllegalArgumentException(
-                        entity1.getClass().getCanonicalName() + " or " + entity2.getClass().getCanonicalName() + " is not an entity class");
+                        bean1.getClass().getCanonicalName() + " or " + bean2.getClass().getCanonicalName() + " is not a bean class");
             }
 
-            return of(Maps.entity2Map(entity1), Maps.entity2Map(entity2));
+            return of(Maps.bean2Map(bean1), Maps.bean2Map(bean2));
         }
 
         /**
          *
-         * @param entity1
-         * @param entity2
+         * @param bean1
+         * @param bean2
          * @param valueEquivalence
          * @return
          */
-        public static MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object entity1, final Object entity2,
+        public static MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object bean1, final Object bean2,
                 final BiPredicate<?, ?> valueEquivalence) {
-            if (!ClassUtil.isEntity(entity1.getClass()) || !ClassUtil.isEntity(entity2.getClass())) {
+            if (!ClassUtil.isBeanClass(bean1.getClass()) || !ClassUtil.isBeanClass(bean2.getClass())) {
                 throw new IllegalArgumentException(
-                        entity1.getClass().getCanonicalName() + " or " + entity2.getClass().getCanonicalName() + " is not an entity class");
+                        bean1.getClass().getCanonicalName() + " or " + bean2.getClass().getCanonicalName() + " is not a bean class");
             }
 
-            final Map<String, Object> map1 = Maps.entity2Map(entity1);
-            final Map<String, Object> map2 = Maps.entity2Map(entity2);
+            final Map<String, Object> map1 = Maps.bean2Map(bean1);
+            final Map<String, Object> map2 = Maps.bean2Map(bean2);
             final BiPredicate<Object, Object> valueEquivalenceToUse = (BiPredicate<Object, Object>) valueEquivalence;
 
             return of(map1, map2, valueEquivalenceToUse);

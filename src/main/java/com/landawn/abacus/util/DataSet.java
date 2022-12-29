@@ -55,18 +55,18 @@ import com.landawn.abacus.util.stream.Stream;
 public interface DataSet {
 
     //    /**
-    //     * Returns the entity name associated with the query.
+    //     * Returns the bean name associated with the query.
     //     *
     //     * @return
     //     */
-    //    String entityName();
+    //    String beanName();
     //
     //    /**
-    //     * Returns the target entity class associated with the query.
+    //     * Returns the target bean class associated with the query.
     //     *
     //     * @return
     //     */
-    //    <T> Class<T> entityClass();
+    //    <T> Class<T> beanClass();
 
     /**
      * Return the column name list in this DataSet.
@@ -775,7 +775,7 @@ public interface DataSet {
      *
      * @param columnNames
      * @param newColumnName
-     * @param newColumnClass it can be Object[]/List/Set/Map/Entity
+     * @param newColumnClass it can be Object[]/List/Set/Map/Bean
      */
     void combineColumns(Collection<String> columnNames, String newColumnName, Class<?> newColumnClass);
 
@@ -816,7 +816,7 @@ public interface DataSet {
      * @param <E>
      * @param columnNameFilter
      * @param newColumnName
-     * @param newColumnClass it can be Object[]/List/Set/Map/Entity
+     * @param newColumnClass it can be Object[]/List/Set/Map/Bean
      * @throws E the e
      */
     <E extends Exception> void combineColumns(Throwables.Predicate<String, E> columnNameFilter, String newColumnName, Class<?> newColumnClass) throws E;
@@ -884,7 +884,7 @@ public interface DataSet {
     /**
      * Adds the row.
      *
-     * @param row can be Object[]/List/Map/Entity with getter/setter methods
+     * @param row can be Object[]/List/Map/Bean with getter/setter methods
      */
     void addRow(Object row);
 
@@ -892,7 +892,7 @@ public interface DataSet {
      * Adds the row.
      *
      * @param rowIndex
-     * @param row can be Object[]/List/Map/Entity with getter/setter methods
+     * @param row can be Object[]/List/Map/Bean with getter/setter methods
      */
     void addRow(int rowIndex, Object row);
 
@@ -984,7 +984,7 @@ public interface DataSet {
      * Gets the row.
      *
      * @param <T>
-     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param rowClass it can be Object[]/List/Set/Map/Bean
      * @param rowIndex
      * @return
      */
@@ -994,7 +994,7 @@ public interface DataSet {
      * Gets the row.
      *
      * @param <T>
-     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param rowClass it can be Object[]/List/Set/Map/Bean
      * @param columnNames
      * @param rowIndex
      * @return
@@ -1004,7 +1004,7 @@ public interface DataSet {
     /**
      * Gets the row.
      * @param rowIndex
-     * @param rowSupplier it can be Object[]/List/Set/Map/Entity
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      *
      * @param <T>
      * @return
@@ -1015,7 +1015,7 @@ public interface DataSet {
      * Gets the row.
      * @param columnNames
      * @param rowIndex
-     * @param rowSupplier it can be Object[]/List/Set/Map/Entity
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      *
      * @param <T>
      * @return
@@ -1031,7 +1031,7 @@ public interface DataSet {
     /**
      *
      * @param <T>
-     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param rowClass it can be Object[]/List/Set/Map/Bean
      * @return {@code Optional<E>}
      */
     <T> Optional<T> firstRow(Class<? extends T> rowClass);
@@ -1039,7 +1039,7 @@ public interface DataSet {
     /**
      *
      * @param <T>
-     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param rowClass it can be Object[]/List/Set/Map/Bean
      * @param columnNames
      * @return {@code Optional<E>}
      */
@@ -1048,7 +1048,7 @@ public interface DataSet {
     /**
      *
      * @param <T>
-     * @param rowSupplier it can be Object[]/List/Set/Map/Entity
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      * @return {@code Optional<T>}
      */
     <T> Optional<T> firstRow(IntFunction<? extends T> rowSupplier);
@@ -1056,7 +1056,7 @@ public interface DataSet {
     /**
      *
      * @param columnNames
-     * @param rowSupplier it can be Object[]/List/Set/Map/Entity
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      * @param <T>
      * @return {@code Optional<T>}
      */
@@ -1071,7 +1071,7 @@ public interface DataSet {
     /**
      *
      * @param <T>
-     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param rowClass it can be Object[]/List/Set/Map/Bean
      * @return {@code Optional<E>}
      */
     <T> Optional<T> lastRow(Class<? extends T> rowClass);
@@ -1079,8 +1079,8 @@ public interface DataSet {
     /**
      *
      * @param <T>
-     * @param rowClass it can be Object[]/List/Set/Map/Entity
-     *            which can be object array/list/set/map/entity.
+     * @param rowClass it can be Object[]/List/Set/Map/Bean
+     *            which can be object array/list/set/map/bean.
      * @param columnNames
      * @return {@code Optional<E>}
      */
@@ -1089,7 +1089,7 @@ public interface DataSet {
     /**
      *
      * @param <T>
-     * @param rowSupplier it can be Object[]/List/Set/Map/Entity
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      * @return {@code Optional<T>}
      */
     <T> Optional<T> lastRow(IntFunction<? extends T> rowSupplier);
@@ -1097,7 +1097,7 @@ public interface DataSet {
     /**
      *
      * @param columnNames
-     * @param rowSupplier it can be Object[]/List/Set/Map/Entity
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      * @param <T>
      * @return {@code Optional<T>}
      */
@@ -1208,7 +1208,7 @@ public interface DataSet {
     /**
      *
      * @param <T>
-     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param rowClass it can be Object[]/List/Set/Map/Bean
      * @return
      */
     <T> List<T> toList(Class<? extends T> rowClass);
@@ -1216,7 +1216,7 @@ public interface DataSet {
     /**
      *
      * @param <T>
-     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param rowClass it can be Object[]/List/Set/Map/Bean
      * @param fromRowIndex
      * @param toRowIndex
      * @return
@@ -1226,7 +1226,7 @@ public interface DataSet {
     /**
      *
      * @param <T>
-     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param rowClass it can be Object[]/List/Set/Map/Bean
      * @param columnNames
      * @return
      */
@@ -1235,7 +1235,7 @@ public interface DataSet {
     /**
      *
      * @param <T>
-     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param rowClass it can be Object[]/List/Set/Map/Bean
      * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
@@ -1246,7 +1246,7 @@ public interface DataSet {
     /**
      *
      * @param <T>
-     * @param rowSupplier it can be Object[]/List/Set/Map/Entity
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      * @return
      */
     <T> List<T> toList(IntFunction<? extends T> rowSupplier);
@@ -1255,7 +1255,7 @@ public interface DataSet {
      *
      * @param fromRowIndex
      * @param toRowIndex
-     * @param rowSupplier it can be Object[]/List/Set/Map/Entity
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      * @param <T>
      * @return
      */
@@ -1264,7 +1264,7 @@ public interface DataSet {
     /**
      *
      * @param columnNames
-     * @param rowSupplier it can be Object[]/List/Set/Map/Entity
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      * @param <T>
      * @return
      */
@@ -1275,7 +1275,7 @@ public interface DataSet {
      * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
-     * @param rowSupplier it can be Object[]/List/Set/Map/Entity
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      * @param <T>
      * @return
      */
@@ -1284,7 +1284,7 @@ public interface DataSet {
     /**
      *
      * @param <T>
-     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param rowClass it can be Object[]/List/Set/Map/Bean
      * @param columnNameFilter
      * @param columnNameConverter
      * @return
@@ -1295,7 +1295,7 @@ public interface DataSet {
     /**
      *
      * @param <T>
-     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param rowClass it can be Object[]/List/Set/Map/Bean
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNameFilter
@@ -1308,10 +1308,10 @@ public interface DataSet {
     /**
      *
      * @param <T>
-     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param rowClass it can be Object[]/List/Set/Map/Bean
      * @param columnNameFilter
      * @param columnNameConverter
-     * @param rowSupplier it can be Object[]/List/Set/Map/Entity
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      * @return
      */
     <T, E extends Exception, E2 extends Exception> List<T> toList(Throwables.Predicate<? super String, E> columnNameFilter,
@@ -1320,12 +1320,12 @@ public interface DataSet {
     /**
      *
      * @param <T>
-     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param rowClass it can be Object[]/List/Set/Map/Bean
      * @param fromRowIndex
      * @param toRowIndex
      * @param columnNameFilter
      * @param columnNameConverter
-     * @param rowSupplier it can be Object[]/List/Set/Map/Entity
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      * @return
      */
     <T, E extends Exception, E2 extends Exception> List<T> toList(int fromRowIndex, int toRowIndex, Throwables.Predicate<? super String, E> columnNameFilter,
@@ -1334,102 +1334,102 @@ public interface DataSet {
     /**
      *
      * @param <T>
-     * @param entityClass
+     * @param beanClass
      * @param prefixAndFieldNameMap
      * @return
      */
-    <T> List<T> toEntities(Class<? extends T> entityClass, Map<String, String> prefixAndFieldNameMap);
+    <T> List<T> toEntities(Class<? extends T> beanClass, Map<String, String> prefixAndFieldNameMap);
 
     /**
      *
      * @param <T>
-     * @param entityClass
+     * @param beanClass
      * @param fromRowIndex
      * @param toRowIndex
      * @param prefixAndFieldNameMap
      * @return
      */
-    <T> List<T> toEntities(Class<? extends T> entityClass, int fromRowIndex, int toRowIndex, Map<String, String> prefixAndFieldNameMap);
+    <T> List<T> toEntities(Class<? extends T> beanClass, int fromRowIndex, int toRowIndex, Map<String, String> prefixAndFieldNameMap);
 
     /**
      *
      * @param <T>
-     * @param entityClass
+     * @param beanClass
      * @param columnNames
      * @param prefixAndFieldNameMap
      * @return
      */
-    <T> List<T> toEntities(Class<? extends T> entityClass, Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap);
+    <T> List<T> toEntities(Class<? extends T> beanClass, Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap);
 
     /**
      *
      * @param <T>
-     * @param entityClass
+     * @param beanClass
      * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
      * @param prefixAndFieldNameMap
      * @return
      */
-    <T> List<T> toEntities(Class<? extends T> entityClass, Collection<String> columnNames, int fromRowIndex, int toRowIndex,
+    <T> List<T> toEntities(Class<? extends T> beanClass, Collection<String> columnNames, int fromRowIndex, int toRowIndex,
             Map<String, String> prefixAndFieldNameMap);
 
     /**
      *
      * @param <T>
-     * @param entityClass
+     * @param beanClass
      * @return
      */
-    <T> List<T> toMergedEntities(Class<? extends T> entityClass);
+    <T> List<T> toMergedEntities(Class<? extends T> beanClass);
 
     /**
      *
      * @param <T>
-     * @param entityClass
+     * @param beanClass
      * @param selectPropNames
      * @return
      */
-    <T> List<T> toMergedEntities(Class<? extends T> entityClass, Collection<String> selectPropNames);
+    <T> List<T> toMergedEntities(Class<? extends T> beanClass, Collection<String> selectPropNames);
 
     /**
      *
      * @param <T>
-     * @param entityClass
+     * @param beanClass
      * @param idPropName
      * @return
      */
-    <T> List<T> toMergedEntities(Class<? extends T> entityClass, String idPropName);
+    <T> List<T> toMergedEntities(Class<? extends T> beanClass, String idPropName);
 
     /**
      *
      * @param <T>
-     * @param entityClass
+     * @param beanClass
      * @param idPropName
      * @param selectPropNames
      * @return
      */
-    <T> List<T> toMergedEntities(Class<? extends T> entityClass, String idPropName, Collection<String> selectPropNames);
+    <T> List<T> toMergedEntities(Class<? extends T> beanClass, String idPropName, Collection<String> selectPropNames);
 
     /**
      *
      * @param <T>
-     * @param entityClass
+     * @param beanClass
      * @param idPropNames
      * @param selectPropNames
      * @return
      */
-    <T> List<T> toMergedEntities(Class<? extends T> entityClass, Collection<String> idPropNames, Collection<String> selectPropNames);
+    <T> List<T> toMergedEntities(Class<? extends T> beanClass, Collection<String> idPropNames, Collection<String> selectPropNames);
 
     /**
      *
      * @param <T>
-     * @param entityClass
+     * @param beanClass
      * @param idPropNames
      * @param selectPropNames
      * @param prefixAndFieldNameMap
      * @return
      */
-    <T> List<T> toMergedEntities(Class<? extends T> entityClass, Collection<String> idPropNames, Collection<String> selectPropNames,
+    <T> List<T> toMergedEntities(Class<? extends T> beanClass, Collection<String> idPropNames, Collection<String> selectPropNames,
             Map<String, String> prefixAndFieldNameMap);
 
     /**
@@ -1472,7 +1472,7 @@ public interface DataSet {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param rowClass it can be Object[]/List/Set/Map/Bean
      * @param keyColumnName
      * @param valueColumnNames
      * @return
@@ -1483,7 +1483,7 @@ public interface DataSet {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param rowClass it can be Object[]/List/Set/Map/Bean
      * @param keyColumnName
      * @param valueColumnNames
      * @param fromRowIndex
@@ -1497,7 +1497,7 @@ public interface DataSet {
      * @param <K> the key type
      * @param <V> the value type
      * @param <M>
-     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param rowClass it can be Object[]/List/Set/Map/Bean
      * @param keyColumnName
      * @param valueColumnNames
      * @param fromRowIndex
@@ -1512,7 +1512,7 @@ public interface DataSet {
      *
      * @param keyColumnName
      * @param valueColumnNames
-     * @param rowSupplier it can be Object[]/List/Set/Map/Entity
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      * @param <K> the key type
      * @param <V> the value type
      * @return
@@ -1525,7 +1525,7 @@ public interface DataSet {
      * @param valueColumnNames
      * @param fromRowIndex
      * @param toRowIndex
-     * @param rowSupplier it can be Object[]/List/Set/Map/Entity
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      * @param <K> the key type
      * @param <V> the value type
      * @return
@@ -1538,7 +1538,7 @@ public interface DataSet {
      * @param valueColumnNames
      * @param fromRowIndex
      * @param toRowIndex
-     * @param rowSupplier it can be Object[]/List/Set/Map/Entity
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      * @param supplier
      * @param <K> the key type
      * @param <V> the value type
@@ -1590,7 +1590,7 @@ public interface DataSet {
      *
      * @param <K> the key type
      * @param <E>
-     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param rowClass it can be Object[]/List/Set/Map/Bean
      * @param keyColumnName
      * @param valueColumnNames
      * @return
@@ -1601,7 +1601,7 @@ public interface DataSet {
      *
      * @param <K> the key type
      * @param <E>
-     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param rowClass it can be Object[]/List/Set/Map/Bean
      * @param keyColumnName
      * @param valueColumnNames
      * @param fromRowIndex
@@ -1617,7 +1617,7 @@ public interface DataSet {
      * @param <E>
      * @param <V> the value type
      * @param <M>
-     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param rowClass it can be Object[]/List/Set/Map/Bean
      * @param keyColumnName
      * @param valueColumnNames
      * @param fromRowIndex
@@ -1632,7 +1632,7 @@ public interface DataSet {
      *
      * @param keyColumnName
      * @param valueColumnNames
-     * @param rowSupplier it can be Object[]/List/Set/Map/Entity
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      * @param <K> the key type
      * @param <E>
      * @return
@@ -1645,7 +1645,7 @@ public interface DataSet {
      * @param valueColumnNames
      * @param fromRowIndex
      * @param toRowIndex
-     * @param rowSupplier it can be Object[]/List/Set/Map/Entity
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      * @param <K> the key type
      * @param <E>
      * @return
@@ -1659,7 +1659,7 @@ public interface DataSet {
      * @param valueColumnNames
      * @param fromRowIndex
      * @param toRowIndex
-     * @param rowSupplier it can be Object[]/List/Set/Map/Entity
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      * @param supplier
      * @param <K> the key type
      * @param <E>
@@ -3368,7 +3368,7 @@ public interface DataSet {
      * @param right
      * @param onColumnNames
      * @param newColumnName
-     * @param newColumnClass it can be Object[]/List/Set/Map/Entity
+     * @param newColumnClass it can be Object[]/List/Set/Map/Bean
      * @return a new DataSet
      */
     DataSet innerJoin(DataSet right, Map<String, String> onColumnNames, String newColumnName, Class<?> newColumnClass);
@@ -3379,7 +3379,7 @@ public interface DataSet {
      * @param right
      * @param onColumnNames
      * @param newColumnName
-     * @param newColumnClass it can be Object[]/List/Set/Map/Entity
+     * @param newColumnClass it can be Object[]/List/Set/Map/Bean
      * @param collSupplier it's for one-to-many join
      * @return a new DataSet
      */
@@ -3412,7 +3412,7 @@ public interface DataSet {
      * @param right
      * @param onColumnNames
      * @param newColumnName
-     * @param newColumnClass it can be Object[]/List/Set/Map/Entity
+     * @param newColumnClass it can be Object[]/List/Set/Map/Bean
      * @return a new DataSet
      */
     DataSet leftJoin(DataSet right, Map<String, String> onColumnNames, String newColumnName, Class<?> newColumnClass);
@@ -3423,7 +3423,7 @@ public interface DataSet {
      * @param right
      * @param onColumnNames
      * @param newColumnName
-     * @param newColumnClass it can be Object[]/List/Set/Map/Entity
+     * @param newColumnClass it can be Object[]/List/Set/Map/Bean
      * @param collSupplier it's for one-to-many join
      * @return a new DataSet
      */
@@ -3456,7 +3456,7 @@ public interface DataSet {
      * @param right
      * @param onColumnNames
      * @param newColumnName
-     * @param newColumnClass it can be Object[]/List/Set/Map/Entity
+     * @param newColumnClass it can be Object[]/List/Set/Map/Bean
      * @return a new DataSet
      */
     DataSet rightJoin(DataSet right, Map<String, String> onColumnNames, String newColumnName, Class<?> newColumnClass);
@@ -3467,7 +3467,7 @@ public interface DataSet {
      * @param right
      * @param onColumnNames
      * @param newColumnName
-     * @param newColumnClass it can be Object[]/List/Set/Map/Entity
+     * @param newColumnClass it can be Object[]/List/Set/Map/Bean
      * @param collSupplier it's for one-to-many join
      * @return a new DataSet
      */
@@ -3500,7 +3500,7 @@ public interface DataSet {
      * @param right
      * @param onColumnNames
      * @param newColumnName
-     * @param newColumnClass it can be Object[]/List/Set/Map/Entity
+     * @param newColumnClass it can be Object[]/List/Set/Map/Bean
      * @return a new DataSet
      */
     DataSet fullJoin(DataSet right, Map<String, String> onColumnNames, String newColumnName, Class<?> newColumnClass);
@@ -3511,7 +3511,7 @@ public interface DataSet {
      * @param right
      * @param onColumnNames
      * @param newColumnName
-     * @param newColumnClass it can be Object[]/List/Set/Map/Entity
+     * @param newColumnClass it can be Object[]/List/Set/Map/Bean
      * @param collSupplier it's for one-to-many join
      * @return a new DataSet
      */
@@ -3911,7 +3911,7 @@ public interface DataSet {
     /**
      *
      * @param <T>
-     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param rowClass it can be Object[]/List/Set/Map/Bean
      * @return
      */
     <T> Stream<T> stream(Class<? extends T> rowClass);
@@ -3919,7 +3919,7 @@ public interface DataSet {
     /**
      *
      * @param <T>
-     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param rowClass it can be Object[]/List/Set/Map/Bean
      * @param fromRowIndex
      * @param toRowIndex
      * @return
@@ -3929,7 +3929,7 @@ public interface DataSet {
     /**
      *
      * @param <T>
-     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param rowClass it can be Object[]/List/Set/Map/Bean
      * @param columnNames
      * @return
      */
@@ -3938,7 +3938,7 @@ public interface DataSet {
     /**
      *
      * @param <T>
-     * @param rowClass it can be Object[]/List/Set/Map/Entity
+     * @param rowClass it can be Object[]/List/Set/Map/Bean
      * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
@@ -3949,7 +3949,7 @@ public interface DataSet {
     /**
      *
      * @param <T>
-     * @param rowSupplier it can be Object[]/List/Set/Map/Entity
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      * @return
      */
     <T> Stream<T> stream(IntFunction<? extends T> rowSupplier);
@@ -3958,7 +3958,7 @@ public interface DataSet {
      *
      * @param fromRowIndex
      * @param toRowIndex
-     * @param rowSupplier it can be Object[]/List/Set/Map/Entity
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      * @param <T>
      * @return
      */
@@ -3967,7 +3967,7 @@ public interface DataSet {
     /**
      *
      * @param columnNames
-     * @param rowSupplier it can be Object[]/List/Set/Map/Entity
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      * @param <T>
      * @return
      */
@@ -3978,7 +3978,7 @@ public interface DataSet {
      * @param columnNames
      * @param fromRowIndex
      * @param toRowIndex
-     * @param rowSupplier it can be Object[]/List/Set/Map/Entity
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      * @param <T>
      * @return
      */
@@ -3987,44 +3987,44 @@ public interface DataSet {
     /**
     *
     * @param <T>
-    * @param entityClass
+    * @param beanClass
     * @param prefixAndFieldNameMap
     * @return
     */
-    <T> Stream<T> stream(Class<? extends T> entityClass, Map<String, String> prefixAndFieldNameMap);
+    <T> Stream<T> stream(Class<? extends T> beanClass, Map<String, String> prefixAndFieldNameMap);
 
     /**
     *
     * @param <T>
-    * @param entityClass
+    * @param beanClass
     * @param fromRowIndex
     * @param toRowIndex
     * @param prefixAndFieldNameMap
     * @return
     */
-    <T> Stream<T> stream(Class<? extends T> entityClass, int fromRowIndex, int toRowIndex, Map<String, String> prefixAndFieldNameMap);
+    <T> Stream<T> stream(Class<? extends T> beanClass, int fromRowIndex, int toRowIndex, Map<String, String> prefixAndFieldNameMap);
 
     /**
     *
     * @param <T>
-    * @param entityClass
+    * @param beanClass
     * @param columnNames
     * @param prefixAndFieldNameMap
     * @return
     */
-    <T> Stream<T> stream(Class<? extends T> entityClass, Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap);
+    <T> Stream<T> stream(Class<? extends T> beanClass, Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap);
 
     /**
     *
     * @param <T>
-    * @param entityClass
+    * @param beanClass
     * @param columnNames
     * @param fromRowIndex
     * @param toRowIndex
     * @param prefixAndFieldNameMap
     * @return
     */
-    <T> Stream<T> stream(Class<? extends T> entityClass, Collection<String> columnNames, int fromRowIndex, int toRowIndex,
+    <T> Stream<T> stream(Class<? extends T> beanClass, Collection<String> columnNames, int fromRowIndex, int toRowIndex,
             Map<String, String> prefixAndFieldNameMap);
 
     /**

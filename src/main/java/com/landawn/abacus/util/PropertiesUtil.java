@@ -1212,9 +1212,9 @@ public final class PropertiesUtil {
     }
 
     /**
-     * The Class ConfigEntity.
+     * The Class ConfigBean.
      */
-    static class ConfigEntity {
+    static class ConfigBean {
 
         /** The id. */
         private long id;
@@ -1426,7 +1426,7 @@ public final class PropertiesUtil {
                 return true;
             }
 
-            if (obj instanceof ConfigEntity other) {
+            if (obj instanceof ConfigBean other) {
                 return N.equals(other.id, id) && N.equals(other.name, name) && N.equals(other.content, content)
                         && N.equals(other.includedServers, includedServers) && N.equals(other.excludedServers, excludedServers)
                         && N.equals(other.status, status) && N.equals(other.description, description) && N.equals(other.lastUpdateTime, lastUpdateTime)

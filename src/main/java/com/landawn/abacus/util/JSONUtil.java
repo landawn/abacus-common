@@ -27,7 +27,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.landawn.abacus.parser.ParserUtil;
-import com.landawn.abacus.parser.ParserUtil.EntityInfo;
+import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 
@@ -52,15 +52,15 @@ public final class JSONUtil {
     }
 
     /**
-     * wrap(entity) -> wrap(Maps.deepEntity2Map(entity, true))
+     * wrap(bean) -> wrap(Maps.deepBean2Map(bean, true))
      *
-     * @param entity
+     * @param bean
      * @return
-     * @see Maps#deepEntity2Map(Object)
+     * @see Maps#deepBean2Map(Object)
      */
     @SuppressWarnings("unchecked")
-    public static JSONObject wrap(final Object entity) {
-        return new JSONObject(entity instanceof Map ? (Map<String, Object>) entity : Maps.deepEntity2Map(entity, true));
+    public static JSONObject wrap(final Object bean) {
+        return new JSONObject(bean instanceof Map ? (Map<String, Object>) bean : Maps.deepBean2Map(bean, true));
     }
 
     /**
@@ -224,9 +224,9 @@ public final class JSONUtil {
             }
 
             return (T) map;
-        } else if (type.isEntity()) {
-            final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
-            final Object result = entityInfo.createEntityResult();
+        } else if (type.isBean()) {
+            final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
+            final Object result = beanInfo.createBeanResult();
             final Iterator<String> iter = jsonObject.keys();
             String key = null;
             Object value = null;
@@ -236,7 +236,7 @@ public final class JSONUtil {
                 key = iter.next();
                 value = jsonObject.get(key);
 
-                propInfo = entityInfo.getPropInfo(key);
+                propInfo = beanInfo.getPropInfo(key);
 
                 if (value == JSONObject.NULL) {
                     value = null;
@@ -251,9 +251,9 @@ public final class JSONUtil {
                 propInfo.setPropValue(result, value);
             }
 
-            return (T) entityInfo.finishEntityResult(result);
+            return (T) beanInfo.finishBeanResult(result);
         } else {
-            throw new IllegalArgumentException(type.name() + " is not a map or entity type");
+            throw new IllegalArgumentException(type.name() + " is not a map or bean type");
         }
     }
 

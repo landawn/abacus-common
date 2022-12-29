@@ -27,13 +27,13 @@ public class TooManyElementsException extends IllegalStateException {
     private static final long serialVersionUID = 4230938963102900489L;
 
     /**
-     * Constructor for EntityNotFoundException.
+     * Constructor for TooManyElementsException.
      */
     public TooManyElementsException() {
     }
 
     /**
-     * Constructor for EntityNotFoundException.
+     * Constructor for TooManyElementsException.
      *
      * @param message
      */
@@ -42,7 +42,7 @@ public class TooManyElementsException extends IllegalStateException {
     }
 
     /**
-     * Constructor for EntityNotFoundException.
+     * Constructor for TooManyElementsException.
      *
      * @param message
      * @param cause
@@ -52,7 +52,7 @@ public class TooManyElementsException extends IllegalStateException {
     }
 
     /**
-     * Constructor for EntityNotFoundException.
+     * Constructor for TooManyElementsException.
      *
      * @param cause
      */

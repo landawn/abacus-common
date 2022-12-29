@@ -36,7 +36,7 @@ import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
 import com.landawn.abacus.parser.JSONParser;
 import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.parser.ParserUtil;
-import com.landawn.abacus.parser.ParserUtil.EntityInfo;
+import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Fn.Fnn;
@@ -361,30 +361,30 @@ public final class CSVUtil {
 
     /**
      *
-     * @param entityClass
+     * @param beanClass
      * @param csvFile
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static DataSet loadCSV(final Class<?> entityClass, final File csvFile) throws UncheckedIOException {
-        return loadCSV(entityClass, csvFile, null);
+    public static DataSet loadCSV(final Class<?> beanClass, final File csvFile) throws UncheckedIOException {
+        return loadCSV(beanClass, csvFile, null);
     }
 
     /**
      *
-     * @param entityClass
+     * @param beanClass
      * @param csvFile
      * @param selectColumnNames
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static DataSet loadCSV(final Class<?> entityClass, final File csvFile, final Collection<String> selectColumnNames) throws UncheckedIOException {
-        return loadCSV(entityClass, csvFile, selectColumnNames, 0, Long.MAX_VALUE);
+    public static DataSet loadCSV(final Class<?> beanClass, final File csvFile, final Collection<String> selectColumnNames) throws UncheckedIOException {
+        return loadCSV(beanClass, csvFile, selectColumnNames, 0, Long.MAX_VALUE);
     }
 
     /**
      *
-     * @param entityClass
+     * @param beanClass
      * @param csvFile
      * @param selectColumnNames
      * @param offset
@@ -392,16 +392,16 @@ public final class CSVUtil {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static DataSet loadCSV(final Class<?> entityClass, final File csvFile, final Collection<String> selectColumnNames, final long offset,
-            final long count) throws UncheckedIOException {
-        return loadCSV(entityClass, csvFile, selectColumnNames, offset, count, Fn.<String[]> alwaysTrue());
+    public static DataSet loadCSV(final Class<?> beanClass, final File csvFile, final Collection<String> selectColumnNames, final long offset, final long count)
+            throws UncheckedIOException {
+        return loadCSV(beanClass, csvFile, selectColumnNames, offset, count, Fn.<String[]> alwaysTrue());
     }
 
     /**
      * Load the data from CSV.
      *
      * @param <E>
-     * @param entityClass
+     * @param beanClass
      * @param csvFile
      * @param selectColumnNames
      * @param offset
@@ -411,14 +411,14 @@ public final class CSVUtil {
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      */
-    public static <E extends Exception> DataSet loadCSV(final Class<?> entityClass, final File csvFile, final Collection<String> selectColumnNames,
+    public static <E extends Exception> DataSet loadCSV(final Class<?> beanClass, final File csvFile, final Collection<String> selectColumnNames,
             final long offset, final long count, final Throwables.Predicate<String[], E> filter) throws UncheckedIOException, E {
         InputStream csvInputStream = null;
 
         try {
             csvInputStream = IOUtil.newFileInputStream(csvFile);
 
-            return loadCSV(entityClass, csvInputStream, selectColumnNames, offset, count, filter);
+            return loadCSV(beanClass, csvInputStream, selectColumnNames, offset, count, filter);
         } finally {
             IOUtil.closeQuietly(csvInputStream);
         }
@@ -426,31 +426,31 @@ public final class CSVUtil {
 
     /**
      *
-     * @param entityClass
+     * @param beanClass
      * @param csvInputStream
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static DataSet loadCSV(final Class<?> entityClass, final InputStream csvInputStream) throws UncheckedIOException {
-        return loadCSV(entityClass, csvInputStream, null);
+    public static DataSet loadCSV(final Class<?> beanClass, final InputStream csvInputStream) throws UncheckedIOException {
+        return loadCSV(beanClass, csvInputStream, null);
     }
 
     /**
      *
-     * @param entityClass
+     * @param beanClass
      * @param csvInputStream
      * @param selectColumnNames
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static DataSet loadCSV(final Class<?> entityClass, final InputStream csvInputStream, final Collection<String> selectColumnNames)
+    public static DataSet loadCSV(final Class<?> beanClass, final InputStream csvInputStream, final Collection<String> selectColumnNames)
             throws UncheckedIOException {
-        return loadCSV(entityClass, csvInputStream, selectColumnNames, 0, Long.MAX_VALUE);
+        return loadCSV(beanClass, csvInputStream, selectColumnNames, 0, Long.MAX_VALUE);
     }
 
     /**
      *
-     * @param entityClass
+     * @param beanClass
      * @param csvInputStream
      * @param selectColumnNames
      * @param offset
@@ -458,16 +458,16 @@ public final class CSVUtil {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static DataSet loadCSV(final Class<?> entityClass, final InputStream csvInputStream, final Collection<String> selectColumnNames, final long offset,
+    public static DataSet loadCSV(final Class<?> beanClass, final InputStream csvInputStream, final Collection<String> selectColumnNames, final long offset,
             final long count) throws UncheckedIOException {
-        return loadCSV(entityClass, csvInputStream, selectColumnNames, offset, count, Fn.<String[]> alwaysTrue());
+        return loadCSV(beanClass, csvInputStream, selectColumnNames, offset, count, Fn.<String[]> alwaysTrue());
     }
 
     /**
      * Load the data from CSV.
      *
      * @param <E>
-     * @param entityClass
+     * @param beanClass
      * @param csvInputStream
      * @param selectColumnNames
      * @param offset
@@ -477,39 +477,38 @@ public final class CSVUtil {
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      */
-    public static <E extends Exception> DataSet loadCSV(final Class<?> entityClass, final InputStream csvInputStream,
-            final Collection<String> selectColumnNames, final long offset, final long count, final Throwables.Predicate<String[], E> filter)
-            throws UncheckedIOException, E {
+    public static <E extends Exception> DataSet loadCSV(final Class<?> beanClass, final InputStream csvInputStream, final Collection<String> selectColumnNames,
+            final long offset, final long count, final Throwables.Predicate<String[], E> filter) throws UncheckedIOException, E {
         final Reader csvReader = new InputStreamReader(csvInputStream);
-        return loadCSV(entityClass, csvReader, selectColumnNames, offset, count, filter);
+        return loadCSV(beanClass, csvReader, selectColumnNames, offset, count, filter);
     }
 
     /**
      *
-     * @param entityClass
+     * @param beanClass
      * @param csvReader
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static DataSet loadCSV(final Class<?> entityClass, final Reader csvReader) throws UncheckedIOException {
-        return loadCSV(entityClass, csvReader, null);
+    public static DataSet loadCSV(final Class<?> beanClass, final Reader csvReader) throws UncheckedIOException {
+        return loadCSV(beanClass, csvReader, null);
     }
 
     /**
      *
-     * @param entityClass
+     * @param beanClass
      * @param csvReader
      * @param selectColumnNames
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static DataSet loadCSV(final Class<?> entityClass, final Reader csvReader, final Collection<String> selectColumnNames) throws UncheckedIOException {
-        return loadCSV(entityClass, csvReader, selectColumnNames, 0, Long.MAX_VALUE);
+    public static DataSet loadCSV(final Class<?> beanClass, final Reader csvReader, final Collection<String> selectColumnNames) throws UncheckedIOException {
+        return loadCSV(beanClass, csvReader, selectColumnNames, 0, Long.MAX_VALUE);
     }
 
     /**
      *
-     * @param entityClass
+     * @param beanClass
      * @param csvReader
      * @param selectColumnNames
      * @param offset
@@ -517,16 +516,16 @@ public final class CSVUtil {
      * @return
      * @throws UncheckedIOException the unchecked IO exception
      */
-    public static DataSet loadCSV(final Class<?> entityClass, final Reader csvReader, final Collection<String> selectColumnNames, long offset, long count)
+    public static DataSet loadCSV(final Class<?> beanClass, final Reader csvReader, final Collection<String> selectColumnNames, long offset, long count)
             throws UncheckedIOException {
-        return loadCSV(entityClass, csvReader, selectColumnNames, offset, count, Fn.<String[]> alwaysTrue());
+        return loadCSV(beanClass, csvReader, selectColumnNames, offset, count, Fn.<String[]> alwaysTrue());
     }
 
     /**
      * Load the data from CSV.
      *
      * @param <E>
-     * @param entityClass
+     * @param beanClass
      * @param csvReader
      * @param selectColumnNames
      * @param offset
@@ -536,14 +535,14 @@ public final class CSVUtil {
      * @throws UncheckedIOException the unchecked IO exception
      * @throws E the e
      */
-    public static <E extends Exception> DataSet loadCSV(final Class<?> entityClass, final Reader csvReader, final Collection<String> selectColumnNames,
+    public static <E extends Exception> DataSet loadCSV(final Class<?> beanClass, final Reader csvReader, final Collection<String> selectColumnNames,
             long offset, long count, final Throwables.Predicate<String[], E> filter) throws UncheckedIOException, E {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
 
         final Function<String, String[]> headerParser = csvHeaderParser_TL.get();
         final BiConsumer<String[], String> lineParser = csvLineParser_TL.get();
         final BufferedReader br = csvReader instanceof BufferedReader ? (BufferedReader) csvReader : Objectory.createBufferedReader(csvReader);
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
 
         try {
             String line = br.readLine();
@@ -562,11 +561,11 @@ public final class CSVUtil {
 
             for (int i = 0; i < columnCount; i++) {
                 if (selectPropNameSet == null || selectPropNameSet.remove(titles[i])) {
-                    propInfos[i] = entityInfo.getPropInfo(titles[i]);
+                    propInfos[i] = beanInfo.getPropInfo(titles[i]);
 
                     if (propInfos[i] == null) {
                         if (selectPropNameSet != null && selectPropNameSet.remove(titles[i])) {
-                            throw new IllegalArgumentException(titles[i] + " is not defined in entity class: " + ClassUtil.getCanonicalClassName(entityClass));
+                            throw new IllegalArgumentException(titles[i] + " is not defined in bean class: " + ClassUtil.getCanonicalClassName(beanClass));
                         }
                     } else {
                         if (selectPropNameSet == null || selectPropNameSet.remove(titles[i]) || selectPropNameSet.remove(propInfos[i].name)) {
@@ -1091,23 +1090,22 @@ public final class CSVUtil {
 
                 final String[] titles = headerParser.apply(line);
 
-                final boolean isEntity = ClassUtil.isEntity(targetType);
-                final EntityInfo entityInfo = isEntity ? ParserUtil.getEntityInfo(targetType) : null;
+                final boolean isBean = ClassUtil.isBeanClass(targetType);
+                final BeanInfo beanInfo = isBean ? ParserUtil.getBeanInfo(targetType) : null;
 
                 final int columnCount = titles.length;
                 final String[] resultColumnNames = new String[columnCount];
                 final Set<String> selectPropNameSet = selectColumnNames == null ? null : N.newHashSet(selectColumnNames);
-                final PropInfo[] propInfos = isEntity ? new PropInfo[columnCount] : null;
+                final PropInfo[] propInfos = isBean ? new PropInfo[columnCount] : null;
                 int resultColumnCount = 0;
 
                 for (int i = 0; i < columnCount; i++) {
-                    if (isEntity) {
-                        propInfos[i] = entityInfo.getPropInfo(titles[i]);
+                    if (isBean) {
+                        propInfos[i] = beanInfo.getPropInfo(titles[i]);
 
                         if (propInfos[i] == null) {
                             if (selectPropNameSet != null && selectPropNameSet.remove(titles[i])) {
-                                throw new IllegalArgumentException(
-                                        titles[i] + " is not defined in entity class: " + ClassUtil.getCanonicalClassName(targetType));
+                                throw new IllegalArgumentException(titles[i] + " is not defined in bean class: " + ClassUtil.getCanonicalClassName(targetType));
                             }
                         } else {
                             if (selectPropNameSet == null || selectPropNameSet.remove(titles[i]) || selectPropNameSet.remove(propInfos[i].name)) {
@@ -1181,9 +1179,9 @@ public final class CSVUtil {
                         return (T) result;
                     };
 
-                } else if (type.isEntity()) {
+                } else if (type.isBean()) {
                     mapper = values -> {
-                        final Object result = entityInfo.createEntityResult();
+                        final Object result = beanInfo.createBeanResult();
 
                         for (int i = 0; i < columnCount; i++) {
                             if (resultColumnNames[i] != null) {
@@ -1191,7 +1189,7 @@ public final class CSVUtil {
                             }
                         }
 
-                        entityInfo.finishEntityResult(result);
+                        beanInfo.finishBeanResult(result);
 
                         return (T) result;
                     };

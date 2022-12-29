@@ -48,7 +48,7 @@ import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.exception.ParseException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
-import com.landawn.abacus.parser.ParserUtil.EntityInfo;
+import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.BufferedReader;
@@ -235,7 +235,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 break;
 
             case ENTITY:
-                writeEntity(bw, type, obj, configToUse, indentation, serializedObjects);
+                writeBean(bw, type, obj, configToUse, indentation, serializedObjects);
 
                 break;
 
@@ -256,7 +256,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
             default:
                 throw new ParseException("Unsupported class: " + ClassUtil.getCanonicalClassName(cls)
-                        + ". Only Array/List/Map and Entity class with getter/setter methods are supported");
+                        + ". Only Array/List/Map and Bean class with getter/setter methods are supported");
         }
 
         if (flush) {
@@ -274,23 +274,23 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
      * @param serializedObjects
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    protected void writeEntity(final BufferedXMLWriter bw, final Type<Object> type, final Object obj, final XMLSerializationConfig config,
+    protected void writeBean(final BufferedXMLWriter bw, final Type<Object> type, final Object obj, final XMLSerializationConfig config,
             final String indentation, final IdentityHashSet<Object> serializedObjects) throws IOException {
         if (hasCircularReference(bw, obj, serializedObjects)) {
             return;
         }
 
         final Class<?> cls = type.clazz();
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
 
-        if (N.isNullOrEmpty(entityInfo.jsonXmlSerializablePropInfos)) {
+        if (N.isNullOrEmpty(beanInfo.jsonXmlSerializablePropInfos)) {
             throw new ParseException("No serializable property is found in class: " + ClassUtil.getCanonicalClassName(cls));
         }
 
         final boolean tagByPropertyName = config.tagByPropertyName();
         final boolean ignoreTypeInfo = config.ignoreTypeInfo();
         final boolean isPrettyFormat = config.prettyFormat();
-        final NamingPolicy jsonXmlNamingPolicy = config.getPropNamingPolicy() == null ? entityInfo.jsonXmlNamingPolicy : config.getPropNamingPolicy();
+        final NamingPolicy jsonXmlNamingPolicy = config.getPropNamingPolicy() == null ? beanInfo.jsonXmlNamingPolicy : config.getPropNamingPolicy();
         final int nameTagIdx = jsonXmlNamingPolicy.ordinal();
 
         if (isPrettyFormat && indentation != null) {
@@ -300,15 +300,15 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
         if (tagByPropertyName) {
             if (ignoreTypeInfo) {
-                bw.write(entityInfo.xmlNameTags[nameTagIdx].namedStart);
+                bw.write(beanInfo.xmlNameTags[nameTagIdx].namedStart);
             } else {
-                bw.write(entityInfo.xmlNameTags[nameTagIdx].namedStartWithType);
+                bw.write(beanInfo.xmlNameTags[nameTagIdx].namedStartWithType);
             }
         } else {
             if (ignoreTypeInfo) {
-                bw.write(entityInfo.xmlNameTags[nameTagIdx].epStart);
+                bw.write(beanInfo.xmlNameTags[nameTagIdx].epStart);
             } else {
-                bw.write(entityInfo.xmlNameTags[nameTagIdx].epStartWithType);
+                bw.write(beanInfo.xmlNameTags[nameTagIdx].epStartWithType);
             }
         }
 
@@ -325,9 +325,9 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
 
         if (tagByPropertyName) {
-            bw.write(entityInfo.xmlNameTags[nameTagIdx].namedEnd);
+            bw.write(beanInfo.xmlNameTags[nameTagIdx].namedEnd);
         } else {
-            bw.write(entityInfo.xmlNameTags[nameTagIdx].epEnd);
+            bw.write(beanInfo.xmlNameTags[nameTagIdx].epEnd);
         }
     }
 
@@ -348,7 +348,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         }
 
         final Class<?> cls = type.clazz();
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
 
         final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(cls);
         final boolean ignoreNullProperty = (config.getExclusion() == Exclusion.NULL) || (config.getExclusion() == Exclusion.DEFAULT);
@@ -358,8 +358,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         final boolean isPrettyFormat = config.prettyFormat();
 
         final String nextIndentation = isPrettyFormat ? ((propIndentation == null ? N.EMPTY_STRING : propIndentation) + config.getIndentation()) : null;
-        final PropInfo[] propInfoList = config.skipTransientField() ? entityInfo.nonTransientSeriPropInfos : entityInfo.jsonXmlSerializablePropInfos;
-        final NamingPolicy jsonXmlNamingPolicy = config.getPropNamingPolicy() == null ? entityInfo.jsonXmlNamingPolicy : config.getPropNamingPolicy();
+        final PropInfo[] propInfoList = config.skipTransientField() ? beanInfo.nonTransientSeriPropInfos : beanInfo.jsonXmlSerializablePropInfos;
+        final NamingPolicy jsonXmlNamingPolicy = config.getPropNamingPolicy() == null ? beanInfo.jsonXmlNamingPolicy : config.getPropNamingPolicy();
         final int nameTagIdx = jsonXmlNamingPolicy.ordinal();
         PropInfo propInfo = null;
         String propName = null;
@@ -1136,7 +1136,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 nodeType = NodeType.ARRAY;
             } else if (targetType.isCollection()) {
                 nodeType = NodeType.COLLECTION;
-            } else if (targetType.isEntity()) {
+            } else if (targetType.isBean()) {
                 nodeType = NodeType.ENTITY;
             } else {
                 nodeType = NodeType.PROPERTY;
@@ -1153,8 +1153,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
         switch (nodeType) {
             case ENTITY: {
-                if ((targetClass == null) || !ClassUtil.isEntity(targetClass)) {
-                    if ((propType != null) && propType.isEntity()) {
+                if ((targetClass == null) || !ClassUtil.isBeanClass(targetClass)) {
+                    if ((propType != null) && propType.isBean()) {
                         targetClass = propType.clazz();
                     } else {
                         if (ClassUtil.getSimpleClassName(inputClass).equalsIgnoreCase(nodeName)) {
@@ -1168,9 +1168,9 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                 targetClass = getClassByNodeName(inputClass, nodeName);
                             }
 
-                            if ((targetClass == null) || !ClassUtil.isEntity(targetClass)) {
+                            if ((targetClass == null) || !ClassUtil.isBeanClass(targetClass)) {
                                 throw new ParseException(
-                                        "No entity class found by node name : " + nodeName + " in package of class: " + inputClass.getCanonicalName());
+                                        "No bean class found by node name : " + nodeName + " in package of class: " + inputClass.getCanonicalName());
                             }
                         }
                     }
@@ -1186,8 +1186,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                 final boolean ignoreUnmatchedProperty = config.ignoreUnmatchedProperty();
                 final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(targetClass);
-                final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
-                final Object result = isNullValue ? null : entityInfo.createEntityResult();
+                final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetClass);
+                final Object result = isNullValue ? null : beanInfo.createBeanResult();
                 int attrCount = 0;
 
                 for (int event = xmlReader.next(); xmlReader.hasNext(); event = xmlReader.next()) {
@@ -1199,7 +1199,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                 isNullValue = Boolean.parseBoolean(getAttribute(xmlReader, XMLConstants.IS_NULL));
 
                                 propName = isTagByPropertyName ? xmlReader.getLocalName() : getAttribute(xmlReader, XMLConstants.NAME);
-                                propInfo = entityInfo.getPropInfo(propName);
+                                propInfo = beanInfo.getPropInfo(propName);
 
                                 if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
                                     continue;
@@ -1325,7 +1325,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                         case XMLStreamConstants.END_ELEMENT: {
                             if (propName == null) {
-                                return entityInfo.finishEntityResult(result);
+                                return beanInfo.finishBeanResult(result);
                             } else {
                                 if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
                                         || (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
@@ -1836,7 +1836,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
             default:
                 throw new ParseException("Unsupported class type: " + ClassUtil.getCanonicalClassName(targetClass)
-                        + ". Only array, collection, map and entity types are supported");
+                        + ". Only array, collection, map and bean types are supported");
         }
     }
 
@@ -1916,8 +1916,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
         switch (nodeType) {
             case ENTITY: {
-                if ((typeClass == null) || !ClassUtil.isEntity(typeClass)) {
-                    if ((propType != null) && propType.isEntity()) {
+                if ((typeClass == null) || !ClassUtil.isBeanClass(typeClass)) {
+                    if ((propType != null) && propType.isBean()) {
                         typeClass = propType.clazz();
                     } else {
                         if (ClassUtil.getSimpleClassName(inputClass).equalsIgnoreCase(nodeName)) {
@@ -1931,9 +1931,9 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                 typeClass = getClassByNodeName(inputClass, nodeName);
                             }
 
-                            if ((typeClass == null) || !ClassUtil.isEntity(typeClass)) {
+                            if ((typeClass == null) || !ClassUtil.isBeanClass(typeClass)) {
                                 throw new ParseException(
-                                        "No entity class found by node name : " + nodeName + " in package of class: " + inputClass.getCanonicalName());
+                                        "No bean class found by node name : " + nodeName + " in package of class: " + inputClass.getCanonicalName());
                             }
                         }
                     }
@@ -1947,8 +1947,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                 final boolean ignoreUnmatchedProperty = config.ignoreUnmatchedProperty();
                 final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(typeClass);
-                final EntityInfo entityInfo = ParserUtil.getEntityInfo(typeClass);
-                final Object result = entityInfo.createEntityResult();
+                final BeanInfo beanInfo = ParserUtil.getBeanInfo(typeClass);
+                final Object result = beanInfo.createBeanResult();
 
                 for (int i = 0; i < propNodeLength; i++) {
                     propNode = propNodes.item(i);
@@ -1958,7 +1958,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     }
 
                     propName = isTagByPropertyName ? propNode.getNodeName() : XMLUtil.getAttribute(propNode, XMLConstants.NAME);
-                    propInfo = entityInfo.getPropInfo(propName);
+                    propInfo = beanInfo.getPropInfo(propName);
 
                     if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
                         continue;
@@ -1994,7 +1994,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     }
                 }
 
-                return entityInfo.finishEntityResult(result);
+                return beanInfo.finishBeanResult(result);
             }
 
             case MAP: {
@@ -2247,7 +2247,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
             default:
                 throw new ParseException("Unsupported class type: " + ClassUtil.getCanonicalClassName(targetClass)
-                        + ". Only array, collection, map and entity types are supported");
+                        + ". Only array, collection, map and bean types are supported");
         }
     }
 
@@ -2324,7 +2324,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
             final String[] tokens = packName.split("\\.");
 
-            // search the entity class under package:
+            // search the bean class under package:
             // com.companayName.componentName
             if (tokens.length > 3) {
                 String tmp = "";
@@ -2431,11 +2431,11 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
         private Collection<String> mapIgnoredPropNames;
 
-        private EntityInfo entityInfo;
+        private BeanInfo beanInfo;
 
         private PropInfo propInfo;
 
-        private final List<String> entityOrPropNameQueue = new ArrayList<>();
+        private final List<String> beanOrPropNameQueue = new ArrayList<>();
 
         private final List<NodeType> nodeTypeQueue = new ArrayList<>();
 
@@ -2446,13 +2446,13 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         // ...
         private String nodeName;
 
-        private String entityOrPropName;
+        private String beanOrPropName;
 
         private Collection<String> ignoredClassPropNames;
 
-        private Object entity;
+        private Object bean;
 
-        private Class<?> entityClass;
+        private Class<?> beanClass;
 
         private Object array;
 
@@ -2480,7 +2480,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
         private final List<Type<?>> valueTypeQueue = new ArrayList<>();
 
-        private final IdentityHashMap<Object, EntityInfo> entityInfoQueue = new IdentityHashMap<>(1);
+        private final IdentityHashMap<Object, BeanInfo> beanInfoQueue = new IdentityHashMap<>(1);
 
         private boolean isNull = false;
 
@@ -2513,17 +2513,17 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
             nodeName = qName;
             if (checkedPropNameTag) {
-                entityOrPropName = isTagByPropertyName || attrs == null || attrs.getLength() == 0 ? nodeName : attrs.getValue(XMLConstants.NAME);
+                beanOrPropName = isTagByPropertyName || attrs == null || attrs.getLength() == 0 ? nodeName : attrs.getValue(XMLConstants.NAME);
             } else {
-                entityOrPropName = attrs.getValue(XMLConstants.NAME);
-                if (entityOrPropName == null) {
-                    entityOrPropName = nodeName;
+                beanOrPropName = attrs.getValue(XMLConstants.NAME);
+                if (beanOrPropName == null) {
+                    beanOrPropName = nodeName;
                 }
             }
 
             if (isFirstCall) {
                 if ((nodeClasses != null) && (inputClass == null)) {
-                    inputClass = (Class<T>) nodeClasses.get(entityOrPropName);
+                    inputClass = (Class<T>) nodeClasses.get(beanOrPropName);
                 }
 
                 if (inputClass == null) {
@@ -2562,47 +2562,47 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     }
 
                     if (!isTagByPropertyName) {
-                        entityOrPropName = attrs.getValue(XMLConstants.NAME);
-                        entityOrPropNameQueue.add(entityOrPropName);
+                        beanOrPropName = attrs.getValue(XMLConstants.NAME);
+                        beanOrPropNameQueue.add(beanOrPropName);
                     }
 
-                    if (hasPropTypes && config.hasPropType(entityOrPropName)) {
-                        typeClass = propTypes.get(entityOrPropName).clazz();
+                    if (hasPropTypes && config.hasPropType(beanOrPropName)) {
+                        typeClass = propTypes.get(beanOrPropName).clazz();
                     }
 
-                    if (typeClass == null || !N.typeOf(typeClass).isEntity()) {
-                        if ((eleType != null) && ClassUtil.isEntity(eleType.clazz())) {
+                    if (typeClass == null || !N.typeOf(typeClass).isBean()) {
+                        if ((eleType != null) && ClassUtil.isBeanClass(eleType.clazz())) {
                             typeClass = eleType.clazz();
                         } else {
-                            if (ClassUtil.getSimpleClassName(inputClass).equalsIgnoreCase(entityOrPropName)) {
+                            if (ClassUtil.getSimpleClassName(inputClass).equalsIgnoreCase(beanOrPropName)) {
                                 typeClass = inputClass;
                             } else {
                                 if (Collection.class.isAssignableFrom(inputClass) || Map.class.isAssignableFrom(inputClass) || inputClass.isArray()) {
                                     if (config.getElementType() != null) {
-                                        typeClass = getClassByNodeName(config.getElementType().clazz(), entityOrPropName);
+                                        typeClass = getClassByNodeName(config.getElementType().clazz(), beanOrPropName);
                                     }
                                 } else {
-                                    typeClass = getClassByNodeName(inputClass, entityOrPropName);
+                                    typeClass = getClassByNodeName(inputClass, beanOrPropName);
                                 }
 
-                                if ((typeClass == null) || !ClassUtil.isEntity(typeClass)) {
-                                    throw new ParseException("No entity class found by node name : " + entityOrPropName + " in package of class: "
-                                            + inputClass.getCanonicalName());
+                                if ((typeClass == null) || !ClassUtil.isBeanClass(typeClass)) {
+                                    throw new ParseException(
+                                            "No bean class found by node name : " + beanOrPropName + " in package of class: " + inputClass.getCanonicalName());
                                 }
                             }
                         }
                     }
 
-                    entityClass = typeClass;
-                    entityInfo = ParserUtil.getEntityInfo(entityClass);
+                    beanClass = typeClass;
+                    beanInfo = ParserUtil.getBeanInfo(beanClass);
 
-                    entity = entityInfo.createEntityResult();
-                    nodeValueQueue.add(entity);
+                    bean = beanInfo.createBeanResult();
+                    nodeValueQueue.add(bean);
 
-                    entityInfoQueue.put(entity, entityInfo);
+                    beanInfoQueue.put(bean, beanInfo);
 
                     if (isFirstCall) {
-                        resultHolder.setValue((T) entity);
+                        resultHolder.setValue((T) bean);
                         isFirstCall = false;
                     }
 
@@ -2764,14 +2764,14 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                 case PROPERTY: {
                     if (!isTagByPropertyName) {
-                        entityOrPropName = attrs.getValue(XMLConstants.NAME);
-                        entityOrPropNameQueue.add(entityOrPropName);
+                        beanOrPropName = attrs.getValue(XMLConstants.NAME);
+                        beanOrPropNameQueue.add(beanOrPropName);
                     }
 
-                    propInfo = entityInfo.getPropInfo(entityOrPropName);
-                    ignoredClassPropNames = config.getIgnoredPropNames(entityClass);
+                    propInfo = beanInfo.getPropInfo(beanOrPropName);
+                    ignoredClassPropNames = config.getIgnoredPropNames(beanClass);
 
-                    if (N.notNullOrEmpty(ignoredClassPropNames) && ignoredClassPropNames.contains(entityOrPropName)) {
+                    if (N.notNullOrEmpty(ignoredClassPropNames) && ignoredClassPropNames.contains(beanOrPropName)) {
                         inIgnorePropRefCount = 1;
 
                         break;
@@ -2781,12 +2781,12 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                         if (ignoreUnmatchedProperty) {
                             break;
                         } else {
-                            throw new ParseException("Unknown property element: " + entityOrPropName + " for class: " + entityClass.getCanonicalName());
+                            throw new ParseException("Unknown property element: " + beanOrPropName + " for class: " + beanClass.getCanonicalName());
                         }
                     }
 
                     if (hasPropTypes) {
-                        propType = propTypes.get(entityOrPropName);
+                        propType = propTypes.get(beanOrPropName);
 
                         if (propType == null) {
                             propType = ignoreTypeInfo ? propInfo.jsonXmlType : N.typeOf(getConcreteClass(propInfo.clazz, attrs));
@@ -2853,11 +2853,11 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 }
 
                 default:
-                    throw new ParseException("only array, collection, map and entity nodes are supported");
+                    throw new ParseException("only array, collection, map and bean nodes are supported");
             }
 
             if (isFirstCall) {
-                throw new ParseException("only array, collection, map and entity nodes are supported");
+                throw new ParseException("only array, collection, map and bean nodes are supported");
             }
 
             nodeTypeQueue.add(nodeType);
@@ -2873,7 +2873,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             }
 
             nodeName = qName;
-            entityOrPropName = nodeName;
+            beanOrPropName = nodeName;
 
             NodeType nodeType = nodeTypeQueue.remove(nodeTypeQueue.size() - 1);
 
@@ -2881,7 +2881,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 case ENTITY: {
 
                     if (!isTagByPropertyName) {
-                        entityOrPropName = entityOrPropNameQueue.remove(entityOrPropNameQueue.size() - 1);
+                        beanOrPropName = beanOrPropNameQueue.remove(beanOrPropNameQueue.size() - 1);
                     }
 
                     popupNodeValue();
@@ -2936,21 +2936,21 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     }
 
                     if (!isTagByPropertyName) {
-                        entityOrPropName = entityOrPropNameQueue.remove(entityOrPropNameQueue.size() - 1);
+                        beanOrPropName = beanOrPropNameQueue.remove(beanOrPropNameQueue.size() - 1);
                     }
 
-                    propInfo = entityInfo.getPropInfo(entityOrPropName);
+                    propInfo = beanInfo.getPropInfo(beanOrPropName);
 
                     // for propInfo is null if it's unknown property
                     if (propInfo != null && propInfo.jsonXmlExpose != JsonXmlField.Expose.SERIALIZE_ONLY) {
                         if (eleValue == null) {
                             if (isNull) {
-                                propInfo.setPropValue(entity, null);
+                                propInfo.setPropValue(bean, null);
                             } else {
-                                propInfo.setPropValue(entity, propInfo.readPropValue(sb.toString()));
+                                propInfo.setPropValue(bean, propInfo.readPropValue(sb.toString()));
                             }
                         } else {
-                            propInfo.setPropValue(entity, eleValue);
+                            propInfo.setPropValue(bean, eleValue);
 
                             eleValue = null;
                         }
@@ -3036,7 +3036,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     break;
 
                 default:
-                    throw new ParseException("only array, collection, map and entity nodes are supported");
+                    throw new ParseException("only array, collection, map and bean nodes are supported");
             }
         }
 
@@ -3052,16 +3052,16 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
         @SuppressWarnings("unchecked")
         private void popupNodeValue() {
             eleValue = nodeValueQueue.remove(nodeValueQueue.size() - 1);
-            entityInfo = entityInfoQueue.remove(eleValue);
+            beanInfo = beanInfoQueue.remove(eleValue);
 
-            if (entityInfo != null) {
-                entityClass = entityInfo.clazz;
+            if (beanInfo != null) {
+                beanClass = beanInfo.clazz;
 
-                if (resultHolder.value() == entity) {
-                    entity = entityInfo.finishEntityResult(entity);
-                    resultHolder.setValue((T) entity);
+                if (resultHolder.value() == bean) {
+                    bean = beanInfo.finishBeanResult(bean);
+                    resultHolder.setValue((T) bean);
                 } else {
-                    entity = entityInfo.finishEntityResult(entity);
+                    bean = beanInfo.finishBeanResult(bean);
                 }
             } else if (eleValue instanceof Map) {
                 keyTypeQueue.remove(keyTypeQueue.size() - 1);
@@ -3072,11 +3072,11 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
             if ((nodeValueQueue.size() > 0)) {
                 final Object next = nodeValueQueue.get(nodeValueQueue.size() - 1);
-                entityInfo = entityInfoQueue.get(next);
+                beanInfo = beanInfoQueue.get(next);
 
-                if (entityInfo != null) {
-                    entity = next;
-                    entityClass = entityInfo.clazz;
+                if (beanInfo != null) {
+                    bean = next;
+                    beanClass = beanInfo.clazz;
                 } else {
                     typeClass = next.getClass();
 
@@ -3123,19 +3123,19 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             mapIgnoredPropNames = null;
 
             // ...
-            entityInfo = null;
+            beanInfo = null;
             propInfo = null;
 
-            entityOrPropNameQueue.clear();
+            beanOrPropNameQueue.clear();
             nodeTypeQueue.clear();
             nodeValueQueue.clear();
             keyQueue.clear();
 
             nodeName = null;
-            entityOrPropName = null;
+            beanOrPropName = null;
             ignoredClassPropNames = null;
-            entity = null;
-            entityClass = null;
+            bean = null;
+            beanClass = null;
             array = null;
             coll = null;
             map = null;
@@ -3149,7 +3149,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             eleTypeQueue.clear();
             keyTypeQueue.clear();
             valueTypeQueue.clear();
-            entityInfoQueue.clear();
+            beanInfoQueue.clear();
 
             // ...
             isNull = false;

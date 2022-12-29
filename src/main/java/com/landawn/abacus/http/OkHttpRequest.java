@@ -30,7 +30,7 @@ import javax.annotation.Nullable;
 import com.landawn.abacus.parser.KryoParser;
 import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.parser.ParserUtil;
-import com.landawn.abacus.parser.ParserUtil.EntityInfo;
+import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.parser.XMLParser;
 import com.landawn.abacus.util.BufferedReader;
@@ -349,24 +349,24 @@ public final class OkHttpRequest {
 
     /**
      *
-     * @param formBodyByEntity
+     * @param formBodyByBean
      * @return
      * @see {@code FormBody.Builder}
      */
-    public OkHttpRequest formBody(final Object formBodyByEntity) {
-        if (formBodyByEntity == null) {
+    public OkHttpRequest formBody(final Object formBodyByBean) {
+        if (formBodyByBean == null) {
             this.body = Util.EMPTY_REQUEST;
             return this;
         }
 
-        final Class<?> cls = formBodyByEntity.getClass();
-        N.checkArgument(ClassUtil.isEntity(cls), "{} is not an entity class with getter/setter methods", cls);
+        final Class<?> cls = formBodyByBean.getClass();
+        N.checkArgument(ClassUtil.isBeanClass(cls), "{} is not a bean class with getter/setter methods", cls);
 
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
         final FormBody.Builder builder = new FormBody.Builder();
 
-        for (PropInfo propInfo : entityInfo.propInfoList) {
-            builder.add(propInfo.name, N.stringOf(propInfo.getPropValue(formBodyByEntity)));
+        for (PropInfo propInfo : beanInfo.propInfoList) {
+            builder.add(propInfo.name, N.stringOf(propInfo.getPropValue(formBodyByBean)));
         }
 
         this.body = builder.build();
@@ -387,14 +387,14 @@ public final class OkHttpRequest {
 
     /**
      *
-     * @param formBodyByEntity
+     * @param formBodyByBean
      * @return
      * @see {@code FormBody.Builder}
      * @deprecated replaced by {@link #formBody(Object)}.
      */
     @Deprecated
-    public OkHttpRequest body(final Object formBodyByEntity) {
-        return formBody(formBodyByEntity);
+    public OkHttpRequest body(final Object formBodyByBean) {
+        return formBody(formBodyByBean);
     }
 
     /**

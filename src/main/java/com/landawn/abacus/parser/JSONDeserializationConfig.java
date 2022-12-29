@@ -40,7 +40,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     }
 
     /**
-     * Won't set/add/put the value to entity/array/list/map if it's null or empty {@code CharSequence/Array/Collection/Map}.
+     * Won't set/add/put the value to bean/array/list/map if it's null or empty {@code CharSequence/Array/Collection/Map}.
      *
      * @param readNullToEmpty
      * @return

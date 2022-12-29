@@ -30,7 +30,7 @@ import com.landawn.abacus.annotation.JsonXmlField;
  */
 public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneable {
 
-    Map<Class<?>, Set<String>> entityIgnoredPropNameMap = null;
+    Map<Class<?>, Set<String>> beanIgnoredPropNameMap = null;
 
     /**
      * Gets the ignored prop names.
@@ -38,7 +38,7 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * @return
      */
     public Map<Class<?>, Set<String>> getIgnoredPropNames() {
-        return entityIgnoredPropNameMap;
+        return beanIgnoredPropNameMap;
     }
 
     /**
@@ -48,14 +48,14 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * @return
      */
     public Collection<String> getIgnoredPropNames(Class<?> cls) {
-        if (this.entityIgnoredPropNameMap == null) {
+        if (this.beanIgnoredPropNameMap == null) {
             return null;
         }
 
-        Collection<String> result = this.entityIgnoredPropNameMap.get(cls);
+        Collection<String> result = this.beanIgnoredPropNameMap.get(cls);
 
         if (result == null) {
-            result = this.entityIgnoredPropNameMap.get(Object.class);
+            result = this.beanIgnoredPropNameMap.get(Object.class);
         }
 
         return result;
@@ -79,11 +79,11 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * @return
      */
     public C setIgnoredPropNames(Class<?> cls, Set<String> ignoredPropNames) {
-        if (this.entityIgnoredPropNameMap == null) {
-            this.entityIgnoredPropNameMap = new HashMap<>();
+        if (this.beanIgnoredPropNameMap == null) {
+            this.beanIgnoredPropNameMap = new HashMap<>();
         }
 
-        this.entityIgnoredPropNameMap.put(cls, ignoredPropNames);
+        this.beanIgnoredPropNameMap.put(cls, ignoredPropNames);
 
         return (C) this;
     }
@@ -95,7 +95,7 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * @return
      */
     public C setIgnoredPropNames(Map<Class<?>, Set<String>> ignoredPropNames) {
-        this.entityIgnoredPropNameMap = ignoredPropNames;
+        this.beanIgnoredPropNameMap = ignoredPropNames;
 
         return (C) this;
     }

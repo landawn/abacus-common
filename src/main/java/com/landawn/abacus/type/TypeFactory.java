@@ -150,7 +150,7 @@ public final class TypeFactory {
             classes.add(com.landawn.abacus.type.DoubleType.class);
             classes.add(com.landawn.abacus.type.DurationType.class);
             classes.add(com.landawn.abacus.type.EntityIdType.class);
-            classes.add(com.landawn.abacus.type.EntityType.class);
+            classes.add(com.landawn.abacus.type.BeanType.class);
             classes.add(com.landawn.abacus.type.EnumType.class);
             classes.add(com.landawn.abacus.type.FloatArrayType.class);
             classes.add(com.landawn.abacus.type.FloatType.class);
@@ -920,8 +920,8 @@ public final class TypeFactory {
                     } else {
                         type = new MapEntryType(typeParameters[0], typeParameters[1]);
                     }
-                } else if (ClassUtil.isEntity(cls)) {
-                    type = new EntityType(cls);
+                } else if (ClassUtil.isBeanClass(cls)) {
+                    type = new BeanType(cls);
                 } else if (Type.class.isAssignableFrom(cls)) {
                     type = (Type) TypeAttrParser.newInstance(cls, typeName);
                 } else if (Object[].class.isAssignableFrom(cls)) {

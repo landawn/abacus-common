@@ -560,23 +560,23 @@ public interface Type<T> {
     boolean isMap();
 
     /**
-     * Checks if is entity.
+     * Checks if is bean.
      *
-     * @return true, if is entity
+     * @return true, if is bean
      */
-    boolean isEntity();
+    boolean isBean();
 
     /**
-     * Checks if is map entity.
+     * Checks if is map bean.
      *
-     * @return true, if is map entity
+     * @return true, if is map bean
      */
     boolean isMapEntity();
 
     /**
-     * Checks if is entity id.
+     * Checks if is bean id.
      *
-     * @return true, if is entity id
+     * @return true, if is bean id
      */
     boolean isEntityId();
 
@@ -637,7 +637,7 @@ public interface Type<T> {
 
     /**
      * Returns {@code true} if the value of this type can be serialized to json/xml/... String directly. The primitive
-     * type/array/wrapper, date, calendar ... belong to this category. Object Array/Collection/Map/Entity are not.
+     * type/array/wrapper, date, calendar ... belong to this category. Object Array/Collection/Map/Bean are not.
      *
      * @return true, if is serializable
      */

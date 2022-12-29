@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 import com.landawn.abacus.parser.ParserUtil;
-import com.landawn.abacus.parser.ParserUtil.EntityInfo;
+import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 
 /**
@@ -250,11 +250,11 @@ public final class URLEncodedUtil {
      * @return
      */
     public static <T> T decode(final String urlQuery, final Charset charset, final Class<? extends T> targetClass) {
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
-        final Object result = entityInfo.createEntityResult();
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetClass);
+        final Object result = beanInfo.createBeanResult();
 
         if (N.isNullOrEmpty(urlQuery)) {
-            return (T) entityInfo.finishEntityResult(result);
+            return (T) beanInfo.finishBeanResult(result);
         }
 
         try (final Scanner scanner = new Scanner(urlQuery)) {
@@ -277,7 +277,7 @@ public final class URLEncodedUtil {
                     value = null;
                 }
 
-                propInfo = entityInfo.getPropInfo(name);
+                propInfo = beanInfo.getPropInfo(name);
 
                 if (value == null) {
                     propValue = propInfo.jsonXmlType.defaultValue();
@@ -285,27 +285,27 @@ public final class URLEncodedUtil {
                     propValue = propInfo.readPropValue(value);
                 }
 
-                entityInfo.setPropValue(result, name, propValue);
+                beanInfo.setPropValue(result, name, propValue);
             }
         }
 
-        return (T) entityInfo.finishEntityResult(result);
+        return (T) beanInfo.finishBeanResult(result);
     }
 
     /**
-     * Parameters 2 entity.
+     * Parameters 2 bean.
      * @param parameters
      * @param targetClass
      *
      * @param <T>
      * @return
      */
-    public static <T> T parameters2Entity(final Map<String, String[]> parameters, final Class<? extends T> targetClass) {
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
-        final Object result = entityInfo.createEntityResult();
+    public static <T> T parameters2Bean(final Map<String, String[]> parameters, final Class<? extends T> targetClass) {
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetClass);
+        final Object result = beanInfo.createBeanResult();
 
         if (N.isNullOrEmpty(parameters)) {
-            return (T) entityInfo.finishEntityResult(result);
+            return (T) beanInfo.finishBeanResult(result);
         }
 
         PropInfo propInfo = null;
@@ -313,7 +313,7 @@ public final class URLEncodedUtil {
         String[] values = null;
 
         for (String key : parameters.keySet()) {
-            propInfo = entityInfo.getPropInfo(key);
+            propInfo = beanInfo.getPropInfo(key);
             values = parameters.get(key);
 
             if (N.isNullOrEmpty(values) || (values.length == 1 && N.isNullOrEmpty(values[0]))) {
@@ -329,7 +329,7 @@ public final class URLEncodedUtil {
             propInfo.setPropValue(result, propValue);
         }
 
-        return (T) entityInfo.finishEntityResult(result);
+        return (T) beanInfo.finishBeanResult(result);
     }
 
     /**
@@ -469,14 +469,14 @@ public final class URLEncodedUtil {
 
                 encodeFormFields(output, N.stringOf(entry.getValue()), charset);
             }
-        } else if (ClassUtil.isEntity(parameters.getClass())) {
-            encode(output, Maps.entity2Map(parameters, true, null, namingPolicy), charset, NamingPolicy.NO_CHANGE);
+        } else if (ClassUtil.isBeanClass(parameters.getClass())) {
+            encode(output, Maps.bean2Map(parameters, true, null, namingPolicy), charset, NamingPolicy.NO_CHANGE);
         } else if (parameters instanceof Object[]) {
             final Object[] a = (Object[]) parameters;
 
             if (0 != (a.length % 2)) {
                 throw new IllegalArgumentException(
-                        "The parameters must be the pairs of property name and value, or Map, or an entity class with getter/setter methods.");
+                        "The parameters must be the pairs of property name and value, or Map, or a bean class with getter/setter methods.");
             }
 
             for (int i = 0, len = a.length; i < len; i++) {

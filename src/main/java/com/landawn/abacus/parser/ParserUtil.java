@@ -109,7 +109,7 @@ public final class ParserUtil {
     private static final int defaultNameIndex = NamingPolicy.LOWER_CAMEL_CASE.ordinal();
 
     // ...
-    private static final Map<Class<?>, EntityInfo> entityInfoPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, BeanInfo> beanInfoPool = new ObjectPool<>(POOL_SIZE);
 
     private ParserUtil() {
         // Singleton.
@@ -309,11 +309,11 @@ public final class ParserUtil {
         return result;
     }
 
-    static XmlNameTag[] getXmlNameTags(final String name, final String typeName, final boolean isEntity) {
+    static XmlNameTag[] getXmlNameTags(final String name, final String typeName, final boolean isBean) {
         final XmlNameTag[] result = new XmlNameTag[NamingPolicy.values().length];
 
         for (NamingPolicy np : NamingPolicy.values()) {
-            result[np.ordinal()] = new XmlNameTag(convertName(name, np), typeName, isEntity);
+            result[np.ordinal()] = new XmlNameTag(convertName(name, np), typeName, isBean);
         }
 
         return result;
@@ -373,7 +373,7 @@ public final class ParserUtil {
         return result;
     }
 
-    static XmlNameTag[] getXmlNameTags(final String propName, final Field field, final String typeName, final boolean isEntity) {
+    static XmlNameTag[] getXmlNameTags(final String propName, final Field field, final String typeName, final boolean isBean) {
         String jsonXmlFieldName = null;
 
         if (field != null) {
@@ -421,7 +421,7 @@ public final class ParserUtil {
         final XmlNameTag[] result = new XmlNameTag[NamingPolicy.values().length];
 
         for (NamingPolicy np : NamingPolicy.values()) {
-            result[np.ordinal()] = new XmlNameTag(N.isNullOrEmpty(jsonXmlFieldName) ? convertName(propName, np) : jsonXmlFieldName, typeName, isEntity);
+            result[np.ordinal()] = new XmlNameTag(N.isNullOrEmpty(jsonXmlFieldName) ? convertName(propName, np) : jsonXmlFieldName, typeName, isBean);
         }
 
         return result;
@@ -480,31 +480,31 @@ public final class ParserUtil {
     }
 
     /**
-     * Gets the entity info.
+     * Gets the bean info.
      *
      * @param cls
      * @return
      */
-    public static EntityInfo getEntityInfo(Class<?> cls) {
-        if (!ClassUtil.isEntity(cls)) {
+    public static BeanInfo getBeanInfo(Class<?> cls) {
+        if (!ClassUtil.isBeanClass(cls)) {
             throw new IllegalArgumentException(
-                    "No property getter/setter method or public field found in the specified entity: " + ClassUtil.getCanonicalClassName(cls));
+                    "No property getter/setter method or public field found in the specified bean: " + ClassUtil.getCanonicalClassName(cls));
         }
 
-        EntityInfo entityInfo = entityInfoPool.get(cls);
+        BeanInfo beanInfo = beanInfoPool.get(cls);
 
-        if (entityInfo == null) {
-            synchronized (entityInfoPool) {
-                entityInfo = entityInfoPool.get(cls);
+        if (beanInfo == null) {
+            synchronized (beanInfoPool) {
+                beanInfo = beanInfoPool.get(cls);
 
-                if (entityInfo == null) {
-                    entityInfo = new EntityInfo(cls);
-                    entityInfoPool.put(cls, entityInfo);
+                if (beanInfo == null) {
+                    beanInfo = new BeanInfo(cls);
+                    beanInfoPool.put(cls, beanInfo);
                 }
             }
         }
 
-        return entityInfo;
+        return beanInfo;
     }
 
     static int hashCode(char[] a) {
@@ -532,20 +532,20 @@ public final class ParserUtil {
     // }
 
     /**
-     * Refresh entity prop info.
+     * Refresh bean prop info.
      *
      * @param cls
      * @deprecated internal use only.
      */
     @Deprecated
     @Internal
-    public static void refreshEntityPropInfo(Class<?> cls) {
-        synchronized (entityInfoPool) {
-            entityInfoPool.remove(cls);
+    public static void refreshBeanPropInfo(Class<?> cls) {
+        synchronized (beanInfoPool) {
+            beanInfoPool.remove(cls);
         }
     }
 
-    public static class EntityInfo implements JSONReader.SymbolReader {
+    public static class BeanInfo implements JSONReader.SymbolReader {
 
         public final Class<Object> clazz;
 
@@ -606,10 +606,10 @@ public final class ParserUtil {
         private final boolean isByBuilder;
         private final Tuple3<Class<?>, Supplier<Object>, Function<Object, Object>> builderInfo;
 
-        public final boolean isMarkedToEntity;
+        public final boolean isMarkedToBean;
 
         @SuppressWarnings("deprecation")
-        EntityInfo(final Class<?> cls) {
+        BeanInfo(final Class<?> cls) {
             this.annotations = ImmutableMap.wrap(getAnnotations(cls));
             simpleClassName = ClassUtil.getSimpleClassName(cls);
             canonicalClassName = ClassUtil.getCanonicalClassName(cls);
@@ -847,20 +847,20 @@ public final class ParserUtil {
                 ClassUtil.setAccessibleQuietly(allArgsConstructor, true);
             }
 
-            boolean tmpIsMarkedToEntity = this.annotations.containsKey(Entity.class);
+            boolean tmpIsMarkedToBean = this.annotations.containsKey(Entity.class);
 
-            if (tmpIsMarkedToEntity == false) {
+            if (tmpIsMarkedToBean == false) {
                 try {
-                    tmpIsMarkedToEntity = this.annotations.containsKey(javax.persistence.Entity.class);
+                    tmpIsMarkedToBean = this.annotations.containsKey(javax.persistence.Entity.class);
                 } catch (Throwable e) {
                     // ignore
                 }
             }
 
-            this.isMarkedToEntity = tmpIsMarkedToEntity;
+            this.isMarkedToBean = tmpIsMarkedToBean;
 
             //    if (this.noArgsConstructor == null && this.allArgsConstructor == null) {
-            //        throw new RuntimeException("No Constructor found with empty arg or full args: " + N.toString(fieldTypes) + " in Entity/Record class: "
+            //        throw new RuntimeException("No Constructor found with empty arg or full args: " + N.toString(fieldTypes) + " in Bean/Record class: "
             //                + ClassUtil.getCanonicalClassName(cls));
             //    }
 
@@ -932,17 +932,17 @@ public final class ParserUtil {
         /**
          * Gets the prop info.
          *
-         * @param propInfoFromOtherEntity
+         * @param propInfoFromOtherBean
          * @return
          */
-        public PropInfo getPropInfo(PropInfo propInfoFromOtherEntity) {
-            if (propInfoFromOtherEntity.aliases.isEmpty()) {
-                return getPropInfo(propInfoFromOtherEntity.name);
+        public PropInfo getPropInfo(PropInfo propInfoFromOtherBean) {
+            if (propInfoFromOtherBean.aliases.isEmpty()) {
+                return getPropInfo(propInfoFromOtherBean.name);
             } else {
-                PropInfo ret = getPropInfo(propInfoFromOtherEntity.name);
+                PropInfo ret = getPropInfo(propInfoFromOtherBean.name);
 
                 if (ret == null) {
-                    for (String alias : propInfoFromOtherEntity.aliases) {
+                    for (String alias : propInfoFromOtherBean.aliases) {
                         ret = getPropInfo(alias);
 
                         break;
@@ -971,17 +971,17 @@ public final class ParserUtil {
                 if (propInfoQueue.size() == 0) {
                     throw new RuntimeException("No property method found with property name: " + propName + " in class: " + clazz.getCanonicalName());
                 } else {
-                    Object propEntity = obj;
+                    Object propBean = obj;
 
                     for (int i = 0, len = propInfoQueue.size(); i < len; i++) {
-                        propEntity = propInfoQueue.get(i).getPropValue(propEntity);
+                        propBean = propInfoQueue.get(i).getPropValue(propBean);
 
-                        if (propEntity == null) {
+                        if (propBean == null) {
                             return (T) propInfoQueue.get(len - 1).type.defaultValue();
                         }
                     }
 
-                    return (T) propEntity;
+                    return (T) propBean;
                 }
             } else {
                 return propInfo.getPropValue(obj);
@@ -1014,28 +1014,28 @@ public final class ParserUtil {
                         return false;
                     }
                 } else {
-                    Object propEntity = obj;
+                    Object propBean = obj;
                     Object subPropValue = null;
 
                     for (int i = 0, len = propInfoQueue.size(); i < len; i++) {
                         propInfo = propInfoQueue.get(i);
 
                         if (i == (len - 1)) {
-                            propInfo.setPropValue(propEntity, propValue);
+                            propInfo.setPropValue(propBean, propValue);
                         } else {
-                            subPropValue = propInfo.getPropValue(propEntity);
+                            subPropValue = propInfo.getPropValue(propBean);
 
                             if (subPropValue == null) {
                                 if (propInfo.type.isCollection()) {
                                     subPropValue = N.newInstance(propInfo.type.getElementType().clazz());
                                     final Collection c = N.newCollection(propInfo.type.clazz());
                                     c.add(subPropValue);
-                                    propInfo.setPropValue(propEntity, c);
+                                    propInfo.setPropValue(propBean, c);
                                 } else {
                                     // TODO what's about if propInfo.clazz is immutable (Record)?
-                                    // For example: set "account.Name.firstName" key in Maps.map2Entity, if Account.Name is a Record?
+                                    // For example: set "account.Name.firstName" key in Maps.map2Bean, if Account.Name is a Record?
                                     subPropValue = N.newInstance(propInfo.clazz);
-                                    propInfo.setPropValue(propEntity, subPropValue);
+                                    propInfo.setPropValue(propBean, subPropValue);
                                 }
                             } else if (propInfo.type.isCollection()) {
                                 final Collection c = (Collection) subPropValue;
@@ -1050,7 +1050,7 @@ public final class ParserUtil {
                                 }
                             }
 
-                            propEntity = subPropValue;
+                            propBean = subPropValue;
                         }
                     }
                 }
@@ -1061,16 +1061,16 @@ public final class ParserUtil {
             return true;
         }
 
-        public void setPropValue(final Object obj, final PropInfo propInfoFromOtherEntity, final Object propValue) {
-            setPropValue(obj, propInfoFromOtherEntity, propValue, false);
+        public void setPropValue(final Object obj, final PropInfo propInfoFromOtherBean, final Object propValue) {
+            setPropValue(obj, propInfoFromOtherBean, propValue, false);
         }
 
-        public boolean setPropValue(final Object obj, final PropInfo propInfoFromOtherEntity, final Object propValue, final boolean ignoreUnmatchedProperty) {
-            if (propInfoFromOtherEntity.aliases.isEmpty()) {
-                return setPropValue(obj, propInfoFromOtherEntity.name, propValue, ignoreUnmatchedProperty);
+        public boolean setPropValue(final Object obj, final PropInfo propInfoFromOtherBean, final Object propValue, final boolean ignoreUnmatchedProperty) {
+            if (propInfoFromOtherBean.aliases.isEmpty()) {
+                return setPropValue(obj, propInfoFromOtherBean.name, propValue, ignoreUnmatchedProperty);
             } else {
-                if (!setPropValue(obj, propInfoFromOtherEntity.name, propValue, true)) {
-                    for (String alias : propInfoFromOtherEntity.aliases) {
+                if (!setPropValue(obj, propInfoFromOtherBean.name, propValue, true)) {
+                    for (String alias : propInfoFromOtherBean.aliases) {
                         if (setPropValue(obj, alias, propValue, true)) {
                             return true;
                         }
@@ -1079,7 +1079,7 @@ public final class ParserUtil {
 
                 if (!ignoreUnmatchedProperty) {
                     throw new RuntimeException(
-                            "No property method found with property name: " + propInfoFromOtherEntity.name + " in class: " + clazz.getCanonicalName());
+                            "No property method found with property name: " + propInfoFromOtherBean.name + " in class: " + clazz.getCanonicalName());
                 }
 
                 return false;
@@ -1126,17 +1126,17 @@ public final class ParserUtil {
 
                 if (strs.length > 1) {
                     Class<?> propClass = clazz;
-                    EntityInfo propEntityInfo = null;
+                    BeanInfo propBeanInfo = null;
 
                     PropInfo propInfo = null;
 
                     for (int i = 0, len = strs.length; i < len; i++) {
-                        propEntityInfo = ClassUtil.isEntity(propClass) ? ParserUtil.getEntityInfo(propClass) : null;
-                        propInfo = propEntityInfo == null ? null : propEntityInfo.getPropInfo(strs[i]);
+                        propBeanInfo = ClassUtil.isBeanClass(propClass) ? ParserUtil.getBeanInfo(propClass) : null;
+                        propInfo = propBeanInfo == null ? null : propBeanInfo.getPropInfo(strs[i]);
 
                         if (propInfo == null) {
                             if (i == 0) {
-                                return N.emptyList(); // return directly because the first part is not valid property/field name of the target entity class.
+                                return N.emptyList(); // return directly because the first part is not valid property/field name of the target bean class.
                             }
 
                             propInfoQueue.clear();
@@ -1322,7 +1322,7 @@ public final class ParserUtil {
          * @return
          */
         @Beta
-        public Object createEntityResult() {
+        public Object createBeanResult() {
             return isImmutable ? (builderInfo != null ? builderInfo._2.get() : createArgsForConstructor()) : N.newInstance(clazz);
         }
 
@@ -1333,7 +1333,7 @@ public final class ParserUtil {
          * @return
          */
         @Beta
-        public <T> T finishEntityResult(final Object result) {
+        public <T> T finishBeanResult(final Object result) {
             if (result == null) {
                 return null;
             }
@@ -1365,7 +1365,7 @@ public final class ParserUtil {
          */
         @Override
         public boolean equals(Object obj) {
-            return this == obj || (obj instanceof EntityInfo && N.equals(((EntityInfo) obj).clazz, clazz));
+            return this == obj || (obj instanceof BeanInfo && N.equals(((BeanInfo) obj).clazz, clazz));
         }
 
         @Override
@@ -1442,7 +1442,7 @@ public final class ParserUtil {
 
         final int fieldOrder;
 
-        final boolean isImmutableEntity;
+        final boolean isImmutableBean;
 
         final boolean isByBuilder;
 
@@ -1484,13 +1484,13 @@ public final class ParserUtil {
             canSetFieldByGetMethod = false;
 
             fieldOrder = -1;
-            isImmutableEntity = false;
+            isImmutableBean = false;
             isByBuilder = false;
         }
 
         @SuppressWarnings("deprecation")
         PropInfo(final String propName, final Field field, final Method getMethod, final Method setMethod, final JsonXmlConfig jsonXmlConfig,
-                final ImmutableMap<Class<? extends Annotation>, Annotation> classAnnotations, final int fieldOrder, final boolean isImmutableEntity,
+                final ImmutableMap<Class<? extends Annotation>, Annotation> classAnnotations, final int fieldOrder, final boolean isImmutableBean,
                 final boolean isByBuilder, final List<String> idPropNames, final List<String> readOnlyIdPropNames) {
             this.declaringClass = (Class<Object>) (field != null ? field.getDeclaringClass() : getMethod.getDeclaringClass());
             this.field = field;
@@ -1604,7 +1604,7 @@ public final class ParserUtil {
                     && (Map.class.isAssignableFrom(getMethod.getReturnType()) || Collection.class.isAssignableFrom(getMethod.getReturnType()));
 
             this.fieldOrder = fieldOrder;
-            this.isImmutableEntity = isImmutableEntity;
+            this.isImmutableBean = isImmutableBean;
             this.isByBuilder = isByBuilder;
         }
 
@@ -1617,7 +1617,7 @@ public final class ParserUtil {
          */
         @SuppressWarnings("unchecked")
         public <T> T getPropValue(Object obj) {
-            if (isImmutableEntity && obj instanceof Object[]) {
+            if (isImmutableBean && obj instanceof Object[]) {
                 return (T) ((Object[]) obj)[fieldOrder];
             }
 
@@ -1639,7 +1639,7 @@ public final class ParserUtil {
                 propValue = N.toJSON(propValue);
             }
 
-            if (isImmutableEntity && !isByBuilder) {
+            if (isImmutableBean && !isByBuilder) {
                 ((Object[]) obj)[fieldOrder] = propValue;
                 return;
             }
@@ -2190,12 +2190,12 @@ public final class ParserUtil {
          * @param getMethod
          * @param setMethod
          * @param propClass
-         * @param entityClass
+         * @param beanClass
          * @return
          */
         @SuppressWarnings("unused")
         private <T> Type<T> getType(final String annoType, final Field field, final Method getMethod, final Method setMethod, final Class<?> propClass,
-                final Class<?> entityClass) {
+                final Class<?> beanClass) {
             if (N.isNullOrEmpty(annoType)) {
                 final String parameterizedTypeName = field != null ? ClassUtil.getParameterizedTypeNameByField(field)
                         : ClassUtil.getParameterizedTypeNameByMethod((setMethod == null) ? getMethod : setMethod);
@@ -2210,8 +2210,8 @@ public final class ParserUtil {
                     // ignore
                 }
 
-                if ((type == null || type.getClass().equals(ObjectType.class)) && N.notNullOrEmpty(ClassUtil.getPackageName(entityClass))) {
-                    final String pkgName = ClassUtil.getPackageName(entityClass);
+                if ((type == null || type.getClass().equals(ObjectType.class)) && N.notNullOrEmpty(ClassUtil.getPackageName(beanClass))) {
+                    final String pkgName = ClassUtil.getPackageName(beanClass);
                     final StringBuilder sb = new StringBuilder();
                     int start = 0;
 
@@ -2288,9 +2288,9 @@ public final class ParserUtil {
         final int fieldAccessIndex;
 
         ASMPropInfo(final String name, final Field field, final Method getMethod, final Method setMethod, final JsonXmlConfig jsonXmlConfig,
-                final ImmutableMap<Class<? extends Annotation>, Annotation> classAnnotations, final int fieldOrder, final boolean isImmutableEntity,
+                final ImmutableMap<Class<? extends Annotation>, Annotation> classAnnotations, final int fieldOrder, final boolean isImmutableBean,
                 final boolean isByBuilder, final List<String> idPropNames, final List<String> readOnlyIdPropNames) {
-            super(name, field, getMethod, setMethod, jsonXmlConfig, classAnnotations, fieldOrder, isImmutableEntity, isByBuilder, idPropNames,
+            super(name, field, getMethod, setMethod, jsonXmlConfig, classAnnotations, fieldOrder, isImmutableBean, isByBuilder, idPropNames,
                     readOnlyIdPropNames);
 
             getMethodAccess = getMethod == null ? null : com.esotericsoftware.reflectasm.MethodAccess.get(getMethod.getDeclaringClass());
@@ -2325,7 +2325,7 @@ public final class ParserUtil {
          */
         @Override
         public void setPropValue(final Object obj, Object propValue) {
-            if (isImmutableEntity && !isByBuilder) {
+            if (isImmutableBean && !isByBuilder) {
                 ((Object[]) obj)[fieldOrder] = propValue;
 
                 return;
@@ -2413,17 +2413,17 @@ public final class ParserUtil {
         final char[] namedNull;
         final char[] namedNullWithType;
 
-        public XmlNameTag(String name, String typeName, boolean isEntity) {
+        public XmlNameTag(String name, String typeName, boolean isBean) {
             this.name = name.toCharArray();
 
             final String typeAttr = typeName.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 
-            if (isEntity) {
-                this.epStart = ("<entity name=\"" + name + "\">").toCharArray();
-                this.epStartWithType = ("<entity name=\"" + name + "\" type=\"" + typeAttr + "\">").toCharArray();
-                this.epEnd = ("</entity>").toCharArray();
-                this.epNull = ("<entity name=\"" + name + "\" isNull=\"true\" />").toCharArray();
-                this.epNullWithType = ("<entity name=\"" + name + "\" type=\"" + typeAttr + "\" isNull=\"true\" />").toCharArray();
+            if (isBean) {
+                this.epStart = ("<bean name=\"" + name + "\">").toCharArray();
+                this.epStartWithType = ("<bean name=\"" + name + "\" type=\"" + typeAttr + "\">").toCharArray();
+                this.epEnd = ("</bean>").toCharArray();
+                this.epNull = ("<bean name=\"" + name + "\" isNull=\"true\" />").toCharArray();
+                this.epNullWithType = ("<bean name=\"" + name + "\" type=\"" + typeAttr + "\" isNull=\"true\" />").toCharArray();
             } else {
                 this.epStart = ("<property name=\"" + name + "\">").toCharArray();
                 this.epStartWithType = ("<property name=\"" + name + "\" type=\"" + typeAttr + "\">").toCharArray();
@@ -2489,7 +2489,7 @@ public final class ParserUtil {
     //        RecordInfo<T> recordInfo = (RecordInfo<T>) recordInfoMap.get(recordClass);
     //
     //        if (recordInfo == null) {
-    //            final EntityInfo entityInfo = ParserUtil.getEntityInfo(recordClass);
+    //            final BeanInfo beanInfo = ParserUtil.getBeanInfo(recordClass);
     //
     //            final Field[] fields = recordClass.getDeclaredFields();
     //            final Map<String, Tuple5<String, Field, Method, PropInfo, Integer>> map = new LinkedHashMap<>(fields.length);
@@ -2501,7 +2501,7 @@ public final class ParserUtil {
     //
     //                for (Field field : fields) {
     //                    name = field.getName();
-    //                    propInfo = entityInfo.getPropInfo(name);
+    //                    propInfo = beanInfo.getPropInfo(name);
     //
     //                    map.put(name, Tuple.of(name, field, recordClass.getDeclaredMethod(name), propInfo, idx++));
     //                }
@@ -2524,7 +2524,7 @@ public final class ParserUtil {
     //                }
     //            };
     //
-    //            recordInfo = new RecordInfo<>(recordClass, entityInfo, creator, ImmutableList.copyOf(map.keySet()), ImmutableMap.wrap(map));
+    //            recordInfo = new RecordInfo<>(recordClass, beanInfo, creator, ImmutableList.copyOf(map.keySet()), ImmutableMap.wrap(map));
     //
     //            recordInfoMap.put(recordClass, recordInfo);
     //        }
@@ -2536,7 +2536,7 @@ public final class ParserUtil {
     //    @Accessors(fluent = true)
     //    public static final class RecordInfo<T> {
     //        private final Class<T> clazz;
-    //        private final EntityInfo entityInfo;
+    //        private final BeanInfo beanInfo;
     //        private final Function<Object[], T> creator;
     //        private) final ImmutableList<String> fieldNames;
     //        private final ImmutableMap<String, Tuple5<String, Field, Method, PropInfo, Integer>> fieldMap;

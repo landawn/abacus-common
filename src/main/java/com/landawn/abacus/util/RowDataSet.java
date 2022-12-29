@@ -55,7 +55,7 @@ import com.landawn.abacus.parser.JSONSerializationConfig.JSC;
 import com.landawn.abacus.parser.KryoParser;
 import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.parser.ParserUtil;
-import com.landawn.abacus.parser.ParserUtil.EntityInfo;
+import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.parser.XMLConstants;
 import com.landawn.abacus.parser.XMLParser;
@@ -169,14 +169,14 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     //    @Override
-    //    public String entityName() {
-    //        return _entityName;
+    //    public String beanName() {
+    //        return _beanName;
     //    }
     //
     //    @SuppressWarnings("unchecked")
     //    @Override
-    //    public <T> Class<T> entityClass() {
-    //        return (Class<T>) _entityClass;
+    //    public <T> Class<T> beanClass() {
+    //        return (Class<T>) _beanClass;
     //    }
 
     /**
@@ -222,7 +222,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
         Integer columnIndex = _columnIndexMap.get(columnName);
 
-        if (columnIndex == null /* && NameUtil.isCanonicalName(_entityName, columnName)*/) {
+        if (columnIndex == null /* && NameUtil.isCanonicalName(_beanName, columnName)*/) {
             columnIndex = _columnIndexMap.get(NameUtil.getSimpleName(columnName));
         }
 
@@ -1769,17 +1769,17 @@ public class RowDataSet implements DataSet, Cloneable {
                     _columnList.get(i).add(rowIndex, a[i]);
                 }
             }
-        } else if (rowType.isEntity()) {
-            final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
+        } else if (rowType.isBean()) {
+            final BeanInfo beanInfo = ParserUtil.getBeanInfo(rowClass);
             final Object[] a = new Object[this._columnNameList.size()];
             PropInfo propInfo = null;
             int idx = 0;
 
             for (String columnName : this._columnNameList) {
-                propInfo = entityInfo.getPropInfo(columnName);
+                propInfo = beanInfo.getPropInfo(columnName);
 
                 if (propInfo == null) {
-                    throw new IllegalArgumentException("Column (" + columnName + ") is not found in entity (" + rowClass + ")");
+                    throw new IllegalArgumentException("Column (" + columnName + ") is not found in bean (" + rowClass + ")");
                 }
 
                 a[idx++] = propInfo.getPropValue(row);
@@ -1796,7 +1796,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
         } else {
             throw new IllegalArgumentException(
-                    "Unsupported row type: " + ClassUtil.getCanonicalClassName(rowClass) + ". Only Array, List/Set, Map and entity class are supported");
+                    "Unsupported row type: " + ClassUtil.getCanonicalClassName(rowClass) + ". Only Array, List/Set, Map and bean class are supported");
         }
 
         modCount++;
@@ -2057,14 +2057,14 @@ public class RowDataSet implements DataSet, Cloneable {
 
         rowClass = rowClass == null ? (Class<T>) rowSupplier.apply(0).getClass() : rowClass;
         final Type<T> rowType = N.typeOf(rowClass);
-        final EntityInfo entityInfo = rowType.isEntity() ? ParserUtil.getEntityInfo(rowClass) : null;
+        final BeanInfo beanInfo = rowType.isBean() ? ParserUtil.getBeanInfo(rowClass) : null;
 
-        rowSupplier = rowSupplier == null && !rowType.isEntity() ? this.createRowSupplier(rowType, rowClass) : rowSupplier;
+        rowSupplier = rowSupplier == null && !rowType.isBean() ? this.createRowSupplier(rowType, rowClass) : rowSupplier;
 
-        return getRow(rowType, rowClass, entityInfo, columnNames, columnIndexes, columnCount, rowIndex, null, rowSupplier);
+        return getRow(rowType, rowClass, beanInfo, columnNames, columnIndexes, columnCount, rowIndex, null, rowSupplier);
     }
 
-    private <T> T getRow(final Type<T> rowType, final Class<? extends T> rowClass, final EntityInfo entityInfo, final Collection<String> columnNames,
+    private <T> T getRow(final Type<T> rowType, final Class<? extends T> rowClass, final BeanInfo beanInfo, final Collection<String> columnNames,
             final int[] columnIndexes, final int columnCount, final int rowIndex, final Map<String, String> prefixAndFieldNameMap,
             final IntFunction<? extends T> rowSupplier) {
 
@@ -2092,9 +2092,9 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             return (T) result;
-        } else if (rowType.isEntity()) {
+        } else if (rowType.isBean()) {
             final boolean ignoreUnmatchedProperty = columnNames == this._columnNameList;
-            Object result = rowSupplier == null ? entityInfo.createEntityResult() : rowSupplier.apply(columnCount);
+            Object result = rowSupplier == null ? beanInfo.createBeanResult() : rowSupplier.apply(columnCount);
 
             Set<String> mergedPropNames = null;
             String propName = null;
@@ -2107,7 +2107,7 @@ public class RowDataSet implements DataSet, Cloneable {
                     continue;
                 }
 
-                propInfo = entityInfo.getPropInfo(propName);
+                propInfo = beanInfo.getPropInfo(propName);
 
                 if (propInfo != null) {
                     propInfo.setPropValue(result, _columnList.get(columnIndexes[i]).get(rowIndex));
@@ -2123,7 +2123,7 @@ public class RowDataSet implements DataSet, Cloneable {
                     }
 
                     final String realPropName = propName.substring(0, idx);
-                    propInfo = getPropInfoByPrefix(entityInfo, realPropName, prefixAndFieldNameMap);
+                    propInfo = getPropInfoByPrefix(beanInfo, realPropName, prefixAndFieldNameMap);
 
                     if (propInfo == null) {
                         if (ignoreUnmatchedProperty) {
@@ -2133,14 +2133,14 @@ public class RowDataSet implements DataSet, Cloneable {
                         }
                     }
 
-                    final Type<Object> propEntityType = propInfo.type.isCollection() ? (Type<Object>) propInfo.type.getElementType() : propInfo.type;
+                    final Type<Object> propBeanType = propInfo.type.isCollection() ? (Type<Object>) propInfo.type.getElementType() : propInfo.type;
 
-                    if (!propEntityType.isEntity()) {
-                        throw new UnsupportedOperationException("Property: " + propInfo.name + " in class: " + rowClass + " is not an entity type");
+                    if (!propBeanType.isBean()) {
+                        throw new UnsupportedOperationException("Property: " + propInfo.name + " in class: " + rowClass + " is not a bean type");
                     }
 
-                    final Class<Object> propEntityClass = propEntityType.clazz();
-                    final EntityInfo propEntityInfo = ParserUtil.getEntityInfo(propEntityClass);
+                    final Class<Object> propBeanClass = propBeanType.clazz();
+                    final BeanInfo propBeanInfo = ParserUtil.getBeanInfo(propBeanClass);
                     final List<String> newTmpColumnNameList = new ArrayList<>();
                     final List<List<Object>> newTmpColumnList = new ArrayList<>();
 
@@ -2169,7 +2169,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                     final RowDataSet tmp = new RowDataSet(newTmpColumnNameList, newTmpColumnList);
 
-                    final Object propValue = tmp.getRow(propEntityType, propEntityClass, propEntityInfo, newTmpColumnNameList,
+                    final Object propValue = tmp.getRow(propBeanType, propBeanClass, propBeanInfo, newTmpColumnNameList,
                             tmp.checkColumnName(newTmpColumnNameList), newTmpColumnNameList.size(), rowIndex, prefixAndFieldNameMap, null);
 
                     if (propInfo.type.isCollection()) {
@@ -2183,13 +2183,13 @@ public class RowDataSet implements DataSet, Cloneable {
             }
 
             if (rowSupplier == null) {
-                result = entityInfo.finishEntityResult(result);
+                result = beanInfo.finishBeanResult(result);
             }
 
             return (T) result;
         } else {
             throw new IllegalArgumentException(
-                    "Unsupported row type: " + rowType.clazz().getCanonicalName() + ". Only Array, Collection, Map and entity class are supported");
+                    "Unsupported row type: " + rowType.clazz().getCanonicalName() + ". Only Array, Collection, Map and bean class are supported");
         }
     }
 
@@ -2707,12 +2707,12 @@ public class RowDataSet implements DataSet, Cloneable {
         rowClass = rowClass == null ? (Class<T>) rowSupplier.apply(0).getClass() : rowClass;
         final Type<?> rowType = N.typeOf(rowClass);
 
-        if (rowType.isEntity()) {
-            return toEntities(rowClass, ParserUtil.getEntityInfo(rowClass), null, columnNames, fromRowIndex, toRowIndex, prefixAndFieldNameMap, rowSupplier,
+        if (rowType.isBean()) {
+            return toEntities(rowClass, ParserUtil.getBeanInfo(rowClass), null, columnNames, fromRowIndex, toRowIndex, prefixAndFieldNameMap, rowSupplier,
                     false, true);
         }
 
-        rowSupplier = rowSupplier == null && !rowType.isEntity() ? this.createRowSupplier(rowType, rowClass) : rowSupplier;
+        rowSupplier = rowSupplier == null && !rowType.isBean() ? this.createRowSupplier(rowType, rowClass) : rowSupplier;
 
         final int[] columnIndexes = checkColumnName(columnNames);
         final int columnCount = columnIndexes.length;
@@ -2764,7 +2764,7 @@ public class RowDataSet implements DataSet, Cloneable {
             }
         } else {
             throw new IllegalArgumentException(
-                    "Unsupported row type: " + ClassUtil.getCanonicalClassName(rowClass) + ". Only Array, List/Set, Map and entity class are supported");
+                    "Unsupported row type: " + ClassUtil.getCanonicalClassName(rowClass) + ". Only Array, List/Set, Map and bean class are supported");
         }
 
         return (List<T>) rowList;
@@ -2781,7 +2781,7 @@ public class RowDataSet implements DataSet, Cloneable {
             return (IntFunction<T>) Factory.ofMap(rowClass);
         } else {
             throw new IllegalArgumentException(
-                    "Unsupported row type: " + ClassUtil.getCanonicalClassName(rowClass) + ". Only Array, List/Set, Map and entity class are supported");
+                    "Unsupported row type: " + ClassUtil.getCanonicalClassName(rowClass) + ". Only Array, List/Set, Map and bean class are supported");
         }
     }
 
@@ -2871,67 +2871,67 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     @Override
-    public <T> List<T> toEntities(Class<? extends T> entityClass, Map<String, String> prefixAndFieldNameMap) {
-        return toEntities(entityClass, this._columnNameList, 0, size(), prefixAndFieldNameMap);
+    public <T> List<T> toEntities(Class<? extends T> beanClass, Map<String, String> prefixAndFieldNameMap) {
+        return toEntities(beanClass, this._columnNameList, 0, size(), prefixAndFieldNameMap);
     }
 
     @Override
-    public <T> List<T> toEntities(Class<? extends T> entityClass, int fromRowIndex, int toRowIndex, Map<String, String> prefixAndFieldNameMap) {
-        return toEntities(entityClass, this._columnNameList, fromRowIndex, toRowIndex, prefixAndFieldNameMap);
+    public <T> List<T> toEntities(Class<? extends T> beanClass, int fromRowIndex, int toRowIndex, Map<String, String> prefixAndFieldNameMap) {
+        return toEntities(beanClass, this._columnNameList, fromRowIndex, toRowIndex, prefixAndFieldNameMap);
     }
 
     @Override
-    public <T> List<T> toEntities(Class<? extends T> entityClass, Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap) {
-        return toEntities(entityClass, columnNames, 0, size(), prefixAndFieldNameMap);
+    public <T> List<T> toEntities(Class<? extends T> beanClass, Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap) {
+        return toEntities(beanClass, columnNames, 0, size(), prefixAndFieldNameMap);
     }
 
     @Override
-    public <T> List<T> toEntities(Class<? extends T> entityClass, Collection<String> columnNames, int fromRowIndex, int toRowIndex,
+    public <T> List<T> toEntities(Class<? extends T> beanClass, Collection<String> columnNames, int fromRowIndex, int toRowIndex,
             Map<String, String> prefixAndFieldNameMap) {
-        N.checkArgument(ClassUtil.isEntity(entityClass), "{} is not an entity class", entityClass);
+        N.checkArgument(ClassUtil.isBeanClass(beanClass), "{} is not a bean class", beanClass);
 
-        return toList(entityClass, columnNames, fromRowIndex, toRowIndex, prefixAndFieldNameMap, null);
+        return toList(beanClass, columnNames, fromRowIndex, toRowIndex, prefixAndFieldNameMap, null);
     }
 
     @Override
-    public <T> List<T> toMergedEntities(final Class<? extends T> entityClass) {
-        return toMergedEntities(entityClass, this._columnNameList);
+    public <T> List<T> toMergedEntities(final Class<? extends T> beanClass) {
+        return toMergedEntities(beanClass, this._columnNameList);
     }
 
     @Override
-    public <T> List<T> toMergedEntities(final Class<? extends T> entityClass, final Collection<String> selectPropNames) {
-        return toMergedEntities(entityClass, (Collection<String>) null, selectPropNames);
+    public <T> List<T> toMergedEntities(final Class<? extends T> beanClass, final Collection<String> selectPropNames) {
+        return toMergedEntities(beanClass, (Collection<String>) null, selectPropNames);
     }
 
     @Override
-    public <T> List<T> toMergedEntities(final Class<? extends T> entityClass, final String idPropName) {
-        return toMergedEntities(entityClass, idPropName, this._columnNameList);
+    public <T> List<T> toMergedEntities(final Class<? extends T> beanClass, final String idPropName) {
+        return toMergedEntities(beanClass, idPropName, this._columnNameList);
     }
 
     @Override
-    public <T> List<T> toMergedEntities(final Class<? extends T> entityClass, final String idPropName, final Collection<String> selectPropNames) {
-        return toMergedEntities(entityClass, N.asList(idPropName), selectPropNames);
+    public <T> List<T> toMergedEntities(final Class<? extends T> beanClass, final String idPropName, final Collection<String> selectPropNames) {
+        return toMergedEntities(beanClass, N.asList(idPropName), selectPropNames);
     }
 
     @Override
-    public <T> List<T> toMergedEntities(final Class<? extends T> entityClass, final Collection<String> idPropNames, final Collection<String> selectPropNames) {
-        return toMergedEntities(entityClass, idPropNames, selectPropNames, null);
+    public <T> List<T> toMergedEntities(final Class<? extends T> beanClass, final Collection<String> idPropNames, final Collection<String> selectPropNames) {
+        return toMergedEntities(beanClass, idPropNames, selectPropNames, null);
     }
 
     @Override
-    public <T> List<T> toMergedEntities(final Class<? extends T> entityClass, final Collection<String> idPropNames, Collection<String> selectPropNames,
+    public <T> List<T> toMergedEntities(final Class<? extends T> beanClass, final Collection<String> idPropNames, Collection<String> selectPropNames,
             final Map<String, String> prefixAndFieldNameMap) {
-        N.checkArgument(ClassUtil.isEntity(entityClass), "{} is not an entity class", entityClass);
+        N.checkArgument(ClassUtil.isBeanClass(beanClass), "{} is not a bean class", beanClass);
 
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
 
         Collection<String> idPropNamesToUse = idPropNames;
 
         if (idPropNames == null) {
-            idPropNamesToUse = entityInfo.idPropNameList;
+            idPropNamesToUse = beanInfo.idPropNameList;
 
             if (N.isNullOrEmpty(idPropNamesToUse)) {
-                throw new IllegalArgumentException("No id property defined in class: " + entityClass);
+                throw new IllegalArgumentException("No id property defined in class: " + beanClass);
             }
         }
 
@@ -2945,7 +2945,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 if (this._columnNameList.contains(idPropName)) {
                     tmp.add(idPropName);
                 } else {
-                    propInfo = entityInfo.getPropInfo(idPropName);
+                    propInfo = beanInfo.getPropInfo(idPropName);
 
                     if (propInfo != null && propInfo.columnName.isPresent() && this._columnNameList.contains(propInfo.columnName.get())) {
                         tmp.add(propInfo.columnName.get());
@@ -2960,7 +2960,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                         if (propInfo != null) {
                             for (String columnName : this._columnNameList) {
-                                if (propInfo.equals(entityInfo.getPropInfo(columnName))) {
+                                if (propInfo.equals(beanInfo.getPropInfo(columnName))) {
                                     tmp.add(columnName);
 
                                     continue outer;
@@ -2979,23 +2979,23 @@ public class RowDataSet implements DataSet, Cloneable {
             }
         }
 
-        N.checkArgument(this._columnNameList.containsAll(idPropNamesToUse), "Some id properties {} are not found in DataSet: {} for entity {}",
-                idPropNamesToUse, this._columnNameList, ClassUtil.getSimpleClassName(entityClass));
+        N.checkArgument(this._columnNameList.containsAll(idPropNamesToUse), "Some id properties {} are not found in DataSet: {} for bean {}", idPropNamesToUse,
+                this._columnNameList, ClassUtil.getSimpleClassName(beanClass));
 
         selectPropNames = N.isNullOrEmpty(selectPropNames) ? this._columnNameList : selectPropNames;
 
         N.checkArgument(N.isNullOrEmpty(selectPropNames) || selectPropNames == this._columnNameList || this._columnNameList.containsAll(selectPropNames),
-                "Some select properties {} are not found in DataSet: {} for entity {}", selectPropNames, this._columnNameList,
-                ClassUtil.getSimpleClassName(entityClass));
+                "Some select properties {} are not found in DataSet: {} for bean {}", selectPropNames, this._columnNameList,
+                ClassUtil.getSimpleClassName(beanClass));
 
-        return toEntities(entityClass, entityInfo, idPropNamesToUse, selectPropNames, 0, size(), prefixAndFieldNameMap, null, true, false);
+        return toEntities(beanClass, beanInfo, idPropNamesToUse, selectPropNames, 0, size(), prefixAndFieldNameMap, null, true, false);
     }
 
     @SuppressWarnings("rawtypes")
-    private <T> List<T> toEntities(final Class<? extends T> entityClass, final EntityInfo entityInfo, final Collection<String> idPropNames,
+    private <T> List<T> toEntities(final Class<? extends T> beanClass, final BeanInfo beanInfo, final Collection<String> idPropNames,
             final Collection<String> columnNames, final int fromRowIndex, final int toRowIndex, final Map<String, String> prefixAndFieldNameMap,
             final IntFunction<? extends T> rowSupplier, boolean mergeResult, final boolean returnAllList) {
-        N.checkArgNotNull(entityClass, "entityClass");
+        N.checkArgNotNull(beanClass, "beanClass");
         checkRowIndex(fromRowIndex, toRowIndex);
 
         if (mergeResult && N.isNullOrEmpty(idPropNames)) {
@@ -3008,12 +3008,12 @@ public class RowDataSet implements DataSet, Cloneable {
         final boolean ignoreUnmatchedProperty = columnNames == this._columnNameList;
 
         final Object[] resultEntities = new Object[rowCount];
-        final Map<Object, Object> idEntityMap = mergeResult ? N.newLinkedHashMap(N.min(64, rowCount)) : N.emptyMap();
-        Object entity = null;
+        final Map<Object, Object> idBeanMap = mergeResult ? N.newLinkedHashMap(N.min(64, rowCount)) : N.emptyMap();
+        Object bean = null;
 
         if (N.isNullOrEmpty(idColumnIndexes)) {
             for (int rowIndex = fromRowIndex, i = 0; rowIndex < toRowIndex; rowIndex++, i++) {
-                resultEntities[i] = rowSupplier == null ? entityInfo.createEntityResult() : rowSupplier.apply(columnCount);
+                resultEntities[i] = rowSupplier == null ? beanInfo.createBeanResult() : rowSupplier.apply(columnCount);
             }
         } else if (idColumnIndexes.length == 1) {
             final List<Object> idColumn = _columnList.get(idColumnIndexes[0]);
@@ -3028,14 +3028,14 @@ public class RowDataSet implements DataSet, Cloneable {
                 }
 
                 rowKey = getHashKey(key);
-                entity = idEntityMap.get(rowKey);
+                bean = idBeanMap.get(rowKey);
 
-                if (entity == null) {
-                    entity = rowSupplier == null ? entityInfo.createEntityResult() : rowSupplier.apply(columnCount);
-                    idEntityMap.put(rowKey, entity);
+                if (bean == null) {
+                    bean = rowSupplier == null ? beanInfo.createBeanResult() : rowSupplier.apply(columnCount);
+                    idBeanMap.put(rowKey, bean);
                 }
 
-                resultEntities[i] = entity;
+                resultEntities[i] = bean;
             }
         } else {
             final int idColumnCount = idColumnIndexes.length;
@@ -3060,16 +3060,16 @@ public class RowDataSet implements DataSet, Cloneable {
                 }
 
                 rowKey = Wrapper.of(keyRow);
-                entity = idEntityMap.get(rowKey);
+                bean = idBeanMap.get(rowKey);
 
-                if (entity == null) {
-                    entity = rowSupplier == null ? entityInfo.createEntityResult() : rowSupplier.apply(columnCount);
-                    idEntityMap.put(rowKey, entity);
+                if (bean == null) {
+                    bean = rowSupplier == null ? beanInfo.createBeanResult() : rowSupplier.apply(columnCount);
+                    idBeanMap.put(rowKey, bean);
 
                     keyRow = Objectory.createObjectArray(idColumnCount);
                 }
 
-                resultEntities[i] = entity;
+                resultEntities[i] = bean;
             }
 
             if (keyRow != null) {
@@ -3094,7 +3094,7 @@ public class RowDataSet implements DataSet, Cloneable {
                 curColumnIndex = checkColumnName(propName);
                 curColumn = _columnList.get(curColumnIndex);
 
-                propInfo = entityInfo.getPropInfo(propName);
+                propInfo = beanInfo.getPropInfo(propName);
 
                 if (propInfo != null) {
                     boolean isPropValueChecked = false;
@@ -3138,29 +3138,29 @@ public class RowDataSet implements DataSet, Cloneable {
                             continue;
                         }
 
-                        throw new IllegalArgumentException("Property " + propName + " is not found in class: " + entityClass);
+                        throw new IllegalArgumentException("Property " + propName + " is not found in class: " + beanClass);
                     }
 
                     final String realPropName = propName.substring(0, idx);
-                    propInfo = getPropInfoByPrefix(entityInfo, realPropName, prefixAndFieldNameMap);
+                    propInfo = getPropInfoByPrefix(beanInfo, realPropName, prefixAndFieldNameMap);
 
                     if (propInfo == null) {
                         if (ignoreUnmatchedProperty) {
                             continue;
                         } else {
-                            throw new IllegalArgumentException("Property " + propName + " is not found in class: " + entityClass);
+                            throw new IllegalArgumentException("Property " + propName + " is not found in class: " + beanClass);
                         }
                     }
 
-                    final Type<?> propEntityType = propInfo.type.isCollection() ? propInfo.type.getElementType() : propInfo.type;
+                    final Type<?> propBeanType = propInfo.type.isCollection() ? propInfo.type.getElementType() : propInfo.type;
 
-                    if (!propEntityType.isEntity()) {
-                        throw new UnsupportedOperationException("Property: " + propInfo.name + " in class: " + entityClass + " is not an entity type");
+                    if (!propBeanType.isBean()) {
+                        throw new UnsupportedOperationException("Property: " + propInfo.name + " in class: " + beanClass + " is not a bean type");
                     }
 
-                    final Class<?> propEntityClass = propEntityType.clazz();
-                    final EntityInfo propEntityInfo = ParserUtil.getEntityInfo(propEntityClass);
-                    final List<String> propEntityIdPropNames = mergeResult ? propEntityInfo.idPropNameList : null;
+                    final Class<?> propBeanClass = propBeanType.clazz();
+                    final BeanInfo propBeanInfo = ParserUtil.getBeanInfo(propBeanClass);
+                    final List<String> propEntityIdPropNames = mergeResult ? propBeanInfo.idPropNameList : null;
                     final List<String> newPropEntityIdNames = mergeResult && N.isNullOrEmpty(propEntityIdPropNames) ? new ArrayList<>() : propEntityIdPropNames;
                     final List<String> newTmpColumnNameList = new ArrayList<>();
                     final List<List<Object>> newTmpColumnList = new ArrayList<>();
@@ -3192,7 +3192,7 @@ public class RowDataSet implements DataSet, Cloneable {
 
                     final boolean isToMerge = mergeResult && N.notNullOrEmpty(newPropEntityIdNames) && tmp._columnNameList.containsAll(newPropEntityIdNames);
 
-                    final List<?> propValueList = tmp.toEntities(propEntityClass, propEntityInfo, isToMerge ? newPropEntityIdNames : null, tmp._columnNameList,
+                    final List<?> propValueList = tmp.toEntities(propBeanClass, propBeanInfo, isToMerge ? newPropEntityIdNames : null, tmp._columnNameList,
                             fromRowIndex, toRowIndex, prefixAndFieldNameMap, null, isToMerge, true);
 
                     if (propInfo.type.isCollection()) {
@@ -3238,46 +3238,45 @@ public class RowDataSet implements DataSet, Cloneable {
                 }
             }
 
-            final List<T> result = returnAllList || N.isNullOrEmpty(idEntityMap) ? (List<T>) N.asList(resultEntities)
-                    : new ArrayList<>((Collection<T>) idEntityMap.values());
+            final List<T> result = returnAllList || N.isNullOrEmpty(idBeanMap) ? (List<T>) N.asList(resultEntities)
+                    : new ArrayList<>((Collection<T>) idBeanMap.values());
 
             if (rowSupplier == null && N.notNullOrEmpty(result)) {
                 for (int i = 0, size = result.size(); i < size; i++) {
-                    result.set(i, entityInfo.finishEntityResult(result.get(i)));
+                    result.set(i, beanInfo.finishBeanResult(result.get(i)));
                 }
             }
 
             return result;
         } finally {
-            if (N.len(idColumnIndexes) > 1 && N.notNullOrEmpty(idEntityMap)) {
-                for (Wrapper<Object[]> e : ((Map<Wrapper<Object[]>, Object>) ((Map) idEntityMap)).keySet()) {
+            if (N.len(idColumnIndexes) > 1 && N.notNullOrEmpty(idBeanMap)) {
+                for (Wrapper<Object[]> e : ((Map<Wrapper<Object[]>, Object>) ((Map) idBeanMap)).keySet()) {
                     Objectory.recycle(e.value());
                 }
             }
         }
     }
 
-    private PropInfo getPropInfoByPrefix(final EntityInfo entityInfo, final String prefix, final Map<String, String> prefixAndFieldNameMap) {
-        PropInfo propInfo = entityInfo.getPropInfo(prefix);
+    private PropInfo getPropInfoByPrefix(final BeanInfo beanInfo, final String prefix, final Map<String, String> prefixAndFieldNameMap) {
+        PropInfo propInfo = beanInfo.getPropInfo(prefix);
 
         if (propInfo == null && N.notNullOrEmpty(prefixAndFieldNameMap) && prefixAndFieldNameMap.containsKey(prefix)) {
-            propInfo = entityInfo.getPropInfo(prefixAndFieldNameMap.get(prefix));
+            propInfo = beanInfo.getPropInfo(prefixAndFieldNameMap.get(prefix));
         }
 
         if (propInfo == null) {
-            propInfo = entityInfo.getPropInfo(prefix + "s"); // Trying to do something smart?
+            propInfo = beanInfo.getPropInfo(prefix + "s"); // Trying to do something smart?
             final int len = prefix.length() + 1;
 
-            if (propInfo != null && (propInfo.type.isEntity() || (propInfo.type.isCollection() && propInfo.type.getElementType().isEntity()))
+            if (propInfo != null && (propInfo.type.isBean() || (propInfo.type.isCollection() && propInfo.type.getElementType().isBean()))
                     && N.noneMatch(this._columnNameList, it -> it.length() > len && it.charAt(len) == '.' && Strings.startsWithIgnoreCase(it, prefix + "s."))) {
                 // good
             } else {
-                propInfo = entityInfo.getPropInfo(prefix + "es"); // Trying to do something smart?
+                propInfo = beanInfo.getPropInfo(prefix + "es"); // Trying to do something smart?
                 final int len2 = prefix.length() + 2;
 
-                if (propInfo != null && (propInfo.type.isEntity() || (propInfo.type.isCollection() && propInfo.type.getElementType().isEntity()))
-                        && N.noneMatch(this._columnNameList,
-                                it -> it.length() > len2 && it.charAt(len2) == '.' && Strings.startsWithIgnoreCase(it, prefix + "es."))) {
+                if (propInfo != null && (propInfo.type.isBean() || (propInfo.type.isCollection() && propInfo.type.getElementType().isBean())) && N.noneMatch(
+                        this._columnNameList, it -> it.length() > len2 && it.charAt(len2) == '.' && Strings.startsWithIgnoreCase(it, prefix + "es."))) {
                     // good
                 } else {
                     // Sorry, have done all I can do.
@@ -3447,27 +3446,27 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 resultMap.put(_columnList.get(keyColumnIndex).get(rowIndex), value);
             }
-        } else if (valueType.isEntity()) {
-            final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
+        } else if (valueType.isBean()) {
+            final BeanInfo beanInfo = ParserUtil.getBeanInfo(rowClass);
             final boolean ignoreUnmatchedProperty = valueColumnNames == _columnNameList;
             Object value = null;
             String propName = null;
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                value = entityInfo.createEntityResult();
+                value = beanInfo.createBeanResult();
 
                 for (int columIndex : valueColumnIndexes) {
                     propName = _columnNameList.get(columIndex);
-                    entityInfo.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnmatchedProperty);
+                    beanInfo.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnmatchedProperty);
                 }
 
-                value = entityInfo.finishEntityResult(value);
+                value = beanInfo.finishBeanResult(value);
 
                 resultMap.put(_columnList.get(keyColumnIndex).get(rowIndex), value);
             }
         } else {
             throw new IllegalArgumentException(
-                    "Unsupported row type: " + rowClass.getCanonicalName() + ". Only Array, List/Set, Map and entity class are supported");
+                    "Unsupported row type: " + rowClass.getCanonicalName() + ". Only Array, List/Set, Map and bean class are supported");
         }
 
         return (M) resultMap;
@@ -3566,9 +3565,9 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 resultMap.put(_columnList.get(keyColumnIndex).get(rowIndex), value);
             }
-        } else if (valueType.isEntity()) {
+        } else if (valueType.isBean()) {
             final boolean ignoreUnmatchedProperty = valueColumnNames == _columnNameList;
-            final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
+            final BeanInfo beanInfo = ParserUtil.getBeanInfo(rowClass);
             Object value = null;
             String propName = null;
 
@@ -3577,14 +3576,14 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 for (int columIndex : valueColumnIndexes) {
                     propName = _columnNameList.get(columIndex);
-                    entityInfo.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnmatchedProperty);
+                    beanInfo.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnmatchedProperty);
                 }
 
                 resultMap.put(_columnList.get(keyColumnIndex).get(rowIndex), value);
             }
         } else {
             throw new IllegalArgumentException(
-                    "Unsupported row type: " + rowClass.getCanonicalName() + ". Only Array, List/Set, Map and entity class are supported");
+                    "Unsupported row type: " + rowClass.getCanonicalName() + ". Only Array, List/Set, Map and bean class are supported");
         }
 
         return (M) resultMap;
@@ -3752,27 +3751,27 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 resultMap.put((K) _columnList.get(keyColumnIndex).get(rowIndex), (E) value);
             }
-        } else if (elementType.isEntity()) {
-            final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
+        } else if (elementType.isBean()) {
+            final BeanInfo beanInfo = ParserUtil.getBeanInfo(rowClass);
             final boolean ignoreUnmatchedProperty = valueColumnNames == _columnNameList;
             Object value = null;
             String propName = null;
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                value = entityInfo.createEntityResult();
+                value = beanInfo.createBeanResult();
 
                 for (int columIndex : valueColumnIndexes) {
                     propName = _columnNameList.get(columIndex);
-                    entityInfo.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnmatchedProperty);
+                    beanInfo.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnmatchedProperty);
                 }
 
-                value = entityInfo.finishEntityResult(value);
+                value = beanInfo.finishBeanResult(value);
 
                 resultMap.put((K) _columnList.get(keyColumnIndex).get(rowIndex), (E) value);
             }
         } else {
             throw new IllegalArgumentException(
-                    "Unsupported row type: " + rowClass.getCanonicalName() + ". Only Array, List/Set, Map and entity class are supported");
+                    "Unsupported row type: " + rowClass.getCanonicalName() + ". Only Array, List/Set, Map and bean class are supported");
         }
 
         return resultMap;
@@ -3874,9 +3873,9 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 resultMap.put((K) _columnList.get(keyColumnIndex).get(rowIndex), (E) value);
             }
-        } else if (elementType.isEntity()) {
+        } else if (elementType.isBean()) {
             final boolean ignoreUnmatchedProperty = valueColumnNames == _columnNameList;
-            final EntityInfo entityInfo = ParserUtil.getEntityInfo(rowClass);
+            final BeanInfo beanInfo = ParserUtil.getBeanInfo(rowClass);
             Object value = null;
             String propName = null;
 
@@ -3885,14 +3884,14 @@ public class RowDataSet implements DataSet, Cloneable {
 
                 for (int columIndex : valueColumnIndexes) {
                     propName = _columnNameList.get(columIndex);
-                    entityInfo.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnmatchedProperty);
+                    beanInfo.setPropValue(value, propName, _columnList.get(columIndex).get(rowIndex), ignoreUnmatchedProperty);
                 }
 
                 resultMap.put((K) _columnList.get(keyColumnIndex).get(rowIndex), (E) value);
             }
         } else {
             throw new IllegalArgumentException(
-                    "Unsupported row type: " + rowClass.getCanonicalName() + ". Only Array, List/Set, Map and entity class are supported");
+                    "Unsupported row type: " + rowClass.getCanonicalName() + ". Only Array, List/Set, Map and bean class are supported");
         }
 
         return resultMap;
@@ -10662,26 +10661,26 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     @Override
-    public <T> Stream<T> stream(Class<? extends T> entityClass, Map<String, String> prefixAndFieldNameMap) {
-        return stream(entityClass, this._columnNameList, 0, size(), prefixAndFieldNameMap);
+    public <T> Stream<T> stream(Class<? extends T> beanClass, Map<String, String> prefixAndFieldNameMap) {
+        return stream(beanClass, this._columnNameList, 0, size(), prefixAndFieldNameMap);
     }
 
     @Override
-    public <T> Stream<T> stream(Class<? extends T> entityClass, int fromRowIndex, int toRowIndex, Map<String, String> prefixAndFieldNameMap) {
-        return stream(entityClass, this._columnNameList, fromRowIndex, toRowIndex, prefixAndFieldNameMap);
+    public <T> Stream<T> stream(Class<? extends T> beanClass, int fromRowIndex, int toRowIndex, Map<String, String> prefixAndFieldNameMap) {
+        return stream(beanClass, this._columnNameList, fromRowIndex, toRowIndex, prefixAndFieldNameMap);
     }
 
     @Override
-    public <T> Stream<T> stream(Class<? extends T> entityClass, Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap) {
-        return stream(entityClass, columnNames, 0, size(), prefixAndFieldNameMap);
+    public <T> Stream<T> stream(Class<? extends T> beanClass, Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap) {
+        return stream(beanClass, columnNames, 0, size(), prefixAndFieldNameMap);
     }
 
     @Override
-    public <T> Stream<T> stream(Class<? extends T> entityClass, Collection<String> columnNames, int fromRowIndex, int toRowIndex,
+    public <T> Stream<T> stream(Class<? extends T> beanClass, Collection<String> columnNames, int fromRowIndex, int toRowIndex,
             final Map<String, String> prefixAndFieldNameMap) {
-        N.checkArgument(ClassUtil.isEntity(entityClass), "{} is not an entity class", entityClass);
+        N.checkArgument(ClassUtil.isBeanClass(beanClass), "{} is not a bean class", beanClass);
 
-        return stream(entityClass, columnNames, fromRowIndex, toRowIndex, prefixAndFieldNameMap, null);
+        return stream(beanClass, columnNames, fromRowIndex, toRowIndex, prefixAndFieldNameMap, null);
     }
 
     private <T> Stream<T> stream(final Class<? extends T> inputRowClass, final Collection<String> inputColumnNames, final int fromRowIndex,
@@ -10698,9 +10697,9 @@ public class RowDataSet implements DataSet, Cloneable {
 
         final Class<? extends T> rowClass = inputRowClass == null ? (Class<T>) inputRowSupplier.apply(0).getClass() : inputRowClass;
         final Type<T> rowType = N.typeOf(rowClass);
-        final EntityInfo entityInfo = rowType.isEntity() ? ParserUtil.getEntityInfo(rowClass) : null;
+        final BeanInfo beanInfo = rowType.isBean() ? ParserUtil.getBeanInfo(rowClass) : null;
 
-        final IntFunction<? extends T> rowSupplier = inputRowSupplier == null && !rowType.isEntity() ? this.createRowSupplier(rowType, rowClass)
+        final IntFunction<? extends T> rowSupplier = inputRowSupplier == null && !rowType.isBean() ? this.createRowSupplier(rowType, rowClass)
                 : inputRowSupplier;
 
         return Stream.of(new ObjIteratorEx<T>() {
@@ -10722,7 +10721,7 @@ public class RowDataSet implements DataSet, Cloneable {
                     throw new NoSuchElementException();
                 }
 
-                return getRow(rowType, rowClass, entityInfo, columnNames, columnIndexes, columnCount, cursor++, prefixAndFieldNameMap, rowSupplier);
+                return getRow(rowType, rowClass, beanInfo, columnNames, columnIndexes, columnCount, cursor++, prefixAndFieldNameMap, rowSupplier);
             }
 
             @Override

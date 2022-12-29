@@ -25,13 +25,13 @@ public class ObjectNotFoundException extends IllegalStateException {
     private static final long serialVersionUID = -1806452586200243492L;
 
     /**
-     * Constructor for EntityNotFoundException.
+     * Constructor for ObjectNotFoundException.
      */
     public ObjectNotFoundException() {
     }
 
     /**
-     * Constructor for EntityNotFoundException.
+     * Constructor for ObjectNotFoundException.
      *
      * @param message
      */
@@ -40,7 +40,7 @@ public class ObjectNotFoundException extends IllegalStateException {
     }
 
     /**
-     * Constructor for EntityNotFoundException.
+     * Constructor for ObjectNotFoundException.
      *
      * @param message
      * @param cause
@@ -50,7 +50,7 @@ public class ObjectNotFoundException extends IllegalStateException {
     }
 
     /**
-     * Constructor for EntityNotFoundException.
+     * Constructor for ObjectNotFoundException.
      *
      * @param cause
      */

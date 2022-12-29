@@ -1,3 +1,8 @@
+### 3.6.2
+
+* Replace name "entity" with "bean".
+
+
 ### 3.6.1
 
 * Improvements and bug fix.

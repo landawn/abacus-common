@@ -22,7 +22,7 @@ package com.landawn.abacus.util;
  */
 public enum LockMode {
     /**
-     * Others can't read by entity id (but can query by condition) if lock on this level.
+     * Others can't read by bean id (but can query by condition) if lock on this level.
      */
     R(1),
     /**
@@ -40,17 +40,17 @@ public enum LockMode {
      */
     D(8),
     /**
-     * Others can't read by entity id (but can query by condition) and add(insert) if lock on this level.
+     * Others can't read by bean id (but can query by condition) and add(insert) if lock on this level.
      *
      * @deprecated not supported at present.
      */
     RA(R.intValue + A.intValue),
     /**
-     * Others can't read by entity id (but can query by condition) and modify(update) if lock on this level.
+     * Others can't read by bean id (but can query by condition) and modify(update) if lock on this level.
      */
     RU(R.intValue + U.intValue),
     /**
-     * Others can't read by entity id (but can query by condition) and delete if lock on this level.
+     * Others can't read by bean id (but can query by condition) and delete if lock on this level.
      */
     RD(R.intValue + D.intValue),
     /**
@@ -70,20 +70,20 @@ public enum LockMode {
      */
     UD(U.intValue + D.intValue),
     /**
-     * Others can't read by entity id (but can query by condition), add(insert) and modify(update) if lock on this
+     * Others can't read by bean id (but can query by condition), add(insert) and modify(update) if lock on this
      * level.
      *
      * @deprecated not supported at present.
      */
     RAU(R.intValue + A.intValue + U.intValue),
     /**
-     * Others can't read by entity id (but can query by condition), add(insert) and delete if lock on this level.
+     * Others can't read by bean id (but can query by condition), add(insert) and delete if lock on this level.
      *
      * @deprecated not supported at present.
      */
     RAD(R.intValue + A.intValue + D.intValue),
     /**
-     * Others can't read by entity id (but can query by condition), modify(update) and delete if lock on this level.
+     * Others can't read by bean id (but can query by condition), modify(update) and delete if lock on this level.
      */
     RUD(R.intValue + U.intValue + D.intValue),
     /**
@@ -94,7 +94,7 @@ public enum LockMode {
     AUD(A.intValue + U.intValue + D.intValue),
 
     /**
-     * Others read by entity id (but can query by condition), add(insert), modify(update) and delete if lock on this
+     * Others read by bean id (but can query by condition), add(insert), modify(update) and delete if lock on this
      * level.
      *
      * @deprecated not supported at present.

@@ -22,11 +22,11 @@ import com.landawn.abacus.util.N;
  * @param <T>
  * @since 0.8
  */
-public final class EntityType<T> extends AbstractType<T> {
+public final class BeanType<T> extends AbstractType<T> {
 
     private final Class<T> typeClass;
 
-    EntityType(Class<T> cls) {
+    BeanType(Class<T> cls) {
         super(TypeFactory.getClassName(cls));
         this.typeClass = cls;
     }
@@ -37,12 +37,12 @@ public final class EntityType<T> extends AbstractType<T> {
     }
 
     /**
-     * Checks if is entity.
+     * Checks if is bean.
      *
-     * @return true, if is entity
+     * @return true, if is bean
      */
     @Override
-    public boolean isEntity() {
+    public boolean isBean() {
         return true;
     }
 

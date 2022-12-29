@@ -40,9 +40,9 @@ public class EntityIdType extends AbstractType<EntityId> {
     }
 
     /**
-     * Checks if is entity id.
+     * Checks if is bean id.
      *
-     * @return true, if is entity id
+     * @return true, if is bean id
      */
     @Override
     public boolean isEntityId() {

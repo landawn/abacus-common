@@ -246,53 +246,53 @@ public class XMLConstants {
      */
     public static final String ENTITY_IDS_NULL_ELE = "<entityIds isNull=\"true\" />";
     /**
-     * Field ENTITY. (value is ""entity"")
+     * Field ENTITY. (value is ""bean"")
      */
-    public static final String ENTITY = "entity";
+    public static final String ENTITY = "bean";
     /**
-     * Field ENTITY_ELE_START. (value is ""<entity>"")
+     * Field ENTITY_ELE_START. (value is ""<bean>"")
      */
-    public static final String ENTITY_ELE_START = "<entity>";
+    public static final String ENTITY_ELE_START = "<bean>";
     /**
-     * Field ENTITY_ELE_END. (value is ""</entity>"")
+     * Field ENTITY_ELE_END. (value is ""</bean>"")
      */
-    public static final String ENTITY_ELE_END = "</entity>";
+    public static final String ENTITY_ELE_END = "</bean>";
     /**
-     * Field ENTITY_NULL_ELE. (value is ""<entity isNull=\"true\" />"")
+     * Field ENTITY_NULL_ELE. (value is ""<bean isNull=\"true\" />"")
      */
-    public static final String ENTITY_NULL_ELE = "<entity isNull=\"true\" />";
+    public static final String ENTITY_NULL_ELE = "<bean isNull=\"true\" />";
     /**
-     * Field ENTITY_NAME. (value is ""entityName"")
+     * Field ENTITY_NAME. (value is ""beanName"")
      */
-    public static final String ENTITY_NAME = "entityName";
+    public static final String ENTITY_NAME = "beanName";
     /**
-     * Field ENTITY_NAME_ELE_START. (value is ""<entityName>"")
+     * Field ENTITY_NAME_ELE_START. (value is ""<beanName>"")
      */
-    public static final String ENTITY_NAME_ELE_START = "<entityName>";
+    public static final String ENTITY_NAME_ELE_START = "<beanName>";
     /**
-     * Field ENTITY_NAME_ELE_END. (value is ""</entityName>"")
+     * Field ENTITY_NAME_ELE_END. (value is ""</beanName>"")
      */
-    public static final String ENTITY_NAME_ELE_END = "</entityName>";
+    public static final String ENTITY_NAME_ELE_END = "</beanName>";
     /**
-     * Field ENTITY_NAME_NULL_ELE. (value is ""<entityName isNull=\"true\" />"")
+     * Field ENTITY_NAME_NULL_ELE. (value is ""<beanName isNull=\"true\" />"")
      */
-    public static final String ENTITY_NAME_NULL_ELE = "<entityName isNull=\"true\" />";
+    public static final String ENTITY_NAME_NULL_ELE = "<beanName isNull=\"true\" />";
     /**
-     * Field ENTITY_CLASS. (value is ""entityClass"")
+     * Field ENTITY_CLASS. (value is ""beanClass"")
      */
-    public static final String ENTITY_CLASS = "entityClass";
+    public static final String ENTITY_CLASS = "beanClass";
     /**
-     * Field ENTITY_CLASS_ELE_START. (value is ""<entityClass>"")
+     * Field ENTITY_CLASS_ELE_START. (value is ""<beanClass>"")
      */
-    public static final String ENTITY_CLASS_ELE_START = "<entityClass>";
+    public static final String ENTITY_CLASS_ELE_START = "<beanClass>";
     /**
-     * Field ENTITY_CLASS_ELE_END. (value is ""</entityClass>"")
+     * Field ENTITY_CLASS_ELE_END. (value is ""</beanClass>"")
      */
-    public static final String ENTITY_CLASS_ELE_END = "</entityClass>";
+    public static final String ENTITY_CLASS_ELE_END = "</beanClass>";
     /**
-     * Field ENTITY_CLASS_NULL_ELE. (value is ""<entityClass isNull=\"true\" />"")
+     * Field ENTITY_CLASS_NULL_ELE. (value is ""<beanClass isNull=\"true\" />"")
      */
-    public static final String ENTITY_CLASS_NULL_ELE = "<entityClass isNull=\"true\" />";
+    public static final String ENTITY_CLASS_NULL_ELE = "<beanClass isNull=\"true\" />";
     /**
      * Field PROPERTY. (value is ""property"")
      */

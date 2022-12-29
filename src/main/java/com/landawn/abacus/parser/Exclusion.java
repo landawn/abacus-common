@@ -22,15 +22,15 @@ package com.landawn.abacus.parser;
  */
 public enum Exclusion {
     /**
-     * Excludes the entity properties with null values.
+     * Excludes the bean properties with null values.
      */
     NULL,
     /**
-     * Excludes the entity properties with default values.
+     * Excludes the bean properties with default values.
      */
     DEFAULT,
     /**
-     * No entity property is excluded.
+     * No bean property is excluded.
      */
     NONE;
 }

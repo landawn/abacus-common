@@ -316,19 +316,19 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if is entity.
+     * Checks if is bean.
      *
-     * @return true, if is entity
+     * @return true, if is bean
      */
     @Override
-    public boolean isEntity() {
+    public boolean isBean() {
         return false;
     }
 
     /**
-     * Checks if is map entity.
+     * Checks if is map bean.
      *
-     * @return true, if is map entity
+     * @return true, if is map bean
      */
     @Override
     public boolean isMapEntity() {
@@ -336,9 +336,9 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if is entity id.
+     * Checks if is bean id.
      *
-     * @return true, if is entity id
+     * @return true, if is bean id
      */
     @Override
     public boolean isEntityId() {

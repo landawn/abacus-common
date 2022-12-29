@@ -145,11 +145,11 @@ public final class XMLUtil {
     /**
      * {@link Marshaller#marshal(Object, java.io.Writer)} is called
      *
-     * @param jaxbEntity
+     * @param jaxbBean
      * @return
      */
-    public static String marshal(Object jaxbEntity) {
-        Class<?> cls = jaxbEntity.getClass();
+    public static String marshal(Object jaxbBean) {
+        Class<?> cls = jaxbBean.getClass();
         JAXBContext jc = classJaxbContextPool.get(cls);
         final ByteArrayOutputStream writer = Objectory.createByteArrayOutputStream();
 
@@ -160,7 +160,7 @@ public final class XMLUtil {
             }
 
             Marshaller marshaller = jc.createMarshaller();
-            marshaller.marshal(jaxbEntity, writer);
+            marshaller.marshal(jaxbBean, writer);
             writer.flush();
 
             return writer.toString();
@@ -584,14 +584,14 @@ public final class XMLUtil {
     /**
      * {@link XMLEncoder#writeObject(Object)} is called.
      *
-     * @param entity
+     * @param bean
      * @return
      */
-    public static String xmlEncode(Object entity) {
+    public static String xmlEncode(Object bean) {
         final ByteArrayOutputStream os = Objectory.createByteArrayOutputStream();
 
         try (XMLEncoder xmlEncoder = new XMLEncoder(os)) {
-            xmlEncoder.writeObject(entity);
+            xmlEncoder.writeObject(bean);
             xmlEncoder.flush();
         }
 
@@ -1109,7 +1109,7 @@ public final class XMLUtil {
      */
     enum NodeType {
 
-        /** The entity. */
+        /** The bean. */
         ENTITY,
         /** The property. */
         PROPERTY,

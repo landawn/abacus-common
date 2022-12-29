@@ -30,7 +30,7 @@ import java.util.TreeMap;
 import com.landawn.abacus.annotation.Immutable;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.parser.ParserUtil;
-import com.landawn.abacus.parser.ParserUtil.EntityInfo;
+import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 
 /**
  *
@@ -174,7 +174,7 @@ public class Seid implements EntityId, Cloneable {
         }
 
         final Class<?> cls = entity.getClass();
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
+        final BeanInfo entityInfo = ParserUtil.getBeanInfo(cls);
         final Seid seid = Seid.of(ClassUtil.getSimpleClassName(cls));
 
         for (String idPropName : idPropNames) {
@@ -528,7 +528,7 @@ public class Seid implements EntityId, Cloneable {
     @Internal
     @Immutable
     static List<String> getIdFieldNames(final Class<?> targetClass) {
-        final ImmutableList<String> idPropNames = ParserUtil.getEntityInfo(targetClass).idPropNameList;
+        final ImmutableList<String> idPropNames = ParserUtil.getBeanInfo(targetClass).idPropNameList;
 
         return N.isNullOrEmpty(idPropNames) ? N.emptyList() : idPropNames;
     }

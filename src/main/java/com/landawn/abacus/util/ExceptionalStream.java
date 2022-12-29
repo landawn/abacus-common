@@ -70,7 +70,7 @@ import com.landawn.abacus.parser.JSONSerializationConfig;
 import com.landawn.abacus.parser.JSONSerializationConfig.JSC;
 import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.parser.ParserUtil;
-import com.landawn.abacus.parser.ParserUtil.EntityInfo;
+import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Fn.Factory;
@@ -9237,7 +9237,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * The first row will be used as column names if its type is array or list,
-     * or obtain the column names from first row if its type is entity or map.
+     * or obtain the column names from first row if its type is bean or map.
      *
      * @return
      * @throws E
@@ -9250,7 +9250,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     /**
      * If the specified {@code columnNames} is null or empty, the first row will be used as column names if its type is array or list,
-     * or obtain the column names from first row if its type is entity or map.
+     * or obtain the column names from first row if its type is bean or map.
      *
      *
      * @param columnNames
@@ -10086,8 +10086,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     cnt++;
                     cls = next.getClass();
 
-                    if (ClassUtil.isEntity(cls)) {
-                        final List<PropInfo> propInfoList = ParserUtil.getEntityInfo(cls).propInfoList;
+                    if (ClassUtil.isBeanClass(cls)) {
+                        final List<PropInfo> propInfoList = ParserUtil.getBeanInfo(cls).propInfoList;
                         final int headerSize = propInfoList.size();
                         PropInfo propInfo = null;
 
@@ -10165,7 +10165,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                             }
                         }
                     } else {
-                        throw new RuntimeException(cls + " is no supported for CSV format. Only entity/Map are supported");
+                        throw new RuntimeException(cls + " is no supported for CSV format. Only bean/Map are supported");
                     }
                 }
 
@@ -10213,13 +10213,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     cnt++;
                     cls = next.getClass();
 
-                    if (ClassUtil.isEntity(cls)) {
-                        final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
+                    if (ClassUtil.isBeanClass(cls)) {
+                        final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
                         final PropInfo[] propInfos = new PropInfo[headSize];
                         PropInfo propInfo = null;
 
                         for (int i = 0; i < headSize; i++) {
-                            propInfos[i] = entityInfo.getPropInfo(headers.get(i));
+                            propInfos[i] = beanInfo.getPropInfo(headers.get(i));
                         }
 
                         for (int i = 0; i < headSize; i++) {
@@ -10367,7 +10367,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                             }
                         }
                     } else {
-                        throw new RuntimeException(cls + " is no supported for CSV format. Only entity/Map are supported");
+                        throw new RuntimeException(cls + " is no supported for CSV format. Only bean/Map are supported");
                     }
                 }
 

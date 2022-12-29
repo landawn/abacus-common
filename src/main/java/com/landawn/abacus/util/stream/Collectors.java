@@ -3456,14 +3456,14 @@ public abstract class Collectors {
         return new CollectorImpl<>(mapFactory, accumulator, combiner, CH_UNORDERED_ID);
     }
 
-    //    public static <T> Collector<T, ?, DataSet> toDataSet(final String entityName, final Class<?> entityClass, final List<String> columnNames) {
+    //    public static <T> Collector<T, ?, DataSet> toDataSet(final String beanName, final Class<?> beanClass, final List<String> columnNames) {
     //        @SuppressWarnings("rawtypes")
     //        final Collector<T, List<T>, List<T>> collector = (Collector) toList();
     //
     //        final Function<List<T>, DataSet> finisher = new Function<List<T>, DataSet>() {
     //            @Override
     //            public DataSet apply(List<T> t) {
-    //                return N.newDataSet(entityName, entityClass, columnNames, t);
+    //                return N.newDataSet(beanName, beanClass, columnNames, t);
     //            }
     //        };
     //

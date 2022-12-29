@@ -26,13 +26,13 @@ public class DuplicatedResultException extends IllegalStateException {
     private static final long serialVersionUID = -8407459420058648924L;
 
     /**
-     * Constructor for EntityNotFoundException.
+     * Constructor for DuplicatedResultException.
      */
     public DuplicatedResultException() {
     }
 
     /**
-     * Constructor for EntityNotFoundException.
+     * Constructor for DuplicatedResultException.
      *
      * @param message
      */
@@ -41,7 +41,7 @@ public class DuplicatedResultException extends IllegalStateException {
     }
 
     /**
-     * Constructor for EntityNotFoundException.
+     * Constructor for DuplicatedResultException.
      *
      * @param message
      * @param cause
@@ -51,7 +51,7 @@ public class DuplicatedResultException extends IllegalStateException {
     }
 
     /**
-     * Constructor for EntityNotFoundException.
+     * Constructor for DuplicatedResultException.
      *
      * @param cause
      */

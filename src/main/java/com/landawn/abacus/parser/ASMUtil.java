@@ -42,9 +42,9 @@ final class ASMUtil {
             Class.forName("com.esotericsoftware.reflectasm.MethodAccess");
             Class.forName("org.objectweb.asm.ClassWriter");
 
-            final Method getMethod = TestEntityA.class.getMethod("getName");
-            final Method setMethod = TestEntityA.class.getMethod("setName", String.class);
-            final Field field = TestEntityA.class.getDeclaredField("name");
+            final Method getMethod = TestBeanA.class.getMethod("getName");
+            final Method setMethod = TestBeanA.class.getMethod("setName", String.class);
+            final Field field = TestBeanA.class.getDeclaredField("name");
 
             final com.esotericsoftware.reflectasm.MethodAccess getMethodAccess = com.esotericsoftware.reflectasm.MethodAccess
                     .get(getMethod.getDeclaringClass());
@@ -57,10 +57,10 @@ final class ASMUtil {
             final int fieldAccessIndex = (Modifier.isPrivate(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) ? -1
                     : fieldAccess.getIndex(field.getName());
 
-            TestEntityA entity = new TestEntityA();
+            TestBeanA bean = new TestBeanA();
 
-            setMethodAccess.invoke(entity, setMethodAccessIndex, "Tom");
-            tmp = Objects.equal(fieldAccess.get(entity, fieldAccessIndex), getMethodAccess.invoke(entity, getMethodAccessIndex));
+            setMethodAccess.invoke(bean, setMethodAccessIndex, "Tom");
+            tmp = Objects.equal(fieldAccess.get(bean, fieldAccessIndex), getMethodAccess.invoke(bean, getMethodAccessIndex));
 
         } catch (Throwable e) {
             // ignore.
@@ -91,7 +91,7 @@ final class ASMUtil {
     }
 
     @Data
-    public static final class TestEntityA {
+    public static final class TestBeanA {
         private int id;
         public String name;
     }

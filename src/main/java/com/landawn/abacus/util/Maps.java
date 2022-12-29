@@ -40,7 +40,7 @@ import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.parser.ParserUtil;
-import com.landawn.abacus.parser.ParserUtil.EntityInfo;
+import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Fn.IntFunctions;
@@ -1231,25 +1231,25 @@ public final class Maps {
      * <code>
         Map map = N.asMap("key1", "val1");
         assertEquals("val1", Maps.getByPath(map, "key1"));
-
+    
         map = N.asMap("key1", N.asList("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-
+    
         map = N.asMap("key1", N.asSet("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-
+    
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", "val2")));
         assertEquals("val2", Maps.getByPath(map, "key1[0][1]"));
-
+    
         map = N.asMap("key1", N.asSet(N.asList(N.asSet("val1"))));
         assertEquals("val1", Maps.getByPath(map, "key1[0][0][0]"));
-
+    
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", "val22"))));
         assertEquals("val22", Maps.getByPath(map, "key1[0][1].key2"));
-
+    
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertEquals("val33", Maps.getByPath(map, "key1[0][1].key2[1].key3"));
-
+    
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertNull(Maps.getByPath(map, "key1[0][2].key2[1].key3"));
      * </code>
@@ -2296,19 +2296,19 @@ public final class Maps {
     }
 
     /**
-     * Map to entity.
+     * Map to bean.
      * @param m
      * @param targetClass
      *
      * @param <T>
      * @return
      */
-    public static <T> T map2Entity(final Map<String, Object> m, final Class<? extends T> targetClass) {
-        return map2Entity(m, false, true, targetClass);
+    public static <T> T map2Bean(final Map<String, Object> m, final Class<? extends T> targetClass) {
+        return map2Bean(m, false, true, targetClass);
     }
 
     /**
-     * Map to entity.
+     * Map to bean.
      * @param m
      * @param ignoreNullProperty
      * @param ignoreUnmatchedProperty
@@ -2318,16 +2318,16 @@ public final class Maps {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static <T> T map2Entity(final Map<String, Object> m, final boolean ignoreNullProperty, final boolean ignoreUnmatchedProperty,
+    public static <T> T map2Bean(final Map<String, Object> m, final boolean ignoreNullProperty, final boolean ignoreUnmatchedProperty,
             final Class<? extends T> targetClass) {
-        checkEntityClass(targetClass);
+        checkBeanClass(targetClass);
 
         if (m == null) {
             return null;
         }
 
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
-        final Object result = entityInfo.createEntityResult();
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetClass);
+        final Object result = beanInfo.createBeanResult();
         PropInfo propInfo = null;
 
         String propName = null;
@@ -2341,24 +2341,24 @@ public final class Maps {
                 continue;
             }
 
-            propInfo = entityInfo.getPropInfo(propName);
+            propInfo = beanInfo.getPropInfo(propName);
 
             if (propInfo == null) {
-                entityInfo.setPropValue(result, propName, propValue, ignoreUnmatchedProperty);
+                beanInfo.setPropValue(result, propName, propValue, ignoreUnmatchedProperty);
             } else {
-                if (propValue != null && N.typeOf(propValue.getClass()).isMap() && propInfo.type.isEntity()) {
-                    propInfo.setPropValue(result, map2Entity((Map<String, Object>) propValue, ignoreNullProperty, ignoreUnmatchedProperty, propInfo.clazz));
+                if (propValue != null && N.typeOf(propValue.getClass()).isMap() && propInfo.type.isBean()) {
+                    propInfo.setPropValue(result, map2Bean((Map<String, Object>) propValue, ignoreNullProperty, ignoreUnmatchedProperty, propInfo.clazz));
                 } else {
                     propInfo.setPropValue(result, propValue);
                 }
             }
         }
 
-        return entityInfo.finishEntityResult(result);
+        return beanInfo.finishBeanResult(result);
     }
 
     /**
-     * Map to entity.
+     * Map to bean.
      * @param m
      * @param selectPropNames
      * @param targetClass
@@ -2366,15 +2366,15 @@ public final class Maps {
      * @param <T>
      * @return
      */
-    public static <T> T map2Entity(final Map<String, Object> m, final Collection<String> selectPropNames, final Class<? extends T> targetClass) {
-        checkEntityClass(targetClass);
+    public static <T> T map2Bean(final Map<String, Object> m, final Collection<String> selectPropNames, final Class<? extends T> targetClass) {
+        checkBeanClass(targetClass);
 
         if (m == null) {
             return null;
         }
 
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
-        final Object result = entityInfo.createEntityResult();
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetClass);
+        final Object result = beanInfo.createBeanResult();
         PropInfo propInfo = null;
         Object propValue = null;
 
@@ -2385,36 +2385,36 @@ public final class Maps {
                 throw new IllegalArgumentException("Property name: " + propName + " is not found in map with key set: " + m.keySet());
             }
 
-            propInfo = entityInfo.getPropInfo(propName);
+            propInfo = beanInfo.getPropInfo(propName);
 
             if (propInfo == null) {
-                entityInfo.setPropValue(result, propName, propValue, false);
+                beanInfo.setPropValue(result, propName, propValue, false);
             } else {
-                if (propValue != null && N.typeOf(propValue.getClass()).isMap() && propInfo.type.isEntity()) {
-                    propInfo.setPropValue(result, map2Entity((Map<String, Object>) propValue, propInfo.clazz));
+                if (propValue != null && N.typeOf(propValue.getClass()).isMap() && propInfo.type.isBean()) {
+                    propInfo.setPropValue(result, map2Bean((Map<String, Object>) propValue, propInfo.clazz));
                 } else {
                     propInfo.setPropValue(result, propValue);
                 }
             }
         }
 
-        return entityInfo.finishEntityResult(result);
+        return beanInfo.finishBeanResult(result);
     }
 
     /**
-     * Map to entity.
+     * Map to bean.
      * @param mList
      * @param targetClass
      *
      * @param <T>
      * @return
      */
-    public static <T> List<T> map2Entity(final Collection<Map<String, Object>> mList, final Class<? extends T> targetClass) {
-        return map2Entity(mList, false, true, targetClass);
+    public static <T> List<T> map2Bean(final Collection<Map<String, Object>> mList, final Class<? extends T> targetClass) {
+        return map2Bean(mList, false, true, targetClass);
     }
 
     /**
-     * Map to entity.
+     * Map to bean.
      * @param mList
      * @param igoreNullProperty
      * @param ignoreUnmatchedProperty
@@ -2423,21 +2423,21 @@ public final class Maps {
      * @param <T>
      * @return
      */
-    public static <T> List<T> map2Entity(final Collection<Map<String, Object>> mList, final boolean igoreNullProperty, final boolean ignoreUnmatchedProperty,
+    public static <T> List<T> map2Bean(final Collection<Map<String, Object>> mList, final boolean igoreNullProperty, final boolean ignoreUnmatchedProperty,
             final Class<? extends T> targetClass) {
-        checkEntityClass(targetClass);
+        checkBeanClass(targetClass);
 
-        final List<T> entityList = new ArrayList<>(mList.size());
+        final List<T> beanList = new ArrayList<>(mList.size());
 
         for (Map<String, Object> m : mList) {
-            entityList.add(map2Entity(m, igoreNullProperty, ignoreUnmatchedProperty, targetClass));
+            beanList.add(map2Bean(m, igoreNullProperty, ignoreUnmatchedProperty, targetClass));
         }
 
-        return entityList;
+        return beanList;
     }
 
     /**
-     * Map to entity.
+     * Map to bean.
      * @param mList
      * @param selectPropNames
      * @param targetClass
@@ -2445,141 +2445,141 @@ public final class Maps {
      * @param <T>
      * @return
      */
-    public static <T> List<T> map2Entity(final Collection<Map<String, Object>> mList, final Collection<String> selectPropNames,
+    public static <T> List<T> map2Bean(final Collection<Map<String, Object>> mList, final Collection<String> selectPropNames,
             final Class<? extends T> targetClass) {
-        checkEntityClass(targetClass);
+        checkBeanClass(targetClass);
 
-        final List<T> entityList = new ArrayList<>(mList.size());
+        final List<T> beanList = new ArrayList<>(mList.size());
 
         for (Map<String, Object> m : mList) {
-            entityList.add(map2Entity(m, selectPropNames, targetClass));
+            beanList.add(map2Bean(m, selectPropNames, targetClass));
         }
 
-        return entityList;
+        return beanList;
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
-     * @param entity
+     * @param bean
      * @return
      */
-    public static Map<String, Object> entity2Map(final Object entity) {
-        return entity2Map(entity, IntFunctions.ofLinkedHashMap());
+    public static Map<String, Object> bean2Map(final Object bean) {
+        return bean2Map(bean, IntFunctions.ofLinkedHashMap());
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
-     * @param entity
+     * @param bean
      * @param mapSupplier
      * @return
      */
-    public static <M extends Map<String, Object>> M entity2Map(final Object entity, final IntFunction<? extends M> mapSupplier) {
-        return entity2Map(entity, null, mapSupplier);
+    public static <M extends Map<String, Object>> M bean2Map(final Object bean, final IntFunction<? extends M> mapSupplier) {
+        return bean2Map(bean, null, mapSupplier);
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
-     * @param entity
+     * @param bean
      * @param selectPropNames
      * @return
      */
-    public static Map<String, Object> entity2Map(final Object entity, final Collection<String> selectPropNames) {
-        return entity2Map(entity, selectPropNames, IntFunctions.ofLinkedHashMap());
+    public static Map<String, Object> bean2Map(final Object bean, final Collection<String> selectPropNames) {
+        return bean2Map(bean, selectPropNames, IntFunctions.ofLinkedHashMap());
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
-     * @param entity
+     * @param bean
      * @param selectPropNames
      * @param mapSupplier
      * @return
      */
-    public static <M extends Map<String, Object>> M entity2Map(final Object entity, final Collection<String> selectPropNames,
+    public static <M extends Map<String, Object>> M bean2Map(final Object bean, final Collection<String> selectPropNames,
             final IntFunction<? extends M> mapSupplier) {
-        return entity2Map(entity, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, mapSupplier);
+        return bean2Map(bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, mapSupplier);
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
-     * @param entity
+     * @param bean
      * @param selectPropNames
      * @param keyNamingPolicy
      * @param mapSupplier
      * @return
      */
-    public static <M extends Map<String, Object>> M entity2Map(final Object entity, final Collection<String> selectPropNames,
-            final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
-        final M resultMap = mapSupplier.apply(N.isNullOrEmpty(selectPropNames) ? ClassUtil.getPropNameList(entity.getClass()).size() : selectPropNames.size());
+    public static <M extends Map<String, Object>> M bean2Map(final Object bean, final Collection<String> selectPropNames, final NamingPolicy keyNamingPolicy,
+            final IntFunction<? extends M> mapSupplier) {
+        final M resultMap = mapSupplier.apply(N.isNullOrEmpty(selectPropNames) ? ClassUtil.getPropNameList(bean.getClass()).size() : selectPropNames.size());
 
-        entity2Map(resultMap, entity, selectPropNames, keyNamingPolicy);
+        bean2Map(resultMap, bean, selectPropNames, keyNamingPolicy);
 
         return resultMap;
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
      * @param resultMap
-     * @param entity
+     * @param bean
      * @return
      */
-    public static <M extends Map<String, Object>> M entity2Map(final M resultMap, final Object entity) {
-        return entity2Map(resultMap, entity, null);
+    public static <M extends Map<String, Object>> M bean2Map(final M resultMap, final Object bean) {
+        return bean2Map(resultMap, bean, null);
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
      * @param resultMap
-     * @param entity
+     * @param bean
      * @param selectPropNames
      * @return
      */
-    public static <M extends Map<String, Object>> M entity2Map(final M resultMap, final Object entity, final Collection<String> selectPropNames) {
-        return entity2Map(resultMap, entity, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE);
+    public static <M extends Map<String, Object>> M bean2Map(final M resultMap, final Object bean, final Collection<String> selectPropNames) {
+        return bean2Map(resultMap, bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE);
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
      * @param resultMap
-     * @param entity
+     * @param bean
      * @param selectPropNames
      * @param keyNamingPolicy
      * @return
      */
-    public static <M extends Map<String, Object>> M entity2Map(final M resultMap, final Object entity, final Collection<String> selectPropNames,
+    public static <M extends Map<String, Object>> M bean2Map(final M resultMap, final Object bean, final Collection<String> selectPropNames,
             NamingPolicy keyNamingPolicy) {
         keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
         final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy) || NamingPolicy.NO_CHANGE.equals(keyNamingPolicy);
-        final Class<?> entityClass = entity.getClass();
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
+        final Class<?> beanClass = bean.getClass();
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
 
         if (N.isNullOrEmpty(selectPropNames)) {
-            entity2Map(resultMap, entity, true, null, keyNamingPolicy);
+            bean2Map(resultMap, bean, true, null, keyNamingPolicy);
         } else {
             PropInfo propInfo = null;
             Object propValue = null;
 
             for (String propName : selectPropNames) {
-                propInfo = entityInfo.getPropInfo(propName);
+                propInfo = beanInfo.getPropInfo(propName);
 
                 if (propInfo == null) {
-                    throw new IllegalArgumentException("Property: " + propName + " is not found in entity class: " + entityClass);
+                    throw new IllegalArgumentException("Property: " + propName + " is not found in bean class: " + beanClass);
                 }
 
-                propValue = propInfo.getPropValue(entity);
+                propValue = propInfo.getPropValue(bean);
 
                 if (isLowerCamelCaseOrNoChange) {
                     resultMap.put(propName, propValue);
@@ -2593,140 +2593,140 @@ public final class Maps {
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
-     * @param entity
+     * @param bean
      * @param ignoreNullProperty
      * @return
      */
-    public static Map<String, Object> entity2Map(final Object entity, final boolean ignoreNullProperty) {
-        return entity2Map(entity, ignoreNullProperty, null);
+    public static Map<String, Object> bean2Map(final Object bean, final boolean ignoreNullProperty) {
+        return bean2Map(bean, ignoreNullProperty, null);
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
-     * @param entity
+     * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @return
      */
-    public static Map<String, Object> entity2Map(final Object entity, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) {
-        return entity2Map(entity, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
+    public static Map<String, Object> bean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) {
+        return bean2Map(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
-     * @param entity
+     * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @return
      */
-    public static <M extends Map<String, Object>> M entity2Map(final Object entity, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static <M extends Map<String, Object>> M bean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final IntFunction<? extends M> mapSupplier) {
-        return entity2Map(entity, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE, mapSupplier);
+        return bean2Map(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE, mapSupplier);
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
-     * @param entity
+     * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @param keyNamingPolicy
      * @return
      */
-    public static Map<String, Object> entity2Map(final Object entity, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static Map<String, Object> bean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy) {
-        return entity2Map(entity, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, IntFunctions.ofLinkedHashMap());
+        return bean2Map(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, IntFunctions.ofLinkedHashMap());
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
-     * @param entity
+     * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @param keyNamingPolicy
      * @return
      */
-    public static <M extends Map<String, Object>> M entity2Map(final Object entity, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static <M extends Map<String, Object>> M bean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
-        if (entity == null) {
+        if (bean == null) {
             return mapSupplier.apply(0);
         }
 
-        final int entityPropNameSize = ClassUtil.getPropNameList(entity.getClass()).size();
-        final int initCapacity = entityPropNameSize - N.size(ignoredPropNames);
+        final int beanPropNameSize = ClassUtil.getPropNameList(bean.getClass()).size();
+        final int initCapacity = beanPropNameSize - N.size(ignoredPropNames);
 
         final M resultMap = mapSupplier.apply(initCapacity);
 
-        entity2Map(resultMap, entity, ignoreNullProperty, ignoredPropNames, keyNamingPolicy);
+        bean2Map(resultMap, bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy);
 
         return resultMap;
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
      * @param resultMap
-     * @param entity
+     * @param bean
      * @param ignoreNullProperty
      * @return
      */
-    public static <M extends Map<String, Object>> M entity2Map(final M resultMap, final Object entity, final boolean ignoreNullProperty) {
-        return entity2Map(resultMap, entity, ignoreNullProperty, null);
+    public static <M extends Map<String, Object>> M bean2Map(final M resultMap, final Object bean, final boolean ignoreNullProperty) {
+        return bean2Map(resultMap, bean, ignoreNullProperty, null);
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
      * @param resultMap
-     * @param entity
+     * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @return
      */
-    public static <M extends Map<String, Object>> M entity2Map(final M resultMap, final Object entity, final boolean ignoreNullProperty,
+    public static <M extends Map<String, Object>> M bean2Map(final M resultMap, final Object bean, final boolean ignoreNullProperty,
             final Set<String> ignoredPropNames) {
-        return entity2Map(resultMap, entity, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
+        return bean2Map(resultMap, bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
      * @param resultMap
-     * @param entity
+     * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @param keyNamingPolicy
      * @return
      */
-    public static <M extends Map<String, Object>> M entity2Map(final M resultMap, final Object entity, final boolean ignoreNullProperty,
+    public static <M extends Map<String, Object>> M bean2Map(final M resultMap, final Object bean, final boolean ignoreNullProperty,
             final Set<String> ignoredPropNames, NamingPolicy keyNamingPolicy) {
         keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
         final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy) || NamingPolicy.NO_CHANGE.equals(keyNamingPolicy);
         final boolean hasIgnoredPropNames = N.notNullOrEmpty(ignoredPropNames);
-        final Class<?> entityClass = entity.getClass();
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
+        final Class<?> beanClass = bean.getClass();
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
 
         String propName = null;
         Object propValue = null;
 
-        for (PropInfo propInfo : entityInfo.propInfoList) {
+        for (PropInfo propInfo : beanInfo.propInfoList) {
             propName = propInfo.name;
 
             if (hasIgnoredPropNames && ignoredPropNames.contains(propName)) {
                 continue;
             }
 
-            propValue = propInfo.getPropValue(entity);
+            propValue = propInfo.getPropValue(bean);
 
             if (ignoreNullProperty && (propValue == null)) {
                 continue;
@@ -2743,130 +2743,130 @@ public final class Maps {
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
-     * @param entity
+     * @param bean
      * @return
      */
-    public static Map<String, Object> deepEntity2Map(final Object entity) {
-        return deepEntity2Map(entity, IntFunctions.ofLinkedHashMap());
+    public static Map<String, Object> deepBean2Map(final Object bean) {
+        return deepBean2Map(bean, IntFunctions.ofLinkedHashMap());
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
-     * @param entity
+     * @param bean
      * @param mapSupplier
      * @return
      */
-    public static <M extends Map<String, Object>> M deepEntity2Map(final Object entity, final IntFunction<? extends M> mapSupplier) {
-        return deepEntity2Map(entity, null, mapSupplier);
+    public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final IntFunction<? extends M> mapSupplier) {
+        return deepBean2Map(bean, null, mapSupplier);
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
-     * @param entity
+     * @param bean
      * @param selectPropNames
      * @return
      */
-    public static Map<String, Object> deepEntity2Map(final Object entity, final Collection<String> selectPropNames) {
-        return deepEntity2Map(entity, selectPropNames, IntFunctions.ofLinkedHashMap());
+    public static Map<String, Object> deepBean2Map(final Object bean, final Collection<String> selectPropNames) {
+        return deepBean2Map(bean, selectPropNames, IntFunctions.ofLinkedHashMap());
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
-     * @param entity
+     * @param bean
      * @param selectPropNames
      * @param mapSupplier
      * @return
      */
-    public static <M extends Map<String, Object>> M deepEntity2Map(final Object entity, final Collection<String> selectPropNames,
+    public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final Collection<String> selectPropNames,
             final IntFunction<? extends M> mapSupplier) {
-        return deepEntity2Map(entity, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, mapSupplier);
+        return deepBean2Map(bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, mapSupplier);
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
-     * @param entity
+     * @param bean
      * @param selectPropNames
      * @param keyNamingPolicy
      * @param mapSupplier
      * @return
      */
-    public static <M extends Map<String, Object>> M deepEntity2Map(final Object entity, final Collection<String> selectPropNames,
+    public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final Collection<String> selectPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
-        final M resultMap = mapSupplier.apply(N.isNullOrEmpty(selectPropNames) ? ClassUtil.getPropNameList(entity.getClass()).size() : selectPropNames.size());
+        final M resultMap = mapSupplier.apply(N.isNullOrEmpty(selectPropNames) ? ClassUtil.getPropNameList(bean.getClass()).size() : selectPropNames.size());
 
-        deepEntity2Map(resultMap, entity, selectPropNames, keyNamingPolicy);
+        deepBean2Map(resultMap, bean, selectPropNames, keyNamingPolicy);
 
         return resultMap;
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
      * @param resultMap
-     * @param entity
+     * @param bean
      * @return
      */
-    public static <M extends Map<String, Object>> M deepEntity2Map(final M resultMap, final Object entity) {
-        return deepEntity2Map(resultMap, entity, null);
+    public static <M extends Map<String, Object>> M deepBean2Map(final M resultMap, final Object bean) {
+        return deepBean2Map(resultMap, bean, null);
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
      * @param resultMap
-     * @param entity
+     * @param bean
      * @param selectPropNames
      * @return
      */
-    public static <M extends Map<String, Object>> M deepEntity2Map(final M resultMap, final Object entity, final Collection<String> selectPropNames) {
-        return deepEntity2Map(resultMap, entity, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE);
+    public static <M extends Map<String, Object>> M deepBean2Map(final M resultMap, final Object bean, final Collection<String> selectPropNames) {
+        return deepBean2Map(resultMap, bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE);
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
      * @param resultMap
-     * @param entity
+     * @param bean
      * @param selectPropNames
      * @param keyNamingPolicy
      * @return
      */
-    public static <M extends Map<String, Object>> M deepEntity2Map(final M resultMap, final Object entity, final Collection<String> selectPropNames,
+    public static <M extends Map<String, Object>> M deepBean2Map(final M resultMap, final Object bean, final Collection<String> selectPropNames,
             final NamingPolicy keyNamingPolicy) {
         final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy)
                 || NamingPolicy.NO_CHANGE.equals(keyNamingPolicy);
 
-        final Class<?> entityClass = entity.getClass();
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
+        final Class<?> beanClass = bean.getClass();
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
 
         if (N.isNullOrEmpty(selectPropNames)) {
-            deepEntity2Map(resultMap, entity, true, null, keyNamingPolicy);
+            deepBean2Map(resultMap, bean, true, null, keyNamingPolicy);
         } else {
             PropInfo propInfo = null;
             Object propValue = null;
 
             for (String propName : selectPropNames) {
-                propInfo = entityInfo.getPropInfo(propName);
+                propInfo = beanInfo.getPropInfo(propName);
 
                 if (propInfo == null) {
-                    throw new IllegalArgumentException("Property: " + propName + " is not found in entity class: " + entityClass);
+                    throw new IllegalArgumentException("Property: " + propName + " is not found in bean class: " + beanClass);
                 }
 
-                propValue = propInfo.getPropValue(entity);
+                propValue = propInfo.getPropValue(bean);
 
-                if ((propValue == null) || !propInfo.jsonXmlType.isEntity()) {
+                if ((propValue == null) || !propInfo.jsonXmlType.isBean()) {
                     if (isLowerCamelCaseOrNoChange) {
                         resultMap.put(propName, propValue);
                     } else {
@@ -2874,9 +2874,9 @@ public final class Maps {
                     }
                 } else {
                     if (isLowerCamelCaseOrNoChange) {
-                        resultMap.put(propName, deepEntity2Map(propValue, true, null, keyNamingPolicy));
+                        resultMap.put(propName, deepBean2Map(propValue, true, null, keyNamingPolicy));
                     } else {
-                        resultMap.put(keyNamingPolicy.convert(propName), deepEntity2Map(propValue, true, null, keyNamingPolicy));
+                        resultMap.put(keyNamingPolicy.convert(propName), deepBean2Map(propValue, true, null, keyNamingPolicy));
                     }
                 }
             }
@@ -2886,147 +2886,147 @@ public final class Maps {
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
-     * @param entity
+     * @param bean
      * @param ignoreNullProperty
      * @return
      */
-    public static Map<String, Object> deepEntity2Map(final Object entity, final boolean ignoreNullProperty) {
-        return deepEntity2Map(entity, ignoreNullProperty, null);
+    public static Map<String, Object> deepBean2Map(final Object bean, final boolean ignoreNullProperty) {
+        return deepBean2Map(bean, ignoreNullProperty, null);
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
-     * @param entity
+     * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @return
      */
-    public static Map<String, Object> deepEntity2Map(final Object entity, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) {
-        return deepEntity2Map(entity, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
+    public static Map<String, Object> deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) {
+        return deepBean2Map(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
-     * @param entity
+     * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @return
      */
-    public static <M extends Map<String, Object>> M deepEntity2Map(final Object entity, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final IntFunction<? extends M> mapSupplier) {
-        return deepEntity2Map(entity, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE, mapSupplier);
+        return deepBean2Map(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE, mapSupplier);
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
-     * @param entity
+     * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @param keyNamingPolicy
      * @return
      */
-    public static Map<String, Object> deepEntity2Map(final Object entity, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static Map<String, Object> deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy) {
-        return deepEntity2Map(entity, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, IntFunctions.ofLinkedHashMap());
+        return deepBean2Map(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, IntFunctions.ofLinkedHashMap());
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
-     * @param entity
+     * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @param keyNamingPolicy
      * @return
      */
-    public static <M extends Map<String, Object>> M deepEntity2Map(final Object entity, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
-        if (entity == null) {
+        if (bean == null) {
             return mapSupplier.apply(0);
         }
 
-        final int entityPropNameSize = ClassUtil.getPropNameList(entity.getClass()).size();
-        final int initCapacity = entityPropNameSize - N.size(ignoredPropNames);
+        final int beanPropNameSize = ClassUtil.getPropNameList(bean.getClass()).size();
+        final int initCapacity = beanPropNameSize - N.size(ignoredPropNames);
 
         final M resultMap = mapSupplier.apply(initCapacity);
 
-        deepEntity2Map(resultMap, entity, ignoreNullProperty, ignoredPropNames, keyNamingPolicy);
+        deepBean2Map(resultMap, bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy);
 
         return resultMap;
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
      * @param resultMap
-     * @param entity
+     * @param bean
      * @param ignoreNullProperty
      * @return
      */
-    public static <M extends Map<String, Object>> M deepEntity2Map(final M resultMap, final Object entity, final boolean ignoreNullProperty) {
-        return deepEntity2Map(resultMap, entity, ignoreNullProperty, null);
+    public static <M extends Map<String, Object>> M deepBean2Map(final M resultMap, final Object bean, final boolean ignoreNullProperty) {
+        return deepBean2Map(resultMap, bean, ignoreNullProperty, null);
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
      * @param resultMap
-     * @param entity
+     * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @return
      */
-    public static <M extends Map<String, Object>> M deepEntity2Map(final M resultMap, final Object entity, final boolean ignoreNullProperty,
+    public static <M extends Map<String, Object>> M deepBean2Map(final M resultMap, final Object bean, final boolean ignoreNullProperty,
             final Set<String> ignoredPropNames) {
-        return deepEntity2Map(resultMap, entity, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
+        return deepBean2Map(resultMap, bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
      * @param resultMap
-     * @param entity
+     * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @param keyNamingPolicy
      * @return
      */
-    public static <M extends Map<String, Object>> M deepEntity2Map(final M resultMap, final Object entity, final boolean ignoreNullProperty,
+    public static <M extends Map<String, Object>> M deepBean2Map(final M resultMap, final Object bean, final boolean ignoreNullProperty,
             final Set<String> ignoredPropNames, final NamingPolicy keyNamingPolicy) {
         final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy)
                 || NamingPolicy.NO_CHANGE.equals(keyNamingPolicy);
 
         final boolean hasIgnoredPropNames = N.notNullOrEmpty(ignoredPropNames);
-        final Class<?> entityClass = entity.getClass();
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
+        final Class<?> beanClass = bean.getClass();
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
 
         String propName = null;
         Object propValue = null;
 
-        for (PropInfo propInfo : entityInfo.propInfoList) {
+        for (PropInfo propInfo : beanInfo.propInfoList) {
             propName = propInfo.name;
 
             if (hasIgnoredPropNames && ignoredPropNames.contains(propName)) {
                 continue;
             }
 
-            propValue = propInfo.getPropValue(entity);
+            propValue = propInfo.getPropValue(bean);
 
             if (ignoreNullProperty && (propValue == null)) {
                 continue;
             }
 
-            if ((propValue == null) || !propInfo.jsonXmlType.isEntity()) {
+            if ((propValue == null) || !propInfo.jsonXmlType.isBean()) {
                 if (isLowerCamelCaseOrNoChange) {
                     resultMap.put(propName, propValue);
                 } else {
@@ -3034,9 +3034,9 @@ public final class Maps {
                 }
             } else {
                 if (isLowerCamelCaseOrNoChange) {
-                    resultMap.put(propName, deepEntity2Map(propValue, ignoreNullProperty, null, keyNamingPolicy));
+                    resultMap.put(propName, deepBean2Map(propValue, ignoreNullProperty, null, keyNamingPolicy));
                 } else {
-                    resultMap.put(keyNamingPolicy.convert(propName), deepEntity2Map(propValue, ignoreNullProperty, null, keyNamingPolicy));
+                    resultMap.put(keyNamingPolicy.convert(propName), deepBean2Map(propValue, ignoreNullProperty, null, keyNamingPolicy));
                 }
             }
         }
@@ -3045,137 +3045,136 @@ public final class Maps {
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
-     * @param entity
+     * @param bean
      * @return
      */
-    public static Map<String, Object> entity2FlatMap(final Object entity) {
-        return entity2FlatMap(entity, IntFunctions.ofLinkedHashMap());
+    public static Map<String, Object> bean2FlatMap(final Object bean) {
+        return bean2FlatMap(bean, IntFunctions.ofLinkedHashMap());
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
-     * @param entity
+     * @param bean
      * @param mapSupplier
      * @return
      */
-    public static <M extends Map<String, Object>> M entity2FlatMap(final Object entity, final IntFunction<? extends M> mapSupplier) {
-        return entity2FlatMap(entity, null, mapSupplier);
+    public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final IntFunction<? extends M> mapSupplier) {
+        return bean2FlatMap(bean, null, mapSupplier);
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
-     * @param entity
+     * @param bean
      * @param selectPropNames
      * @return
      */
-    public static Map<String, Object> entity2FlatMap(final Object entity, final Collection<String> selectPropNames) {
-        return entity2FlatMap(entity, selectPropNames, IntFunctions.ofLinkedHashMap());
+    public static Map<String, Object> bean2FlatMap(final Object bean, final Collection<String> selectPropNames) {
+        return bean2FlatMap(bean, selectPropNames, IntFunctions.ofLinkedHashMap());
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
-     * @param entity
+     * @param bean
      * @param selectPropNames
      * @param mapSupplier
      * @return
      */
-    public static <M extends Map<String, Object>> M entity2FlatMap(final Object entity, final Collection<String> selectPropNames,
+    public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final Collection<String> selectPropNames,
             final IntFunction<? extends M> mapSupplier) {
-        return entity2FlatMap(entity, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, mapSupplier);
+        return bean2FlatMap(bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE, mapSupplier);
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
-     * @param entity
+     * @param bean
      * @param selectPropNames
      * @param keyNamingPolicy
      * @param mapSupplier
      * @return
      */
-    public static <M extends Map<String, Object>> M entity2FlatMap(final Object entity, final Collection<String> selectPropNames,
+    public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final Collection<String> selectPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
-        final M resultMap = mapSupplier.apply(N.isNullOrEmpty(selectPropNames) ? ClassUtil.getPropNameList(entity.getClass()).size() : selectPropNames.size());
+        final M resultMap = mapSupplier.apply(N.isNullOrEmpty(selectPropNames) ? ClassUtil.getPropNameList(bean.getClass()).size() : selectPropNames.size());
 
-        entity2FlatMap(resultMap, entity, selectPropNames, keyNamingPolicy);
+        bean2FlatMap(resultMap, bean, selectPropNames, keyNamingPolicy);
 
         return resultMap;
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
      * @param resultMap
-     * @param entity
+     * @param bean
      * @return
      */
-    public static <M extends Map<String, Object>> M entity2FlatMap(final M resultMap, final Object entity) {
-        return entity2FlatMap(resultMap, entity, null);
+    public static <M extends Map<String, Object>> M bean2FlatMap(final M resultMap, final Object bean) {
+        return bean2FlatMap(resultMap, bean, null);
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
      * @param resultMap
-     * @param entity
+     * @param bean
      * @param selectPropNames
      * @return
      */
-    public static <M extends Map<String, Object>> M entity2FlatMap(final M resultMap, final Object entity, final Collection<String> selectPropNames) {
-        return entity2FlatMap(resultMap, entity, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE);
+    public static <M extends Map<String, Object>> M bean2FlatMap(final M resultMap, final Object bean, final Collection<String> selectPropNames) {
+        return bean2FlatMap(resultMap, bean, selectPropNames, NamingPolicy.LOWER_CAMEL_CASE);
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
      * @param resultMap
-     * @param entity
+     * @param bean
      * @param selectPropNames
      * @param keyNamingPolicy
      * @return
      */
-    public static <M extends Map<String, Object>> M entity2FlatMap(final M resultMap, final Object entity, final Collection<String> selectPropNames,
+    public static <M extends Map<String, Object>> M bean2FlatMap(final M resultMap, final Object bean, final Collection<String> selectPropNames,
             NamingPolicy keyNamingPolicy) {
         keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.LOWER_CAMEL_CASE : keyNamingPolicy;
         final boolean isLowerCamelCaseOrNoChange = NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy) || NamingPolicy.NO_CHANGE.equals(keyNamingPolicy);
-        final Class<?> entityClass = entity.getClass();
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
+        final Class<?> beanClass = bean.getClass();
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
 
         if (N.isNullOrEmpty(selectPropNames)) {
-            entity2FlatMap(resultMap, entity, true, null, keyNamingPolicy);
+            bean2FlatMap(resultMap, bean, true, null, keyNamingPolicy);
         } else {
             PropInfo propInfo = null;
             Object propValue = null;
 
             for (String propName : selectPropNames) {
-                propInfo = entityInfo.getPropInfo(propName);
+                propInfo = beanInfo.getPropInfo(propName);
 
                 if (propInfo == null) {
-                    throw new IllegalArgumentException("Property: " + propName + " is not found in entity class: " + entityClass);
+                    throw new IllegalArgumentException("Property: " + propName + " is not found in bean class: " + beanClass);
                 }
 
-                propValue = propInfo.getPropValue(entity);
+                propValue = propInfo.getPropValue(bean);
 
-                if ((propValue == null) || !propInfo.jsonXmlType.isEntity()) {
+                if ((propValue == null) || !propInfo.jsonXmlType.isBean()) {
                     if (isLowerCamelCaseOrNoChange) {
                         resultMap.put(propName, propValue);
                     } else {
                         resultMap.put(keyNamingPolicy.convert(propName), propValue);
                     }
                 } else {
-                    entity2FlatMap(resultMap, propValue, true, null, keyNamingPolicy,
-                            isLowerCamelCaseOrNoChange ? propName : keyNamingPolicy.convert(propName));
+                    bean2FlatMap(resultMap, propValue, true, null, keyNamingPolicy, isLowerCamelCaseOrNoChange ? propName : keyNamingPolicy.convert(propName));
                 }
             }
         }
@@ -3184,152 +3183,152 @@ public final class Maps {
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
-     * @param entity
+     * @param bean
      * @param ignoreNullProperty
      * @return
      */
-    public static Map<String, Object> entity2FlatMap(final Object entity, final boolean ignoreNullProperty) {
-        return entity2FlatMap(entity, ignoreNullProperty, null);
+    public static Map<String, Object> bean2FlatMap(final Object bean, final boolean ignoreNullProperty) {
+        return bean2FlatMap(bean, ignoreNullProperty, null);
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
-     * @param entity
+     * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @return
      */
-    public static Map<String, Object> entity2FlatMap(final Object entity, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) {
-        return entity2FlatMap(entity, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
+    public static Map<String, Object> bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) {
+        return bean2FlatMap(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
-     * @param entity
+     * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @return
      */
-    public static <M extends Map<String, Object>> M entity2FlatMap(final Object entity, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final IntFunction<? extends M> mapSupplier) {
-        return entity2FlatMap(entity, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE, mapSupplier);
+        return bean2FlatMap(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE, mapSupplier);
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
-     * @param entity
+     * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @param keyNamingPolicy
      * @return
      */
-    public static Map<String, Object> entity2FlatMap(final Object entity, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static Map<String, Object> bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy) {
-        return entity2FlatMap(entity, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, IntFunctions.ofLinkedHashMap());
+        return bean2FlatMap(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, IntFunctions.ofLinkedHashMap());
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
-     * @param entity
+     * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @param keyNamingPolicy
      * @return
      */
-    public static <M extends Map<String, Object>> M entity2FlatMap(final Object entity, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
+    public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
-        if (entity == null) {
+        if (bean == null) {
             return mapSupplier.apply(0);
         }
 
-        final int entityPropNameSize = ClassUtil.getPropNameList(entity.getClass()).size();
-        final int initCapacity = entityPropNameSize - N.size(ignoredPropNames);
+        final int beanPropNameSize = ClassUtil.getPropNameList(bean.getClass()).size();
+        final int initCapacity = beanPropNameSize - N.size(ignoredPropNames);
 
         final M resultMap = mapSupplier.apply(initCapacity);
 
-        entity2FlatMap(resultMap, entity, ignoreNullProperty, ignoredPropNames, keyNamingPolicy);
+        bean2FlatMap(resultMap, bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy);
 
         return resultMap;
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
      * @param resultMap
-     * @param entity
+     * @param bean
      * @param ignoreNullProperty
      * @return
      */
-    public static <M extends Map<String, Object>> M entity2FlatMap(final M resultMap, final Object entity, final boolean ignoreNullProperty) {
-        return entity2FlatMap(resultMap, entity, ignoreNullProperty, null);
+    public static <M extends Map<String, Object>> M bean2FlatMap(final M resultMap, final Object bean, final boolean ignoreNullProperty) {
+        return bean2FlatMap(resultMap, bean, ignoreNullProperty, null);
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
      * @param resultMap
-     * @param entity
+     * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @return
      */
-    public static <M extends Map<String, Object>> M entity2FlatMap(final M resultMap, final Object entity, final boolean ignoreNullProperty,
+    public static <M extends Map<String, Object>> M bean2FlatMap(final M resultMap, final Object bean, final boolean ignoreNullProperty,
             final Set<String> ignoredPropNames) {
-        return entity2FlatMap(resultMap, entity, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
+        return bean2FlatMap(resultMap, bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.LOWER_CAMEL_CASE);
     }
 
     /**
-     * Entity to map.
+     * Bean to map.
      *
      * @param <M>
      * @param resultMap
-     * @param entity
+     * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @param keyNamingPolicy
      * @return
      */
-    public static <M extends Map<String, Object>> M entity2FlatMap(final M resultMap, final Object entity, final boolean ignoreNullProperty,
+    public static <M extends Map<String, Object>> M bean2FlatMap(final M resultMap, final Object bean, final boolean ignoreNullProperty,
             final Set<String> ignoredPropNames, final NamingPolicy keyNamingPolicy) {
-        return entity2FlatMap(resultMap, entity, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, null);
+        return bean2FlatMap(resultMap, bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, null);
     }
 
-    static <T extends Map<String, Object>> T entity2FlatMap(final T resultMap, final Object entity, final boolean ignoreNullProperty,
+    static <T extends Map<String, Object>> T bean2FlatMap(final T resultMap, final Object bean, final boolean ignoreNullProperty,
             final Collection<String> ignoredPropNames, final NamingPolicy keyNamingPolicy, final String parentPropName) {
         final boolean isLowerCamelCaseOrNoChange = keyNamingPolicy == null || NamingPolicy.LOWER_CAMEL_CASE.equals(keyNamingPolicy)
                 || NamingPolicy.NO_CHANGE.equals(keyNamingPolicy);
 
         final boolean hasIgnoredPropNames = N.notNullOrEmpty(ignoredPropNames);
         final boolean isNullParentPropName = (parentPropName == null);
-        final Class<?> entityClass = entity.getClass();
+        final Class<?> beanClass = bean.getClass();
 
         String propName = null;
         Object propValue = null;
 
-        for (PropInfo propInfo : ParserUtil.getEntityInfo(entityClass).propInfoList) {
+        for (PropInfo propInfo : ParserUtil.getBeanInfo(beanClass).propInfoList) {
             propName = propInfo.name;
 
             if (hasIgnoredPropNames && ignoredPropNames.contains(propName)) {
                 continue;
             }
 
-            propValue = propInfo.getPropValue(entity);
+            propValue = propInfo.getPropValue(bean);
 
             if (ignoreNullProperty && (propValue == null)) {
                 continue;
             }
 
-            if ((propValue == null) || !propInfo.jsonXmlType.isEntity()) {
+            if ((propValue == null) || !propInfo.jsonXmlType.isBean()) {
                 if (isNullParentPropName) {
                     if (isLowerCamelCaseOrNoChange) {
                         resultMap.put(propName, propValue);
@@ -3345,10 +3344,10 @@ public final class Maps {
                 }
             } else {
                 if (isNullParentPropName) {
-                    entity2FlatMap(resultMap, propValue, ignoreNullProperty, null, keyNamingPolicy,
+                    bean2FlatMap(resultMap, propValue, ignoreNullProperty, null, keyNamingPolicy,
                             isLowerCamelCaseOrNoChange ? propName : keyNamingPolicy.convert(propName));
                 } else {
-                    entity2FlatMap(resultMap, propValue, ignoreNullProperty, null, keyNamingPolicy,
+                    bean2FlatMap(resultMap, propValue, ignoreNullProperty, null, keyNamingPolicy,
                             parentPropName + WD.PERIOD + (isLowerCamelCaseOrNoChange ? propName : keyNamingPolicy.convert(propName)));
                 }
             }
@@ -3358,13 +3357,13 @@ public final class Maps {
     }
 
     /**
-     * Check entity class.
+     * Check bean class.
      *
      * @param <T>
      * @param cls
      */
-    private static <T> void checkEntityClass(final Class<T> cls) {
-        if (!ClassUtil.isEntity(cls)) {
+    private static <T> void checkBeanClass(final Class<T> cls) {
+        if (!ClassUtil.isBeanClass(cls)) {
             throw new IllegalArgumentException("No property getter/setter method is found in the specified class: " + ClassUtil.getCanonicalClassName(cls));
         }
     }

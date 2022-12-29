@@ -23,7 +23,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.parser.ParserUtil;
-import com.landawn.abacus.parser.ParserUtil.EntityInfo;
+import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.stream.Stream;
 
@@ -168,7 +168,7 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * Ignore the {@code null} element/value for {@code key/value, Map, Entity} when the specified {@code element} or {@code value} is {@code null} if it's set to {@code true}.
+     * Ignore the {@code null} element/value for {@code key/value, Map, Bean} when the specified {@code element} or {@code value} is {@code null} if it's set to {@code true}.
      *
      * @param skipNull
      * @return
@@ -1664,38 +1664,38 @@ public final class Joiner implements Closeable {
 
     /**
      *
-     * @param entity entity class with getter/setter methods.
+     * @param bea bean class with getter/setter methods.
      * @return
      */
-    public Joiner appendEntries(final Object entity) {
-        return appendEntries(entity, (Collection<String>) null);
+    public Joiner appendEntries(final Object bean) {
+        return appendEntries(bean, (Collection<String>) null);
     }
 
     /**
      *
-     * @param entity entity class with getter/setter methods.
+     * @param bea bean class with getter/setter methods.
      * @param propNamesToAppend
      * @return
      */
-    public Joiner appendEntries(final Object entity, final Collection<String> selectPropNames) {
-        if (entity == null) {
+    public Joiner appendEntries(final Object bean, final Collection<String> selectPropNames) {
+        if (bean == null) {
             return this;
         }
 
         if (N.isNullOrEmpty(selectPropNames)) {
-            return appendEntries(entity, true, null);
+            return appendEntries(bean, true, null);
         }
 
-        final Class<?> cls = entity.getClass();
+        final Class<?> cls = bean.getClass();
 
-        N.checkArgument(ClassUtil.isEntity(cls), "'entity' must be entity class with getter/setter methods");
+        N.checkArgument(ClassUtil.isBeanClass(cls), "'bean' must be bean class with getter/setter methods");
 
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
         StringBuilder sb = null;
         Object propValue = null;
 
         for (String propName : selectPropNames) {
-            propValue = entityInfo.getPropValue(entity, propName);
+            propValue = beanInfo.getPropValue(bean, propName);
 
             if (sb == null) {
                 sb = prepareBuilder().append(propName).append(keyValueSeparator).append(toString(propValue));
@@ -1719,22 +1719,22 @@ public final class Joiner implements Closeable {
 
     /**
      *
-     * @param entity
+     * @param bean
      * @param ignoreNullProperty
      * @param ignoredPropNames
      * @return
      */
-    public Joiner appendEntries(final Object entity, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) {
-        if (entity == null) {
+    public Joiner appendEntries(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) {
+        if (bean == null) {
             return this;
         }
 
-        final Class<?> cls = entity.getClass();
+        final Class<?> cls = bean.getClass();
 
-        N.checkArgument(ClassUtil.isEntity(cls), "'entity' must be entity class with getter/setter methods");
+        N.checkArgument(ClassUtil.isBeanClass(cls), "'bean' must be bean class with getter/setter methods");
 
         final boolean hasIgnoredPropNames = N.notNullOrEmpty(ignoredPropNames);
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
         StringBuilder sb = null;
         Object propValue = null;
 
@@ -1743,7 +1743,7 @@ public final class Joiner implements Closeable {
                 continue;
             }
 
-            propValue = entityInfo.getPropValue(entity, propName);
+            propValue = beanInfo.getPropValue(bean, propName);
 
             if (propValue != null || !ignoreNullProperty) {
                 if (sb == null) {
@@ -1767,24 +1767,24 @@ public final class Joiner implements Closeable {
         return this;
     }
 
-    public <E extends Exception> Joiner appendEntries(final Object entity, final Throwables.BiPredicate<? super String, ?, E> filter) throws E {
+    public <E extends Exception> Joiner appendEntries(final Object bean, final Throwables.BiPredicate<? super String, ?, E> filter) throws E {
         N.checkArgNotNull(filter, "filter");
 
-        if (entity == null) {
+        if (bean == null) {
             return this;
         }
 
-        final Class<?> cls = entity.getClass();
+        final Class<?> cls = bean.getClass();
 
-        N.checkArgument(ClassUtil.isEntity(cls), "'entity' must be entity class with getter/setter methods");
+        N.checkArgument(ClassUtil.isBeanClass(cls), "'bean' must be bean class with getter/setter methods");
 
         final Throwables.BiPredicate<? super String, Object, E> filterToUse = (Throwables.BiPredicate<? super String, Object, E>) filter;
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
         StringBuilder sb = null;
         Object propValue = null;
 
         for (String propName : ClassUtil.getPropNameList(cls)) {
-            propValue = entityInfo.getPropValue(entity, propName);
+            propValue = beanInfo.getPropValue(bean, propName);
 
             if (filterToUse.test(propName, propValue) == false) {
                 continue;

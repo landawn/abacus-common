@@ -88,7 +88,7 @@ import com.landawn.abacus.annotation.NullSafe;
 import com.landawn.abacus.exception.TooManyElementsException;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.ParserUtil;
-import com.landawn.abacus.parser.ParserUtil.EntityInfo;
+import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
@@ -105,7 +105,7 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * Note: This class includes codes copied from Apache Commons Lang, Google Guava and other open source projects under the Apache License 2.0.
  * The methods copied from other libraries/frameworks/projects may be modified in this class.
  * </p>
- * Class <code>N</code> is a general java utility class. It provides the most daily used operations for Object/primitive types/String/Array/Collection/Map/Entity...:
+ * Class <code>N</code> is a general java utility class. It provides the most daily used operations for Object/primitive types/String/Array/Collection/Map/Bean...:
  *
  * When to throw exception? It's designed to avoid throwing any unnecessary
  * exception if the contract defined by method is not broken. for example, if
@@ -1184,20 +1184,20 @@ class CommonUtil {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static <T> T newEntity(final Class<T> cls) {
-        return newEntity(cls, null);
+    public static <T> T newBean(final Class<T> cls) {
+        return newBean(cls, null);
     }
 
     /**
      *
      * @param <T>
      * @param cls
-     * @param entityName
+     * @param beanName
      * @return
      */
-    public static <T> T newEntity(final Class<T> cls, final String entityName) {
+    public static <T> T newBean(final Class<T> cls, final String beanName) {
         if (MapEntity.class.isAssignableFrom(cls)) {
-            return (T) new MapEntity(entityName);
+            return (T) new MapEntity(beanName);
         }
 
         return newInstance(cls);
@@ -2226,10 +2226,10 @@ class CommonUtil {
 
     /**
      * The first row will be used as column names if its type is array or list,
-     * or obtain the column names from first row if its type is entity or map.
+     * or obtain the column names from first row if its type is bean or map.
      *
      * @param <T>
-     * @param rowList list of row which can be: Map/Entity/Array/List
+     * @param rowList list of row which can be: Map/Bean/Array/List
      * @return
      */
     public static DataSet newDataSet(final Collection<?> rowList) {
@@ -2238,10 +2238,10 @@ class CommonUtil {
 
     /**
      * If the specified {@code columnNames} is null or empty, the first row will be used as column names if its type is array or list,
-     * or obtain the column names from first row if its type is entity or map.
+     * or obtain the column names from first row if its type is bean or map.
      *
      * @param columnNames
-     * @param rows list of row which can be: Map/Entity/Array/List
+     * @param rows list of row which can be: Map/Bean/Array/List
      * @return
      */
     public static DataSet newDataSet(Collection<String> columnNames, Collection<?> rowList) {
@@ -2266,7 +2266,7 @@ class CommonUtil {
 
             if (type.isMap()) {
                 columnNames = new ArrayList<>(((Map<String, Object>) firstNonNullRow).keySet());
-            } else if (type.isEntity()) {
+            } else if (type.isBean()) {
                 columnNames = new ArrayList<>(ClassUtil.getPropNameList(cls));
             } else if (type.isArray()) {
                 final Object[] a = (Object[]) firstNonNullRow;
@@ -2329,12 +2329,12 @@ class CommonUtil {
                 for (int i = 0; i < columnCount; i++) {
                     columnList.get(i).add(props.get(columnNameList.get(i)));
                 }
-            } else if (type.isEntity()) {
-                final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
+            } else if (type.isBean()) {
+                final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
                 PropInfo propInfo = null;
 
                 for (int i = 0; i < columnCount; i++) {
-                    propInfo = entityInfo.getPropInfo(columnNameList.get(i));
+                    propInfo = beanInfo.getPropInfo(columnNameList.get(i));
 
                     if (propInfo == null) {
                         columnList.get(i).add(null);
@@ -2362,7 +2362,7 @@ class CommonUtil {
                 }
             } else {
                 throw new IllegalArgumentException(
-                        "Unsupported row type: " + ClassUtil.getCanonicalClassName(row.getClass()) + ". Only array, collection, map and entity are supported");
+                        "Unsupported row type: " + ClassUtil.getCanonicalClassName(row.getClass()) + ". Only array, collection, map and bean are supported");
             }
         }
 
@@ -4474,16 +4474,16 @@ class CommonUtil {
         if (a.length == 1) {
             if (a[0] instanceof Map) {
                 m.putAll((Map<K, V>) a[0]);
-            } else if (ClassUtil.isEntity(a[0].getClass())) {
-                Maps.entity2Map((Map<String, Object>) m, a[0]);
+            } else if (ClassUtil.isBeanClass(a[0].getClass())) {
+                Maps.bean2Map((Map<String, Object>) m, a[0]);
             } else {
                 throw new IllegalArgumentException(
-                        "The parameters must be the pairs of property name and value, or Map, or an entity class with getter/setter methods.");
+                        "The parameters must be the pairs of property name and value, or Map, or a bean class with getter/setter methods.");
             }
         } else {
             if (0 != (a.length % 2)) {
                 throw new IllegalArgumentException(
-                        "The parameters must be the pairs of property name and value, or Map, or an entity class with getter/setter methods.");
+                        "The parameters must be the pairs of property name and value, or Map, or a bean class with getter/setter methods.");
             }
 
             for (int i = 0; i < a.length; i++) {
@@ -4945,7 +4945,7 @@ class CommonUtil {
 
     /**
      *
-     * @param a pairs of property name and value or a Java Entity Object what
+     * @param a pairs of property name and value or a Java Bean Object what
      *            allows access to properties using getter and setter methods.
      * @return
      * @deprecated
@@ -6064,17 +6064,17 @@ class CommonUtil {
             return (T) ((Boolean) (((Number) obj).longValue() > 0));
         }
 
-        if (targetType.isEntity()) {
-            if (srcType.isEntity()) {
+        if (targetType.isBean()) {
+            if (srcType.isBean()) {
                 return copy(obj, targetType.clazz());
             } else if (srcType.isMap()) {
-                return Maps.map2Entity((Map<String, Object>) obj, targetType.clazz());
+                return Maps.map2Bean((Map<String, Object>) obj, targetType.clazz());
             }
         } else if (targetType.isMap()) {
-            if (srcType.isEntity() && targetType.getParameterTypes()[0].clazz().isAssignableFrom(String.class)
+            if (srcType.isBean() && targetType.getParameterTypes()[0].clazz().isAssignableFrom(String.class)
                     && Object.class.equals(targetType.getParameterTypes()[1].clazz())) {
                 try {
-                    return (T) Maps.entity2Map(N.<String, Object> newMap(targetType.clazz()), obj);
+                    return (T) Maps.bean2Map(N.<String, Object> newMap(targetType.clazz()), obj);
                 } catch (Exception e) {
                     // ignore.
                 }
@@ -6501,16 +6501,16 @@ class CommonUtil {
     }
 
     /**
-     * Checks if is entity.
+     * Checks if is bean.
      *
      * @param cls
-     * @return true, if is entity
-     * @see ClassUtil#isEntity(Class)
-     * @deprecated replaced by {@code ClassUtil.isEntity(Class)}
+     * @return true, if is bean
+     * @see ClassUtil#isBeanClass(Class)
+     * @deprecated replaced by {@code ClassUtil.isBeanClass(Class)}
      */
     @Deprecated
-    public static boolean isEntity(final Class<?> cls) {
-        return ClassUtil.isEntity(cls);
+    public static boolean isBeanClass(final Class<?> cls) {
+        return ClassUtil.isBeanClass(cls);
     }
 
     private static final Set<Class<?>> notKryoCompatible = newHashSet();
@@ -6519,7 +6519,7 @@ class CommonUtil {
      *
      * @param <T>
      * @param obj a Java object which must be serializable and deserializable through {@code Kryo} or {@code JSON}.
-     * @return {@code null} if {@code entity} is {@code null}
+     * @return {@code null} if {@code bean} is {@code null}
      */
     @SuppressWarnings("unchecked")
     public static <T> T clone(final T obj) {
@@ -6536,7 +6536,7 @@ class CommonUtil {
      * @param targetClass
      *
      * @param <T>
-     * @return a new instance of {@code targetClass} even if {@code entity} is {@code null}.
+     * @return a new instance of {@code targetClass} even if {@code bean} is {@code null}.
      * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
     @SuppressWarnings("unchecked")
@@ -6544,7 +6544,7 @@ class CommonUtil {
         N.checkArgNotNull(targetClass, "targetClass");
 
         if (obj == null) {
-            if (ClassUtil.isEntity(targetClass)) {
+            if (ClassUtil.isBeanClass(targetClass)) {
                 return copy(obj, targetClass);
             } else {
                 return newInstance(targetClass);
@@ -6574,74 +6574,74 @@ class CommonUtil {
 
     /**
      * Returns a new created instance of the same class and set with same
-     * properties retrieved by 'getXXX' method in the specified {@code entity}.
+     * properties retrieved by 'getXXX' method in the specified {@code bean}.
      *
      * @param <T>
-     * @param entity a Java Object what allows access to properties using getter
+     * @param bean a Java Object what allows access to properties using getter
      *            and setter methods.
-     * @return {@code null} if {@code entity} is {@code null}
+     * @return {@code null} if {@code bean} is {@code null}
      */
     @SuppressWarnings("unchecked")
-    public static <T> T copy(final T entity) {
-        if (entity == null) {
+    public static <T> T copy(final T bean) {
+        if (bean == null) {
             return null;
         }
 
-        return copy(entity, (Class<T>) entity.getClass());
+        return copy(bean, (Class<T>) bean.getClass());
     }
 
     /**
      *
      * @param <T>
-     * @param entity
+     * @param bean
      * @param selectPropNames
-     * @return {@code null} if {@code entity} is {@code null}
+     * @return {@code null} if {@code bean} is {@code null}
      */
-    public static <T> T copy(final T entity, final Collection<String> selectPropNames) {
-        if (entity == null) {
+    public static <T> T copy(final T bean, final Collection<String> selectPropNames) {
+        if (bean == null) {
             return null;
         }
 
-        return copy(entity, selectPropNames, (Class<T>) entity.getClass());
+        return copy(bean, selectPropNames, (Class<T>) bean.getClass());
     }
 
     /**
      *
-     * @param entity
+     * @param bean
      * @param targetClass
      * @param <T>
-     * @return a new instance of {@code targetClass} even if {@code entity} is {@code null}.
+     * @return a new instance of {@code targetClass} even if {@code bean} is {@code null}.
      * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
-    public static <T> T copy(final Object entity, final Class<? extends T> targetClass) throws IllegalArgumentException {
-        return copy(entity, null, targetClass);
+    public static <T> T copy(final Object bean, final Class<? extends T> targetClass) throws IllegalArgumentException {
+        return copy(bean, null, targetClass);
     }
 
     /**
      * Returns a new created instance of the specified {@code cls} and set with
      * same properties retrieved by 'getXXX' method in the specified
-     * {@code entity}.
-     * @param entity a Java Object what allows access to properties using getter
+     * {@code bean}.
+     * @param bean a Java Object what allows access to properties using getter
      *            and setter methods.
      * @param selectPropNames
      * @param targetClass a Java Object what allows access to properties using getter
      *            and setter methods.
      *
      * @param <T>
-     * @return a new instance of {@code targetClass} even if {@code entity} is {@code null}.
+     * @return a new instance of {@code targetClass} even if {@code bean} is {@code null}.
      * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
     @SuppressWarnings({ "unchecked" })
-    public static <T> T copy(final Object entity, final Collection<String> selectPropNames, final Class<? extends T> targetClass)
+    public static <T> T copy(final Object bean, final Collection<String> selectPropNames, final Class<? extends T> targetClass)
             throws IllegalArgumentException {
         N.checkArgNotNull(targetClass, "targetClass");
 
-        if (entity != null) {
-            final Class<?> srcCls = entity.getClass();
+        if (bean != null) {
+            final Class<?> srcCls = bean.getClass();
 
             if (selectPropNames == null && Utils.kryoParser != null && targetClass.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
                 try {
-                    final T copy = (T) Utils.kryoParser.copy(entity);
+                    final T copy = (T) Utils.kryoParser.copy(bean);
 
                     if (copy != null) {
                         return copy;
@@ -6654,39 +6654,39 @@ class CommonUtil {
             }
         }
 
-        final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetClass);
-        Object result = targetEntityInfo.createEntityResult();
+        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetClass);
+        Object result = targetBeanInfo.createBeanResult();
 
-        if (entity != null) {
-            merge(entity, result, selectPropNames, targetEntityInfo);
+        if (bean != null) {
+            merge(bean, result, selectPropNames, targetBeanInfo);
         }
 
-        result = targetEntityInfo.finishEntityResult(result);
+        result = targetBeanInfo.finishBeanResult(result);
 
         return (T) result;
     }
 
     /**
      *
-     * @param entity
+     * @param bean
      * @param ignoreUnmatchedProperty
      * @param ignoredPropNames
      * @param targetClass
      * @param <T>
-     * @return a new instance of {@code targetClass} even if {@code entity} is {@code null}.
+     * @return a new instance of {@code targetClass} even if {@code bean} is {@code null}.
      * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
     @SuppressWarnings({ "unchecked" })
-    public static <T> T copy(final Object entity, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
-            final Class<? extends T> targetClass) throws IllegalArgumentException {
+    public static <T> T copy(final Object bean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames, final Class<? extends T> targetClass)
+            throws IllegalArgumentException {
         N.checkArgNotNull(targetClass, "targetClass");
 
-        if (entity != null) {
-            final Class<?> srcCls = entity.getClass();
+        if (bean != null) {
+            final Class<?> srcCls = bean.getClass();
 
             if (ignoredPropNames == null && Utils.kryoParser != null && targetClass.equals(srcCls) && !notKryoCompatible.contains(srcCls)) {
                 try {
-                    final T copy = (T) Utils.kryoParser.copy(entity);
+                    final T copy = (T) Utils.kryoParser.copy(bean);
 
                     if (copy != null) {
                         return copy;
@@ -6699,67 +6699,67 @@ class CommonUtil {
             }
         }
 
-        final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetClass);
-        Object result = targetEntityInfo.createEntityResult();
+        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetClass);
+        Object result = targetBeanInfo.createBeanResult();
 
-        if (entity != null) {
-            merge(entity, result, ignoreUnmatchedProperty, ignoredPropNames, targetEntityInfo);
+        if (bean != null) {
+            merge(bean, result, ignoreUnmatchedProperty, ignoredPropNames, targetBeanInfo);
         }
 
-        result = targetEntityInfo.finishEntityResult(result);
+        result = targetBeanInfo.finishBeanResult(result);
 
         return (T) result;
     }
 
     /**
      *
-     * @param sourceEntity
-     * @param targetEntity
-     * @return {@code targetEntity}
-     * @throws IllegalArgumentException if {@code targetEntity} is {@code null}.
+     * @param sourceBean
+     * @param targetBean
+     * @return {@code targetBean}
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
-    public static <T> T merge(final Object sourceEntity, final T targetEntity) throws IllegalArgumentException {
-        return merge(sourceEntity, targetEntity, (Collection<String>) null);
+    public static <T> T merge(final Object sourceBean, final T targetBean) throws IllegalArgumentException {
+        return merge(sourceBean, targetBean, (Collection<String>) null);
     }
 
     /**
      * Set all the signed properties(including all primitive type properties) in
-     * the specified {@code sourceEntity} to the specified {@code targetEntity}.
+     * the specified {@code sourceBean} to the specified {@code targetBean}.
      *
-     * @param sourceEntity a Java Object what allows access to properties using getter
+     * @param sourceBean a Java Object what allows access to properties using getter
      *            and setter methods.
-     * @param targetEntity a Java Object what allows access to properties using getter
+     * @param targetBean a Java Object what allows access to properties using getter
      *            and setter methods.
      * @param selectPropNames
-     * @return {@code targetEntity}
-     * @throws IllegalArgumentException if {@code targetEntity} is {@code null}.
+     * @return {@code targetBean}
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
-    public static <T> T merge(final Object sourceEntity, final T targetEntity, final Collection<String> selectPropNames) throws IllegalArgumentException {
-        N.checkArgNotNull(targetEntity, "targetEntity");
+    public static <T> T merge(final Object sourceBean, final T targetBean, final Collection<String> selectPropNames) throws IllegalArgumentException {
+        N.checkArgNotNull(targetBean, "targetBean");
 
-        return merge(sourceEntity, targetEntity, selectPropNames, ParserUtil.getEntityInfo(targetEntity.getClass()));
+        return merge(sourceBean, targetBean, selectPropNames, ParserUtil.getBeanInfo(targetBean.getClass()));
     }
 
     @SuppressWarnings("deprecation")
-    private static <T> T merge(final Object sourceEntity, final T targetEntity, final Collection<String> selectPropNames, final EntityInfo targetEntityInfo)
+    private static <T> T merge(final Object sourceBean, final T targetBean, final Collection<String> selectPropNames, final BeanInfo targetBeanInfo)
             throws IllegalArgumentException {
-        N.checkArgNotNull(targetEntity, "targetEntity");
+        N.checkArgNotNull(targetBean, "targetBean");
 
-        if (sourceEntity == null) {
-            return targetEntity;
+        if (sourceBean == null) {
+            return targetBean;
         }
 
-        final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
+        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
         final boolean ignoreUnmatchedProperty = selectPropNames == null;
 
         if (selectPropNames == null) {
             Object propValue = null;
 
-            for (PropInfo propInfo : srcEntityInfo.propInfoList) {
-                propValue = propInfo.getPropValue(sourceEntity);
+            for (PropInfo propInfo : srcBeanInfo.propInfoList) {
+                propValue = propInfo.getPropValue(sourceBean);
 
                 if (InternalUtil.notNullOrDefault(propValue)) {
-                    targetEntityInfo.setPropValue(targetEntity, propInfo, propValue, ignoreUnmatchedProperty);
+                    targetBeanInfo.setPropValue(targetBean, propInfo, propValue, ignoreUnmatchedProperty);
                 }
             }
         } else {
@@ -6767,133 +6767,133 @@ class CommonUtil {
             Object propValue = null;
 
             for (String propName : selectPropNames) {
-                propInfo = srcEntityInfo.getPropInfo(propName);
-                propValue = propInfo.getPropValue(sourceEntity);
+                propInfo = srcBeanInfo.getPropInfo(propName);
+                propValue = propInfo.getPropValue(sourceBean);
 
-                targetEntityInfo.setPropValue(targetEntity, propInfo, propValue, ignoreUnmatchedProperty);
+                targetBeanInfo.setPropValue(targetBean, propInfo, propValue, ignoreUnmatchedProperty);
             }
         }
 
-        return targetEntity;
+        return targetBean;
     }
 
     /**
      * Set all the signed properties(including all primitive type properties) in
-     * the specified {@code sourceEntity} to the specified {@code targetEntity}.
+     * the specified {@code sourceBean} to the specified {@code targetBean}.
      *
-     * @param sourceEntity a Java Object what allows access to properties using getter
+     * @param sourceBean a Java Object what allows access to properties using getter
      *            and setter methods.
-     * @param targetEntity a Java Object what allows access to properties using getter
+     * @param targetBean a Java Object what allows access to properties using getter
      *            and setter methods.
      * @param filter
-     * @return {@code targetEntity}
-     * @throws IllegalArgumentException if {@code targetEntity} is {@code null}.
+     * @return {@code targetBean}
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
-    public static <T> T merge(final Object sourceEntity, final T targetEntity, final BiPredicate<String, ?> filter) throws IllegalArgumentException {
-        N.checkArgNotNull(targetEntity, "targetEntity");
+    public static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<String, ?> filter) throws IllegalArgumentException {
+        N.checkArgNotNull(targetBean, "targetBean");
 
-        if (sourceEntity == null) {
-            return targetEntity;
+        if (sourceBean == null) {
+            return targetBean;
         }
 
-        final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
-        final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
+        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
+        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
         final BiPredicate<String, Object> objFilter = (BiPredicate<String, Object>) filter;
 
         Object propValue = null;
 
-        for (PropInfo propInfo : srcEntityInfo.propInfoList) {
-            propValue = propInfo.getPropValue(sourceEntity);
+        for (PropInfo propInfo : srcBeanInfo.propInfoList) {
+            propValue = propInfo.getPropValue(sourceBean);
 
             if (objFilter.test(propInfo.name, propValue)) {
-                targetEntityInfo.setPropValue(targetEntity, propInfo, propValue, false);
+                targetBeanInfo.setPropValue(targetBean, propInfo, propValue, false);
             }
         }
 
-        return targetEntity;
+        return targetBean;
     }
 
     /**
      *
-     * @param sourceEntity
-     * @param targetEntity
+     * @param sourceBean
+     * @param targetBean
      * @param ignoreUnmatchedProperty
      * @param ignoredPropNames
-     * @return {@code targetEntity}
-     * @throws IllegalArgumentException if {@code targetEntity} is {@code null}.
+     * @return {@code targetBean}
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
-    public static <T> T merge(final Object sourceEntity, final T targetEntity, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames)
+    public static <T> T merge(final Object sourceBean, final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames)
             throws IllegalArgumentException {
-        N.checkArgNotNull(targetEntity, "targetEntity");
+        N.checkArgNotNull(targetBean, "targetBean");
 
-        if (sourceEntity == null) {
-            return targetEntity;
+        if (sourceBean == null) {
+            return targetBean;
         }
 
-        return merge(sourceEntity, targetEntity, ignoreUnmatchedProperty, ignoredPropNames, ParserUtil.getEntityInfo(targetEntity.getClass()));
+        return merge(sourceBean, targetBean, ignoreUnmatchedProperty, ignoredPropNames, ParserUtil.getBeanInfo(targetBean.getClass()));
     }
 
     @SuppressWarnings("deprecation")
-    private static <T> T merge(final Object sourceEntity, final T targetEntity, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
-            final EntityInfo targetEntityInfo) throws IllegalArgumentException {
-        N.checkArgNotNull(targetEntity, "targetEntity");
+    private static <T> T merge(final Object sourceBean, final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
+            final BeanInfo targetBeanInfo) throws IllegalArgumentException {
+        N.checkArgNotNull(targetBean, "targetBean");
 
-        if (sourceEntity == null) {
-            return targetEntity;
+        if (sourceBean == null) {
+            return targetBean;
         }
 
-        final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
+        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
 
         Object propValue = null;
 
-        for (PropInfo propInfo : srcEntityInfo.propInfoList) {
+        for (PropInfo propInfo : srcBeanInfo.propInfoList) {
             if (ignoredPropNames == null || !ignoredPropNames.contains(propInfo.name)) {
-                propValue = propInfo.getPropValue(sourceEntity);
+                propValue = propInfo.getPropValue(sourceBean);
 
                 if (InternalUtil.notNullOrDefault(propValue)) {
-                    targetEntityInfo.setPropValue(targetEntity, propInfo, propValue, ignoreUnmatchedProperty);
+                    targetBeanInfo.setPropValue(targetBean, propInfo, propValue, ignoreUnmatchedProperty);
                 }
             }
         }
 
-        return targetEntity;
+        return targetBean;
     }
 
     /**
      *
-     * @param sourceEntity
-     * @param targetEntity
+     * @param sourceBean
+     * @param targetBean
      * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
-     * @return {@code targetEntity}
-     * @throws IllegalArgumentException if {@code targetEntity} is {@code null}.
+     * @return {@code targetBean}
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
-    public static <T> T merge(final Object sourceEntity, final T targetEntity, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
-        return merge(sourceEntity, targetEntity, (Collection<String>) null, mergeFunc);
+    public static <T> T merge(final Object sourceBean, final T targetBean, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
+        return merge(sourceBean, targetBean, (Collection<String>) null, mergeFunc);
     }
 
     /**
      * Set all the signed properties(including all primitive type properties) in
-     * the specified {@code sourceEntity} to the specified {@code targetEntity}.
+     * the specified {@code sourceBean} to the specified {@code targetBean}.
      *
-     * @param sourceEntity a Java Object what allows access to properties using getter
+     * @param sourceBean a Java Object what allows access to properties using getter
      *            and setter methods.
-     * @param targetEntity a Java Object what allows access to properties using getter
+     * @param targetBean a Java Object what allows access to properties using getter
      *            and setter methods.
      * @param selectPropNames
      * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
-     * @return {@code targetEntity}
-     * @throws IllegalArgumentException if {@code targetEntity} is {@code null}.
+     * @return {@code targetBean}
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
-    public static <T> T merge(final Object sourceEntity, final T targetEntity, final Collection<String> selectPropNames, final BinaryOperator<?> mergeFunc)
+    public static <T> T merge(final Object sourceBean, final T targetBean, final Collection<String> selectPropNames, final BinaryOperator<?> mergeFunc)
             throws IllegalArgumentException {
-        N.checkArgNotNull(targetEntity, "targetEntity");
+        N.checkArgNotNull(targetBean, "targetBean");
 
-        if (sourceEntity == null) {
-            return targetEntity;
+        if (sourceBean == null) {
+            return targetBean;
         }
 
-        final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
-        final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
+        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
+        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
         final BinaryOperator<Object> objMergeFunc = (BinaryOperator<Object>) mergeFunc;
         final boolean ignoreUnmatchedProperty = selectPropNames == null;
 
@@ -6901,17 +6901,17 @@ class CommonUtil {
             PropInfo targetPropInfo = null;
             Object propValue = null;
 
-            for (PropInfo propInfo : srcEntityInfo.propInfoList) {
-                targetPropInfo = targetEntityInfo.getPropInfo(propInfo);
+            for (PropInfo propInfo : srcBeanInfo.propInfoList) {
+                targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
 
                 if (targetPropInfo == null) {
                     //    if (!ignoreUnmatchedProperty) {
                     //        throw new IllegalArgumentException(
-                    //                "No property found by name: " + propInfo.name + " in target entity class: " + targetEntity.getClass());
+                    //                "No property found by name: " + propInfo.name + " in target bean class: " + targetBean.getClass());
                     //    }
                 } else {
-                    propValue = propInfo.getPropValue(sourceEntity);
-                    targetPropInfo.setPropValue(targetEntity, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
+                    propValue = propInfo.getPropValue(sourceBean);
+                    targetPropInfo.setPropValue(targetBean, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetBean)));
                 }
             }
         } else {
@@ -6920,162 +6920,161 @@ class CommonUtil {
             Object propValue = null;
 
             for (String propName : selectPropNames) {
-                propInfo = srcEntityInfo.getPropInfo(propName);
-                targetPropInfo = targetEntityInfo.getPropInfo(propInfo);
+                propInfo = srcBeanInfo.getPropInfo(propName);
+                targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
 
                 if (targetPropInfo == null) {
                     if (!ignoreUnmatchedProperty) {
-                        throw new IllegalArgumentException("No property found by name: " + propName + " in target entity class: " + targetEntity.getClass());
+                        throw new IllegalArgumentException("No property found by name: " + propName + " in target bean class: " + targetBean.getClass());
                     }
                 } else {
-                    propValue = srcEntityInfo.getPropValue(sourceEntity, propName);
-                    targetPropInfo.setPropValue(targetEntity, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
+                    propValue = srcBeanInfo.getPropValue(sourceBean, propName);
+                    targetPropInfo.setPropValue(targetBean, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetBean)));
                 }
             }
         }
 
-        return targetEntity;
+        return targetBean;
     }
 
     /**
      * Set all the signed properties(including all primitive type properties) in
-     * the specified {@code sourceEntity} to the specified {@code targetEntity}.
+     * the specified {@code sourceBean} to the specified {@code targetBean}.
      *
-     * @param sourceEntity a Java Object what allows access to properties using getter
+     * @param sourceBean a Java Object what allows access to properties using getter
      *            and setter methods.
-     * @param targetEntity a Java Object what allows access to properties using getter
+     * @param targetBean a Java Object what allows access to properties using getter
      *            and setter methods.
      * @param filter
      * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
-     * @return {@code targetEntity}
-     * @throws IllegalArgumentException if {@code targetEntity} is {@code null}.
+     * @return {@code targetBean}
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
-    public static <T> T merge(final Object sourceEntity, final T targetEntity, final BiPredicate<String, ?> filter, final BinaryOperator<?> mergeFunc)
+    public static <T> T merge(final Object sourceBean, final T targetBean, final BiPredicate<String, ?> filter, final BinaryOperator<?> mergeFunc)
             throws IllegalArgumentException {
-        N.checkArgNotNull(targetEntity, "targetEntity");
+        N.checkArgNotNull(targetBean, "targetBean");
 
-        if (sourceEntity == null) {
-            return targetEntity;
+        if (sourceBean == null) {
+            return targetBean;
         }
 
-        final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
-        final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
+        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
+        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
         final BiPredicate<String, Object> objFilter = (BiPredicate<String, Object>) filter;
         final BinaryOperator<Object> objMergeFunc = (BinaryOperator<Object>) mergeFunc;
 
         Object propValue = null;
         PropInfo targetPropInfo = null;
 
-        for (PropInfo propInfo : srcEntityInfo.propInfoList) {
-            propValue = propInfo.getPropValue(sourceEntity);
+        for (PropInfo propInfo : srcBeanInfo.propInfoList) {
+            propValue = propInfo.getPropValue(sourceBean);
 
             if (objFilter.test(propInfo.name, propValue)) {
-                targetPropInfo = targetEntityInfo.getPropInfo(propInfo);
+                targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
 
                 if (targetPropInfo == null) {
-                    throw new IllegalArgumentException("No property found by name: " + propInfo.name + " in target entity class: " + targetEntity.getClass());
+                    throw new IllegalArgumentException("No property found by name: " + propInfo.name + " in target bean class: " + targetBean.getClass());
                 }
 
-                targetPropInfo.setPropValue(targetEntity, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
+                targetPropInfo.setPropValue(targetBean, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetBean)));
             }
         }
 
-        return targetEntity;
+        return targetBean;
     }
 
     /**
      *
-     * @param sourceEntity
-     * @param targetEntity
+     * @param sourceBean
+     * @param targetBean
      * @param ignoreUnmatchedProperty
      * @param ignoredPropNames
      * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
-     * @return {@code targetEntity}
-     * @throws IllegalArgumentException if {@code targetEntity} is {@code null}.
+     * @return {@code targetBean}
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
-    public static <T> T merge(final Object sourceEntity, final T targetEntity, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
+    public static <T> T merge(final Object sourceBean, final T targetBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
             final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
-        N.checkArgNotNull(targetEntity, "targetEntity");
+        N.checkArgNotNull(targetBean, "targetBean");
 
-        if (sourceEntity == null) {
-            return targetEntity;
+        if (sourceBean == null) {
+            return targetBean;
         }
 
-        final EntityInfo srcEntityInfo = ParserUtil.getEntityInfo(sourceEntity.getClass());
-        final EntityInfo targetEntityInfo = ParserUtil.getEntityInfo(targetEntity.getClass());
+        final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
+        final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
         final BinaryOperator<Object> objMergeFunc = (BinaryOperator<Object>) mergeFunc;
 
         PropInfo targetPropInfo = null;
         Object propValue = null;
 
-        for (PropInfo propInfo : srcEntityInfo.propInfoList) {
+        for (PropInfo propInfo : srcBeanInfo.propInfoList) {
             if (ignoredPropNames == null || !ignoredPropNames.contains(propInfo.name)) {
-                targetPropInfo = targetEntityInfo.getPropInfo(propInfo);
+                targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
 
                 if (targetPropInfo == null) {
                     if (!ignoreUnmatchedProperty) {
-                        throw new IllegalArgumentException(
-                                "No property found by name: " + propInfo.name + " in target entity class: " + targetEntity.getClass());
+                        throw new IllegalArgumentException("No property found by name: " + propInfo.name + " in target bean class: " + targetBean.getClass());
                     }
                 } else {
-                    propValue = propInfo.getPropValue(sourceEntity);
-                    targetPropInfo.setPropValue(targetEntity, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetEntity)));
+                    propValue = propInfo.getPropValue(sourceBean);
+                    targetPropInfo.setPropValue(targetBean, objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetBean)));
                 }
             }
         }
 
-        return targetEntity;
+        return targetBean;
     }
 
     /**
      *
-     * @param entity
+     * @param bean
      * @param propNames
      */
     @SafeVarargs
-    public static void erase(final Object entity, final String... propNames) {
-        if (entity == null || isNullOrEmpty(propNames)) {
+    public static void erase(final Object bean, final String... propNames) {
+        if (bean == null || isNullOrEmpty(propNames)) {
             return;
         }
 
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entity.getClass());
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());
 
         for (String propName : propNames) {
-            entityInfo.setPropValue(entity, propName, null);
+            beanInfo.setPropValue(bean, propName, null);
         }
     }
 
     /**
      *
-     * @param entity
+     * @param bean
      * @param propNames
      */
-    public static void erase(final Object entity, final Collection<String> propNames) {
-        if (entity == null || isNullOrEmpty(propNames)) {
+    public static void erase(final Object bean, final Collection<String> propNames) {
+        if (bean == null || isNullOrEmpty(propNames)) {
             return;
         }
 
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entity.getClass());
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());
 
         for (String propName : propNames) {
-            entityInfo.setPropValue(entity, propName, null);
+            beanInfo.setPropValue(bean, propName, null);
         }
     }
 
     /**
      *
-     * @param entity
+     * @param bean
      */
-    public static void eraseAll(final Object entity) {
-        if (entity == null) {
+    public static void eraseAll(final Object bean) {
+        if (bean == null) {
             return;
         }
 
-        final Class<?> cls = entity.getClass();
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
+        final Class<?> cls = bean.getClass();
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
 
-        for (PropInfo propInfo : entityInfo.propInfoList) {
-            propInfo.setPropValue(entity, null);
+        for (PropInfo propInfo : beanInfo.propInfoList) {
+            propInfo.setPropValue(bean, null);
         }
     }
 
@@ -13024,30 +13023,30 @@ class CommonUtil {
 
     /**
      *
-     * @param entity1
-     * @param entity2
+     * @param bean1
+     * @param bean2
      * @return
      * @see MapDifference#of(Object, Object)
      */
-    public static boolean equalsByCommonProps(final Object entity1, final Object entity2) {
-        N.checkArgNotNull(entity1);
-        N.checkArgNotNull(entity2);
-        N.checkArgument(ClassUtil.isEntity(entity1.getClass()), "{} is not an entity class", entity1.getClass());
-        N.checkArgument(ClassUtil.isEntity(entity2.getClass()), "{} is not an entity class", entity2.getClass());
+    public static boolean equalsByCommonProps(final Object bean1, final Object bean2) {
+        N.checkArgNotNull(bean1);
+        N.checkArgNotNull(bean2);
+        N.checkArgument(ClassUtil.isBeanClass(bean1.getClass()), "{} is not a bean class", bean1.getClass());
+        N.checkArgument(ClassUtil.isBeanClass(bean2.getClass()), "{} is not a bean class", bean2.getClass());
 
-        EntityInfo entityInfo1 = ParserUtil.getEntityInfo(entity1.getClass());
-        EntityInfo entityInfo2 = ParserUtil.getEntityInfo(entity2.getClass());
+        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(bean1.getClass());
+        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(bean2.getClass());
 
         PropInfo propInfo2 = null;
         Object propValue1 = null;
 
-        for (PropInfo propInfo1 : entityInfo1.propInfoList) {
-            propInfo2 = entityInfo2.getPropInfo(propInfo1);
+        for (PropInfo propInfo1 : beanInfo1.propInfoList) {
+            propInfo2 = beanInfo2.getPropInfo(propInfo1);
 
             if (propInfo2 != null) {
-                propValue1 = propInfo1.getPropValue(entity1);
+                propValue1 = propInfo1.getPropValue(bean1);
 
-                if (!equals(propValue1, propInfo2.getPropValue(entity2))) {
+                if (!equals(propValue1, propInfo2.getPropValue(bean2))) {
                     return false;
                 }
             }
@@ -13058,53 +13057,53 @@ class CommonUtil {
 
     /**
      *
-     * @param entity1
-     * @param entity2
+     * @param bean1
+     * @param bean2
      * @param propNamesToCompare
      * @return
      * @see MapDifference#of(Object, Object)
      */
-    public static boolean equalsByCommonProps(final Object entity1, final Object entity2, final Collection<String> propNamesToCompare) {
-        N.checkArgNotNull(entity1);
-        N.checkArgNotNull(entity2);
-        N.checkArgument(ClassUtil.isEntity(entity1.getClass()), "{} is not an entity class", entity1.getClass());
-        N.checkArgument(ClassUtil.isEntity(entity2.getClass()), "{} is not an entity class", entity2.getClass());
+    public static boolean equalsByCommonProps(final Object bean1, final Object bean2, final Collection<String> propNamesToCompare) {
+        N.checkArgNotNull(bean1);
+        N.checkArgNotNull(bean2);
+        N.checkArgument(ClassUtil.isBeanClass(bean1.getClass()), "{} is not a bean class", bean1.getClass());
+        N.checkArgument(ClassUtil.isBeanClass(bean2.getClass()), "{} is not a bean class", bean2.getClass());
 
         if (N.isNullOrEmpty(propNamesToCompare)) {
             return true;
         }
 
-        EntityInfo entityInfo1 = ParserUtil.getEntityInfo(entity1.getClass());
-        EntityInfo entityInfo2 = ParserUtil.getEntityInfo(entity2.getClass());
+        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(bean1.getClass());
+        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(bean2.getClass());
 
         PropInfo propInfo1 = null;
         PropInfo propInfo2 = null;
         Object propValue1 = null;
 
         for (String propName : propNamesToCompare) {
-            propInfo1 = entityInfo1.getPropInfo(propName);
+            propInfo1 = beanInfo1.getPropInfo(propName);
 
             if (propInfo1 != null) {
-                propInfo2 = entityInfo2.getPropInfo(propInfo1);
+                propInfo2 = beanInfo2.getPropInfo(propInfo1);
 
                 if (propInfo2 == null) {
-                    throw new IllegalArgumentException("No field found in class: " + entity2.getClass() + " by name: " + propName);
+                    throw new IllegalArgumentException("No field found in class: " + bean2.getClass() + " by name: " + propName);
                 }
             } else {
-                propInfo2 = entityInfo2.getPropInfo(propName);
+                propInfo2 = beanInfo2.getPropInfo(propName);
 
                 if (propInfo2 != null) {
-                    propInfo1 = entityInfo1.getPropInfo(propInfo2);
+                    propInfo1 = beanInfo1.getPropInfo(propInfo2);
                 }
 
                 if (propInfo1 == null) {
-                    throw new IllegalArgumentException("No field found in class: " + entity1.getClass() + " by name: " + propName);
+                    throw new IllegalArgumentException("No field found in class: " + bean1.getClass() + " by name: " + propName);
                 }
             }
 
-            propValue1 = propInfo1.getPropValue(entity1);
+            propValue1 = propInfo1.getPropValue(bean1);
 
-            if (!equals(propValue1, propInfo2.getPropValue(entity2))) {
+            if (!equals(propValue1, propInfo2.getPropValue(bean2))) {
                 return false;
             }
         }
@@ -15979,35 +15978,35 @@ class CommonUtil {
     }
 
     /**
-     * Fill the properties of the entity with random values.
+     * Fill the properties of the bean with random values.
      *
-     * @param entity an entity object with getter/setter method
+     * @param bean a bean object with getter/setter method
      */
-    public static void fill(Object entity) {
-        TestUtil.fill(entity);
+    public static void fill(Object bean) {
+        TestUtil.fill(bean);
     }
 
     /**
-     * Fill the properties of the entity with random values.
+     * Fill the properties of the bean with random values.
      *
      * @param <T>
-     * @param entityClass entity class with getter/setter methods
+     * @param beanClass bean class with getter/setter methods
      * @return
      */
-    public static <T> T fill(Class<? extends T> entityClass) {
-        return TestUtil.fill(entityClass);
+    public static <T> T fill(Class<? extends T> beanClass) {
+        return TestUtil.fill(beanClass);
     }
 
     /**
-     * Fill the properties of the entity with random values.
+     * Fill the properties of the bean with random values.
      *
      * @param <T>
-     * @param entityClass entity class with getter/setter methods
+     * @param beanClass bean class with getter/setter methods
      * @param count
      * @return
      */
-    public static <T> List<T> fill(Class<? extends T> entityClass, int count) {
-        return TestUtil.fill(entityClass, count);
+    public static <T> List<T> fill(Class<? extends T> beanClass, int count) {
+        return TestUtil.fill(beanClass, count);
     }
 
     /**

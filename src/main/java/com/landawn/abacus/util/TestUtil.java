@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.landawn.abacus.parser.ParserUtil;
-import com.landawn.abacus.parser.ParserUtil.EntityInfo;
+import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 
@@ -32,36 +32,36 @@ public final class TestUtil {
     }
 
     /**
-     * Fill the properties of the entity with random values.
+     * Fill the properties of the bean with random values.
      *
-     * @param entity an entity object with getter/setter method
+     * @param bean a bean object with getter/setter method
      */
-    public static void fill(final Object entity) {
-        final Class<?> entityClass = entity.getClass();
+    public static void fill(final Object bean) {
+        final Class<?> beanClass = bean.getClass();
 
-        N.checkArgument(ClassUtil.isEntity(entityClass), "{} is not a valid entity class with property getter/setter method", entityClass);
+        N.checkArgument(ClassUtil.isBeanClass(beanClass), "{} is not a valid bean class with property getter/setter method", beanClass);
 
-        fill(entity, ClassUtil.getPropNameList(entityClass));
+        fill(bean, ClassUtil.getPropNameList(beanClass));
     }
 
     /**
-     * Fill the properties of the entity with random values.
+     * Fill the properties of the bean with random values.
      *
-     * @param entity an entity object with getter/setter method
+     * @param bean a bean object with getter/setter method
      * @param propNamesToFill
      */
-    public static void fill(final Object entity, final Collection<String> propNamesToFill) {
-        fill(ParserUtil.getEntityInfo(entity.getClass()), entity, propNamesToFill);
+    public static void fill(final Object bean, final Collection<String> propNamesToFill) {
+        fill(ParserUtil.getBeanInfo(bean.getClass()), bean, propNamesToFill);
     }
 
-    private static void fill(final EntityInfo entityInfo, final Object entity, final Collection<String> propNamesToFill) {
+    private static void fill(final BeanInfo beanInfo, final Object bean, final Collection<String> propNamesToFill) {
         PropInfo propInfo = null;
         Type<Object> type = null;
         Class<?> parameterClass = null;
         Object propValue = null;
 
         for (String propName : propNamesToFill) {
-            propInfo = entityInfo.getPropInfo(propName);
+            propInfo = beanInfo.getPropInfo(propName);
             parameterClass = propInfo.clazz;
             type = propInfo.jsonXmlType;
 
@@ -87,85 +87,85 @@ public final class TestUtil {
                 propValue = type.valueOf(String.valueOf(N.RAND.nextInt()));
             } else if (java.util.Date.class.isAssignableFrom(parameterClass) || Calendar.class.isAssignableFrom(parameterClass)) {
                 propValue = type.valueOf(String.valueOf(System.currentTimeMillis()));
-            } else if (ClassUtil.isEntity(parameterClass)) {
+            } else if (ClassUtil.isBeanClass(parameterClass)) {
                 propValue = fill(parameterClass);
             } else {
                 propValue = type.defaultValue();
             }
 
-            propInfo.setPropValue(entity, propValue);
+            propInfo.setPropValue(bean, propValue);
         }
     }
 
     /**
-     * Fill the properties of the entity with random values.
+     * Fill the properties of the bean with random values.
      *
      * @param <T>
-     * @param entityClass entity class with getter/setter methods
+     * @param beanClass bean class with getter/setter methods
      * @return
      */
-    public static <T> T fill(final Class<? extends T> entityClass) {
-        N.checkArgument(ClassUtil.isEntity(entityClass), "{} is not a valid entity class with property getter/setter method", entityClass);
+    public static <T> T fill(final Class<? extends T> beanClass) {
+        N.checkArgument(ClassUtil.isBeanClass(beanClass), "{} is not a valid bean class with property getter/setter method", beanClass);
 
-        return fill(entityClass, ClassUtil.getPropNameList(entityClass));
+        return fill(beanClass, ClassUtil.getPropNameList(beanClass));
     }
 
     /**
-     * Fill the properties of the entity with random values.
+     * Fill the properties of the bean with random values.
      *
      * @param <T>
-     * @param entityClass entity class with getter/setter methods
+     * @param beanClass bean class with getter/setter methods
      * @param count
      * @return
      */
-    public static <T> List<T> fill(final Class<? extends T> entityClass, final int count) {
-        N.checkArgument(ClassUtil.isEntity(entityClass), "{} is not a valid entity class with property getter/setter method", entityClass);
+    public static <T> List<T> fill(final Class<? extends T> beanClass, final int count) {
+        N.checkArgument(ClassUtil.isBeanClass(beanClass), "{} is not a valid bean class with property getter/setter method", beanClass);
 
-        return fill(entityClass, ClassUtil.getPropNameList(entityClass), count);
+        return fill(beanClass, ClassUtil.getPropNameList(beanClass), count);
     }
 
     /**
-     * Fill the properties of the entity with random values.
+     * Fill the properties of the bean with random values.
      *
      * @param <T>
-     * @param entityClass entity class with getter/setter methods
+     * @param beanClass bean class with getter/setter methods
      * @param propNamesToFill
      * @return
      */
-    public static <T> T fill(final Class<? extends T> entityClass, final Collection<String> propNamesToFill) {
-        N.checkArgument(ClassUtil.isEntity(entityClass), "{} is not a valid entity class with property getter/setter method", entityClass);
+    public static <T> T fill(final Class<? extends T> beanClass, final Collection<String> propNamesToFill) {
+        N.checkArgument(ClassUtil.isBeanClass(beanClass), "{} is not a valid bean class with property getter/setter method", beanClass);
 
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
-        final Object result = entityInfo.createEntityResult();
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
+        final Object result = beanInfo.createBeanResult();
 
-        fill(entityInfo, result, propNamesToFill);
+        fill(beanInfo, result, propNamesToFill);
 
-        return (T) entityInfo.finishEntityResult(result);
+        return (T) beanInfo.finishBeanResult(result);
     }
 
     /**
-     * Fill the properties of the entity with random values.
+     * Fill the properties of the bean with random values.
      *
      * @param <T>
-     * @param entityClass entity class with getter/setter methods
+     * @param beanClass bean class with getter/setter methods
      * @param propNamesToFill
      * @param count
      * @return
      */
-    public static <T> List<T> fill(final Class<? extends T> entityClass, final Collection<String> propNamesToFill, final int count) {
-        N.checkArgument(ClassUtil.isEntity(entityClass), "{} is not a valid entity class with property getter/setter method", entityClass);
+    public static <T> List<T> fill(final Class<? extends T> beanClass, final Collection<String> propNamesToFill, final int count) {
+        N.checkArgument(ClassUtil.isBeanClass(beanClass), "{} is not a valid bean class with property getter/setter method", beanClass);
         N.checkArgNotNegative(count, "count");
 
         final List<T> resultList = new ArrayList<>(count);
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(entityClass);
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
         Object result = null;
 
         for (int i = 0; i < count; i++) {
-            result = entityInfo.createEntityResult();
+            result = beanInfo.createBeanResult();
 
-            fill(entityInfo, result, propNamesToFill);
+            fill(beanInfo, result, propNamesToFill);
 
-            resultList.add((T) entityInfo.finishEntityResult(result));
+            resultList.add((T) beanInfo.finishBeanResult(result));
         }
 
         return resultList;

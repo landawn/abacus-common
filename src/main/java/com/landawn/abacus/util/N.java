@@ -79,7 +79,7 @@ import com.landawn.abacus.util.stream.Stream;
  * Note: This class includes codes copied from Apache Commons Lang, Google Guava and other open source projects under the Apache License 2.0.
  * The methods copied from other libraries/frameworks/projects may be modified in this class.
  * </p>
- * Class <code>N</code> is a general java utility class. It provides the most daily used operations for Object/primitive types/String/Array/Collection/Map/Entity...:
+ * Class <code>N</code> is a general java utility class. It provides the most daily used operations for Object/primitive types/String/Array/Collection/Map/Bean...:
  *
  * When to throw exception? It's designed to avoid throwing any unnecessary
  * exception if the contract defined by method is not broken. for example, if
@@ -24188,7 +24188,7 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param json
      * @return
      * @see com.landawn.abacus.util.TypeReference
@@ -24201,7 +24201,7 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param json
      * @param config
      * @return
@@ -24215,7 +24215,7 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param json
      * @return
      * @see com.landawn.abacus.util.TypeReference
@@ -24228,7 +24228,7 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param json
      * @param config
      * @return
@@ -24242,7 +24242,7 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param json
      * @return
      * @see com.landawn.abacus.util.TypeReference
@@ -24255,7 +24255,7 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param json
      * @param config
      * @return
@@ -24269,7 +24269,7 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param json
      * @return
      * @see com.landawn.abacus.util.TypeReference
@@ -24282,7 +24282,7 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param json
      * @param config
      * @return
@@ -24296,7 +24296,7 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param json
      * @param fromIndex
      * @param toIndex
@@ -24311,7 +24311,7 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param json
      * @param fromIndex
      * @param toIndex
@@ -24328,7 +24328,7 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
      * @return
      */
@@ -24339,7 +24339,7 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
      * @param config
      * @return
@@ -24351,7 +24351,7 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
      * @return
      */
@@ -24362,7 +24362,7 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
      * @param config
      * @return
@@ -24374,7 +24374,7 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
      * @param closeInputStreamWhenStreamIsClosed
      * @return
@@ -24387,7 +24387,7 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
      * @param closeInputStreamWhenStreamIsClosed
      * @param config
@@ -24401,7 +24401,7 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
      * @param closeReaderWhenStreamIsClosed
      * @return
@@ -24413,7 +24413,7 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param elementClass Only Entity/Map/Collection/Array/DataSet element types are supported at present.
+     * @param elementClass Only Bean/Map/Collection/Array/DataSet element types are supported at present.
      * @param source
      * @param closeReaderWhenStreamIsClosed
      * @param config
@@ -24667,7 +24667,7 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param xml
      * @return
      * @see com.landawn.abacus.util.TypeReference
@@ -24680,7 +24680,7 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param xml
      * @param config
      * @return
@@ -24694,7 +24694,7 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param xml
      * @return
      * @see com.landawn.abacus.util.TypeReference
@@ -24707,7 +24707,7 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param xml
      * @param config
      * @return
@@ -24721,7 +24721,7 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param xml
      * @return
      * @see com.landawn.abacus.util.TypeReference
@@ -24734,7 +24734,7 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param xml
      * @param config
      * @return
@@ -24748,7 +24748,7 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param xml
      * @return
      * @see com.landawn.abacus.util.TypeReference
@@ -24761,7 +24761,7 @@ public final class N extends CommonUtil {
     /**
      *
      * @param <T>
-     * @param targetType can be the {@code Type} of {@code Entity/Array/Collection/Map}.
+     * @param targetType can be the {@code Type} of {@code Bean/Array/Collection/Map}.
      * @param xml
      * @param config
      * @return

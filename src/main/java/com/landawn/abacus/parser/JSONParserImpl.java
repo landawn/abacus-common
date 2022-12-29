@@ -46,7 +46,7 @@ import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.exception.ParseException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JSONDeserializationConfig.JDC;
-import com.landawn.abacus.parser.ParserUtil.EntityInfo;
+import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Array;
@@ -88,9 +88,9 @@ import com.landawn.abacus.util.Tuple.Tuple9;
  */
 final class JSONParserImpl extends AbstractJSONParser {
 
-    private static final String ENTITY_NAME = "entityName";
+    private static final String ENTITY_NAME = "beanName";
 
-    private static final String ENTITY_TYPE = "entityType";
+    private static final String ENTITY_TYPE = "beanType";
 
     private static final String COLUMN_NAMES = "columnNames";
 
@@ -275,7 +275,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                 }
 
             case ENTITY:
-                return readEntity(type, targetClass, jr, config, true);
+                return readBean(type, targetClass, jr, config, true);
 
             case MAP:
                 return readMap(m, targetClass, jr, config, null, true);
@@ -304,7 +304,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                 }
 
                 throw new ParseException("Unsupported class: " + ClassUtil.getCanonicalClassName(type.clazz())
-                        + ". Only Array/List/Map and Entity class with getter/setter methods are supported");
+                        + ". Only Array/List/Map and Bean class with getter/setter methods are supported");
         }
     }
 
@@ -563,7 +563,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                 break;
 
             case ENTITY:
-                writeEntity(bw, type, obj, config, isFirstCall, indentation, serializedObjects);
+                writeBean(bw, type, obj, config, isFirstCall, indentation, serializedObjects);
 
                 break;
 
@@ -599,7 +599,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
             default:
                 throw new ParseException("Unsupported class: " + ClassUtil.getCanonicalClassName(type.clazz())
-                        + ". Only Array/List/Map and Entity class with getter/setter methods are supported");
+                        + ". Only Array/List/Map and Bean class with getter/setter methods are supported");
         }
     }
 
@@ -614,16 +614,16 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @param serializedObjects
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    protected void writeEntity(final BufferedJSONWriter bw, final Type<Object> type, final Object obj, final JSONSerializationConfig config,
-            boolean isFirstCall, final String indentation, final IdentityHashSet<Object> serializedObjects) throws IOException {
+    protected void writeBean(final BufferedJSONWriter bw, final Type<Object> type, final Object obj, final JSONSerializationConfig config, boolean isFirstCall,
+            final String indentation, final IdentityHashSet<Object> serializedObjects) throws IOException {
         if (hasCircularReference(bw, obj, serializedObjects)) {
             return;
         }
 
         final Class<?> cls = type.clazz();
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(cls);
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
 
-        if (N.isNullOrEmpty(entityInfo.jsonXmlSerializablePropInfos)) {
+        if (N.isNullOrEmpty(beanInfo.jsonXmlSerializablePropInfos)) {
             throw new ParseException("No serializable property is found in class: " + ClassUtil.getCanonicalClassName(cls));
         }
 
@@ -633,10 +633,10 @@ final class JSONParserImpl extends AbstractJSONParser {
         final boolean writeNullToEmpty = config.writeNullToEmpty();
         final boolean quotePropName = config.quotePropName();
         final boolean isPrettyFormat = config.prettyFormat();
-        final NamingPolicy jsonXmlNamingPolicy = config.getPropNamingPolicy() == null ? entityInfo.jsonXmlNamingPolicy : config.getPropNamingPolicy();
+        final NamingPolicy jsonXmlNamingPolicy = config.getPropNamingPolicy() == null ? beanInfo.jsonXmlNamingPolicy : config.getPropNamingPolicy();
         final int nameTagIdx = jsonXmlNamingPolicy.ordinal();
 
-        final PropInfo[] propInfoList = config.skipTransientField() ? entityInfo.nonTransientSeriPropInfos : entityInfo.jsonXmlSerializablePropInfos;
+        final PropInfo[] propInfoList = config.skipTransientField() ? beanInfo.nonTransientSeriPropInfos : beanInfo.jsonXmlSerializablePropInfos;
         PropInfo propInfo = null;
         String propName = null;
         Object propValue = null;
@@ -990,7 +990,7 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     /**
-     * Write map entity.
+     * Write map bean.
      *
      * @param bw
      * @param type
@@ -1102,7 +1102,7 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     /**
-     * Write entity id.
+     * Write bean id.
      *
      * @param bw
      * @param type
@@ -1263,7 +1263,7 @@ final class JSONParserImpl extends AbstractJSONParser {
         //
         //        bw.write(_COLON);
         //
-        //        strType.writeCharacter(bw, rs.entityName(), config);
+        //        strType.writeCharacter(bw, rs.beanName(), config);
         //
         //        bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
         //
@@ -1289,10 +1289,10 @@ final class JSONParserImpl extends AbstractJSONParser {
         //
         //        bw.write(_COLON);
         //
-        //        if (rs.entityClass() == null) {
+        //        if (rs.beanClass() == null) {
         //            bw.write(NULL_CHAR_ARRAY);
         //        } else {
-        //            strType.writeCharacter(bw, N.getCanonicalClassName(rs.entityClass()), config);
+        //            strType.writeCharacter(bw, N.getCanonicalClassName(rs.beanClass()), config);
         //        }
         //
         //        bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
@@ -1697,7 +1697,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                 }
 
             case ENTITY:
-                return readEntity(type, targetClass, jr, config, isFirstCall);
+                return readBean(type, targetClass, jr, config, isFirstCall);
 
             case MAP:
                 return readMap(null, targetClass, jr, config, null, isFirstCall);
@@ -1729,7 +1729,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                 }
 
                 throw new ParseException(firstTokenToUse, "Unsupported class: " + ClassUtil.getCanonicalClassName(type.clazz())
-                        + ". Only Array/List/Map and Entity class with getter/setter methods are supported");
+                        + ". Only Array/List/Map and Bean class with getter/setter methods are supported");
         }
     }
 
@@ -1745,15 +1745,15 @@ final class JSONParserImpl extends AbstractJSONParser {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @SuppressWarnings("unused")
-    protected <T> T readEntity(final Type<? extends T> type, final Class<? extends T> targetClass, final JSONReader jr, final JSONDeserializationConfig config,
+    protected <T> T readBean(final Type<? extends T> type, final Class<? extends T> targetClass, final JSONReader jr, final JSONDeserializationConfig config,
             final boolean isFirstCall) throws IOException {
         final boolean hasPropTypes = N.notNullOrEmpty(config.getPropTypes());
         final boolean ignoreUnmatchedProperty = config.ignoreUnmatchedProperty();
         final boolean ignoreNullOrEmpty = config.ignoreNullOrEmpty();
         final boolean readNullToEmpty = config.readNullToEmpty();
         final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(targetClass);
-        final EntityInfo entityInfo = ParserUtil.getEntityInfo(targetClass);
-        final Object result = entityInfo.createEntityResult();
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetClass);
+        final Object result = beanInfo.createBeanResult();
 
         PropInfo propInfo = null;
         String propName = null;
@@ -1787,14 +1787,14 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                     if (isPropName) {
                         // propName = jr.getText();
-                        // propName = jr.readPropName(entityInfo);
-                        // propInfo = entityInfo.getPropInfo(propName);
+                        // propName = jr.readPropName(beanInfo);
+                        // propInfo = beanInfo.getPropInfo(propName);
 
-                        propInfo = jr.readPropInfo(entityInfo);
+                        propInfo = jr.readPropInfo(beanInfo);
 
                         if (propInfo == null) {
                             propName = jr.getText();
-                            propInfo = entityInfo.getPropInfo(propName);
+                            propInfo = beanInfo.getPropInfo(propName);
                         } else {
                             propName = propInfo.name;
                         }
@@ -1839,7 +1839,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                         if (jr.hasText()) {
                             propName = jr.getText();
-                            propInfo = entityInfo.getPropInfo(propName);
+                            propInfo = beanInfo.getPropInfo(propName);
 
                             if (propInfo == null) {
                                 propType = null;
@@ -2016,7 +2016,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                         }
                     }
 
-                    return entityInfo.finishEntityResult(result);
+                    return beanInfo.finishBeanResult(result);
                 default:
                     throw new ParseException(token, getErrorMsg(jr, token));
             }
@@ -2604,7 +2604,7 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     /**
-     * Read map entity.
+     * Read map bean.
      *
      * @param <T>
      * @param targetClass
@@ -2648,7 +2648,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                         }
                     } else {
                         if (mapEntity == null) {
-                            throw new ParseException(token, "Entity name can't be null or empty");
+                            throw new ParseException(token, "Bean name can't be null or empty");
                         }
                     }
 
@@ -2677,7 +2677,7 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     /**
-     * Read entity id.
+     * Read bean id.
      *
      * @param <T>
      * @param targetClass
@@ -2721,7 +2721,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                         }
                     } else {
                         if (entityId == null) {
-                            throw new ParseException(token, "Entity name can't be null or empty");
+                            throw new ParseException(token, "Bean name can't be null or empty");
                         }
                     }
 
@@ -2765,8 +2765,8 @@ final class JSONParserImpl extends AbstractJSONParser {
             throws IOException {
         DataSet rs = null;
 
-        //        String entityName = null;
-        //        Class<?> entityClass = null;
+        //        String beanName = null;
+        //        Class<?> beanClass = null;
         List<String> columnNameList = null;
         List<List<Object>> columnList = null;
         Properties<String, Object> properties = null;
@@ -2808,18 +2808,18 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                         switch (order) {
                             //    case 1:
-                            //        entityName = jr.readValue(strType);
+                            //        beanName = jr.readValue(strType);
                             //        break;
                             //
                             //    case 2:
                             //        String str = jr.readValue(strType);
                             //        if (N.isNullOrEmpty(str)) {
-                            //            entityClass = Map.class;
+                            //            beanClass = Map.class;
                             //        } else {
                             //            try {
-                            //                entityClass = N.forClass(str);
+                            //                beanClass = N.forClass(str);
                             //            } catch (Exception e) {
-                            //                entityClass = Map.class;
+                            //                beanClass = Map.class;
                             //            }
                             //        }
                             //
@@ -2864,18 +2864,18 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                             switch (order) {
                                 //    case 1:
-                                //        entityName = jr.readValue(strType);
+                                //        beanName = jr.readValue(strType);
                                 //        break;
                                 //
                                 //    case 2:
                                 //        String str = jr.readValue(strType);
                                 //        if (N.isNullOrEmpty(str)) {
-                                //            entityClass = Map.class;
+                                //            beanClass = Map.class;
                                 //        } else {
                                 //            try {
-                                //                entityClass = N.forClass(str);
+                                //                beanClass = N.forClass(str);
                                 //            } catch (Exception e) {
-                                //                entityClass = Map.class;
+                                //                beanClass = Map.class;
                                 //            }
                                 //        }
                                 //
@@ -2958,18 +2958,18 @@ final class JSONParserImpl extends AbstractJSONParser {
                             //
                             // switch (order) {
                             // case 1:
-                            // entityName = jr.getText();
+                            // beanName = jr.getText();
                             // break;
                             //
                             // case 2:
                             // String str = jr.getText();
                             // if (N.isNullOrEmpty(str)) {
-                            // entityClass = Map.class;
+                            // beanClass = Map.class;
                             // } else {
                             // try {
-                            // entityClass = N.forClass(str);
+                            // beanClass = N.forClass(str);
                             // } catch (Exception e) {
-                            // entityClass = Map.class;
+                            // beanClass = Map.class;
                             // }
                             // }
                             //
@@ -2989,7 +2989,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                         }
                     }
 
-                    // rs = new RowDataSet(entityName, entityClass, columnNameList, columnList, properties);
+                    // rs = new RowDataSet(beanName, beanClass, columnNameList, columnList, properties);
                     if (columnNameList == null) {
                         columnNameList = new ArrayList<>();
                     }
@@ -3048,8 +3048,8 @@ final class JSONParserImpl extends AbstractJSONParser {
             config.setMapValueType(type.getParameterTypes()[1]);
         }
 
-        if (type.isEntity()) {
-            return readEntity((Type<Object>) type, (Class<Object>) type.clazz(), jr, config, false);
+        if (type.isBean()) {
+            return readBean((Type<Object>) type, (Class<Object>) type.clazz(), jr, config, false);
         } else if (type.isMap()) {
             return readMap(null, type.clazz(), jr, config, type, false);
         } else if (type.isDataSet()) {
@@ -3209,8 +3209,8 @@ final class JSONParserImpl extends AbstractJSONParser {
                 break;
 
             default:
-                if (!(eleType.isEntity() || eleType.isMap() || eleType.isCollection() || eleType.isArray())) {
-                    throw new IllegalArgumentException("Only Entity/Map/Collection/Array/DataSet element types are supported by stream methods at present");
+                if (!(eleType.isBean() || eleType.isMap() || eleType.isCollection() || eleType.isArray())) {
+                    throw new IllegalArgumentException("Only Bean/Map/Collection/Array/DataSet element types are supported by stream methods at present");
                 }
         }
 

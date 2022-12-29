@@ -40,9 +40,9 @@ public class MapEntityType extends AbstractType<MapEntity> {
     }
 
     /**
-     * Checks if is map entity.
+     * Checks if is map bean.
      *
-     * @return true, if is map entity
+     * @return true, if is map bean
      */
     @Override
     public boolean isMapEntity() {
