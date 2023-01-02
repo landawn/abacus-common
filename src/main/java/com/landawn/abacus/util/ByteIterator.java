@@ -19,6 +19,8 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.util.u.OptionalByte;
+import com.landawn.abacus.util.function.BytePredicate;
 import com.landawn.abacus.util.function.ByteSupplier;
 import com.landawn.abacus.util.stream.ByteStream;
 
@@ -246,6 +248,137 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     public abstract byte nextByte();
+
+    public ByteIterator skip(final long n) {
+        N.checkArgNotNegative(n, "n");
+
+        if (n <= 0) {
+            return this;
+        }
+
+        final ByteIterator iter = this;
+
+        return new ByteIterator() {
+            private boolean skipped = false;
+
+            @Override
+            public boolean hasNext() {
+                if (!skipped) {
+                    skip();
+                }
+
+                return iter.hasNext();
+            }
+
+            @Override
+            public byte nextByte() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                return iter.nextByte();
+            }
+
+            private void skip() {
+                long idx = 0;
+
+                while (idx++ < n && iter.hasNext()) {
+                    iter.nextByte();
+                }
+
+                skipped = true;
+            }
+        };
+    }
+
+    public ByteIterator limit(final long count) {
+        N.checkArgNotNegative(count, "count");
+
+        if (count == 0) {
+            return ByteIterator.EMPTY;
+        }
+
+        final ByteIterator iter = this;
+
+        return new ByteIterator() {
+            private long cnt = count;
+
+            @Override
+            public boolean hasNext() {
+                return cnt > 0 && iter.hasNext();
+            }
+
+            @Override
+            public byte nextByte() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                cnt--;
+                return iter.nextByte();
+            }
+        };
+    }
+
+    public ByteIterator filter(final BytePredicate predicate) {
+        N.checkArgNotNull(predicate, "predicate");
+
+        final ByteIterator iter = this;
+
+        return new ByteIterator() {
+            private boolean hasNext = false;
+            private byte next = 0;
+
+            @Override
+            public boolean hasNext() {
+                if (!hasNext) {
+                    while (iter.hasNext()) {
+                        next = iter.nextByte();
+
+                        if (predicate.test(next)) {
+                            hasNext = true;
+                            break;
+                        }
+                    }
+                }
+
+                return hasNext;
+            }
+
+            @Override
+            public byte nextByte() {
+                if (!hasNext && !hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                hasNext = false;
+
+                return next;
+            }
+        };
+    }
+
+    public OptionalByte first() {
+        if (hasNext()) {
+            return OptionalByte.of(nextByte());
+        } else {
+            return OptionalByte.empty();
+        }
+    }
+
+    public OptionalByte last() {
+        if (hasNext()) {
+            byte next = nextByte();
+
+            while (hasNext()) {
+                next = nextByte();
+            }
+
+            return OptionalByte.of(next);
+        } else {
+            return OptionalByte.empty();
+        }
+    }
 
     public byte[] toArray() {
         return toList().trimToSize().array();

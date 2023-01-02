@@ -21,10 +21,12 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 import com.landawn.abacus.util.Fn.Suppliers;
+import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.function.IndexedConsumer;
 import com.landawn.abacus.util.stream.Stream;
 
@@ -46,6 +48,11 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
         @Override
         public Object next() {
+            throw new NoSuchElementException();
+        }
+
+        @Override
+        protected void next(Throwables.BiConsumer action) throws NoSuchElementException {
             throw new NoSuchElementException();
         }
 
@@ -109,6 +116,15 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             @Override
             public Pair<K, V> next() {
                 return Pair.from(iter.next());
+            }
+
+            @Override
+            protected <E extends Exception> void next(final Throwables.BiConsumer<? super K, ? super V, E> action) throws NoSuchElementException, E {
+                // N.checkArgNotNull(action);
+
+                final Map.Entry<K, V> entry = iter.next();
+
+                action.accept(entry.getKey(), entry.getValue());
             }
 
             @Override
@@ -190,6 +206,19 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             }
 
             @Override
+            protected <E extends Exception> void next(final Throwables.BiConsumer<? super A, ? super B, E> action) throws NoSuchElementException, E {
+                // N.checkArgNotNull(action);
+
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                output.accept(tmp);
+
+                action.accept(tmp.left, tmp.right);
+            }
+
+            @Override
             public <E extends Exception> void forEachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
                 N.checkArgNotNull(action);
 
@@ -256,6 +285,19 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
                 output.accept(cursor.getAndIncrement(), tmp);
 
                 return Pair.of(tmp.left, tmp.right);
+            }
+
+            @Override
+            protected <E extends Exception> void next(final Throwables.BiConsumer<? super A, ? super B, E> action) throws NoSuchElementException, E {
+                // N.checkArgNotNull(action);
+
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                output.accept(cursor.getAndIncrement(), tmp);
+
+                action.accept(tmp.left, tmp.right);
             }
 
             @Override
@@ -375,6 +417,13 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             }
 
             @Override
+            protected <E extends Exception> void next(final Throwables.BiConsumer<? super A, ? super B, E> action) throws NoSuchElementException, E {
+                // N.checkArgNotNull(action);
+
+                action.accept(iterA.next(), iterB.next());
+            }
+
+            @Override
             public <E extends Exception> void forEachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
                 N.checkArgNotNull(action);
 
@@ -433,6 +482,17 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
                 }
 
                 return Pair.of(iter1.hasNext() ? iter1.next() : valueForNoneA, iter2.hasNext() ? iter2.next() : valueForNoneB);
+            }
+
+            @Override
+            protected <E extends Exception> void next(final Throwables.BiConsumer<? super A, ? super B, E> action) throws NoSuchElementException, E {
+                // N.checkArgNotNull(action);
+
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                action.accept(iter1.hasNext() ? iter1.next() : valueForNoneA, iter2.hasNext() ? iter2.next() : valueForNoneB);
             }
 
             @Override
@@ -506,6 +566,15 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
+     *
+     * @param <E>
+     * @param action
+     * @throws NoSuchElementException
+     * @throws E
+     */
+    protected abstract <E extends Exception> void next(final Throwables.BiConsumer<? super A, ? super B, E> action) throws NoSuchElementException, E;
+
+    /**
      * For each remaining.
      *
      * @param <E>
@@ -544,6 +613,251 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
         N.checkArgNotNull(mapper);
 
         return Stream.of(map(mapper));
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static final Throwables.BiConsumer DO_NOTHING = (a, b) -> {
+        // do nothing;
+    };
+
+    public BiIterator<A, B> skip(final long n) {
+        N.checkArgNotNegative(n, "n");
+
+        if (n <= 0) {
+            return this;
+        }
+
+        final BiIterator<A, B> iter = this;
+
+        return new BiIterator<>() {
+            private boolean skipped = false;
+
+            @Override
+            public boolean hasNext() {
+                if (!skipped) {
+                    skip();
+                }
+
+                return iter.hasNext();
+            }
+
+            @Override
+            public Pair<A, B> next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                return iter.next();
+            }
+
+            @Override
+            protected <E extends Exception> void next(final Throwables.BiConsumer<? super A, ? super B, E> action) throws NoSuchElementException, E {
+                if (!skipped) {
+                    skip();
+                }
+
+                iter.next(action);
+            }
+
+            @Override
+            public <E extends Exception> void forEachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
+                if (!skipped) {
+                    skip();
+                }
+
+                iter.forEachRemaining(action);
+            }
+
+            @Override
+            public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) {
+                if (!skipped) {
+                    skip();
+                }
+
+                return iter.map(mapper);
+            }
+
+            private void skip() {
+                long idx = 0;
+
+                final Throwables.BiConsumer<A, B, RuntimeException> action = DO_NOTHING;
+
+                while (idx++ < n && iter.hasNext()) {
+                    iter.next(action);
+                }
+
+                skipped = true;
+            }
+        };
+    }
+
+    public BiIterator<A, B> limit(final long count) {
+        N.checkArgNotNegative(count, "count");
+
+        if (count == 0) {
+            return BiIterator.<A, B> empty();
+        }
+
+        final BiIterator<A, B> iter = this;
+
+        return new BiIterator<>() {
+            private long cnt = count;
+
+            @Override
+            public boolean hasNext() {
+                return cnt > 0 && iter.hasNext();
+            }
+
+            @Override
+            public Pair<A, B> next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                cnt--;
+                return iter.next();
+            }
+
+            @Override
+            protected <E extends Exception> void next(final Throwables.BiConsumer<? super A, ? super B, E> action) throws NoSuchElementException, E {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                cnt--;
+                iter.next(action);
+            }
+
+            @Override
+            public <E extends Exception> void forEachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
+                while (hasNext()) {
+                    cnt--;
+                    iter.next(action);
+                }
+            }
+
+            @Override
+            public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) {
+                if (cnt > 0) {
+                    return iter.<R> map(mapper).limit(cnt);
+                } else {
+                    return ObjIterator.<R> empty();
+                }
+            }
+        };
+    }
+
+    public BiIterator<A, B> filter(final BiPredicate<? super A, ? super B> predicate) {
+        N.checkArgNotNull(predicate, "predicate");
+
+        final BiIterator<A, B> iter = this;
+
+        return new BiIterator<>() {
+            private final Pair<A, B> next = new Pair<>();
+            private final Throwables.BiConsumer<A, B, RuntimeException> setNext = (a, b) -> next.set(a, b);
+
+            private boolean hasNext = false;
+
+            @Override
+            public boolean hasNext() {
+                if (!hasNext) {
+                    while (iter.hasNext()) {
+                        iter.next(setNext);
+
+                        if (predicate.test(next.left, next.right)) {
+                            hasNext = true;
+                            break;
+                        }
+                    }
+                }
+
+                return hasNext;
+            }
+
+            @Override
+            public Pair<A, B> next() {
+                if (!hasNext && !hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                hasNext = false;
+
+                return next.copy();
+            }
+
+            @Override
+            protected <E extends Exception> void next(final Throwables.BiConsumer<? super A, ? super B, E> action) throws NoSuchElementException, E {
+                if (!hasNext && !hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                hasNext = false;
+
+                action.accept(next.left, next.right);
+            }
+
+            @Override
+            public <E extends Exception> void forEachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
+                while (hasNext()) {
+                    hasNext = false;
+
+                    action.accept(next.left, next.right);
+                }
+            }
+
+            @Override
+            public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) {
+                return new ObjIterator<>() {
+                    @Override
+                    public boolean hasNext() {
+                        if (!hasNext) {
+                            while (iter.hasNext()) {
+                                iter.next(setNext);
+
+                                if (predicate.test(next.left, next.right)) {
+                                    hasNext = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        return hasNext;
+                    }
+
+                    @Override
+                    public R next() {
+                        if (!hasNext && !hasNext()) {
+                            throw new NoSuchElementException();
+                        }
+
+                        hasNext = false;
+
+                        return mapper.apply(next.left, next.right);
+                    }
+                };
+            }
+        };
+    }
+
+    public Optional<Pair<A, B>> first() {
+        if (hasNext()) {
+            return Optional.of(next());
+        } else {
+            return Optional.<Pair<A, B>> empty();
+        }
+    }
+
+    public Optional<Pair<A, B>> last() {
+        if (hasNext()) {
+            final Pair<A, B> next = new Pair<>();
+            final Throwables.BiConsumer<A, B, RuntimeException> setNext = (a, b) -> next.set(a, b);
+
+            forEachRemaining(setNext);
+
+            return Optional.of(next);
+        } else {
+            return Optional.<Pair<A, B>> empty();
+        }
     }
 
     public Pair<A, B>[] toArray() {

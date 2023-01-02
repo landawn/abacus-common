@@ -383,7 +383,9 @@ public final class TypeFactory {
 
         for (Type<?> type : typePool.values()) {
             if (typeClassMultiset.get(type.clazz()) > 1 && !builtinType.contains(type.getClass())) {
-                logger.info("More than one types are defined for class: " + getClassName(type.clazz()) + ". Ignore type: " + type.name());
+                if (type.getClass().getPackage() == null || !type.getClass().getPackageName().startsWith("com.landawn.abacus.type")) {
+                    logger.info("More than one types are defined for class: " + getClassName(type.clazz()) + ". Ignore type: " + type.name());
+                }
 
                 continue;
             }

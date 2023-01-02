@@ -16,10 +16,12 @@ package com.landawn.abacus.util;
 
 import java.util.NoSuchElementException;
 import java.util.function.BooleanSupplier;
+import java.util.function.DoublePredicate;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.stream.DoubleStream;
 
 /**
@@ -246,6 +248,137 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     public abstract double nextDouble();
+
+    public DoubleIterator skip(final long n) {
+        N.checkArgNotNegative(n, "n");
+
+        if (n <= 0) {
+            return this;
+        }
+
+        final DoubleIterator iter = this;
+
+        return new DoubleIterator() {
+            private boolean skipped = false;
+
+            @Override
+            public boolean hasNext() {
+                if (!skipped) {
+                    skip();
+                }
+
+                return iter.hasNext();
+            }
+
+            @Override
+            public double nextDouble() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                return iter.nextDouble();
+            }
+
+            private void skip() {
+                long idx = 0;
+
+                while (idx++ < n && iter.hasNext()) {
+                    iter.nextDouble();
+                }
+
+                skipped = true;
+            }
+        };
+    }
+
+    public DoubleIterator limit(final long count) {
+        N.checkArgNotNegative(count, "count");
+
+        if (count == 0) {
+            return DoubleIterator.EMPTY;
+        }
+
+        final DoubleIterator iter = this;
+
+        return new DoubleIterator() {
+            private long cnt = count;
+
+            @Override
+            public boolean hasNext() {
+                return cnt > 0 && iter.hasNext();
+            }
+
+            @Override
+            public double nextDouble() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                cnt--;
+                return iter.nextDouble();
+            }
+        };
+    }
+
+    public DoubleIterator filter(final DoublePredicate predicate) {
+        N.checkArgNotNull(predicate, "predicate");
+
+        final DoubleIterator iter = this;
+
+        return new DoubleIterator() {
+            private boolean hasNext = false;
+            private double next = 0;
+
+            @Override
+            public boolean hasNext() {
+                if (!hasNext) {
+                    while (iter.hasNext()) {
+                        next = iter.nextDouble();
+
+                        if (predicate.test(next)) {
+                            hasNext = true;
+                            break;
+                        }
+                    }
+                }
+
+                return hasNext;
+            }
+
+            @Override
+            public double nextDouble() {
+                if (!hasNext && !hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                hasNext = false;
+
+                return next;
+            }
+        };
+    }
+
+    public OptionalDouble first() {
+        if (hasNext()) {
+            return OptionalDouble.of(nextDouble());
+        } else {
+            return OptionalDouble.empty();
+        }
+    }
+
+    public OptionalDouble last() {
+        if (hasNext()) {
+            double next = nextDouble();
+
+            while (hasNext()) {
+                next = nextDouble();
+            }
+
+            return OptionalDouble.of(next);
+        } else {
+            return OptionalDouble.empty();
+        }
+    }
 
     public double[] toArray() {
         return toList().trimToSize().array();

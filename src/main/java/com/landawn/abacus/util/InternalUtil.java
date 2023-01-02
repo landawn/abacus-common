@@ -58,7 +58,12 @@ public final class InternalUtil {
         listElementDataField = tmp != null && tmp.getType().equals(Object[].class) ? tmp : null;
 
         if (listElementDataField != null) {
-            ClassUtil.setAccessibleQuietly(listElementDataField, true);
+            try {
+                listElementDataField.setAccessible(true);
+                isListElementDataFieldGettable = listElementDataField.canAccess(new ArrayList<String>());
+            } catch (Throwable e) {
+                // ignore.
+            }
         }
     }
 

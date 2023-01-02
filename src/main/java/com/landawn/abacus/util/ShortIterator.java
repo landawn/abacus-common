@@ -19,6 +19,8 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.util.u.OptionalShort;
+import com.landawn.abacus.util.function.ShortPredicate;
 import com.landawn.abacus.util.function.ShortSupplier;
 import com.landawn.abacus.util.stream.ShortStream;
 
@@ -246,6 +248,137 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     public abstract short nextShort();
+
+    public ShortIterator skip(final long n) {
+        N.checkArgNotNegative(n, "n");
+
+        if (n <= 0) {
+            return this;
+        }
+
+        final ShortIterator iter = this;
+
+        return new ShortIterator() {
+            private boolean skipped = false;
+
+            @Override
+            public boolean hasNext() {
+                if (!skipped) {
+                    skip();
+                }
+
+                return iter.hasNext();
+            }
+
+            @Override
+            public short nextShort() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                return iter.nextShort();
+            }
+
+            private void skip() {
+                long idx = 0;
+
+                while (idx++ < n && iter.hasNext()) {
+                    iter.nextShort();
+                }
+
+                skipped = true;
+            }
+        };
+    }
+
+    public ShortIterator limit(final long count) {
+        N.checkArgNotNegative(count, "count");
+
+        if (count == 0) {
+            return ShortIterator.EMPTY;
+        }
+
+        final ShortIterator iter = this;
+
+        return new ShortIterator() {
+            private long cnt = count;
+
+            @Override
+            public boolean hasNext() {
+                return cnt > 0 && iter.hasNext();
+            }
+
+            @Override
+            public short nextShort() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                cnt--;
+                return iter.nextShort();
+            }
+        };
+    }
+
+    public ShortIterator filter(final ShortPredicate predicate) {
+        N.checkArgNotNull(predicate, "predicate");
+
+        final ShortIterator iter = this;
+
+        return new ShortIterator() {
+            private boolean hasNext = false;
+            private short next = 0;
+
+            @Override
+            public boolean hasNext() {
+                if (!hasNext) {
+                    while (iter.hasNext()) {
+                        next = iter.nextShort();
+
+                        if (predicate.test(next)) {
+                            hasNext = true;
+                            break;
+                        }
+                    }
+                }
+
+                return hasNext;
+            }
+
+            @Override
+            public short nextShort() {
+                if (!hasNext && !hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                hasNext = false;
+
+                return next;
+            }
+        };
+    }
+
+    public OptionalShort first() {
+        if (hasNext()) {
+            return OptionalShort.of(nextShort());
+        } else {
+            return OptionalShort.empty();
+        }
+    }
+
+    public OptionalShort last() {
+        if (hasNext()) {
+            short next = nextShort();
+
+            while (hasNext()) {
+                next = nextShort();
+            }
+
+            return OptionalShort.of(next);
+        } else {
+            return OptionalShort.empty();
+        }
+    }
 
     public short[] toArray() {
         return toList().trimToSize().array();

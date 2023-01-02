@@ -29,6 +29,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
@@ -515,6 +516,108 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
         };
     }
 
+    public ObjIterator<T> skip(final long n) {
+        N.checkArgNotNegative(n, "n");
+
+        if (n <= 0) {
+            return this;
+        }
+
+        final ObjIterator<T> iter = this;
+
+        return new ObjIterator<>() {
+            private boolean skipped = false;
+
+            @Override
+            public boolean hasNext() {
+                if (!skipped) {
+                    skip();
+                }
+
+                return iter.hasNext();
+            }
+
+            @Override
+            public T next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                return iter.next();
+            }
+
+            private void skip() {
+                long idx = 0;
+
+                while (idx++ < n && iter.hasNext()) {
+                    iter.next();
+                }
+
+                skipped = true;
+            }
+        };
+    }
+
+    public ObjIterator<T> limit(final long count) {
+        N.checkArgNotNegative(count, "count");
+
+        if (count == 0) {
+            return ObjIterator.<T> empty();
+        }
+
+        final ObjIterator<T> iter = this;
+
+        return new ObjIterator<>() {
+            private long cnt = count;
+
+            @Override
+            public boolean hasNext() {
+                return cnt > 0 && iter.hasNext();
+            }
+
+            @Override
+            public T next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                cnt--;
+                return iter.next();
+            }
+        };
+    }
+
+    public ObjIterator<T> filter(final Predicate<? super T> predicate) {
+        return Iterators.filter(this, predicate);
+    }
+
+    @Beta
+    public <U> ObjIterator<U> map(final Function<? super T, U> mapper) {
+        return Iterators.map(this, mapper);
+    }
+
+    public Nullable<T> first() {
+        if (hasNext()) {
+            return Nullable.of(next());
+        } else {
+            return Nullable.<T> empty();
+        }
+    }
+
+    public Nullable<T> last() {
+        if (hasNext()) {
+            T next = next();
+
+            while (hasNext()) {
+                next = next();
+            }
+
+            return Nullable.of(next);
+        } else {
+            return Nullable.<T> empty();
+        }
+    }
+
     public Object[] toArray() {
         return toArray(N.EMPTY_OBJECT_ARRAY);
     }
@@ -531,16 +634,6 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
         }
 
         return list;
-    }
-
-    @Beta
-    public ObjIterator<T> filter(final Predicate<? super T> filter) {
-        return Iterators.filter(this, filter);
-    }
-
-    @Beta
-    public <U> ObjIterator<U> map(final Function<? super T, U> mapper) {
-        return Iterators.map(this, mapper);
     }
 
     public Stream<T> stream() {

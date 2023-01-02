@@ -16,10 +16,12 @@ package com.landawn.abacus.util;
 
 import java.util.NoSuchElementException;
 import java.util.function.BooleanSupplier;
+import java.util.function.IntPredicate;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.stream.IntStream;
 
 /**
@@ -246,6 +248,137 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     public abstract int nextInt();
+
+    public IntIterator skip(final long n) {
+        N.checkArgNotNegative(n, "n");
+
+        if (n <= 0) {
+            return this;
+        }
+
+        final IntIterator iter = this;
+
+        return new IntIterator() {
+            private boolean skipped = false;
+
+            @Override
+            public boolean hasNext() {
+                if (!skipped) {
+                    skip();
+                }
+
+                return iter.hasNext();
+            }
+
+            @Override
+            public int nextInt() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                return iter.nextInt();
+            }
+
+            private void skip() {
+                long idx = 0;
+
+                while (idx++ < n && iter.hasNext()) {
+                    iter.nextInt();
+                }
+
+                skipped = true;
+            }
+        };
+    }
+
+    public IntIterator limit(final long count) {
+        N.checkArgNotNegative(count, "count");
+
+        if (count == 0) {
+            return IntIterator.EMPTY;
+        }
+
+        final IntIterator iter = this;
+
+        return new IntIterator() {
+            private long cnt = count;
+
+            @Override
+            public boolean hasNext() {
+                return cnt > 0 && iter.hasNext();
+            }
+
+            @Override
+            public int nextInt() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                cnt--;
+                return iter.nextInt();
+            }
+        };
+    }
+
+    public IntIterator filter(final IntPredicate predicate) {
+        N.checkArgNotNull(predicate, "predicate");
+
+        final IntIterator iter = this;
+
+        return new IntIterator() {
+            private boolean hasNext = false;
+            private int next = 0;
+
+            @Override
+            public boolean hasNext() {
+                if (!hasNext) {
+                    while (iter.hasNext()) {
+                        next = iter.nextInt();
+
+                        if (predicate.test(next)) {
+                            hasNext = true;
+                            break;
+                        }
+                    }
+                }
+
+                return hasNext;
+            }
+
+            @Override
+            public int nextInt() {
+                if (!hasNext && !hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                hasNext = false;
+
+                return next;
+            }
+        };
+    }
+
+    public OptionalInt first() {
+        if (hasNext()) {
+            return OptionalInt.of(nextInt());
+        } else {
+            return OptionalInt.empty();
+        }
+    }
+
+    public OptionalInt last() {
+        if (hasNext()) {
+            int next = nextInt();
+
+            while (hasNext()) {
+                next = nextInt();
+            }
+
+            return OptionalInt.of(next);
+        } else {
+            return OptionalInt.empty();
+        }
+    }
 
     public int[] toArray() {
         return toList().trimToSize().array();

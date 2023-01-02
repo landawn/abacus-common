@@ -19,6 +19,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.util.u.OptionalChar;
 import com.landawn.abacus.util.function.CharSupplier;
 import com.landawn.abacus.util.stream.CharStream;
 
@@ -246,6 +247,28 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     }
 
     public abstract char nextChar();
+
+    public OptionalChar first() {
+        if (hasNext()) {
+            return OptionalChar.of(nextChar());
+        } else {
+            return OptionalChar.empty();
+        }
+    }
+
+    public OptionalChar last() {
+        if (hasNext()) {
+            char next = nextChar();
+
+            while (hasNext()) {
+                next = nextChar();
+            }
+
+            return OptionalChar.of(next);
+        } else {
+            return OptionalChar.empty();
+        }
+    }
 
     public char[] toArray() {
         return toList().trimToSize().array();

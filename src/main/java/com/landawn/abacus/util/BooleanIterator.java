@@ -19,6 +19,8 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.util.u.OptionalBoolean;
+import com.landawn.abacus.util.function.BooleanPredicate;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
@@ -251,6 +253,137 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * @return
      */
     public abstract boolean nextBoolean();
+
+    public BooleanIterator skip(final long n) {
+        N.checkArgNotNegative(n, "n");
+
+        if (n <= 0) {
+            return this;
+        }
+
+        final BooleanIterator iter = this;
+
+        return new BooleanIterator() {
+            private boolean skipped = false;
+
+            @Override
+            public boolean hasNext() {
+                if (!skipped) {
+                    skip();
+                }
+
+                return iter.hasNext();
+            }
+
+            @Override
+            public boolean nextBoolean() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                return iter.nextBoolean();
+            }
+
+            private void skip() {
+                long idx = 0;
+
+                while (idx++ < n && iter.hasNext()) {
+                    iter.nextBoolean();
+                }
+
+                skipped = true;
+            }
+        };
+    }
+
+    public BooleanIterator limit(final long count) {
+        N.checkArgNotNegative(count, "count");
+
+        if (count == 0) {
+            return BooleanIterator.EMPTY;
+        }
+
+        final BooleanIterator iter = this;
+
+        return new BooleanIterator() {
+            private long cnt = count;
+
+            @Override
+            public boolean hasNext() {
+                return cnt > 0 && iter.hasNext();
+            }
+
+            @Override
+            public boolean nextBoolean() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                cnt--;
+                return iter.nextBoolean();
+            }
+        };
+    }
+
+    public BooleanIterator filter(final BooleanPredicate predicate) {
+        N.checkArgNotNull(predicate, "predicate");
+
+        final BooleanIterator iter = this;
+
+        return new BooleanIterator() {
+            private boolean hasNext = false;
+            private boolean next = false;
+
+            @Override
+            public boolean hasNext() {
+                if (!hasNext) {
+                    while (iter.hasNext()) {
+                        next = iter.nextBoolean();
+
+                        if (predicate.test(next)) {
+                            hasNext = true;
+                            break;
+                        }
+                    }
+                }
+
+                return hasNext;
+            }
+
+            @Override
+            public boolean nextBoolean() {
+                if (!hasNext && !hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                hasNext = false;
+
+                return next;
+            }
+        };
+    }
+
+    public OptionalBoolean first() {
+        if (hasNext()) {
+            return OptionalBoolean.of(nextBoolean());
+        } else {
+            return OptionalBoolean.empty();
+        }
+    }
+
+    public OptionalBoolean last() {
+        if (hasNext()) {
+            boolean next = nextBoolean();
+
+            while (hasNext()) {
+                next = nextBoolean();
+            }
+
+            return OptionalBoolean.of(next);
+        } else {
+            return OptionalBoolean.empty();
+        }
+    }
 
     public boolean[] toArray() {
         return toList().trimToSize().array();

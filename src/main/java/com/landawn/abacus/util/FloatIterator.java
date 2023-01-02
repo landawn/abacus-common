@@ -19,6 +19,8 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.util.u.OptionalFloat;
+import com.landawn.abacus.util.function.FloatPredicate;
 import com.landawn.abacus.util.function.FloatSupplier;
 import com.landawn.abacus.util.stream.FloatStream;
 
@@ -246,6 +248,137 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     public abstract float nextFloat();
+
+    public FloatIterator skip(final long n) {
+        N.checkArgNotNegative(n, "n");
+
+        if (n <= 0) {
+            return this;
+        }
+
+        final FloatIterator iter = this;
+
+        return new FloatIterator() {
+            private boolean skipped = false;
+
+            @Override
+            public boolean hasNext() {
+                if (!skipped) {
+                    skip();
+                }
+
+                return iter.hasNext();
+            }
+
+            @Override
+            public float nextFloat() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                return iter.nextFloat();
+            }
+
+            private void skip() {
+                long idx = 0;
+
+                while (idx++ < n && iter.hasNext()) {
+                    iter.nextFloat();
+                }
+
+                skipped = true;
+            }
+        };
+    }
+
+    public FloatIterator limit(final long count) {
+        N.checkArgNotNegative(count, "count");
+
+        if (count == 0) {
+            return FloatIterator.EMPTY;
+        }
+
+        final FloatIterator iter = this;
+
+        return new FloatIterator() {
+            private long cnt = count;
+
+            @Override
+            public boolean hasNext() {
+                return cnt > 0 && iter.hasNext();
+            }
+
+            @Override
+            public float nextFloat() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                cnt--;
+                return iter.nextFloat();
+            }
+        };
+    }
+
+    public FloatIterator filter(final FloatPredicate predicate) {
+        N.checkArgNotNull(predicate, "predicate");
+
+        final FloatIterator iter = this;
+
+        return new FloatIterator() {
+            private boolean hasNext = false;
+            private float next = 0;
+
+            @Override
+            public boolean hasNext() {
+                if (!hasNext) {
+                    while (iter.hasNext()) {
+                        next = iter.nextFloat();
+
+                        if (predicate.test(next)) {
+                            hasNext = true;
+                            break;
+                        }
+                    }
+                }
+
+                return hasNext;
+            }
+
+            @Override
+            public float nextFloat() {
+                if (!hasNext && !hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                hasNext = false;
+
+                return next;
+            }
+        };
+    }
+
+    public OptionalFloat first() {
+        if (hasNext()) {
+            return OptionalFloat.of(nextFloat());
+        } else {
+            return OptionalFloat.empty();
+        }
+    }
+
+    public OptionalFloat last() {
+        if (hasNext()) {
+            float next = nextFloat();
+
+            while (hasNext()) {
+                next = nextFloat();
+            }
+
+            return OptionalFloat.of(next);
+        } else {
+            return OptionalFloat.empty();
+        }
+    }
 
     public float[] toArray() {
         return toList().trimToSize().array();

@@ -37,6 +37,7 @@ import java.util.function.Predicate;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
+import com.landawn.abacus.util.Throwables.TriConsumer;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.stream.Stream;
@@ -111,11 +112,11 @@ public final class Iterators {
     /**
      *
      * @param iter
-     * @param filter
+     * @param predicate
      * @return
      */
-    public static <T, E extends Exception> long count(final Iterator<? extends T> iter, final Throwables.Predicate<? super T, E> filter) throws E {
-        N.checkArgNotNull(filter, "filter");
+    public static <T, E extends Exception> long count(final Iterator<? extends T> iter, final Throwables.Predicate<? super T, E> predicate) throws E {
+        N.checkArgNotNull(predicate, "predicate");
 
         if (iter == null) {
             return 0;
@@ -124,7 +125,7 @@ public final class Iterators {
         long res = 0;
 
         while (iter.hasNext()) {
-            if (filter.test(iter.next())) {
+            if (predicate.test(iter.next())) {
                 res++;
             }
         }
@@ -1066,6 +1067,16 @@ public final class Iterators {
             }
 
             @Override
+            protected <E extends Exception> void next(com.landawn.abacus.util.Throwables.BiConsumer<? super A, ? super B, E> action)
+                    throws NoSuchElementException, E {
+                if ((cur == null || !cur.hasNext()) && !hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                cur.next(action);
+            }
+
+            @Override
             public <E extends Exception> void forEachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
                 while (hasNext()) {
                     cur.forEachRemaining(action);
@@ -1141,6 +1152,15 @@ public final class Iterators {
                 }
 
                 return cur.next();
+            }
+
+            @Override
+            protected <E extends Exception> void next(final TriConsumer<? super A, ? super B, ? super C, E> action) throws NoSuchElementException, E {
+                if ((cur == null || !cur.hasNext()) && !hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                cur.next(action);
             }
 
             @Override
@@ -1708,8 +1728,10 @@ public final class Iterators {
     public static <T> ObjIterator<T> skip(final Iterator<? extends T> iter, final long n) {
         N.checkArgNotNegative(n, "n");
 
-        if (iter == null || n == 0) {
+        if (iter == null) {
             return ObjIterator.empty();
+        } else if (n <= 0) {
+            return ObjIterator.of(iter);
         }
 
         return new ObjIterator<>() {
@@ -1933,11 +1955,11 @@ public final class Iterators {
      *
      * @param <T>
      * @param iter
-     * @param filter
+     * @param predicate
      * @return
      */
-    public static <T> ObjIterator<T> filter(final Iterator<? extends T> iter, final Predicate<? super T> filter) {
-        N.checkArgNotNull(filter, "filter");
+    public static <T> ObjIterator<T> filter(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
+        N.checkArgNotNull(predicate, "predicate");
 
         if (iter == null) {
             return ObjIterator.empty();
@@ -1954,7 +1976,7 @@ public final class Iterators {
                     while (iter.hasNext()) {
                         tmp = iter.next();
 
-                        if (filter.test(tmp)) {
+                        if (predicate.test(tmp)) {
                             next = tmp;
                             break;
                         }
@@ -1977,8 +1999,8 @@ public final class Iterators {
         };
     }
 
-    public static <T> ObjIterator<T> takeWhile(final Iterator<? extends T> iter, final Predicate<? super T> filter) {
-        N.checkArgNotNull(filter, "filter");
+    public static <T> ObjIterator<T> takeWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
+        N.checkArgNotNull(predicate, "predicate");
 
         if (iter == null) {
             return ObjIterator.empty();
@@ -1995,7 +2017,7 @@ public final class Iterators {
                 if (next == NONE && hasMore && iter.hasNext()) {
                     tmp = iter.next();
 
-                    if (filter.test(tmp)) {
+                    if (predicate.test(tmp)) {
                         next = tmp;
                     } else {
                         hasMore = false;
@@ -2018,8 +2040,8 @@ public final class Iterators {
         };
     }
 
-    public static <T> ObjIterator<T> takeWhileInclusive(final Iterator<? extends T> iter, final Predicate<? super T> filter) {
-        N.checkArgNotNull(filter, "filter");
+    public static <T> ObjIterator<T> takeWhileInclusive(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
+        N.checkArgNotNull(predicate, "predicate");
 
         if (iter == null) {
             return ObjIterator.empty();
@@ -2036,7 +2058,7 @@ public final class Iterators {
                 if (next == NONE && hasMore && iter.hasNext()) {
                     tmp = iter.next();
 
-                    if (filter.test(tmp)) {
+                    if (predicate.test(tmp)) {
                         next = tmp;
                     } else {
                         next = tmp;
@@ -2060,8 +2082,8 @@ public final class Iterators {
         };
     }
 
-    public static <T> ObjIterator<T> dropWhile(final Iterator<? extends T> iter, final Predicate<? super T> filter) {
-        N.checkArgNotNull(filter, "filter");
+    public static <T> ObjIterator<T> dropWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
+        N.checkArgNotNull(predicate, "predicate");
 
         if (iter == null) {
             return ObjIterator.empty();
@@ -2078,7 +2100,7 @@ public final class Iterators {
                     while (iter.hasNext()) {
                         next = iter.next();
 
-                        if (filter.test(next)) {
+                        if (predicate.test(next)) {
                             next = NONE;
                         } else {
                             hasDropped = true;
@@ -2107,8 +2129,8 @@ public final class Iterators {
         };
     }
 
-    public static <T> ObjIterator<T> skipUntil(final Iterator<? extends T> iter, final Predicate<? super T> filter) {
-        N.checkArgNotNull(filter, "filter");
+    public static <T> ObjIterator<T> skipUntil(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
+        N.checkArgNotNull(predicate, "predicate");
 
         if (iter == null) {
             return ObjIterator.empty();
@@ -2125,7 +2147,7 @@ public final class Iterators {
                     while (iter.hasNext()) {
                         next = iter.next();
 
-                        if (filter.test(next)) {
+                        if (predicate.test(next)) {
                             hasSkipped = true;
                             break;
                         } else {

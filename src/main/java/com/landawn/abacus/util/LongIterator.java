@@ -16,10 +16,12 @@ package com.landawn.abacus.util;
 
 import java.util.NoSuchElementException;
 import java.util.function.BooleanSupplier;
+import java.util.function.LongPredicate;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.stream.LongStream;
 
 /**
@@ -246,6 +248,137 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     }
 
     public abstract long nextLong();
+
+    public LongIterator skip(final long n) {
+        N.checkArgNotNegative(n, "n");
+
+        if (n <= 0) {
+            return this;
+        }
+
+        final LongIterator iter = this;
+
+        return new LongIterator() {
+            private boolean skipped = false;
+
+            @Override
+            public boolean hasNext() {
+                if (!skipped) {
+                    skip();
+                }
+
+                return iter.hasNext();
+            }
+
+            @Override
+            public long nextLong() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                return iter.nextLong();
+            }
+
+            private void skip() {
+                long idx = 0;
+
+                while (idx++ < n && iter.hasNext()) {
+                    iter.nextLong();
+                }
+
+                skipped = true;
+            }
+        };
+    }
+
+    public LongIterator limit(final long count) {
+        N.checkArgNotNegative(count, "count");
+
+        if (count == 0) {
+            return LongIterator.EMPTY;
+        }
+
+        final LongIterator iter = this;
+
+        return new LongIterator() {
+            private long cnt = count;
+
+            @Override
+            public boolean hasNext() {
+                return cnt > 0 && iter.hasNext();
+            }
+
+            @Override
+            public long nextLong() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                cnt--;
+                return iter.nextLong();
+            }
+        };
+    }
+
+    public LongIterator filter(final LongPredicate predicate) {
+        N.checkArgNotNull(predicate, "predicate");
+
+        final LongIterator iter = this;
+
+        return new LongIterator() {
+            private boolean hasNext = false;
+            private long next = 0;
+
+            @Override
+            public boolean hasNext() {
+                if (!hasNext) {
+                    while (iter.hasNext()) {
+                        next = iter.nextLong();
+
+                        if (predicate.test(next)) {
+                            hasNext = true;
+                            break;
+                        }
+                    }
+                }
+
+                return hasNext;
+            }
+
+            @Override
+            public long nextLong() {
+                if (!hasNext && !hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                hasNext = false;
+
+                return next;
+            }
+        };
+    }
+
+    public OptionalLong first() {
+        if (hasNext()) {
+            return OptionalLong.of(nextLong());
+        } else {
+            return OptionalLong.empty();
+        }
+    }
+
+    public OptionalLong last() {
+        if (hasNext()) {
+            long next = nextLong();
+
+            while (hasNext()) {
+                next = nextLong();
+            }
+
+            return OptionalLong.of(next);
+        } else {
+            return OptionalLong.empty();
+        }
+    }
 
     public long[] toArray() {
         return toList().trimToSize().array();
