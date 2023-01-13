@@ -21,7 +21,7 @@ import java.util.Arrays;
  * Note: this file contains the source codes and docs copied from {@code Apache commons-codec} under Apache License v2 and may be modified.
  *
  */
-final class Base64 {
+public final class Base64 {
 
     /**
      *

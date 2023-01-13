@@ -2532,7 +2532,7 @@ public final class Iterators {
         }
 
         if (logger.isInfoEnabled()) {
-            logger.info("### Start to parse");
+            logger.info("### Start to process");
         }
 
         try (final Stream<T> stream = ((readThreadNum > 0 || queueSize > 0)
@@ -2603,7 +2603,7 @@ public final class Iterators {
             }
         } finally {
             if (logger.isInfoEnabled()) {
-                logger.info("### End to parse");
+                logger.info("### End to process");
             }
         }
     }

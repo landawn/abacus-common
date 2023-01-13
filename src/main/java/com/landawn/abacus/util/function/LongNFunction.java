@@ -15,6 +15,7 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Throwables;
 
 /**
  *
@@ -22,10 +23,12 @@ import com.landawn.abacus.util.N;
  *
  * @author Haiyang Li
  */
-public interface LongNFunction<R> {
+public interface LongNFunction<R> extends Throwables.LongNFunction<R, RuntimeException> {
 
+    @Override
     R apply(long... args);
 
+    @Override
     default <V> LongNFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 

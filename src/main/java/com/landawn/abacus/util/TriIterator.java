@@ -548,26 +548,6 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
         super.forEachRemaining(action);
     }
 
-    /**
-     *
-     * @param <R>
-     * @param mapper
-     * @return
-     */
-    public abstract <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper);
-
-    /**
-     *
-     * @param <R>
-     * @param mapper
-     * @return
-     */
-    public <R> Stream<R> stream(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper) {
-        N.checkArgNotNull(mapper);
-
-        return Stream.of(map(mapper));
-    }
-
     @SuppressWarnings("rawtypes")
     private static final Throwables.TriConsumer DO_NOTHING = (a, b, c) -> {
         // do nothing;
@@ -795,6 +775,14 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
         };
     }
 
+    /**
+     *
+     * @param <R>
+     * @param mapper
+     * @return
+     */
+    public abstract <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper);
+
     public Optional<Triple<A, B, C>> first() {
         if (hasNext()) {
             return Optional.of(next());
@@ -814,6 +802,18 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
         } else {
             return Optional.<Triple<A, B, C>> empty();
         }
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param mapper
+     * @return
+     */
+    public <R> Stream<R> stream(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper) {
+        N.checkArgNotNull(mapper);
+
+        return Stream.of(map(mapper));
     }
 
     public Triple<A, B, C>[] toArray() {

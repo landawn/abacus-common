@@ -23,6 +23,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.NullSafe;
 
 /**
@@ -33,7 +34,7 @@ import com.landawn.abacus.annotation.NullSafe;
  *
  * @see com.landawn.abacus.util.N
  */
-public final class Array {
+public class Array {
     static final int CPU_CORES = Runtime.getRuntime().availableProcessors();
 
     static final Executor parallelSortExecutor = new ThreadPoolExecutor(Math.min(8, CPU_CORES), CPU_CORES, 180L, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
@@ -5294,4 +5295,11 @@ public final class Array {
     //            }
     //        }
     //    }
+
+    @Beta
+    public static final class ArrayEx extends Array {
+        private ArrayEx() {
+            // utility class
+        }
+    }
 }

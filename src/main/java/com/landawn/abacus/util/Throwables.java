@@ -1155,6 +1155,38 @@ public final class Throwables {
     }
 
     /**
+     * The Interface IntToLongFunction.
+     *
+     * @param <E>
+     */
+    public interface IntToLongFunction<E extends Throwable> {
+
+        /**
+         *
+         * @param value
+         * @return
+         * @throws E the e
+         */
+        long applyAsLong(int value) throws E;
+    }
+
+    /**
+     * The Interface IntToDoubleFunction.
+     *
+     * @param <E>
+     */
+    public interface IntToDoubleFunction<E extends Throwable> {
+
+        /**
+         *
+         * @param value
+         * @return
+         * @throws E the e
+         */
+        double applyAsDouble(int value) throws E;
+    }
+
+    /**
      * The Interface IntConsumer.
      *
      * @param <E>
@@ -1200,6 +1232,38 @@ public final class Throwables {
          * @throws E the e
          */
         R apply(long value) throws E;
+    }
+
+    /**
+     * The Interface LongToIntFunction.
+     *
+     * @param <E>
+     */
+    public interface LongToIntFunction<E extends Throwable> {
+
+        /**
+         *
+         * @param value
+         * @return
+         * @throws E the e
+         */
+        int applyAsInt(long value) throws E;
+    }
+
+    /**
+     * The Interface LongToDoubleFunction.
+     *
+     * @param <E>
+     */
+    public interface LongToDoubleFunction<E extends Throwable> {
+
+        /**
+         *
+         * @param value
+         * @return
+         * @throws E the e
+         */
+        double applyAsDouble(long value) throws E;
     }
 
     /**
@@ -1296,6 +1360,38 @@ public final class Throwables {
          * @throws E the e
          */
         R apply(double value) throws E;
+    }
+
+    /**
+     * The Interface DoubleToIntFunction.
+     *
+     * @param <E>
+     */
+    public interface DoubleToIntFunction<E extends Throwable> {
+
+        /**
+         *
+         * @param value
+         * @return
+         * @throws E the e
+         */
+        int applyAsInt(double value) throws E;
+    }
+
+    /**
+     * The Interface DoubleToLongFunction.
+     *
+     * @param <E>
+     */
+    public interface DoubleToLongFunction<E extends Throwable> {
+
+        /**
+         *
+         * @param value
+         * @return
+         * @throws E the e
+         */
+        long applyAsLong(double value) throws E;
     }
 
     /**
@@ -2929,6 +3025,105 @@ public final class Throwables {
                 accept(i, j, t);
                 after.accept(i, j, t);
             };
+        }
+    }
+
+    public interface BooleanNFunction<R, E extends Throwable> {
+
+        R apply(boolean... args) throws E;
+
+        default <V> BooleanNFunction<V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
+            N.checkArgNotNull(after);
+
+            return args -> after.apply(apply(args));
+        }
+    }
+
+    public interface CharNFunction<R, E extends Throwable> {
+
+        R apply(char... args) throws E;
+
+        default <V> CharNFunction<V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
+            N.checkArgNotNull(after);
+
+            return args -> after.apply(apply(args));
+        }
+    }
+
+    public interface ByteNFunction<R, E extends Throwable> {
+
+        R apply(byte... args) throws E;
+
+        default <V> ByteNFunction<V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
+            N.checkArgNotNull(after);
+
+            return args -> after.apply(apply(args));
+        }
+    }
+
+    public interface ShortNFunction<R, E extends Throwable> {
+
+        R apply(short... args) throws E;
+
+        default <V> ShortNFunction<V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
+            N.checkArgNotNull(after);
+
+            return args -> after.apply(apply(args));
+        }
+    }
+
+    public interface IntNFunction<R, E extends Throwable> {
+
+        R apply(int... args) throws E;
+
+        default <V> IntNFunction<V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
+            N.checkArgNotNull(after);
+
+            return args -> after.apply(apply(args));
+        }
+    }
+
+    public interface LongNFunction<R, E extends Throwable> {
+
+        R apply(long... args) throws E;
+
+        default <V> LongNFunction<V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
+            N.checkArgNotNull(after);
+
+            return args -> after.apply(apply(args));
+        }
+    }
+
+    public interface FloatNFunction<R, E extends Throwable> {
+
+        R apply(float... args) throws E;
+
+        default <V> FloatNFunction<V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
+            N.checkArgNotNull(after);
+
+            return args -> after.apply(apply(args));
+        }
+    }
+
+    public interface DoubleNFunction<R, E extends Throwable> {
+
+        R apply(double... args) throws E;
+
+        default <V> DoubleNFunction<V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
+            N.checkArgNotNull(after);
+
+            return args -> after.apply(apply(args));
+        }
+    }
+
+    public interface NFunction<T, R, E extends Throwable> {
+
+        R apply(T... args) throws E;
+
+        default <V> NFunction<T, V, E> andThen(java.util.function.Function<? super R, ? extends V> after) {
+            N.checkArgNotNull(after);
+
+            return args -> after.apply(apply(args));
         }
     }
 

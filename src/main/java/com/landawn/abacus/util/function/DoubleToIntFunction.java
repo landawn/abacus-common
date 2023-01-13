@@ -14,13 +14,15 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.util.Throwables;
+
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
  * @since 0.8
  *
  * @author Haiyang Li
  */
-public interface DoubleToIntFunction extends java.util.function.DoubleToIntFunction {
+public interface DoubleToIntFunction extends Throwables.DoubleToIntFunction<RuntimeException>, java.util.function.DoubleToIntFunction {
 
     DoubleToIntFunction DEFAULT = value -> (int) value;
 

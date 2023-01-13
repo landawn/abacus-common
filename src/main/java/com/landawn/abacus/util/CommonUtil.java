@@ -6265,6 +6265,45 @@ class CommonUtil {
         return Numbers.toDouble(str);
     }
 
+    //    // Rarely used. ============================================================================
+    //    /**
+    //     * Returns whether or not the <code>octet</code> is in the base 64 alphabet.
+    //     *
+    //     * @param octet
+    //     *            The value to test
+    //     * @return <code>true</code> if the value is defined in the the base 64 alphabet, <code>false</code> otherwise.
+    //     */
+    //    public static boolean isBase64(final byte octet) {
+    //        return Base64.isBase64(octet);
+    //    }
+    //
+    //    /**
+    //     * Tests a given String to see if it contains only valid characters within the Base64 alphabet. Currently the
+    //     * method treats whitespace as valid.
+    //     *
+    //     * @param base64
+    //     *            String to test
+    //     * @return <code>true</code> if all characters in the String are valid characters in the Base64 alphabet or if
+    //     *         the String is empty; <code>false</code>, otherwise
+    //     */
+    //    public static boolean isBase64(final String base64) {
+    //        return Base64.isBase64(base64);
+    //    }
+    //
+    //    /**
+    //     * Tests a given byte array to see if it contains only valid characters within the Base64 alphabet. Currently the
+    //     * method treats whitespace as valid.
+    //     *
+    //     * @param arrayOctet
+    //     *            byte array to test
+    //     * @return <code>true</code> if all bytes are valid characters in the Base64 alphabet or if the byte array is empty;
+    //     *         <code>false</code>, otherwise
+    //     */
+    //    public static boolean isBase64(final byte[] arrayOctet) {
+    //        return Base64.isBase64(arrayOctet);
+    //    }
+    //    // Rarely used. ============================================================================
+
     /**
      * Base 64 encode.
      *

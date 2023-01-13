@@ -15,6 +15,7 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Throwables;
 
 /**
  *
@@ -22,10 +23,12 @@ import com.landawn.abacus.util.N;
  *
  * @author Haiyang Li
  */
-public interface FloatNFunction<R> {
+public interface FloatNFunction<R> extends Throwables.FloatNFunction<R, RuntimeException> {
 
+    @Override
     R apply(float... args);
 
+    @Override
     default <V> FloatNFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 

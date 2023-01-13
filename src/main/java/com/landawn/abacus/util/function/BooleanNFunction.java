@@ -15,6 +15,7 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Throwables;
 
 /**
  *
@@ -22,10 +23,12 @@ import com.landawn.abacus.util.N;
  *
  * @author Haiyang Li
  */
-public interface BooleanNFunction<R> {
+public interface BooleanNFunction<R> extends Throwables.BooleanNFunction<R, RuntimeException> {
 
+    @Override
     R apply(boolean... args);
 
+    @Override
     default <V> BooleanNFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 

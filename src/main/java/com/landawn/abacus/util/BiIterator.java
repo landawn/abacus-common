@@ -595,26 +595,6 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
         super.forEachRemaining(action);
     }
 
-    /**
-     *
-     * @param <R>
-     * @param mapper
-     * @return
-     */
-    public abstract <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper);
-
-    /**
-     *
-     * @param <R>
-     * @param mapper
-     * @return
-     */
-    public <R> Stream<R> stream(final BiFunction<? super A, ? super B, ? extends R> mapper) {
-        N.checkArgNotNull(mapper);
-
-        return Stream.of(map(mapper));
-    }
-
     @SuppressWarnings("rawtypes")
     private static final Throwables.BiConsumer DO_NOTHING = (a, b) -> {
         // do nothing;
@@ -839,6 +819,14 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
         };
     }
 
+    /**
+     *
+     * @param <R>
+     * @param mapper
+     * @return
+     */
+    public abstract <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper);
+
     public Optional<Pair<A, B>> first() {
         if (hasNext()) {
             return Optional.of(next());
@@ -858,6 +846,18 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
         } else {
             return Optional.<Pair<A, B>> empty();
         }
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param mapper
+     * @return
+     */
+    public <R> Stream<R> stream(final BiFunction<? super A, ? super B, ? extends R> mapper) {
+        N.checkArgNotNull(mapper);
+
+        return Stream.of(map(mapper));
     }
 
     public Pair<A, B>[] toArray() {

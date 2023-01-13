@@ -14,13 +14,15 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.util.Throwables;
+
 /**
  * Refer to JDK API documentation at: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html</a>
  * @since 0.8
  *
  * @author Haiyang Li
  */
-public interface IntToDoubleFunction extends java.util.function.IntToDoubleFunction {
+public interface IntToDoubleFunction extends Throwables.IntToDoubleFunction<RuntimeException>, java.util.function.IntToDoubleFunction {
 
     IntToDoubleFunction DEFAULT = value -> value;
 

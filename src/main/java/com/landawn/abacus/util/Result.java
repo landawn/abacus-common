@@ -31,7 +31,7 @@ import com.landawn.abacus.util.u.Optional;
  * @param <E>
  */
 @com.landawn.abacus.annotation.Immutable
-public final class Result<T, E extends Throwable> implements Immutable {
+public class Result<T, E extends Throwable> implements Immutable {
 
     private final T value;
 
@@ -321,4 +321,26 @@ public final class Result<T, E extends Throwable> implements Immutable {
     public String toString() {
         return "{value=" + N.toString(value) + ", exception=" + N.toString(exception) + "}";
     }
+
+    @Beta
+    public static class R<T> extends Result<T, RuntimeException> {
+        R(T value, RuntimeException exception) {
+            super(value, exception);
+        }
+
+        public static <T> Result.R<T> of(final T value, final RuntimeException exception) {
+            return new R<>(value, exception);
+        }
+    }
+
+    //    @Beta
+    //    public static class X<T> extends Result<T, Exception> {
+    //        X(T value, Exception exception) {
+    //            super(value, exception);
+    //        }
+    //
+    //        public static <T> Result.X<T> of(final T value, final Exception exception) {
+    //            return new X<>(value, exception);
+    //        }
+    //    }
 }
