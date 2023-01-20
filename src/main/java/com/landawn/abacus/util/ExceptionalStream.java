@@ -5197,13 +5197,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             public T next() throws E {
                 next = elements.next();
 
-                if (elements.hasNext()) {
-                    return next;
-                } else {
-                    final T e = elements.next();
-                    action.accept(e);
-                    return e;
+                if (!elements.hasNext()) {
+                    action.accept(next);
                 }
+
+                return next;
             }
         }, sorted, cmp, closeHandlers);
     }

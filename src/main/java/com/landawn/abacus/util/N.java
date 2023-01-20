@@ -19687,6 +19687,54 @@ public final class N extends CommonUtil {
     }
 
     /**
+     *
+     * @param <E>
+     * @param a
+     * @param mapper
+     * @return
+     * @throws E the e
+     */
+    @Beta
+    public static <E extends Exception> int[] mapToInt(final long[] a, final Throwables.LongToIntFunction<E> mapper) throws E {
+        if (a == null) {
+            return EMPTY_INT_ARRAY;
+        }
+
+        final int len = N.len(a);
+        final int[] result = new int[len];
+
+        for (int i = 0; i < len; i++) {
+            result[i] = mapper.applyAsInt(a[i]);
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param a
+     * @param mapper
+     * @return
+     * @throws E the e
+     */
+    @Beta
+    public static <E extends Exception> int[] mapToInt(final double[] a, final Throwables.DoubleToIntFunction<E> mapper) throws E {
+        if (a == null) {
+            return EMPTY_INT_ARRAY;
+        }
+
+        final int len = N.len(a);
+        final int[] result = new int[len];
+
+        for (int i = 0; i < len; i++) {
+            result[i] = mapper.applyAsInt(a[i]);
+        }
+
+        return result;
+    }
+
+    /**
      * Map to long.
      *
      * @param <T>
@@ -19801,6 +19849,54 @@ public final class N extends CommonUtil {
                     break;
                 }
             }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param a
+     * @param mapper
+     * @return
+     * @throws E the e
+     */
+    @Beta
+    public static <E extends Exception> long[] mapToLong(final int[] a, final Throwables.IntToLongFunction<E> mapper) throws E {
+        if (a == null) {
+            return EMPTY_LONG_ARRAY;
+        }
+
+        final int len = N.len(a);
+        final long[] result = new long[len];
+
+        for (int i = 0; i < len; i++) {
+            result[i] = mapper.applyAsLong(a[i]);
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param a
+     * @param mapper
+     * @return
+     * @throws E the e
+     */
+    @Beta
+    public static <E extends Exception> long[] mapToLong(final double[] a, final Throwables.DoubleToLongFunction<E> mapper) throws E {
+        if (a == null) {
+            return EMPTY_LONG_ARRAY;
+        }
+
+        final int len = N.len(a);
+        final long[] result = new long[len];
+
+        for (int i = 0; i < len; i++) {
+            result[i] = mapper.applyAsLong(a[i]);
         }
 
         return result;
@@ -20042,6 +20138,54 @@ public final class N extends CommonUtil {
                     break;
                 }
             }
+        }
+
+        return result;
+    }
+
+    /**
+    *
+    * @param <E>
+    * @param a
+    * @param mapper
+    * @return
+    * @throws E the e
+    */
+    @Beta
+    public static <E extends Exception> double[] mapToDouble(final int[] a, final Throwables.IntToDoubleFunction<E> mapper) throws E {
+        if (a == null) {
+            return EMPTY_DOUBLE_ARRAY;
+        }
+
+        final int len = N.len(a);
+        final double[] result = new double[len];
+
+        for (int i = 0; i < len; i++) {
+            result[i] = mapper.applyAsDouble(a[i]);
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <E>
+     * @param a
+     * @param mapper
+     * @return
+     * @throws E the e
+     */
+    @Beta
+    public static <E extends Exception> double[] mapToDouble(final long[] a, final Throwables.LongToDoubleFunction<E> mapper) throws E {
+        if (a == null) {
+            return EMPTY_DOUBLE_ARRAY;
+        }
+
+        final int len = N.len(a);
+        final double[] result = new double[len];
+
+        for (int i = 0; i < len; i++) {
+            result[i] = mapper.applyAsDouble(a[i]);
         }
 
         return result;

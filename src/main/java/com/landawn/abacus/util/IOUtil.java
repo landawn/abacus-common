@@ -1365,6 +1365,82 @@ public final class IOUtil {
     }
 
     /**
+     * <br />
+     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     *
+     * @param file
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     * @deprecated replaced by {@link #readAllLines(File)}
+     */
+    @Deprecated
+    public static List<String> readLines(final File file) throws UncheckedIOException {
+        return readAllLines(file);
+    }
+
+    /**
+     * <br />
+     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     *
+     * @param file
+     * @param encoding
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     * @deprecated replaced by {@link #readAllLines(File, Charset)}
+     */
+    @Deprecated
+    public static List<String> readLines(final File file, final Charset encoding) throws UncheckedIOException {
+        return readAllLines(file, encoding);
+    }
+
+    /**
+     * <br />
+     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     *
+     * @param is
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     * @deprecated replaced by {@link #readAllLines(InputStream)}
+     */
+    @Deprecated
+    public static List<String> readLines(final InputStream is) throws UncheckedIOException {
+        return readAllLines(is);
+    }
+
+    /**
+     * <br />
+     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     *
+     * @param is
+     * @param encoding
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     * @deprecated replaced by {@link #readAllLines(InputStream, Charset)}
+     */
+    @Deprecated
+    public static List<String> readLines(final InputStream is, final Charset encoding) throws UncheckedIOException {
+        return readAllLines(is, encoding);
+    }
+
+    /**
+     * <br />
+     * Note: It should not be used to read {@code File/InputStream/Reader} with size closed to {@code Integer.MAX_VALUE}.
+     *
+     * @param reader
+     * @return
+     * @throws UncheckedIOException the unchecked IO exception
+     * @deprecated replaced by {@link #readAllLines(Reader)}
+     */
+    @Deprecated
+    public static List<String> readLines(final Reader reader) throws UncheckedIOException {
+        try {
+            return readLines(reader, 0, Integer.MAX_VALUE);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
      *
      * @param file
      * @param offset
