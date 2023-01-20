@@ -1,3 +1,8 @@
+### 3.6.5
+
+* Replace name "entity" with "bean".
+
+
 ### 3.6.4
 
 * Replace name "entity" with "bean".
