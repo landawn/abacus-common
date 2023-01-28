@@ -1036,7 +1036,7 @@ public final class HttpClient {
                     return null;
                 } else {
                     if (resultClass != null && resultClass.equals(HttpResponse.class)) {
-                        return (T) new HttpResponse(sentRequestAtMillis, System.currentTimeMillis(), code, connection.getResponseMessage(), respHeaders,
+                        return (T) new HttpResponse(_url, sentRequestAtMillis, System.currentTimeMillis(), code, connection.getResponseMessage(), respHeaders,
                                 IOUtil.readAllBytes(is), respContentFormat, respCharset);
                     } else {
                         if (resultClass == null || resultClass.equals(String.class)) {

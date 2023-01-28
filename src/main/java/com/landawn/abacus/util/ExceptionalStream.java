@@ -2350,18 +2350,19 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         assertNotClosed();
 
         return newStream(new ExceptionalIterator<T, E>() {
+            private boolean hasNext = false;
             private T next = null;
 
             @Override
             public boolean hasNext() throws E {
-                return elements.hasNext();
+                return hasNext || elements.hasNext();
             }
 
             @Override
             public T next() throws E {
                 next = elements.next();
 
-                if (elements.hasNext()) {
+                if (hasNext = elements.hasNext()) {
                     return next;
                 } else {
                     return mapperForLast.apply(next);
@@ -5186,18 +5187,19 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         assertNotClosed();
 
         return newStream(new ExceptionalIterator<T, E>() {
+            private boolean hasNext = false;
             private T next = null;
 
             @Override
             public boolean hasNext() throws E {
-                return elements.hasNext();
+                return hasNext || elements.hasNext();
             }
 
             @Override
             public T next() throws E {
                 next = elements.next();
 
-                if (!elements.hasNext()) {
+                if (!(hasNext = elements.hasNext())) {
                     action.accept(next);
                 }
 
@@ -12273,287 +12275,286 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //        }
     //    }
 
-    /**
-     * Mostly it's for android.
-     *
-     * @see {@code ExceptionalStream<T, RuntimeException>}
-     *
-     * @deprecated Mostly it's for android.
-     */
-    @Beta
-    @Deprecated
-    public static final class Seq {
-        private Seq() {
-            // singleton for utility class.
-        }
-
-        public static <T> ExceptionalStream<T, RuntimeException> empty() {
-            return ExceptionalStream.<T, RuntimeException> empty();
-        }
-
-        public static <T> ExceptionalStream<T, RuntimeException> just(final T e) {
-            return ExceptionalStream.<T, RuntimeException> just(e);
-        }
-
-        public static <T> ExceptionalStream<T, RuntimeException> ofNullable(final T e) {
-            return ExceptionalStream.<T, RuntimeException> ofNullable(e);
-        }
-
-        public static <T> ExceptionalStream<T, RuntimeException> of(final T... a) {
-            return ExceptionalStream.<T, RuntimeException> of(a);
-        }
-
-        public static <T> ExceptionalStream<T, RuntimeException> of(final Collection<? extends T> c) {
-            return ExceptionalStream.<T, RuntimeException> of(c);
-        }
-
-        public static <T> ExceptionalStream<T, RuntimeException> of(final Iterator<? extends T> iter) {
-            return ExceptionalStream.<T, RuntimeException> of(iter);
-        }
-
-        public static <T> ExceptionalStream<T, RuntimeException> of(final Iterable<? extends T> iterable) {
-            return ExceptionalStream.<T, RuntimeException> of(iterable);
-        }
-
-        public static <K, V> ExceptionalStream<Map.Entry<K, V>, RuntimeException> of(final Map<K, V> m) {
-            return ExceptionalStream.<K, V, RuntimeException> of(m);
-        }
-
-        public static <T> ExceptionalStream<T, RuntimeException> of(final Stream<? extends T> stream) {
-            return ExceptionalStream.<T, RuntimeException> of(stream);
-        }
-
-        public static <T> ExceptionalStream<T, RuntimeException> of(final java.util.stream.Stream<? extends T> stream) {
-            return ExceptionalStream.<T, RuntimeException> of(stream);
-        }
-
-        public static ExceptionalStream<Boolean, RuntimeException> of(final boolean[] a) {
-            return ExceptionalStream.<RuntimeException> of(a);
-        }
-
-        public static ExceptionalStream<Character, RuntimeException> of(final char[] a) {
-            return ExceptionalStream.<RuntimeException> of(a);
-        }
-
-        public static ExceptionalStream<Byte, RuntimeException> of(final byte[] a) {
-            return ExceptionalStream.<RuntimeException> of(a);
-        }
-
-        public static ExceptionalStream<Short, RuntimeException> of(final short[] a) {
-            return ExceptionalStream.<RuntimeException> of(a);
-        }
-
-        public static ExceptionalStream<Integer, RuntimeException> of(final int[] a) {
-            return ExceptionalStream.<RuntimeException> of(a);
-        }
-
-        public static ExceptionalStream<Long, RuntimeException> of(final long[] a) {
-            return ExceptionalStream.<RuntimeException> of(a);
-        }
-
-        public static ExceptionalStream<Float, RuntimeException> of(final float[] a) {
-            return ExceptionalStream.<RuntimeException> of(a);
-        }
-
-        public static ExceptionalStream<Double, RuntimeException> of(final double[] a) {
-            return ExceptionalStream.<RuntimeException> of(a);
-        }
-
-        public static <T> ExceptionalStream<T, RuntimeException> of(final Optional<T> op) {
-            return ExceptionalStream.<T, RuntimeException> of(op);
-        }
-
-        public static <T> ExceptionalStream<T, RuntimeException> of(final java.util.Optional<T> op) {
-            return ExceptionalStream.<T, RuntimeException> of(op);
-        }
-
-        public static <K> ExceptionalStream<K, RuntimeException> ofKeys(final Map<K, ?> map) {
-            return ExceptionalStream.<K, RuntimeException> ofKeys(map);
-        }
-
-        public static <K, V> ExceptionalStream<K, RuntimeException> ofKeys(final Map<K, V> map,
-                final Throwables.Predicate<? super V, RuntimeException> valueFilter) {
-            return ExceptionalStream.<K, V, RuntimeException> ofKeys(map, valueFilter);
-        }
-
-        public static <K, V> ExceptionalStream<K, RuntimeException> ofKeys(final Map<K, V> map,
-                final Throwables.BiPredicate<? super K, ? super V, RuntimeException> filter) {
-            return ExceptionalStream.ofKeys(map, filter);
-        }
-
-        public static <V> ExceptionalStream<V, RuntimeException> ofValues(final Map<?, V> map) {
-            return ExceptionalStream.<V, RuntimeException> ofValues(map);
-        }
-
-        public static <K, V> ExceptionalStream<V, RuntimeException> ofValues(final Map<K, V> map,
-                final Throwables.Predicate<? super K, RuntimeException> keyFilter) {
-            return ExceptionalStream.<K, V, RuntimeException> ofValues(map, keyFilter);
-        }
-
-        public static <K, V> ExceptionalStream<V, RuntimeException> ofValues(final Map<K, V> map,
-                final Throwables.BiPredicate<? super K, ? super V, RuntimeException> filter) {
-            return ExceptionalStream.ofValues(map, filter);
-        }
-
-        //    @Beta
-        //    public static <T> ExceptionalStream<T, RuntimeException> from(final Throwables.Supplier<Collection<? extends T>, RuntimeException> supplier) {
-        //        return ExceptionalStream.<T, RuntimeException> from(supplier);
-        //    }
-
-        public static <T> ExceptionalStream<T, RuntimeException> defer(
-                final Throwables.Supplier<ExceptionalStream<? extends T, ? extends RuntimeException>, RuntimeException> supplier) {
-            return ExceptionalStream.<T, RuntimeException> defer(supplier);
-        }
-
-        public static <T> ExceptionalStream<T, RuntimeException> iterate(final Throwables.BooleanSupplier<? extends RuntimeException> hasNext,
-                final Throwables.Supplier<? extends T, RuntimeException> next) {
-            return ExceptionalStream.<T, RuntimeException> iterate(hasNext, next);
-        }
-
-        public static <T> ExceptionalStream<T, RuntimeException> iterate(final T init, final Throwables.BooleanSupplier<? extends RuntimeException> hasNext,
-                final Throwables.UnaryOperator<T, ? extends RuntimeException> f) {
-            return ExceptionalStream.<T, RuntimeException> iterate(init, hasNext, f);
-        }
-
-        public static <T> ExceptionalStream<T, RuntimeException> iterate(final T init, final Throwables.Predicate<? super T, RuntimeException> hasNext,
-                final Throwables.UnaryOperator<T, RuntimeException> f) {
-            return ExceptionalStream.<T, RuntimeException> iterate(init, hasNext, f);
-        }
-
-        public static <T> ExceptionalStream<T, RuntimeException> iterate(final T init, final Throwables.UnaryOperator<T, RuntimeException> f) {
-            return ExceptionalStream.<T, RuntimeException> iterate(init, f);
-        }
-
-        public static <T> ExceptionalStream<T, RuntimeException> generate(final Throwables.Supplier<T, RuntimeException> supplier) {
-            return ExceptionalStream.<T, RuntimeException> generate(supplier);
-        }
-
-        public static <T> ExceptionalStream<T, RuntimeException> repeat(final T element, final long n) {
-            return ExceptionalStream.<T, RuntimeException> repeat(element, n);
-        }
-
-        public static ExceptionalStream<Integer, RuntimeException> range(final int startInclusive, final int endExclusive) {
-            return ExceptionalStream.<RuntimeException> range(startInclusive, endExclusive);
-        }
-
-        public static ExceptionalStream<Integer, RuntimeException> range(final int startInclusive, final int endExclusive, final int by) {
-            return ExceptionalStream.<RuntimeException> range(startInclusive, endExclusive, by);
-        }
-
-        public static ExceptionalStream<Integer, RuntimeException> rangeClosed(final int startInclusive, final int endExclusive) {
-            return ExceptionalStream.<RuntimeException> rangeClosed(startInclusive, endExclusive);
-        }
-
-        public static ExceptionalStream<Integer, RuntimeException> rangeClosed(final int startInclusive, final int endExclusive, final int by) {
-            return ExceptionalStream.<RuntimeException> rangeClosed(startInclusive, endExclusive, by);
-        }
-
-        @SafeVarargs
-        public static <T> ExceptionalStream<T, RuntimeException> concat(final T[]... a) {
-            return ExceptionalStream.<T, RuntimeException> concat(a);
-        }
-
-        @SafeVarargs
-        public static <T> ExceptionalStream<T, RuntimeException> concat(final Iterable<? extends T>... a) {
-            return ExceptionalStream.<T, RuntimeException> concat(a);
-        }
-
-        @SafeVarargs
-        public static <T> ExceptionalStream<T, RuntimeException> concat(final Iterator<? extends T>... a) {
-            return ExceptionalStream.<T, RuntimeException> concat(a);
-        }
-
-        public static <A, B, T> ExceptionalStream<T, RuntimeException> zip(final A[] a, final B[] b,
-                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-            return ExceptionalStream.<A, B, T, RuntimeException> zip(a, b, zipFunction);
-        }
-
-        public static <A, B, C, T> ExceptionalStream<T, RuntimeException> zip(final A[] a, final B[] b, final C[] c,
-                final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-            return ExceptionalStream.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
-        }
-
-        public static <A, B, T> ExceptionalStream<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
-                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-            return ExceptionalStream.<A, B, T, RuntimeException> zip(a, b, zipFunction);
-        }
-
-        public static <A, B, C, T> ExceptionalStream<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
-                final Iterable<? extends C> c, final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-            return ExceptionalStream.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
-        }
-
-        public static <A, B, T> ExceptionalStream<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
-                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-            return ExceptionalStream.<A, B, T, RuntimeException> zip(a, b, zipFunction);
-        }
-
-        public static <A, B, C, T> ExceptionalStream<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
-                final Iterator<? extends C> c, final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-            return ExceptionalStream.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
-        }
-
-        public static <A, B, T> ExceptionalStream<T, RuntimeException> zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
-                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-            return ExceptionalStream.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
-        }
-
-        public static <A, B, C, T> ExceptionalStream<T, RuntimeException> zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA,
-                final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-            return ExceptionalStream.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
-        }
-
-        public static <A, B, T> ExceptionalStream<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b, final A valueForNoneA,
-                final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-            return ExceptionalStream.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
-        }
-
-        public static <A, B, C, T> ExceptionalStream<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
-                final Iterable<? extends C> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
-                final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-            return ExceptionalStream.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
-        }
-
-        public static <A, B, T> ExceptionalStream<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b, final A valueForNoneA,
-                final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
-            return ExceptionalStream.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
-        }
-
-        public static <A, B, C, T> ExceptionalStream<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
-                final Iterator<? extends C> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
-                final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
-            return ExceptionalStream.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
-        }
-
-        public static <T> ExceptionalStream<T, RuntimeException> merge(final T[] a, final T[] b,
-                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-            return ExceptionalStream.<T, RuntimeException> merge(a, b, nextSelector);
-        }
-
-        public static <T> ExceptionalStream<T, RuntimeException> merge(final T[] a, final T[] b, final T[] c,
-                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-            return ExceptionalStream.<T, RuntimeException> merge(a, b, c, nextSelector);
-        }
-
-        public static <T> ExceptionalStream<T, RuntimeException> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
-                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-            return ExceptionalStream.<T, RuntimeException> merge(a, b, nextSelector);
-        }
-
-        public static <T> ExceptionalStream<T, RuntimeException> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
-                final Iterable<? extends T> c, final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-            return ExceptionalStream.<T, RuntimeException> merge(a, b, c, nextSelector);
-        }
-
-        public static <T> ExceptionalStream<T, RuntimeException> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
-                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-            return ExceptionalStream.<T, RuntimeException> merge(a, b, nextSelector);
-        }
-
-        public static <T> ExceptionalStream<T, RuntimeException> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
-                final Iterator<? extends T> c, final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
-            return ExceptionalStream.<T, RuntimeException> merge(a, b, c, nextSelector);
-        }
-
-    }
+    //    /**
+    //     * Mostly it's for android.
+    //     *
+    //     * @see {@code ExceptionalStream<T, RuntimeException>}
+    //     *
+    //     * @deprecated Mostly it's for android.
+    //     */
+    //    @Beta
+    //    @Deprecated
+    //    public static final class Seq {
+    //        private Seq() {
+    //            // singleton for utility class.
+    //        }
+    //
+    //        public static <T> ExceptionalStream<T, RuntimeException> empty() {
+    //            return ExceptionalStream.<T, RuntimeException> empty();
+    //        }
+    //
+    //        public static <T> ExceptionalStream<T, RuntimeException> just(final T e) {
+    //            return ExceptionalStream.<T, RuntimeException> just(e);
+    //        }
+    //
+    //        public static <T> ExceptionalStream<T, RuntimeException> ofNullable(final T e) {
+    //            return ExceptionalStream.<T, RuntimeException> ofNullable(e);
+    //        }
+    //
+    //        public static <T> ExceptionalStream<T, RuntimeException> of(final T... a) {
+    //            return ExceptionalStream.<T, RuntimeException> of(a);
+    //        }
+    //
+    //        public static <T> ExceptionalStream<T, RuntimeException> of(final Collection<? extends T> c) {
+    //            return ExceptionalStream.<T, RuntimeException> of(c);
+    //        }
+    //
+    //        public static <T> ExceptionalStream<T, RuntimeException> of(final Iterator<? extends T> iter) {
+    //            return ExceptionalStream.<T, RuntimeException> of(iter);
+    //        }
+    //
+    //        public static <T> ExceptionalStream<T, RuntimeException> of(final Iterable<? extends T> iterable) {
+    //            return ExceptionalStream.<T, RuntimeException> of(iterable);
+    //        }
+    //
+    //        public static <K, V> ExceptionalStream<Map.Entry<K, V>, RuntimeException> of(final Map<K, V> m) {
+    //            return ExceptionalStream.<K, V, RuntimeException> of(m);
+    //        }
+    //
+    //        public static <T> ExceptionalStream<T, RuntimeException> of(final Stream<? extends T> stream) {
+    //            return ExceptionalStream.<T, RuntimeException> of(stream);
+    //        }
+    //
+    //        public static <T> ExceptionalStream<T, RuntimeException> of(final java.util.stream.Stream<? extends T> stream) {
+    //            return ExceptionalStream.<T, RuntimeException> of(stream);
+    //        }
+    //
+    //        public static ExceptionalStream<Boolean, RuntimeException> of(final boolean[] a) {
+    //            return ExceptionalStream.<RuntimeException> of(a);
+    //        }
+    //
+    //        public static ExceptionalStream<Character, RuntimeException> of(final char[] a) {
+    //            return ExceptionalStream.<RuntimeException> of(a);
+    //        }
+    //
+    //        public static ExceptionalStream<Byte, RuntimeException> of(final byte[] a) {
+    //            return ExceptionalStream.<RuntimeException> of(a);
+    //        }
+    //
+    //        public static ExceptionalStream<Short, RuntimeException> of(final short[] a) {
+    //            return ExceptionalStream.<RuntimeException> of(a);
+    //        }
+    //
+    //        public static ExceptionalStream<Integer, RuntimeException> of(final int[] a) {
+    //            return ExceptionalStream.<RuntimeException> of(a);
+    //        }
+    //
+    //        public static ExceptionalStream<Long, RuntimeException> of(final long[] a) {
+    //            return ExceptionalStream.<RuntimeException> of(a);
+    //        }
+    //
+    //        public static ExceptionalStream<Float, RuntimeException> of(final float[] a) {
+    //            return ExceptionalStream.<RuntimeException> of(a);
+    //        }
+    //
+    //        public static ExceptionalStream<Double, RuntimeException> of(final double[] a) {
+    //            return ExceptionalStream.<RuntimeException> of(a);
+    //        }
+    //
+    //        public static <T> ExceptionalStream<T, RuntimeException> of(final Optional<T> op) {
+    //            return ExceptionalStream.<T, RuntimeException> of(op);
+    //        }
+    //
+    //        public static <T> ExceptionalStream<T, RuntimeException> of(final java.util.Optional<T> op) {
+    //            return ExceptionalStream.<T, RuntimeException> of(op);
+    //        }
+    //
+    //        public static <K> ExceptionalStream<K, RuntimeException> ofKeys(final Map<K, ?> map) {
+    //            return ExceptionalStream.<K, RuntimeException> ofKeys(map);
+    //        }
+    //
+    //        public static <K, V> ExceptionalStream<K, RuntimeException> ofKeys(final Map<K, V> map,
+    //                final Throwables.Predicate<? super V, RuntimeException> valueFilter) {
+    //            return ExceptionalStream.<K, V, RuntimeException> ofKeys(map, valueFilter);
+    //        }
+    //
+    //        public static <K, V> ExceptionalStream<K, RuntimeException> ofKeys(final Map<K, V> map,
+    //                final Throwables.BiPredicate<? super K, ? super V, RuntimeException> filter) {
+    //            return ExceptionalStream.ofKeys(map, filter);
+    //        }
+    //
+    //        public static <V> ExceptionalStream<V, RuntimeException> ofValues(final Map<?, V> map) {
+    //            return ExceptionalStream.<V, RuntimeException> ofValues(map);
+    //        }
+    //
+    //        public static <K, V> ExceptionalStream<V, RuntimeException> ofValues(final Map<K, V> map,
+    //                final Throwables.Predicate<? super K, RuntimeException> keyFilter) {
+    //            return ExceptionalStream.<K, V, RuntimeException> ofValues(map, keyFilter);
+    //        }
+    //
+    //        public static <K, V> ExceptionalStream<V, RuntimeException> ofValues(final Map<K, V> map,
+    //                final Throwables.BiPredicate<? super K, ? super V, RuntimeException> filter) {
+    //            return ExceptionalStream.ofValues(map, filter);
+    //        }
+    //
+    //        //    @Beta
+    //        //    public static <T> ExceptionalStream<T, RuntimeException> from(final Throwables.Supplier<Collection<? extends T>, RuntimeException> supplier) {
+    //        //        return ExceptionalStream.<T, RuntimeException> from(supplier);
+    //        //    }
+    //
+    //        public static <T> ExceptionalStream<T, RuntimeException> defer(
+    //                final Throwables.Supplier<ExceptionalStream<? extends T, ? extends RuntimeException>, RuntimeException> supplier) {
+    //            return ExceptionalStream.<T, RuntimeException> defer(supplier);
+    //        }
+    //
+    //        public static <T> ExceptionalStream<T, RuntimeException> iterate(final Throwables.BooleanSupplier<? extends RuntimeException> hasNext,
+    //                final Throwables.Supplier<? extends T, RuntimeException> next) {
+    //            return ExceptionalStream.<T, RuntimeException> iterate(hasNext, next);
+    //        }
+    //
+    //        public static <T> ExceptionalStream<T, RuntimeException> iterate(final T init, final Throwables.BooleanSupplier<? extends RuntimeException> hasNext,
+    //                final Throwables.UnaryOperator<T, ? extends RuntimeException> f) {
+    //            return ExceptionalStream.<T, RuntimeException> iterate(init, hasNext, f);
+    //        }
+    //
+    //        public static <T> ExceptionalStream<T, RuntimeException> iterate(final T init, final Throwables.Predicate<? super T, RuntimeException> hasNext,
+    //                final Throwables.UnaryOperator<T, RuntimeException> f) {
+    //            return ExceptionalStream.<T, RuntimeException> iterate(init, hasNext, f);
+    //        }
+    //
+    //        public static <T> ExceptionalStream<T, RuntimeException> iterate(final T init, final Throwables.UnaryOperator<T, RuntimeException> f) {
+    //            return ExceptionalStream.<T, RuntimeException> iterate(init, f);
+    //        }
+    //
+    //        public static <T> ExceptionalStream<T, RuntimeException> generate(final Throwables.Supplier<T, RuntimeException> supplier) {
+    //            return ExceptionalStream.<T, RuntimeException> generate(supplier);
+    //        }
+    //
+    //        public static <T> ExceptionalStream<T, RuntimeException> repeat(final T element, final long n) {
+    //            return ExceptionalStream.<T, RuntimeException> repeat(element, n);
+    //        }
+    //
+    //        public static ExceptionalStream<Integer, RuntimeException> range(final int startInclusive, final int endExclusive) {
+    //            return ExceptionalStream.<RuntimeException> range(startInclusive, endExclusive);
+    //        }
+    //
+    //        public static ExceptionalStream<Integer, RuntimeException> range(final int startInclusive, final int endExclusive, final int by) {
+    //            return ExceptionalStream.<RuntimeException> range(startInclusive, endExclusive, by);
+    //        }
+    //
+    //        public static ExceptionalStream<Integer, RuntimeException> rangeClosed(final int startInclusive, final int endExclusive) {
+    //            return ExceptionalStream.<RuntimeException> rangeClosed(startInclusive, endExclusive);
+    //        }
+    //
+    //        public static ExceptionalStream<Integer, RuntimeException> rangeClosed(final int startInclusive, final int endExclusive, final int by) {
+    //            return ExceptionalStream.<RuntimeException> rangeClosed(startInclusive, endExclusive, by);
+    //        }
+    //
+    //        @SafeVarargs
+    //        public static <T> ExceptionalStream<T, RuntimeException> concat(final T[]... a) {
+    //            return ExceptionalStream.<T, RuntimeException> concat(a);
+    //        }
+    //
+    //        @SafeVarargs
+    //        public static <T> ExceptionalStream<T, RuntimeException> concat(final Iterable<? extends T>... a) {
+    //            return ExceptionalStream.<T, RuntimeException> concat(a);
+    //        }
+    //
+    //        @SafeVarargs
+    //        public static <T> ExceptionalStream<T, RuntimeException> concat(final Iterator<? extends T>... a) {
+    //            return ExceptionalStream.<T, RuntimeException> concat(a);
+    //        }
+    //
+    //        public static <A, B, T> ExceptionalStream<T, RuntimeException> zip(final A[] a, final B[] b,
+    //                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
+    //            return ExceptionalStream.<A, B, T, RuntimeException> zip(a, b, zipFunction);
+    //        }
+    //
+    //        public static <A, B, C, T> ExceptionalStream<T, RuntimeException> zip(final A[] a, final B[] b, final C[] c,
+    //                final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
+    //            return ExceptionalStream.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
+    //        }
+    //
+    //        public static <A, B, T> ExceptionalStream<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
+    //                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
+    //            return ExceptionalStream.<A, B, T, RuntimeException> zip(a, b, zipFunction);
+    //        }
+    //
+    //        public static <A, B, C, T> ExceptionalStream<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
+    //                final Iterable<? extends C> c, final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
+    //            return ExceptionalStream.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
+    //        }
+    //
+    //        public static <A, B, T> ExceptionalStream<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
+    //                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
+    //            return ExceptionalStream.<A, B, T, RuntimeException> zip(a, b, zipFunction);
+    //        }
+    //
+    //        public static <A, B, C, T> ExceptionalStream<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
+    //                final Iterator<? extends C> c, final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
+    //            return ExceptionalStream.<A, B, C, T, RuntimeException> zip(a, b, c, zipFunction);
+    //        }
+    //
+    //        public static <A, B, T> ExceptionalStream<T, RuntimeException> zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
+    //                final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
+    //            return ExceptionalStream.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
+    //        }
+    //
+    //        public static <A, B, C, T> ExceptionalStream<T, RuntimeException> zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA,
+    //                final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
+    //            return ExceptionalStream.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
+    //        }
+    //
+    //        public static <A, B, T> ExceptionalStream<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b, final A valueForNoneA,
+    //                final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
+    //            return ExceptionalStream.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
+    //        }
+    //
+    //        public static <A, B, C, T> ExceptionalStream<T, RuntimeException> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
+    //                final Iterable<? extends C> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
+    //                final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
+    //            return ExceptionalStream.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
+    //        }
+    //
+    //        public static <A, B, T> ExceptionalStream<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b, final A valueForNoneA,
+    //                final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, T, RuntimeException> zipFunction) {
+    //            return ExceptionalStream.<A, B, T, RuntimeException> zip(a, b, valueForNoneA, valueForNoneB, zipFunction);
+    //        }
+    //
+    //        public static <A, B, C, T> ExceptionalStream<T, RuntimeException> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
+    //                final Iterator<? extends C> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
+    //                final Throwables.TriFunction<? super A, ? super B, ? super C, T, RuntimeException> zipFunction) {
+    //            return ExceptionalStream.<A, B, C, T, RuntimeException> zip(a, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
+    //        }
+    //
+    //        public static <T> ExceptionalStream<T, RuntimeException> merge(final T[] a, final T[] b,
+    //                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
+    //            return ExceptionalStream.<T, RuntimeException> merge(a, b, nextSelector);
+    //        }
+    //
+    //        public static <T> ExceptionalStream<T, RuntimeException> merge(final T[] a, final T[] b, final T[] c,
+    //                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
+    //            return ExceptionalStream.<T, RuntimeException> merge(a, b, c, nextSelector);
+    //        }
+    //
+    //        public static <T> ExceptionalStream<T, RuntimeException> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
+    //                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
+    //            return ExceptionalStream.<T, RuntimeException> merge(a, b, nextSelector);
+    //        }
+    //
+    //        public static <T> ExceptionalStream<T, RuntimeException> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
+    //                final Iterable<? extends T> c, final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
+    //            return ExceptionalStream.<T, RuntimeException> merge(a, b, c, nextSelector);
+    //        }
+    //
+    //        public static <T> ExceptionalStream<T, RuntimeException> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
+    //                final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
+    //            return ExceptionalStream.<T, RuntimeException> merge(a, b, nextSelector);
+    //        }
+    //
+    //        public static <T> ExceptionalStream<T, RuntimeException> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
+    //                final Iterator<? extends T> c, final Throwables.BiFunction<? super T, ? super T, MergeResult, RuntimeException> nextSelector) {
+    //            return ExceptionalStream.<T, RuntimeException> merge(a, b, c, nextSelector);
+    //        }
+    //    }
 }

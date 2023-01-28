@@ -30,12 +30,13 @@ import com.landawn.abacus.util.URLEncodedUtil;
  * @since 1.3
  */
 public class HttpResponse {
+    private final String requestUrl;
 
-    private final long sentRequestAtMillis;
+    private final long requestSentAtMillis;
 
-    private final long receivedResponseAtMillis;
+    private final long responseReceivedAtMillis;
 
-    private final int code;
+    private final int status;
 
     private final String message;
 
@@ -47,11 +48,12 @@ public class HttpResponse {
 
     private final Charset respCharset;
 
-    HttpResponse(final long sentRequestAtMillis, final long receivedResponseAtMillis, final int code, final String message,
+    HttpResponse(final String requestUrl, final long requestSentAtMillis, final long responseReceivedAtMillis, final int code, final String message,
             final Map<String, List<String>> headers, final byte[] body, final ContentFormat bodyFormat, final Charset respCharset) {
-        this.sentRequestAtMillis = sentRequestAtMillis;
-        this.receivedResponseAtMillis = receivedResponseAtMillis;
-        this.code = code;
+        this.requestUrl = requestUrl;
+        this.requestSentAtMillis = requestSentAtMillis;
+        this.responseReceivedAtMillis = responseReceivedAtMillis;
+        this.status = code;
         this.message = message;
         this.headers = headers;
         this.body = body;
@@ -66,7 +68,15 @@ public class HttpResponse {
      * @return true, if is successful
      */
     public boolean isSuccessful() {
-        return HttpUtil.isSuccessfulResponseCode(code);
+        return HttpUtil.isSuccessfulResponseCode(status);
+    }
+
+    /**
+     *
+     * @return
+     */
+    public String requestUrl() {
+        return requestUrl;
     }
 
     /**
@@ -74,8 +84,8 @@ public class HttpResponse {
      *
      * @return
      */
-    public long sentRequestAtMillis() {
-        return sentRequestAtMillis;
+    public long requestSentAtMillis() {
+        return requestSentAtMillis;
     }
 
     /**
@@ -83,12 +93,23 @@ public class HttpResponse {
      *
      * @return
      */
-    public long receivedResponseAtMillis() {
-        return receivedResponseAtMillis;
+    public long responseReceivedAtMillis() {
+        return responseReceivedAtMillis;
     }
 
-    public int code() {
-        return code;
+    //    /**
+    //     *
+    //     * @return
+    //     * @deprecated replaced with {@code status}
+    //     * @see #status()
+    //     */
+    //    @Deprecated
+    //    public int code() {
+    //        return status;
+    //    }
+
+    public int status() {
+        return status;
     }
 
     public String message() {
@@ -159,7 +180,8 @@ public class HttpResponse {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + code;
+        result = prime * result + ((requestUrl == null) ? 0 : requestUrl.hashCode());
+        result = prime * result + status;
         result = prime * result + ((message == null) ? 0 : message.hashCode());
         result = prime * result + ((headers == null) ? 0 : headers.hashCode());
         result = prime * result + ((bodyFormat == null) ? 0 : bodyFormat.hashCode());
@@ -179,8 +201,8 @@ public class HttpResponse {
         }
 
         if (obj instanceof HttpResponse other) {
-            return code == other.code && N.equals(message, other.message) && N.equals(headers, other.headers) && N.equals(bodyFormat, other.bodyFormat)
-                    && N.equals(body, other.body);
+            return requestUrl == other.requestUrl && status == other.status && N.equals(message, other.message) && N.equals(headers, other.headers)
+                    && N.equals(bodyFormat, other.bodyFormat) && N.equals(body, other.body);
         }
 
         return false;
@@ -188,7 +210,6 @@ public class HttpResponse {
 
     @Override
     public String toString() {
-        return "{sentRequestAtMillis=" + sentRequestAtMillis + ", receivedResponseAtMillis=" + receivedResponseAtMillis + ", code=" + code + ", message="
-                + message + ", headers=" + headers + ", bodyFormat=" + bodyFormat + ", body=" + body(String.class) + "}";
+        return requestUrl + ". " + status + ": " + message;
     }
 }

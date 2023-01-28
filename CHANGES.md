@@ -1,16 +1,21 @@
+### 3.6.6
+
+* Improvements and bug fix.
+
+
 ### 3.6.5
 
-* Replace name "entity" with "bean".
+* Improvements and bug fix.
 
 
 ### 3.6.4
 
-* Replace name "entity" with "bean".
+* Improvements and bug fix.
 
 
 ### 3.6.3
 
-* Replace name "entity" with "bean".
+* Improvements and bug fix.
 
 
 ### 3.6.2
