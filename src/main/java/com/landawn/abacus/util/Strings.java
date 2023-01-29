@@ -1956,8 +1956,8 @@ public abstract class Strings {
      * @return the text with any replacements processed,
      *  {@code null} if null String input
      */
-    public static String replaceOnce(final String str, final String target, final String replacement) {
-        return replaceOnce(str, 0, target, replacement);
+    public static String replaceFirst(final String str, final String target, final String replacement) {
+        return replaceFirst(str, 0, target, replacement);
     }
 
     /**
@@ -1968,8 +1968,51 @@ public abstract class Strings {
      * @param replacement
      * @return
      */
-    public static String replaceOnce(final String str, final int fromIndex, final String target, final String replacement) {
+    public static String replaceFirst(final String str, final int fromIndex, final String target, final String replacement) {
         return replace(str, fromIndex, target, replacement, 1);
+    }
+
+    /**
+     * <p>Replaces a String with another String inside a larger String, once.</p>
+     *
+     * <p>A {@code null} reference passed to this method is a no-op.</p>
+     *
+     * <pre>
+     * StringUtil.replaceOnce(null, *, *)        = null
+     * StringUtil.replaceOnce("", *, *)          = ""
+     * StringUtil.replaceOnce("any", null, *)    = "any"
+     * StringUtil.replaceOnce("any", *, null)    = "any"
+     * StringUtil.replaceOnce("any", "", *)      = "any"
+     * StringUtil.replaceOnce("aba", "a", null)  = "ba"
+     * StringUtil.replaceOnce("aba", "a", "")    = "ba"
+     * StringUtil.replaceOnce("aba", "a", "z")   = "zba"
+     * </pre>
+     *
+     * @see #replace(String text, String searchString, String replacement, int max)
+     * @param text text to search and replace in, may be null
+     * @param searchString the String to search for, may be null
+     * @param replacement the String to replace with, may be null
+     * @return the text with any replacements processed,
+     *  {@code null} if null String input
+     * @deprecated Use {@link #replaceFirst(String,String,String)} instead
+     */
+    @Deprecated
+    public static String replaceOnce(final String str, final String target, final String replacement) {
+        return replaceFirst(str, target, replacement);
+    }
+
+    /**
+     *
+     * @param str
+     * @param fromIndex
+     * @param target
+     * @param replacement
+     * @return
+     * @deprecated Use {@link #replaceFirst(String,int,String,String)} instead
+     */
+    @Deprecated
+    public static String replaceOnce(final String str, final int fromIndex, final String target, final String replacement) {
+        return replaceFirst(str, fromIndex, target, replacement);
     }
 
     /**
@@ -2042,8 +2085,8 @@ public abstract class Strings {
      * @param replacement
      * @return
      */
-    public static String replaceOnceIgnoreCase(final String str, final String target, final String replacement) {
-        return replaceOnceIgnoreCase(str, 0, target, replacement);
+    public static String replaceFirstIgnoreCase(final String str, final String target, final String replacement) {
+        return replaceFirstIgnoreCase(str, 0, target, replacement);
     }
 
     /**
@@ -2055,8 +2098,37 @@ public abstract class Strings {
      * @param replacement
      * @return
      */
-    public static String replaceOnceIgnoreCase(final String str, final int fromIndex, final String target, final String replacement) {
+    public static String replaceFirstIgnoreCase(final String str, final int fromIndex, final String target, final String replacement) {
         return replaceIgnoreCase(str, fromIndex, target, replacement, 1);
+    }
+
+    /**
+     * Replace once ignore case.
+     *
+     * @param str
+     * @param target
+     * @param replacement
+     * @return
+     * @deprecated Use {@link #replaceFirstIgnoreCase(String,String,String)} instead
+     */
+    @Deprecated
+    public static String replaceOnceIgnoreCase(final String str, final String target, final String replacement) {
+        return replaceFirstIgnoreCase(str, target, replacement);
+    }
+
+    /**
+     * Replace once ignore case.
+     *
+     * @param str
+     * @param fromIndex
+     * @param target
+     * @param replacement
+     * @return
+     * @deprecated Use {@link #replaceFirstIgnoreCase(String,int,String,String)} instead
+     */
+    @Deprecated
+    public static String replaceOnceIgnoreCase(final String str, final int fromIndex, final String target, final String replacement) {
+        return replaceFirstIgnoreCase(str, fromIndex, target, replacement);
     }
 
     /**

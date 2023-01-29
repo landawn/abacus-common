@@ -33,18 +33,18 @@ public final class Retry<T> {
 
     private final int retryTimes;
 
-    private final long retryInterval;
+    private final long retryIntervallInMillis;
 
     private final Predicate<? super Exception> retryCondition;
 
     /** The retry condition 2. */
     private final BiPredicate<? super T, ? super Exception> retryCondition2;
 
-    Retry(final int retryTimes, final long retryInterval, final Predicate<? super Exception> retryCondition,
+    Retry(final int retryTimes, final long retryIntervallInMillis, final Predicate<? super Exception> retryCondition,
             final BiPredicate<? super T, ? super Exception> retryCondition2) {
 
         this.retryTimes = retryTimes;
-        this.retryInterval = retryInterval;
+        this.retryIntervallInMillis = retryIntervallInMillis;
         this.retryCondition = retryCondition;
         this.retryCondition2 = retryCondition2;
     }
@@ -52,32 +52,32 @@ public final class Retry<T> {
     /**
      *
      * @param retryTimes
-     * @param retryInterval
+     * @param retryIntervallInMillis
      * @param retryCondition
      * @return
      */
-    public static Retry<Void> of(final int retryTimes, final long retryInterval, final Predicate<? super Exception> retryCondition) {
+    public static Retry<Void> of(final int retryTimes, final long retryIntervallInMillis, final Predicate<? super Exception> retryCondition) {
         N.checkArgNotNegative(retryTimes, "retryTimes");
-        N.checkArgNotNegative(retryInterval, "retryInterval");
+        N.checkArgNotNegative(retryIntervallInMillis, "retryIntervallInMillis");
         N.checkArgNotNull(retryCondition);
 
-        return new Retry<>(retryTimes, retryInterval, retryCondition, null);
+        return new Retry<>(retryTimes, retryIntervallInMillis, retryCondition, null);
     }
 
     /**
      *
      * @param <R>
      * @param retryTimes
-     * @param retryInterval
+     * @param retryIntervallInMillis
      * @param retryCondition
      * @return
      */
-    public static <R> Retry<R> of(final int retryTimes, final long retryInterval, final BiPredicate<? super R, ? super Exception> retryCondition) {
+    public static <R> Retry<R> of(final int retryTimes, final long retryIntervallInMillis, final BiPredicate<? super R, ? super Exception> retryCondition) {
         N.checkArgNotNegative(retryTimes, "retryTimes");
-        N.checkArgNotNegative(retryInterval, "retryInterval");
+        N.checkArgNotNegative(retryIntervallInMillis, "retryIntervallInMillis");
         N.checkArgNotNull(retryCondition);
 
-        return new Retry<>(retryTimes, retryInterval, null, retryCondition);
+        return new Retry<>(retryTimes, retryIntervallInMillis, null, retryCondition);
     }
 
     /**
@@ -101,8 +101,8 @@ public final class Retry<T> {
                     retriedTimes++;
 
                     try {
-                        if (retryInterval > 0) {
-                            N.sleepUninterruptibly(retryInterval);
+                        if (retryIntervallInMillis > 0) {
+                            N.sleepUninterruptibly(retryIntervallInMillis);
                         }
 
                         logger.info("Start " + retriedTimes + " retry");
@@ -144,8 +144,8 @@ public final class Retry<T> {
                 while (retriedTimes < retryTimes) {
                     retriedTimes++;
 
-                    if (retryInterval > 0) {
-                        N.sleepUninterruptibly(retryInterval);
+                    if (retryIntervallInMillis > 0) {
+                        N.sleepUninterruptibly(retryIntervallInMillis);
                     }
 
                     logger.info("Start " + retriedTimes + " retry");
@@ -169,8 +169,8 @@ public final class Retry<T> {
                     retriedTimes++;
 
                     try {
-                        if (retryInterval > 0) {
-                            N.sleepUninterruptibly(retryInterval);
+                        if (retryIntervallInMillis > 0) {
+                            N.sleepUninterruptibly(retryIntervallInMillis);
                         }
 
                         logger.info("Start " + retriedTimes + " retry");
@@ -211,18 +211,18 @@ public final class Retry<T> {
 
         private final int retryTimes;
 
-        private final long retryInterval;
+        private final long retryIntervallInMillis;
 
         private final Predicate<? super RuntimeException> retryCondition;
 
         /** The retry condition 2. */
         private final BiPredicate<? super T, ? super RuntimeException> retryCondition2;
 
-        RetryR(final int retryTimes, final long retryInterval, final Predicate<? super RuntimeException> retryCondition,
+        RetryR(final int retryTimes, final long retryIntervallInMillis, final Predicate<? super RuntimeException> retryCondition,
                 final BiPredicate<? super T, ? super RuntimeException> retryCondition2) {
 
             this.retryTimes = retryTimes;
-            this.retryInterval = retryInterval;
+            this.retryIntervallInMillis = retryIntervallInMillis;
             this.retryCondition = retryCondition;
             this.retryCondition2 = retryCondition2;
         }
@@ -230,32 +230,33 @@ public final class Retry<T> {
         /**
          *
          * @param retryTimes
-         * @param retryInterval
+         * @param retryIntervallInMillis
          * @param retryCondition
          * @return
          */
-        public static RetryR<Void> of(final int retryTimes, final long retryInterval, final Predicate<? super RuntimeException> retryCondition) {
+        public static RetryR<Void> of(final int retryTimes, final long retryIntervallInMillis, final Predicate<? super RuntimeException> retryCondition) {
             N.checkArgNotNegative(retryTimes, "retryTimes");
-            N.checkArgNotNegative(retryInterval, "retryInterval");
+            N.checkArgNotNegative(retryIntervallInMillis, "retryIntervallInMillis");
             N.checkArgNotNull(retryCondition);
 
-            return new RetryR<>(retryTimes, retryInterval, retryCondition, null);
+            return new RetryR<>(retryTimes, retryIntervallInMillis, retryCondition, null);
         }
 
         /**
          *
          * @param <R>
          * @param retryTimes
-         * @param retryInterval
+         * @param retryIntervallInMillis
          * @param retryCondition
          * @return
          */
-        public static <R> RetryR<R> of(final int retryTimes, final long retryInterval, final BiPredicate<? super R, ? super RuntimeException> retryCondition) {
+        public static <R> RetryR<R> of(final int retryTimes, final long retryIntervallInMillis,
+                final BiPredicate<? super R, ? super RuntimeException> retryCondition) {
             N.checkArgNotNegative(retryTimes, "retryTimes");
-            N.checkArgNotNegative(retryInterval, "retryInterval");
+            N.checkArgNotNegative(retryIntervallInMillis, "retryIntervallInMillis");
             N.checkArgNotNull(retryCondition);
 
-            return new RetryR<>(retryTimes, retryInterval, null, retryCondition);
+            return new RetryR<>(retryTimes, retryIntervallInMillis, null, retryCondition);
         }
 
         /**
@@ -279,8 +280,8 @@ public final class Retry<T> {
                         retriedTimes++;
 
                         try {
-                            if (retryInterval > 0) {
-                                N.sleepUninterruptibly(retryInterval);
+                            if (retryIntervallInMillis > 0) {
+                                N.sleepUninterruptibly(retryIntervallInMillis);
                             }
 
                             logger.info("Start " + retriedTimes + " retry");
@@ -322,8 +323,8 @@ public final class Retry<T> {
                     while (retriedTimes < retryTimes) {
                         retriedTimes++;
 
-                        if (retryInterval > 0) {
-                            N.sleepUninterruptibly(retryInterval);
+                        if (retryIntervallInMillis > 0) {
+                            N.sleepUninterruptibly(retryIntervallInMillis);
                         }
 
                         logger.info("Start " + retriedTimes + " retry");
@@ -347,8 +348,8 @@ public final class Retry<T> {
                         retriedTimes++;
 
                         try {
-                            if (retryInterval > 0) {
-                                N.sleepUninterruptibly(retryInterval);
+                            if (retryIntervallInMillis > 0) {
+                                N.sleepUninterruptibly(retryIntervallInMillis);
                             }
 
                             logger.info("Start " + retriedTimes + " retry");
@@ -424,8 +425,8 @@ public final class Retry<T> {
                             retriedTimes++;
 
                             try {
-                                if (retryInterval > 0) {
-                                    N.sleepUninterruptibly(retryInterval);
+                                if (retryIntervallInMillis > 0) {
+                                    N.sleepUninterruptibly(retryIntervallInMillis);
                                 }
 
                                 logger.info("Start " + retriedTimes + " retry in hasNext()");
@@ -459,8 +460,8 @@ public final class Retry<T> {
                             retriedTimes++;
 
                             try {
-                                if (retryInterval > 0) {
-                                    N.sleepUninterruptibly(retryInterval);
+                                if (retryIntervallInMillis > 0) {
+                                    N.sleepUninterruptibly(retryIntervallInMillis);
                                 }
 
                                 logger.info("Start " + retriedTimes + " retry in next()");
@@ -494,8 +495,8 @@ public final class Retry<T> {
                             retriedTimes++;
 
                             try {
-                                if (retryInterval > 0) {
-                                    N.sleepUninterruptibly(retryInterval);
+                                if (retryIntervallInMillis > 0) {
+                                    N.sleepUninterruptibly(retryIntervallInMillis);
                                 }
 
                                 logger.info("Start " + retriedTimes + " retry in remove()");

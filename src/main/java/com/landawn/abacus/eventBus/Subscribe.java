@@ -59,7 +59,7 @@ public @interface Subscribe {
     /**
      * The event will be ignored if the interval between this event and last event is less than the specified <code>interval</code>.
      *
-     * @return
+     * @return unit is milliseconds.
      */
     long interval() default 0; // Unit is milliseconds.
 

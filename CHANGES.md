@@ -1,3 +1,8 @@
+### 3.6.7
+
+* Improvements and bug fix.
+
+
 ### 3.6.6
 
 * Improvements and bug fix.

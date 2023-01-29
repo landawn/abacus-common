@@ -9884,7 +9884,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     @TerminalOp
-    public long persist(final Connection conn, final String insertSQL, final int batchSize, final int batchInterval,
+    public long persist(final Connection conn, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws E, SQLException {
         assertNotClosed();
 
@@ -9893,19 +9893,19 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         try {
             stmt = conn.prepareStatement(insertSQL);
 
-            return persist(stmt, batchSize, batchInterval, stmtSetter);
+            return persist(stmt, batchSize, batchIntervalInMillis, stmtSetter);
         } finally {
             IOUtil.closeQuietly(stmt);
         }
     }
 
     @TerminalOp
-    public long persist(final PreparedStatement stmt, final int batchSize, final int batchInterval,
+    public long persist(final PreparedStatement stmt, final int batchSize, final long batchIntervalInMillis,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws E, SQLException {
         assertNotClosed();
 
-        checkArgument(batchSize > 0 && batchInterval >= 0, "'batchSize'=%s must be greater than 0 and 'batchInterval'=%s can't be negative", batchSize,
-                batchInterval);
+        checkArgument(batchSize > 0 && batchIntervalInMillis >= 0, "'batchSize'=%s must be greater than 0 and 'batchIntervalInMillis'=%s can't be negative",
+                batchSize, batchIntervalInMillis);
 
         try {
             final ExceptionalIterator<T, E> iter = iteratorEx();
@@ -9918,8 +9918,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 if ((++cnt % batchSize) == 0) {
                     executeBatch(stmt);
 
-                    if (batchInterval > 0) {
-                        N.sleep(batchInterval);
+                    if (batchIntervalInMillis > 0) {
+                        N.sleep(batchIntervalInMillis);
                     }
                 }
             }
@@ -11758,6 +11758,27 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param p2
      */
     private void checkArgument(boolean b, String errorMessageTemplate, int p1, int p2) {
+        if (!b) {
+            try {
+                N.checkArgument(b, errorMessageTemplate, p1, p2);
+            } finally {
+                try {
+                    close();
+                } catch (Exception e) {
+                    throw ExceptionUtil.toRuntimeException(e);
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     * @param b
+     * @param errorMessageTemplate
+     * @param p1
+     * @param p2
+     */
+    private void checkArgument(boolean b, String errorMessageTemplate, long p1, long p2) {
         if (!b) {
             try {
                 N.checkArgument(b, errorMessageTemplate, p1, p2);

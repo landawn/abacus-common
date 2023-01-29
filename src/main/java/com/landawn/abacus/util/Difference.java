@@ -770,8 +770,7 @@ public class Difference<L, R> {
          */
         public static MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object bean1, final Object bean2) {
             if (!ClassUtil.isBeanClass(bean1.getClass()) || !ClassUtil.isBeanClass(bean2.getClass())) {
-                throw new IllegalArgumentException(
-                        bean1.getClass().getCanonicalName() + " or " + bean2.getClass().getCanonicalName() + " is not a bean class");
+                throw new IllegalArgumentException(bean1.getClass().getCanonicalName() + " or " + bean2.getClass().getCanonicalName() + " is not a bean class");
             }
 
             return of(Maps.bean2Map(bean1), Maps.bean2Map(bean2));
@@ -787,8 +786,7 @@ public class Difference<L, R> {
         public static MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object bean1, final Object bean2,
                 final BiPredicate<?, ?> valueEquivalence) {
             if (!ClassUtil.isBeanClass(bean1.getClass()) || !ClassUtil.isBeanClass(bean2.getClass())) {
-                throw new IllegalArgumentException(
-                        bean1.getClass().getCanonicalName() + " or " + bean2.getClass().getCanonicalName() + " is not a bean class");
+                throw new IllegalArgumentException(bean1.getClass().getCanonicalName() + " or " + bean2.getClass().getCanonicalName() + " is not a bean class");
             }
 
             final Map<String, Object> map1 = Maps.bean2Map(bean1);

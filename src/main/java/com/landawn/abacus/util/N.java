@@ -25027,13 +25027,13 @@ public final class N extends CommonUtil {
      *
      * @param cmd
      * @param retryTimes
-     * @param retryInterval
+     * @param retryIntervallInMillis
      * @param retryCondition
      */
-    public static void execute(final Throwables.Runnable<? extends Exception> cmd, final int retryTimes, final long retryInterval,
+    public static void execute(final Throwables.Runnable<? extends Exception> cmd, final int retryTimes, final long retryIntervallInMillis,
             final Predicate<? super Exception> retryCondition) {
         try {
-            Retry.of(retryTimes, retryInterval, retryCondition).run(cmd);
+            Retry.of(retryTimes, retryIntervallInMillis, retryCondition).run(cmd);
         } catch (Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
@@ -25044,14 +25044,14 @@ public final class N extends CommonUtil {
      * @param <R>
      * @param cmd
      * @param retryTimes
-     * @param retryInterval
+     * @param retryIntervallInMillis
      * @param retryCondition
      * @return
      */
-    public static <R> R execute(final Callable<R> cmd, final int retryTimes, final long retryInterval,
+    public static <R> R execute(final Callable<R> cmd, final int retryTimes, final long retryIntervallInMillis,
             final BiPredicate<? super R, ? super Exception> retryCondition) {
         try {
-            final Retry<R> retry = Retry.of(retryTimes, retryInterval, retryCondition);
+            final Retry<R> retry = Retry.of(retryTimes, retryIntervallInMillis, retryCondition);
             return retry.call(cmd);
         } catch (Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
@@ -25155,15 +25155,15 @@ public final class N extends CommonUtil {
      *
      * @param cmd
      * @param retryTimes
-     * @param retryIntervalInMillis
+     * @param retryIntervallInMillisInMillis
      * @param retryCondition
      * @return
      * @see Futures
      */
     public static ContinuableFuture<Void> asyncExecute(final Throwables.Runnable<? extends Exception> cmd, final int retryTimes,
-            final long retryIntervalInMillis, final Predicate<? super Exception> retryCondition) {
+            final long retryIntervallInMillisInMillis, final Predicate<? super Exception> retryCondition) {
         return asyncExecutor.execute((Callable<Void>) () -> {
-            Retry.of(retryTimes, retryIntervalInMillis, retryCondition).run(cmd);
+            Retry.of(retryTimes, retryIntervallInMillisInMillis, retryCondition).run(cmd);
             return null;
         });
     }
@@ -25173,15 +25173,15 @@ public final class N extends CommonUtil {
      * @param <R>
      * @param cmd
      * @param retryTimes
-     * @param retryIntervalInMillis
+     * @param retryIntervallInMillisInMillis
      * @param retryCondition
      * @return
      * @see Futures
      */
-    public static <R> ContinuableFuture<R> asyncExecute(final Callable<R> cmd, final int retryTimes, final long retryIntervalInMillis,
+    public static <R> ContinuableFuture<R> asyncExecute(final Callable<R> cmd, final int retryTimes, final long retryIntervallInMillisInMillis,
             final BiPredicate<? super R, ? super Exception> retryCondition) {
         return asyncExecutor.execute((Callable<R>) () -> {
-            final Retry<R> retry = Retry.of(retryTimes, retryIntervalInMillis, retryCondition);
+            final Retry<R> retry = Retry.of(retryTimes, retryIntervallInMillisInMillis, retryCondition);
             return retry.call(cmd);
         });
     }

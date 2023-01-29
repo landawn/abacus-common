@@ -499,10 +499,10 @@ public abstract class Observer<T> implements Immutable {
             public synchronized void onNext(final Object param) {
                 if (downDispatcher != null) {
                     long now = System.currentTimeMillis();
-                    long interval = now - startTime;
+                    long intervalInMillis = now - startTime;
                     startTime = now;
 
-                    downDispatcher.onNext(Timed.of(param, interval));
+                    downDispatcher.onNext(Timed.of(param, intervalInMillis));
                 }
             }
         });

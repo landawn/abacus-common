@@ -1334,8 +1334,9 @@ public final class Fn extends Comparators {
      * @param <T>
      * @return
      */
-    public static <T extends CharSequence> Function<T, Integer> length() {
-        return (Function<T, Integer>) LENGTH;
+    @SuppressWarnings("rawtypes")
+    public static <T> Function<T[], Integer> len() {
+        return (Function) LEN;
     }
 
     /**
@@ -1343,9 +1344,8 @@ public final class Fn extends Comparators {
      * @param <T>
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static <T> Function<T[], Integer> len() {
-        return (Function) LEN;
+    public static <T extends CharSequence> Function<T, Integer> length() {
+        return (Function<T, Integer>) LENGTH;
     }
 
     /**

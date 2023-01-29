@@ -235,14 +235,14 @@ public class AsyncExecutor {
      *
      * @param action
      * @param retryTimes
-     * @param retryInterval
+     * @param retryIntervallInMillis
      * @param retryCondition
      * @return
      */
-    public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> action, final int retryTimes, final long retryInterval,
+    public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> action, final int retryTimes, final long retryIntervallInMillis,
             final Predicate<? super Exception> retryCondition) {
         return execute((Callable<Void>) () -> {
-            Retry.of(retryTimes, retryInterval, retryCondition).run(action);
+            Retry.of(retryTimes, retryIntervallInMillis, retryCondition).run(action);
             return null;
         });
     }
@@ -252,14 +252,14 @@ public class AsyncExecutor {
      * @param <R>
      * @param action
      * @param retryTimes
-     * @param retryInterval
+     * @param retryIntervallInMillis
      * @param retryCondition
      * @return
      */
-    public <R> ContinuableFuture<R> execute(final Callable<R> action, final int retryTimes, final long retryInterval,
+    public <R> ContinuableFuture<R> execute(final Callable<R> action, final int retryTimes, final long retryIntervallInMillis,
             final BiPredicate<? super R, ? super Exception> retryCondition) {
         return execute((Callable<R>) () -> {
-            final Retry<R> retry = Retry.of(retryTimes, retryInterval, retryCondition);
+            final Retry<R> retry = Retry.of(retryTimes, retryIntervallInMillis, retryCondition);
             return retry.call(action);
         });
     }
