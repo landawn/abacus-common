@@ -65,6 +65,7 @@ import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.Fn.IntFunctions;
 import com.landawn.abacus.util.Fn.Suppliers;
+import com.landawn.abacus.util.Throwables.Runnable;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.Tuple.Tuple4;
@@ -25106,6 +25107,27 @@ public final class N extends CommonUtil {
 
     /**
      *
+     * @param commands
+     * @param executor
+     * @return
+     * @see Futures
+     */
+    public static List<ContinuableFuture<Void>> asyncExecute(final List<? extends Throwables.Runnable<? extends Exception>> commands, final Executor executor) {
+        if (N.isNullOrEmpty(commands)) {
+            return new ArrayList<>();
+        }
+
+        final List<ContinuableFuture<Void>> results = new ArrayList<>(commands.size());
+
+        for (Throwables.Runnable<? extends Exception> cmd : commands) {
+            results.add(ContinuableFuture.run(cmd, executor));
+        }
+
+        return results;
+    }
+
+    /**
+     *
      * @param <R>
      * @param command
      * @return
@@ -25149,6 +25171,28 @@ public final class N extends CommonUtil {
      */
     public static <R> List<ContinuableFuture<R>> asyncExecute(final Collection<? extends Callable<R>> commands) {
         return asyncExecutor.execute(commands);
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param commands
+     * @param executor
+     * @return
+     * @see Futures
+     */
+    public static <R> List<ContinuableFuture<R>> asyncExecute(final Collection<? extends Callable<R>> commands, final Executor executor) {
+        if (N.isNullOrEmpty(commands)) {
+            return new ArrayList<>();
+        }
+
+        final List<ContinuableFuture<R>> results = new ArrayList<>(commands.size());
+
+        for (Callable<R> cmd : commands) {
+            results.add(ContinuableFuture.call(cmd, executor));
+        }
+
+        return results;
     }
 
     /**
@@ -25203,13 +25247,20 @@ public final class N extends CommonUtil {
      * @see Fn#jc2r(Callable)
      */
     public static void runInParallel(final Throwables.Runnable<? extends Exception> command, final Throwables.Runnable<? extends Exception> command2) {
-        final ContinuableFuture<Void> f = asyncExecute(command2);
+        final ContinuableFuture<Void> f2 = asyncExecute(command2);
+        boolean hasException = true;
 
         try {
             command.run();
-            f.get();
+            f2.get();
+
+            hasException = false;
         } catch (Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
+        } finally {
+            if (hasException) {
+                f2.cancel(false);
+            }
         }
     }
 
@@ -25226,13 +25277,21 @@ public final class N extends CommonUtil {
             final Throwables.Runnable<? extends Exception> command3) {
         final ContinuableFuture<Void> f2 = asyncExecute(command2);
         final ContinuableFuture<Void> f3 = asyncExecute(command3);
+        boolean hasException = true;
 
         try {
             command.run();
             f2.get();
             f3.get();
+
+            hasException = false;
         } catch (Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
+        } finally {
+            if (hasException) {
+                f2.cancel(false);
+                f3.cancel(false);
+            }
         }
     }
 
@@ -25251,14 +25310,23 @@ public final class N extends CommonUtil {
         final ContinuableFuture<Void> f2 = asyncExecute(command2);
         final ContinuableFuture<Void> f3 = asyncExecute(command3);
         final ContinuableFuture<Void> f4 = asyncExecute(command4);
+        boolean hasException = true;
 
         try {
             command.run();
             f2.get();
             f3.get();
             f4.get();
+
+            hasException = false;
         } catch (Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
+        } finally {
+            if (hasException) {
+                f2.cancel(false);
+                f3.cancel(false);
+                f4.cancel(false);
+            }
         }
     }
 
@@ -25280,6 +25348,7 @@ public final class N extends CommonUtil {
         final ContinuableFuture<Void> f3 = asyncExecute(command3);
         final ContinuableFuture<Void> f4 = asyncExecute(command4);
         final ContinuableFuture<Void> f5 = asyncExecute(command5);
+        boolean hasException = true;
 
         try {
             command.run();
@@ -25287,8 +25356,66 @@ public final class N extends CommonUtil {
             f3.get();
             f4.get();
             f5.get();
+
+            hasException = false;
         } catch (Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
+        } finally {
+            if (hasException) {
+                f2.cancel(false);
+                f3.cancel(false);
+                f4.cancel(false);
+                f5.cancel(false);
+            }
+        }
+    }
+
+    /**
+     *
+     * @param commands
+     */
+    public static void runInParallel(final Collection<? extends Throwables.Runnable<? extends Exception>> commands) {
+        runInParallel(commands, asyncExecutor.getExecutor());
+    }
+
+    /**
+     *
+     * @param commands
+     * @param executor
+     */
+    public static void runInParallel(final Collection<? extends Throwables.Runnable<? extends Exception>> commands, final Executor executor) {
+        N.checkArgNotNull(executor, "executor");
+
+        if (N.isNullOrEmpty(commands)) {
+            return;
+        }
+
+        final int cmdSize = commands.size();
+        final List<ContinuableFuture<Void>> futures = new ArrayList<>(cmdSize - 1);
+        boolean hasException = true;
+
+        try {
+            final Iterator<? extends Runnable<? extends Exception>> iter = commands.iterator();
+
+            for (int i = 0, toIndex = cmdSize - 1; i < toIndex; i++) {
+                futures.add(asyncExecute(iter.next(), executor));
+            }
+
+            iter.next().run();
+
+            for (ContinuableFuture<Void> f : futures) {
+                f.get();
+            }
+
+            hasException = false;
+        } catch (Exception e) {
+            throw ExceptionUtil.toRuntimeException(e);
+        } finally {
+            if (hasException) {
+                for (ContinuableFuture<Void> f : futures) {
+                    f.cancel(false);
+                }
+            }
         }
     }
 
@@ -25301,15 +25428,22 @@ public final class N extends CommonUtil {
      * @see Fn#jr2c(Runnable)
      */
     public static <R, R2> Tuple2<R, R2> callInParallel(final Callable<R> command, final Callable<R2> command2) {
-        final ContinuableFuture<R2> f = asyncExecute(command2);
+        final ContinuableFuture<R2> f2 = asyncExecute(command2);
+        boolean hasException = true;
 
         try {
             final R r = command.call();
-            final R2 r2 = f.get();
+            final R2 r2 = f2.get();
+
+            hasException = false;
 
             return Tuple.of(r, r2);
         } catch (Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
+        } finally {
+            if (hasException) {
+                f2.cancel(false);
+            }
         }
     }
 
@@ -25325,15 +25459,23 @@ public final class N extends CommonUtil {
     public static <R, R2, R3> Tuple3<R, R2, R3> callInParallel(final Callable<R> command, final Callable<R2> command2, final Callable<R3> command3) {
         final ContinuableFuture<R2> f2 = asyncExecute(command2);
         final ContinuableFuture<R3> f3 = asyncExecute(command3);
+        boolean hasException = true;
 
         try {
             final R r = command.call();
             final R2 r2 = f2.get();
             final R3 r3 = f3.get();
 
+            hasException = false;
+
             return Tuple.of(r, r2, r3);
         } catch (Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
+        } finally {
+            if (hasException) {
+                f2.cancel(false);
+                f3.cancel(false);
+            }
         }
     }
 
@@ -25352,6 +25494,7 @@ public final class N extends CommonUtil {
         final ContinuableFuture<R2> f2 = asyncExecute(command2);
         final ContinuableFuture<R3> f3 = asyncExecute(command3);
         final ContinuableFuture<R4> f4 = asyncExecute(command4);
+        boolean hasException = true;
 
         try {
             final R r = command.call();
@@ -25359,9 +25502,17 @@ public final class N extends CommonUtil {
             final R3 r3 = f3.get();
             final R4 r4 = f4.get();
 
+            hasException = false;
+
             return Tuple.of(r, r2, r3, r4);
         } catch (Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
+        } finally {
+            if (hasException) {
+                f2.cancel(false);
+                f3.cancel(false);
+                f4.cancel(false);
+            }
         }
     }
 
@@ -25382,6 +25533,7 @@ public final class N extends CommonUtil {
         final ContinuableFuture<R3> f3 = asyncExecute(command3);
         final ContinuableFuture<R4> f4 = asyncExecute(command4);
         final ContinuableFuture<R5> f5 = asyncExecute(command5);
+        boolean hasException = true;
 
         try {
             final R r = command.call();
@@ -25390,9 +25542,77 @@ public final class N extends CommonUtil {
             final R4 r4 = f4.get();
             final R5 r5 = f5.get();
 
+            hasException = false;
+
             return Tuple.of(r, r2, r3, r4, r5);
         } catch (Exception e) {
             throw ExceptionUtil.toRuntimeException(e);
+        } finally {
+            if (hasException) {
+                f2.cancel(false);
+                f3.cancel(false);
+                f4.cancel(false);
+                f5.cancel(false);
+            }
+        }
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param commands
+     * @return
+     */
+    public static <R> List<R> callInParallel(final Collection<? extends Callable<? extends R>> commands) {
+        return callInParallel(commands, asyncExecutor.getExecutor());
+    }
+
+    /**
+     *
+     * @param <R>
+     * @param commands
+     * @param executor
+     * @return
+     */
+    public static <R> List<R> callInParallel(final Collection<? extends Callable<? extends R>> commands, final Executor executor) {
+        N.checkArgNotNull(executor, "executor");
+
+        if (N.isNullOrEmpty(commands)) {
+            return new ArrayList<>(0);
+        }
+
+        final int cmdSize = commands.size();
+        final List<ContinuableFuture<? extends R>> futures = new ArrayList<>(cmdSize - 1);
+        boolean hasException = true;
+
+        try {
+            final Iterator<? extends Callable<? extends R>> iter = commands.iterator();
+
+            for (int i = 0, toIndex = cmdSize - 1; i < toIndex; i++) {
+                futures.add(asyncExecute(iter.next(), executor));
+            }
+
+            final R r = iter.next().call();
+
+            final List<R> result = new ArrayList<>(cmdSize);
+
+            for (ContinuableFuture<? extends R> f : futures) {
+                result.add(f.get());
+            }
+
+            result.add(r);
+
+            hasException = false;
+
+            return result;
+        } catch (Exception e) {
+            throw ExceptionUtil.toRuntimeException(e);
+        } finally {
+            if (hasException) {
+                for (ContinuableFuture<? extends R> f : futures) {
+                    f.cancel(false);
+                }
+            }
         }
     }
 

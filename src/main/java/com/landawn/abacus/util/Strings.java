@@ -6379,8 +6379,6 @@ public abstract class Strings {
 
         if (delimiterOfInclusiveBeginIndex.length() == 0) {
             return str.substring(exclusiveEndIndex, exclusiveEndIndex);
-        } else if (exclusiveEndIndex == 0) {
-            return null;
         } else {
             return substring(str, str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1), exclusiveEndIndex);
         }
