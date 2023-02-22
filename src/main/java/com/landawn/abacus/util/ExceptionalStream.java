@@ -8828,12 +8828,22 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
             while (elements.hasNext()) {
                 next = elements.next();
-                Maps.merge(result, keyMapper.apply(next), valueMapper.apply(next), mergeFunction);
+                merge(result, keyMapper.apply(next), valueMapper.apply(next), mergeFunction);
             }
 
             return result;
         } finally {
             close();
+        }
+    }
+
+    static <K, V, E extends Exception> void merge(Map<K, V> map, K key, V value, Throwables.BinaryOperator<V, E> remappingFunction) throws E {
+        final V oldValue = map.get(key);
+
+        if (oldValue == null && !map.containsKey(key)) {
+            map.put(key, value);
+        } else {
+            map.put(key, remappingFunction.apply(oldValue, value));
         }
     }
 

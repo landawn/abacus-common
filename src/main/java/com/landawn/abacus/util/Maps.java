@@ -36,6 +36,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
+import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
@@ -77,14 +78,11 @@ public final class Maps {
      *
      * @param <T>
      * @param <K> the key type
-     * @param <E>
      * @param c
      * @param keyMapper
      * @return
-     * @throws E the e
      */
-    public static <T, K, E extends Exception> Map<K, T> newMap(Collection<? extends T> c, final Throwables.Function<? super T, ? extends K, E> keyMapper)
-            throws E {
+    public static <T, K> Map<K, T> create(Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper) {
         N.checkArgNotNull(keyMapper);
 
         if (N.isNullOrEmpty(c)) {
@@ -105,17 +103,13 @@ public final class Maps {
      * @param <T>
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E>
-     * @param <E2>
      * @param c
      * @param keyMapper
      * @param valueExtractor
      * @return
-     * @throws E the e
-     * @throws E2 the e2
      */
-    public static <T, K, V, E extends Exception, E2 extends Exception> Map<K, V> newMap(Collection<? extends T> c,
-            final Throwables.Function<? super T, ? extends K, E> keyMapper, final Throwables.Function<? super T, ? extends V, E2> valueExtractor) throws E, E2 {
+    public static <T, K, V> Map<K, V> create(Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends V> valueExtractor) {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(valueExtractor);
 
@@ -138,21 +132,17 @@ public final class Maps {
      * @param <K> the key type
      * @param <V> the value type
      * @param <M>
-     * @param <E>
-     * @param <E2>
      * @param c
      * @param keyMapper
      * @param valueExtractor
      * @param mapSupplier
      * @return
-     * @throws E the e
-     * @throws E2 the e2
      */
-    public static <T, K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M newMap(Collection<? extends T> c,
-            final Throwables.Function<? super T, ? extends K, E> keyMapper, final Throwables.Function<? super T, ? extends V, E2> valueExtractor,
-            final IntFunction<? extends M> mapSupplier) throws E, E2 {
+    public static <T, K, V, M extends Map<K, V>> M create(Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends V> valueExtractor, final IntFunction<? extends M> mapSupplier) {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(valueExtractor);
+        N.checkArgNotNull(mapSupplier);
 
         if (N.isNullOrEmpty(c)) {
             return mapSupplier.apply(0);
@@ -170,15 +160,54 @@ public final class Maps {
     /**
      *
      * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param <M>
+     * @param c
+     * @param keyMapper
+     * @param valueExtractor
+     * @param mergeFunction
+     * @param mapSupplier
+     * @return
+     */
+    public static <T, K, V, M extends Map<K, V>> M create(Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
+        N.checkArgNotNull(keyMapper);
+        N.checkArgNotNull(valueExtractor);
+        N.checkArgNotNull(mergeFunction);
+        N.checkArgNotNull(mapSupplier);
+
+        if (N.isNullOrEmpty(c)) {
+            return mapSupplier.apply(0);
+        }
+
+        final M result = mapSupplier.apply(c.size());
+        K key = null;
+
+        for (T e : c) {
+            key = keyMapper.apply(e);
+
+            final V oldValue = result.get(key);
+
+            if (oldValue == null && !result.containsKey(key)) {
+                result.put(key, valueExtractor.apply(e));
+            } else {
+                result.put(key, mergeFunction.apply(oldValue, valueExtractor.apply(e)));
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <T>
      * @param <K> the key type
-     * @param <E>
      * @param iter
      * @param keyMapper
      * @return
-     * @throws E the e
      */
-    public static <T, K, E extends Exception> Map<K, T> newMap(final Iterator<? extends T> iter, final Throwables.Function<? super T, K, E> keyMapper)
-            throws E {
+    public static <T, K> Map<K, T> create(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper) {
         N.checkArgNotNull(keyMapper);
 
         if (iter == null) {
@@ -201,17 +230,13 @@ public final class Maps {
      * @param <T>
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E>
-     * @param <E2>
      * @param iter
      * @param keyMapper
      * @param valueExtractor
      * @return
-     * @throws E the e
-     * @throws E2 the e2
      */
-    public static <T, K, V, E extends Exception, E2 extends Exception> Map<K, V> newMap(final Iterator<? extends T> iter,
-            final Throwables.Function<? super T, K, E> keyMapper, final Throwables.Function<? super T, ? extends V, E2> valueExtractor) throws E, E2 {
+    public static <T, K, V> Map<K, V> create(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
+            final Function<? super T, ? extends V> valueExtractor) {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(valueExtractor);
 
@@ -236,21 +261,17 @@ public final class Maps {
      * @param <K> the key type
      * @param <V> the value type
      * @param <M>
-     * @param <E>
-     * @param <E2>
      * @param iter
      * @param keyMapper
      * @param valueExtractor
      * @param mapSupplier
      * @return
-     * @throws E the e
-     * @throws E2 the e2
      */
-    public static <T, K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M newMap(final Iterator<? extends T> iter,
-            final Throwables.Function<? super T, K, E> keyMapper, final Throwables.Function<? super T, ? extends V, E2> valueExtractor,
-            final Supplier<? extends M> mapSupplier) throws E, E2 {
+    public static <T, K, V, M extends Map<K, V>> M create(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
+            final Function<? super T, ? extends V> valueExtractor, final Supplier<? extends M> mapSupplier) {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(valueExtractor);
+        N.checkArgNotNull(mapSupplier);
 
         if (iter == null) {
             return mapSupplier.get();
@@ -265,6 +286,272 @@ public final class Maps {
         }
 
         return result;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param <M>
+     * @param iter
+     * @param keyMapper
+     * @param valueExtractor
+     * @param mergeFunction
+     * @param mapSupplier
+     * @return
+     */
+    public static <T, K, V, M extends Map<K, V>> M create(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
+            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapSupplier) {
+        N.checkArgNotNull(keyMapper);
+        N.checkArgNotNull(valueExtractor);
+        N.checkArgNotNull(mergeFunction);
+        N.checkArgNotNull(mapSupplier);
+
+        if (iter == null) {
+            return mapSupplier.get();
+        }
+
+        final M result = mapSupplier.get();
+        T e = null;
+        K key = null;
+
+        while (iter.hasNext()) {
+            e = iter.next();
+            key = keyMapper.apply(e);
+
+            final V oldValue = result.get(key);
+
+            if (oldValue == null && !result.containsKey(key)) {
+                result.put(key, valueExtractor.apply(e));
+            } else {
+                result.put(key, mergeFunction.apply(oldValue, valueExtractor.apply(e)));
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <K>
+     * @param <V>
+     * @param <V2>
+     * @param map
+     * @param valueMapper
+     * @return
+     */
+    public static <K, V, V2> Map<K, V2> create(final Map<? extends K, ? extends V> map, final Function<? super V, V2> valueMapper) {
+        N.checkArgNotNull(valueMapper);
+
+        if (map == null) {
+            return new HashMap<>();
+        }
+
+        final Map<K, V2> result = Maps.newTargetMap(map);
+
+        for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
+            result.put(entry.getKey(), valueMapper.apply(entry.getValue()));
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <K>
+     * @param <V>
+     * @param <V2>
+     * @param <M>
+     * @param map
+     * @param valueMapper
+     * @param mapSupplier
+     * @return
+     */
+    public static <K, V, V2, M extends Map<K, V2>> M create(final Map<? extends K, ? extends V> map, final Function<? super V, V2> valueMapper,
+            final IntFunction<? extends M> mapSupplier) {
+        N.checkArgNotNull(valueMapper);
+        N.checkArgNotNull(mapSupplier);
+
+        if (map == null) {
+            return mapSupplier.apply(0);
+        }
+
+        final M result = mapSupplier.apply(map.size());
+
+        for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
+            result.put(entry.getKey(), valueMapper.apply(entry.getValue()));
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <K> the key type
+     * @param <E>
+     * @param c
+     * @param keyMapper
+     * @return
+     * @throws E the e
+     * @deprecated Use {@link #create(Collection<? extends T>,Function<? super T, ? extends K>)} instead
+     */
+    @Deprecated
+    public static <T, K> Map<K, T> newMap(Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper) {
+        return create(c, keyMapper);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <E>
+     * @param <E2>
+     * @param c
+     * @param keyMapper
+     * @param valueExtractor
+     * @return
+     * @throws E the e
+     * @throws E2 the e2
+     * @deprecated Use {@link #create(Collection<? extends T>,Function<? super T, ? extends K>,Function<? super T, ? extends V>)} instead
+     */
+    @Deprecated
+    public static <T, K, V> Map<K, V> newMap(Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends V> valueExtractor) {
+        return create(c, keyMapper, valueExtractor);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param c
+     * @param keyMapper
+     * @param valueExtractor
+     * @param mapSupplier
+     * @return
+     * @throws E the e
+     * @throws E2 the e2
+     * @deprecated Use {@link #create(Collection<? extends T>,Function<? super T, ? extends K>,Function<? super T, ? extends V>,IntFunction<? extends M>)} instead
+     */
+    @Deprecated
+    public static <T, K, V, M extends Map<K, V>> M newMap(Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends V> valueExtractor, final IntFunction<? extends M> mapSupplier) {
+        return create(c, keyMapper, valueExtractor, mapSupplier);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param c
+     * @param keyMapper
+     * @param valueExtractor
+     * @param mergeFunction
+     * @param mapSupplier
+     * @return
+     * @throws E
+     * @throws E2
+     * @deprecated Use {@link #create(Collection<? extends T>,Function<? super T, ? extends K>,Function<? super T, ? extends V>,BinaryOperator<V>,IntFunction<? extends M>)} instead
+     */
+    @Deprecated
+    public static <T, K, V, M extends Map<K, V>> M newMap(Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
+        return create(c, keyMapper, valueExtractor, mergeFunction, mapSupplier);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <K> the key type
+     * @param <E>
+     * @param iter
+     * @param keyMapper
+     * @return
+     * @throws E the e
+     * @deprecated Use {@link #create(Iterator<? extends T>,Throwables.Function<? super T, K, E>)} instead
+     */
+    @Deprecated
+    public static <T, K> Map<K, T> newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper) {
+        return create(iter, keyMapper);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <E>
+     * @param <E2>
+     * @param iter
+     * @param keyMapper
+     * @param valueExtractor
+     * @return
+     * @throws E the e
+     * @throws E2 the e2
+     * @deprecated Use {@link #create(Iterator<? extends T>,Throwables.Function<? super T, K, E>,Function<? super T, ? extends V>)} instead
+     */
+    @Deprecated
+    public static <T, K, V> Map<K, V> newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
+            final Function<? super T, ? extends V> valueExtractor) {
+        return create(iter, keyMapper, valueExtractor);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param iter
+     * @param keyMapper
+     * @param valueExtractor
+     * @param mapSupplier
+     * @return
+     * @throws E the e
+     * @throws E2 the e2
+     * @deprecated Use {@link #create(Iterator<? extends T>,Throwables.Function<? super T, K, E>,Function<? super T, ? extends V>,Supplier<? extends M>)} instead
+     */
+    @Deprecated
+    public static <T, K, V, M extends Map<K, V>> M newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
+            final Function<? super T, ? extends V> valueExtractor, final Supplier<? extends M> mapSupplier) {
+        return create(iter, keyMapper, valueExtractor, mapSupplier);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param <M>
+     * @param <E>
+     * @param <E2>
+     * @param iter
+     * @param keyMapper
+     * @param valueExtractor
+     * @param mergeFunction
+     * @param mapSupplier
+     * @return
+     * @throws E
+     * @throws E2
+     * @deprecated Use {@link #create(Iterator<? extends T>,Throwables.Function<? super T, K, E>,Function<? super T, ? extends V>,BinaryOperator<V>,Supplier<? extends M>)} instead
+     */
+    @Deprecated
+    public static <T, K, V, M extends Map<K, V>> M newMap(final Iterator<? extends T> iter, final Function<? super T, K> keyMapper,
+            final Function<? super T, ? extends V> valueExtractor, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapSupplier) {
+        return create(iter, keyMapper, valueExtractor, mergeFunction, mapSupplier);
     }
 
     /**
@@ -1231,25 +1518,25 @@ public final class Maps {
      * <code>
         Map map = N.asMap("key1", "val1");
         assertEquals("val1", Maps.getByPath(map, "key1"));
-    
+
         map = N.asMap("key1", N.asList("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-    
+
         map = N.asMap("key1", N.asSet("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", "val2")));
         assertEquals("val2", Maps.getByPath(map, "key1[0][1]"));
-    
+
         map = N.asMap("key1", N.asSet(N.asList(N.asSet("val1"))));
         assertEquals("val1", Maps.getByPath(map, "key1[0][0][0]"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", "val22"))));
         assertEquals("val22", Maps.getByPath(map, "key1[0][1].key2"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertEquals("val33", Maps.getByPath(map, "key1[0][1].key2[1].key3"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertNull(Maps.getByPath(map, "key1[0][2].key2[1].key3"));
      * </code>
@@ -2008,13 +2295,11 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E>
      * @param map
      * @param mergeOp
      * @return
-     * @throws E the e
      */
-    public static <K, V, E extends Exception> Map<V, K> invert(final Map<K, V> map, Throwables.BinaryOperator<K, E> mergeOp) throws E {
+    public static <K, V> Map<V, K> invert(final Map<K, V> map, final BinaryOperator<K> mergeOp) {
         N.checkArgNotNull(mergeOp, "mergeOp");
 
         if (map == null) {
@@ -2278,14 +2563,12 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <E>
      * @param map
      * @param key
      * @param value
      * @param remappingFunction
-     * @throws E the e
      */
-    public static <K, V, E extends Exception> void merge(Map<K, V> map, K key, V value, Throwables.BinaryOperator<V, E> remappingFunction) throws E {
+    public static <K, V> void merge(Map<K, V> map, K key, V value, BinaryOperator<V> remappingFunction) {
         final V oldValue = map.get(key);
 
         if (oldValue == null && !map.containsKey(key)) {

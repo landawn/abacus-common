@@ -4815,66 +4815,6 @@ public abstract class Strings {
     }
 
     /**
-     * <p>Find the first index of any of a set of potential substrings.</p>
-     *
-     * @param str
-     * @param substrs
-     * @return
-     * @see #indexOfAny(String, String...)
-     */
-    @SafeVarargs
-    public static int smallestIndexOfAll(final String str, final String... substrs) {
-        return smallestIndexOfAll(str, 0, substrs);
-    }
-
-    /**
-     * <p>Find the first index of any of a set of potential substrings from {@code fromIndex}.</p>
-     *
-     *
-     * @param str
-     * @param fromIndex
-     * @param substrs
-     * @return
-     * @see #indexOfAny(String, int, String...)
-     */
-    @SafeVarargs
-    public static int smallestIndexOfAll(final String str, final int fromIndex, final String... substrs) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substrs)) {
-            return N.INDEX_NOT_FOUND;
-        }
-
-        String srcStr = str;
-        int result = N.INDEX_NOT_FOUND;
-        int idx = 0;
-
-        for (int i = 0, len = substrs.length; i < len; i++) {
-            if (N.isNullOrEmpty(substrs[i])) {
-                continue;
-            }
-
-            idx = indexOf(srcStr, fromIndex, substrs[i]);
-
-            if (idx != N.INDEX_NOT_FOUND && (result == N.INDEX_NOT_FOUND || idx < result)) {
-                result = idx;
-
-                if (len - i > 1) {
-                    int max = 0;
-
-                    for (int j = i + 1; j < len; j++) {
-                        max = N.max(max, N.len(substrs[j]));
-                    }
-
-                    if (max > 0 && idx + max < srcStr.length() * 0.8) {
-                        srcStr = srcStr.substring(0, idx + max - 1);
-                    }
-                }
-            }
-        }
-
-        return result;
-    }
-
-    /**
      * Index of any but.
      *
      * @param str
@@ -4999,22 +4939,6 @@ public abstract class Strings {
         }
 
         return N.INDEX_NOT_FOUND;
-    }
-
-    /**
-     * <p>
-     * Finds the n-th index within a String, handling {@code null}.
-     * </p>
-     *
-     * @param str
-     * @param substr
-     * @param ordinal the n-th {@code searchStr} to find
-     * @return
-     *         {@code N.INDEX_NOT_FOUND}) if no match or {@code null} or empty
-     *         string input
-     */
-    public static int ordinalIndexOf(final String str, final String substr, final int ordinal) {
-        return ordinalIndexOf(str, substr, ordinal, false);
     }
 
     /**
@@ -5287,55 +5211,6 @@ public abstract class Strings {
         return N.INDEX_NOT_FOUND;
     }
 
-    /**
-     * Last index of any.
-     *
-     * @param str
-     * @param substrs
-     * @return
-     * @see #lastIndexOfAny(String, String...)
-     */
-    @SafeVarargs
-    public static int largestIndexOfAll(final String str, final String... substrs) {
-        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substrs)) {
-            return N.INDEX_NOT_FOUND;
-        }
-
-        int result = N.INDEX_NOT_FOUND;
-        int tmp = 0;
-
-        for (String substr : substrs) {
-            if (N.isNullOrEmpty(substr)) {
-                continue;
-            }
-
-            tmp = str.lastIndexOf(substr);
-
-            if (tmp != N.INDEX_NOT_FOUND && (result == N.INDEX_NOT_FOUND || tmp > result)) {
-                result = tmp;
-                // TODO performance improvement: refer to smallestIndexOfAll
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * <p>
-     * Finds the n-th last index within a String, handling {@code null}.
-     * </p>
-     *
-     * @param str
-     * @param substr
-     * @param ordinal the n-th last {@code searchStr} to find
-     * @return
-     *         {@code N.INDEX_NOT_FOUND}) if no match or {@code null} or empty
-     *         string input
-     */
-    public static int lastOrdinalIndexOf(final String str, final String substr, final int ordinal) {
-        return ordinalIndexOf(str, substr, ordinal, true);
-    }
-
     // Shared code between ordinalIndexOf(String,String,int) and
     /**
      * Ordinal index of.
@@ -5373,6 +5248,131 @@ public abstract class Strings {
         }
 
         return fromIndex;
+    }
+
+    /**
+     * <p>Find the first index of any of a set of potential substrings.</p>
+     *
+     * @param str
+     * @param substrs
+     * @return
+     * @see #indexOfAny(String, String...)
+     */
+    @SafeVarargs
+    public static int smallestIndexOfAll(final String str, final String... substrs) {
+        return smallestIndexOfAll(str, 0, substrs);
+    }
+
+    /**
+     * <p>Find the first index of any of a set of potential substrings from {@code fromIndex}.</p>
+     *
+     *
+     * @param str
+     * @param fromIndex
+     * @param substrs
+     * @return
+     * @see #indexOfAny(String, int, String...)
+     */
+    @SafeVarargs
+    public static int smallestIndexOfAll(final String str, final int fromIndex, final String... substrs) {
+        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substrs)) {
+            return N.INDEX_NOT_FOUND;
+        }
+
+        String srcStr = str;
+        int result = N.INDEX_NOT_FOUND;
+        int idx = 0;
+
+        for (int i = 0, len = substrs.length; i < len; i++) {
+            if (N.isNullOrEmpty(substrs[i])) {
+                continue;
+            }
+
+            idx = indexOf(srcStr, fromIndex, substrs[i]);
+
+            if (idx != N.INDEX_NOT_FOUND && (result == N.INDEX_NOT_FOUND || idx < result)) {
+                result = idx;
+
+                if (len - i > 1) {
+                    int max = 0;
+
+                    for (int j = i + 1; j < len; j++) {
+                        max = N.max(max, N.len(substrs[j]));
+                    }
+
+                    if (max > 0 && idx + max < srcStr.length() * 0.8) {
+                        srcStr = srcStr.substring(0, idx + max - 1);
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Last index of any.
+     *
+     * @param str
+     * @param substrs
+     * @return
+     * @see #lastIndexOfAny(String, String...)
+     */
+    @SafeVarargs
+    public static int largestIndexOfAll(final String str, final String... substrs) {
+        if (N.isNullOrEmpty(str) || N.isNullOrEmpty(substrs)) {
+            return N.INDEX_NOT_FOUND;
+        }
+
+        int result = N.INDEX_NOT_FOUND;
+        int tmp = 0;
+
+        for (String substr : substrs) {
+            if (N.isNullOrEmpty(substr)) {
+                continue;
+            }
+
+            tmp = str.lastIndexOf(substr);
+
+            if (tmp != N.INDEX_NOT_FOUND && (result == N.INDEX_NOT_FOUND || tmp > result)) {
+                result = tmp;
+                // TODO performance improvement: refer to smallestIndexOfAll
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * <p>
+     * Finds the n-th index within a String, handling {@code null}.
+     * </p>
+     *
+     * @param str
+     * @param substr
+     * @param ordinal the n-th {@code searchStr} to find
+     * @return
+     *         {@code N.INDEX_NOT_FOUND}) if no match or {@code null} or empty
+     *         string input
+     */
+    public static int ordinalIndexOf(final String str, final String substr, final int ordinal) {
+        return ordinalIndexOf(str, substr, ordinal, false);
+    }
+
+    /**
+     * <p>
+     * Finds the n-th last index within a String, handling {@code null}.
+     * </p>
+     *
+     * @param str
+     * @param substr
+     * @param ordinal the n-th last {@code searchStr} to find
+     * @return
+     *         {@code N.INDEX_NOT_FOUND}) if no match or {@code null} or empty
+     *         string input
+     */
+    public static int lastOrdinalIndexOf(final String str, final String substr, final int ordinal) {
+        return ordinalIndexOf(str, substr, ordinal, true);
     }
 
     /**
@@ -5679,6 +5679,29 @@ public abstract class Strings {
     }
 
     /**
+     * Starts with any.
+     *
+     * @param str
+     * @param substrs
+     * @return
+     */
+    @SafeVarargs
+    public static boolean startsWithAnyIgnoreCase(final String str, final String... substrs) {
+        if (str == null || N.isNullOrEmpty(substrs)) {
+            return false;
+        }
+
+        for (final String substr : substrs) {
+            if (startsWithIgnoreCase(str, substr)) {
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      *
      * @param str
      * @param suffix
@@ -5697,23 +5720,6 @@ public abstract class Strings {
      */
     public static boolean endsWithIgnoreCase(final String str, final String suffix) {
         return endsWith(str, suffix, true);
-    }
-
-    /**
-     *
-     * @param str
-     * @param suffix
-     * @param ignoreCase
-     * @return
-     */
-    private static boolean endsWith(final String str, final String suffix, final boolean ignoreCase) {
-        if (str == null || suffix == null || suffix.length() > str.length()) {
-            return false;
-        }
-
-        final int strOffset = str.length() - suffix.length();
-
-        return ignoreCase ? str.regionMatches(true, strOffset, suffix, 0, suffix.length()) : str.endsWith(suffix);
     }
 
     /**
@@ -5739,6 +5745,44 @@ public abstract class Strings {
     }
 
     /**
+     * Ends with ignore case.
+     *
+     * @param str
+     * @param substrs
+     * @return
+     */
+    public static boolean endsWithAnyIgnoreCase(final String str, final String... substrs) {
+        if (str == null || N.isNullOrEmpty(substrs)) {
+            return false;
+        }
+
+        for (final String searchString : substrs) {
+            if (endsWithIgnoreCase(str, searchString)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     *
+     * @param str
+     * @param suffix
+     * @param ignoreCase
+     * @return
+     */
+    private static boolean endsWith(final String str, final String suffix, final boolean ignoreCase) {
+        if (str == null || suffix == null || suffix.length() > str.length()) {
+            return false;
+        }
+
+        final int strOffset = str.length() - suffix.length();
+
+        return ignoreCase ? str.regionMatches(true, strOffset, suffix, 0, suffix.length()) : str.endsWith(suffix);
+    }
+
+    /**
      *
      * @param a
      * @param b
@@ -5746,6 +5790,17 @@ public abstract class Strings {
      */
     public static boolean equals(final String a, final String b) {
         return (a == null) ? b == null : (b == null ? false : a.length() == b.length() && a.equals(b));
+    }
+
+    /**
+     * Equals ignore case.
+     *
+     * @param a
+     * @param b
+     * @return
+     */
+    public static boolean equalsIgnoreCase(final String a, final String b) {
+        return (a == null) ? b == null : (b == null ? false : a.equalsIgnoreCase(b));
     }
 
     /**
@@ -5800,17 +5855,6 @@ public abstract class Strings {
         }
 
         return false;
-    }
-
-    /**
-     * Equals ignore case.
-     *
-     * @param a
-     * @param b
-     * @return
-     */
-    public static boolean equalsIgnoreCase(final String a, final String b) {
-        return (a == null) ? b == null : (b == null ? false : a.equalsIgnoreCase(b));
     }
 
     /**

@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
@@ -284,14 +285,11 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *
      * @param <T>
      * @param <K> the key type
-     * @param <X>
      * @param c
      * @param keyMapper
      * @return
-     * @throws X the x
      */
-    public static <T, K, X extends Exception> SetMultimap<K, T> from(final Collection<? extends T> c,
-            final Throwables.Function<? super T, ? extends K, X> keyMapper) throws X {
+    public static <T, K> SetMultimap<K, T> from(final Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper) {
         N.checkArgNotNull(keyMapper);
 
         final SetMultimap<K, T> multimap = N.newSetMultimap(N.size(c));
@@ -310,17 +308,13 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param <T>
      * @param <K> the key type
      * @param <E>
-     * @param <X>
-     * @param <X2>
      * @param c
      * @param keyMapper
      * @param valueExtractor
      * @return
-     * @throws X the x
-     * @throws X2 the x2
      */
-    public static <T, K, E, X extends Exception, X2 extends Exception> SetMultimap<K, E> from(final Collection<? extends T> c,
-            final Throwables.Function<? super T, ? extends K, X> keyMapper, final Throwables.Function<? super T, ? extends E, X2> valueExtractor) throws X, X2 {
+    public static <T, K, E> SetMultimap<K, E> from(final Collection<? extends T> c, final Function<? super T, ? extends K> keyMapper,
+            final Function<? super T, ? extends E> valueExtractor) {
         N.checkArgNotNull(keyMapper);
         N.checkArgNotNull(valueExtractor);
 
