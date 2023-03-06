@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface LongBiConsumer extends Throwables.LongBiConsumer<RuntimeException> {
+public interface LongBiConsumer extends Throwables.LongBiConsumer<RuntimeException> { //NOSONAR
 
     @Override
     void accept(long t, long u);

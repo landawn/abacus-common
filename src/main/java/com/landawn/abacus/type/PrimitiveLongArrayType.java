@@ -30,6 +30,7 @@ import com.landawn.abacus.util.WD;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<long[]> {
 
     public static final String LONG_ARRAY = long[].class.getSimpleName();

@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface DoubleTriFunction<R> extends Throwables.DoubleTriFunction<R, RuntimeException> {
+public interface DoubleTriFunction<R> extends Throwables.DoubleTriFunction<R, RuntimeException> { //NOSONAR
 
     @Override
     R apply(double a, double b, double c);

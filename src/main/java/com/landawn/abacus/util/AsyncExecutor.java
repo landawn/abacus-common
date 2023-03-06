@@ -54,7 +54,7 @@ public class AsyncExecutor {
 
     private final TimeUnit unit;
 
-    private volatile Executor executor;
+    private volatile Executor executor; //NOSONAR
 
     public AsyncExecutor() {
         this(DEFAULT_CORE_POOL_SIZE, DEFAULT_MAX_THREAD_POOL_SIZE, 180L, TimeUnit.SECONDS);
@@ -271,7 +271,7 @@ public class AsyncExecutor {
      * @return
      */
     protected <R> ContinuableFuture<R> execute(final FutureTask<R> futureTask) {
-        final Executor executor = getExecutor();
+        final Executor executor = getExecutor(); //NOSONAR
 
         executor.execute(futureTask);
 
@@ -323,10 +323,8 @@ public class AsyncExecutor {
         try {
             executorService.shutdown();
 
-            if (terminationTimeout > 0) {
-                if (!executorService.isTerminated()) {
-                    executorService.awaitTermination(terminationTimeout, timeUnit);
-                }
+            if (terminationTimeout > 0 && !executorService.isTerminated()) {
+                executorService.awaitTermination(terminationTimeout, timeUnit);
             }
         } catch (InterruptedException e) {
             logger.warn("Not all the requests/tasks executed in AsyncExecutor are completed successfully before shutdown.");

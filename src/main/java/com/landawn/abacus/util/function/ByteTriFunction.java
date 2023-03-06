@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface ByteTriFunction<R> extends Throwables.ByteTriFunction<R, RuntimeException> {
+public interface ByteTriFunction<R> extends Throwables.ByteTriFunction<R, RuntimeException> { //NOSONAR
 
     @Override
     R apply(byte a, byte b, byte c);

@@ -164,7 +164,7 @@ public abstract class Observer<T> implements Immutable {
      */
     public static Observer<Long> timer(long delay, TimeUnit unit) {
         N.checkArgument(delay >= 0, "delay can't be negative");
-        N.checkArgNotNull(unit, "Time unit can't be null");
+        N.checkArgNotNull(unit, "Time unit can't be null"); //NOSONAR
 
         return new TimerObserver<>(delay, unit);
     }
@@ -700,7 +700,7 @@ public abstract class Observer<T> implements Immutable {
         dispatcher.append(new Dispatcher<>() {
             private final List<T> queue = new ArrayList<>();
 
-            {
+            { //NOSONAR
                 scheduledFutures.put(schedulerForIntermediateOp.scheduleAtFixedRate(() -> {
                     List<T> list = null;
                     synchronized (queue) {
@@ -768,7 +768,7 @@ public abstract class Observer<T> implements Immutable {
             private final long interval = timespan + timeskip;
             private final List<T> queue = new ArrayList<>();
 
-            {
+            { //NOSONAR
                 scheduledFutures.put(schedulerForIntermediateOp.scheduleAtFixedRate(() -> {
                     List<T> list = null;
                     synchronized (queue) {
@@ -945,7 +945,7 @@ public abstract class Observer<T> implements Immutable {
      *
      * @param <T>
      */
-    protected static abstract class DispatcherBase<T> extends Dispatcher<T> {
+    protected abstract static class DispatcherBase<T> extends Dispatcher<T> {
 
         /** The on error. */
         private final Consumer<? super Exception> onError;
@@ -987,7 +987,7 @@ public abstract class Observer<T> implements Immutable {
      *
      * @param <T>
      */
-    protected static abstract class ObserverBase<T> extends Observer<T> {
+    protected abstract static class ObserverBase<T> extends Observer<T> {
 
         /**
          * Instantiates a new observer base.
@@ -1030,7 +1030,7 @@ public abstract class Observer<T> implements Immutable {
          */
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete) {
-            N.checkArgNotNull(action, "action");
+            N.checkArgNotNull(action, "action"); //NOSONAR
 
             dispatcher.append(new DispatcherBase<>(onError, onComplete) {
                 @Override

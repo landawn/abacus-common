@@ -25,6 +25,7 @@ import java.util.TreeSet;
  * @param <E>
  * @since 1.1.4
  */
+@SuppressWarnings("java:S2160")
 public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<E> {
 
     @SuppressWarnings("rawtypes")

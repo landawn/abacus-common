@@ -50,6 +50,7 @@ import com.landawn.abacus.util.u.OptionalLong;
  *  The purpose of copying the code is to re-organize the APIs.
  *
  */
+@SuppressWarnings("java:S1192")
 public final class Numbers {
 
     /** Reusable Byte constant for zero. */
@@ -152,7 +153,7 @@ public final class Numbers {
             1 * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11, 1 * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10 * 11 * 12 };
 
     // binomial(biggestBinomials[k], k) fits in an int, but not binomial(biggestBinomials[k]+1,k).
-    static int[] int_biggestBinomials = { Integer.MAX_VALUE, Integer.MAX_VALUE, 65536, 2345, 477, 193, 110, 75, 58, 49, 43, 39, 37, 35, 34, 34, 33 };
+    static int[] int_biggestBinomials = { Integer.MAX_VALUE, Integer.MAX_VALUE, 65536, 2345, 477, 193, 110, 75, 58, 49, 43, 39, 37, 35, 34, 34, 33 }; //NOSONAR
 
     // halfPowersOf10[i] = largest int less than 10^(i + 0.5)
     static final int[] int_halfPowersOf10 = { 3, 31, 316, 3162, 31622, 316227, 3162277, 31622776, 316227766, Integer.MAX_VALUE };
@@ -2359,10 +2360,10 @@ public final class Numbers {
                 increment = !isPowerOfTwo(x);
                 break;
             case DOWN:
-                increment = exponent < 0 & !isPowerOfTwo(x);
+                increment = exponent < 0 & !isPowerOfTwo(x); //NOSONAR
                 break;
             case UP:
-                increment = exponent >= 0 & !isPowerOfTwo(x);
+                increment = exponent >= 0 & !isPowerOfTwo(x); //NOSONAR
                 break;
             case HALF_DOWN:
             case HALF_EVEN:
@@ -3114,7 +3115,7 @@ public final class Numbers {
                 // subtracting two nonnegative longs can't overflow
                 // cmpRemToHalfDivisor has the same sign as compare(abs(rem), abs(q) / 2).
                 if (cmpRemToHalfDivisor == 0) { // exactly on the half mark
-                    increment = (mode == HALF_UP || (mode == HALF_EVEN & (div & 1) != 0));
+                    increment = (mode == HALF_UP || (mode == HALF_EVEN & (div & 1) != 0)); //NOSONAR
                 } else {
                     increment = cmpRemToHalfDivisor > 0; // closer to the UP value
                 }
@@ -3706,7 +3707,7 @@ public final class Numbers {
         }
         // the return value if we will overflow (which we calculate by overflowing a long :) )
         long limit = Long.MAX_VALUE + ((a ^ b) >>> (Long.SIZE - 1));
-        if (leadingZeros < Long.SIZE || (a < 0 & b == Long.MIN_VALUE)) {
+        if (leadingZeros < Long.SIZE || (a < 0 & b == Long.MIN_VALUE)) { //NOSONAR
             // overflow
             return limit;
         }
@@ -3956,7 +3957,7 @@ public final class Numbers {
             if (normalizedBits + productBits >= Long.SIZE) {
                 bignums.add(BigInteger.valueOf(product));
                 product = 1;
-                productBits = 0;
+                productBits = 0; //NOSONAR
             }
             product *= normalizedNum;
             productBits = log2(product, FLOOR) + 1;
@@ -4298,14 +4299,14 @@ public final class Numbers {
                 if (x >= 0.0 || isMathematicalInteger(x)) {
                     return x;
                 } else {
-                    return (long) x - 1;
+                    return (long) x - 1; //NOSONAR
                 }
 
             case CEILING:
                 if (x <= 0.0 || isMathematicalInteger(x)) {
                     return x;
                 } else {
-                    return (long) x + 1;
+                    return (long) x + 1; //NOSONAR
                 }
 
             case DOWN:
@@ -4315,7 +4316,7 @@ public final class Numbers {
                 if (isMathematicalInteger(x)) {
                     return x;
                 } else {
-                    return (long) x + (x > 0 ? 1 : -1);
+                    return (long) x + (x > 0 ? 1 : -1); //NOSONAR
                 }
 
             case HALF_EVEN:
@@ -4550,10 +4551,10 @@ public final class Numbers {
         }
         long commonDivisor = gcd(x, denominator);
         x /= commonDivisor;
-        denominator /= commonDivisor;
+        denominator /= commonDivisor; //NOSONAR
         // We know gcd(x, denominator) = 1, and x * numerator / denominator is exact,
         // so denominator must be a divisor of numerator.
-        return x * (numerator / denominator);
+        return x * (numerator / denominator); //NOSONAR
     }
 
     /**
@@ -4795,7 +4796,7 @@ public final class Numbers {
      * @return
      */
     static double checkNonNegative(String role, double x) {
-        if (!(x >= 0)) { // not x < 0, to work with NaN.
+        if (!(x >= 0)) { // not x < 0, to work with NaN. //NOSONAR
             throw new IllegalArgumentException(role + " (" + x + ") must be >= 0");
         }
         return x;

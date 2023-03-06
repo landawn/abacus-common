@@ -158,7 +158,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 }
 
                 if (memoryMeasure != null) {
-                    usedMemorySize += memorySize;
+                    usedMemorySize += memorySize; //NOSONAR
                 }
 
                 notEmpty.signal();
@@ -246,7 +246,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 activityPrint.updateAccessCount();
 
                 if (memoryMeasure != null) {
-                    usedMemorySize -= memoryMeasure.sizeOf(key, e);
+                    usedMemorySize -= memoryMeasure.sizeOf(key, e); //NOSONAR
                 }
 
                 notFull.signal();
@@ -499,7 +499,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             }
 
             if (memoryMeasure != null) {
-                usedMemorySize -= memoryMeasure.sizeOf(key, value);
+                usedMemorySize -= memoryMeasure.sizeOf(key, value); //NOSONAR
             }
 
             try {

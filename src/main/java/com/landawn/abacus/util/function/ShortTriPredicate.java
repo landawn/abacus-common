@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface ShortTriPredicate extends Throwables.ShortTriPredicate<RuntimeException> {
+public interface ShortTriPredicate extends Throwables.ShortTriPredicate<RuntimeException> { //NOSONAR
 
     ShortTriPredicate ALWAYS_TRUE = (a, b, c) -> true;
 

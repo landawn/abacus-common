@@ -32,6 +32,7 @@ import com.landawn.abacus.util.WD;
  * @param <T>
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
 
     private final String declaringName;

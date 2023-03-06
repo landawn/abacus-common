@@ -93,6 +93,6 @@ final class ASMUtil {
     @Data
     public static final class TestBeanA {
         private int id;
-        public String name;
+        public String name; //NOSONAR
     }
 }

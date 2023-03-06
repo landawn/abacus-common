@@ -1060,7 +1060,7 @@ final class XMLParserImpl extends AbstractXMLParser {
         }
 
         if (targetClass == null) {
-            throw new ParseException("No target class is specified");
+            throw new ParseException("No target class is specified"); //NOSONAR
         }
 
         return readByDOMParser(targetClass, node, config);
@@ -1111,7 +1111,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                     throw new ParseException(e);
                 }
 
-            case DOM:
+            case DOM: //NOSONAR
                 DocumentBuilder docBuilder = XMLUtil.createContentParser();
 
                 try {
@@ -1275,8 +1275,9 @@ final class XMLParserImpl extends AbstractXMLParser {
                                         }
 
                                     } else {
+                                        @SuppressWarnings("rawtypes")
                                         Collection<Object> c = Collection.class.isAssignableFrom(propType.clazz())
-                                                ? (Collection<Object>) N.newCollection(propType.clazz())
+                                                ? (Collection<Object>) N.newCollection((Class<Collection>) propType.clazz())
                                                 : new ArrayList<>();
 
                                         Type<?> propEleType = getPropEleType(propType);
@@ -1307,7 +1308,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                                     propValue = null;
                                     propInfo = null;
                                 } else {
-                                    throw new ParseException("Unknown parser error at element: " + xmlReader.getLocalName());
+                                    throw new ParseException("Unknown parser error at element: " + xmlReader.getLocalName()); //NOSONAR
                                 }
                             }
 
@@ -1379,7 +1380,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                     }
                 }
 
-                throw new ParseException("Unknown parser error");
+                throw new ParseException("Unknown parser error"); //NOSONAR
             }
 
             case MAP: {
@@ -1411,7 +1412,8 @@ final class XMLParserImpl extends AbstractXMLParser {
                     }
                 }
 
-                final Map<Object, Object> map = N.newMap(targetClass);
+                @SuppressWarnings("rawtypes")
+                final Map<Object, Object> map = N.newMap((Class<Map>) targetClass);
                 int attrCount = 0;
 
                 for (int event = xmlReader.next(); xmlReader.hasNext(); event = xmlReader.next()) {
@@ -1467,8 +1469,9 @@ final class XMLParserImpl extends AbstractXMLParser {
                                         }
 
                                     } else {
+                                        @SuppressWarnings("rawtypes")
                                         Collection<Object> c = Collection.class.isAssignableFrom(propType.clazz())
-                                                ? (Collection<Object>) N.newCollection(propType.clazz())
+                                                ? (Collection<Object>) N.newCollection((Class<Collection>) propType.clazz())
                                                 : new ArrayList<>();
 
                                         Type<?> propEleType = getPropEleType(propType);
@@ -1638,8 +1641,9 @@ final class XMLParserImpl extends AbstractXMLParser {
                                         }
 
                                     } else {
+                                        @SuppressWarnings("rawtypes")
                                         Collection<Object> c = Collection.class.isAssignableFrom(propType.clazz())
-                                                ? (Collection<Object>) N.newCollection(propType.clazz())
+                                                ? (Collection<Object>) N.newCollection((Class<Collection>) propType.clazz())
                                                 : new ArrayList<>();
 
                                         Type<?> propEleType = getPropEleType(propType);
@@ -1845,7 +1849,8 @@ final class XMLParserImpl extends AbstractXMLParser {
                     }
                 }
 
-                Collection<Object> result = N.newCollection(targetClass);
+                @SuppressWarnings("rawtypes")
+                Collection<Object> result = N.newCollection((Class<Collection>) targetClass);
 
                 for (int event = xmlReader.next(); xmlReader.hasNext(); event = xmlReader.next()) {
                     switch (event) {
@@ -2024,7 +2029,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                         checkedAttr = true;
                     }
 
-                    propName = isTagByPropertyName ? propNode.getNodeName() : XMLUtil.getAttribute(propNode, XMLConstants.NAME);
+                    propName = isTagByPropertyName ? propNode.getNodeName() : XMLUtil.getAttribute(propNode, XMLConstants.NAME); //NOSONAR
                     propInfo = beanInfo.getPropInfo(propName);
 
                     if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
@@ -2105,7 +2110,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                         checkedAttr = true;
                     }
 
-                    propName = isTagByPropertyName ? propNode.getNodeName() : XMLUtil.getAttribute(propNode, XMLConstants.NAME);
+                    propName = isTagByPropertyName ? propNode.getNodeName() : XMLUtil.getAttribute(propNode, XMLConstants.NAME); //NOSONAR
 
                     if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
                         continue;
@@ -2165,7 +2170,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                         checkedAttr = true;
                     }
 
-                    propName = isTagByPropertyName ? propNode.getNodeName() : XMLUtil.getAttribute(propNode, XMLConstants.NAME);
+                    propName = isTagByPropertyName ? propNode.getNodeName() : XMLUtil.getAttribute(propNode, XMLConstants.NAME); //NOSONAR
 
                     if (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
                         continue;
@@ -2190,7 +2195,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                 return (T) mResult;
             }
 
-            case ARRAY: {
+            case ARRAY: { //NOSONAR
                 Type<?> eleType = null;
 
                 if (propType != null && (propType.isArray() || propType.isCollection()) && propType.getElementType() != null
@@ -2231,7 +2236,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                             checkedAttr = true;
                         }
 
-                        propName = isTagByPropertyName ? eleNode.getNodeName() : XMLUtil.getAttribute(eleNode, XMLConstants.NAME);
+                        propName = isTagByPropertyName ? eleNode.getNodeName() : XMLUtil.getAttribute(eleNode, XMLConstants.NAME); //NOSONAR
 
                         propType = hasPropTypes ? configToUse.getPropType(propName) : null;
 
@@ -2250,7 +2255,6 @@ final class XMLParserImpl extends AbstractXMLParser {
                     }
 
                     return collection2Array(typeClass, c);
-
                 } finally {
                     Objectory.recycle(c);
                 }
@@ -2295,7 +2299,7 @@ final class XMLParserImpl extends AbstractXMLParser {
                         checkedAttr = true;
                     }
 
-                    propName = isTagByPropertyName ? eleNode.getNodeName() : XMLUtil.getAttribute(eleNode, XMLConstants.NAME);
+                    propName = isTagByPropertyName ? eleNode.getNodeName() : XMLUtil.getAttribute(eleNode, XMLConstants.NAME); //NOSONAR
 
                     propType = hasPropTypes ? configToUse.getPropType(propName) : null;
 
@@ -2376,7 +2380,9 @@ final class XMLParserImpl extends AbstractXMLParser {
 
                 propValue = readByDOMParser(inputClass, propNode, config, propName, propType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false);
             } else {
-                Collection<Object> coll = Collection.class.isAssignableFrom(propType.clazz()) ? (Collection<Object>) N.newCollection(propType.clazz())
+                @SuppressWarnings("rawtypes")
+                Collection<Object> coll = Collection.class.isAssignableFrom(propType.clazz())
+                        ? (Collection<Object>) N.newCollection((Class<Collection>) propType.clazz())
                         : new ArrayList<>();
 
                 Type<?> propEleType = getPropEleType(propType);

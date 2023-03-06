@@ -25,7 +25,7 @@ import java.util.Iterator;
  */
 public class IdentityHashSet<T> extends AbstractSet<T> {
 
-    private static final Object VAL = new Object();
+    private static final Object VAL = Boolean.TRUE;
 
     private final IdentityHashMap<T, Object> map;
 
@@ -202,5 +202,29 @@ public class IdentityHashSet<T> extends AbstractSet<T> {
     @Override
     public void clear() {
         map.clear();
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+
+        if (o instanceof IdentityHashSet) {
+            return ((IdentityHashSet) o).map.equals(this.map);
+        }
+
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return map.keySet().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return map.keySet().toString();
     }
 }

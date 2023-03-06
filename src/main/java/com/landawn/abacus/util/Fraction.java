@@ -857,7 +857,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      */
     private Fraction addSub(final Fraction fraction, final boolean isAdd) {
         if (fraction == null) {
-            throw new IllegalArgumentException("The fraction must not be null");
+            throw new IllegalArgumentException("The fraction must not be null"); //NOSONAR
         }
         // zero is identity for addition.
         if (numerator == 0) {

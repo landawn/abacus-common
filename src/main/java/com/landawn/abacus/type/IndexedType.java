@@ -34,12 +34,13 @@ import com.landawn.abacus.util.WD;
  * @param <T>
  * @since 0.9
  */
+@SuppressWarnings("java:S2160")
 public class IndexedType<T> extends AbstractType<Indexed<T>> {
 
     private final String declaringName;
 
     @SuppressWarnings("rawtypes")
-    private final Class<Indexed<T>> typeClass = (Class) Indexed.class;
+    private final Class<Indexed<T>> typeClass = (Class) Indexed.class; //NOSONAR
 
     private final Type<T> valueType;
 

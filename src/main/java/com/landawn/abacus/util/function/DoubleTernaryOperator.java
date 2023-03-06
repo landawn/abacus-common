@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface DoubleTernaryOperator extends Throwables.DoubleTernaryOperator<RuntimeException> {
+public interface DoubleTernaryOperator extends Throwables.DoubleTernaryOperator<RuntimeException> { //NOSONAR
 
     @Override
     double applyAsDouble(double a, double b, double c);

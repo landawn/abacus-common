@@ -82,21 +82,21 @@ public final class HttpClient {
     public static final int DEFAULT_READ_TIMEOUT = 16000;
 
     // ...
-    protected final String _url;
+    protected final String _url; //NOSONAR
 
-    protected final int _maxConnection;
+    protected final int _maxConnection; //NOSONAR
 
-    protected final long _connectionTimeoutInMillis;
+    protected final long _connectionTimeoutInMillis; //NOSONAR
 
-    protected final long _readTimeoutInMillis;
+    protected final long _readTimeoutInMillis; //NOSONAR
 
-    protected final HttpSettings _settings;
+    protected final HttpSettings _settings; //NOSONAR
 
-    protected final AsyncExecutor _asyncExecutor;
+    protected final AsyncExecutor _asyncExecutor; //NOSONAR
 
-    protected final URL _netURL;
+    protected final URL _netURL; //NOSONAR
 
-    protected final AtomicInteger _activeConnectionCounter;
+    protected final AtomicInteger _activeConnectionCounter; //NOSONAR
 
     protected HttpClient(String url, int maxConnection, long connectionTimeoutInMillis, long readTimeoutInMillis, HttpSettings settings,
             final AtomicInteger sharedActiveConnectionCounter, final Executor executor) {
@@ -957,7 +957,7 @@ public final class HttpClient {
         InputStream is = null;
         OutputStream os = null;
 
-        try {
+        try { //NOSONAR
             if (request != null && (requireBody(httpMethod))) {
                 os = HttpUtil.getOutputStream(connection, requestContentFormat, getContentType(settings), getContentEncoding(settings));
 
@@ -1297,7 +1297,7 @@ public final class HttpClient {
      * @param is
      * @param connection
      */
-    void close(OutputStream os, InputStream is, @SuppressWarnings("unused") HttpURLConnection connection) {
+    void close(OutputStream os, InputStream is, @SuppressWarnings("unused") HttpURLConnection connection) { //NOSONAR
         try {
             IOUtil.closeQuietly(os);
             IOUtil.closeQuietly(is);

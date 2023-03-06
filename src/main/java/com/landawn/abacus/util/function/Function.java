@@ -24,7 +24,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface Function<T, R> extends Throwables.Function<T, R, RuntimeException>, java.util.function.Function<T, R> {
+public interface Function<T, R> extends Throwables.Function<T, R, RuntimeException>, java.util.function.Function<T, R> { //NOSONAR
 
     static <T> Function<T, T> identity() {
         return Fn.identity();

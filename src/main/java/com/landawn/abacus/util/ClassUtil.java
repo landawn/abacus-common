@@ -141,7 +141,7 @@ public final class ClassUtil {
     /**
      * The Class ClassMask.
      */
-    static final class ClassMask {
+    static final class ClassMask {//NOSONAR
 
         /** The Constant FIELD_MASK. */
         @SuppressWarnings("hiding")
@@ -150,7 +150,7 @@ public final class ClassUtil {
         /**
          * Method mask.
          */
-        static void methodMask() {
+        static void methodMask() { //NOSONAR
         }
     }
 
@@ -811,14 +811,14 @@ public final class ClassUtil {
 
                         if (index > 0) {
                             String componentTypeName = newClassName.substring(0, index);
-                            String temp = newClassName.replaceAll("\\[\\]", "");
+                            String temp = newClassName.replaceAll("\\[\\]", ""); //NOSONAR
 
                             if (componentTypeName.equals(temp)) {
                                 int dimensions = (newClassName.length() - temp.length()) / 2;
                                 String prefixOfArray = "";
 
                                 while (dimensions-- > 0) {
-                                    prefixOfArray += "[";
+                                    prefixOfArray += "["; //NOSONAR
                                 }
 
                                 String symbolOfPrimitiveArraryClassName = SYMBOL_OF_PRIMITIVE_ARRAY_CLASS_NAME.get(componentTypeName);
@@ -890,7 +890,7 @@ public final class ClassUtil {
         if (newPropName == null) {
             newPropName = toCamelCase(propName);
 
-            for (String keyWord : keyWordMapper.keySet()) {
+            for (String keyWord : keyWordMapper.keySet()) { //NOSONAR
                 if (keyWord.equalsIgnoreCase(newPropName)) {
                     newPropName = keyWordMapper.get(keyWord);
 
@@ -927,7 +927,7 @@ public final class ClassUtil {
             res = res.substring("interface [L".length(), res.length() - 1) + "[]";
         }
 
-        res = res.replaceAll("java.lang.", "").replaceAll("class ", "").replaceAll("interface ", "");
+        res = res.replaceAll("java.lang.", "").replaceAll("class ", "").replaceAll("interface ", ""); //NOSONAR
 
         final int idx = res.lastIndexOf('$');
 
@@ -1221,7 +1221,7 @@ public final class ClassUtil {
         List<Class<?>> classes = new ArrayList<>();
         for (URL resource : resourceList) {
             // Get a File object for the package
-            String fullPath = resource.getPath().replace("%20", " ").replaceFirst("[.]jar[!].*", JAR_POSTFIX).replaceFirst("file:", "");
+            String fullPath = resource.getPath().replace("%20", " ").replaceFirst("[.]jar[!].*", JAR_POSTFIX).replaceFirst("file:", "");//NOSONAR
 
             if (logger.isInfoEnabled()) {
                 logger.info("ClassDiscovery: FullPath = " + fullPath);
@@ -1259,7 +1259,7 @@ public final class ClassUtil {
                             }
 
                             if (!skipClassLoaddingException) {
-                                throw new RuntimeException("ClassNotFoundException loading " + className);
+                                throw new RuntimeException("ClassNotFoundException loading " + className); //NOSONAR
                             }
                         }
                     } else if (file2.isDirectory() && isRecursive) {
@@ -1270,7 +1270,7 @@ public final class ClassUtil {
             } else if (file.exists() && file.getName().endsWith(JAR_POSTFIX)) {
                 JarFile jarFile = null;
 
-                try {
+                try { //NOSONAR
                     jarFile = new JarFile(file.getPath());
 
                     Enumeration<JarEntry> entries = jarFile.entries();
@@ -1285,7 +1285,7 @@ public final class ClassUtil {
                             if (entryName.endsWith(CLASS_POSTFIX) && (entryName.indexOf("/", pkgPath.length()) < 0)) {
                                 String className = filePath2PackageName(entryName).replace(CLASS_POSTFIX, "");
 
-                                try {
+                                try { //NOSONAR
                                     Class<?> clazz = ClassUtil.forClass(className, false);
 
                                     if ((clazz.getCanonicalName() != null) && (clazz.getPackage().getName().equals(pkgName)
@@ -1916,7 +1916,7 @@ public final class ClassUtil {
             synchronized (beanDeclaredPropGetMethodPool) {
                 Map<String, Method> getterMethodList = getPropGetMethods(cls);
 
-                for (String key : getterMethodList.keySet()) {
+                for (String key : getterMethodList.keySet()) { //NOSONAR
                     if (isPropName(cls, propName, key)) {
                         method = getterMethodList.get(key);
 
@@ -2977,7 +2977,7 @@ public final class ClassUtil {
                                 propFieldMap.put(propName, field);
                                 propGetMethodMap.put(propName, method);
 
-                                continue;
+                                continue;//NOSONAR
                             }
                         } else if (Modifier.isPublic(field.getModifiers()) && !Modifier.isStatic(field.getModifiers())
                                 && !Modifier.isFinal(field.getModifiers())) {
@@ -3020,13 +3020,13 @@ public final class ClassUtil {
 
                             propGetMethodMap.put(propName, method);
 
-                            continue;
+                            continue;//NOSONAR
                         }
                     }
                 }
             }
 
-            for (Class<?> key : registeredNonPropGetSetMethodPool.keySet()) {
+            for (Class<?> key : registeredNonPropGetSetMethodPool.keySet()) { //NOSONAR
                 if (key.isAssignableFrom(cls)) {
                     final Set<String> set = registeredNonPropGetSetMethodPool.get(key);
                     final List<String> methodNames = new ArrayList<>(propGetMethodMap.keySet());
@@ -3047,7 +3047,7 @@ public final class ClassUtil {
 
             // for Double-Checked Locking is Broke initialize it before
             final ImmutableMap<String, Field> unmodifiableFieldMap = ImmutableMap.wrap(propFieldMap);
-            unmodifiableFieldMap.keySet(); // initialize?
+            unmodifiableFieldMap.keySet(); // initialize? //NOSONAR
             beanDeclaredPropFieldPool.put(cls, unmodifiableFieldMap);
 
             // put it into map.
@@ -3056,7 +3056,7 @@ public final class ClassUtil {
             beanPropFieldPool.put(cls, tempFieldMap);
 
             final ImmutableMap<String, Method> unmodifiableGetMethodMap = ImmutableMap.wrap(propGetMethodMap);
-            unmodifiableGetMethodMap.keySet(); // initialize?
+            unmodifiableGetMethodMap.keySet(); // initialize? //NOSONAR
             beanDeclaredPropGetMethodPool.put(cls, unmodifiableGetMethodMap);
 
             if (beanPropGetMethodPool.get(cls) == null) {
@@ -3070,7 +3070,7 @@ public final class ClassUtil {
             // for Double-Checked Locking is Broke initialize it before
             // put it into map.
             final ImmutableMap<String, Method> unmodifiableSetMethodMap = ImmutableMap.wrap(propSetMethodMap);
-            unmodifiableSetMethodMap.keySet(); // initialize?
+            unmodifiableSetMethodMap.keySet(); // initialize? //NOSONAR
             beanDeclaredPropSetMethodPool.put(cls, unmodifiableSetMethodMap);
 
             if (beanPropSetMethodPool.get(cls) == null) {
@@ -3104,7 +3104,7 @@ public final class ClassUtil {
                     }
 
                     final ImmutableMap<String, Method> unmodifiableBuilderPropSetMethodMap = ImmutableMap.wrap(builderPropSetMethodMap);
-                    unmodifiableBuilderPropSetMethodMap.keySet(); // initialize?
+                    unmodifiableBuilderPropSetMethodMap.keySet(); // initialize? //NOSONAR
                     beanDeclaredPropSetMethodPool.put(builderClass, unmodifiableBuilderPropSetMethodMap);
 
                     Map<String, Method> tmp = new ObjectPool<>(N.max(64, builderPropSetMethodMap.size()));

@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface ToBooleanFunction<T> extends Throwables.ToBooleanFunction<T, RuntimeException> {
+public interface ToBooleanFunction<T> extends Throwables.ToBooleanFunction<T, RuntimeException> { //NOSONAR
 
     ToBooleanFunction<Boolean> UNBOX = value -> value == null ? false : value;
 

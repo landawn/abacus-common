@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface DoubleNFunction<R> extends Throwables.DoubleNFunction<R, RuntimeException> {
+public interface DoubleNFunction<R> extends Throwables.DoubleNFunction<R, RuntimeException> { //NOSONAR
 
     @Override
     R apply(double... args);

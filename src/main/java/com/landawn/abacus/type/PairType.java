@@ -34,12 +34,13 @@ import com.landawn.abacus.util.WD;
  * @param <R>
  * @since 0.9
  */
+@SuppressWarnings("java:S2160")
 public class PairType<L, R> extends AbstractType<Pair<L, R>> {
 
     private final String declaringName;
 
     @SuppressWarnings("rawtypes")
-    private final Class<Pair<L, R>> typeClass = (Class) Pair.class;
+    private final Class<Pair<L, R>> typeClass = (Class) Pair.class; //NOSONAR
 
     private final Type<L> leftType;
 

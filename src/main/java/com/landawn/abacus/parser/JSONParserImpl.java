@@ -303,8 +303,8 @@ final class JSONParserImpl extends AbstractJSONParser {
                     }
                 }
 
-                throw new ParseException("Unsupported class: " + ClassUtil.getCanonicalClassName(type.clazz())
-                        + ". Only Array/List/Map and Bean class with getter/setter methods are supported");
+                throw new ParseException("Unsupported class: " + ClassUtil.getCanonicalClassName(type.clazz()) //NOSONAR
+                        + ". Only Array/List/Map and Bean class with getter/setter methods are supported"); //NOSONAR
         }
     }
 
@@ -1765,7 +1765,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         if (firstToken == EOR) {
             if (isFirstCall && N.notNullOrEmpty(jr.getText())) {
-                throw new ParseException(firstToken, "Can't parse: " + jr.getText());
+                throw new ParseException(firstToken, "Can't parse: " + jr.getText()); //NOSONAR
             }
 
             return null; // result;
@@ -2003,7 +2003,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                                                         */) {
                         throw new ParseException(token, getErrorMsg(jr, token));
                     } else if ((firstToken == START_BRACE && token != END_BRACE) || (firstToken != START_BRACE && token == END_BRACE)) {
-                        throw new ParseException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"");
+                        throw new ParseException(token, "The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\""); //NOSONAR
                     } else {
                         if (jr.hasText()) {
                             if (propInfo == null || propInfo.jsonXmlExpose == JsonXmlField.Expose.SERIALIZE_ONLY
@@ -2025,9 +2025,7 @@ final class JSONParserImpl extends AbstractJSONParser {
     }
 
     <T> void setPropValue(PropInfo propInfo, Object propValue, T result, boolean ignoreNullOrEmpty) {
-        if (!ignoreNullOrEmpty) {
-            propInfo.setPropValue(result, propValue);
-        } else if (!isNullOrEmptyValue(propInfo.jsonXmlType, propValue)) {
+        if (!ignoreNullOrEmpty || !isNullOrEmptyValue(propInfo.jsonXmlType, propValue)) {
             propInfo.setPropValue(result, propValue);
         }
     }
@@ -2089,9 +2087,10 @@ final class JSONParserImpl extends AbstractJSONParser {
 
         final Tuple2<Function<Class<?>, Object>, Function<Object, Object>> creatorAndConvertor = getCreatorAndConvertorForTargetType(targetClass, null);
 
+        @SuppressWarnings("rawtypes")
         final Map<Object, Object> result = outResult == null
                 ? (Map.class.isAssignableFrom(targetClass) ? (Map<Object, Object>) creatorAndConvertor._1.apply(targetClass)
-                        : N.newMap(Map.class.equals(targetClass) ? config.getMapInstanceType() : targetClass))
+                        : N.newMap(Map.class.equals(targetClass) ? config.getMapInstanceType() : (Class<Map>) targetClass))
                 : outResult;
 
         String propName = null;
@@ -2334,13 +2333,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                         case COMMA:
 
-                            if (jr.hasText() || preToken == COMMA) {
-                                propValue = readPropValue(eleType, jr, readNullToEmpty);
-
-                                if (!ignoreNullOrEmpty || !isNullOrEmptyValue(eleType, propValue)) {
-                                    c.add(propValue);
-                                }
-                            } else if (preToken == START_BRACKET && c.size() == 0) {
+                            if (jr.hasText() || preToken == COMMA || (preToken == START_BRACKET && c.size() == 0)) {
                                 propValue = readPropValue(eleType, jr, readNullToEmpty);
 
                                 if (!ignoreNullOrEmpty || !isNullOrEmptyValue(eleType, propValue)) {
@@ -2416,13 +2409,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                     case COMMA:
 
-                        if (jr.hasText() || preToken == COMMA) {
-                            propValue = readPropValue(eleType, jr, readNullToEmpty);
-
-                            if (!ignoreNullOrEmpty || !isNullOrEmptyValue(eleType, propValue)) {
-                                a[idx++] = propValue;
-                            }
-                        } else if (preToken == START_BRACKET && idx == 0) {
+                        if (jr.hasText() || preToken == COMMA || (preToken == START_BRACKET && idx == 0)) {
                             propValue = readPropValue(eleType, jr, readNullToEmpty);
 
                             if (!ignoreNullOrEmpty || !isNullOrEmptyValue(eleType, propValue)) {
@@ -2546,13 +2533,7 @@ final class JSONParserImpl extends AbstractJSONParser {
 
                 case COMMA:
 
-                    if (jr.hasText() || preToken == COMMA) {
-                        propValue = readPropValue(eleType, jr, readNullToEmpty);
-
-                        if (!ignoreNullOrEmpty || !isNullOrEmptyValue(eleType, propValue)) {
-                            result.add(propValue);
-                        }
-                    } else if (preToken == START_BRACKET && result.size() == 0) {
+                    if (jr.hasText() || preToken == COMMA || (preToken == START_BRACKET && result.size() == 0)) {
                         propValue = readPropValue(eleType, jr, readNullToEmpty);
 
                         if (!ignoreNullOrEmpty || !isNullOrEmptyValue(eleType, propValue)) {
@@ -2806,7 +2787,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                             throw new ParseException(token, getErrorMsg(jr, token));
                         }
 
-                        switch (order) {
+                        switch (order) { //NOSONAR
                             //    case 1:
                             //        beanName = jr.readValue(strType);
                             //        break;
@@ -2862,7 +2843,7 @@ final class JSONParserImpl extends AbstractJSONParser {
                                 throw new ParseException(token, getErrorMsg(jr, token));
                             }
 
-                            switch (order) {
+                            switch (order) { //NOSONAR
                                 //    case 1:
                                 //        beanName = jr.readValue(strType);
                                 //        break;

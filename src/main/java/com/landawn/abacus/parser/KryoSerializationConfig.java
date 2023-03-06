@@ -33,7 +33,7 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
 
     private boolean writeClass = defaultWriteClass;
 
-    public KryoSerializationConfig() {
+    public KryoSerializationConfig() { //NOSONAR
     }
 
     /**
@@ -394,8 +394,8 @@ public class KryoSerializationConfig extends SerializationConfig<KryoSerializati
             return true;
         }
 
-        if (obj instanceof KryoSerializationConfig other) {
-            if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getExclusion(), other.getExclusion())
+        if (obj instanceof KryoSerializationConfig other) { //NOSONAR
+            if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getExclusion(), other.getExclusion()) //NOSONAR
                     && N.equals(skipTransientField(), other.skipTransientField()) && N.equals(writeClass, other.writeClass)) {
 
                 return true;

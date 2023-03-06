@@ -116,7 +116,7 @@ public final class Iterators {
      * @return
      */
     public static <T, E extends Exception> long count(final Iterator<? extends T> iter, final Throwables.Predicate<? super T, E> predicate) throws E {
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(predicate, "predicate"); //NOSONAR
 
         if (iter == null) {
             return 0;
@@ -141,7 +141,7 @@ public final class Iterators {
      * @return
      */
     public static <T> ObjIterator<T> repeat(final T e, final int n) {
-        N.checkArgument(n >= 0, "'n' can't be negative: %s", n);
+        N.checkArgument(n >= 0, "'n' can't be negative: %s", n); //NOSONAR
 
         if (n == 0) {
             return ObjIterator.empty();
@@ -1877,7 +1877,7 @@ public final class Iterators {
         final Set<T> set = new HashSet<>();
 
         return new ObjIterator<>() {
-            private final T NONE = (T) N.NULL_MASK;
+            private final T NONE = (T) N.NULL_MASK; //NOSONAR
             private T next = NONE;
             private T tmp = null;
 
@@ -1918,7 +1918,7 @@ public final class Iterators {
         final Set<Object> set = new HashSet<>();
 
         return new ObjIterator<>() {
-            private final T NONE = (T) N.NULL_MASK;
+            private final T NONE = (T) N.NULL_MASK; //NOSONAR
             private T next = NONE;
             private T tmp = null;
 
@@ -1966,7 +1966,7 @@ public final class Iterators {
         }
 
         return new ObjIterator<>() {
-            private final T NONE = (T) N.NULL_MASK;
+            private final T NONE = (T) N.NULL_MASK; //NOSONAR
             private T next = NONE;
             private T tmp = null;
 
@@ -2007,7 +2007,7 @@ public final class Iterators {
         }
 
         return new ObjIterator<>() {
-            private final T NONE = (T) N.NULL_MASK;
+            private final T NONE = (T) N.NULL_MASK; //NOSONAR
             private T next = NONE;
             private T tmp = null;
             private boolean hasMore = true;
@@ -2048,7 +2048,7 @@ public final class Iterators {
         }
 
         return new ObjIterator<>() {
-            private final T NONE = (T) N.NULL_MASK;
+            private final T NONE = (T) N.NULL_MASK; //NOSONAR
             private T next = NONE;
             private T tmp = null;
             private boolean hasMore = true;
@@ -2090,7 +2090,7 @@ public final class Iterators {
         }
 
         return new ObjIterator<>() {
-            private final T NONE = (T) N.NULL_MASK;
+            private final T NONE = (T) N.NULL_MASK; //NOSONAR
             private T next = NONE;
             private boolean hasDropped = false;
 
@@ -2137,7 +2137,7 @@ public final class Iterators {
         }
 
         return new ObjIterator<>() {
-            private final T NONE = (T) N.NULL_MASK;
+            private final T NONE = (T) N.NULL_MASK; //NOSONAR
             private T next = NONE;
             private boolean hasSkipped = false;
 
@@ -2185,7 +2185,7 @@ public final class Iterators {
      * @return
      */
     public static <T, U> ObjIterator<U> map(final Iterator<? extends T> iter, final Function<? super T, U> mapper) {
-        N.checkArgNotNull(mapper, "mapper");
+        N.checkArgNotNull(mapper, "mapper"); //NOSONAR
 
         if (iter == null) {
             return ObjIterator.empty();
@@ -2250,7 +2250,7 @@ public final class Iterators {
         };
     }
 
-    public static <T, U> ObjIterator<U> flatmap(final Iterator<? extends T> iter, final Function<? super T, ? extends U[]> mapper) {
+    public static <T, U> ObjIterator<U> flatmap(final Iterator<? extends T> iter, final Function<? super T, ? extends U[]> mapper) { //NOSONAR
         N.checkArgNotNull(mapper, "mapper");
 
         if (iter == null) {

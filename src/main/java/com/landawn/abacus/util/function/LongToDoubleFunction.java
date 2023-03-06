@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface LongToDoubleFunction extends Throwables.LongToDoubleFunction<RuntimeException>, java.util.function.LongToDoubleFunction {
+public interface LongToDoubleFunction extends Throwables.LongToDoubleFunction<RuntimeException>, java.util.function.LongToDoubleFunction { //NOSONAR
 
     LongToDoubleFunction DEFAULT = value -> value;
 

@@ -98,7 +98,7 @@ public final class IEEE754rUtil {
     public static float min(final float... array) {
         // Validates input
         if (N.isNullOrEmpty(array)) {
-            throw new IllegalArgumentException("Array cannot be null or empty.");
+            throw new IllegalArgumentException("Array cannot be null or empty."); //NOSONAR
         }
 
         // Finds and returns min

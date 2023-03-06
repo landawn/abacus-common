@@ -37,6 +37,7 @@ import com.landawn.abacus.util.WD;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byte[]> {
 
     public static final String BYTE_ARRAY = byte[].class.getSimpleName();
@@ -153,7 +154,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
                 try {
                     blob.free();
                 } catch (SQLException e) {
-                    throw new UncheckedSQLException(e);
+                    throw new UncheckedSQLException(e); //NOSONAR
                 }
             }
         } else {

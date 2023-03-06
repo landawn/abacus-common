@@ -31,6 +31,7 @@ import com.landawn.abacus.util.WD;
  * @param <E>
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public class SetMultimapType<K, E> extends AbstractType<SetMultimap<K, E>> {
 
     private static final Class<?> typeClass = SetMultimap.class;

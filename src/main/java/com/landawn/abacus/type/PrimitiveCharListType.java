@@ -27,6 +27,7 @@ import com.landawn.abacus.util.N;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public final class PrimitiveCharListType extends AbstractPrimitiveListType<CharList> {
 
     public static final String CHAR_LIST = CharList.class.getSimpleName();

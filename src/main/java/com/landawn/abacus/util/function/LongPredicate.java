@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface LongPredicate extends Throwables.LongPredicate<RuntimeException>, java.util.function.LongPredicate {
+public interface LongPredicate extends Throwables.LongPredicate<RuntimeException>, java.util.function.LongPredicate { //NOSONAR
 
     LongPredicate ALWAYS_TRUE = value -> true;
 
@@ -73,7 +73,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
         return predicate;
     }
 
-    static LongPredicate equal(long targetLong) {
+    static LongPredicate equal(long targetLong) { //NOSONAR
         return value -> value == targetLong;
     }
 

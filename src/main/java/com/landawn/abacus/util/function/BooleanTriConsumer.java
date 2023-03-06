@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface BooleanTriConsumer extends Throwables.BooleanTriConsumer<RuntimeException> {
+public interface BooleanTriConsumer extends Throwables.BooleanTriConsumer<RuntimeException> { //NOSONAR
 
     @Override
     void accept(boolean a, boolean b, boolean c);

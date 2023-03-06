@@ -25,6 +25,7 @@ import com.landawn.abacus.util.CharacterWriter;
  * @author haiyangl
  *
  */
+@SuppressWarnings("java:S2160")
 public class BooleanCharType extends AbstractType<Boolean> {
 
     private static final String typeName = "BooleanChar";

@@ -3778,7 +3778,7 @@ public interface DataSet {
      *
      * @return
      */
-    DataSet clone();
+    DataSet clone(); //NOSONAR
 
     /**
      * Deeply copy each element in this <code>DataSet</code> by Serialization/Deserialization.

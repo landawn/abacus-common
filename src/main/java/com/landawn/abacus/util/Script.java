@@ -20,6 +20,6 @@ package com.landawn.abacus.util;
  * @author Haiyang Li
  * @since 0.8
  */
-public final class Script {
+public final class Script { //NOSONAR
 
 }

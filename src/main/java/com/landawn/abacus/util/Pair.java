@@ -33,9 +33,9 @@ import com.landawn.abacus.util.stream.Stream;
  */
 public final class Pair<L, R> implements Mutable {
     // implements Map.Entry<L, R> {
-    public L left;
+    public L left; //NOSONAR
 
-    public R right;
+    public R right; //NOSONAR
 
     public Pair() {
     }

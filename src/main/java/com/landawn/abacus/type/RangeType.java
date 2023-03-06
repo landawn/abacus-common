@@ -36,6 +36,7 @@ import com.landawn.abacus.util.WD;
  * @param <T>
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public class RangeType<T extends Comparable<? super T>> extends AbstractType<Range<T>> {
 
     static final Type<String> strType = TypeFactory.getType(String.class);

@@ -14,7 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
-public interface LongMapMultiConsumer extends java.util.stream.LongStream.LongMapMultiConsumer {
+public interface LongMapMultiConsumer extends java.util.stream.LongStream.LongMapMultiConsumer { //NOSONAR
 
     @Override
     void accept(long value, java.util.function.LongConsumer ic);

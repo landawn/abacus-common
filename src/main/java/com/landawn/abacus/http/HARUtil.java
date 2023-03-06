@@ -25,7 +25,7 @@ public class HARUtil {
 
     private static final BiPredicate<String, String> defaultHttpHeaderFilterForHARRequest = HttpUtil::isValidHttpHeader;
 
-    private static final ThreadLocal<BiPredicate<String, String>> httpHeaderFilterForHARRequest_TL = ThreadLocal
+    private static final ThreadLocal<BiPredicate<String, String>> httpHeaderFilterForHARRequest_TL = ThreadLocal //NOSONAR
             .withInitial(() -> defaultHttpHeaderFilterForHARRequest);
 
     private static final Consumer<String> defaultCurlLogHandler = curl -> {
@@ -34,7 +34,7 @@ public class HARUtil {
         }
     };
 
-    private static final ThreadLocal<Tuple3<Boolean, Character, Consumer<String>>> logRequestCurlForHARRequest_TL = ThreadLocal
+    private static final ThreadLocal<Tuple3<Boolean, Character, Consumer<String>>> logRequestCurlForHARRequest_TL = ThreadLocal //NOSONAR
             .withInitial(() -> Tuple.of(false, '\'', defaultCurlLogHandler));
 
     public static void setHttpHeaderFilterForHARRequest(final BiPredicate<String, String> httpHeaderFilterForHARRequest) {
@@ -110,10 +110,10 @@ public class HARUtil {
     @SuppressWarnings("rawtypes")
     public static String sendRequstByHAR(final String har, final Predicate<String> filterForTargetUrl) {
         Map map = N.fromJSON(Map.class, har);
-        List<Map> entries = Maps.getByPath(map, "log.entries");
+        List<Map> entries = Maps.getByPath(map, "log.entries"); //NOSONAR
 
         return Stream.of(entries) //
-                .map(m -> (Map<String, Object>) m.get("request"))
+                .map(m -> (Map<String, Object>) m.get("request")) //NOSONAR
                 // .peek(m -> N.println(m.get("url")))
                 .filter(m -> filterForTargetUrl.test((String) m.get("url")))
                 .map(requestEntry -> sendRequestByRequestEntry(requestEntry, String.class))

@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface BooleanUnaryOperator extends Throwables.BooleanUnaryOperator<RuntimeException> {
+public interface BooleanUnaryOperator extends Throwables.BooleanUnaryOperator<RuntimeException> { //NOSONAR
 
     @Override
     boolean applyAsBoolean(boolean operand);

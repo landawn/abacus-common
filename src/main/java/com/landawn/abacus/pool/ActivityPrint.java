@@ -191,7 +191,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
     }
 
     @Override
-    public Object clone() {
+    public Object clone() { //NOSONAR
         ActivityPrint result = null;
 
         try {

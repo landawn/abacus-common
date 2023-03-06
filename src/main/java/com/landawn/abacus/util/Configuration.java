@@ -161,7 +161,7 @@ public abstract class Configuration {
      * @return
      */
     public static String getSourceCodeLocation(Class<?> clazz) {
-        return clazz.getProtectionDomain().getCodeSource().getLocation().getPath().replaceAll("%20", " ");
+        return clazz.getProtectionDomain().getCodeSource().getLocation().getPath().replaceAll("%20", " "); //NOSONAR
     }
 
     /**
@@ -405,7 +405,7 @@ public abstract class Configuration {
 
         foundDir.add(dir.getAbsolutePath());
 
-        String absolutePath = dir.getAbsolutePath().replaceAll("%20", " ");
+        String absolutePath = dir.getAbsolutePath().replaceAll("%20", " "); //NOSONAR
 
         if (logger.isInfoEnabled()) {
             logger.info("finding file [" + configFileName + "] in directory [" + absolutePath + "] ...");
@@ -425,7 +425,7 @@ public abstract class Configuration {
                 && absolutePath.substring(absolutePath.length() - folderPrefix.length()).equalsIgnoreCase(folderPrefix))) {
             for (File file : files) {
                 if (file.getName().equalsIgnoreCase(configFileName)) {
-                    if ((isDir && file.isDirectory()) || (!isDir && !file.isDirectory())) {
+                    if ((isDir && file.isDirectory()) || (!isDir && !file.isDirectory())) { //NOSONAR
 
                         if (logger.isWarnEnabled()) {
                             logger.warn("found file [" + file.getAbsolutePath() + "]");
@@ -465,8 +465,8 @@ public abstract class Configuration {
         final String path = dir.getAbsolutePath().replace('\\', '/');
 
         // if the class/library is loaded from local maven repository.
-        if (path.indexOf("/.m2/repository/com/landawn/abacus-common/") > 0 || path.indexOf("/.m2/repository/com/landawn/abacus-common-se/") > 0
-                || path.indexOf("/.m2/repository/com/landawn/abacus-common-se-jdk7/") > 0) {
+        if (path.indexOf("/.m2/repository/com/landawn/abacus-common/") > 0 || path.indexOf("/.m2/repository/com/landawn/abacus-common-se/") > 0 //NOSONAR
+                || path.indexOf("/.m2/repository/com/landawn/abacus-common-se-jdk7/") > 0) { //NOSONAR
             return new File(IOUtil.CURRENT_PATH);
         }
 
@@ -509,8 +509,8 @@ public abstract class Configuration {
      * @return
      */
     public static File formatPath(File file) {
-        if (!file.exists() && (new File(file.getAbsolutePath().replaceAll("%20", " "))).exists()) {
-            file = new File(file.getAbsolutePath().replaceAll("%20", " "));
+        if (!file.exists() && (new File(file.getAbsolutePath().replaceAll("%20", " "))).exists()) { //NOSONAR
+            file = new File(file.getAbsolutePath().replaceAll("%20", " ")); //NOSONAR
         }
 
         return file;
@@ -671,14 +671,14 @@ public abstract class Configuration {
      */
     protected String setAttribute(String attrName, String attrValue) {
         if (attrValue != null) {
-            String var = attrValue;
-            var = var.trim();
+            String attrVal = attrValue;
+            attrVal = attrVal.trim();
 
-            if ((props.size() > 0) && var.startsWith("${") && var.endsWith("}")) {
-                var = props.get(var.substring(2, var.length() - 1));
+            if ((props.size() > 0) && attrVal.startsWith("${") && attrVal.endsWith("}")) {
+                attrVal = props.get(attrVal.substring(2, attrVal.length() - 1));
 
-                if (var != null) {
-                    attrValue = var;
+                if (attrVal != null) {
+                    attrValue = attrVal;
                 }
             }
         }

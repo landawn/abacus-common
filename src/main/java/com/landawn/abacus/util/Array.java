@@ -484,7 +484,7 @@ public class Array {
      */
     @Deprecated
     @SafeVarargs
-    public static <T> T[] oF(final T... a) {
+    public static <T> T[] oF(final T... a) { //NOSONAR
         return a;
     }
 
@@ -734,7 +734,7 @@ public class Array {
         }
 
         if (endExclusive * 1L - startInclusive > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("overflow");
+            throw new IllegalArgumentException("overflow"); //NOSONAR
         }
 
         final int[] a = new int[endExclusive - startInclusive];
@@ -813,7 +813,7 @@ public class Array {
      */
     public static char[] range(char startInclusive, final char endExclusive, final int by) {
         if (by == 0) {
-            throw new IllegalArgumentException("The input parameter 'by' can't be zero");
+            throw new IllegalArgumentException("The input parameter 'by' can't be zero"); //NOSONAR
         }
 
         if (endExclusive == startInclusive || endExclusive > startInclusive != by > 0) {

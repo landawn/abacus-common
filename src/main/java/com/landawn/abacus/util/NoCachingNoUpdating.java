@@ -120,7 +120,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         @Override
-        public T[] clone() {
+        public T[] clone() { //NOSONAR
             return N.clone(a);
         }
 
@@ -323,7 +323,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         @Override
-        public boolean[] clone() {
+        public boolean[] clone() { //NOSONAR
             return N.clone(a);
         }
 
@@ -483,7 +483,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         @Override
-        public char[] clone() {
+        public char[] clone() { //NOSONAR
             return N.clone(a);
         }
 
@@ -675,7 +675,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         @Override
-        public byte[] clone() {
+        public byte[] clone() { //NOSONAR
             return N.clone(a);
         }
 
@@ -867,7 +867,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         @Override
-        public short[] clone() {
+        public short[] clone() { //NOSONAR
             return N.clone(a);
         }
 
@@ -1059,7 +1059,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         @Override
-        public int[] clone() {
+        public int[] clone() { //NOSONAR
             return N.clone(a);
         }
 
@@ -1251,7 +1251,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         @Override
-        public long[] clone() {
+        public long[] clone() { //NOSONAR
             return N.clone(a);
         }
 
@@ -1443,7 +1443,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         @Override
-        public float[] clone() {
+        public float[] clone() { //NOSONAR
             return N.clone(a);
         }
 
@@ -1635,7 +1635,7 @@ public interface NoCachingNoUpdating {
          * @return
          */
         @Override
-        public double[] clone() {
+        public double[] clone() { //NOSONAR
             return N.clone(a);
         }
 

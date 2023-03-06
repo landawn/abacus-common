@@ -39,7 +39,7 @@ public final class TestUtil {
     public static void fill(final Object bean) {
         final Class<?> beanClass = bean.getClass();
 
-        N.checkArgument(ClassUtil.isBeanClass(beanClass), "{} is not a valid bean class with property getter/setter method", beanClass);
+        N.checkArgument(ClassUtil.isBeanClass(beanClass), "{} is not a valid bean class with property getter/setter method", beanClass); //NOSONAR
 
         fill(bean, ClassUtil.getPropNameList(beanClass));
     }
@@ -80,9 +80,9 @@ public final class TestUtil {
             } else if (double.class.equals(parameterClass) || Double.class.equals(parameterClass)) {
                 propValue = N.RAND.nextDouble();
             } else if (byte.class.equals(parameterClass) || Byte.class.equals(parameterClass)) {
-                propValue = Integer.valueOf(N.RAND.nextInt()).byteValue();
+                propValue = Integer.valueOf(N.RAND.nextInt()).byteValue(); //NOSONAR
             } else if (short.class.equals(parameterClass) || Short.class.equals(parameterClass)) {
-                propValue = Integer.valueOf(N.RAND.nextInt()).shortValue();
+                propValue = Integer.valueOf(N.RAND.nextInt()).shortValue(); //NOSONAR
             } else if (Number.class.isAssignableFrom(parameterClass)) {
                 propValue = type.valueOf(String.valueOf(N.RAND.nextInt()));
             } else if (java.util.Date.class.isAssignableFrom(parameterClass) || Calendar.class.isAssignableFrom(parameterClass)) {

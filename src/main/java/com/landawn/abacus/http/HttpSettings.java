@@ -25,7 +25,7 @@ import com.landawn.abacus.util.N;
  * @author Haiyang Li
  * @since 1.3
  */
-public final class HttpSettings implements Cloneable {
+public final class HttpSettings {
 
     private int connectionTimeout;
 
@@ -45,7 +45,7 @@ public final class HttpSettings implements Cloneable {
 
     private HttpHeaders headers = null;
 
-    public HttpSettings() {
+    public HttpSettings() { //NOSONAR
     }
 
     public static HttpSettings create() {

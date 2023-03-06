@@ -209,7 +209,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * @return <code>true</code> if the current value is <code>true</code>
      * @since 2.5
      */
-    public boolean isTrue() {
+    public boolean isTrue() { //NOSONAR
         return value;
     }
 

@@ -133,7 +133,7 @@ class JSONStreamReader extends JSONStringReader {
                                 text = TRUE;
                             }
                         } else if (nextEvent == 'n') { // null
-                            if (saveChar(nextChar()) == 'u' && saveChar(nextChar()) == 'l' && saveChar(nextChar()) == 'l') {
+                            if (saveChar(nextChar()) == 'u' && saveChar(nextChar()) == 'l' && saveChar(nextChar()) == 'l') { //NOSONAR
                                 text = NULL;
                             }
                         } else if ((nextEvent >= '0' && nextEvent <= '9') || nextEvent == '-' || nextEvent == '+') { // number.
@@ -212,7 +212,7 @@ class JSONStreamReader extends JSONStringReader {
 
         while ((ch = nextChar()) >= 0) {
             if (ch >= '0' && ch <= '9') {
-                if (cnt < MAX_PARSABLE_NUM_LEN || ((cnt == MAX_PARSABLE_NUM_LEN && ret <= (Long.MAX_VALUE - (ch - '0')) / 10))) {
+                if (cnt < MAX_PARSABLE_NUM_LEN || (cnt == MAX_PARSABLE_NUM_LEN && ret <= (Long.MAX_VALUE - (ch - '0')) / 10)) {
                     ret = ret * 10 + (ch - '0');
 
                     if (ret > 0 || pointPositoin > 0) {

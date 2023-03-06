@@ -80,6 +80,7 @@ import com.landawn.abacus.util.u.Optional;
  * @see com.landawn.abacus.util.TypeReference
  * @see com.landawn.abacus.util.TypeReference.TypeToken
  */
+@SuppressWarnings({ "java:S1192", "java:S2160" })
 public final class TypeFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(TypeFactory.class);
@@ -1046,7 +1047,7 @@ public final class TypeFactory {
      */
     @Deprecated
     @SuppressWarnings("unchecked")
-    static <T> List<Type<T>> getType(final Collection<? extends Class<? extends T>> classes) {
+    static <T> List<Type<T>> getType(final Collection<Class<? extends T>> classes) {
         final List<Type<T>> result = new ArrayList<>(classes.size());
 
         for (Class<?> cls : classes) {

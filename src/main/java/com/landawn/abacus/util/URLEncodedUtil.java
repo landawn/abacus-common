@@ -312,7 +312,7 @@ public final class URLEncodedUtil {
         Object propValue = null;
         String[] values = null;
 
-        for (String key : parameters.keySet()) {
+        for (String key : parameters.keySet()) { //NOSONAR
             propInfo = beanInfo.getPropInfo(key);
             values = parameters.get(key);
 

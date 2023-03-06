@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface BooleanTernaryOperator extends Throwables.BooleanTernaryOperator<RuntimeException> {
+public interface BooleanTernaryOperator extends Throwables.BooleanTernaryOperator<RuntimeException> { //NOSONAR
 
     @Override
     boolean applyAsBoolean(boolean a, boolean b, boolean c);

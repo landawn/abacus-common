@@ -35,12 +35,13 @@ import com.landawn.abacus.util.WD;
  * @param <R>
  * @since 0.9
  */
+@SuppressWarnings("java:S2160")
 public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
 
     private final String declaringName;
 
     @SuppressWarnings("rawtypes")
-    private final Class<Triple<L, M, R>> typeClass = (Class) Triple.class;
+    private final Class<Triple<L, M, R>> typeClass = (Class) Triple.class; //NOSONAR
 
     private final Type<L> leftType;
 

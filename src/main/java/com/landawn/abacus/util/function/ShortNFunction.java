@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface ShortNFunction<R> extends Throwables.ShortNFunction<R, RuntimeException> {
+public interface ShortNFunction<R> extends Throwables.ShortNFunction<R, RuntimeException> { //NOSONAR
 
     @Override
     R apply(short... args);

@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface ToFloatFunction<T> extends Throwables.ToFloatFunction<T, RuntimeException> {
+public interface ToFloatFunction<T> extends Throwables.ToFloatFunction<T, RuntimeException> { //NOSONAR
 
     ToFloatFunction<Float> UNBOX = value -> value == null ? 0 : value;
 

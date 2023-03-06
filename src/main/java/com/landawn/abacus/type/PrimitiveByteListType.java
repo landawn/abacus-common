@@ -31,6 +31,7 @@ import com.landawn.abacus.util.N;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteList> {
 
     public static final String BYTE_LIST = ByteList.class.getSimpleName();

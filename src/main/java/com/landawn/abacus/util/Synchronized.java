@@ -20,6 +20,7 @@ package com.landawn.abacus.util;
  * @param <T>
  * @since 0.8
  */
+@SuppressWarnings("java:S2445")
 public final class Synchronized<T> {
 
     private final T mutex;

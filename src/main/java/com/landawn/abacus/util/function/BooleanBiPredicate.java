@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<RuntimeException> {
+public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<RuntimeException> { //NOSONAR
 
     BooleanBiPredicate ALWAYS_TRUE = (t, u) -> true;
 

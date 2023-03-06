@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface IndexedBiFunction<T, U, R> extends Throwables.IndexedBiFunction<T, U, R, RuntimeException> {
+public interface IndexedBiFunction<T, U, R> extends Throwables.IndexedBiFunction<T, U, R, RuntimeException> { //NOSONAR
 
     @Override
     R apply(int idx, T e, U u);

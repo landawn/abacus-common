@@ -260,7 +260,7 @@ class JSONStringReader extends AbstractJSONReader {
                             }
                         } else if (nextEvent == 'n' && strEndIndex - strBeginIndex > 2) { // null
                             if (saveChar(strValue[strBeginIndex++]) == 'u' && saveChar(strValue[strBeginIndex++]) == 'l'
-                                    && saveChar(strValue[strBeginIndex++]) == 'l') {
+                                    && saveChar(strValue[strBeginIndex++]) == 'l') { //NOSONAR
                                 text = NULL;
                             }
                         } else if ((nextEvent >= '0' && nextEvent <= '9') || nextEvent == '-' || nextEvent == '+') { // number.
@@ -324,7 +324,7 @@ class JSONStringReader extends AbstractJSONReader {
             ch = strValue[strBeginIndex++];
 
             if (ch >= '0' && ch <= '9') {
-                if (cnt < MAX_PARSABLE_NUM_LEN || ((cnt == MAX_PARSABLE_NUM_LEN && ret <= (Long.MAX_VALUE - (ch - '0')) / 10))) {
+                if (cnt < MAX_PARSABLE_NUM_LEN || (cnt == MAX_PARSABLE_NUM_LEN && ret <= (Long.MAX_VALUE - (ch - '0')) / 10)) {
                     ret = ret * 10 + (ch - '0');
 
                     if (ret > 0 || pointPositoin > 0) {
@@ -521,11 +521,11 @@ class JSONStringReader extends AbstractJSONReader {
                     }
                 }
             } else if (text != null) {
-                if (text == NULL) {
+                if (text.equals(NULL)) {
                     return type.isOptionalOrNullable() ? (T) defaultOptionals.get(type.clazz()) : null;
-                } else if (text == FALSE || text == TRUE) {
+                } else if (text.equals(FALSE) || text.equals(TRUE)) {
                     if (type.isBoolean() || type.isObjectType()) {
-                        return (T) (text == FALSE ? Boolean.FALSE : Boolean.TRUE);
+                        return (T) (text.equals(FALSE) ? Boolean.FALSE : Boolean.TRUE);
                     } else {
                         return type.valueOf(text);
                     }

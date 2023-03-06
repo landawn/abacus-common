@@ -901,10 +901,14 @@ public final class XMLUtil {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public static void writeCharacters(OutputStream os, char[] cbuf, int off, int len) throws IOException {
-        final BufferedXMLWriter bufWriter = Objectory.createBufferedXMLWriter(os);
-        bufWriter.writeCharacter(cbuf, off, len);
-        bufWriter.flush();
-        Objectory.recycle(bufWriter);
+        final BufferedXMLWriter bufWriter = Objectory.createBufferedXMLWriter(os); //NOSONAR
+
+        try {
+            bufWriter.writeCharacter(cbuf, off, len);
+            bufWriter.flush();
+        } finally {
+            Objectory.recycle(bufWriter);
+        }
     }
 
     /**
@@ -927,10 +931,14 @@ public final class XMLUtil {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public static void writeCharacters(OutputStream os, String str, int off, int len) throws IOException {
-        final BufferedXMLWriter bufWriter = Objectory.createBufferedXMLWriter(os);
-        bufWriter.writeCharacter(str, off, len);
-        bufWriter.flush();
-        Objectory.recycle(bufWriter);
+        final BufferedXMLWriter bufWriter = Objectory.createBufferedXMLWriter(os); //NOSONAR
+
+        try {
+            bufWriter.writeCharacter(str, off, len);
+            bufWriter.flush();
+        } finally {
+            Objectory.recycle(bufWriter);
+        }
     }
 
     /**
@@ -953,7 +961,7 @@ public final class XMLUtil {
      */
     public static void writeCharacters(Writer writer, char[] cbuf, int off, int len) throws IOException {
         boolean isBufferedWriter = writer instanceof BufferedXMLWriter;
-        final BufferedXMLWriter bw = isBufferedWriter ? (BufferedXMLWriter) writer : Objectory.createBufferedXMLWriter(writer);
+        final BufferedXMLWriter bw = isBufferedWriter ? (BufferedXMLWriter) writer : Objectory.createBufferedXMLWriter(writer); //NOSONAR
 
         try {
             bw.writeCharacter(cbuf, off, len);
@@ -987,7 +995,7 @@ public final class XMLUtil {
      */
     public static void writeCharacters(Writer writer, String str, int off, int len) throws IOException {
         boolean isBufferedWriter = writer instanceof BufferedXMLWriter;
-        final BufferedXMLWriter bw = isBufferedWriter ? (BufferedXMLWriter) writer : Objectory.createBufferedXMLWriter(writer);
+        final BufferedXMLWriter bw = isBufferedWriter ? (BufferedXMLWriter) writer : Objectory.createBufferedXMLWriter(writer); //NOSONAR
 
         try {
             bw.writeCharacter(str, off, len);

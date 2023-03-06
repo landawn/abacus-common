@@ -22,6 +22,7 @@ import com.landawn.abacus.util.N;
  * @param <T>
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public final class BeanType<T> extends AbstractType<T> {
 
     private final Class<T> typeClass;

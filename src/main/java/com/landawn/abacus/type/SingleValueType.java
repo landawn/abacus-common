@@ -38,7 +38,7 @@ import com.landawn.abacus.util.TypeAttrParser;
  * @param <T>
  * @since 0.8
  */
-abstract class SingleValueType<T> extends AbstractType<T> {
+abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
 
     final Class<T> typeClass;
     final boolean isGenericType;
@@ -60,7 +60,7 @@ abstract class SingleValueType<T> extends AbstractType<T> {
         super(typeName);
         this.typeClass = cls;
 
-        this.isGenericType = typeName.indexOf('<') > 0 && typeName.indexOf('>') > 0;
+        this.isGenericType = typeName.indexOf('<') > 0 && typeName.indexOf('>') > 0; //NOSONAR
         final TypeAttrParser attrs = TypeAttrParser.parse(typeName);
         parameterTypes = new Type<?>[attrs.getTypeParameters().length];
         for (int i = 0, len = parameterTypes.length; i < len; i++) {

@@ -27,6 +27,7 @@ import com.landawn.abacus.util.N;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<BooleanList> {
 
     public static final String BOOLEAN_LIST = BooleanList.class.getSimpleName();

@@ -43,7 +43,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
         }
     };
 
-    public static LongIterator empty() {
+    public static LongIterator empty() {//NOSONAR
         return EMPTY;
     }
 
@@ -430,6 +430,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * For each remaining.
      *
      * @param action
+     * @deprecated
      */
     @Override
     @Deprecated
@@ -443,7 +444,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void foreachRemaining(Throwables.LongConsumer<E> action) throws E {
+    public <E extends Exception> void foreachRemaining(Throwables.LongConsumer<E> action) throws E {//NOSONAR
         N.checkArgNotNull(action);
 
         while (hasNext()) {

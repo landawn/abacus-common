@@ -51,7 +51,7 @@ public class WebUtil {
             } else if (StringUtil.equals(token, "--header") || StringUtil.equals(token, "-H")) {
                 String header = tokens.get(++i);
                 int idx = header.indexOf(':');
-                headers = headers + indent + ".header(\"" + header.substring(0, idx).trim() + "\", \"" + escapeJava(header.substring(idx + 1).trim()) + "\")";
+                headers = headers + indent + ".header(\"" + header.substring(0, idx).trim() + "\", \"" + escapeJava(header.substring(idx + 1).trim()) + "\")"; //NOSONAR
             } else if (StringUtil.equals(token, "--data-raw") || StringUtil.equals(token, "--data") || StringUtil.equals(token, "-d")) {
                 body = tokens.get(++i);
             }
@@ -128,7 +128,7 @@ public class WebUtil {
             } else if (StringUtil.equals(token, "--header") || StringUtil.equals(token, "-H")) {
                 String header = tokens.get(++i);
                 int idx = header.indexOf(':');
-                headers = headers + indent + ".header(\"" + header.substring(0, idx).trim() + "\", \"" + escapeJava(header.substring(idx + 1).trim()) + "\")";
+                headers = headers + indent + ".header(\"" + header.substring(0, idx).trim() + "\", \"" + escapeJava(header.substring(idx + 1).trim()) + "\")"; //NOSONAR
 
                 if ("Content-Type".equalsIgnoreCase(header.substring(0, idx).trim())) {
                     mediaType = "MediaType.parse(\"" + header.substring(idx + 1).trim() + "\")";

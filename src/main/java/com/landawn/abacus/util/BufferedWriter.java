@@ -41,7 +41,7 @@ public class BufferedWriter extends Writer {
 
     protected int count = 0;
 
-    protected char[] _cbuf;
+    protected char[] _cbuf; //NOSONAR
 
     protected int nextChar = 0;
 
@@ -344,7 +344,7 @@ public class BufferedWriter extends Writer {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public Writer append(CharSequence csq) throws IOException {
+    public Writer append(CharSequence csq) throws IOException { //NOSONAR
         return super.append(csq);
     }
 
@@ -357,7 +357,7 @@ public class BufferedWriter extends Writer {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public Writer append(CharSequence csq, int start, int end) throws IOException {
+    public Writer append(CharSequence csq, int start, int end) throws IOException { //NOSONAR
         return super.append(csq, start, end);
     }
 
@@ -368,7 +368,7 @@ public class BufferedWriter extends Writer {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public Writer append(char c) throws IOException {
+    public Writer append(char c) throws IOException { //NOSONAR
         return super.append(c);
     }
 
@@ -475,7 +475,7 @@ public class BufferedWriter extends Writer {
     /**
      * Reset.
      */
-    void _reset() {
+    void _reset() { //NOSONAR
         Objectory.recycle(_cbuf);
         _cbuf = null;
         nextChar = 0;

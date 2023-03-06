@@ -28,9 +28,9 @@ import com.landawn.abacus.util.stream.IntStream;
 @com.landawn.abacus.annotation.Immutable
 public final class IntTriple implements Immutable {
 
-    public final int _1;
-    public final int _2;
-    public final int _3;
+    public final int _1; //NOSONAR
+    public final int _2; //NOSONAR
+    public final int _3; //NOSONAR
 
     IntTriple() {
         this(0, 0, 0);

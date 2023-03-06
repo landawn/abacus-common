@@ -110,6 +110,7 @@ import com.landawn.abacus.util.stream.Stream;
 @LazyEvaluation
 @SequentialOnly
 @com.landawn.abacus.annotation.Immutable
+@SuppressWarnings("java:S1192")
 public class ExceptionalStream<T, E extends Exception> implements Closeable, Immutable {
 
     static final Logger logger = LoggerFactory.getLogger(ExceptionalStream.class);
@@ -211,7 +212,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param exceptionType
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> just(final T e, @SuppressWarnings("unused") final Class<E> exceptionType) {
+    public static <T, E extends Exception> ExceptionalStream<T, E> just(final T e, @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
         return of(e);
     }
 
@@ -239,7 +240,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param e
      * @return
      */
-    public static <T, E extends Exception> ExceptionalStream<T, E> ofNullable(final T e, @SuppressWarnings("unused") final Class<E> exceptionType) {
+    public static <T, E extends Exception> ExceptionalStream<T, E> ofNullable(final T e, @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
         if (e == null) {
             return empty();
         }
@@ -281,7 +282,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
             @Override
             public long count() throws E {
-                return len - position;
+                return len - position; //NOSONAR
             }
 
             @Override
@@ -332,7 +333,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                 @Override
                 public long count() throws E {
-                    return len - position;
+                    return len - position; //NOSONAR
                 }
 
                 @Override
@@ -434,7 +435,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> of(final Collection<? extends T> c,
-            @SuppressWarnings("unused") final Class<E> exceptionType) {
+            @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
         return of(c);
     }
 
@@ -447,7 +448,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> of(final Iterator<? extends T> iter,
-            @SuppressWarnings("unused") final Class<E> exceptionType) {
+            @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
         return of(iter);
     }
 
@@ -460,7 +461,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> of(final Iterable<? extends T> iterable,
-            @SuppressWarnings("unused") final Class<E> exceptionType) {
+            @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
         return of(iterable);
     }
 
@@ -474,7 +475,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     public static <K, V, E extends Exception> ExceptionalStream<Map.Entry<K, V>, E> of(final Map<K, V> m,
-            @SuppressWarnings("unused") final Class<E> exceptionType) {
+            @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
         return of(m);
     }
 
@@ -487,7 +488,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> of(final Stream<? extends T> stream,
-            @SuppressWarnings("unused") final Class<E> exceptionType) {
+            @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
         return of(stream);
     }
 
@@ -500,7 +501,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> of(final java.util.stream.Stream<? extends T> stream,
-            @SuppressWarnings("unused") final Class<E> exceptionType) {
+            @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
         return of(stream);
     }
 
@@ -526,7 +527,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
             @Override
             public long count() throws E {
-                return len - position;
+                return len - position; //NOSONAR
             }
 
             @Override
@@ -562,7 +563,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
             @Override
             public long count() throws E {
-                return len - position;
+                return len - position; //NOSONAR
             }
 
             @Override
@@ -598,7 +599,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
             @Override
             public long count() throws E {
-                return len - position;
+                return len - position; //NOSONAR
             }
 
             @Override
@@ -634,7 +635,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
             @Override
             public long count() throws E {
-                return len - position;
+                return len - position; //NOSONAR
             }
 
             @Override
@@ -676,7 +677,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
             @Override
             public long count() throws E {
-                return len - position;
+                return len - position; //NOSONAR
             }
 
             @Override
@@ -718,7 +719,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
             @Override
             public long count() throws E {
-                return len - position;
+                return len - position; //NOSONAR
             }
 
             @Override
@@ -754,7 +755,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
             @Override
             public long count() throws E {
-                return len - position;
+                return len - position; //NOSONAR
             }
 
             @Override
@@ -796,7 +797,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
             @Override
             public long count() throws E {
-                return len - position;
+                return len - position; //NOSONAR
             }
 
             @Override
@@ -811,11 +812,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     public static <T, E extends Exception> ExceptionalStream<T, E> of(final Optional<T> op) {
-        return op == null || !op.isPresent() ? ExceptionalStream.<T, E> empty() : ExceptionalStream.<T, E> of(op.get());
+        return op == null || !op.isPresent() ? ExceptionalStream.<T, E> empty() : ExceptionalStream.<T, E> of(op.get()); //NOSONAR
     }
 
     public static <T, E extends Exception> ExceptionalStream<T, E> of(final java.util.Optional<T> op) {
-        return op == null || !op.isPresent() ? ExceptionalStream.<T, E> empty() : ExceptionalStream.<T, E> of(op.get());
+        return op == null || !op.isPresent() ? ExceptionalStream.<T, E> empty() : ExceptionalStream.<T, E> of(op.get()); //NOSONAR
     }
 
     public static <K, E extends Exception> ExceptionalStream<K, E> ofKeys(final Map<K, ?> map) {
@@ -1136,7 +1137,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         final ExceptionalIterator<String, IOException> iter = createLazyLineIterator(file, null, charset, null, true);
 
-        return newStream(iter).onClose(newCloseHandler(iter));
+        return newStream(iter).onClose(newCloseHandler(iter)); //NOSONAR
     }
 
     /**
@@ -1249,7 +1250,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     lazyIter = new ExceptionalIterator<>() {
                         private BufferedReader bufferedReader;
 
-                        {
+                        { //NOSONAR
                             if (reader != null) {
                                 bufferedReader = reader instanceof BufferedReader ? ((BufferedReader) reader) : new BufferedReader(reader);
                             } else if (file != null) {
@@ -2472,7 +2473,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      */
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> flatmap(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends E> mapper) {
+    public <R> ExceptionalStream<R, E> flatmap(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends E> mapper) { //NOSONAR
         assertNotClosed();
 
         return newStream(new ExceptionalIterator<R, E>() {
@@ -3359,7 +3360,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             @SuppressWarnings("unchecked")
             private final T none = (T) NONE;
             private T prev = none;
-            private T _1 = none;
+            private T _1 = none; //NOSONAR
 
             @Override
             public boolean hasNext() throws E {
@@ -3446,8 +3447,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             private final T none = (T) NONE;
             private T prev = none;
             private T prev2 = none;
-            private T _1 = none;
-            private T _2 = none;
+            private T _1 = none; //NOSONAR
+            private T _2 = none; //NOSONAR
 
             @Override
             public boolean hasNext() throws E {
@@ -5440,7 +5441,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             public long count() throws E {
                 iter.count();
 
-                return 2 - cursor;
+                return 2 - cursor; //NOSONAR
             }
 
             @Override
@@ -5541,7 +5542,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             public long count() throws E {
                 iter.count();
 
-                return 2 - cursor;
+                return 2 - cursor; //NOSONAR
             }
 
             @Override
@@ -5716,7 +5717,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                         elements.advance(m);
                     } else {
                         final long m = (n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
-                        final int prevSize = increment >= windowSize ? 0 : (queue == null ? 0 : queue.size());
+                        final int prevSize = increment >= windowSize ? 0 : (queue == null ? 0 : queue.size()); //NOSONAR
 
                         if (m < prevSize) {
                             for (int i = 0; i < m; i++) {
@@ -5859,7 +5860,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                         elements.advance(m);
                     } else {
                         final long m = (n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
-                        final int prevSize = increment >= windowSize ? 0 : (queue == null ? 0 : queue.size());
+                        final int prevSize = increment >= windowSize ? 0 : (queue == null ? 0 : queue.size()); //NOSONAR
 
                         if (m < prevSize) {
                             for (int i = 0; i < m; i++) {
@@ -6028,7 +6029,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     init();
                 }
 
-                return to - cursor;
+                return to - cursor; //NOSONAR
             }
 
             @Override
@@ -6301,7 +6302,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     init();
                 }
 
-                return len - cnt;
+                return len - cnt; //NOSONAR
             }
 
             @Override
@@ -6366,7 +6367,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     public ExceptionalStream<T, E> sorted(final Comparator<? super T> comparator) {
         assertNotClosed();
 
-        final Comparator<? super T> cmp = comparator == null ? Comparators.NATURAL_ORDER : comparator;
+        final Comparator<? super T> cmp = comparator == null ? Comparators.NATURAL_ORDER : comparator; //NOSONAR
 
         if (sorted && cmp == this.cmp) {
             return newStream(elements, sorted, comparator, closeHandlers);
@@ -6404,7 +6405,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @IntermediateOp
     @TerminalOpTriggered
     public ExceptionalStream<T, E> reverseSorted(Comparator<? super T> comparator) {
-        final Comparator<? super T> cmp = comparator == null ? Comparators.REVERSED_ORDER : comparator.reversed();
+        final Comparator<? super T> cmp = comparator == null ? Comparators.REVERSED_ORDER : comparator.reversed(); //NOSONAR
 
         return sorted(cmp);
     }
@@ -6453,7 +6454,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     init();
                 }
 
-                return len - cursor;
+                return len - cursor; //NOSONAR
             }
 
             @Override
@@ -6624,6 +6625,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         final Throwables.Consumer<T, E> action = it -> rateLimiter.acquire();
 
         return onEach(action);
+    }
+
+    @Beta
+    @IntermediateOp
+    public ExceptionalStream<Timed<T>, E> timed() {
+        return map(Timed::of);
     }
 
     @IntermediateOp
@@ -8131,10 +8138,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                 if (predicateForFirst.test(next)) {
                     return Optional.of(next);
-                } else if (ret == NONE) {
-                    if (predicateForAny.test(next)) {
-                        ret = next;
-                    }
+                } else if (ret == NONE && predicateForAny.test(next)) {
+                    ret = next;
                 }
             }
 
@@ -9203,7 +9208,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     @TerminalOp
-    public Multiset<T> toMultiset(Supplier<? extends Multiset<T>> supplier) throws E {
+    public Multiset<T> toMultiset(Supplier<? extends Multiset<T>> supplier) throws E { //NOSONAR
         assertNotClosed();
 
         checkArgNotNull(supplier, "supplier");
@@ -9227,7 +9232,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     @TerminalOp
-    public LongMultiset<T> toLongMultiset(Supplier<? extends LongMultiset<T>> supplier) throws E {
+    public LongMultiset<T> toLongMultiset(Supplier<? extends LongMultiset<T>> supplier) throws E { //NOSONAR
         assertNotClosed();
 
         checkArgNotNull(supplier, "supplier");
@@ -9790,7 +9795,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         try {
             boolean isBufferedWriter = writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
-            final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);
+            final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
             final ExceptionalIterator<T, E> iter = iteratorEx();
             long cnt = 0;
 
@@ -9859,7 +9864,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
         try {
             boolean isBufferedWriter = writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
-            final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);
+            final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
             final ExceptionalIterator<T, E> iter = iteratorEx();
             long cnt = 0;
 
@@ -10559,7 +10564,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <TT, EE extends Exception> ExceptionalStream<TT, EE> __(Function<? super ExceptionalStream<T, E>, ExceptionalStream<TT, EE>> transfer) {
+    public <TT, EE extends Exception> ExceptionalStream<TT, EE> __(Function<? super ExceptionalStream<T, E>, ExceptionalStream<TT, EE>> transfer) { //NOSONAR
         assertNotClosed();
 
         checkArgNotNull(transfer, "transfer");
@@ -10756,7 +10761,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> spsFlatmap(final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) {
+    public <R> ExceptionalStream<R, E> spsFlatmap(final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) { //NOSONAR
         final Function<Stream<T>, Stream<R>> ops = s -> s.flatmap(Fn.ff(mapper));
 
         return sps(ops);
@@ -10842,7 +10847,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> spsFlatMap(final int maxThreadNum, final Throwables.Function<? super T, ? extends Stream<? extends R>, E> mapper) {
+    public <R> ExceptionalStream<R, E> spsFlatMap(final int maxThreadNum, final Throwables.Function<? super T, ? extends Stream<? extends R>, E> mapper) { //NOSONAR
         final Function<Stream<T>, Stream<R>> ops = s -> s.flatMap(Fn.ff(mapper));
 
         return sps(maxThreadNum, ops);
@@ -10864,7 +10869,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, E> spsFlatmap(final int maxThreadNum, final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) {
+    public <R> ExceptionalStream<R, E> spsFlatmap(final int maxThreadNum, final Throwables.Function<? super T, ? extends Collection<? extends R>, E> mapper) { //NOSONAR
         final Function<Stream<T>, Stream<R>> ops = s -> s.flatmap(Fn.ff(mapper));
 
         return sps(maxThreadNum, ops);
@@ -10966,7 +10971,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, Exception> spsFlatmapE(
+    public <R> ExceptionalStream<R, Exception> spsFlatmapE( //NOSONAR
             final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) {
         return checked(unchecked().<R> spsFlatmapE(mapper), true);
     }
@@ -11048,7 +11053,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, Exception> spsFlatMapE(final int maxThreadNum,
+    public <R> ExceptionalStream<R, Exception> spsFlatMapE(final int maxThreadNum, //NOSONAR
             final Throwables.Function<? super T, ? extends Stream<? extends R>, ? extends Exception> mapper) {
         return checked(unchecked().<R> spsFlatMapE(maxThreadNum, mapper), true);
     }
@@ -11070,7 +11075,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      */
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, Exception> spsFlatmapE(final int maxThreadNum,
+    public <R> ExceptionalStream<R, Exception> spsFlatmapE(final int maxThreadNum, //NOSONAR
             final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) {
         return checked(unchecked().<R> spsFlatmapE(maxThreadNum, mapper), true);
     }
@@ -11390,7 +11395,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     @SuppressWarnings("rawtypes")
     @Beta
     @IntermediateOp
-    public <R> ExceptionalStream<R, Exception> flatmapE(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) {
+    public <R> ExceptionalStream<R, Exception> flatmapE(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends Exception> mapper) { //NOSONAR
         assertNotClosed();
 
         return newStream(new ExceptionalIterator<R, Exception>() {
@@ -11653,7 +11658,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 try {
                     close();
                 } catch (Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e); //NOSONAR
                 }
             }
         }
@@ -11669,7 +11674,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 try {
                     close();
                 } catch (Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e); //NOSONAR
                 }
             }
         }
@@ -11692,7 +11697,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 try {
                     close();
                 } catch (Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e); //NOSONAR
                 }
             }
         }
@@ -11716,7 +11721,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 try {
                     close();
                 } catch (Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e); //NOSONAR
                 }
             }
         }
@@ -11733,7 +11738,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 try {
                     close();
                 } catch (Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e); //NOSONAR
                 }
             }
         }
@@ -11754,7 +11759,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 try {
                     close();
                 } catch (Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e); //NOSONAR
                 }
             }
         }
@@ -11775,7 +11780,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 try {
                     close();
                 } catch (Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e); //NOSONAR
                 }
             }
         }
@@ -11796,7 +11801,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                 try {
                     close();
                 } catch (Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e);
+                    throw ExceptionUtil.toRuntimeException(e); //NOSONAR
                 }
             }
         }
@@ -12015,7 +12020,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
                 @Override
                 public long count() {
-                    return toIndex - cursor;
+                    return toIndex - cursor; //NOSONAR
                 }
             };
         }
@@ -12084,7 +12089,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         //                        init();
         //                    }
         //
-        //                    return len - position;
+        //                    return len - position; //NOSONAR
         //                }
         //
         //                @Override

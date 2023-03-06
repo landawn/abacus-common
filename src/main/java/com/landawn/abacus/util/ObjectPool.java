@@ -35,6 +35,7 @@ import com.landawn.abacus.annotation.Internal;
  */
 @Internal
 @Beta
+@SuppressWarnings("java:S2160")
 public final class ObjectPool<K, V> extends AbstractMap<K, V> {
 
     final int capacity;
@@ -43,13 +44,13 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
 
     private final int indexMask;
 
-    private int size = 0;
+    private int _size = 0; //NOSONAR
 
-    private Set<K> keySet = null;
+    private transient Set<K> _keySet = null; //NOSONAR
 
-    private Collection<V> values = null;
+    private transient Collection<V> _values = null; //NOSONAR
 
-    private Set<java.util.Map.Entry<K, V>> entrySet;
+    private transient Set<java.util.Map.Entry<K, V>> _entrySet; //NOSONAR
 
     @SuppressWarnings("unchecked")
     public ObjectPool(int capacity) {
@@ -85,6 +86,12 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      */
     @Override
     public V put(K key, V value) {
+        synchronized (table) {
+            return internalPut(key, value);
+        }
+    }
+
+    private V internalPut(K key, V value) {
         if ((key == null) || (value == null)) {
             throw new NullPointerException();
         }
@@ -92,31 +99,29 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         final int hash = hash(key);
         final int i = hash & indexMask;
 
-        synchronized (table) {
-            //            if (size() > capacity) {
-            //                throw new IndexOutOfBoundsException("Object pool is full with capacity=" + capacity);
-            //            }
-            //
-            for (Entry<K, V> entry = table[i]; entry != null; entry = entry.next) {
-                if ((hash == entry.hash) && key.equals(entry.key)) {
-                    V previousValue = entry.value;
-                    entry.value = value;
+        //            if (size() > capacity) {
+        //                throw new IndexOutOfBoundsException("Object pool is full with capacity=" + capacity);
+        //            }
+        //
+        for (Entry<K, V> entry = table[i]; entry != null; entry = entry.next) {
+            if ((hash == entry.hash) && key.equals(entry.key)) {
+                V previousValue = entry.value;
+                entry.value = value;
 
-                    return previousValue;
-                }
+                return previousValue;
             }
-
-            Entry<K, V> entry = new Entry<>(hash, key, value, table[i]);
-            table[i] = entry;
-
-            keySet = null;
-            values = null;
-            entrySet = null;
-
-            size++;
-
-            return null;
         }
+
+        Entry<K, V> entry = new Entry<>(hash, key, value, table[i]);
+        table[i] = entry;
+
+        _keySet = null;
+        _values = null;
+        _entrySet = null;
+
+        _size++;
+
+        return null;
     }
 
     /**
@@ -125,9 +130,11 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      */
     @Override
     public void putAll(Map<? extends K, ? extends V> m) {
-        for (Map.Entry<? extends K, ? extends V> entry : m.entrySet()) {
-            if (entry.getValue() != null) {
-                put(entry.getKey(), entry.getValue());
+        synchronized (table) {
+            for (Map.Entry<? extends K, ? extends V> entry : m.entrySet()) {
+                if (entry.getValue() != null) {
+                    internalPut(entry.getKey(), entry.getValue());
+                }
             }
         }
     }
@@ -139,7 +146,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      */
     @Override
     public V remove(Object key) {
-        if (size == 0) {
+        if (_size == 0) {
             return null;
         }
 
@@ -160,11 +167,11 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
                         prev.next = next;
                     }
 
-                    keySet = null;
-                    values = null;
-                    entrySet = null;
+                    _keySet = null;
+                    _values = null;
+                    _entrySet = null;
 
-                    size--;
+                    _size--;
 
                     return e.value;
                 }
@@ -220,22 +227,24 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
 
     @Override
     public Set<K> keySet() {
-        Set<K> tmp = keySet;
+        Set<K> tmp = _keySet;
 
         if (tmp == null) {
-            tmp = N.newHashSet(size);
+            synchronized (table) {
+                tmp = N.newHashSet(_size);
 
-            for (Entry<K, V> element : table) {
-                for (Entry<K, V> entry = element; entry != null; entry = entry.next) {
-                    if (entry.value != null) {
-                        tmp.add(entry.key);
+                for (Entry<K, V> element : table) {
+                    for (Entry<K, V> entry = element; entry != null; entry = entry.next) {
+                        if (entry.value != null) {
+                            tmp.add(entry.key);
+                        }
                     }
                 }
+
+                tmp = Collections.unmodifiableSet(tmp);
+
+                _keySet = tmp;
             }
-
-            tmp = Collections.unmodifiableSet(tmp);
-
-            keySet = tmp;
         }
 
         return tmp;
@@ -243,26 +252,28 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
 
     @Override
     public Collection<V> values() {
-        Collection<V> tmp = values;
+        Collection<V> tmp = _values;
 
         if (tmp == null) {
-            tmp = N.newHashSet(size);
+            synchronized (table) {
+                tmp = N.newHashSet(_size);
 
-            V value = null;
+                V value = null;
 
-            for (Entry<K, V> element : table) {
-                for (Entry<K, V> entry = element; entry != null; entry = entry.next) {
-                    value = entry.value;
+                for (Entry<K, V> element : table) {
+                    for (Entry<K, V> entry = element; entry != null; entry = entry.next) {
+                        value = entry.value;
 
-                    if (value != null) {
-                        tmp.add(value);
+                        if (value != null) {
+                            tmp.add(value);
+                        }
                     }
                 }
+
+                tmp = Collections.unmodifiableCollection(tmp);
+
+                _values = tmp;
             }
-
-            tmp = Collections.unmodifiableCollection(tmp);
-
-            values = tmp;
         }
 
         return tmp;
@@ -270,22 +281,24 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
 
     @Override
     public Set<java.util.Map.Entry<K, V>> entrySet() {
-        Set<java.util.Map.Entry<K, V>> tmp = entrySet;
+        Set<java.util.Map.Entry<K, V>> tmp = _entrySet;
 
         if (tmp == null) {
-            tmp = N.newHashSet(size);
+            synchronized (table) {
+                tmp = N.newHashSet(_size);
 
-            for (Entry<K, V> element : table) {
-                for (Entry<K, V> entry = element; entry != null; entry = entry.next) {
-                    if (entry.value != null) {
-                        tmp.add(entry);
+                for (Entry<K, V> element : table) {
+                    for (Entry<K, V> entry = element; entry != null; entry = entry.next) {
+                        if (entry.value != null) {
+                            tmp.add(entry);
+                        }
                     }
                 }
+
+                tmp = Collections.unmodifiableSet(tmp);
+
+                _entrySet = tmp;
             }
-
-            tmp = Collections.unmodifiableSet(tmp);
-
-            entrySet = tmp;
         }
 
         return tmp;
@@ -293,7 +306,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
 
     @Override
     public int size() {
-        return size;
+        return _size;
     }
 
     /**
@@ -303,7 +316,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      */
     @Override
     public boolean isEmpty() {
-        return size == 0;
+        return _size == 0;
     }
 
     /**
@@ -314,11 +327,11 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         synchronized (table) {
             Arrays.fill(table, null);
 
-            keySet = null;
-            values = null;
-            entrySet = null;
+            _keySet = null;
+            _values = null;
+            _entrySet = null;
 
-            size = 0;
+            _size = 0;
         }
     }
 

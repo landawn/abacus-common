@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface LongSupplier extends Throwables.LongSupplier<RuntimeException>, java.util.function.LongSupplier {
+public interface LongSupplier extends Throwables.LongSupplier<RuntimeException>, java.util.function.LongSupplier { //NOSONAR
 
     LongSupplier ZERO = () -> 0;
 

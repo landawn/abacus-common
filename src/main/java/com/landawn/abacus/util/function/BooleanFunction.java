@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface BooleanFunction<R> extends Throwables.BooleanFunction<R, RuntimeException> {
+public interface BooleanFunction<R> extends Throwables.BooleanFunction<R, RuntimeException> { //NOSONAR
     BooleanFunction<Boolean> BOX = value -> value;
 
     @Override

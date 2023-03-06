@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface ObjShortConsumer<T> extends Throwables.ObjShortConsumer<T, RuntimeException> {
+public interface ObjShortConsumer<T> extends Throwables.ObjShortConsumer<T, RuntimeException> { //NOSONAR
 
     @Override
     void accept(T t, short value);

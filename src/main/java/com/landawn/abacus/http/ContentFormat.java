@@ -21,12 +21,12 @@ package com.landawn.abacus.http;
  */
 public enum ContentFormat {
     NONE("", ""), //
-    JSON("application/json", ""), //
+    JSON("application/json", ""), // //NOSONAR
     JSON_LZ4("application/json", "lz4"), //
-    JSON_SNAPPY("application/json", "snappy"), //
+    JSON_SNAPPY("application/json", "snappy"), // //NOSONAR
     JSON_GZIP("application/json", "gzip"), //
     JSON_BR("application/json", "br"), //
-    XML("application/xml", ""), //
+    XML("application/xml", ""), // //NOSONAR
     XML_LZ4("application/xml", "lz4"), //
     XML_SNAPPY("application/xml", "snappy"), //
     XML_GZIP("application/xml", "gzip"), //

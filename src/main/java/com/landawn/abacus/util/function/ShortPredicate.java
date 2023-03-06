@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeException> {
+public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeException> { //NOSONAR
 
     ShortPredicate ALWAYS_TRUE = value -> true;
 
@@ -72,7 +72,7 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
         return t -> test(t) || other.test(t);
     }
 
-    static ShortPredicate equal(short targetShort) {
+    static ShortPredicate equal(short targetShort) { //NOSONAR
         return value -> value == targetShort;
     }
 

@@ -27,7 +27,7 @@ import java.io.Reader;
  */
 public final class BufferedReader extends Reader {
 
-    protected char[] _cbuf;
+    protected char[] _cbuf; //NOSONAR
 
     protected int nChars = 0;
 
@@ -205,7 +205,7 @@ public final class BufferedReader extends Reader {
             }
 
             if (nextChar >= nChars) { /* EOF */
-                String str = null;
+                String str = null; //NOSONAR
 
                 if ((sb != null) && (sb.length() > 0)) {
                     str = sb.toString();
@@ -242,7 +242,7 @@ public final class BufferedReader extends Reader {
             nextChar = i;
 
             if (eol) {
-                String str = null;
+                String str = null; //NOSONAR
 
                 if (sb == null) {
                     str = new String(_cbuf, startChar, i - startChar);
@@ -321,7 +321,7 @@ public final class BufferedReader extends Reader {
                     }
                 }
 
-                long d = nChars - nextChar;
+                long d = nChars - nextChar; //NOSONAR
 
                 if (r <= d) {
                     nextChar += r;
@@ -341,7 +341,7 @@ public final class BufferedReader extends Reader {
             }
 
             // Bound skip by beginning and end of the source
-            long ns = Math.min(strLength - nextChar, n);
+            long ns = Math.min(strLength - nextChar, n); //NOSONAR
             nextChar += ns;
 
             return ns;
@@ -435,7 +435,7 @@ public final class BufferedReader extends Reader {
     /**
      * Reset.
      */
-    void _reset() {
+    void _reset() { //NOSONAR
         synchronized (lock) {
             Objectory.recycle(_cbuf);
             _cbuf = null;

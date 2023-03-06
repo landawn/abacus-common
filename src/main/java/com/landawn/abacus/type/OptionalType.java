@@ -23,6 +23,7 @@ import com.landawn.abacus.util.u.Optional;
  * @param <T>
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
 
     public static final String OPTIONAL = Optional.class.getSimpleName();

@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface ShortBinaryOperator extends Throwables.ShortBinaryOperator<RuntimeException> {
+public interface ShortBinaryOperator extends Throwables.ShortBinaryOperator<RuntimeException> { //NOSONAR
 
     @Override
     short applyAsShort(short left, short right);

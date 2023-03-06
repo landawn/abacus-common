@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface LongFunction<R> extends Throwables.LongFunction<R, RuntimeException>, java.util.function.LongFunction<R> {
+public interface LongFunction<R> extends Throwables.LongFunction<R, RuntimeException>, java.util.function.LongFunction<R> { //NOSONAR
     LongFunction<Long> BOX = value -> value;
 
     @Override

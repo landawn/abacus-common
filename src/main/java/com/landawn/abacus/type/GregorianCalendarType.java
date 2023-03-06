@@ -28,6 +28,7 @@ import com.landawn.abacus.util.N;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public class GregorianCalendarType extends AbstractCalendarType<GregorianCalendar> {
 
     public static final String GREGORIAN_CALENDAR = GregorianCalendar.class.getSimpleName();

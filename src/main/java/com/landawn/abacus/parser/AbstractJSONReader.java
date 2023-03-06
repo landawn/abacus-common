@@ -21,7 +21,7 @@ import com.landawn.abacus.util.Strings;
  * @author Haiyang Li
  * @since 0.8
  */
-abstract class AbstractJSONReader implements JSONReader {
+abstract class AbstractJSONReader implements JSONReader { //NOSONAR
     static final int MAX_PARSABLE_NUM_LEN = Long.toString(Long.MAX_VALUE, 10).length() - 1;
 
     static final long[] POWERS_OF_TEN = { 1L, 10L, 100L, 1_000L, 10_000L, 100_000L, 1_000_000L, 10_000_000L, 100_000_000L, 1_000_000_000L, 10_000_000_000L,

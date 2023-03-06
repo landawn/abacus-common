@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface IndexedConsumer<T> extends Throwables.IndexedConsumer<T, RuntimeException> {
+public interface IndexedConsumer<T> extends Throwables.IndexedConsumer<T, RuntimeException> { //NOSONAR
 
     @Override
     void accept(int idx, T e);

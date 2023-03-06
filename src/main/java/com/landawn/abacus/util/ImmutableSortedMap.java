@@ -25,6 +25,7 @@ import java.util.TreeMap;
  * @param <V> the value type
  * @since 1.1.4
  */
+@SuppressWarnings("java:S2160")
 public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements SortedMap<K, V> {
 
     @SuppressWarnings("rawtypes")

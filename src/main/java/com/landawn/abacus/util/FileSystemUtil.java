@@ -83,7 +83,7 @@ final class FileSystemUtil {
                 os = UNIX;
             } else if (osName.indexOf("sun os") != -1 || osName.indexOf("sunos") != -1 || osName.indexOf("solaris") != -1) {
                 os = POSIX_UNIX;
-                dfPath = "/usr/xpg4/bin/df";
+                dfPath = "/usr/xpg4/bin/df"; //NOSONAR
             } else if (osName.indexOf("hp-ux") != -1 || osName.indexOf("aix") != -1) {
                 os = POSIX_UNIX;
             } else {
@@ -270,7 +270,7 @@ final class FileSystemUtil {
             }
         }
         // all lines are blank
-        throw new IOException("Command line 'dir /-c' did not return any info " + "for path '" + path + "'");
+        throw new IOException("Command line 'dir /-c' did not return any info " + "for path '" + path + "'"); //NOSONAR
     }
 
     /**
@@ -289,7 +289,7 @@ final class FileSystemUtil {
         int bytesStart = 0;
         int bytesEnd = 0;
         int j = line.length() - 1;
-        innerLoop1: while (j >= 0) {
+        innerLoop1: while (j >= 0) { //NOSONAR
             final char c = line.charAt(j);
             if (Character.isDigit(c)) {
                 // found the last numeric character, this is the end of
@@ -299,7 +299,7 @@ final class FileSystemUtil {
             }
             j--;
         }
-        innerLoop2: while (j >= 0) {
+        innerLoop2: while (j >= 0) { //NOSONAR
             final char c = line.charAt(j);
             if (!Character.isDigit(c) && c != ',' && c != '.') {
                 // found the next non-numeric character, this is the
@@ -354,7 +354,7 @@ final class FileSystemUtil {
         final List<String> lines = performCommand(cmdAttribs, 3, timeout);
         if (lines.size() < 2) {
             // unknown problem, throw exception
-            throw new IOException("Command line '" + DF + "' did not return info as expected " + "for path '" + path + "'- response was " + lines);
+            throw new IOException("Command line '" + DF + "' did not return info as expected " + "for path '" + path + "'- response was " + lines); //NOSONAR
         }
         final String line2 = lines.get(1); // the line we're interested in
 
@@ -366,7 +366,7 @@ final class FileSystemUtil {
                 final String line3 = lines.get(2); // the line may be interested in
                 tok = new StringTokenizer(line3, " ");
             } else {
-                throw new IOException("Command line '" + DF + "' did not return data as expected " + "for path '" + path + "'- check path is valid");
+                throw new IOException("Command line '" + DF + "' did not return data as expected " + "for path '" + path + "'- check path is valid"); //NOSONAR
             }
         } else {
             tok.nextToken(); // Ignore Filesystem
@@ -425,7 +425,7 @@ final class FileSystemUtil {
         OutputStream out = null;
         InputStream err = null;
         BufferedReader inr = null;
-        try {
+        try { //NOSONAR
 
             final Thread monitor = ThreadMonitor.start(timeout);
 

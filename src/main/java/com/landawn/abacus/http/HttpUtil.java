@@ -764,6 +764,7 @@ public final class HttpUtil {
 
     /**
      * For test only. Don't use it on production.
+     * @deprecated
      */
     // copied from: https://nakov.com/blog/2009/07/16/disable-certificate-validation-in-java-ssl-connections/
     @Deprecated
@@ -776,22 +777,22 @@ public final class HttpUtil {
             }
 
             @Override
-            public void checkClientTrusted(X509Certificate[] certs, String authType) {
+            public void checkClientTrusted(X509Certificate[] certs, String authType) { //NOSONAR
             }
 
             @Override
-            public void checkServerTrusted(X509Certificate[] certs, String authType) {
+            public void checkServerTrusted(X509Certificate[] certs, String authType) { //NOSONAR
             }
         } };
 
         try {
             // Install the all-trusting trust manager
-            SSLContext sc = SSLContext.getInstance("SSL");
+            SSLContext sc = SSLContext.getInstance("SSL"); //NOSONAR
             sc.init(null, trustAllCerts, new java.security.SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 
             // Create all-trusting host name verifier
-            HostnameVerifier allHostsValid = (hostname, session) -> true;
+            HostnameVerifier allHostsValid = (hostname, session) -> true; //NOSONAR
 
             // Install the all-trusting host verifier
             HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
@@ -831,7 +832,7 @@ public final class HttpUtil {
          * Most websites serve cookies in the blessed format. Eagerly create the parser to ensure such
          * cookies are on the fast path.
          */
-        private static final ThreadLocal<DateFormat> STANDARD_DATE_FORMAT = ThreadLocal.withInitial(() -> {
+        private static final ThreadLocal<DateFormat> STANDARD_DATE_FORMAT = ThreadLocal.withInitial(() -> { //NOSONAR
             // Date format specified by RFC 7231 section 7.1.1.1.
             DateFormat rfc1123 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
             rfc1123.setLenient(false);

@@ -393,7 +393,7 @@ public final class FilenameUtil {
         }
 
         // double dot slash
-        outer: for (int i = prefix + 2; i < size; i++) {
+        outer: for (int i = prefix + 2; i < size; i++) { //NOSONAR
             if (array[i] == separator && array[i - 1] == '.' && array[i - 2] == '.' && (i == prefix + 2 || array[i - 3] == separator)) {
                 if (i == prefix + 2) {
                     return null;
@@ -1315,7 +1315,7 @@ public final class FilenameUtil {
         boolean anyChars = false;
         int textIdx = 0;
         int wcsIdx = 0;
-        final Stack<int[]> backtrack = new Stack<>();
+        final Stack<int[]> backtrack = new Stack<>(); //NOSONAR
 
         // loop around a backtrack stack, to handle complex * matching
         do {

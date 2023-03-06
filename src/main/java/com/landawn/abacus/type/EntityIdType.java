@@ -22,6 +22,7 @@ import com.landawn.abacus.util.N;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public class EntityIdType extends AbstractType<EntityId> {
 
     public static final String ENTITY_ID = EntityId.class.getSimpleName();

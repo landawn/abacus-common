@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface FloatConsumer extends Throwables.FloatConsumer<RuntimeException> {
+public interface FloatConsumer extends Throwables.FloatConsumer<RuntimeException> { //NOSONAR
 
     @Override
     void accept(float t);

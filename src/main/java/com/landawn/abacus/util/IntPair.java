@@ -28,8 +28,8 @@ import com.landawn.abacus.util.stream.IntStream;
 @com.landawn.abacus.annotation.Immutable
 public final class IntPair implements Immutable {
 
-    public final int _1;
-    public final int _2;
+    public final int _1; //NOSONAR
+    public final int _2; //NOSONAR
 
     IntPair() {
         this(0, 0);

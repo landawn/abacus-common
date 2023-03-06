@@ -188,7 +188,7 @@ public class ContinuableFuture<T> implements Future<T> {
 
         if (N.notNullOrEmpty(upFutures)) {
             for (ContinuableFuture<?> preFuture : upFutures) {
-                res = res & preFuture.cancelAll(mayInterruptIfRunning);
+                res = res & preFuture.cancelAll(mayInterruptIfRunning); //NOSONAR
             }
         }
 
@@ -1397,8 +1397,8 @@ public class ContinuableFuture<T> implements Future<T> {
         asyncExecutor.execute(futureTask);
 
         @SuppressWarnings("rawtypes")
-        final List<ContinuableFuture<?>> upFutures = other == null ? (List) Arrays.asList(this) : Arrays.asList(this, other);
-        return new ContinuableFuture<>(futureTask, upFutures, asyncExecutor);
+        final List<ContinuableFuture<?>> upFutureList = other == null ? (List) Arrays.asList(this) : Arrays.asList(this, other);
+        return new ContinuableFuture<>(futureTask, upFutureList, asyncExecutor);
     }
 
     /**
@@ -1430,6 +1430,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param delay
      * @param unit
      * @return
+     * @deprecated
      */
     @Deprecated
     ContinuableFuture<T> with(final Executor executor, final long delay, final TimeUnit unit) {
@@ -1484,12 +1485,12 @@ public class ContinuableFuture<T> implements Future<T> {
             }
         }, null, executor) {
             @Override
-            public boolean cancelAll(boolean mayInterruptIfRunning) {
+            public boolean cancelAll(boolean mayInterruptIfRunning) { //NOSONAR
                 return super.cancelAll(mayInterruptIfRunning);
             }
 
             @Override
-            public boolean isAllCancelled() {
+            public boolean isAllCancelled() { //NOSONAR
                 return super.isAllCancelled();
             }
         };

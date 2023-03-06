@@ -218,7 +218,7 @@ public class XMLSerializationConfig extends SerializationConfig<XMLSerialization
         }
 
         if (obj instanceof XMLSerializationConfig other) {
-            if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getCharQuotation(), other.getCharQuotation())
+            if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getCharQuotation(), other.getCharQuotation()) //NOSONAR
                     && N.equals(getStringQuotation(), other.getStringQuotation()) && N.equals(getDateTimeFormat(), other.getDateTimeFormat())
                     && N.equals(getExclusion(), other.getExclusion()) && N.equals(skipTransientField(), other.skipTransientField())
                     && N.equals(prettyFormat(), other.prettyFormat()) && N.equals(supportCircularReference(), other.supportCircularReference())

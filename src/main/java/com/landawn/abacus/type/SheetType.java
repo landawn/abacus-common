@@ -36,6 +36,7 @@ import com.landawn.abacus.util.WD;
  * @param <E>
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
 
     private static final String ROW_KEY_SET = "rowKeySet";

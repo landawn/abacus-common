@@ -1176,7 +1176,7 @@ public final class Joiner implements Closeable {
      * @throws E
      */
     public <T, E extends Exception> Joiner appendAll(final Iterable<T> iter, final Throwables.Predicate<? super T, E> filter) throws E {
-        N.checkArgNotNull(filter, "filter");
+        N.checkArgNotNull(filter, "filter"); //NOSONAR
 
         if (iter != null) {
             StringBuilder sb = null;
@@ -1688,7 +1688,7 @@ public final class Joiner implements Closeable {
 
         final Class<?> cls = bean.getClass();
 
-        N.checkArgument(ClassUtil.isBeanClass(cls), "'bean' must be bean class with getter/setter methods");
+        N.checkArgument(ClassUtil.isBeanClass(cls), "'bean' must be bean class with getter/setter methods"); //NOSONAR
 
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
         StringBuilder sb = null;

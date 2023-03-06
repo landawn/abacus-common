@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface LongTriPredicate extends Throwables.LongTriPredicate<RuntimeException> {
+public interface LongTriPredicate extends Throwables.LongTriPredicate<RuntimeException> { //NOSONAR
 
     LongTriPredicate ALWAYS_TRUE = (a, b, c) -> true;
 

@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface LongTriConsumer extends Throwables.LongTriConsumer<RuntimeException> {
+public interface LongTriConsumer extends Throwables.LongTriConsumer<RuntimeException> { //NOSONAR
 
     @Override
     void accept(long a, long b, long c);

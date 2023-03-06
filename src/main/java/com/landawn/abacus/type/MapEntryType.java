@@ -36,12 +36,13 @@ import com.landawn.abacus.util.WD;
  * @param <V> the value type
  * @since 0.9
  */
+@SuppressWarnings("java:S2160")
 public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
 
     private final String declaringName;
 
     @SuppressWarnings("rawtypes")
-    private final Class<Map.Entry<K, V>> typeClass = (Class) Map.Entry.class;
+    private final Class<Map.Entry<K, V>> typeClass = (Class) Map.Entry.class; //NOSONAR
 
     private final Type<K> keyType;
 

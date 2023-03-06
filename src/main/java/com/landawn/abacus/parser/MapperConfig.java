@@ -19,6 +19,6 @@ package com.landawn.abacus.parser;
  * @author Haiyang Li
  * @since 0.8
  */
-public abstract class MapperConfig implements Cloneable {
+public abstract class MapperConfig implements Cloneable { //NOSONAR
 
 }

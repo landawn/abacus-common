@@ -588,7 +588,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return
      */
     private int batchRemove(DoubleList c, boolean complement) {
-        final double[] elementData = this.elementData;
+        final double[] elementData = this.elementData;//NOSONAR
 
         int w = 0;
 
@@ -664,7 +664,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
             return;
         }
 
-        final int size = size();
+        final int size = size();//NOSONAR
         final int newSize = size - (toIndex - fromIndex);
 
         if (toIndex < size) {
@@ -690,7 +690,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
             return;
         }
 
-        final int size = this.size;
+        final int size = this.size;//NOSONAR
         final int newSize = size - (toIndex - fromIndex) + replacement.length;
 
         if (elementData.length < newSize) {

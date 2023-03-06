@@ -22,12 +22,12 @@ import com.landawn.abacus.util.N;
  * @author Haiyang Li
  * @since 0.8
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({ "rawtypes", "java:S2160" })
 public class ClazzType extends AbstractType<Class> {
 
-    public static final String CLAZZ = "Clazz";
+    public static final String CLAZZ = "Clazz"; //NOSONAR
 
-    private final Class clazz;
+    private final Class clazz; //NOSONAR
 
     protected ClazzType(String typeName) {
         super("Clazz<" + typeName + ">");

@@ -27,6 +27,7 @@ import com.landawn.abacus.util.N;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntList> {
 
     public static final String INT_LIST = IntList.class.getSimpleName();

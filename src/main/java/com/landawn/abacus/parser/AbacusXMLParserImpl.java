@@ -1040,7 +1040,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     throw new ParseException(e);
                 }
 
-            case DOM:
+            case DOM: //NOSONAR
                 final DocumentBuilder docBuilder = XMLUtil.createContentParser();
 
                 try {
@@ -1168,10 +1168,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                 targetClass = getClassByNodeName(inputClass, nodeName);
                             }
 
-                            if ((targetClass == null) || !ClassUtil.isBeanClass(targetClass)) {
-                                throw new ParseException(
-                                        "No bean class found by node name : " + nodeName + " in package of class: " + inputClass.getCanonicalName());
-                            }
+                            checkBeanType(inputClass, targetClass, nodeName);
                         }
                     }
                 }
@@ -1209,7 +1206,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                     if (ignoreUnmatchedProperty) {
                                         continue;
                                     } else {
-                                        throw new ParseException("Unknown property element: " + propName + " for class: " + targetClass.getCanonicalName());
+                                        throw new ParseException("Unknown property element: " + propName + " for class: " + targetClass.getCanonicalName()); //NOSONAR
                                     }
                                 }
 
@@ -1347,7 +1344,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     }
                 }
 
-                throw new ParseException("Unknown parser error");
+                throw new ParseException("Unknown parser error"); //NOSONAR
             }
 
             case MAP: {
@@ -1387,7 +1384,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 }
 
                 isNullValue = Boolean.parseBoolean(getAttribute(xmlReader, XMLConstants.IS_NULL));
-                final Map<Object, Object> mResult = isNullValue ? null : (Map<Object, Object>) N.newMap(targetClass);
+                @SuppressWarnings("rawtypes")
+                final Map<Object, Object> mResult = isNullValue ? null : (Map<Object, Object>) N.newMap((Class<Map>) targetClass);
                 Object key = null;
                 Type<?> entryKeyType = null;
                 Type<?> entryValueType = null;
@@ -1714,7 +1712,8 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 }
 
                 isNullValue = Boolean.parseBoolean(getAttribute(xmlReader, XMLConstants.IS_NULL));
-                final Collection<Object> result = isNullValue ? null : (Collection<Object>) N.newCollection(targetClass);
+                @SuppressWarnings("rawtypes")
+                final Collection<Object> result = isNullValue ? null : (Collection<Object>) N.newCollection((Class<Collection>) targetClass);
 
                 for (int event = xmlReader.next(); xmlReader.hasNext(); event = xmlReader.next()) {
                     switch (event) {
@@ -1931,10 +1930,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                 typeClass = getClassByNodeName(inputClass, nodeName);
                             }
 
-                            if ((typeClass == null) || !ClassUtil.isBeanClass(typeClass)) {
-                                throw new ParseException(
-                                        "No bean class found by node name : " + nodeName + " in package of class: " + inputClass.getCanonicalName());
-                            }
+                            checkBeanType(inputClass, typeClass, nodeName);
                         }
                     }
                 }
@@ -1957,7 +1953,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                         continue;
                     }
 
-                    propName = isTagByPropertyName ? propNode.getNodeName() : XMLUtil.getAttribute(propNode, XMLConstants.NAME);
+                    propName = isTagByPropertyName ? propNode.getNodeName() : XMLUtil.getAttribute(propNode, XMLConstants.NAME); //NOSONAR
                     propInfo = beanInfo.getPropInfo(propName);
 
                     if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
@@ -2119,7 +2115,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 return (T) mResult;
             }
 
-            case ARRAY: {
+            case ARRAY: { //NOSONAR
                 if ((typeClass == null) || !typeClass.isArray()) {
                     if ((propType != null) && propType.clazz().isArray()) {
                         typeClass = propType.clazz();
@@ -2142,7 +2138,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     }
                 }
 
-                propName = XMLConstants.E;
+                propName = XMLConstants.E; //NOSONAR
 
                 if (XMLUtil.isTextElement(node)) {
                     String st = XMLUtil.getTextContent(node);
@@ -2154,6 +2150,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     }
                 } else {
                     final List<Object> c = Objectory.createList();
+
                     try {
                         NodeList eleNodes = node.getChildNodes();
                         Node eleNode = null;
@@ -2211,7 +2208,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                     }
                 }
 
-                propName = XMLConstants.E;
+                propName = XMLConstants.E; //NOSONAR
 
                 final Collection<Object> result = newPropInstance(typeClass, node);
 
@@ -2248,6 +2245,12 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
             default:
                 throw new ParseException("Unsupported class type: " + ClassUtil.getCanonicalClassName(targetClass)
                         + ". Only array, collection, map and bean types are supported");
+        }
+    }
+
+    private static void checkBeanType(final Class<?> inputClass, final Class<?> targetClass, final String nodeName) {
+        if ((targetClass == null) || !ClassUtil.isBeanClass(targetClass)) {
+            throw new ParseException("No bean class found by node name : " + nodeName + " in package of class: " + inputClass.getCanonicalName());
         }
     }
 
@@ -2331,10 +2334,10 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
 
                 for (int i = 0; i < 3; i++) {
                     if (i > 0) {
-                        tmp += ".";
+                        tmp += "."; //NOSONAR
                     }
 
-                    tmp += tokens[i];
+                    tmp += tokens[i]; //NOSONAR
                 }
 
                 packName = tmp;
@@ -2585,10 +2588,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                                     typeClass = getClassByNodeName(inputClass, beanOrPropName);
                                 }
 
-                                if ((typeClass == null) || !ClassUtil.isBeanClass(typeClass)) {
-                                    throw new ParseException(
-                                            "No bean class found by node name : " + beanOrPropName + " in package of class: " + inputClass.getCanonicalName());
-                                }
+                                checkBeanType(inputClass, typeClass, nodeName);
                             }
                         }
                     }
@@ -2853,7 +2853,7 @@ final class AbacusXMLParserImpl extends AbstractXMLParser {
                 }
 
                 default:
-                    throw new ParseException("only array, collection, map and bean nodes are supported");
+                    throw new ParseException("only array, collection, map and bean nodes are supported"); //NOSONAR
             }
 
             if (isFirstCall) {

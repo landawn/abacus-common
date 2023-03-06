@@ -33,6 +33,7 @@ import com.landawn.abacus.util.WD;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<char[]> {
 
     public static final String CHAR_ARRAY = char[].class.getSimpleName();
@@ -148,7 +149,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
                 try {
                     clob.free();
                 } catch (SQLException e) {
-                    throw new UncheckedSQLException(e);
+                    throw new UncheckedSQLException(e); //NOSONAR
                 }
             }
         } else {

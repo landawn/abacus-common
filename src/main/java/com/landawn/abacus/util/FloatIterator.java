@@ -43,7 +43,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
         }
     };
 
-    public static FloatIterator empty() {
+    public static FloatIterator empty() { //NOSONAR
         return EMPTY;
     }
 
@@ -430,6 +430,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * For each remaining.
      *
      * @param action
+     * @deprecated
      */
     @Override
     @Deprecated
@@ -443,7 +444,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void foreachRemaining(Throwables.FloatConsumer<E> action) throws E {
+    public <E extends Exception> void foreachRemaining(Throwables.FloatConsumer<E> action) throws E { //NOSONAR
         N.checkArgNotNull(action);
 
         while (hasNext()) {

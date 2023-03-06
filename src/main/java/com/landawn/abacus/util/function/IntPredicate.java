@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>, java.util.function.IntPredicate {
+public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>, java.util.function.IntPredicate { //NOSONAR
 
     IntPredicate ALWAYS_TRUE = value -> true;
 
@@ -73,7 +73,7 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
         return predicate;
     }
 
-    static IntPredicate equal(int targetInt) {
+    static IntPredicate equal(int targetInt) { //NOSONAR
         return value -> value == targetInt;
     }
 

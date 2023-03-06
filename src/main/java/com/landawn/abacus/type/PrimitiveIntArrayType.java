@@ -30,6 +30,7 @@ import com.landawn.abacus.util.WD;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[]> {
 
     public static final String INT_ARRAY = int[].class.getSimpleName();

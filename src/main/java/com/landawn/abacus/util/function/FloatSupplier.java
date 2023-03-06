@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface FloatSupplier extends Throwables.FloatSupplier<RuntimeException> {
+public interface FloatSupplier extends Throwables.FloatSupplier<RuntimeException> { //NOSONAR
 
     FloatSupplier ZERO = () -> 0;
 

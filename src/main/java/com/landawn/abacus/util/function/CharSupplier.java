@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface CharSupplier extends Throwables.CharSupplier<RuntimeException> {
+public interface CharSupplier extends Throwables.CharSupplier<RuntimeException> { //NOSONAR
 
     CharSupplier ZERO = () -> 0;
 

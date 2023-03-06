@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface ByteTernaryOperator extends Throwables.ByteTernaryOperator<RuntimeException> {
+public interface ByteTernaryOperator extends Throwables.ByteTernaryOperator<RuntimeException> { //NOSONAR
 
     @Override
     byte applyAsByte(byte a, byte b, byte c);

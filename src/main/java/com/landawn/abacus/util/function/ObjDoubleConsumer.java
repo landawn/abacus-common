@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface ObjDoubleConsumer<T> extends Throwables.ObjDoubleConsumer<T, RuntimeException>, java.util.function.ObjDoubleConsumer<T> {
+public interface ObjDoubleConsumer<T> extends Throwables.ObjDoubleConsumer<T, RuntimeException>, java.util.function.ObjDoubleConsumer<T> { //NOSONAR
 
     @Override
     void accept(T t, double value);

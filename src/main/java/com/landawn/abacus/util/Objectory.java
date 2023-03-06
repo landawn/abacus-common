@@ -98,6 +98,10 @@ public final class Objectory {
 
     private static final Queue<BufferedReader> bufferedReaderPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
+    private Objectory() {
+        // Utility class
+    }
+
     /**
      * Creates the list.
      *
@@ -360,7 +364,7 @@ public final class Objectory {
         BufferedWriter bw = bufferedWriterPool.poll();
 
         if (bw == null) {
-            logCreated("createBufferedWriter");
+            logCreated("createBufferedWriter"); //NOSONAR
 
             bw = new BufferedWriter();
         } else {
@@ -419,7 +423,7 @@ public final class Objectory {
         BufferedXMLWriter bw = bufferedXMLWriterPool.poll();
 
         if (bw == null) {
-            logCreated("createBufferedXMLWriter");
+            logCreated("createBufferedXMLWriter"); //NOSONAR
 
             bw = new BufferedXMLWriter();
         } else {
@@ -478,7 +482,7 @@ public final class Objectory {
         BufferedJSONWriter bw = bufferedJSONWriterPool.poll();
 
         if (bw == null) {
-            logCreated("createBufferedJSONWriter");
+            logCreated("createBufferedJSONWriter"); //NOSONAR
 
             bw = new BufferedJSONWriter();
         } else {
@@ -538,7 +542,7 @@ public final class Objectory {
         BufferedReader br = bufferedReaderPool.poll();
 
         if (br == null) {
-            logCreated("createBufferedReader");
+            logCreated("createBufferedReader"); //NOSONAR
 
             return new BufferedReader(st);
         } else {

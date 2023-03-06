@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  * @author Haiyang Li
  *
  */
-public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B, C, D, RuntimeException> {
+public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B, C, D, RuntimeException> { //NOSONAR
 
     @Override
     boolean test(A a, B b, C c, D d);

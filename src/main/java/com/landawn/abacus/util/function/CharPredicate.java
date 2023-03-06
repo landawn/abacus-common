@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface CharPredicate extends Throwables.CharPredicate<RuntimeException> {
+public interface CharPredicate extends Throwables.CharPredicate<RuntimeException> { //NOSONAR
 
     CharPredicate ALWAYS_TRUE = value -> true;
 
@@ -64,7 +64,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
         return t -> test(t) || other.test(t);
     }
 
-    static CharPredicate equal(char targetChar) {
+    static CharPredicate equal(char targetChar) { //NOSONAR
         return value -> value == targetChar;
     }
 

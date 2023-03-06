@@ -41,6 +41,7 @@ import com.landawn.abacus.util.Objectory;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public class ReaderType extends AbstractType<Reader> {
 
     public static final String READER = Reader.class.getSimpleName();

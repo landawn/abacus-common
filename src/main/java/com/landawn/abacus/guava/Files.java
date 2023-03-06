@@ -41,7 +41,7 @@ import com.landawn.abacus.util.ImmutableList;
  * The purpose is to provide unified API.
  *
  */
-public abstract class Files {
+public abstract class Files { //NOSONAR
 
     private Files() {
         // singleton
@@ -193,7 +193,7 @@ public abstract class Files {
      * @return true, if successful
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static boolean equal(File file1, File file2) throws IOException {
+    public static boolean equal(File file1, File file2) throws IOException { //NOSONAR
         return com.google.common.io.Files.equal(file1, file2);
     }
 
@@ -204,7 +204,7 @@ public abstract class Files {
      * @return true, if successful
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static boolean equal(Path path1, Path path2) throws IOException {
+    public static boolean equal(Path path1, Path path2) throws IOException { //NOSONAR
         return com.google.common.io.MoreFiles.equal(path1, path2);
     }
 
@@ -238,7 +238,7 @@ public abstract class Files {
      */
     @Deprecated
     public static File createTempDir() {
-        return com.google.common.io.Files.createTempDir();
+        return com.google.common.io.Files.createTempDir(); //NOSONAR
     }
 
     /**

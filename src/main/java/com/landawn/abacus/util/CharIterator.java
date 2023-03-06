@@ -42,7 +42,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
         }
     };
 
-    public static CharIterator empty() {
+    public static CharIterator empty() {//NOSONAR
         return EMPTY;
     }
 
@@ -320,6 +320,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * For each remaining.
      *
      * @param action
+     * @deprecated
      */
     @Override
     @Deprecated
@@ -333,7 +334,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void foreachRemaining(Throwables.CharConsumer<E> action) throws E {
+    public <E extends Exception> void foreachRemaining(Throwables.CharConsumer<E> action) throws E {//NOSONAR
         N.checkArgNotNull(action);
 
         while (hasNext()) {

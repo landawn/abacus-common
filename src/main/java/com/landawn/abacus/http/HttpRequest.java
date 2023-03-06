@@ -412,7 +412,7 @@ public final class HttpRequest {
      * @throws UncheckedIOException the unchecked IO exception
      */
     public <T> T execute(final Class<T> resultClass, final HttpMethod httpMethod, final Object body) throws UncheckedIOException {
-        N.checkArgNotNull(httpMethod, "httpMethod");
+        N.checkArgNotNull(httpMethod, "httpMethod"); //NOSONAR
 
         this.httpMethod = httpMethod;
         this.request = body;

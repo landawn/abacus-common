@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface ToShortFunction<T> extends Throwables.ToShortFunction<T, RuntimeException> {
+public interface ToShortFunction<T> extends Throwables.ToShortFunction<T, RuntimeException> { //NOSONAR
 
     ToShortFunction<Short> UNBOX = value -> value == null ? 0 : value;
 

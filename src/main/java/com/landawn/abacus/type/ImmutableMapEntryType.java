@@ -37,12 +37,13 @@ import com.landawn.abacus.util.WD;
  * @param <V> the value type
  * @since 0.9
  */
+@SuppressWarnings("java:S2160")
 public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.SimpleImmutableEntry<K, V>> {
 
     private final String declaringName;
 
     @SuppressWarnings("rawtypes")
-    private final Class<AbstractMap.SimpleImmutableEntry<K, V>> typeClass = (Class) AbstractMap.SimpleImmutableEntry.class;
+    private final Class<AbstractMap.SimpleImmutableEntry<K, V>> typeClass = (Class) AbstractMap.SimpleImmutableEntry.class; //NOSONAR
 
     private final Type<K> keyType;
 

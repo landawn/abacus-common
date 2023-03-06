@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface BiFunction<T, U, R> extends Throwables.BiFunction<T, U, R, RuntimeException>, java.util.function.BiFunction<T, U, R> {
+public interface BiFunction<T, U, R> extends Throwables.BiFunction<T, U, R, RuntimeException>, java.util.function.BiFunction<T, U, R> { //NOSONAR
 
     @Override
     R apply(T t, U u);

@@ -85,6 +85,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings({ "java:S1192", "java:S1854" })
 public class RowDataSet implements DataSet, Cloneable {
 
     static final char PROP_NAME_SEPARATOR = '.';
@@ -123,21 +124,21 @@ public class RowDataSet implements DataSet, Cloneable {
 
     private static final Type<Object> strType = N.typeOf(String.class);
 
-    List<String> _columnNameList;
+    List<String> _columnNameList; //NOSONAR
 
-    List<List<Object>> _columnList;
+    List<List<Object>> _columnList; //NOSONAR
 
-    Map<String, Integer> _columnIndexMap;
+    Map<String, Integer> _columnIndexMap; //NOSONAR
 
-    int[] _columnIndexes;
+    int[] _columnIndexes; //NOSONAR
 
-    int _currentRowNum = 0;
+    int _currentRowNum = 0; //NOSONAR
 
-    boolean _isFrozen = false;
+    boolean _isFrozen = false; //NOSONAR
 
-    Properties<String, Object> _properties;
+    Properties<String, Object> _properties; //NOSONAR
 
-    transient int modCount = 0;
+    transient int modCount = 0; //NOSONAR
 
     // For Kryo
     protected RowDataSet() {
@@ -2173,7 +2174,8 @@ public class RowDataSet implements DataSet, Cloneable {
                             tmp.checkColumnName(newTmpColumnNameList), newTmpColumnNameList.size(), rowIndex, prefixAndFieldNameMap, null);
 
                     if (propInfo.type.isCollection()) {
-                        Collection<Object> c = N.newCollection(propInfo.clazz);
+                        @SuppressWarnings("rawtypes")
+                        Collection<Object> c = N.newCollection((Class) propInfo.clazz);
                         c.add(propValue);
                         propInfo.setPropValue(result, c);
                     } else {
@@ -2770,15 +2772,16 @@ public class RowDataSet implements DataSet, Cloneable {
         return (List<T>) rowList;
     }
 
+    @SuppressWarnings("rawtypes")
     private <T> IntFunction<? extends T> createRowSupplier(final Type<?> rowType, final Class<? extends T> rowClass) {
         if (rowType.isObjectArray()) {
             final Class<?> componentType = rowClass.getComponentType();
             return cc -> N.newArray(componentType, cc);
         } else if (rowType.isList() || rowType.isSet()) {
-            return (IntFunction<T>) Factory.ofCollection(rowClass);
+            return (IntFunction<T>) Factory.ofCollection((Class<Collection>) rowClass);
 
         } else if (rowType.isMap()) {
-            return (IntFunction<T>) Factory.ofMap(rowClass);
+            return (IntFunction<T>) Factory.ofMap((Class<Map>) rowClass);
         } else {
             throw new IllegalArgumentException(
                     "Unsupported row type: " + ClassUtil.getCanonicalClassName(rowClass) + ". Only Array, List/Set, Map and bean class are supported");
@@ -2941,7 +2944,7 @@ public class RowDataSet implements DataSet, Cloneable {
             final List<String> tmp = new ArrayList<>(idPropNamesToUse.size());
             PropInfo propInfo = null;
 
-            outer: for (String idPropName : idPropNamesToUse) {
+            outer: for (String idPropName : idPropNamesToUse) { //NOSONAR
                 if (this._columnNameList.contains(idPropName)) {
                     tmp.add(idPropName);
                 } else {
@@ -3206,7 +3209,7 @@ public class RowDataSet implements DataSet, Cloneable {
                             c = propInfo.getPropValue(resultEntities[i]);
 
                             if (c == null) {
-                                c = N.newCollection(propInfo.clazz);
+                                c = N.newCollection((Class) propInfo.clazz);
                                 propInfo.setPropValue(resultEntities[i], c);
 
                                 if (isToMerge && !(c instanceof Set)) {
@@ -4110,7 +4113,7 @@ public class RowDataSet implements DataSet, Cloneable {
                     } else {
                         // jsonParser.serialize(bw, element, jsc);
 
-                        try {
+                        try { //NOSONAR
                             jsonParser.serialize(bw, element, jsc);
                         } catch (Exception e) {
                             // ignore.
@@ -4488,7 +4491,7 @@ public class RowDataSet implements DataSet, Cloneable {
                     } else {
                         // xmlParser.serialize(bw, element, xsc);
 
-                        try {
+                        try { //NOSONAR
                             xmlParser.serialize(bw, element, xsc);
                         } catch (Exception e) {
                             // ignore.
@@ -7836,7 +7839,7 @@ public class RowDataSet implements DataSet, Cloneable {
     }
 
     @Override
-    public DataSet clone() {
+    public DataSet clone() { //NOSONAR
         return clone(this._isFrozen);
     }
 
@@ -7846,7 +7849,7 @@ public class RowDataSet implements DataSet, Cloneable {
      * @return
      */
     @Override
-    public DataSet clone(boolean freeze) {
+    public DataSet clone(boolean freeze) { //NOSONAR
         RowDataSet dataSet = null;
 
         if (kryoParser != null) {
@@ -10728,7 +10731,7 @@ public class RowDataSet implements DataSet, Cloneable {
             public long count() {
                 checkConcurrentModification();
 
-                return toRowIndex - cursor;
+                return toRowIndex - cursor; //NOSONAR
             }
 
             @Override

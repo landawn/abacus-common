@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface CharNFunction<R> extends Throwables.CharNFunction<R, RuntimeException> {
+public interface CharNFunction<R> extends Throwables.CharNFunction<R, RuntimeException> { //NOSONAR
 
     @Override
     R apply(char... args);

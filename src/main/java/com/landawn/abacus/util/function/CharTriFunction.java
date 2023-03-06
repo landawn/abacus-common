@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface CharTriFunction<R> extends Throwables.CharTriFunction<R, RuntimeException> {
+public interface CharTriFunction<R> extends Throwables.CharTriFunction<R, RuntimeException> { //NOSONAR
 
     @Override
     R apply(char a, char b, char c);

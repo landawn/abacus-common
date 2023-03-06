@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>, java.util.function.Predicate<T> {
+public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>, java.util.function.Predicate<T> { //NOSONAR
 
     @Override
     boolean test(T value);

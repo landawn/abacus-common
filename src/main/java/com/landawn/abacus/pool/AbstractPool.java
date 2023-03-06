@@ -60,9 +60,9 @@ public abstract class AbstractPool implements Pool {
 
     final ReentrantLock lock = new ReentrantLock();
 
-    final Condition notEmpty = lock.newCondition();
+    final transient Condition notEmpty = lock.newCondition();
 
-    final Condition notFull = lock.newCondition();
+    final transient Condition notFull = lock.newCondition();
 
     final int capacity;
 

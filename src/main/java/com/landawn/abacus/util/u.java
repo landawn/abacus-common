@@ -33,7 +33,8 @@ import com.landawn.abacus.util.stream.LongStream;
 import com.landawn.abacus.util.stream.ShortStream;
 import com.landawn.abacus.util.stream.Stream;
 
-public class u {
+@SuppressWarnings("java:S1192")
+public class u {//NOSONAR
 
     private u() {
         // utility class
@@ -606,7 +607,7 @@ public class u {
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public java.util.Optional<T> __() {
+        public java.util.Optional<T> __() {//NOSONAR
             return toJdkOptional();
         }
 
@@ -2932,7 +2933,7 @@ public class u {
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public java.util.OptionalInt __() {
+        public java.util.OptionalInt __() {//NOSONAR
             return toJdkOptional();
         }
 
@@ -3442,7 +3443,7 @@ public class u {
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public java.util.OptionalLong __() {
+        public java.util.OptionalLong __() {//NOSONAR
             return toJdkOptional();
         }
 
@@ -4397,7 +4398,7 @@ public class u {
          * @deprecated to be removed in future version.
          */
         @Deprecated
-        public java.util.OptionalDouble __() {
+        public java.util.OptionalDouble __() {//NOSONAR
             return toJdkOptional();
         }
 

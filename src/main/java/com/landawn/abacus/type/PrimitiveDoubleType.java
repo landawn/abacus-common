@@ -19,6 +19,7 @@ package com.landawn.abacus.type;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public final class PrimitiveDoubleType extends AbstractDoubleType {
 
     public static final String DOUBLE = double.class.getSimpleName();

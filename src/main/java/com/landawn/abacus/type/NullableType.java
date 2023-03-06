@@ -23,6 +23,7 @@ import com.landawn.abacus.util.u.Nullable;
  * @param <T>
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
 
     public static final String NULLABLE = Nullable.class.getSimpleName();

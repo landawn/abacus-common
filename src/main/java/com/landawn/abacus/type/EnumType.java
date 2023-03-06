@@ -40,6 +40,7 @@ import com.landawn.abacus.util.Strings;
  * @param <T>
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     public static final String ENUM = Enum.class.getSimpleName();
 
@@ -216,7 +217,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
                 return field.getAnnotation(JsonXmlField.class).name();
             }
 
-            try {
+            try { //NOSONAR
                 if (field.isAnnotationPresent(com.alibaba.fastjson.annotation.JSONField.class)
                         && N.notNullOrEmpty(field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name())) {
                     return field.getAnnotation(com.alibaba.fastjson.annotation.JSONField.class).name();
@@ -225,7 +226,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
                 // ignore
             }
 
-            try {
+            try { //NOSONAR
                 if (field.isAnnotationPresent(com.alibaba.fastjson2.annotation.JSONField.class)
                         && N.notNullOrEmpty(field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name())) {
                     return field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).name();
@@ -234,7 +235,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
                 // ignore
             }
 
-            try {
+            try { //NOSONAR
                 if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonProperty.class)
                         && N.notNullOrEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value())) {
                     return field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value();

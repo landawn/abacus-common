@@ -80,7 +80,7 @@ public final class ParserFactory {
             boolean isAvailable = false;
 
             try {
-                org.apache.avro.Schema schema = new org.apache.avro.Schema.Parser().parse("{\"namespace\": \"example.avro\",\r\n" + " \"type\": \"record\",\r\n"
+                org.apache.avro.Schema schema = new org.apache.avro.Schema.Parser().parse("{\"namespace\": \"example.avro\",\r\n" + " \"type\": \"record\",\r\n" //NOSONAR
                         + " \"name\": \"User\",\r\n" + " \"fields\": [\r\n" + "     {\"name\": \"name\", \"type\": \"string\"},\r\n"
                         + "     {\"name\": \"favorite_number\",  \"type\": [\"int\", \"null\"]},\r\n"
                         + "     {\"name\": \"favorite_color\", \"type\": [\"string\", \"null\"]}\r\n" + " ]\r\n" + "}");

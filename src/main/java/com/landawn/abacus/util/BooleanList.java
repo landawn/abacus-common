@@ -579,7 +579,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return
      */
     private int batchRemove(BooleanList c, boolean complement) {
-        final boolean[] elementData = this.elementData;
+        final boolean[] elementData = this.elementData;//NOSONAR
 
         int w = 0;
 
@@ -655,7 +655,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
             return;
         }
 
-        final int size = size();
+        final int size = size();//NOSONAR
         final int newSize = size - (toIndex - fromIndex);
 
         if (toIndex < size) {
@@ -681,7 +681,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
             return;
         }
 
-        final int size = this.size;
+        final int size = this.size;//NOSONAR
         final int newSize = size - (toIndex - fromIndex) + replacement.length;
 
         if (elementData.length < newSize) {

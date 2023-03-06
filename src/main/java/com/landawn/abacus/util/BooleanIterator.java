@@ -42,7 +42,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
         }
     };
 
-    public static BooleanIterator empty() {
+    public static BooleanIterator empty() {//NOSONAR
         return EMPTY;
     }
 
@@ -435,6 +435,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * For each remaining.
      *
      * @param action
+     * @deprecated
      */
     @Override
     @Deprecated
@@ -448,7 +449,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void foreachRemaining(Throwables.BooleanConsumer<E> action) throws E {
+    public <E extends Exception> void foreachRemaining(Throwables.BooleanConsumer<E> action) throws E {//NOSONAR
         N.checkArgNotNull(action);
 
         while (hasNext()) {

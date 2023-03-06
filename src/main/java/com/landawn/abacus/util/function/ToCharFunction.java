@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface ToCharFunction<T> extends Throwables.ToCharFunction<T, RuntimeException> {
+public interface ToCharFunction<T> extends Throwables.ToCharFunction<T, RuntimeException> { //NOSONAR
 
     ToCharFunction<Character> UNBOX = value -> value == null ? 0 : value;
 

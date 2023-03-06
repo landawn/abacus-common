@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface FloatBinaryOperator extends Throwables.FloatBinaryOperator<RuntimeException> {
+public interface FloatBinaryOperator extends Throwables.FloatBinaryOperator<RuntimeException> { //NOSONAR
 
     @Override
     float applyAsFloat(float left, float right);

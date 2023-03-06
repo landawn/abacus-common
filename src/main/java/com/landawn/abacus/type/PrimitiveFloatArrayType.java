@@ -30,6 +30,7 @@ import com.landawn.abacus.util.WD;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<float[]> {
 
     public static final String FLOAT_ARRAY = float[].class.getSimpleName();

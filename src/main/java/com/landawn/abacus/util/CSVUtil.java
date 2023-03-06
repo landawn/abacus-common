@@ -48,6 +48,9 @@ import com.landawn.abacus.util.stream.Stream;
  * @since 0.8
  */
 public final class CSVUtil {
+    private CSVUtil() {
+        // Utillity class
+    }
 
     public static final JSONParser jsonParser = ParserFactory.createJSONParser();
 
@@ -294,7 +297,7 @@ public final class CSVUtil {
      */
     public static <E extends Exception> DataSet loadCSV(final Reader csvReader, final Collection<String> selectColumnNames, long offset, long count,
             final Throwables.Predicate<String[], E> filter) throws UncheckedIOException, E {
-        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count);
+        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s can't be negative", offset, count); //NOSONAR
 
         final Function<String, String[]> headerParser = csvHeaderParser_TL.get();
         final BiConsumer<String[], String> lineParser = csvLineParser_TL.get();
@@ -324,7 +327,7 @@ public final class CSVUtil {
             }
 
             if (selectPropNameSet != null && selectPropNameSet.size() > 0) {
-                throw new IllegalArgumentException(selectPropNameSet + " are not included in titles: " + N.toString(titles));
+                throw new IllegalArgumentException(selectPropNameSet + " are not included in titles: " + N.toString(titles)); //NOSONAR
             }
 
             final String[] strs = new String[titles.length];
@@ -1155,7 +1158,8 @@ public final class CSVUtil {
 
                 } else if (type.isCollection()) {
                     mapper = values -> {
-                        final Collection<Object> result = N.newCollection(targetType, finalResultColumnCount);
+                        @SuppressWarnings("rawtypes")
+                        final Collection<Object> result = N.newCollection((Class<Collection>) targetType, finalResultColumnCount);
 
                         for (int i = 0; i < columnCount; i++) {
                             if (resultColumnNames[i] != null) {
@@ -1168,7 +1172,8 @@ public final class CSVUtil {
 
                 } else if (type.isMap()) {
                     mapper = values -> {
-                        final Map<String, Object> result = N.newMap(targetType, finalResultColumnCount);
+                        @SuppressWarnings("rawtypes")
+                        final Map<String, Object> result = N.newMap((Class<Map>) targetType, finalResultColumnCount);
 
                         for (int i = 0; i < columnCount; i++) {
                             if (resultColumnNames[i] != null) {

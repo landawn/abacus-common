@@ -179,7 +179,7 @@ public class Utf8 {
                         // Third byte trailing-byte test
                         || bytes[index++] > (byte) 0xBF
                         // Fourth byte trailing-byte test
-                        || bytes[index++] > (byte) 0xBF) {
+                        || bytes[index++] > (byte) 0xBF) { //NOSONAR
                     return false;
                 }
             }

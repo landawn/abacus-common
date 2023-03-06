@@ -632,7 +632,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return
      */
     private int batchRemove(ShortList c, boolean complement) {
-        final short[] elementData = this.elementData;
+        final short[] elementData = this.elementData;//NOSONAR
 
         int w = 0;
 
@@ -708,7 +708,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
             return;
         }
 
-        final int size = size();
+        final int size = size();//NOSONAR
         final int newSize = size - (toIndex - fromIndex);
 
         if (toIndex < size) {
@@ -734,7 +734,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
             return;
         }
 
-        final int size = this.size;
+        final int size = this.size;//NOSONAR
         final int newSize = size - (toIndex - fromIndex) + replacement.length;
 
         if (elementData.length < newSize) {
@@ -2136,7 +2136,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         final int[] a = new int[size];
 
         for (int i = 0; i < size; i++) {
-            a[i] = elementData[i];
+            a[i] = elementData[i];//NOSONAR
         }
 
         return IntList.of(a);

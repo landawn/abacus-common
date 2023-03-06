@@ -99,6 +99,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.Strings
  * @see com.landawn.abacus.util.IOUtil
  */
+@SuppressWarnings("java:S1192")
 public final class N extends CommonUtil {
 
     private static final int CPU_CORES = Runtime.getRuntime().availableProcessors();
@@ -648,7 +649,8 @@ public final class N extends CommonUtil {
      * @param valuesToFind the objs to find
      * @return
      */
-    public static boolean containsAll(final Collection<?> c, final Object[] valuesToFind) {
+    @SafeVarargs
+    public static boolean containsAll(final Collection<?> c, final Object... valuesToFind) {
         if (isNullOrEmpty(valuesToFind)) {
             return true;
         } else if (isNullOrEmpty(c)) {
@@ -696,7 +698,8 @@ public final class N extends CommonUtil {
      * @param valuesToFind the objs to find
      * @return
      */
-    public static boolean containsAny(final Collection<?> c, final Object[] valuesToFind) {
+    @SafeVarargs
+    public static boolean containsAny(final Collection<?> c, final Object... valuesToFind) {
         if (isNullOrEmpty(c) || isNullOrEmpty(valuesToFind)) {
             return false;
         }
@@ -727,7 +730,7 @@ public final class N extends CommonUtil {
      * @return
      */
     public static List<boolean[]> split(final boolean[] a, final int chunkSize) {
-        checkArgPositive(chunkSize, "chunkSize");
+        checkArgPositive(chunkSize, "chunkSize"); //NOSONAR
 
         if (isNullOrEmpty(a)) {
             return new ArrayList<>();
@@ -2450,14 +2453,14 @@ public final class N extends CommonUtil {
         int count = 0;
 
         for (Iterable<? extends T> e : c) {
-            count += ((e == null || !(e instanceof Collection)) ? 0 : ((Collection) e).size());
+            count += e instanceof Collection ? ((Collection) e).size() : 3; //NOSONAR
         }
 
         final C ret = supplier.apply(count);
 
         for (Iterable<? extends T> e : c) {
             if (e == null) {
-                continue;
+                continue; //NOSONAR
             } else if (e instanceof Collection) {
                 ret.addAll((Collection) e);
             } else {
@@ -2477,7 +2480,7 @@ public final class N extends CommonUtil {
      * @return
      */
     @Beta
-    public static List<?> flattenEachElement(final Iterable<?> iter) {
+    public static List<?> flattenEachElement(final Iterable<?> iter) { //NOSONAR
         return flattenEachElement(iter, IntFunctions.ofList());
     }
 
@@ -3523,7 +3526,7 @@ public final class N extends CommonUtil {
     public static boolean isEqualCollection(final Collection<?> a, final Collection<?> b) {
         if (a == null && b == null) {
             return true;
-        } else if ((a == null && b != null) || (a != null && b == null)) {
+        } else if ((a == null && b != null) || (a != null && b == null)) { //NOSONAR
             return false;
         }
 
@@ -5784,7 +5787,7 @@ public final class N extends CommonUtil {
         final int lastIndex = indices[indices.length - 1];
 
         if (indices[0] < 0 || lastIndex >= a.length) {
-            throw new IndexOutOfBoundsException("The specified indices are from: " + indices[0] + " to: " + lastIndex);
+            throw new IndexOutOfBoundsException("The specified indices are from: " + indices[0] + " to: " + lastIndex); //NOSONAR
         }
 
         int diff = 1;
@@ -8059,7 +8062,7 @@ public final class N extends CommonUtil {
             final Set<String> set = newLinkedHashSet(a.length);
 
             for (int i = fromIndex; i < toIndex; i++) {
-                set.add(a[i]);
+                set.add(a[i]); //NOSONAR
             }
 
             if (set.size() == toIndex - fromIndex) {
@@ -12267,7 +12270,7 @@ public final class N extends CommonUtil {
      */
     @SafeVarargs
     public static char min(final char... a) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty"); //NOSONAR
 
         if (isNullOrEmpty(a)) {
             throw new IllegalArgumentException("The spcified array can not be null or empty");
@@ -12643,7 +12646,7 @@ public final class N extends CommonUtil {
             return min(coll, 0, coll.size(), cmp);
         }
 
-        final Iterator<? extends T> iter = Iterables.checkNotNullOrEmpty(c, "The spcified collection can not be null or empty");
+        final Iterator<? extends T> iter = Iterables.checkNotNullOrEmpty(c, "The spcified collection can not be null or empty"); //NOSONAR
 
         T candidate = iter.next();
         T e = null;
@@ -14420,7 +14423,7 @@ public final class N extends CommonUtil {
     public static <T> T median(final Collection<? extends T> c, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
             throws IllegalArgumentException {
         if (isNullOrEmpty(c) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The length of collection can not be null or empty");
+            throw new IllegalArgumentException("The length of collection can not be null or empty"); //NOSONAR
         }
 
         checkFromToIndex(fromIndex, toIndex, c.size());
@@ -14460,7 +14463,7 @@ public final class N extends CommonUtil {
         }
 
         checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
-        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex);
+        checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range %s", k, toIndex - fromIndex); //NOSONAR
 
         final int len = toIndex - fromIndex;
 
@@ -16024,7 +16027,7 @@ public final class N extends CommonUtil {
      * @throws IllegalArgumentException if the specified <code>sortedArray</code> is {@code null} or empty.
      */
     public static Map<Percentage, Character> percentiles(final char[] sortedArray) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty");
+        checkArgNotNullOrEmpty(sortedArray, "The spcified 'sortedArray' can not be null or empty"); //NOSONAR
 
         final int len = sortedArray.length;
         final Map<Percentage, Character> m = newLinkedHashMap(Percentage.values().length);
@@ -16220,7 +16223,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <E extends Exception> void forEach(final int startInclusive, final int endExclusive, final int step, Throwables.Runnable<E> action) throws E {
-        checkArgument(step != 0, "The input parameter 'step' can not be zero");
+        checkArgument(step != 0, "The input parameter 'step' can not be zero"); //NOSONAR
 
         if (endExclusive == startInclusive || endExclusive > startInclusive != step > 0) {
             return;
@@ -17646,7 +17649,7 @@ public final class N extends CommonUtil {
             throws E {
         checkArgNotNull(action);
         final int windowSize = 2;
-        checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
+        checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment); //NOSONAR
 
         if (isNullOrEmpty(a)) {
             return;
@@ -17902,7 +17905,7 @@ public final class N extends CommonUtil {
      * @throws E the e
      */
     public static <E extends Exception> boolean[] filter(final boolean[] a, final Throwables.BooleanPredicate<E> filter) throws E {
-        checkArgNotNull(filter, "filter");
+        checkArgNotNull(filter, "filter"); //NOSONAR
 
         if (isNullOrEmpty(a)) {
             return EMPTY_BOOLEAN_ARRAY;
@@ -20869,7 +20872,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R, E extends Exception> List<R> flatmap(final T[] a, final Throwables.Function<? super T, ? extends R[], E> func) throws E {
+    public static <T, R, E extends Exception> List<R> flatmap(final T[] a, final Throwables.Function<? super T, ? extends R[], E> func) throws E { //NOSONAR
         checkArgNotNull(func);
 
         if (isNullOrEmpty(a)) {
@@ -20891,7 +20894,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R, C extends Collection<R>, E extends Exception> C flatmap(final T[] a, final Throwables.Function<? super T, ? extends R[], E> func,
+    public static <T, R, C extends Collection<R>, E extends Exception> C flatmap(final T[] a, final Throwables.Function<? super T, ? extends R[], E> func, //NOSONAR
             final IntFunction<? extends C> supplier) throws E {
         checkArgNotNull(func);
 
@@ -20916,7 +20919,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R, E extends Exception> List<R> flatmap(final T[] a, final int fromIndex, final int toIndex,
+    public static <T, R, E extends Exception> List<R> flatmap(final T[] a, final int fromIndex, final int toIndex, //NOSONAR
             final Throwables.Function<? super T, ? extends R[], E> func) throws E {
         return flatmap(a, fromIndex, toIndex, func, Factory.ofList());
     }
@@ -20937,7 +20940,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R, C extends Collection<R>, E extends Exception> C flatmap(final T[] a, final int fromIndex, final int toIndex,
+    public static <T, R, C extends Collection<R>, E extends Exception> C flatmap(final T[] a, final int fromIndex, final int toIndex, //NOSONAR
             final Throwables.Function<? super T, ? extends R[], E> func, final IntFunction<? extends C> supplier) throws E {
         checkFromToIndex(fromIndex, toIndex, len(a));
         checkArgNotNull(func);
@@ -20969,7 +20972,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R, E extends Exception> List<R> flatmap(final Iterable<? extends T> c, final Throwables.Function<? super T, ? extends R[], E> func)
+    public static <T, R, E extends Exception> List<R> flatmap(final Iterable<? extends T> c, final Throwables.Function<? super T, ? extends R[], E> func) //NOSONAR
             throws E {
         return flatmap(c, func, Factory.<R> ofList());
     }
@@ -20986,7 +20989,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R, C extends Collection<R>, E extends Exception> C flatmap(final Iterable<? extends T> c,
+    public static <T, R, C extends Collection<R>, E extends Exception> C flatmap(final Iterable<? extends T> c, //NOSONAR
             final Throwables.Function<? super T, ? extends R[], E> func, final IntFunction<? extends C> supplier) throws E {
         checkArgNotNull(func);
 
@@ -21020,7 +21023,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R, E extends Exception> List<R> flatmap(final Collection<? extends T> c, final int fromIndex, final int toIndex,
+    public static <T, R, E extends Exception> List<R> flatmap(final Collection<? extends T> c, final int fromIndex, final int toIndex, //NOSONAR
             final Throwables.Function<? super T, ? extends R[], E> func) throws E {
         return flatmap(c, fromIndex, toIndex, func, Factory.ofList());
     }
@@ -21041,7 +21044,7 @@ public final class N extends CommonUtil {
      * @return
      * @throws E the e
      */
-    public static <T, R, C extends Collection<R>, E extends Exception> C flatmap(final Collection<? extends T> c, final int fromIndex, final int toIndex,
+    public static <T, R, C extends Collection<R>, E extends Exception> C flatmap(final Collection<? extends T> c, final int fromIndex, final int toIndex, //NOSONAR
             final Throwables.Function<? super T, ? extends R[], E> func, final IntFunction<? extends C> supplier) throws E {
         checkFromToIndex(fromIndex, toIndex, size(c));
         checkArgNotNull(func);
@@ -22105,9 +22108,9 @@ public final class N extends CommonUtil {
      */
     public static <T, E extends Exception> boolean nMatch(final T[] a, final int atLeast, final int atMost, final Throwables.Predicate<? super T, E> filter)
             throws E {
-        checkArgNotNegative(atLeast, "atLeast");
-        checkArgNotNegative(atMost, "atMost");
-        checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
+        checkArgNotNegative(atLeast, "atLeast"); //NOSONAR
+        checkArgNotNegative(atMost, "atMost"); //NOSONAR
+        checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'"); //NOSONAR
         checkArgNotNull(filter, "filter");
 
         if (isNullOrEmpty(a)) {
@@ -23881,8 +23884,8 @@ public final class N extends CommonUtil {
         final int length = len(a);
 
         checkFromToIndex(fromIndex, toIndex, length);
-        checkArgNotNull(keyExtractor, "keyExtractor");
-        checkArgNotNull(mapSupplier, "mapSupplier");
+        checkArgNotNull(keyExtractor, "keyExtractor"); //NOSONAR
+        checkArgNotNull(mapSupplier, "mapSupplier"); //NOSONAR
 
         final M ret = mapSupplier.get();
         K key = null;

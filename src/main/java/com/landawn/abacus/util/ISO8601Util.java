@@ -80,6 +80,7 @@ public final class ISO8601Util {
      * @param millis
      * @param tz
      * @return
+     * @deprecated
      */
     @Deprecated // since 2.9
     public static String format(Date date, boolean millis, TimeZone tz) {

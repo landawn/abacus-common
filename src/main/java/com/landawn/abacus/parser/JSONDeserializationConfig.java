@@ -148,7 +148,7 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
         }
 
         if (obj instanceof JSONDeserializationConfig other) {
-            if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(ignoreUnmatchedProperty, other.ignoreUnmatchedProperty)
+            if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(ignoreUnmatchedProperty, other.ignoreUnmatchedProperty) //NOSONAR
                     && N.equals(ignoreNullOrEmpty, other.ignoreNullOrEmpty) && N.equals(readNullToEmpty, other.readNullToEmpty)
                     && N.equals(elementType, other.elementType) && N.equals(keyType, other.keyType) && N.equals(valueType, other.valueType)
                     && N.equals(propTypes, other.propTypes) && N.equals(mapInstanceType, other.mapInstanceType)) {

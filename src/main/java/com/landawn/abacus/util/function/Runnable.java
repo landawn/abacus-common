@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface Runnable extends java.lang.Runnable, Throwables.Runnable<RuntimeException> {
+public interface Runnable extends java.lang.Runnable, Throwables.Runnable<RuntimeException> { //NOSONAR
 
     @Override
     void run();

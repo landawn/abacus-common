@@ -15,7 +15,6 @@
 package com.landawn.abacus.type;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,6 +33,7 @@ import com.landawn.abacus.util.WD;
  * @param <V> the value type
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public class MultimapType<K, E, V extends Collection<E>> extends AbstractType<Multimap<K, E, V>> {
 
     private static final Class<?> typeClass = Multimap.class;
@@ -125,15 +125,7 @@ public class MultimapType<K, E, V extends Collection<E>> extends AbstractType<Mu
 
         final Map<K, Collection<E>> map = Utils.jsonParser.deserialize(Map.class, st, jdc);
 
-        if (List.class.isAssignableFrom(parameterTypes[1].clazz())) {
-            final Multimap<K, E, V> multiMap = (Multimap<K, E, V>) N.newLinkedListMultimap(map.size());
-
-            for (Map.Entry<K, Collection<E>> entry : map.entrySet()) {
-                multiMap.putAll(entry.getKey(), entry.getValue());
-            }
-
-            return multiMap;
-        } else if (Set.class.isAssignableFrom(parameterTypes[1].clazz())) {
+        if (Set.class.isAssignableFrom(parameterTypes[1].clazz())) {
             final Multimap<K, E, V> multiMap = (Multimap<K, E, V>) N.newLinkedSetMultimap(map.size());
             for (Map.Entry<K, Collection<E>> entry : map.entrySet()) {
                 multiMap.putAll(entry.getKey(), entry.getValue());

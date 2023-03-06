@@ -97,7 +97,7 @@ public final class Reflection<T> {
         return new Reflection<>((Class<T>) target.getClass(), target);
     }
 
-    public Reflection<T> _new() {
+    public Reflection<T> _new() { //NOSONAR
         return new Reflection<>(cls, N.newInstance(cls));
     }
 
@@ -107,7 +107,7 @@ public final class Reflection<T> {
      * @return
      */
     @SafeVarargs
-    public final Reflection<T> _new(Object... args) {
+    public final Reflection<T> _new(Object... args) { //NOSONAR
         if (N.isNullOrEmpty(args)) {
             return _new();
         }
@@ -157,7 +157,7 @@ public final class Reflection<T> {
                 final Field field = getField(fieldName);
                 ClassUtil.setAccessibleQuietly(field, true);
 
-                field.set(target, value);
+                field.set(target, value); //NOSONAR
             } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
                 throw ExceptionUtil.toRuntimeException(e);
             }

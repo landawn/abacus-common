@@ -25,6 +25,7 @@ import com.landawn.abacus.util.WD;
  * @param <T>
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
 
     private static final String SEPERATOR = ":";

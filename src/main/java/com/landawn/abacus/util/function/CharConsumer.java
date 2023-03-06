@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface CharConsumer extends Throwables.CharConsumer<RuntimeException> {
+public interface CharConsumer extends Throwables.CharConsumer<RuntimeException> { //NOSONAR
 
     @Override
     void accept(char t);

@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeException> {
+public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeException> { //NOSONAR
 
     FloatPredicate ALWAYS_TRUE = value -> true;
 
@@ -72,7 +72,7 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
         return t -> test(t) || other.test(t);
     }
 
-    static FloatPredicate equal(float targetFloat) {
+    static FloatPredicate equal(float targetFloat) { //NOSONAR
         return value -> value == targetFloat;
     }
 

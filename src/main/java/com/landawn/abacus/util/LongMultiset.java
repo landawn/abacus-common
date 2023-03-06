@@ -546,7 +546,7 @@ public final class LongMultiset<T> implements Iterable<T> {
         MutableLong count = valueMap.get(e);
 
         if (count != null && occurrencesToAdd > (Long.MAX_VALUE - count.value())) {
-            throw new IllegalArgumentException("The total count is out of the bound of long");
+            throw new IllegalArgumentException("The total count is out of the bound of long"); //NOSONAR
         }
 
         if (count == null) {

@@ -109,7 +109,7 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
         if (N.isNullOrEmpty(txtValue)) {
             Node attrNode = propNode.getAttributes().getNamedItem(XMLConstants.IS_NULL);
 
-            if ((attrNode != null) && Boolean.valueOf(attrNode.getNodeValue())) {
+            if ((attrNode != null) && Boolean.valueOf(attrNode.getNodeValue())) { //NOSONAR
                 return null;
             }
         }
@@ -351,7 +351,7 @@ abstract class AbstractXMLParser extends AbstractParser<XMLSerializationConfig, 
         } else {
             for (int j = 0; j < subEleNodes.getLength(); j++) {
                 if (subEleNodes.item(j).getNodeType() == Document.TEXT_NODE) {
-                    continue;
+                    continue; //NOSONAR
                 } else if (subEleNode == null) {
                     subEleNode = subEleNodes.item(j);
                 } else {

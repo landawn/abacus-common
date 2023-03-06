@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeException>, java.util.function.IntUnaryOperator {
+public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeException>, java.util.function.IntUnaryOperator { //NOSONAR
 
     @Override
     int applyAsInt(int operand);

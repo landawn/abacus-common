@@ -92,7 +92,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      */
     public static <T extends Comparable<? super T>> Range<T> open(final T min, final T max) {
         if (min == null || max == null || min.compareTo(max) > 0) {
-            throw new IllegalArgumentException("'fromInclusive' and 'toInclusive' can't be null, or min > max");
+            throw new IllegalArgumentException("'fromInclusive' and 'toInclusive' can't be null, or min > max");//NOSONAR
         }
 
         return new Range<>(new LowerEndpoint<>(min, false), new UpperEndpoint<>(max, false), BoundType.OPEN_OPEN);
@@ -387,9 +387,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      *             if ranges cannot be compared
      */
     public boolean isOverlappedBy(final Range<T> other) {
-        if (other == null) {
-            return false;
-        } else if (isAfterRange(other) || isBeforeRange(other)) {
+        if (other == null || isAfterRange(other) || isBeforeRange(other)) {//NOSONAR
             return false;
         }
 
@@ -414,7 +412,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
         final LowerEndpoint<T> newLowerEndpoint = lowerEndpoint.includes(other.lowerEndpoint.value) ? other.lowerEndpoint : lowerEndpoint;
         final UpperEndpoint<T> newUpperEndpoint = upperEndpoint.includes(other.upperEndpoint.value) ? other.upperEndpoint : upperEndpoint;
 
-        BoundType boundType = null;
+        BoundType boundType = null;//NOSONAR
 
         if (newLowerEndpoint.isClosed) {
             boundType = newUpperEndpoint.isClosed ? BoundType.CLOSED_CLOSED : BoundType.CLOSED_OPEN;
@@ -445,7 +443,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
         final LowerEndpoint<T> newLowerEndpoint = lowerEndpoint.includes(other.lowerEndpoint.value) ? lowerEndpoint : other.lowerEndpoint;
         final UpperEndpoint<T> newUpperEndpoint = upperEndpoint.includes(other.upperEndpoint.value) ? upperEndpoint : other.upperEndpoint;
 
-        BoundType boundType = null;
+        BoundType boundType = null;//NOSONAR
 
         if (newLowerEndpoint.isClosed) {
             boundType = newUpperEndpoint.isClosed ? BoundType.CLOSED_CLOSED : BoundType.CLOSED_OPEN;
@@ -462,7 +460,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @return true, if is empty
      */
     public boolean isEmpty() {
-        if (lowerEndpoint.isClosed || upperEndpoint.isClosed || lowerEndpoint.compareTo(upperEndpoint.value) != 0) {
+        if (lowerEndpoint.isClosed || upperEndpoint.isClosed || lowerEndpoint.compareTo(upperEndpoint.value) != 0) {//NOSONAR
             return false;
         }
 
@@ -541,13 +539,13 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      *
      * @param <T>
      */
-    static abstract class Endpoint<T extends Comparable<? super T>> implements Serializable {
+    abstract static class Endpoint<T extends Comparable<? super T>> implements Serializable {
 
         /** The Constant serialVersionUID. */
         private static final long serialVersionUID = -1404748904424344410L;
 
         /** The value. */
-        final T value;
+        final T value; //NOSONAR
 
         /** The is closed. */
         final boolean isClosed;

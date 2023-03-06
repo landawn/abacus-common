@@ -43,7 +43,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         }
     };
 
-    public static DoubleIterator empty() {
+    public static DoubleIterator empty() {//NOSONAR
         return EMPTY;
     }
 
@@ -426,13 +426,16 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         };
     }
 
+    /**
+     * @deprecated
+     */
     @Override
     @Deprecated
     public void forEachRemaining(java.util.function.Consumer<? super Double> action) {
         super.forEachRemaining(action);
     }
 
-    public <E extends Exception> void foreachRemaining(Throwables.DoubleConsumer<E> action) throws E {
+    public <E extends Exception> void foreachRemaining(Throwables.DoubleConsumer<E> action) throws E {//NOSONAR
         N.checkArgNotNull(action);
 
         while (hasNext()) {

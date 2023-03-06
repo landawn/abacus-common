@@ -27,13 +27,14 @@ import com.landawn.abacus.util.Password;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public class PasswordType extends AbstractStringType {
 
     public static final String PASSWORD = "Password";
 
     private static final String DEFAULT_ALGORITHM = "SHA-256";
 
-    private final Password password;
+    private final Password password; //NOSONAR
 
     PasswordType() {
         this(DEFAULT_ALGORITHM);

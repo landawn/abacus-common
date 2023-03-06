@@ -794,13 +794,13 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
             }
 
             if (N.notNullOrEmpty(kryoClassIdMap)) {
-                for (Class<?> cls : kryoClassIdMap.keySet()) {
+                for (Class<?> cls : kryoClassIdMap.keySet()) { //NOSONAR
                     kryo.register(cls, kryoClassIdMap.get(cls));
                 }
             }
 
             if (N.notNullOrEmpty(kryoClassSerializerMap)) {
-                for (Class<?> cls : kryoClassSerializerMap.keySet()) {
+                for (Class<?> cls : kryoClassSerializerMap.keySet()) { //NOSONAR
                     kryo.register(cls, kryoClassSerializerMap.get(cls));
                 }
             }

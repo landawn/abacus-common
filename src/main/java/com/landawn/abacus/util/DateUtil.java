@@ -276,7 +276,7 @@ public abstract class DateUtil {
      * @return
      */
     public static java.util.Date createJUDate(final long timeInMillis) {
-        N.checkArgPositive(timeInMillis, "timeInMillis");
+        N.checkArgPositive(timeInMillis, "timeInMillis"); //NOSONAR
 
         return (timeInMillis == 0) ? null : new java.util.Date(timeInMillis);
     }
@@ -1518,7 +1518,7 @@ public abstract class DateUtil {
      */
     @Deprecated
     public static <T extends Calendar> T roll(final T calendar, final long amount, final TimeUnit unit) {
-        N.checkArgNotNull(calendar, "calendar");
+        N.checkArgNotNull(calendar, "calendar"); //NOSONAR
 
         return createCalendar(calendar, calendar.getTimeInMillis() + unit.toMillis(amount));
     }
@@ -2794,10 +2794,10 @@ public abstract class DateUtil {
         // Fragments bigger than a day require a breakdown to days
         switch (fragment) {
             case Calendar.YEAR:
-                result += unit.convert(calendar.get(Calendar.DAY_OF_YEAR) - offset, TimeUnit.DAYS);
+                result += unit.convert(calendar.get(Calendar.DAY_OF_YEAR) - offset, TimeUnit.DAYS); //NOSONAR
                 break;
             case Calendar.MONTH:
-                result += unit.convert(calendar.get(Calendar.DAY_OF_MONTH) - offset, TimeUnit.DAYS);
+                result += unit.convert(calendar.get(Calendar.DAY_OF_MONTH) - offset, TimeUnit.DAYS); //NOSONAR
                 break;
             default:
                 break;

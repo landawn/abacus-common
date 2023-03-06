@@ -34,6 +34,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings("java:S1192")
 public final class Splitter {
 
     public static final Pattern WHITE_SPACE_PATTERN = Pattern.compile("\\s+");

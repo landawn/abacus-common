@@ -24,6 +24,7 @@ import com.landawn.abacus.util.Numbers;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public final class PrimitiveShortType extends AbstractShortType {
 
     public static final String SHORT = short.class.getSimpleName();

@@ -51,7 +51,7 @@ public final class Median {
      */
     @SafeVarargs
     public static Pair<Character, OptionalChar> of(final char... a) throws IllegalArgumentException {
-        N.checkArgNotNullOrEmpty(a, "The spcified array 'a' can't be null or empty");
+        N.checkArgNotNullOrEmpty(a, "The spcified array 'a' can't be null or empty"); //NOSONAR
 
         return of(a, 0, a.length);
     }
@@ -68,7 +68,7 @@ public final class Median {
      */
     public static Pair<Character, OptionalChar> of(final char[] a, final int fromIndex, final int toIndex) {
         if (N.isNullOrEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The length of array can't be null or empty");
+            throw new IllegalArgumentException("The length of array can't be null or empty"); //NOSONAR
         }
 
         N.checkFromToIndex(fromIndex, toIndex, a.length);

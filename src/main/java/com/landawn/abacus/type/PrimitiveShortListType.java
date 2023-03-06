@@ -27,6 +27,7 @@ import com.landawn.abacus.util.ShortList;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public final class PrimitiveShortListType extends AbstractPrimitiveListType<ShortList> {
 
     public static final String SHORT_LIST = ShortList.class.getSimpleName();

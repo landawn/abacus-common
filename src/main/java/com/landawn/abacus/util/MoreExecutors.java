@@ -32,6 +32,10 @@ import java.util.concurrent.TimeUnit;
  */
 public final class MoreExecutors {
 
+    private MoreExecutors() {
+        // utility class
+    }
+
     /**
      * Gets the exiting executor service.
      *

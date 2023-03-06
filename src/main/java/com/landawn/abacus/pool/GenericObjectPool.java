@@ -150,7 +150,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                 pool.push(e);
 
                 if (memoryMeasure != null) {
-                    usedMemorySize += memoryMeasure.sizeOf(e);
+                    usedMemorySize += memoryMeasure.sizeOf(e); //NOSONAR
                 }
 
                 notEmpty.signal();
@@ -223,7 +223,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                         pool.push(e);
 
                         if (memoryMeasure != null) {
-                            usedMemorySize += memoryMeasure.sizeOf(e);
+                            usedMemorySize += memoryMeasure.sizeOf(e); //NOSONAR
                         }
 
                         notEmpty.signal();
@@ -284,7 +284,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                 activityPrint.updateAccessCount();
 
                 if (memoryMeasure != null) {
-                    usedMemorySize -= memoryMeasure.sizeOf(e);
+                    usedMemorySize -= memoryMeasure.sizeOf(e); //NOSONAR
                 }
 
                 hitCount.incrementAndGet();
@@ -326,7 +326,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                     activityPrint.updateAccessCount();
 
                     if (memoryMeasure != null) {
-                        usedMemorySize -= memoryMeasure.sizeOf(e);
+                        usedMemorySize -= memoryMeasure.sizeOf(e); //NOSONAR
                     }
 
                     hitCount.incrementAndGet();
@@ -521,7 +521,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             }
 
             if (memoryMeasure != null) {
-                usedMemorySize -= memoryMeasure.sizeOf(value);
+                usedMemorySize -= memoryMeasure.sizeOf(value); //NOSONAR
             }
 
             try {

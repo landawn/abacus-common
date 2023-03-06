@@ -14,7 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
-public interface DoubleMapMultiConsumer extends java.util.stream.DoubleStream.DoubleMapMultiConsumer {
+public interface DoubleMapMultiConsumer extends java.util.stream.DoubleStream.DoubleMapMultiConsumer { //NOSONAR
 
     @Override
     void accept(double value, java.util.function.DoubleConsumer ic);

@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface DoubleFunction<R> extends Throwables.DoubleFunction<R, RuntimeException>, java.util.function.DoubleFunction<R> {
+public interface DoubleFunction<R> extends Throwables.DoubleFunction<R, RuntimeException>, java.util.function.DoubleFunction<R> { //NOSONAR
     DoubleFunction<Double> BOX = value -> value;
 
     @Override

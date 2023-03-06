@@ -35,7 +35,7 @@ public final class Try<T extends AutoCloseable> {
     }
 
     public static <T extends AutoCloseable> Try<T> with(final T targetResource) {
-        N.checkArgNotNull(targetResource, "targetResourceSupplier");
+        N.checkArgNotNull(targetResource, "targetResourceSupplier");//NOSONAR
 
         return new Try<>(targetResource, null, null);
     }

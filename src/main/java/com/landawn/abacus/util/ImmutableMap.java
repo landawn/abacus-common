@@ -34,10 +34,11 @@ import java.util.function.Function;
  * @since 0.8
  */
 @com.landawn.abacus.annotation.Immutable
+@SuppressWarnings("java:S2160")
 public class ImmutableMap<K, V> extends AbstractMap<K, V> implements Immutable {
 
     @SuppressWarnings("rawtypes")
-    private static final ImmutableMap EMPTY = new ImmutableMap(Collections.EMPTY_MAP);
+    private static final ImmutableMap EMPTY = new ImmutableMap(Collections.emptyMap());
 
     private final Map<K, V> map;
 

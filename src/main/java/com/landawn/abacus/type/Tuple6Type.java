@@ -39,12 +39,13 @@ import com.landawn.abacus.util.WD;
  * @param <T6>
  * @since 0.9
  */
+@SuppressWarnings("java:S2160")
 public class Tuple6Type<T1, T2, T3, T4, T5, T6> extends AbstractType<Tuple6<T1, T2, T3, T4, T5, T6>> {
 
     private final String declaringName;
 
     @SuppressWarnings("rawtypes")
-    private final Class<Tuple6<T1, T2, T3, T4, T5, T6>> typeClass = (Class) Tuple6.class;
+    private final Class<Tuple6<T1, T2, T3, T4, T5, T6>> typeClass = (Class) Tuple6.class; //NOSONAR
 
     /** The type 1. */
     private final Type<T1> type1;

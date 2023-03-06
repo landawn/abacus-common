@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface DoubleToIntFunction extends Throwables.DoubleToIntFunction<RuntimeException>, java.util.function.DoubleToIntFunction {
+public interface DoubleToIntFunction extends Throwables.DoubleToIntFunction<RuntimeException>, java.util.function.DoubleToIntFunction { //NOSONAR
 
     DoubleToIntFunction DEFAULT = value -> (int) value;
 

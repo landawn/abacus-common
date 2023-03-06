@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface FloatBiFunction<R> extends Throwables.FloatBiFunction<R, RuntimeException> {
+public interface FloatBiFunction<R> extends Throwables.FloatBiFunction<R, RuntimeException> { //NOSONAR
 
     @Override
     R apply(float t, float u);

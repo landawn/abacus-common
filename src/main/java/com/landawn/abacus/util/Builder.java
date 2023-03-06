@@ -3601,7 +3601,7 @@ public class Builder<T> {
          *
          * @param val
          */
-        private X(T val) {
+        private X(T val) { //NOSONAR
             super(val);
         }
 

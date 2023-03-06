@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface NFunction<T, R> extends Throwables.NFunction<T, R, RuntimeException> {
+public interface NFunction<T, R> extends Throwables.NFunction<T, R, RuntimeException> { //NOSONAR
 
     @Override
     R apply(T... args);

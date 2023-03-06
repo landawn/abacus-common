@@ -19,6 +19,7 @@ import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,9 @@ import java.util.regex.Pattern;
 
 import com.landawn.abacus.exception.UncheckedException;
 import com.landawn.abacus.exception.UncheckedIOException;
+import com.landawn.abacus.exception.UncheckedInterruptedException;
+import com.landawn.abacus.exception.UncheckedParseException;
+import com.landawn.abacus.exception.UncheckedReflectiveOperationException;
 import com.landawn.abacus.exception.UncheckedSQLException;
 
 /**
@@ -52,6 +56,12 @@ public final class ExceptionUtil {
         toRuntimeExceptionFuncMap.put(IOException.class, e -> new UncheckedIOException((IOException) e));
 
         toRuntimeExceptionFuncMap.put(SQLException.class, e -> new UncheckedSQLException((SQLException) e));
+
+        toRuntimeExceptionFuncMap.put(ReflectiveOperationException.class, e -> new UncheckedReflectiveOperationException((ReflectiveOperationException) e));
+
+        toRuntimeExceptionFuncMap.put(ParseException.class, e -> new UncheckedParseException((ParseException) e));
+
+        toRuntimeExceptionFuncMap.put(InterruptedException.class, e -> new UncheckedInterruptedException((InterruptedException) e));
 
         toRuntimeExceptionFuncMap.put(ExecutionException.class, e -> e.getCause() == null ? new UncheckedException(e) : toRuntimeException(e.getCause()));
 
@@ -94,8 +104,13 @@ public final class ExceptionUtil {
         N.checkArgNotNull(exceptionClass, "exceptionClass");
         N.checkArgNotNull(runtimeExceptionMapper, "runtimeExceptionMapper");
 
-        if (!force && toRuntimeExceptionFuncMap.containsKey(exceptionClass)) {
-            throw new IllegalArgumentException("Exception class: " + ClassUtil.getCanonicalClassName(exceptionClass) + " has already been registered");
+        if (toRuntimeExceptionFuncMap.containsKey(exceptionClass)) {
+            if (!force) {
+                throw new IllegalArgumentException("Exception class: " + ClassUtil.getCanonicalClassName(exceptionClass) + " has already been registered");
+            } else if (exceptionClass.getPackage() != null && Strings.startsWithAny(exceptionClass.getPackage().getName(), "java.", "javax.")) {
+                throw new IllegalArgumentException("Exception class: " + ClassUtil.getCanonicalClassName(exceptionClass)
+                        + " has already been registered. Can't forcedly register class with package starting with \"java.\" or \"javax.\"");
+            }
         }
 
         toRuntimeExceptionFuncMap.put((Class) exceptionClass, (Function) runtimeExceptionMapper);
@@ -111,7 +126,7 @@ public final class ExceptionUtil {
         Function<Throwable, RuntimeException> func = toRuntimeExceptionFuncMap.get(cls);
 
         if (func == null) {
-            for (Class<?> key : toRuntimeExceptionFuncMap.keySet()) {
+            for (Class<?> key : toRuntimeExceptionFuncMap.keySet()) { //NOSONAR
                 if (key.isAssignableFrom(cls)) {
                     func = toRuntimeExceptionFuncMap.get(key);
                     break;
@@ -159,7 +174,7 @@ public final class ExceptionUtil {
         Function<Throwable, RuntimeException> func = toRuntimeExceptionFuncMap.get(cls);
 
         if (func == null) {
-            for (Class<?> key : toRuntimeExceptionFuncMap.keySet()) {
+            for (Class<?> key : toRuntimeExceptionFuncMap.keySet()) { //NOSONAR
                 if (key.isAssignableFrom(cls)) {
                     func = toRuntimeExceptionFuncMap.get(key);
                     break;
@@ -203,7 +218,7 @@ public final class ExceptionUtil {
 
                 return (Exception) cause;
             }
-        } else if (e.getCause() != null && e.getCause() instanceof Exception && (e instanceof InvocationTargetException || e instanceof ExecutionException)) {
+        } else if (e.getCause() instanceof Exception && (e instanceof InvocationTargetException || e instanceof ExecutionException)) {
             return tryToGetOriginalCheckedException((Exception) e.getCause());
         }
 

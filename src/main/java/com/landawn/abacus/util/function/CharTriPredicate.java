@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface CharTriPredicate extends Throwables.CharTriPredicate<RuntimeException> {
+public interface CharTriPredicate extends Throwables.CharTriPredicate<RuntimeException> { //NOSONAR
 
     CharTriPredicate ALWAYS_TRUE = (a, b, c) -> true;
 

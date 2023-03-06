@@ -66,7 +66,8 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
             return null;
         }
 
-        Collection<E> c = N.newCollection(collClass, Array.getLength(x));
+        @SuppressWarnings("rawtypes")
+        final Collection<E> c = N.newCollection((Class<Collection>) collClass, Array.getLength(x));
 
         return array2Collection(c, x);
     }

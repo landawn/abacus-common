@@ -107,11 +107,17 @@ import com.landawn.abacus.util.function.TriFunction;
  *
  */
 public abstract class Collectors {
-    static final Object NONE = new Object();
+    static final Object NONE = new Object(); //NOSONAR
 
+    /**
+     * @deprecated
+     */
     @Deprecated
     static final Set<Characteristics> CH_CONCURRENT_ID = Collections
             .unmodifiableSet(EnumSet.of(Characteristics.CONCURRENT, Characteristics.UNORDERED, Characteristics.IDENTITY_FINISH));
+    /**
+     * @deprecated
+     */
     @Deprecated
     static final Set<Characteristics> CH_CONCURRENT_NOID = Collections.unmodifiableSet(EnumSet.of(Characteristics.CONCURRENT, Characteristics.UNORDERED));
 
@@ -264,11 +270,11 @@ public abstract class Collectors {
 
     static final Function<Joiner, String> Joiner_Finisher = Joiner::toString;
 
-    static final Function<Object, ? extends Long> Counting_Accumulator = t -> 1L;
+    static final Function<Object, Long> Counting_Accumulator = t -> 1L;
 
     static final BinaryOperator<Long> Counting_Combiner = (a, b) -> a.longValue() + b.longValue();
 
-    static final Function<Object, ? extends Integer> CountingInt_Accumulator = t -> 1;
+    static final Function<Object, Integer> CountingInt_Accumulator = t -> 1;
 
     static final BinaryOperator<Integer> CountingInt_Combiner = (a, b) -> a.intValue() + b.intValue();
 
@@ -1200,7 +1206,7 @@ public abstract class Collectors {
 
     private static final BinaryOperator<Holder<Object>> first_last_combiner = (t, u) -> {
         if (t.value() != NONE && u.value() != NONE) {
-            throw new UnsupportedOperationException("The 'first' and 'last' Collector only can be used in sequential stream");
+            throw new UnsupportedOperationException("The 'first' and 'last' Collector only can be used in sequential stream"); //NOSONAR
         }
 
         return t.value() != NONE ? t : u;
@@ -1654,14 +1660,14 @@ public abstract class Collectors {
     }
 
     public static <T> Collector<T, ?, Long> counting() {
-        final Function<? super T, ? extends Long> accumulator = Counting_Accumulator;
+        final Function<? super T, Long> accumulator = Counting_Accumulator;
         final BinaryOperator<Long> combiner = Counting_Combiner;
 
         return reducing(0L, accumulator, combiner);
     }
 
     public static <T> Collector<T, ?, Integer> countingInt() {
-        final Function<? super T, ? extends Integer> accumulator = CountingInt_Accumulator;
+        final Function<? super T, Integer> accumulator = CountingInt_Accumulator;
         final BinaryOperator<Integer> combiner = CountingInt_Combiner;
 
         return reducing(0, accumulator, combiner);
@@ -2308,7 +2314,7 @@ public abstract class Collectors {
     }
 
     @SuppressWarnings("unchecked")
-    static <T> T none() {
+    static <T> T none() { //NOSONAR
         return (T) NONE;
     }
 
@@ -3168,7 +3174,7 @@ public abstract class Collectors {
     }
 
     @SuppressWarnings("rawtypes")
-    public static <K, V> Collector<Map.Entry<? extends K, ? extends V>, ?, ListMultimap<K, V>> toMultimap() {
+    public static <K, V> Collector<Map.Entry<K, V>, ?, ListMultimap<K, V>> toMultimap() {
         final Function<Map.Entry<? extends K, ? extends V>, ? extends K> keyMapper = (Function) Fn.key();
         final Function<Map.Entry<? extends K, ? extends V>, ? extends V> valueMapper = (Function) Fn.value();
 
@@ -3176,7 +3182,7 @@ public abstract class Collectors {
     }
 
     @SuppressWarnings("rawtypes")
-    public static <K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<Map.Entry<? extends K, ? extends V>, ?, M> toMultimap(
+    public static <K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<Map.Entry<K, V>, ?, M> toMultimap(
             final Supplier<? extends M> mapFactory) {
         final Function<Map.Entry<? extends K, ? extends V>, ? extends K> keyMapper = (Function) Fn.key();
         final Function<Map.Entry<? extends K, ? extends V>, ? extends V> valueMapper = (Function) Fn.value();
@@ -4008,7 +4014,7 @@ public abstract class Collectors {
          * @see Tuple#from(Collection)
          */
         @SuppressWarnings("rawtypes")
-        public static <T> Collector<T, ?, List<?>> combine(final Collection<? extends Collector<? super T, ?, ?>> collectors) {
+        public static <T> Collector<T, ?, List<?>> combine(final Collection<? extends Collector<? super T, ?, ?>> collectors) { //NOSONAR
             N.checkArgument(N.notNullOrEmpty(collectors), "The specified 'collectors' can't be null or empty");
 
             final int len = collectors.size();

@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface ToLongFunction<T> extends Throwables.ToLongFunction<T, RuntimeException>, java.util.function.ToLongFunction<T> {
+public interface ToLongFunction<T> extends Throwables.ToLongFunction<T, RuntimeException>, java.util.function.ToLongFunction<T> { //NOSONAR
 
     ToLongFunction<Long> UNBOX = value -> value == null ? 0 : value;
 

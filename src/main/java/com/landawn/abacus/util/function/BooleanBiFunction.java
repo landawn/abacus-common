@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface BooleanBiFunction<R> extends Throwables.BooleanBiFunction<R, RuntimeException> {
+public interface BooleanBiFunction<R> extends Throwables.BooleanBiFunction<R, RuntimeException> { //NOSONAR
 
     @Override
     R apply(boolean t, boolean u);

@@ -83,6 +83,7 @@ import com.landawn.abacus.util.function.Supplier;
  * @since 0.8
  */
 @Internal
+@SuppressWarnings("java:S1192")
 public final class ParserUtil {
 
     static final Logger logger = LoggerFactory.getLogger(ParserUtil.class);
@@ -620,12 +621,12 @@ public final class ParserUtil {
 
             final List<String> propNameList = ClassUtil.getPropNameList(cls);
 
-            boolean isImmutable = true;
+            boolean localIsImmutable = true;
 
             if (ClassUtil.isRecordClass(cls)) {
-                isImmutable = true;
+                localIsImmutable = true;
             } else if (ClassUtil.isRegisteredXMLBindingClass(cls)) {
-                isImmutable = false;
+                localIsImmutable = false;
             } else {
                 try {
                     final Object tmp = N.newInstance(cls);
@@ -637,12 +638,12 @@ public final class ParserUtil {
                         setMethod = ClassUtil.getPropSetMethod(cls, propName);
 
                         if (setMethod != null) {
-                            isImmutable = false;
+                            localIsImmutable = false;
                             break;
                         } else if (field != null) {
-                            try {
-                                field.set(tmp, N.defaultValueOf(field.getType()));
-                                isImmutable = false;
+                            try { //NOSONAR
+                                field.set(tmp, N.defaultValueOf(field.getType())); //NOSONAR
+                                localIsImmutable = false;
 
                                 break;
                             } catch (Throwable e) {
@@ -655,9 +656,9 @@ public final class ParserUtil {
                 }
             }
 
-            this.isImmutable = isImmutable;
-            this.builderInfo = isImmutable ? ClassUtil.getBuilderInfo(cls) : null;
-            this.isByBuilder = isImmutable && builderInfo != null;
+            this.isImmutable = localIsImmutable;
+            this.builderInfo = localIsImmutable ? ClassUtil.getBuilderInfo(cls) : null;
+            this.isByBuilder = localIsImmutable && builderInfo != null;
 
             final JsonXmlConfig jsonXmlConfig = (JsonXmlConfig) annotations.get(JsonXmlConfig.class);
             this.jsonXmlNamingPolicy = jsonXmlConfig == null || jsonXmlConfig.namingPolicy() == null ? NamingPolicy.LOWER_CAMEL_CASE
@@ -892,7 +893,7 @@ public final class ParserUtil {
                 }
 
                 if (propInfo == null) {
-                    for (String key : propInfoMap.keySet()) {
+                    for (String key : propInfoMap.keySet()) { //NOSONAR
                         if (isPropName(clazz, propName, key)) {
                             propInfo = propInfoMap.get(key);
 
@@ -945,7 +946,9 @@ public final class ParserUtil {
                     for (String alias : propInfoFromOtherBean.aliases) {
                         ret = getPropInfo(alias);
 
-                        break;
+                        if (ret != null) {
+                            break;
+                        }
                     }
                 }
 
@@ -1028,7 +1031,7 @@ public final class ParserUtil {
                             if (subPropValue == null) {
                                 if (propInfo.type.isCollection()) {
                                     subPropValue = N.newInstance(propInfo.type.getElementType().clazz());
-                                    final Collection c = N.newCollection(propInfo.type.clazz());
+                                    final Collection c = N.newCollection((Class) propInfo.type.clazz());
                                     c.add(subPropValue);
                                     propInfo.setPropValue(propBean, c);
                                 } else {
@@ -1041,7 +1044,7 @@ public final class ParserUtil {
                                 final Collection c = (Collection) subPropValue;
 
                                 if (c.size() == 0) {
-                                    subPropValue = N.newCollection(propInfo.type.getElementType().clazz());
+                                    subPropValue = N.newCollection((Class<Collection>) propInfo.type.getElementType().clazz());
                                     c.add(subPropValue);
                                 } else if (propInfo.type.isList()) {
                                     subPropValue = ((List) c).get(0);
@@ -1274,21 +1277,21 @@ public final class ParserUtil {
         }
 
         private Map<Class<? extends Annotation>, Annotation> getAnnotations(final Class<?> cls) {
-            final Map<Class<? extends Annotation>, Annotation> annotations = new HashMap<>();
+            final Map<Class<? extends Annotation>, Annotation> annos = new HashMap<>();
 
             final Set<Class<?>> classes = ClassUtil.getAllSuperTypes(cls);
             N.reverse(classes);
             classes.add(cls);
 
-            for (Class<?> clazz : classes) {
-                if (N.notNullOrEmpty(clazz.getAnnotations())) {
-                    for (Annotation anno : clazz.getAnnotations()) {
-                        annotations.put(anno.annotationType(), anno);
+            for (Class<?> e : classes) {
+                if (N.notNullOrEmpty(e.getAnnotations())) {
+                    for (Annotation anno : e.getAnnotations()) {
+                        annos.put(anno.annotationType(), anno);
                     }
                 }
             }
 
-            return annotations;
+            return annos;
         }
 
         /**
@@ -1499,7 +1502,7 @@ public final class ParserUtil {
             this.getMethod = getMethod;
             this.setMethod = setMethod; // ClassUtil.getPropSetMethod(declaringClass, propName);
             this.annotations = ImmutableMap.wrap(getAnnotations());
-            this.isTransient = annotations.containsKey(Transient.class) || annotations.keySet().stream().anyMatch(it -> it.getSimpleName().equals("Transient"))
+            this.isTransient = annotations.containsKey(Transient.class) || annotations.keySet().stream().anyMatch(it -> it.getSimpleName().equals("Transient")) //NOSONAR
                     || (field != null && Modifier.isTransient(field.getModifiers()));
 
             this.clazz = (Class<Object>) (field == null ? (setMethod == null ? getMethod.getReturnType() : setMethod.getParameterTypes()[0]) : field.getType());
@@ -1648,13 +1651,13 @@ public final class ParserUtil {
 
             try {
                 if (isFieldSettable) {
-                    field.set(obj, propValue);
+                    field.set(obj, propValue); //NOSONAR
                 } else if (setMethod != null) {
                     setMethod.invoke(obj, propValue);
                 } else if (canSetFieldByGetMethod) {
                     ClassUtil.setPropValueByGet(obj, getMethod, propValue);
                 } else {
-                    field.set(obj, propValue);
+                    field.set(obj, propValue); //NOSONAR
                 }
 
             } catch (Exception e) {
@@ -1667,11 +1670,11 @@ public final class ParserUtil {
 
                 try {
                     if (isFieldSettable) {
-                        field.set(obj, propValue);
+                        field.set(obj, propValue); //NOSONAR
                     } else if (setMethod != null) {
                         setMethod.invoke(obj, propValue);
                     } else {
-                        field.set(obj, propValue);
+                        field.set(obj, propValue); //NOSONAR
                     }
                 } catch (Exception e2) {
                     throw ExceptionUtil.toRuntimeException(e);
@@ -2014,27 +2017,27 @@ public final class ParserUtil {
         }
 
         private Map<Class<? extends Annotation>, Annotation> getAnnotations() {
-            final Map<Class<? extends Annotation>, Annotation> annotations = new HashMap<>();
+            final Map<Class<? extends Annotation>, Annotation> annos = new HashMap<>();
 
             if (field != null && N.notNullOrEmpty(field.getAnnotations())) {
                 for (Annotation anno : field.getAnnotations()) {
-                    annotations.put(anno.annotationType(), anno);
+                    annos.put(anno.annotationType(), anno);
                 }
             }
 
             if (getMethod != null && N.notNullOrEmpty(getMethod.getAnnotations())) {
                 for (Annotation anno : getMethod.getAnnotations()) {
-                    annotations.put(anno.annotationType(), anno);
+                    annos.put(anno.annotationType(), anno);
                 }
             }
 
             if (setMethod != null && N.notNullOrEmpty(setMethod.getAnnotations())) {
                 for (Annotation anno : setMethod.getAnnotations()) {
-                    annotations.put(anno.annotationType(), anno);
+                    annos.put(anno.annotationType(), anno);
                 }
             }
 
-            return annotations;
+            return annos;
         }
 
         @SuppressWarnings("unused")
@@ -2134,7 +2137,7 @@ public final class ParserUtil {
             final Class<? extends Type> typeClass = typeAnno.clazz();
 
             if (typeClass != null && !typeClass.equals(Type.class)) {
-                Type<?> type = null;
+                Type<?> localType = null;
                 @SuppressWarnings("rawtypes")
                 Constructor<? extends Type> constructor = null;
 
@@ -2143,7 +2146,7 @@ public final class ParserUtil {
 
                     if (constructor != null) {
                         ClassUtil.setAccessibleQuietly(constructor, true);
-                        type = ClassUtil.invokeConstructor(constructor, typeName.get());
+                        localType = ClassUtil.invokeConstructor(constructor, typeName.get());
                     } else {
                         constructor = ClassUtil.getDeclaredConstructor(typeClass);
 
@@ -2152,7 +2155,7 @@ public final class ParserUtil {
                         }
 
                         ClassUtil.setAccessibleQuietly(constructor, true);
-                        type = ClassUtil.invokeConstructor(constructor);
+                        localType = ClassUtil.invokeConstructor(constructor);
                     }
                 } else {
                     constructor = ClassUtil.getDeclaredConstructor(typeClass);
@@ -2162,16 +2165,16 @@ public final class ParserUtil {
                     }
 
                     ClassUtil.setAccessibleQuietly(constructor, true);
-                    type = ClassUtil.invokeConstructor(constructor);
+                    localType = ClassUtil.invokeConstructor(constructor);
                 }
 
                 try {
-                    TypeFactory.registerType(type);
+                    TypeFactory.registerType(localType);
                 } catch (Exception e) {
                     // ignore.
                 }
 
-                return type.name();
+                return localType.name();
             } else if (typeName.isPresent()) {
                 return typeName.get();
             } else if (propClass.isEnum()) {
@@ -2202,15 +2205,15 @@ public final class ParserUtil {
 
                 return N.typeOf(parameterizedTypeName);
             } else {
-                Type<T> type = null;
+                Type<T> localType = null;
 
                 try {
-                    type = N.typeOf(annoType);
+                    localType = N.typeOf(annoType);
                 } catch (Exception e) {
                     // ignore
                 }
 
-                if ((type == null || type.getClass().equals(ObjectType.class)) && N.notNullOrEmpty(ClassUtil.getPackageName(beanClass))) {
+                if ((localType == null || localType.getClass().equals(ObjectType.class)) && N.notNullOrEmpty(ClassUtil.getPackageName(beanClass))) {
                     final String pkgName = ClassUtil.getPackageName(beanClass);
                     final StringBuilder sb = new StringBuilder();
                     int start = 0;
@@ -2242,10 +2245,10 @@ public final class ParserUtil {
                         }
                     }
 
-                    type = N.typeOf(sb.toString());
+                    localType = N.typeOf(sb.toString());
                 }
 
-                return type;
+                return localType;
             }
         }
 
@@ -2278,7 +2281,7 @@ public final class ParserUtil {
         }
     }
 
-    static class ASMPropInfo extends PropInfo {
+    static class ASMPropInfo extends PropInfo { //NOSONAR
         final com.esotericsoftware.reflectasm.MethodAccess getMethodAccess;
         final com.esotericsoftware.reflectasm.MethodAccess setMethodAccess;
         final com.esotericsoftware.reflectasm.FieldAccess fieldAccess;
@@ -2341,7 +2344,7 @@ public final class ParserUtil {
                 } else if (canSetFieldByGetMethod) {
                     ClassUtil.setPropValueByGet(obj, getMethod, propValue);
                 } else {
-                    field.set(obj, propValue);
+                    field.set(obj, propValue); //NOSONAR
                 }
 
             } catch (Exception e) {
@@ -2358,7 +2361,7 @@ public final class ParserUtil {
                     getMethodAccess.invoke(obj, setMethodAccessIndex, propValue);
                 } else {
                     try {
-                        field.set(obj, propValue);
+                        field.set(obj, propValue); //NOSONAR
                     } catch (Exception e2) {
                         throw ExceptionUtil.toRuntimeException(e);
                     }
@@ -2416,7 +2419,7 @@ public final class ParserUtil {
         public XmlNameTag(String name, String typeName, boolean isBean) {
             this.name = name.toCharArray();
 
-            final String typeAttr = typeName.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+            final String typeAttr = typeName.replaceAll("<", "&lt;").replaceAll(">", "&gt;"); //NOSONAR
 
             if (isBean) {
                 this.epStart = ("<bean name=\"" + name + "\">").toCharArray();

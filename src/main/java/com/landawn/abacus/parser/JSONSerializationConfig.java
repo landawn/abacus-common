@@ -46,7 +46,7 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
 
     boolean bracketRootValue = defaultBracketRootValue;
 
-    public JSONSerializationConfig() {
+    public JSONSerializationConfig() { //NOSONAR
     }
 
     /**
@@ -292,7 +292,7 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
         }
 
         if (obj instanceof JSONSerializationConfig other) {
-            if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getCharQuotation(), other.getCharQuotation())
+            if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getCharQuotation(), other.getCharQuotation()) //NOSONAR
                     && N.equals(getStringQuotation(), other.getStringQuotation()) && N.equals(getDateTimeFormat(), other.getDateTimeFormat())
                     && N.equals(getExclusion(), other.getExclusion()) && N.equals(skipTransientField(), other.skipTransientField())
                     && N.equals(prettyFormat(), other.prettyFormat()) && N.equals(supportCircularReference(), other.supportCircularReference())

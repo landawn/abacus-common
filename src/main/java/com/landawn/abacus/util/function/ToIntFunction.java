@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface ToIntFunction<T> extends Throwables.ToIntFunction<T, RuntimeException>, java.util.function.ToIntFunction<T> {
+public interface ToIntFunction<T> extends Throwables.ToIntFunction<T, RuntimeException>, java.util.function.ToIntFunction<T> { //NOSONAR
 
     ToIntFunction<Integer> UNBOX = value -> value == null ? 0 : value;
 

@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface ByteTriConsumer extends Throwables.ByteTriConsumer<RuntimeException> {
+public interface ByteTriConsumer extends Throwables.ByteTriConsumer<RuntimeException> { //NOSONAR
 
     @Override
     void accept(byte a, byte b, byte c);

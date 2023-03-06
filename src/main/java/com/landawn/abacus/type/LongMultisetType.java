@@ -29,6 +29,7 @@ import com.landawn.abacus.util.WD;
  * @param <E>
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public class LongMultisetType<E> extends AbstractType<LongMultiset<E>> {
 
     private final String declaringName;

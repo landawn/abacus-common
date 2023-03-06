@@ -43,7 +43,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
         }
     };
 
-    public static ShortIterator empty() {
+    public static ShortIterator empty() {//NOSONAR
         return EMPTY;
     }
 
@@ -430,6 +430,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * For each remaining.
      *
      * @param action
+     * @deprecated
      */
     @Override
     @Deprecated
@@ -443,7 +444,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void foreachRemaining(Throwables.ShortConsumer<E> action) throws E {
+    public <E extends Exception> void foreachRemaining(Throwables.ShortConsumer<E> action) throws E {//NOSONAR
         N.checkArgNotNull(action);
 
         while (hasNext()) {

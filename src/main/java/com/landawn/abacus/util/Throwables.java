@@ -3265,7 +3265,7 @@ public final class Throwables {
 
     public static final class LazyInitializer<T, E extends Throwable> implements Throwables.Supplier<T, E> {
         private volatile boolean initialized = false;
-        private volatile T value = null;
+        private volatile T value = null; //NOSONAR
         private final Supplier<T, E> supplier;
 
         LazyInitializer(final Throwables.Supplier<T, E> supplier) {

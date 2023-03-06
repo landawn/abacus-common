@@ -35,6 +35,7 @@ import java.util.Set;
  * <p>#ThreadSafe#</p>
  * @since 2.0
  */
+@SuppressWarnings({ "java:S100", "java:S3878" })
 public final class EscapeUtil {
     /**
      * {@code \u000a} linefeed LF ('\n').
@@ -971,12 +972,8 @@ public final class EscapeUtil {
          */
         @Override
         public boolean translate(final int codepoint, final Writer out) throws IOException {
-            if (codepoint >= Character.MIN_SURROGATE && codepoint <= Character.MAX_SURROGATE) {
-                // It's a surrogate. Write nothing and say we've translated.
-                return true;
-            }
-            // It's not a surrogate. Don't translate it.
-            return false;
+            // It's a surrogate. Write nothing and say we've translated.
+            return codepoint >= Character.MIN_SURROGATE && codepoint <= Character.MAX_SURROGATE;
         }
     }
 
@@ -1413,7 +1410,7 @@ public final class EscapeUtil {
      *
      * @since 3.0
      */
-    static abstract class CodePointTranslator extends CharSequenceTranslator {
+    abstract static class CodePointTranslator extends CharSequenceTranslator {
 
         /**
          * Implementation of translate that maps onto the abstract translate(int, Writer) method.
@@ -1542,6 +1539,9 @@ public final class EscapeUtil {
      * @since 3.0
      */
     static class BeanArrays {
+        private BeanArrays() {
+
+        }
 
         /**
          * Mapping to escape <a href="https://secure.wikimedia.org/wikipedia/en/wiki/ISO/IEC_8859-1">ISO-8859-1</a>

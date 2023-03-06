@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface CharBinaryOperator extends Throwables.CharBinaryOperator<RuntimeException> {
+public interface CharBinaryOperator extends Throwables.CharBinaryOperator<RuntimeException> { //NOSONAR
 
     @Override
     char applyAsChar(char left, char right);

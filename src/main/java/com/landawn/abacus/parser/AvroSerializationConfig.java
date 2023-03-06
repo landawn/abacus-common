@@ -33,7 +33,7 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
 
     private Schema schema;
 
-    public AvroSerializationConfig() {
+    public AvroSerializationConfig() { //NOSONAR
     }
 
     /**
@@ -395,7 +395,7 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
         }
 
         if (obj instanceof AvroSerializationConfig other) {
-            if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getExclusion(), other.getExclusion())
+            if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getExclusion(), other.getExclusion()) //NOSONAR
                     && N.equals(skipTransientField(), other.skipTransientField()) && N.equals(schema, other.schema)) {
 
                 return true;

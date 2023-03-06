@@ -19,7 +19,7 @@ import java.util.function.Supplier;
 
 public final class LazyInitializer<T> implements com.landawn.abacus.util.function.Supplier<T> {
     private volatile boolean initialized = false;
-    private volatile T value = null;
+    private volatile T value = null; //NOSONAR
     private final Supplier<T> supplier;
 
     LazyInitializer(final Supplier<T> supplier) {

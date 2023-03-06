@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<RuntimeException>, java.util.function.DoubleUnaryOperator {
+public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<RuntimeException>, java.util.function.DoubleUnaryOperator { //NOSONAR
 
     @Override
     double applyAsDouble(double operand);

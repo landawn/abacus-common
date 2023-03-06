@@ -23,6 +23,7 @@ import com.landawn.abacus.util.WD;
  * @param <T>
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
 
     public static final String OPTIONAL = "JdkOptional";
@@ -89,7 +90,7 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
      */
     @Override
     public String stringOf(Optional<T> x) {
-        return (x == null || x.isEmpty()) ? null : N.stringOf(x.get()); // elementType.stringOf(x.get());
+        return (x == null || x.isEmpty()) ? null : N.stringOf(x.get()); // elementType.stringOf(x.get()); //NOSONAR
     }
 
     /**
@@ -141,7 +142,7 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
      */
     @Override
     public void set(PreparedStatement stmt, int columnIndex, Optional<T> x) throws SQLException {
-        stmt.setObject(columnIndex, (x == null || x.isEmpty()) ? null : x.get());
+        stmt.setObject(columnIndex, (x == null || x.isEmpty()) ? null : x.get()); //NOSONAR
     }
 
     /**
@@ -153,7 +154,7 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
      */
     @Override
     public void set(CallableStatement stmt, String parameterName, Optional<T> x) throws SQLException {
-        stmt.setObject(parameterName, (x == null || x.isEmpty()) ? null : x.get());
+        stmt.setObject(parameterName, (x == null || x.isEmpty()) ? null : x.get()); //NOSONAR
     }
 
     /**
@@ -164,7 +165,7 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
      */
     @Override
     public void write(Writer writer, Optional<T> x) throws IOException {
-        if (x == null || x.isEmpty()) {
+        if (x == null || x.isEmpty()) { //NOSONAR
             writer.write(NULL_CHAR_ARRAY);
         } else {
             // elementType.write(writer, x.get());
@@ -181,7 +182,7 @@ public class JdkOptionalType<T> extends AbstractOptionalType<Optional<T>> {
      */
     @Override
     public void writeCharacter(CharacterWriter writer, Optional<T> x, SerializationConfig<?> config) throws IOException {
-        if (x == null || x.isEmpty()) {
+        if (x == null || x.isEmpty()) { //NOSONAR
             writer.write(NULL_CHAR_ARRAY);
         } else {
             // elementType.writeCharacter(writer, x.get(), config);

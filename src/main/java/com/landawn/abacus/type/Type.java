@@ -119,7 +119,7 @@ public interface Type<T> {
      * @return
      */
     @SuppressWarnings("unchecked")
-    static <T> List<Type<T>> ofAll(final Collection<? extends Class<? extends T>> classes) {
+    static <T> List<Type<T>> ofAll(final Collection<Class<? extends T>> classes) {
         final List<Type<T>> types = new ArrayList<>(N.size(classes));
 
         if (N.notNullOrEmpty(classes)) {
@@ -662,14 +662,14 @@ public interface Type<T> {
      *
      * @return
      */
-    Type<?> getElementType();
+    Type<?> getElementType(); //NOSONAR
 
     /**
      * Gets the parameter types.
      *
      * @return
      */
-    Type<?>[] getParameterTypes();
+    Type<?>[] getParameterTypes(); //NOSONAR
 
     /**
      *

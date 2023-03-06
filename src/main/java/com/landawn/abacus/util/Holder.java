@@ -200,7 +200,7 @@ public final class Holder<T> implements Mutable {
      * @throws E the e
      */
     public <E extends Exception> void ifNotNull(final Throwables.Consumer<? super T, E> action) throws E {
-        N.checkArgNotNull(action, "action");
+        N.checkArgNotNull(action, "action"); //NOSONAR
 
         if (isNotNull()) {
             action.accept(value);

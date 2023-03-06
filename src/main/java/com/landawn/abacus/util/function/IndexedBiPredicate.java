@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface IndexedBiPredicate<T, U> extends Throwables.IndexedBiPredicate<T, U, RuntimeException> {
+public interface IndexedBiPredicate<T, U> extends Throwables.IndexedBiPredicate<T, U, RuntimeException> { //NOSONAR
 
     @Override
     boolean test(int idx, T e, U u);

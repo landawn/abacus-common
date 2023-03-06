@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface IndexedFunction<T, R> extends Throwables.IndexedFunction<T, R, RuntimeException> {
+public interface IndexedFunction<T, R> extends Throwables.IndexedFunction<T, R, RuntimeException> { //NOSONAR
 
     @Override
     R apply(int idx, T e);

@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface ShortTriConsumer extends Throwables.ShortTriConsumer<RuntimeException> {
+public interface ShortTriConsumer extends Throwables.ShortTriConsumer<RuntimeException> { //NOSONAR
 
     @Override
     void accept(short a, short b, short c);

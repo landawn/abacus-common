@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface BinaryOperator<T> extends BiFunction<T, T, T>, Throwables.BinaryOperator<T, RuntimeException>, java.util.function.BinaryOperator<T> {
+public interface BinaryOperator<T> extends BiFunction<T, T, T>, Throwables.BinaryOperator<T, RuntimeException>, java.util.function.BinaryOperator<T> { //NOSONAR
 
     @Override
     default <E extends Throwable> Throwables.BinaryOperator<T, E> toThrowable() {

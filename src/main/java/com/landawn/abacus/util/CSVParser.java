@@ -363,7 +363,7 @@ public class CSVParser {
 
                     // the tricky case of an embedded quote in the middle: a,bc"d"ef,g
                     if (!strictQuotes) {
-                        if (i > 2 //not on the beginning of the line
+                        if (i > 2 //not on the beginning of the line  //NOSONAR
                                 && nextLine.charAt(i - 1) != this.separator //not at the beginning of an escape sequence
                                 && nextLine.length() > (i + 1) && nextLine.charAt(i + 1) != this.separator //not at the   end of an escape sequence
                         ) {

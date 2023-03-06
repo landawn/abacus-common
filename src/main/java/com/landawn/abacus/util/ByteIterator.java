@@ -43,7 +43,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
         }
     };
 
-    public static ByteIterator empty() {
+    public static ByteIterator empty() {//NOSONAR
         return EMPTY;
     }
 
@@ -430,6 +430,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * For each remaining.
      *
      * @param action
+     * @deprecated
      */
     @Override
     @Deprecated
@@ -443,7 +444,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void foreachRemaining(Throwables.ByteConsumer<E> action) throws E {
+    public <E extends Exception> void foreachRemaining(Throwables.ByteConsumer<E> action) throws E {//NOSONAR
         N.checkArgNotNull(action);
 
         while (hasNext()) {

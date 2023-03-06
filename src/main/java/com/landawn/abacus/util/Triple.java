@@ -31,11 +31,11 @@ import com.landawn.abacus.util.stream.Stream;
  */
 public final class Triple<L, M, R> implements Mutable {
 
-    public L left;
+    public L left; //NOSONAR
 
-    public M middle;
+    public M middle; //NOSONAR
 
-    public R right;
+    public R right; //NOSONAR
 
     public Triple() {
     }

@@ -190,7 +190,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      *
      * @return
      */
-    public Map<String, Type<?>> getPropTypes() {
+    public Map<String, Type<?>> getPropTypes() { //NOSONAR
         return propTypes;
     }
 

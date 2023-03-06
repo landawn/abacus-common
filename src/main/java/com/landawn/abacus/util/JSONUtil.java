@@ -200,7 +200,8 @@ public final class JSONUtil {
         if (type.clazz().isAssignableFrom(JSONObject.class)) {
             return (T) jsonObject;
         } else if (type.isMap()) {
-            final Map<String, Object> map = N.newMap(cls, jsonObject.keySet().size());
+            @SuppressWarnings("rawtypes")
+            final Map<String, Object> map = N.newMap((Class<Map>) cls, jsonObject.keySet().size());
             final Iterator<String> iter = jsonObject.keys();
             final Type<?> valueType = type.getParameterTypes()[1];
             String key = null;
@@ -341,7 +342,8 @@ public final class JSONUtil {
         if (type.clazz().isAssignableFrom(JSONArray.class)) {
             return (T) jsonArray;
         } else if (type.isCollection()) {
-            final Collection<Object> coll = N.newCollection(type.clazz(), len);
+            @SuppressWarnings("rawtypes")
+            final Collection<Object> coll = N.newCollection((Class<Collection>) type.clazz(), len);
             final Type<?> elementType = type.getElementType();
             Object element = null;
 

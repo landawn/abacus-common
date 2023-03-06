@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeException>, java.util.function.BiPredicate<T, U> {
+public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeException>, java.util.function.BiPredicate<T, U> { //NOSONAR
 
     @Override
     boolean test(T t, U u);

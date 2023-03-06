@@ -23,6 +23,7 @@ import java.util.Map;
  * @param <V> the value type
  * @since 1.1.4
  */
+@SuppressWarnings("java:S2160")
 public final class ImmutableBiMap<K, V> extends ImmutableMap<K, V> {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })

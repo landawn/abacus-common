@@ -18,7 +18,6 @@ package com.landawn.abacus.util;
 import static com.landawn.abacus.util.WD._BACKSLASH;
 import static com.landawn.abacus.util.WD._QUOTATION_D;
 import static com.landawn.abacus.util.WD._QUOTATION_S;
-import static java.util.logging.Level.WARNING;
 
 import java.text.Normalizer;
 import java.util.ArrayList;
@@ -35,10 +34,11 @@ import java.util.Random;
 import java.util.RandomAccess;
 import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.logging.Logger;
+import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalChar;
 
@@ -58,6 +58,8 @@ import com.landawn.abacus.util.u.OptionalChar;
  * @see com.landawn.abacus.util.Maps
  */
 public abstract class Strings {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Strings.class);
+
     public static final String ELEMENT_SEPARATOR = ", ".intern();
 
     static final char[] ELEMENT_SEPARATOR_CHAR_ARRAY = ELEMENT_SEPARATOR.toCharArray();
@@ -120,7 +122,7 @@ public abstract class Strings {
      * normalize whitespace, condensing "blocks" down to a single space, thus
      * matching the same would likely cause a great many noop replacements.
      */
-    private static final Pattern WHITESPACE_PATTERN = Pattern.compile("(?: |\\u00A0|\\s|[\\s&&[^ ]])\\s*");
+    private static final Pattern WHITESPACE_PATTERN = Pattern.compile("(?: |\\u00A0|\\s|[\\s&&[^ ]])\\s*");//NOSONAR
 
     private static final Map<Object, Splitter> splitterPool = new HashMap<>();
 
@@ -1374,7 +1376,7 @@ public abstract class Strings {
 
                 if (Character.isUpperCase(ch)) {
                     if (i > 0 && (Character.isLowerCase(str.charAt(i - 1)) || (i < len - 1 && Character.isLowerCase(str.charAt(i + 1))))) {
-                        if (sb.length() > 0 && sb.charAt(sb.length() - 1) != WD._UNDERSCORE) {
+                        if (sb.length() > 0 && sb.charAt(sb.length() - 1) != WD._UNDERSCORE) {//NOSONAR
                             sb.append(WD._UNDERSCORE);
                         }
                     }
@@ -1496,7 +1498,7 @@ public abstract class Strings {
 
                 if (Character.isUpperCase(ch)) {
                     if (i > 0 && (Character.isLowerCase(str.charAt(i - 1)) || (i < len - 1 && Character.isLowerCase(str.charAt(i + 1))))) {
-                        if (sb.length() > 0 && sb.charAt(sb.length() - 1) != WD._UNDERSCORE) {
+                        if (sb.length() > 0 && sb.charAt(sb.length() - 1) != WD._UNDERSCORE) {//NOSONAR
                             sb.append(WD._UNDERSCORE);
                         }
                     }
@@ -4603,7 +4605,7 @@ public abstract class Strings {
 
         if (count == 0) {
             return false;
-        } else if (i == len) {
+        } else if (i == len) { //NOSONAR
             return true;
         } else {
             return false;
@@ -4842,7 +4844,7 @@ public abstract class Strings {
         final int chsLast = chsLen - 1;
         char ch = 0;
 
-        outer: for (int i = fromIndex < 0 ? 0 : fromIndex; i < strLen; i++) {
+        outer: for (int i = fromIndex < 0 ? 0 : fromIndex; i < strLen; i++) {//NOSONAR
             ch = str.charAt(i);
 
             for (int j = 0; j < chsLen; j++) {
@@ -7059,7 +7061,7 @@ public abstract class Strings {
 
                 if (res.size() > 0 && startIndex < res.get(res.size() - 1)._1) {
                     while (res.size() > 0 && startIndex < res.get(res.size() - 1)._1) {
-                        res.remove(res.size() - 1);
+                        res.remove(res.size() - 1);//NOSONAR
                     }
                 }
 
@@ -9782,7 +9784,10 @@ public abstract class Strings {
             // Default toString() behavior - see Object.toString()
             String objectToString = obj.getClass().getName() + '@' + Integer.toHexString(System.identityHashCode(obj));
             // Logger is created inline with fixed name to avoid forcing Proguard to create another class.
-            Logger.getLogger("com.google.common.base.Strings").log(WARNING, "Exception during lenientFormat for " + objectToString, e);
+            // Logger.getLogger("com.google.common.base.Strings").log(WARNING, "Exception during lenientFormat for " + objectToString, e);
+
+            LOGGER.warn("Exception during lenientFormat for " + objectToString, e); //NOSONAR
+
             return "<" + objectToString + " threw " + e.getClass().getName() + ">";
         }
     }

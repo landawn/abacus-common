@@ -20,7 +20,7 @@ package com.landawn.abacus.util.function;
  *
  * @author Haiyang Li
  */
-public interface ToLongBiFunction<T, U> extends java.util.function.ToLongBiFunction<T, U> {
+public interface ToLongBiFunction<T, U> extends java.util.function.ToLongBiFunction<T, U> { //NOSONAR
 
     @Override
     long applyAsLong(T t, U u);

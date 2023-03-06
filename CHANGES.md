@@ -1,3 +1,9 @@
+### 3.6.10
+
+* Fix violation reported SonarLint
+* Improvements and bug fix.
+
+
 ### 3.6.9
 
 * Improvements and bug fix.

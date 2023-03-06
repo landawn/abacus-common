@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, RuntimeException> {
+public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, RuntimeException> { //NOSONAR
 
     @Override
     boolean test(A a, B b, C c);

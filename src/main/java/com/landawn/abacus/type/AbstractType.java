@@ -81,7 +81,7 @@ public abstract class AbstractType<T> implements Type<T> {
     protected AbstractType(String typeName) {
         String simpleName = typeName;
 
-        if (typeName.indexOf('.') > 0) {
+        if (typeName.indexOf('.') > 0) { //NOSONAR
             // generic type.
 
             int index = typeName.indexOf('<');
@@ -101,7 +101,7 @@ public abstract class AbstractType<T> implements Type<T> {
         }
 
         name = simpleName;
-        xmlName = name.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+        xmlName = name.replaceAll("<", "&lt;").replaceAll(">", "&gt;"); //NOSONAR
     }
 
     protected static String[] getTypeParameters(String typeName) {
@@ -752,7 +752,7 @@ public abstract class AbstractType<T> implements Type<T> {
 
         if (obj instanceof AbstractType) {
             final AbstractType<T> another = ((AbstractType<T>) obj);
-            return N.equals(another.name(), this.name()) && another.clazz().equals(this.clazz());
+            return N.equals(another.name(), this.name()) && N.equals(another.declaringName(), this.declaringName()) && another.clazz().equals(this.clazz());
         }
 
         return false;
@@ -803,7 +803,7 @@ public abstract class AbstractType<T> implements Type<T> {
             case 1: {
                 char ch = cbuf[offset];
                 if (ch < '0' || ch > '9') {
-                    throw new NumberFormatException("Invalid numeric String: \"" + ch + "\"");
+                    throw new NumberFormatException("Invalid numeric String: \"" + ch + "\""); //NOSONAR
                 }
 
                 return ch - '0';
@@ -866,7 +866,7 @@ public abstract class AbstractType<T> implements Type<T> {
                     throw new NumberFormatException("Invalid numeric String: \"" + ch + "\"");
                 }
 
-                return ch - '0';
+                return ch - '0'; //NOSONAR
             }
 
             case 2:

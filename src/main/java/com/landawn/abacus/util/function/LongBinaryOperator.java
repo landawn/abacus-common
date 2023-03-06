@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface LongBinaryOperator extends Throwables.LongBinaryOperator<RuntimeException>, java.util.function.LongBinaryOperator {
+public interface LongBinaryOperator extends Throwables.LongBinaryOperator<RuntimeException>, java.util.function.LongBinaryOperator { //NOSONAR
 
     @Override
     long applyAsLong(long left, long right);

@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface LongTernaryOperator extends Throwables.LongTernaryOperator<RuntimeException> {
+public interface LongTernaryOperator extends Throwables.LongTernaryOperator<RuntimeException> { //NOSONAR
 
     @Override
     long applyAsLong(long a, long b, long c);

@@ -29,10 +29,11 @@ import java.util.function.UnaryOperator;
  * @param <E>
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public final class ImmutableList<E> extends ImmutableCollection<E> implements List<E> {
 
     @SuppressWarnings("rawtypes")
-    private static final ImmutableList EMPTY = new ImmutableList(Collections.EMPTY_LIST);
+    private static final ImmutableList EMPTY = new ImmutableList(Collections.emptyList());
 
     private final List<E> list;
 

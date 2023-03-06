@@ -789,7 +789,7 @@ public final class HttpHeaders {
      * @param m
      * @return
      */
-    public HttpHeaders setAll(Map<? extends String, ? extends Object> m) {
+    public HttpHeaders setAll(Map<String, ?> m) {
         map.putAll(m);
 
         return this;

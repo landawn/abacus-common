@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface IntFunction<R> extends Throwables.IntFunction<R, RuntimeException>, java.util.function.IntFunction<R> {
+public interface IntFunction<R> extends Throwables.IntFunction<R, RuntimeException>, java.util.function.IntFunction<R> { //NOSONAR
     IntFunction<Integer> BOX = value -> value;
 
     @Override

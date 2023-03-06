@@ -31,6 +31,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @since 0.8
  */
 @com.landawn.abacus.annotation.Immutable
+@SuppressWarnings("java:S116")
 public abstract class Tuple<TP> implements Immutable {
 
     private static final Tuple0 EMPTY = new Tuple0();
@@ -796,7 +797,7 @@ public abstract class Tuple<TP> implements Immutable {
          * @return
          */
         public Tuple2<T2, T1> reverse() {
-            return of(_2, _1);
+            return of(_2, _1); //NOSONAR
         }
 
         /**

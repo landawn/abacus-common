@@ -27,6 +27,7 @@ import com.landawn.abacus.util.N;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<DoubleList> {
 
     public static final String DOUBLE_LIST = DoubleList.class.getSimpleName();

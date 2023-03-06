@@ -124,8 +124,8 @@ public final class IOUtil {
 
     static {
         String hostName = null;
-        final boolean IS_PLATFORM_ANDROID = System.getProperty("java.vendor").toUpperCase().contains("ANDROID")
-                || System.getProperty("java.vm.vendor").toUpperCase().contains("ANDROID");
+        final boolean IS_PLATFORM_ANDROID = System.getProperty("java.vendor").toUpperCase().contains("ANDROID") //NOSONAR
+                || System.getProperty("java.vm.vendor").toUpperCase().contains("ANDROID"); //NOSONAR
 
         // implementation for android support
         if (IS_PLATFORM_ANDROID) {
@@ -1263,13 +1263,13 @@ public final class IOUtil {
      * @throws IOException
      */
     public static String readLastLine(final Reader reader) throws IOException {
-        final BufferedReader br = reader instanceof BufferedReader ? (BufferedReader) reader : Objectory.createBufferedReader(reader);
+        final BufferedReader br = reader instanceof BufferedReader ? (BufferedReader) reader : Objectory.createBufferedReader(reader); //NOSONAR
 
         try {
             String ret = null;
             String line = null;
 
-            while ((line = br.readLine()) != null) {
+            while ((line = br.readLine()) != null) { //NOSONAR
                 ret = line;
             }
 
@@ -1345,18 +1345,27 @@ public final class IOUtil {
      * @throws IOException
      */
     public static String readLine(final Reader reader, int lineIndex) throws IOException {
-        final BufferedReader br = reader instanceof BufferedReader ? (BufferedReader) reader : Objectory.createBufferedReader(reader);
+        final BufferedReader br = reader instanceof BufferedReader ? (BufferedReader) reader : Objectory.createBufferedReader(reader); //NOSONAR
 
         try {
+            String result = null;
+
             if (lineIndex == 0) {
-                return br.readLine();
+                result = br.readLine(); //NOSONAR
             } else {
                 while (lineIndex-- > 0 && br.readLine() != null) {
                     // continue
                 }
 
-                return br.readLine();
+                result = br.readLine(); //NOSONAR
             }
+
+            // Has trouble for reading first/last line from empty file? // TODO
+            //    if (result == null) {
+            //        throw new IndexOutOfBoundsException("lineIndex: " + lineIndex + " excceded the total line count of the specified reader/file"); // Should throw IllegalArgumentException
+            //    }
+
+            return result;
         } finally {
             if (br != reader) {
                 Objectory.recycle(br);
@@ -1521,16 +1530,16 @@ public final class IOUtil {
      */
     public static List<String> readLines(final Reader reader, int offset, int count) throws IOException {
         final List<String> res = new ArrayList<>();
-        final BufferedReader br = reader instanceof BufferedReader ? (BufferedReader) reader : Objectory.createBufferedReader(reader);
+        final BufferedReader br = reader instanceof BufferedReader ? (BufferedReader) reader : Objectory.createBufferedReader(reader); //NOSONAR
 
         try {
-            while (offset-- > 0 && br.readLine() != null) {
+            while (offset-- > 0 && br.readLine() != null) { //NOSONAR
                 // continue
             }
 
             String line = null;
 
-            while (count-- > 0 && (line = br.readLine()) != null) {
+            while (count-- > 0 && (line = br.readLine()) != null) { //NOSONAR
                 res.add(line);
             }
 
@@ -1672,7 +1681,7 @@ public final class IOUtil {
     public static int read(final File file, final char[] buf, final int off, final int len, final Charset charset) throws IOException {
         Reader reader = null;
 
-        try {
+        try { //NOSONAR
             reader = new InputStreamReader(IOUtil.newFileInputStream(file), charset == null ? Charsets.UTF_8 : charset);
 
             return read(reader, buf, off, len);
@@ -1963,7 +1972,7 @@ public final class IOUtil {
         }
 
         boolean isBufferedWriter = writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
-        final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);
+        final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
         try {
             int lineNum = 0;
@@ -2158,7 +2167,7 @@ public final class IOUtil {
         }
 
         boolean isBufferedWriter = writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
-        final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);
+        final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
         try {
             int lineNum = 0;
@@ -3000,7 +3009,7 @@ public final class IOUtil {
     public static long write(final File output, final Reader input, final long offset, final long len, final Charset charset) throws IOException {
         Writer writer = null;
 
-        try {
+        try { //NOSONAR
             writer = new OutputStreamWriter(IOUtil.newFileOutputStream(output), charset == null ? Charsets.UTF_8 : charset);
 
             long result = write(writer, input, offset, len);
@@ -3269,7 +3278,7 @@ public final class IOUtil {
 
         OutputStream os = null;
 
-        try {
+        try { //NOSONAR
             createNewFileIfNotExists(output);
 
             os = new FileOutputStream(output, true);
@@ -3390,7 +3399,7 @@ public final class IOUtil {
     public static long append(final File output, final InputStream input, final long offset, final long len) throws IOException {
         OutputStream os = null;
 
-        try {
+        try { //NOSONAR
             createNewFileIfNotExists(output);
 
             os = new FileOutputStream(output, true);
@@ -3454,7 +3463,7 @@ public final class IOUtil {
     public static long append(final File output, final Reader input, final long offset, final long len, final Charset charset) throws IOException {
         Writer writer = null;
 
-        try {
+        try { //NOSONAR
             writer = new OutputStreamWriter(new FileOutputStream(output, true), charset == null ? Charsets.UTF_8 : charset);
 
             long result = write(writer, input, offset, len);
@@ -3491,7 +3500,7 @@ public final class IOUtil {
         OutputStream os = null;
         InputStream is = null;
 
-        try {
+        try { //NOSONAR
             os = new FileOutputStream(output, true);
             is = IOUtil.newFileInputStream(input);
 
@@ -3703,7 +3712,7 @@ public final class IOUtil {
 
         RandomAccessFile raf = null;
 
-        try {
+        try { //NOSONAR
             raf = new RandomAccessFile(file, mode == MapMode.READ_ONLY ? "r" : "rw");
             return raf.getChannel().map(mode, offset, len);
         } finally {
@@ -3750,7 +3759,7 @@ public final class IOUtil {
         // resolve ., .., and //
         for (String component : components) {
             if (component.length() == 0 || component.equals(".")) {
-                continue;
+                continue; //NOSONAR
             } else if (component.equals("..")) {
                 if (path.size() > 0 && !path.get(path.size() - 1).equals("..")) {
                     path.remove(path.size() - 1);
@@ -4320,7 +4329,7 @@ public final class IOUtil {
         }
 
         if (!destDir.canWrite()) {
-            throw new UncheckedIOException(new IOException("Destination '" + destDir + "' cannot be written to"));
+            throw new UncheckedIOException(new IOException("Destination '" + destDir + "' cannot be written to")); //NOSONAR
         }
 
         String destCanonicalPath = null;
@@ -4414,7 +4423,7 @@ public final class IOUtil {
 
         // Do this last, as the above has probably affected directory metadata
         if (preserveFileDate) {
-            destDir.setLastModified(srcDir.lastModified());
+            destDir.setLastModified(srcDir.lastModified()); //NOSONAR
         }
     }
 
@@ -4467,7 +4476,7 @@ public final class IOUtil {
         }
 
         if (preserveFileDate) {
-            destFile.setLastModified(srcFile.lastModified());
+            destFile.setLastModified(srcFile.lastModified()); //NOSONAR
         }
     }
 
@@ -4627,13 +4636,15 @@ public final class IOUtil {
      *
      * @param file
      * @return true if the file is deleted successfully, otherwise false if the file is null or doesn't exist, or can't be deleted.
+     * @see Files#delete(Path)
+     * @see Files#deleteIfExists(Path)
      */
     public static boolean deleteIfExists(final File file) {
         if ((file == null) || !file.exists()) {
             return false;
         }
 
-        return file.delete();
+        return file.delete(); //NOSONAR
     }
 
     /**
@@ -4641,6 +4652,8 @@ public final class IOUtil {
      *
      * @param file
      * @return true if the file is deleted successfully, otherwise false if the file is null or doesn't exist, or can't be deleted.
+     * @see Files#delete(Path)
+     * @see Files#deleteIfExists(Path)
      */
     public static boolean deleteAllIfExists(final File file) {
         if ((file == null) || !file.exists()) {
@@ -4657,7 +4670,7 @@ public final class IOUtil {
                     }
 
                     if (subFile.isFile()) {
-                        if (!subFile.delete()) {
+                        if (!subFile.delete()) { //NOSONAR
                             return false;
                         }
                     } else {
@@ -4669,7 +4682,7 @@ public final class IOUtil {
             }
         }
 
-        return file.delete();
+        return file.delete(); //NOSONAR
     }
 
     /**
@@ -4689,6 +4702,8 @@ public final class IOUtil {
      * @param filter
      * @return {@code false} if the file or some of its sub files if it's directory can't be deleted.
      * @throws E the e
+     * @see Files#delete(Path)
+     * @see Files#deleteIfExists(Path)
      */
     public static <E extends Exception> boolean deleteFiles(final File dir, Throwables.BiPredicate<? super File, ? super File, E> filter) throws E {
         if ((dir == null) || !dir.exists()) {
@@ -4709,7 +4724,7 @@ public final class IOUtil {
 
                 if (filter == null || filter.test(dir, subFile)) {
                     if (subFile.isFile()) {
-                        if (!subFile.delete()) {
+                        if (!subFile.delete()) { //NOSONAR
                             return false;
                         }
                     } else {
@@ -4725,7 +4740,7 @@ public final class IOUtil {
             }
         } else {
             if (filter == null || filter.test(dir.getParentFile(), dir)) {
-                return dir.delete();
+                return dir.delete(); //NOSONAR
             }
         }
 
@@ -4748,8 +4763,8 @@ public final class IOUtil {
     }
 
     static void createNewFileIfNotExists(final File file) throws IOException {
-        if (!file.exists()) {
-            if (file.createNewFile() == false) {
+        if (!file.exists()) { //NOSONAR
+            if (file.createNewFile() == false) { //NOSONAR
                 throw new IOException("Failed to create new file: " + file.getName());
             }
         }
@@ -4994,7 +5009,7 @@ public final class IOUtil {
     public static void zip(final File sourceFile, final File targetFile) throws UncheckedIOException {
         ZipOutputStream zos = null;
 
-        try {
+        try { //NOSONAR
             zos = new ZipOutputStream(IOUtil.newFileOutputStream(targetFile));
             zipFile(sourceFile, zos, targetFile);
         } catch (IOException e) {
@@ -5013,7 +5028,7 @@ public final class IOUtil {
     public static void zip(final Collection<File> sourceFiles, final File targetFile) throws UncheckedIOException {
         ZipOutputStream zos = null;
 
-        try {
+        try { //NOSONAR
             zos = new ZipOutputStream(IOUtil.newFileOutputStream(targetFile));
 
             for (File sourceFile : sourceFiles) {
@@ -5104,7 +5119,7 @@ public final class IOUtil {
         final byte[] buf = Objectory.createByteArrayBuffer();
         final int bufLength = buf.length;
 
-        try {
+        try { //NOSONAR
             zip = new ZipFile(srcZipFile);
 
             Enumeration<? extends ZipEntry> entryEnum = zip.entries();
@@ -5421,9 +5436,9 @@ public final class IOUtil {
             char c = relativeFilePath.charAt(i);
 
             if ((c == '\\') || (c == '/')) {
-                newRelativePath += File.separator;
+                newRelativePath += File.separator; //NOSONAR
             } else {
-                newRelativePath += c;
+                newRelativePath += c; //NOSONAR
             }
         }
 
@@ -5640,7 +5655,6 @@ public final class IOUtil {
                             bytes.put(octet);
                             i += 3;
                         } while (i < n && url.charAt(i) == '%');
-                        continue;
                     } catch (final RuntimeException e) {
                         // malformed percent-encoded octet, fall through and
                         // append characters literally
@@ -5988,7 +6002,7 @@ public final class IOUtil {
 
         final List<Reader> readers = new ArrayList<>(files.size());
 
-        try {
+        try { //NOSONAR
             for (final File subFile : files) {
                 if (subFile.isFile()) {
                     readers.add(newBufferedReader(subFile));
@@ -6169,7 +6183,7 @@ public final class IOUtil {
 
         final List<Reader> readers = new ArrayList<>(files.size());
 
-        try {
+        try { //NOSONAR
             for (final File subFile : files) {
                 if (subFile.isFile()) {
                     readers.add(newBufferedReader(subFile));

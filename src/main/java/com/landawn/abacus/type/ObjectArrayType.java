@@ -38,7 +38,7 @@ import com.landawn.abacus.util.WD;
  * @param <T>
  * @since 0.8
  */
-public class ObjectArrayType<T> extends AbstractArrayType<T[]> {
+public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
     protected final Class<T[]> typeClass;
 
@@ -172,7 +172,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> {
             writer.write(NULL_CHAR_ARRAY);
         } else {
             boolean isBufferedWriter = writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
-            final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);
+            final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
             try {
                 bw.write(WD._BRACKET_L);

@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperator<T, RuntimeException>, java.util.function.UnaryOperator<T> {
+public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperator<T, RuntimeException>, java.util.function.UnaryOperator<T> { //NOSONAR
 
     static <T> UnaryOperator<T> identity() {
         return UnaryOperators.identity();

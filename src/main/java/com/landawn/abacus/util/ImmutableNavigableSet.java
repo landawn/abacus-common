@@ -24,7 +24,7 @@ import java.util.TreeSet;
  * @param <E>
  * @since 1.1.4
  */
-public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implements NavigableSet<E> {
+public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implements NavigableSet<E> { //NOSONAR
 
     @SuppressWarnings("rawtypes")
     private static final ImmutableNavigableSet EMPTY = new ImmutableNavigableSet(N.emptyNavigableSet());

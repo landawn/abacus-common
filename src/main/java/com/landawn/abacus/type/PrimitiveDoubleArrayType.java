@@ -30,6 +30,7 @@ import com.landawn.abacus.util.WD;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<double[]> {
 
     public static final String DOUBLE_ARRAY = double[].class.getSimpleName();

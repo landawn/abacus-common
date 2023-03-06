@@ -43,7 +43,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
         }
     };
 
-    public static IntIterator empty() {
+    public static IntIterator empty() {//NOSONAR
         return EMPTY;
     }
 
@@ -430,6 +430,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * For each remaining.
      *
      * @param action
+     * @deprecated
      */
     @Override
     @Deprecated
@@ -443,7 +444,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * @param action
      * @throws E the e
      */
-    public <E extends Exception> void foreachRemaining(Throwables.IntConsumer<E> action) throws E {
+    public <E extends Exception> void foreachRemaining(Throwables.IntConsumer<E> action) throws E {//NOSONAR
         N.checkArgNotNull(action);
 
         while (hasNext()) {

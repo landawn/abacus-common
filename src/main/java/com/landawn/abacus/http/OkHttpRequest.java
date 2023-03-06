@@ -337,13 +337,13 @@ public final class OkHttpRequest {
             return this;
         }
 
-        final FormBody.Builder builder = new FormBody.Builder();
+        final FormBody.Builder formBodyBuilder = new FormBody.Builder();
 
         for (Map.Entry<?, ?> entry : formBodyByMap.entrySet()) {
-            builder.add(N.stringOf(entry.getKey()), N.stringOf(entry.getValue()));
+            formBodyBuilder.add(N.stringOf(entry.getKey()), N.stringOf(entry.getValue()));
         }
 
-        this.body = builder.build();
+        this.body = formBodyBuilder.build();
         return this;
     }
 
@@ -363,13 +363,13 @@ public final class OkHttpRequest {
         N.checkArgument(ClassUtil.isBeanClass(cls), "{} is not a bean class with getter/setter methods", cls);
 
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
-        final FormBody.Builder builder = new FormBody.Builder();
+        final FormBody.Builder formBodyBuilder = new FormBody.Builder();
 
         for (PropInfo propInfo : beanInfo.propInfoList) {
-            builder.add(propInfo.name, N.stringOf(propInfo.getPropValue(formBodyByBean)));
+            formBodyBuilder.add(propInfo.name, N.stringOf(propInfo.getPropValue(formBodyByBean)));
         }
 
-        this.body = builder.build();
+        this.body = formBodyBuilder.build();
         return this;
     }
 

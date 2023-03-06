@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface ByteBiPredicate extends Throwables.ByteBiPredicate<RuntimeException> {
+public interface ByteBiPredicate extends Throwables.ByteBiPredicate<RuntimeException> { //NOSONAR
 
     ByteBiPredicate ALWAYS_TRUE = (t, u) -> true;
 

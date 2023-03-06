@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface IntTernaryOperator extends Throwables.IntTernaryOperator<RuntimeException> {
+public interface IntTernaryOperator extends Throwables.IntTernaryOperator<RuntimeException> { //NOSONAR
 
     @Override
     int applyAsInt(int a, int b, int c);

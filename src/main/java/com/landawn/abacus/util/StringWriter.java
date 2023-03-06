@@ -138,7 +138,8 @@ public final class StringWriter extends Writer {
      * Flush.
      */
     @Override
-    public void flush() {
+    public void flush() { //NOSONAR
+        // Do nothing.
     }
 
     /**
@@ -146,6 +147,7 @@ public final class StringWriter extends Writer {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
-    public void close() throws IOException {
+    public void close() throws IOException { //NOSONAR
+        // Do nothing
     }
 }

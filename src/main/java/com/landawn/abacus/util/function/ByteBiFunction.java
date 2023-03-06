@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface ByteBiFunction<R> extends Throwables.ByteBiFunction<R, RuntimeException> {
+public interface ByteBiFunction<R> extends Throwables.ByteBiFunction<R, RuntimeException> { //NOSONAR
 
     @Override
     R apply(byte t, byte u);

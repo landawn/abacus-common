@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface FloatNFunction<R> extends Throwables.FloatNFunction<R, RuntimeException> {
+public interface FloatNFunction<R> extends Throwables.FloatNFunction<R, RuntimeException> { //NOSONAR
 
     @Override
     R apply(float... args);

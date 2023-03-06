@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface BooleanSupplier extends Throwables.BooleanSupplier<RuntimeException>, java.util.function.BooleanSupplier {
+public interface BooleanSupplier extends Throwables.BooleanSupplier<RuntimeException>, java.util.function.BooleanSupplier { //NOSONAR
 
     BooleanSupplier TRUE = () -> true;
 

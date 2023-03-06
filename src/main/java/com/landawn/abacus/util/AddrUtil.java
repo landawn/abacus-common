@@ -30,7 +30,7 @@ import java.util.List;
 
 public final class AddrUtil {
 
-    private static final String URL_SEPERATOR = "(?:\\s|,)+";
+    private static final String URL_SEPERATOR = "(?:\\s|,)+"; //NOSONAR
 
     private static final Splitter URL_SPLITTER = Splitter.pattern(URL_SEPERATOR).omitEmptyStrings().trimResults();
 

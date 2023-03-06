@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface ToByteFunction<T> extends Throwables.ToByteFunction<T, RuntimeException> {
+public interface ToByteFunction<T> extends Throwables.ToByteFunction<T, RuntimeException> { //NOSONAR
 
     ToByteFunction<Byte> UNBOX = value -> value == null ? 0 : value;
 

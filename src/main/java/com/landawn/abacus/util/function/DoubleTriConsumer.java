@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface DoubleTriConsumer extends Throwables.DoubleTriConsumer<RuntimeException> {
+public interface DoubleTriConsumer extends Throwables.DoubleTriConsumer<RuntimeException> { //NOSONAR
 
     @Override
     void accept(double a, double b, double c);

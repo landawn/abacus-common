@@ -22,6 +22,7 @@ import com.landawn.abacus.util.N;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public class DataSetType extends AbstractType<DataSet> {
 
     public static final String DATA_SET = DataSet.class.getSimpleName();

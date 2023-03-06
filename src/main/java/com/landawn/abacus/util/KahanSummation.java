@@ -26,9 +26,6 @@ public class KahanSummation {
 
     private double simpleSum;
 
-    public KahanSummation() {
-    }
-
     /**
      *
      * @param a

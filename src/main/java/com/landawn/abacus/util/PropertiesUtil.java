@@ -58,6 +58,7 @@ import com.landawn.abacus.type.Type;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings("java:S1192")
 public final class PropertiesUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(PropertiesUtil.class);
@@ -669,7 +670,7 @@ public final class PropertiesUtil {
             Object propValue = null;
             Object listPropvalue;
             Type<Object> type = null;
-            for (Object propName : properties.keySet()) {
+            for (Object propName : properties.keySet()) { //NOSONAR
                 listPropName = propName + "List";
                 elementPropName = propName.toString();
 
@@ -792,7 +793,7 @@ public final class PropertiesUtil {
         DocumentBuilder docBuilder = XMLUtil.createDOMParser(true, true);
         Writer writer = null;
 
-        try {
+        try { //NOSONAR
             Document doc = docBuilder.parse(is);
             Node root = doc.getFirstChild();
 

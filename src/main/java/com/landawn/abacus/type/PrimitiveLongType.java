@@ -19,6 +19,7 @@ package com.landawn.abacus.type;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public final class PrimitiveLongType extends AbstractLongType {
 
     public static final String LONG = long.class.getSimpleName();

@@ -40,6 +40,7 @@ import com.landawn.abacus.util.WD;
  * @param <T>
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> {
 
     private final String declaringName;
@@ -260,7 +261,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
             writer.write(NULL_CHAR_ARRAY);
         } else {
             boolean isBufferedWriter = writer instanceof BufferedWriter || writer instanceof java.io.BufferedWriter;
-            final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer);
+            final Writer bw = isBufferedWriter ? writer : Objectory.createBufferedWriter(writer); //NOSONAR
 
             try {
                 bw.write(WD._BRACKET_L);

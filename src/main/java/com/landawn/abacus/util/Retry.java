@@ -27,6 +27,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  * @param <T>
  * @since 0.8
  */
+@SuppressWarnings("java:S1192")
 public final class Retry<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(Retry.class);

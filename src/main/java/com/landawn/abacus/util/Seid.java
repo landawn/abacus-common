@@ -37,7 +37,7 @@ import com.landawn.abacus.parser.ParserUtil.BeanInfo;
  * @author Haiyang Li
  * @since 0.8
  */
-public class Seid implements EntityId, Cloneable {
+public class Seid implements EntityId {
 
     private static final Comparator<String> keyComparator = Comparators.NATURAL_ORDER;
 
@@ -52,6 +52,10 @@ public class Seid implements EntityId, Cloneable {
         entityName = N.EMPTY_STRING;
     }
 
+    /**
+     * @deprecated
+     * @param entityName
+     */
     @Deprecated
     @Internal
     public Seid(String entityName) {
@@ -409,18 +413,6 @@ public class Seid implements EntityId, Cloneable {
         copy.strValue = strValue;
 
         return copy;
-    }
-
-    /**
-     *
-     * @return
-     * @deprecated for internal use only
-     */
-    @Deprecated
-    @Internal
-    @Override
-    public Seid clone() {
-        return copy();
     }
 
     /**

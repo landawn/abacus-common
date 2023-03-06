@@ -20,7 +20,7 @@ package com.landawn.abacus.pool;
  * @author Haiyang Li
  * @since 0.8
  */
-public abstract class PoolFactory {
+public abstract class PoolFactory { //NOSONAR
 
     private PoolFactory() {
         // singleton

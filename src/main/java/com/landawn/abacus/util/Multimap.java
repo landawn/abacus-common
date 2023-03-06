@@ -1070,7 +1070,7 @@ public class Multimap<K, E, V extends Collection<E>> {
 
         for (Map.Entry<K, V> entry : this.valueMap.entrySet()) {
             if (predicate.test(entry.getKey())) {
-                modified = modified | replaceOne(entry.getValue(), oldValue, newValue);
+                modified = modified | replaceOne(entry.getValue(), oldValue, newValue); //NOSONAR
             }
         }
 
@@ -1092,7 +1092,7 @@ public class Multimap<K, E, V extends Collection<E>> {
 
         for (Map.Entry<K, V> entry : this.valueMap.entrySet()) {
             if (predicate.test(entry.getKey(), entry.getValue())) {
-                modified = modified | replaceOne(entry.getValue(), oldValue, newValue);
+                modified = modified | replaceOne(entry.getValue(), oldValue, newValue); //NOSONAR
             }
         }
 
@@ -1114,7 +1114,7 @@ public class Multimap<K, E, V extends Collection<E>> {
 
         for (Map.Entry<K, V> entry : this.valueMap.entrySet()) {
             if (predicate.test(entry.getKey())) {
-                modified = modified | replaceAll(entry.getValue(), oldValue, newValue);
+                modified = modified | replaceAll(entry.getValue(), oldValue, newValue); //NOSONAR
             }
         }
 
@@ -1136,7 +1136,7 @@ public class Multimap<K, E, V extends Collection<E>> {
 
         for (Map.Entry<K, V> entry : this.valueMap.entrySet()) {
             if (predicate.test(entry.getKey(), entry.getValue())) {
-                modified = modified | replaceAll(entry.getValue(), oldValue, newValue);
+                modified = modified | replaceAll(entry.getValue(), oldValue, newValue); //NOSONAR
             }
         }
 

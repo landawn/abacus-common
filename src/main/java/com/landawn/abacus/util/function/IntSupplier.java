@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface IntSupplier extends Throwables.IntSupplier<RuntimeException>, java.util.function.IntSupplier {
+public interface IntSupplier extends Throwables.IntSupplier<RuntimeException>, java.util.function.IntSupplier { //NOSONAR
 
     IntSupplier ZERO = () -> 0;
 

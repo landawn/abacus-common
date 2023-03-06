@@ -680,7 +680,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @return
      */
     private int batchRemove(IntList c, boolean complement) {
-        final int[] elementData = this.elementData;
+        final int[] elementData = this.elementData;//NOSONAR
 
         int w = 0;
 
@@ -756,7 +756,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
             return;
         }
 
-        final int size = size();
+        final int size = size();//NOSONAR
         final int newSize = size - (toIndex - fromIndex);
 
         if (toIndex < size) {
@@ -782,7 +782,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
             return;
         }
 
-        final int size = this.size;
+        final int size = this.size;//NOSONAR
         final int newSize = size - (toIndex - fromIndex) + replacement.length;
 
         if (elementData.length < newSize) {
@@ -2213,7 +2213,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         final long[] a = new long[size];
 
         for (int i = 0; i < size; i++) {
-            a[i] = elementData[i];
+            a[i] = elementData[i];//NOSONAR
         }
 
         return LongList.of(a);
@@ -2228,7 +2228,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         final float[] a = new float[size];
 
         for (int i = 0; i < size; i++) {
-            a[i] = elementData[i];
+            a[i] = elementData[i];//NOSONAR
         }
 
         return FloatList.of(a);
@@ -2243,7 +2243,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
         final double[] a = new double[size];
 
         for (int i = 0; i < size; i++) {
-            a[i] = elementData[i];
+            a[i] = elementData[i];//NOSONAR
         }
 
         return DoubleList.of(a);

@@ -27,6 +27,7 @@ import com.landawn.abacus.util.N;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongList> {
 
     public static final String LONG_LIST = LongList.class.getSimpleName();

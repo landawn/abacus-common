@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface ToDoubleFunction<T> extends Throwables.ToDoubleFunction<T, RuntimeException>, java.util.function.ToDoubleFunction<T> {
+public interface ToDoubleFunction<T> extends Throwables.ToDoubleFunction<T, RuntimeException>, java.util.function.ToDoubleFunction<T> { //NOSONAR
 
     ToDoubleFunction<Double> UNBOX = value -> value == null ? 0 : value;
 

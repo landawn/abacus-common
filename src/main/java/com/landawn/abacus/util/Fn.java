@@ -184,6 +184,8 @@ import com.landawn.abacus.util.function.UnaryOperator;
  * @author haiyang li
  *
  */
+
+@SuppressWarnings({ "java:S1192", "java:S1221", "java:S1452", "java:S2445" })
 public final class Fn extends Comparators {
 
     private static final Object NONE = new Object();
@@ -466,8 +468,8 @@ public final class Fn extends Comparators {
     @Stateful
     public static <T, R> Function<T, R> memoize(final java.util.function.Function<? super T, ? extends R> func) {
         return new Function<>() {
-            private volatile R resultForNull = (R) NONE;
-            private volatile Map<T, R> resultMap = null;
+            private volatile R resultForNull = (R) NONE; //NOSONAR
+            private volatile Map<T, R> resultMap = null; //NOSONAR
 
             @Override
             public R apply(T t) {
@@ -5301,7 +5303,7 @@ public final class Fn extends Comparators {
         private static final Map<Class<?>, Supplier> collectionSupplierPool = new ConcurrentHashMap<>();
 
         @SuppressWarnings("rawtypes")
-        public static <T> java.util.function.Supplier<? extends Collection<T>> ofCollection(final Class<?> targetClass) {
+        public static <T> java.util.function.Supplier<? extends Collection<T>> ofCollection(final Class<? extends Collection> targetClass) {
             Supplier ret = collectionSupplierPool.get(targetClass);
 
             if (ret == null) {
@@ -5362,7 +5364,7 @@ public final class Fn extends Comparators {
         private static final Map<Class<?>, Supplier> mapSupplierPool = new ConcurrentHashMap<>();
 
         @SuppressWarnings("rawtypes")
-        public static <K, V> Supplier<? extends Map<K, V>> ofMap(final Class<?> targetClass) {
+        public static <K, V> Supplier<? extends Map<K, V>> ofMap(final Class<? extends Map> targetClass) {
             Supplier ret = mapSupplierPool.get(targetClass);
 
             if (ret == null) {
@@ -5410,7 +5412,7 @@ public final class Fn extends Comparators {
             N.checkArgNotNull(supplier, "supplier");
 
             if (N.isBuiltinClass(targetClass)) {
-                throw new IllegalArgumentException("Can't register Supplier with builtin class: " + ClassUtil.getCanonicalClassName(targetClass));
+                throw new IllegalArgumentException("Can't register Supplier with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));
             }
 
             synchronized (collectionSupplierPool) {
@@ -5430,7 +5432,7 @@ public final class Fn extends Comparators {
             N.checkArgNotNull(supplier, "supplier");
 
             if (N.isBuiltinClass(targetClass)) {
-                throw new IllegalArgumentException("Can't register Supplier with builtin class: " + ClassUtil.getCanonicalClassName(targetClass));
+                throw new IllegalArgumentException("Can't register Supplier with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));
             }
 
             synchronized (mapSupplierPool) {
@@ -6160,7 +6162,7 @@ public final class Fn extends Comparators {
         private static final Map<Class<?>, IntFunction> collectionCreatorPool = new ConcurrentHashMap<>();
 
         @SuppressWarnings("rawtypes")
-        public static <T> IntFunction<? extends Collection<T>> ofCollection(final Class<?> targetClass) {
+        public static <T> IntFunction<? extends Collection<T>> ofCollection(final Class<? extends Collection> targetClass) {
             IntFunction ret = collectionCreatorPool.get(targetClass);
 
             if (ret == null) {
@@ -6272,7 +6274,7 @@ public final class Fn extends Comparators {
         private static final Map<Class<?>, IntFunction> mapCreatorPool = new ConcurrentHashMap<>();
 
         @SuppressWarnings("rawtypes")
-        public static <K, V> IntFunction<? extends Map<K, V>> ofMap(final Class<?> targetClass) {
+        public static <K, V> IntFunction<? extends Map<K, V>> ofMap(final Class<? extends Map> targetClass) {
             IntFunction ret = mapCreatorPool.get(targetClass);
 
             if (ret == null) {
@@ -6346,7 +6348,7 @@ public final class Fn extends Comparators {
             N.checkArgNotNull(creator, "creator");
 
             if (N.isBuiltinClass(targetClass)) {
-                throw new IllegalArgumentException("Can't register IntFunction with builtin class: " + ClassUtil.getCanonicalClassName(targetClass));
+                throw new IllegalArgumentException("Can't register IntFunction with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));
             }
 
             synchronized (collectionCreatorPool) {
@@ -6366,7 +6368,7 @@ public final class Fn extends Comparators {
             N.checkArgNotNull(creator, "creator");
 
             if (N.isBuiltinClass(targetClass)) {
-                throw new IllegalArgumentException("Can't register IntFunction with builtin class: " + ClassUtil.getCanonicalClassName(targetClass));
+                throw new IllegalArgumentException("Can't register IntFunction with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));
             }
 
             synchronized (mapCreatorPool) {

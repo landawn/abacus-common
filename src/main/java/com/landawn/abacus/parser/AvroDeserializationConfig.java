@@ -95,7 +95,7 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
         }
 
         if (obj instanceof AvroDeserializationConfig other) {
-            if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(ignoreUnmatchedProperty(), other.ignoreUnmatchedProperty())
+            if (N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(ignoreUnmatchedProperty(), other.ignoreUnmatchedProperty()) //NOSONAR
                     && N.equals(getElementType(), other.getElementType()) && N.equals(getPropTypes(), other.getPropTypes())
                     && N.equals(getMapKeyType(), other.getMapKeyType()) && N.equals(getMapValueType(), other.getMapValueType())
                     && N.equals(schema, other.schema)) {

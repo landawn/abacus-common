@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface ShortBiPredicate extends Throwables.ShortBiPredicate<RuntimeException> {
+public interface ShortBiPredicate extends Throwables.ShortBiPredicate<RuntimeException> { //NOSONAR
 
     ShortBiPredicate ALWAYS_TRUE = (t, u) -> true;
 

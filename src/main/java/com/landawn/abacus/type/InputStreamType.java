@@ -40,6 +40,7 @@ import com.landawn.abacus.util.N;
  * @author Haiyang Li
  * @since 0.8
  */
+@SuppressWarnings("java:S2160")
 public class InputStreamType extends AbstractType<InputStream> {
 
     public static final String INPUT_STREAM = InputStream.class.getSimpleName();
@@ -114,7 +115,7 @@ public class InputStreamType extends AbstractType<InputStream> {
         }
 
         if (bytesConstructor != null) {
-            return (InputStream) ClassUtil.invokeConstructor(bytesConstructor, N.base64Decode(str));
+            return (InputStream) ClassUtil.invokeConstructor(bytesConstructor, N.base64Decode(str)); //NOSONAR
         } else if (streamConstructor != null) {
             return (InputStream) ClassUtil.invokeConstructor(streamConstructor, new ByteArrayInputStream(N.base64Decode(str)));
         } else {

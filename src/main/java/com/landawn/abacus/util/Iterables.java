@@ -1678,7 +1678,7 @@ public final class Iterables {
                     return new ObjIterator<>() {
                         private final Iterator<? extends E> iter1 = set1.iterator();
                         private final Iterator<? extends E> iter2 = set2.iterator();
-                        private final E NONE = (E) N.NULL_MASK;
+                        private final E NONE = (E) N.NULL_MASK; //NOSONAR
                         private E next = NONE;
                         private E tmp = null;
 
@@ -1794,7 +1794,7 @@ public final class Iterables {
                 public ObjIterator<E> iterator() {
                     return new ObjIterator<>() {
                         private final Iterator<E> iter1 = set1.iterator();
-                        private final E NONE = (E) N.NULL_MASK;
+                        private final E NONE = (E) N.NULL_MASK; //NOSONAR
                         private E next = NONE;
                         private E tmp = null;
 
@@ -1888,7 +1888,7 @@ public final class Iterables {
                 public ObjIterator<E> iterator() {
                     return new ObjIterator<>() {
                         private final Iterator<E> iter1 = set1.iterator();
-                        private final E NONE = (E) N.NULL_MASK;
+                        private final E NONE = (E) N.NULL_MASK; //NOSONAR
                         private E next = NONE;
                         private E tmp = null;
 
@@ -1981,7 +1981,7 @@ public final class Iterables {
                     return new ObjIterator<>() {
                         private final Iterator<? extends E> iter1 = set1.iterator();
                         private final Iterator<? extends E> iter2 = set2.iterator();
-                        private final E NONE = (E) N.NULL_MASK;
+                        private final E NONE = (E) N.NULL_MASK; //NOSONAR
                         private E next = NONE;
                         private E tmp = null;
 
@@ -2534,7 +2534,7 @@ public final class Iterables {
      *
      * @param <E>
      */
-    private static final class SubSet<E> extends AbstractSet<E> {
+    private static final class SubSet<E> extends AbstractSet<E> { //NOSONAR
 
         /** The input set. */
         private final ImmutableMap<E, Integer> inputSet;
@@ -2818,13 +2818,13 @@ public final class Iterables {
      *
      * @param <E>
      */
-    private static final class CartesianList<E> extends AbstractList<List<E>> implements RandomAccess {
+    private static final class CartesianList<E> extends AbstractList<List<E>> implements RandomAccess { //NOSONAR
 
         /** The axes. */
-        private final transient Object[][] axes;
+        private final transient Object[][] axes; //NOSONAR
 
         /** The axes size product. */
-        private final transient int[] axesSizeProduct;
+        private final transient int[] axesSizeProduct; //NOSONAR
 
         /**
          * Instantiates a new cartesian list.
@@ -2931,7 +2931,7 @@ public final class Iterables {
      *
      * @param <T>
      */
-    static final class Slice<T> extends ImmutableCollection<T> {
+    static final class Slice<T> extends ImmutableCollection<T> { //NOSONAR
 
         /** The from index. */
         private final int fromIndex;
@@ -3026,7 +3026,7 @@ public final class Iterables {
          */
         @Override
         public int size() {
-            return toIndex - fromIndex;
+            return toIndex - fromIndex; //NOSONAR
         }
 
         /**
@@ -3044,11 +3044,11 @@ public final class Iterables {
             if (fromIndex == 0 && toIndex == coll.size()) {
                 return ObjIterator.of(iter);
             } else if (fromIndex == 0) {
-                return Iterators.limit(iter, toIndex - fromIndex);
+                return Iterators.limit(iter, toIndex - fromIndex); //NOSONAR
             } else if (toIndex == coll.size()) {
                 return Iterators.skip(iter, fromIndex);
             } else {
-                return Iterators.skipAndLimit(iter, fromIndex, toIndex - fromIndex);
+                return Iterators.skipAndLimit(iter, fromIndex, toIndex - fromIndex); //NOSONAR
             }
         }
 

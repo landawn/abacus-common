@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeException>, java.util.function.DoublePredicate {
+public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeException>, java.util.function.DoublePredicate { //NOSONAR
     DoublePredicate ALWAYS_TRUE = value -> true;
 
     DoublePredicate ALWAYS_FALSE = value -> false;
@@ -72,7 +72,7 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
         return predicate;
     }
 
-    static DoublePredicate equal(double targetDouble) {
+    static DoublePredicate equal(double targetDouble) { //NOSONAR
         return value -> value == targetDouble;
     }
 

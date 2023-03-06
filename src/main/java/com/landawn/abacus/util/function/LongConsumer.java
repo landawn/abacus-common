@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface LongConsumer extends Throwables.LongConsumer<RuntimeException>, java.util.function.LongConsumer {
+public interface LongConsumer extends Throwables.LongConsumer<RuntimeException>, java.util.function.LongConsumer { //NOSONAR
 
     @Override
     void accept(long t);

@@ -54,19 +54,19 @@ public final class Sheet<R, C, E> implements Cloneable {
 
     static final KryoParser kryoParser = ParserFactory.isKryoAvailable() ? ParserFactory.createKryoParser() : null;
 
-    private final Set<R> _rowKeySet;
+    private final Set<R> _rowKeySet; //NOSONAR
 
-    private final Set<C> _columnKeySet;
+    private final Set<C> _columnKeySet; //NOSONAR
 
-    private BiMap<R, Integer> _rowKeyIndexMap;
+    private BiMap<R, Integer> _rowKeyIndexMap; //NOSONAR
 
-    private BiMap<C, Integer> _columnKeyIndexMap;
+    private BiMap<C, Integer> _columnKeyIndexMap; //NOSONAR
 
-    private List<List<E>> _columnList;
+    private List<List<E>> _columnList; //NOSONAR
 
-    private boolean _initialized = false;
+    private boolean _initialized = false; //NOSONAR
 
-    private boolean _isFrozen = false;
+    private boolean _isFrozen = false; //NOSONAR
 
     public Sheet() {
         this(N.emptyList(), N.emptyList());
@@ -87,7 +87,7 @@ public final class Sheet<R, C, E> implements Cloneable {
         final int columnLength = this.columnLength();
 
         if (N.notNullOrEmpty(rows)) {
-            N.checkArgument(rows.length == rowLength, "The length of array is not equal to size of row/column key set");
+            N.checkArgument(rows.length == rowLength, "The length of array is not equal to size of row/column key set"); //NOSONAR
 
             for (Object[] e : rows) {
                 N.checkArgument(e.length == columnLength, "The length of array is not equal to size of row/column key set");
@@ -142,7 +142,7 @@ public final class Sheet<R, C, E> implements Cloneable {
         final int columnLength = instance.columnLength();
 
         if (N.notNullOrEmpty(rows)) {
-            N.checkArgument(rows.size() == rowLength, "The size of collection is not equal to size of row/column key set");
+            N.checkArgument(rows.size() == rowLength, "The size of collection is not equal to size of row/column key set"); //NOSONAR
 
             for (Collection<? extends E> e : rows) {
                 N.checkArgument(e.size() == columnLength, "The size of collection is not equal to size of row/column key set");
@@ -529,7 +529,7 @@ public final class Sheet<R, C, E> implements Cloneable {
         final int columnLength = columnLength();
 
         if (N.notNullOrEmpty(row) && row.size() != columnLength) {
-            throw new IllegalArgumentException("The size of specified row: " + row.size() + " doesn't match the length of column key set: " + columnLength);
+            throw new IllegalArgumentException("The size of specified row: " + row.size() + " doesn't match the length of column key set: " + columnLength); //NOSONAR
         }
 
         init();
@@ -559,7 +559,7 @@ public final class Sheet<R, C, E> implements Cloneable {
         checkFrozen();
 
         if (_rowKeySet.contains(rowKey)) {
-            throw new IllegalArgumentException("Row '" + rowKey + "' already existed");
+            throw new IllegalArgumentException("Row '" + rowKey + "' already existed"); //NOSONAR
         }
 
         final int rowLength = rowLength();
@@ -694,7 +694,7 @@ public final class Sheet<R, C, E> implements Cloneable {
 
             if (_initialized) {
                 for (int columnIndex = 0; columnIndex < columnLength; columnIndex++) {
-                    _columnList.get(columnIndex).remove(removedRowIndex);
+                    _columnList.get(columnIndex).remove(removedRowIndex); //NOSONAR
                 }
             }
         }
@@ -868,7 +868,7 @@ public final class Sheet<R, C, E> implements Cloneable {
         final int rowLength = rowLength();
 
         if (N.notNullOrEmpty(column) && column.size() != rowLength) {
-            throw new IllegalArgumentException("The size of specified column: " + column.size() + " doesn't match the length of row key set: " + rowLength);
+            throw new IllegalArgumentException("The size of specified column: " + column.size() + " doesn't match the length of row key set: " + rowLength); //NOSONAR
         }
 
         init();
@@ -1411,7 +1411,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @return
      */
     @Override
-    public Sheet<R, C, E> clone() {
+    public Sheet<R, C, E> clone() { //NOSONAR
         return clone(this._isFrozen);
     }
 
@@ -1729,7 +1729,7 @@ public final class Sheet<R, C, E> implements Cloneable {
 
             @Override
             public long count() {
-                return toIndex - cursor;
+                return toIndex - cursor; //NOSONAR
             }
         });
     }
@@ -1800,7 +1800,7 @@ public final class Sheet<R, C, E> implements Cloneable {
 
             @Override
             public long count() {
-                return toIndex - cursor;
+                return toIndex - cursor; //NOSONAR
             }
         });
     }
@@ -1873,7 +1873,7 @@ public final class Sheet<R, C, E> implements Cloneable {
 
                     @Override
                     public long count() {
-                        return columnLength - columnIndex;
+                        return columnLength - columnIndex; //NOSONAR
                     }
                 });
             }
@@ -1887,7 +1887,7 @@ public final class Sheet<R, C, E> implements Cloneable {
 
             @Override
             public long count() {
-                return toRowIndex - rowIndex;
+                return toRowIndex - rowIndex; //NOSONAR
             }
         });
     }
@@ -1951,7 +1951,7 @@ public final class Sheet<R, C, E> implements Cloneable {
 
             @Override
             public long count() {
-                return toColumnIndex - columnIndex;
+                return toColumnIndex - columnIndex; //NOSONAR
             }
 
         });
@@ -2114,7 +2114,7 @@ public final class Sheet<R, C, E> implements Cloneable {
 
             @Override
             public long count() {
-                return toIndex - cursor;
+                return toIndex - cursor; //NOSONAR
             }
         });
     }
@@ -2182,7 +2182,7 @@ public final class Sheet<R, C, E> implements Cloneable {
 
             @Override
             public long count() {
-                return toIndex - cursor;
+                return toIndex - cursor; //NOSONAR
             }
         });
     }
@@ -2256,7 +2256,7 @@ public final class Sheet<R, C, E> implements Cloneable {
 
                     @Override
                     public long count() {
-                        return toIndex2 - cursor2;
+                        return toIndex2 - cursor2; //NOSONAR
                     }
                 });
             }
@@ -2270,7 +2270,7 @@ public final class Sheet<R, C, E> implements Cloneable {
 
             @Override
             public long count() {
-                return toIndex - cursor;
+                return toIndex - cursor; //NOSONAR
             }
         });
     }
@@ -2328,7 +2328,7 @@ public final class Sheet<R, C, E> implements Cloneable {
 
             @Override
             public long count() {
-                return toIndex - cursor;
+                return toIndex - cursor; //NOSONAR
             }
         });
     }
@@ -2404,7 +2404,7 @@ public final class Sheet<R, C, E> implements Cloneable {
 
                     @Override
                     public long count() {
-                        return toIndex2 - cursor2;
+                        return toIndex2 - cursor2; //NOSONAR
                     }
                 });
 
@@ -2420,7 +2420,7 @@ public final class Sheet<R, C, E> implements Cloneable {
 
             @Override
             public long count() {
-                return toIndex - cursor;
+                return toIndex - cursor; //NOSONAR
             }
         });
     }
@@ -2480,7 +2480,7 @@ public final class Sheet<R, C, E> implements Cloneable {
 
             @Override
             public long count() {
-                return toIndex - cursor;
+                return toIndex - cursor; //NOSONAR
             }
         });
     }

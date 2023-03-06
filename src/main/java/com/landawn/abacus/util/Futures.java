@@ -151,7 +151,7 @@ public final class Futures {
     public static <T, FC extends Collection<? extends Future<? extends T>>, R> ContinuableFuture<R> compose(final FC cfs,
             final Throwables.Function<? super FC, R, Exception> zipFunctionForGet,
             final Throwables.Function<? super Tuple3<FC, Long, TimeUnit>, R, Exception> zipFunctionTimeoutGet) {
-        N.checkArgument(N.notNullOrEmpty(cfs), "'cfs' can't be null or empty");
+        N.checkArgument(N.notNullOrEmpty(cfs), "'cfs' can't be null or empty"); //NOSONAR
         N.checkArgNotNull(zipFunctionForGet);
         N.checkArgNotNull(zipFunctionTimeoutGet);
 
@@ -163,7 +163,7 @@ public final class Futures {
 
                 for (Future<? extends T> future : cfs) {
                     try {
-                        res = res & future.cancel(mayInterruptIfRunning);
+                        res = res & future.cancel(mayInterruptIfRunning); //NOSONAR
                     } catch (RuntimeException e) {
                         if (exception == null) {
                             exception = e;
@@ -442,7 +442,7 @@ public final class Futures {
 
                 for (Future<? extends T> future : cfs) {
                     try {
-                        res = res & future.cancel(mayInterruptIfRunning);
+                        res = res & future.cancel(mayInterruptIfRunning); //NOSONAR
                     } catch (RuntimeException e) {
                         if (exception == null) {
                             exception = e;
@@ -552,7 +552,7 @@ public final class Futures {
 
                 for (Future<? extends T> future : cfs) {
                     try {
-                        res = res & future.cancel(mayInterruptIfRunning);
+                        res = res & future.cancel(mayInterruptIfRunning); //NOSONAR
                     } catch (RuntimeException e) {
                         if (exception == null) {
                             exception = e;
@@ -758,7 +758,7 @@ public final class Futures {
 
         return new ObjIterator<>() {
             private final Set<Future<? extends T>> activeFutures = N.newSetFromMap(new IdentityHashMap<Future<? extends T>, Boolean>());
-            {
+            { //NOSONAR
                 activeFutures.addAll(cfs);
             }
 

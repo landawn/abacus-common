@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface IntConsumer extends Throwables.IntConsumer<RuntimeException>, java.util.function.IntConsumer {
+public interface IntConsumer extends Throwables.IntConsumer<RuntimeException>, java.util.function.IntConsumer { //NOSONAR
 
     @Override
     void accept(int t);

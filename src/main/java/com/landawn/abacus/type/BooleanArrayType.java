@@ -120,7 +120,7 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
                 if (x[i] == null) {
                     writer.write(NULL_CHAR_ARRAY);
                 } else {
-                    writer.write(x[i] ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY);
+                    writer.write(x[i] ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY); //NOSONAR
                 }
             }
 
@@ -150,7 +150,7 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
                 if (x[i] == null) {
                     writer.write(NULL_CHAR_ARRAY);
                 } else {
-                    writer.write(x[i] ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY);
+                    writer.write(x[i] ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY); //NOSONAR
                 }
             }
 

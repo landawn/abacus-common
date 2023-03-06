@@ -6,7 +6,7 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 
-public interface BytePredicate extends Throwables.BytePredicate<RuntimeException> {
+public interface BytePredicate extends Throwables.BytePredicate<RuntimeException> { //NOSONAR
 
     BytePredicate ALWAYS_TRUE = value -> true;
 
@@ -55,7 +55,7 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
         return t -> test(t) || other.test(t);
     }
 
-    static BytePredicate equal(byte targetByte) {
+    static BytePredicate equal(byte targetByte) { //NOSONAR
         return value -> value == targetByte;
     }
 

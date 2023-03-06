@@ -59,7 +59,7 @@ public final class BiMap<K, V> implements Map<K, V> {
 
     final Map<V, K> valueMap;
 
-    private transient BiMap<V, K> inverse;
+    private transient BiMap<V, K> inverse; //NOSONAR
 
     public BiMap() {
         this(DEFAULT_INITIAL_CAPACITY);

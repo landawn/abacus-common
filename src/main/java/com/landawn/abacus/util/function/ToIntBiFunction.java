@@ -20,7 +20,7 @@ package com.landawn.abacus.util.function;
  *
  * @author Haiyang Li
  */
-public interface ToIntBiFunction<T, U> extends java.util.function.ToIntBiFunction<T, U> {
+public interface ToIntBiFunction<T, U> extends java.util.function.ToIntBiFunction<T, U> { //NOSONAR
 
     @Override
     int applyAsInt(T t, U u);

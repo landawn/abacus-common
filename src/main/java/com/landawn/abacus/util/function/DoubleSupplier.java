@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface DoubleSupplier extends Throwables.DoubleSupplier<RuntimeException>, java.util.function.DoubleSupplier {
+public interface DoubleSupplier extends Throwables.DoubleSupplier<RuntimeException>, java.util.function.DoubleSupplier { //NOSONAR
 
     DoubleSupplier ZERO = () -> 0;
 

@@ -66,7 +66,7 @@ public class UncheckedSQLException extends UncheckedException {
     /**
      * Returns the cause of this exception.
      *
-     * @return  the {@code IOException} which is the cause of this exception.
+     * @return  the {@code SQLException} which is the cause of this exception.
      */
     @Override
     public SQLException getCause() {

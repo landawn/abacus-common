@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<RuntimeException> {
+public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<RuntimeException> { //NOSONAR
 
     @Override
     float applyAsFloat(float operand);

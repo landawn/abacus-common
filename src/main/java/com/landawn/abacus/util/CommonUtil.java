@@ -124,6 +124,7 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  * @see com.landawn.abacus.util.Strings
  * @see com.landawn.abacus.util.IOUtil
  */
+@SuppressWarnings("java:S1192")
 class CommonUtil {
     // ... it has to be big enough to make it's safety to add element to
     // ArrayBlockingQueue.
@@ -1014,12 +1015,13 @@ class CommonUtil {
      * @see IntFunctions#ofMap(Class)
      * @see IntFunctions#registerForMap(Class, com.landawn.abacus.util.function.IntFunction)
      */
+    @SuppressWarnings("rawtypes")
     public static <T> T newInstance(final Class<T> cls) {
         if (Modifier.isAbstract(cls.getModifiers())) {
             if (Collection.class.isAssignableFrom(cls)) {
-                return (T) Suppliers.ofCollection(cls).get();
+                return (T) Suppliers.ofCollection((Class<Collection>) cls).get();
             } else if (Map.class.isAssignableFrom(cls)) {
-                return (T) Suppliers.ofMap(cls).get();
+                return (T) Suppliers.ofMap((Class<Map>) cls).get();
             } else {
                 throw new IllegalArgumentException("Can't create instance for abstract class: " + cls);
             }
@@ -1121,7 +1123,8 @@ class CommonUtil {
      * @see Suppliers#ofCollection(Class)
      * @see Suppliers#registerForCollection(Class, com.landawn.abacus.util.function.Supplier)
      */
-    public static <T> Collection<T> newCollection(final Class<?> targetClass) {
+    @SuppressWarnings("rawtypes")
+    public static <T> Collection<T> newCollection(final Class<? extends Collection> targetClass) {
         return Suppliers.<T> ofCollection(targetClass).get();
     }
 
@@ -1134,7 +1137,8 @@ class CommonUtil {
      * @see IntFunctions#ofCollection(Class)
      * @see IntFunctions#registerForCollection(Class, com.landawn.abacus.util.function.IntFunction)
      */
-    public static <T> Collection<T> newCollection(final Class<?> targetClass, final int size) {
+    @SuppressWarnings("rawtypes")
+    public static <T> Collection<T> newCollection(final Class<? extends Collection> targetClass, final int size) {
         return IntFunctions.<T> ofCollection(targetClass).apply(size);
     }
 
@@ -1147,7 +1151,8 @@ class CommonUtil {
      * @see Suppliers#ofMap(Class)
      * @see Suppliers#registerForMap(Class, com.landawn.abacus.util.function.Supplier)
      */
-    public static <K, V> Map<K, V> newMap(final Class<?> targetClass) {
+    @SuppressWarnings("rawtypes")
+    public static <K, V> Map<K, V> newMap(final Class<? extends Map> targetClass) {
         return Suppliers.<K, V> ofMap(targetClass).get();
     }
 
@@ -1161,7 +1166,8 @@ class CommonUtil {
      * @see IntFunctions#ofMap(Class)
      * @see IntFunctions#registerForMap(Class, com.landawn.abacus.util.function.IntFunction)
      */
-    public static <K, V> Map<K, V> newMap(final Class<?> targetClass, final int size) {
+    @SuppressWarnings("rawtypes")
+    public static <K, V> Map<K, V> newMap(final Class<? extends Map> targetClass, final int size) {
         return IntFunctions.<K, V> ofMap(targetClass).apply(size);
     }
 
@@ -1243,7 +1249,7 @@ class CommonUtil {
      * @param <T>
      * @return
      */
-    public static <T> ArrayList<T> newArrayList() {
+    public static <T> ArrayList<T> newArrayList() { //NOSONAR
         return new ArrayList<>();
     }
 
@@ -1254,7 +1260,7 @@ class CommonUtil {
      * @param initialCapacity
      * @return
      */
-    public static <T> ArrayList<T> newArrayList(int initialCapacity) {
+    public static <T> ArrayList<T> newArrayList(int initialCapacity) { //NOSONAR
         return new ArrayList<>(initialCapacity);
     }
 
@@ -1265,7 +1271,7 @@ class CommonUtil {
      * @param c
      * @return
      */
-    public static <T> ArrayList<T> newArrayList(Collection<? extends T> c) {
+    public static <T> ArrayList<T> newArrayList(Collection<? extends T> c) { //NOSONAR
         return isNullOrEmpty(c) ? new ArrayList<>() : new ArrayList<>(c);
     }
 
@@ -1275,7 +1281,7 @@ class CommonUtil {
      * @param <T>
      * @return
      */
-    public static <T> LinkedList<T> newLinkedList() {
+    public static <T> LinkedList<T> newLinkedList() { //NOSONAR
         return new LinkedList<>();
     }
 
@@ -1286,7 +1292,7 @@ class CommonUtil {
      * @param c
      * @return
      */
-    public static <T> LinkedList<T> newLinkedList(Collection<? extends T> c) {
+    public static <T> LinkedList<T> newLinkedList(Collection<? extends T> c) { //NOSONAR
         return isNullOrEmpty(c) ? new LinkedList<>() : new LinkedList<>(c);
     }
 
@@ -1360,7 +1366,7 @@ class CommonUtil {
      * @param <T>
      * @return
      */
-    public static <T extends Comparable<? super T>> TreeSet<T> newTreeSet() {
+    public static <T extends Comparable<? super T>> TreeSet<T> newTreeSet() { //NOSONAR
         return new TreeSet<>();
     }
 
@@ -1371,7 +1377,7 @@ class CommonUtil {
      * @param comparator
      * @return
      */
-    public static <T> TreeSet<T> newTreeSet(Comparator<? super T> comparator) {
+    public static <T> TreeSet<T> newTreeSet(Comparator<? super T> comparator) { //NOSONAR
         return new TreeSet<>(comparator);
     }
 
@@ -1382,7 +1388,7 @@ class CommonUtil {
      * @param c
      * @return
      */
-    public static <T extends Comparable<? super T>> TreeSet<T> newTreeSet(Collection<? extends T> c) {
+    public static <T extends Comparable<? super T>> TreeSet<T> newTreeSet(Collection<? extends T> c) { //NOSONAR
         return isNullOrEmpty(c) ? new TreeSet<>() : new TreeSet<>(c);
     }
 
@@ -1393,7 +1399,7 @@ class CommonUtil {
      * @param c
      * @return
      */
-    public static <T> TreeSet<T> newTreeSet(SortedSet<T> c) {
+    public static <T> TreeSet<T> newTreeSet(SortedSet<T> c) { //NOSONAR
         return isNullOrEmpty(c) ? new TreeSet<>() : new TreeSet<>(c);
     }
 
@@ -1503,7 +1509,7 @@ class CommonUtil {
      * @param <T>
      * @return
      */
-    public static <T> ArrayDeque<T> newArrayDeque() {
+    public static <T> ArrayDeque<T> newArrayDeque() { //NOSONAR
         return new ArrayDeque<>();
     }
 
@@ -1514,7 +1520,7 @@ class CommonUtil {
      * @param numElements lower bound on initial capacity of the deque.
      * @return
      */
-    public static <T> ArrayDeque<T> newArrayDeque(int numElements) {
+    public static <T> ArrayDeque<T> newArrayDeque(int numElements) { //NOSONAR
         return new ArrayDeque<>(numElements);
     }
 
@@ -1525,7 +1531,7 @@ class CommonUtil {
      * @param c
      * @return
      */
-    public static <E> ArrayDeque<E> newArrayDeque(Collection<? extends E> c) {
+    public static <E> ArrayDeque<E> newArrayDeque(Collection<? extends E> c) { //NOSONAR
         return new ArrayDeque<>(c);
     }
 
@@ -1687,7 +1693,7 @@ class CommonUtil {
      * @param <V> the value type
      * @return
      */
-    public static <K extends Comparable<? super K>, V> TreeMap<K, V> newTreeMap() {
+    public static <K extends Comparable<? super K>, V> TreeMap<K, V> newTreeMap() { //NOSONAR
         return new TreeMap<>();
     }
 
@@ -1700,7 +1706,7 @@ class CommonUtil {
      * @param comparator
      * @return
      */
-    public static <C, K extends C, V> TreeMap<K, V> newTreeMap(Comparator<C> comparator) {
+    public static <C, K extends C, V> TreeMap<K, V> newTreeMap(Comparator<C> comparator) { //NOSONAR
         return new TreeMap<>(comparator);
     }
 
@@ -1712,7 +1718,7 @@ class CommonUtil {
      * @param m
      * @return
      */
-    public static <K extends Comparable<? super K>, V> TreeMap<K, V> newTreeMap(Map<? extends K, ? extends V> m) {
+    public static <K extends Comparable<? super K>, V> TreeMap<K, V> newTreeMap(Map<? extends K, ? extends V> m) { //NOSONAR
         return isNullOrEmpty(m) ? new TreeMap<>() : new TreeMap<>(m);
     }
 
@@ -1724,7 +1730,7 @@ class CommonUtil {
      * @param m
      * @return
      */
-    public static <K, V> TreeMap<K, V> newTreeMap(SortedMap<K, ? extends V> m) {
+    public static <K, V> TreeMap<K, V> newTreeMap(SortedMap<K, ? extends V> m) { //NOSONAR
         return isNullOrEmpty(m) ? new TreeMap<>() : new TreeMap<>(m);
     }
 
@@ -1735,7 +1741,7 @@ class CommonUtil {
      * @param <V> the value type
      * @return
      */
-    public static <K, V> IdentityHashMap<K, V> newIdentityHashMap() {
+    public static <K, V> IdentityHashMap<K, V> newIdentityHashMap() { //NOSONAR
         return new IdentityHashMap<>();
     }
 
@@ -1747,7 +1753,7 @@ class CommonUtil {
      * @param initialCapacity
      * @return
      */
-    public static <K, V> IdentityHashMap<K, V> newIdentityHashMap(int initialCapacity) {
+    public static <K, V> IdentityHashMap<K, V> newIdentityHashMap(int initialCapacity) { //NOSONAR
         return new IdentityHashMap<>(N.initHashCapacity(initialCapacity));
     }
 
@@ -1759,7 +1765,7 @@ class CommonUtil {
      * @param m
      * @return
      */
-    public static <K, V> IdentityHashMap<K, V> newIdentityHashMap(Map<? extends K, ? extends V> m) {
+    public static <K, V> IdentityHashMap<K, V> newIdentityHashMap(Map<? extends K, ? extends V> m) { //NOSONAR
         return isNullOrEmpty(m) ? new IdentityHashMap<>() : new IdentityHashMap<>(m);
     }
 
@@ -1770,7 +1776,7 @@ class CommonUtil {
      * @param <V> the value type
      * @return
      */
-    public static <K, V> ConcurrentHashMap<K, V> newConcurrentHashMap() {
+    public static <K, V> ConcurrentHashMap<K, V> newConcurrentHashMap() { //NOSONAR
         return new ConcurrentHashMap<>();
     }
 
@@ -1782,7 +1788,7 @@ class CommonUtil {
      * @param initialCapacity
      * @return
      */
-    public static <K, V> ConcurrentHashMap<K, V> newConcurrentHashMap(int initialCapacity) {
+    public static <K, V> ConcurrentHashMap<K, V> newConcurrentHashMap(int initialCapacity) { //NOSONAR
         return new ConcurrentHashMap<>(N.initHashCapacity(initialCapacity));
     }
 
@@ -1794,7 +1800,7 @@ class CommonUtil {
      * @param m
      * @return
      */
-    public static <K, V> ConcurrentHashMap<K, V> newConcurrentHashMap(Map<? extends K, ? extends V> m) {
+    public static <K, V> ConcurrentHashMap<K, V> newConcurrentHashMap(Map<? extends K, ? extends V> m) { //NOSONAR
         return isNullOrEmpty(m) ? new ConcurrentHashMap<>() : new ConcurrentHashMap<>(m);
     }
 
@@ -3201,7 +3207,7 @@ class CommonUtil {
             final int[] result = new int[len];
 
             for (int i = 0; i < len; i++) {
-                result[i] = a[i];
+                result[i] = a[i]; //NOSONAR
             }
 
             return result;
@@ -3762,7 +3768,7 @@ class CommonUtil {
         final List<T> result = new ArrayList<>(toIndex - fromIndex);
 
         for (int i = fromIndex; i < toIndex; i++) {
-            result.add(a[i]);
+            result.add(a[i]); //NOSONAR
         }
 
         return result;
@@ -4070,7 +4076,7 @@ class CommonUtil {
         final Set<T> result = newHashSet(toIndex - fromIndex);
 
         for (int i = fromIndex; i < toIndex; i++) {
-            result.add(a[i]);
+            result.add(a[i]); //NOSONAR
         }
 
         return result;
@@ -4423,7 +4429,7 @@ class CommonUtil {
             final C result = supplier.apply(toIndex - fromIndex);
 
             for (int i = fromIndex; i < toIndex; i++) {
-                result.add(a[i]);
+                result.add(a[i]); //NOSONAR
             }
 
             return result;
@@ -5171,7 +5177,7 @@ class CommonUtil {
      * @param e
      * @return
      */
-    public static <T> LinkedList<T> asLinkedList(final T e) {
+    public static <T> LinkedList<T> asLinkedList(final T e) { //NOSONAR
         final LinkedList<T> list = new LinkedList<>();
         list.add(e);
         return list;
@@ -5185,7 +5191,7 @@ class CommonUtil {
      * @param e2
      * @return
      */
-    public static <T> LinkedList<T> asLinkedList(final T e1, final T e2) {
+    public static <T> LinkedList<T> asLinkedList(final T e1, final T e2) { //NOSONAR
         final LinkedList<T> list = new LinkedList<>();
         list.add(e1);
         list.add(e2);
@@ -5201,7 +5207,7 @@ class CommonUtil {
      * @param e3
      * @return
      */
-    public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3) {
+    public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3) { //NOSONAR
         final LinkedList<T> list = new LinkedList<>();
         list.add(e1);
         list.add(e2);
@@ -5219,7 +5225,7 @@ class CommonUtil {
      * @param e4
      * @return
      */
-    public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4) {
+    public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4) { //NOSONAR
         final LinkedList<T> list = new LinkedList<>();
         list.add(e1);
         list.add(e2);
@@ -5239,7 +5245,7 @@ class CommonUtil {
      * @param e5
      * @return
      */
-    public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4, final T e5) {
+    public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4, final T e5) { //NOSONAR
         final LinkedList<T> list = new LinkedList<>();
         list.add(e1);
         list.add(e2);
@@ -5261,7 +5267,7 @@ class CommonUtil {
      * @param e6
      * @return
      */
-    public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
+    public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) { //NOSONAR
         final LinkedList<T> list = new LinkedList<>();
         list.add(e1);
         list.add(e2);
@@ -5285,7 +5291,7 @@ class CommonUtil {
      * @param e7
      * @return
      */
-    public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) {
+    public static <T> LinkedList<T> asLinkedList(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) { //NOSONAR
         final LinkedList<T> list = new LinkedList<>();
         list.add(e1);
         list.add(e2);
@@ -5306,7 +5312,7 @@ class CommonUtil {
      */
     @SafeVarargs
     @NullSafe
-    public static <T> LinkedList<T> asLinkedList(final T... a) {
+    public static <T> LinkedList<T> asLinkedList(final T... a) { //NOSONAR
         if (isNullOrEmpty(a)) {
             return new LinkedList<>();
         }
@@ -5772,7 +5778,7 @@ class CommonUtil {
      * @return
      */
     @SafeVarargs
-    public static <T> ConcurrentLinkedQueue<T> asConcurrentLinkedQueue(final T... a) {
+    public static <T> ConcurrentLinkedQueue<T> asConcurrentLinkedQueue(final T... a) { //NOSONAR
         if (isNullOrEmpty(a)) {
             return new ConcurrentLinkedQueue<>();
         }
@@ -5843,7 +5849,7 @@ class CommonUtil {
      * @return
      */
     @SafeVarargs
-    public static <T> ArrayDeque<T> asArrayDeque(final T... a) {
+    public static <T> ArrayDeque<T> asArrayDeque(final T... a) { //NOSONAR
         if (isNullOrEmpty(a)) {
             return new ArrayDeque<>();
         }
@@ -5883,7 +5889,7 @@ class CommonUtil {
      * @return
      */
     @SafeVarargs
-    public static <T> ConcurrentLinkedDeque<T> asConcurrentLinkedDeque(final T... a) {
+    public static <T> ConcurrentLinkedDeque<T> asConcurrentLinkedDeque(final T... a) { //NOSONAR
         if (isNullOrEmpty(a)) {
             return new ConcurrentLinkedDeque<>();
         }
@@ -5996,11 +6002,7 @@ class CommonUtil {
 
         final String pkgName = pkg.getName();
 
-        if (notNullOrEmpty(pkgName) && (pkgName.startsWith("java.") || pkgName.startsWith("com.landawn.abaus."))) {
-            return true;
-        }
-
-        return false;
+        return notNullOrEmpty(pkgName) && (pkgName.startsWith("java.") || pkgName.startsWith("com.landawn.abaus."));
     }
 
     /**
@@ -6074,20 +6076,20 @@ class CommonUtil {
             if (srcType.isBean() && targetType.getParameterTypes()[0].clazz().isAssignableFrom(String.class)
                     && Object.class.equals(targetType.getParameterTypes()[1].clazz())) {
                 try {
-                    return (T) Maps.bean2Map(N.<String, Object> newMap(targetType.clazz()), obj);
+                    return (T) Maps.bean2Map(N.<String, Object> newMap((Class<Map>) targetType.clazz()), obj);
                 } catch (Exception e) {
                     // ignore.
                 }
             } else if (srcType.isMap() && Object.class.equals(targetType.getParameterTypes()[0].clazz())
                     && Object.class.equals(targetType.getParameterTypes()[1].clazz())) {
-                final Map result = N.newMap(targetType.clazz());
+                final Map result = N.newMap((Class<Map>) targetType.clazz());
                 result.putAll((Map) obj);
                 return (T) result;
             }
         }
 
         if (targetType.isCollection() && (srcType.isCollection() && Object.class.equals(targetType.getParameterTypes()[0].clazz()))) {
-            final Collection result = N.newCollection(targetType.clazz());
+            final Collection result = N.newCollection((Class<Collection>) targetType.clazz());
             result.addAll((Collection) obj);
             return (T) result;
         }
@@ -6095,7 +6097,7 @@ class CommonUtil {
         if (targetType.isNumber() && srcType.isNumber()) {
             return (T) Numbers.convert((Number) obj, (Type) targetType);
         } else if ((targetType.clazz().equals(int.class) || targetType.clazz().equals(Integer.class)) && srcType.clazz().equals(Character.class)) {
-            return (T) (Integer.valueOf(((Character) obj).charValue()));
+            return (T) (Integer.valueOf(((Character) obj).charValue())); //NOSONAR
         } else if ((targetType.clazz().equals(char.class) || targetType.clazz().equals(Character.class)) && srcType.clazz().equals(Integer.class)) {
             return (T) (Character.valueOf((char) ((Integer) obj).intValue()));
         } else if (targetType.clazz().equals(byte[].class) && srcType.clazz().equals(Blob.class)) {
@@ -6109,7 +6111,7 @@ class CommonUtil {
                 try {
                     blob.free();
                 } catch (SQLException e) {
-                    throw new UncheckedSQLException(e);
+                    throw new UncheckedSQLException(e); //NOSONAR
                 }
             }
         } else if (targetType.clazz().equals(char[].class) && srcType.clazz().equals(Clob.class)) {
@@ -6123,7 +6125,7 @@ class CommonUtil {
                 try {
                     clob.free();
                 } catch (SQLException e) {
-                    throw new UncheckedSQLException(e);
+                    throw new UncheckedSQLException(e); //NOSONAR
                 }
             }
         } else if (targetType.clazz().equals(String.class) && srcType.clazz().equals(Clob.class)) {
@@ -6137,7 +6139,7 @@ class CommonUtil {
                 try {
                     clob.free();
                 } catch (SQLException e) {
-                    throw new UncheckedSQLException(e);
+                    throw new UncheckedSQLException(e); //NOSONAR
                 }
             }
         }
@@ -6963,8 +6965,8 @@ class CommonUtil {
                 targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
 
                 if (targetPropInfo == null) {
-                    if (!ignoreUnmatchedProperty) {
-                        throw new IllegalArgumentException("No property found by name: " + propName + " in target bean class: " + targetBean.getClass());
+                    if (!ignoreUnmatchedProperty) { //NOSONAR
+                        throw new IllegalArgumentException("No property found by name: " + propName + " in target bean class: " + targetBean.getClass()); //NOSONAR
                     }
                 } else {
                     propValue = srcBeanInfo.getPropValue(sourceBean, propName);
@@ -9877,7 +9879,7 @@ class CommonUtil {
      */
     private static boolean isNullErrorMsg(final String msg) {
         // shortest message: "it is null"
-        return msg.length() > 9 && msg.indexOf(WD._SPACE) > 0;
+        return msg.length() > 9 && msg.indexOf(WD._SPACE) > 0; //NOSONAR
     }
 
     /**
@@ -10340,7 +10342,7 @@ class CommonUtil {
     public static <T extends CharSequence> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
         if (isNullOrEmpty(arg)) {
             if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty"); //NOSONAR
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
             }
@@ -10651,7 +10653,7 @@ class CommonUtil {
     public static int checkArgNotNegative(final int arg, final String argNameOrErrorMsg) {
         if (arg < 0) {
             if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg);
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg); //NOSONAR
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
             }
@@ -11565,6 +11567,7 @@ class CommonUtil {
      * @param b3
      * @return
      */
+    @SuppressWarnings("java:S1871")
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>> int compare(T1 a1, T1 b1, T2 a2, T2 b2, T3 a3, T3 b3) {
         int res = 0;
 
@@ -11598,6 +11601,7 @@ class CommonUtil {
      * @see Builder#compare(Comparable, Comparable)
      */
     @Deprecated
+    @SuppressWarnings("java:S1871")
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>> int compare(T1 a1, T1 b1, T2 a2,
             T2 b2, T3 a3, T3 b3, T4 a4, T4 b4) {
         int res = 0;
@@ -11637,6 +11641,7 @@ class CommonUtil {
      * @see Builder#compare(Comparable, Comparable)
      */
     @Deprecated
+    @SuppressWarnings("java:S1871")
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>, T5 extends Comparable<T5>> int compare(
             T1 a1, T1 b1, T2 a2, T2 b2, T3 a3, T3 b3, T4 a4, T4 b4, T5 a5, T5 b5) {
         int res = 0;
@@ -11681,6 +11686,7 @@ class CommonUtil {
      * @see Builder#compare(Comparable, Comparable)
      */
     @Deprecated
+    @SuppressWarnings("java:S1871")
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>, T5 extends Comparable<T5>, T6 extends Comparable<T6>> int compare(
             T1 a1, T1 b1, T2 a2, T2 b2, T3 a3, T3 b3, T4 a4, T4 b4, T5 a5, T5 b5, T6 a6, T6 b6) {
         int res = 0;
@@ -11730,6 +11736,7 @@ class CommonUtil {
      * @see Builder#compare(Comparable, Comparable)
      */
     @Deprecated
+    @SuppressWarnings("java:S1871")
     public static <T1 extends Comparable<T1>, T2 extends Comparable<T2>, T3 extends Comparable<T3>, T4 extends Comparable<T4>, T5 extends Comparable<T5>, T6 extends Comparable<T6>, T7 extends Comparable<T7>> int compare(
             T1 a1, T1 b1, T2 a2, T2 b2, T3 a3, T3 b3, T4 a4, T4 b4, T5 a5, T5 b5, T6 a6, T6 b6, T7 a7, T7 b7) {
         int res = 0;
@@ -14754,7 +14761,7 @@ class CommonUtil {
             return;
         }
 
-        long tmp = 0L;
+        long tmp = 0L; //NOSONAR
 
         for (int i = fromIndex, j = toIndex - 1; i < j; i++, j--) {
             tmp = a[i];
@@ -14794,7 +14801,7 @@ class CommonUtil {
             return;
         }
 
-        float tmp = 0f;
+        float tmp = 0f; //NOSONAR
 
         for (int i = fromIndex, j = toIndex - 1; i < j; i++, j--) {
             tmp = a[i];
@@ -14834,7 +14841,7 @@ class CommonUtil {
             return;
         }
 
-        double tmp = 0d;
+        double tmp = 0d; //NOSONAR
 
         for (int i = fromIndex, j = toIndex - 1; i < j; i++, j--) {
             tmp = a[i];
@@ -21790,7 +21797,7 @@ class CommonUtil {
          *
          * @return
          */
-        private Object readResolve() {
+        protected Object readResolve() {
             return NULL_MASK;
         }
     }

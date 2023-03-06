@@ -589,7 +589,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @return
      */
     private int batchRemove(FloatList c, boolean complement) {
-        final float[] elementData = this.elementData;
+        final float[] elementData = this.elementData;//NOSONAR
 
         int w = 0;
 
@@ -666,7 +666,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
             return;
         }
 
-        final int size = size();
+        final int size = size();//NOSONAR
         final int newSize = size - (toIndex - fromIndex);
 
         if (toIndex < size) {
@@ -692,7 +692,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
             return;
         }
 
-        final int size = this.size;
+        final int size = this.size;//NOSONAR
         final int newSize = size - (toIndex - fromIndex) + replacement.length;
 
         if (elementData.length < newSize) {
@@ -2094,7 +2094,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
         final double[] a = new double[size];
 
         for (int i = 0; i < size; i++) {
-            a[i] = elementData[i];
+            a[i] = elementData[i];//NOSONAR
         }
 
         return DoubleList.of(a);

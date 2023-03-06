@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface IntBinaryOperator extends Throwables.IntBinaryOperator<RuntimeException>, java.util.function.IntBinaryOperator {
+public interface IntBinaryOperator extends Throwables.IntBinaryOperator<RuntimeException>, java.util.function.IntBinaryOperator { //NOSONAR
 
     @Override
     int applyAsInt(int left, int right);

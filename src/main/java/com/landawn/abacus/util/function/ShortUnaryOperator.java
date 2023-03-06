@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<RuntimeException> {
+public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<RuntimeException> { //NOSONAR
 
     @Override
     short applyAsShort(short operand);

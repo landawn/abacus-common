@@ -22,7 +22,7 @@ import com.landawn.abacus.util.Throwables;
  * @author Haiyang Li
  *
  */
-public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, B, C, D, R, RuntimeException> {
+public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, B, C, D, R, RuntimeException> { //NOSONAR
 
     @Override
     R apply(A a, B b, C c, D d);

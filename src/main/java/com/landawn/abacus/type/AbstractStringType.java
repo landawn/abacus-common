@@ -117,7 +117,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
                 try {
                     clob.free();
                 } catch (SQLException e) {
-                    throw new UncheckedSQLException(e);
+                    throw new UncheckedSQLException(e); //NOSONAR
                 }
             }
         } else {

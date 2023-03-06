@@ -633,7 +633,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return
      */
     private int batchRemove(ByteList c, boolean complement) {
-        final byte[] elementData = this.elementData;
+        final byte[] elementData = this.elementData;//NOSONAR
 
         int w = 0;
 
@@ -709,7 +709,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
             return;
         }
 
-        final int size = size();
+        final int size = size();//NOSONAR
         final int newSize = size - (toIndex - fromIndex);
 
         if (toIndex < size) {
@@ -735,7 +735,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
             return;
         }
 
-        final int size = this.size;
+        final int size = this.size;//NOSONAR
         final int newSize = size - (toIndex - fromIndex) + replacement.length;
 
         if (elementData.length < newSize) {
@@ -2091,7 +2091,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         final int[] a = new int[size];
 
         for (int i = 0; i < size; i++) {
-            a[i] = elementData[i];
+            a[i] = elementData[i]; //NOSONAR
         }
 
         return IntList.of(a);

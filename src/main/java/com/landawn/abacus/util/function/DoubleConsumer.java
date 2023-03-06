@@ -24,7 +24,7 @@ import com.landawn.abacus.util.Throwables;
  * @author Haiyang Li
  */
 
-public interface DoubleConsumer extends Throwables.DoubleConsumer<RuntimeException>, java.util.function.DoubleConsumer {
+public interface DoubleConsumer extends Throwables.DoubleConsumer<RuntimeException>, java.util.function.DoubleConsumer { //NOSONAR
 
     @Override
     void accept(double t);

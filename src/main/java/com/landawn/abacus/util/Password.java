@@ -27,13 +27,13 @@ public final class Password {
 
     private final String algorithm;
 
-    private final MessageDigest MD;
+    private final MessageDigest msgDigest;
 
     public Password(String algorithm) {
         this.algorithm = algorithm;
 
         try {
-            MD = MessageDigest.getInstance(algorithm);
+            this.msgDigest = MessageDigest.getInstance(algorithm);
         } catch (NoSuchAlgorithmException e) {
             throw ExceptionUtil.toRuntimeException(e);
         }
@@ -60,9 +60,9 @@ public final class Password {
         }
 
         try {
-            return N.base64Encode(MD.digest(x.getBytes()));
+            return N.base64Encode(msgDigest.digest(x.getBytes()));
         } finally {
-            MD.reset();
+            msgDigest.reset();
         }
     }
 
