@@ -4655,6 +4655,9 @@ public final class Fn extends Comparators {
         /** The Constant EMPTY_OBJECT_ARRAY. */
         private static final Supplier<Object[]> EMPTY_OBJECT_ARRAY = () -> N.EMPTY_OBJECT_ARRAY;
 
+        /** The Constant EMPTY_STRING. */
+        private static final Supplier<String> EMPTY_STRING = () -> N.EMPTY_STRING;
+
         /** The Constant BOOLEAN_LIST. */
         private static final Supplier<BooleanList> BOOLEAN_LIST = BooleanList::new;
 
@@ -4896,6 +4899,15 @@ public final class Fn extends Comparators {
          */
         public static Supplier<Object[]> ofEmptyObjectArray() {
             return EMPTY_OBJECT_ARRAY;
+        }
+
+        /**
+         * Of empty String.
+         *
+         * @return
+         */
+        public static Supplier<String> ofEmptyString() {
+            return EMPTY_STRING;
         }
 
         /**

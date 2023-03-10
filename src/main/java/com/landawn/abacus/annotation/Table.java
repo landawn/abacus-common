@@ -34,4 +34,6 @@ public @interface Table {
     String value() default "";
 
     String name() default "";
+
+    String alias() default "";
 }

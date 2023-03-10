@@ -6483,7 +6483,7 @@ class CommonUtil {
      * @return
      */
     public static Map<String, String> urlDecode(final String urlQuery, final Charset charset) {
-        if (isNullErrorMsg(urlQuery)) {
+        if (isNullOrEmpty(urlQuery)) {
             return N.newLinkedHashMap();
         }
 
@@ -6498,7 +6498,7 @@ class CommonUtil {
      * @return
      */
     public static <T> T urlDecode(final String urlQuery, final Class<? extends T> targetClass) {
-        if (isNullErrorMsg(urlQuery)) {
+        if (isNullOrEmpty(urlQuery)) {
             return newInstance(targetClass);
         }
 
@@ -9872,17 +9872,6 @@ class CommonUtil {
     }
 
     /**
-     * Checks if is null error msg.
-     *
-     * @param msg
-     * @return true, if is null error msg
-     */
-    private static boolean isNullErrorMsg(final String msg) {
-        // shortest message: "it is null"
-        return msg.length() > 9 && msg.indexOf(WD._SPACE) > 0; //NOSONAR
-    }
-
-    /**
      *
      * @param index
      * @param length
@@ -10320,14 +10309,19 @@ class CommonUtil {
      */
     public static <T> T checkArgNotNull(final T obj, final String errorMessage) {
         if (obj == null) {
-            if (isNullErrorMsg(errorMessage)) {
-                throw new IllegalArgumentException(errorMessage);
-            } else {
+            if (isArgNameOnly(errorMessage)) {
                 throw new IllegalArgumentException("'" + errorMessage + "' can not be null");
+            } else {
+                throw new IllegalArgumentException(errorMessage);
             }
         }
 
         return obj;
+    }
+
+    private static boolean isArgNameOnly(final String argNameOrErrorMsg) {
+        // shortest message: "it is null"
+        return !(argNameOrErrorMsg.length() > 9 && argNameOrErrorMsg.indexOf(WD._SPACE) > 0); //NOSONAR
     }
 
     /**
@@ -10341,11 +10335,7 @@ class CommonUtil {
      */
     public static <T extends CharSequence> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
         if (isNullOrEmpty(arg)) {
-            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty"); //NOSONAR
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
         return arg;
@@ -10361,11 +10351,7 @@ class CommonUtil {
      */
     public static boolean[] checkArgNotNullOrEmpty(final boolean[] arg, final String argNameOrErrorMsg) {
         if (isNullOrEmpty(arg)) {
-            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
         return arg;
@@ -10381,11 +10367,7 @@ class CommonUtil {
      */
     public static char[] checkArgNotNullOrEmpty(final char[] arg, final String argNameOrErrorMsg) {
         if (isNullOrEmpty(arg)) {
-            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
         return arg;
@@ -10401,11 +10383,7 @@ class CommonUtil {
      */
     public static byte[] checkArgNotNullOrEmpty(final byte[] arg, final String argNameOrErrorMsg) {
         if (isNullOrEmpty(arg)) {
-            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
         return arg;
@@ -10421,11 +10399,7 @@ class CommonUtil {
      */
     public static short[] checkArgNotNullOrEmpty(final short[] arg, final String argNameOrErrorMsg) {
         if (isNullOrEmpty(arg)) {
-            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
         return arg;
@@ -10441,11 +10415,7 @@ class CommonUtil {
      */
     public static int[] checkArgNotNullOrEmpty(final int[] arg, final String argNameOrErrorMsg) {
         if (isNullOrEmpty(arg)) {
-            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
         return arg;
@@ -10461,11 +10431,7 @@ class CommonUtil {
      */
     public static long[] checkArgNotNullOrEmpty(final long[] arg, final String argNameOrErrorMsg) {
         if (isNullOrEmpty(arg)) {
-            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
         return arg;
@@ -10481,11 +10447,7 @@ class CommonUtil {
      */
     public static float[] checkArgNotNullOrEmpty(final float[] arg, final String argNameOrErrorMsg) {
         if (isNullOrEmpty(arg)) {
-            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
         return arg;
@@ -10501,11 +10463,7 @@ class CommonUtil {
      */
     public static double[] checkArgNotNullOrEmpty(final double[] arg, final String argNameOrErrorMsg) {
         if (isNullOrEmpty(arg)) {
-            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
         return arg;
@@ -10522,11 +10480,7 @@ class CommonUtil {
      */
     public static <T> T[] checkArgNotNullOrEmpty(final T[] arg, final String argNameOrErrorMsg) {
         if (isNullOrEmpty(arg)) {
-            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
         return arg;
@@ -10543,11 +10497,7 @@ class CommonUtil {
      */
     public static <T extends Collection<?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
         if (isNullOrEmpty(arg)) {
-            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
         return arg;
@@ -10565,11 +10515,7 @@ class CommonUtil {
     @Beta
     public static <T extends Iterable<?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
         if (isNullOrEmpty(arg)) {
-            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
         return arg;
@@ -10587,11 +10533,7 @@ class CommonUtil {
     @Beta
     public static <T extends Iterator<?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
         if (isNullOrEmpty(arg)) {
-            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
         return arg;
@@ -10608,14 +10550,18 @@ class CommonUtil {
      */
     public static <T extends Map<?, ?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
         if (isNullOrEmpty(arg)) {
-            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be null or empty");
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
         }
 
         return arg;
+    }
+
+    private static void throwIllegalArgumentExceptionForNllOrEmptyCheck(final String errorMessage) {
+        if (isArgNameOnly(errorMessage)) {
+            throw new IllegalArgumentException("'" + errorMessage + "' can not be null or empty");
+        } else {
+            throw new IllegalArgumentException(errorMessage);
+        }
     }
 
     /**
@@ -10632,10 +10578,10 @@ class CommonUtil {
     // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
     public static <T extends CharSequence> T checkArgNotBlank(final T arg, final String msg) {
         if (isBlank(arg)) {
-            if (isNullErrorMsg(msg)) {
-                throw new IllegalArgumentException(msg);
-            } else {
+            if (isArgNameOnly(msg)) {
                 throw new IllegalArgumentException("'" + msg + "' can not be null or empty or blank");
+            } else {
+                throw new IllegalArgumentException(msg);
             }
         }
 
@@ -10652,7 +10598,7 @@ class CommonUtil {
      */
     public static int checkArgNotNegative(final int arg, final String argNameOrErrorMsg) {
         if (arg < 0) {
-            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg); //NOSONAR
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
@@ -10672,7 +10618,7 @@ class CommonUtil {
      */
     public static long checkArgNotNegative(final long arg, final String argNameOrErrorMsg) {
         if (arg < 0) {
-            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg);
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
@@ -10692,7 +10638,7 @@ class CommonUtil {
      */
     public static double checkArgNotNegative(final double arg, final String argNameOrErrorMsg) {
         if (arg < 0) {
-            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg);
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
@@ -10712,7 +10658,7 @@ class CommonUtil {
      */
     public static int checkArgPositive(final int arg, final String argNameOrErrorMsg) {
         if (arg <= 0) {
-            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be zero or negative: " + arg);
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
@@ -10732,7 +10678,7 @@ class CommonUtil {
      */
     public static long checkArgPositive(final long arg, final String argNameOrErrorMsg) {
         if (arg <= 0) {
-            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be zero or negative: " + arg);
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
@@ -10752,7 +10698,7 @@ class CommonUtil {
      */
     public static double checkArgPositive(final double arg, final String argNameOrErrorMsg) {
         if (arg <= 0) {
-            if (argNameOrErrorMsg.indexOf(' ') == INDEX_NOT_FOUND) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
                 throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be zero or negative: " + arg);
             } else {
                 throw new IllegalArgumentException(argNameOrErrorMsg);
@@ -10798,10 +10744,10 @@ class CommonUtil {
 
         for (Object e : c) {
             if (e == null) {
-                if (isNullErrorMsg(errorMessage)) {
-                    throw new IllegalArgumentException(errorMessage);
-                } else {
+                if (isArgNameOnly(errorMessage)) {
                     throw new IllegalArgumentException("null element is found in " + errorMessage);
+                } else {
+                    throw new IllegalArgumentException(errorMessage);
                 }
             }
         }
@@ -10843,10 +10789,10 @@ class CommonUtil {
 
         for (Object e : m.keySet()) {
             if (e == null) {
-                if (isNullErrorMsg(errorMessage)) {
-                    throw new IllegalArgumentException(errorMessage);
-                } else {
+                if (isArgNameOnly(errorMessage)) {
                     throw new IllegalArgumentException("null key is found in " + errorMessage);
+                } else {
+                    throw new IllegalArgumentException(errorMessage);
                 }
             }
         }
@@ -10888,10 +10834,10 @@ class CommonUtil {
 
         for (Object e : m.values()) {
             if (e == null) {
-                if (isNullErrorMsg(errorMessage)) {
-                    throw new IllegalArgumentException(errorMessage);
-                } else {
+                if (isArgNameOnly(errorMessage)) {
                     throw new IllegalArgumentException("null value is found in " + errorMessage);
+                } else {
+                    throw new IllegalArgumentException(errorMessage);
                 }
             }
         }

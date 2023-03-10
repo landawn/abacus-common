@@ -507,7 +507,7 @@ public abstract class Strings {
      * @param <T>
      * @param a
      * @param b
-     * @return
+     * @return the first value from specified parameters which is not empty, or {@code null} if there are no non-empty values
      * @see #firstNonEmpty(CharSequence...)
      */
     public static <T extends CharSequence> T firstNonEmpty(final T a, final T b) {
@@ -520,7 +520,7 @@ public abstract class Strings {
      * @param a
      * @param b
      * @param c
-     * @return
+     * @return the first value from specified parameters which is not empty, or {@code null} if there are no non-empty values
      * @see #firstNonEmpty(CharSequence...)
      */
     public static <T extends CharSequence> T firstNonEmpty(final T a, final T b, final T c) {
@@ -567,7 +567,7 @@ public abstract class Strings {
      * @param <T>
      * @param a
      * @param b
-     * @return
+     * @return the first value from specified parameters which is not blank, or {@code null} if there are no non-blank values
      * @see #firstNonBlank(CharSequence...)
      */
     public static <T extends CharSequence> T firstNonBlank(final T a, final T b) {
@@ -580,7 +580,7 @@ public abstract class Strings {
      * @param a
      * @param b
      * @param c
-     * @return
+     * @return the first value from specified parameters which is not blank, or {@code null} if there are no non-blank values
      * @see #firstNonBlank(CharSequence...)
      */
     public static <T extends CharSequence> T firstNonBlank(final T a, final T b, final T c) {
