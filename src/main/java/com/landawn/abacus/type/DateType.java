@@ -40,6 +40,11 @@ public class DateType extends AbstractDateType<Date> {
         super(typeName);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<Date> clazz() {
         return Date.class;

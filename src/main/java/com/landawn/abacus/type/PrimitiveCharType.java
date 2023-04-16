@@ -30,6 +30,11 @@ public final class PrimitiveCharType extends AbstractCharacterType {
         super(CHAR);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {
@@ -46,6 +51,11 @@ public final class PrimitiveCharType extends AbstractCharacterType {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Character defaultValue() {
         return DEFAULT_VALUE;

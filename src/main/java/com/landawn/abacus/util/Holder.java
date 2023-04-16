@@ -287,6 +287,15 @@ public final class Holder<T> implements Mutable {
         }
     }
 
+    /**
+     * 
+     *
+     * @param <U> 
+     * @param <E> 
+     * @param mapper 
+     * @return 
+     * @throws E 
+     */
     public <U, E extends Exception> Optional<U> mapToNonNullIfNotNull(final Throwables.Function<? super T, ? extends U, E> mapper) throws E {
         N.checkArgNotNull(mapper, "mapper");
 

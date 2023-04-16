@@ -43,6 +43,11 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         }
     };
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public static DoubleIterator empty() {//NOSONAR
         return EMPTY;
     }
@@ -247,8 +252,19 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         return nextDouble();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public abstract double nextDouble();
 
+    /**
+     * 
+     *
+     * @param n 
+     * @return 
+     */
     public DoubleIterator skip(final long n) {
         N.checkArgNotNegative(n, "n");
 
@@ -291,6 +307,12 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         };
     }
 
+    /**
+     * 
+     *
+     * @param count 
+     * @return 
+     */
     public DoubleIterator limit(final long count) {
         N.checkArgNotNegative(count, "count");
 
@@ -320,6 +342,12 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         };
     }
 
+    /**
+     * 
+     *
+     * @param predicate 
+     * @return 
+     */
     public DoubleIterator filter(final DoublePredicate predicate) {
         N.checkArgNotNull(predicate, "predicate");
 
@@ -358,6 +386,11 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         };
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public OptionalDouble first() {
         if (hasNext()) {
             return OptionalDouble.of(nextDouble());
@@ -366,6 +399,11 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public OptionalDouble last() {
         if (hasNext()) {
             double next = nextDouble();
@@ -380,10 +418,20 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public double[] toArray() {
         return toList().trimToSize().array();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public DoubleList toList() {
         final DoubleList list = new DoubleList();
 
@@ -394,15 +442,31 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         return list;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public DoubleStream stream() {
         return DoubleStream.of(this);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Beta
     public ObjIterator<IndexedDouble> indexed() {
         return indexed(0);
     }
 
+    /**
+     * 
+     *
+     * @param startIndex 
+     * @return 
+     */
     @Beta
     public ObjIterator<IndexedDouble> indexed(final long startIndex) {
         if (startIndex < 0) {
@@ -427,7 +491,10 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     }
 
     /**
-     * @deprecated
+     * 
+     *
+     * @param action 
+     * @deprecated 
      */
     @Override
     @Deprecated
@@ -435,6 +502,13 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         super.forEachRemaining(action);
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @param action 
+     * @throws E 
+     */
     public <E extends Exception> void foreachRemaining(Throwables.DoubleConsumer<E> action) throws E {//NOSONAR
         N.checkArgNotNull(action);
 
@@ -443,6 +517,13 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         }
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @param action 
+     * @throws E 
+     */
     public <E extends Exception> void foreachIndexed(Throwables.IndexedDoubleConsumer<E> action) throws E {
         N.checkArgNotNull(action);
 

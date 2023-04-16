@@ -62,11 +62,21 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
         this.parameterTypes = new Type[] { leftType, middleType, rightType };
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<Triple<L, M, R>> clazz() {
         return typeClass;

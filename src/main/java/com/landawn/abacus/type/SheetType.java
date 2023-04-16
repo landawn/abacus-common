@@ -53,6 +53,13 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
 
     private final JSONDeserializationConfig jdc;
 
+    /**
+     * 
+     *
+     * @param rowKeyTypeName 
+     * @param columnKeyTypeName 
+     * @param elementTypeName 
+     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public SheetType(String rowKeyTypeName, String columnKeyTypeName, String elementTypeName) {
         super(getTypeName(Sheet.class, rowKeyTypeName, columnKeyTypeName, elementTypeName, false));
@@ -68,11 +75,21 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
         this.jdc = JDC.create().setPropType(ROW_KEY_SET, rowKeyListType).setPropType(COLUMN_KEY_SET, columnKeyListType).setPropType(ROW_LIST, rowListType);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<Sheet<R, C, E>> clazz() {
         return typeClass;

@@ -26,9 +26,20 @@ public class DoubleSummaryStatistics implements DoubleConsumer {
 
     private double max = Double.NEGATIVE_INFINITY;
 
+    /**
+     * 
+     */
     public DoubleSummaryStatistics() {
     }
 
+    /**
+     * 
+     *
+     * @param count 
+     * @param min 
+     * @param max 
+     * @param sum 
+     */
     public DoubleSummaryStatistics(long count, double min, double max, double sum) {
         summation.combine(count, sum);
 
@@ -127,6 +138,11 @@ public class DoubleSummaryStatistics implements DoubleConsumer {
     //        return summation.average();
     //    }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return String.format("{min=%d, max=%d, count=%d, sum=%d, average=%f}", getMin(), getMax(), getCount(), getSum(), getAverage());

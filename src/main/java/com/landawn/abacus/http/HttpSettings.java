@@ -45,9 +45,17 @@ public final class HttpSettings {
 
     private HttpHeaders headers = null;
 
+    /**
+     * 
+     */
     public HttpSettings() { //NOSONAR
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public static HttpSettings create() {
         return new HttpSettings();
     }
@@ -256,12 +264,23 @@ public final class HttpSettings {
         return this;
     }
 
+    /**
+     * 
+     *
+     * @param contentType 
+     * @return 
+     */
     public HttpSettings setContentType(final String contentType) {
         header(HttpHeaders.Names.CONTENT_TYPE, contentType);
 
         return this;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public String getContentType() {
         String contentType = HttpUtil.getContentType(headers);
 
@@ -276,12 +295,23 @@ public final class HttpSettings {
         return contentType;
     }
 
+    /**
+     * 
+     *
+     * @param contentEncoding 
+     * @return 
+     */
     public HttpSettings setContentEncoding(final String contentEncoding) {
         header(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding);
 
         return this;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public String getContentEncoding() {
         String contentEncoding = HttpUtil.getContentEncoding(headers);
 
@@ -386,6 +416,11 @@ public final class HttpSettings {
         return this;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public HttpHeaders headers() {
         if (headers == null) {
             headers = HttpHeaders.create();
@@ -394,6 +429,11 @@ public final class HttpSettings {
         return headers;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public HttpSettings copy() {
         return new HttpSettings().setConnectionTimeout(connectionTimeout)
                 .setReadTimeout(readTimeout)
@@ -406,6 +446,11 @@ public final class HttpSettings {
                 .headers(headers == null ? null : headers.copy());
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return "{connectionTimeout=" + connectionTimeout + ", readTimeout=" + readTimeout + ", sslSocketFactory=" + sslSocketFactory + ", useCaches="

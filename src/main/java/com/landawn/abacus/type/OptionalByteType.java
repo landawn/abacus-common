@@ -31,6 +31,11 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
         super(OPTIONAL_BYTE);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<OptionalByte> clazz() {
         return OptionalByte.class;

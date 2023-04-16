@@ -130,6 +130,11 @@ public final class Wrapper<T> implements Immutable {
         return new Wrapper<>(value, hashFunction, equalsFunction, toStringFunction);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public T value() {
         return value;
     }
@@ -142,6 +147,11 @@ public final class Wrapper<T> implements Immutable {
     //        return a;
     //    }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         if (hashCode == 0) {
@@ -161,6 +171,11 @@ public final class Wrapper<T> implements Immutable {
         return (obj == this) || (obj instanceof Wrapper && equalsFunction.test(((Wrapper<T>) obj).value, value));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         if (toStringFunction == null) {

@@ -703,10 +703,21 @@ public final class Fn extends Comparators {
         };
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public static Runnable emptyAction() {
         return EMPTY_ACTION;
     }
 
+    /**
+     * 
+     *
+     * @param service 
+     * @return 
+     */
     public static Runnable shutDown(final ExecutorService service) {
         return new Runnable() {
             private volatile boolean isClosed = false;
@@ -723,6 +734,14 @@ public final class Fn extends Comparators {
         };
     }
 
+    /**
+     * 
+     *
+     * @param service 
+     * @param terminationTimeout 
+     * @param timeUnit 
+     * @return 
+     */
     public static Runnable shutDown(final ExecutorService service, final long terminationTimeout, final TimeUnit timeUnit) {
         return new Runnable() {
             private volatile boolean isClosed = false;
@@ -777,6 +796,11 @@ public final class Fn extends Comparators {
         };
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public static Function<Throwable, RuntimeException> toRuntimeException() {
         return TO_RUNTIME_EXCEPTION;
     }
@@ -822,9 +846,9 @@ public final class Fn extends Comparators {
     /**
      * Returns a stateful <code>Consumer</code>. Don't save or cache for reuse
      *
-     * @param <T>
-     * @param rateLimiter
-     * @return
+     * @param <T> 
+     * @param permitsPerSecond 
+     * @return 
      * @see RateLimiter#acquire()
      * @see RateLimiter#create(double)
      */
@@ -1028,10 +1052,10 @@ public final class Fn extends Comparators {
     private static final Function<Wrapper<Object>, Object> UNWRAP = Wrapper::value;
 
     /**
+     * 
      *
-     * @param <K> the key type
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @return 
      */
     @SuppressWarnings("rawtypes")
     public static <T> Function<Wrapper<T>, T> unwrap() {
@@ -1060,11 +1084,25 @@ public final class Fn extends Comparators {
         return (Function) VALUE;
     }
 
+    /**
+     * 
+     *
+     * @param <L> 
+     * @param <R> 
+     * @return 
+     */
     @SuppressWarnings("rawtypes")
     public static <L, R> Function<Pair<L, R>, L> left() {
         return (Function) LEFT;
     }
 
+    /**
+     * 
+     *
+     * @param <L> 
+     * @param <R> 
+     * @return 
+     */
     @SuppressWarnings("rawtypes")
     public static <L, R> Function<Pair<L, R>, R> right() {
         return (Function) RIGHT;
@@ -1235,30 +1273,65 @@ public final class Fn extends Comparators {
         return (QuadFunction) TUPLE_4;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public static Function<String, String> trim() {
         return TRIM;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public static Function<String, String> trimToEmpty() {
         return TRIM_TO_EMPTY;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public static Function<String, String> trimToNull() {
         return TRIM_TO_NULL;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public static Function<String, String> strip() {
         return STRIP;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public static Function<String, String> stripToEmpty() {
         return STRIP_TO_EMPTY;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public static Function<String, String> stripToNull() {
         return STRIP_TO_NULL;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public static Function<String, String> nullToEmpty() {
         return NULL_TO_EMPTY;
     }
@@ -1464,6 +1537,12 @@ public final class Fn extends Comparators {
 
     private static final Predicate<Object[]> IS_NULL_OR_EMPTY_A = value -> value == null || value.length == 0;
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @return 
+     */
     @Beta
     @SuppressWarnings("rawtypes")
     public static <T> Predicate<T[]> isNullOrEmptyA() {
@@ -1473,6 +1552,12 @@ public final class Fn extends Comparators {
     @SuppressWarnings("rawtypes")
     private static final Predicate<Collection> IS_NULL_OR_EMPTY_C = value -> value == null || value.size() == 0;
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @return 
+     */
     @Beta
     @SuppressWarnings("rawtypes")
     public static <T extends Collection> Predicate<T> isNullOrEmptyC() {
@@ -1482,6 +1567,12 @@ public final class Fn extends Comparators {
     @SuppressWarnings("rawtypes")
     private static final Predicate<Map> IS_NULL_OR_EMPTY_M = value -> value == null || value.size() == 0;
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @return 
+     */
     @Beta
     @SuppressWarnings("rawtypes")
     public static <T extends Map> Predicate<T> isNullOrEmptyM() {
@@ -1498,11 +1589,11 @@ public final class Fn extends Comparators {
     }
 
     /**
-     * Not null
+     * Not null.
      *
-     * @param <T>
-     * @param valueExtractor
-     * @return
+     * @param <T> 
+     * @param valueExtractor 
+     * @return 
      */
     public static <T> Predicate<T> notNull(final java.util.function.Function<T, ?> valueExtractor) {
         return t -> valueExtractor.apply(t) != null;
@@ -1550,6 +1641,12 @@ public final class Fn extends Comparators {
 
     private static final Predicate<Object[]> NOT_NULL_OR_EMPTY_A = value -> value != null && value.length > 0;
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @return 
+     */
     @Beta
     @SuppressWarnings("rawtypes")
     public static <T> Predicate<T[]> notNullOrEmptyA() {
@@ -1559,6 +1656,12 @@ public final class Fn extends Comparators {
     @SuppressWarnings("rawtypes")
     private static final Predicate<Collection> NOT_NULL_OR_EMPTY_C = value -> value != null && value.size() > 0;
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @return 
+     */
     @Beta
     @SuppressWarnings("rawtypes")
     public static <T extends Collection> Predicate<T> notNullOrEmptyC() {
@@ -1568,6 +1671,12 @@ public final class Fn extends Comparators {
     @SuppressWarnings("rawtypes")
     private static final Predicate<Map> NOT_NULL_OR_EMPTY_M = value -> value != null && value.size() > 0;
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @return 
+     */
     @Beta
     @SuppressWarnings("rawtypes")
     public static <T extends Map> Predicate<T> notNullOrEmptyM() {
@@ -2293,6 +2402,14 @@ public final class Fn extends Comparators {
         return entry -> consumer.accept(entry.getValue());
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param predicate 
+     * @param consumer 
+     * @return 
+     */
     @Beta
     public static <T> Consumer<T> acceptIf(final java.util.function.Predicate<? super T> predicate, final java.util.function.Consumer<? super T> consumer) {
         N.checkArgNotNull(predicate);
@@ -2305,6 +2422,15 @@ public final class Fn extends Comparators {
         };
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param predicate 
+     * @param consumerForTrue 
+     * @param consumerForFalse 
+     * @return 
+     */
     @Beta
     public static <T> Consumer<T> acceptIfOrElse(final java.util.function.Predicate<? super T> predicate,
             final java.util.function.Consumer<? super T> consumerForTrue, final java.util.function.Consumer<? super T> consumerForFalse) {
@@ -2351,6 +2477,16 @@ public final class Fn extends Comparators {
         return entry -> func.apply(entry.getValue());
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param <R> 
+     * @param predicate 
+     * @param func 
+     * @param defaultValue 
+     * @return 
+     */
     @Beta
     public static <T, R> Function<T, R> applyIfOrElseDefault(final java.util.function.Predicate<? super T> predicate,
             final java.util.function.Function<? super T, ? extends R> func, final R defaultValue) {
@@ -2366,6 +2502,16 @@ public final class Fn extends Comparators {
         };
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param <R> 
+     * @param predicate 
+     * @param func 
+     * @param supplier 
+     * @return 
+     */
     @Beta
     public static <T, R> Function<T, R> applyIfOrElseGet(final java.util.function.Predicate<? super T> predicate,
             final java.util.function.Function<? super T, ? extends R> func, final java.util.function.Supplier<? extends R> supplier) {
@@ -2699,11 +2845,11 @@ public final class Fn extends Comparators {
     private static final Function<Map<Object, Collection<Object>>, List<Map<Object, Object>>> FLAT_TO_MAP_FUNC = Maps::flatToMap;
 
     /**
-     * {a=[1, 2, 3], b=[4, 5, 6], c=[7, 8]} -> [{a=1, b=4, c=7}, {a=2, b=5, c=8}, {a=3, b=6}]
+     * {a=[1, 2, 3], b=[4, 5, 6], c=[7, 8]} -> [{a=1, b=4, c=7}, {a=2, b=5, c=8}, {a=3, b=6}].
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return
+     * @return 
      * @see Maps#flatToMap(Map)
      */
     @SuppressWarnings("rawtypes")
@@ -3006,10 +3152,10 @@ public final class Fn extends Comparators {
     private static final BinaryOperator<Object> RETURN_FIRST = (t, u) -> t;
 
     /**
+     * 
      *
-     * @param <T>
-     * @param <U>
-     * @return
+     * @param <T> 
+     * @return 
      */
     public static <T> BinaryOperator<T> selectFirst() {
         return (BinaryOperator<T>) RETURN_FIRST;
@@ -3019,10 +3165,10 @@ public final class Fn extends Comparators {
     private static final BinaryOperator<Object> RETURN_SECOND = (t, u) -> u;
 
     /**
+     * 
      *
-     * @param <T>
-     * @param <U>
-     * @return
+     * @param <T> 
+     * @return 
      */
     public static <T> BinaryOperator<T> selectSecond() {
         return (BinaryOperator<T>) RETURN_SECOND;
@@ -3055,10 +3201,11 @@ public final class Fn extends Comparators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param comparator
-     * @return
+     * @param <T> 
+     * @param keyMapper 
+     * @return 
      */
     @SuppressWarnings("rawtypes")
     public static <T> BinaryOperator<T> minBy(final java.util.function.Function<? super T, ? extends Comparable> keyMapper) {
@@ -3072,9 +3219,11 @@ public final class Fn extends Comparators {
     private static final BinaryOperator<Map.Entry<Comparable, Object>> MIN_BY_KEY = (t, u) -> N.compare(t.getKey(), u.getKey()) <= 0 ? t : u;
 
     /**
+     * 
      *
-     * @param <T>
-     * @return
+     * @param <K> 
+     * @param <V> 
+     * @return 
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <K extends Comparable<? super K>, V> BinaryOperator<Map.Entry<K, V>> minByKey() {
@@ -3086,9 +3235,11 @@ public final class Fn extends Comparators {
     private static final BinaryOperator<Map.Entry<Object, Comparable>> MIN_BY_VALUE = (t, u) -> N.compare(t.getValue(), u.getValue()) <= 0 ? t : u;
 
     /**
+     * 
      *
-     * @param <T>
-     * @return
+     * @param <K> 
+     * @param <V> 
+     * @return 
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <K, V extends Comparable<? super V>> BinaryOperator<Map.Entry<K, V>> minByValue() {
@@ -3122,10 +3273,11 @@ public final class Fn extends Comparators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param comparator
-     * @return
+     * @param <T> 
+     * @param keyMapper 
+     * @return 
      */
     @SuppressWarnings("rawtypes")
     public static <T> BinaryOperator<T> maxBy(final java.util.function.Function<? super T, ? extends Comparable> keyMapper) {
@@ -3139,9 +3291,11 @@ public final class Fn extends Comparators {
     private static final BinaryOperator<Map.Entry<Comparable, Object>> MAX_BY_KEY = (t, u) -> N.compare(t.getKey(), u.getKey()) >= 0 ? t : u;
 
     /**
+     * 
      *
-     * @param <T>
-     * @return
+     * @param <K> 
+     * @param <V> 
+     * @return 
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <K extends Comparable<? super K>, V> BinaryOperator<Map.Entry<K, V>> maxByKey() {
@@ -3153,9 +3307,11 @@ public final class Fn extends Comparators {
     private static final BinaryOperator<Map.Entry<Object, Comparable>> MAX_BY_VALUE = (t, u) -> N.compare(t.getValue(), u.getValue()) >= 0 ? t : u;
 
     /**
+     * 
      *
-     * @param <T>
-     * @return
+     * @param <K> 
+     * @param <V> 
+     * @return 
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <K, V extends Comparable<? super V>> BinaryOperator<Map.Entry<K, V>> maxByValue() {
@@ -4013,13 +4169,15 @@ public final class Fn extends Comparators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param <U>
-     * @param <R>
-     * @param <E>
-     * @param biFunction
-     * @param defaultOnError
+     * @param <T> 
+     * @param <U> 
+     * @param <R> 
+     * @param <E> 
+     * @param biFunction 
+     * @param defaultOnError 
+     * @return 
      */
     @Beta
     public static <T, U, R, E extends Exception> BiFunction<T, U, R> ff(final Throwables.BiFunction<T, U, R, E> biFunction, final R defaultOnError) {
@@ -4322,6 +4480,13 @@ public final class Fn extends Comparators {
         };
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param action 
+     * @return 
+     */
     public static <T> Function<T, Void> c2f(final java.util.function.Consumer<? super T> action) {
         N.checkArgNotNull(action);
 
@@ -4331,6 +4496,15 @@ public final class Fn extends Comparators {
         };
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param <R> 
+     * @param action 
+     * @param valueToReturn 
+     * @return 
+     */
     public static <T, R> Function<T, R> c2f(final java.util.function.Consumer<? super T> action, final R valueToReturn) {
         N.checkArgNotNull(action);
 
@@ -4340,6 +4514,14 @@ public final class Fn extends Comparators {
         };
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param <U> 
+     * @param action 
+     * @return 
+     */
     public static <T, U> BiFunction<T, U, Void> c2f(final java.util.function.BiConsumer<? super T, ? super U> action) {
         N.checkArgNotNull(action);
 
@@ -4349,6 +4531,16 @@ public final class Fn extends Comparators {
         };
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param <U> 
+     * @param <R> 
+     * @param action 
+     * @param valueToReturn 
+     * @return 
+     */
     public static <T, U, R> BiFunction<T, U, R> c2f(final java.util.function.BiConsumer<? super T, ? super U> action, final R valueToReturn) {
         N.checkArgNotNull(action);
 
@@ -4358,6 +4550,15 @@ public final class Fn extends Comparators {
         };
     }
 
+    /**
+     * 
+     *
+     * @param <A> 
+     * @param <B> 
+     * @param <C> 
+     * @param action 
+     * @return 
+     */
     public static <A, B, C> TriFunction<A, B, C, Void> c2f(final TriConsumer<? super A, ? super B, ? super C> action) {
         N.checkArgNotNull(action);
 
@@ -4367,6 +4568,17 @@ public final class Fn extends Comparators {
         };
     }
 
+    /**
+     * 
+     *
+     * @param <A> 
+     * @param <B> 
+     * @param <C> 
+     * @param <R> 
+     * @param action 
+     * @param valueToReturn 
+     * @return 
+     */
     public static <A, B, C, R> TriFunction<A, B, C, R> c2f(final TriConsumer<? super A, ? super B, ? super C> action, final R valueToReturn) {
         N.checkArgNotNull(action);
 
@@ -4389,18 +4601,42 @@ public final class Fn extends Comparators {
         return func::apply;
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param <U> 
+     * @param func 
+     * @return 
+     */
     public static <T, U> BiConsumer<T, U> f2c(final java.util.function.BiFunction<? super T, ? super U, ?> func) {
         N.checkArgNotNull(func);
 
         return func::apply;
     }
 
+    /**
+     * 
+     *
+     * @param <A> 
+     * @param <B> 
+     * @param <C> 
+     * @param func 
+     * @return 
+     */
     public static <A, B, C> TriConsumer<A, B, C> f2c(final TriFunction<? super A, ? super B, ? super C, ?> func) {
         N.checkArgNotNull(func);
 
         return func::apply;
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @param runnbale 
+     * @return 
+     */
     public static <E extends Exception> Runnable rr(final Throwables.Runnable<E> runnbale) {
         return () -> {
             try {
@@ -4411,6 +4647,14 @@ public final class Fn extends Comparators {
         };
     }
 
+    /**
+     * 
+     *
+     * @param <R> 
+     * @param <E> 
+     * @param callable 
+     * @return 
+     */
     public static <R, E extends Exception> Callable<R> cc(final Throwables.Callable<R, E> callable) {
         return () -> {
             try {
@@ -4459,10 +4703,12 @@ public final class Fn extends Comparators {
     }
 
     /**
+     * 
      *
-     * @param runnable
-     * @param valueToReturn
-     * @return
+     * @param <R> 
+     * @param runnable 
+     * @param valueToReturn 
+     * @return 
      */
     public static <R> Callable<R> r2c(final java.lang.Runnable runnable, final R valueToReturn) {
         N.checkArgNotNull(runnable);
@@ -4485,6 +4731,12 @@ public final class Fn extends Comparators {
         return callable::call;
     }
 
+    /**
+     * 
+     *
+     * @param runnable 
+     * @return 
+     */
     public static Runnable jr2r(final java.lang.Runnable runnable) {
         N.checkArgNotNull(runnable);
 
@@ -4495,6 +4747,13 @@ public final class Fn extends Comparators {
         return runnable::run;
     }
 
+    /**
+     * 
+     *
+     * @param <R> 
+     * @param callable 
+     * @return 
+     */
     public static <R> Callable<R> jc2c(final java.util.concurrent.Callable<R> callable) {
         N.checkArgNotNull(callable);
 
@@ -4511,6 +4770,12 @@ public final class Fn extends Comparators {
         };
     }
 
+    /**
+     * 
+     *
+     * @param callable 
+     * @return 
+     */
     public static Runnable jc2r(final java.util.concurrent.Callable<?> callable) {
         N.checkArgNotNull(callable);
 
@@ -4556,6 +4821,12 @@ public final class Fn extends Comparators {
     @SuppressWarnings("rawtypes")
     static final Function<Optional, Object> GET_AS_IT = it -> it.orElse(null);
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @return 
+     */
     @SuppressWarnings("rawtypes")
     public static <T> Function<Optional<? extends T>, T> getIfPresentOrElseNull() {
         return (Function) GET_AS_IT;
@@ -4564,6 +4835,12 @@ public final class Fn extends Comparators {
     @SuppressWarnings("rawtypes")
     static final Function<java.util.Optional, Object> GET_AS_IT_JDK = it -> it.orElse(null);
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @return 
+     */
     @SuppressWarnings("rawtypes")
     public static <T> Function<java.util.Optional<? extends T>, T> getIfPresentOrElseNullJdk() {
         return (Function) GET_AS_IT_JDK;
@@ -4572,6 +4849,12 @@ public final class Fn extends Comparators {
     @SuppressWarnings("rawtypes")
     static final Predicate<Optional> IS_PRESENT_IT = Optional::isPresent;
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @return 
+     */
     @SuppressWarnings("rawtypes")
     public static <T> Predicate<Optional<? extends T>> isPresent() {
         return (Predicate) IS_PRESENT_IT;
@@ -4580,6 +4863,12 @@ public final class Fn extends Comparators {
     @SuppressWarnings("rawtypes")
     static final Predicate<java.util.Optional> IS_PRESENT_IT_JDK = java.util.Optional::isPresent;
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @return 
+     */
     @SuppressWarnings("rawtypes")
     public static <T> Predicate<java.util.Optional<? extends T>> isPresentJdk() {
         return (Predicate) IS_PRESENT_IT_JDK;
@@ -4612,6 +4901,11 @@ public final class Fn extends Comparators {
 
         private static final LongSupplier CURRENT_TIME = System::currentTimeMillis;
 
+        /**
+         * 
+         *
+         * @return 
+         */
         public static LongSupplier ofCurrentTimeMillis() {
             return CURRENT_TIME;
         }
@@ -5099,11 +5393,23 @@ public final class Fn extends Comparators {
             return (Supplier) LINKED_BLOCKING_QUEUE;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<ArrayBlockingQueue<T>> ofArrayBlockingQueue() {
             return (Supplier) ARRAY_BLOCKING_QUEUE;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<LinkedBlockingDeque<T>> ofLinkedBlockingDeque() {
             return (Supplier) LINKED_BLOCKING_DEQUE;
@@ -5214,89 +5520,225 @@ public final class Fn extends Comparators {
             return (Supplier) CONCURRENT_HASH_MAP;
         }
 
+        /**
+         * 
+         *
+         * @param <K> 
+         * @param <V> 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <K, V> Supplier<ConcurrentHashMap<K, V>> ofConcurrentHashMap() {
             return (Supplier) CONCURRENT_HASH_MAP;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<Set<T>> ofConcurrentHashSet() {
             return (Supplier) CONCURRENT_HASH_SET;
         }
 
+        /**
+         * 
+         *
+         * @param <K> 
+         * @param <V> 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <K, V> Supplier<BiMap<K, V>> ofBiMap() {
             return (Supplier) BI_MAP;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<Multiset<T>> ofMultiset() {
             return (Supplier) MULTISET;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param valueMapType 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<Multiset<T>> ofMultiset(final Class<? extends Map> valueMapType) {
             return () -> N.newMultiset(valueMapType);
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param mapSupplier 
+         * @return 
+         */
         public static <T> Supplier<Multiset<T>> ofMultiset(final java.util.function.Supplier<? extends Map<T, ?>> mapSupplier) {
             return () -> N.newMultiset(mapSupplier);
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<LongMultiset<T>> ofLongMultiset() {
             return (Supplier) LONG_MULTISET;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param valueMapType 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <T> Supplier<LongMultiset<T>> ofLongMultiset(final Class<? extends Map> valueMapType) {
             return () -> new LongMultiset<>(valueMapType);
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param mapSupplier 
+         * @return 
+         */
         public static <T> Supplier<LongMultiset<T>> ofLongMultiset(final java.util.function.Supplier<? extends Map<T, ?>> mapSupplier) {
             return () -> new LongMultiset<>(mapSupplier);
         }
 
+        /**
+         * 
+         *
+         * @param <K> 
+         * @param <E> 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <K, E> Supplier<ListMultimap<K, E>> ofListMultimap() {
             return (Supplier) LIST_MULTIMAP;
         }
 
+        /**
+         * 
+         *
+         * @param <K> 
+         * @param <E> 
+         * @param mapType 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <K, E> Supplier<ListMultimap<K, E>> ofListMultimap(final Class<? extends Map> mapType) {
             return () -> N.newListMultimap(mapType);
         }
 
+        /**
+         * 
+         *
+         * @param <K> 
+         * @param <E> 
+         * @param mapType 
+         * @param valueType 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <K, E> Supplier<ListMultimap<K, E>> ofListMultimap(final Class<? extends Map> mapType, final Class<? extends List> valueType) {
             return () -> N.newListMultimap(mapType, valueType);
         }
 
+        /**
+         * 
+         *
+         * @param <K> 
+         * @param <E> 
+         * @param mapSupplier 
+         * @param valueSupplier 
+         * @return 
+         */
         public static <K, E> Supplier<ListMultimap<K, E>> ofListMultimap(final java.util.function.Supplier<? extends Map<K, List<E>>> mapSupplier,
                 final java.util.function.Supplier<? extends List<E>> valueSupplier) {
             return () -> N.newListMultimap(mapSupplier, valueSupplier);
         }
 
+        /**
+         * 
+         *
+         * @param <K> 
+         * @param <E> 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <K, E> Supplier<SetMultimap<K, E>> ofSetMultimap() {
             return (Supplier) SET_MULTIMAP;
         }
 
+        /**
+         * 
+         *
+         * @param <K> 
+         * @param <E> 
+         * @param mapType 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <K, E> Supplier<SetMultimap<K, E>> ofSetMultimap(final Class<? extends Map> mapType) {
             return () -> N.newSetMultimap(mapType);
         }
 
+        /**
+         * 
+         *
+         * @param <K> 
+         * @param <E> 
+         * @param mapType 
+         * @param valueType 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <K, E> Supplier<SetMultimap<K, E>> ofSetMultimap(final Class<? extends Map> mapType, final Class<? extends Set> valueType) {
             return () -> N.newSetMultimap(mapType, valueType);
         }
 
+        /**
+         * 
+         *
+         * @param <K> 
+         * @param <E> 
+         * @param mapSupplier 
+         * @param valueSupplier 
+         * @return 
+         */
         public static <K, E> Supplier<SetMultimap<K, E>> ofSetMultimap(final java.util.function.Supplier<? extends Map<K, Set<E>>> mapSupplier,
                 final java.util.function.Supplier<? extends Set<E>> valueSupplier) {
             return () -> N.newSetMultimap(mapSupplier, valueSupplier);
         }
 
+        /**
+         * 
+         *
+         * @param <K> 
+         * @param <E> 
+         * @param <V> 
+         * @param mapSupplier 
+         * @param valueSupplier 
+         * @return 
+         */
         public static <K, E, V extends Collection<E>> Supplier<Multimap<K, E, V>> ofMultimap(final java.util.function.Supplier<? extends Map<K, V>> mapSupplier,
                 final java.util.function.Supplier<? extends V> valueSupplier) {
             return () -> N.newMultimap(mapSupplier, valueSupplier);
@@ -5314,6 +5756,13 @@ public final class Fn extends Comparators {
         @SuppressWarnings("rawtypes")
         private static final Map<Class<?>, Supplier> collectionSupplierPool = new ConcurrentHashMap<>();
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param targetClass 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <T> java.util.function.Supplier<? extends Collection<T>> ofCollection(final Class<? extends Collection> targetClass) {
             Supplier ret = collectionSupplierPool.get(targetClass);
@@ -5375,6 +5824,14 @@ public final class Fn extends Comparators {
         @SuppressWarnings("rawtypes")
         private static final Map<Class<?>, Supplier> mapSupplierPool = new ConcurrentHashMap<>();
 
+        /**
+         * 
+         *
+         * @param <K> 
+         * @param <V> 
+         * @param targetClass 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <K, V> Supplier<? extends Map<K, V>> ofMap(final Class<? extends Map> targetClass) {
             Supplier ret = mapSupplierPool.get(targetClass);
@@ -5418,6 +5875,14 @@ public final class Fn extends Comparators {
             return ret;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param targetClass 
+         * @param supplier 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <T extends Collection> boolean registerForCollection(final Class<T> targetClass, final java.util.function.Supplier<T> supplier) {
             N.checkArgNotNull(targetClass, "targetClass");
@@ -5438,6 +5903,14 @@ public final class Fn extends Comparators {
             }
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param targetClass 
+         * @param supplier 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <T extends Map> boolean registerForMap(final Class<T> targetClass, final java.util.function.Supplier<T> supplier) {
             N.checkArgNotNull(targetClass, "targetClass");
@@ -5943,21 +6416,45 @@ public final class Fn extends Comparators {
             return (IntFunction) ARRAY_DEQUE_FACTORY;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<LinkedBlockingQueue<T>> ofLinkedBlockingQueue() {
             return (IntFunction) LINKED_BLOCKING_QUEUE_FACTORY;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<ArrayBlockingQueue<T>> ofArrayBlockingQueue() {
             return (IntFunction) ARRAY_BLOCKING_QUEUE_FACTORY;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<LinkedBlockingDeque<T>> ofLinkedBlockingDeque() {
             return (IntFunction) LINKED_BLOCKING_DEQUE_FACTORY;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<ConcurrentLinkedQueue<T>> ofConcurrentLinkedQueue() {
             return (IntFunction) CONCURRENT_LINKED_QUEUE_FACTORY;
@@ -6149,7 +6646,10 @@ public final class Fn extends Comparators {
         }
 
         /**
+         * 
          *
+         * @param <T> 
+         * @param componentType 
          * @return a new created {@code IntFunction} whose {@code apply} will return the same {@code DisposableArray} which is defined as a private field.
          */
         @Beta
@@ -6173,6 +6673,13 @@ public final class Fn extends Comparators {
         @SuppressWarnings("rawtypes")
         private static final Map<Class<?>, IntFunction> collectionCreatorPool = new ConcurrentHashMap<>();
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param targetClass 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <T> IntFunction<? extends Collection<T>> ofCollection(final Class<? extends Collection> targetClass) {
             IntFunction ret = collectionCreatorPool.get(targetClass);
@@ -6285,6 +6792,14 @@ public final class Fn extends Comparators {
         @SuppressWarnings("rawtypes")
         private static final Map<Class<?>, IntFunction> mapCreatorPool = new ConcurrentHashMap<>();
 
+        /**
+         * 
+         *
+         * @param <K> 
+         * @param <V> 
+         * @param targetClass 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <K, V> IntFunction<? extends Map<K, V>> ofMap(final Class<? extends Map> targetClass) {
             IntFunction ret = mapCreatorPool.get(targetClass);
@@ -6354,6 +6869,14 @@ public final class Fn extends Comparators {
             return ret;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param targetClass 
+         * @param creator 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <T extends Collection> boolean registerForCollection(final Class<T> targetClass, final java.util.function.IntFunction<T> creator) {
             N.checkArgNotNull(targetClass, "targetClass");
@@ -6374,6 +6897,14 @@ public final class Fn extends Comparators {
             }
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param targetClass 
+         * @param creator 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <T extends Map> boolean registerForMap(final Class<T> targetClass, final java.util.function.IntFunction<T> creator) {
             N.checkArgNotNull(targetClass, "targetClass");
@@ -7191,9 +7722,8 @@ public final class Fn extends Comparators {
          *
          * @param <K> the key type
          * @param <V> the value type
-         * @param <M>
-         * @param <U>
-         * @return
+         * @param <M> 
+         * @return 
          */
         public static <K, V, M extends Map<K, V>> BiFunction<M, K, M> ofRemoveByKey() {
             return (BiFunction<M, K, M>) REMOVE_BY_KEY;
@@ -9307,107 +9837,260 @@ public final class Fn extends Comparators {
         /**
          * Returns a {@code Supplier} which returns a single instance created by calling the specified {@code supplier.get()}.
          *
-         * @param <T>
-         * @param supplier
-         * @return
+         * @param <T> 
+         * @param <E> 
+         * @param supplier 
+         * @return 
          */
         public static <T, E extends Throwable> Throwables.LazyInitializer<T, E> memoize(final Throwables.Supplier<T, E> supplier) {
             return Throwables.LazyInitializer.of(supplier);
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @return 
+         */
         public static <T, E extends Exception> Throwables.Function<T, T, E> identity() {
             return Fn.IDENTITY;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @return 
+         */
         public static <T, E extends Exception> Throwables.Predicate<T, E> alwaysTrue() {
             return Fn.ALWAYS_TRUE;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @return 
+         */
         public static <T, E extends Exception> Throwables.Predicate<T, E> alwaysFalse() {
             return Fn.ALWAYS_FALSE;
         }
 
+        /**
+         * 
+         *
+         * @param <K> 
+         * @param <V> 
+         * @param <E> 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <K, V, E extends Exception> Throwables.Function<Map.Entry<K, V>, K, E> key() {
             return (Throwables.Function) Fn.KEY;
         }
 
+        /**
+         * 
+         *
+         * @param <K> 
+         * @param <V> 
+         * @param <E> 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <K, V, E extends Exception> Throwables.Function<Map.Entry<K, V>, V, E> value() {
             return (Throwables.Function) Fn.VALUE;
         }
 
+        /**
+         * 
+         *
+         * @param <K> 
+         * @param <V> 
+         * @param <E> 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <K, V, E extends Exception> Throwables.Function<Entry<K, V>, Entry<V, K>, E> inverse() {
             return (Throwables.Function) Fn.INVERSE;
         }
 
+        /**
+         * 
+         *
+         * @param <K> 
+         * @param <V> 
+         * @param <E> 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <K, V, E extends Exception> Throwables.BiFunction<K, V, Map.Entry<K, V>, E> entry() {
             return (Throwables.BiFunction) Fn.ENTRY;
         }
 
+        /**
+         * 
+         *
+         * @param <L> 
+         * @param <R> 
+         * @param <E> 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <L, R, E extends Exception> Throwables.BiFunction<L, R, Pair<L, R>, E> pair() {
             return (Throwables.BiFunction) Fn.PAIR;
         }
 
+        /**
+         * 
+         *
+         * @param <L> 
+         * @param <M> 
+         * @param <R> 
+         * @param <E> 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <L, M, R, E extends Exception> Throwables.TriFunction<L, M, R, Triple<L, M, R>, E> triple() {
             return (Throwables.TriFunction) Fn.TRIPLE;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <T, E extends Exception> Throwables.Function<T, Tuple1<T>, E> tuple1() {
             return (Throwables.Function) Fn.TUPLE_1;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <U> 
+         * @param <E> 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <T, U, E extends Exception> Throwables.BiFunction<T, U, Tuple2<T, U>, E> tuple2() {
             return (Throwables.BiFunction) Fn.TUPLE_2;
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <B> 
+         * @param <C> 
+         * @param <E> 
+         * @return 
+         */
         @SuppressWarnings("rawtypes")
         public static <A, B, C, E extends Exception> Throwables.TriFunction<A, B, C, Tuple3<A, B, C>, E> tuple3() {
             return (Throwables.TriFunction) Fn.TUPLE_3;
         }
 
+        /**
+         * 
+         *
+         * @param <E> 
+         * @return 
+         */
         public static <E extends Exception> Throwables.Runnable<E> emptyAction() {
             return (Throwables.Runnable<E>) Fn.EMPTY_ACTION;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @return 
+         */
         public static <T, E extends Exception> Throwables.Consumer<T, E> doNothing() {
             return Fn.DO_NOTHING;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param errorMessage 
+         * @return 
+         */
         public static <T> Throwables.Consumer<T, RuntimeException> throwRuntimeException(final String errorMessage) {
             return t -> {
                 throw new RuntimeException(errorMessage);
             };
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param errorMessage 
+         * @return 
+         */
         public static <T> Throwables.Consumer<T, IOException> throwIOException(final String errorMessage) {
             return t -> {
                 throw new IOException(errorMessage);
             };
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param errorMessage 
+         * @return 
+         */
         public static <T> Throwables.Consumer<T, Exception> throwException(final String errorMessage) {
             return t -> {
                 throw new Exception(errorMessage);
             };
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @param excpetionSupplier 
+         * @return 
+         */
         public static <T, E extends Exception> Throwables.Consumer<T, E> throwException(final java.util.function.Supplier<? extends E> excpetionSupplier) {
             return t -> {
                 throw excpetionSupplier.get();
             };
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @param millis 
+         * @return 
+         */
         public static <T, E extends Exception> Throwables.Consumer<T, E> sleep(final long millis) {
             return t -> N.sleep(millis);
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @param millis 
+         * @return 
+         */
         public static <T, E extends Exception> Throwables.Consumer<T, E> sleepUninterruptibly(final long millis) {
             return t -> N.sleepUninterruptibly(millis);
         }
@@ -9415,9 +10098,10 @@ public final class Fn extends Comparators {
         /**
          * Returns a stateful <code>Consumer</code>. Don't save or cache for reuse
          *
-         * @param <T>
-         * @param rateLimiter
-         * @return
+         * @param <T> 
+         * @param <E> 
+         * @param permitsPerSecond 
+         * @return 
          * @see RateLimiter#acquire()
          * @see RateLimiter#create(double)
          */
@@ -9429,9 +10113,10 @@ public final class Fn extends Comparators {
         /**
          * Returns a stateful <code>Consumer</code>. Don't save or cache for reuse
          *
-         * @param <T>
-         * @param rateLimiter
-         * @return
+         * @param <T> 
+         * @param <E> 
+         * @param rateLimiter 
+         * @return 
          * @see RateLimiter#acquire()
          */
         @Stateful
@@ -9477,112 +10162,278 @@ public final class Fn extends Comparators {
         //        };
         //    }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @return 
+         */
         public static <T extends AutoCloseable> Throwables.Consumer<T, Exception> close() {
             return (Throwables.Consumer<T, Exception>) CLOSE;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @return 
+         */
         public static <T extends AutoCloseable, E extends Exception> Throwables.Consumer<T, E> closeQuietly() {
             return (Throwables.Consumer<T, E>) Fn.CLOSE_QUIETLY;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @return 
+         */
         public static <T, E extends Exception> Throwables.Consumer<T, E> println() {
             return Fn.PRINTLN;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <U> 
+         * @param <E> 
+         * @param separator 
+         * @return 
+         */
         public static <T, U, E extends Exception> Throwables.BiConsumer<T, U, E> println(final String separator) {
             return cc(Fn.<T, U> println(separator));
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @return 
+         */
         @Beta
         public static <T, E extends Exception> Throwables.Predicate<T, E> notNull() {
             return Fn.NOT_NULL;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @return 
+         */
         public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> notNullOrEmpty() {
             return (Throwables.Predicate<T, E>) Fn.NOT_NULL_OR_EMPTY;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @return 
+         */
         @Beta
         @SuppressWarnings("rawtypes")
         public static <T, E extends Exception> Throwables.Predicate<T[], E> notNullOrEmptyA() {
             return (Throwables.Predicate) Fn.NOT_NULL_OR_EMPTY_A;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @return 
+         */
         @Beta
         @SuppressWarnings("rawtypes")
         public static <T extends Collection, E extends Exception> Throwables.Predicate<T, E> notNullOrEmptyC() {
             return (Throwables.Predicate<T, E>) Fn.NOT_NULL_OR_EMPTY_C;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @return 
+         */
         @Beta
         @SuppressWarnings("rawtypes")
         public static <T extends Map, E extends Exception> Throwables.Predicate<T, E> notNullOrEmptyM() {
             return (Throwables.Predicate<T, E>) Fn.NOT_NULL_OR_EMPTY_M;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @return 
+         */
         @Beta
         public static <T, E extends Exception> Throwables.Predicate<T, E> isNull() {
             return Fn.IS_NULL;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @return 
+         */
         public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> isNullOrEmpty() {
             return (Throwables.Predicate<T, E>) Fn.IS_NULL_OR_EMPTY;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @return 
+         */
         @Beta
         @SuppressWarnings("rawtypes")
         public static <T, E extends Exception> Throwables.Predicate<T[], E> isNullOrEmptyA() {
             return (Throwables.Predicate) Fn.IS_NULL_OR_EMPTY_A;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @return 
+         */
         @Beta
         @SuppressWarnings("rawtypes")
         public static <T extends Collection, E extends Exception> Throwables.Predicate<T, E> isNullOrEmptyC() {
             return (Throwables.Predicate<T, E>) Fn.IS_NULL_OR_EMPTY_C;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @return 
+         */
         @Beta
         @SuppressWarnings("rawtypes")
         public static <T extends Map, E extends Exception> Throwables.Predicate<T, E> isNullOrEmptyM() {
             return (Throwables.Predicate<T, E>) Fn.IS_NULL_OR_EMPTY_M;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @return 
+         */
         public static <T, E extends Exception> Throwables.BinaryOperator<T, E> throwingMerger() {
             return BinaryOperators.THROWING_MERGER;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @return 
+         */
         public static <T, E extends Exception> Throwables.BinaryOperator<T, E> ignoringMerger() {
             return BinaryOperators.IGNORING_MERGER;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @return 
+         */
         public static <T, E extends Exception> Throwables.BinaryOperator<T, E> replacingMerger() {
             return BinaryOperators.REPLACING_MERGER;
         }
 
+        /**
+         * 
+         *
+         * @param <K> 
+         * @param <V> 
+         * @param <E> 
+         * @param predicate 
+         * @return 
+         */
         public static <K, V, E extends Throwable> Throwables.Predicate<Map.Entry<K, V>, E> testByKey(final Throwables.Predicate<? super K, E> predicate) {
             N.checkArgNotNull(predicate);
 
             return entry -> predicate.test(entry.getKey());
         }
 
+        /**
+         * 
+         *
+         * @param <K> 
+         * @param <V> 
+         * @param <E> 
+         * @param predicate 
+         * @return 
+         */
         public static <K, V, E extends Throwable> Throwables.Predicate<Map.Entry<K, V>, E> testByValue(final Throwables.Predicate<? super V, E> predicate) {
             N.checkArgNotNull(predicate);
 
             return entry -> predicate.test(entry.getValue());
         }
 
+        /**
+         * 
+         *
+         * @param <K> 
+         * @param <V> 
+         * @param <E> 
+         * @param consumer 
+         * @return 
+         */
         public static <K, V, E extends Throwable> Throwables.Consumer<Map.Entry<K, V>, E> acceptByKey(final Throwables.Consumer<? super K, E> consumer) {
             N.checkArgNotNull(consumer);
 
             return entry -> consumer.accept(entry.getKey());
         }
 
+        /**
+         * 
+         *
+         * @param <K> 
+         * @param <V> 
+         * @param <E> 
+         * @param consumer 
+         * @return 
+         */
         public static <K, V, E extends Throwable> Throwables.Consumer<Map.Entry<K, V>, E> acceptByValue(final Throwables.Consumer<? super V, E> consumer) {
             N.checkArgNotNull(consumer);
 
             return entry -> consumer.accept(entry.getValue());
         }
 
+        /**
+         * 
+         *
+         * @param <K> 
+         * @param <V> 
+         * @param <R> 
+         * @param <E> 
+         * @param func 
+         * @return 
+         */
         public static <K, V, R, E extends Throwable> Throwables.Function<Map.Entry<K, V>, R, E> applyByKey(
                 final Throwables.Function<? super K, ? extends R, E> func) {
             N.checkArgNotNull(func);
@@ -9590,6 +10441,16 @@ public final class Fn extends Comparators {
             return entry -> func.apply(entry.getKey());
         }
 
+        /**
+         * 
+         *
+         * @param <K> 
+         * @param <V> 
+         * @param <R> 
+         * @param <E> 
+         * @param func 
+         * @return 
+         */
         public static <K, V, R, E extends Throwable> Throwables.Function<Map.Entry<K, V>, R, E> applyByValue(
                 final Throwables.Function<? super V, ? extends R, E> func) {
             N.checkArgNotNull(func);
@@ -9601,10 +10462,11 @@ public final class Fn extends Comparators {
         private static final Throwables.BinaryOperator<Object, Throwable> RETURN_FIRST = (t, u) -> t;
 
         /**
+         * 
          *
-         * @param <T>
-         * @param <U>
-         * @return
+         * @param <T> 
+         * @param <E> 
+         * @return 
          */
         @SuppressWarnings("rawtypes")
         public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> selectFirst() {
@@ -9615,10 +10477,11 @@ public final class Fn extends Comparators {
         private static final Throwables.BinaryOperator<Object, Throwable> RETURN_SECOND = (t, u) -> u;
 
         /**
+         * 
          *
-         * @param <T>
-         * @param <U>
-         * @return
+         * @param <T> 
+         * @param <E> 
+         * @return 
          */
         @SuppressWarnings("rawtypes")
         public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> selectSecond() {
@@ -9630,9 +10493,11 @@ public final class Fn extends Comparators {
         private static final Throwables.BinaryOperator<Comparable, Throwable> MIN = (t, u) -> N.compare(t, u) <= 0 ? t : u;
 
         /**
+         * 
          *
-         * @param <T>
-         * @return
+         * @param <T> 
+         * @param <E> 
+         * @return 
          */
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public static <T extends Comparable<? super T>, E extends Throwable> Throwables.BinaryOperator<T, E> min() {
@@ -9640,10 +10505,12 @@ public final class Fn extends Comparators {
         }
 
         /**
+         * 
          *
-         * @param <T>
-         * @param comparator
-         * @return
+         * @param <T> 
+         * @param <E> 
+         * @param comparator 
+         * @return 
          */
         public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> min(final Comparator<? super T> comparator) {
             N.checkArgNotNull(comparator);
@@ -9652,10 +10519,12 @@ public final class Fn extends Comparators {
         }
 
         /**
+         * 
          *
-         * @param <T>
-         * @param comparator
-         * @return
+         * @param <T> 
+         * @param <E> 
+         * @param keyMapper 
+         * @return 
          */
         @SuppressWarnings("rawtypes")
         public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> minBy(
@@ -9671,9 +10540,12 @@ public final class Fn extends Comparators {
                 u) -> N.compare(t.getKey(), u.getKey()) <= 0 ? t : u;
 
         /**
+         * 
          *
-         * @param <T>
-         * @return
+         * @param <K> 
+         * @param <V> 
+         * @param <E> 
+         * @return 
          */
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public static <K extends Comparable<? super K>, V, E extends Throwable> Throwables.BinaryOperator<Map.Entry<K, V>, E> minByKey() {
@@ -9686,9 +10558,12 @@ public final class Fn extends Comparators {
                 u) -> N.compare(t.getValue(), u.getValue()) <= 0 ? t : u;
 
         /**
+         * 
          *
-         * @param <T>
-         * @return
+         * @param <K> 
+         * @param <V> 
+         * @param <E> 
+         * @return 
          */
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public static <K, V extends Comparable<? super V>, E extends Throwable> Throwables.BinaryOperator<Map.Entry<K, V>, E> minByValue() {
@@ -9700,9 +10575,11 @@ public final class Fn extends Comparators {
         private static final Throwables.BinaryOperator<Comparable, Throwable> MAX = (t, u) -> N.compare(t, u) >= 0 ? t : u;
 
         /**
+         * 
          *
-         * @param <T>
-         * @return
+         * @param <T> 
+         * @param <E> 
+         * @return 
          */
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public static <T extends Comparable<? super T>, E extends Throwable> Throwables.BinaryOperator<T, E> max() {
@@ -9710,10 +10587,12 @@ public final class Fn extends Comparators {
         }
 
         /**
+         * 
          *
-         * @param <T>
-         * @param comparator
-         * @return
+         * @param <T> 
+         * @param <E> 
+         * @param comparator 
+         * @return 
          */
         public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> max(final Comparator<? super T> comparator) {
             N.checkArgNotNull(comparator);
@@ -9722,10 +10601,12 @@ public final class Fn extends Comparators {
         }
 
         /**
+         * 
          *
-         * @param <T>
-         * @param comparator
-         * @return
+         * @param <T> 
+         * @param <E> 
+         * @param keyMapper 
+         * @return 
          */
         @SuppressWarnings("rawtypes")
         public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> maxBy(
@@ -9741,9 +10622,12 @@ public final class Fn extends Comparators {
                 u) -> N.compare(t.getKey(), u.getKey()) >= 0 ? t : u;
 
         /**
+         * 
          *
-         * @param <T>
-         * @return
+         * @param <K> 
+         * @param <V> 
+         * @param <E> 
+         * @return 
          */
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public static <K extends Comparable<? super K>, V, E extends Throwable> Throwables.BinaryOperator<Map.Entry<K, V>, E> maxByKey() {
@@ -9756,98 +10640,231 @@ public final class Fn extends Comparators {
                 u) -> N.compare(t.getValue(), u.getValue()) >= 0 ? t : u;
 
         /**
+         * 
          *
-         * @param <T>
-         * @return
+         * @param <K> 
+         * @param <V> 
+         * @param <E> 
+         * @return 
          */
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public static <K, V extends Comparable<? super V>, E extends Throwable> Throwables.BinaryOperator<Map.Entry<K, V>, E> maxByValue() {
             return (Throwables.BinaryOperator) MAX_BY_VALUE;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @param predicate 
+         * @return 
+         */
         public static <T, E extends Throwable> Throwables.Predicate<T, E> not(final Throwables.Predicate<T, E> predicate) {
             N.checkArgNotNull(predicate);
 
             return t -> !predicate.test(t);
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <U> 
+         * @param <E> 
+         * @param biPredicate 
+         * @return 
+         */
         public static <T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> not(final Throwables.BiPredicate<T, U, E> biPredicate) {
             N.checkArgNotNull(biPredicate);
 
             return (t, u) -> !biPredicate.test(t, u);
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <B> 
+         * @param <C> 
+         * @param <E> 
+         * @param triPredicate 
+         * @return 
+         */
         public static <A, B, C, E extends Throwable> Throwables.TriPredicate<A, B, C, E> not(final Throwables.TriPredicate<A, B, C, E> triPredicate) {
             N.checkArgNotNull(triPredicate);
 
             return (a, b, c) -> !triPredicate.test(a, b, c);
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @param supplier 
+         * @return 
+         */
         @Beta
         @SuppressWarnings("rawtypes")
         public static <T, E extends Throwable> Throwables.Supplier<T, E> from(final java.util.function.Supplier<T> supplier) {
             return supplier instanceof Throwables.Supplier ? ((Throwables.Supplier) supplier) : supplier::get;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @param func 
+         * @return 
+         */
         @Beta
         @SuppressWarnings("rawtypes")
         public static <T, E extends Throwable> Throwables.IntFunction<T, E> from(final java.util.function.IntFunction<? extends T> func) {
             return func instanceof Throwables.IntFunction ? ((Throwables.IntFunction) func) : func::apply;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @param predicate 
+         * @return 
+         */
         @Beta
         @SuppressWarnings("rawtypes")
         public static <T, E extends Throwable> Throwables.Predicate<T, E> from(final java.util.function.Predicate<T> predicate) {
             return predicate instanceof Throwables.Predicate ? ((Throwables.Predicate) predicate) : predicate::test;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <U> 
+         * @param <E> 
+         * @param predicate 
+         * @return 
+         */
         @Beta
         @SuppressWarnings("rawtypes")
         public static <T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> from(final java.util.function.BiPredicate<T, U> predicate) {
             return predicate instanceof Throwables.BiPredicate ? ((Throwables.BiPredicate) predicate) : predicate::test;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @param consumer 
+         * @return 
+         */
         @Beta
         @SuppressWarnings("rawtypes")
         public static <T, E extends Throwable> Throwables.Consumer<T, E> from(final java.util.function.Consumer<T> consumer) {
             return consumer instanceof Throwables.Consumer ? ((Throwables.Consumer) consumer) : consumer::accept;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <U> 
+         * @param <E> 
+         * @param consumer 
+         * @return 
+         */
         @Beta
         @SuppressWarnings("rawtypes")
         public static <T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> from(final java.util.function.BiConsumer<T, U> consumer) {
             return consumer instanceof Throwables.BiConsumer ? ((Throwables.BiConsumer) consumer) : consumer::accept;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <R> 
+         * @param <E> 
+         * @param function 
+         * @return 
+         */
         @Beta
         @SuppressWarnings("rawtypes")
         public static <T, R, E extends Throwable> Throwables.Function<T, R, E> from(final java.util.function.Function<T, ? extends R> function) {
             return function instanceof Throwables.Function ? ((Throwables.Function) function) : function::apply;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <U> 
+         * @param <R> 
+         * @param <E> 
+         * @param function 
+         * @return 
+         */
         @Beta
         @SuppressWarnings("rawtypes")
         public static <T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> from(final java.util.function.BiFunction<T, U, ? extends R> function) {
             return function instanceof Throwables.BiFunction ? ((Throwables.BiFunction) function) : function::apply;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @param op 
+         * @return 
+         */
         @Beta
         @SuppressWarnings("rawtypes")
         public static <T, E extends Throwable> Throwables.UnaryOperator<T, E> from(final java.util.function.UnaryOperator<T> op) {
             return op instanceof Throwables.UnaryOperator ? ((Throwables.UnaryOperator) op) : op::apply;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @param op 
+         * @return 
+         */
         @Beta
         @SuppressWarnings("rawtypes")
         public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> from(final java.util.function.BinaryOperator<T> op) {
             return op instanceof Throwables.BinaryOperator ? ((Throwables.BinaryOperator) op) : op::apply;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @param predicate 
+         * @return 
+         */
         @Beta
         public static <T, E extends Throwable> Throwables.Predicate<T, E> p(final Throwables.Predicate<T, E> predicate) {
             return predicate;
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <T> 
+         * @param <E> 
+         * @param a 
+         * @param biPredicate 
+         * @return 
+         */
         @Beta
         public static <A, T, E extends Throwable> Throwables.Predicate<T, E> p(final A a, final Throwables.BiPredicate<A, T, E> biPredicate) {
             N.checkArgNotNull(biPredicate);
@@ -9855,6 +10872,18 @@ public final class Fn extends Comparators {
             return t -> biPredicate.test(a, t);
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <B> 
+         * @param <T> 
+         * @param <E> 
+         * @param a 
+         * @param b 
+         * @param triPredicate 
+         * @return 
+         */
         @Beta
         public static <A, B, T, E extends Throwable> Throwables.Predicate<T, E> p(final A a, final B b,
                 final Throwables.TriPredicate<A, B, T, E> triPredicate) {
@@ -9863,11 +10892,31 @@ public final class Fn extends Comparators {
             return t -> triPredicate.test(a, b, t);
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <U> 
+         * @param <E> 
+         * @param biPredicate 
+         * @return 
+         */
         @Beta
         public static <T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> p(final Throwables.BiPredicate<T, U, E> biPredicate) {
             return biPredicate;
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <T> 
+         * @param <U> 
+         * @param <E> 
+         * @param a 
+         * @param triPredicate 
+         * @return 
+         */
         @Beta
         public static <A, T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> p(final A a, final Throwables.TriPredicate<A, T, U, E> triPredicate) {
             N.checkArgNotNull(triPredicate);
@@ -9875,16 +10924,44 @@ public final class Fn extends Comparators {
             return (t, u) -> triPredicate.test(a, t, u);
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <B> 
+         * @param <C> 
+         * @param <E> 
+         * @param triPredicate 
+         * @return 
+         */
         @Beta
         public static <A, B, C, E extends Throwable> Throwables.TriPredicate<A, B, C, E> p(final Throwables.TriPredicate<A, B, C, E> triPredicate) {
             return triPredicate;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @param predicate 
+         * @return 
+         */
         @Beta
         public static <T, E extends Throwable> Throwables.Consumer<T, E> c(final Throwables.Consumer<T, E> predicate) {
             return predicate;
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <T> 
+         * @param <E> 
+         * @param a 
+         * @param biConsumer 
+         * @return 
+         */
         @Beta
         public static <A, T, E extends Throwable> Throwables.Consumer<T, E> c(final A a, final Throwables.BiConsumer<A, T, E> biConsumer) {
             N.checkArgNotNull(biConsumer);
@@ -9892,6 +10969,18 @@ public final class Fn extends Comparators {
             return t -> biConsumer.accept(a, t);
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <B> 
+         * @param <T> 
+         * @param <E> 
+         * @param a 
+         * @param b 
+         * @param triConsumer 
+         * @return 
+         */
         @Beta
         public static <A, B, T, E extends Throwable> Throwables.Consumer<T, E> c(final A a, final B b, final Throwables.TriConsumer<A, B, T, E> triConsumer) {
             N.checkArgNotNull(triConsumer);
@@ -9899,11 +10988,31 @@ public final class Fn extends Comparators {
             return t -> triConsumer.accept(a, b, t);
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <U> 
+         * @param <E> 
+         * @param biConsumer 
+         * @return 
+         */
         @Beta
         public static <T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> c(final Throwables.BiConsumer<T, U, E> biConsumer) {
             return biConsumer;
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <T> 
+         * @param <U> 
+         * @param <E> 
+         * @param a 
+         * @param triConsumer 
+         * @return 
+         */
         @Beta
         public static <A, T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> c(final A a, final Throwables.TriConsumer<A, T, U, E> triConsumer) {
             N.checkArgNotNull(triConsumer);
@@ -9911,16 +11020,46 @@ public final class Fn extends Comparators {
             return (t, u) -> triConsumer.accept(a, t, u);
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <B> 
+         * @param <C> 
+         * @param <E> 
+         * @param triConsumer 
+         * @return 
+         */
         @Beta
         public static <A, B, C, E extends Throwable> Throwables.TriConsumer<A, B, C, E> c(final Throwables.TriConsumer<A, B, C, E> triConsumer) {
             return triConsumer;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <R> 
+         * @param <E> 
+         * @param predicate 
+         * @return 
+         */
         @Beta
         public static <T, R, E extends Throwable> Throwables.Function<T, R, E> f(final Throwables.Function<T, R, E> predicate) {
             return predicate;
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <T> 
+         * @param <R> 
+         * @param <E> 
+         * @param a 
+         * @param biFunction 
+         * @return 
+         */
         @Beta
         public static <A, T, R, E extends Throwable> Throwables.Function<T, R, E> f(final A a, final Throwables.BiFunction<A, T, R, E> biFunction) {
             N.checkArgNotNull(biFunction);
@@ -9928,6 +11067,19 @@ public final class Fn extends Comparators {
             return t -> biFunction.apply(a, t);
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <B> 
+         * @param <T> 
+         * @param <R> 
+         * @param <E> 
+         * @param a 
+         * @param b 
+         * @param triFunction 
+         * @return 
+         */
         @Beta
         public static <A, B, T, R, E extends Throwable> Throwables.Function<T, R, E> f(final A a, final B b,
                 final Throwables.TriFunction<A, B, T, R, E> triFunction) {
@@ -9936,11 +11088,33 @@ public final class Fn extends Comparators {
             return t -> triFunction.apply(a, b, t);
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <U> 
+         * @param <R> 
+         * @param <E> 
+         * @param biFunction 
+         * @return 
+         */
         @Beta
         public static <T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> f(final Throwables.BiFunction<T, U, R, E> biFunction) {
             return biFunction;
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <T> 
+         * @param <U> 
+         * @param <R> 
+         * @param <E> 
+         * @param a 
+         * @param triFunction 
+         * @return 
+         */
         @Beta
         public static <A, T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> f(final A a,
                 final Throwables.TriFunction<A, T, U, R, E> triFunction) {
@@ -9949,11 +11123,30 @@ public final class Fn extends Comparators {
             return (t, u) -> triFunction.apply(a, t, u);
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <B> 
+         * @param <C> 
+         * @param <R> 
+         * @param <E> 
+         * @param triFunction 
+         * @return 
+         */
         @Beta
         public static <A, B, C, R, E extends Throwable> Throwables.TriFunction<A, B, C, R, E> f(final Throwables.TriFunction<A, B, C, R, E> triFunction) {
             return triFunction;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @param predicate 
+         * @return 
+         */
         @Beta
         public static <T, E extends Throwable> Throwables.Predicate<T, E> pp(final Predicate<T> predicate) {
             N.checkArgNotNull(predicate);
@@ -9961,6 +11154,16 @@ public final class Fn extends Comparators {
             return (Throwables.Predicate<T, E>) predicate;
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <T> 
+         * @param <E> 
+         * @param a 
+         * @param biPredicate 
+         * @return 
+         */
         @Beta
         public static <A, T, E extends Throwable> Throwables.Predicate<T, E> pp(final A a, final java.util.function.BiPredicate<A, T> biPredicate) {
             N.checkArgNotNull(biPredicate);
@@ -9968,6 +11171,18 @@ public final class Fn extends Comparators {
             return t -> biPredicate.test(a, t);
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <B> 
+         * @param <T> 
+         * @param <E> 
+         * @param a 
+         * @param b 
+         * @param triPredicate 
+         * @return 
+         */
         @Beta
         public static <A, B, T, E extends Throwable> Throwables.Predicate<T, E> pp(final A a, final B b, final TriPredicate<A, B, T> triPredicate) {
             N.checkArgNotNull(triPredicate);
@@ -9975,6 +11190,15 @@ public final class Fn extends Comparators {
             return t -> triPredicate.test(a, b, t);
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <U> 
+         * @param <E> 
+         * @param biPredicate 
+         * @return 
+         */
         @Beta
         public static <T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> pp(final BiPredicate<T, U> biPredicate) {
             N.checkArgNotNull(biPredicate);
@@ -9982,6 +11206,17 @@ public final class Fn extends Comparators {
             return (Throwables.BiPredicate<T, U, E>) biPredicate;
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <T> 
+         * @param <U> 
+         * @param <E> 
+         * @param a 
+         * @param triPredicate 
+         * @return 
+         */
         @Beta
         public static <A, T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> pp(final A a, final TriPredicate<A, T, U> triPredicate) {
             N.checkArgNotNull(triPredicate);
@@ -9989,6 +11224,16 @@ public final class Fn extends Comparators {
             return (t, u) -> triPredicate.test(a, t, u);
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <B> 
+         * @param <C> 
+         * @param <E> 
+         * @param triPredicate 
+         * @return 
+         */
         @Beta
         public static <A, B, C, E extends Throwable> Throwables.TriPredicate<A, B, C, E> pp(final TriPredicate<A, B, C> triPredicate) {
             N.checkArgNotNull(triPredicate);
@@ -9996,6 +11241,14 @@ public final class Fn extends Comparators {
             return (Throwables.TriPredicate<A, B, C, E>) triPredicate;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @param consumer 
+         * @return 
+         */
         @Beta
         public static <T, E extends Throwable> Throwables.Consumer<T, E> cc(final Consumer<T> consumer) {
             N.checkArgNotNull(consumer);
@@ -10003,6 +11256,16 @@ public final class Fn extends Comparators {
             return (Throwables.Consumer<T, E>) consumer;
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <T> 
+         * @param <E> 
+         * @param a 
+         * @param biConsumer 
+         * @return 
+         */
         @Beta
         public static <A, T, E extends Throwable> Throwables.Consumer<T, E> cc(final A a, final java.util.function.BiConsumer<A, T> biConsumer) {
             N.checkArgNotNull(biConsumer);
@@ -10010,6 +11273,18 @@ public final class Fn extends Comparators {
             return t -> biConsumer.accept(a, t);
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <B> 
+         * @param <T> 
+         * @param <E> 
+         * @param a 
+         * @param b 
+         * @param triConsumer 
+         * @return 
+         */
         @Beta
         public static <A, B, T, E extends Throwable> Throwables.Consumer<T, E> cc(final A a, final B b, final TriConsumer<A, B, T> triConsumer) {
             N.checkArgNotNull(triConsumer);
@@ -10017,6 +11292,15 @@ public final class Fn extends Comparators {
             return t -> triConsumer.accept(a, b, t);
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <U> 
+         * @param <E> 
+         * @param biConsumer 
+         * @return 
+         */
         @Beta
         public static <T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> cc(final BiConsumer<T, U> biConsumer) {
             N.checkArgNotNull(biConsumer);
@@ -10024,6 +11308,17 @@ public final class Fn extends Comparators {
             return (Throwables.BiConsumer<T, U, E>) biConsumer;
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <T> 
+         * @param <U> 
+         * @param <E> 
+         * @param a 
+         * @param triConsumer 
+         * @return 
+         */
         @Beta
         public static <A, T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> cc(final A a, final TriConsumer<A, T, U> triConsumer) {
             N.checkArgNotNull(triConsumer);
@@ -10031,6 +11326,16 @@ public final class Fn extends Comparators {
             return (t, u) -> triConsumer.accept(a, t, u);
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <B> 
+         * @param <C> 
+         * @param <E> 
+         * @param triConsumer 
+         * @return 
+         */
         @Beta
         public static <A, B, C, E extends Throwable> Throwables.TriConsumer<A, B, C, E> cc(final TriConsumer<A, B, C> triConsumer) {
             N.checkArgNotNull(triConsumer);
@@ -10038,6 +11343,15 @@ public final class Fn extends Comparators {
             return (Throwables.TriConsumer<A, B, C, E>) triConsumer;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <R> 
+         * @param <E> 
+         * @param function 
+         * @return 
+         */
         @Beta
         public static <T, R, E extends Throwable> Throwables.Function<T, R, E> ff(final Function<T, ? extends R> function) {
             N.checkArgNotNull(function);
@@ -10045,6 +11359,17 @@ public final class Fn extends Comparators {
             return (Throwables.Function<T, R, E>) function;
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <T> 
+         * @param <R> 
+         * @param <E> 
+         * @param a 
+         * @param biFunction 
+         * @return 
+         */
         @Beta
         public static <A, T, R, E extends Throwable> Throwables.Function<T, R, E> ff(final A a, final java.util.function.BiFunction<A, T, R> biFunction) {
             N.checkArgNotNull(biFunction);
@@ -10052,6 +11377,19 @@ public final class Fn extends Comparators {
             return t -> biFunction.apply(a, t);
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <B> 
+         * @param <T> 
+         * @param <R> 
+         * @param <E> 
+         * @param a 
+         * @param b 
+         * @param triFunction 
+         * @return 
+         */
         @Beta
         public static <A, B, T, R, E extends Throwable> Throwables.Function<T, R, E> ff(final A a, final B b, final TriFunction<A, B, T, R> triFunction) {
             N.checkArgNotNull(triFunction);
@@ -10059,6 +11397,16 @@ public final class Fn extends Comparators {
             return t -> triFunction.apply(a, b, t);
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <U> 
+         * @param <R> 
+         * @param <E> 
+         * @param biFunction 
+         * @return 
+         */
         @Beta
         public static <T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> ff(final BiFunction<T, U, R> biFunction) {
             N.checkArgNotNull(biFunction);
@@ -10066,6 +11414,18 @@ public final class Fn extends Comparators {
             return (Throwables.BiFunction<T, U, R, E>) biFunction;
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <T> 
+         * @param <U> 
+         * @param <R> 
+         * @param <E> 
+         * @param a 
+         * @param triFunction 
+         * @return 
+         */
         @Beta
         public static <A, T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> ff(final A a, final TriFunction<A, T, U, R> triFunction) {
             N.checkArgNotNull(triFunction);
@@ -10073,6 +11433,17 @@ public final class Fn extends Comparators {
             return (t, u) -> triFunction.apply(a, t, u);
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <B> 
+         * @param <C> 
+         * @param <R> 
+         * @param <E> 
+         * @param triFunction 
+         * @return 
+         */
         @Beta
         public static <A, B, C, R, E extends Throwable> Throwables.TriFunction<A, B, C, R, E> ff(final TriFunction<A, B, C, R> triFunction) {
             N.checkArgNotNull(triFunction);
@@ -10104,12 +11475,13 @@ public final class Fn extends Comparators {
         /**
          * Synchronized {@code Predicate}.
          *
-         * @param <A>
-         * @param <T>
+         * @param <A> 
+         * @param <T> 
+         * @param <E> 
          * @param mutex to synchronized on
-         * @param a
-         * @param biPredicate
-         * @return
+         * @param a 
+         * @param biPredicate 
+         * @return 
          */
         @Beta
         public static <A, T, E extends Throwable> Throwables.Predicate<T, E> sp(final Object mutex, final A a,
@@ -10309,6 +11681,14 @@ public final class Fn extends Comparators {
             };
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @param consumer 
+         * @return 
+         */
         public static <T, E extends Throwable> Throwables.Function<T, Void, E> c2f(final Throwables.Consumer<T, E> consumer) {
             N.checkArgNotNull(consumer);
 
@@ -10319,6 +11699,16 @@ public final class Fn extends Comparators {
             };
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <R> 
+         * @param <E> 
+         * @param consumer 
+         * @param valueToReturn 
+         * @return 
+         */
         public static <T, R, E extends Throwable> Throwables.Function<T, R, E> c2f(final Throwables.Consumer<T, E> consumer, final R valueToReturn) {
             N.checkArgNotNull(consumer);
 
@@ -10329,6 +11719,15 @@ public final class Fn extends Comparators {
             };
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <U> 
+         * @param <E> 
+         * @param biConsumer 
+         * @return 
+         */
         public static <T, U, E extends Throwable> Throwables.BiFunction<T, U, Void, E> c2f(final Throwables.BiConsumer<T, U, E> biConsumer) {
             N.checkArgNotNull(biConsumer);
 
@@ -10339,6 +11738,17 @@ public final class Fn extends Comparators {
             };
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <U> 
+         * @param <R> 
+         * @param <E> 
+         * @param biConsumer 
+         * @param valueToReturn 
+         * @return 
+         */
         public static <T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> c2f(final Throwables.BiConsumer<T, U, E> biConsumer,
                 final R valueToReturn) {
             N.checkArgNotNull(biConsumer);
@@ -10350,6 +11760,16 @@ public final class Fn extends Comparators {
             };
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <B> 
+         * @param <C> 
+         * @param <E> 
+         * @param triConsumer 
+         * @return 
+         */
         public static <A, B, C, E extends Throwable> Throwables.TriFunction<A, B, C, Void, E> c2f(final Throwables.TriConsumer<A, B, C, E> triConsumer) {
             N.checkArgNotNull(triConsumer);
 
@@ -10360,6 +11780,18 @@ public final class Fn extends Comparators {
             };
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <B> 
+         * @param <C> 
+         * @param <R> 
+         * @param <E> 
+         * @param triConsumer 
+         * @param valueToReturn 
+         * @return 
+         */
         public static <A, B, C, R, E extends Throwable> Throwables.TriFunction<A, B, C, R, E> c2f(final Throwables.TriConsumer<A, B, C, E> triConsumer,
                 final R valueToReturn) {
             N.checkArgNotNull(triConsumer);
@@ -10371,24 +11803,61 @@ public final class Fn extends Comparators {
             };
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <R> 
+         * @param <E> 
+         * @param func 
+         * @return 
+         */
         public static <T, R, E extends Throwable> Throwables.Consumer<T, E> f2c(final Throwables.Function<T, ? extends R, E> func) {
             N.checkArgNotNull(func);
 
             return func::apply;
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <U> 
+         * @param <R> 
+         * @param <E> 
+         * @param func 
+         * @return 
+         */
         public static <T, U, R, E extends Throwable> Throwables.BiConsumer<T, U, E> f2c(final Throwables.BiFunction<T, U, ? extends R, E> func) {
             N.checkArgNotNull(func);
 
             return func::apply;
         }
 
+        /**
+         * 
+         *
+         * @param <A> 
+         * @param <B> 
+         * @param <C> 
+         * @param <R> 
+         * @param <E> 
+         * @param func 
+         * @return 
+         */
         public static <A, B, C, R, E extends Throwable> Throwables.TriConsumer<A, B, C, E> f2c(final Throwables.TriFunction<A, B, C, ? extends R, E> func) {
             N.checkArgNotNull(func);
 
             return func::apply;
         }
 
+        /**
+         * 
+         *
+         * @param <E> 
+         * @param runnable 
+         * @return 
+         */
         public static <E extends Throwable> Throwables.Callable<Void, E> r2c(final Throwables.Runnable<E> runnable) {
             N.checkArgNotNull(runnable);
 
@@ -10398,6 +11867,15 @@ public final class Fn extends Comparators {
             };
         }
 
+        /**
+         * 
+         *
+         * @param <R> 
+         * @param <E> 
+         * @param runnable 
+         * @param valueToReturn 
+         * @return 
+         */
         public static <R, E extends Throwable> Throwables.Callable<R, E> r2c(final Throwables.Runnable<E> runnable, final R valueToReturn) {
             N.checkArgNotNull(runnable);
 
@@ -10407,32 +11885,77 @@ public final class Fn extends Comparators {
             };
         }
 
+        /**
+         * 
+         *
+         * @param <R> 
+         * @param <E> 
+         * @param callable 
+         * @return 
+         */
         public static <R, E extends Throwable> Throwables.Runnable<E> c2r(final Throwables.Callable<R, E> callable) {
             N.checkArgNotNull(callable);
 
             return callable::call;
         }
 
+        /**
+         * 
+         *
+         * @param <E> 
+         * @param runnable 
+         * @return 
+         */
         public static <E extends Throwable> Throwables.Runnable<E> rr(final Runnable runnable) {
             return (Throwables.Runnable<E>) runnable;
         }
 
+        /**
+         * 
+         *
+         * @param <R> 
+         * @param <E> 
+         * @param callable 
+         * @return 
+         */
         public static <R, E extends Throwable> Throwables.Callable<R, E> cc(final Callable<R> callable) {
             return (Throwables.Callable<R, E>) callable;
         }
 
+        /**
+         * 
+         *
+         * @param <E> 
+         * @param runnable 
+         * @return 
+         */
         public static <E extends Throwable> Throwables.Runnable<E> r(final Throwables.Runnable<E> runnable) {
             N.checkArgNotNull(runnable);
 
             return runnable;
         }
 
+        /**
+         * 
+         *
+         * @param <R> 
+         * @param <E> 
+         * @param callable 
+         * @return 
+         */
         public static <R, E extends Throwable> Throwables.Callable<R, E> c(final Throwables.Callable<R, E> callable) {
             N.checkArgNotNull(callable);
 
             return callable;
         }
 
+        /**
+         * 
+         *
+         * @param <E> 
+         * @param runnable 
+         * @return 
+         */
         public static <E extends Throwable> Throwables.Runnable<E> jr2r(final java.lang.Runnable runnable) {
             N.checkArgNotNull(runnable);
 
@@ -10443,6 +11966,13 @@ public final class Fn extends Comparators {
             return runnable::run;
         }
 
+        /**
+         * 
+         *
+         * @param <E> 
+         * @param runnable 
+         * @return 
+         */
         public static <E extends Throwable> java.lang.Runnable r2jr(final Throwables.Runnable<E> runnable) {
             N.checkArgNotNull(runnable);
 
@@ -10459,6 +11989,13 @@ public final class Fn extends Comparators {
             };
         }
 
+        /**
+         * 
+         *
+         * @param <R> 
+         * @param callable 
+         * @return 
+         */
         public static <R> Throwables.Callable<R, Exception> jc2c(final java.util.concurrent.Callable<R> callable) {
             N.checkArgNotNull(callable);
 
@@ -10469,6 +12006,14 @@ public final class Fn extends Comparators {
             return callable::call;
         }
 
+        /**
+         * 
+         *
+         * @param <R> 
+         * @param <E> 
+         * @param callable 
+         * @return 
+         */
         public static <R, E extends Exception> java.util.concurrent.Callable<R> c2jc(final Throwables.Callable<R, E> callable) {
             N.checkArgNotNull(callable);
 

@@ -231,8 +231,9 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param a
-     * @return
+     * @param <T> 
+     * @param a 
+     * @return 
      */
     public static <T extends Comparable<? super T>> Nullable<T> min(final T[] a) {
         return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.min(a));
@@ -241,9 +242,10 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param a
-     * @param cmp
-     * @return
+     * @param <T> 
+     * @param a 
+     * @param cmp 
+     * @return 
      */
     public static <T> Nullable<T> min(final T[] a, final Comparator<? super T> cmp) {
         return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.min(a, cmp));
@@ -252,8 +254,9 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param c
-     * @return
+     * @param <T> 
+     * @param c 
+     * @return 
      */
     public static <T extends Comparable<? super T>> Nullable<T> min(final Iterable<? extends T> c) {
         return min(c, N.NULL_MAX_COMPARATOR);
@@ -262,9 +265,10 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param c
-     * @param cmp
-     * @return
+     * @param <T> 
+     * @param c 
+     * @param cmp 
+     * @return 
      */
     public static <T> Nullable<T> min(final Iterable<? extends T> c, final Comparator<? super T> cmp) {
         return c == null ? Nullable.<T> empty() : min(c.iterator(), cmp);
@@ -273,8 +277,9 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param iter
-     * @return
+     * @param <T> 
+     * @param iter 
+     * @return 
      */
     public static <T extends Comparable<? super T>> Nullable<T> min(final Iterator<? extends T> iter) {
         return min(iter, N.NULL_MAX_COMPARATOR);
@@ -283,9 +288,10 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param iter
-     * @param cmp
-     * @return
+     * @param <T> 
+     * @param iter 
+     * @param cmp 
+     * @return 
      */
     public static <T> Nullable<T> min(final Iterator<? extends T> iter, Comparator<? super T> cmp) {
         cmp = cmp == null ? N.NULL_MAX_COMPARATOR : cmp;
@@ -313,9 +319,10 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param a
-     * @param cmp
-     * @return
+     * @param <T> 
+     * @param a 
+     * @param keyMapper 
+     * @return 
      */
     @SuppressWarnings("rawtypes")
     public static <T> Nullable<T> minBy(final T[] a, final Function<? super T, ? extends Comparable> keyMapper) {
@@ -325,9 +332,10 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param c
-     * @param cmp
-     * @return
+     * @param <T> 
+     * @param c 
+     * @param keyMapper 
+     * @return 
      */
     @SuppressWarnings("rawtypes")
     public static <T> Nullable<T> minBy(final Iterable<? extends T> c, final Function<? super T, ? extends Comparable> keyMapper) {
@@ -337,9 +345,10 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param iter
-     * @param cmp
-     * @return
+     * @param <T> 
+     * @param iter 
+     * @param keyMapper 
+     * @return 
      */
     @SuppressWarnings("rawtypes")
     public static <T> Nullable<T> minBy(final Iterator<? extends T> iter, final Function<? super T, ? extends Comparable> keyMapper) {
@@ -349,8 +358,9 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param a
-     * @return
+     * @param <T> 
+     * @param a 
+     * @return 
      */
     public static <T extends Comparable<? super T>> Nullable<T> max(final T[] a) {
         return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.max(a));
@@ -359,9 +369,10 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param a
-     * @param cmp
-     * @return
+     * @param <T> 
+     * @param a 
+     * @param cmp 
+     * @return 
      */
     public static <T> Nullable<T> max(final T[] a, final Comparator<? super T> cmp) {
         return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.max(a, cmp));
@@ -370,8 +381,9 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param c
-     * @return
+     * @param <T> 
+     * @param c 
+     * @return 
      */
     public static <T extends Comparable<? super T>> Nullable<T> max(final Iterable<? extends T> c) {
         return max(c, N.NULL_MIN_COMPARATOR);
@@ -380,8 +392,10 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param c
-     * @return
+     * @param <T> 
+     * @param c 
+     * @param cmp 
+     * @return 
      */
     public static <T> Nullable<T> max(final Iterable<? extends T> c, final Comparator<? super T> cmp) {
         return c == null ? Nullable.<T> empty() : max(c.iterator(), cmp);
@@ -390,8 +404,9 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param iter
-     * @return
+     * @param <T> 
+     * @param iter 
+     * @return 
      */
     public static <T extends Comparable<? super T>> Nullable<T> max(final Iterator<? extends T> iter) {
         return max(iter, N.NULL_MIN_COMPARATOR);
@@ -400,9 +415,10 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param iter
-     * @param cmp
-     * @return
+     * @param <T> 
+     * @param iter 
+     * @param cmp 
+     * @return 
      */
     public static <T> Nullable<T> max(final Iterator<? extends T> iter, Comparator<? super T> cmp) {
         cmp = cmp == null ? N.NULL_MIN_COMPARATOR : cmp;
@@ -430,9 +446,10 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param a
-     * @param cmp
-     * @return
+     * @param <T> 
+     * @param a 
+     * @param keyMapper 
+     * @return 
      */
     @SuppressWarnings("rawtypes")
     public static <T> Nullable<T> maxBy(final T[] a, final Function<? super T, ? extends Comparable> keyMapper) {
@@ -442,9 +459,10 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param c
-     * @param cmp
-     * @return
+     * @param <T> 
+     * @param c 
+     * @param keyMapper 
+     * @return 
      */
     @SuppressWarnings("rawtypes")
     public static <T> Nullable<T> maxBy(final Iterable<? extends T> c, final Function<? super T, ? extends Comparable> keyMapper) {
@@ -454,9 +472,10 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param iter
-     * @param cmp
-     * @return
+     * @param <T> 
+     * @param iter 
+     * @param keyMapper 
+     * @return 
      */
     @SuppressWarnings("rawtypes")
     public static <T> Nullable<T> maxBy(final Iterator<? extends T> iter, final Function<? super T, ? extends Comparable> keyMapper) {
@@ -535,8 +554,9 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param a
-     * @return
+     * @param <T> 
+     * @param a 
+     * @return 
      */
     public static <T extends Comparable<? super T>> Nullable<T> median(final T[] a) {
         return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.median(a));
@@ -545,8 +565,9 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param c
-     * @return
+     * @param <T> 
+     * @param c 
+     * @return 
      */
     public static <T extends Comparable<? super T>> Nullable<T> median(final Collection<? extends T> c) {
         return N.isNullOrEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.median(c));
@@ -555,9 +576,10 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param a
-     * @param cmp
-     * @return
+     * @param <T> 
+     * @param a 
+     * @param cmp 
+     * @return 
      */
     public static <T> Nullable<T> median(final T[] a, final Comparator<? super T> cmp) {
         return N.isNullOrEmpty(a) ? Nullable.<T> empty() : Nullable.of(N.median(a, cmp));
@@ -566,9 +588,10 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param c
-     * @param cmp
-     * @return
+     * @param <T> 
+     * @param c 
+     * @param cmp 
+     * @return 
      */
     public static <T> Nullable<T> median(final Collection<? extends T> c, final Comparator<? super T> cmp) {
         return N.isNullOrEmpty(c) ? Nullable.<T> empty() : Nullable.of(N.median(c, cmp));
@@ -577,9 +600,10 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param a
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param a 
+     * @param keyMapper 
+     * @return 
      */
     @SuppressWarnings("rawtypes")
     public static <T> Nullable<T> medianBy(final T[] a, final Function<? super T, ? extends Comparable> keyMapper) {
@@ -589,9 +613,10 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty.
      *
-     * @param c
-     * @param keyMapper
-     * @return
+     * @param <T> 
+     * @param c 
+     * @param keyMapper 
+     * @return 
      */
     @SuppressWarnings("rawtypes")
     public static <T> Nullable<T> medianBy(final Collection<? extends T> c, final Function<? super T, ? extends Comparable> keyMapper) {
@@ -601,9 +626,10 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}.
      *
-     * @param c
-     * @param k
-     * @return
+     * @param <T> 
+     * @param c 
+     * @param k 
+     * @return 
      */
     public static <T extends Comparable<? super T>> Nullable<T> kthLargest(final Collection<? extends T> c, final int k) {
         return N.isNullOrEmpty(c) || c.size() < k ? Nullable.<T> empty() : Nullable.of(N.kthLargest(c, k));
@@ -612,9 +638,10 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}.
      *
-     * @param a
-     * @param k
-     * @return
+     * @param <T> 
+     * @param a 
+     * @param k 
+     * @return 
      */
     public static <T extends Comparable<? super T>> Nullable<T> kthLargest(final T[] a, final int k) {
         return N.isNullOrEmpty(a) || a.length < k ? Nullable.<T> empty() : Nullable.of(N.kthLargest(a, k));
@@ -623,10 +650,11 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}.
      *
-     * @param c
-     * @param k
-     * @param cmp
-     * @return
+     * @param <T> 
+     * @param c 
+     * @param k 
+     * @param cmp 
+     * @return 
      */
     public static <T> Nullable<T> kthLargest(final Collection<? extends T> c, final int k, final Comparator<? super T> cmp) {
         return N.isNullOrEmpty(c) || c.size() < k ? Nullable.<T> empty() : Nullable.of(N.kthLargest(c, k, cmp));
@@ -635,10 +663,11 @@ public final class Iterables {
     /**
      * Returns {@code Nullable.empty()} if the specified {@code Array/Collection} is {@code null} or empty, or its length/size is less than {@code k}.
      *
-     * @param a
-     * @param k
-     * @param cmp
-     * @return
+     * @param <T> 
+     * @param a 
+     * @param k 
+     * @param cmp 
+     * @return 
      */
     public static <T> Nullable<T> kthLargest(final T[] a, final int k, final Comparator<? super T> cmp) {
         return N.isNullOrEmpty(a) || a.length < k ? Nullable.<T> empty() : Nullable.of(N.kthLargest(a, k, cmp));
@@ -1393,18 +1422,46 @@ public final class Iterables {
         return cnt == 0 ? Optional.of(BigDecimal.ZERO) : Optional.of(sum.divide(BigDecimal.valueOf(cnt)));
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param objToFind 
+     * @return 
+     */
     public static OptionalInt indexOf(final Object[] a, final Object objToFind) {
         return Index.of(a, objToFind);
     }
 
+    /**
+     * 
+     *
+     * @param c 
+     * @param objToFind 
+     * @return 
+     */
     public static OptionalInt indexOf(final Collection<?> c, final Object objToFind) {
         return Index.of(c, objToFind);
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param objToFind 
+     * @return 
+     */
     public static OptionalInt lastIndexOf(final Object[] a, final Object objToFind) {
         return Index.last(a, objToFind);
     }
 
+    /**
+     * 
+     *
+     * @param c 
+     * @param objToFind 
+     * @return 
+     */
     public static OptionalInt lastIndexOf(final Collection<?> c, final Object objToFind) {
         return Index.last(c, objToFind);
     }
@@ -1433,6 +1490,19 @@ public final class Iterables {
         return res.isPresent() ? res : N.findLastIndex(a, predicateForLast);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param <E> 
+     * @param <E2> 
+     * @param c 
+     * @param predicateForFirst 
+     * @param predicateForLast 
+     * @return 
+     * @throws E 
+     * @throws E2 
+     */
     public static <T, E extends Exception, E2 extends Exception> OptionalInt findFirstOrLastIndex(final Collection<? extends T> c,
             final Throwables.Predicate<? super T, E> predicateForFirst, final Throwables.Predicate<? super T, E2> predicateForLast) throws E, E2 {
         if (N.isNullOrEmpty(c)) {
@@ -1645,6 +1715,13 @@ public final class Iterables {
             super(set);
         }
 
+        /**
+         * 
+         *
+         * @param <S> 
+         * @param set 
+         * @return 
+         */
         public <S extends Set<? super E>> S copyInto(S set) {
             set.addAll(this);
             return set;
@@ -1656,10 +1733,15 @@ public final class Iterables {
      * elements that are contained in either backing set. Iterating over the returned set iterates
      * first over all the elements of {@code set1}, then over each element of {@code set2}, in order,
      * that is not contained in {@code set1}.
-     *
+     * 
      * <p>Results are undefined if {@code set1} and {@code set2} are sets based on different
      * equivalence relations (as {@link HashSet}, {@link TreeSet}, and the {@link Map#keySet} of an
      * {@code IdentityHashMap} all are).
+     *
+     * @param <E> 
+     * @param set1 
+     * @param set2 
+     * @return 
      */
     public static <E> SetView<E> union(final Set<? extends E> set1, final Set<? extends E> set2) {
         // N.checkArgNotNull(set1, "set1");
@@ -1757,28 +1839,33 @@ public final class Iterables {
      * Returns an unmodifiable <b>view</b> of the intersection of two sets. The returned set contains
      * all elements that are contained by both backing sets. The iteration order of the returned set
      * matches that of {@code set1}.
-     *
+     * 
      * <p>Results are undefined if {@code set1} and {@code set2} are sets based on different
      * equivalence relations (as {@code HashSet}, {@code TreeSet}, and the keySet of an {@code
      * IdentityHashMap} all are).
-     *
+     * 
      * <p><b>Note:</b> The returned view performs slightly better when {@code set1} is the smaller of
      * the two sets. If you have reason to believe one of your sets will generally be smaller than the
      * other, pass it first. Unfortunately, since this method sets the generic type of the returned
      * set based on the type of the first set passed, this could in rare cases force you to make a
      * cast, for example:
-     *
+     * 
      * <pre>{@code
      * Set<Object> aFewBadObjects = ...
      * Set<String> manyBadStrings = ...
-     *
+     * 
      * // impossible for a non-String to be in the intersection
      * SuppressWarnings("unchecked")
      * Set<String> badStrings = (Set) Sets.intersection(
      *     aFewBadObjects, manyBadStrings);
      * }</pre>
-     *
+     * 
      * <p>This is unfortunate, but should come up only very rarely.
+     *
+     * @param <E> 
+     * @param set1 
+     * @param set2 
+     * @return 
      */
     public static <E> SetView<E> intersection(final Set<E> set1, final Set<?> set2) {
         // N.checkArgNotNull(set1, "set1");
@@ -1869,10 +1956,15 @@ public final class Iterables {
      * all elements that are contained by {@code set1} and not contained by {@code set2}. {@code set2}
      * may also contain elements not present in {@code set1}; these are simply ignored. The iteration
      * order of the returned set matches that of {@code set1}.
-     *
+     * 
      * <p>Results are undefined if {@code set1} and {@code set2} are sets based on different
      * equivalence relations (as {@code HashSet}, {@code TreeSet}, and the keySet of an {@code
      * IdentityHashMap} all are).
+     *
+     * @param <E> 
+     * @param set1 
+     * @param set2 
+     * @return 
      */
     public static <E> SetView<E> difference(final Set<E> set1, final Set<?> set2) {
         // N.checkArgNotNull(set1, "set1");
@@ -1957,11 +2049,15 @@ public final class Iterables {
      * Returns an unmodifiable <b>view</b> of the symmetric difference of two sets. The returned set
      * contains all elements that are contained in either {@code set1} or {@code set2} but not in
      * both. The iteration order of the returned set is undefined.
-     *
+     * 
      * <p>Results are undefined if {@code set1} and {@code set2} are sets based on different
      * equivalence relations (as {@code HashSet}, {@code TreeSet}, and the keySet of an {@code
      * IdentityHashMap} all are).
      *
+     * @param <E> 
+     * @param set1 
+     * @param set2 
+     * @return 
      * @since 3.0
      */
     public static <E> SetView<E> symmetricDifference(final Set<? extends E> set1, final Set<? extends E> set2) {
@@ -2060,6 +2156,14 @@ public final class Iterables {
         };
     }
 
+    /**
+     * 
+     *
+     * @param <K> 
+     * @param set 
+     * @param range 
+     * @return 
+     */
     public static <K extends Comparable<? super K>> NavigableSet<K> subSet(NavigableSet<K> set, Range<K> range) {
         if (set.comparator() != null && set.comparator() != Comparators.naturalOrder()) {
             N.checkArgument(set.comparator().compare(range.lowerEndpoint(), range.upperEndpoint()) <= 0,

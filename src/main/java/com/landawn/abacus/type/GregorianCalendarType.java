@@ -37,6 +37,11 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
         super(GREGORIAN_CALENDAR);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<GregorianCalendar> clazz() {
         return GregorianCalendar.class;

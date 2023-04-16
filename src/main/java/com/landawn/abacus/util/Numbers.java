@@ -651,6 +651,14 @@ public final class Numbers {
         }
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param value 
+     * @param targetType 
+     * @return 
+     */
     public static <T extends Number> T convert(final Number value, final Class<? extends T> targetType) {
         if (value == null) {
             return N.defaultValueOf(targetType);
@@ -666,6 +674,14 @@ public final class Numbers {
         }
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param value 
+     * @param targetType 
+     * @return 
+     */
     public static <T extends Number> T convert(final Number value, final Type<? extends T> targetType) {
         if (value == null) {
             return targetType.defaultValue();

@@ -41,6 +41,11 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
         super(typeName);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<String> clazz() {
         return String.class;

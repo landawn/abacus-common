@@ -26,10 +26,21 @@ public final class SnappyOutputStream extends OutputStream {
 
     private final org.xerial.snappy.SnappyOutputStream out;
 
+    /**
+     * 
+     *
+     * @param os 
+     */
     public SnappyOutputStream(OutputStream os) {
         this.out = new org.xerial.snappy.SnappyOutputStream(os);
     }
 
+    /**
+     * 
+     *
+     * @param os 
+     * @param bufferSizes 
+     */
     public SnappyOutputStream(OutputStream os, int bufferSizes) {
         this.out = new org.xerial.snappy.SnappyOutputStream(os, bufferSizes);
     }

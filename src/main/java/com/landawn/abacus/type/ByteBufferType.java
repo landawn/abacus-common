@@ -36,6 +36,11 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
         super(ClassUtil.getSimpleClassName(cls));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<ByteBuffer> clazz() {
         return ByteBuffer.class;

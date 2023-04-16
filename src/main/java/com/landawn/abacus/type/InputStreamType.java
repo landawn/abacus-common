@@ -78,6 +78,11 @@ public class InputStreamType extends AbstractType<InputStream> {
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<InputStream> clazz() {
         return typeClass;

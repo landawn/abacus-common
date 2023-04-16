@@ -33,15 +33,22 @@ public class BlobType extends AbstractType<Blob> {
         super(BLOB);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<Blob> clazz() {
         return Blob.class;
     }
 
     /**
+     * 
      *
-     * @param x
-     * @return
+     * @param x 
+     * @return 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public String stringOf(Blob x) throws UnsupportedOperationException {
@@ -49,9 +56,11 @@ public class BlobType extends AbstractType<Blob> {
     }
 
     /**
+     * 
      *
-     * @param str
-     * @return
+     * @param str 
+     * @return 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public Blob valueOf(String str) throws UnsupportedOperationException {

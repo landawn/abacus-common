@@ -27,21 +27,43 @@ public class StringBufferType extends AbstractCharSequenceType<StringBuffer> {
         super(STRING_BUFFER);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<StringBuffer> clazz() {
         return StringBuffer.class;
     }
 
+    /**
+     * 
+     *
+     * @param x 
+     * @return 
+     */
     @Override
     public String stringOf(StringBuffer x) {
         return x == null ? null : x.toString();
     }
 
+    /**
+     * 
+     *
+     * @param str 
+     * @return 
+     */
     @Override
     public StringBuffer valueOf(String str) {
         return str == null ? null : new StringBuffer(str);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public boolean isImmutable() {
         return false;

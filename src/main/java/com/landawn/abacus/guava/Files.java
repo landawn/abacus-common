@@ -386,10 +386,20 @@ public abstract class Files { //NOSONAR
         return com.google.common.io.MoreFiles.getFileExtension(path);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public static Traverser<File> fileTraverser() {
         return com.google.common.io.Files.fileTraverser();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public static Traverser<Path> pathTraverser() {
         return com.google.common.io.MoreFiles.fileTraverser();
     }

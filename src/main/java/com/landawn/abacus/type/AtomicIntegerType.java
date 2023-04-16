@@ -40,6 +40,11 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
         super(ATOMIC_INTEGER);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<AtomicInteger> clazz() {
         return AtomicInteger.class;

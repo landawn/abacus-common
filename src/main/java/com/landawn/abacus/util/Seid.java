@@ -53,8 +53,10 @@ public class Seid implements EntityId {
     }
 
     /**
-     * @deprecated
-     * @param entityName
+     * 
+     *
+     * @param entityName 
+     * @deprecated 
      */
     @Deprecated
     @Internal
@@ -66,12 +68,23 @@ public class Seid implements EntityId {
         this.entityName = entityName == null ? N.EMPTY_STRING : entityName;
     }
 
+    /**
+     * 
+     *
+     * @param propName 
+     * @param propValue 
+     */
     public Seid(String propName, Object propValue) {
         this(NameUtil.getParentName(propName));
 
         set(propName, propValue);
     }
 
+    /**
+     * 
+     *
+     * @param nameValues 
+     */
     public Seid(Map<String, Object> nameValues) {
         this(NameUtil.getParentName(nameValues.keySet().iterator().next()));
 
@@ -188,6 +201,11 @@ public class Seid implements EntityId {
         return seid;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String entityName() {
         return entityName;
@@ -208,12 +226,24 @@ public class Seid implements EntityId {
         return (T) values.get(propName);
     }
 
+    /**
+     * 
+     *
+     * @param propName 
+     * @return 
+     */
     @Override
     public int getInt(String propName) {
         final Object value = get(propName);
         return value instanceof Number ? ((Number) value).intValue() : N.convert(value, int.class);
     }
 
+    /**
+     * 
+     *
+     * @param propName 
+     * @return 
+     */
     @Override
     public long getLong(String propName) {
         final Object value = get(propName);
@@ -221,11 +251,12 @@ public class Seid implements EntityId {
     }
 
     /**
+     * 
      *
-     * @param propName
-     * @param targetType
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param propName 
+     * @param targetType 
+     * @return 
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -362,16 +393,31 @@ public class Seid implements EntityId {
         return values.containsKey(propName);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Set<String> keySet() {
         return values.keySet();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Set<Entry<String, Object>> entrySet() {
         return values.entrySet();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int size() {
         return values.size();
@@ -429,11 +475,21 @@ public class Seid implements EntityId {
         return (obj instanceof EntityId) ? toString().equals(obj.toString()) : false;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         return toString().hashCode();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return stringValue();

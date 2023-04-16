@@ -39,6 +39,11 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
         super(BIG_DECIMAL);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<BigDecimal> clazz() {
         return BigDecimal.class;
@@ -64,6 +69,14 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
         return N.isNullOrEmpty(str) ? null : new BigDecimal(str, MathContext.UNLIMITED);
     }
 
+    /**
+     * 
+     *
+     * @param cbuf 
+     * @param offset 
+     * @param len 
+     * @return 
+     */
     @Override
     public BigDecimal valueOf(char[] cbuf, int offset, int len) {
         return len == 0 ? null : new BigDecimal(cbuf, offset, len, MathContext.UNLIMITED);

@@ -20,10 +20,23 @@ public final class BrotliInputStream extends InputStream {
 
     private final org.brotli.dec.BrotliInputStream in;
 
+    /**
+     * 
+     *
+     * @param source 
+     * @throws IOException 
+     */
     public BrotliInputStream(InputStream source) throws IOException {
         in = new org.brotli.dec.BrotliInputStream(source);
     }
 
+    /**
+     * 
+     *
+     * @param source 
+     * @param byteReadBufferSize 
+     * @throws IOException 
+     */
     public BrotliInputStream(InputStream source, int byteReadBufferSize) throws IOException {
         in = new org.brotli.dec.BrotliInputStream(source, byteReadBufferSize);
     }

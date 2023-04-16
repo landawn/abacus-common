@@ -126,14 +126,28 @@ public class EventBus {
 
     private static final EventBus INSTANCE = new EventBus("default");
 
+    /**
+     * 
+     */
     public EventBus() {
         this(N.guid());
     }
 
+    /**
+     * 
+     *
+     * @param identifier 
+     */
     public EventBus(final String identifier) {
         this(identifier, DEFAULT_EXECUTOR);
     }
 
+    /**
+     * 
+     *
+     * @param identifier 
+     * @param executor 
+     */
     public EventBus(final String identifier, final Executor executor) {
         this.identifier = identifier;
         this.executor = executor == null ? DEFAULT_EXECUTOR : executor;
@@ -169,6 +183,11 @@ public class EventBus {
         return INSTANCE;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public String identifier() {
         return identifier;
     }

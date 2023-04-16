@@ -42,11 +42,21 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
         this.elementType = parameterTypes[0];
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @SuppressWarnings("rawtypes")
     @Override
     public Class<Optional<T>> clazz() {

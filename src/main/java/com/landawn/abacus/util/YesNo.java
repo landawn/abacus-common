@@ -30,6 +30,11 @@ public enum YesNo {
         this.intValue = intValue;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public int intValue() {
         return intValue;
     }

@@ -31,6 +31,11 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
         super(OPTIONAL_FLOAT);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<OptionalFloat> clazz() {
         return OptionalFloat.class;

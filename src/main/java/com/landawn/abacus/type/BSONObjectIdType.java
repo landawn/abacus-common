@@ -31,6 +31,11 @@ public class BSONObjectIdType extends AbstractType<ObjectId> {
         super(OBJECT_ID);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<ObjectId> clazz() {
         return ObjectId.class;

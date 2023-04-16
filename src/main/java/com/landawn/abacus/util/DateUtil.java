@@ -1834,6 +1834,14 @@ public abstract class DateUtil {
         return createDate(date.getClass(), gval.getTimeInMillis());
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param date 
+     * @param field 
+     * @return 
+     */
     public static <T extends java.util.Date> T round(final T date, final CalendarField field) {
         return round(date, field.value());
     }
@@ -1882,6 +1890,14 @@ public abstract class DateUtil {
         return createCalendar(calendar, rounded.getTimeInMillis());
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param calendar 
+     * @param field 
+     * @return 
+     */
     public static <T extends Calendar> T round(final T calendar, final CalendarField field) {
         return round(calendar, field.value());
     }

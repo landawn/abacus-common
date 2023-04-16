@@ -33,6 +33,11 @@ public class SQLArrayType extends AbstractType<Array> {
         super(SQL_ARRAY);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<Array> clazz() {
         return Array.class;
@@ -49,9 +54,11 @@ public class SQLArrayType extends AbstractType<Array> {
     }
 
     /**
+     * 
      *
-     * @param x
-     * @return
+     * @param x 
+     * @return 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public String stringOf(Array x) throws UnsupportedOperationException {
@@ -59,9 +66,11 @@ public class SQLArrayType extends AbstractType<Array> {
     }
 
     /**
+     * 
      *
-     * @param str
-     * @return
+     * @param str 
+     * @return 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public Array valueOf(String str) throws UnsupportedOperationException {

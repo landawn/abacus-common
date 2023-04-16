@@ -30,6 +30,11 @@ public final class CharacterType extends AbstractCharacterType {
         super(CHARACTER);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<Character> clazz() {
         return Character.class;

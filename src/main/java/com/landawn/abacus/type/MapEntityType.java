@@ -35,6 +35,11 @@ public class MapEntityType extends AbstractType<MapEntity> {
         this.typeClass = MapEntity.class;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<MapEntity> clazz() {
         return typeClass;

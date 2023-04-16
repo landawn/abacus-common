@@ -231,23 +231,25 @@ public final class URLEncodedUtil {
     }
 
     /**
+     * 
      *
-     * @param urlQuery
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param urlQuery 
+     * @param targetClass 
+     * @return 
      */
     public static <T> T decode(final String urlQuery, final Class<? extends T> targetClass) {
         return decode(urlQuery, Charsets.UTF_8, targetClass);
     }
 
     /**
+     * 
      *
-     * @param urlQuery
-     * @param charset
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param urlQuery 
+     * @param charset 
+     * @param targetClass 
+     * @return 
      */
     public static <T> T decode(final String urlQuery, final Charset charset, final Class<? extends T> targetClass) {
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetClass);
@@ -294,11 +296,11 @@ public final class URLEncodedUtil {
 
     /**
      * Parameters 2 bean.
-     * @param parameters
-     * @param targetClass
      *
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param parameters 
+     * @param targetClass 
+     * @return 
      */
     public static <T> T parameters2Bean(final Map<String, String[]> parameters, final Class<? extends T> targetClass) {
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetClass);
@@ -438,10 +440,12 @@ public final class URLEncodedUtil {
     }
 
     /**
+     * 
      *
-     * @param output
-     * @param parameters
-     * @param charset
+     * @param output 
+     * @param parameters 
+     * @param charset 
+     * @param namingPolicy 
      */
     @SuppressWarnings("rawtypes")
     public static void encode(final StringBuilder output, final Object parameters, final Charset charset, final NamingPolicy namingPolicy) {

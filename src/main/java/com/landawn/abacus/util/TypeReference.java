@@ -48,6 +48,11 @@ public abstract class TypeReference<T> {
         type = TypeFactory.getType(((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0]);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Type<T> type() {
         return type;
     }

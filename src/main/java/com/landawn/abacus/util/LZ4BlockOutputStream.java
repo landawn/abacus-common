@@ -26,10 +26,21 @@ public final class LZ4BlockOutputStream extends OutputStream {
 
     private final net.jpountz.lz4.LZ4BlockOutputStream out;
 
+    /**
+     * 
+     *
+     * @param os 
+     */
     public LZ4BlockOutputStream(OutputStream os) {
         this.out = new net.jpountz.lz4.LZ4BlockOutputStream(os);
     }
 
+    /**
+     * 
+     *
+     * @param os 
+     * @param blockSize 
+     */
     public LZ4BlockOutputStream(OutputStream os, int blockSize) {
         this.out = new net.jpountz.lz4.LZ4BlockOutputStream(os, blockSize);
     }

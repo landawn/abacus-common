@@ -28,10 +28,20 @@ abstract class AbstractIndexed implements Immutable {
         this.index = index;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public int index() {
         return (int) index;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public long longIndex() {
         return index;
     }

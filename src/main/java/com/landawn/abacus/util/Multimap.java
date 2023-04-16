@@ -963,9 +963,9 @@ public class Multimap<K, E, V extends Collection<E>> {
      * Replace the specified {@code oldValue} (all occurrences) with the specified {@code newValue}.
      * <code>False</code> is returned if no <code>oldValue</code> is found.
      *
-     * @param key
-     * @param oldValues
-     * @param newValue
+     * @param key 
+     * @param oldValue 
+     * @param newValue 
      * @return <code>true</code> if this Multimap is modified by this operation, otherwise <code>false</code>.
      */
     public boolean replaceAll(final K key, final E oldValue, final E newValue) {
@@ -1650,6 +1650,11 @@ public class Multimap<K, E, V extends Collection<E>> {
         return newValue;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Multimap<K, E, V> copy() {
         final Multimap<K, E, V> copy = new Multimap<>(mapSupplier, valueSupplier);
 
@@ -1658,6 +1663,14 @@ public class Multimap<K, E, V extends Collection<E>> {
         return copy;
     }
 
+    /**
+     * 
+     *
+     * @param <VV> 
+     * @param <M> 
+     * @param multimapSupplier 
+     * @return 
+     */
     public <VV extends Collection<K>, M extends Multimap<E, K, VV>> M inverse(final IntFunction<? extends M> multimapSupplier) {
         final Multimap<K, E, V> multimap = this;
         final M res = multimapSupplier.apply(multimap.size());
@@ -1677,14 +1690,29 @@ public class Multimap<K, E, V extends Collection<E>> {
         return res;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Set<K> keySet() {
         return valueMap.keySet();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Collection<V> values() {
         return valueMap.values();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public List<E> flatValues() {
         final List<E> result = new ArrayList<>(totalCountOfValues());
 
@@ -1711,10 +1739,20 @@ public class Multimap<K, E, V extends Collection<E>> {
         return result;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Set<Map.Entry<K, V>> entrySet() {
         return valueMap.entrySet();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Map<K, V> toMap() {
         final Map<K, V> result = Maps.newOrderingMap(valueMap);
 
@@ -1735,6 +1773,11 @@ public class Multimap<K, E, V extends Collection<E>> {
         return map;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Multiset<K> toMultiset() {
         final Multiset<K> multiset = new Multiset<>(valueMap.getClass());
 
@@ -1770,10 +1813,20 @@ public class Multimap<K, E, V extends Collection<E>> {
         return valueMap;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Stream<Map.Entry<K, V>> stream() {
         return Stream.of(valueMap.entrySet());
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public EntryStream<K, V> entryStream() {
         return EntryStream.of(valueMap);
     }
@@ -1785,6 +1838,11 @@ public class Multimap<K, E, V extends Collection<E>> {
         valueMap.clear();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public int size() {
         return valueMap.size();
     }
@@ -1850,14 +1908,20 @@ public class Multimap<K, E, V extends Collection<E>> {
     /**
      * Accept if not empty.
      *
-     * @param <X>
-     * @param action
+     * @param <X> 
+     * @param action 
+     * @return 
      * @throws X the x
      */
     public <X extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super Multimap<K, E, V>, X> action) throws X {
         return If.is(size() > 0).then(this, action);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         return valueMap.hashCode();
@@ -1874,6 +1938,11 @@ public class Multimap<K, E, V extends Collection<E>> {
         return obj == this || (obj instanceof Multimap && valueMap.equals(((Multimap<K, E, V>) obj).valueMap));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return valueMap.toString();

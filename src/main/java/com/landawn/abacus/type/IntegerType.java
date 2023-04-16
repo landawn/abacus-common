@@ -32,6 +32,11 @@ public final class IntegerType extends AbstractIntegerType {
         super(INTEGER);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {

@@ -55,9 +55,17 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
     private int size = 0;
 
+    /**
+     * 
+     */
     public ByteList() {
     }
 
+    /**
+     * 
+     *
+     * @param initialCapacity 
+     */
     public ByteList(int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_BYTE_ARRAY : new byte[initialCapacity];
     }
@@ -71,6 +79,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         this(a, a.length);
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param size 
+     */
     public ByteList(byte[] a, int size) {
         N.checkFromIndexSize(0, size, a.length);
 
@@ -557,6 +571,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public boolean removeDuplicates() {
         if (size < 2) {
@@ -721,11 +740,25 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         this.size = newSize;
     }
 
+    /**
+     * 
+     *
+     * @param fromIndex 
+     * @param toIndex 
+     * @param newPositionStartIndex 
+     */
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionStartIndex) {
         N.moveRange(elementData, fromIndex, toIndex, newPositionStartIndex);
     }
 
+    /**
+     * 
+     *
+     * @param fromIndex 
+     * @param toIndex 
+     * @param replacement 
+     */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final byte[] replacement) {
         N.checkFromToIndex(fromIndex, toIndex, size());
@@ -1169,6 +1202,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return N.INDEX_NOT_FOUND;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public OptionalByte min() {
         return size() == 0 ? OptionalByte.empty() : OptionalByte.of(N.min(elementData, 0, size));
     }
@@ -1185,6 +1223,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return fromIndex == toIndex ? OptionalByte.empty() : OptionalByte.of(N.min(elementData, fromIndex, toIndex));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public OptionalByte median() {
         return size() == 0 ? OptionalByte.empty() : OptionalByte.of(N.median(elementData, 0, size));
     }
@@ -1201,6 +1244,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return fromIndex == toIndex ? OptionalByte.empty() : OptionalByte.of(N.median(elementData, fromIndex, toIndex));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public OptionalByte max() {
         return size() == 0 ? OptionalByte.empty() : OptionalByte.of(N.max(elementData, 0, size));
     }
@@ -1240,6 +1288,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return toIndex - fromIndex < k ? OptionalByte.empty() : OptionalByte.of(N.kthLargest(elementData, fromIndex, toIndex, k));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public int sum() {
         return sum(0, size());
     }
@@ -1256,6 +1309,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return N.sum(elementData, fromIndex, toIndex);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public OptionalDouble average() {
         return average(0, size());
     }
@@ -1340,10 +1398,20 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public OptionalByte first() {
         return size() == 0 ? OptionalByte.empty() : OptionalByte.of(elementData[0]);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public OptionalByte last() {
         return size() == 0 ? OptionalByte.empty() : OptionalByte.of(elementData[size() - 1]);
     }
@@ -1773,6 +1841,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return N.hasDuplicates(elementData, 0, size, false);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public boolean isSorted() {
         return N.isSorted(elementData, 0, size);
@@ -1811,11 +1884,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * This List should be sorted first.
      *
-     * @param key
+     * @param valueToFind
      * @return
      */
-    public int binarySearch(final byte key) {
-        return N.binarySearch(elementData, key);
+    public int binarySearch(final byte valueToFind) {
+        return N.binarySearch(elementData, valueToFind);
     }
 
     /**
@@ -1823,13 +1896,13 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param fromIndex
      * @param toIndex
-     * @param key
+     * @param valueToFind
      * @return
      */
-    public int binarySearch(final int fromIndex, final int toIndex, final byte key) {
+    public int binarySearch(final int fromIndex, final int toIndex, final byte valueToFind) {
         checkFromToIndex(fromIndex, toIndex);
 
-        return N.binarySearch(elementData, fromIndex, toIndex, key);
+        return N.binarySearch(elementData, fromIndex, toIndex, valueToFind);
     }
 
     /**
@@ -1901,6 +1974,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         set(i, set(j, elementData[i]));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public ByteList copy() {
         return new ByteList(N.copyOfRange(elementData, 0, size));
@@ -2050,11 +2128,21 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return size == 0;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int size() {
         return size;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public List<Byte> boxed() {
         return boxed(0, size);
     }
@@ -2077,6 +2165,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return res;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public byte[] toArray() {
         return N.copyOfRange(elementData, 0, size);
@@ -2138,6 +2231,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return multiset;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public ByteIterator iterator() {
         if (isEmpty()) {
             return ByteIterator.EMPTY;
@@ -2146,6 +2244,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return ByteIterator.of(elementData, 0, size);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public ByteStream stream() {
         return ByteStream.of(elementData, 0, size());
     }
@@ -2203,8 +2306,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Accept if not empty.
      *
-     * @param <E>
-     * @param action
+     * @param <E> 
+     * @param action 
+     * @return 
      * @throws E the e
      */
     @Override
@@ -2212,6 +2316,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return If.is(size > 0).then(this, action);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         return N.hashCode(elementData, 0, size);
@@ -2236,6 +2345,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return false;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return size == 0 ? "[]" : N.toString(elementData, 0, size);

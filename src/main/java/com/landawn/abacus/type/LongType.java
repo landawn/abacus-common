@@ -32,6 +32,11 @@ public final class LongType extends AbstractLongType {
         super(LONG);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {

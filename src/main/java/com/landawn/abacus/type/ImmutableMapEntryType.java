@@ -63,11 +63,21 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
         this.jdc = JDC.create().setMapKeyType(keyType).setMapValueType(valueType);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<AbstractMap.SimpleImmutableEntry<K, V>> clazz() {
         return typeClass;

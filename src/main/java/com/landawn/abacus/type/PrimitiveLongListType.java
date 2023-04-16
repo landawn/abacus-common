@@ -40,6 +40,11 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
         super(LONG_LIST);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<LongList> clazz() {
         return LongList.class;

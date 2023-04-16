@@ -36,6 +36,11 @@ public class LocalTimeType extends AbstractType<LocalTime> {
         super(LOCAL_TIME);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<LocalTime> clazz() {
         return LocalTime.class;

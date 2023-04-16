@@ -52,10 +52,20 @@ public final class IndexedFloat extends AbstractIndexed {
         return new IndexedFloat(index, value);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public float value() {
         return value;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         return (int) index + (int) (value * 31);
@@ -71,6 +81,11 @@ public final class IndexedFloat extends AbstractIndexed {
         return obj instanceof IndexedFloat && ((IndexedFloat) obj).index == index && N.equals(((IndexedFloat) obj).value, value);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return "[" + index + "]=" + value;

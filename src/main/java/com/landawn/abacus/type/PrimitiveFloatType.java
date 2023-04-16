@@ -30,6 +30,11 @@ public final class PrimitiveFloatType extends AbstractFloatType {
         super(FLOAT);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {
@@ -46,6 +51,11 @@ public final class PrimitiveFloatType extends AbstractFloatType {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Float defaultValue() {
         return DEFAULT_VALUE;

@@ -28,9 +28,20 @@ public class IntSummaryStatistics implements IntConsumer {
 
     private int max = Integer.MIN_VALUE;
 
+    /**
+     * 
+     */
     public IntSummaryStatistics() {
     }
 
+    /**
+     * 
+     *
+     * @param count 
+     * @param min 
+     * @param max 
+     * @param sum 
+     */
     public IntSummaryStatistics(long count, int min, int max, long sum) {
         this.count = count;
         this.sum = sum;
@@ -122,6 +133,11 @@ public class IntSummaryStatistics implements IntConsumer {
     //        return OptionalDouble.of(getAverage());
     //    }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return String.format("{min=%d, max=%d, count=%d, sum=%d, average=%f}", getMin(), getMax(), getCount(), getSum(), getAverage());

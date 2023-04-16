@@ -37,6 +37,9 @@ public final class Pair<L, R> implements Mutable {
 
     public R right; //NOSONAR
 
+    /**
+     * 
+     */
     public Pair() {
     }
 
@@ -70,6 +73,13 @@ public final class Pair<L, R> implements Mutable {
 
     private static final Pair<?, ?>[] EMPTY_ARRAY = new Pair[0];
 
+    /**
+     * 
+     *
+     * @param <L> 
+     * @param <R> 
+     * @return 
+     */
     @SuppressWarnings("unchecked")
     public static <L, R> Pair<L, R>[] emptyArray() {
         return (Pair<L, R>[]) EMPTY_ARRAY;
@@ -295,10 +305,20 @@ public final class Pair<L, R> implements Mutable {
         return new Pair<>(this.right, this.left);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Pair<L, R> copy() {
         return new Pair<>(this.left, this.right);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Object[] toArray() {
         return new Object[] { left, right };
     }
@@ -399,30 +419,69 @@ public final class Pair<L, R> implements Mutable {
         return predicate.test(this) ? Optional.of(this) : Optional.<Pair<L, R>> empty();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Stream<Pair<L, R>> stream() {
         return Stream.of(this);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param <E> 
+     * @param func 
+     * @return 
+     * @throws E 
+     */
     public <T, E extends Exception> Stream<T> stream(final Throwables.Function<? super Pair<L, R>, Stream<T>, E> func) throws E {
         return func.apply(this);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Optional<Pair<L, R>> toOptional() {
         return Optional.of(this);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Tuple2<L, R> toTuple() {
         return Tuple.of(left, right);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Map.Entry<L, R> toEntry() {
         return new AbstractMap.SimpleEntry<>(left, right);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public ImmutableEntry<L, R> toImmutableEntry() {
         return ImmutableEntry.of(left, right);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -451,6 +510,11 @@ public final class Pair<L, R> implements Mutable {
         return false;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return "[" + N.toString(left) + ", " + N.toString(right) + "]";

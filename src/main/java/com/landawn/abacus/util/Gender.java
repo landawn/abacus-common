@@ -30,6 +30,11 @@ public enum Gender {
         this.intValue = intValue;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public int intValue() {
         return intValue;
     }

@@ -32,6 +32,12 @@ public class WebUtil {
 
     static final ImmutableBiMap<HttpMethod, String> httpMethodMap = N.enumMapOf(HttpMethod.class);
 
+    /**
+     * 
+     *
+     * @param curl 
+     * @return 
+     */
     public static String curl2HttpRequest(String curl) {
         String indent = "\n    ";
         final List<String> tokens = parseCurl(curl);
@@ -108,6 +114,12 @@ public class WebUtil {
         return sb.toString();
     }
 
+    /**
+     * 
+     *
+     * @param curl 
+     * @return 
+     */
     public static String curl2OkHttpRequest(String curl) {
         String indent = "\n    ";
         final List<String> tokens = parseCurl(curl);
@@ -248,27 +260,46 @@ public class WebUtil {
     }
 
     /**
-     *
      * <pre>
      * <code>
      * final OkHttpClient client = new OkHttpClient().newBuilder().addInterceptor(new com.moczul.ok2curl.CurlInterceptor(System.out::println)).build();
      * </code>
      * </pre>
      *
-     * @param url
-     * @return
+     * @param url 
+     * @param logHandler 
+     * @return 
      * @see https://github.com/mrmike/Ok2Curl
      */
     public static OkHttpRequest createOkHttpRequestForCurl(final String url, Consumer<String> logHandler) {
         return createOkHttpRequestForCurl(url, CurlInterceptor.DEFAULT_QUOTE_CHAR, logHandler);
     }
 
+    /**
+     * 
+     *
+     * @param url 
+     * @param quoteChar 
+     * @param logHandler 
+     * @return 
+     */
     public static OkHttpRequest createOkHttpRequestForCurl(final String url, final char quoteChar, Consumer<String> logHandler) {
         final okhttp3.OkHttpClient client = new okhttp3.OkHttpClient().newBuilder().addInterceptor(new CurlInterceptor(quoteChar, logHandler)).build();
 
         return OkHttpRequest.create(url, client);
     }
 
+    /**
+     * 
+     *
+     * @param httpMethod 
+     * @param url 
+     * @param headers 
+     * @param body 
+     * @param bodyType 
+     * @param quoteChar 
+     * @return 
+     */
     public static String buildCurl(final String httpMethod, final String url, final Map<String, ?> headers, final String body, final String bodyType,
             final char quoteChar) {
         final StringBuilder sb = Objectory.createStringBuilder();
@@ -315,6 +346,12 @@ public class WebUtil {
         }
     }
 
+    /**
+     * 
+     *
+     * @param requestBodyType 
+     * @param httpHeaders 
+     */
     public static void setContentTypeByRequestBodyType(final String requestBodyType, final HttpHeaders httpHeaders) {
         if (N.notNullOrEmpty(requestBodyType) && httpHeaders.get(HttpHeaders.Names.CONTENT_TYPE) == null) {
             httpHeaders.setContentType(requestBodyType);

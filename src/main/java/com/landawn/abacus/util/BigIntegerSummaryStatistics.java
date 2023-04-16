@@ -32,9 +32,20 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
 
     private BigInteger max = null;
 
+    /**
+     * 
+     */
     public BigIntegerSummaryStatistics() {
     }
 
+    /**
+     * 
+     *
+     * @param count 
+     * @param min 
+     * @param max 
+     * @param sum 
+     */
     public BigIntegerSummaryStatistics(long count, BigInteger min, BigInteger max, BigInteger sum) {
         this.count = count;
         this.sum = sum;
@@ -126,6 +137,11 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
     //        return Optional.of(getAverage());
     //    }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return String.format("{min=%d, max=%d, count=%d, sum=%d, average=%f}", getMin(), getMax(), getCount(), getSum(), getAverage());

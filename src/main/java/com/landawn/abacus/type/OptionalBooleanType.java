@@ -29,6 +29,11 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
         super(OPTIONAL_BOOLEAN);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<OptionalBoolean> clazz() {
         return OptionalBoolean.class;

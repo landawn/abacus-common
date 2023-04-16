@@ -34,5 +34,10 @@ public @interface Column {
     @Deprecated
     String value() default "";
 
+    /**
+     * 
+     *
+     * @return 
+     */
     String name() default "";
 }

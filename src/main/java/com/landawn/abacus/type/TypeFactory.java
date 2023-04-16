@@ -1157,9 +1157,11 @@ public final class TypeFactory {
     }
 
     /**
+     * 
      *
-     * @param cls
-     * @param type
+     * @param <T> 
+     * @param cls 
+     * @param type 
      */
     public static <T> void registerType(final Class<T> cls, final Type<T> type) {
         N.checkArgNotNull(cls, "cls");

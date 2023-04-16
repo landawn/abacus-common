@@ -68,6 +68,11 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
         return new MutableByte(value);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public byte value() {
         return value;
     }

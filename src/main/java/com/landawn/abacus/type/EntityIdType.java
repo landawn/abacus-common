@@ -35,6 +35,11 @@ public class EntityIdType extends AbstractType<EntityId> {
         this.typeClass = EntityId.class;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<EntityId> clazz() {
         return typeClass;

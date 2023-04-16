@@ -208,10 +208,10 @@ public class Builder<T> {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param val
-     * @return
+     * @param val 
+     * @return 
      * @throws IllegalArgumentException if the specified {@code val} is {@code null}.
      */
     public static final DataSetBuilder of(final DataSet val) throws IllegalArgumentException {
@@ -304,6 +304,11 @@ public class Builder<T> {
     //        return new Builder<>(supplier.get());
     //    }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public T val() {
         return val;
     }
@@ -357,6 +362,11 @@ public class Builder<T> {
         return func.apply(val);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Stream<T> stream() {
         return Stream.of(val);
     }
@@ -2220,12 +2230,12 @@ public class Builder<T> {
         }
 
         /**
+         * 
          *
-         * @param <T>
-         * @param <E>
-         * @param columnNames
-         * @param func
-         * @return
+         * @param <E> 
+         * @param columnNames 
+         * @param func 
+         * @return 
          * @throws E the e
          */
         public <E extends Exception> DataSetBuilder updateColumns(Collection<String> columnNames, Throwables.Function<?, ?, E> func) throws E {

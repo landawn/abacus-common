@@ -37,6 +37,11 @@ public class URLType extends AbstractType<URL> {
         super(URL);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<URL> clazz() {
         return URL.class;

@@ -198,6 +198,12 @@ public final class ExceptionUtil {
     static final java.util.function.Predicate<String> uncheckedExceptionNameTester = Pattern.compile("Unchecked[a-zA-Z0-9]*Exception").asPredicate();
     static final Map<Class<? extends Throwable>, Class<? extends Throwable>> runtimeToCheckedExceptionClassMap = new ConcurrentHashMap<>();
 
+    /**
+     * 
+     *
+     * @param e 
+     * @return 
+     */
     public static Exception tryToGetOriginalCheckedException(final Exception e) {
         if (e instanceof RuntimeException && e.getCause() != null && (!(e.getCause() instanceof RuntimeException) && (e.getCause() instanceof Exception))) {
             if (e instanceof UncheckedException //
@@ -225,6 +231,13 @@ public final class ExceptionUtil {
         return e;
     }
 
+    /**
+     * 
+     *
+     * @param throwable 
+     * @param targetExceptionType 
+     * @return 
+     */
     public static boolean hasCause(Throwable throwable, final Class<? extends Throwable> targetExceptionType) {
         while (throwable != null) {
             if (targetExceptionType.isAssignableFrom(throwable.getClass())) {
@@ -237,6 +250,13 @@ public final class ExceptionUtil {
         return false;
     }
 
+    /**
+     * 
+     *
+     * @param throwable 
+     * @param targetExceptionTester 
+     * @return 
+     */
     public static boolean hasCause(Throwable throwable, final Predicate<? super Throwable> targetExceptionTester) {
         while (throwable != null) {
             if (targetExceptionTester.test(throwable)) {
@@ -249,6 +269,12 @@ public final class ExceptionUtil {
         return false;
     }
 
+    /**
+     * 
+     *
+     * @param throwable 
+     * @return 
+     */
     public static boolean hasSQLCause(Throwable throwable) {
         while (throwable != null) {
             if (throwable instanceof SQLException || UncheckedSQLExceptionClassName.equals(throwable.getClass().getSimpleName())) {
@@ -261,6 +287,12 @@ public final class ExceptionUtil {
         return false;
     }
 
+    /**
+     * 
+     *
+     * @param throwable 
+     * @return 
+     */
     public static boolean hasIOCause(Throwable throwable) {
         while (throwable != null) {
             if (throwable instanceof IOException || UncheckedIOExceptionClassName.equals(throwable.getClass().getSimpleName())) {
@@ -273,6 +305,12 @@ public final class ExceptionUtil {
         return false;
     }
 
+    /**
+     * 
+     *
+     * @param throwable 
+     * @return 
+     */
     public static List<Throwable> listCause(Throwable throwable) {
         final List<Throwable> list = new ArrayList<>();
 
@@ -333,10 +371,23 @@ public final class ExceptionUtil {
     //        return getErrorMessage(e, true);
     //    }
 
+    /**
+     * 
+     *
+     * @param e 
+     * @return 
+     */
     public static String getErrorMessage(final Throwable e) {
         return getErrorMessage(e, false);
     }
 
+    /**
+     * 
+     *
+     * @param e 
+     * @param withExceptionClassName 
+     * @return 
+     */
     public static String getErrorMessage(final Throwable e, final boolean withExceptionClassName) {
         String msg = e.getMessage();
 

@@ -520,6 +520,11 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         }
     }
 
+    /**
+     * 
+     *
+     * @param type 
+     */
     public void register(Class<?> type) {
         N.checkArgNotNull(type, "type");
 
@@ -531,6 +536,12 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         }
     }
 
+    /**
+     * 
+     *
+     * @param type 
+     * @param id 
+     */
     public void register(Class<?> type, int id) {
         N.checkArgNotNull(type, "type");
 
@@ -542,6 +553,12 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         }
     }
 
+    /**
+     * 
+     *
+     * @param type 
+     * @param serializer 
+     */
     public void register(Class<?> type, Serializer<?> serializer) {
         N.checkArgNotNull(type, "type");
         N.checkArgNotNull(serializer, "serializer");
@@ -554,6 +571,13 @@ public final class KryoParser extends AbstractParser<KryoSerializationConfig, Kr
         }
     }
 
+    /**
+     * 
+     *
+     * @param type 
+     * @param serializer 
+     * @param id 
+     */
     public void register(final Class<?> type, final Serializer<?> serializer, final int id) {
         N.checkArgNotNull(type, "type");
         N.checkArgNotNull(serializer, "serializer");

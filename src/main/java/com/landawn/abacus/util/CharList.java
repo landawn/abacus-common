@@ -55,9 +55,17 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     private int size = 0;
 
+    /**
+     * 
+     */
     public CharList() {
     }
 
+    /**
+     * 
+     *
+     * @param initialCapacity 
+     */
     public CharList(int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_CHAR_ARRAY : new char[initialCapacity];
     }
@@ -71,6 +79,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         this(a, a.length);
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param size 
+     */
     public CharList(char[] a, int size) {
         N.checkFromIndexSize(0, size, a.length);
 
@@ -600,6 +614,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public boolean removeDuplicates() {
         if (size < 2) {
@@ -764,11 +783,25 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         this.size = newSize;
     }
 
+    /**
+     * 
+     *
+     * @param fromIndex 
+     * @param toIndex 
+     * @param newPositionStartIndex 
+     */
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionStartIndex) {
         N.moveRange(elementData, fromIndex, toIndex, newPositionStartIndex);
     }
 
+    /**
+     * 
+     *
+     * @param fromIndex 
+     * @param toIndex 
+     * @param replacement 
+     */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final char[] replacement) {
         N.checkFromToIndex(fromIndex, toIndex, size());
@@ -1212,6 +1245,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return N.INDEX_NOT_FOUND;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public OptionalChar min() {
         return size() == 0 ? OptionalChar.empty() : OptionalChar.of(N.min(elementData, 0, size));
     }
@@ -1228,6 +1266,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return fromIndex == toIndex ? OptionalChar.empty() : OptionalChar.of(N.min(elementData, fromIndex, toIndex));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public OptionalChar median() {
         return size() == 0 ? OptionalChar.empty() : OptionalChar.of(N.median(elementData, 0, size));
     }
@@ -1244,6 +1287,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return fromIndex == toIndex ? OptionalChar.empty() : OptionalChar.of(N.median(elementData, fromIndex, toIndex));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public OptionalChar max() {
         return size() == 0 ? OptionalChar.empty() : OptionalChar.of(N.max(elementData, 0, size));
     }
@@ -1283,6 +1331,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return toIndex - fromIndex < k ? OptionalChar.empty() : OptionalChar.of(N.kthLargest(elementData, fromIndex, toIndex, k));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public int sum() {
         return sum(0, size());
     }
@@ -1299,6 +1352,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return N.sum(elementData, fromIndex, toIndex);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public OptionalDouble average() {
         return average(0, size());
     }
@@ -1383,10 +1441,20 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public OptionalChar first() {
         return size() == 0 ? OptionalChar.empty() : OptionalChar.of(elementData[0]);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public OptionalChar last() {
         return size() == 0 ? OptionalChar.empty() : OptionalChar.of(elementData[size() - 1]);
     }
@@ -1816,6 +1884,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return N.hasDuplicates(elementData, 0, size, false);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public boolean isSorted() {
         return N.isSorted(elementData, 0, size);
@@ -1854,11 +1927,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * This List should be sorted first.
      *
-     * @param key
+     * @param valueToFind
      * @return
      */
-    public int binarySearch(final char key) {
-        return N.binarySearch(elementData, key);
+    public int binarySearch(final char valueToFind) {
+        return N.binarySearch(elementData, valueToFind);
     }
 
     /**
@@ -1866,13 +1939,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @param fromIndex
      * @param toIndex
-     * @param key
+     * @param valueToFind
      * @return
      */
-    public int binarySearch(final int fromIndex, final int toIndex, final char key) {
+    public int binarySearch(final int fromIndex, final int toIndex, final char valueToFind) {
         checkFromToIndex(fromIndex, toIndex);
 
-        return N.binarySearch(elementData, fromIndex, toIndex, key);
+        return N.binarySearch(elementData, fromIndex, toIndex, valueToFind);
     }
 
     /**
@@ -1944,6 +2017,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         set(i, set(j, elementData[i]));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public CharList copy() {
         return new CharList(N.copyOfRange(elementData, 0, size));
@@ -2093,11 +2171,21 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return size == 0;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int size() {
         return size;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public List<Character> boxed() {
         return boxed(0, size);
     }
@@ -2120,6 +2208,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return res;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public char[] toArray() {
         return N.copyOfRange(elementData, 0, size);
@@ -2181,6 +2274,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return multiset;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public CharIterator iterator() {
         if (isEmpty()) {
             return CharIterator.EMPTY;
@@ -2189,6 +2287,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return CharIterator.of(elementData, 0, size);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public CharStream stream() {
         return CharStream.of(elementData, 0, size());
     }
@@ -2246,8 +2349,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Accept if not empty.
      *
-     * @param <E>
-     * @param action
+     * @param <E> 
+     * @param action 
+     * @return 
      * @throws E the e
      */
     @Override
@@ -2255,6 +2359,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return If.is(size > 0).then(this, action);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         return N.hashCode(elementData, 0, size);
@@ -2279,6 +2388,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return false;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return size == 0 ? "[]" : N.toString(elementData, 0, size);

@@ -516,6 +516,12 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
         };
     }
 
+    /**
+     * 
+     *
+     * @param n 
+     * @return 
+     */
     public ObjIterator<T> skip(final long n) {
         N.checkArgNotNegative(n, "n");
 
@@ -558,6 +564,12 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
         };
     }
 
+    /**
+     * 
+     *
+     * @param count 
+     * @return 
+     */
     public ObjIterator<T> limit(final long count) {
         N.checkArgNotNegative(count, "count");
 
@@ -587,15 +599,33 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
         };
     }
 
+    /**
+     * 
+     *
+     * @param predicate 
+     * @return 
+     */
     public ObjIterator<T> filter(final Predicate<? super T> predicate) {
         return Iterators.filter(this, predicate);
     }
 
+    /**
+     * 
+     *
+     * @param <U> 
+     * @param mapper 
+     * @return 
+     */
     @Beta
     public <U> ObjIterator<U> map(final Function<? super T, U> mapper) {
         return Iterators.map(this, mapper);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Nullable<T> first() {
         if (hasNext()) {
             return Nullable.of(next());
@@ -604,6 +634,11 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Nullable<T> last() {
         if (hasNext()) {
             T next = next();
@@ -618,14 +653,31 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Object[] toArray() {
         return toArray(N.EMPTY_OBJECT_ARRAY);
     }
 
+    /**
+     * 
+     *
+     * @param <A> 
+     * @param a 
+     * @return 
+     */
     public <A> A[] toArray(A[] a) {
         return toList().toArray(a);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public List<T> toList() {
         final List<T> list = new ArrayList<>();
 
@@ -636,15 +688,31 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
         return list;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Stream<T> stream() {
         return Stream.of(this);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Beta
     public ObjIterator<Indexed<T>> indexed() {
         return indexed(0);
     }
 
+    /**
+     * 
+     *
+     * @param startIndex 
+     * @return 
+     */
     @Beta
     public ObjIterator<Indexed<T>> indexed(final long startIndex) {
         if (startIndex < 0) {

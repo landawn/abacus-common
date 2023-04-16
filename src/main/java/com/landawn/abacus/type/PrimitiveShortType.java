@@ -35,6 +35,11 @@ public final class PrimitiveShortType extends AbstractShortType {
         super(SHORT);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {
@@ -51,6 +56,11 @@ public final class PrimitiveShortType extends AbstractShortType {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Short defaultValue() {
         return DEFAULT_VALUE;

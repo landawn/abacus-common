@@ -32,6 +32,11 @@ public final class ByteType extends AbstractByteType {
         super(BYTE);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {

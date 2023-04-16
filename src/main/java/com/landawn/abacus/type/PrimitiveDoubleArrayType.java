@@ -43,6 +43,11 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
         elementType = TypeFactory.getType(double.class);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<double[]> clazz() {
         return double[].class;

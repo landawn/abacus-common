@@ -62,26 +62,49 @@ public final class Multiset<T> implements Iterable<T> {
 
     final Map<T, MutableInt> valueMap;
 
+    /**
+     * 
+     */
     public Multiset() {
         this(HashMap.class);
     }
 
+    /**
+     * 
+     *
+     * @param initialCapacity 
+     */
     public Multiset(int initialCapacity) {
         this.mapSupplier = Suppliers.ofMap();
         this.valueMap = N.newHashMap(initialCapacity);
     }
 
+    /**
+     * 
+     *
+     * @param c 
+     */
     public Multiset(final Collection<? extends T> c) {
         this((c == null || c instanceof Set) ? N.size(c) : N.size(c) / 2);
 
         addAll(c);
     }
 
+    /**
+     * 
+     *
+     * @param valueMapType 
+     */
     @SuppressWarnings("rawtypes")
     public Multiset(final Class<? extends Map> valueMapType) {
         this(Suppliers.ofMap(valueMapType));
     }
 
+    /**
+     * 
+     *
+     * @param mapSupplier 
+     */
     @SuppressWarnings("rawtypes")
     public Multiset(final Supplier<? extends Map<? extends T, ?>> mapSupplier) {
         this.mapSupplier = (Supplier) mapSupplier;
@@ -347,6 +370,11 @@ public final class Multiset<T> implements Iterable<T> {
         return get(e);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Optional<Pair<Integer, T>> minOccurrences() {
         if (size() == 0) {
             return Optional.empty();
@@ -369,6 +397,11 @@ public final class Multiset<T> implements Iterable<T> {
         return Optional.of(Pair.of(minCount, minCountElement));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Optional<Pair<Integer, T>> maxOccurrences() {
         if (size() == 0) {
             return Optional.empty();
@@ -1233,6 +1266,11 @@ public final class Multiset<T> implements Iterable<T> {
         return N.isNullOrEmpty(others) ? false : removeAll(others, Integer.MAX_VALUE);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Multiset<T> copy() {
         final Multiset<T> copy = new Multiset<>(mapSupplier);
 
@@ -1241,11 +1279,21 @@ public final class Multiset<T> implements Iterable<T> {
         return copy;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @SuppressWarnings("deprecation")
     public ImmutableSet<T> elements() {
         return ImmutableSet.wrap(valueMap.keySet());
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public int size() {
         return valueMap.size();
     }
@@ -1266,11 +1314,21 @@ public final class Multiset<T> implements Iterable<T> {
         valueMap.clear();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Iterator<T> iterator() {
         return valueMap.keySet().iterator();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Iterator<T> flatIterator() {
         final Iterator<Map.Entry<T, MutableInt>> entryIter = valueMap.entrySet().iterator();
 
@@ -1311,6 +1369,11 @@ public final class Multiset<T> implements Iterable<T> {
     //        return valueMap.entrySet();
     //    }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Object[] toArray() {
         return valueMap.keySet().toArray();
     }
@@ -1325,6 +1388,11 @@ public final class Multiset<T> implements Iterable<T> {
         return valueMap.keySet().toArray(a);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Map<T, Integer> toMap() {
         final Map<T, Integer> result = Maps.newOrderingMap(valueMap);
 
@@ -1696,16 +1764,31 @@ public final class Multiset<T> implements Iterable<T> {
         return newValue;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Stream<T> stream() {
         return Stream.of(valueMap.keySet());
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Stream<T> flatStream() {
         return Stream.of(flatIterator());
     }
 
     private static final com.landawn.abacus.util.function.Function<MutableInt, Integer> TO_INT = MutableInt::value;
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public EntryStream<T, Integer> entryStream() {
         return EntryStream.of(valueMap).mapValue(TO_INT);
     }
@@ -1748,14 +1831,20 @@ public final class Multiset<T> implements Iterable<T> {
     /**
      * Accept if not empty.
      *
-     * @param <E>
-     * @param action
+     * @param <E> 
+     * @param action 
+     * @return 
      * @throws E the e
      */
     public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super Multiset<T>, E> action) throws E {
         return If.is(size() > 0).then(this, action);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         return valueMap.hashCode();
@@ -1771,6 +1860,11 @@ public final class Multiset<T> implements Iterable<T> {
         return obj == this || (obj instanceof Multiset && valueMap.equals(((Multiset<T>) obj).valueMap));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return valueMap.toString();

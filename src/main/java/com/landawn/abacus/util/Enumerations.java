@@ -45,10 +45,23 @@ public final class Enumerations {
         // singleton
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @return 
+     */
     public static <T> Enumeration<T> empty() {
         return EMPTY;
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param single 
+     * @return 
+     */
     public static <T> Enumeration<T> just(final T single) {
         return new Enumeration<>() {
             private boolean hasNext = true;
@@ -71,6 +84,13 @@ public final class Enumerations {
         };
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param a 
+     * @return 
+     */
     public static <T> Enumeration<T> of(final T... a) {
         if (N.isNullOrEmpty(a)) {
             return empty();
@@ -96,6 +116,13 @@ public final class Enumerations {
         };
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param c 
+     * @return 
+     */
     public static <T> Enumeration<T> from(final Collection<? extends T> c) {
         if (N.isNullOrEmpty(c)) {
             return empty();
@@ -104,6 +131,13 @@ public final class Enumerations {
         return from(c.iterator());
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param iter 
+     * @return 
+     */
     public static <T> Enumeration<T> from(final Iterator<? extends T> iter) {
         return new Enumeration<>() {
             @Override
@@ -168,6 +202,13 @@ public final class Enumerations {
         };
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param e 
+     * @return 
+     */
     public static <T> ObjIterator<T> toIterator(final Enumeration<? extends T> e) {
         if (e == null) {
             return ObjIterator.empty();
@@ -186,6 +227,13 @@ public final class Enumerations {
         };
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param e 
+     * @return 
+     */
     public static <T> List<T> toList(final Enumeration<? extends T> e) {
         if (e == null) {
             return new ArrayList<>();
@@ -200,6 +248,13 @@ public final class Enumerations {
         return result;
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param e 
+     * @return 
+     */
     public static <T> Set<T> toSet(final Enumeration<? extends T> e) {
         if (e == null) {
             return new HashSet<>();
@@ -214,6 +269,15 @@ public final class Enumerations {
         return result;
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param <C> 
+     * @param e 
+     * @param supplier 
+     * @return 
+     */
     public static <T, C extends Collection<T>> C toCollection(final Enumeration<? extends T> e, final Supplier<? extends C> supplier) {
         final C c = supplier.get();
 

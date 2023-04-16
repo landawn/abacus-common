@@ -61,30 +61,100 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
         return new ImmutableList<>(Collections.singletonList(e));
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param e1 
+     * @return 
+     */
     public static <T> ImmutableList<T> of(final T e1) {
         return new ImmutableList<>(N.asList(e1));
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param e1 
+     * @param e2 
+     * @return 
+     */
     public static <T> ImmutableList<T> of(final T e1, final T e2) {
         return new ImmutableList<>(N.asList(e1, e2));
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param e1 
+     * @param e2 
+     * @param e3 
+     * @return 
+     */
     public static <T> ImmutableList<T> of(final T e1, final T e2, final T e3) {
         return new ImmutableList<>(N.asList(e1, e2, e3));
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param e1 
+     * @param e2 
+     * @param e3 
+     * @param e4 
+     * @return 
+     */
     public static <T> ImmutableList<T> of(final T e1, final T e2, final T e3, final T e4) {
         return new ImmutableList<>(N.asList(e1, e2, e3, e4));
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param e1 
+     * @param e2 
+     * @param e3 
+     * @param e4 
+     * @param e5 
+     * @return 
+     */
     public static <T> ImmutableList<T> of(final T e1, final T e2, final T e3, final T e4, final T e5) {
         return new ImmutableList<>(N.asList(e1, e2, e3, e4, e5));
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param e1 
+     * @param e2 
+     * @param e3 
+     * @param e4 
+     * @param e5 
+     * @param e6 
+     * @return 
+     */
     public static <T> ImmutableList<T> of(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
         return new ImmutableList<>(N.asList(e1, e2, e3, e4, e5, e6));
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param e1 
+     * @param e2 
+     * @param e3 
+     * @param e4 
+     * @param e5 
+     * @param e6 
+     * @param e7 
+     * @return 
+     */
     public static <T> ImmutableList<T> of(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) {
         return new ImmutableList<>(N.asList(e1, e2, e3, e4, e5, e6, e7));
     }
@@ -141,12 +211,13 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
+     * 
      *
-     * @param <E>
-     * @param c
-     * @return
+     * @param <E> 
+     * @param c 
+     * @return 
+     * @throws UnsupportedOperationException 
      * @deprecated throws {@code UnsupportedOperationException}
-     * @throws UnsupportedOperationException
      */
     @Deprecated
     public static <E> ImmutableCollection<E> wrap(final Collection<? extends E> c) throws UnsupportedOperationException {
@@ -184,6 +255,11 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
         return list.lastIndexOf(o);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public ImmutableListIterator<E> listIterator() {
         return ImmutableListIterator.of(list.listIterator());
@@ -213,11 +289,11 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     /**
      * Adds the all.
      *
-     * @param index
-     * @param newElements
-     * @return
+     * @param index 
+     * @param newElements 
+     * @return 
+     * @throws UnsupportedOperationException 
      * @deprecated throws {@code UnsupportedOperationException}
-     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
@@ -226,12 +302,13 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
+     * 
      *
-     * @param index
-     * @param element
-     * @return
+     * @param index 
+     * @param element 
+     * @return 
+     * @throws UnsupportedOperationException 
      * @deprecated throws {@code UnsupportedOperationException}
-     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
@@ -240,11 +317,12 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
+     * 
      *
-     * @param index
-     * @param element
+     * @param index 
+     * @param element 
+     * @throws UnsupportedOperationException 
      * @deprecated throws {@code UnsupportedOperationException}
-     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
@@ -253,11 +331,12 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
+     * 
      *
-     * @param index
-     * @return
+     * @param index 
+     * @return 
+     * @throws UnsupportedOperationException 
      * @deprecated throws {@code UnsupportedOperationException}
-     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
@@ -266,10 +345,11 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
+     * 
      *
-     * @param operator
+     * @param operator 
+     * @throws UnsupportedOperationException 
      * @deprecated throws {@code UnsupportedOperationException}
-     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
@@ -278,10 +358,11 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     }
 
     /**
+     * 
      *
-     * @param c
+     * @param c 
+     * @throws UnsupportedOperationException 
      * @deprecated throws {@code UnsupportedOperationException}
-     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
@@ -289,6 +370,12 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @return 
+     */
     public static <E> Builder<E> builder() {
         return new Builder<>();
     }
@@ -296,12 +383,24 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
     public static final class Builder<E> {
         private final List<E> ret = new ArrayList<>();
 
+        /**
+         * 
+         *
+         * @param element 
+         * @return 
+         */
         public Builder<E> add(final E element) {
             ret.add(element);
 
             return this;
         }
 
+        /**
+         * 
+         *
+         * @param elements 
+         * @return 
+         */
         public Builder<E> add(final E... elements) {
             if (N.notNullOrEmpty(elements)) {
                 ret.addAll(Arrays.asList(elements));
@@ -310,6 +409,12 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
             return this;
         }
 
+        /**
+         * 
+         *
+         * @param c 
+         * @return 
+         */
         public Builder<E> addAll(final Collection<? extends E> c) {
             if (N.notNullOrEmpty(c)) {
                 ret.addAll(c);
@@ -318,6 +423,12 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
             return this;
         }
 
+        /**
+         * 
+         *
+         * @param iter 
+         * @return 
+         */
         public Builder<E> addAll(final Iterator<? extends E> iter) {
             if (iter != null) {
                 while (iter.hasNext()) {
@@ -328,6 +439,11 @@ public final class ImmutableList<E> extends ImmutableCollection<E> implements Li
             return this;
         }
 
+        /**
+         * 
+         *
+         * @return 
+         */
         public ImmutableList<E> build() {
             return new ImmutableList<>(ret);
         }

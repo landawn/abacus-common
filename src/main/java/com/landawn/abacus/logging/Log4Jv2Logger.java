@@ -46,6 +46,11 @@ class Log4Jv2Logger extends AbstractLogger {
     //
     private final ExtendedLogger loggerImpl;
 
+    /**
+     * 
+     *
+     * @param name 
+     */
     public Log4Jv2Logger(String name) {
         super(name);
         // if (!existsLog4JFile) {

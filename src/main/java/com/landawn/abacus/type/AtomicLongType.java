@@ -40,6 +40,11 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
         super(ATOMIC_LONG);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<AtomicLong> clazz() {
         return AtomicLong.class;

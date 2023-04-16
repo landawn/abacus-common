@@ -43,6 +43,11 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
         elementType = TypeFactory.getType(float.class);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<float[]> clazz() {
         return float[].class;

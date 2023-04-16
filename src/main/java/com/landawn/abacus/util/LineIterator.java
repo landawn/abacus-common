@@ -196,8 +196,8 @@ public final class LineIterator extends ObjIterator<String> implements Closeable
      * @param input the <code>InputStream</code> to read from, not null
      * @param encoding the encoding to use, null means platform default
      * @return an Iterator of the lines in the reader, never null
-     * @throws IllegalArgumentException if the input is null
      * @throws UncheckedIOException if an I/O error occurs, such as if the encoding is invalid
+     * @throws IllegalArgumentException if the input is null
      */
     public static LineIterator of(final InputStream input, final Charset encoding) throws UncheckedIOException {
         return new LineIterator(IOUtil.createReader(input, encoding));

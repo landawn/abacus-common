@@ -31,6 +31,11 @@ public class MutableByteType extends MutableType<MutableByte> {
         super(MUTABLE_BYTE);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<MutableByte> clazz() {
         return MutableByte.class;

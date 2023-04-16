@@ -68,6 +68,11 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
         return new MutableFloat(value);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public float value() {
         return value;
     }

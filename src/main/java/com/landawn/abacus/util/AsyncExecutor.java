@@ -56,10 +56,21 @@ public class AsyncExecutor {
 
     private volatile Executor executor; //NOSONAR
 
+    /**
+     * 
+     */
     public AsyncExecutor() {
         this(DEFAULT_CORE_POOL_SIZE, DEFAULT_MAX_THREAD_POOL_SIZE, 180L, TimeUnit.SECONDS);
     }
 
+    /**
+     * 
+     *
+     * @param coreThreadPoolSize 
+     * @param maxThreadPoolSize 
+     * @param keepAliveTime 
+     * @param unit 
+     */
     public AsyncExecutor(int coreThreadPoolSize, int maxThreadPoolSize, long keepAliveTime, TimeUnit unit) {
         N.checkArgNotNegative(coreThreadPoolSize, "coreThreadPoolSize");
         N.checkArgNotNegative(maxThreadPoolSize, "maxThreadPoolSize");
@@ -72,6 +83,11 @@ public class AsyncExecutor {
         this.unit = unit;
     }
 
+    /**
+     * 
+     *
+     * @param executor 
+     */
     public AsyncExecutor(final Executor executor) {
         this(getCorePoolSize(executor), getMaximumPoolSize(executor), getKeepAliveTime(executor), TimeUnit.MILLISECONDS);
 
@@ -309,10 +325,19 @@ public class AsyncExecutor {
         return executor;
     }
 
+    /**
+     * 
+     */
     public synchronized void shutdown() {
         shutdown(0, TimeUnit.SECONDS);
     }
 
+    /**
+     * 
+     *
+     * @param terminationTimeout 
+     * @param timeUnit 
+     */
     public synchronized void shutdown(final long terminationTimeout, final TimeUnit timeUnit) {
         if (executor == null || !(executor instanceof ExecutorService executorService)) {
             return;
@@ -334,6 +359,11 @@ public class AsyncExecutor {
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         final String activeCount = executor instanceof ThreadPoolExecutor ? "" + ((ThreadPoolExecutor) executor).getActiveCount() : "?";

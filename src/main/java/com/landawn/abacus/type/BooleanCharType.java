@@ -34,6 +34,11 @@ public class BooleanCharType extends AbstractType<Boolean> {
         super(typeName);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<Boolean> clazz() {
         return Boolean.class;
@@ -69,6 +74,11 @@ public class BooleanCharType extends AbstractType<Boolean> {
         return "Y".equalsIgnoreCase(st) ? Boolean.TRUE : Boolean.FALSE;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Boolean defaultValue() {
         return Boolean.FALSE;

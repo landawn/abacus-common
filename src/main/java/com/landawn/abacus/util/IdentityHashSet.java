@@ -29,14 +29,27 @@ public class IdentityHashSet<T> extends AbstractSet<T> {
 
     private final IdentityHashMap<T, Object> map;
 
+    /**
+     * 
+     */
     public IdentityHashSet() {
         map = new IdentityHashMap<>();
     }
 
+    /**
+     * 
+     *
+     * @param initialCapacity 
+     */
     public IdentityHashSet(int initialCapacity) {
         map = N.newIdentityHashMap(initialCapacity);
     }
 
+    /**
+     * 
+     *
+     * @param c 
+     */
     public IdentityHashSet(Collection<? extends T> c) {
         map = N.newIdentityHashMap(N.size(c));
 
@@ -160,11 +173,21 @@ public class IdentityHashSet<T> extends AbstractSet<T> {
         return map.containsKey(o);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Iterator<T> iterator() {
         return map.keySet().iterator();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Object[] toArray() {
         return map.keySet().toArray();
@@ -181,6 +204,11 @@ public class IdentityHashSet<T> extends AbstractSet<T> {
         return map.keySet().toArray(a);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int size() {
         return map.size();
@@ -204,6 +232,12 @@ public class IdentityHashSet<T> extends AbstractSet<T> {
         map.clear();
     }
 
+    /**
+     * 
+     *
+     * @param o 
+     * @return 
+     */
     @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object o) {
@@ -218,11 +252,21 @@ public class IdentityHashSet<T> extends AbstractSet<T> {
         return false;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         return map.keySet().hashCode();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return map.keySet().toString();

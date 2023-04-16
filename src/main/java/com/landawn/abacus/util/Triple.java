@@ -37,6 +37,9 @@ public final class Triple<L, M, R> implements Mutable {
 
     public R right; //NOSONAR
 
+    /**
+     * 
+     */
     public Triple() {
     }
 
@@ -62,6 +65,14 @@ public final class Triple<L, M, R> implements Mutable {
 
     private static final Triple<?, ?, ?>[] EMPTY_ARRAY = new Triple[0];
 
+    /**
+     * 
+     *
+     * @param <L> 
+     * @param <M> 
+     * @param <R> 
+     * @return 
+     */
     @SuppressWarnings("unchecked")
     public static <L, M, R> Triple<L, M, R>[] emptyArray() {
         return (Triple<L, M, R>[]) EMPTY_ARRAY;
@@ -313,10 +324,20 @@ public final class Triple<L, M, R> implements Mutable {
         return new Triple<>(this.right, this.middle, this.left);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Triple<L, M, R> copy() {
         return new Triple<>(this.left, this.middle, this.right);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Object[] toArray() {
         return new Object[] { left, middle, right };
     }
@@ -419,22 +440,51 @@ public final class Triple<L, M, R> implements Mutable {
         return predicate.test(this) ? Optional.of(this) : Optional.<Triple<L, M, R>> empty();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Stream<Triple<L, M, R>> stream() {
         return Stream.of(this);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param <E> 
+     * @param func 
+     * @return 
+     * @throws E 
+     */
     public <T, E extends Exception> Stream<T> stream(final Throwables.Function<? super Triple<L, M, R>, Stream<T>, E> func) throws E {
         return func.apply(this);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Optional<Triple<L, M, R>> toOptional() {
         return Optional.of(this);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Tuple3<L, M, R> toTuple() {
         return Tuple.of(left, middle, right);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -464,6 +514,11 @@ public final class Triple<L, M, R> implements Mutable {
         return false;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return "[" + N.toString(left) + ", " + N.toString(middle) + ", " + N.toString(right) + "]";

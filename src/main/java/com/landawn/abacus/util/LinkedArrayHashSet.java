@@ -31,6 +31,9 @@ import com.landawn.abacus.annotation.Beta;
 @Beta
 public final class LinkedArrayHashSet<E> extends ArrayHashSet<E> {
 
+    /**
+     * 
+     */
     public LinkedArrayHashSet() {
         super(LinkedHashSet.class);
     }

@@ -35,6 +35,11 @@ public class ClazzType extends AbstractType<Class> {
         clazz = ClassUtil.forClass(typeName);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<Class> clazz() {
         return clazz;

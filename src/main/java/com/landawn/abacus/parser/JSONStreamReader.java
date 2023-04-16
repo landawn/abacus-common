@@ -65,6 +65,12 @@ class JSONStreamReader extends JSONStringReader {
         return new JSONStreamReader(reader, rbuf, cbuf);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     * @throws IOException 
+     */
     @Override
     public int nextToken() throws IOException {
         if (strBeginIndex >= strEndIndex) {

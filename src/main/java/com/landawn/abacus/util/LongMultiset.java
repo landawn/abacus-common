@@ -64,26 +64,49 @@ public final class LongMultiset<T> implements Iterable<T> {
 
     final Map<T, MutableLong> valueMap;
 
+    /**
+     * 
+     */
     public LongMultiset() {
         this(HashMap.class);
     }
 
+    /**
+     * 
+     *
+     * @param initialCapacity 
+     */
     public LongMultiset(int initialCapacity) {
         this.mapSupplier = Suppliers.ofMap();
         this.valueMap = N.newHashMap(initialCapacity);
     }
 
+    /**
+     * 
+     *
+     * @param c 
+     */
     public LongMultiset(final Collection<? extends T> c) {
         this((c == null || c instanceof Set) ? N.size(c) : N.size(c) / 2);
 
         addAll(c);
     }
 
+    /**
+     * 
+     *
+     * @param valueMapType 
+     */
     @SuppressWarnings("rawtypes")
     public LongMultiset(final Class<? extends Map> valueMapType) {
         this(Suppliers.ofMap(valueMapType));
     }
 
+    /**
+     * 
+     *
+     * @param mapSupplier 
+     */
     @SuppressWarnings("rawtypes")
     public LongMultiset(final Supplier<? extends Map<? extends T, ?>> mapSupplier) {
         this.mapSupplier = (Supplier) mapSupplier;
@@ -179,10 +202,13 @@ public final class LongMultiset<T> implements Iterable<T> {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param m
-     * @return
+     * @param <T> 
+     * @param <V> 
+     * @param m 
+     * @param valueMapper 
+     * @return 
      */
     @Beta
     public static <T, V> LongMultiset<T> from(final Map<? extends T, ? extends V> m, final ToLongFunction<? super V> valueMapper) {
@@ -390,6 +416,11 @@ public final class LongMultiset<T> implements Iterable<T> {
         return get(e);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Optional<Pair<Long, T>> minOccurrences() {
         if (size() == 0) {
             return Optional.empty();
@@ -412,6 +443,11 @@ public final class LongMultiset<T> implements Iterable<T> {
         return Optional.of(Pair.of(minCount, minCountElement));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Optional<Pair<Long, T>> maxOccurrences() {
         if (size() == 0) {
             return Optional.empty();
@@ -1274,6 +1310,11 @@ public final class LongMultiset<T> implements Iterable<T> {
         return N.isNullOrEmpty(others) ? false : removeAll(others, Long.MAX_VALUE);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public LongMultiset<T> copy() {
         final LongMultiset<T> copy = new LongMultiset<>(mapSupplier);
 
@@ -1282,11 +1323,21 @@ public final class LongMultiset<T> implements Iterable<T> {
         return copy;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @SuppressWarnings("deprecation")
     public ImmutableSet<T> elements() {
         return ImmutableSet.wrap(valueMap.keySet());
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public int size() {
         return valueMap.size();
     }
@@ -1307,11 +1358,21 @@ public final class LongMultiset<T> implements Iterable<T> {
         valueMap.clear();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Iterator<T> iterator() {
         return valueMap.keySet().iterator();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Iterator<T> flatIterator() {
         final Iterator<Map.Entry<T, MutableLong>> entryIter = valueMap.entrySet().iterator();
 
@@ -1352,6 +1413,11 @@ public final class LongMultiset<T> implements Iterable<T> {
     //        return valueMap.entrySet();
     //    }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Object[] toArray() {
         return valueMap.keySet().toArray();
     }
@@ -1366,6 +1432,11 @@ public final class LongMultiset<T> implements Iterable<T> {
         return valueMap.keySet().toArray(a);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Map<T, Long> toMap() {
         final Map<T, Long> result = Maps.newOrderingMap(valueMap);
 
@@ -1737,16 +1808,31 @@ public final class LongMultiset<T> implements Iterable<T> {
         return newValue;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Stream<T> stream() {
         return Stream.of(valueMap.keySet());
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Stream<T> flatStream() {
         return Stream.of(flatIterator());
     }
 
     private static final com.landawn.abacus.util.function.Function<MutableLong, Long> TO_LONG = MutableLong::value;
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public EntryStream<T, Long> entryStream() {
         return EntryStream.of(valueMap).mapValue(TO_LONG);
     }
@@ -1789,14 +1875,20 @@ public final class LongMultiset<T> implements Iterable<T> {
     /**
      * Accept if not empty.
      *
-     * @param <E>
-     * @param action
+     * @param <E> 
+     * @param action 
+     * @return 
      * @throws E the e
      */
     public <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super LongMultiset<T>, E> action) throws E {
         return If.is(size() > 0).then(this, action);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         return valueMap.hashCode();
@@ -1812,6 +1904,11 @@ public final class LongMultiset<T> implements Iterable<T> {
         return obj == this || (obj instanceof LongMultiset && valueMap.equals(((LongMultiset<T>) obj).valueMap));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return valueMap.toString();

@@ -321,11 +321,11 @@ public final class PropertiesUtil {
 
     /**
      * Load from XML.
-     * @param file
-     * @param targetClass
      *
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param file 
+     * @param targetClass 
+     * @return 
      */
     public static <T extends Properties<String, Object>> T loadFromXML(File file, Class<? extends T> targetClass) {
         return loadFromXML(file, false, targetClass);
@@ -333,12 +333,12 @@ public final class PropertiesUtil {
 
     /**
      * Load from XML.
-     * @param file
-     * @param autoRefresh
-     * @param targetClass
      *
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param file 
+     * @param autoRefresh 
+     * @param targetClass 
+     * @return 
      */
     public static <T extends Properties<String, Object>> T loadFromXML(File file, boolean autoRefresh, Class<? extends T> targetClass) {
         T properties = null;
@@ -372,11 +372,11 @@ public final class PropertiesUtil {
 
     /**
      * Load from XML.
-     * @param is
-     * @param targetClass
      *
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param is 
+     * @param targetClass 
+     * @return 
      */
     public static <T extends Properties<String, Object>> T loadFromXML(InputStream is, Class<? extends T> targetClass) {
         return loadFromXML(null, is, targetClass);

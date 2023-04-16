@@ -31,6 +31,11 @@ public class MutableIntType extends MutableType<MutableInt> {
         super(MUTABLE_INT);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<MutableInt> clazz() {
         return MutableInt.class;

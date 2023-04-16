@@ -39,6 +39,11 @@ public abstract class Tuple<TP> implements Immutable {
     Tuple() {
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public abstract int arity();
 
     /**
@@ -60,6 +65,11 @@ public abstract class Tuple<TP> implements Immutable {
      */
     public abstract boolean contains(final Object objToFind);
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public abstract Object[] toArray();
 
     /**
@@ -111,10 +121,24 @@ public abstract class Tuple<TP> implements Immutable {
         return predicate.test((TP) this) ? Optional.of((TP) this) : Optional.<TP> empty();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Stream<TP> stream() {
         return Stream.of((TP) this);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param <E> 
+     * @param func 
+     * @return 
+     * @throws E 
+     */
     public <T, E extends Exception> Stream<T> stream(final Throwables.Function<? super TP, Stream<T>, E> func) throws E {
         return func.apply((TP) this);
     }
@@ -307,10 +331,11 @@ public abstract class Tuple<TP> implements Immutable {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <TP> 
+     * @param a 
+     * @return 
      */
     @Beta
     public static <TP extends Tuple<TP>> TP from(final Object[] a) {
@@ -367,10 +392,11 @@ public abstract class Tuple<TP> implements Immutable {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param c
-     * @return
+     * @param <TP> 
+     * @param c 
+     * @return 
      */
     @Beta
     public static <TP extends Tuple<TP>> TP from(final Collection<?> c) {
@@ -427,57 +453,140 @@ public abstract class Tuple<TP> implements Immutable {
         return (TP) result;
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param tp 
+     * @return 
+     */
     @Beta
     public static <T> List<T> toList(Tuple1<? extends T> tp) {
         return N.asList(tp._1);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param tp 
+     * @return 
+     */
     @Beta
     public static <T> List<T> toList(Tuple2<? extends T, ? extends T> tp) {
         return N.asList(tp._1, tp._2);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param tp 
+     * @return 
+     */
     @Beta
     public static <T> List<T> toList(Tuple3<? extends T, ? extends T, ? extends T> tp) {
         return N.asList(tp._1, tp._2, tp._3);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param tp 
+     * @return 
+     */
     @Beta
     public static <T> List<T> toList(Tuple4<? extends T, ? extends T, ? extends T, ? extends T> tp) {
         return N.asList(tp._1, tp._2, tp._3, tp._4);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param tp 
+     * @return 
+     */
     @Beta
     public static <T> List<T> toList(Tuple5<? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
         return N.asList(tp._1, tp._2, tp._3, tp._4, tp._5);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param tp 
+     * @return 
+     */
     @Beta
     public static <T> List<T> toList(Tuple6<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
         return N.asList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param tp 
+     * @return 
+     */
     @Beta
     public static <T> List<T> toList(Tuple7<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
         return N.asList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6, tp._7);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param tp 
+     * @return 
+     */
     @Beta
     public static <T> List<T> toList(Tuple8<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
         return N.asList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6, tp._7, tp._8);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param tp 
+     * @return 
+     */
     @Beta
     public static <T> List<T> toList(
             Tuple9<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
         return N.asList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6, tp._7, tp._8, tp._9);
     }
 
+    /**
+     * 
+     *
+     * @param <T1> 
+     * @param <T2> 
+     * @param <T3> 
+     * @param tp 
+     * @return 
+     */
     @Beta
     public static <T1, T2, T3> Tuple3<T1, T2, T3> flatten(Tuple2<Tuple2<T1, T2>, T3> tp) {
         return new Tuple3<>(tp._1._1, tp._1._2, tp._2);
     }
 
+    /**
+     * 
+     *
+     * @param <T1> 
+     * @param <T2> 
+     * @param <T3> 
+     * @param <T4> 
+     * @param <T5> 
+     * @param tp 
+     * @return 
+     */
     @Beta
     public static <T1, T2, T3, T4, T5> Tuple5<T1, T2, T3, T4, T5> flatten(Tuple3<Tuple3<T1, T2, T3>, T4, T5> tp) {
         return new Tuple5<>(tp._1._1, tp._1._2, tp._1._3, tp._2, tp._3);
@@ -590,6 +699,12 @@ public abstract class Tuple<TP> implements Immutable {
             return _1 == null;
         }
 
+        /**
+         * 
+         *
+         * @param objToFind 
+         * @return 
+         */
         @Override
         public boolean contains(final Object objToFind) {
             return N.equals(_1, objToFind);
@@ -744,6 +859,12 @@ public abstract class Tuple<TP> implements Immutable {
             return _1 == null && _2 == null;
         }
 
+        /**
+         * 
+         *
+         * @param objToFind 
+         * @return 
+         */
         @Override
         public boolean contains(final Object objToFind) {
             return N.equals(_1, objToFind) || N.equals(_2, objToFind);
@@ -955,6 +1076,12 @@ public abstract class Tuple<TP> implements Immutable {
             return _1 == null && _2 == null && _3 == null;
         }
 
+        /**
+         * 
+         *
+         * @param objToFind 
+         * @return 
+         */
         @Override
         public boolean contains(final Object objToFind) {
             return N.equals(_1, objToFind) || N.equals(_2, objToFind) || N.equals(_3, objToFind);
@@ -1168,6 +1295,12 @@ public abstract class Tuple<TP> implements Immutable {
             return _1 == null && _2 == null && _3 == null && _4 == null;
         }
 
+        /**
+         * 
+         *
+         * @param objToFind 
+         * @return 
+         */
         @Override
         public boolean contains(final Object objToFind) {
             return N.equals(_1, objToFind) || N.equals(_2, objToFind) || N.equals(_3, objToFind) || N.equals(_4, objToFind);
@@ -1348,6 +1481,12 @@ public abstract class Tuple<TP> implements Immutable {
             return _1 == null && _2 == null && _3 == null && _4 == null && _5 == null;
         }
 
+        /**
+         * 
+         *
+         * @param objToFind 
+         * @return 
+         */
         @Override
         public boolean contains(final Object objToFind) {
             return N.equals(_1, objToFind) || N.equals(_2, objToFind) || N.equals(_3, objToFind) || N.equals(_4, objToFind) || N.equals(_5, objToFind);
@@ -1538,6 +1677,12 @@ public abstract class Tuple<TP> implements Immutable {
             return _1 == null && _2 == null && _3 == null && _4 == null && _5 == null && _6 == null;
         }
 
+        /**
+         * 
+         *
+         * @param objToFind 
+         * @return 
+         */
         @Override
         public boolean contains(final Object objToFind) {
             return N.equals(_1, objToFind) || N.equals(_2, objToFind) || N.equals(_3, objToFind) || N.equals(_4, objToFind) || N.equals(_5, objToFind)
@@ -1739,6 +1884,12 @@ public abstract class Tuple<TP> implements Immutable {
             return _1 == null && _2 == null && _3 == null && _4 == null && _5 == null && _6 == null && _7 == null;
         }
 
+        /**
+         * 
+         *
+         * @param objToFind 
+         * @return 
+         */
         @Override
         public boolean contains(final Object objToFind) {
             return N.equals(_1, objToFind) || N.equals(_2, objToFind) || N.equals(_3, objToFind) || N.equals(_4, objToFind) || N.equals(_5, objToFind)
@@ -1953,6 +2104,12 @@ public abstract class Tuple<TP> implements Immutable {
             return _1 == null && _2 == null && _3 == null && _4 == null && _5 == null && _6 == null && _7 == null && _8 == null;
         }
 
+        /**
+         * 
+         *
+         * @param objToFind 
+         * @return 
+         */
         @Override
         public boolean contains(final Object objToFind) {
             return N.equals(_1, objToFind) || N.equals(_2, objToFind) || N.equals(_3, objToFind) || N.equals(_4, objToFind) || N.equals(_5, objToFind)
@@ -2177,6 +2334,12 @@ public abstract class Tuple<TP> implements Immutable {
             return _1 == null && _2 == null && _3 == null && _4 == null && _5 == null && _6 == null && _7 == null && _8 == null && _9 == null;
         }
 
+        /**
+         * 
+         *
+         * @param objToFind 
+         * @return 
+         */
         @Override
         public boolean contains(final Object objToFind) {
             return N.equals(_1, objToFind) || N.equals(_2, objToFind) || N.equals(_3, objToFind) || N.equals(_4, objToFind) || N.equals(_5, objToFind)

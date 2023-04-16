@@ -103,6 +103,11 @@ public final class CSVUtil {
     static final ThreadLocal<Function<String, String[]>> csvHeaderParser_TL = ThreadLocal.withInitial(() -> defaultCsvHeadereParser);
     static final ThreadLocal<BiConsumer<String[], String>> csvLineParser_TL = ThreadLocal.withInitial(() -> defaultCsvLineParser);
 
+    /**
+     * 
+     *
+     * @param parser 
+     */
     // TODO should share/use the same parser for line?
     public static void setCSVHeaderParser(final Function<String, String[]> parser) {
         N.checkArgNotNull(parser, "parser");
@@ -110,24 +115,45 @@ public final class CSVUtil {
         csvHeaderParser_TL.set(parser);
     }
 
+    /**
+     * 
+     *
+     * @param parser 
+     */
     public static void setCSVLineParser(final BiConsumer<String[], String> parser) {
         N.checkArgNotNull(parser, "parser");
 
         csvLineParser_TL.set(parser);
     }
 
+    /**
+     * 
+     */
     public static void resetCSVHeaderParser() {
         csvHeaderParser_TL.set(defaultCsvHeadereParser);
     }
 
+    /**
+     * 
+     */
     public static void resetCSVLineParser() {
         csvLineParser_TL.set(defaultCsvLineParser);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public static Function<String, String[]> getCurrentHeaderParser() {
         return csvHeaderParser_TL.get();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public static BiConsumer<String[], String> getCurrentLineParser() {
         return csvLineParser_TL.get();
     }
@@ -1036,14 +1062,43 @@ public final class CSVUtil {
         }
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param targetType 
+     * @param csvFile 
+     * @return 
+     */
     public static <T> Stream<T> stream(final Class<? extends T> targetType, final File csvFile) {
         return stream(targetType, csvFile, (Collection<String>) null);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param targetType 
+     * @param csvFile 
+     * @param selectColumnNames 
+     * @return 
+     */
     public static <T> Stream<T> stream(final Class<? extends T> targetType, final File csvFile, final Collection<String> selectColumnNames) {
         return stream(targetType, csvFile, selectColumnNames, 0, Long.MAX_VALUE, Fn.alwaysTrue());
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param targetType 
+     * @param csvFile 
+     * @param selectColumnNames 
+     * @param offset 
+     * @param count 
+     * @param filter 
+     * @return 
+     */
     public static <T> Stream<T> stream(final Class<? extends T> targetType, final File csvFile, final Collection<String> selectColumnNames, final long offset,
             final long count, final Predicate<String[]> filter) {
         FileReader csvReader = null;
@@ -1061,15 +1116,47 @@ public final class CSVUtil {
         }
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param targetType 
+     * @param csvReader 
+     * @param closeReaderWhenStreamIsClosed 
+     * @return 
+     */
     public static <T> Stream<T> stream(final Class<? extends T> targetType, final Reader csvReader, final boolean closeReaderWhenStreamIsClosed) {
         return stream(targetType, csvReader, (Collection<String>) null, closeReaderWhenStreamIsClosed);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param targetType 
+     * @param csvReader 
+     * @param selectColumnNames 
+     * @param closeReaderWhenStreamIsClosed 
+     * @return 
+     */
     public static <T> Stream<T> stream(final Class<? extends T> targetType, final Reader csvReader, final Collection<String> selectColumnNames,
             final boolean closeReaderWhenStreamIsClosed) {
         return stream(targetType, csvReader, selectColumnNames, 0, Long.MAX_VALUE, closeReaderWhenStreamIsClosed, Fn.alwaysTrue());
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param targetType 
+     * @param csvReader 
+     * @param selectColumnNames 
+     * @param offset 
+     * @param count 
+     * @param closeReaderWhenStreamIsClosed 
+     * @param filter 
+     * @return 
+     */
     public static <T> Stream<T> stream(final Class<? extends T> targetType, final Reader csvReader, final Collection<String> selectColumnNames,
             final long offset, final long count, final boolean closeReaderWhenStreamIsClosed, final Predicate<String[]> filter) {
 

@@ -52,10 +52,20 @@ public final class IndexedDouble extends AbstractIndexed {
         return new IndexedDouble(index, value);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public double value() {
         return value;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         return (int) index + (int) (value * 31);
@@ -71,6 +81,11 @@ public final class IndexedDouble extends AbstractIndexed {
         return obj instanceof IndexedDouble && ((IndexedDouble) obj).index == index && N.equals(((IndexedDouble) obj).value, value);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return "[" + index + "]=" + value;

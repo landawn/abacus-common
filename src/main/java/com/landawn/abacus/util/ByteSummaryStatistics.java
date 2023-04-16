@@ -28,9 +28,20 @@ public class ByteSummaryStatistics implements ByteConsumer {
 
     private byte max = Byte.MIN_VALUE;
 
+    /**
+     * 
+     */
     public ByteSummaryStatistics() {
     }
 
+    /**
+     * 
+     *
+     * @param count 
+     * @param min 
+     * @param max 
+     * @param sum 
+     */
     public ByteSummaryStatistics(long count, byte min, byte max, long sum) {
         this.count = count;
         this.sum = sum;
@@ -122,6 +133,11 @@ public class ByteSummaryStatistics implements ByteConsumer {
     //        return OptionalDouble.of(getAverage());
     //    }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return String.format("{min=%d, max=%d, count=%d, sum=%d, average=%f}", getMin(), getMax(), getCount(), getSum(), getAverage());

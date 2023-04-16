@@ -60,12 +60,14 @@ public final class EmailUtil {
     /**
      * Send mail with attachment.
      *
-     * @param recipients
-     * @param from
-     * @param subject
-     * @param content
-     * @param mailServer
-     * @param attachedFiles
+     * @param recipients 
+     * @param from 
+     * @param subject 
+     * @param content 
+     * @param attachedFiles 
+     * @param userName 
+     * @param password 
+     * @param props 
      */
     public static void sendEmailWithAttachment(String[] recipients, String from, String subject, String content, String[] attachedFiles, String userName,
             String password, Properties props) {
@@ -75,11 +77,13 @@ public final class EmailUtil {
     /**
      * Send HTML mail.
      *
-     * @param recipients
-     * @param from
-     * @param subject
-     * @param content
-     * @param mailServer
+     * @param recipients 
+     * @param from 
+     * @param subject 
+     * @param content 
+     * @param userName 
+     * @param password 
+     * @param props 
      */
     public static void sendHTMLEmail(String[] recipients, String from, String subject, String content, String userName, String password, Properties props) {
         sendHTMLEmailWithAttachment(recipients, from, subject, content, null, userName, password, props);
@@ -88,12 +92,14 @@ public final class EmailUtil {
     /**
      * Send HTML mail with attachment.
      *
-     * @param recipients
-     * @param from
-     * @param subject
-     * @param content
-     * @param mailServer
-     * @param attachedFiles
+     * @param recipients 
+     * @param from 
+     * @param subject 
+     * @param content 
+     * @param attachedFiles 
+     * @param userName 
+     * @param password 
+     * @param props 
      */
     public static void sendHTMLEmailWithAttachment(String[] recipients, String from, String subject, String content, String[] attachedFiles, String userName,
             String password, Properties props) {

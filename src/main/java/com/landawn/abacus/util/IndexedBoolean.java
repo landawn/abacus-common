@@ -60,6 +60,11 @@ public final class IndexedBoolean extends AbstractIndexed {
         return value;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         return (int) index + (value ? 0 : 31);
@@ -75,6 +80,11 @@ public final class IndexedBoolean extends AbstractIndexed {
         return obj instanceof IndexedBoolean && ((IndexedBoolean) obj).index == index && N.equals(((IndexedBoolean) obj).value, value);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return "[" + index + "]=" + value;

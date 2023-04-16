@@ -40,6 +40,11 @@ public class TimestampType extends AbstractDateType<Timestamp> {
         super(typeName);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<Timestamp> clazz() {
         return Timestamp.class;

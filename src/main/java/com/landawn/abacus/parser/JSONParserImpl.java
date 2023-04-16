@@ -3085,6 +3085,15 @@ final class JSONParserImpl extends AbstractJSONParser {
                 nullToEmpty);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param elementClass 
+     * @param json 
+     * @param config 
+     * @return 
+     */
     @Override
     public <T> ExceptionalStream<T, IOException> stream(final Class<? extends T> elementClass, final String json, final JSONDeserializationConfig config) {
         final Type<T> eleType = checkStreamSupportedType(elementClass);
@@ -3112,6 +3121,15 @@ final class JSONParserImpl extends AbstractJSONParser {
         return result;
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param elementClass 
+     * @param file 
+     * @param config 
+     * @return 
+     */
     @Override
     public <T> ExceptionalStream<T, IOException> stream(final Class<? extends T> elementClass, final File file, final JSONDeserializationConfig config) {
         ExceptionalStream<T, IOException> result = null;
@@ -3130,6 +3148,16 @@ final class JSONParserImpl extends AbstractJSONParser {
         return result;
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param elementClass 
+     * @param is 
+     * @param closeInputStreamWhenStreamIsClosed 
+     * @param config 
+     * @return 
+     */
     @Override
     public <T> ExceptionalStream<T, IOException> stream(final Class<? extends T> elementClass, final InputStream is,
             final boolean closeInputStreamWhenStreamIsClosed, final JSONDeserializationConfig config) {
@@ -3138,6 +3166,16 @@ final class JSONParserImpl extends AbstractJSONParser {
         return stream(elementClass, reader, closeInputStreamWhenStreamIsClosed, config);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param elementClass 
+     * @param reader 
+     * @param closeReaderWhenStreamIsClosed 
+     * @param config 
+     * @return 
+     */
     @Override
     public <T> ExceptionalStream<T, IOException> stream(final Class<? extends T> elementClass, final Reader reader, final boolean closeReaderWhenStreamIsClosed,
             final JSONDeserializationConfig config) {

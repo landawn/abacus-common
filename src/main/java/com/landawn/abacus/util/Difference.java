@@ -605,6 +605,11 @@ public class Difference<L, R> {
         return new Difference<>(common, leftOnly, rightOnly);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public L inCommon() {
         return common;
     }
@@ -637,6 +642,11 @@ public class Difference<L, R> {
                 || (leftOnly instanceof Map && (((Map) leftOnly).isEmpty() && ((Map) rightOnly).isEmpty()));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return "{inCommon=" + common + ", onLeftOnly=" + leftOnly + ", onRightOnly=" + rightOnly + "}";
@@ -694,18 +704,17 @@ public class Difference<L, R> {
         }
 
         /**
+         * 
          *
-         * @param <K1>
-         * @param <V1>
-         * @param <K2>
-         * @param <V2>
-         * @param <L>
-         * @param <R>
-         * @param <D>
-         * @param map1
-         * @param map2
-         * @param valueEquivalence
-         * @return
+         * @param <CK> 
+         * @param <K1> 
+         * @param <V1> 
+         * @param <K2> 
+         * @param <V2> 
+         * @param map1 
+         * @param map2 
+         * @param valueEquivalence 
+         * @return 
          */
         @SuppressWarnings("unlikely-arg-type")
         public static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> of(

@@ -127,21 +127,41 @@ public abstract class AbstractPool implements Pool {
         return capacity;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public long putCount() {
         return putCount.get();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public long hitCount() {
         return hitCount.get();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public long missCount() {
         return missCount.get();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public long evictionCount() {
         return evictionCount.get();

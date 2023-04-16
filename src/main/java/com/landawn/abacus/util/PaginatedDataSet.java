@@ -98,10 +98,11 @@ public interface PaginatedDataSet extends Iterable<DataSet> {
     int pageSize();
 
     /**
+     * 
      *
      * @return int
-     * @deprecated replaced by {@code totalPages}
      * @see #totalPages()
+     * @deprecated replaced by {@code totalPages}
      */
     @Deprecated
     int pageCount();
@@ -112,5 +113,10 @@ public interface PaginatedDataSet extends Iterable<DataSet> {
      */
     int totalPages();
 
+    /**
+     * 
+     *
+     * @return 
+     */
     Stream<DataSet> stream();
 }

@@ -351,10 +351,25 @@ public final class Index {
         return toOptionalInt(Strings.indexOfIgnoreCase(str, startIndex, valueToFind));
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt ofSubArray(final boolean[] sourceArray, final boolean[] subArrayToFind) {
         return ofSubArray(sourceArray, 0, subArrayToFind, 0, N.len(subArrayToFind));
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param startIndex 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt ofSubArray(final boolean[] sourceArray, final int startIndex, final boolean[] subArrayToFind) {
         return ofSubArray(sourceArray, startIndex, subArrayToFind, 0, N.len(subArrayToFind));
     }
@@ -394,10 +409,25 @@ public final class Index {
         return toOptionalInt(N.INDEX_NOT_FOUND);
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt ofSubArray(final char[] sourceArray, final char[] subArrayToFind) {
         return ofSubArray(sourceArray, 0, subArrayToFind, 0, N.len(subArrayToFind));
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param startIndex 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt ofSubArray(final char[] sourceArray, final int startIndex, final char[] subArrayToFind) {
         return ofSubArray(sourceArray, startIndex, subArrayToFind, 0, N.len(subArrayToFind));
     }
@@ -437,10 +467,25 @@ public final class Index {
         return toOptionalInt(N.INDEX_NOT_FOUND);
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt ofSubArray(final byte[] sourceArray, final byte[] subArrayToFind) {
         return ofSubArray(sourceArray, 0, subArrayToFind, 0, N.len(subArrayToFind));
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param startIndex 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt ofSubArray(final byte[] sourceArray, final int startIndex, final byte[] subArrayToFind) {
         return ofSubArray(sourceArray, startIndex, subArrayToFind, 0, N.len(subArrayToFind));
     }
@@ -480,10 +525,25 @@ public final class Index {
         return toOptionalInt(N.INDEX_NOT_FOUND);
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt ofSubArray(final short[] sourceArray, final short[] subArrayToFind) {
         return ofSubArray(sourceArray, 0, subArrayToFind, 0, N.len(subArrayToFind));
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param startIndex 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt ofSubArray(final short[] sourceArray, final int startIndex, final short[] subArrayToFind) {
         return ofSubArray(sourceArray, startIndex, subArrayToFind, 0, N.len(subArrayToFind));
     }
@@ -523,10 +583,25 @@ public final class Index {
         return toOptionalInt(N.INDEX_NOT_FOUND);
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt ofSubArray(final int[] sourceArray, final int[] subArrayToFind) {
         return ofSubArray(sourceArray, 0, subArrayToFind, 0, N.len(subArrayToFind));
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param startIndex 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt ofSubArray(final int[] sourceArray, final int startIndex, final int[] subArrayToFind) {
         return ofSubArray(sourceArray, startIndex, subArrayToFind, 0, N.len(subArrayToFind));
     }
@@ -566,10 +641,25 @@ public final class Index {
         return toOptionalInt(N.INDEX_NOT_FOUND);
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt ofSubArray(final long[] sourceArray, final long[] subArrayToFind) {
         return ofSubArray(sourceArray, 0, subArrayToFind, 0, N.len(subArrayToFind));
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param startIndex 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt ofSubArray(final long[] sourceArray, final int startIndex, final long[] subArrayToFind) {
         return ofSubArray(sourceArray, startIndex, subArrayToFind, 0, N.len(subArrayToFind));
     }
@@ -609,10 +699,25 @@ public final class Index {
         return toOptionalInt(N.INDEX_NOT_FOUND);
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt ofSubArray(final float[] sourceArray, final float[] subArrayToFind) {
         return ofSubArray(sourceArray, 0, subArrayToFind, 0, N.len(subArrayToFind));
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param startIndex 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt ofSubArray(final float[] sourceArray, final int startIndex, final float[] subArrayToFind) {
         return ofSubArray(sourceArray, startIndex, subArrayToFind, 0, N.len(subArrayToFind));
     }
@@ -652,10 +757,25 @@ public final class Index {
         return toOptionalInt(N.INDEX_NOT_FOUND);
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt ofSubArray(final double[] sourceArray, final double[] subArrayToFind) {
         return ofSubArray(sourceArray, 0, subArrayToFind, 0, N.len(subArrayToFind));
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param startIndex 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt ofSubArray(final double[] sourceArray, final int startIndex, final double[] subArrayToFind) {
         return ofSubArray(sourceArray, startIndex, subArrayToFind, 0, N.len(subArrayToFind));
     }
@@ -695,10 +815,25 @@ public final class Index {
         return toOptionalInt(N.INDEX_NOT_FOUND);
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt ofSubArray(final Object[] sourceArray, final Object[] subArrayToFind) {
         return ofSubArray(sourceArray, 0, subArrayToFind, 0, N.len(subArrayToFind));
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param startIndex 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt ofSubArray(final Object[] sourceArray, final int startIndex, final Object[] subArrayToFind) {
         return ofSubArray(sourceArray, startIndex, subArrayToFind, 0, N.len(subArrayToFind));
     }
@@ -738,10 +873,25 @@ public final class Index {
         return toOptionalInt(N.INDEX_NOT_FOUND);
     }
 
+    /**
+     * 
+     *
+     * @param sourceList 
+     * @param subListToFind 
+     * @return 
+     */
     public static OptionalInt ofSubList(final List<?> sourceList, final List<?> subListToFind) {
         return ofSubList(sourceList, 0, subListToFind, 0, N.size(subListToFind));
     }
 
+    /**
+     * 
+     *
+     * @param sourceList 
+     * @param startIndex 
+     * @param subListToFind 
+     * @return 
+     */
     public static OptionalInt ofSubList(final List<?> sourceList, final int startIndex, final List<?> subListToFind) {
         return ofSubList(sourceList, startIndex, subListToFind, 0, N.size(subListToFind));
     }
@@ -1084,10 +1234,25 @@ public final class Index {
         return toOptionalInt(Strings.lastIndexOfIgnoreCase(str, startIndexFromBack, valueToFind));
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt lastOfSubArray(final boolean[] sourceArray, final boolean[] subArrayToFind) {
         return lastOfSubArray(sourceArray, 0, subArrayToFind, 0, N.len(subArrayToFind));
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param startIndexFromBack 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt lastOfSubArray(final boolean[] sourceArray, final int startIndexFromBack, final boolean[] subArrayToFind) {
         return lastOfSubArray(sourceArray, startIndexFromBack, subArrayToFind, 0, N.len(subArrayToFind));
     }
@@ -1127,10 +1292,25 @@ public final class Index {
         return toOptionalInt(N.INDEX_NOT_FOUND);
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt lastOfSubArray(final char[] sourceArray, final char[] subArrayToFind) {
         return lastOfSubArray(sourceArray, 0, subArrayToFind, 0, N.len(subArrayToFind));
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param startIndexFromBack 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt lastOfSubArray(final char[] sourceArray, final int startIndexFromBack, final char[] subArrayToFind) {
         return lastOfSubArray(sourceArray, startIndexFromBack, subArrayToFind, 0, N.len(subArrayToFind));
     }
@@ -1170,10 +1350,25 @@ public final class Index {
         return toOptionalInt(N.INDEX_NOT_FOUND);
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt lastOfSubArray(final byte[] sourceArray, final byte[] subArrayToFind) {
         return lastOfSubArray(sourceArray, 0, subArrayToFind, 0, N.len(subArrayToFind));
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param startIndexFromBack 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt lastOfSubArray(final byte[] sourceArray, final int startIndexFromBack, final byte[] subArrayToFind) {
         return lastOfSubArray(sourceArray, startIndexFromBack, subArrayToFind, 0, N.len(subArrayToFind));
     }
@@ -1213,10 +1408,25 @@ public final class Index {
         return toOptionalInt(N.INDEX_NOT_FOUND);
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt lastOfSubArray(final short[] sourceArray, final short[] subArrayToFind) {
         return lastOfSubArray(sourceArray, 0, subArrayToFind, 0, N.len(subArrayToFind));
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param startIndexFromBack 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt lastOfSubArray(final short[] sourceArray, final int startIndexFromBack, final short[] subArrayToFind) {
         return lastOfSubArray(sourceArray, startIndexFromBack, subArrayToFind, 0, N.len(subArrayToFind));
     }
@@ -1256,10 +1466,25 @@ public final class Index {
         return toOptionalInt(N.INDEX_NOT_FOUND);
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt lastOfSubArray(final int[] sourceArray, final int[] subArrayToFind) {
         return lastOfSubArray(sourceArray, 0, subArrayToFind, 0, N.len(subArrayToFind));
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param startIndexFromBack 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt lastOfSubArray(final int[] sourceArray, final int startIndexFromBack, final int[] subArrayToFind) {
         return lastOfSubArray(sourceArray, startIndexFromBack, subArrayToFind, 0, N.len(subArrayToFind));
     }
@@ -1299,10 +1524,25 @@ public final class Index {
         return toOptionalInt(N.INDEX_NOT_FOUND);
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt lastOfSubArray(final long[] sourceArray, final long[] subArrayToFind) {
         return lastOfSubArray(sourceArray, 0, subArrayToFind, 0, N.len(subArrayToFind));
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param startIndexFromBack 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt lastOfSubArray(final long[] sourceArray, final int startIndexFromBack, final long[] subArrayToFind) {
         return lastOfSubArray(sourceArray, startIndexFromBack, subArrayToFind, 0, N.len(subArrayToFind));
     }
@@ -1342,10 +1582,25 @@ public final class Index {
         return toOptionalInt(N.INDEX_NOT_FOUND);
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt lastOfSubArray(final float[] sourceArray, final float[] subArrayToFind) {
         return lastOfSubArray(sourceArray, 0, subArrayToFind, 0, N.len(subArrayToFind));
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param startIndexFromBack 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt lastOfSubArray(final float[] sourceArray, final int startIndexFromBack, final float[] subArrayToFind) {
         return lastOfSubArray(sourceArray, startIndexFromBack, subArrayToFind, 0, N.len(subArrayToFind));
     }
@@ -1385,10 +1640,25 @@ public final class Index {
         return toOptionalInt(N.INDEX_NOT_FOUND);
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt lastOfSubArray(final double[] sourceArray, final double[] subArrayToFind) {
         return lastOfSubArray(sourceArray, 0, subArrayToFind, 0, N.len(subArrayToFind));
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param startIndexFromBack 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt lastOfSubArray(final double[] sourceArray, final int startIndexFromBack, final double[] subArrayToFind) {
         return lastOfSubArray(sourceArray, startIndexFromBack, subArrayToFind, 0, N.len(subArrayToFind));
     }
@@ -1428,10 +1698,25 @@ public final class Index {
         return toOptionalInt(N.INDEX_NOT_FOUND);
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt lastOfSubArray(final Object[] sourceArray, final Object[] subArrayToFind) {
         return lastOfSubArray(sourceArray, 0, subArrayToFind, 0, N.len(subArrayToFind));
     }
 
+    /**
+     * 
+     *
+     * @param sourceArray 
+     * @param startIndexFromBack 
+     * @param subArrayToFind 
+     * @return 
+     */
     public static OptionalInt lastOfSubArray(final Object[] sourceArray, final int startIndexFromBack, final Object[] subArrayToFind) {
         return lastOfSubArray(sourceArray, startIndexFromBack, subArrayToFind, 0, N.len(subArrayToFind));
     }
@@ -1471,10 +1756,25 @@ public final class Index {
         return toOptionalInt(N.INDEX_NOT_FOUND);
     }
 
+    /**
+     * 
+     *
+     * @param sourceList 
+     * @param subListToFind 
+     * @return 
+     */
     public static OptionalInt lastOfSubList(final List<?> sourceList, final List<?> subListToFind) {
         return lastOfSubList(sourceList, 0, subListToFind, 0, N.size(subListToFind));
     }
 
+    /**
+     * 
+     *
+     * @param sourceList 
+     * @param startIndexFromBack 
+     * @param subListToFind 
+     * @return 
+     */
     public static OptionalInt lastOfSubList(final List<?> sourceList, final int startIndexFromBack, final List<?> subListToFind) {
         return lastOfSubList(sourceList, startIndexFromBack, subListToFind, 0, N.size(subListToFind));
     }
@@ -2007,10 +2307,10 @@ public final class Index {
 
     /**
      * Finds the indices of the given object in the array.
-     *
+     * 
      * <p>This method returns an empty BitSet for a {@code null} input array.</p>
      *
-     * @param a the a to search through for the object, may be {@code null}
+     * @param c 
      * @param valueToFind the object to find, may be {@code null}
      * @return a BitSet of all the indices of the object within the a,
      *  an empty BitSet if not found or {@code null} a input
@@ -2022,13 +2322,13 @@ public final class Index {
 
     /**
      * Finds the indices of the given object in the a starting at the given index.
-     *
+     * 
      * <p>This method returns an empty BitSet for a {@code null} input array.</p>
-     *
+     * 
      * <p>A negative startIndex is treated as zero. A startIndex larger than the a
      * length will return an empty BitSet.</p>
      *
-     * @param a the a to search through for the object, may be {@code null}
+     * @param c 
      * @param startIndex the index to start searching at
      * @param valueToFind the object to find, may be {@code null}
      * @return a BitSet of all the indices of the object within the a starting at the index,

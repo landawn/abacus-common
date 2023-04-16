@@ -229,10 +229,12 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
     }
 
     /**
+     * 
      *
-     * @param writer
-     * @param obj
-     * @param config
+     * @param writer 
+     * @param obj 
+     * @param config 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public void serialize(Writer writer, Object obj, AvroSerializationConfig config) throws UnsupportedOperationException {
@@ -422,12 +424,14 @@ public final class AvroParser extends AbstractParser<AvroSerializationConfig, Av
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param targetClass
-     * @param reader
-     * @param config
-     * @return
+     * @param <T> 
+     * @param targetClass 
+     * @param reader 
+     * @param config 
+     * @return 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public <T> T deserialize(Class<? extends T> targetClass, Reader reader, AvroDeserializationConfig config) throws UnsupportedOperationException {

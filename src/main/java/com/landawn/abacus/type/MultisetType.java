@@ -53,11 +53,21 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
         jdc = JDC.create().setMapKeyType(elementType).setMapValueType(Integer.class);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<Multiset<E>> clazz() {
         return (Class<Multiset<E>>) typeClass;

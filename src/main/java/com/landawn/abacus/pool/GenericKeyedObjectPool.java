@@ -312,6 +312,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Set<K> keySet() {
         assertNotClosed();
@@ -325,6 +330,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Collection<E> values() {
         assertNotClosed();
@@ -386,6 +396,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int size() {
         // assertNotClosed();
@@ -393,6 +408,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         return pool.size();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         return pool.hashCode();
@@ -409,6 +429,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         return this == obj || (obj instanceof GenericKeyedObjectPool && N.equals(((GenericKeyedObjectPool<K, E>) obj).pool, pool));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return pool.toString();

@@ -149,10 +149,11 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
     }
 
     /**
+     * 
      *
-     * @param writer
-     * @param t
-     * @param config
+     * @param writer 
+     * @param x 
+     * @param config 
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override

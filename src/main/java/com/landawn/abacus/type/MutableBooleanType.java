@@ -29,6 +29,11 @@ public class MutableBooleanType extends MutableType<MutableBoolean> {
         super(MUTABLE_BOOLEAN);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<MutableBoolean> clazz() {
         return MutableBoolean.class;

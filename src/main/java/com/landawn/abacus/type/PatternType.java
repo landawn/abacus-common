@@ -31,6 +31,11 @@ public class PatternType extends AbstractType<Pattern> {
         super(PATTERN);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<Pattern> clazz() {
         return Pattern.class;

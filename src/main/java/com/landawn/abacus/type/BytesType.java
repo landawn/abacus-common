@@ -34,6 +34,11 @@ public class BytesType extends AbstractType<byte[]> {
         super(BYTES);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<byte[]> clazz() {
         return byte[].class;

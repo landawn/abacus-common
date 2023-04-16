@@ -408,6 +408,11 @@ public abstract class RateLimiter {
      */
     abstract long reserveEarliestAvailable(int permits, long nowMicros);
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return String.format(Locale.ROOT, "RateLimiter[stableRate=%3.1fqps]", getRate());

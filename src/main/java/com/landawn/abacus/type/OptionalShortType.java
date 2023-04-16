@@ -31,6 +31,11 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
         super(OPTIONAL_SHORT);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<OptionalShort> clazz() {
         return OptionalShort.class;

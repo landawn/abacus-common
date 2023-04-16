@@ -261,9 +261,9 @@ public final class Retry<T> {
         }
 
         /**
+         * 
          *
-         * @param cmd
-         * @throws Exception the exception
+         * @param cmd 
          */
         public void run(final Runnable cmd) {
             if (retryTimes > 0) {

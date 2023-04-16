@@ -30,6 +30,11 @@ public enum AccountStatus {
         this.intValue = intValue;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public int intValue() {
         return intValue;
     }

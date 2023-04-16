@@ -243,6 +243,11 @@ public final class HttpClient {
         return new HttpClient(url, maxConnection, connectionTimeoutInMillis, readTimeoutInMillis, settings, sharedActiveConnectionCounter, executor);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public String url() {
         return _url;
     }
@@ -335,6 +340,11 @@ public final class HttpClient {
         return execute(resultClass, HttpMethod.GET, queryParameters, settings);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public ContinuableFuture<String> asyncGet() {
         return asyncGet(String.class);
     }
@@ -499,6 +509,11 @@ public final class HttpClient {
         return execute(resultClass, HttpMethod.DELETE, queryParameters, settings);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public ContinuableFuture<String> asyncDelete() {
         return asyncDelete(String.class);
     }

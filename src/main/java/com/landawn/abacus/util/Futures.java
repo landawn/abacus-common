@@ -225,28 +225,28 @@ public final class Futures {
     }
 
     /**
+     * 
      *
-     * @param <T1>
-     * @param <T2>
-     * @param <E>
-     * @param cf1
-     * @param cf2
-     * @return
+     * @param <T1> 
+     * @param <T2> 
+     * @param cf1 
+     * @param cf2 
+     * @return 
      */
     public static <T1, T2> ContinuableFuture<Tuple2<T1, T2>> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2) {
         return allOf(Arrays.asList(cf1, cf2)).map(t -> Tuple.of((T1) t.get(0), (T2) t.get(1)));
     }
 
     /**
+     * 
      *
-     * @param <T1>
-     * @param <T2>
-     * @param <T3>
-     * @param <E>
-     * @param cf1
-     * @param cf2
-     * @param cf3
-     * @return
+     * @param <T1> 
+     * @param <T2> 
+     * @param <T3> 
+     * @param cf1 
+     * @param cf2 
+     * @param cf3 
+     * @return 
      */
     public static <T1, T2, T3> ContinuableFuture<Tuple3<T1, T2, T3>> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2,
             final Future<? extends T3> cf3) {
@@ -254,17 +254,17 @@ public final class Futures {
     }
 
     /**
+     * 
      *
-     * @param <T1>
-     * @param <T2>
-     * @param <T3>
-     * @param <T4>
-     * @param <E>
-     * @param cf1
-     * @param cf2
-     * @param cf3
-     * @param cf4
-     * @return
+     * @param <T1> 
+     * @param <T2> 
+     * @param <T3> 
+     * @param <T4> 
+     * @param cf1 
+     * @param cf2 
+     * @param cf3 
+     * @param cf4 
+     * @return 
      */
     public static <T1, T2, T3, T4> ContinuableFuture<Tuple4<T1, T2, T3, T4>> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2,
             final Future<? extends T3> cf3, final Future<? extends T4> cf4) {
@@ -272,19 +272,19 @@ public final class Futures {
     }
 
     /**
+     * 
      *
-     * @param <T1>
-     * @param <T2>
-     * @param <T3>
-     * @param <T4>
-     * @param <T5>
-     * @param <E>
-     * @param cf1
-     * @param cf2
-     * @param cf3
-     * @param cf4
-     * @param cf5
-     * @return
+     * @param <T1> 
+     * @param <T2> 
+     * @param <T3> 
+     * @param <T4> 
+     * @param <T5> 
+     * @param cf1 
+     * @param cf2 
+     * @param cf3 
+     * @param cf4 
+     * @param cf5 
+     * @return 
      */
     public static <T1, T2, T3, T4, T5> ContinuableFuture<Tuple5<T1, T2, T3, T4, T5>> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2,
             final Future<? extends T3> cf3, final Future<? extends T4> cf4, final Future<? extends T5> cf5) {
@@ -292,21 +292,21 @@ public final class Futures {
     }
 
     /**
+     * 
      *
-     * @param <T1>
-     * @param <T2>
-     * @param <T3>
-     * @param <T4>
-     * @param <T5>
-     * @param <T6>
-     * @param <E>
-     * @param cf1
-     * @param cf2
-     * @param cf3
-     * @param cf4
-     * @param cf5
-     * @param cf6
-     * @return
+     * @param <T1> 
+     * @param <T2> 
+     * @param <T3> 
+     * @param <T4> 
+     * @param <T5> 
+     * @param <T6> 
+     * @param cf1 
+     * @param cf2 
+     * @param cf3 
+     * @param cf4 
+     * @param cf5 
+     * @param cf6 
+     * @return 
      */
     public static <T1, T2, T3, T4, T5, T6> ContinuableFuture<Tuple6<T1, T2, T3, T4, T5, T6>> combine(final Future<? extends T1> cf1,
             final Future<? extends T2> cf2, final Future<? extends T3> cf3, final Future<? extends T4> cf4, final Future<? extends T5> cf5,
@@ -316,23 +316,23 @@ public final class Futures {
     }
 
     /**
+     * 
      *
-     * @param <T1>
-     * @param <T2>
-     * @param <T3>
-     * @param <T4>
-     * @param <T5>
-     * @param <T6>
-     * @param <T7>
-     * @param <E>
-     * @param cf1
-     * @param cf2
-     * @param cf3
-     * @param cf4
-     * @param cf5
-     * @param cf6
-     * @param cf7
-     * @return
+     * @param <T1> 
+     * @param <T2> 
+     * @param <T3> 
+     * @param <T4> 
+     * @param <T5> 
+     * @param <T6> 
+     * @param <T7> 
+     * @param cf1 
+     * @param cf2 
+     * @param cf3 
+     * @param cf4 
+     * @param cf5 
+     * @param cf6 
+     * @param cf7 
+     * @return 
      */
     public static <T1, T2, T3, T4, T5, T6, T7> ContinuableFuture<Tuple7<T1, T2, T3, T4, T5, T6, T7>> combine(final Future<? extends T1> cf1,
             final Future<? extends T2> cf2, final Future<? extends T3> cf3, final Future<? extends T4> cf4, final Future<? extends T5> cf5,

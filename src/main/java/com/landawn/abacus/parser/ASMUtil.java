@@ -90,6 +90,9 @@ final class ASMUtil {
         // Singleton.
     }
 
+    /**
+     * 
+     */
     @Data
     public static final class TestBeanA {
         private int id;

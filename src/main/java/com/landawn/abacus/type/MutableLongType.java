@@ -31,6 +31,11 @@ public class MutableLongType extends MutableType<MutableLong> {
         super(MUTABLE_LONG);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<MutableLong> clazz() {
         return MutableLong.class;

@@ -52,11 +52,12 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     }
 
     /**
+     * 
      *
-     * @param e
-     * @return
+     * @param e 
+     * @return 
+     * @throws UnsupportedOperationException 
      * @deprecated throws {@code UnsupportedOperationException}
-     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
@@ -67,10 +68,10 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     /**
      * Adds the all.
      *
-     * @param newElements
-     * @return
+     * @param newElements 
+     * @return 
+     * @throws UnsupportedOperationException 
      * @deprecated throws {@code UnsupportedOperationException}
-     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
@@ -79,11 +80,12 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     }
 
     /**
+     * 
      *
-     * @param object
-     * @return
+     * @param object 
+     * @return 
+     * @throws UnsupportedOperationException 
      * @deprecated throws {@code UnsupportedOperationException}
-     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
@@ -94,10 +96,10 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     /**
      * Removes the if.
      *
-     * @param filter
-     * @return
+     * @param filter 
+     * @return 
+     * @throws UnsupportedOperationException 
      * @deprecated throws {@code UnsupportedOperationException}
-     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
@@ -108,10 +110,10 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     /**
      * Removes the all.
      *
-     * @param oldElements
-     * @return
+     * @param oldElements 
+     * @return 
+     * @throws UnsupportedOperationException 
      * @deprecated throws {@code UnsupportedOperationException}
-     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
@@ -120,11 +122,12 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     }
 
     /**
+     * 
      *
-     * @param elementsToKeep
-     * @return
+     * @param elementsToKeep 
+     * @return 
+     * @throws UnsupportedOperationException 
      * @deprecated throws {@code UnsupportedOperationException}
-     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
@@ -133,9 +136,10 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     }
 
     /**
+     * 
      *
+     * @throws UnsupportedOperationException 
      * @deprecated throws {@code UnsupportedOperationException}
-     * @throws UnsupportedOperationException
      */
     @Deprecated
     @Override
@@ -153,16 +157,31 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
         return coll.contains(o);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public ObjIterator<E> iterator() {
         return ObjIterator.of(coll.iterator());
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int size() {
         return coll.size();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Object[] toArray() {
         return coll.toArray();
@@ -189,11 +208,21 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
         return obj instanceof Collection && coll.equals(obj);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         return coll.hashCode();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return coll.toString();

@@ -43,6 +43,11 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
         }
     };
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public static FloatIterator empty() { //NOSONAR
         return EMPTY;
     }
@@ -247,8 +252,19 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
         return nextFloat();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public abstract float nextFloat();
 
+    /**
+     * 
+     *
+     * @param n 
+     * @return 
+     */
     public FloatIterator skip(final long n) {
         N.checkArgNotNegative(n, "n");
 
@@ -291,6 +307,12 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
         };
     }
 
+    /**
+     * 
+     *
+     * @param count 
+     * @return 
+     */
     public FloatIterator limit(final long count) {
         N.checkArgNotNegative(count, "count");
 
@@ -320,6 +342,12 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
         };
     }
 
+    /**
+     * 
+     *
+     * @param predicate 
+     * @return 
+     */
     public FloatIterator filter(final FloatPredicate predicate) {
         N.checkArgNotNull(predicate, "predicate");
 
@@ -358,6 +386,11 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
         };
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public OptionalFloat first() {
         if (hasNext()) {
             return OptionalFloat.of(nextFloat());
@@ -366,6 +399,11 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public OptionalFloat last() {
         if (hasNext()) {
             float next = nextFloat();
@@ -380,10 +418,20 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public float[] toArray() {
         return toList().trimToSize().array();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public FloatList toList() {
         final FloatList list = new FloatList();
 
@@ -394,15 +442,31 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
         return list;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public FloatStream stream() {
         return FloatStream.of(this);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Beta
     public ObjIterator<IndexedFloat> indexed() {
         return indexed(0);
     }
 
+    /**
+     * 
+     *
+     * @param startIndex 
+     * @return 
+     */
     @Beta
     public ObjIterator<IndexedFloat> indexed(final long startIndex) {
         if (startIndex < 0) {

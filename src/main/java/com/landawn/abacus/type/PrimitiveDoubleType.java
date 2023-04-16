@@ -30,6 +30,11 @@ public final class PrimitiveDoubleType extends AbstractDoubleType {
         super(DOUBLE);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {
@@ -46,6 +51,11 @@ public final class PrimitiveDoubleType extends AbstractDoubleType {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Double defaultValue() {
         return DEFAULT_VALUE;

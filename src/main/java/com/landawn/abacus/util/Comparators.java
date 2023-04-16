@@ -221,10 +221,10 @@ public abstract class Comparators {
     };
 
     /**
-     * Same as {@code nullsFirst}
-     * @param <T>
-     * @return
-     * {@link #nullsFirst()}
+     * Same as {@code nullsFirst}.
+     *
+     * @param <T> 
+     * @return {@link #nullsFirst()}
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T extends Comparable> Comparator<T> naturalOrder() {
@@ -695,6 +695,13 @@ public abstract class Comparators {
         return (Comparator<T>) COMPARING_BY_MAP_SIZE;
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param cmp 
+     * @return 
+     */
     public static <T> Comparator<T[]> comparingArray(final Comparator<T> cmp) {
         N.checkArgNotNull(cmp);
 
@@ -721,6 +728,14 @@ public abstract class Comparators {
         };
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param <C> 
+     * @param cmp 
+     * @return 
+     */
     public static <T, C extends Collection<T>> Comparator<C> comparingCollection(final Comparator<T> cmp) {
         N.checkArgNotNull(cmp);
 
@@ -750,6 +765,14 @@ public abstract class Comparators {
         };
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param <C> 
+     * @param cmp 
+     * @return 
+     */
     public static <T, C extends Iterator<T>> Comparator<C> comparingIterator(final Comparator<T> cmp) {
         N.checkArgNotNull(cmp);
 

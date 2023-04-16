@@ -43,6 +43,11 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
         elementType = TypeFactory.getType(long.class);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {

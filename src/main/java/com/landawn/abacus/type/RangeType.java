@@ -65,11 +65,21 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
         this.elementType = parameterTypes[0];
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<Range<T>> clazz() {
         return typeClass;

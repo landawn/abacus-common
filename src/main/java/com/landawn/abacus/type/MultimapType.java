@@ -60,11 +60,21 @@ public class MultimapType<K, E, V extends Collection<E>> extends AbstractType<Mu
         jdc = JDC.create().setMapKeyType(parameterTypes[0]).setMapValueType(parameterTypes[1]).setElementType(collType.getElementType());
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Class<Multimap<K, E, V>> clazz() {

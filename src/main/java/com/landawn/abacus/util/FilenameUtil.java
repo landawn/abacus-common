@@ -496,7 +496,7 @@ public final class FilenameUtil {
      * <p>
      * The files names are expected to be normalized.
      * </p>
-     *
+     * 
      * Edge cases:
      * <ul>
      * <li>A {@code directory} must not be null: if null, throw IllegalArgumentException</li>
@@ -504,13 +504,11 @@ public final class FilenameUtil {
      * <li>A null child file is not contained in any parent: return false</li>
      * </ul>
      *
-     * @param canonicalParent
-     *            the file to consider as the parent.
-     * @param canonicalChild
-     *            the file to consider as the child.
+     * @param canonicalParent            the file to consider as the parent.
+     * @param canonicalChild            the file to consider as the child.
      * @return true is the candidate leaf is under by the specified composite. False otherwise.
-     * @since 2.2
      * @see FileUtils#directoryContains(File, File)
+     * @since 2.2
      */
     public static boolean directoryContains(final String canonicalParent, final String canonicalChild) {
 

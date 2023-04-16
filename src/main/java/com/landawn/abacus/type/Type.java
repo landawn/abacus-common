@@ -71,10 +71,11 @@ public interface Type<T> {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param type
-     * @return
+     * @param <T> 
+     * @param typeRef 
+     * @return 
      */
     static <T> Type<T> of(final TypeReference<T> typeRef) {
         return typeRef.type();
@@ -430,12 +431,32 @@ public interface Type<T> {
         return TypeFactory.getType("Multiset<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     String name();
 
+    /**
+     * 
+     *
+     * @return 
+     */
     String declaringName();
 
+    /**
+     * 
+     *
+     * @return 
+     */
     String xmlName();
 
+    /**
+     * 
+     *
+     * @return 
+     */
     Class<T> clazz();
 
     /**
@@ -480,6 +501,11 @@ public interface Type<T> {
      */
     boolean isString();
 
+    /**
+     * 
+     *
+     * @return 
+     */
     boolean isCharSequence();
 
     /**

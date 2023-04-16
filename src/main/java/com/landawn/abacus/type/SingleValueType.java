@@ -166,26 +166,52 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
         this.isSerializable = this.jsonValueType == null ? false : this.jsonValueType.isSerializable();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<T> clazz() {
         return typeClass;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public boolean isGenericType() {
         return isGenericType;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Type<?>[] getParameterTypes() {
         return parameterTypes;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public boolean isSerializable() {
         return isSerializable;
     }
 
+    /**
+     * 
+     *
+     * @param x 
+     * @return 
+     */
     @Override
     public String stringOf(T x) {
         if (x == null) {
@@ -209,6 +235,12 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
         }
     }
 
+    /**
+     * 
+     *
+     * @param str 
+     * @return 
+     */
     @Override
     public T valueOf(String str) {
         // throw new UnsupportedOperationException();
@@ -224,6 +256,14 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
         }
     }
 
+    /**
+     * 
+     *
+     * @param rs 
+     * @param columnIndex 
+     * @return 
+     * @throws SQLException 
+     */
     @Override
     public T get(ResultSet rs, int columnIndex) throws SQLException {
         if (jsonValueType == null) {
@@ -239,6 +279,14 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
         }
     }
 
+    /**
+     * 
+     *
+     * @param rs 
+     * @param columnLabel 
+     * @return 
+     * @throws SQLException 
+     */
     @Override
     public T get(ResultSet rs, String columnLabel) throws SQLException {
         if (jsonValueType == null) {
@@ -254,6 +302,14 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
         }
     }
 
+    /**
+     * 
+     *
+     * @param stmt 
+     * @param columnIndex 
+     * @param x 
+     * @throws SQLException 
+     */
     @Override
     public void set(PreparedStatement stmt, int columnIndex, T x) throws SQLException {
         if (jsonValueType == null) {
@@ -271,6 +327,14 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
         }
     }
 
+    /**
+     * 
+     *
+     * @param stmt 
+     * @param parameterName 
+     * @param x 
+     * @throws SQLException 
+     */
     @Override
     public void set(CallableStatement stmt, String parameterName, T x) throws SQLException {
         if (jsonValueType == null) {
@@ -288,6 +352,15 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
         }
     }
 
+    /**
+     * 
+     *
+     * @param stmt 
+     * @param columnIndex 
+     * @param x 
+     * @param sqlTypeOrLength 
+     * @throws SQLException 
+     */
     @Override
     public void set(PreparedStatement stmt, int columnIndex, T x, int sqlTypeOrLength) throws SQLException {
         if (jsonValueType == null) {
@@ -305,6 +378,15 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
         }
     }
 
+    /**
+     * 
+     *
+     * @param stmt 
+     * @param parameterName 
+     * @param x 
+     * @param sqlTypeOrLength 
+     * @throws SQLException 
+     */
     @Override
     public void set(CallableStatement stmt, String parameterName, T x, int sqlTypeOrLength) throws SQLException {
         if (jsonValueType == null) {
@@ -322,6 +404,14 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
         }
     }
 
+    /**
+     * 
+     *
+     * @param writer 
+     * @param x 
+     * @param config 
+     * @throws IOException 
+     */
     @Override
     public void writeCharacter(CharacterWriter writer, T x, SerializationConfig<?> config) throws IOException {
         if (x == null) {

@@ -50,22 +50,47 @@ public final class IntPair implements Immutable {
         return new IntPair(_1, _2);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public int min() {
         return N.min(_1, _2);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public int max() {
         return N.max(_1, _2);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public int sum() {
         return _1 + _2;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public double average() {
         return ((double) sum()) / 2;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public IntPair reverse() {
         return new IntPair(_2, _1);
     }
@@ -114,10 +139,20 @@ public final class IntPair implements Immutable {
         return predicate.test(_1, _2) ? Optional.of(this) : Optional.<IntPair> empty();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public IntStream stream() {
         return IntStream.of(_1, _2);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         return 31 * _1 + this._2;
@@ -140,6 +175,11 @@ public final class IntPair implements Immutable {
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return "[" + this._1 + ", " + this._2 + "]";

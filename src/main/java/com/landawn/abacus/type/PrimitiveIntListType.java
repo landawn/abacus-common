@@ -40,6 +40,11 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
         super(INT_LIST);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<IntList> clazz() {
         return IntList.class;

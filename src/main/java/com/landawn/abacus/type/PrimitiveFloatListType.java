@@ -40,6 +40,11 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
         super(FLOAT_LIST);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<FloatList> clazz() {
         return FloatList.class;

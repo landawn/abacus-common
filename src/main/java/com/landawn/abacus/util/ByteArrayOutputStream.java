@@ -30,10 +30,18 @@ public final class ByteArrayOutputStream extends OutputStream {
 
     protected int count;
 
+    /**
+     * 
+     */
     public ByteArrayOutputStream() {
         this(32);
     }
 
+    /**
+     * 
+     *
+     * @param size 
+     */
     public ByteArrayOutputStream(int size) {
         if (size < 0) {
             throw new IllegalArgumentException("Negative initial size: " + size);
@@ -89,14 +97,29 @@ public final class ByteArrayOutputStream extends OutputStream {
         out.write(buf, 0, count);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public int capacity() {
         return buf == null ? 0 : buf.length;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public byte[] array() {
         return buf;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public int size() {
         return count;
     }
@@ -117,6 +140,11 @@ public final class ByteArrayOutputStream extends OutputStream {
         return Arrays.copyOf(buf, count);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return new String(buf, 0, count);

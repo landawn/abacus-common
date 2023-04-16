@@ -67,6 +67,7 @@ public abstract class Strings {
     /**
      * String with value {@code "null"}.
      */
+    @Beta
     public static final String NULL_STRING = "null".intern();
 
     /**
@@ -171,6 +172,12 @@ public abstract class Strings {
         return value == null ? null : String.valueOf(value);
     }
 
+    /**
+     * 
+     *
+     * @param str 
+     * @return 
+     */
     public static boolean isValidJavaIdentifier(String str) {
         if (N.isNullOrEmpty(str)) {
             return false;
@@ -225,7 +232,7 @@ public abstract class Strings {
 
     /**
      * <p>Checks if all of the CharSequences are empty ("") or null.</p>
-     *
+     * 
      * <pre>
      * StringUtil.isAllEmpty(null)             = true
      * StringUtil.isAllEmpty(null, "")         = true
@@ -240,8 +247,8 @@ public abstract class Strings {
      *
      * @param css the CharSequences to check, may be null or empty
      * @return {@code true} if all of the CharSequences are empty or null
-     * @since 3.6
      * @see N#allNullOrEmpty(CharSequence...)
+     * @since 3.6
      */
     public static boolean isAllEmpty(final CharSequence... css) {
         if (N.isNullOrEmpty(css)) {
@@ -279,9 +286,9 @@ public abstract class Strings {
 
     /**
      * <p>Checks if all of the CharSequences are empty (""), null or whitespace only.</p>
-     *
+     * 
      * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
-     *
+     * 
      * <pre>
      * StringUtil.isAllBlank(null)             = true
      * StringUtil.isAllBlank(null, "foo")      = false
@@ -296,8 +303,8 @@ public abstract class Strings {
      *
      * @param css the CharSequences to check, may be null or empty
      * @return {@code true} if all of the CharSequences are empty or null or whitespace only
-     * @since 3.6
      * @see N#allBlank(CharSequence...)
+     * @since 3.6
      */
     public static boolean isAllBlank(final CharSequence... css) {
         if (N.isNullOrEmpty(css)) {
@@ -335,7 +342,7 @@ public abstract class Strings {
 
     /**
      * <p>Checks if any of the CharSequences are empty ("") or null.</p>
-     *
+     * 
      * <pre>
      * StringUtil.isAnyEmpty((String) null)    = true
      * StringUtil.isAnyEmpty((String[]) null)  = false
@@ -351,8 +358,8 @@ public abstract class Strings {
      *
      * @param css the CharSequences to check, may be null or empty
      * @return {@code true} if any of the CharSequences are empty or null
-     * @since 3.2
      * @see N#anyNullOrEmpty(CharSequence...)
+     * @since 3.2
      */
     public static boolean isAnyEmpty(final CharSequence... css) {
         if (N.isNullOrEmpty(css)) {
@@ -390,9 +397,9 @@ public abstract class Strings {
 
     /**
      * <p>Checks if any of the CharSequences are empty ("") or null or whitespace only.</p>
-     *
+     * 
      * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
-     *
+     * 
      * <pre>
      * StringUtil.isAnyBlank((String) null)    = true
      * StringUtil.isAnyBlank((String[]) null)  = false
@@ -409,8 +416,8 @@ public abstract class Strings {
      *
      * @param css the CharSequences to check, may be null or empty
      * @return {@code true} if any of the CharSequences are empty or null or whitespace only
-     * @since 3.2
      * @see N#anyBlank(CharSequence...)
+     * @since 3.2
      */
     public static boolean isAnyBlank(final CharSequence... css) {
         if (N.isNullOrEmpty(css)) {
@@ -529,10 +536,10 @@ public abstract class Strings {
 
     /**
      * <p>Returns the first value in the array which is not empty.</p>
-     *
+     * 
      * <p>If all values are empty or the array is {@code null}
      * or empty then {@code null} is returned.</p>
-     *
+     * 
      * <pre>
      * StringUtil.firstNonEmpty(null, null, null)   = null
      * StringUtil.firstNonEmpty(null, null, "")     = null
@@ -547,8 +554,8 @@ public abstract class Strings {
      * @param <T> the specific kind of CharSequence
      * @param values the values to test, may be {@code null} or empty
      * @return the first value from {@code values} which is not empty, or {@code null} if there are no non-empty values
-     * @since 3.8
      * @see N#firstNonEmpty(CharSequence...)
+     * @since 3.8
      */
     @SafeVarargs
     public static <T extends CharSequence> T firstNonEmpty(final T... values) {
@@ -644,11 +651,22 @@ public abstract class Strings {
         return abbreviate(str, "...", 0, maxWidth);
     }
 
-    public static String nullToEmpty(String str) {
+    /**
+     * 
+     *
+     * @param str 
+     * @return 
+     */
+    public static String nullToEmpty(final String str) {
         return str == null ? N.EMPTY_STRING : str;
     }
 
-    public static void nullToEmpty(String[] strs) {
+    /**
+     * 
+     *
+     * @param strs 
+     */
+    public static void nullToEmpty(final String[] strs) {
         if (N.isNullOrEmpty(strs)) {
             return;
         }
@@ -658,17 +676,78 @@ public abstract class Strings {
         }
     }
 
-    public static String emptyToNull(String str) {
-        return str == null || str.length() > 0 ? str : null;
+    /**
+     * 
+     *
+     * @param str 
+     * @return 
+     */
+    public static String emptyToNull(final String str) {
+        return str == null || str.length() == 0 ? null : str;
     }
 
-    public static void emptyToNull(String[] strs) {
+    /**
+     * 
+     *
+     * @param strs 
+     */
+    public static void emptyToNull(final String[] strs) {
         if (N.isNullOrEmpty(strs)) {
             return;
         }
 
         for (int i = 0, len = strs.length; i < len; i++) {
-            strs[i] = strs[i] == null || strs[i].length() > 0 ? strs[i] : null;
+            strs[i] = strs[i] == null || strs[i].length() == 0 ? null : strs[i];
+        }
+    }
+
+    /**
+     * 
+     *
+     * @param str 
+     * @return 
+     */
+    public static String blankToEmpty(final String str) {
+        return isBlank(str) ? EMPTY : str;
+    }
+
+    /**
+     * 
+     *
+     * @param strs 
+     */
+    public static void blankToEmpty(final String[] strs) {
+        if (N.isNullOrEmpty(strs)) {
+            return;
+        }
+
+        for (int i = 0, len = strs.length; i < len; i++) {
+            strs[i] = isBlank(strs[i]) ? EMPTY : strs[i];
+        }
+    }
+
+    /**
+     * 
+     *
+     * @param str 
+     * @return 
+     */
+    public static String blankToNull(final String str) {
+        return isBlank(str) ? null : str;
+    }
+
+    /**
+     * 
+     *
+     * @param strs 
+     */
+    public static void blankToNull(final String[] strs) {
+        if (N.isNullOrEmpty(strs)) {
+            return;
+        }
+
+        for (int i = 0, len = strs.length; i < len; i++) {
+            strs[i] = isBlank(strs[i]) ? null : strs[i];
         }
     }
 
@@ -1570,6 +1649,12 @@ public abstract class Strings {
         return str;
     }
 
+    /**
+     * 
+     *
+     * @param source 
+     * @return 
+     */
     public static char[] toCharArray(final CharSequence source) {
         final int len = N.len(source);
 
@@ -1937,9 +2022,9 @@ public abstract class Strings {
 
     /**
      * <p>Replaces a String with another String inside a larger String, once.</p>
-     *
+     * 
      * <p>A {@code null} reference passed to this method is a no-op.</p>
-     *
+     * 
      * <pre>
      * StringUtil.replaceOnce(null, *, *)        = null
      * StringUtil.replaceOnce("", *, *)          = ""
@@ -1951,12 +2036,12 @@ public abstract class Strings {
      * StringUtil.replaceOnce("aba", "a", "z")   = "zba"
      * </pre>
      *
-     * @see #replace(String text, String searchString, String replacement, int max)
-     * @param text text to search and replace in, may be null
-     * @param searchString the String to search for, may be null
+     * @param str 
+     * @param target 
      * @param replacement the String to replace with, may be null
      * @return the text with any replacements processed,
      *  {@code null} if null String input
+     * @see #replace(String text, String searchString, String replacement, int max)
      */
     public static String replaceFirst(final String str, final String target, final String replacement) {
         return replaceFirst(str, 0, target, replacement);
@@ -1976,9 +2061,9 @@ public abstract class Strings {
 
     /**
      * <p>Replaces a String with another String inside a larger String, once.</p>
-     *
+     * 
      * <p>A {@code null} reference passed to this method is a no-op.</p>
-     *
+     * 
      * <pre>
      * StringUtil.replaceOnce(null, *, *)        = null
      * StringUtil.replaceOnce("", *, *)          = ""
@@ -1990,12 +2075,12 @@ public abstract class Strings {
      * StringUtil.replaceOnce("aba", "a", "z")   = "zba"
      * </pre>
      *
-     * @see #replace(String text, String searchString, String replacement, int max)
-     * @param text text to search and replace in, may be null
-     * @param searchString the String to search for, may be null
+     * @param str 
+     * @param target 
      * @param replacement the String to replace with, may be null
      * @return the text with any replacements processed,
      *  {@code null} if null String input
+     * @see #replace(String text, String searchString, String replacement, int max)
      * @deprecated Use {@link #replaceFirst(String,String,String)} instead
      */
     @Deprecated
@@ -2750,6 +2835,11 @@ public abstract class Strings {
         return N.isNullOrEmpty(str) || (str.charAt(0) != ' ' && str.charAt(str.length() - 1) != ' ') ? str : str.trim();
     }
 
+    /**
+     * 
+     *
+     * @param strs 
+     */
     public static void trim(final String[] strs) {
         if (N.isNullOrEmpty(strs)) {
             return;
@@ -2792,6 +2882,11 @@ public abstract class Strings {
         return N.isNullOrEmpty(str) ? null : str;
     }
 
+    /**
+     * 
+     *
+     * @param strs 
+     */
     public static void trimToNull(final String[] strs) {
         if (N.isNullOrEmpty(strs)) {
             return;
@@ -2831,6 +2926,11 @@ public abstract class Strings {
         return N.isNullOrEmpty(str) ? N.EMPTY_STRING : str.trim();
     }
 
+    /**
+     * 
+     *
+     * @param strs 
+     */
     public static void trimToEmpty(final String[] strs) {
         if (N.isNullOrEmpty(strs)) {
             return;
@@ -2876,6 +2976,11 @@ public abstract class Strings {
         return strip(str, null);
     }
 
+    /**
+     * 
+     *
+     * @param strs 
+     */
     public static void strip(final String[] strs) {
         if (N.isNullOrEmpty(strs)) {
             return;
@@ -2920,6 +3025,11 @@ public abstract class Strings {
         return N.isNullOrEmpty(str) ? null : str;
     }
 
+    /**
+     * 
+     *
+     * @param strs 
+     */
     public static void stripToNull(final String[] strs) {
         if (N.isNullOrEmpty(strs)) {
             return;
@@ -2961,6 +3071,11 @@ public abstract class Strings {
         return N.isNullOrEmpty(str) ? N.EMPTY_STRING : strip(str, null);
     }
 
+    /**
+     * 
+     *
+     * @param strs 
+     */
     public static void stripToEmpty(final String[] strs) {
         if (N.isNullOrEmpty(strs)) {
             return;
@@ -3013,6 +3128,12 @@ public abstract class Strings {
         return stripEnd(stripStart(str, stripChars), stripChars);
     }
 
+    /**
+     * 
+     *
+     * @param strs 
+     * @param stripChars 
+     */
     public static void strip(final String[] strs, final String stripChars) {
         if (N.isNullOrEmpty(strs)) {
             return;
@@ -3075,6 +3196,12 @@ public abstract class Strings {
         return start == 0 ? str : str.substring(start);
     }
 
+    /**
+     * 
+     *
+     * @param strs 
+     * @param stripChars 
+     */
     public static void stripStart(final String[] strs, final String stripChars) {
         if (N.isNullOrEmpty(strs)) {
             return;
@@ -3138,6 +3265,12 @@ public abstract class Strings {
         return end == str.length() ? str : str.substring(0, end);
     }
 
+    /**
+     * 
+     *
+     * @param strs 
+     * @param stripChars 
+     */
     public static void stripEnd(final String[] strs, final String stripChars) {
         if (N.isNullOrEmpty(strs)) {
             return;
@@ -3203,6 +3336,11 @@ public abstract class Strings {
         }
     }
 
+    /**
+     * 
+     *
+     * @param strs 
+     */
     public static void stripAccents(final String[] strs) {
         if (N.isNullOrEmpty(strs)) {
             return;
@@ -3273,6 +3411,11 @@ public abstract class Strings {
         return lastIdx == str.length() ? str : str.substring(0, lastIdx);
     }
 
+    /**
+     * 
+     *
+     * @param strs 
+     */
     public static void chomp(final String[] strs) {
         if (N.isNullOrEmpty(strs)) {
             return;
@@ -3332,6 +3475,11 @@ public abstract class Strings {
         }
     }
 
+    /**
+     * 
+     *
+     * @param strs 
+     */
     public static void chop(final String[] strs) {
         if (N.isNullOrEmpty(strs)) {
             return;
@@ -3493,6 +3641,11 @@ public abstract class Strings {
         return count == cbuf.length ? str : new String(cbuf, 0, count);
     }
 
+    /**
+     * 
+     *
+     * @param strs 
+     */
     public static void deleteWhitespace(final String[] strs) {
         if (N.isNullOrEmpty(strs)) {
             return;
@@ -3559,6 +3712,13 @@ public abstract class Strings {
         }
     }
 
+    /**
+     * 
+     *
+     * @param str 
+     * @param prefix 
+     * @return 
+     */
     public static String prependIfMissingIgnoreCase(final String str, final String prefix) {
         N.checkArgNotNull(prefix);
 
@@ -4828,6 +4988,14 @@ public abstract class Strings {
         return indexOfAnyBut(str, 0, chs);
     }
 
+    /**
+     * 
+     *
+     * @param str 
+     * @param fromIndex 
+     * @param chs 
+     * @return 
+     */
     @SafeVarargs
     public static int indexOfAnyBut(final String str, final int fromIndex, final char... chs) {
         if (N.isNullOrEmpty(str)) {
@@ -5378,10 +5546,11 @@ public abstract class Strings {
     }
 
     /**
+     * 
      *
-     * @param str
-     * @param substr
-     * @return
+     * @param str 
+     * @param ch 
+     * @return 
      * @see N#occurrencesOf(String, String)
      */
     @SuppressWarnings("deprecation")
@@ -6930,11 +7099,12 @@ public abstract class Strings {
     }
 
     /**
+     * 
      *
-     * @param str
-     * @param delimiterOfExclusiveBeginIndex
-     * @param delimiterOfExclusiveBeginIndex
-     * @return
+     * @param str 
+     * @param delimiterOfExclusiveBeginIndex 
+     * @param delimiterOfExclusiveEndIndex 
+     * @return 
      * @see #substringBetween(String, int, int)
      */
     public static String substringBetween(String str, char delimiterOfExclusiveBeginIndex, char delimiterOfExclusiveEndIndex) {
@@ -6970,11 +7140,12 @@ public abstract class Strings {
     }
 
     /**
+     * 
      *
-     * @param str
-     * @param delimiterOfExclusiveBeginIndex
-     * @param delimiterOfExclusiveBeginIndex
-     * @return
+     * @param str 
+     * @param delimiterOfExclusiveBeginIndex 
+     * @param delimiterOfExclusiveEndIndex 
+     * @return 
      * @see #substringBetween(String, int, int)
      */
     public static String substringBetween(String str, String delimiterOfExclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
@@ -6982,12 +7153,13 @@ public abstract class Strings {
     }
 
     /**
+     * 
      *
-     * @param str
+     * @param str 
      * @param fromIndex start index for {@code delimiterOfExclusive}. {@code str.indexOf(delimiterOfExclusiveBeginIndex, fromIndex)}
-     * @param delimiterOfExclusiveBeginIndex
-     * @param delimiterOfExclusiveBeginIndex
-     * @return
+     * @param delimiterOfExclusiveBeginIndex 
+     * @param delimiterOfExclusiveEndIndex 
+     * @return 
      * @see #substringBetween(String, int, int)
      */
     public static String substringBetween(String str, int fromIndex, String delimiterOfExclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
@@ -7404,6 +7576,17 @@ public abstract class Strings {
         }
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @param delimiter 
+     * @param prefix 
+     * @param suffix 
+     * @return 
+     */
     public static String join(final boolean[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
@@ -7563,6 +7746,17 @@ public abstract class Strings {
         }
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @param delimiter 
+     * @param prefix 
+     * @param suffix 
+     * @return 
+     */
     public static String join(final char[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
@@ -7722,6 +7916,17 @@ public abstract class Strings {
         }
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @param delimiter 
+     * @param prefix 
+     * @param suffix 
+     * @return 
+     */
     public static String join(final byte[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
@@ -7881,6 +8086,17 @@ public abstract class Strings {
         }
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @param delimiter 
+     * @param prefix 
+     * @param suffix 
+     * @return 
+     */
     public static String join(final short[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
@@ -8040,6 +8256,17 @@ public abstract class Strings {
         }
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @param delimiter 
+     * @param prefix 
+     * @param suffix 
+     * @return 
+     */
     public static String join(final int[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
@@ -8199,6 +8426,17 @@ public abstract class Strings {
         }
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @param delimiter 
+     * @param prefix 
+     * @param suffix 
+     * @return 
+     */
     public static String join(final long[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
@@ -8358,6 +8596,17 @@ public abstract class Strings {
         }
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @param delimiter 
+     * @param prefix 
+     * @param suffix 
+     * @return 
+     */
     public static String join(final float[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
@@ -8517,6 +8766,17 @@ public abstract class Strings {
         }
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @param delimiter 
+     * @param prefix 
+     * @param suffix 
+     * @return 
+     */
     public static String join(final double[] a, final int fromIndex, final int toIndex, final String delimiter, final String prefix, final String suffix) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
@@ -8602,10 +8862,29 @@ public abstract class Strings {
         return join(a, 0, a.length, delimiter);
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param delimiter 
+     * @param prefix 
+     * @param suffix 
+     * @return 
+     */
     public static String join(final Object[] a, final String delimiter, final String prefix, final String suffix) {
         return join(a, 0, N.len(a), delimiter, prefix, suffix, false);
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param delimiter 
+     * @param prefix 
+     * @param suffix 
+     * @param trim 
+     * @return 
+     */
     public static String join(final Object[] a, final String delimiter, final String prefix, final String suffix, final boolean trim) {
         return join(a, 0, N.len(a), delimiter, prefix, suffix, trim);
     }
@@ -8771,10 +9050,29 @@ public abstract class Strings {
         return join(c == null ? null : c.iterator(), delimiter);
     }
 
+    /**
+     * 
+     *
+     * @param c 
+     * @param delimiter 
+     * @param prefix 
+     * @param suffix 
+     * @return 
+     */
     public static String join(final Iterable<?> c, final String delimiter, final String prefix, final String suffix) {
         return join(c == null ? null : c.iterator(), delimiter, prefix, suffix);
     }
 
+    /**
+     * 
+     *
+     * @param c 
+     * @param delimiter 
+     * @param prefix 
+     * @param suffix 
+     * @param trim 
+     * @return 
+     */
     public static String join(final Iterable<?> c, final String delimiter, final String prefix, final String suffix, final boolean trim) {
         return join(c == null ? null : c.iterator(), delimiter, prefix, suffix, trim);
     }
@@ -8945,10 +9243,23 @@ public abstract class Strings {
         }
     }
 
+    /**
+     * 
+     *
+     * @param iter 
+     * @return 
+     */
     public static String join(final Iterator<?> iter) {
         return join(iter, Strings.ELEMENT_SEPARATOR);
     }
 
+    /**
+     * 
+     *
+     * @param iter 
+     * @param delimiter 
+     * @return 
+     */
     public static String join(final Iterator<?> iter, final char delimiter) {
         if (iter == null) {
             return N.EMPTY_STRING;
@@ -8973,14 +9284,40 @@ public abstract class Strings {
         }
     }
 
+    /**
+     * 
+     *
+     * @param iter 
+     * @param delimiter 
+     * @return 
+     */
     public static String join(final Iterator<?> iter, final String delimiter) {
         return join(iter, delimiter, EMPTY, EMPTY, false);
     }
 
+    /**
+     * 
+     *
+     * @param iter 
+     * @param delimiter 
+     * @param prefix 
+     * @param suffix 
+     * @return 
+     */
     public static String join(final Iterator<?> iter, final String delimiter, final String prefix, final String suffix) {
         return join(iter, delimiter, prefix, suffix, false);
     }
 
+    /**
+     * 
+     *
+     * @param iter 
+     * @param delimiter 
+     * @param prefix 
+     * @param suffix 
+     * @param trim 
+     * @return 
+     */
     public static String join(final Iterator<?> iter, final String delimiter, final String prefix, final String suffix, final boolean trim) {
         if (iter == null) {
             return N.EMPTY_STRING;
@@ -9094,15 +9431,55 @@ public abstract class Strings {
         return joinEntries(m, 0, m.size(), entryDelimiter, keyValueDelimiter);
     }
 
+    /**
+     * 
+     *
+     * @param m 
+     * @param entryDelimiter 
+     * @param keyValueDelimiter 
+     * @param prefix 
+     * @param suffix 
+     * @return 
+     */
     public static String joinEntries(final Map<?, ?> m, final String entryDelimiter, final String keyValueDelimiter, final String prefix, final String suffix) {
         return joinEntries(m, 0, N.size(m), entryDelimiter, keyValueDelimiter, prefix, suffix, false);
     }
 
+    /**
+     * 
+     *
+     * @param m 
+     * @param entryDelimiter 
+     * @param keyValueDelimiter 
+     * @param prefix 
+     * @param suffix 
+     * @param trim 
+     * @return 
+     */
     public static String joinEntries(final Map<?, ?> m, final String entryDelimiter, final String keyValueDelimiter, final String prefix, final String suffix,
             final boolean trim) {
         return joinEntries(m, 0, N.size(m), entryDelimiter, keyValueDelimiter, prefix, suffix, trim);
     }
 
+    /**
+     * 
+     *
+     * @param <K> 
+     * @param <V> 
+     * @param <E> 
+     * @param <E2> 
+     * @param m 
+     * @param entryDelimiter 
+     * @param keyValueDelimiter 
+     * @param prefix 
+     * @param suffix 
+     * @param trim 
+     * @param keyMapper 
+     * @param valueMapper 
+     * @return 
+     * @throws E 
+     * @throws E2 
+     */
     public static <K, V, E extends Exception, E2 extends Exception> String joinEntries(final Map<K, V> m, final String entryDelimiter,
             final String keyValueDelimiter, final String prefix, final String suffix, final boolean trim, final Throwables.Function<? super K, ?, E> keyMapper,
             final Throwables.Function<? super V, ?, E2> valueMapper) throws E, E2 {
@@ -9277,6 +9654,19 @@ public abstract class Strings {
         return joinEntries(m, fromIndex, toIndex, entryDelimiter, keyValueDelimiter, null, null, false);
     }
 
+    /**
+     * 
+     *
+     * @param m 
+     * @param fromIndex 
+     * @param toIndex 
+     * @param entryDelimiter 
+     * @param keyValueDelimiter 
+     * @param prefix 
+     * @param suffix 
+     * @param trim 
+     * @return 
+     */
     public static String joinEntries(final Map<?, ?> m, final int fromIndex, final int toIndex, final String entryDelimiter, final String keyValueDelimiter,
             final String prefix, final String suffix, final boolean trim) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(m));
@@ -9937,10 +10327,23 @@ public abstract class Strings {
         return Strings.substring(str, offset) + Strings.substring(str, 0, offset);
     }
 
+    /**
+     * 
+     *
+     * @param str 
+     * @return 
+     */
     public static String shuffle(final String str) {
         return shuffle(str, N.RAND);
     }
 
+    /**
+     * 
+     *
+     * @param str 
+     * @param rnd 
+     * @return 
+     */
     public static String shuffle(final String str, final Random rnd) {
         final int strLen = N.len(str);
 
@@ -10319,10 +10722,9 @@ public abstract class Strings {
          * Returns the input {@code str} if {@code inclusiveBeginIndex < 0},
          * otherwise an {@code Optional} with String value: {@code str.substring(inclusiveBeginIndex)} is returned.
          *
-         * @param str
-         * @param inclusiveBeginIndex
-         * @param defaultStr
-         * @return
+         * @param str 
+         * @param inclusiveBeginIndex 
+         * @return 
          * @see Strings#substring(String, int)
          */
         @Beta
@@ -10336,10 +10738,9 @@ public abstract class Strings {
          * Returns the input {@code str} if {@code N.isNullOrEmpty(str) || str.indexOf(delimiterOfInclusiveBeginIndex) < 0},
          * otherwise an {@code Optional} with String value: {@code str.substring(str.indexOf(delimiterOfInclusiveBeginIndex))} is returned.
          *
-         * @param str
+         * @param str 
          * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.indexOf(delimiterOfInclusiveBeginIndex)}
-         * @param defaultStr
-         * @return
+         * @return 
          * @see Strings#substring(String, char)
          */
         @Beta
@@ -10353,10 +10754,9 @@ public abstract class Strings {
          * Returns the input {@code str} if {@code N.isNullOrEmpty(str) || str.indexOf(delimiterOfInclusiveBeginIndex) < 0},
          * otherwise an {@code Optional} with String value: {@code str.substring(str.indexOf(delimiterOfInclusiveBeginIndex))} is returned.
          *
-         * @param str
+         * @param str 
          * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.indexOf(delimiterOfInclusiveBeginIndex)}
-         * @param defaultStr
-         * @return
+         * @return 
          * @see Strings#substring(String, String)
          */
         @Beta
@@ -10370,11 +10770,10 @@ public abstract class Strings {
          * Returns the input {@code str} if {@code inclusiveBeginIndex < 0 ||exclusiveEndIndex <= 0 || inclusiveBeginIndex > exclusiveEndIndex},
          * otherwise an {@code Optional} with String value: {@code str.substring(exclusiveBeginIndex, exclusiveEndIndex)} is returned.
          *
-         * @param str
-         * @param inclusiveBeginIndex
-         * @param exclusiveEndIndex
-         * @param defaultStr
-         * @return
+         * @param str 
+         * @param inclusiveBeginIndex 
+         * @param exclusiveEndIndex 
+         * @return 
          * @see Strings#substring(String, int, int)
          */
         @Beta
@@ -10385,12 +10784,12 @@ public abstract class Strings {
         }
 
         /**
+         * 
          *
-         * @param str
-         * @param inclusiveBeginIndex
+         * @param str 
+         * @param inclusiveBeginIndex 
          * @param delimiterOfExclusiveEndIndex {@code exclusiveEndIndex <- str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1) if inclusiveBeginIndex >= 0}
-         * @param defaultStr
-         * @return
+         * @return 
          * @see Strings#substring(String, int, char)
          */
         @Beta
@@ -10401,12 +10800,12 @@ public abstract class Strings {
         }
 
         /**
+         * 
          *
-         * @param str
-         * @param inclusiveBeginIndex
+         * @param str 
+         * @param inclusiveBeginIndex 
          * @param delimiterOfExclusiveEndIndex {@code exclusiveEndIndex <- str.indexOf(delimiterOfExclusiveEndIndex, inclusiveBeginIndex + 1) if inclusiveBeginIndex >= 0}
-         * @param defaultStr
-         * @return
+         * @return 
          * @see Strings#substring(String, int, String)
          */
         @Beta
@@ -10417,12 +10816,12 @@ public abstract class Strings {
         }
 
         /**
+         * 
          *
-         * @param str
-         * @param inclusiveBeginIndex
+         * @param str 
+         * @param inclusiveBeginIndex 
          * @param funcOfExclusiveEndIndex {@code exclusiveEndIndex <- funcOfExclusiveEndIndex.applyAsInt(inclusiveBeginIndex) if inclusiveBeginIndex >= 0}
-         * @param defaultStr
-         * @return
+         * @return 
          * @see Strings#substring(String, int, IntUnaryOperator)
          */
         @Beta
@@ -10433,12 +10832,12 @@ public abstract class Strings {
         }
 
         /**
+         * 
          *
-         * @param str
+         * @param str 
          * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) if exclusiveEndIndex > 0}
-         * @param exclusiveEndIndex
-         * @param defaultStr
-         * @return
+         * @param exclusiveEndIndex 
+         * @return 
          * @see Strings#substring(String, char, int)
          */
         @Beta
@@ -10449,12 +10848,12 @@ public abstract class Strings {
         }
 
         /**
+         * 
          *
-         * @param str
+         * @param str 
          * @param delimiterOfInclusiveBeginIndex {@code inclusiveBeginIndex <- str.lastIndexOf(delimiterOfInclusiveBeginIndex, exclusiveEndIndex - 1) if exclusiveEndIndex > 0}
-         * @param exclusiveEndIndex
-         * @param defaultStr
-         * @return
+         * @param exclusiveEndIndex 
+         * @return 
          * @see Strings#substring(String, String, int)
          */
         @Beta
@@ -10465,12 +10864,12 @@ public abstract class Strings {
         }
 
         /**
+         * 
          *
-         * @param str
+         * @param str 
          * @param funcOfInclusiveBeginIndex {@code inclusiveBeginIndex <- funcOfInclusiveBeginIndex.applyAsInt(exclusiveEndIndex)) if exclusiveEndIndex > 0}
-         * @param exclusiveEndIndex
-         * @param defaultStr
-         * @return
+         * @param exclusiveEndIndex 
+         * @return 
          * @see Strings#substring(String, IntUnaryOperator, int)
          */
         @Beta
@@ -11027,11 +11426,12 @@ public abstract class Strings {
         }
 
         /**
+         * 
          *
-         * @param str
-         * @param delimiterOfExclusiveBeginIndex
-         * @param delimiterOfExclusiveBeginIndex
-         * @return
+         * @param str 
+         * @param delimiterOfExclusiveBeginIndex 
+         * @param delimiterOfExclusiveEndIndex 
+         * @return 
          * @see Strings#substringBetween(String, char, char)
          */
         public static Optional<String> substringBetween(String str, char delimiterOfExclusiveBeginIndex, char delimiterOfExclusiveEndIndex) {
@@ -11051,11 +11451,12 @@ public abstract class Strings {
         }
 
         /**
+         * 
          *
-         * @param str
-         * @param delimiterOfExclusiveBeginIndex
-         * @param delimiterOfExclusiveBeginIndex
-         * @return
+         * @param str 
+         * @param delimiterOfExclusiveBeginIndex 
+         * @param delimiterOfExclusiveEndIndex 
+         * @return 
          * @see Strings#substringBetween(String, String, String)
          */
         public static Optional<String> substringBetween(String str, String delimiterOfExclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {
@@ -11063,12 +11464,13 @@ public abstract class Strings {
         }
 
         /**
+         * 
          *
-         * @param str
+         * @param str 
          * @param fromIndex start index for {@code delimiterOfExclusive}. {@code str.indexOf(delimiterOfExclusiveBeginIndex, fromIndex)}
-         * @param delimiterOfExclusiveBeginIndex
-         * @param delimiterOfExclusiveBeginIndex
-         * @return
+         * @param delimiterOfExclusiveBeginIndex 
+         * @param delimiterOfExclusiveEndIndex 
+         * @return 
          * @see #substringBetween(String, int, int)
          */
         public static Optional<String> substringBetween(String str, int fromIndex, String delimiterOfExclusiveBeginIndex, String delimiterOfExclusiveEndIndex) {

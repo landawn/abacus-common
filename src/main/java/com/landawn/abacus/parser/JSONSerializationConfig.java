@@ -46,6 +46,9 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
 
     boolean bracketRootValue = defaultBracketRootValue;
 
+    /**
+     * 
+     */
     public JSONSerializationConfig() { //NOSONAR
     }
 
@@ -253,6 +256,11 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
     //        return copy;
     //    }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         int h = 17;
@@ -310,6 +318,11 @@ public class JSONSerializationConfig extends SerializationConfig<JSONSerializati
         return false;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", charQuotation=" + N.toString(getCharQuotation()) + ", stringQuotation="

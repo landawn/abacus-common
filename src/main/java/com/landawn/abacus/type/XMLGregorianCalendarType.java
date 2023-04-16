@@ -42,6 +42,11 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
         super(XML_GREGORIAN_CALENDAR);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<XMLGregorianCalendar> clazz() {
         return XMLGregorianCalendar.class;

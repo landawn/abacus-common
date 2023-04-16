@@ -32,7 +32,9 @@ import com.landawn.abacus.util.Fn.Suppliers;
 abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable {
 
     /**
+     * 
      *
+     * @throws UnsupportedOperationException 
      * @deprecated - UnsupportedOperationException
      */
     @Deprecated
@@ -41,6 +43,11 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Set<T> toSet() {
         return toCollection(Suppliers.<T> ofSet());
     }
@@ -61,11 +68,21 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T>, Immutable 
         return c;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @SuppressWarnings("deprecation")
     public ImmutableList<T> toImmutableList() {
         return ImmutableList.wrap(toCollection(Suppliers.<T> ofList()));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @SuppressWarnings("deprecation")
     public ImmutableSet<T> toImmutableSet() {
         return ImmutableSet.wrap(toSet());

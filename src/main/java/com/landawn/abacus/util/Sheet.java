@@ -68,10 +68,19 @@ public final class Sheet<R, C, E> implements Cloneable {
 
     private boolean _isFrozen = false; //NOSONAR
 
+    /**
+     * 
+     */
     public Sheet() {
         this(N.emptyList(), N.emptyList());
     }
 
+    /**
+     * 
+     *
+     * @param rowKeySet 
+     * @param columnKeySet 
+     */
     public Sheet(Collection<R> rowKeySet, Collection<C> columnKeySet) {
         N.checkArgument(!N.anyNull(rowKeySet), "Row key can't be null");
         N.checkArgument(!N.anyNull(columnKeySet), "Column key can't be null");
@@ -80,6 +89,13 @@ public final class Sheet<R, C, E> implements Cloneable {
         this._columnKeySet = N.newLinkedHashSet(columnKeySet);
     }
 
+    /**
+     * 
+     *
+     * @param rowKeySet 
+     * @param columnKeySet 
+     * @param rows 
+     */
     public Sheet(Collection<R> rowKeySet, Collection<C> columnKeySet, Object[][] rows) {
         this(rowKeySet, columnKeySet);
 
@@ -824,6 +840,11 @@ public final class Sheet<R, C, E> implements Cloneable {
         return rowMap;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Map<R, Map<C, E>> rowMap() {
         final Map<R, Map<C, E>> result = N.newLinkedHashMap(this.rowKeySet().size());
 
@@ -1143,6 +1164,11 @@ public final class Sheet<R, C, E> implements Cloneable {
         return columnMap;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Map<C, Map<R, E>> columnMap() {
         final Map<C, Map<R, E>> result = N.newLinkedHashMap(this.columnKeySet().size());
 
@@ -1339,6 +1365,11 @@ public final class Sheet<R, C, E> implements Cloneable {
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Sheet<R, C, E> copy() {
         final Sheet<R, C, E> copy = new Sheet<>(this._rowKeySet, this._columnKeySet);
 
@@ -1481,6 +1512,11 @@ public final class Sheet<R, C, E> implements Cloneable {
         return result;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Sheet<C, R, E> transpose() {
         final Sheet<C, R, E> copy = new Sheet<>(this._columnKeySet, this._rowKeySet);
 
@@ -1957,6 +1993,11 @@ public final class Sheet<R, C, E> implements Cloneable {
         });
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Stream<IntPair> pointsH() {
         return pointsH(0, rowLength());
     }
@@ -1985,6 +2026,11 @@ public final class Sheet<R, C, E> implements Cloneable {
                 .flatMapToObj(rowIndex -> IntStream.range(0, columnLength).mapToObj(columnIndex -> IntPair.of(rowIndex, columnIndex)));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Stream<IntPair> pointsV() {
         return pointsV(0, columnLength());
     }
@@ -2013,6 +2059,11 @@ public final class Sheet<R, C, E> implements Cloneable {
                 .flatMapToObj(columnIndex -> IntStream.range(0, rowLength).mapToObj(rowIndex -> IntPair.of(rowIndex, columnIndex)));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Stream<Stream<IntPair>> pointsR() {
         return pointsR(0, rowLength());
     }
@@ -2032,6 +2083,11 @@ public final class Sheet<R, C, E> implements Cloneable {
                 .mapToObj(rowIndex -> IntStream.range(0, columnLength).mapToObj(columnIndex -> IntPair.of(rowIndex, columnIndex)));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Stream<Stream<IntPair>> pointsC() {
         return pointsR(0, columnLength());
     }
@@ -2904,6 +2960,11 @@ public final class Sheet<R, C, E> implements Cloneable {
         return outputWriter;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -2933,6 +2994,11 @@ public final class Sheet<R, C, E> implements Cloneable {
         return false;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         final StringBuilder sb = Objectory.createBigStringBuilder();

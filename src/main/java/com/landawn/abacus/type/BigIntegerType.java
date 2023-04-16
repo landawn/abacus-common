@@ -35,6 +35,11 @@ public final class BigIntegerType extends NumberType<BigInteger> {
         super(BIG_INTEGER);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<BigInteger> clazz() {
         return BigInteger.class;

@@ -27,18 +27,33 @@ import com.landawn.abacus.util.NamingPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JsonXmlConfig {
 
+    /**
+     * 
+     *
+     * @return 
+     */
     NamingPolicy namingPolicy() default NamingPolicy.LOWER_CAMEL_CASE;
 
     /**
-     * values can be regular expressions
+     * values can be regular expressions.
      *
-     * @return
+     * @return 
      * @see String#matches(String)
      */
     String[] ignoredFields() default {};
 
+    /**
+     * 
+     *
+     * @return 
+     */
     String dateFormat() default "";
 
+    /**
+     * 
+     *
+     * @return 
+     */
     String timeZone() default "";
 
     /**
@@ -48,5 +63,10 @@ public @interface JsonXmlConfig {
      */
     String numberFormat() default "";
 
+    /**
+     * 
+     *
+     * @return 
+     */
     EnumBy enumerated() default EnumBy.NAME;
 }

@@ -36,6 +36,11 @@ public class LocalDateType extends AbstractType<LocalDate> {
         super(LOCAL_DATE);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<LocalDate> clazz() {
         return LocalDate.class;

@@ -68,6 +68,11 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
         return new MutableLong(value);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public long value() {
         return value;
     }

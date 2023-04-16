@@ -32,6 +32,11 @@ public final class FloatType extends AbstractFloatType {
         super(FLOAT);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {

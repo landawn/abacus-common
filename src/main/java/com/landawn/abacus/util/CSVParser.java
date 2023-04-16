@@ -289,24 +289,54 @@ public class CSVParser {
         return parseLine(nextLine, true);
     }
 
+    /**
+     * 
+     *
+     * @param nextLine 
+     * @return 
+     * @throws ParseException 
+     */
     public String[] parseLineToArray(String nextLine) throws ParseException {
         final List<String> ret = parseLine(nextLine);
 
         return ret.toArray(new String[ret.size()]);
     }
 
+    /**
+     * 
+     *
+     * @param nextLine 
+     * @return 
+     * @throws ParseException 
+     */
     public String[] parseLineMultiToArray(String nextLine) throws ParseException {
         final List<String> ret = parseLineMulti(nextLine);
 
         return ret.toArray(new String[ret.size()]);
     }
 
+    /**
+     * 
+     *
+     * @param output 
+     * @param nextLine 
+     * @return 
+     * @throws ParseException 
+     */
     public String[] parseLineToArray(final String[] output, String nextLine) throws ParseException {
         final List<String> ret = parseLine(nextLine);
 
         return ret.toArray(output);
     }
 
+    /**
+     * 
+     *
+     * @param output 
+     * @param nextLine 
+     * @return 
+     * @throws ParseException 
+     */
     public String[] parseLineMultiToArray(final String[] output, String nextLine) throws ParseException {
         final List<String> ret = parseLineMulti(nextLine);
 

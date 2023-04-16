@@ -33,6 +33,9 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
 
     private Schema schema;
 
+    /**
+     * 
+     */
     public AvroSerializationConfig() { //NOSONAR
     }
 
@@ -267,9 +270,10 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
     }
 
     /**
+     * 
      *
-     * @param writeNullStringAsEmpty
-     * @return
+     * @param writeNullNumberAsZero 
+     * @return 
      * @deprecated UnsupportedOperationException
      */
     @Deprecated
@@ -372,6 +376,11 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
     //        return copy;
     //    }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         int h = 17;
@@ -405,6 +414,11 @@ public class AvroSerializationConfig extends SerializationConfig<AvroSerializati
         return false;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", exclusion=" + N.toString(getExclusion()) + ", skipTransientField="

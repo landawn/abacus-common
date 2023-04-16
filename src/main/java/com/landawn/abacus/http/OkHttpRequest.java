@@ -75,18 +75,39 @@ public final class OkHttpRequest {
         this.httpClient = httpClient;
     }
 
+    /**
+     * 
+     *
+     * @param url 
+     * @param httpClient 
+     * @return 
+     */
     public static OkHttpRequest create(final String url, final OkHttpClient httpClient) {
         final OkHttpRequest okHttpRequest = new OkHttpRequest(httpClient);
         okHttpRequest.builder.url(url);
         return okHttpRequest;
     }
 
+    /**
+     * 
+     *
+     * @param url 
+     * @param httpClient 
+     * @return 
+     */
     public static OkHttpRequest create(final URL url, final OkHttpClient httpClient) {
         final OkHttpRequest okHttpRequest = new OkHttpRequest(httpClient);
         okHttpRequest.builder.url(url);
         return okHttpRequest;
     }
 
+    /**
+     * 
+     *
+     * @param url 
+     * @param httpClient 
+     * @return 
+     */
     public static OkHttpRequest create(final HttpUrl url, final OkHttpClient httpClient) {
         final OkHttpRequest okHttpRequest = new OkHttpRequest(httpClient);
         okHttpRequest.builder.url(url);
@@ -96,6 +117,8 @@ public final class OkHttpRequest {
     /**
      * Sets the URL target of this request.
      *
+     * @param url 
+     * @return 
      * @throws IllegalArgumentException if {@code url} is not a valid HTTP or HTTPS URL. Avoid this
      * exception by calling {@link HttpUrl#parse}; it returns null for invalid URLs.
      */
@@ -106,6 +129,8 @@ public final class OkHttpRequest {
     /**
      * Sets the URL target of this request.
      *
+     * @param url 
+     * @return 
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code
      * https}.
      */
@@ -113,10 +138,24 @@ public final class OkHttpRequest {
         return create(url, defaultClient);
     }
 
+    /**
+     * 
+     *
+     * @param url 
+     * @return 
+     */
     public static OkHttpRequest url(HttpUrl url) {
         return create(url, defaultClient);
     }
 
+    /**
+     * 
+     *
+     * @param url 
+     * @param connectionTimeoutInMillis 
+     * @param readTimeoutInMillis 
+     * @return 
+     */
     public static OkHttpRequest url(final String url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
         return create(url,
                 new OkHttpClient.Builder().connectTimeout(connectionTimeoutInMillis, TimeUnit.MILLISECONDS)
@@ -124,6 +163,14 @@ public final class OkHttpRequest {
                         .build());
     }
 
+    /**
+     * 
+     *
+     * @param url 
+     * @param connectionTimeoutInMillis 
+     * @param readTimeoutInMillis 
+     * @return 
+     */
     public static OkHttpRequest url(final URL url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
         return create(url,
                 new OkHttpClient.Builder().connectTimeout(connectionTimeoutInMillis, TimeUnit.MILLISECONDS)
@@ -131,6 +178,14 @@ public final class OkHttpRequest {
                         .build());
     }
 
+    /**
+     * 
+     *
+     * @param url 
+     * @param connectionTimeoutInMillis 
+     * @param readTimeoutInMillis 
+     * @return 
+     */
     public static OkHttpRequest url(final HttpUrl url, final long connectionTimeoutInMillis, final long readTimeoutInMillis) {
         return create(url,
                 new OkHttpClient.Builder().connectTimeout(connectionTimeoutInMillis, TimeUnit.MILLISECONDS)
@@ -142,6 +197,9 @@ public final class OkHttpRequest {
      * Sets this request's {@code Cache-Control} header, replacing any cache control headers already
      * present. If {@code cacheControl} doesn't define any directives, this clears this request's
      * cache-control headers.
+     *
+     * @param cacheControl 
+     * @return 
      */
     public OkHttpRequest cacheControl(CacheControl cacheControl) {
         builder.cacheControl(cacheControl);
@@ -151,6 +209,9 @@ public final class OkHttpRequest {
     /**
      * Attaches {@code tag} to the request. It can be used later to cancel the request. If the tag
      * is unspecified or null, the request is canceled by using the request itself as the tag.
+     *
+     * @param tag 
+     * @return 
      */
     public OkHttpRequest tag(@Nullable Object tag) {
         builder.tag(tag);
@@ -161,9 +222,14 @@ public final class OkHttpRequest {
      * Attaches {@code tag} to the request using {@code type} as a key. Tags can be read from a
      * request using {@link Request#tag}. Use null to remove any existing tag assigned for {@code
      * type}.
-     *
+     * 
      * <p>Use this API to attach timing, debugging, or other application data to a request so that
      * you may read it in interceptors, event listeners, or callbacks.
+     *
+     * @param <T> 
+     * @param type 
+     * @param tag 
+     * @return 
      */
     public <T> OkHttpRequest tag(Class<? super T> type, @Nullable T tag) {
         builder.tag(type, tag);
@@ -253,10 +319,10 @@ public final class OkHttpRequest {
     }
 
     /**
-     * Removes all headers on this builder and adds {@code headers}
+     * Removes all headers on this builder and adds {@code headers}.
      *
-     * @param headers
-     * @return
+     * @param headers 
+     * @return 
      * @see Request.Builder#headers(Headers)
      */
     public OkHttpRequest headers(Headers headers) {
@@ -265,10 +331,10 @@ public final class OkHttpRequest {
     }
 
     /**
-     * Removes all headers on this builder and adds {@code headers}
+     * Removes all headers on this builder and adds {@code headers}.
      *
-     * @param headers
-     * @return
+     * @param headers 
+     * @return 
      * @see Request.Builder#headers(Headers)
      */
     public OkHttpRequest headers(HttpHeaders headers) {
@@ -284,9 +350,13 @@ public final class OkHttpRequest {
     /**
      * Adds a header with {@code name} and {@code value}. Prefer this method for multiply-valued
      * headers like "Cookie".
-     *
+     * 
      * <p>Note that for some headers including {@code Content-Length} and {@code Content-Encoding},
      * OkHttp may replace {@code value} with a header derived from the request body.
+     *
+     * @param name 
+     * @param value 
+     * @return 
      * @deprecated no use case?
      */
     @Deprecated
@@ -435,12 +505,13 @@ public final class OkHttpRequest {
     }
 
     /**
+     * 
      *
-     * @param content
-     * @param offset
-     * @param len
-     * @param contentType
-     * @return
+     * @param content 
+     * @param offset 
+     * @param byteCount 
+     * @param contentType 
+     * @return 
      * @see RequestBody#create(MediaType, byte[], int, int)
      */
     public OkHttpRequest body(final byte[] content, final int offset, final int byteCount, @Nullable MediaType contentType) {
@@ -461,50 +532,133 @@ public final class OkHttpRequest {
         return this;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     * @throws IOException 
+     */
     public Response get() throws IOException {
         return execute(HttpMethod.GET);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param resultClass 
+     * @return 
+     * @throws IOException 
+     */
     public <T> T get(Class<T> resultClass) throws IOException {
         return execute(resultClass, HttpMethod.GET);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     * @throws IOException 
+     */
     public Response post() throws IOException {
         return execute(HttpMethod.POST);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param resultClass 
+     * @return 
+     * @throws IOException 
+     */
     public <T> T post(Class<T> resultClass) throws IOException {
         return execute(resultClass, HttpMethod.POST);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     * @throws IOException 
+     */
     public Response put() throws IOException {
         return execute(HttpMethod.PUT);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param resultClass 
+     * @return 
+     * @throws IOException 
+     */
     public <T> T put(Class<T> resultClass) throws IOException {
         return execute(resultClass, HttpMethod.PUT);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     * @throws IOException 
+     */
     public Response patch() throws IOException {
         return execute(HttpMethod.PATCH);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param resultClass 
+     * @return 
+     * @throws IOException 
+     */
     public <T> T patch(Class<T> resultClass) throws IOException {
         return execute(resultClass, HttpMethod.PATCH);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     * @throws IOException 
+     */
     public Response delete() throws IOException {
         return execute(HttpMethod.DELETE);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param resultClass 
+     * @return 
+     * @throws IOException 
+     */
     public <T> T delete(Class<T> resultClass) throws IOException {
         return execute(resultClass, HttpMethod.DELETE);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     * @throws IOException 
+     */
     public Response head() throws IOException {
         return execute(HttpMethod.HEAD);
     }
 
+    /**
+     * 
+     *
+     * @param httpMethod 
+     * @return 
+     * @throws IOException 
+     */
     public Response execute(final HttpMethod httpMethod) throws IOException {
         // body = (body == null && HttpMethod.DELETE.equals(httpMethod)) ? Util.EMPTY_REQUEST : body;
         request = builder.method(httpMethod.name(), body).build();
@@ -512,6 +666,15 @@ public final class OkHttpRequest {
         return httpClient.newCall(request).execute();
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param resultClass 
+     * @param httpMethod 
+     * @return 
+     * @throws IOException 
+     */
     public <T> T execute(final Class<T> resultClass, final HttpMethod httpMethod) throws IOException {
         N.checkArgNotNull(resultClass, "resultClass");
         N.checkArgument(!HttpResponse.class.equals(resultClass), "Return type can't be HttpResponse");
@@ -555,106 +718,277 @@ public final class OkHttpRequest {
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public ContinuableFuture<Response> asyncGet() {
         return asyncGet(HttpUtil.DEFAULT_EXECUTOR);
     }
 
+    /**
+     * 
+     *
+     * @param executor 
+     * @return 
+     */
     public ContinuableFuture<Response> asyncGet(final Executor executor) {
         return ContinuableFuture.call(this::get, executor);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param resultClass 
+     * @return 
+     */
     public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass) {
         return asyncGet(resultClass, HttpUtil.DEFAULT_EXECUTOR);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param resultClass 
+     * @param executor 
+     * @return 
+     */
     public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Executor executor) {
         return ContinuableFuture.call(() -> get(resultClass), executor);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public ContinuableFuture<Response> asyncPost() {
         return asyncPost(HttpUtil.DEFAULT_EXECUTOR);
     }
 
+    /**
+     * 
+     *
+     * @param executor 
+     * @return 
+     */
     public ContinuableFuture<Response> asyncPost(final Executor executor) {
         return ContinuableFuture.call(this::post, executor);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param resultClass 
+     * @return 
+     */
     public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass) {
         return asyncPost(resultClass, HttpUtil.DEFAULT_EXECUTOR);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param resultClass 
+     * @param executor 
+     * @return 
+     */
     public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Executor executor) {
         return ContinuableFuture.call(() -> post(resultClass), executor);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public ContinuableFuture<Response> asyncPut() {
         return asyncPut(HttpUtil.DEFAULT_EXECUTOR);
     }
 
+    /**
+     * 
+     *
+     * @param executor 
+     * @return 
+     */
     public ContinuableFuture<Response> asyncPut(final Executor executor) {
         return ContinuableFuture.call(this::put, executor);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param resultClass 
+     * @return 
+     */
     public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass) {
         return asyncPut(resultClass, HttpUtil.DEFAULT_EXECUTOR);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param resultClass 
+     * @param executor 
+     * @return 
+     */
     public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass, final Executor executor) {
         return ContinuableFuture.call(() -> put(resultClass), executor);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public ContinuableFuture<Response> asyncPatch() {
         return asyncPatch(HttpUtil.DEFAULT_EXECUTOR);
     }
 
+    /**
+     * 
+     *
+     * @param executor 
+     * @return 
+     */
     public ContinuableFuture<Response> asyncPatch(final Executor executor) {
         return ContinuableFuture.call(this::patch, executor);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param resultClass 
+     * @return 
+     */
     public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass) {
         return asyncPatch(resultClass, HttpUtil.DEFAULT_EXECUTOR);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param resultClass 
+     * @param executor 
+     * @return 
+     */
     public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Executor executor) {
         return ContinuableFuture.call(() -> patch(resultClass), executor);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public ContinuableFuture<Response> asyncDelete() {
         return asyncDelete(HttpUtil.DEFAULT_EXECUTOR);
     }
 
+    /**
+     * 
+     *
+     * @param executor 
+     * @return 
+     */
     public ContinuableFuture<Response> asyncDelete(final Executor executor) {
         return ContinuableFuture.call(this::delete, executor);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param resultClass 
+     * @return 
+     */
     public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass) {
         return asyncDelete(resultClass, HttpUtil.DEFAULT_EXECUTOR);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param resultClass 
+     * @param executor 
+     * @return 
+     */
     public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final Executor executor) {
         return ContinuableFuture.call(() -> delete(resultClass), executor);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public ContinuableFuture<Response> asyncHead() {
         return asyncHead(HttpUtil.DEFAULT_EXECUTOR);
     }
 
+    /**
+     * 
+     *
+     * @param executor 
+     * @return 
+     */
     public ContinuableFuture<Response> asyncHead(final Executor executor) {
         return ContinuableFuture.call(this::head, executor);
     }
 
+    /**
+     * 
+     *
+     * @param httpMethod 
+     * @return 
+     */
     public ContinuableFuture<Response> asyncExecute(final HttpMethod httpMethod) {
         return asyncExecute(httpMethod, HttpUtil.DEFAULT_EXECUTOR);
     }
 
+    /**
+     * 
+     *
+     * @param httpMethod 
+     * @param executor 
+     * @return 
+     */
     public ContinuableFuture<Response> asyncExecute(final HttpMethod httpMethod, final Executor executor) {
         return ContinuableFuture.call(() -> execute(httpMethod), executor);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param resultClass 
+     * @param httpMethod 
+     * @return 
+     */
     public <T> ContinuableFuture<T> asyncExecute(final Class<T> resultClass, final HttpMethod httpMethod) {
         return asyncExecute(resultClass, httpMethod, HttpUtil.DEFAULT_EXECUTOR);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param resultClass 
+     * @param httpMethod 
+     * @param executor 
+     * @return 
+     */
     public <T> ContinuableFuture<T> asyncExecute(final Class<T> resultClass, final HttpMethod httpMethod, final Executor executor) {
         return ContinuableFuture.call(() -> execute(resultClass, httpMethod), executor);
     }

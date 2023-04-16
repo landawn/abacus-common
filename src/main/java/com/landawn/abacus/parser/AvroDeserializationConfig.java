@@ -69,6 +69,11 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
     //        return copy;
     //    }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         int h = 17;
@@ -107,6 +112,11 @@ public class AvroDeserializationConfig extends DeserializationConfig<AvroDeseria
         return false;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", ignoreUnmatchedProperty=" + N.toString(ignoreUnmatchedProperty())

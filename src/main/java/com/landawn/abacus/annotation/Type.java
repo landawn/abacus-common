@@ -42,6 +42,11 @@ public @interface Type {
     @Deprecated
     String value() default "";
 
+    /**
+     * 
+     *
+     * @return 
+     */
     String name() default "";
 
     /**
@@ -51,8 +56,18 @@ public @interface Type {
     @SuppressWarnings("rawtypes")
     Class<? extends com.landawn.abacus.type.Type> clazz() default com.landawn.abacus.type.Type.class;
 
+    /**
+     * 
+     *
+     * @return 
+     */
     EnumBy enumerated() default EnumBy.NAME;
 
+    /**
+     * 
+     *
+     * @return 
+     */
     Scope scope() default Scope.ALL;
 
     /**

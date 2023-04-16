@@ -553,6 +553,12 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
         // do nothing;
     };
 
+    /**
+     * 
+     *
+     * @param n 
+     * @return 
+     */
     public TriIterator<A, B, C> skip(final long n) {
         N.checkArgNotNegative(n, "n");
 
@@ -625,6 +631,12 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
         };
     }
 
+    /**
+     * 
+     *
+     * @param count 
+     * @return 
+     */
     public TriIterator<A, B, C> limit(final long count) {
         N.checkArgNotNegative(count, "count");
 
@@ -682,6 +694,12 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
         };
     }
 
+    /**
+     * 
+     *
+     * @param predicate 
+     * @return 
+     */
     public TriIterator<A, B, C> filter(final TriPredicate<? super A, ? super B, ? super C> predicate) {
         N.checkArgNotNull(predicate, "predicate");
 
@@ -783,6 +801,11 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      */
     public abstract <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper);
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Optional<Triple<A, B, C>> first() {
         if (hasNext()) {
             return Optional.of(next());
@@ -791,6 +814,11 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Optional<Triple<A, B, C>> last() {
         if (hasNext()) {
             final Triple<A, B, C> next = new Triple<>();
@@ -816,6 +844,11 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
         return Stream.of(map(mapper));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Triple<A, B, C>[] toArray() {
         return toArray(new Triple[0]);
     }
@@ -832,6 +865,11 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
         return toList().toArray(a);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public List<Triple<A, B, C>> toList() {
         return toCollection(Suppliers.ofList());
     }

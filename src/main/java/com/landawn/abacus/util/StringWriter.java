@@ -27,19 +27,37 @@ public final class StringWriter extends Writer {
 
     private final StringBuilder buf;
 
+    /**
+     * 
+     */
     public StringWriter() {
         this(new StringBuilder());
     }
 
+    /**
+     * 
+     *
+     * @param initialSize 
+     */
     public StringWriter(int initialSize) {
         this(new StringBuilder(initialSize));
     }
 
+    /**
+     * 
+     *
+     * @param sb 
+     */
     public StringWriter(StringBuilder sb) {
         this.buf = sb;
         lock = buf;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public StringBuilder stringBuilder() {
         return buf;
     }

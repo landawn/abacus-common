@@ -36,6 +36,11 @@ public final class ObjectType<T> extends SingleValueType<T> {
         super(typeName, cls);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public boolean isObjectType() {
         return true;

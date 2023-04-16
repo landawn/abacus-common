@@ -41,6 +41,11 @@ public class DurationType extends AbstractType<Duration> {
         super(DURATION);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<Duration> clazz() {
         return Duration.class;

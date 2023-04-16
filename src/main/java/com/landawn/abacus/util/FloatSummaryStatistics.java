@@ -26,9 +26,20 @@ public class FloatSummaryStatistics implements FloatConsumer {
 
     private float max = Float.NEGATIVE_INFINITY;
 
+    /**
+     * 
+     */
     public FloatSummaryStatistics() {
     }
 
+    /**
+     * 
+     *
+     * @param count 
+     * @param min 
+     * @param max 
+     * @param sum 
+     */
     public FloatSummaryStatistics(long count, float min, float max, double sum) {
         summation.combine(count, sum);
 
@@ -116,6 +127,11 @@ public class FloatSummaryStatistics implements FloatConsumer {
     //        return summation.average();
     //    }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return String.format("{min=%d, max=%d, count=%d, sum=%d, average=%f}", getMin(), getMax(), getCount(), getSum(), getAverage());

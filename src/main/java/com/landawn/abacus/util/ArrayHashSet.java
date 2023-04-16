@@ -34,19 +34,37 @@ public class ArrayHashSet<E> implements Set<E> {
 
     private final Set<Wrapper<E>> set;
 
+    /**
+     * 
+     */
     public ArrayHashSet() {
         this.set = N.newHashSet();
     }
 
+    /**
+     * 
+     *
+     * @param initialCapacity 
+     */
     public ArrayHashSet(final int initialCapacity) {
         this.set = N.newHashSet(initialCapacity);
     }
 
+    /**
+     * 
+     *
+     * @param setType 
+     */
     @SuppressWarnings("rawtypes")
     public ArrayHashSet(final Class<? extends Set> setType) {
         this.set = (Set) N.newCollection(setType);
     }
 
+    /**
+     * 
+     *
+     * @param coll 
+     */
     public ArrayHashSet(final Collection<? extends E> coll) {
         if (N.isNullOrEmpty(coll)) {
             set = N.newHashSet();
@@ -179,11 +197,21 @@ public class ArrayHashSet<E> implements Set<E> {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Iterator<E> iterator() {
         return new Itr<>(set.iterator());
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Object[] toArray() {
         final int size = size();
@@ -226,6 +254,11 @@ public class ArrayHashSet<E> implements Set<E> {
         return a;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int size() {
         return set.size();
@@ -249,6 +282,11 @@ public class ArrayHashSet<E> implements Set<E> {
         set.clear();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         return set.hashCode();
@@ -264,6 +302,11 @@ public class ArrayHashSet<E> implements Set<E> {
         return obj == this || (obj instanceof ArrayHashSet && ((ArrayHashSet<E>) obj).set.equals(set));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return set.toString();

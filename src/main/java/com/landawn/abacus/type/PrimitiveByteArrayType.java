@@ -50,6 +50,11 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
         elementType = TypeFactory.getType(byte.class);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<byte[]> clazz() {
         return byte[].class;

@@ -31,6 +31,9 @@ public class Properties<K, V> implements Map<K, V> {
 
     protected final Map<K, V> values;
 
+    /**
+     * 
+     */
     public Properties() {
         this(new ConcurrentHashMap<>());
     }
@@ -62,11 +65,11 @@ public class Properties<K, V> implements Map<K, V> {
 
     /**
      * To avoid <code>NullPointerException</code> for primitive type if the target property is null or not set.
-     * @param propName
-     * @param targetType
      *
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param propName 
+     * @param targetType 
+     * @return 
      */
     @SuppressWarnings("unchecked")
     public <T> T get(Object propName, Class<? extends T> targetType) {
@@ -95,12 +98,12 @@ public class Properties<K, V> implements Map<K, V> {
 
     /**
      * Gets the or default.
-     * @param propName
-     * @param defaultValue is returned if the specified {@code propName} is not contained in this Properties instance or it's null.
-     * @param targetType
      *
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param propName 
+     * @param defaultValue is returned if the specified {@code propName} is not contained in this Properties instance or it's null.
+     * @param targetType 
+     * @return 
      */
     public <T> T getOrDefault(Object propName, T defaultValue, Class<? extends T> targetType) {
         Object result = values.get(propName);
@@ -249,16 +252,31 @@ public class Properties<K, V> implements Map<K, V> {
         return values.containsValue(value);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Set<K> keySet() {
         return values.keySet();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Collection<V> values() {
         return values.values();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Set<java.util.Map.Entry<K, V>> entrySet() {
         return values.entrySet();
@@ -274,6 +292,11 @@ public class Properties<K, V> implements Map<K, V> {
         return values.isEmpty();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int size() {
         return values.size();
@@ -287,6 +310,11 @@ public class Properties<K, V> implements Map<K, V> {
         values.clear();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Properties<K, V> copy() {
         final Properties<K, V> copy = new Properties<>();
 
@@ -295,6 +323,11 @@ public class Properties<K, V> implements Map<K, V> {
         return copy;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         return 31 + ((values == null) ? 0 : values.hashCode());
@@ -310,6 +343,11 @@ public class Properties<K, V> implements Map<K, V> {
         return this == obj || (obj instanceof Properties && N.equals(((Properties<K, V>) obj).values, values));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return values.toString();

@@ -244,6 +244,11 @@ public final class Objectory {
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public static StringBuilder createBigStringBuilder() {
         StringBuilder sb = bigStringBuilderPool.poll();
 

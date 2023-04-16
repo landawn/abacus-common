@@ -35,6 +35,11 @@ class SLF4JLogger extends AbstractLogger {
 
     private final LocationAwareLogger locationAwareLogger;
 
+    /**
+     * 
+     *
+     * @param name 
+     */
     public SLF4JLogger(String name) {
         super(name);
         if (org.slf4j.LoggerFactory.getILoggerFactory() instanceof NOPLoggerFactory) {

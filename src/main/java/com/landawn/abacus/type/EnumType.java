@@ -79,25 +79,52 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
         enumBy = ordinal ? EnumBy.ORDINAL : EnumBy.NAME;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public EnumBy enumerated() {
         return enumBy;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public boolean isSerializable() {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public boolean isImmutable() {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @param x 
+     * @return 
+     */
     @Override
     public String stringOf(T x) {
         return (jsonValueType == null) ? (x == null ? null : x.name()) : super.stringOf(x);
     }
 
+    /**
+     * 
+     *
+     * @param str 
+     * @return 
+     */
     @Override
     public T valueOf(String str) {
         if (jsonValueType == null) {
@@ -121,6 +148,12 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
         }
     }
 
+    /**
+     * 
+     *
+     * @param value 
+     * @return 
+     */
     public T valueOf(final int value) {
         T result = numberEnum.get(value);
 
@@ -131,6 +164,14 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
         return result;
     }
 
+    /**
+     * 
+     *
+     * @param rs 
+     * @param columnIndex 
+     * @return 
+     * @throws SQLException 
+     */
     @Override
     public T get(final ResultSet rs, final int columnIndex) throws SQLException {
         if (jsonValueType == null) {
@@ -144,6 +185,14 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
         }
     }
 
+    /**
+     * 
+     *
+     * @param rs 
+     * @param columnLabel 
+     * @return 
+     * @throws SQLException 
+     */
     @Override
     public T get(final ResultSet rs, final String columnLabel) throws SQLException {
         if (jsonValueType == null) {
@@ -157,6 +206,14 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
         }
     }
 
+    /**
+     * 
+     *
+     * @param stmt 
+     * @param columnIndex 
+     * @param x 
+     * @throws SQLException 
+     */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final T x) throws SQLException {
         if (jsonValueType == null) {
@@ -170,6 +227,14 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
         }
     }
 
+    /**
+     * 
+     *
+     * @param stmt 
+     * @param parameterName 
+     * @param x 
+     * @throws SQLException 
+     */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final T x) throws SQLException {
         if (jsonValueType == null) {
@@ -183,6 +248,14 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
         }
     }
 
+    /**
+     * 
+     *
+     * @param writer 
+     * @param x 
+     * @param config 
+     * @throws IOException 
+     */
     @SuppressWarnings("rawtypes")
     @Override
     public void writeCharacter(final CharacterWriter writer, final T x, final SerializationConfig<?> config) throws IOException {

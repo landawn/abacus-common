@@ -178,9 +178,9 @@ public interface EntityId {
      * Node: To follow one of general design rules in {@code Abacus}, if there is a conversion behind when the source value is not assignable to the target type, put the {@code targetType} to last parameter of the method.
      * Otherwise, put the {@code targetTpye} to the first parameter of the method.
      *
-     * @param propName
-     * @param targetType
-     * @param <T>
+     * @param <T> 
+     * @param propName 
+     * @param targetType 
      * @return T
      */
     <T> T get(String propName, Class<? extends T> targetType);
@@ -198,9 +198,24 @@ public interface EntityId {
      */
     Set<String> keySet();
 
+    /**
+     * 
+     *
+     * @return 
+     */
     Set<Map.Entry<String, Object>> entrySet();
 
+    /**
+     * 
+     *
+     * @return 
+     */
     int size();
 
+    /**
+     * 
+     *
+     * @return 
+     */
     boolean isEmpty();
 }

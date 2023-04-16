@@ -31,6 +31,11 @@ public class UUIDType extends AbstractType<UUID> {
         super(UUID);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<UUID> clazz() {
         return UUID.class;

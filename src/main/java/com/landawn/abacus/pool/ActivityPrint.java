@@ -37,6 +37,13 @@ public final class ActivityPrint implements Cloneable, Serializable {
 
     private int accessCount;
 
+    /**
+     * 
+     *
+     * @param liveTime 
+     * @param maxIdleTime 
+     * @throws IllegalArgumentException 
+     */
     public ActivityPrint(long liveTime, long maxIdleTime) throws IllegalArgumentException {
         if (liveTime <= 0) {
             throw new IllegalArgumentException("Illegal liveTime[" + liveTime + "]. ");
@@ -190,6 +197,11 @@ public final class ActivityPrint implements Cloneable, Serializable {
         return (maxIdleTime < (now - lastAccessTime)) || (liveTime < (now - createTime));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Object clone() { //NOSONAR
         ActivityPrint result = null;
@@ -203,6 +215,11 @@ public final class ActivityPrint implements Cloneable, Serializable {
         return result;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         long h = 7;
@@ -235,6 +252,11 @@ public final class ActivityPrint implements Cloneable, Serializable {
         return false;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return "{createTime=" + createTime + ", liveTime=" + liveTime + ", maxIdleTime=" + maxIdleTime + ", lastAccessedTime=" + lastAccessTime

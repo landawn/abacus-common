@@ -30,6 +30,11 @@ public class MutableCharType extends MutableType<MutableChar> {
         super(MUTABLE_CHAR);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<MutableChar> clazz() {
         return MutableChar.class;

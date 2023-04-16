@@ -46,6 +46,11 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
         elementType = TypeFactory.getType(char.class);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<char[]> clazz() {
         return char[].class;
@@ -135,6 +140,12 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
         return a;
     }
 
+    /**
+     * 
+     *
+     * @param obj 
+     * @return 
+     */
     @SuppressFBWarnings
     @Override
     public char[] valueOf(final Object obj) {

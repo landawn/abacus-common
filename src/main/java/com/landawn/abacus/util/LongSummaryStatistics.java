@@ -29,9 +29,20 @@ public class LongSummaryStatistics implements LongConsumer, IntConsumer {
 
     private long max = Long.MIN_VALUE;
 
+    /**
+     * 
+     */
     public LongSummaryStatistics() {
     }
 
+    /**
+     * 
+     *
+     * @param count 
+     * @param min 
+     * @param max 
+     * @param sum 
+     */
     public LongSummaryStatistics(long count, long min, long max, long sum) {
         this.count = count;
         this.sum = sum;
@@ -132,6 +143,11 @@ public class LongSummaryStatistics implements LongConsumer, IntConsumer {
     //        return OptionalDouble.of(getAverage());
     //    }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return String.format("{min=%d, max=%d, count=%d, sum=%d, average=%f}", getMin(), getMax(), getCount(), getSum(), getAverage());

@@ -35,11 +35,14 @@ import static java.lang.Character.MIN_SURROGATE;
  * @since 16.0
  */
 public class Utf8 {
+
     /**
      * Returns the number of bytes in the UTF-8-encoded form of {@code sequence}. For a string, this
      * method is equivalent to {@code string.getBytes(UTF_8).length}, but is more efficient in both
      * time and space.
      *
+     * @param sequence 
+     * @return 
      * @throws IllegalArgumentException if {@code sequence} contains ill-formed UTF-16 (unpaired
      *     surrogates)
      */
@@ -100,9 +103,12 @@ public class Utf8 {
      * decoded. For example, some versions of the JDK decoder will accept "non-shortest form" byte
      * sequences, but encoding never reproduces these. Such byte sequences are <i>not</i> considered
      * well-formed.
-     *
+     * 
      * <p>This method returns {@code true} if and only if {@code Arrays.equals(bytes, new
      * String(bytes, UTF_8).getBytes(UTF_8))} does, but is more efficient in both time and space.
+     *
+     * @param bytes 
+     * @return 
      */
     public static boolean isWellFormed(byte[] bytes) {
         return isWellFormed(bytes, 0, bytes.length);
@@ -116,6 +122,7 @@ public class Utf8 {
      * @param bytes the input buffer
      * @param off the offset in the buffer of the first byte to read
      * @param len the number of bytes to read from the buffer
+     * @return 
      */
     public static boolean isWellFormed(byte[] bytes, int off, int len) {
         N.checkFromIndexSize(off, len, bytes.length);

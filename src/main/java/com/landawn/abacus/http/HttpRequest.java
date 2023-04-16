@@ -182,6 +182,12 @@ public final class HttpRequest {
         return this;
     }
 
+    /**
+     * 
+     *
+     * @param connectionTimeout 
+     * @return 
+     */
     public HttpRequest connectionTimeout(int connectionTimeout) {
         checkSettings();
 
@@ -190,6 +196,12 @@ public final class HttpRequest {
         return this;
     }
 
+    /**
+     * 
+     *
+     * @param readTimeout 
+     * @return 
+     */
     public HttpRequest readTimeout(int readTimeout) {
         checkSettings();
 
@@ -198,6 +210,12 @@ public final class HttpRequest {
         return this;
     }
 
+    /**
+     * 
+     *
+     * @param useCaches 
+     * @return 
+     */
     public HttpRequest useCaches(boolean useCaches) {
         checkSettings();
 
@@ -440,6 +458,14 @@ public final class HttpRequest {
         }
     }
 
+    /**
+     * 
+     *
+     * @param output 
+     * @param httpMethod 
+     * @param body 
+     * @throws UncheckedIOException 
+     */
     public void execute(final File output, final HttpMethod httpMethod, final Object body) throws UncheckedIOException {
         N.checkArgNotNull(httpMethod, "httpMethod");
 
@@ -455,6 +481,14 @@ public final class HttpRequest {
         }
     }
 
+    /**
+     * 
+     *
+     * @param output 
+     * @param httpMethod 
+     * @param body 
+     * @throws UncheckedIOException 
+     */
     public void execute(final OutputStream output, final HttpMethod httpMethod, final Object body) throws UncheckedIOException {
         N.checkArgNotNull(httpMethod, "httpMethod");
 
@@ -470,6 +504,14 @@ public final class HttpRequest {
         }
     }
 
+    /**
+     * 
+     *
+     * @param output 
+     * @param httpMethod 
+     * @param body 
+     * @throws UncheckedIOException 
+     */
     public void execute(final Writer output, final HttpMethod httpMethod, final Object body) throws UncheckedIOException {
         N.checkArgNotNull(httpMethod, "httpMethod");
 
@@ -485,6 +527,11 @@ public final class HttpRequest {
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public ContinuableFuture<String> asyncGet() {
         return asyncGet(String.class);
     }
@@ -591,6 +638,11 @@ public final class HttpRequest {
     //        return asyncExecute(resultClass);
     //    }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public ContinuableFuture<String> asyncDelete() {
         return asyncDelete(String.class);
     }
@@ -628,35 +680,47 @@ public final class HttpRequest {
         return asyncExecute(resultClass);
     }
 
+    /**
+     * 
+     *
+     * @param httpMethod 
+     * @return 
+     */
     public ContinuableFuture<String> asyncExecute(final HttpMethod httpMethod) {
         return asyncExecute(String.class, httpMethod);
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param resultClass
-     * @return
+     * @param <T> 
+     * @param resultClass 
+     * @param httpMethod 
+     * @return 
      */
     public <T> ContinuableFuture<T> asyncExecute(final Class<T> resultClass, final HttpMethod httpMethod) {
         return asyncExecute(resultClass, httpMethod, null);
     }
 
     /**
+     * 
      *
-     * @param body
-     * @return
+     * @param httpMethod 
+     * @param body 
+     * @return 
      */
     public ContinuableFuture<String> asyncExecute(final HttpMethod httpMethod, Object body) {
         return asyncExecute(String.class, httpMethod, body);
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param resultClass
-     * @param body
-     * @return
+     * @param <T> 
+     * @param resultClass 
+     * @param httpMethod 
+     * @param body 
+     * @return 
      */
     public <T> ContinuableFuture<T> asyncExecute(final Class<T> resultClass, final HttpMethod httpMethod, final Object body) {
         this.httpMethod = httpMethod;
@@ -673,6 +737,14 @@ public final class HttpRequest {
         return httpClient._asyncExecutor.execute(() -> execute(resultClass));
     }
 
+    /**
+     * 
+     *
+     * @param output 
+     * @param httpMethod 
+     * @param body 
+     * @return 
+     */
     public ContinuableFuture<Void> asyncExecute(final File output, final HttpMethod httpMethod, final Object body) {
         final Callable<Void> cmd = () -> {
             execute(output, httpMethod, body);
@@ -683,6 +755,14 @@ public final class HttpRequest {
         return httpClient._asyncExecutor.execute(cmd);
     }
 
+    /**
+     * 
+     *
+     * @param output 
+     * @param httpMethod 
+     * @param body 
+     * @return 
+     */
     public ContinuableFuture<Void> asyncExecute(final OutputStream output, final HttpMethod httpMethod, final Object body) {
         final Callable<Void> cmd = () -> {
             execute(output, httpMethod, body);
@@ -693,6 +773,14 @@ public final class HttpRequest {
         return httpClient._asyncExecutor.execute(cmd);
     }
 
+    /**
+     * 
+     *
+     * @param output 
+     * @param httpMethod 
+     * @param body 
+     * @return 
+     */
     public ContinuableFuture<Void> asyncExecute(final Writer output, final HttpMethod httpMethod, final Object body) {
         final Callable<Void> cmd = () -> {
             execute(output, httpMethod, body);

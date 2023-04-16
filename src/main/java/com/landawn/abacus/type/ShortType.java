@@ -27,6 +27,11 @@ public final class ShortType extends AbstractShortType {
         super(SHORT);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {

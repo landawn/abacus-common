@@ -257,30 +257,65 @@ public final class Duration implements Comparable<Duration>, Immutable {
         return create(milliseconds / divisor);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Duration negated() {
         return multipliedBy(-1);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Duration abs() {
         return isNegative() ? negated() : this;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public long toDays() {
         return milliseconds / MILLIS_PER_DAY;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public long toHours() {
         return milliseconds / MILLIS_PER_HOUR;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public long toMinutes() {
         return milliseconds / MILLIS_PER_MINUTE;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public long toSeconds() {
         return milliseconds / MILLIS_PER_SECOND;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public long toMillis() {
         return milliseconds;
     }
@@ -309,11 +344,21 @@ public final class Duration implements Comparable<Duration>, Immutable {
         return obj instanceof Duration && ((Duration) obj).milliseconds == this.milliseconds;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         return ((int) (milliseconds ^ (milliseconds >>> 32)));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         if (this == ZERO) {

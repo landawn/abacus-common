@@ -284,14 +284,29 @@ public class Result<T, E extends Throwable> implements Immutable {
     //        return exception == null ? Nullable.of(value) : Nullable.<T> empty();
     //    }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Pair<T, E> toPair() {
         return Pair.of(value, exception);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Tuple2<T, E> toTuple() {
         return Tuple.of(value, exception);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         return (exception == null) ? N.hashCode(value) : exception.hashCode();
@@ -317,6 +332,11 @@ public class Result<T, E extends Throwable> implements Immutable {
         return false;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return "{value=" + N.toString(value) + ", exception=" + N.toString(exception) + "}";
@@ -328,6 +348,14 @@ public class Result<T, E extends Throwable> implements Immutable {
             super(value, exception);
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param value 
+         * @param exception 
+         * @return 
+         */
         public static <T> Result.R<T> of(final T value, final RuntimeException exception) {
             return new R<>(value, exception);
         }

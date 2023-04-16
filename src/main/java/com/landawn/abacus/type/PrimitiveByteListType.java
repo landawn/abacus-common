@@ -44,6 +44,11 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
         super(BYTE_LIST);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<ByteList> clazz() {
         return ByteList.class;

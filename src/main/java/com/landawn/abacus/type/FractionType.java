@@ -30,6 +30,11 @@ public class FractionType extends AbstractType<Fraction> {
         super(FRACTION);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<Fraction> clazz() {
         return Fraction.class;

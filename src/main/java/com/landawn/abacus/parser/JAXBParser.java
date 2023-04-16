@@ -264,12 +264,14 @@ final class JAXBParser extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param targetClass
-     * @param node
-     * @param config
-     * @return
+     * @param <T> 
+     * @param targetClass 
+     * @param node 
+     * @param config 
+     * @return 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public <T> T deserialize(Class<? extends T> targetClass, Node node, XMLDeserializationConfig config) throws UnsupportedOperationException {
@@ -277,12 +279,14 @@ final class JAXBParser extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param nodeClasses
-     * @param is
-     * @param config
-     * @return
+     * @param <T> 
+     * @param nodeClasses 
+     * @param is 
+     * @param config 
+     * @return 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public <T> T deserialize(Map<String, Class<?>> nodeClasses, InputStream is, XMLDeserializationConfig config) throws UnsupportedOperationException {
@@ -290,12 +294,14 @@ final class JAXBParser extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param nodeClasses
-     * @param reader
-     * @param config
-     * @return
+     * @param <T> 
+     * @param nodeClasses 
+     * @param reader 
+     * @param config 
+     * @return 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public <T> T deserialize(Map<String, Class<?>> nodeClasses, Reader reader, XMLDeserializationConfig config) throws UnsupportedOperationException {
@@ -303,12 +309,14 @@ final class JAXBParser extends AbstractXMLParser {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param nodeClasses
-     * @param node
-     * @param config
-     * @return
+     * @param <T> 
+     * @param nodeClasses 
+     * @param node 
+     * @param config 
+     * @return 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public <T> T deserialize(Map<String, Class<?>> nodeClasses, Node node, XMLDeserializationConfig config) throws UnsupportedOperationException {

@@ -34,6 +34,11 @@ public class TypeType extends AbstractType<Type> {
         super(typeName);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<Type> clazz() {
         return Type.class;

@@ -76,11 +76,21 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractType<Tuple5<T1, T2, 
         this.parameterTypes = new Type[] { type1, type2, type3, type4, type5 };
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<Tuple5<T1, T2, T3, T4, T5>> clazz() {
         return typeClass;

@@ -35,6 +35,11 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     @SuppressWarnings("rawtypes")
     Class<? extends Map> mapInstanceType = HashMap.class;
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public boolean ignoreNullOrEmpty() {
         return ignoreNullOrEmpty;
     }
@@ -42,8 +47,8 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     /**
      * Won't set/add/put the value to bean/array/list/map if it's null or empty {@code CharSequence/Array/Collection/Map}.
      *
-     * @param readNullToEmpty
-     * @return
+     * @param ignoreNullOrEmpty 
+     * @return 
      */
     public JSONDeserializationConfig ignoreNullOrEmpty(boolean ignoreNullOrEmpty) {
         this.ignoreNullOrEmpty = ignoreNullOrEmpty;
@@ -52,6 +57,9 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     }
 
     /**
+     * 
+     *
+     * @return 
      * @deprecated Use {@link #readNullToEmpty()} instead
      */
     @Deprecated
@@ -71,6 +79,11 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
         return readNullToEmpty(nullToEmpty);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public boolean readNullToEmpty() {
         return readNullToEmpty;
     }
@@ -87,11 +100,22 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
         return this;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @SuppressWarnings("rawtypes")
     public Class<? extends Map> getMapInstanceType() {
         return mapInstanceType;
     }
 
+    /**
+     * 
+     *
+     * @param mapInstanceType 
+     * @return 
+     */
     @SuppressWarnings("rawtypes")
     public JSONDeserializationConfig setMapInstanceType(Class<? extends Map> mapInstanceType) {
         N.checkArgNotNull(mapInstanceType, "mapInstanceType");
@@ -121,6 +145,11 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
     //        return copy;
     //    }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         int h = 17;
@@ -160,6 +189,11 @@ public class JSONDeserializationConfig extends DeserializationConfig<JSONDeseria
         return false;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", ignoreUnmatchedProperty=" + N.toString(ignoreUnmatchedProperty)

@@ -33,15 +33,22 @@ public class ClobType extends AbstractType<Clob> {
         super(CLOB);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<Clob> clazz() {
         return Clob.class;
     }
 
     /**
+     * 
      *
-     * @param x
-     * @return
+     * @param x 
+     * @return 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public String stringOf(Clob x) throws UnsupportedOperationException {
@@ -49,9 +56,11 @@ public class ClobType extends AbstractType<Clob> {
     }
 
     /**
+     * 
      *
-     * @param str
-     * @return
+     * @param str 
+     * @return 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public Clob valueOf(String str) throws UnsupportedOperationException {

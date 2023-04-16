@@ -33,6 +33,11 @@ public class SQLXMLType extends AbstractType<SQLXML> {
         super(SQL_XML);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<SQLXML> clazz() {
         return SQLXML.class;
@@ -49,9 +54,11 @@ public class SQLXMLType extends AbstractType<SQLXML> {
     }
 
     /**
+     * 
      *
-     * @param x
-     * @return
+     * @param x 
+     * @return 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public String stringOf(SQLXML x) throws UnsupportedOperationException {
@@ -59,9 +66,11 @@ public class SQLXMLType extends AbstractType<SQLXML> {
     }
 
     /**
+     * 
      *
-     * @param str
-     * @return
+     * @param str 
+     * @return 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public SQLXML valueOf(String str) throws UnsupportedOperationException {

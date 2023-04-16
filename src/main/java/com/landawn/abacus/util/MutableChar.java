@@ -64,6 +64,11 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
         return new MutableChar(value);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public char value() {
         return value;
     }

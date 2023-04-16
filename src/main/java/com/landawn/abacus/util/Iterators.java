@@ -110,10 +110,14 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     * @param iter
-     * @param predicate
-     * @return
+     * @param <T> 
+     * @param <E> 
+     * @param iter 
+     * @param predicate 
+     * @return 
+     * @throws E 
      */
     public static <T, E extends Exception> long count(final Iterator<? extends T> iter, final Throwables.Predicate<? super T, E> predicate) throws E {
         N.checkArgNotNull(predicate, "predicate"); //NOSONAR
@@ -939,10 +943,12 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param a
-     * @return
+     * @param <K> 
+     * @param <V> 
+     * @param a 
+     * @return 
      */
     @SafeVarargs
     public static <K, V> ObjIterator<Map.Entry<K, V>> concat(final Map<? extends K, ? extends V>... a) {
@@ -1278,10 +1284,12 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     * @param c
+     * @param <T> 
+     * @param c 
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
-     * @return
+     * @return 
      */
     public static <T> ObjIterator<T> merge(final Collection<? extends Iterator<? extends T>> c,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
@@ -1337,6 +1345,14 @@ public final class Iterators {
     //        return mergeIterables(collections, nextSelector);
     //    }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param iterables 
+     * @param nextSelector 
+     * @return 
+     */
     public static <T> ObjIterator<T> mergeIterables(final Collection<? extends Iterable<? extends T>> iterables,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
         N.checkArgNotNull(nextSelector);
@@ -1869,6 +1885,13 @@ public final class Iterators {
         return filter(iter, Fn.<T> notNull());
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param iter 
+     * @return 
+     */
     public static <T> ObjIterator<T> distinct(final Iterator<? extends T> iter) {
         if (iter == null) {
             return ObjIterator.empty();
@@ -1910,6 +1933,14 @@ public final class Iterators {
         };
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param iter 
+     * @param keyMapper 
+     * @return 
+     */
     public static <T> ObjIterator<T> distinctBy(final Iterator<? extends T> iter, final Function<? super T, ?> keyMapper) {
         if (iter == null) {
             return ObjIterator.empty();
@@ -1999,6 +2030,14 @@ public final class Iterators {
         };
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param iter 
+     * @param predicate 
+     * @return 
+     */
     public static <T> ObjIterator<T> takeWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
         N.checkArgNotNull(predicate, "predicate");
 
@@ -2040,6 +2079,14 @@ public final class Iterators {
         };
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param iter 
+     * @param predicate 
+     * @return 
+     */
     public static <T> ObjIterator<T> takeWhileInclusive(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
         N.checkArgNotNull(predicate, "predicate");
 
@@ -2082,6 +2129,14 @@ public final class Iterators {
         };
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param iter 
+     * @param predicate 
+     * @return 
+     */
     public static <T> ObjIterator<T> dropWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
         N.checkArgNotNull(predicate, "predicate");
 
@@ -2129,6 +2184,14 @@ public final class Iterators {
         };
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param iter 
+     * @param predicate 
+     * @return 
+     */
     public static <T> ObjIterator<T> skipUntil(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
         N.checkArgNotNull(predicate, "predicate");
 
@@ -2250,6 +2313,15 @@ public final class Iterators {
         };
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param <U> 
+     * @param iter 
+     * @param mapper 
+     * @return 
+     */
     public static <T, U> ObjIterator<U> flatmap(final Iterator<? extends T> iter, final Function<? super T, ? extends U[]> mapper) { //NOSONAR
         N.checkArgNotNull(mapper, "mapper");
 
@@ -2469,17 +2541,19 @@ public final class Iterators {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param <E>
-     * @param <E2>
-     * @param iterators
-     * @param readThreadNum
-     * @param processThreadNum
-     * @param queueSize
-     * @param elementParser
-     * @param onComplete
+     * @param <T> 
+     * @param <E> 
+     * @param <E2> 
+     * @param iterators 
+     * @param readThreadNum 
+     * @param processThreadNum 
+     * @param queueSize 
+     * @param elementParser 
+     * @param onComplete 
      * @throws E the e
+     * @throws E2 
      */
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators,
             final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementParser,

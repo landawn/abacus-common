@@ -26,34 +26,111 @@ public final class ImmutableArray<T> implements Immutable {
         this.length = N.len(this.elements);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param e1 
+     * @return 
+     */
     public static <T> ImmutableArray<T> of(final T e1) {
         return new ImmutableArray<>(N.asArray(e1));
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param e1 
+     * @param e2 
+     * @return 
+     */
     public static <T> ImmutableArray<T> of(final T e1, final T e2) {
         return new ImmutableArray<>(N.asArray(e1, e2));
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param e1 
+     * @param e2 
+     * @param e3 
+     * @return 
+     */
     public static <T> ImmutableArray<T> of(final T e1, final T e2, final T e3) {
         return new ImmutableArray<>(N.asArray(e1, e2, e3));
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param e1 
+     * @param e2 
+     * @param e3 
+     * @param e4 
+     * @return 
+     */
     public static <T> ImmutableArray<T> of(final T e1, final T e2, final T e3, final T e4) {
         return new ImmutableArray<>(N.asArray(e1, e2, e3, e4));
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param e1 
+     * @param e2 
+     * @param e3 
+     * @param e4 
+     * @param e5 
+     * @return 
+     */
     public static <T> ImmutableArray<T> of(final T e1, final T e2, final T e3, final T e4, final T e5) {
         return new ImmutableArray<>(N.asArray(e1, e2, e3, e4, e5));
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param e1 
+     * @param e2 
+     * @param e3 
+     * @param e4 
+     * @param e5 
+     * @param e6 
+     * @return 
+     */
     public static <T> ImmutableArray<T> of(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
         return new ImmutableArray<>(N.asArray(e1, e2, e3, e4, e5, e6));
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param e1 
+     * @param e2 
+     * @param e3 
+     * @param e4 
+     * @param e5 
+     * @param e6 
+     * @param e7 
+     * @return 
+     */
     public static <T> ImmutableArray<T> of(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6, final T e7) {
         return new ImmutableArray<>(N.asArray(e1, e2, e3, e4, e5, e6, e7));
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param elements 
+     * @return 
+     */
     public static <T> ImmutableArray<T> copyOf(final T[] elements) {
         return new ImmutableArray<>(elements == null ? null : elements.clone());
     }
@@ -70,30 +147,71 @@ public final class ImmutableArray<T> implements Immutable {
         return new ImmutableArray<>(elements);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public int length() {
         return length;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public boolean isEmpty() {
         return length == 0;
     }
 
+    /**
+     * 
+     *
+     * @param index 
+     * @return 
+     */
     public T get(int index) {
         return elements[index];
     }
 
+    /**
+     * 
+     *
+     * @param valueToFind 
+     * @return 
+     */
     public int indexOf(T valueToFind) {
         return N.indexOf(elements, valueToFind);
     }
 
+    /**
+     * 
+     *
+     * @param valueToFind 
+     * @return 
+     */
     public int lastIndexOf(T valueToFind) {
         return N.lastIndexOf(elements, valueToFind);
     }
 
+    /**
+     * 
+     *
+     * @param valueToFind 
+     * @return 
+     */
     public boolean contains(T valueToFind) {
         return N.contains(elements, valueToFind);
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @param consumer 
+     * @throws E 
+     */
     public <E extends Exception> void forEach(final Throwables.Consumer<T, E> consumer) throws E {
         N.checkArgNotNull(consumer, "consumer");
 
@@ -102,6 +220,13 @@ public final class ImmutableArray<T> implements Immutable {
         }
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @param consumer 
+     * @throws E 
+     */
     public <E extends Exception> void forEachIndexed(final Throwables.IndexedConsumer<T, E> consumer) throws E {
         N.checkArgNotNull(consumer, "consumer");
 
@@ -110,31 +235,64 @@ public final class ImmutableArray<T> implements Immutable {
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Stream<T> stream() {
         return Stream.of(elements);
     }
 
+    /**
+     * 
+     *
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     */
     public ImmutableArray<T> copy(final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, length);
 
         return new ImmutableArray<>(N.copyOfRange(elements, fromIndex, toIndex));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @SuppressWarnings("deprecation")
     public ImmutableList<T> asList() {
         return ImmutableList.wrap(N.asList(elements));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         return N.hashCode(elements);
     }
 
+    /**
+     * 
+     *
+     * @param obj 
+     * @return 
+     */
     @Override
     public boolean equals(final Object obj) {
         return obj instanceof ImmutableArray && N.equals(this.elements, ((ImmutableArray<T>) obj).elements);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return N.toString(elements);

@@ -94,7 +94,6 @@ import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.Fn.IntFunctions;
 import com.landawn.abacus.util.Fn.Suppliers;
-import com.landawn.abacus.util.Iterables.Slice;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalInt;
@@ -530,11 +529,12 @@ class CommonUtil {
     }
 
     /**
+     * 
      *
-     * @param str
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param str 
+     * @param targetClass 
+     * @return 
      */
     @SuppressWarnings("unchecked")
     public static <T> T valueOf(final String str, final Class<? extends T> targetClass) {
@@ -800,10 +800,10 @@ class CommonUtil {
     /**
      * Default if null.
      *
-     * @param <T>
-     * @param obj
-     * @param defaultForNull
-     * @return
+     * @param <T> 
+     * @param obj 
+     * @param supplierForDefault 
+     * @return 
      */
     public static <T> T defaultIfNull(final T obj, final Supplier<? extends T> supplierForDefault) {
         if (obj == null) {
@@ -813,6 +813,14 @@ class CommonUtil {
         return obj;
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param str 
+     * @param defaultStr 
+     * @return 
+     */
     public static <T extends CharSequence> T defaultIfNullOrEmpty(final T str, final T defaultStr) {
         return N.isNullOrEmpty(str) ? defaultStr : str;
     }
@@ -2234,9 +2242,8 @@ class CommonUtil {
      * The first row will be used as column names if its type is array or list,
      * or obtain the column names from first row if its type is bean or map.
      *
-     * @param <T>
      * @param rowList list of row which can be: Map/Bean/Array/List
-     * @return
+     * @return 
      */
     public static DataSet newDataSet(final Collection<?> rowList) {
         return newDataSet(null, rowList);
@@ -2246,9 +2253,9 @@ class CommonUtil {
      * If the specified {@code columnNames} is null or empty, the first row will be used as column names if its type is array or list,
      * or obtain the column names from first row if its type is bean or map.
      *
-     * @param columnNames
-     * @param rows list of row which can be: Map/Bean/Array/List
-     * @return
+     * @param columnNames 
+     * @param rowList 
+     * @return 
      */
     public static DataSet newDataSet(Collection<String> columnNames, Collection<?> rowList) {
         if (isNullOrEmpty(columnNames) && isNullOrEmpty(rowList)) {
@@ -2375,6 +2382,13 @@ class CommonUtil {
         return new RowDataSet(columnNameList, columnList);
     }
 
+    /**
+     * 
+     *
+     * @param columnNames 
+     * @param rowList 
+     * @return 
+     */
     public static DataSet newDataSet(Collection<String> columnNames, final Object[][] rowList) {
         if (isNullOrEmpty(columnNames) && isNullOrEmpty(rowList)) {
             // throw new IllegalArgumentException("Column name list and row list can not be both null or empty");
@@ -2427,6 +2441,13 @@ class CommonUtil {
         return new RowDataSet(columnNameList, columnList);
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param b 
+     * @return 
+     */
     public static DataSet merge(final DataSet a, final DataSet b) {
         N.checkArgNotNull(a);
         N.checkArgNotNull(b);
@@ -2434,6 +2455,14 @@ class CommonUtil {
         return a.merge(b);
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param b 
+     * @param c 
+     * @return 
+     */
     public static DataSet merge(final DataSet a, final DataSet b, final DataSet c) {
         N.checkArgNotNull(a);
         N.checkArgNotNull(b);
@@ -2442,6 +2471,12 @@ class CommonUtil {
         return merge(N.asList(a, b, c));
     }
 
+    /**
+     * 
+     *
+     * @param dss 
+     * @return 
+     */
     public static DataSet merge(final Collection<? extends DataSet> dss) {
         if (N.isNullOrEmpty(dss)) {
             return N.newEmptyDataSet();
@@ -2663,12 +2698,13 @@ class CommonUtil {
     }
 
     /**
+     * 
      *
-     * @param c
-     * @param targetClass
-     * @param <A>
-     * @param <T>
-     * @return
+     * @param <A> 
+     * @param <T> 
+     * @param c 
+     * @param targetClass 
+     * @return 
      * @throws IllegalArgumentException if the specified {@code Class} is <code>null</code>.
      */
     public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final Class<A[]> targetClass) throws IllegalArgumentException {
@@ -2682,14 +2718,15 @@ class CommonUtil {
     }
 
     /**
+     * 
      *
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @param targetClass
-     * @param <A>
-     * @param <T>
-     * @return
+     * @param <A> 
+     * @param <T> 
+     * @param c 
+     * @param fromIndex 
+     * @param toIndex 
+     * @param targetClass 
+     * @return 
      * @throws IllegalArgumentException if the specified {@code Class} is <code>null</code>.
      */
     public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final int fromIndex, final int toIndex, final Class<A[]> targetClass)
@@ -2811,6 +2848,12 @@ class CommonUtil {
         return result;
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @return 
+     */
     public static boolean[] toBooleanArray(final byte[] a) {
         if (a == null) {
             return null;
@@ -3004,6 +3047,12 @@ class CommonUtil {
         return result;
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @return 
+     */
     public static byte[] toByteArray(final boolean[] a) {
         if (a == null) {
             return null;
@@ -3197,6 +3246,12 @@ class CommonUtil {
         return result;
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @return 
+     */
     public static int[] toIntArray(final char[] a) {
         if (a == null) {
             return null;
@@ -3774,6 +3829,13 @@ class CommonUtil {
         return result;
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param iter 
+     * @return 
+     */
     public static <T> List<T> toList(final Iterator<? extends T> iter) {
         if (iter == null) {
             return new ArrayList<>();
@@ -4082,6 +4144,13 @@ class CommonUtil {
         return result;
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param iter 
+     * @return 
+     */
     public static <T> Set<T> toSet(final Iterator<? extends T> iter) {
         if (iter == null) {
             return N.newHashSet();
@@ -4436,6 +4505,15 @@ class CommonUtil {
         }
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param <C> 
+     * @param iter 
+     * @param supplier 
+     * @return 
+     */
     public static <T, C extends Collection<T>> C toCollection(final Iterator<? extends T> iter, final Supplier<? extends C> supplier) {
         final C c = supplier.get();
 
@@ -4501,14 +4579,13 @@ class CommonUtil {
     }
 
     /**
+     * 
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k>
-     * @param <v>
-     * @param k1
-     * @param v1
-     * @return
+     * @param k1 
+     * @param v1 
+     * @return 
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1) {
         final Map<K, V> map = N.newHashMap(1);
@@ -4517,16 +4594,15 @@ class CommonUtil {
     }
 
     /**
+     * 
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k>
-     * @param <v>
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @return
+     * @param k1 
+     * @param v1 
+     * @param k2 
+     * @param v2 
+     * @return 
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2) {
         final Map<K, V> map = N.newHashMap(2);
@@ -4536,18 +4612,17 @@ class CommonUtil {
     }
 
     /**
+     * 
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k>
-     * @param <v>
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @return
+     * @param k1 
+     * @param v1 
+     * @param k2 
+     * @param v2 
+     * @param k3 
+     * @param v3 
+     * @return 
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
         final Map<K, V> map = N.newHashMap(3);
@@ -4558,20 +4633,19 @@ class CommonUtil {
     }
 
     /**
+     * 
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k>
-     * @param <v>
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @return
+     * @param k1 
+     * @param v1 
+     * @param k2 
+     * @param v2 
+     * @param k3 
+     * @param v3 
+     * @param k4 
+     * @param v4 
+     * @return 
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4) {
         final Map<K, V> map = N.newHashMap(4);
@@ -4583,22 +4657,21 @@ class CommonUtil {
     }
 
     /**
+     * 
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k>
-     * @param <v>
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @param k5
-     * @param v5
-     * @return
+     * @param k1 
+     * @param v1 
+     * @param k2 
+     * @param v2 
+     * @param k3 
+     * @param v3 
+     * @param k4 
+     * @param v4 
+     * @param k5 
+     * @param v5 
+     * @return 
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5) {
@@ -4612,24 +4685,23 @@ class CommonUtil {
     }
 
     /**
+     * 
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k>
-     * @param <v>
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @param k5
-     * @param v5
-     * @param k6
-     * @param v6
-     * @return
+     * @param k1 
+     * @param v1 
+     * @param k2 
+     * @param v2 
+     * @param k3 
+     * @param v3 
+     * @param k4 
+     * @param v4 
+     * @param k5 
+     * @param v5 
+     * @param k6 
+     * @param v6 
+     * @return 
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
             final K k6, final V v6) {
@@ -4644,26 +4716,25 @@ class CommonUtil {
     }
 
     /**
+     * 
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k>
-     * @param <v>
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @param k5
-     * @param v5
-     * @param k6
-     * @param v6
-     * @param k7
-     * @param v7
-     * @return
+     * @param k1 
+     * @param v1 
+     * @param k2 
+     * @param v2 
+     * @param k3 
+     * @param v3 
+     * @param k4 
+     * @param v4 
+     * @param k5 
+     * @param v5 
+     * @param k6 
+     * @param v6 
+     * @param k7 
+     * @param v7 
+     * @return 
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
             final K k6, final V v6, final K k7, final V v7) {
@@ -4702,11 +4773,9 @@ class CommonUtil {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k>
-     * @param <v>
-     * @param k1
-     * @param v1
-     * @return
+     * @param k1 
+     * @param v1 
+     * @return 
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1) {
         final Map<K, V> map = N.newLinkedHashMap(1);
@@ -4719,13 +4788,11 @@ class CommonUtil {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k>
-     * @param <v>
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @return
+     * @param k1 
+     * @param v1 
+     * @param k2 
+     * @param v2 
+     * @return 
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2) {
         final Map<K, V> map = N.newLinkedHashMap(2);
@@ -4739,15 +4806,13 @@ class CommonUtil {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k>
-     * @param <v>
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @return
+     * @param k1 
+     * @param v1 
+     * @param k2 
+     * @param v2 
+     * @param k3 
+     * @param v3 
+     * @return 
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
         final Map<K, V> map = N.newLinkedHashMap(3);
@@ -4762,17 +4827,15 @@ class CommonUtil {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k>
-     * @param <v>
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @return
+     * @param k1 
+     * @param v1 
+     * @param k2 
+     * @param v2 
+     * @param k3 
+     * @param v3 
+     * @param k4 
+     * @param v4 
+     * @return 
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4) {
         final Map<K, V> map = N.newLinkedHashMap(4);
@@ -4788,19 +4851,17 @@ class CommonUtil {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k>
-     * @param <v>
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @param k5
-     * @param v5
-     * @return
+     * @param k1 
+     * @param v1 
+     * @param k2 
+     * @param v2 
+     * @param k3 
+     * @param v3 
+     * @param k4 
+     * @param v4 
+     * @param k5 
+     * @param v5 
+     * @return 
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5) {
@@ -4818,21 +4879,19 @@ class CommonUtil {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k>
-     * @param <v>
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @param k5
-     * @param v5
-     * @param k6
-     * @param v6
-     * @return
+     * @param k1 
+     * @param v1 
+     * @param k2 
+     * @param v2 
+     * @param k3 
+     * @param v3 
+     * @param k4 
+     * @param v4 
+     * @param k5 
+     * @param v5 
+     * @param k6 
+     * @param v6 
+     * @return 
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6) {
@@ -4851,23 +4910,21 @@ class CommonUtil {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <k>
-     * @param <v>
-     * @param k1
-     * @param v1
-     * @param k2
-     * @param v2
-     * @param k3
-     * @param v3
-     * @param k4
-     * @param v4
-     * @param k5
-     * @param v5
-     * @param k6
-     * @param v6
-     * @param k7
-     * @param v7
-     * @return
+     * @param k1 
+     * @param v1 
+     * @param k2 
+     * @param v2 
+     * @param k3 
+     * @param v3 
+     * @param k4 
+     * @param v4 
+     * @param k5 
+     * @param v5 
+     * @param k6 
+     * @param v6 
+     * @param k7 
+     * @param v7 
+     * @return 
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7) {
@@ -4901,6 +4958,13 @@ class CommonUtil {
         return newMap(N.<K, V> newLinkedHashMap(a.length / 2), a);
     }
 
+    /**
+     * 
+     *
+     * @param propName 
+     * @param propValue 
+     * @return 
+     */
     public static Map<String, Object> asProps(final String propName, final Object propValue) {
         final Map<String, Object> props = N.newLinkedHashMap(1);
         props.put(propName, propValue);
@@ -4908,6 +4972,15 @@ class CommonUtil {
         return props;
     }
 
+    /**
+     * 
+     *
+     * @param propName1 
+     * @param propValue1 
+     * @param propName2 
+     * @param propValue2 
+     * @return 
+     */
     public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2) {
         final Map<String, Object> props = N.newLinkedHashMap(2);
         props.put(propName1, propValue1);
@@ -4916,6 +4989,17 @@ class CommonUtil {
         return props;
     }
 
+    /**
+     * 
+     *
+     * @param propName1 
+     * @param propValue1 
+     * @param propName2 
+     * @param propValue2 
+     * @param propName3 
+     * @param propValue3 
+     * @return 
+     */
     public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2,
             final String propName3, final Object propValue3) {
         final Map<String, Object> props = N.newLinkedHashMap(3);
@@ -4926,6 +5010,19 @@ class CommonUtil {
         return props;
     }
 
+    /**
+     * 
+     *
+     * @param propName1 
+     * @param propValue1 
+     * @param propName2 
+     * @param propValue2 
+     * @param propName3 
+     * @param propValue3 
+     * @param propName4 
+     * @param propValue4 
+     * @return 
+     */
     public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2,
             final String propName3, final Object propValue3, final String propName4, final Object propValue4) {
         final Map<String, Object> props = N.newLinkedHashMap(4);
@@ -4937,6 +5034,21 @@ class CommonUtil {
         return props;
     }
 
+    /**
+     * 
+     *
+     * @param propName1 
+     * @param propValue1 
+     * @param propName2 
+     * @param propValue2 
+     * @param propName3 
+     * @param propValue3 
+     * @param propName4 
+     * @param propValue4 
+     * @param propName5 
+     * @param propValue5 
+     * @return 
+     */
     public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2,
             final String propName3, final Object propValue3, final String propName4, final Object propValue4, final String propName5, final Object propValue5) {
         final Map<String, Object> props = N.newLinkedHashMap(5);
@@ -6176,11 +6288,11 @@ class CommonUtil {
      * is not {@code null}, otherwise, the default value 0 for {@code byte} is
      * returned.
      *
-     * @param str
-     * @return
+     * @param str 
+     * @return 
      * @throws NumberFormatException If the string is not a parsable {@code byte}.
-     * @deprecated replaced by {@code Numbers.toByte(String)}
      * @see Numbers#toByte(String)
+     * @deprecated replaced by {@code Numbers.toByte(String)}
      */
     @Deprecated
     public static byte parseByte(final String str) throws NumberFormatException {
@@ -6192,11 +6304,11 @@ class CommonUtil {
      * is not {@code null}, otherwise, the default value 0 for {@code short} is
      * returned.
      *
-     * @param str
-     * @return
+     * @param str 
+     * @return 
      * @throws NumberFormatException If the string is not a parsable {@code short}.
-     * @deprecated replaced by {@code Numbers.toShort(String)}
      * @see Numbers#toShort(String)
+     * @deprecated replaced by {@code Numbers.toShort(String)}
      */
     @Deprecated
     public static short parseShort(final String str) throws NumberFormatException {
@@ -6208,11 +6320,11 @@ class CommonUtil {
      * {@code str} is not {@code null}, otherwise, the default value 0 for
      * {@code int} is returned.
      *
-     * @param str
-     * @return
+     * @param str 
+     * @return 
      * @throws NumberFormatException If the string is not a parsable {@code int}.
-     * @deprecated replaced by {@code Numbers.toInt(String)}
      * @see Numbers#toInt(String)
+     * @deprecated replaced by {@code Numbers.toInt(String)}
      */
     @Deprecated
     public static int parseInt(final String str) throws NumberFormatException {
@@ -6224,11 +6336,11 @@ class CommonUtil {
      * is not {@code null}, otherwise, the default value 0 for {@code long} is
      * returned.
      *
-     * @param str
-     * @return
+     * @param str 
+     * @return 
      * @throws NumberFormatException If the string is not a parsable {@code long}.
-     * @deprecated replaced by {@code Numbers.toLong(String)}
      * @see Numbers#toLong(String)
+     * @deprecated replaced by {@code Numbers.toLong(String)}
      */
     @Deprecated
     public static long parseLong(final String str) throws NumberFormatException {
@@ -6240,11 +6352,11 @@ class CommonUtil {
      * is not {@code null}, otherwise, the default value 0f for {@code float} is
      * returned.
      *
-     * @param str
-     * @return
+     * @param str 
+     * @return 
      * @throws NumberFormatException If the string is not a parsable {@code float}.
-     * @deprecated replaced by {@code Numbers.toFloat(String)}
      * @see Numbers#toFloat(String)
+     * @deprecated replaced by {@code Numbers.toFloat(String)}
      */
     @Deprecated
     public static float parseFloat(final String str) throws NumberFormatException {
@@ -6256,11 +6368,11 @@ class CommonUtil {
      * is not {@code null}, otherwise, the default value 0d for {@code double} is
      * returned.
      *
-     * @param str
-     * @return
+     * @param str 
+     * @return 
      * @throws NumberFormatException If the string is not a parsable {@code double}.
-     * @deprecated replaced by {@code Numbers.toDouble(String)}
      * @see Numbers#toDouble(String)
+     * @deprecated replaced by {@code Numbers.toDouble(String)}
      */
     @Deprecated
     public static double parseDouble(final String str) throws NumberFormatException {
@@ -6320,6 +6432,12 @@ class CommonUtil {
         return Base64.encodeBase64String(binaryData);
     }
 
+    /**
+     * 
+     *
+     * @param str 
+     * @return 
+     */
     public static String base64EncodeString(final String str) {
         if (isNullOrEmpty(str)) {
             return EMPTY_STRING;
@@ -6328,6 +6446,12 @@ class CommonUtil {
         return Base64.encodeBase64String(str.getBytes());
     }
 
+    /**
+     * 
+     *
+     * @param str 
+     * @return 
+     */
     public static String base64EncodeUtf8String(final String str) {
         if (isNullOrEmpty(str)) {
             return EMPTY_STRING;
@@ -6378,6 +6502,12 @@ class CommonUtil {
         return new String(base64Decode(base64String));
     }
 
+    /**
+     * 
+     *
+     * @param base64String 
+     * @return 
+     */
     public static String base64DecodeToUtf8String(final String base64String) {
         if (isNullOrEmpty(base64String)) {
             return EMPTY_STRING;
@@ -6428,6 +6558,12 @@ class CommonUtil {
         return new String(Base64.decodeBase64URL(base64String));
     }
 
+    /**
+     * 
+     *
+     * @param base64String 
+     * @return 
+     */
     public static String base64UrlDecodeToUtf8String(final String base64String) {
         if (isNullOrEmpty(base64String)) {
             return EMPTY_STRING;
@@ -6491,11 +6627,12 @@ class CommonUtil {
     }
 
     /**
+     * 
      *
-     * @param urlQuery
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param urlQuery 
+     * @param targetClass 
+     * @return 
      */
     public static <T> T urlDecode(final String urlQuery, final Class<? extends T> targetClass) {
         if (isNullOrEmpty(urlQuery)) {
@@ -6506,12 +6643,13 @@ class CommonUtil {
     }
 
     /**
+     * 
      *
-     * @param urlQuery
-     * @param charset
-     * @param targetClass
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param urlQuery 
+     * @param charset 
+     * @param targetClass 
+     * @return 
      */
     public static <T> T urlDecode(final String urlQuery, final Charset charset, final Class<? extends T> targetClass) {
         if (isNullOrEmpty(urlQuery)) {
@@ -6573,10 +6711,10 @@ class CommonUtil {
 
     /**
      * Deeply copy by: obj -> serialize -> kryo/Json -> deserialize -> new object.
-     * @param obj a Java object which must be serializable and deserialiable through {@code Kryo} or {@code JSON}.
-     * @param targetClass
      *
-     * @param <T>
+     * @param <T> 
+     * @param obj a Java object which must be serializable and deserialiable through {@code Kryo} or {@code JSON}.
+     * @param targetClass 
      * @return a new instance of {@code targetClass} even if {@code bean} is {@code null}.
      * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
@@ -6647,10 +6785,11 @@ class CommonUtil {
     }
 
     /**
+     * 
      *
-     * @param bean
-     * @param targetClass
-     * @param <T>
+     * @param <T> 
+     * @param bean 
+     * @param targetClass 
      * @return a new instance of {@code targetClass} even if {@code bean} is {@code null}.
      * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
@@ -6662,13 +6801,13 @@ class CommonUtil {
      * Returns a new created instance of the specified {@code cls} and set with
      * same properties retrieved by 'getXXX' method in the specified
      * {@code bean}.
+     *
+     * @param <T> 
      * @param bean a Java Object what allows access to properties using getter
      *            and setter methods.
-     * @param selectPropNames
+     * @param selectPropNames 
      * @param targetClass a Java Object what allows access to properties using getter
      *            and setter methods.
-     *
-     * @param <T>
      * @return a new instance of {@code targetClass} even if {@code bean} is {@code null}.
      * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
@@ -6708,12 +6847,13 @@ class CommonUtil {
     }
 
     /**
+     * 
      *
-     * @param bean
-     * @param ignoreUnmatchedProperty
-     * @param ignoredPropNames
-     * @param targetClass
-     * @param <T>
+     * @param <T> 
+     * @param bean 
+     * @param ignoreUnmatchedProperty 
+     * @param ignoredPropNames 
+     * @param targetClass 
      * @return a new instance of {@code targetClass} even if {@code bean} is {@code null}.
      * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
@@ -6753,9 +6893,11 @@ class CommonUtil {
     }
 
     /**
+     * 
      *
-     * @param sourceBean
-     * @param targetBean
+     * @param <T> 
+     * @param sourceBean 
+     * @param targetBean 
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
@@ -6767,11 +6909,12 @@ class CommonUtil {
      * Set all the signed properties(including all primitive type properties) in
      * the specified {@code sourceBean} to the specified {@code targetBean}.
      *
+     * @param <T> 
      * @param sourceBean a Java Object what allows access to properties using getter
      *            and setter methods.
      * @param targetBean a Java Object what allows access to properties using getter
      *            and setter methods.
-     * @param selectPropNames
+     * @param selectPropNames 
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
@@ -6822,11 +6965,12 @@ class CommonUtil {
      * Set all the signed properties(including all primitive type properties) in
      * the specified {@code sourceBean} to the specified {@code targetBean}.
      *
+     * @param <T> 
      * @param sourceBean a Java Object what allows access to properties using getter
      *            and setter methods.
      * @param targetBean a Java Object what allows access to properties using getter
      *            and setter methods.
-     * @param filter
+     * @param filter 
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
@@ -6855,11 +6999,13 @@ class CommonUtil {
     }
 
     /**
+     * 
      *
-     * @param sourceBean
-     * @param targetBean
-     * @param ignoreUnmatchedProperty
-     * @param ignoredPropNames
+     * @param <T> 
+     * @param sourceBean 
+     * @param targetBean 
+     * @param ignoreUnmatchedProperty 
+     * @param ignoredPropNames 
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
@@ -6901,9 +7047,11 @@ class CommonUtil {
     }
 
     /**
+     * 
      *
-     * @param sourceBean
-     * @param targetBean
+     * @param <T> 
+     * @param sourceBean 
+     * @param targetBean 
      * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
@@ -6916,11 +7064,12 @@ class CommonUtil {
      * Set all the signed properties(including all primitive type properties) in
      * the specified {@code sourceBean} to the specified {@code targetBean}.
      *
+     * @param <T> 
      * @param sourceBean a Java Object what allows access to properties using getter
      *            and setter methods.
      * @param targetBean a Java Object what allows access to properties using getter
      *            and setter methods.
-     * @param selectPropNames
+     * @param selectPropNames 
      * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
@@ -6982,11 +7131,12 @@ class CommonUtil {
      * Set all the signed properties(including all primitive type properties) in
      * the specified {@code sourceBean} to the specified {@code targetBean}.
      *
+     * @param <T> 
      * @param sourceBean a Java Object what allows access to properties using getter
      *            and setter methods.
      * @param targetBean a Java Object what allows access to properties using getter
      *            and setter methods.
-     * @param filter
+     * @param filter 
      * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
@@ -7025,11 +7175,13 @@ class CommonUtil {
     }
 
     /**
+     * 
      *
-     * @param sourceBean
-     * @param targetBean
-     * @param ignoreUnmatchedProperty
-     * @param ignoredPropNames
+     * @param <T> 
+     * @param sourceBean 
+     * @param targetBean 
+     * @param ignoreUnmatchedProperty 
+     * @param ignoredPropNames 
      * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
@@ -7289,10 +7441,10 @@ class CommonUtil {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param c
-     * @return
+     * @param c 
+     * @return 
      */
     public static boolean anyNull(final Collection<?> c) {
         if (isNullOrEmpty(c)) {
@@ -7356,10 +7508,10 @@ class CommonUtil {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param c
-     * @return
+     * @param c 
+     * @return 
      */
     public static boolean allNull(final Collection<?> c) {
         if (isNullOrEmpty(c)) {
@@ -7540,12 +7692,12 @@ class CommonUtil {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * @param a 
+     * @param b 
+     * @param c 
+     * @return 
      */
     public static boolean anyNullOrEmpty(final Collection<?> a, final Collection<?> b, final Collection<?> c) {
         return a == null || a.size() == 0 || b == null || b.size() == 0 || c == null || c.size() == 0;
@@ -7751,9 +7903,10 @@ class CommonUtil {
     /**
      * Gets the only element.
      *
-     * @param <T>
-     * @param iterable
+     * @param <T> 
+     * @param c 
      * @return throws TooManyElementsException if there are more than one elements in the specified {@code iterable}.
+     * @throws TooManyElementsException 
      */
     public static <T> Nullable<T> getOnlyElement(Collection<? extends T> c) throws TooManyElementsException {
         if (isNullOrEmpty(c)) {
@@ -8851,88 +9004,6 @@ class CommonUtil {
     }
 
     /**
-     * Returns a read-only <code>Seq</code>.
-     *
-     * @param <T>
-     * @param a
-     * @param fromIndex
-     * @param toIndex
-     * @return the immutable collection<? extends t>
-     */
-    public static <T> ImmutableList<T> slice(final T[] a, final int fromIndex, final int toIndex) {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
-
-        if (N.isNullOrEmpty(a)) {
-            return ImmutableList.empty();
-        }
-
-        return slice(Array.asList(a), fromIndex, toIndex);
-    }
-
-    /**
-     * Returns a read-only <code>ImmutableCollection</code>.
-     *
-     * @param <T>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @return the immutable collection<? extends t>
-     */
-    @SuppressWarnings("deprecation")
-    public static <T> ImmutableList<T> slice(final List<? extends T> c, final int fromIndex, final int toIndex) {
-        N.checkFromToIndex(fromIndex, toIndex, N.size(c));
-
-        if (N.isNullOrEmpty(c)) {
-            return ImmutableList.empty();
-        }
-
-        return ImmutableList.wrap(((List<T>) c).subList(fromIndex, toIndex));
-    }
-
-    /**
-     * Returns a read-only <code>ImmutableCollection</code>.
-     *
-     * @param <T>
-     * @param c
-     * @param fromIndex
-     * @param toIndex
-     * @return the immutable collection<? extends t>
-     */
-    public static <T> ImmutableCollection<T> slice(final Collection<? extends T> c, final int fromIndex, final int toIndex) {
-        N.checkFromToIndex(fromIndex, toIndex, N.size(c));
-
-        if (N.isNullOrEmpty(c)) {
-            return ImmutableList.empty();
-        }
-
-        if (c instanceof List) {
-            return slice((List<T>) c, fromIndex, toIndex);
-        }
-
-        return new Slice<>(c, fromIndex, toIndex);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param iter
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     */
-    public static <T> ObjIterator<T> slice(final Iterator<T> iter, final long fromIndex, final long toIndex) {
-        if (fromIndex < 0 || fromIndex > toIndex) {
-            throw new IndexOutOfBoundsException("Index range [" + fromIndex + ", " + toIndex + "] is out-of-bounds");
-        }
-
-        if (iter == null || fromIndex == toIndex) {
-            return ObjIterator.empty();
-        }
-
-        return Iterators.skipAndLimit(iter, fromIndex, toIndex - fromIndex);
-    }
-
-    /**
      * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
      *
      * @param s
@@ -9053,11 +9124,24 @@ class CommonUtil {
     }
 
     /**
+     * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
+     *
+     * @param c 
+     * @return 
+     */
+    @Beta
+    @SuppressWarnings("rawtypes")
+    public static int size(final PrimitiveList c) {
+        return c == null ? 0 : c.size();
+    }
+
+    /**
      * Returns an immutable empty list if the specified List is <code>null</code>, otherwise itself is returned.
      *
      * @param <T>
      * @param list
      * @return
+     * @see #emptyList()
      */
     public static <T> List<T> nullToEmpty(final List<T> list) {
         return list == null ? emptyList() : list;
@@ -9069,6 +9153,7 @@ class CommonUtil {
      * @param <T>
      * @param set
      * @return
+     * @see #emptySet()
      */
     public static <T> Set<T> nullToEmpty(final Set<T> set) {
         return set == null ? emptySet() : set;
@@ -9080,6 +9165,7 @@ class CommonUtil {
      * @param <T>
      * @param set
      * @return
+     * @see #emptySortedSet()
      */
     public static <T> SortedSet<T> nullToEmpty(final SortedSet<T> set) {
         return set == null ? emptySortedSet() : set;
@@ -9091,6 +9177,7 @@ class CommonUtil {
      * @param <T>
      * @param set
      * @return
+     * @see #emptyNavigableSet()
      */
     public static <T> NavigableSet<T> nullToEmpty(final NavigableSet<T> set) {
         return set == null ? emptyNavigableSet() : set;
@@ -9103,6 +9190,7 @@ class CommonUtil {
      * @param <V> the value type
      * @param map
      * @return
+     * @see #emptyMap()
      */
     public static <K, V> Map<K, V> nullToEmpty(final Map<K, V> map) {
         return map == null ? emptyMap() : map;
@@ -9115,6 +9203,7 @@ class CommonUtil {
      * @param <V> the value type
      * @param map
      * @return
+     * @see #emptySortedMap()
      */
     public static <K, V> SortedMap<K, V> nullToEmpty(final SortedMap<K, V> map) {
         return map == null ? emptySortedMap() : map;
@@ -9127,6 +9216,7 @@ class CommonUtil {
      * @param <V> the value type
      * @param map
      * @return
+     * @see #emptyNavigableMap()
      */
     public static <K, V> NavigableMap<K, V> nullToEmpty(final NavigableMap<K, V> map) {
         return map == null ? emptyNavigableMap() : map;
@@ -9138,6 +9228,7 @@ class CommonUtil {
      * @param <T>
      * @param iter
      * @return
+     * @see #emptyIterator()
      */
     public static <T> Iterator<T> nullToEmpty(final Iterator<T> iter) {
         return iter == null ? emptyIterator() : iter;
@@ -9149,6 +9240,7 @@ class CommonUtil {
      * @param <T>
      * @param iter
      * @return
+     * @see #emptyListIterator()
      */
     public static <T> ListIterator<T> nullToEmpty(final ListIterator<T> iter) {
         return iter == null ? emptyListIterator() : iter;
@@ -9912,6 +10004,801 @@ class CommonUtil {
     }
 
     /**
+     * Check arg not null.
+     *
+     * @param <T>
+     * @param obj
+     * @return
+     * @throws IllegalArgumentException if {@code obj} is {@code null}
+     */
+    public static <T> T checkArgNotNull(final T obj) {
+        if (obj == null) {
+            throw new IllegalArgumentException();
+        }
+
+        return obj;
+    }
+
+    /**
+     * Check arg not null.
+     *
+     * @param <T>
+     * @param obj
+     * @param errorMessage
+     * @return
+     * @throws IllegalArgumentException if {@code obj} is {@code null}
+     */
+    public static <T> T checkArgNotNull(final T obj, final String errorMessage) {
+        if (obj == null) {
+            if (isArgNameOnly(errorMessage)) {
+                throw new IllegalArgumentException("'" + errorMessage + "' can not be null");
+            } else {
+                throw new IllegalArgumentException(errorMessage);
+            }
+        }
+
+        return obj;
+    }
+
+    private static boolean isArgNameOnly(final String argNameOrErrorMsg) {
+        // shortest message: "it is null"
+        return !(argNameOrErrorMsg.length() > 9 && argNameOrErrorMsg.indexOf(WD._SPACE) > 0); //NOSONAR
+    }
+
+    /**
+     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param <T>
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     */
+    public static <T extends CharSequence> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
+        if (isNullOrEmpty(arg)) {
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     */
+    public static boolean[] checkArgNotNullOrEmpty(final boolean[] arg, final String argNameOrErrorMsg) {
+        if (isNullOrEmpty(arg)) {
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     */
+    public static char[] checkArgNotNullOrEmpty(final char[] arg, final String argNameOrErrorMsg) {
+        if (isNullOrEmpty(arg)) {
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     */
+    public static byte[] checkArgNotNullOrEmpty(final byte[] arg, final String argNameOrErrorMsg) {
+        if (isNullOrEmpty(arg)) {
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     */
+    public static short[] checkArgNotNullOrEmpty(final short[] arg, final String argNameOrErrorMsg) {
+        if (isNullOrEmpty(arg)) {
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     */
+    public static int[] checkArgNotNullOrEmpty(final int[] arg, final String argNameOrErrorMsg) {
+        if (isNullOrEmpty(arg)) {
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     */
+    public static long[] checkArgNotNullOrEmpty(final long[] arg, final String argNameOrErrorMsg) {
+        if (isNullOrEmpty(arg)) {
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     */
+    public static float[] checkArgNotNullOrEmpty(final float[] arg, final String argNameOrErrorMsg) {
+        if (isNullOrEmpty(arg)) {
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     */
+    public static double[] checkArgNotNullOrEmpty(final double[] arg, final String argNameOrErrorMsg) {
+        if (isNullOrEmpty(arg)) {
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param <T>
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     */
+    public static <T> T[] checkArgNotNullOrEmpty(final T[] arg, final String argNameOrErrorMsg) {
+        if (isNullOrEmpty(arg)) {
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param <T>
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     */
+    public static <T extends Collection<?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
+        if (isNullOrEmpty(arg)) {
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param <T>
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     */
+    @Beta
+    public static <T extends Iterable<?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
+        if (isNullOrEmpty(arg)) {
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param <T>
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     */
+    @Beta
+    public static <T extends Iterator<?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
+        if (isNullOrEmpty(arg)) {
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param <T>
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     */
+    public static <T extends Map<?, ?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
+        if (isNullOrEmpty(arg)) {
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param <T>
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     */
+    public static <T extends PrimitiveList<?, ?, ?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
+        if (isNullOrEmpty(arg)) {
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param <T>
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     */
+    public static <T> Multiset<T> checkArgNotNullOrEmpty(final Multiset<T> arg, final String argNameOrErrorMsg) {
+        if (isNullOrEmpty(arg)) {
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param <T>
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     */
+    public static <T> LongMultiset<T> checkArgNotNullOrEmpty(final LongMultiset<T> arg, final String argNameOrErrorMsg) {
+        if (isNullOrEmpty(arg)) {
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param <T>
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     */
+    public static <T extends Multimap<?, ?, ?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
+        if (isNullOrEmpty(arg)) {
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param <T>
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
+     */
+    public static <T extends DataSet> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
+        if (isNullOrEmpty(arg)) {
+            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
+        }
+
+        return arg;
+    }
+
+    private static void throwIllegalArgumentExceptionForNllOrEmptyCheck(final String errorMessage) {
+        if (isArgNameOnly(errorMessage)) {
+            throw new IllegalArgumentException("'" + errorMessage + "' can not be null or empty");
+        } else {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
+    /**
+     * <p>Checks if a CharSequence is NOT {@code null}, empty ("") or whitespace only.</p>
+     *
+     * @param <T>
+     * @param arg
+     * @param msg name of parameter or error message
+     * @return
+     * @throws IllegalArgumentException if the specified parameter is {@code null}, empty ("") or whitespace only.
+     * @see #isBlank(CharSequence)
+     * @see #notBlank(CharSequence)
+     */
+    // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
+    public static <T extends CharSequence> T checkArgNotBlank(final T arg, final String msg) {
+        if (isBlank(arg)) {
+            if (isArgNameOnly(msg)) {
+                throw new IllegalArgumentException("'" + msg + "' can not be null or empty or blank");
+            } else {
+                throw new IllegalArgumentException(msg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is not negative, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is negative.
+     */
+    public static byte checkArgNotNegative(final byte arg, final String argNameOrErrorMsg) {
+        if (arg < 0) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg); //NOSONAR
+            } else {
+                throw new IllegalArgumentException(argNameOrErrorMsg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is not negative, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is negative.
+     */
+    public static short checkArgNotNegative(final short arg, final String argNameOrErrorMsg) {
+        if (arg < 0) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg); //NOSONAR
+            } else {
+                throw new IllegalArgumentException(argNameOrErrorMsg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is not negative, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is negative.
+     */
+    public static int checkArgNotNegative(final int arg, final String argNameOrErrorMsg) {
+        if (arg < 0) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg); //NOSONAR
+            } else {
+                throw new IllegalArgumentException(argNameOrErrorMsg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is not negative, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is negative.
+     */
+    public static long checkArgNotNegative(final long arg, final String argNameOrErrorMsg) {
+        if (arg < 0) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg);
+            } else {
+                throw new IllegalArgumentException(argNameOrErrorMsg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is not negative, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is negative.
+     */
+    public static float checkArgNotNegative(final float arg, final String argNameOrErrorMsg) {
+        if (arg < 0) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg);
+            } else {
+                throw new IllegalArgumentException(argNameOrErrorMsg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is not negative, and throws {@code IllegalArgumentException} if it is.
+     *
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is negative.
+     */
+    public static double checkArgNotNegative(final double arg, final String argNameOrErrorMsg) {
+        if (arg < 0) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg);
+            } else {
+                throw new IllegalArgumentException(argNameOrErrorMsg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is positive, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is negative.
+     */
+    public static byte checkArgPositive(final byte arg, final String argNameOrErrorMsg) {
+        if (arg <= 0) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be zero or negative: " + arg);
+            } else {
+                throw new IllegalArgumentException(argNameOrErrorMsg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is positive, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is negative.
+     */
+    public static short checkArgPositive(final short arg, final String argNameOrErrorMsg) {
+        if (arg <= 0) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be zero or negative: " + arg);
+            } else {
+                throw new IllegalArgumentException(argNameOrErrorMsg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is positive, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is negative.
+     */
+    public static int checkArgPositive(final int arg, final String argNameOrErrorMsg) {
+        if (arg <= 0) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be zero or negative: " + arg);
+            } else {
+                throw new IllegalArgumentException(argNameOrErrorMsg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is positive, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is negative.
+     */
+    public static long checkArgPositive(final long arg, final String argNameOrErrorMsg) {
+        if (arg <= 0) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be zero or negative: " + arg);
+            } else {
+                throw new IllegalArgumentException(argNameOrErrorMsg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is positive, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is negative.
+     */
+    public static float checkArgPositive(final float arg, final String argNameOrErrorMsg) {
+        if (arg <= 0) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be zero or negative: " + arg);
+            } else {
+                throw new IllegalArgumentException(argNameOrErrorMsg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Checks if the specified {@code arg} is positive, and throws {@code IllegalArgumentException} if it is not.
+     *
+     * @param arg
+     * @param argNameOrErrorMsg
+     * @return
+     * @throws IllegalArgumentException if the specified {@code arg} is negative.
+     */
+    public static double checkArgPositive(final double arg, final String argNameOrErrorMsg) {
+        if (arg <= 0) {
+            if (isArgNameOnly(argNameOrErrorMsg)) {
+                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be zero or negative: " + arg);
+            } else {
+                throw new IllegalArgumentException(argNameOrErrorMsg);
+            }
+        }
+
+        return arg;
+    }
+
+    /**
+     * Check if the specified {@code Array} contains any {@code null} element.
+     *
+     * @param a 
+     * @throws IllegalArgumentException if {@code null} element found in {@code a}
+     */
+    public static void checkElementNotNull(final Object[] a) {
+        if (N.isNullOrEmpty(a)) {
+            return;
+        }
+
+        for (Object e : a) {
+            if (e == null) {
+                throw new IllegalArgumentException("null element is found in collection");
+            }
+        }
+    }
+
+    /**
+     * Check if the specified {@code Array} contains any {@code null} element.
+     *
+     * @param a 
+     * @param argNameOrErrorMsg 
+     * @throws IllegalArgumentException if {@code null} element found in {@code a}
+     */
+    public static void checkElementNotNull(final Object[] a, final String argNameOrErrorMsg) {
+        if (N.isNullOrEmpty(a)) {
+            return;
+        }
+
+        for (Object e : a) {
+            if (e == null) {
+                if (isArgNameOnly(argNameOrErrorMsg)) {
+                    throw new IllegalArgumentException("null element is found in " + argNameOrErrorMsg);
+                } else {
+                    throw new IllegalArgumentException(argNameOrErrorMsg);
+                }
+            }
+        }
+    }
+
+    /**
+     * Check if the specified {@code Collection} contains any {@code null} element.
+     *
+     * @param c 
+     * @throws IllegalArgumentException if {@code null} element found in {@code c}
+     */
+    public static void checkElementNotNull(final Collection<?> c) {
+        if (N.isNullOrEmpty(c)) {
+            return;
+        }
+
+        for (Object e : c) {
+            if (e == null) {
+                throw new IllegalArgumentException("null element is found in collection");
+            }
+        }
+    }
+
+    /**
+     * Check if the specified {@code Collection} contains any {@code null} element.
+     *
+     * @param c 
+     * @param argNameOrErrorMsg 
+     * @throws IllegalArgumentException if {@code null} element found in {@code c}
+     */
+    public static void checkElementNotNull(final Collection<?> c, final String argNameOrErrorMsg) {
+        if (N.isNullOrEmpty(c)) {
+            return;
+        }
+
+        for (Object e : c) {
+            if (e == null) {
+                if (isArgNameOnly(argNameOrErrorMsg)) {
+                    throw new IllegalArgumentException("null element is found in " + argNameOrErrorMsg);
+                } else {
+                    throw new IllegalArgumentException(argNameOrErrorMsg);
+                }
+            }
+        }
+    }
+
+    /**
+     * Check if the specified {@code Map} contains any {@code null} key.
+     *
+     * @param m 
+     * @throws IllegalArgumentException if {@code null} key found in {@code m}
+     */
+    public static void checkKeyNotNull(final Map<?, ?> m) {
+        if (N.isNullOrEmpty(m)) {
+            return;
+        }
+
+        for (Object e : m.keySet()) {
+            if (e == null) {
+                throw new IllegalArgumentException("null key is found in Map");
+            }
+        }
+    }
+
+    /**
+     * Check if the specified {@code Map} contains any {@code null} key.
+     *
+     * @param m 
+     * @param argNameOrErrorMsg 
+     * @throws IllegalArgumentException if {@code null} key found in {@code m}
+     */
+    public static void checkKeyNotNull(final Map<?, ?> m, final String argNameOrErrorMsg) {
+        if (N.isNullOrEmpty(m)) {
+            return;
+        }
+
+        for (Object e : m.keySet()) {
+            if (e == null) {
+                if (isArgNameOnly(argNameOrErrorMsg)) {
+                    throw new IllegalArgumentException("null key is found in " + argNameOrErrorMsg);
+                } else {
+                    throw new IllegalArgumentException(argNameOrErrorMsg);
+                }
+            }
+        }
+    }
+
+    /**
+     * Check if the specified {@code Map} contains any {@code null} value.
+     *
+     * @param m 
+     * @throws IllegalArgumentException if {@code null} value found in {@code m}
+     */
+    public static void checkValueNotNull(final Map<?, ?> m) {
+        if (N.isNullOrEmpty(m)) {
+            return;
+        }
+
+        for (Object e : m.values()) {
+            if (e == null) {
+                throw new IllegalArgumentException("null value is found in Map");
+            }
+        }
+    }
+
+    /**
+     * Check if the specified {@code Map} contains any {@code null} value.
+     *
+     * @param m 
+     * @param argNameOrErrorMsg 
+     * @throws IllegalArgumentException if {@code null} value found in {@code m}
+     */
+    public static void checkValueNotNull(final Map<?, ?> m, final String argNameOrErrorMsg) {
+        if (N.isNullOrEmpty(m)) {
+            return;
+        }
+
+        for (Object e : m.values()) {
+            if (e == null) {
+                if (isArgNameOnly(argNameOrErrorMsg)) {
+                    throw new IllegalArgumentException("null value is found in " + argNameOrErrorMsg);
+                } else {
+                    throw new IllegalArgumentException(argNameOrErrorMsg);
+                }
+            }
+        }
+    }
+
+    /**
      * Ensures the truth of an expression involving one or more parameters to the calling method.
      *
      * @param expression a boolean expression
@@ -10271,575 +11158,14 @@ class CommonUtil {
     }
 
     /**
+     * 
      *
-     * @param <E>
-     * @param b
-     * @param errorMessageSupplier
+     * @param b 
+     * @param errorMessageSupplier 
      */
     public static void checkArgument(boolean b, Supplier<String> errorMessageSupplier) {
         if (!b) {
             throw new IllegalArgumentException(errorMessageSupplier.get());
-        }
-    }
-
-    /**
-     * Check arg not null.
-     *
-     * @param <T>
-     * @param obj
-     * @return
-     * @throws IllegalArgumentException if {@code obj} is {@code null}
-     */
-    public static <T> T checkArgNotNull(final T obj) {
-        if (obj == null) {
-            throw new IllegalArgumentException();
-        }
-
-        return obj;
-    }
-
-    /**
-     * Check arg not null.
-     *
-     * @param <T>
-     * @param obj
-     * @param errorMessage
-     * @return
-     * @throws IllegalArgumentException if {@code obj} is {@code null}
-     */
-    public static <T> T checkArgNotNull(final T obj, final String errorMessage) {
-        if (obj == null) {
-            if (isArgNameOnly(errorMessage)) {
-                throw new IllegalArgumentException("'" + errorMessage + "' can not be null");
-            } else {
-                throw new IllegalArgumentException(errorMessage);
-            }
-        }
-
-        return obj;
-    }
-
-    private static boolean isArgNameOnly(final String argNameOrErrorMsg) {
-        // shortest message: "it is null"
-        return !(argNameOrErrorMsg.length() > 9 && argNameOrErrorMsg.indexOf(WD._SPACE) > 0); //NOSONAR
-    }
-
-    /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param <T>
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
-     */
-    public static <T extends CharSequence> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
-     */
-    public static boolean[] checkArgNotNullOrEmpty(final boolean[] arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
-     */
-    public static char[] checkArgNotNullOrEmpty(final char[] arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
-     */
-    public static byte[] checkArgNotNullOrEmpty(final byte[] arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
-     */
-    public static short[] checkArgNotNullOrEmpty(final short[] arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
-     */
-    public static int[] checkArgNotNullOrEmpty(final int[] arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
-     */
-    public static long[] checkArgNotNullOrEmpty(final long[] arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
-     */
-    public static float[] checkArgNotNullOrEmpty(final float[] arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
-     */
-    public static double[] checkArgNotNullOrEmpty(final double[] arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param <T>
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
-     */
-    public static <T> T[] checkArgNotNullOrEmpty(final T[] arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param <T>
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
-     */
-    public static <T extends Collection<?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param <T>
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
-     */
-    @Beta
-    public static <T extends Iterable<?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param <T>
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
-     */
-    @Beta
-    public static <T extends Iterator<?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified {@code arg} is {@code null} or empty, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param <T>
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is {@code null} or empty.
-     */
-    public static <T extends Map<?, ?>> T checkArgNotNullOrEmpty(final T arg, final String argNameOrErrorMsg) {
-        if (isNullOrEmpty(arg)) {
-            throwIllegalArgumentExceptionForNllOrEmptyCheck(argNameOrErrorMsg);
-        }
-
-        return arg;
-    }
-
-    private static void throwIllegalArgumentExceptionForNllOrEmptyCheck(final String errorMessage) {
-        if (isArgNameOnly(errorMessage)) {
-            throw new IllegalArgumentException("'" + errorMessage + "' can not be null or empty");
-        } else {
-            throw new IllegalArgumentException(errorMessage);
-        }
-    }
-
-    /**
-     * <p>Checks if a CharSequence is NOT {@code null}, empty ("") or whitespace only.</p>
-     *
-     * @param <T>
-     * @param arg
-     * @param msg name of parameter or error message
-     * @return
-     * @throws IllegalArgumentException if the specified parameter is {@code null}, empty ("") or whitespace only.
-     * @see #isBlank(CharSequence)
-     * @see #notBlank(CharSequence)
-     */
-    // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
-    public static <T extends CharSequence> T checkArgNotBlank(final T arg, final String msg) {
-        if (isBlank(arg)) {
-            if (isArgNameOnly(msg)) {
-                throw new IllegalArgumentException("'" + msg + "' can not be null or empty or blank");
-            } else {
-                throw new IllegalArgumentException(msg);
-            }
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified {@code arg} is not negative, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is negative.
-     */
-    public static int checkArgNotNegative(final int arg, final String argNameOrErrorMsg) {
-        if (arg < 0) {
-            if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg); //NOSONAR
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified {@code arg} is not negative, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is negative.
-     */
-    public static long checkArgNotNegative(final long arg, final String argNameOrErrorMsg) {
-        if (arg < 0) {
-            if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg);
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified {@code arg} is not negative, and throws {@code IllegalArgumentException} if it is.
-     *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is negative.
-     */
-    public static double checkArgNotNegative(final double arg, final String argNameOrErrorMsg) {
-        if (arg < 0) {
-            if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be negative: " + arg);
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified {@code arg} is positive, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is negative.
-     */
-    public static int checkArgPositive(final int arg, final String argNameOrErrorMsg) {
-        if (arg <= 0) {
-            if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be zero or negative: " + arg);
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified {@code arg} is positive, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is negative.
-     */
-    public static long checkArgPositive(final long arg, final String argNameOrErrorMsg) {
-        if (arg <= 0) {
-            if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be zero or negative: " + arg);
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
-        }
-
-        return arg;
-    }
-
-    /**
-     * Checks if the specified {@code arg} is positive, and throws {@code IllegalArgumentException} if it is not.
-     *
-     * @param arg
-     * @param argNameOrErrorMsg
-     * @return
-     * @throws IllegalArgumentException if the specified {@code arg} is negative.
-     */
-    public static double checkArgPositive(final double arg, final String argNameOrErrorMsg) {
-        if (arg <= 0) {
-            if (isArgNameOnly(argNameOrErrorMsg)) {
-                throw new IllegalArgumentException("'" + argNameOrErrorMsg + "' can not be zero or negative: " + arg);
-            } else {
-                throw new IllegalArgumentException(argNameOrErrorMsg);
-            }
-        }
-
-        return arg;
-    }
-
-    /**
-     * Check if the specified {@code Collection} contains any {@code null} element.
-     *
-     * @param <T>
-     * @param c
-     * @return
-     * @throws IllegalArgumentException if {@code null} element found in {@code c}
-     */
-    public static void checkElementNotNull(final Collection<?> c) {
-        if (N.isNullOrEmpty(c)) {
-            return;
-        }
-
-        for (Object e : c) {
-            if (e == null) {
-                throw new IllegalArgumentException("null element is found in collection");
-            }
-        }
-    }
-
-    /**
-     * Check if the specified {@code Collection} contains any {@code null} element.
-     *
-     * @param <T>
-     * @param c
-     * @param errorMessage
-     * @return
-     * @throws IllegalArgumentException if {@code null} element found in {@code c}
-     */
-    public static void checkElementNotNull(final Collection<?> c, final String errorMessage) {
-        if (N.isNullOrEmpty(c)) {
-            return;
-        }
-
-        for (Object e : c) {
-            if (e == null) {
-                if (isArgNameOnly(errorMessage)) {
-                    throw new IllegalArgumentException("null element is found in " + errorMessage);
-                } else {
-                    throw new IllegalArgumentException(errorMessage);
-                }
-            }
-        }
-    }
-
-    /**
-     * Check if the specified {@code Map} contains any {@code null} key.
-     *
-     * @param <T>
-     * @param m
-     * @return
-     * @throws IllegalArgumentException if {@code null} key found in {@code m}
-     */
-    public static void checkKeyNotNull(final Map<?, ?> m) {
-        if (N.isNullOrEmpty(m)) {
-            return;
-        }
-
-        for (Object e : m.keySet()) {
-            if (e == null) {
-                throw new IllegalArgumentException("null key is found in Map");
-            }
-        }
-    }
-
-    /**
-     * Check if the specified {@code Map} contains any {@code null} key.
-     *
-     * @param <T>
-     * @param m
-     * @param errorMessage
-     * @return
-     * @throws IllegalArgumentException if {@code null} key found in {@code m}
-     */
-    public static void checkKeyNotNull(final Map<?, ?> m, final String errorMessage) {
-        if (N.isNullOrEmpty(m)) {
-            return;
-        }
-
-        for (Object e : m.keySet()) {
-            if (e == null) {
-                if (isArgNameOnly(errorMessage)) {
-                    throw new IllegalArgumentException("null key is found in " + errorMessage);
-                } else {
-                    throw new IllegalArgumentException(errorMessage);
-                }
-            }
-        }
-    }
-
-    /**
-     * Check if the specified {@code Map} contains any {@code null} value.
-     *
-     * @param <T>
-     * @param m
-     * @return
-     * @throws IllegalArgumentException if {@code null} value found in {@code m}
-     */
-    public static void checkValueNotNull(final Map<?, ?> m) {
-        if (N.isNullOrEmpty(m)) {
-            return;
-        }
-
-        for (Object e : m.values()) {
-            if (e == null) {
-                throw new IllegalArgumentException("null value is found in Map");
-            }
-        }
-    }
-
-    /**
-     * Check if the specified {@code Map} contains any {@code null} value.
-     *
-     * @param <T>
-     * @param m
-     * @param errorMessage
-     * @return
-     * @throws IllegalArgumentException if {@code null} value found in {@code m}
-     */
-    public static void checkValueNotNull(final Map<?, ?> m, final String errorMessage) {
-        if (N.isNullOrEmpty(m)) {
-            return;
-        }
-
-        for (Object e : m.values()) {
-            if (e == null) {
-                if (isArgNameOnly(errorMessage)) {
-                    throw new IllegalArgumentException("null value is found in " + errorMessage);
-                } else {
-                    throw new IllegalArgumentException(errorMessage);
-                }
-            }
         }
     }
 
@@ -11127,10 +11453,10 @@ class CommonUtil {
     }
 
     /**
+     * 
      *
-     * @param <E>
-     * @param b
-     * @param errorMessageSupplier
+     * @param b 
+     * @param errorMessageSupplier 
      */
     public static void checkState(boolean b, Supplier<String> errorMessageSupplier) {
         if (!b) {
@@ -11530,21 +11856,21 @@ class CommonUtil {
      * Continue to compare the pairs of values <code>(a1, b1), (a2, b2), (a3, b3), (a4, b4)</code> until they're not equal.
      * <code>0</code> is returned if all of the pairs of values are equal.
      *
-     * @param <T1>
-     * @param <T2>
-     * @param <T3>
-     * @param <T4>
-     * @param a1
-     * @param b1
-     * @param a2
-     * @param b2
-     * @param a3
-     * @param b3
-     * @param a4
-     * @param b4
-     * @return
-     * @deprecated please use {@code Builder.ComparisonBuilder}
+     * @param <T1> 
+     * @param <T2> 
+     * @param <T3> 
+     * @param <T4> 
+     * @param a1 
+     * @param b1 
+     * @param a2 
+     * @param b2 
+     * @param a3 
+     * @param b3 
+     * @param a4 
+     * @param b4 
+     * @return 
      * @see Builder#compare(Comparable, Comparable)
+     * @deprecated please use {@code Builder.ComparisonBuilder}
      */
     @Deprecated
     @SuppressWarnings("java:S1871")
@@ -11567,24 +11893,24 @@ class CommonUtil {
      * Continue to compare the pairs of values <code>(a1, b1), (a2, b2), (a3, b3), (a4, b4), (a5, b5)</code> until they're not equal.
      * <code>0</code> is returned if all of the pairs of values are equal.
      *
-     * @param <T1>
-     * @param <T2>
-     * @param <T3>
-     * @param <T4>
-     * @param <T5>
-     * @param a1
-     * @param b1
-     * @param a2
-     * @param b2
-     * @param a3
-     * @param b3
-     * @param a4
-     * @param b4
-     * @param a5
-     * @param b5
-     * @return
-     * @deprecated please use {@code Builder.ComparisonBuilder}
+     * @param <T1> 
+     * @param <T2> 
+     * @param <T3> 
+     * @param <T4> 
+     * @param <T5> 
+     * @param a1 
+     * @param b1 
+     * @param a2 
+     * @param b2 
+     * @param a3 
+     * @param b3 
+     * @param a4 
+     * @param b4 
+     * @param a5 
+     * @param b5 
+     * @return 
      * @see Builder#compare(Comparable, Comparable)
+     * @deprecated please use {@code Builder.ComparisonBuilder}
      */
     @Deprecated
     @SuppressWarnings("java:S1871")
@@ -11609,27 +11935,27 @@ class CommonUtil {
      * Continue to compare the pairs of values <code>(a1, b1), (a2, b2), (a3, b3), (a4, b4), (a5, b5), (a6, b6)</code> until they're not equal.
      * <code>0</code> is returned if all of the pairs of values are equal.
      *
-     * @param <T1>
-     * @param <T2>
-     * @param <T3>
-     * @param <T4>
-     * @param <T5>
-     * @param <T6>
-     * @param a1
-     * @param b1
-     * @param a2
-     * @param b2
-     * @param a3
-     * @param b3
-     * @param a4
-     * @param b4
-     * @param a5
-     * @param b5
-     * @param a6
-     * @param b6
-     * @return
-     * @deprecated please use {@code Builder.ComparisonBuilder}
+     * @param <T1> 
+     * @param <T2> 
+     * @param <T3> 
+     * @param <T4> 
+     * @param <T5> 
+     * @param <T6> 
+     * @param a1 
+     * @param b1 
+     * @param a2 
+     * @param b2 
+     * @param a3 
+     * @param b3 
+     * @param a4 
+     * @param b4 
+     * @param a5 
+     * @param b5 
+     * @param a6 
+     * @param b6 
+     * @return 
      * @see Builder#compare(Comparable, Comparable)
+     * @deprecated please use {@code Builder.ComparisonBuilder}
      */
     @Deprecated
     @SuppressWarnings("java:S1871")
@@ -11656,30 +11982,30 @@ class CommonUtil {
      * Continue to compare the pairs of values <code>(a1, b1), (a2, b2), (a3, b3), (a4, b4), (a5, b5), (a6, b6), (a7, b7)</code> until they're not equal.
      * <code>0</code> is returned if all of the pairs of values are equal.
      *
-     * @param <T1>
-     * @param <T2>
-     * @param <T3>
-     * @param <T4>
-     * @param <T5>
-     * @param <T6>
-     * @param <T7>
-     * @param a1
-     * @param b1
-     * @param a2
-     * @param b2
-     * @param a3
-     * @param b3
-     * @param a4
-     * @param b4
-     * @param a5
-     * @param b5
-     * @param a6
-     * @param b6
-     * @param a7
-     * @param b7
-     * @return
-     * @deprecated please use {@code Builder.ComparisonBuilder}
+     * @param <T1> 
+     * @param <T2> 
+     * @param <T3> 
+     * @param <T4> 
+     * @param <T5> 
+     * @param <T6> 
+     * @param <T7> 
+     * @param a1 
+     * @param b1 
+     * @param a2 
+     * @param b2 
+     * @param a3 
+     * @param b3 
+     * @param a4 
+     * @param b4 
+     * @param a5 
+     * @param b5 
+     * @param a6 
+     * @param b6 
+     * @param a7 
+     * @param b7 
+     * @return 
      * @see Builder#compare(Comparable, Comparable)
+     * @deprecated please use {@code Builder.ComparisonBuilder}
      */
     @Deprecated
     @SuppressWarnings("java:S1871")
@@ -17949,6 +18275,12 @@ class CommonUtil {
         return result;
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @return 
+     */
     public static boolean isSorted(final boolean[] a) {
         final int len = N.len(a);
 
@@ -17967,6 +18299,14 @@ class CommonUtil {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     */
     public static boolean isSorted(final boolean[] a, final int fromIndex, final int toIndex) {
         final int len = N.len(a);
 
@@ -17987,6 +18327,12 @@ class CommonUtil {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @return 
+     */
     public static boolean isSorted(final char[] a) {
         final int len = N.len(a);
 
@@ -18005,6 +18351,14 @@ class CommonUtil {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     */
     public static boolean isSorted(final char[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
@@ -18023,6 +18377,12 @@ class CommonUtil {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @return 
+     */
     public static boolean isSorted(final byte[] a) {
         final int len = N.len(a);
 
@@ -18041,6 +18401,14 @@ class CommonUtil {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     */
     public static boolean isSorted(final byte[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
@@ -18059,6 +18427,12 @@ class CommonUtil {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @return 
+     */
     public static boolean isSorted(final short[] a) {
         final int len = N.len(a);
 
@@ -18077,6 +18451,14 @@ class CommonUtil {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     */
     public static boolean isSorted(final short[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
@@ -18095,6 +18477,12 @@ class CommonUtil {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @return 
+     */
     public static boolean isSorted(final int[] a) {
         final int len = N.len(a);
 
@@ -18113,6 +18501,14 @@ class CommonUtil {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     */
     public static boolean isSorted(final int[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
@@ -18131,6 +18527,12 @@ class CommonUtil {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @return 
+     */
     public static boolean isSorted(final long[] a) {
         final int len = N.len(a);
 
@@ -18149,6 +18551,14 @@ class CommonUtil {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     */
     public static boolean isSorted(final long[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
@@ -18167,6 +18577,12 @@ class CommonUtil {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @return 
+     */
     public static boolean isSorted(final float[] a) {
         final int len = N.len(a);
 
@@ -18185,6 +18601,14 @@ class CommonUtil {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     */
     public static boolean isSorted(final float[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
@@ -18203,6 +18627,12 @@ class CommonUtil {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @return 
+     */
     public static boolean isSorted(final double[] a) {
         final int len = N.len(a);
 
@@ -18221,6 +18651,14 @@ class CommonUtil {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     */
     public static boolean isSorted(final double[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
@@ -18239,6 +18677,13 @@ class CommonUtil {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param a 
+     * @return 
+     */
     public static <T extends Comparable<? super T>> boolean isSorted(final T[] a) {
         final int len = N.len(a);
 
@@ -18257,6 +18702,15 @@ class CommonUtil {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     */
     public static <T extends Comparable<? super T>> boolean isSorted(final T[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
@@ -18275,6 +18729,14 @@ class CommonUtil {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param a 
+     * @param cmp 
+     * @return 
+     */
     public static <T> boolean isSorted(final T[] a, Comparator<? super T> cmp) {
         cmp = cmp == null ? NATURAL_ORDER : cmp;
 
@@ -18295,6 +18757,16 @@ class CommonUtil {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
+     * @param cmp 
+     * @return 
+     */
     public static <T> boolean isSorted(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
@@ -18315,6 +18787,13 @@ class CommonUtil {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param c 
+     * @return 
+     */
     public static <T extends Comparable<? super T>> boolean isSorted(final Collection<T> c) {
         if (N.size(c) < 2) {
             return true;
@@ -18337,6 +18816,15 @@ class CommonUtil {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param c 
+     * @param fromIndex 
+     * @param toIndex 
+     * @return 
+     */
     public static <T extends Comparable<? super T>> boolean isSorted(final Collection<T> c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
@@ -18370,6 +18858,14 @@ class CommonUtil {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param c 
+     * @param cmp 
+     * @return 
+     */
     public static <T> boolean isSorted(final Collection<T> c, Comparator<? super T> cmp) {
         if (N.size(c) < 2) {
             return true;
@@ -18394,6 +18890,16 @@ class CommonUtil {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param c 
+     * @param fromIndex 
+     * @param toIndex 
+     * @param cmp 
+     * @return 
+     */
     public static <T> boolean isSorted(final Collection<T> c, final int fromIndex, final int toIndex, Comparator<? super T> cmp) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
@@ -19080,8 +19586,10 @@ class CommonUtil {
     }
 
     /**
+     * 
      *
-     * @param a
+     * @param <T> 
+     * @param a 
      */
     public static <T extends Comparable<? super T>> void parallelSort(T[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -19092,10 +19600,12 @@ class CommonUtil {
     }
 
     /**
+     * 
      *
-     * @param a
-     * @param fromIndex
-     * @param toIndex
+     * @param <T> 
+     * @param a 
+     * @param fromIndex 
+     * @param toIndex 
      */
     public static <T extends Comparable<? super T>> void parallelSort(T[] a, int fromIndex, int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -20717,15 +21227,15 @@ class CommonUtil {
      * <p>Finds the index of the given value in the array starting at the given index.
      * This method will return the index of the first value which falls between the region
      * defined by valueToFind - tolerance and valueToFind + tolerance.
-     *
+     * 
      * <p>This method returns {@link #INDEX_NOT_FOUND} ({@code -1}) for a {@code null} input array.
-     *
+     * 
      * <p>A negative startIndex is treated as zero. A startIndex larger than the array
      * length will return {@link #INDEX_NOT_FOUND} ({@code -1}).
      *
      * @param a the array to search through for the object, may be {@code null}
-     * @param valueToFind
      * @param startIndex the index to start searching at
+     * @param valueToFind 
      * @param tolerance tolerance of the search
      * @return the index of the value within the array,
      *  {@link #INDEX_NOT_FOUND} ({@code -1}) if not found or {@code null} array input
@@ -20793,11 +21303,12 @@ class CommonUtil {
     }
 
     /**
+     * 
      *
-     * @param list
+     * @param c 
      * @param startIndex the index from which to start the search.
-     * @param valueToFind
-     * @return
+     * @param valueToFind 
+     * @return 
      */
     public static int indexOf(final Collection<?> c, final int startIndex, final Object valueToFind) {
         final int len = size(c);
@@ -20845,10 +21356,24 @@ class CommonUtil {
         return INDEX_NOT_FOUND;
     }
 
+    /**
+     * 
+     *
+     * @param iter 
+     * @param valueToFind 
+     * @return 
+     */
     public static int indexOf(final Iterator<?> iter, final Object valueToFind) {
         return indexOf(iter, 0, valueToFind);
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param valueToFind 
+     * @return 
+     */
     public static int indexOfIgnoreCase(final String[] a, final String valueToFind) {
         if (N.isNullOrEmpty(a)) {
             return N.INDEX_NOT_FOUND;
@@ -20863,6 +21388,14 @@ class CommonUtil {
         return N.INDEX_NOT_FOUND;
     }
 
+    /**
+     * 
+     *
+     * @param iter 
+     * @param startIndex 
+     * @param valueToFind 
+     * @return 
+     */
     public static int indexOf(final Iterator<?> iter, final int startIndex, final Object valueToFind) {
         if (iter == null) {
             return INDEX_NOT_FOUND;
@@ -21242,15 +21775,15 @@ class CommonUtil {
      * <p>Finds the last index of the given value in the array starting at the given index.
      * This method will return the index of the last value which falls between the region
      * defined by valueToFind - tolerance and valueToFind + tolerance.
-     *
+     * 
      * <p>This method returns {@link #INDEX_NOT_FOUND} ({@code -1}) for a {@code null} input array.
-     *
+     * 
      * <p>A negative startIndex will return {@link #INDEX_NOT_FOUND} ({@code -1}). A startIndex larger than the
      * array length will search from the end of the array.
      *
      * @param a the array to traverse for looking for the object, may be {@code null}
-     * @param valueToFind
      * @param startIndexFromBack the start index to traverse backwards from
+     * @param valueToFind 
      * @param tolerance search for value within plus/minus this amount
      * @return the last index of the value within the array,
      *  {@link #INDEX_NOT_FOUND} ({@code -1}) if not found or {@code null} array input
@@ -21406,6 +21939,13 @@ class CommonUtil {
         }
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param valueToFind 
+     * @return 
+     */
     public static int lastIndexOfIgnoreCase(final String[] a, final String valueToFind) {
         if (N.isNullOrEmpty(a)) {
             return N.INDEX_NOT_FOUND;
@@ -21463,12 +22003,12 @@ class CommonUtil {
     /**
      * Find first index.
      *
-     * @param <T>
-     * @param <U>
-     * @param <E>
-     * @param a
-     * @param predicate
-     * @param valueToFind
+     * @param <T> 
+     * @param <U> 
+     * @param <E> 
+     * @param a 
+     * @param valueToFind 
+     * @param predicate 
      * @return the optional int
      * @throws E the e
      */

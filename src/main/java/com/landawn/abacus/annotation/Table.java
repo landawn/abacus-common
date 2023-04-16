@@ -33,7 +33,17 @@ public @interface Table {
     @Deprecated
     String value() default "";
 
+    /**
+     * 
+     *
+     * @return 
+     */
     String name() default "";
 
+    /**
+     * 
+     *
+     * @return 
+     */
     String alias() default "";
 }

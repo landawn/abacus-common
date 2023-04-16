@@ -43,6 +43,11 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
         }
     };
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public static ShortIterator empty() {//NOSONAR
         return EMPTY;
     }
@@ -247,8 +252,19 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
         return nextShort();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public abstract short nextShort();
 
+    /**
+     * 
+     *
+     * @param n 
+     * @return 
+     */
     public ShortIterator skip(final long n) {
         N.checkArgNotNegative(n, "n");
 
@@ -291,6 +307,12 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
         };
     }
 
+    /**
+     * 
+     *
+     * @param count 
+     * @return 
+     */
     public ShortIterator limit(final long count) {
         N.checkArgNotNegative(count, "count");
 
@@ -320,6 +342,12 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
         };
     }
 
+    /**
+     * 
+     *
+     * @param predicate 
+     * @return 
+     */
     public ShortIterator filter(final ShortPredicate predicate) {
         N.checkArgNotNull(predicate, "predicate");
 
@@ -358,6 +386,11 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
         };
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public OptionalShort first() {
         if (hasNext()) {
             return OptionalShort.of(nextShort());
@@ -366,6 +399,11 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public OptionalShort last() {
         if (hasNext()) {
             short next = nextShort();
@@ -380,10 +418,20 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public short[] toArray() {
         return toList().trimToSize().array();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public ShortList toList() {
         final ShortList list = new ShortList();
 
@@ -394,15 +442,31 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
         return list;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public ShortStream stream() {
         return ShortStream.of(this);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Beta
     public ObjIterator<IndexedShort> indexed() {
         return indexed(0);
     }
 
+    /**
+     * 
+     *
+     * @param startIndex 
+     * @return 
+     */
     @Beta
     public ObjIterator<IndexedShort> indexed(final long startIndex) {
         if (startIndex < 0) {

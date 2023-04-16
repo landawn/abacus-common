@@ -52,10 +52,20 @@ public final class IndexedLong extends AbstractIndexed {
         return new IndexedLong(index, value);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public long value() {
         return value;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         return (int) index + (int) (value * 31);
@@ -71,6 +81,11 @@ public final class IndexedLong extends AbstractIndexed {
         return obj instanceof IndexedLong && ((IndexedLong) obj).index == index && N.equals(((IndexedLong) obj).value, value);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return "[" + index + "]=" + value;

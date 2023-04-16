@@ -55,30 +55,100 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
         return new ImmutableNavigableSet<>(new TreeSet<>(N.asList(e)));
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param e1 
+     * @return 
+     */
     public static <T extends Comparable<? super T>> ImmutableNavigableSet<T> of(final T e1) {
         return new ImmutableNavigableSet<>(new TreeSet<>(N.asList(e1)));
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param e1 
+     * @param e2 
+     * @return 
+     */
     public static <T extends Comparable<? super T>> ImmutableNavigableSet<T> of(final T e1, final T e2) {
         return new ImmutableNavigableSet<>(new TreeSet<>(N.asList(e1, e2)));
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param e1 
+     * @param e2 
+     * @param e3 
+     * @return 
+     */
     public static <T extends Comparable<? super T>> ImmutableNavigableSet<T> of(final T e1, final T e2, final T e3) {
         return new ImmutableNavigableSet<>(new TreeSet<>(N.asList(e1, e2, e3)));
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param e1 
+     * @param e2 
+     * @param e3 
+     * @param e4 
+     * @return 
+     */
     public static <T extends Comparable<? super T>> ImmutableNavigableSet<T> of(final T e1, final T e2, final T e3, final T e4) {
         return new ImmutableNavigableSet<>(new TreeSet<>(N.asList(e1, e2, e3, e4)));
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param e1 
+     * @param e2 
+     * @param e3 
+     * @param e4 
+     * @param e5 
+     * @return 
+     */
     public static <T extends Comparable<? super T>> ImmutableNavigableSet<T> of(final T e1, final T e2, final T e3, final T e4, final T e5) {
         return new ImmutableNavigableSet<>(new TreeSet<>(N.asList(e1, e2, e3, e4, e5)));
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param e1 
+     * @param e2 
+     * @param e3 
+     * @param e4 
+     * @param e5 
+     * @param e6 
+     * @return 
+     */
     public static <T extends Comparable<? super T>> ImmutableNavigableSet<T> of(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6) {
         return new ImmutableNavigableSet<>(new TreeSet<>(N.asList(e1, e2, e3, e4, e5, e6)));
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param e1 
+     * @param e2 
+     * @param e3 
+     * @param e4 
+     * @param e5 
+     * @param e6 
+     * @param e7 
+     * @return 
+     */
     public static <T extends Comparable<? super T>> ImmutableNavigableSet<T> of(final T e1, final T e2, final T e3, final T e4, final T e5, final T e6,
             final T e7) {
         return new ImmutableNavigableSet<>(new TreeSet<>(N.asList(e1, e2, e3, e4, e5, e6, e7)));
@@ -117,12 +187,13 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
+     * 
      *
-     * @param <E>
-     * @param sortedSet
-     * @return
+     * @param <E> 
+     * @param sortedSet 
+     * @return 
+     * @throws UnsupportedOperationException 
      * @deprecated throws {@code UnsupportedOperationException}
-     * @throws UnsupportedOperationException
      */
     @Deprecated
     public static <E> ImmutableSortedSet<E> wrap(final SortedSet<? extends E> sortedSet) throws UnsupportedOperationException {
@@ -170,7 +241,10 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
+     * 
      *
+     * @return 
+     * @throws UnsupportedOperationException 
      * @deprecated - UnsupportedOperationException
      */
     @Deprecated
@@ -180,7 +254,10 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
     }
 
     /**
+     * 
      *
+     * @return 
+     * @throws UnsupportedOperationException 
      * @deprecated - UnsupportedOperationException
      */
     @Deprecated
@@ -189,11 +266,21 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public ImmutableNavigableSet<E> descendingSet() {
         return wrap(navigableSet.descendingSet());
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public ObjIterator<E> descendingIterator() {
         return ObjIterator.of(navigableSet.descendingIterator());

@@ -53,11 +53,21 @@ public class LongMultisetType<E> extends AbstractType<LongMultiset<E>> {
         jdc = JDC.create().setMapKeyType(elementType).setMapValueType(Long.class);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<LongMultiset<E>> clazz() {
         return (Class<LongMultiset<E>>) typeClass;

@@ -85,11 +85,11 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param <E>
-     * @param action
-     * @return
+     * @param <T> 
+     * @param action 
+     * @return 
      * @see N#asyncExecute(Callable)
      */
     public static <T> ContinuableFuture<T> call(final Callable<T> action) {
@@ -97,12 +97,12 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param <E>
-     * @param action
-     * @param executor
-     * @return
+     * @param <T> 
+     * @param action 
+     * @param executor 
+     * @return 
      */
     public static <T> ContinuableFuture<T> call(final Callable<T> action, final Executor executor) {
         final FutureTask<T> futureTask = new FutureTask<>(action::call);
@@ -278,9 +278,8 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Gets the now.
      *
-     * @param defaultValue
-     * @return
-     * @return
+     * @param defaultValue 
+     * @return 
      * @throws InterruptedException the interrupted exception
      * @throws ExecutionException the execution exception
      */
@@ -360,9 +359,8 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Gets the then accept.
      *
-     * @param <E>
-     * @param action
-     * @return
+     * @param <E> 
+     * @param action 
      * @throws InterruptedException the interrupted exception
      * @throws ExecutionException the execution exception
      * @throws E the e
@@ -374,11 +372,10 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Gets the then accept.
      *
-     * @param <E>
-     * @param timeout
-     * @param unit
-     * @param action
-     * @return
+     * @param <E> 
+     * @param timeout 
+     * @param unit 
+     * @param action 
      * @throws InterruptedException the interrupted exception
      * @throws ExecutionException the execution exception
      * @throws TimeoutException the timeout exception
@@ -392,9 +389,8 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Gets the then accept.
      *
-     * @param <E>
-     * @param action
-     * @return
+     * @param <E> 
+     * @param action 
      * @throws E the e
      */
     public <E extends Exception> void getThenAccept(final Throwables.BiConsumer<? super T, ? super Exception, E> action) throws E {
@@ -405,11 +401,10 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Gets the then accept.
      *
-     * @param <E>
-     * @param timeout
-     * @param unit
-     * @param action
-     * @return
+     * @param <E> 
+     * @param timeout 
+     * @param unit 
+     * @param action 
      * @throws E the e
      */
     public <E extends Exception> void getThenAccept(final long timeout, final TimeUnit unit,
@@ -711,11 +706,11 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
+     * 
      *
-     * @param <R>
-     * @param <E>
-     * @param action
-     * @return
+     * @param <R> 
+     * @param action 
+     * @return 
      */
     public <R> ContinuableFuture<R> thenCall(final Callable<R> action) {
         return execute(() -> {
@@ -826,11 +821,10 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Call after both.
      *
-     * @param <R>
-     * @param <E>
-     * @param other
-     * @param action
-     * @return
+     * @param <R> 
+     * @param other 
+     * @param action 
+     * @return 
      */
     public <R> ContinuableFuture<R> callAfterBoth(final ContinuableFuture<?> other, final Callable<R> action) {
         return execute(() -> {
@@ -951,11 +945,10 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Call after either.
      *
-     * @param <R>
-     * @param <E>
-     * @param other
-     * @param action
-     * @return
+     * @param <R> 
+     * @param other 
+     * @param action 
+     * @return 
      */
     public <R> ContinuableFuture<R> callAfterEither(final ContinuableFuture<?> other, final Callable<R> action) {
         return execute(() -> {
@@ -1095,11 +1088,10 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Call after either.
      *
-     * @param <R>
-     * @param <E>
-     * @param other
-     * @param action
-     * @return
+     * @param <R> 
+     * @param other 
+     * @param action 
+     * @return 
      */
     public <R> ContinuableFuture<R> callAfterFirstSucceed(final ContinuableFuture<?> other, final Callable<R> action) {
         return execute(() -> {

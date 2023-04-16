@@ -600,6 +600,12 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
         // do nothing;
     };
 
+    /**
+     * 
+     *
+     * @param n 
+     * @return 
+     */
     public BiIterator<A, B> skip(final long n) {
         N.checkArgNotNegative(n, "n");
 
@@ -671,6 +677,12 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
         };
     }
 
+    /**
+     * 
+     *
+     * @param count 
+     * @return 
+     */
     public BiIterator<A, B> limit(final long count) {
         N.checkArgNotNegative(count, "count");
 
@@ -727,6 +739,12 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
         };
     }
 
+    /**
+     * 
+     *
+     * @param predicate 
+     * @return 
+     */
     public BiIterator<A, B> filter(final BiPredicate<? super A, ? super B> predicate) {
         N.checkArgNotNull(predicate, "predicate");
 
@@ -827,6 +845,11 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      */
     public abstract <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper);
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Optional<Pair<A, B>> first() {
         if (hasNext()) {
             return Optional.of(next());
@@ -835,6 +858,11 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Optional<Pair<A, B>> last() {
         if (hasNext()) {
             final Pair<A, B> next = new Pair<>();
@@ -860,6 +888,11 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
         return Stream.of(map(mapper));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Pair<A, B>[] toArray() {
         return toArray(new Pair[0]);
     }
@@ -876,6 +909,11 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
         return toList().toArray(a);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public List<Pair<A, B>> toList() {
         return toCollection(Suppliers.<Pair<A, B>> ofList());
     }

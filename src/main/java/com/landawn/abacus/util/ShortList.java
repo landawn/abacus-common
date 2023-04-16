@@ -56,9 +56,17 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     private int size = 0;
 
+    /**
+     * 
+     */
     public ShortList() {
     }
 
+    /**
+     * 
+     *
+     * @param initialCapacity 
+     */
     public ShortList(int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_SHORT_ARRAY : new short[initialCapacity];
     }
@@ -72,6 +80,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         this(a, a.length);
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param size 
+     */
     public ShortList(short[] a, int size) {
         N.checkFromIndexSize(0, size, a.length);
 
@@ -556,6 +570,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         return true;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public boolean removeDuplicates() {
         if (size < 2) {
@@ -720,11 +739,25 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         this.size = newSize;
     }
 
+    /**
+     * 
+     *
+     * @param fromIndex 
+     * @param toIndex 
+     * @param newPositionStartIndex 
+     */
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionStartIndex) {
         N.moveRange(elementData, fromIndex, toIndex, newPositionStartIndex);
     }
 
+    /**
+     * 
+     *
+     * @param fromIndex 
+     * @param toIndex 
+     * @param replacement 
+     */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final short[] replacement) {
         N.checkFromToIndex(fromIndex, toIndex, size());
@@ -1168,6 +1201,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         return N.INDEX_NOT_FOUND;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public OptionalShort min() {
         return size() == 0 ? OptionalShort.empty() : OptionalShort.of(N.min(elementData, 0, size));
     }
@@ -1184,6 +1222,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         return fromIndex == toIndex ? OptionalShort.empty() : OptionalShort.of(N.min(elementData, fromIndex, toIndex));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public OptionalShort median() {
         return size() == 0 ? OptionalShort.empty() : OptionalShort.of(N.median(elementData, 0, size));
     }
@@ -1200,6 +1243,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         return fromIndex == toIndex ? OptionalShort.empty() : OptionalShort.of(N.median(elementData, fromIndex, toIndex));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public OptionalShort max() {
         return size() == 0 ? OptionalShort.empty() : OptionalShort.of(N.max(elementData, 0, size));
     }
@@ -1239,6 +1287,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         return toIndex - fromIndex < k ? OptionalShort.empty() : OptionalShort.of(N.kthLargest(elementData, fromIndex, toIndex, k));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public int sum() {
         return sum(0, size());
     }
@@ -1255,6 +1308,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         return N.sum(elementData, fromIndex, toIndex);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public OptionalDouble average() {
         return average(0, size());
     }
@@ -1339,10 +1397,20 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public OptionalShort first() {
         return size() == 0 ? OptionalShort.empty() : OptionalShort.of(elementData[0]);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public OptionalShort last() {
         return size() == 0 ? OptionalShort.empty() : OptionalShort.of(elementData[size() - 1]);
     }
@@ -1818,6 +1886,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         return of(N.top(elementData, fromIndex, toIndex, n, cmp));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public boolean isSorted() {
         return N.isSorted(elementData, 0, size);
@@ -1856,11 +1929,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * This List should be sorted first.
      *
-     * @param key
+     * @param valueToFind
      * @return
      */
-    public int binarySearch(final short key) {
-        return N.binarySearch(elementData, key);
+    public int binarySearch(final short valueToFind) {
+        return N.binarySearch(elementData, valueToFind);
     }
 
     /**
@@ -1868,13 +1941,13 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param fromIndex
      * @param toIndex
-     * @param key
+     * @param valueToFind
      * @return
      */
-    public int binarySearch(final int fromIndex, final int toIndex, final short key) {
+    public int binarySearch(final int fromIndex, final int toIndex, final short valueToFind) {
         checkFromToIndex(fromIndex, toIndex);
 
-        return N.binarySearch(elementData, fromIndex, toIndex, key);
+        return N.binarySearch(elementData, fromIndex, toIndex, valueToFind);
     }
 
     /**
@@ -1946,6 +2019,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         set(i, set(j, elementData[i]));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public ShortList copy() {
         return new ShortList(N.copyOfRange(elementData, 0, size));
@@ -2095,11 +2173,21 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         return size == 0;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int size() {
         return size;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public List<Short> boxed() {
         return boxed(0, size);
     }
@@ -2122,6 +2210,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         return res;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public short[] toArray() {
         return N.copyOfRange(elementData, 0, size);
@@ -2183,6 +2276,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         return multiset;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public ShortIterator iterator() {
         if (isEmpty()) {
             return ShortIterator.EMPTY;
@@ -2191,6 +2289,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         return ShortIterator.of(elementData, 0, size);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public ShortStream stream() {
         return ShortStream.of(elementData, 0, size());
     }
@@ -2248,8 +2351,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Accept if not empty.
      *
-     * @param <E>
-     * @param action
+     * @param <E> 
+     * @param action 
+     * @return 
      * @throws E the e
      */
     @Override
@@ -2257,6 +2361,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         return If.is(size > 0).then(this, action);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         return N.hashCode(elementData, 0, size);
@@ -2281,6 +2390,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         return false;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return size == 0 ? "[]" : N.toString(elementData, 0, size);

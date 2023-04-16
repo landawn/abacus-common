@@ -33,15 +33,22 @@ public class NClobType extends AbstractType<NClob> {
         super(NCLOB);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<NClob> clazz() {
         return NClob.class;
     }
 
     /**
+     * 
      *
-     * @param x
-     * @return
+     * @param x 
+     * @return 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public String stringOf(NClob x) throws UnsupportedOperationException {
@@ -49,9 +56,11 @@ public class NClobType extends AbstractType<NClob> {
     }
 
     /**
+     * 
      *
-     * @param str
-     * @return
+     * @param str 
+     * @return 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public NClob valueOf(String str) throws UnsupportedOperationException {

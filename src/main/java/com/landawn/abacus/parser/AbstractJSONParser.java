@@ -101,12 +101,14 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param targetClass
-     * @param str
-     * @param config
-     * @return
+     * @param <T> 
+     * @param targetClass 
+     * @param str 
+     * @param config 
+     * @return 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public <T> T readString(Class<? extends T> targetClass, String str, JSONDeserializationConfig config) throws UnsupportedOperationException {
@@ -124,10 +126,12 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
+     * 
      *
-     * @param outResult
-     * @param str
-     * @param config
+     * @param outResult 
+     * @param str 
+     * @param config 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public void readString(Object[] outResult, String str, JSONDeserializationConfig config) throws UnsupportedOperationException {
@@ -145,10 +149,12 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
+     * 
      *
-     * @param outResult
-     * @param str
-     * @param config
+     * @param outResult 
+     * @param str 
+     * @param config 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public void readString(Collection<?> outResult, String str, JSONDeserializationConfig config) throws UnsupportedOperationException {
@@ -166,10 +172,12 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
     }
 
     /**
+     * 
      *
-     * @param outResult
-     * @param str
-     * @param config
+     * @param outResult 
+     * @param str 
+     * @param config 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public void readString(Map<?, ?> outResult, String str, JSONDeserializationConfig config) throws UnsupportedOperationException {
@@ -205,21 +213,55 @@ abstract class AbstractJSONParser extends AbstractParser<JSONSerializationConfig
         return deserialize(targetClass, str.substring(fromIndex, toIndex), config);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param elementClass 
+     * @param json 
+     * @return 
+     */
     @Override
     public <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, String json) {
         return stream(elementClass, json, null);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param elementClass 
+     * @param file 
+     * @return 
+     */
     @Override
     public <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, File file) {
         return stream(elementClass, file, null);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param elementClass 
+     * @param is 
+     * @param closeInputStreamWhenStreamIsClosed 
+     * @return 
+     */
     @Override
     public <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, InputStream is, boolean closeInputStreamWhenStreamIsClosed) {
         return stream(elementClass, is, closeInputStreamWhenStreamIsClosed, null);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param elementClass 
+     * @param reader 
+     * @param closeReaderWhenStreamIsClosed 
+     * @return 
+     */
     @Override
     public <T> ExceptionalStream<T, IOException> stream(Class<? extends T> elementClass, Reader reader, boolean closeReaderWhenStreamIsClosed) {
         return stream(elementClass, reader, closeReaderWhenStreamIsClosed, null);

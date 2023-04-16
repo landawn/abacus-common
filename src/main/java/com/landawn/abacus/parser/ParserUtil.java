@@ -991,6 +991,13 @@ public final class ParserUtil {
             }
         }
 
+        /**
+         *
+         *
+         * @param obj
+         * @param propName
+         * @param propValue
+         */
         public void setPropValue(final Object obj, final String propName, final Object propValue) {
             setPropValue(obj, propName, propValue, false);
         }
@@ -1002,6 +1009,7 @@ public final class ParserUtil {
          * @param propName
          * @param propValue
          * @param ignoreUnmatchedProperty
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public boolean setPropValue(final Object obj, final String propName, final Object propValue, final boolean ignoreUnmatchedProperty) {
@@ -1064,10 +1072,26 @@ public final class ParserUtil {
             return true;
         }
 
+        /**
+         *
+         *
+         * @param obj
+         * @param propInfoFromOtherBean
+         * @param propValue
+         */
         public void setPropValue(final Object obj, final PropInfo propInfoFromOtherBean, final Object propValue) {
             setPropValue(obj, propInfoFromOtherBean, propValue, false);
         }
 
+        /**
+         *
+         *
+         * @param obj
+         * @param propInfoFromOtherBean
+         * @param propValue
+         * @param ignoreUnmatchedProperty
+         * @return
+         */
         public boolean setPropValue(final Object obj, final PropInfo propInfoFromOtherBean, final Object propValue, final boolean ignoreUnmatchedProperty) {
             if (propInfoFromOtherBean.aliases.isEmpty()) {
                 return setPropValue(obj, propInfoFromOtherBean.name, propValue, ignoreUnmatchedProperty);
@@ -1268,10 +1292,23 @@ public final class ParserUtil {
         // return propInfo;
         // }
 
+        /**
+         *
+         *
+         * @param annotationClass
+         * @return
+         */
         public boolean isAnnotationPresent(final Class<? extends Annotation> annotationClass) {
             return annotations.containsKey(annotationClass);
         }
 
+        /**
+         *
+         *
+         * @param <T>
+         * @param annotationClass
+         * @return
+         */
         public <T extends Annotation> T getAnnotation(final Class<T> annotationClass) {
             return (T) annotations.get(annotationClass);
         }
@@ -1371,6 +1408,11 @@ public final class ParserUtil {
             return this == obj || (obj instanceof BeanInfo && N.equals(((BeanInfo) obj).clazz, clazz));
         }
 
+        /**
+         *
+         *
+         * @return
+         */
         @Override
         public String toString() {
             return ClassUtil.getCanonicalClassName(clazz);
@@ -2008,10 +2050,23 @@ public final class ParserUtil {
             }
         }
 
+        /**
+         *
+         *
+         * @param annotationClass
+         * @return
+         */
         public boolean isAnnotationPresent(final Class<? extends Annotation> annotationClass) {
             return annotations.containsKey(annotationClass);
         }
 
+        /**
+         *
+         *
+         * @param <T>
+         * @param annotationClass
+         * @return
+         */
         public <T extends Annotation> T getAnnotation(final Class<T> annotationClass) {
             return (T) annotations.get(annotationClass);
         }

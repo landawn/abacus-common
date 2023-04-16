@@ -32,6 +32,11 @@ public final class DoubleType extends AbstractDoubleType {
         super(DOUBLE);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {

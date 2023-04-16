@@ -39,6 +39,11 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
         super(ATOMIC_BOOLEAN);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<AtomicBoolean> clazz() {
         return AtomicBoolean.class;

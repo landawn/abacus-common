@@ -30,6 +30,11 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
         super(OPTIONAL_CHAR);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<OptionalChar> clazz() {
         return OptionalChar.class;

@@ -68,6 +68,11 @@ public final class MutableShort extends Number implements Comparable<MutableShor
         return new MutableShort(value);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public short value() {
         return value;
     }

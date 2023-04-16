@@ -52,6 +52,11 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
 
     private transient Set<java.util.Map.Entry<K, V>> _entrySet; //NOSONAR
 
+    /**
+     * 
+     *
+     * @param capacity 
+     */
     @SuppressWarnings("unchecked")
     public ObjectPool(int capacity) {
         this.capacity = capacity;
@@ -225,6 +230,11 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         return false;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Set<K> keySet() {
         Set<K> tmp = _keySet;
@@ -250,6 +260,11 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         return tmp;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Collection<V> values() {
         Collection<V> tmp = _values;
@@ -279,6 +294,11 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         return tmp;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Set<java.util.Map.Entry<K, V>> entrySet() {
         Set<java.util.Map.Entry<K, V>> tmp = _entrySet;
@@ -304,6 +324,11 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
         return tmp;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int size() {
         return _size;

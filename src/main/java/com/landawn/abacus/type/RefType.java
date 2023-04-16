@@ -33,6 +33,11 @@ public class RefType extends AbstractType<Ref> {
         super(REF);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<Ref> clazz() {
         return Ref.class;
@@ -49,9 +54,11 @@ public class RefType extends AbstractType<Ref> {
     }
 
     /**
+     * 
      *
-     * @param x
-     * @return
+     * @param x 
+     * @return 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public String stringOf(Ref x) throws UnsupportedOperationException {
@@ -59,9 +66,11 @@ public class RefType extends AbstractType<Ref> {
     }
 
     /**
+     * 
      *
-     * @param str
-     * @return
+     * @param str 
+     * @return 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public Ref valueOf(String str) throws UnsupportedOperationException {

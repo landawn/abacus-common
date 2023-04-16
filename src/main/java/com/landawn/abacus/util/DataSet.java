@@ -729,10 +729,9 @@ public interface DataSet {
     /**
      * Update the values of the specified column by the specified Try.Function.
      *
-     * @param <T>
-     * @param <E>
-     * @param columnName
-     * @param func
+     * @param <E> 
+     * @param columnName 
+     * @param func 
      * @throws E the e
      */
     <E extends Exception> void updateColumn(String columnName, Throwables.Function<?, ?, E> func) throws E;
@@ -740,10 +739,9 @@ public interface DataSet {
     /**
      * Update the values of the specified columns one by one with the specified Try.Function.
      *
-     * @param <T>
-     * @param <E>
-     * @param columnNames
-     * @param func
+     * @param <E> 
+     * @param columnNames 
+     * @param func 
      * @throws E the e
      */
     <E extends Exception> void updateColumns(Collection<String> columnNames, Throwables.Function<?, ?, E> func) throws E;
@@ -1003,22 +1001,22 @@ public interface DataSet {
 
     /**
      * Gets the row.
-     * @param rowIndex
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      *
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param rowIndex 
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
+     * @return 
      */
     <T> T getRow(int rowIndex, IntFunction<? extends T> rowSupplier);
 
     /**
      * Gets the row.
-     * @param columnNames
-     * @param rowIndex
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      *
-     * @param <T>
-     * @return
+     * @param <T> 
+     * @param columnNames 
+     * @param rowIndex 
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
+     * @return 
      */
     <T> T getRow(Collection<String> columnNames, int rowIndex, IntFunction<? extends T> rowSupplier);
 
@@ -1054,10 +1052,11 @@ public interface DataSet {
     <T> Optional<T> firstRow(IntFunction<? extends T> rowSupplier);
 
     /**
+     * 
      *
-     * @param columnNames
+     * @param <T> 
+     * @param columnNames 
      * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @param <T>
      * @return {@code Optional<T>}
      */
     <T> Optional<T> firstRow(Collection<String> columnNames, IntFunction<? extends T> rowSupplier);
@@ -1095,10 +1094,11 @@ public interface DataSet {
     <T> Optional<T> lastRow(IntFunction<? extends T> rowSupplier);
 
     /**
+     * 
      *
-     * @param columnNames
+     * @param <T> 
+     * @param columnNames 
      * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @param <T>
      * @return {@code Optional<T>}
      */
     <T> Optional<T> lastRow(Collection<String> columnNames, IntFunction<? extends T> rowSupplier);
@@ -1195,6 +1195,11 @@ public interface DataSet {
     <E extends Exception> void forEach(Tuple3<String, String, String> columnNames, int fromRowIndex, int toRowIndex, Throwables.TriConsumer<?, ?, ?, E> action)
             throws E;
 
+    /**
+     * 
+     *
+     * @return 
+     */
     List<Object[]> toList();
 
     /**
@@ -1252,81 +1257,102 @@ public interface DataSet {
     <T> List<T> toList(IntFunction<? extends T> rowSupplier);
 
     /**
+     * 
      *
-     * @param fromRowIndex
-     * @param toRowIndex
+     * @param <T> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
      * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @param <T>
-     * @return
+     * @return 
      */
     <T> List<T> toList(int fromRowIndex, int toRowIndex, IntFunction<? extends T> rowSupplier);
 
     /**
+     * 
      *
-     * @param columnNames
+     * @param <T> 
+     * @param columnNames 
      * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @param <T>
-     * @return
+     * @return 
      */
     <T> List<T> toList(Collection<String> columnNames, IntFunction<? extends T> rowSupplier);
 
     /**
+     * 
      *
-     * @param columnNames
-     * @param fromRowIndex
-     * @param toRowIndex
+     * @param <T> 
+     * @param columnNames 
+     * @param fromRowIndex 
+     * @param toRowIndex 
      * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @param <T>
-     * @return
+     * @return 
      */
     <T> List<T> toList(Collection<String> columnNames, int fromRowIndex, int toRowIndex, IntFunction<? extends T> rowSupplier);
 
     /**
+     * 
      *
-     * @param <T>
+     * @param <T> 
+     * @param <E> 
+     * @param <E2> 
      * @param rowClass it can be Object[]/List/Set/Map/Bean
-     * @param columnNameFilter
-     * @param columnNameConverter
-     * @return
+     * @param columnNameFilter 
+     * @param columnNameConverter 
+     * @return 
+     * @throws E 
+     * @throws E2 
      */
     <T, E extends Exception, E2 extends Exception> List<T> toList(Class<? extends T> rowClass, Throwables.Predicate<? super String, E> columnNameFilter,
             Throwables.Function<? super String, String, E2> columnNameConverter) throws E, E2;
 
     /**
+     * 
      *
-     * @param <T>
+     * @param <T> 
+     * @param <E> 
+     * @param <E2> 
      * @param rowClass it can be Object[]/List/Set/Map/Bean
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNameFilter
-     * @param columnNameConverter
-     * @return
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param columnNameFilter 
+     * @param columnNameConverter 
+     * @return 
+     * @throws E 
+     * @throws E2 
      */
     <T, E extends Exception, E2 extends Exception> List<T> toList(Class<? extends T> rowClass, int fromRowIndex, int toRowIndex,
             Throwables.Predicate<? super String, E> columnNameFilter, Throwables.Function<? super String, String, E2> columnNameConverter) throws E, E2;
 
     /**
+     * 
      *
-     * @param <T>
-     * @param rowClass it can be Object[]/List/Set/Map/Bean
-     * @param columnNameFilter
-     * @param columnNameConverter
+     * @param <T> 
+     * @param <E> 
+     * @param <E2> 
+     * @param columnNameFilter 
+     * @param columnNameConverter 
      * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @return 
+     * @throws E 
+     * @throws E2 
      */
     <T, E extends Exception, E2 extends Exception> List<T> toList(Throwables.Predicate<? super String, E> columnNameFilter,
             Throwables.Function<? super String, String, E2> columnNameConverter, IntFunction<? extends T> rowSupplier) throws E, E2;
 
     /**
+     * 
      *
-     * @param <T>
-     * @param rowClass it can be Object[]/List/Set/Map/Bean
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param columnNameFilter
-     * @param columnNameConverter
+     * @param <T> 
+     * @param <E> 
+     * @param <E2> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param columnNameFilter 
+     * @param columnNameConverter 
      * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @return
+     * @return 
+     * @throws E 
+     * @throws E2 
      */
     <T, E extends Exception, E2 extends Exception> List<T> toList(int fromRowIndex, int toRowIndex, Throwables.Predicate<? super String, E> columnNameFilter,
             Throwables.Function<? super String, String, E2> columnNameConverter, IntFunction<? extends T> rowSupplier) throws E, E2;
@@ -1509,41 +1535,44 @@ public interface DataSet {
             int toRowIndex, IntFunction<? extends M> supplier);
 
     /**
+     * 
      *
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      * @param <K> the key type
      * @param <V> the value type
-     * @return
+     * @param keyColumnName 
+     * @param valueColumnNames 
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
+     * @return 
      */
     <K, V> Map<K, V> toMap(String keyColumnName, Collection<String> valueColumnNames, IntFunction<? extends V> rowSupplier);
 
     /**
+     * 
      *
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      * @param <K> the key type
      * @param <V> the value type
-     * @return
+     * @param keyColumnName 
+     * @param valueColumnNames 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
+     * @return 
      */
     <K, V> Map<K, V> toMap(String keyColumnName, Collection<String> valueColumnNames, int fromRowIndex, int toRowIndex, IntFunction<? extends V> rowSupplier);
 
     /**
+     * 
      *
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @param supplier
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M>
-     * @return
+     * @param <M> 
+     * @param keyColumnName 
+     * @param valueColumnNames 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
+     * @param supplier 
+     * @return 
      */
     <K, V, M extends Map<K, V>> M toMap(String keyColumnName, Collection<String> valueColumnNames, int fromRowIndex, int toRowIndex,
             IntFunction<? extends V> rowSupplier, IntFunction<? extends M> supplier);
@@ -1629,47 +1658,55 @@ public interface DataSet {
             Collection<String> valueColumnNames, int fromRowIndex, int toRowIndex, IntFunction<? extends M> supplier);
 
     /**
+     * 
      *
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      * @param <K> the key type
-     * @param <E>
-     * @return
+     * @param <E> 
+     * @param keyColumnName 
+     * @param valueColumnNames 
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
+     * @return 
      */
     <K, E> ListMultimap<K, E> toMultimap(String keyColumnName, Collection<String> valueColumnNames, IntFunction<? extends E> rowSupplier);
 
     /**
+     * 
      *
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
      * @param <K> the key type
-     * @param <E>
-     * @return
+     * @param <E> 
+     * @param keyColumnName 
+     * @param valueColumnNames 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
+     * @return 
      */
     <K, E> ListMultimap<K, E> toMultimap(String keyColumnName, Collection<String> valueColumnNames, int fromRowIndex, int toRowIndex,
             IntFunction<? extends E> rowSupplier);
 
     /**
+     * 
      *
-     * @param keyColumnName
-     * @param valueColumnNames
-     * @param fromRowIndex
-     * @param toRowIndex
-     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @param supplier
      * @param <K> the key type
-     * @param <E>
+     * @param <E> 
      * @param <V> the value type
-     * @param <M>
-     * @return
+     * @param <M> 
+     * @param keyColumnName 
+     * @param valueColumnNames 
+     * @param fromRowIndex 
+     * @param toRowIndex 
+     * @param rowSupplier it can be Object[]/List/Set/Map/Bean
+     * @param supplier 
+     * @return 
      */
     <K, E, V extends Collection<E>, M extends Multimap<K, E, V>> M toMultimap(String keyColumnName, Collection<String> valueColumnNames, int fromRowIndex,
             int toRowIndex, IntFunction<? extends E> rowSupplier, IntFunction<? extends M> supplier);
 
+    /**
+     * 
+     *
+     * @return 
+     */
     String toJSON();
 
     /**
@@ -1767,6 +1804,11 @@ public interface DataSet {
      */
     void toJSON(Writer output, Collection<String> columnNames, int fromRowIndex, int toRowIndex) throws UncheckedIOException;
 
+    /**
+     * 
+     *
+     * @return 
+     */
     String toXML();
 
     /**
@@ -3955,32 +3997,35 @@ public interface DataSet {
     <T> Stream<T> stream(IntFunction<? extends T> rowSupplier);
 
     /**
+     * 
      *
-     * @param fromRowIndex
-     * @param toRowIndex
+     * @param <T> 
+     * @param fromRowIndex 
+     * @param toRowIndex 
      * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @param <T>
-     * @return
+     * @return 
      */
     <T> Stream<T> stream(int fromRowIndex, int toRowIndex, IntFunction<? extends T> rowSupplier);
 
     /**
+     * 
      *
-     * @param columnNames
+     * @param <T> 
+     * @param columnNames 
      * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @param <T>
-     * @return
+     * @return 
      */
     <T> Stream<T> stream(Collection<String> columnNames, IntFunction<? extends T> rowSupplier);
 
     /**
+     * 
      *
-     * @param columnNames
-     * @param fromRowIndex
-     * @param toRowIndex
+     * @param <T> 
+     * @param columnNames 
+     * @param fromRowIndex 
+     * @param toRowIndex 
      * @param rowSupplier it can be Object[]/List/Set/Map/Bean
-     * @param <T>
-     * @return
+     * @return 
      */
     <T> Stream<T> stream(Collection<String> columnNames, int fromRowIndex, int toRowIndex, IntFunction<? extends T> rowSupplier);
 
@@ -4080,11 +4125,26 @@ public interface DataSet {
      */
     int size();
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Beta
     Properties<String, Object> properties();
 
+    /**
+     * 
+     *
+     * @return 
+     */
     Stream<String> columnNames();
 
+    /**
+     * 
+     *
+     * @return 
+     */
     Stream<ImmutableList<Object>> columns();
 
     /**

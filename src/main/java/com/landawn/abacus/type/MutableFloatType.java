@@ -31,6 +31,11 @@ public class MutableFloatType extends MutableType<MutableFloat> {
         super(MUTABLE_FLOAT);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<MutableFloat> clazz() {
         return MutableFloat.class;

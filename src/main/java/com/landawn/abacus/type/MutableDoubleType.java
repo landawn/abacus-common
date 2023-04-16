@@ -31,6 +31,11 @@ public class MutableDoubleType extends MutableType<MutableDouble> {
         super(MUTABLE_DOUBLE);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<MutableDouble> clazz() {
         return MutableDouble.class;

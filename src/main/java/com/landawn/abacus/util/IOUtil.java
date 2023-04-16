@@ -1145,7 +1145,7 @@ public final class IOUtil {
     /**
      *
      * @param file
-     * @return
+     * @return {@code null} if the specified {@code file/InputStream/Reader} is empty.
      * @throws IOException
      */
     public static String readFirstLine(final File file) throws IOException {
@@ -1156,7 +1156,7 @@ public final class IOUtil {
      *
      * @param file
      * @param encoding
-     * @return
+     * @return {@code null} if the specified {@code file/InputStream/Reader} is empty.
      * @throws IOException
      */
     public static String readFirstLine(final File file, final Charset encoding) throws IOException {
@@ -1176,7 +1176,7 @@ public final class IOUtil {
     /**
      *
      * @param is
-     * @return
+     * @return {@code null} if the specified {@code file/InputStream/Reader} is empty.
      * @throws IOException
      */
     public static String readFirstLine(final InputStream is) throws IOException {
@@ -1187,7 +1187,7 @@ public final class IOUtil {
      *
      * @param is
      * @param encoding
-     * @return
+     * @return {@code null} if the specified {@code file/InputStream/Reader} is empty.
      * @throws IOException
      */
     public static String readFirstLine(final InputStream is, final Charset encoding) throws IOException {
@@ -1197,7 +1197,7 @@ public final class IOUtil {
     /**
      *
      * @param reader
-     * @return
+     * @return {@code null} if the specified {@code file/InputStream/Reader} is empty.
      * @throws IOException
      */
     public static String readFirstLine(final Reader reader) throws IOException {
@@ -1218,7 +1218,7 @@ public final class IOUtil {
      *
      * @param file
      * @param encoding
-     * @return
+     * @return {@code null} if the specified {@code file/InputStream/Reader} is empty.
      * @throws IOException
      */
     public static String readLastLine(final File file, final Charset encoding) throws IOException {
@@ -1238,7 +1238,7 @@ public final class IOUtil {
     /**
      *
      * @param is
-     * @return
+     * @return {@code null} if the specified {@code file/InputStream/Reader} is empty.
      * @throws IOException
      */
     public static String readLastLine(final InputStream is) throws IOException {
@@ -1249,7 +1249,7 @@ public final class IOUtil {
      *
      * @param is
      * @param encoding
-     * @return
+     * @return {@code null} if the specified {@code file/InputStream/Reader} is empty.
      * @throws IOException
      */
     public static String readLastLine(final InputStream is, final Charset encoding) throws IOException {
@@ -1259,7 +1259,7 @@ public final class IOUtil {
     /**
      *
      * @param reader
-     * @return
+     * @return {@code null} if the specified {@code file/InputStream/Reader} is empty.
      * @throws IOException
      */
     public static String readLastLine(final Reader reader) throws IOException {
@@ -1285,7 +1285,7 @@ public final class IOUtil {
      *
      * @param file
      * @param lineIndex
-     * @return
+     * @return {@code null} if line size of the specified {@code file/InputStream/Reader} is less than {@code lineIndx + 1}.
      * @throws IOException
      */
     public static String readLine(final File file, final int lineIndex) throws IOException {
@@ -1297,7 +1297,7 @@ public final class IOUtil {
      * @param file
      * @param lineIndex
      * @param encoding
-     * @return
+     * @return {@code null} if line size of the specified {@code file/InputStream/Reader} is less than {@code lineIndx + 1}.
      * @throws IOException
      */
     public static String readLine(final File file, final int lineIndex, final Charset encoding) throws IOException {
@@ -1318,7 +1318,7 @@ public final class IOUtil {
      *
      * @param is
      * @param lineIndex
-     * @return
+     * @return {@code null} if line size of the specified {@code file/InputStream/Reader} is less than {@code lineIndx + 1}.
      * @throws IOException
      */
     public static String readLine(final InputStream is, final int lineIndex) throws IOException {
@@ -1330,7 +1330,7 @@ public final class IOUtil {
      * @param is
      * @param lineIndex
      * @param encoding
-     * @return
+     * @return {@code null} if line size of the specified {@code file/InputStream/Reader} is less than {@code lineIndx + 1}.
      * @throws IOException
      */
     public static String readLine(final InputStream is, final int lineIndex, final Charset encoding) throws IOException {
@@ -1341,7 +1341,7 @@ public final class IOUtil {
      *
      * @param reader
      * @param lineIndex
-     * @return
+     * @return {@code null} if line size of the specified {@code file/InputStream/Reader} is less than {@code lineIndx + 1}.
      * @throws IOException
      */
     public static String readLine(final Reader reader, int lineIndex) throws IOException {
@@ -3830,6 +3830,13 @@ public final class IOUtil {
         return (dotIndex == -1) ? fileName : fileName.substring(0, dotIndex);
     }
 
+    /**
+     * 
+     *
+     * @param file 
+     * @return 
+     * @throws UncheckedIOException 
+     */
     public static FileOutputStream newFileOutputStream(final File file) throws UncheckedIOException {
         try {
             return new FileOutputStream(file);
@@ -3838,6 +3845,13 @@ public final class IOUtil {
         }
     }
 
+    /**
+     * 
+     *
+     * @param file 
+     * @return 
+     * @throws UncheckedIOException 
+     */
     public static FileInputStream newFileInputStream(final File file) throws UncheckedIOException {
         try {
             return new FileInputStream(file);
@@ -3846,6 +3860,13 @@ public final class IOUtil {
         }
     }
 
+    /**
+     * 
+     *
+     * @param name 
+     * @return 
+     * @throws UncheckedIOException 
+     */
     public static FileOutputStream newFileOutputStream(final String name) throws UncheckedIOException {
         try {
             return new FileOutputStream(name);
@@ -3854,6 +3875,13 @@ public final class IOUtil {
         }
     }
 
+    /**
+     * 
+     *
+     * @param file 
+     * @return 
+     * @throws UncheckedIOException 
+     */
     public static FileReader newFileReader(final File file) throws UncheckedIOException {
         try {
             return new FileReader(file);
@@ -3862,6 +3890,14 @@ public final class IOUtil {
         }
     }
 
+    /**
+     * 
+     *
+     * @param file 
+     * @param charset 
+     * @return 
+     * @throws UncheckedIOException 
+     */
     public static FileReader newFileReader(final File file, final Charset charset) throws UncheckedIOException {
         try {
             return new FileReader(file, charset);
@@ -3870,6 +3906,13 @@ public final class IOUtil {
         }
     }
 
+    /**
+     * 
+     *
+     * @param file 
+     * @return 
+     * @throws UncheckedIOException 
+     */
     public static FileWriter newFileWriter(final File file) throws UncheckedIOException {
         try {
             return new FileWriter(file);
@@ -3878,6 +3921,14 @@ public final class IOUtil {
         }
     }
 
+    /**
+     * 
+     *
+     * @param file 
+     * @param charset 
+     * @return 
+     * @throws UncheckedIOException 
+     */
     public static FileWriter newFileWriter(final File file, final Charset charset) throws UncheckedIOException {
         try {
             return new FileWriter(file, charset);
@@ -4785,6 +4836,12 @@ public final class IOUtil {
         }
     }
 
+    /**
+     * 
+     *
+     * @param dir 
+     * @return 
+     */
     public static boolean mkdirIfNotExists(final File dir) {
         if (!(dir.exists() && dir.isDirectory())) {
             return dir.mkdir();
@@ -4793,6 +4850,12 @@ public final class IOUtil {
         return false;
     }
 
+    /**
+     * 
+     *
+     * @param dir 
+     * @return 
+     */
     public static boolean mkdirsIfNotExists(final File dir) {
         if (!(dir.exists() && dir.isDirectory())) {
             return dir.mkdirs();

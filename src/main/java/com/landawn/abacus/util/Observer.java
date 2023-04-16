@@ -576,6 +576,11 @@ public abstract class Observer<T> implements Immutable {
         return this;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Observer<T> distinct() {
         dispatcher.append(new Dispatcher<>() {
             private Set<T> set = N.newHashSet();

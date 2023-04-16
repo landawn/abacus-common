@@ -682,10 +682,22 @@ public final class ClassUtil {
         }
     }
 
+    /**
+     * 
+     *
+     * @param cls 
+     * @return 
+     */
     public static boolean isRegisteredXMLBindingClass(final Class<?> cls) {
         return registeredXMLBindingClassList.containsKey(cls);
     }
 
+    /**
+     * 
+     *
+     * @param method 
+     * @return 
+     */
     public static MethodHandle createMethodHandle(final Method method) {
         final Class<?> declaringClass = method.getDeclaringClass();
 
@@ -1878,6 +1890,12 @@ public final class ClassUtil {
         return (field == FIELD_MASK) ? null : field;
     }
 
+    /**
+     * 
+     *
+     * @param cls 
+     * @return 
+     */
     public static ImmutableMap<String, Field> getPropFields(final Class<?> cls) {
         ImmutableMap<String, Field> getterMethodList = beanDeclaredPropFieldPool.get(cls);
 
@@ -2433,6 +2451,12 @@ public final class ClassUtil {
 
     private static final Map<Class<?>, Tuple3<Class<?>, com.landawn.abacus.util.function.Supplier<Object>, com.landawn.abacus.util.function.Function<Object, Object>>> builderMap = new ConcurrentHashMap<>();
 
+    /**
+     * 
+     *
+     * @param cls 
+     * @return 
+     */
     public static Tuple3<Class<?>, com.landawn.abacus.util.function.Supplier<Object>, com.landawn.abacus.util.function.Function<Object, Object>> getBuilderInfo(
             final Class<?> cls) {
         N.checkArgNotNull(cls, "cls");
@@ -2543,6 +2567,12 @@ public final class ClassUtil {
         return buildMethod;
     }
 
+    /**
+     * 
+     *
+     * @param type 
+     * @return 
+     */
     public static String getTypeName(final java.lang.reflect.Type type) {
         return formatParameterizedTypeName(type.getTypeName());
     }
@@ -3403,6 +3433,12 @@ public final class ClassUtil {
         return ret;
     }
 
+    /**
+     * 
+     *
+     * @param cls 
+     * @return 
+     */
     public static boolean isRecordClass(final Class<?> cls) {
         if (cls == null) {
             return false;
@@ -3420,6 +3456,12 @@ public final class ClassUtil {
 
     private static final Map<Class<?>, Boolean> anonymousClassMap = new ConcurrentHashMap<>();
 
+    /**
+     * 
+     *
+     * @param cls 
+     * @return 
+     */
     public static boolean isAnonymousClass(final Class<?> cls) {
         Boolean v = anonymousClassMap.get(cls);
 
@@ -3433,6 +3475,12 @@ public final class ClassUtil {
 
     private static final Map<Class<?>, Boolean> memberClassMap = new ConcurrentHashMap<>();
 
+    /**
+     * 
+     *
+     * @param cls 
+     * @return 
+     */
     public static boolean isMemberClass(final Class<?> cls) {
         Boolean v = memberClassMap.get(cls);
 
@@ -3444,6 +3492,12 @@ public final class ClassUtil {
         return v;
     }
 
+    /**
+     * 
+     *
+     * @param cls 
+     * @return 
+     */
     public static boolean isAnonymousOrMemeberClass(final Class<?> cls) {
         Boolean v = anonymousClassMap.get(cls);
 

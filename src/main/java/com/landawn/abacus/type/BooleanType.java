@@ -32,6 +32,11 @@ public final class BooleanType extends AbstractBooleanType {
         super(BOOLEAN);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<Boolean> clazz() {
         return Boolean.class;

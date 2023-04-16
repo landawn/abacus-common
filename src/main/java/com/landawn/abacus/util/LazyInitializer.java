@@ -28,6 +28,11 @@ public final class LazyInitializer<T> implements com.landawn.abacus.util.functio
         this.supplier = supplier;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public T get() {
         if (!initialized) {

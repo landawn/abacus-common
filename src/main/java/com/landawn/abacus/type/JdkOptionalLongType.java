@@ -31,6 +31,11 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
         super(OPTIONAL_LONG);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<OptionalLong> clazz() {
         return OptionalLong.class;

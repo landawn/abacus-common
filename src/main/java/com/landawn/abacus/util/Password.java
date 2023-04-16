@@ -29,6 +29,11 @@ public final class Password {
 
     private final MessageDigest msgDigest;
 
+    /**
+     * 
+     *
+     * @param algorithm 
+     */
     public Password(String algorithm) {
         this.algorithm = algorithm;
 
@@ -77,6 +82,11 @@ public final class Password {
         return (plainPassword == null) ? (encryptedPassword == null) : ((encryptedPassword != null) && encryptedPassword.equals(encrypt(plainPassword)));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         return Objects.hash(algorithm);
@@ -92,6 +102,11 @@ public final class Password {
         return obj == this || (obj instanceof Password && ((Password) obj).algorithm.equals(algorithm));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return "{algorithm=" + algorithm + "}";

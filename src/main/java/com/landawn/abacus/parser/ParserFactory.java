@@ -252,7 +252,9 @@ public final class ParserFactory {
     /**
      * Creates a new Parser object.
      *
-     * @return
+     * @param xsc 
+     * @param xdc 
+     * @return 
      */
     public static XMLParser createXMLParser(final XMLSerializationConfig xsc, final XMLDeserializationConfig xdc) {
         return new XMLParserImpl(XMLParserType.StAX, xsc, xdc);
@@ -285,6 +287,13 @@ public final class ParserFactory {
         return new JAXBParser();
     }
 
+    /**
+     * 
+     *
+     * @param xsc 
+     * @param xdc 
+     * @return 
+     */
     public static XMLParser createJAXBParser(final XMLSerializationConfig xsc, final XMLDeserializationConfig xdc) {
         return new JAXBParser(xsc, xdc);
     }
@@ -307,18 +316,35 @@ public final class ParserFactory {
         return new JacksonMapper(jmc);
     }
 
+    /**
+     * 
+     *
+     * @param type 
+     */
     public static void registerKryo(final Class<?> type) {
         N.checkArgNotNull(type, "type");
 
         _kryoClassSet.add(type);
     }
 
+    /**
+     * 
+     *
+     * @param type 
+     * @param id 
+     */
     public static void registerKryo(final Class<?> type, final int id) {
         N.checkArgNotNull(type, "type");
 
         _kryoClassIdMap.put(type, id);
     }
 
+    /**
+     * 
+     *
+     * @param type 
+     * @param serializer 
+     */
     public static void registerKryo(final Class<?> type, final Serializer<?> serializer) {
         N.checkArgNotNull(type, "type");
         N.checkArgNotNull(serializer, "serializer");
@@ -326,6 +352,13 @@ public final class ParserFactory {
         _kryoClassSerializerMap.put(type, serializer);
     }
 
+    /**
+     * 
+     *
+     * @param type 
+     * @param serializer 
+     * @param id 
+     */
     public static void registerKryo(final Class<?> type, final Serializer<?> serializer, final int id) {
         N.checkArgNotNull(type, "type");
         N.checkArgNotNull(serializer, "serializer");

@@ -79,6 +79,11 @@ public class ReaderType extends AbstractType<Reader> {
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<Reader> clazz() {
         return typeClass;

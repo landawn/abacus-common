@@ -158,14 +158,29 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
         return (C) this;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public C noCharQuotation() {
         return setCharQuotation((char) 0);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public C noStringQuotation() {
         return setStringQuotation((char) 0);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public C noQuotation() {
         return setCharQuotation((char) 0).setStringQuotation((char) 0);
     }
@@ -370,6 +385,11 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
         return (C) this;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         int h = 17;
@@ -418,6 +438,11 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
         return false;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", charQuotation=" + N.toString(charQuotation) + ", stringQuotation="

@@ -209,6 +209,11 @@ public final class Stopwatch {
         return desiredUnit.convert(elapsedNanos(), NANOSECONDS);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Duration elapsed() {
         return Duration.ofNanos(elapsedNanos());
     }

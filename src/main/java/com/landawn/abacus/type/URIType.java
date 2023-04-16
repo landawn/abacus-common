@@ -35,6 +35,11 @@ public class URIType extends AbstractType<URI> {
         super(URI);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<URI> clazz() {
         return URI.class;

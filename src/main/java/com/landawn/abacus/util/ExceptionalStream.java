@@ -235,10 +235,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      * Returns an empty {@code Stream} if the specified {@code t} is null.
      *
-     * @param <T>
-     * @param <E>
-     * @param e
-     * @return
+     * @param <T> 
+     * @param <E> 
+     * @param e 
+     * @param exceptionType 
+     * @return 
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> ofNullable(final T e, @SuppressWarnings("unused") final Class<E> exceptionType) { //NOSONAR
         if (e == null) {
@@ -505,6 +506,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return of(stream);
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @param a 
+     * @return 
+     */
     public static <E extends Exception> ExceptionalStream<Boolean, E> of(final boolean[] a) {
         if (N.isNullOrEmpty(a)) {
             return empty();
@@ -541,6 +549,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         });
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @param a 
+     * @return 
+     */
     public static <E extends Exception> ExceptionalStream<Character, E> of(final char[] a) {
         if (N.isNullOrEmpty(a)) {
             return empty();
@@ -577,6 +592,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         });
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @param a 
+     * @return 
+     */
     public static <E extends Exception> ExceptionalStream<Byte, E> of(final byte[] a) {
         if (N.isNullOrEmpty(a)) {
             return empty();
@@ -613,6 +635,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         });
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @param a 
+     * @return 
+     */
     public static <E extends Exception> ExceptionalStream<Short, E> of(final short[] a) {
         if (N.isNullOrEmpty(a)) {
             return empty();
@@ -733,6 +762,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         });
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @param a 
+     * @return 
+     */
     public static <E extends Exception> ExceptionalStream<Float, E> of(final float[] a) {
         if (N.isNullOrEmpty(a)) {
             return empty();
@@ -811,14 +847,38 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         });
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param <E> 
+     * @param op 
+     * @return 
+     */
     public static <T, E extends Exception> ExceptionalStream<T, E> of(final Optional<T> op) {
         return op == null || !op.isPresent() ? ExceptionalStream.<T, E> empty() : ExceptionalStream.<T, E> of(op.get()); //NOSONAR
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param <E> 
+     * @param op 
+     * @return 
+     */
     public static <T, E extends Exception> ExceptionalStream<T, E> of(final java.util.Optional<T> op) {
         return op == null || !op.isPresent() ? ExceptionalStream.<T, E> empty() : ExceptionalStream.<T, E> of(op.get()); //NOSONAR
     }
 
+    /**
+     * 
+     *
+     * @param <K> 
+     * @param <E> 
+     * @param map 
+     * @return 
+     */
     public static <K, E extends Exception> ExceptionalStream<K, E> ofKeys(final Map<K, ?> map) {
         if (N.isNullOrEmpty(map)) {
             return empty();
@@ -827,6 +887,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return of(map.keySet());
     }
 
+    /**
+     * 
+     *
+     * @param <K> 
+     * @param <V> 
+     * @param <E> 
+     * @param map 
+     * @param valueFilter 
+     * @return 
+     */
     public static <K, V, E extends Exception> ExceptionalStream<K, E> ofKeys(final Map<K, V> map, final Throwables.Predicate<? super V, E> valueFilter) {
         if (N.isNullOrEmpty(map)) {
             return empty();
@@ -835,6 +905,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return ExceptionalStream.<K, V, E> of(map).filter(Fnn.<K, V, E> testByValue(valueFilter)).map(Fnn.<K, V, E> key());
     }
 
+    /**
+     * 
+     *
+     * @param <K> 
+     * @param <V> 
+     * @param <E> 
+     * @param map 
+     * @param filter 
+     * @return 
+     */
     public static <K, V, E extends Exception> ExceptionalStream<K, E> ofKeys(final Map<K, V> map,
             final Throwables.BiPredicate<? super K, ? super V, E> filter) {
         if (N.isNullOrEmpty(map)) {
@@ -844,6 +924,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return ExceptionalStream.<K, V, E> of(map).filter(Fn.Entries.ep(filter)).map(Fnn.<K, V, E> key());
     }
 
+    /**
+     * 
+     *
+     * @param <V> 
+     * @param <E> 
+     * @param map 
+     * @return 
+     */
     public static <V, E extends Exception> ExceptionalStream<V, E> ofValues(final Map<?, V> map) {
         if (N.isNullOrEmpty(map)) {
             return empty();
@@ -852,6 +940,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return of(map.values());
     }
 
+    /**
+     * 
+     *
+     * @param <K> 
+     * @param <V> 
+     * @param <E> 
+     * @param map 
+     * @param keyFilter 
+     * @return 
+     */
     public static <K, V, E extends Exception> ExceptionalStream<V, E> ofValues(final Map<K, V> map, final Throwables.Predicate<? super K, E> keyFilter) {
         if (N.isNullOrEmpty(map)) {
             return empty();
@@ -860,6 +958,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return ExceptionalStream.<K, V, E> of(map).filter(Fnn.<K, V, E> testByKey(keyFilter)).map(Fnn.<K, V, E> value());
     }
 
+    /**
+     * 
+     *
+     * @param <K> 
+     * @param <V> 
+     * @param <E> 
+     * @param map 
+     * @param filter 
+     * @return 
+     */
     public static <K, V, E extends Exception> ExceptionalStream<V, E> ofValues(final Map<K, V> map,
             final Throwables.BiPredicate<? super K, ? super V, E> filter) {
         if (N.isNullOrEmpty(map)) {
@@ -889,11 +997,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      * Lazy evaluation.
      * <br />
-     *
+     * 
      * This is equal to: {@code ExceptionalStream.just(supplier).flatMap(it -> it.get())}.
      *
-     * @param supplier
-     * @return
+     * @param <T> 
+     * @param <E> 
+     * @param supplier 
+     * @return 
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> defer(
             final Throwables.Supplier<? extends ExceptionalStream<? extends T, ? extends E>, ? extends E> supplier) {
@@ -1055,6 +1165,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         });
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param <E> 
+     * @param supplier 
+     * @return 
+     */
     public static <T, E extends Exception> ExceptionalStream<T, E> generate(final Throwables.Supplier<T, E> supplier) {
         N.checkArgNotNull(supplier, "supplier");
 
@@ -1071,6 +1189,15 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         });
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param <E> 
+     * @param element 
+     * @param n 
+     * @return 
+     */
     public static <T, E extends Exception> ExceptionalStream<T, E> repeat(final T element, final long n) {
         N.checkArgNotNegative(n, "n");
 
@@ -1097,22 +1224,64 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         });
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @param startInclusive 
+     * @param endExclusive 
+     * @return 
+     */
     public static <E extends Exception> ExceptionalStream<Integer, E> range(final int startInclusive, final int endExclusive) {
         return IntStream.range(startInclusive, endExclusive).boxed().<E> checked();
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @param startInclusive 
+     * @param endExclusive 
+     * @param by 
+     * @return 
+     */
     public static <E extends Exception> ExceptionalStream<Integer, E> range(final int startInclusive, final int endExclusive, final int by) {
         return IntStream.range(startInclusive, endExclusive, by).boxed().<E> checked();
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @param startInclusive 
+     * @param endExclusive 
+     * @return 
+     */
     public static <E extends Exception> ExceptionalStream<Integer, E> rangeClosed(final int startInclusive, final int endExclusive) {
         return IntStream.rangeClosed(startInclusive, endExclusive).boxed().<E> checked();
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @param startInclusive 
+     * @param endExclusive 
+     * @param by 
+     * @return 
+     */
     public static <E extends Exception> ExceptionalStream<Integer, E> rangeClosed(final int startInclusive, final int endExclusive, final int by) {
         return IntStream.rangeClosed(startInclusive, endExclusive, by).boxed().<E> checked();
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @param str 
+     * @param delimiter 
+     * @return 
+     */
     public static <E extends Exception> ExceptionalStream<String, E> split(final CharSequence str, final CharSequence delimiter) {
         return of(Splitter.with(delimiter).iterate(str));
     }
@@ -1174,6 +1343,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return newStream(createLazyLineIterator(null, null, Charsets.UTF_8, reader, false));
     }
 
+    /**
+     * 
+     *
+     * @param parentPath 
+     * @return 
+     */
     public static ExceptionalStream<File, IOException> listFiles(final File parentPath) {
         if (!parentPath.exists()) {
             return empty();
@@ -1182,6 +1357,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return of(parentPath.listFiles());
     }
 
+    /**
+     * 
+     *
+     * @param parentPath 
+     * @param recursively 
+     * @return 
+     */
     public static ExceptionalStream<File, IOException> listFiles(final File parentPath, final boolean recursively) {
         if (!parentPath.exists()) {
             return empty();
@@ -1305,6 +1487,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         });
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param <E> 
+     * @param a 
+     * @return 
+     */
     @SafeVarargs
     public static <T, E extends Exception> ExceptionalStream<T, E> concat(final T[]... a) {
         if (N.isNullOrEmpty(a)) {
@@ -1314,6 +1504,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return of(Iterators.concat(a));
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param <E> 
+     * @param a 
+     * @return 
+     */
     @SafeVarargs
     public static <T, E extends Exception> ExceptionalStream<T, E> concat(final Iterable<? extends T>... a) {
         if (N.isNullOrEmpty(a)) {
@@ -1323,6 +1521,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return of(Iterators.concat(a));
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param <E> 
+     * @param a 
+     * @return 
+     */
     @SafeVarargs
     public static <T, E extends Exception> ExceptionalStream<T, E> concat(final Iterator<? extends T>... a) {
         if (N.isNullOrEmpty(a)) {
@@ -1394,9 +1600,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * Zip together the "a" and "b" arrays until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param <A> 
+     * @param <B> 
+     * @param <T> 
+     * @param <E> 
+     * @param a 
+     * @param b 
+     * @param zipFunction 
+     * @return 
      */
     public static <A, B, T, E extends Exception> ExceptionalStream<T, E> zip(final A[] a, final B[] b,
             final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
@@ -1407,9 +1618,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * Zip together the "a", "b" and "c" arrays until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param <A> 
+     * @param <B> 
+     * @param <C> 
+     * @param <T> 
+     * @param <E> 
+     * @param a 
+     * @param b 
+     * @param c 
+     * @param zipFunction 
+     * @return 
      */
     public static <A, B, C, T, E extends Exception> ExceptionalStream<T, E> zip(final A[] a, final B[] b, final C[] c,
             final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
@@ -1420,9 +1638,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * Zip together the "a" and "b" arrays until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param <A> 
+     * @param <B> 
+     * @param <T> 
+     * @param <E> 
+     * @param a 
+     * @param b 
+     * @param zipFunction 
+     * @return 
      */
     public static <A, B, T, E extends Exception> ExceptionalStream<T, E> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
             final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
@@ -1433,9 +1656,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * Zip together the "a", "b" and "c" arrays until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param <A> 
+     * @param <B> 
+     * @param <C> 
+     * @param <T> 
+     * @param <E> 
+     * @param a 
+     * @param b 
+     * @param c 
+     * @param zipFunction 
+     * @return 
      */
     public static <A, B, C, T, E extends Exception> ExceptionalStream<T, E> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
             final Iterable<? extends C> c, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
@@ -1446,9 +1676,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * Zip together the "a" and "b" iterators until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param <A> 
+     * @param <B> 
+     * @param <T> 
+     * @param <E> 
+     * @param a 
+     * @param b 
+     * @param zipFunction 
+     * @return 
      */
     public static <A, B, T, E extends Exception> ExceptionalStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
             final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
@@ -1472,9 +1707,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * Zip together the "a", "b" and "c" iterators until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param <A> 
+     * @param <B> 
+     * @param <C> 
+     * @param <T> 
+     * @param <E> 
+     * @param a 
+     * @param b 
+     * @param c 
+     * @param zipFunction 
+     * @return 
      */
     public static <A, B, C, T, E extends Exception> ExceptionalStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
             final Iterator<? extends C> c, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
@@ -1499,9 +1741,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * Zip together the "a" and "b" streams until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param <A> 
+     * @param <B> 
+     * @param <T> 
+     * @param <E> 
+     * @param a 
+     * @param b 
+     * @param zipFunction 
+     * @return 
      */
     public static <A, B, T, E extends Exception> ExceptionalStream<T, E> zip(final ExceptionalStream<? extends A, E> a,
             final ExceptionalStream<? extends B, E> b, final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
@@ -1525,10 +1772,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * Zip together the "a", "b" and "c" streams until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
      *
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * @param <A> 
+     * @param <B> 
+     * @param <C> 
+     * @param <T> 
+     * @param <E> 
+     * @param a 
+     * @param b 
+     * @param c 
+     * @param zipFunction 
+     * @return 
      */
     public static <A, B, C, T, E extends Exception> ExceptionalStream<T, E> zip(final ExceptionalStream<? extends A, E> a,
             final ExceptionalStream<? extends B, E> b, final ExceptionalStream<? extends C, E> c,
@@ -1554,12 +1807,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
      *
-     * @param a
-     * @param b
+     * @param <A> 
+     * @param <B> 
+     * @param <T> 
+     * @param <E> 
+     * @param a 
+     * @param b 
      * @param valueForNoneA value to fill if "a" runs out of values first.
      * @param valueForNoneB value to fill if "b" runs out of values first.
-     * @param zipFunction
-     * @return
+     * @param zipFunction 
+     * @return 
      */
     public static <A, B, T, E extends Exception> ExceptionalStream<T, E> zip(final A[] a, final B[] b, final A valueForNoneA, final B valueForNoneB,
             final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
@@ -1570,14 +1827,19 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
      *
-     * @param a
-     * @param b
-     * @param c
+     * @param <A> 
+     * @param <B> 
+     * @param <C> 
+     * @param <T> 
+     * @param <E> 
+     * @param a 
+     * @param b 
+     * @param c 
      * @param valueForNoneA value to fill if "a" runs out of values.
      * @param valueForNoneB value to fill if "b" runs out of values.
      * @param valueForNoneC value to fill if "c" runs out of values.
-     * @param zipFunction
-     * @return
+     * @param zipFunction 
+     * @return 
      */
     public static <A, B, C, T, E extends Exception> ExceptionalStream<T, E> zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA,
             final B valueForNoneB, final C valueForNoneC, final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) {
@@ -1588,12 +1850,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
      *
-     * @param a
-     * @param b
+     * @param <A> 
+     * @param <B> 
+     * @param <T> 
+     * @param <E> 
+     * @param a 
+     * @param b 
      * @param valueForNoneA value to fill if "a" runs out of values first.
      * @param valueForNoneB value to fill if "b" runs out of values first.
-     * @param zipFunction
-     * @return
+     * @param zipFunction 
+     * @return 
      */
     public static <A, B, T, E extends Exception> ExceptionalStream<T, E> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
             final A valueForNoneA, final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
@@ -1604,14 +1870,19 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
      *
-     * @param a
-     * @param b
-     * @param c
+     * @param <A> 
+     * @param <B> 
+     * @param <C> 
+     * @param <T> 
+     * @param <E> 
+     * @param a 
+     * @param b 
+     * @param c 
      * @param valueForNoneA value to fill if "a" runs out of values.
      * @param valueForNoneB value to fill if "b" runs out of values.
      * @param valueForNoneC value to fill if "c" runs out of values.
-     * @param zipFunction
-     * @return
+     * @param zipFunction 
+     * @return 
      */
     public static <A, B, C, T, E extends Exception> ExceptionalStream<T, E> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
             final Iterable<? extends C> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
@@ -1623,12 +1894,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * Zip together the "a" and "b" iterators until all of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
      *
-     * @param a
-     * @param b
+     * @param <A> 
+     * @param <B> 
+     * @param <T> 
+     * @param <E> 
+     * @param a 
+     * @param b 
      * @param valueForNoneA value to fill if "a" runs out of values first.
      * @param valueForNoneB value to fill if "b" runs out of values first.
-     * @param zipFunction
-     * @return
+     * @param zipFunction 
+     * @return 
      */
     public static <A, B, T, E extends Exception> ExceptionalStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
             final A valueForNoneA, final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) {
@@ -1656,14 +1931,19 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * Zip together the "a", "b" and "c" iterators until all of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
      *
-     * @param a
-     * @param b
-     * @param c
+     * @param <A> 
+     * @param <B> 
+     * @param <C> 
+     * @param <T> 
+     * @param <E> 
+     * @param a 
+     * @param b 
+     * @param c 
      * @param valueForNoneA value to fill if "a" runs out of values.
      * @param valueForNoneB value to fill if "b" runs out of values.
      * @param valueForNoneC value to fill if "c" runs out of values.
-     * @param zipFunction
-     * @return
+     * @param zipFunction 
+     * @return 
      */
     public static <A, B, C, T, E extends Exception> ExceptionalStream<T, E> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
             final Iterator<? extends C> c, final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
@@ -1694,9 +1974,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * Zip together the "a" and "b" streams until one of them runs out of values.
      * Each pair of values is combined into a single value using the supplied zipFunction function.
      *
-     * @param a
-     * @param b
-     * @return
+     * @param <A> 
+     * @param <B> 
+     * @param <T> 
+     * @param <E> 
+     * @param a 
+     * @param b 
+     * @param valueForNoneA 
+     * @param valueForNoneB 
+     * @param zipFunction 
+     * @return 
      */
     public static <A, B, T, E extends Exception> ExceptionalStream<T, E> zip(final ExceptionalStream<? extends A, E> a,
             final ExceptionalStream<? extends B, E> b, final A valueForNoneA, final B valueForNoneB,
@@ -1725,10 +2012,19 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * Zip together the "a", "b" and "c" streams until one of them runs out of values.
      * Each triple of values is combined into a single value using the supplied zipFunction function.
      *
-     * @param a
-     * @param b
-     * @param c
-     * @return
+     * @param <A> 
+     * @param <B> 
+     * @param <C> 
+     * @param <T> 
+     * @param <E> 
+     * @param a 
+     * @param b 
+     * @param c 
+     * @param valueForNoneA 
+     * @param valueForNoneB 
+     * @param valueForNoneC 
+     * @param zipFunction 
+     * @return 
      */
     public static <A, B, C, T, E extends Exception> ExceptionalStream<T, E> zip(final ExceptionalStream<? extends A, E> a,
             final ExceptionalStream<? extends B, E> b, final ExceptionalStream<? extends C, E> c, final A valueForNoneA, final B valueForNoneB,
@@ -1785,11 +2081,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param a
-     * @param b
+     * @param <T> 
+     * @param <E> 
+     * @param a 
+     * @param b 
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
-     * @return
+     * @return 
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> merge(final T[] a, final T[] b,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
@@ -1832,12 +2131,15 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param a
-     * @param b
-     * @param c
+     * @param <T> 
+     * @param <E> 
+     * @param a 
+     * @param b 
+     * @param c 
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
-     * @return
+     * @return 
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> merge(final T[] a, final T[] b, final T[] c,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
@@ -1845,11 +2147,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param a
-     * @param b
+     * @param <T> 
+     * @param <E> 
+     * @param a 
+     * @param b 
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
-     * @return
+     * @return 
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
@@ -1857,12 +2162,15 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param a
-     * @param b
-     * @param c
+     * @param <T> 
+     * @param <E> 
+     * @param a 
+     * @param b 
+     * @param c 
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
-     * @return
+     * @return 
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
             final Iterable<? extends T> c, final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
@@ -1870,11 +2178,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param a
-     * @param b
+     * @param <T> 
+     * @param <E> 
+     * @param a 
+     * @param b 
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
-     * @return
+     * @return 
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
@@ -1882,12 +2193,15 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param a
-     * @param b
-     * @param c
+     * @param <T> 
+     * @param <E> 
+     * @param a 
+     * @param b 
+     * @param c 
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
-     * @return
+     * @return 
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
             final Iterator<? extends T> c, final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
@@ -1895,11 +2209,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param a
-     * @param b
+     * @param <T> 
+     * @param <E> 
+     * @param a 
+     * @param b 
      * @param nextSelector first parameter is selected if <code>Nth.FIRST</code> is returned, otherwise the second parameter is selected.
-     * @return
+     * @return 
      */
     public static <T, E extends Exception> ExceptionalStream<T, E> merge(final ExceptionalStream<? extends T, E> a, final ExceptionalStream<? extends T, E> b,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
@@ -1916,6 +2233,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         });
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param <E> 
+     * @param a 
+     * @param b 
+     * @param c 
+     * @param nextSelector 
+     * @return 
+     */
     public static <T, E extends Exception> ExceptionalStream<T, E> merge(final ExceptionalStream<? extends T, E> a, final ExceptionalStream<? extends T, E> b,
             final ExceptionalStream<? extends T, E> c, final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) {
         return merge(merge(a, b, nextSelector), c, nextSelector);
@@ -2217,8 +2545,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      * Distinct by the value mapped from <code>keyMapper</code> .
      *
+     * @param <K> 
      * @param keyMapper don't change value of the input parameter.
-     * @return
+     * @return 
      */
     @IntermediateOp
     public <K> ExceptionalStream<T, E> distinctBy(final Throwables.Function<? super T, K, ? extends E> keyMapper) {
@@ -2232,9 +2561,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      * Distinct and filter by occurrences.
      *
-     * @param keyMapper
-     * @param mergeFunction
-     * @return
+     * @param <K> 
+     * @param keyMapper 
+     * @param mergeFunction 
+     * @return 
      * @see #groupBy(Function, Function, BinaryOperator)
      */
     @IntermediateOp
@@ -2251,9 +2581,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      * Distinct and filter by occurrences.
      *
-     * @param keyMapper
-     * @param occurrencesFilter
-     * @return
+     * @param <K> 
+     * @param keyMapper 
+     * @param occurrencesFilter 
+     * @return 
      * @see #groupBy(Function, Collector)
      */
     @IntermediateOp
@@ -2297,6 +2628,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }, closeHandlers);
     }
 
+    /**
+     * 
+     *
+     * @param mapperForFirst 
+     * @return 
+     */
     @IntermediateOp
     public ExceptionalStream<T, E> mapFirst(final Throwables.Function<? super T, ? extends T, ? extends E> mapperForFirst) {
         assertNotClosed();
@@ -2321,6 +2658,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }, closeHandlers);
     }
 
+    /**
+     * 
+     *
+     * @param <R> 
+     * @param mapperForFirst 
+     * @param mapperForElse 
+     * @return 
+     */
     @IntermediateOp
     public <R> ExceptionalStream<R, E> mapFirstOrElse(final Throwables.Function<? super T, ? extends R, E> mapperForFirst,
             final Throwables.Function<? super T, ? extends R, E> mapperForElse) {
@@ -2346,6 +2691,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }, closeHandlers);
     }
 
+    /**
+     * 
+     *
+     * @param mapperForLast 
+     * @return 
+     */
     @IntermediateOp
     public ExceptionalStream<T, E> mapLast(final Throwables.Function<? super T, ? extends T, ? extends E> mapperForLast) {
         assertNotClosed();
@@ -2372,6 +2723,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }, closeHandlers);
     }
 
+    /**
+     * 
+     *
+     * @param <R> 
+     * @param mapperForLast 
+     * @param mapperForElse 
+     * @return 
+     */
     @IntermediateOp
     public <R> ExceptionalStream<R, E> mapLastOrElse(final Throwables.Function<? super T, ? extends R, E> mapperForLast,
             final Throwables.Function<? super T, ? extends R, E> mapperForElse) {
@@ -2747,14 +3106,15 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //    }
 
     /**
+     * 
+     *
+     * @param <R> 
+     * @param mapper 
+     * @return 
      * @implNote same as ====>
      * <pre>
      * skipNull().flatmap(mapper)
      * </pre>
-     *
-     * @param <R>
-     * @param mapper
-     * @return
      */
     @Beta
     @IntermediateOp
@@ -2763,16 +3123,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
+     *
+     * @param <U> 
+     * @param <R> 
+     * @param mapper 
+     * @param mapper2 
+     * @return 
      * @implNote same as ====>
      * <pre>
      * skipNull().flatmap(mapper).skipNull().flatmap(mapper2)
      * </pre>
-     *
-     * @param <U>
-     * @param <R>
-     * @param mapper
-     * @param mapper2
-     * @return
      */
     @Beta
     @IntermediateOp
@@ -2782,10 +3143,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param <R>
-     * @param mapper
-     * @return
+     * @param mapper 
+     * @return 
      */
     @Beta
     @IntermediateOp
@@ -2825,10 +3186,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param <R>
-     * @param mapper
-     * @return
+     * @param mapper 
+     * @return 
      */
     @Beta
     @IntermediateOp
@@ -2868,10 +3229,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param <R>
-     * @param mapper
-     * @return
+     * @param mapper 
+     * @return 
      */
     @Beta
     @IntermediateOp
@@ -2911,10 +3272,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param <R>
-     * @param mapper
-     * @return
+     * @param mapper 
+     * @return 
      */
     @Beta
     @IntermediateOp
@@ -2954,10 +3315,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param <R>
-     * @param mapper
-     * @return
+     * @param mapper 
+     * @return 
      */
     @Beta
     @IntermediateOp
@@ -2997,10 +3358,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param <R>
-     * @param mapper
-     * @return
+     * @param mapper 
+     * @return 
      */
     @Beta
     @IntermediateOp
@@ -3040,10 +3401,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param <R>
-     * @param mapper
-     * @return
+     * @param mapper 
+     * @return 
      */
     @Beta
     @IntermediateOp
@@ -3083,10 +3444,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param <R>
-     * @param mapper
-     * @return
+     * @param mapper 
+     * @return 
      */
     @Beta
     @IntermediateOp
@@ -3282,6 +3643,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return map(mapper).filter((Throwables.Predicate) IS_PRESENT_DOUBLE_JDK).map(GET_AS_DOUBLE_JDK);
     }
 
+    /**
+     * 
+     *
+     * @param <R> 
+     * @param mapper 
+     * @return 
+     */
     public <R> ExceptionalStream<R, E> mapMulti(final Throwables.BiConsumer<? super T, ? super Consumer<R>, ? extends E> mapper) {
         final Deque<R> queue = new ArrayDeque<>();
 
@@ -3646,14 +4014,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
      * @param <K> the key type
-     * @param <A>
-     * @param <D>
-     * @param keyMapper
-     * @param downstream
-     * @return
-     * @throws E the e
+     * @param <A> 
+     * @param <D> 
+     * @param keyMapper 
+     * @param downstream 
+     * @return 
      */
     @IntermediateOp
     @TerminalOpTriggered
@@ -3663,15 +4031,15 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
      * @param <K> the key type
-     * @param <A>
-     * @param <D>
-     * @param keyMapper
-     * @param downstream
-     * @param mapFactory
-     * @return
-     * @throws E the e
+     * @param <A> 
+     * @param <D> 
+     * @param keyMapper 
+     * @param downstream 
+     * @param mapFactory 
+     * @return 
      */
     @IntermediateOp
     @TerminalOpTriggered
@@ -3681,16 +4049,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <A>
-     * @param <D>
-     * @param keyMapper
-     * @param valueMapper
-     * @param downstream
-     * @return
-     * @throws E the e
+     * @param <A> 
+     * @param <D> 
+     * @param keyMapper 
+     * @param valueMapper 
+     * @param downstream 
+     * @return 
      */
     @IntermediateOp
     @TerminalOpTriggered
@@ -3700,17 +4068,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <A>
-     * @param <D>
-     * @param keyMapper
-     * @param valueMapper
-     * @param downstream
-     * @param mapFactory
-     * @return
-     * @throws E the e
+     * @param <A> 
+     * @param <D> 
+     * @param keyMapper 
+     * @param valueMapper 
+     * @param downstream 
+     * @param mapFactory 
+     * @return 
      */
     @IntermediateOp
     @TerminalOpTriggered
@@ -3757,10 +4125,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param predicate
-     * @param downstream
-     * @return
+     * @param <A> 
+     * @param <D> 
+     * @param predicate 
+     * @param downstream 
+     * @return 
      * @see Collectors#partitioningBy(Predicate, Collector)
      */
     @IntermediateOp
@@ -4464,10 +4835,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param mapper
-     * @param c
-     * @return
+     * @param <U> 
+     * @param mapper 
+     * @param c 
+     * @return 
      * @see N#intersection(Collection, Collection)
      */
     public <U> ExceptionalStream<T, E> intersection(final Throwables.Function<? super T, ? extends U, E> mapper, final Collection<U> c) {
@@ -4493,10 +4866,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param mapper
-     * @param c
-     * @return
+     * @param <U> 
+     * @param mapper 
+     * @param c 
+     * @return 
      * @see N#difference(Collection, Collection)
      */
     public <U> ExceptionalStream<T, E> difference(final Function<? super T, ? extends U> mapper, final Collection<U> c) {
@@ -4554,12 +4929,24 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return appendIfEmpty(supplier);
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @return 
+     */
     @IntermediateOp
     @SafeVarargs
     public final ExceptionalStream<T, E> prepend(final T... a) {
         return prepend(ExceptionalStream.of(a));
     }
 
+    /**
+     * 
+     *
+     * @param c 
+     * @return 
+     */
     @IntermediateOp
     public ExceptionalStream<T, E> prepend(final Collection<? extends T> c) {
         return prepend(ExceptionalStream.of(c));
@@ -4577,12 +4964,24 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return concat(s, this);
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @return 
+     */
     @IntermediateOp
     @SafeVarargs
     public final ExceptionalStream<T, E> append(final T... a) {
         return append(ExceptionalStream.of(a));
     }
 
+    /**
+     * 
+     *
+     * @param c 
+     * @return 
+     */
     @IntermediateOp
     public ExceptionalStream<T, E> append(final Collection<? extends T> c) {
         return append(ExceptionalStream.of(c));
@@ -4600,12 +4999,24 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return concat(this, s);
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @return 
+     */
     @IntermediateOp
     @SafeVarargs
     public final ExceptionalStream<T, E> appendIfEmpty(final T... a) {
         return appendIfEmpty(Arrays.asList(a));
     }
 
+    /**
+     * 
+     *
+     * @param c 
+     * @return 
+     */
     @IntermediateOp
     public ExceptionalStream<T, E> appendIfEmpty(final Collection<? extends T> c) {
         assertNotClosed();
@@ -4668,9 +5079,8 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      * Append if empty.
      *
-     * @param supplier
-     * @return
-     * @throws E the e
+     * @param supplier 
+     * @return 
      */
     @IntermediateOp
     public ExceptionalStream<T, E> appendIfEmpty(final Throwables.Supplier<? extends ExceptionalStream<T, E>, ? extends E> supplier) {
@@ -5074,6 +5484,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //        return newStream(iter).onClose(newCloseHandler(iter)).filter(NOT_NULL_MASK);
     //    }
 
+    /**
+     * 
+     *
+     * @param exceptionSupplier 
+     * @return 
+     */
     @IntermediateOp
     public ExceptionalStream<T, E> throwIfEmpty(final Supplier<? extends E> exceptionSupplier) {
         this.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
@@ -5091,6 +5507,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    /**
+     * 
+     *
+     * @param <R> 
+     * @param <E2> 
+     * @param func 
+     * @return 
+     * @throws E 
+     * @throws E2 
+     */
     @TerminalOp
     public <R, E2 extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super ExceptionalStream<T, E>, R, E2> func) throws E, E2 {
         assertNotClosed();
@@ -5106,6 +5532,15 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    /**
+     * 
+     *
+     * @param <E2> 
+     * @param action 
+     * @return 
+     * @throws E 
+     * @throws E2 
+     */
     @TerminalOp
     public <E2 extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super ExceptionalStream<T, E>, E2> action) throws E, E2 {
         assertNotClosed();
@@ -5157,6 +5592,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return onEach(action);
     }
 
+    /**
+     * 
+     *
+     * @param action 
+     * @return 
+     */
     @IntermediateOp
     public ExceptionalStream<T, E> peekFirst(final Throwables.Consumer<? super T, ? extends E> action) {
         assertNotClosed();
@@ -5183,6 +5624,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }, sorted, cmp, closeHandlers);
     }
 
+    /**
+     * 
+     *
+     * @param action 
+     * @return 
+     */
     @IntermediateOp
     public ExceptionalStream<T, E> peekLast(final Throwables.Consumer<? super T, ? extends E> action) {
         assertNotClosed();
@@ -5395,6 +5842,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }, closeHandlers);
     }
 
+    /**
+     * 
+     *
+     * @param where 
+     * @return 
+     */
     @IntermediateOp
     public ExceptionalStream<ExceptionalStream<T, E>, E> splitAt(final int where) {
         assertNotClosed();
@@ -5463,6 +5916,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }, closeHandlers);
     }
 
+    /**
+     * 
+     *
+     * @param where 
+     * @return 
+     */
     @IntermediateOp
     public ExceptionalStream<ExceptionalStream<T, E>, E> splitAt(final Throwables.Predicate<? super T, ? extends E> where) {
         assertNotClosed();
@@ -5929,6 +6388,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }, sorted, cmp, closeHandlers);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @IntermediateOp
     public ExceptionalStream<T, E> skipNull() {
         return filter(Fnn.notNull());
@@ -5982,6 +6446,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //        return from == 0 ? limit(to) : skip(from).limit(to - from);
     //    }
 
+    /**
+     * 
+     *
+     * @param n 
+     * @return 
+     */
     @IntermediateOp
     public ExceptionalStream<T, E> top(int n) {
         assertNotClosed();
@@ -5989,6 +6459,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return top(n, Comparators.NATURAL_ORDER);
     }
 
+    /**
+     * 
+     *
+     * @param n 
+     * @param comparator 
+     * @return 
+     */
     @IntermediateOp
     public ExceptionalStream<T, E> top(final int n, final Comparator<? super T> comparator) {
         assertNotClosed();
@@ -6164,6 +6641,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }, sorted, cmp, closeHandlers);
     }
 
+    /**
+     * 
+     *
+     * @param n 
+     * @return 
+     */
     @IntermediateOp
     public ExceptionalStream<T, E> skipLast(final int n) {
         assertNotClosed();
@@ -6202,6 +6685,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }, sorted, cmp, closeHandlers);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @IntermediateOp
     @TerminalOpTriggered
     public ExceptionalStream<T, E> reversed() {
@@ -6262,6 +6750,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }, false, null, closeHandlers);
     }
 
+    /**
+     * 
+     *
+     * @param distance 
+     * @return 
+     */
     @IntermediateOp
     @TerminalOpTriggered
     public ExceptionalStream<T, E> rotated(final int distance) {
@@ -6334,12 +6828,23 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }, false, null, closeHandlers);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @IntermediateOp
     @TerminalOpTriggered
     public ExceptionalStream<T, E> shuffled() {
         return shuffled(RAND);
     }
 
+    /**
+     * 
+     *
+     * @param rnd 
+     * @return 
+     */
     @IntermediateOp
     @TerminalOpTriggered
     public ExceptionalStream<T, E> shuffled(final Random rnd) {
@@ -6351,6 +6856,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }, false, null);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @IntermediateOp
     @TerminalOpTriggered
     public ExceptionalStream<T, E> sorted() {
@@ -6396,12 +6906,23 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return sorted(comparator);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @IntermediateOp
     @TerminalOpTriggered
     public ExceptionalStream<T, E> reverseSorted() {
         return sorted(Comparators.REVERSED_ORDER);
     }
 
+    /**
+     * 
+     *
+     * @param comparator 
+     * @return 
+     */
     @IntermediateOp
     @TerminalOpTriggered
     public ExceptionalStream<T, E> reverseSorted(Comparator<? super T> comparator) {
@@ -6478,6 +6999,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }, sorted, cmp, closeHandlers);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @SequentialOnly
     @IntermediateOp
     public ExceptionalStream<T, E> cycled() {
@@ -6538,6 +7064,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }, false, null, closeHandlers);
     }
 
+    /**
+     * 
+     *
+     * @param times 
+     * @return 
+     */
     @SequentialOnly
     @IntermediateOp
     public ExceptionalStream<T, E> cycled(long times) {
@@ -6602,9 +7134,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param rateLimiter
-     * @return
+     * @param permitsPerSecond 
+     * @return 
      */
     @IntermediateOp
     public ExceptionalStream<T, E> rateLimited(double permitsPerSecond) {
@@ -6612,9 +7145,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param permitsPerSecond
-     * @return
+     * @param rateLimiter 
+     * @return 
      * @see RateLimiter#create(double)
      */
     @IntermediateOp
@@ -6627,12 +7161,23 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return onEach(action);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Beta
     @IntermediateOp
     public ExceptionalStream<Timed<T>, E> timed() {
         return map(Timed::of);
     }
 
+    /**
+     * 
+     *
+     * @param delimiter 
+     * @return 
+     */
     @IntermediateOp
     public ExceptionalStream<T, E> intersperse(final T delimiter) {
         assertNotClosed();
@@ -6664,6 +7209,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }, closeHandlers);
     }
 
+    /**
+     * 
+     *
+     * @param step 
+     * @return 
+     */
     @Beta
     @IntermediateOp
     public ExceptionalStream<T, E> step(final long step) {
@@ -6695,6 +7246,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return newStream(iterator, sorted, cmp, closeHandlers);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Beta
     @IntermediateOp
     public ExceptionalStream<Indexed<T>, E> indexed() {
@@ -7780,9 +8336,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param <E2>
-     * @param action
+     * @param <E2> 
+     * @param action 
+     * @param threadNum 
      * @throws E the e
      * @throws E2 the e2
      */
@@ -7801,9 +8359,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param <E2>
-     * @param action
+     * @param <E2> 
+     * @param action 
+     * @param threadNum 
+     * @param executor 
      * @throws E the e
      * @throws E2 the e2
      */
@@ -8229,6 +8790,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return findFirst(predicate);
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @return 
+     * @throws E 
+     */
     @TerminalOp
     @SafeVarargs
     public final boolean containsAll(final T... a) throws E {
@@ -8257,6 +8825,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    /**
+     * 
+     *
+     * @param c 
+     * @return 
+     * @throws E 
+     */
     @TerminalOp
     public boolean containsAll(final Collection<? extends T> c) throws E {
         assertNotClosed();
@@ -8278,6 +8853,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    /**
+     * 
+     *
+     * @param a 
+     * @return 
+     * @throws E 
+     */
     @TerminalOp
     @SafeVarargs
     public final boolean containsAny(final T... a) throws E {
@@ -8308,6 +8890,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    /**
+     * 
+     *
+     * @param c 
+     * @return 
+     * @throws E 
+     */
     @TerminalOp
     public boolean containsAny(final Collection<? extends T> c) throws E {
         assertNotClosed();
@@ -8328,6 +8917,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     * @throws E 
+     */
     @TerminalOp
     public boolean hasDuplicates() throws E {
         assertNotClosed();
@@ -8347,6 +8942,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    /**
+     * 
+     *
+     * @param k 
+     * @param comparator 
+     * @return 
+     * @throws E 
+     */
     @TerminalOp
     public Optional<T> kthLargest(int k, Comparator<? super T> comparator) throws E {
         assertNotClosed();
@@ -8393,6 +8996,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    /**
+     * 
+     *
+     * @param comparator 
+     * @return 
+     * @throws E 
+     */
     @TerminalOp
     public Optional<Map<Percentage, T>> percentiles(Comparator<? super T> comparator) throws E {
         assertNotClosed();
@@ -8678,6 +9288,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    /**
+     * 
+     *
+     * @param <R> 
+     * @param <E2> 
+     * @param func 
+     * @return 
+     * @throws E 
+     * @throws E2 
+     */
     @TerminalOp
     public <R, E2 extends Exception> R toListAndThen(Throwables.Function<? super List<T>, R, E2> func) throws E, E2 {
         assertNotClosed();
@@ -8685,6 +9305,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return func.apply(toList());
     }
 
+    /**
+     * 
+     *
+     * @param <R> 
+     * @param <E2> 
+     * @param func 
+     * @return 
+     * @throws E 
+     * @throws E2 
+     */
     @TerminalOp
     public <R, E2 extends Exception> R toSetAndThen(Throwables.Function<? super Set<T>, R, E2> func) throws E, E2 {
         assertNotClosed();
@@ -8692,6 +9322,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return func.apply(toSet());
     }
 
+    /**
+     * 
+     *
+     * @param <R> 
+     * @param <CC> 
+     * @param <E2> 
+     * @param supplier 
+     * @param func 
+     * @return 
+     * @throws E 
+     * @throws E2 
+     */
     @TerminalOp
     public <R, CC extends Collection<T>, E2 extends Exception> R toCollectionAndThen(Supplier<? extends CC> supplier,
             Throwables.Function<? super CC, R, E2> func) throws E, E2 {
@@ -8701,13 +9343,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param keyMapper
-     * @param valueMapper
-     * @return
+     * @param <E2> 
+     * @param <E3> 
+     * @param keyMapper 
+     * @param valueMapper 
+     * @return 
      * @throws E the e
+     * @throws E2 
+     * @throws E3 
      * @throws IllegalStateException if there are duplicated keys.
      * @see {@link Fn.Fnn#throwingMerger()}
      * @see {@link Fn.Fnn#replacingMerger()}
@@ -8721,14 +9368,21 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param keyMapper
-     * @param valueMapper
-     * @param mergeFunction
-     * @return
+     * @param <E2> 
+     * @param <E3> 
+     * @param <E4> 
+     * @param keyMapper 
+     * @param valueMapper 
+     * @param mergeFunction 
+     * @return 
      * @throws E the e
+     * @throws E2 
+     * @throws E3 
+     * @throws E4 
      * @see {@link Fn.Fnn#throwingMerger()}
      * @see {@link Fn.Fnn#replacingMerger()}
      * @see {@link Fn.Fnn#ignoringMerger()}
@@ -8742,13 +9396,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param keyMapper
-     * @param valueMapper
-     * @return
+     * @param <E2> 
+     * @param <E3> 
+     * @param keyMapper 
+     * @param valueMapper 
+     * @return 
      * @throws E the e
+     * @throws E2 
+     * @throws E3 
      * @throws IllegalStateException if there are duplicated keys.
      * @see {@link Fn.Fnn#throwingMerger()}
      * @see {@link Fn.Fnn#replacingMerger()}
@@ -8761,15 +9420,20 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M>
-     * @param keyMapper
-     * @param valueMapper
-     * @param mapFactory
-     * @return
+     * @param <M> 
+     * @param <E2> 
+     * @param <E3> 
+     * @param keyMapper 
+     * @param valueMapper 
+     * @param mapFactory 
+     * @return 
      * @throws E the e
+     * @throws E2 
+     * @throws E3 
      * @throws IllegalStateException if there are duplicated keys.
      * @see {@link Fn.Fnn#throwingMerger()}
      * @see {@link Fn.Fnn#replacingMerger()}
@@ -8782,14 +9446,21 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param keyMapper
-     * @param valueMapper
-     * @param mergeFunction
-     * @return
+     * @param <E2> 
+     * @param <E3> 
+     * @param <E4> 
+     * @param keyMapper 
+     * @param valueMapper 
+     * @param mergeFunction 
+     * @return 
      * @throws E the e
+     * @throws E2 
+     * @throws E3 
+     * @throws E4 
      * @see {@link Fn.Fnn#throwingMerger()}
      * @see {@link Fn.Fnn#replacingMerger()}
      * @see {@link Fn.Fnn#ignoringMerger()}
@@ -8802,16 +9473,23 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M>
-     * @param keyMapper
-     * @param valueMapper
-     * @param mergeFunction
-     * @param mapFactory
-     * @return
+     * @param <M> 
+     * @param <E2> 
+     * @param <E3> 
+     * @param <E4> 
+     * @param keyMapper 
+     * @param valueMapper 
+     * @param mergeFunction 
+     * @param mapFactory 
+     * @return 
      * @throws E the e
+     * @throws E2 
+     * @throws E3 
+     * @throws E4 
      * @see {@link Fn.Fnn#throwingMerger()}
      * @see {@link Fn.Fnn#replacingMerger()}
      * @see {@link Fn.Fnn#ignoringMerger()}
@@ -8918,11 +9596,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //    }
 
     /**
+     * 
      *
      * @param <K> the key type
-     * @param keyMapper
-     * @return
+     * @param <E2> 
+     * @param keyMapper 
+     * @return 
      * @throws E the e
+     * @throws E2 
      * @see Collectors#groupingBy(Function)
      */
     @TerminalOp
@@ -8931,13 +9612,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
      * @param <K> the key type
-     * @param <M>
-     * @param keyMapper
-     * @param mapFactory
-     * @return
+     * @param <M> 
+     * @param <E2> 
+     * @param keyMapper 
+     * @param mapFactory 
+     * @return 
      * @throws E the e
+     * @throws E2 
      * @see Collectors#groupingBy(Function, Supplier)
      */
     @TerminalOp
@@ -8949,13 +9633,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param keyMapper
-     * @param valueMapper
-     * @return
+     * @param <E2> 
+     * @param <E3> 
+     * @param keyMapper 
+     * @param valueMapper 
+     * @return 
      * @throws E the e
+     * @throws E2 
+     * @throws E3 
      */
     @TerminalOp
     public <K, V, E2 extends Exception, E3 extends Exception> Map<K, List<V>> groupTo(Throwables.Function<? super T, ? extends K, E2> keyMapper,
@@ -8964,15 +9653,20 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M>
-     * @param keyMapper
-     * @param valueMapper
-     * @param mapFactory
-     * @return
+     * @param <M> 
+     * @param <E2> 
+     * @param <E3> 
+     * @param keyMapper 
+     * @param valueMapper 
+     * @param mapFactory 
+     * @return 
      * @throws E the e
+     * @throws E2 
+     * @throws E3 
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     @TerminalOp
@@ -9007,14 +9701,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
      * @param <K> the key type
-     * @param <A>
-     * @param <D>
-     * @param keyMapper
-     * @param downstream
-     * @return
+     * @param <A> 
+     * @param <D> 
+     * @param <E2> 
+     * @param keyMapper 
+     * @param downstream 
+     * @return 
      * @throws E the e
+     * @throws E2 
      */
     @TerminalOp
     public <K, A, D, E2 extends Exception> Map<K, D> groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
@@ -9023,16 +9720,19 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
      * @param <K> the key type
-     * @param <A>
-     * @param <D>
-     * @param <M>
-     * @param keyMapper
-     * @param downstream
-     * @param mapFactory
-     * @return
+     * @param <A> 
+     * @param <D> 
+     * @param <M> 
+     * @param <E2> 
+     * @param keyMapper 
+     * @param downstream 
+     * @param mapFactory 
+     * @return 
      * @throws E the e
+     * @throws E2 
      */
     @TerminalOp
     public <K, A, D, M extends Map<K, D>, E2 extends Exception> M groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
@@ -9041,16 +9741,21 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <A>
-     * @param <D>
-     * @param keyMapper
-     * @param valueMapper
-     * @param downstream
-     * @return
+     * @param <A> 
+     * @param <D> 
+     * @param <E2> 
+     * @param <E3> 
+     * @param keyMapper 
+     * @param valueMapper 
+     * @param downstream 
+     * @return 
      * @throws E the e
+     * @throws E2 
+     * @throws E3 
      */
     @TerminalOp
     public <K, V, A, D, E2 extends Exception, E3 extends Exception> Map<K, D> groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
@@ -9059,18 +9764,23 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param <A>
-     * @param <D>
-     * @param <M>
-     * @param keyMapper
-     * @param valueMapper
-     * @param downstream
-     * @param mapFactory
-     * @return
+     * @param <A> 
+     * @param <D> 
+     * @param <M> 
+     * @param <E2> 
+     * @param <E3> 
+     * @param keyMapper 
+     * @param valueMapper 
+     * @param downstream 
+     * @param mapFactory 
+     * @return 
      * @throws E the e
+     * @throws E2 
+     * @throws E3 
      */
     @TerminalOp
     public <K, V, A, D, M extends Map<K, D>, E2 extends Exception, E3 extends Exception> M groupTo(
@@ -9118,9 +9828,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param predicate
-     * @return
+     * @param <E2> 
+     * @param predicate 
+     * @return 
+     * @throws E 
+     * @throws E2 
      * @see Collectors#partitioningBy(Predicate)
      */
     @TerminalOp
@@ -9131,10 +9845,16 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param predicate
-     * @param downstream
-     * @return
+     * @param <A> 
+     * @param <D> 
+     * @param <E2> 
+     * @param predicate 
+     * @param downstream 
+     * @return 
+     * @throws E 
+     * @throws E2 
      * @see Collectors#partitioningBy(Predicate, Collector)
      */
     @TerminalOp
@@ -9157,11 +9877,34 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return map;
     }
 
+    /**
+     * 
+     *
+     * @param <K> 
+     * @param <E2> 
+     * @param keyMapper 
+     * @return 
+     * @throws E 
+     * @throws E2 
+     */
     @TerminalOp
     public <K, E2 extends Exception> ListMultimap<K, T> toMultimap(final Throwables.Function<? super T, ? extends K, E2> keyMapper) throws E, E2 {
         return toMultimap(keyMapper, Suppliers.<K, T> ofListMultimap());
     }
 
+    /**
+     * 
+     *
+     * @param <K> 
+     * @param <V> 
+     * @param <M> 
+     * @param <E2> 
+     * @param keyMapper 
+     * @param mapFactory 
+     * @return 
+     * @throws E 
+     * @throws E2 
+     */
     @TerminalOp
     public <K, V extends Collection<T>, M extends Multimap<K, T, V>, E2 extends Exception> M toMultimap(
             final Throwables.Function<? super T, ? extends K, E2> keyMapper, Supplier<? extends M> mapFactory) throws E, E2 {
@@ -9170,12 +9913,43 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return toMultimap(keyMapper, valueMapper, mapFactory);
     }
 
+    /**
+     * 
+     *
+     * @param <K> 
+     * @param <V> 
+     * @param <E2> 
+     * @param <E3> 
+     * @param keyMapper 
+     * @param valueMapper 
+     * @return 
+     * @throws E 
+     * @throws E2 
+     * @throws E3 
+     */
     @TerminalOp
     public <K, V, E2 extends Exception, E3 extends Exception> ListMultimap<K, V> toMultimap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
             final Throwables.Function<? super T, ? extends V, E3> valueMapper) throws E, E2, E3 {
         return toMultimap(keyMapper, valueMapper, Suppliers.<K, V> ofListMultimap());
     }
 
+    /**
+     * 
+     *
+     * @param <K> 
+     * @param <V> 
+     * @param <C> 
+     * @param <M> 
+     * @param <E2> 
+     * @param <E3> 
+     * @param keyMapper 
+     * @param valueMapper 
+     * @param mapFactory 
+     * @return 
+     * @throws E 
+     * @throws E2 
+     * @throws E3 
+     */
     @TerminalOp
     public <K, V, C extends Collection<V>, M extends Multimap<K, V, C>, E2 extends Exception, E3 extends Exception> M toMultimap(
             final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
@@ -9202,11 +9976,24 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     * @throws E 
+     */
     @TerminalOp
     public Multiset<T> toMultiset() throws E {
         return toMultiset(Suppliers.<T> ofMultiset());
     }
 
+    /**
+     * 
+     *
+     * @param supplier 
+     * @return 
+     * @throws E 
+     */
     @TerminalOp
     public Multiset<T> toMultiset(Supplier<? extends Multiset<T>> supplier) throws E { //NOSONAR
         assertNotClosed();
@@ -9226,11 +10013,24 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     * @throws E 
+     */
     @TerminalOp
     public LongMultiset<T> toLongMultiset() throws E {
         return toLongMultiset(Suppliers.<T> ofLongMultiset());
     }
 
+    /**
+     * 
+     *
+     * @param supplier 
+     * @return 
+     * @throws E 
+     */
     @TerminalOp
     public LongMultiset<T> toLongMultiset(Supplier<? extends LongMultiset<T>> supplier) throws E { //NOSONAR
         assertNotClosed();
@@ -9279,10 +10079,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param func
-     * @return
+     * @param <E2> 
+     * @param func 
+     * @return 
      * @throws E the e
+     * @throws E2 
      */
     @TerminalOp
     public <E2 extends Exception> long sumInt(Throwables.ToIntFunction<? super T, E2> func) throws E, E2 {
@@ -9302,10 +10105,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param func
-     * @return
+     * @param <E2> 
+     * @param func 
+     * @return 
      * @throws E the e
+     * @throws E2 
      */
     @TerminalOp
     public <E2 extends Exception> long sumLong(Throwables.ToLongFunction<? super T, E2> func) throws E, E2 {
@@ -9325,10 +10131,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param func
-     * @return
+     * @param <E2> 
+     * @param func 
+     * @return 
      * @throws E the e
+     * @throws E2 
      */
     @TerminalOp
     public <E2 extends Exception> double sumDouble(Throwables.ToDoubleFunction<? super T, E2> func) throws E, E2 {
@@ -9348,10 +10157,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param func
-     * @return
+     * @param <E2> 
+     * @param func 
+     * @return 
      * @throws E the e
+     * @throws E2 
      */
     @TerminalOp
     public <E2 extends Exception> OptionalDouble averageInt(Throwables.ToIntFunction<? super T, E2> func) throws E, E2 {
@@ -9377,10 +10189,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param func
-     * @return
+     * @param <E2> 
+     * @param func 
+     * @return 
      * @throws E the e
+     * @throws E2 
      */
     @TerminalOp
     public <E2 extends Exception> OptionalDouble averageLong(Throwables.ToLongFunction<? super T, E2> func) throws E, E2 {
@@ -9406,10 +10221,13 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param func
-     * @return
+     * @param <E2> 
+     * @param func 
+     * @return 
      * @throws E the e
+     * @throws E2 
      */
     @TerminalOp
     public <E2 extends Exception> OptionalDouble averageDouble(Throwables.ToDoubleFunction<? super T, E2> func) throws E, E2 {
@@ -9688,11 +10506,27 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return func.apply(collect(collector));
     }
 
+    /**
+     * 
+     *
+     * @param delimiter 
+     * @return 
+     * @throws E 
+     */
     @TerminalOp
     public String join(final CharSequence delimiter) throws E {
         return join(delimiter, "", "");
     }
 
+    /**
+     * 
+     *
+     * @param delimiter 
+     * @param prefix 
+     * @param suffix 
+     * @return 
+     * @throws E 
+     */
     @TerminalOp
     public String join(CharSequence delimiter, CharSequence prefix, CharSequence suffix) throws E {
         assertNotClosed();
@@ -9712,11 +10546,29 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
 
     private static final Throwables.Function<Object, String, IOException> TO_LINE_OF_STRING = N::stringOf;
 
+    /**
+     * 
+     *
+     * @param file 
+     * @return 
+     * @throws E 
+     * @throws IOException 
+     */
     @TerminalOp
     public long persist(final File file) throws E, IOException {
         return persist(TO_LINE_OF_STRING, file);
     }
 
+    /**
+     * 
+     *
+     * @param header 
+     * @param tail 
+     * @param file 
+     * @return 
+     * @throws E 
+     * @throws IOException 
+     */
     @TerminalOp
     public long persist(final String header, final String tail, final File file) throws E, IOException {
         return persist(TO_LINE_OF_STRING, header, tail, file);
@@ -9741,6 +10593,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return persist(toLine, null, null, file);
     }
 
+    /**
+     * 
+     *
+     * @param toLine 
+     * @param header 
+     * @param tail 
+     * @param file 
+     * @return 
+     * @throws E 
+     * @throws IOException 
+     */
     @TerminalOp
     public long persist(final Throwables.Function<? super T, String, IOException> toLine, final String header, final String tail, final File file)
             throws E, IOException {
@@ -9755,6 +10618,15 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    /**
+     * 
+     *
+     * @param toLine 
+     * @param os 
+     * @return 
+     * @throws E 
+     * @throws IOException 
+     */
     @TerminalOp
     public long persist(final Throwables.Function<? super T, String, IOException> toLine, final OutputStream os) throws E, IOException {
         assertNotClosed();
@@ -9789,6 +10661,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return persist(toLine, null, null, writer);
     }
 
+    /**
+     * 
+     *
+     * @param toLine 
+     * @param header 
+     * @param tail 
+     * @param writer 
+     * @return 
+     * @throws E 
+     * @throws IOException 
+     */
     @TerminalOp
     public long persist(Throwables.Function<? super T, String, IOException> toLine, String header, String tail, Writer writer) throws E, IOException {
         assertNotClosed();
@@ -9829,6 +10712,15 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    /**
+     * 
+     *
+     * @param writeLine 
+     * @param file 
+     * @return 
+     * @throws E 
+     * @throws IOException 
+     */
     @TerminalOp
     public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final File file) throws E, IOException {
         assertNotClosed();
@@ -9836,6 +10728,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return persist(writeLine, null, null, file);
     }
 
+    /**
+     * 
+     *
+     * @param writeLine 
+     * @param header 
+     * @param tail 
+     * @param file 
+     * @return 
+     * @throws E 
+     * @throws IOException 
+     */
     @TerminalOp
     public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final String header, final String tail, final File file)
             throws E, IOException {
@@ -9850,6 +10753,15 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    /**
+     * 
+     *
+     * @param writeLine 
+     * @param writer 
+     * @return 
+     * @throws E 
+     * @throws IOException 
+     */
     @TerminalOp
     public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final Writer writer) throws E, IOException {
         assertNotClosed();
@@ -9857,6 +10769,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         return persist(writeLine, null, null, writer);
     }
 
+    /**
+     * 
+     *
+     * @param writeLine 
+     * @param header 
+     * @param tail 
+     * @param writer 
+     * @return 
+     * @throws E 
+     * @throws IOException 
+     */
     @TerminalOp
     public long persist(final Throwables.BiConsumer<? super T, Writer, IOException> writeLine, final String header, final String tail, final Writer writer)
             throws E, IOException {
@@ -9898,6 +10821,18 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    /**
+     * 
+     *
+     * @param conn 
+     * @param insertSQL 
+     * @param batchSize 
+     * @param batchIntervalInMillis 
+     * @param stmtSetter 
+     * @return 
+     * @throws E 
+     * @throws SQLException 
+     */
     @TerminalOp
     public long persist(final Connection conn, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws E, SQLException {
@@ -9914,6 +10849,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    /**
+     * 
+     *
+     * @param stmt 
+     * @param batchSize 
+     * @param batchIntervalInMillis 
+     * @param stmtSetter 
+     * @return 
+     * @throws E 
+     * @throws SQLException 
+     */
     @TerminalOp
     public long persist(final PreparedStatement stmt, final int batchSize, final long batchIntervalInMillis,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws E, SQLException {
@@ -10200,11 +11146,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      * Each line in the output file/Writer is an array of JSON String without root bracket.
      *
-     * @param headers
-     * @param writer
-     * @return
-     * @throws E
-     * @throws IOException
+     * @param csvHeaders 
+     * @param writer 
+     * @return 
+     * @throws E 
+     * @throws IOException 
      */
     @TerminalOp
     public long persistToCSV(Collection<String> csvHeaders, Writer writer) throws E, IOException {
@@ -10399,12 +11345,22 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    /**
+     * 
+     *
+     * @throws E 
+     */
     @Beta
     @TerminalOp
     public void println() throws E {
         N.println(join(", ", "[", "]"));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @IntermediateOp
     public Stream<T> unchecked() {
         assertNotClosed();
@@ -10422,6 +11378,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @IntermediateOp
     public java.util.stream.Stream<T> toJdkStream() {
         assertNotClosed();
@@ -10547,6 +11508,11 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //        }, sorted, comparator, newCloseHandlers);
     //    }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Beta
     @IntermediateOp
     public ExceptionalStream<T, Exception> cast() {
@@ -10556,11 +11522,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
+     * 
      *
-     * @param <SS>
-     * @param transfer
-     * @return
-     * @throws E the e
+     * @param <TT> 
+     * @param <EE> 
+     * @param transfer 
+     * @return 
      */
     @Beta
     @IntermediateOp
@@ -10792,9 +11759,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * Temporarily switch the stream to parallel stream for operation {@code filter} and then switch back to sequence stream.
      * <br />
      *
-     *
-     * @param predicate
-     * @return
+     * @param maxThreadNum 
+     * @param predicate 
+     * @return 
      * @see Stream#spsFilter(int, Predicate)
      * @see ExceptionUtil#toRuntimeException(Throwable)
      * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
@@ -10813,10 +11780,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * Temporarily switch the stream to parallel stream for operation {@code map} and then switch back to sequence stream.
      * <br />
      *
-     *
-     * @param <R>
-     * @param mapper
-     * @return
+     * @param <R> 
+     * @param maxThreadNum 
+     * @param mapper 
+     * @return 
      * @see Stream#spsMap(int, Function)
      * @see ExceptionUtil#toRuntimeException(Throwable)
      * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
@@ -10835,10 +11802,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
      * <br />
      *
-     *
-     * @param <R>
-     * @param mapper
-     * @return
+     * @param <R> 
+     * @param maxThreadNum 
+     * @param mapper 
+     * @return 
      * @see Stream#spsFlatMap(int, Function)
      * @see ExceptionUtil#toRuntimeException(Throwable)
      * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
@@ -10857,10 +11824,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * Temporarily switch the stream to parallel stream for operation {@code flatMap} and then switch back to sequence stream.
      * <br />
      *
-     *
-     * @param <R>
-     * @param mapper
-     * @return
+     * @param <R> 
+     * @param maxThreadNum 
+     * @param mapper 
+     * @return 
      * @see Stream#spsFlatmap(int, Function)
      * @see ExceptionUtil#toRuntimeException(Throwable)
      * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
@@ -10879,9 +11846,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * Temporarily switch the stream to parallel stream for operation {@code onEach} and then switch back to sequence stream.
      * <br />
      *
-     *
-     * @param action
-     * @return
+     * @param maxThreadNum 
+     * @param action 
+     * @return 
      * @see Stream#onEach(int, Consumer)
      * @see ExceptionUtil#toRuntimeException(Throwable)
      * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
@@ -10919,10 +11886,9 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * Temporarily switch the stream to parallel stream for operation {@code map} and then switch back to sequence stream.
      * <br />
      *
-     *
-     * @param <R>
-     * @param mapper
-     * @return
+     * @param <U> 
+     * @param mapper 
+     * @return 
      * @see Stream#spsMap(Function)
      * @see ExceptionUtil#toRuntimeException(Throwable)
      * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
@@ -11019,11 +11985,10 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * Temporarily switch the stream to parallel stream for operation {@code map} and then switch back to sequence stream.
      * <br />
      *
-     *
-     * @param <R>
-     * @param maxThreadNum
-     * @param mapper
-     * @return
+     * @param <U> 
+     * @param maxThreadNum 
+     * @param mapper 
+     * @return 
      * @see Stream#spsMap(Function)
      * @see ExceptionUtil#toRuntimeException(Throwable)
      * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
@@ -11556,10 +12521,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     }
 
     /**
-     *
      * It will be called by terminal operations in final.
-     *
-     * @throws E the e
      */
     @TerminalOp
     @Override
@@ -11934,15 +12896,24 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             }
         };
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @return 
+         */
         public static <T, E extends Exception> ExceptionalIterator<T, E> empty() {
             return EMPTY;
         }
 
         /**
+         * 
          *
-         * @param <T>
-         * @param val
-         * @return
+         * @param <T> 
+         * @param <E> 
+         * @param val 
+         * @return 
          */
         public static <T, E extends Exception> ExceptionalIterator<T, E> just(final T val) {
             return new ExceptionalIterator<>() {
@@ -11967,10 +12938,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
 
         /**
+         * 
          *
-         * @param <T>
-         * @param a
-         * @return
+         * @param <T> 
+         * @param <E> 
+         * @param a 
+         * @return 
          */
         @SafeVarargs
         public static <T, E extends Exception> ExceptionalIterator<T, E> of(final T... a) {
@@ -11978,12 +12951,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         }
 
         /**
+         * 
          *
-         * @param <T>
-         * @param a
-         * @param fromIndex
-         * @param toIndex
-         * @return
+         * @param <T> 
+         * @param <E> 
+         * @param a 
+         * @param fromIndex 
+         * @param toIndex 
+         * @return 
          */
         public static <T, E extends Exception> ExceptionalIterator<T, E> of(final T[] a, final int fromIndex, final int toIndex) {
             N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -12025,6 +13000,14 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             };
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @param iter 
+         * @return 
+         */
         public static <T, E extends Exception> ExceptionalIterator<T, E> of(final Iterator<? extends T> iter) {
             if (iter == null) {
                 return EMPTY;
@@ -12189,10 +13172,26 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
             };
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @param a 
+         * @return 
+         */
         public static <T, E extends Exception> ExceptionalIterator<T, E> concat(final ExceptionalIterator<? extends T, ? extends E>... a) {
             return concat(N.asList(a));
         }
 
+        /**
+         * 
+         *
+         * @param <T> 
+         * @param <E> 
+         * @param c 
+         * @return 
+         */
         public static <T, E extends Exception> ExceptionalIterator<T, E> concat(final Collection<? extends ExceptionalIterator<? extends T, ? extends E>> c) {
             if (N.isNullOrEmpty(c)) {
                 return ExceptionalIterator.empty();

@@ -30,6 +30,11 @@ import com.landawn.abacus.util.ThreadMode;
 @Target(ElementType.METHOD)
 public @interface Subscribe {
 
+    /**
+     * 
+     *
+     * @return 
+     */
     ThreadMode threadMode() default ThreadMode.DEFAULT;
 
     /**

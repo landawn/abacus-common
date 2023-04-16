@@ -31,6 +31,11 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
         super(OPTIONAL_DOUBLE);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<OptionalDouble> clazz() {
         return OptionalDouble.class;

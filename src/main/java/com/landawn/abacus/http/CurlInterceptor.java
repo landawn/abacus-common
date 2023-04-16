@@ -35,15 +35,33 @@ class CurlInterceptor implements Interceptor {
     private final Consumer<String> logHandler;
     private final char quoteChar;
 
+    /**
+     * 
+     *
+     * @param logHandler 
+     */
     public CurlInterceptor(final Consumer<String> logHandler) {
         this(DEFAULT_QUOTE_CHAR, logHandler);
     }
 
+    /**
+     * 
+     *
+     * @param quoteChar 
+     * @param logHandler 
+     */
     public CurlInterceptor(final char quoteChar, final Consumer<String> logHandler) {
         this.logHandler = logHandler;
         this.quoteChar = quoteChar;
     }
 
+    /**
+     * 
+     *
+     * @param chain 
+     * @return 
+     * @throws IOException 
+     */
     @Override
     public Response intercept(Chain chain) throws IOException {
         final Request request = chain.request();

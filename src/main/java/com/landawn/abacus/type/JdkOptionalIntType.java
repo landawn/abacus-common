@@ -31,6 +31,11 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
         super(OPTIONAL_INT);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<OptionalInt> clazz() {
         return OptionalInt.class;

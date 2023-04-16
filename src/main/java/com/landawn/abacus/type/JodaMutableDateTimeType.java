@@ -41,6 +41,11 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
         super(typeName);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<MutableDateTime> clazz() {
         return MutableDateTime.class;

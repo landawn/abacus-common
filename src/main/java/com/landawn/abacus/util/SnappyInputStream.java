@@ -26,6 +26,12 @@ public final class SnappyInputStream extends InputStream {
 
     private final org.xerial.snappy.SnappyInputStream in;
 
+    /**
+     * 
+     *
+     * @param is 
+     * @throws IOException 
+     */
     public SnappyInputStream(InputStream is) throws IOException {
         in = new org.xerial.snappy.SnappyInputStream(is);
     }

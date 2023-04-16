@@ -43,6 +43,11 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
         elementType = TypeFactory.getType(short.class);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Class clazz() {

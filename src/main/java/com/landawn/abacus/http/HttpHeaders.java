@@ -530,6 +530,11 @@ public final class HttpHeaders {
         this.map = (Map) headers;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public static HttpHeaders create() {
         return new HttpHeaders();
     }
@@ -556,6 +561,12 @@ public final class HttpHeaders {
         return new HttpHeaders(new HashMap<>(headers));
     }
 
+    /**
+     * 
+     *
+     * @param headerValue 
+     * @return 
+     */
     public static String valueOf(final Object headerValue) {
         if (headerValue instanceof String) {
             return (String) headerValue;
@@ -846,14 +857,29 @@ public final class HttpHeaders {
         return map.isEmpty();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public Map<String, Object> toMap() {
         return map instanceof LinkedHashMap || map instanceof SortedMap ? new LinkedHashMap<>(map) : new HashMap<>(map);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public HttpHeaders copy() {
         return new HttpHeaders().setAll(this.map);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public int hashCode() {
         return map.hashCode();
@@ -869,6 +895,11 @@ public final class HttpHeaders {
         return obj instanceof HttpHeaders && this.map.equals(((HttpHeaders) obj).map);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return map.toString();

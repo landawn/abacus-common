@@ -76,6 +76,11 @@ import java.lang.annotation.Target;
 @Retention(RUNTIME)
 public @interface JoinedBy {
 
+    /**
+     * 
+     *
+     * @return 
+     */
     String[] value() default {};
 
     // OnDeleteAction onDelete() default OnDeleteAction.NO_ACTION; // TODO it's very complicated to support it.

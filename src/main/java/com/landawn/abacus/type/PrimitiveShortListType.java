@@ -40,6 +40,11 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
         super(SHORT_LIST);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<ShortList> clazz() {
         return ShortList.class;

@@ -31,6 +31,11 @@ public class MutableShortType extends MutableType<MutableShort> {
         super(MUTABLE_SHORT);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<MutableShort> clazz() {
         return MutableShort.class;

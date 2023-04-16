@@ -40,6 +40,11 @@ public final class PrimitiveCharListType extends AbstractPrimitiveListType<CharL
         super(CHAR_LIST);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<CharList> clazz() {
         return CharList.class;

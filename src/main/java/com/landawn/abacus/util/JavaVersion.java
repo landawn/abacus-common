@@ -292,6 +292,12 @@ public enum JavaVersion {
         }
     }
 
+    /**
+     * 
+     *
+     * @param versionStr 
+     * @return 
+     */
     public static JavaVersion of(final String versionStr) {
         JavaVersion result = null;
 

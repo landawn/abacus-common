@@ -42,6 +42,11 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
         elementType = TypeFactory.getType(boolean.class);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<boolean[]> clazz() {
         return boolean[].class;

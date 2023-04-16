@@ -146,6 +146,11 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
         return new Range<>(new LowerEndpoint<>(min, true), new UpperEndpoint<>(max, true), BoundType.CLOSED_CLOSED);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     public BoundType boundType() {
         return boundType;
     }
@@ -514,6 +519,11 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
         return 37 * result + upperEndpoint.hashCode();
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return lowerEndpoint.toString() + ", " + upperEndpoint.toString();

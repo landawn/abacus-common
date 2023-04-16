@@ -32,9 +32,20 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
 
     private BigDecimal max = null;
 
+    /**
+     * 
+     */
     public BigDecimalSummaryStatistics() {
     }
 
+    /**
+     * 
+     *
+     * @param count 
+     * @param min 
+     * @param max 
+     * @param sum 
+     */
     public BigDecimalSummaryStatistics(long count, BigDecimal min, BigDecimal max, BigDecimal sum) {
         this.count = count;
         this.sum = sum;
@@ -138,6 +149,11 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
 
     static final DecimalFormat df = new DecimalFormat("#,###.000000");
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return Strings.concat("{min=", min == null ? "null" : df.format(min), ", max=", max == null ? "null" : df.format(max), ", count=",

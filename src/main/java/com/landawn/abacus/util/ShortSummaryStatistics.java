@@ -28,9 +28,20 @@ public class ShortSummaryStatistics implements ShortConsumer {
 
     private short max = Short.MIN_VALUE;
 
+    /**
+     * 
+     */
     public ShortSummaryStatistics() {
     }
 
+    /**
+     * 
+     *
+     * @param count 
+     * @param min 
+     * @param max 
+     * @param sum 
+     */
     public ShortSummaryStatistics(long count, short min, short max, long sum) {
         this.count = count;
         this.sum = sum;
@@ -122,6 +133,11 @@ public class ShortSummaryStatistics implements ShortConsumer {
     //        return OptionalDouble.of(getAverage());
     //    }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String toString() {
         return String.format("{min=%d, max=%d, count=%d, sum=%d, average=%f}", getMin(), getMax(), getCount(), getSum(), getAverage());

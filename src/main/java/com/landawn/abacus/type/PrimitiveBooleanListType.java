@@ -40,6 +40,11 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
         super(BOOLEAN_LIST);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<BooleanList> clazz() {
         return BooleanList.class;

@@ -66,11 +66,21 @@ public class Tuple3Type<T1, T2, T3> extends AbstractType<Tuple3<T1, T2, T3>> {
         this.parameterTypes = new Type[] { type1, type2, type3 };
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<Tuple3<T1, T2, T3>> clazz() {
         return typeClass;

@@ -34,12 +34,27 @@ public final class Try<T extends AutoCloseable> {
         this.finalAction = finalAction;
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param targetResource 
+     * @return 
+     */
     public static <T extends AutoCloseable> Try<T> with(final T targetResource) {
         N.checkArgNotNull(targetResource, "targetResourceSupplier");//NOSONAR
 
         return new Try<>(targetResource, null, null);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param targetResource 
+     * @param finalAction 
+     * @return 
+     */
     public static <T extends AutoCloseable> Try<T> with(final T targetResource, final Runnable finalAction) {
         N.checkArgNotNull(targetResource, "targetResourceSupplier");
         N.checkArgNotNull(finalAction, "finalAction");
@@ -47,11 +62,26 @@ public final class Try<T extends AutoCloseable> {
         return new Try<>(targetResource, null, finalAction);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param targetResourceSupplier 
+     * @return 
+     */
     public static <T extends AutoCloseable> Try<T> with(final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier) {
         N.checkArgNotNull(targetResourceSupplier, "targetResourceSupplier");
         return new Try<>(null, targetResourceSupplier, null);
     }
 
+    /**
+     * 
+     *
+     * @param <T> 
+     * @param targetResourceSupplier 
+     * @param finalAction 
+     * @return 
+     */
     public static <T extends AutoCloseable> Try<T> with(final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier, final Runnable finalAction) {
         N.checkArgNotNull(targetResourceSupplier, "targetResourceSupplier");
         N.checkArgNotNull(finalAction, "finalAction");
@@ -60,10 +90,11 @@ public final class Try<T extends AutoCloseable> {
     }
 
     /**
+     * 
      *
-     * @param <T>
-     * @param targetResource
-     * @return
+     * @param <T> 
+     * @param finalAction 
+     * @return 
      */
     public static <T extends AutoCloseable> Try<T> with(final Runnable finalAction) {
         N.checkArgNotNull(finalAction);

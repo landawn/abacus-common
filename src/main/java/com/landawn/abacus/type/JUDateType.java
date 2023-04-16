@@ -44,11 +44,21 @@ public class JUDateType extends AbstractDateType<Date> {
         super(typeName);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<Date> clazz() {
         return Date.class;

@@ -31,6 +31,11 @@ public class CurrencyType extends AbstractType<Currency> {
         super(CURRENCY);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<Currency> clazz() {
         return Currency.class;

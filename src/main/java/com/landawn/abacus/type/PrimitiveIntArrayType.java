@@ -43,6 +43,11 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
         elementType = TypeFactory.getType(int.class);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<int[]> clazz() {
         return int[].class;

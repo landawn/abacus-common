@@ -27,21 +27,43 @@ public class StringBuilderType extends AbstractCharSequenceType<StringBuilder> {
         super(STRING_BUILDER);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<StringBuilder> clazz() {
         return StringBuilder.class;
     }
 
+    /**
+     * 
+     *
+     * @param x 
+     * @return 
+     */
     @Override
     public String stringOf(StringBuilder x) {
         return x == null ? null : x.toString();
     }
 
+    /**
+     * 
+     *
+     * @param str 
+     * @return 
+     */
     @Override
     public StringBuilder valueOf(String str) {
         return str == null ? null : new StringBuilder(str);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public boolean isImmutable() {
         return false;

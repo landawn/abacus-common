@@ -29,16 +29,33 @@ public class Base64EncodedType extends AbstractType<byte[]> {
         super(BASE64_ENCODED);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<byte[]> clazz() {
         return byte[].class;
     }
 
+    /**
+     * 
+     *
+     * @param x 
+     * @return 
+     */
     @Override
     public String stringOf(byte[] x) {
         return N.base64Encode(x);
     }
 
+    /**
+     * 
+     *
+     * @param base64String 
+     * @return 
+     */
     @Override
     public byte[] valueOf(String base64String) {
         return N.base64Decode(base64String);

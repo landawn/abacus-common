@@ -30,6 +30,11 @@ class JDKLogger extends AbstractLogger {
 
     private final java.util.logging.Logger loggerImpl;
 
+    /**
+     * 
+     *
+     * @param name 
+     */
     public JDKLogger(String name) {
         super(name);
         loggerImpl = java.util.logging.Logger.getLogger(name);

@@ -40,6 +40,11 @@ public class TimeType extends AbstractDateType<Time> {
         super(typeName);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<Time> clazz() {
         return Time.class;

@@ -37,6 +37,11 @@ public class RowIdType extends AbstractType<RowId> {
         super(ROW_ID);
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<RowId> clazz() {
         return RowId.class;
@@ -63,9 +68,11 @@ public class RowIdType extends AbstractType<RowId> {
     }
 
     /**
+     * 
      *
-     * @param str
-     * @return
+     * @param str 
+     * @return 
+     * @throws UnsupportedOperationException 
      */
     @Override
     public RowId valueOf(String str) throws UnsupportedOperationException {

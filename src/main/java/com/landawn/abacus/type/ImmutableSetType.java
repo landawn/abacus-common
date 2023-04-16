@@ -55,11 +55,21 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
         this.setType = TypeFactory.getType("Set<" + parameterTypeName + ">");
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public String declaringName() {
         return declaringName;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     public Class<ImmutableSet<E>> clazz() {
         return typeClass;
