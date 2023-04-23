@@ -26,15 +26,33 @@ import com.landawn.abacus.util.Throwables;
 public interface LongFunction<R> extends Throwables.LongFunction<R, RuntimeException>, java.util.function.LongFunction<R> { //NOSONAR
     LongFunction<Long> BOX = value -> value;
 
+    /**
+     * 
+     *
+     * @param value 
+     * @return 
+     */
     @Override
     R apply(long value);
 
+    /**
+     * 
+     *
+     * @param <V> 
+     * @param after 
+     * @return 
+     */
     default <V> LongFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return t -> after.apply(apply(t));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     static LongFunction<Long> identity() {
         return t -> t;
     }

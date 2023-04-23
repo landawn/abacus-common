@@ -24,8 +24,19 @@ import com.landawn.abacus.util.N;
  */
 public interface DoubleNConsumer {
 
+    /**
+     * 
+     *
+     * @param args 
+     */
     void accept(double... args);
 
+    /**
+     * 
+     *
+     * @param after 
+     * @return 
+     */
     default DoubleNConsumer andThen(DoubleNConsumer after) {
         N.checkArgNotNull(after);
 

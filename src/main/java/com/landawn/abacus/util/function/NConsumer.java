@@ -24,8 +24,19 @@ import com.landawn.abacus.util.N;
  */
 public interface NConsumer<T> {
 
+    /**
+     * 
+     *
+     * @param args 
+     */
     void accept(T... args);
 
+    /**
+     * 
+     *
+     * @param after 
+     * @return 
+     */
     default NConsumer<T> andThen(NConsumer<? super T> after) {
         N.checkArgNotNull(after);
 

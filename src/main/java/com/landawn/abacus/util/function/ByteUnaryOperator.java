@@ -25,21 +25,44 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface ByteUnaryOperator extends Throwables.ByteUnaryOperator<RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param operand 
+    * @return 
+    */
     @Override
     byte applyAsByte(byte operand);
 
+    /**
+     * 
+     *
+     * @param before 
+     * @return 
+     */
     default ByteUnaryOperator compose(ByteUnaryOperator before) {
         N.checkArgNotNull(before);
 
         return v -> applyAsByte(before.applyAsByte(v));
     }
 
+    /**
+     * 
+     *
+     * @param after 
+     * @return 
+     */
     default ByteUnaryOperator andThen(ByteUnaryOperator after) {
         N.checkArgNotNull(after);
 
         return t -> after.applyAsByte(applyAsByte(t));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     static ByteUnaryOperator identity() {
         return t -> t;
     }

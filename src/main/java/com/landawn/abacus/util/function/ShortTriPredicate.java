@@ -29,19 +29,44 @@ public interface ShortTriPredicate extends Throwables.ShortTriPredicate<RuntimeE
 
     ShortTriPredicate ALWAYS_FALSE = (a, b, c) -> false;
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param b 
+     * @param c 
+     * @return 
+     */
     @Override
     boolean test(short a, short b, short c);
 
+    /**
+     * 
+     *
+     * @return 
+     */
     default ShortTriPredicate negate() {
         return (a, b, c) -> !test(a, b, c);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default ShortTriPredicate and(ShortTriPredicate other) {
         N.checkArgNotNull(other);
 
         return (a, b, c) -> test(a, b, c) && other.test(a, b, c);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default ShortTriPredicate or(ShortTriPredicate other) {
         N.checkArgNotNull(other);
 

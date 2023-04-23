@@ -25,21 +25,44 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param operand 
+    * @return 
+    */
     @Override
     short applyAsShort(short operand);
 
+    /**
+     * 
+     *
+     * @param before 
+     * @return 
+     */
     default ShortUnaryOperator compose(ShortUnaryOperator before) {
         N.checkArgNotNull(before);
 
         return v -> applyAsShort(before.applyAsShort(v));
     }
 
+    /**
+     * 
+     *
+     * @param after 
+     * @return 
+     */
     default ShortUnaryOperator andThen(ShortUnaryOperator after) {
         N.checkArgNotNull(after);
 
         return t -> after.applyAsShort(applyAsShort(t));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     static ShortUnaryOperator identity() {
         return t -> t;
     }

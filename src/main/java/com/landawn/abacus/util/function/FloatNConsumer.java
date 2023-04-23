@@ -24,8 +24,19 @@ import com.landawn.abacus.util.N;
  */
 public interface FloatNConsumer {
 
+    /**
+     * 
+     *
+     * @param args 
+     */
     void accept(float... args);
 
+    /**
+     * 
+     *
+     * @param after 
+     * @return 
+     */
     default FloatNConsumer andThen(FloatNConsumer after) {
         N.checkArgNotNull(after);
 

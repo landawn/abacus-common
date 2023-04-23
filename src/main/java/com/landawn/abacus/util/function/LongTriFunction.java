@@ -25,9 +25,24 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface LongTriFunction<R> extends Throwables.LongTriFunction<R, RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param a 
+    * @param b 
+    * @param c 
+    * @return 
+    */
     @Override
     R apply(long a, long b, long c);
 
+    /**
+     * 
+     *
+     * @param <V> 
+     * @param after 
+     * @return 
+     */
     default <V> LongTriFunction<V> andThen(Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 

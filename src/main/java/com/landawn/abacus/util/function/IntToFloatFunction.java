@@ -24,5 +24,11 @@ public interface IntToFloatFunction {
 
     IntToFloatFunction DEFAULT = value -> value;
 
+    /**
+     * 
+     *
+     * @param value 
+     * @return 
+     */
     float applyAsFloat(int value);
 }

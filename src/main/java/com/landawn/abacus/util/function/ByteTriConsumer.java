@@ -25,9 +25,22 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface ByteTriConsumer extends Throwables.ByteTriConsumer<RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param a 
+    * @param b 
+    * @param c 
+    */
     @Override
     void accept(byte a, byte b, byte c);
 
+    /**
+     * 
+     *
+     * @param after 
+     * @return 
+     */
     default ByteTriConsumer andThen(ByteTriConsumer after) {
         N.checkArgNotNull(after);
 

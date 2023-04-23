@@ -25,9 +25,24 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface IntTriFunction<R> extends Throwables.IntTriFunction<R, RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param a 
+    * @param b 
+    * @param c 
+    * @return 
+    */
     @Override
     R apply(int a, int b, int c);
 
+    /**
+     * 
+     *
+     * @param <V> 
+     * @param after 
+     * @return 
+     */
     default <V> IntTriFunction<V> andThen(Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 

@@ -25,9 +25,21 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface LongBiConsumer extends Throwables.LongBiConsumer<RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param t 
+    * @param u 
+    */
     @Override
     void accept(long t, long u);
 
+    /**
+     * 
+     *
+     * @param after 
+     * @return 
+     */
     default LongBiConsumer andThen(LongBiConsumer after) {
         N.checkArgNotNull(after);
 

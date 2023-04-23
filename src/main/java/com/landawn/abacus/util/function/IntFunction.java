@@ -26,15 +26,33 @@ import com.landawn.abacus.util.Throwables;
 public interface IntFunction<R> extends Throwables.IntFunction<R, RuntimeException>, java.util.function.IntFunction<R> { //NOSONAR
     IntFunction<Integer> BOX = value -> value;
 
+    /**
+     * 
+     *
+     * @param value 
+     * @return 
+     */
     @Override
     R apply(int value);
 
+    /**
+     * 
+     *
+     * @param <V> 
+     * @param after 
+     * @return 
+     */
     default <V> IntFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return t -> after.apply(apply(t));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     static IntFunction<Integer> identity() {
         return t -> t;
     }

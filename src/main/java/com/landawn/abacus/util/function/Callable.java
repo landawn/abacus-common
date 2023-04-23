@@ -25,13 +25,29 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface Callable<R> extends java.util.concurrent.Callable<R>, Throwables.Callable<R, RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @return 
+    */
     @Override
     R call();
 
+    /**
+     * 
+     *
+     * @return 
+     */
     default Runnable toRunnable() {
         return Fn.c2r(this);
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @return 
+     */
     default <E extends Throwable> Throwables.Callable<R, E> toThrowable() {
         return (Throwables.Callable<R, E>) this;
     }

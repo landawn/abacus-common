@@ -22,6 +22,13 @@ package com.landawn.abacus.util.function;
  */
 public interface ToLongBiFunction<T, U> extends java.util.function.ToLongBiFunction<T, U> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param t 
+    * @param u 
+    * @return 
+    */
     @Override
     long applyAsLong(T t, U u);
 }

@@ -24,6 +24,13 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface DoubleBinaryOperator extends Throwables.DoubleBinaryOperator<RuntimeException>, java.util.function.DoubleBinaryOperator { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param left 
+    * @param right 
+    * @return 
+    */
     @Override
     double applyAsDouble(double left, double right);
 }

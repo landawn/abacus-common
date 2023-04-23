@@ -25,9 +25,20 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface CharConsumer extends Throwables.CharConsumer<RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param t 
+    */
     @Override
     void accept(char t);
 
+    /**
+     * 
+     *
+     * @param after 
+     * @return 
+     */
     default CharConsumer andThen(CharConsumer after) {
         N.checkArgNotNull(after);
 

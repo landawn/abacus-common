@@ -24,6 +24,12 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface ObjCharConsumer<T> extends Throwables.ObjCharConsumer<T, RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param t 
+    * @param value 
+    */
     @Override
     void accept(T t, char value);
 }

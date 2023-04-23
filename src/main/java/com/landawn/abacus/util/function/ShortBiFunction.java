@@ -25,9 +25,23 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface ShortBiFunction<R> extends Throwables.ShortBiFunction<R, RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param t 
+    * @param u 
+    * @return 
+    */
     @Override
     R apply(short t, short u);
 
+    /**
+     * 
+     *
+     * @param <V> 
+     * @param after 
+     * @return 
+     */
     default <V> ShortBiFunction<V> andThen(Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 

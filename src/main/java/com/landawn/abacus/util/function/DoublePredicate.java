@@ -40,20 +40,43 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
 
     DoublePredicate NOT_NEGATIVE = value -> value >= 0;
 
+    /**
+     * 
+     *
+     * @param value 
+     * @return 
+     */
     @Override
     boolean test(double value);
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     default DoublePredicate negate() {
         return value -> !test(value);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     @Override
     default DoublePredicate and(java.util.function.DoublePredicate other) {
         N.checkArgNotNull(other);
         return value -> test(value) && other.test(value);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     @Override
     default DoublePredicate or(java.util.function.DoublePredicate other) {
         N.checkArgNotNull(other);
@@ -61,10 +84,10 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
     }
 
     /**
-     * Returns the specified instance
+     * Returns the specified instance.
      *
-     * @param predicate
-     * @return
+     * @param predicate 
+     * @return 
      */
     static DoublePredicate of(final DoublePredicate predicate) {
         N.checkArgNotNull(predicate);
@@ -72,30 +95,73 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
         return predicate;
     }
 
+    /**
+     * 
+     *
+     * @param targetDouble 
+     * @return 
+     */
     static DoublePredicate equal(double targetDouble) { //NOSONAR
         return value -> value == targetDouble;
     }
 
+    /**
+     * 
+     *
+     * @param targetDouble 
+     * @return 
+     */
     static DoublePredicate notEqual(double targetDouble) {
         return value -> value != targetDouble;
     }
 
+    /**
+     * 
+     *
+     * @param targetDouble 
+     * @return 
+     */
     static DoublePredicate greaterThan(double targetDouble) {
         return value -> N.compare(value, targetDouble) > 0;
     }
 
+    /**
+     * 
+     *
+     * @param targetDouble 
+     * @return 
+     */
     static DoublePredicate greaterEqual(double targetDouble) {
         return value -> N.compare(value, targetDouble) >= 0;
     }
 
+    /**
+     * 
+     *
+     * @param targetDouble 
+     * @return 
+     */
     static DoublePredicate lessThan(double targetDouble) {
         return value -> N.compare(value, targetDouble) < 0;
     }
 
+    /**
+     * 
+     *
+     * @param targetDouble 
+     * @return 
+     */
     static DoublePredicate lessEqual(double targetDouble) {
         return value -> N.compare(value, targetDouble) <= 0;
     }
 
+    /**
+     * 
+     *
+     * @param minValue 
+     * @param maxValue 
+     * @return 
+     */
     static DoublePredicate between(double minValue, double maxValue) {
         return value -> N.compare(value, minValue) > 0 && N.compare(value, maxValue) < 0;
     }

@@ -24,6 +24,14 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface ShortTernaryOperator extends Throwables.ShortTernaryOperator<RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param a 
+    * @param b 
+    * @param c 
+    * @return 
+    */
     @Override
     short applyAsShort(short a, short b, short c);
 }

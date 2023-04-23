@@ -28,6 +28,11 @@ public interface FloatSupplier extends Throwables.FloatSupplier<RuntimeException
 
     FloatSupplier RANDOM = Util.RAND_FLOAT::nextFloat;
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     float getAsFloat();
 }

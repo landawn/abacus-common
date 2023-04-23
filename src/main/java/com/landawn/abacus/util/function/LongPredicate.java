@@ -41,20 +41,43 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
 
     LongPredicate NOT_NEGATIVE = value -> value >= 0;
 
+    /**
+     * 
+     *
+     * @param value 
+     * @return 
+     */
     @Override
     boolean test(long value);
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     default LongPredicate negate() {
         return value -> !test(value);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     @Override
     default LongPredicate or(java.util.function.LongPredicate other) {
         N.checkArgNotNull(other);
         return value -> test(value) || other.test(value);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     @Override
     default LongPredicate and(java.util.function.LongPredicate other) {
         N.checkArgNotNull(other);
@@ -62,10 +85,10 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
     }
 
     /**
-     * Returns the specified instance
+     * Returns the specified instance.
      *
-     * @param predicate
-     * @return
+     * @param predicate 
+     * @return 
      */
     static LongPredicate of(final LongPredicate predicate) {
         N.checkArgNotNull(predicate);
@@ -73,30 +96,73 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
         return predicate;
     }
 
+    /**
+     * 
+     *
+     * @param targetLong 
+     * @return 
+     */
     static LongPredicate equal(long targetLong) { //NOSONAR
         return value -> value == targetLong;
     }
 
+    /**
+     * 
+     *
+     * @param targetLong 
+     * @return 
+     */
     static LongPredicate notEqual(long targetLong) {
         return value -> value != targetLong;
     }
 
+    /**
+     * 
+     *
+     * @param targetLong 
+     * @return 
+     */
     static LongPredicate greaterThan(long targetLong) {
         return value -> value > targetLong;
     }
 
+    /**
+     * 
+     *
+     * @param targetLong 
+     * @return 
+     */
     static LongPredicate greaterEqual(long targetLong) {
         return value -> value >= targetLong;
     }
 
+    /**
+     * 
+     *
+     * @param targetLong 
+     * @return 
+     */
     static LongPredicate lessThan(long targetLong) {
         return value -> value < targetLong;
     }
 
+    /**
+     * 
+     *
+     * @param targetLong 
+     * @return 
+     */
     static LongPredicate lessEqual(long targetLong) {
         return value -> value <= targetLong;
     }
 
+    /**
+     * 
+     *
+     * @param minValue 
+     * @param maxValue 
+     * @return 
+     */
     static LongPredicate between(long minValue, long maxValue) {
         return value -> value > minValue && value < maxValue;
     }

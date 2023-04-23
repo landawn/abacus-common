@@ -24,8 +24,19 @@ import com.landawn.abacus.util.N;
  */
 public interface BooleanNConsumer {
 
+    /**
+     * 
+     *
+     * @param args 
+     */
     void accept(boolean... args);
 
+    /**
+     * 
+     *
+     * @param after 
+     * @return 
+     */
     default BooleanNConsumer andThen(BooleanNConsumer after) {
         N.checkArgNotNull(after);
 

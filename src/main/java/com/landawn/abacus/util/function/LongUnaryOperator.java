@@ -25,21 +25,44 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeException>, java.util.function.LongUnaryOperator { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param operand 
+    * @return 
+    */
     @Override
     long applyAsLong(long operand);
 
+    /**
+     * 
+     *
+     * @param before 
+     * @return 
+     */
     @Override
     default LongUnaryOperator compose(java.util.function.LongUnaryOperator before) {
         N.checkArgNotNull(before);
         return (long v) -> applyAsLong(before.applyAsLong(v));
     }
 
+    /**
+     * 
+     *
+     * @param after 
+     * @return 
+     */
     @Override
     default LongUnaryOperator andThen(java.util.function.LongUnaryOperator after) {
         N.checkArgNotNull(after);
         return (long t) -> after.applyAsLong(applyAsLong(t));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     static LongUnaryOperator identity() {
         return t -> t;
     }

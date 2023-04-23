@@ -25,26 +25,56 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeException>, java.util.function.BiPredicate<T, U> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param t 
+    * @param u 
+    * @return 
+    */
     @Override
     boolean test(T t, U u);
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     default BiPredicate<T, U> negate() {
         return (T t, U u) -> !test(t, u);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     @Override
     default BiPredicate<T, U> and(java.util.function.BiPredicate<? super T, ? super U> other) {
         N.checkArgNotNull(other);
         return (T t, U u) -> test(t, u) && other.test(t, u);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     @Override
     default BiPredicate<T, U> or(java.util.function.BiPredicate<? super T, ? super U> other) {
         N.checkArgNotNull(other);
         return (T t, U u) -> test(t, u) || other.test(t, u);
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @return 
+     */
     default <E extends Throwable> Throwables.BiPredicate<T, U, E> toThrowable() {
         return (Throwables.BiPredicate<T, U, E>) this;
     }

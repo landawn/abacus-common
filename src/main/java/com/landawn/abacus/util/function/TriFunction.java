@@ -25,15 +25,36 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface TriFunction<A, B, C, R> extends Throwables.TriFunction<A, B, C, R, RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param a 
+    * @param b 
+    * @param c 
+    * @return 
+    */
     @Override
     R apply(A a, B b, C c);
 
+    /**
+     * 
+     *
+     * @param <V> 
+     * @param after 
+     * @return 
+     */
     default <V> TriFunction<A, B, C, V> andThen(java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return (a, b, c) -> after.apply(apply(a, b, c));
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @return 
+     */
     default <E extends Throwable> Throwables.TriFunction<A, B, C, R, E> toThrowable() {
         return (Throwables.TriFunction<A, B, C, R, E>) this;
     }

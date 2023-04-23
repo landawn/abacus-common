@@ -25,10 +25,22 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperator<T, RuntimeException>, java.util.function.UnaryOperator<T> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param <T> 
+    * @return 
+    */
     static <T> UnaryOperator<T> identity() {
         return UnaryOperators.identity();
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @return 
+     */
     @Override
     default <E extends Throwable> Throwables.UnaryOperator<T, E> toThrowable() {
         return (Throwables.UnaryOperator<T, E>) this;

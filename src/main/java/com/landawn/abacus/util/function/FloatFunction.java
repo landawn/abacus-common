@@ -26,15 +26,33 @@ import com.landawn.abacus.util.Throwables;
 public interface FloatFunction<R> extends Throwables.FloatFunction<R, RuntimeException> { //NOSONAR
     FloatFunction<Float> BOX = value -> value;
 
+    /**
+     * 
+     *
+     * @param value 
+     * @return 
+     */
     @Override
     R apply(float value);
 
+    /**
+     * 
+     *
+     * @param <V> 
+     * @param after 
+     * @return 
+     */
     default <V> FloatFunction<V> andThen(Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return t -> after.apply(apply(t));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     static FloatFunction<Float> identity() {
         return t -> t;
     }

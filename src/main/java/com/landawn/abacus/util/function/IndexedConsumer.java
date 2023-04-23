@@ -25,9 +25,21 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface IndexedConsumer<T> extends Throwables.IndexedConsumer<T, RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param idx 
+    * @param e 
+    */
     @Override
     void accept(int idx, T e);
 
+    /**
+     * 
+     *
+     * @param after 
+     * @return 
+     */
     default IndexedConsumer<T> andThen(IndexedConsumer<? super T> after) {
         N.checkArgNotNull(after);
 

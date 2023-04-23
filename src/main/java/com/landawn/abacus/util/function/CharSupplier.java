@@ -28,6 +28,11 @@ public interface CharSupplier extends Throwables.CharSupplier<RuntimeException> 
 
     CharSupplier RANDOM = () -> (char) Math.abs(Util.RAND_CHAR.nextInt() % Util.CHAR_MOD);
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     char getAsChar();
 }

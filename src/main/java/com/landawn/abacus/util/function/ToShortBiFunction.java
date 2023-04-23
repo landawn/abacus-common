@@ -22,5 +22,12 @@ package com.landawn.abacus.util.function;
  */
 public interface ToShortBiFunction<T, U> {
 
+    /**
+     * 
+     *
+     * @param t 
+     * @param u 
+     * @return 
+     */
     short applyAsShort(T t, U u);
 }

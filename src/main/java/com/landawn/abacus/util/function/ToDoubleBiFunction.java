@@ -22,6 +22,13 @@ package com.landawn.abacus.util.function;
  */
 public interface ToDoubleBiFunction<T, U> extends java.util.function.ToDoubleBiFunction<T, U> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param t 
+    * @param u 
+    * @return 
+    */
     @Override
     double applyAsDouble(T t, U u);
 }

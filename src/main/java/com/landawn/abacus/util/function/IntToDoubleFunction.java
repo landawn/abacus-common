@@ -26,6 +26,12 @@ public interface IntToDoubleFunction extends Throwables.IntToDoubleFunction<Runt
 
     IntToDoubleFunction DEFAULT = value -> value;
 
+    /**
+     * 
+     *
+     * @param value 
+     * @return 
+     */
     @Override
     double applyAsDouble(int value);
 }

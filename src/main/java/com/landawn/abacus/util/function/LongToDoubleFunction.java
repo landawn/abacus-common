@@ -26,6 +26,12 @@ public interface LongToDoubleFunction extends Throwables.LongToDoubleFunction<Ru
 
     LongToDoubleFunction DEFAULT = value -> value;
 
+    /**
+     * 
+     *
+     * @param value 
+     * @return 
+     */
     @Override
     double applyAsDouble(long value);
 }

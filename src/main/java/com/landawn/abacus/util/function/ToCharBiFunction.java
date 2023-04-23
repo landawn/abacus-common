@@ -22,5 +22,12 @@ package com.landawn.abacus.util.function;
  */
 public interface ToCharBiFunction<T, U> {
 
+    /**
+     * 
+     *
+     * @param t 
+     * @param u 
+     * @return 
+     */
     char applyAsChar(T t, U u);
 }

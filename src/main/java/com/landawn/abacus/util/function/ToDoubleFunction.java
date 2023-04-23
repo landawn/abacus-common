@@ -34,6 +34,12 @@ public interface ToDoubleFunction<T> extends Throwables.ToDoubleFunction<T, Runt
     //    @Deprecated
     //    ToDoubleFunction<Number> NUM = FROM_NUM;
 
+    /**
+     * 
+     *
+     * @param value 
+     * @return 
+     */
     @Override
     double applyAsDouble(T value);
 }

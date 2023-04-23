@@ -41,19 +41,43 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
 
     CharBiPredicate LESS_EQUAL = (t, u) -> t <= u;
 
+    /**
+     * 
+     *
+     * @param t 
+     * @param u 
+     * @return 
+     */
     @Override
     boolean test(char t, char u);
 
+    /**
+     * 
+     *
+     * @return 
+     */
     default CharBiPredicate negate() {
         return (t, u) -> !test(t, u);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default CharBiPredicate and(CharBiPredicate other) {
         N.checkArgNotNull(other);
 
         return (t, u) -> test(t, u) && other.test(t, u);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default CharBiPredicate or(CharBiPredicate other) {
         N.checkArgNotNull(other);
 

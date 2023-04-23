@@ -25,19 +25,43 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface IndexedPredicate<T> extends Throwables.IndexedPredicate<T, RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param idx 
+    * @param e 
+    * @return 
+    */
     @Override
     boolean test(int idx, T e);
 
+    /**
+     * 
+     *
+     * @return 
+     */
     default IndexedPredicate<T> negate() {
         return (idx, e) -> !test(idx, e);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default IndexedPredicate<T> and(IndexedPredicate<? super T> other) {
         N.checkArgNotNull(other);
 
         return (idx, e) -> test(idx, e) && other.test(idx, e);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default IndexedPredicate<T> or(IndexedPredicate<? super T> other) {
         N.checkArgNotNull(other);
 

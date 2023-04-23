@@ -25,9 +25,20 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface LongConsumer extends Throwables.LongConsumer<RuntimeException>, java.util.function.LongConsumer { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param t 
+    */
     @Override
     void accept(long t);
 
+    /**
+     * 
+     *
+     * @param after 
+     * @return 
+     */
     @Override
     default LongConsumer andThen(java.util.function.LongConsumer after) {
         N.checkArgNotNull(after);

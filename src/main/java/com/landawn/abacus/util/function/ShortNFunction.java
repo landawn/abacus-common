@@ -25,9 +25,22 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface ShortNFunction<R> extends Throwables.ShortNFunction<R, RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param args 
+    * @return 
+    */
     @Override
     R apply(short... args);
 
+    /**
+     * 
+     *
+     * @param <V> 
+     * @param after 
+     * @return 
+     */
     @Override
     default <V> ShortNFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);

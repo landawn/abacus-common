@@ -25,9 +25,22 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface DoubleTriConsumer extends Throwables.DoubleTriConsumer<RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param a 
+    * @param b 
+    * @param c 
+    */
     @Override
     void accept(double a, double b, double c);
 
+    /**
+     * 
+     *
+     * @param after 
+     * @return 
+     */
     default DoubleTriConsumer andThen(DoubleTriConsumer after) {
         N.checkArgNotNull(after);
 

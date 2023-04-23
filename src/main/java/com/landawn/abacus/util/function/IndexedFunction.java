@@ -25,15 +25,36 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface IndexedFunction<T, R> extends Throwables.IndexedFunction<T, R, RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param idx 
+    * @param e 
+    * @return 
+    */
     @Override
     R apply(int idx, T e);
 
+    /**
+     * 
+     *
+     * @param <V> 
+     * @param before 
+     * @return 
+     */
     default <V> IndexedFunction<V, R> compose(IndexedFunction<? super V, ? extends T> before) {
         N.checkArgNotNull(before);
 
         return (idx, v) -> apply(idx, before.apply(idx, v));
     }
 
+    /**
+     * 
+     *
+     * @param <V> 
+     * @param after 
+     * @return 
+     */
     default <V> IndexedFunction<T, V> andThen(IndexedFunction<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 

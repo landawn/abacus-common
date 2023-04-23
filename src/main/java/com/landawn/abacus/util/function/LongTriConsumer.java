@@ -25,9 +25,22 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface LongTriConsumer extends Throwables.LongTriConsumer<RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param a 
+    * @param b 
+    * @param c 
+    */
     @Override
     void accept(long a, long b, long c);
 
+    /**
+     * 
+     *
+     * @param after 
+     * @return 
+     */
     default LongTriConsumer andThen(LongTriConsumer after) {
         N.checkArgNotNull(after);
 

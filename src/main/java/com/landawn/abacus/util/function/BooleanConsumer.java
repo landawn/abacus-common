@@ -25,9 +25,20 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface BooleanConsumer extends Throwables.BooleanConsumer<RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param t 
+    */
     @Override
     void accept(boolean t);
 
+    /**
+     * 
+     *
+     * @param after 
+     * @return 
+     */
     default BooleanConsumer andThen(BooleanConsumer after) {
         N.checkArgNotNull(after);
 

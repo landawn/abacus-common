@@ -24,14 +24,20 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
 
     BytePredicate NOT_NEGATIVE = value -> value >= 0;
 
+    /**
+     * 
+     *
+     * @param value 
+     * @return 
+     */
     @Override
     boolean test(byte value);
 
     /**
-     * Returns the specified instance
+     * Returns the specified instance.
      *
-     * @param predicate
-     * @return
+     * @param predicate 
+     * @return 
      */
     static BytePredicate of(final BytePredicate predicate) {
         N.checkArgNotNull(predicate);
@@ -39,46 +45,106 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
         return predicate;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     default BytePredicate negate() {
         return t -> !test(t);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default BytePredicate and(BytePredicate other) {
         N.checkArgNotNull(other);
 
         return t -> test(t) && other.test(t);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default BytePredicate or(BytePredicate other) {
         N.checkArgNotNull(other);
 
         return t -> test(t) || other.test(t);
     }
 
+    /**
+     * 
+     *
+     * @param targetByte 
+     * @return 
+     */
     static BytePredicate equal(byte targetByte) { //NOSONAR
         return value -> value == targetByte;
     }
 
+    /**
+     * 
+     *
+     * @param targetByte 
+     * @return 
+     */
     static BytePredicate notEqual(byte targetByte) {
         return value -> value != targetByte;
     }
 
+    /**
+     * 
+     *
+     * @param targetByte 
+     * @return 
+     */
     static BytePredicate greaterThan(byte targetByte) {
         return value -> value > targetByte;
     }
 
+    /**
+     * 
+     *
+     * @param targetByte 
+     * @return 
+     */
     static BytePredicate greaterEqual(byte targetByte) {
         return value -> value >= targetByte;
     }
 
+    /**
+     * 
+     *
+     * @param targetByte 
+     * @return 
+     */
     static BytePredicate lessThan(byte targetByte) {
         return value -> value < targetByte;
     }
 
+    /**
+     * 
+     *
+     * @param targetByte 
+     * @return 
+     */
     static BytePredicate lessEqual(byte targetByte) {
         return value -> value <= targetByte;
     }
 
+    /**
+     * 
+     *
+     * @param minValue 
+     * @param maxValue 
+     * @return 
+     */
     static BytePredicate between(byte minValue, byte maxValue) {
         return value -> value > minValue && value < maxValue;
     }

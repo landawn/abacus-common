@@ -24,5 +24,11 @@ public interface CharToIntFunction {
 
     CharToIntFunction DEFAULT = value -> value;
 
+    /**
+     * 
+     *
+     * @param value 
+     * @return 
+     */
     int applyAsInt(char value);
 }

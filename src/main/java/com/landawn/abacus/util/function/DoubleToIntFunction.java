@@ -26,6 +26,12 @@ public interface DoubleToIntFunction extends Throwables.DoubleToIntFunction<Runt
 
     DoubleToIntFunction DEFAULT = value -> (int) value;
 
+    /**
+     * 
+     *
+     * @param value 
+     * @return 
+     */
     @Override
     int applyAsInt(double value);
 }

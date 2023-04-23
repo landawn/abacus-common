@@ -25,19 +25,44 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface IndexedBiPredicate<T, U> extends Throwables.IndexedBiPredicate<T, U, RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param idx 
+    * @param e 
+    * @param u 
+    * @return 
+    */
     @Override
     boolean test(int idx, T e, U u);
 
+    /**
+     * 
+     *
+     * @return 
+     */
     default IndexedBiPredicate<T, U> negate() {
         return (idx, e, u) -> !test(idx, e, u);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default IndexedBiPredicate<T, U> and(IndexedBiPredicate<? super T, ? super U> other) {
         N.checkArgNotNull(other);
 
         return (idx, e, u) -> test(idx, e, u) && other.test(idx, e, u);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default IndexedBiPredicate<T, U> or(IndexedBiPredicate<? super T, ? super U> other) {
         N.checkArgNotNull(other);
 

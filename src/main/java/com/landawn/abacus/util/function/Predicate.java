@@ -25,20 +25,43 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>, java.util.function.Predicate<T> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param value 
+    * @return 
+    */
     @Override
     boolean test(T value);
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     default Predicate<T> negate() {
         return t -> !test(t);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     @Override
     default Predicate<T> and(java.util.function.Predicate<? super T> other) {
         N.checkArgNotNull(other);
         return t -> test(t) && other.test(t);
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @return 
+     */
     default <E extends Throwable> Throwables.Predicate<T, E> toThrowable() {
         return (Throwables.Predicate<T, E>) this;
     }

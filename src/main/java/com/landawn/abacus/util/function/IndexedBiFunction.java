@@ -25,9 +25,24 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface IndexedBiFunction<T, U, R> extends Throwables.IndexedBiFunction<T, U, R, RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param idx 
+    * @param e 
+    * @param u 
+    * @return 
+    */
     @Override
     R apply(int idx, T e, U u);
 
+    /**
+     * 
+     *
+     * @param <V> 
+     * @param after 
+     * @return 
+     */
     default <V> IndexedBiFunction<T, U, V> andThen(IndexedFunction<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 

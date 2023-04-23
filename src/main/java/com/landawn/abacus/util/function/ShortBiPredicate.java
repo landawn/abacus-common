@@ -41,19 +41,43 @@ public interface ShortBiPredicate extends Throwables.ShortBiPredicate<RuntimeExc
 
     ShortBiPredicate LESS_EQUAL = (t, u) -> t <= u;
 
+    /**
+     * 
+     *
+     * @param t 
+     * @param u 
+     * @return 
+     */
     @Override
     boolean test(short t, short u);
 
+    /**
+     * 
+     *
+     * @return 
+     */
     default ShortBiPredicate negate() {
         return (t, u) -> !test(t, u);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default ShortBiPredicate and(ShortBiPredicate other) {
         N.checkArgNotNull(other);
 
         return (t, u) -> test(t, u) && other.test(t, u);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default ShortBiPredicate or(ShortBiPredicate other) {
         N.checkArgNotNull(other);
 

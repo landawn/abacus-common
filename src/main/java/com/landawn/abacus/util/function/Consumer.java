@@ -25,9 +25,20 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface Consumer<T> extends Throwables.Consumer<T, RuntimeException>, java.util.function.Consumer<T> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param t 
+    */
     @Override
     void accept(T t);
 
+    /**
+     * 
+     *
+     * @param after 
+     * @return 
+     */
     @Override
     default Consumer<T> andThen(java.util.function.Consumer<? super T> after) {
         N.checkArgNotNull(after);
@@ -38,6 +49,12 @@ public interface Consumer<T> extends Throwables.Consumer<T, RuntimeException>, j
         };
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @return 
+     */
     default <E extends Throwable> Throwables.Consumer<T, E> toThrowable() {
         return (Throwables.Consumer<T, E>) this;
     }

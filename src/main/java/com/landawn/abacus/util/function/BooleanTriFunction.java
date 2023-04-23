@@ -25,9 +25,24 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface BooleanTriFunction<R> extends Throwables.BooleanTriFunction<R, RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param a 
+    * @param b 
+    * @param c 
+    * @return 
+    */
     @Override
     R apply(boolean a, boolean b, boolean c);
 
+    /**
+     * 
+     *
+     * @param <V> 
+     * @param after 
+     * @return 
+     */
     default <V> BooleanTriFunction<V> andThen(Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 

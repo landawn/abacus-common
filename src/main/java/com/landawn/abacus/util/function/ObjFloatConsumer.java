@@ -24,6 +24,12 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface ObjFloatConsumer<T> extends Throwables.ObjFloatConsumer<T, RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param t 
+    * @param value 
+    */
     @Override
     void accept(T t, float value);
 }

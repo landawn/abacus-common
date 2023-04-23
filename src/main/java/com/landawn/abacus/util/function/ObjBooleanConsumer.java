@@ -24,6 +24,12 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface ObjBooleanConsumer<T> extends Throwables.ObjBooleanConsumer<T, RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param t 
+    * @param value 
+    */
     @Override
     void accept(T t, boolean value);
 }

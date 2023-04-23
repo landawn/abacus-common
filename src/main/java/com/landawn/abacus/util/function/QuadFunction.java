@@ -24,9 +24,25 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, B, C, D, R, RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param a 
+    * @param b 
+    * @param c 
+    * @param d 
+    * @return 
+    */
     @Override
     R apply(A a, B b, C c, D d);
 
+    /**
+     * 
+     *
+     * @param <V> 
+     * @param after 
+     * @return 
+     */
     default <V> QuadFunction<A, B, C, D, V> andThen(Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 

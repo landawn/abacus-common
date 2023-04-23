@@ -24,6 +24,14 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface ByteTernaryOperator extends Throwables.ByteTernaryOperator<RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param a 
+    * @param b 
+    * @param c 
+    * @return 
+    */
     @Override
     byte applyAsByte(byte a, byte b, byte c);
 }

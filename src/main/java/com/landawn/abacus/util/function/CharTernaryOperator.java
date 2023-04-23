@@ -24,6 +24,14 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface CharTernaryOperator extends Throwables.CharTernaryOperator<RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param a 
+    * @param b 
+    * @param c 
+    * @return 
+    */
     @Override
     char applyAsChar(char a, char b, char c);
 }

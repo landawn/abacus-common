@@ -41,19 +41,43 @@ public interface FloatBiPredicate extends Throwables.FloatBiPredicate<RuntimeExc
 
     FloatBiPredicate LESS_EQUAL = (t, u) -> Float.compare(t, u) <= 0;
 
+    /**
+     * 
+     *
+     * @param t 
+     * @param u 
+     * @return 
+     */
     @Override
     boolean test(float t, float u);
 
+    /**
+     * 
+     *
+     * @return 
+     */
     default FloatBiPredicate negate() {
         return (t, u) -> !test(t, u);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default FloatBiPredicate and(FloatBiPredicate other) {
         N.checkArgNotNull(other);
 
         return (t, u) -> test(t, u) && other.test(t, u);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default FloatBiPredicate or(FloatBiPredicate other) {
         N.checkArgNotNull(other);
 

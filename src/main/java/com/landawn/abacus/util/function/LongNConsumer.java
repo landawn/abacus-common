@@ -24,8 +24,19 @@ import com.landawn.abacus.util.N;
  */
 public interface LongNConsumer {
 
+    /**
+     * 
+     *
+     * @param args 
+     */
     void accept(long... args);
 
+    /**
+     * 
+     *
+     * @param after 
+     * @return 
+     */
     default LongNConsumer andThen(LongNConsumer after) {
         N.checkArgNotNull(after);
 

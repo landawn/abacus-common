@@ -26,15 +26,33 @@ import com.landawn.abacus.util.Throwables;
 public interface CharFunction<R> extends Throwables.CharFunction<R, RuntimeException> { //NOSONAR
     CharFunction<Character> BOX = value -> value;
 
+    /**
+     * 
+     *
+     * @param value 
+     * @return 
+     */
     @Override
     R apply(char value);
 
+    /**
+     * 
+     *
+     * @param <V> 
+     * @param after 
+     * @return 
+     */
     default <V> CharFunction<V> andThen(Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return t -> after.apply(apply(t));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     static CharFunction<Character> identity() {
         return t -> t;
     }

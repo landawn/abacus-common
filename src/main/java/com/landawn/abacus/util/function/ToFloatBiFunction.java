@@ -22,5 +22,12 @@ package com.landawn.abacus.util.function;
  */
 public interface ToFloatBiFunction<T, U> {
 
+    /**
+     * 
+     *
+     * @param t 
+     * @param u 
+     * @return 
+     */
     float applyAsFloat(T t, U u);
 }

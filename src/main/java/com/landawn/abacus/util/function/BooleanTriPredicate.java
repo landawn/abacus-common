@@ -29,19 +29,44 @@ public interface BooleanTriPredicate extends Throwables.BooleanTriPredicate<Runt
 
     BooleanTriPredicate ALWAYS_FALSE = (a, b, c) -> false;
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param b 
+     * @param c 
+     * @return 
+     */
     @Override
     boolean test(boolean a, boolean b, boolean c);
 
+    /**
+     * 
+     *
+     * @return 
+     */
     default BooleanTriPredicate negate() {
         return (a, b, c) -> !test(a, b, c);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default BooleanTriPredicate and(BooleanTriPredicate other) {
         N.checkArgNotNull(other);
 
         return (a, b, c) -> test(a, b, c) && other.test(a, b, c);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default BooleanTriPredicate or(BooleanTriPredicate other) {
         N.checkArgNotNull(other);
 

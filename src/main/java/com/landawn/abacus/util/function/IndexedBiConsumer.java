@@ -25,9 +25,22 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface IndexedBiConsumer<T, U> extends Throwables.IndexedBiConsumer<T, U, RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param idx 
+    * @param e 
+    * @param u 
+    */
     @Override
     void accept(int idx, T e, U u);
 
+    /**
+     * 
+     *
+     * @param after 
+     * @return 
+     */
     default IndexedBiConsumer<T, U> andThen(IndexedBiConsumer<? super T, ? super U> after) {
         N.checkArgNotNull(after);
 

@@ -26,15 +26,33 @@ import com.landawn.abacus.util.Throwables;
 public interface BooleanFunction<R> extends Throwables.BooleanFunction<R, RuntimeException> { //NOSONAR
     BooleanFunction<Boolean> BOX = value -> value;
 
+    /**
+     * 
+     *
+     * @param value 
+     * @return 
+     */
     @Override
     R apply(boolean value);
 
+    /**
+     * 
+     *
+     * @param <V> 
+     * @param after 
+     * @return 
+     */
     default <V> BooleanFunction<V> andThen(Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return t -> after.apply(apply(t));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     static BooleanFunction<Boolean> identity() {
         return t -> t;
     }

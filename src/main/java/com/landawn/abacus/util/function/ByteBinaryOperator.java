@@ -24,6 +24,13 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface ByteBinaryOperator extends Throwables.ByteBinaryOperator<RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param left 
+    * @param right 
+    * @return 
+    */
     @Override
     byte applyAsByte(byte left, byte right);
 }

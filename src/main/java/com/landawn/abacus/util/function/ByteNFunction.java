@@ -25,9 +25,22 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface ByteNFunction<R> extends Throwables.ByteNFunction<R, RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param args 
+    * @return 
+    */
     @Override
     R apply(byte... args);
 
+    /**
+     * 
+     *
+     * @param <V> 
+     * @param after 
+     * @return 
+     */
     @Override
     default <V> ByteNFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);

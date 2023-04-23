@@ -529,12 +529,12 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param str 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param str
+     * @param targetClass
+     * @return
      */
     @SuppressWarnings("unchecked")
     public static <T> T valueOf(final String str, final Class<? extends T> targetClass) {
@@ -800,10 +800,10 @@ class CommonUtil {
     /**
      * Default if null.
      *
-     * @param <T> 
-     * @param obj 
-     * @param supplierForDefault 
-     * @return 
+     * @param <T>
+     * @param obj
+     * @param supplierForDefault
+     * @return
      */
     public static <T> T defaultIfNull(final T obj, final Supplier<? extends T> supplierForDefault) {
         if (obj == null) {
@@ -814,12 +814,12 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param str 
-     * @param defaultStr 
-     * @return 
+     *
+     * @param <T>
+     * @param str
+     * @param defaultStr
+     * @return
      */
     public static <T extends CharSequence> T defaultIfNullOrEmpty(final T str, final T defaultStr) {
         return N.isNullOrEmpty(str) ? defaultStr : str;
@@ -2243,7 +2243,7 @@ class CommonUtil {
      * or obtain the column names from first row if its type is bean or map.
      *
      * @param rowList list of row which can be: Map/Bean/Array/List
-     * @return 
+     * @return
      */
     public static DataSet newDataSet(final Collection<?> rowList) {
         return newDataSet(null, rowList);
@@ -2253,9 +2253,9 @@ class CommonUtil {
      * If the specified {@code columnNames} is null or empty, the first row will be used as column names if its type is array or list,
      * or obtain the column names from first row if its type is bean or map.
      *
-     * @param columnNames 
-     * @param rowList 
-     * @return 
+     * @param columnNames
+     * @param rowList
+     * @return
      */
     public static DataSet newDataSet(Collection<String> columnNames, Collection<?> rowList) {
         if (isNullOrEmpty(columnNames) && isNullOrEmpty(rowList)) {
@@ -2383,11 +2383,11 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param columnNames 
-     * @param rowList 
-     * @return 
+     *
+     * @param columnNames
+     * @param rowList
+     * @return
      */
     public static DataSet newDataSet(Collection<String> columnNames, final Object[][] rowList) {
         if (isNullOrEmpty(columnNames) && isNullOrEmpty(rowList)) {
@@ -2442,11 +2442,11 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param b 
-     * @return 
+     *
+     * @param a
+     * @param b
+     * @return
      */
     public static DataSet merge(final DataSet a, final DataSet b) {
         N.checkArgNotNull(a);
@@ -2456,12 +2456,12 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param b 
-     * @param c 
-     * @return 
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return
      */
     public static DataSet merge(final DataSet a, final DataSet b, final DataSet c) {
         N.checkArgNotNull(a);
@@ -2472,10 +2472,10 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param dss 
-     * @return 
+     *
+     * @param dss
+     * @return
      */
     public static DataSet merge(final Collection<? extends DataSet> dss) {
         if (N.isNullOrEmpty(dss)) {
@@ -2698,13 +2698,13 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <T> 
-     * @param c 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <A>
+     * @param <T>
+     * @param c
+     * @param targetClass
+     * @return
      * @throws IllegalArgumentException if the specified {@code Class} is <code>null</code>.
      */
     public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final Class<A[]> targetClass) throws IllegalArgumentException {
@@ -2718,15 +2718,15 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param <T> 
-     * @param c 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <A>
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param targetClass
+     * @return
      * @throws IllegalArgumentException if the specified {@code Class} is <code>null</code>.
      */
     public static <A, T extends A> A[] toArray(final Collection<? extends T> c, final int fromIndex, final int toIndex, final Class<A[]> targetClass)
@@ -2849,10 +2849,10 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @return 
+     *
+     * @param a
+     * @return
      */
     public static boolean[] toBooleanArray(final byte[] a) {
         if (a == null) {
@@ -3048,10 +3048,10 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @return 
+     *
+     * @param a
+     * @return
      */
     public static byte[] toByteArray(final boolean[] a) {
         if (a == null) {
@@ -3247,10 +3247,10 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @return 
+     *
+     * @param a
+     * @return
      */
     public static int[] toIntArray(final char[] a) {
         if (a == null) {
@@ -3830,11 +3830,11 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param iter 
-     * @return 
+     *
+     * @param <T>
+     * @param iter
+     * @return
      */
     public static <T> List<T> toList(final Iterator<? extends T> iter) {
         if (iter == null) {
@@ -4145,11 +4145,11 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param iter 
-     * @return 
+     *
+     * @param <T>
+     * @param iter
+     * @return
      */
     public static <T> Set<T> toSet(final Iterator<? extends T> iter) {
         if (iter == null) {
@@ -4506,13 +4506,13 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <C> 
-     * @param iter 
-     * @param supplier 
-     * @return 
+     *
+     * @param <T>
+     * @param <C>
+     * @param iter
+     * @param supplier
+     * @return
      */
     public static <T, C extends Collection<T>> C toCollection(final Iterator<? extends T> iter, final Supplier<? extends C> supplier) {
         final C c = supplier.get();
@@ -4579,13 +4579,13 @@ class CommonUtil {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 
-     * @param v1 
-     * @return 
+     * @param k1
+     * @param v1
+     * @return
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1) {
         final Map<K, V> map = N.newHashMap(1);
@@ -4594,15 +4594,15 @@ class CommonUtil {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @return 
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @return
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2) {
         final Map<K, V> map = N.newHashMap(2);
@@ -4612,17 +4612,17 @@ class CommonUtil {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @param k3 
-     * @param v3 
-     * @return 
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @return
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
         final Map<K, V> map = N.newHashMap(3);
@@ -4633,19 +4633,19 @@ class CommonUtil {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @param k3 
-     * @param v3 
-     * @param k4 
-     * @param v4 
-     * @return 
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @return
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4) {
         final Map<K, V> map = N.newHashMap(4);
@@ -4657,21 +4657,21 @@ class CommonUtil {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @param k3 
-     * @param v3 
-     * @param k4 
-     * @param v4 
-     * @param k5 
-     * @param v5 
-     * @return 
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @return
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5) {
@@ -4685,23 +4685,23 @@ class CommonUtil {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @param k3 
-     * @param v3 
-     * @param k4 
-     * @param v4 
-     * @param k5 
-     * @param v5 
-     * @param k6 
-     * @param v6 
-     * @return 
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @return
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
             final K k6, final V v6) {
@@ -4716,25 +4716,25 @@ class CommonUtil {
     }
 
     /**
-     * 
+     *
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @param k3 
-     * @param v3 
-     * @param k4 
-     * @param v4 
-     * @param k5 
-     * @param v5 
-     * @param k6 
-     * @param v6 
-     * @param k7 
-     * @param v7 
-     * @return 
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @param k7
+     * @param v7
+     * @return
      */
     public static <K, V> Map<K, V> asMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
             final K k6, final V v6, final K k7, final V v7) {
@@ -4773,9 +4773,9 @@ class CommonUtil {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 
-     * @param v1 
-     * @return 
+     * @param k1
+     * @param v1
+     * @return
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1) {
         final Map<K, V> map = N.newLinkedHashMap(1);
@@ -4788,11 +4788,11 @@ class CommonUtil {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @return 
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @return
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2) {
         final Map<K, V> map = N.newLinkedHashMap(2);
@@ -4806,13 +4806,13 @@ class CommonUtil {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @param k3 
-     * @param v3 
-     * @return 
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @return
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
         final Map<K, V> map = N.newLinkedHashMap(3);
@@ -4827,15 +4827,15 @@ class CommonUtil {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @param k3 
-     * @param v3 
-     * @param k4 
-     * @param v4 
-     * @return 
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @return
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4) {
         final Map<K, V> map = N.newLinkedHashMap(4);
@@ -4851,17 +4851,17 @@ class CommonUtil {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @param k3 
-     * @param v3 
-     * @param k4 
-     * @param v4 
-     * @param k5 
-     * @param v5 
-     * @return 
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @return
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5) {
@@ -4879,19 +4879,19 @@ class CommonUtil {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @param k3 
-     * @param v3 
-     * @param k4 
-     * @param v4 
-     * @param k5 
-     * @param v5 
-     * @param k6 
-     * @param v6 
-     * @return 
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @return
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6) {
@@ -4910,21 +4910,21 @@ class CommonUtil {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param k1 
-     * @param v1 
-     * @param k2 
-     * @param v2 
-     * @param k3 
-     * @param v3 
-     * @param k4 
-     * @param v4 
-     * @param k5 
-     * @param v5 
-     * @param k6 
-     * @param v6 
-     * @param k7 
-     * @param v7 
-     * @return 
+     * @param k1
+     * @param v1
+     * @param k2
+     * @param v2
+     * @param k3
+     * @param v3
+     * @param k4
+     * @param v4
+     * @param k5
+     * @param v5
+     * @param k6
+     * @param v6
+     * @param k7
+     * @param v7
+     * @return
      */
     public static <K, V> Map<K, V> asLinkedHashMap(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
             final V v5, final K k6, final V v6, final K k7, final V v7) {
@@ -4959,11 +4959,11 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param propName 
-     * @param propValue 
-     * @return 
+     *
+     * @param propName
+     * @param propValue
+     * @return
      */
     public static Map<String, Object> asProps(final String propName, final Object propValue) {
         final Map<String, Object> props = N.newLinkedHashMap(1);
@@ -4973,13 +4973,13 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param propName1 
-     * @param propValue1 
-     * @param propName2 
-     * @param propValue2 
-     * @return 
+     *
+     * @param propName1
+     * @param propValue1
+     * @param propName2
+     * @param propValue2
+     * @return
      */
     public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2) {
         final Map<String, Object> props = N.newLinkedHashMap(2);
@@ -4990,15 +4990,15 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param propName1 
-     * @param propValue1 
-     * @param propName2 
-     * @param propValue2 
-     * @param propName3 
-     * @param propValue3 
-     * @return 
+     *
+     * @param propName1
+     * @param propValue1
+     * @param propName2
+     * @param propValue2
+     * @param propName3
+     * @param propValue3
+     * @return
      */
     public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2,
             final String propName3, final Object propValue3) {
@@ -5011,17 +5011,17 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param propName1 
-     * @param propValue1 
-     * @param propName2 
-     * @param propValue2 
-     * @param propName3 
-     * @param propValue3 
-     * @param propName4 
-     * @param propValue4 
-     * @return 
+     *
+     * @param propName1
+     * @param propValue1
+     * @param propName2
+     * @param propValue2
+     * @param propName3
+     * @param propValue3
+     * @param propName4
+     * @param propValue4
+     * @return
      */
     public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2,
             final String propName3, final Object propValue3, final String propName4, final Object propValue4) {
@@ -5035,19 +5035,19 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param propName1 
-     * @param propValue1 
-     * @param propName2 
-     * @param propValue2 
-     * @param propName3 
-     * @param propValue3 
-     * @param propName4 
-     * @param propValue4 
-     * @param propName5 
-     * @param propValue5 
-     * @return 
+     *
+     * @param propName1
+     * @param propValue1
+     * @param propName2
+     * @param propValue2
+     * @param propName3
+     * @param propValue3
+     * @param propName4
+     * @param propValue4
+     * @param propName5
+     * @param propValue5
+     * @return
      */
     public static Map<String, Object> asProps(final String propName1, final Object propValue1, final String propName2, final Object propValue2,
             final String propName3, final Object propValue3, final String propName4, final Object propValue4, final String propName5, final Object propValue5) {
@@ -6288,8 +6288,8 @@ class CommonUtil {
      * is not {@code null}, otherwise, the default value 0 for {@code byte} is
      * returned.
      *
-     * @param str 
-     * @return 
+     * @param str
+     * @return
      * @throws NumberFormatException If the string is not a parsable {@code byte}.
      * @see Numbers#toByte(String)
      * @deprecated replaced by {@code Numbers.toByte(String)}
@@ -6304,8 +6304,8 @@ class CommonUtil {
      * is not {@code null}, otherwise, the default value 0 for {@code short} is
      * returned.
      *
-     * @param str 
-     * @return 
+     * @param str
+     * @return
      * @throws NumberFormatException If the string is not a parsable {@code short}.
      * @see Numbers#toShort(String)
      * @deprecated replaced by {@code Numbers.toShort(String)}
@@ -6320,8 +6320,8 @@ class CommonUtil {
      * {@code str} is not {@code null}, otherwise, the default value 0 for
      * {@code int} is returned.
      *
-     * @param str 
-     * @return 
+     * @param str
+     * @return
      * @throws NumberFormatException If the string is not a parsable {@code int}.
      * @see Numbers#toInt(String)
      * @deprecated replaced by {@code Numbers.toInt(String)}
@@ -6336,8 +6336,8 @@ class CommonUtil {
      * is not {@code null}, otherwise, the default value 0 for {@code long} is
      * returned.
      *
-     * @param str 
-     * @return 
+     * @param str
+     * @return
      * @throws NumberFormatException If the string is not a parsable {@code long}.
      * @see Numbers#toLong(String)
      * @deprecated replaced by {@code Numbers.toLong(String)}
@@ -6352,8 +6352,8 @@ class CommonUtil {
      * is not {@code null}, otherwise, the default value 0f for {@code float} is
      * returned.
      *
-     * @param str 
-     * @return 
+     * @param str
+     * @return
      * @throws NumberFormatException If the string is not a parsable {@code float}.
      * @see Numbers#toFloat(String)
      * @deprecated replaced by {@code Numbers.toFloat(String)}
@@ -6368,8 +6368,8 @@ class CommonUtil {
      * is not {@code null}, otherwise, the default value 0d for {@code double} is
      * returned.
      *
-     * @param str 
-     * @return 
+     * @param str
+     * @return
      * @throws NumberFormatException If the string is not a parsable {@code double}.
      * @see Numbers#toDouble(String)
      * @deprecated replaced by {@code Numbers.toDouble(String)}
@@ -6433,10 +6433,10 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param str 
-     * @return 
+     *
+     * @param str
+     * @return
      */
     public static String base64EncodeString(final String str) {
         if (isNullOrEmpty(str)) {
@@ -6447,10 +6447,10 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param str 
-     * @return 
+     *
+     * @param str
+     * @return
      */
     public static String base64EncodeUtf8String(final String str) {
         if (isNullOrEmpty(str)) {
@@ -6503,10 +6503,10 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param base64String 
-     * @return 
+     *
+     * @param base64String
+     * @return
      */
     public static String base64DecodeToUtf8String(final String base64String) {
         if (isNullOrEmpty(base64String)) {
@@ -6559,10 +6559,10 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param base64String 
-     * @return 
+     *
+     * @param base64String
+     * @return
      */
     public static String base64UrlDecodeToUtf8String(final String base64String) {
         if (isNullOrEmpty(base64String)) {
@@ -6627,12 +6627,12 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param urlQuery 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param urlQuery
+     * @param targetClass
+     * @return
      */
     public static <T> T urlDecode(final String urlQuery, final Class<? extends T> targetClass) {
         if (isNullOrEmpty(urlQuery)) {
@@ -6643,13 +6643,13 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param urlQuery 
-     * @param charset 
-     * @param targetClass 
-     * @return 
+     *
+     * @param <T>
+     * @param urlQuery
+     * @param charset
+     * @param targetClass
+     * @return
      */
     public static <T> T urlDecode(final String urlQuery, final Charset charset, final Class<? extends T> targetClass) {
         if (isNullOrEmpty(urlQuery)) {
@@ -6712,9 +6712,9 @@ class CommonUtil {
     /**
      * Deeply copy by: obj -> serialize -> kryo/Json -> deserialize -> new object.
      *
-     * @param <T> 
+     * @param <T>
      * @param obj a Java object which must be serializable and deserialiable through {@code Kryo} or {@code JSON}.
-     * @param targetClass 
+     * @param targetClass
      * @return a new instance of {@code targetClass} even if {@code bean} is {@code null}.
      * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
@@ -6785,11 +6785,11 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param bean 
-     * @param targetClass 
+     *
+     * @param <T>
+     * @param bean
+     * @param targetClass
      * @return a new instance of {@code targetClass} even if {@code bean} is {@code null}.
      * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
@@ -6802,10 +6802,10 @@ class CommonUtil {
      * same properties retrieved by 'getXXX' method in the specified
      * {@code bean}.
      *
-     * @param <T> 
+     * @param <T>
      * @param bean a Java Object what allows access to properties using getter
      *            and setter methods.
-     * @param selectPropNames 
+     * @param selectPropNames
      * @param targetClass a Java Object what allows access to properties using getter
      *            and setter methods.
      * @return a new instance of {@code targetClass} even if {@code bean} is {@code null}.
@@ -6847,13 +6847,13 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param bean 
-     * @param ignoreUnmatchedProperty 
-     * @param ignoredPropNames 
-     * @param targetClass 
+     *
+     * @param <T>
+     * @param bean
+     * @param ignoreUnmatchedProperty
+     * @param ignoredPropNames
+     * @param targetClass
      * @return a new instance of {@code targetClass} even if {@code bean} is {@code null}.
      * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
@@ -6893,11 +6893,11 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param sourceBean 
-     * @param targetBean 
+     *
+     * @param <T>
+     * @param sourceBean
+     * @param targetBean
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
@@ -6909,12 +6909,12 @@ class CommonUtil {
      * Set all the signed properties(including all primitive type properties) in
      * the specified {@code sourceBean} to the specified {@code targetBean}.
      *
-     * @param <T> 
+     * @param <T>
      * @param sourceBean a Java Object what allows access to properties using getter
      *            and setter methods.
      * @param targetBean a Java Object what allows access to properties using getter
      *            and setter methods.
-     * @param selectPropNames 
+     * @param selectPropNames
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
@@ -6965,12 +6965,12 @@ class CommonUtil {
      * Set all the signed properties(including all primitive type properties) in
      * the specified {@code sourceBean} to the specified {@code targetBean}.
      *
-     * @param <T> 
+     * @param <T>
      * @param sourceBean a Java Object what allows access to properties using getter
      *            and setter methods.
      * @param targetBean a Java Object what allows access to properties using getter
      *            and setter methods.
-     * @param filter 
+     * @param filter
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
@@ -6999,13 +6999,13 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param sourceBean 
-     * @param targetBean 
-     * @param ignoreUnmatchedProperty 
-     * @param ignoredPropNames 
+     *
+     * @param <T>
+     * @param sourceBean
+     * @param targetBean
+     * @param ignoreUnmatchedProperty
+     * @param ignoredPropNames
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
      */
@@ -7047,11 +7047,11 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param sourceBean 
-     * @param targetBean 
+     *
+     * @param <T>
+     * @param sourceBean
+     * @param targetBean
      * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
@@ -7064,12 +7064,12 @@ class CommonUtil {
      * Set all the signed properties(including all primitive type properties) in
      * the specified {@code sourceBean} to the specified {@code targetBean}.
      *
-     * @param <T> 
+     * @param <T>
      * @param sourceBean a Java Object what allows access to properties using getter
      *            and setter methods.
      * @param targetBean a Java Object what allows access to properties using getter
      *            and setter methods.
-     * @param selectPropNames 
+     * @param selectPropNames
      * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
@@ -7131,12 +7131,12 @@ class CommonUtil {
      * Set all the signed properties(including all primitive type properties) in
      * the specified {@code sourceBean} to the specified {@code targetBean}.
      *
-     * @param <T> 
+     * @param <T>
      * @param sourceBean a Java Object what allows access to properties using getter
      *            and setter methods.
      * @param targetBean a Java Object what allows access to properties using getter
      *            and setter methods.
-     * @param filter 
+     * @param filter
      * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
@@ -7175,13 +7175,13 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param sourceBean 
-     * @param targetBean 
-     * @param ignoreUnmatchedProperty 
-     * @param ignoredPropNames 
+     *
+     * @param <T>
+     * @param sourceBean
+     * @param targetBean
+     * @param ignoreUnmatchedProperty
+     * @param ignoredPropNames
      * @param mergeFunc the first parameter is source property value, the second parameter is target property value.
      * @return {@code targetBean}
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
@@ -7441,10 +7441,10 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param c 
-     * @return 
+     *
+     * @param c
+     * @return
      */
     public static boolean anyNull(final Collection<?> c) {
         if (isNullOrEmpty(c)) {
@@ -7508,10 +7508,10 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param c 
-     * @return 
+     *
+     * @param c
+     * @return
      */
     public static boolean allNull(final Collection<?> c) {
         if (isNullOrEmpty(c)) {
@@ -7692,12 +7692,12 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param b 
-     * @param c 
-     * @return 
+     *
+     * @param a
+     * @param b
+     * @param c
+     * @return
      */
     public static boolean anyNullOrEmpty(final Collection<?> a, final Collection<?> b, final Collection<?> c) {
         return a == null || a.size() == 0 || b == null || b.size() == 0 || c == null || c.size() == 0;
@@ -7903,10 +7903,10 @@ class CommonUtil {
     /**
      * Gets the only element.
      *
-     * @param <T> 
-     * @param c 
+     * @param <T>
+     * @param c
      * @return throws TooManyElementsException if there are more than one elements in the specified {@code iterable}.
-     * @throws TooManyElementsException 
+     * @throws TooManyElementsException
      */
     public static <T> Nullable<T> getOnlyElement(Collection<? extends T> c) throws TooManyElementsException {
         if (isNullOrEmpty(c)) {
@@ -9126,8 +9126,8 @@ class CommonUtil {
     /**
      * Returns the length/size of the specified {@code Array/Collection/Map/CharSequence}, or {@code 0} if it's empty or {@code null}.
      *
-     * @param c 
-     * @return 
+     * @param c
+     * @return
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -10637,7 +10637,7 @@ class CommonUtil {
     /**
      * Check if the specified {@code Array} contains any {@code null} element.
      *
-     * @param a 
+     * @param a
      * @throws IllegalArgumentException if {@code null} element found in {@code a}
      */
     public static void checkElementNotNull(final Object[] a) {
@@ -10655,8 +10655,8 @@ class CommonUtil {
     /**
      * Check if the specified {@code Array} contains any {@code null} element.
      *
-     * @param a 
-     * @param argNameOrErrorMsg 
+     * @param a
+     * @param argNameOrErrorMsg
      * @throws IllegalArgumentException if {@code null} element found in {@code a}
      */
     public static void checkElementNotNull(final Object[] a, final String argNameOrErrorMsg) {
@@ -10678,7 +10678,7 @@ class CommonUtil {
     /**
      * Check if the specified {@code Collection} contains any {@code null} element.
      *
-     * @param c 
+     * @param c
      * @throws IllegalArgumentException if {@code null} element found in {@code c}
      */
     public static void checkElementNotNull(final Collection<?> c) {
@@ -10696,8 +10696,8 @@ class CommonUtil {
     /**
      * Check if the specified {@code Collection} contains any {@code null} element.
      *
-     * @param c 
-     * @param argNameOrErrorMsg 
+     * @param c
+     * @param argNameOrErrorMsg
      * @throws IllegalArgumentException if {@code null} element found in {@code c}
      */
     public static void checkElementNotNull(final Collection<?> c, final String argNameOrErrorMsg) {
@@ -10719,7 +10719,7 @@ class CommonUtil {
     /**
      * Check if the specified {@code Map} contains any {@code null} key.
      *
-     * @param m 
+     * @param m
      * @throws IllegalArgumentException if {@code null} key found in {@code m}
      */
     public static void checkKeyNotNull(final Map<?, ?> m) {
@@ -10737,8 +10737,8 @@ class CommonUtil {
     /**
      * Check if the specified {@code Map} contains any {@code null} key.
      *
-     * @param m 
-     * @param argNameOrErrorMsg 
+     * @param m
+     * @param argNameOrErrorMsg
      * @throws IllegalArgumentException if {@code null} key found in {@code m}
      */
     public static void checkKeyNotNull(final Map<?, ?> m, final String argNameOrErrorMsg) {
@@ -10760,7 +10760,7 @@ class CommonUtil {
     /**
      * Check if the specified {@code Map} contains any {@code null} value.
      *
-     * @param m 
+     * @param m
      * @throws IllegalArgumentException if {@code null} value found in {@code m}
      */
     public static void checkValueNotNull(final Map<?, ?> m) {
@@ -10778,8 +10778,8 @@ class CommonUtil {
     /**
      * Check if the specified {@code Map} contains any {@code null} value.
      *
-     * @param m 
-     * @param argNameOrErrorMsg 
+     * @param m
+     * @param argNameOrErrorMsg
      * @throws IllegalArgumentException if {@code null} value found in {@code m}
      */
     public static void checkValueNotNull(final Map<?, ?> m, final String argNameOrErrorMsg) {
@@ -11158,10 +11158,10 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param b 
-     * @param errorMessageSupplier 
+     *
+     * @param b
+     * @param errorMessageSupplier
      */
     public static void checkArgument(boolean b, Supplier<String> errorMessageSupplier) {
         if (!b) {
@@ -11453,10 +11453,10 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param b 
-     * @param errorMessageSupplier 
+     *
+     * @param b
+     * @param errorMessageSupplier
      */
     public static void checkState(boolean b, Supplier<String> errorMessageSupplier) {
         if (!b) {
@@ -11856,19 +11856,19 @@ class CommonUtil {
      * Continue to compare the pairs of values <code>(a1, b1), (a2, b2), (a3, b3), (a4, b4)</code> until they're not equal.
      * <code>0</code> is returned if all of the pairs of values are equal.
      *
-     * @param <T1> 
-     * @param <T2> 
-     * @param <T3> 
-     * @param <T4> 
-     * @param a1 
-     * @param b1 
-     * @param a2 
-     * @param b2 
-     * @param a3 
-     * @param b3 
-     * @param a4 
-     * @param b4 
-     * @return 
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param <T4>
+     * @param a1
+     * @param b1
+     * @param a2
+     * @param b2
+     * @param a3
+     * @param b3
+     * @param a4
+     * @param b4
+     * @return
      * @see Builder#compare(Comparable, Comparable)
      * @deprecated please use {@code Builder.ComparisonBuilder}
      */
@@ -11893,22 +11893,22 @@ class CommonUtil {
      * Continue to compare the pairs of values <code>(a1, b1), (a2, b2), (a3, b3), (a4, b4), (a5, b5)</code> until they're not equal.
      * <code>0</code> is returned if all of the pairs of values are equal.
      *
-     * @param <T1> 
-     * @param <T2> 
-     * @param <T3> 
-     * @param <T4> 
-     * @param <T5> 
-     * @param a1 
-     * @param b1 
-     * @param a2 
-     * @param b2 
-     * @param a3 
-     * @param b3 
-     * @param a4 
-     * @param b4 
-     * @param a5 
-     * @param b5 
-     * @return 
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param <T4>
+     * @param <T5>
+     * @param a1
+     * @param b1
+     * @param a2
+     * @param b2
+     * @param a3
+     * @param b3
+     * @param a4
+     * @param b4
+     * @param a5
+     * @param b5
+     * @return
      * @see Builder#compare(Comparable, Comparable)
      * @deprecated please use {@code Builder.ComparisonBuilder}
      */
@@ -11935,25 +11935,25 @@ class CommonUtil {
      * Continue to compare the pairs of values <code>(a1, b1), (a2, b2), (a3, b3), (a4, b4), (a5, b5), (a6, b6)</code> until they're not equal.
      * <code>0</code> is returned if all of the pairs of values are equal.
      *
-     * @param <T1> 
-     * @param <T2> 
-     * @param <T3> 
-     * @param <T4> 
-     * @param <T5> 
-     * @param <T6> 
-     * @param a1 
-     * @param b1 
-     * @param a2 
-     * @param b2 
-     * @param a3 
-     * @param b3 
-     * @param a4 
-     * @param b4 
-     * @param a5 
-     * @param b5 
-     * @param a6 
-     * @param b6 
-     * @return 
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param <T4>
+     * @param <T5>
+     * @param <T6>
+     * @param a1
+     * @param b1
+     * @param a2
+     * @param b2
+     * @param a3
+     * @param b3
+     * @param a4
+     * @param b4
+     * @param a5
+     * @param b5
+     * @param a6
+     * @param b6
+     * @return
      * @see Builder#compare(Comparable, Comparable)
      * @deprecated please use {@code Builder.ComparisonBuilder}
      */
@@ -11982,28 +11982,28 @@ class CommonUtil {
      * Continue to compare the pairs of values <code>(a1, b1), (a2, b2), (a3, b3), (a4, b4), (a5, b5), (a6, b6), (a7, b7)</code> until they're not equal.
      * <code>0</code> is returned if all of the pairs of values are equal.
      *
-     * @param <T1> 
-     * @param <T2> 
-     * @param <T3> 
-     * @param <T4> 
-     * @param <T5> 
-     * @param <T6> 
-     * @param <T7> 
-     * @param a1 
-     * @param b1 
-     * @param a2 
-     * @param b2 
-     * @param a3 
-     * @param b3 
-     * @param a4 
-     * @param b4 
-     * @param a5 
-     * @param b5 
-     * @param a6 
-     * @param b6 
-     * @param a7 
-     * @param b7 
-     * @return 
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param <T4>
+     * @param <T5>
+     * @param <T6>
+     * @param <T7>
+     * @param a1
+     * @param b1
+     * @param a2
+     * @param b2
+     * @param a3
+     * @param b3
+     * @param a4
+     * @param b4
+     * @param a5
+     * @param b5
+     * @param a6
+     * @param b6
+     * @param a7
+     * @param b7
+     * @return
      * @see Builder#compare(Comparable, Comparable)
      * @deprecated please use {@code Builder.ComparisonBuilder}
      */
@@ -18212,74 +18212,74 @@ class CommonUtil {
         return cp;
     }
 
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param newType
+    //     * @param a
+    //     * @return
+    //     */
+    //    public static <T> T[] copy(Class<T[]> newType, Object[] a) {
+    //        if (isNullOrEmpty(a)) {
+    //            return newArray(newType.getComponentType(), 0);
+    //        }
+    //
+    //        return copyOf(a, a.length, newType);
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param newType
+    //     * @param a
+    //     * @return
+    //     */
+    //    public static <T> T[][] copy(Class<T[][]> newType, Object[][] a) {
+    //        final Class<T[]> componentType = (Class<T[]>) newType.getComponentType();
+    //
+    //        if (isNullOrEmpty(a)) {
+    //            return newArray(componentType, 0);
+    //        }
+    //
+    //        final int len = len(a);
+    //        final T[][] result = newArray(componentType, len);
+    //
+    //        for (int i = 0; i < len; i++) {
+    //            result[i] = copy(componentType, a[i]);
+    //        }
+    //
+    //        return result;
+    //    }
+    //
+    //    /**
+    //     *
+    //     * @param <T>
+    //     * @param newType
+    //     * @param a
+    //     * @return
+    //     */
+    //    public static <T> T[][][] copy(Class<T[][][]> newType, Object[][][] a) {
+    //        final Class<T[][]> componentType = (Class<T[][]>) newType.getComponentType();
+    //
+    //        if (isNullOrEmpty(a)) {
+    //            return newArray(componentType, 0);
+    //        }
+    //
+    //        final int len = len(a);
+    //        final T[][][] result = newArray(componentType, len);
+    //
+    //        for (int i = 0; i < len; i++) {
+    //            result[i] = copy(componentType, a[i]);
+    //        }
+    //
+    //        return result;
+    //    }
+
     /**
      *
-     * @param <T>
-     * @param newType
+     *
      * @param a
      * @return
-     */
-    public static <T> T[] copy(Class<T[]> newType, Object[] a) {
-        if (isNullOrEmpty(a)) {
-            return newArray(newType.getComponentType(), 0);
-        }
-
-        return copyOf(a, a.length, newType);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param newType
-     * @param a
-     * @return
-     */
-    public static <T> T[][] copy(Class<T[][]> newType, Object[][] a) {
-        final Class<T[]> componentType = (Class<T[]>) newType.getComponentType();
-
-        if (isNullOrEmpty(a)) {
-            return newArray(componentType, 0);
-        }
-
-        final int len = len(a);
-        final T[][] result = newArray(componentType, len);
-
-        for (int i = 0; i < len; i++) {
-            result[i] = copy(componentType, a[i]);
-        }
-
-        return result;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param newType
-     * @param a
-     * @return
-     */
-    public static <T> T[][][] copy(Class<T[][][]> newType, Object[][][] a) {
-        final Class<T[][]> componentType = (Class<T[][]>) newType.getComponentType();
-
-        if (isNullOrEmpty(a)) {
-            return newArray(componentType, 0);
-        }
-
-        final int len = len(a);
-        final T[][][] result = newArray(componentType, len);
-
-        for (int i = 0; i < len; i++) {
-            result[i] = copy(componentType, a[i]);
-        }
-
-        return result;
-    }
-
-    /**
-     * 
-     *
-     * @param a 
-     * @return 
      */
     public static boolean isSorted(final boolean[] a) {
         final int len = N.len(a);
@@ -18300,12 +18300,12 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static boolean isSorted(final boolean[] a, final int fromIndex, final int toIndex) {
         final int len = N.len(a);
@@ -18328,10 +18328,10 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @return 
+     *
+     * @param a
+     * @return
      */
     public static boolean isSorted(final char[] a) {
         final int len = N.len(a);
@@ -18352,12 +18352,12 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static boolean isSorted(final char[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -18378,10 +18378,10 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @return 
+     *
+     * @param a
+     * @return
      */
     public static boolean isSorted(final byte[] a) {
         final int len = N.len(a);
@@ -18402,12 +18402,12 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static boolean isSorted(final byte[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -18428,10 +18428,10 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @return 
+     *
+     * @param a
+     * @return
      */
     public static boolean isSorted(final short[] a) {
         final int len = N.len(a);
@@ -18452,12 +18452,12 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static boolean isSorted(final short[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -18478,10 +18478,10 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @return 
+     *
+     * @param a
+     * @return
      */
     public static boolean isSorted(final int[] a) {
         final int len = N.len(a);
@@ -18502,12 +18502,12 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static boolean isSorted(final int[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -18528,10 +18528,10 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @return 
+     *
+     * @param a
+     * @return
      */
     public static boolean isSorted(final long[] a) {
         final int len = N.len(a);
@@ -18552,12 +18552,12 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static boolean isSorted(final long[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -18578,10 +18578,10 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @return 
+     *
+     * @param a
+     * @return
      */
     public static boolean isSorted(final float[] a) {
         final int len = N.len(a);
@@ -18602,12 +18602,12 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static boolean isSorted(final float[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -18628,10 +18628,10 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @return 
+     *
+     * @param a
+     * @return
      */
     public static boolean isSorted(final double[] a) {
         final int len = N.len(a);
@@ -18652,12 +18652,12 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static boolean isSorted(final double[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -18678,11 +18678,11 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param a 
-     * @return 
+     *
+     * @param <T>
+     * @param a
+     * @return
      */
     public static <T extends Comparable<? super T>> boolean isSorted(final T[] a) {
         final int len = N.len(a);
@@ -18703,13 +18703,13 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
+     *
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static <T extends Comparable<? super T>> boolean isSorted(final T[] a, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -18730,12 +18730,12 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param a 
-     * @param cmp 
-     * @return 
+     *
+     * @param <T>
+     * @param a
+     * @param cmp
+     * @return
      */
     public static <T> boolean isSorted(final T[] a, Comparator<? super T> cmp) {
         cmp = cmp == null ? NATURAL_ORDER : cmp;
@@ -18758,14 +18758,14 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param cmp 
-     * @return 
+     *
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param cmp
+     * @return
      */
     public static <T> boolean isSorted(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -18788,11 +18788,11 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param c 
-     * @return 
+     *
+     * @param <T>
+     * @param c
+     * @return
      */
     public static <T extends Comparable<? super T>> boolean isSorted(final Collection<T> c) {
         if (N.size(c) < 2) {
@@ -18817,13 +18817,13 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param c 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
+     *
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static <T extends Comparable<? super T>> boolean isSorted(final Collection<T> c, final int fromIndex, final int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
@@ -18859,12 +18859,12 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param c 
-     * @param cmp 
-     * @return 
+     *
+     * @param <T>
+     * @param c
+     * @param cmp
+     * @return
      */
     public static <T> boolean isSorted(final Collection<T> c, Comparator<? super T> cmp) {
         if (N.size(c) < 2) {
@@ -18891,14 +18891,14 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param c 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param cmp 
-     * @return 
+     *
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param cmp
+     * @return
      */
     public static <T> boolean isSorted(final Collection<T> c, final int fromIndex, final int toIndex, Comparator<? super T> cmp) {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
@@ -19586,10 +19586,10 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param a 
+     *
+     * @param <T>
+     * @param a
      */
     public static <T extends Comparable<? super T>> void parallelSort(T[] a) {
         if (N.isNullOrEmpty(a)) {
@@ -19600,12 +19600,12 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
+     *
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      */
     public static <T extends Comparable<? super T>> void parallelSort(T[] a, int fromIndex, int toIndex) {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
@@ -21227,15 +21227,15 @@ class CommonUtil {
      * <p>Finds the index of the given value in the array starting at the given index.
      * This method will return the index of the first value which falls between the region
      * defined by valueToFind - tolerance and valueToFind + tolerance.
-     * 
+     *
      * <p>This method returns {@link #INDEX_NOT_FOUND} ({@code -1}) for a {@code null} input array.
-     * 
+     *
      * <p>A negative startIndex is treated as zero. A startIndex larger than the array
      * length will return {@link #INDEX_NOT_FOUND} ({@code -1}).
      *
      * @param a the array to search through for the object, may be {@code null}
      * @param startIndex the index to start searching at
-     * @param valueToFind 
+     * @param valueToFind
      * @param tolerance tolerance of the search
      * @return the index of the value within the array,
      *  {@link #INDEX_NOT_FOUND} ({@code -1}) if not found or {@code null} array input
@@ -21303,12 +21303,12 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param c 
+     *
+     * @param c
      * @param startIndex the index from which to start the search.
-     * @param valueToFind 
-     * @return 
+     * @param valueToFind
+     * @return
      */
     public static int indexOf(final Collection<?> c, final int startIndex, final Object valueToFind) {
         final int len = size(c);
@@ -21357,22 +21357,22 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param iter 
-     * @param valueToFind 
-     * @return 
+     *
+     * @param iter
+     * @param valueToFind
+     * @return
      */
     public static int indexOf(final Iterator<?> iter, final Object valueToFind) {
         return indexOf(iter, 0, valueToFind);
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param valueToFind 
-     * @return 
+     *
+     * @param a
+     * @param valueToFind
+     * @return
      */
     public static int indexOfIgnoreCase(final String[] a, final String valueToFind) {
         if (N.isNullOrEmpty(a)) {
@@ -21389,12 +21389,12 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param iter 
-     * @param startIndex 
-     * @param valueToFind 
-     * @return 
+     *
+     * @param iter
+     * @param startIndex
+     * @param valueToFind
+     * @return
      */
     public static int indexOf(final Iterator<?> iter, final int startIndex, final Object valueToFind) {
         if (iter == null) {
@@ -21775,15 +21775,15 @@ class CommonUtil {
      * <p>Finds the last index of the given value in the array starting at the given index.
      * This method will return the index of the last value which falls between the region
      * defined by valueToFind - tolerance and valueToFind + tolerance.
-     * 
+     *
      * <p>This method returns {@link #INDEX_NOT_FOUND} ({@code -1}) for a {@code null} input array.
-     * 
+     *
      * <p>A negative startIndex will return {@link #INDEX_NOT_FOUND} ({@code -1}). A startIndex larger than the
      * array length will search from the end of the array.
      *
      * @param a the array to traverse for looking for the object, may be {@code null}
      * @param startIndexFromBack the start index to traverse backwards from
-     * @param valueToFind 
+     * @param valueToFind
      * @param tolerance search for value within plus/minus this amount
      * @return the last index of the value within the array,
      *  {@link #INDEX_NOT_FOUND} ({@code -1}) if not found or {@code null} array input
@@ -21940,11 +21940,11 @@ class CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param valueToFind 
-     * @return 
+     *
+     * @param a
+     * @param valueToFind
+     * @return
      */
     public static int lastIndexOfIgnoreCase(final String[] a, final String valueToFind) {
         if (N.isNullOrEmpty(a)) {
@@ -22003,12 +22003,12 @@ class CommonUtil {
     /**
      * Find first index.
      *
-     * @param <T> 
-     * @param <U> 
-     * @param <E> 
-     * @param a 
-     * @param valueToFind 
-     * @param predicate 
+     * @param <T>
+     * @param <U>
+     * @param <E>
+     * @param a
+     * @param valueToFind
+     * @param predicate
      * @return the optional int
      * @throws E the e
      */

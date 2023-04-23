@@ -26,15 +26,33 @@ import com.landawn.abacus.util.Throwables;
 public interface ByteFunction<R> extends Throwables.ByteFunction<R, RuntimeException> { //NOSONAR
     ByteFunction<Byte> BOX = value -> value;
 
+    /**
+     * 
+     *
+     * @param value 
+     * @return 
+     */
     @Override
     R apply(byte value);
 
+    /**
+     * 
+     *
+     * @param <V> 
+     * @param after 
+     * @return 
+     */
     default <V> ByteFunction<V> andThen(Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);
 
         return t -> after.apply(apply(t));
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     static ByteFunction<Byte> identity() {
         return t -> t;
     }

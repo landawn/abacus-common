@@ -1,3 +1,8 @@
+### 3.6.13
+
+* Improvements and bug fix.
+
+
 ### 3.6.12
 
 * Improvements JavaDoc.

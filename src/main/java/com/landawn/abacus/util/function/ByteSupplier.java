@@ -28,6 +28,11 @@ public interface ByteSupplier extends Throwables.ByteSupplier<RuntimeException> 
 
     ByteSupplier RANDOM = () -> (byte) Util.RAND_BYTE.nextInt();
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     byte getAsByte();
 }

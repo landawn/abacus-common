@@ -22,7 +22,14 @@ import com.landawn.abacus.util.Throwables;
  *
  * @author Haiyang Li
  */
-public interface ObjIntConsumer<T> extends Throwables.ObjIntConsumer<T, RuntimeException>, java.util.function.ObjIntConsumer<T> { //NOSONAR
+public interface ObjIntConsumer<T> extends Throwables.ObjIntConsumer<T, RuntimeException>, java.util.function.ObjIntConsumer<T> {
+    /**
+     * 
+     *
+     * @param t 
+     * @param value 
+     */
+    //NOSONAR
     @Override
     void accept(T t, int value);
 }

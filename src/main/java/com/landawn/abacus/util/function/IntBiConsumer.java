@@ -25,9 +25,21 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface IntBiConsumer extends Throwables.IntBiConsumer<RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param t 
+    * @param u 
+    */
     @Override
     void accept(int t, int u);
 
+    /**
+     * 
+     *
+     * @param after 
+     * @return 
+     */
     default IntBiConsumer andThen(IntBiConsumer after) {
         N.checkArgNotNull(after);
 

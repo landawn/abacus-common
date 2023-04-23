@@ -25,9 +25,22 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface FloatNFunction<R> extends Throwables.FloatNFunction<R, RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param args 
+    * @return 
+    */
     @Override
     R apply(float... args);
 
+    /**
+     * 
+     *
+     * @param <V> 
+     * @param after 
+     * @return 
+     */
     @Override
     default <V> FloatNFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);

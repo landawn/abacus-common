@@ -29,19 +29,44 @@ public interface DoubleTriPredicate extends Throwables.DoubleTriPredicate<Runtim
 
     DoubleTriPredicate ALWAYS_FALSE = (a, b, c) -> false;
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param b 
+     * @param c 
+     * @return 
+     */
     @Override
     boolean test(double a, double b, double c);
 
+    /**
+     * 
+     *
+     * @return 
+     */
     default DoubleTriPredicate negate() {
         return (a, b, c) -> !test(a, b, c);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default DoubleTriPredicate and(DoubleTriPredicate other) {
         N.checkArgNotNull(other);
 
         return (a, b, c) -> test(a, b, c) && other.test(a, b, c);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default DoubleTriPredicate or(DoubleTriPredicate other) {
         N.checkArgNotNull(other);
 

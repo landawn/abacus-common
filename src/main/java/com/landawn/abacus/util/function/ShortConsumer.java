@@ -25,9 +25,20 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface ShortConsumer extends Throwables.ShortConsumer<RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param t 
+    */
     @Override
     void accept(short t);
 
+    /**
+     * 
+     *
+     * @param after 
+     * @return 
+     */
     default ShortConsumer andThen(ShortConsumer after) {
         N.checkArgNotNull(after);
 

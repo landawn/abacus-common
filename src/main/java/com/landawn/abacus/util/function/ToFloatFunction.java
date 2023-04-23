@@ -34,6 +34,12 @@ public interface ToFloatFunction<T> extends Throwables.ToFloatFunction<T, Runtim
     //    @Deprecated
     //    ToFloatFunction<Number> NUM = FROM_NUM;
 
+    /**
+     * 
+     *
+     * @param value 
+     * @return 
+     */
     @Override
     float applyAsFloat(T value);
 }

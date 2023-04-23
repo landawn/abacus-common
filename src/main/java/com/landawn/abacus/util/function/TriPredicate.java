@@ -24,25 +24,56 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param a 
+    * @param b 
+    * @param c 
+    * @return 
+    */
     @Override
     boolean test(A a, B b, C c);
 
+    /**
+     * 
+     *
+     * @return 
+     */
     default TriPredicate<A, B, C> negate() {
         return (a, b, c) -> !test(a, b, c);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default TriPredicate<A, B, C> and(TriPredicate<A, B, C> other) {
         N.checkArgNotNull(other);
 
         return (a, b, c) -> test(a, b, c) && other.test(a, b, c);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default TriPredicate<A, B, C> or(TriPredicate<A, B, C> other) {
         N.checkArgNotNull(other);
 
         return (a, b, c) -> test(a, b, c) || other.test(a, b, c);
     }
 
+    /**
+     * 
+     *
+     * @param <E> 
+     * @return 
+     */
     default <E extends Throwable> Throwables.TriPredicate<A, B, C, E> toThrowable() {
         return (Throwables.TriPredicate<A, B, C, E>) this;
     }

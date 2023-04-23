@@ -24,5 +24,11 @@ public interface IntToShortFunction {
 
     IntToShortFunction DEFAULT = value -> (short) value;
 
+    /**
+     * 
+     *
+     * @param value 
+     * @return 
+     */
     short applyAsShort(int value);
 }

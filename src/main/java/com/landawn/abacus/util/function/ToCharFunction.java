@@ -26,6 +26,12 @@ public interface ToCharFunction<T> extends Throwables.ToCharFunction<T, RuntimeE
 
     ToCharFunction<Character> UNBOX = value -> value == null ? 0 : value;
 
+    /**
+     * 
+     *
+     * @param value 
+     * @return 
+     */
     @Override
     char applyAsChar(T value);
 }

@@ -28,6 +28,11 @@ public interface DoubleSupplier extends Throwables.DoubleSupplier<RuntimeExcepti
 
     DoubleSupplier RANDOM = Util.RAND_DOUBLE::nextDouble;
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     double getAsDouble();
 }

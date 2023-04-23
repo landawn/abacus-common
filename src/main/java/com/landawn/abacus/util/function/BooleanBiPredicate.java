@@ -37,19 +37,43 @@ public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<Runtim
 
     BooleanBiPredicate NOT_EQUAL = (t, u) -> t != u;
 
+    /**
+     * 
+     *
+     * @param t 
+     * @param u 
+     * @return 
+     */
     @Override
     boolean test(boolean t, boolean u);
 
+    /**
+     * 
+     *
+     * @return 
+     */
     default BooleanBiPredicate negate() {
         return (t, u) -> !test(t, u);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default BooleanBiPredicate and(BooleanBiPredicate other) {
         N.checkArgNotNull(other);
 
         return (t, u) -> test(t, u) && other.test(t, u);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default BooleanBiPredicate or(BooleanBiPredicate other) {
         N.checkArgNotNull(other);
 

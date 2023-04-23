@@ -29,19 +29,44 @@ public interface IntTriPredicate extends Throwables.IntTriPredicate<RuntimeExcep
 
     IntTriPredicate ALWAYS_FALSE = (a, b, c) -> false;
 
+    /**
+     * 
+     *
+     * @param a 
+     * @param b 
+     * @param c 
+     * @return 
+     */
     @Override
     boolean test(int a, int b, int c);
 
+    /**
+     * 
+     *
+     * @return 
+     */
     default IntTriPredicate negate() {
         return (a, b, c) -> !test(a, b, c);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default IntTriPredicate and(IntTriPredicate other) {
         N.checkArgNotNull(other);
 
         return (a, b, c) -> test(a, b, c) && other.test(a, b, c);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default IntTriPredicate or(IntTriPredicate other) {
         N.checkArgNotNull(other);
 

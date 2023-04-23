@@ -24,5 +24,11 @@ public interface FloatToDoubleFunction {
 
     FloatToDoubleFunction DEFAULT = value -> value;
 
+    /**
+     * 
+     *
+     * @param value 
+     * @return 
+     */
     double applyAsDouble(float value);
 }

@@ -25,9 +25,21 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface FloatBiConsumer extends Throwables.FloatBiConsumer<RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param t 
+    * @param u 
+    */
     @Override
     void accept(float t, float u);
 
+    /**
+     * 
+     *
+     * @param after 
+     * @return 
+     */
     default FloatBiConsumer andThen(FloatBiConsumer after) {
         N.checkArgNotNull(after);
 

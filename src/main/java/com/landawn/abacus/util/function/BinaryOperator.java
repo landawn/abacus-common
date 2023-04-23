@@ -24,6 +24,12 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface BinaryOperator<T> extends BiFunction<T, T, T>, Throwables.BinaryOperator<T, RuntimeException>, java.util.function.BinaryOperator<T> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param <E> 
+    * @return 
+    */
     @Override
     default <E extends Throwable> Throwables.BinaryOperator<T, E> toThrowable() {
         return (Throwables.BinaryOperator<T, E>) this;

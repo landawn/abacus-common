@@ -41,19 +41,43 @@ public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeExcep
 
     LongBiPredicate LESS_EQUAL = (t, u) -> t <= u;
 
+    /**
+     * 
+     *
+     * @param t 
+     * @param u 
+     * @return 
+     */
     @Override
     boolean test(long t, long u);
 
+    /**
+     * 
+     *
+     * @return 
+     */
     default LongBiPredicate negate() {
         return (t, u) -> !test(t, u);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default LongBiPredicate and(LongBiPredicate other) {
         N.checkArgNotNull(other);
 
         return (t, u) -> test(t, u) && other.test(t, u);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default LongBiPredicate or(LongBiPredicate other) {
         N.checkArgNotNull(other);
 

@@ -25,9 +25,22 @@ import com.landawn.abacus.util.Throwables;
  */
 public interface CharNFunction<R> extends Throwables.CharNFunction<R, RuntimeException> { //NOSONAR
 
+    /**
+    * 
+    *
+    * @param args 
+    * @return 
+    */
     @Override
     R apply(char... args);
 
+    /**
+     * 
+     *
+     * @param <V> 
+     * @param after 
+     * @return 
+     */
     @Override
     default <V> CharNFunction<V> andThen(java.util.function.Function<? super R, ? extends V> after) {
         N.checkArgNotNull(after);

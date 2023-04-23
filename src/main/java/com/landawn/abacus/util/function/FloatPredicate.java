@@ -41,14 +41,20 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
 
     FloatPredicate NOT_NEGATIVE = value -> value >= 0;
 
+    /**
+     * 
+     *
+     * @param value 
+     * @return 
+     */
     @Override
     boolean test(float value);
 
     /**
-     * Returns the specified instance
+     * Returns the specified instance.
      *
-     * @param predicate
-     * @return
+     * @param predicate 
+     * @return 
      */
     static FloatPredicate of(final FloatPredicate predicate) {
         N.checkArgNotNull(predicate);
@@ -56,46 +62,106 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
         return predicate;
     }
 
+    /**
+     * 
+     *
+     * @return 
+     */
     default FloatPredicate negate() {
         return t -> !test(t);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default FloatPredicate and(FloatPredicate other) {
         N.checkArgNotNull(other);
 
         return t -> test(t) && other.test(t);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     default FloatPredicate or(FloatPredicate other) {
         N.checkArgNotNull(other);
 
         return t -> test(t) || other.test(t);
     }
 
+    /**
+     * 
+     *
+     * @param targetFloat 
+     * @return 
+     */
     static FloatPredicate equal(float targetFloat) { //NOSONAR
         return value -> value == targetFloat;
     }
 
+    /**
+     * 
+     *
+     * @param targetFloat 
+     * @return 
+     */
     static FloatPredicate notEqual(float targetFloat) {
         return value -> value != targetFloat;
     }
 
+    /**
+     * 
+     *
+     * @param targetFloat 
+     * @return 
+     */
     static FloatPredicate greaterThan(float targetFloat) {
         return value -> N.compare(value, targetFloat) > 0;
     }
 
+    /**
+     * 
+     *
+     * @param targetFloat 
+     * @return 
+     */
     static FloatPredicate greaterEqual(float targetFloat) {
         return value -> N.compare(value, targetFloat) >= 0;
     }
 
+    /**
+     * 
+     *
+     * @param targetFloat 
+     * @return 
+     */
     static FloatPredicate lessThan(float targetFloat) {
         return value -> N.compare(value, targetFloat) < 0;
     }
 
+    /**
+     * 
+     *
+     * @param targetFloat 
+     * @return 
+     */
     static FloatPredicate lessEqual(float targetFloat) {
         return value -> N.compare(value, targetFloat) <= 0;
     }
 
+    /**
+     * 
+     *
+     * @param minValue 
+     * @param maxValue 
+     * @return 
+     */
     static FloatPredicate between(float minValue, float maxValue) {
         return value -> N.compare(value, minValue) > 0 && N.compare(value, maxValue) < 0;
     }

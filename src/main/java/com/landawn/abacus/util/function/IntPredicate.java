@@ -41,20 +41,43 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
 
     IntPredicate NOT_NEGATIVE = value -> value >= 0;
 
+    /**
+     * 
+     *
+     * @param value 
+     * @return 
+     */
     @Override
     boolean test(int value);
 
+    /**
+     * 
+     *
+     * @return 
+     */
     @Override
     default IntPredicate negate() {
         return value -> !test(value);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     @Override
     default IntPredicate and(java.util.function.IntPredicate other) {
         N.checkArgNotNull(other);
         return value -> test(value) && other.test(value);
     }
 
+    /**
+     * 
+     *
+     * @param other 
+     * @return 
+     */
     @Override
     default IntPredicate or(java.util.function.IntPredicate other) {
         N.checkArgNotNull(other);
@@ -62,10 +85,10 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
     }
 
     /**
-     * Returns the specified instance
+     * Returns the specified instance.
      *
-     * @param predicate
-     * @return
+     * @param predicate 
+     * @return 
      */
     static IntPredicate of(final IntPredicate predicate) {
         N.checkArgNotNull(predicate);
@@ -73,30 +96,73 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
         return predicate;
     }
 
+    /**
+     * 
+     *
+     * @param targetInt 
+     * @return 
+     */
     static IntPredicate equal(int targetInt) { //NOSONAR
         return value -> value == targetInt;
     }
 
+    /**
+     * 
+     *
+     * @param targetInt 
+     * @return 
+     */
     static IntPredicate notEqual(int targetInt) {
         return value -> value != targetInt;
     }
 
+    /**
+     * 
+     *
+     * @param targetInt 
+     * @return 
+     */
     static IntPredicate greaterThan(int targetInt) {
         return value -> value > targetInt;
     }
 
+    /**
+     * 
+     *
+     * @param targetInt 
+     * @return 
+     */
     static IntPredicate greaterEqual(int targetInt) {
         return value -> value >= targetInt;
     }
 
+    /**
+     * 
+     *
+     * @param targetInt 
+     * @return 
+     */
     static IntPredicate lessThan(int targetInt) {
         return value -> value < targetInt;
     }
 
+    /**
+     * 
+     *
+     * @param targetInt 
+     * @return 
+     */
     static IntPredicate lessEqual(int targetInt) {
         return value -> value <= targetInt;
     }
 
+    /**
+     * 
+     *
+     * @param minValue 
+     * @param maxValue 
+     * @return 
+     */
     static IntPredicate between(int minValue, int maxValue) {
         return value -> value > minValue && value < maxValue;
     }

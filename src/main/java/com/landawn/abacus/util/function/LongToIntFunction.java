@@ -26,6 +26,12 @@ public interface LongToIntFunction extends Throwables.LongToIntFunction<RuntimeE
 
     LongToIntFunction DEFAULT = value -> (int) value;
 
+    /**
+     * 
+     *
+     * @param value 
+     * @return 
+     */
     @Override
     int applyAsInt(long value);
 }
