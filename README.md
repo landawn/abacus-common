@@ -165,7 +165,7 @@ and [More](https://www.javadoc.io/static/com.landawn/abacus-common/3.6.13/com/la
 [Stopwatch](https://static.javadoc.io/com.landawn/abacus-common/3.6.13/com/landawn/abacus/util/Stopwatch.html),
 [RateLimiter](https://static.javadoc.io/com.landawn/abacus-common/3.6.13/com/landawn/abacus/util/RateLimiter.html),
 [TypeReference](https://static.javadoc.io/com.landawn/abacus-common/3.6.13/com/landawn/abacus/util/TypeReference.html),
-[WebUtil](https://static.javadoc.io/com.landawn/abacus-common/3.6.13/com/landawn/abacus/guava/WebUtil.html),
+[WebUtil](https://static.javadoc.io/com.landawn/abacus-common/3.6.13/com/landawn/abacus/http/WebUtil.html),
 [Files](https://static.javadoc.io/com.landawn/abacus-common/3.6.13/com/landawn/abacus/guava/Files.html),
 [Traverser](https://static.javadoc.io/com.landawn/abacus-common/3.6.13/com/landawn/abacus/guava/Traverser.html)(copied from Apache commons, Google Guava...under Apache License v2) ...
 
