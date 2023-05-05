@@ -50,7 +50,7 @@ public abstract class DateUtil {
     // ...
     public static final TimeZone UTC_TIME_ZONE = TimeZone.getTimeZone("UTC");
 
-    public static final TimeZone LOCAL_TIME_ZONE = TimeZone.getDefault();
+    static final TimeZone DEFAULT_TIME_ZONE = TimeZone.getDefault();
 
     /**
      * Date format.
@@ -1835,12 +1835,12 @@ public abstract class DateUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param date 
-     * @param field 
-     * @return 
+     *
+     * @param <T>
+     * @param date
+     * @param field
+     * @return
      */
     public static <T extends java.util.Date> T round(final T date, final CalendarField field) {
         return round(date, field.value());
@@ -1891,12 +1891,12 @@ public abstract class DateUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param calendar 
-     * @param field 
-     * @return 
+     *
+     * @param <T>
+     * @param calendar
+     * @param field
+     * @return
      */
     public static <T extends Calendar> T round(final T calendar, final CalendarField field) {
         return round(calendar, field.value());
@@ -3122,7 +3122,7 @@ public abstract class DateUtil {
      */
     private static TimeZone checkTimeZone(final String format, TimeZone timeZone) {
         if (timeZone == null) {
-            timeZone = format != null && format.endsWith("'Z'") ? UTC_TIME_ZONE : LOCAL_TIME_ZONE;
+            timeZone = format != null && format.endsWith("'Z'") ? UTC_TIME_ZONE : DEFAULT_TIME_ZONE;
         }
 
         return timeZone;

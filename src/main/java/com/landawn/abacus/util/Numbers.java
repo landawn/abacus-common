@@ -652,12 +652,12 @@ public final class Numbers {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param value 
-     * @param targetType 
-     * @return 
+     *
+     * @param <T>
+     * @param value
+     * @param targetType
+     * @return
      */
     public static <T extends Number> T convert(final Number value, final Class<? extends T> targetType) {
         if (value == null) {
@@ -675,12 +675,12 @@ public final class Numbers {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param value 
-     * @param targetType 
-     * @return 
+     *
+     * @param <T>
+     * @param value
+     * @param targetType
+     * @return
      */
     public static <T extends Number> T convert(final Number value, final Type<? extends T> targetType) {
         if (value == null) {
@@ -1606,16 +1606,11 @@ public final class Numbers {
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static Optional<Number> createNumber(final String str) {
-        if (N.isBlank(str)) {
+        if (Strings.isEmpty(str)) {
             return Optional.empty();
         }
 
-        char ch = 0;
-
-        if (!(((ch = str.charAt(0)) < 128 && alphanumerics[ch]) && ((ch = str.charAt(str.length() - 1)) < 128 && alphanumerics[ch])
-                && ((ch = str.charAt(str.length() / 2)) < 128 && alphanumerics[ch]))) {
-            return Optional.empty();
-        }
+        final int len = str.length();
 
         // Need to deal with all possible hex prefixes here
         final String[] hex_prefixes = { "0x", "0X", "-0x", "-0X", "#", "-#" };
@@ -1630,7 +1625,7 @@ public final class Numbers {
         if (pfxLen > 0) { // we have a hex number
             char firstSigDigit = 0; // strip leading zeroes
 
-            for (int i = pfxLen; i < str.length(); i++) {
+            for (int i = pfxLen; i < len; i++) {
                 firstSigDigit = str.charAt(i);
                 if (firstSigDigit == '0') { // count leading zeroes
                     pfxLen++;
@@ -1639,7 +1634,7 @@ public final class Numbers {
                 }
             }
 
-            final int hexDigits = str.length() - pfxLen;
+            final int hexDigits = len - pfxLen;
 
             if (hexDigits > 16 || hexDigits == 16 && firstSigDigit > '7') { // too many for Long
                 return (Optional) createBigInteger(str);
@@ -1650,7 +1645,7 @@ public final class Numbers {
             }
         }
 
-        final char lastChar = str.charAt(str.length() - 1);
+        final char lastChar = str.charAt(len - 1);
         String mant;
         String dec;
         String exp;
@@ -1663,7 +1658,7 @@ public final class Numbers {
 
         if (decPos > -1) { // there is a decimal point
             if (expPos > -1) { // there is an exponent
-                if (expPos < decPos || expPos > str.length()) { // prevents double exponent causing IOOBE
+                if (expPos < decPos || expPos > len) { // prevents double exponent causing IOOBE
                     return Optional.empty();
                 }
                 dec = str.substring(decPos + 1, expPos);
@@ -1674,7 +1669,7 @@ public final class Numbers {
             mant = getMantissa(str, decPos);
         } else {
             if (expPos > -1) {
-                if (expPos > str.length()) { // prevents double exponent causing IOOBE
+                if (expPos > len) { // prevents double exponent causing IOOBE
                     return Optional.empty();
                 }
                 mant = getMantissa(str, expPos);
@@ -1686,14 +1681,14 @@ public final class Numbers {
         }
 
         if (!Character.isDigit(lastChar) && lastChar != '.') {
-            if (expPos > -1 && expPos < str.length() - 1) {
-                exp = str.substring(expPos + 1, str.length() - 1);
+            if (expPos > -1 && expPos < len - 1) {
+                exp = str.substring(expPos + 1, len - 1);
             } else {
                 exp = null;
             }
 
             //Requesting a specific type..
-            final String numeric = str.substring(0, str.length() - 1);
+            final String numeric = str.substring(0, len - 1);
             final boolean allZeros = isAllZeros(mant) && isAllZeros(exp);
             switch (lastChar) {
                 case 'l':
@@ -1748,7 +1743,7 @@ public final class Numbers {
 
         //User doesn't have a preference on the return type, so let's start
         //small and go from there...
-        if (expPos > -1 && expPos < str.length() - 1) {
+        if (expPos > -1 && expPos < len - 1) {
             exp = str.substring(expPos + 1);
         } else {
             exp = null;
@@ -1759,7 +1754,7 @@ public final class Numbers {
 
             // 17777777777 N.println(Integer.toString(Integer.MAX_VALUE, 8));
             // -20000000000  N.println(Integer.toString(Integer.MIN_VALUE, 8));
-            if (str.length() < 13) {
+            if (len < 13) {
                 op = createInteger(str).boxed();
 
                 if (op.isPresent()) {
@@ -1769,7 +1764,7 @@ public final class Numbers {
 
             // 777777777777777777777 N.println(Long.toString(Long.MAX_VALUE, 8));
             // -1000000000000000000000 N.println(Long.toString(Long.MIN_VALUE, 8));
-            if (str.length() < 23 || (str.charAt(0) == '-' && str.length() < 24)) {
+            if (len < 23 || (str.charAt(0) == '-' && len < 24)) {
                 op = createLong(str).boxed();
 
                 if (op.isPresent()) {
@@ -1805,7 +1800,7 @@ public final class Numbers {
         //    }
 
         try {
-            if (str.length() > 308 && (decPos < 0 || decPos > 308)) { // MAX_VALUE = 0x1.fffffffffffffP+1023; // 1.7976931348623157e+308
+            if (len > 308 && (decPos < 0 || decPos > 308)) { // MAX_VALUE = 0x1.fffffffffffffP+1023; // 1.7976931348623157e+308
                 return (Optional) createBigDecimal(str);
             }
 
@@ -1872,6 +1867,22 @@ public final class Numbers {
     }
 
     /**
+     * Note: It's copied from NumberUtils in Apache Commons Lang under Apache
+     * License 2.0
+     *
+     * <br />
+     * <br />
+     *
+     * It's same as {@code isCreatable(String)}.
+     *
+     * @see #isCreatable(String)
+     * @see #isParsable(String)
+     */
+    public static boolean isNumber(final String str) {
+        return isCreatable(str);
+    }
+
+    /**
      * <p>Checks whether the String a valid Java number.</p>
      *
      * <p>Valid numbers include hexadecimal marked with the {@code 0x} or
@@ -1891,7 +1902,8 @@ public final class Numbers {
      *
      * @param str the {@code String} to check
      * @return {@code true} if the string is a correctly formatted number
-     * @since 3.5
+     * @see #isNumber(String)
+     * @see #isParsable(String)
      */
     public static boolean isCreatable(final String str) {
         if (Strings.isEmpty(str)) {
@@ -1899,7 +1911,14 @@ public final class Numbers {
         }
 
         final char[] chars = str.toCharArray();
-        int sz = chars.length;
+        int len = chars.length;
+        char ch = 0;
+
+        if (!(((ch = chars[0]) < 128 && alphanumerics[ch]) && ((ch = chars[len - 1]) < 128 && alphanumerics[ch])
+                && ((ch = chars[len / 2]) < 128 && alphanumerics[ch]))) {
+            return false;
+        }
+
         boolean hasExp = false;
         boolean hasDecPoint = false;
         boolean allowSigns = false;
@@ -1907,10 +1926,10 @@ public final class Numbers {
         // deal with any possible sign up front
         final int start = chars[0] == '-' || chars[0] == '+' ? 1 : 0;
 
-        if (sz > start + 1 && chars[start] == '0' && !Strings.contains(str, '.')) { // leading 0, skip if is a decimal number
+        if (len > start + 1 && chars[start] == '0' && !Strings.contains(str, '.')) { // leading 0, skip if is a decimal number
             if (chars[start + 1] == 'x' || chars[start + 1] == 'X') { // leading 0x/0X
                 int i = start + 2;
-                if (i == sz) {
+                if (i == len) {
                     return false; // str == "0x"
                 }
                 // checking hex (it can't be anything else)
@@ -1932,12 +1951,12 @@ public final class Numbers {
             }
         }
 
-        sz--; // don't want to loop to the last char, check it afterwords
-              // for type qualifiers
+        len--; // don't want to loop to the last char, check it afterwords
+               // for type qualifiers
         int i = start;
         // loop to the next to last char or to the last char if we need another digit to
         // make a valid number (e.g. chars[0..5] = "1234E")
-        while (i < sz || i < sz + 1 && allowSigns && !foundDigit) {
+        while (i < len || i < len + 1 && allowSigns && !foundDigit) {
             if (chars[i] >= '0' && chars[i] <= '9') {
                 foundDigit = true;
                 allowSigns = false;
@@ -2038,19 +2057,19 @@ public final class Numbers {
     }
 
     //-----------------------------------------------------------------------
-    /**
-     * <p>Checks whether the {@code String} contains only
-     * digit characters.</p>
-     *
-     * <p>{@code Null} and empty String will return
-     * {@code false}.</p>
-     *
-     * @param str the {@code String} to check
-     * @return {@code true} if str contains only Unicode numeric
-     */
-    public static boolean isDigits(final String str) {
-        return Strings.isNumeric(str);
-    }
+    //    /**
+    //     * <p>Checks whether the {@code String} contains only
+    //     * digit characters.</p>
+    //     *
+    //     * <p>{@code Null} and empty String will return
+    //     * {@code false}.</p>
+    //     *
+    //     * @param str the {@code String} to check
+    //     * @return {@code true} if str contains only Unicode numeric
+    //     */
+    //    public static boolean isDigits(final String str) {
+    //        return Strings.isNumeric(str);
+    //    }
 
     private static boolean withDecimalsParsing(final String str, final int beginIdx) {
         int decimalPoints = 0;
