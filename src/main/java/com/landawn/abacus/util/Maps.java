@@ -387,13 +387,13 @@ public final class Maps {
     }
 
     /**
-     * 
      *
-     * @param <T> 
+     *
+     * @param <T>
      * @param <K> the key type
-     * @param c 
-     * @param keyMapper 
-     * @return 
+     * @param c
+     * @param keyMapper
+     * @return
      * @deprecated Use {@link #create(Collection<? extends T>,Function<? super T, ? extends K>)} instead
      */
     @Deprecated
@@ -402,15 +402,15 @@ public final class Maps {
     }
 
     /**
-     * 
      *
-     * @param <T> 
+     *
+     * @param <T>
      * @param <K> the key type
      * @param <V> the value type
-     * @param c 
-     * @param keyMapper 
-     * @param valueExtractor 
-     * @return 
+     * @param c
+     * @param keyMapper
+     * @param valueExtractor
+     * @return
      * @deprecated Use {@link #create(Collection<? extends T>,Function<? super T, ? extends K>,Function<? super T, ? extends V>)} instead
      */
     @Deprecated
@@ -420,17 +420,17 @@ public final class Maps {
     }
 
     /**
-     * 
      *
-     * @param <T> 
+     *
+     * @param <T>
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> 
-     * @param c 
-     * @param keyMapper 
-     * @param valueExtractor 
-     * @param mapSupplier 
-     * @return 
+     * @param <M>
+     * @param c
+     * @param keyMapper
+     * @param valueExtractor
+     * @param mapSupplier
+     * @return
      * @deprecated Use {@link #create(Collection<? extends T>,Function<? super T, ? extends K>,Function<? super T, ? extends V>,IntFunction<? extends M>)} instead
      */
     @Deprecated
@@ -440,18 +440,18 @@ public final class Maps {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param <M> 
-     * @param c 
-     * @param keyMapper 
-     * @param valueExtractor 
-     * @param mergeFunction 
-     * @param mapSupplier 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param <M>
+     * @param c
+     * @param keyMapper
+     * @param valueExtractor
+     * @param mergeFunction
+     * @param mapSupplier
+     * @return
      * @deprecated Use {@link #create(Collection<? extends T>,Function<? super T, ? extends K>,Function<? super T, ? extends V>,BinaryOperator<V>,IntFunction<? extends M>)} instead
      */
     @Deprecated
@@ -461,13 +461,13 @@ public final class Maps {
     }
 
     /**
-     * 
      *
-     * @param <T> 
+     *
+     * @param <T>
      * @param <K> the key type
-     * @param iter 
-     * @param keyMapper 
-     * @return 
+     * @param iter
+     * @param keyMapper
+     * @return
      * @deprecated Use {@link #create(Iterator<? extends T>,Throwables.Function<? super T, K, E>)} instead
      */
     @Deprecated
@@ -476,15 +476,15 @@ public final class Maps {
     }
 
     /**
-     * 
      *
-     * @param <T> 
+     *
+     * @param <T>
      * @param <K> the key type
      * @param <V> the value type
-     * @param iter 
-     * @param keyMapper 
-     * @param valueExtractor 
-     * @return 
+     * @param iter
+     * @param keyMapper
+     * @param valueExtractor
+     * @return
      * @deprecated Use {@link #create(Iterator<? extends T>,Throwables.Function<? super T, K, E>,Function<? super T, ? extends V>)} instead
      */
     @Deprecated
@@ -494,17 +494,17 @@ public final class Maps {
     }
 
     /**
-     * 
      *
-     * @param <T> 
+     *
+     * @param <T>
      * @param <K> the key type
      * @param <V> the value type
-     * @param <M> 
-     * @param iter 
-     * @param keyMapper 
-     * @param valueExtractor 
-     * @param mapSupplier 
-     * @return 
+     * @param <M>
+     * @param iter
+     * @param keyMapper
+     * @param valueExtractor
+     * @param mapSupplier
+     * @return
      * @deprecated Use {@link #create(Iterator<? extends T>,Throwables.Function<? super T, K, E>,Function<? super T, ? extends V>,Supplier<? extends M>)} instead
      */
     @Deprecated
@@ -514,18 +514,18 @@ public final class Maps {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param <M> 
-     * @param iter 
-     * @param keyMapper 
-     * @param valueExtractor 
-     * @param mergeFunction 
-     * @param mapSupplier 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param <M>
+     * @param iter
+     * @param keyMapper
+     * @param valueExtractor
+     * @param mergeFunction
+     * @param mapSupplier
+     * @return
      * @deprecated Use {@link #create(Iterator<? extends T>,Throwables.Function<? super T, K, E>,Function<? super T, ? extends V>,BinaryOperator<V>,Supplier<? extends M>)} instead
      */
     @Deprecated
@@ -583,7 +583,7 @@ public final class Maps {
     @SuppressWarnings("rawtypes")
     static Map newTargetMap(Map<?, ?> m, int size) {
         if (m == null) {
-            return new HashMap<>();
+            return size == 0 ? new HashMap<>() : new HashMap<>(size);
         }
 
         if (m instanceof SortedMap) {
@@ -609,13 +609,13 @@ public final class Maps {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param keys 
-     * @param values 
-     * @return 
+     *
+     * @param <K>
+     * @param <V>
+     * @param keys
+     * @param values
+     * @return
      */
     public static <K, V> Map<K, V> zip(final Collection<? extends K> keys, final Collection<? extends V> values) {
         if (N.isNullOrEmpty(keys) || N.isNullOrEmpty(values)) {
@@ -636,15 +636,15 @@ public final class Maps {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param <M> 
-     * @param keys 
-     * @param values 
-     * @param mapSupplier 
-     * @return 
+     *
+     * @param <K>
+     * @param <V>
+     * @param <M>
+     * @param keys
+     * @param values
+     * @param mapSupplier
+     * @return
      */
     public static <K, V, M extends Map<K, V>> Map<K, V> zip(final Collection<? extends K> keys, final Collection<? extends V> values,
             final IntFunction<? extends M> mapSupplier) {
@@ -666,16 +666,16 @@ public final class Maps {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param <M> 
-     * @param keys 
-     * @param values 
-     * @param mergeFunction 
-     * @param mapSupplier 
-     * @return 
+     *
+     * @param <K>
+     * @param <V>
+     * @param <M>
+     * @param keys
+     * @param values
+     * @param mergeFunction
+     * @param mapSupplier
+     * @return
      */
     public static <K, V, M extends Map<K, V>> Map<K, V> zip(final Collection<? extends K> keys, final Collection<? extends V> values,
             final BinaryOperator<V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
@@ -1502,14 +1502,14 @@ public final class Maps {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param map 
-     * @param keys 
-     * @param defaultValue 
-     * @return 
+     *
+     * @param <K>
+     * @param <V>
+     * @param map
+     * @param keys
+     * @param defaultValue
+     * @return
      */
     public static <K, V> List<V> getOrDefaultIfNullForEach(final Map<K, V> map, final Collection<?> keys, final V defaultValue) {
         if (N.isNullOrEmpty(keys)) {
@@ -1540,25 +1540,25 @@ public final class Maps {
      * <code>
         Map map = N.asMap("key1", "val1");
         assertEquals("val1", Maps.getByPath(map, "key1"));
-    
+
         map = N.asMap("key1", N.asList("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-    
+
         map = N.asMap("key1", N.asSet("val1"));
         assertEquals("val1", Maps.getByPath(map, "key1[0]"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", "val2")));
         assertEquals("val2", Maps.getByPath(map, "key1[0][1]"));
-    
+
         map = N.asMap("key1", N.asSet(N.asList(N.asSet("val1"))));
         assertEquals("val1", Maps.getByPath(map, "key1[0][0][0]"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", "val22"))));
         assertEquals("val22", Maps.getByPath(map, "key1[0][1].key2"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertEquals("val33", Maps.getByPath(map, "key1[0][1].key2[1].key3"));
-    
+
         map = N.asMap("key1", N.asList(N.asLinkedHashSet("val1", N.asMap("key2", N.asList("val22", N.asMap("key3", "val33"))))));
         assertNull(Maps.getByPath(map, "key1[0][2].key2[1].key3"));
      * </code>
@@ -2384,10 +2384,10 @@ public final class Maps {
     /**
      * {a=[1, 2, 3], b=[4, 5, 6], c=[7, 8]} -> [{a=1, b=4, c=7}, {a=2, b=5, c=8}, {a=3, b=6}].
      *
-     * @param <K> 
-     * @param <V> 
-     * @param map 
-     * @return 
+     * @param <K>
+     * @param <V>
+     * @param map
+     * @return
      */
     public static <K, V> List<Map<K, V>> flatToMap(final Map<K, ? extends Collection<? extends V>> map) {
         if (map == null) {
@@ -2603,10 +2603,10 @@ public final class Maps {
     /**
      * Map to bean.
      *
-     * @param <T> 
-     * @param m 
-     * @param targetClass 
-     * @return 
+     * @param <T>
+     * @param m
+     * @param targetClass
+     * @return
      */
     public static <T> T map2Bean(final Map<String, Object> m, final Class<? extends T> targetClass) {
         return map2Bean(m, false, true, targetClass);
@@ -2615,12 +2615,12 @@ public final class Maps {
     /**
      * Map to bean.
      *
-     * @param <T> 
-     * @param m 
-     * @param ignoreNullProperty 
-     * @param ignoreUnmatchedProperty 
-     * @param targetClass 
-     * @return 
+     * @param <T>
+     * @param m
+     * @param ignoreNullProperty
+     * @param ignoreUnmatchedProperty
+     * @param targetClass
+     * @return
      */
     @SuppressWarnings("unchecked")
     public static <T> T map2Bean(final Map<String, Object> m, final boolean ignoreNullProperty, final boolean ignoreUnmatchedProperty,
@@ -2665,11 +2665,11 @@ public final class Maps {
     /**
      * Map to bean.
      *
-     * @param <T> 
-     * @param m 
-     * @param selectPropNames 
-     * @param targetClass 
-     * @return 
+     * @param <T>
+     * @param m
+     * @param selectPropNames
+     * @param targetClass
+     * @return
      */
     public static <T> T map2Bean(final Map<String, Object> m, final Collection<String> selectPropNames, final Class<? extends T> targetClass) {
         checkBeanClass(targetClass);
@@ -2709,10 +2709,10 @@ public final class Maps {
     /**
      * Map to bean.
      *
-     * @param <T> 
-     * @param mList 
-     * @param targetClass 
-     * @return 
+     * @param <T>
+     * @param mList
+     * @param targetClass
+     * @return
      */
     public static <T> List<T> map2Bean(final Collection<Map<String, Object>> mList, final Class<? extends T> targetClass) {
         return map2Bean(mList, false, true, targetClass);
@@ -2721,12 +2721,12 @@ public final class Maps {
     /**
      * Map to bean.
      *
-     * @param <T> 
-     * @param mList 
-     * @param igoreNullProperty 
-     * @param ignoreUnmatchedProperty 
-     * @param targetClass 
-     * @return 
+     * @param <T>
+     * @param mList
+     * @param igoreNullProperty
+     * @param ignoreUnmatchedProperty
+     * @param targetClass
+     * @return
      */
     public static <T> List<T> map2Bean(final Collection<Map<String, Object>> mList, final boolean igoreNullProperty, final boolean ignoreUnmatchedProperty,
             final Class<? extends T> targetClass) {
@@ -2744,11 +2744,11 @@ public final class Maps {
     /**
      * Map to bean.
      *
-     * @param <T> 
-     * @param mList 
-     * @param selectPropNames 
-     * @param targetClass 
-     * @return 
+     * @param <T>
+     * @param mList
+     * @param selectPropNames
+     * @param targetClass
+     * @return
      */
     public static <T> List<T> map2Bean(final Collection<Map<String, Object>> mList, final Collection<String> selectPropNames,
             final Class<? extends T> targetClass) {
@@ -2923,12 +2923,12 @@ public final class Maps {
     /**
      * Bean to map.
      *
-     * @param <M> 
-     * @param bean 
-     * @param ignoreNullProperty 
-     * @param ignoredPropNames 
-     * @param mapSupplier 
-     * @return 
+     * @param <M>
+     * @param bean
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @param mapSupplier
+     * @return
      */
     public static <M extends Map<String, Object>> M bean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final IntFunction<? extends M> mapSupplier) {
@@ -2952,13 +2952,13 @@ public final class Maps {
     /**
      * Bean to map.
      *
-     * @param <M> 
-     * @param bean 
-     * @param ignoreNullProperty 
-     * @param ignoredPropNames 
-     * @param keyNamingPolicy 
-     * @param mapSupplier 
-     * @return 
+     * @param <M>
+     * @param bean
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @param keyNamingPolicy
+     * @param mapSupplier
+     * @return
      */
     public static <M extends Map<String, Object>> M bean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
@@ -3218,12 +3218,12 @@ public final class Maps {
     /**
      * Bean to map.
      *
-     * @param <M> 
-     * @param bean 
-     * @param ignoreNullProperty 
-     * @param ignoredPropNames 
-     * @param mapSupplier 
-     * @return 
+     * @param <M>
+     * @param bean
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @param mapSupplier
+     * @return
      */
     public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final IntFunction<? extends M> mapSupplier) {
@@ -3247,13 +3247,13 @@ public final class Maps {
     /**
      * Bean to map.
      *
-     * @param <M> 
-     * @param bean 
-     * @param ignoreNullProperty 
-     * @param ignoredPropNames 
-     * @param keyNamingPolicy 
-     * @param mapSupplier 
-     * @return 
+     * @param <M>
+     * @param bean
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @param keyNamingPolicy
+     * @param mapSupplier
+     * @return
      */
     public static <M extends Map<String, Object>> M deepBean2Map(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
@@ -3517,12 +3517,12 @@ public final class Maps {
     /**
      * Bean to map.
      *
-     * @param <M> 
-     * @param bean 
-     * @param ignoreNullProperty 
-     * @param ignoredPropNames 
-     * @param mapSupplier 
-     * @return 
+     * @param <M>
+     * @param bean
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @param mapSupplier
+     * @return
      */
     public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final IntFunction<? extends M> mapSupplier) {
@@ -3546,13 +3546,13 @@ public final class Maps {
     /**
      * Bean to map.
      *
-     * @param <M> 
-     * @param bean 
-     * @param ignoreNullProperty 
-     * @param ignoredPropNames 
-     * @param keyNamingPolicy 
-     * @param mapSupplier 
-     * @return 
+     * @param <M>
+     * @param bean
+     * @param ignoreNullProperty
+     * @param ignoredPropNames
+     * @param keyNamingPolicy
+     * @param mapSupplier
+     * @return
      */
     public static <M extends Map<String, Object>> M bean2FlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
@@ -3773,35 +3773,35 @@ public final class Maps {
         }
 
         /**
-         * 
          *
-         * @param <K> 
-         * @param <V> 
-         * @param map 
-         * @return 
+         *
+         * @param <K>
+         * @param <V>
+         * @param map
+         * @return
          */
         public static <K, V> MapGetter<K, V> of(final Map<K, V> map) {
             return of(map, false);
         }
 
         /**
-         * 
          *
-         * @param <K> 
-         * @param <V> 
-         * @param map 
-         * @param defaultForPrimitive 
-         * @return 
+         *
+         * @param <K>
+         * @param <V>
+         * @param map
+         * @param defaultForPrimitive
+         * @return
          */
         public static <K, V> MapGetter<K, V> of(final Map<K, V> map, final boolean defaultForPrimitive) {
             return new MapGetter<>(map, defaultForPrimitive);
         }
 
         /**
-         * 
          *
-         * @param key 
-         * @return 
+         *
+         * @param key
+         * @return
          */
         public Boolean getBoolean(Object key) {
             Object value = map.get(key);
@@ -3816,10 +3816,10 @@ public final class Maps {
         }
 
         /**
-         * 
          *
-         * @param key 
-         * @return 
+         *
+         * @param key
+         * @return
          */
         public Character getChar(Object key) {
             Object value = map.get(key);
@@ -3834,10 +3834,10 @@ public final class Maps {
         }
 
         /**
-         * 
          *
-         * @param key 
-         * @return 
+         *
+         * @param key
+         * @return
          */
         public Byte getByte(Object key) {
             Object value = map.get(key);
@@ -3852,10 +3852,10 @@ public final class Maps {
         }
 
         /**
-         * 
          *
-         * @param key 
-         * @return 
+         *
+         * @param key
+         * @return
          */
         public Short getShort(Object key) {
             Object value = map.get(key);
@@ -3870,10 +3870,10 @@ public final class Maps {
         }
 
         /**
-         * 
          *
-         * @param key 
-         * @return 
+         *
+         * @param key
+         * @return
          */
         public Integer getInt(Object key) {
             Object value = map.get(key);
@@ -3888,10 +3888,10 @@ public final class Maps {
         }
 
         /**
-         * 
          *
-         * @param key 
-         * @return 
+         *
+         * @param key
+         * @return
          */
         public Long getLong(Object key) {
             Object value = map.get(key);
@@ -3906,10 +3906,10 @@ public final class Maps {
         }
 
         /**
-         * 
          *
-         * @param key 
-         * @return 
+         *
+         * @param key
+         * @return
          */
         public Float getFloat(Object key) {
             Object value = map.get(key);
@@ -3924,10 +3924,10 @@ public final class Maps {
         }
 
         /**
-         * 
          *
-         * @param key 
-         * @return 
+         *
+         * @param key
+         * @return
          */
         public Double getDouble(Object key) {
             Object value = map.get(key);
@@ -3942,10 +3942,10 @@ public final class Maps {
         }
 
         /**
-         * 
          *
-         * @param key 
-         * @return 
+         *
+         * @param key
+         * @return
          */
         public BigInteger getBigInteger(Object key) {
             Object value = map.get(key);
@@ -3958,10 +3958,10 @@ public final class Maps {
         }
 
         /**
-         * 
          *
-         * @param key 
-         * @return 
+         *
+         * @param key
+         * @return
          */
         public BigDecimal getBigDecimal(Object key) {
             Object value = map.get(key);
@@ -3974,10 +3974,10 @@ public final class Maps {
         }
 
         /**
-         * 
          *
-         * @param key 
-         * @return 
+         *
+         * @param key
+         * @return
          */
         public String getString(Object key) {
             Object value = map.get(key);
@@ -3990,10 +3990,10 @@ public final class Maps {
         }
 
         /**
-         * 
          *
-         * @param key 
-         * @return 
+         *
+         * @param key
+         * @return
          */
         public Calendar getCalendar(Object key) {
             Object value = map.get(key);
@@ -4006,10 +4006,10 @@ public final class Maps {
         }
 
         /**
-         * 
          *
-         * @param key 
-         * @return 
+         *
+         * @param key
+         * @return
          */
         public Date getJUDate(Object key) {
             Object value = map.get(key);
@@ -4022,10 +4022,10 @@ public final class Maps {
         }
 
         /**
-         * 
          *
-         * @param key 
-         * @return 
+         *
+         * @param key
+         * @return
          */
         public java.sql.Date getDate(Object key) {
             Object value = map.get(key);
@@ -4038,10 +4038,10 @@ public final class Maps {
         }
 
         /**
-         * 
          *
-         * @param key 
-         * @return 
+         *
+         * @param key
+         * @return
          */
         public java.sql.Time getTime(Object key) {
             Object value = map.get(key);
@@ -4054,10 +4054,10 @@ public final class Maps {
         }
 
         /**
-         * 
          *
-         * @param key 
-         * @return 
+         *
+         * @param key
+         * @return
          */
         public java.sql.Timestamp getTimestamp(Object key) {
             Object value = map.get(key);
@@ -4070,10 +4070,10 @@ public final class Maps {
         }
 
         /**
-         * 
          *
-         * @param key 
-         * @return 
+         *
+         * @param key
+         * @return
          */
         public LocalDate getLocalDate(Object key) {
             Object value = map.get(key);
@@ -4086,10 +4086,10 @@ public final class Maps {
         }
 
         /**
-         * 
          *
-         * @param key 
-         * @return 
+         *
+         * @param key
+         * @return
          */
         public LocalTime getLocalTime(Object key) {
             Object value = map.get(key);
@@ -4102,10 +4102,10 @@ public final class Maps {
         }
 
         /**
-         * 
          *
-         * @param key 
-         * @return 
+         *
+         * @param key
+         * @return
          */
         public LocalDateTime getLocalDateTime(Object key) {
             Object value = map.get(key);
@@ -4118,10 +4118,10 @@ public final class Maps {
         }
 
         /**
-         * 
          *
-         * @param key 
-         * @return 
+         *
+         * @param key
+         * @return
          */
         public ZonedDateTime getZonedDateTime(Object key) {
             Object value = map.get(key);
@@ -4134,10 +4134,10 @@ public final class Maps {
         }
 
         /**
-         * 
          *
-         * @param key 
-         * @return 
+         *
+         * @param key
+         * @return
          */
         public Object getObject(Object key) {
             return map.get(key);

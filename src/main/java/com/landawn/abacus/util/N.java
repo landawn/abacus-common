@@ -41,8 +41,11 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.RandomAccess;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -366,11 +369,11 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param iter 
-     * @param valueToFind 
-     * @return 
+     *
+     * @param iter
+     * @param valueToFind
+     * @return
      */
     public static long occurrencesOf(final Iterator<?> iter, final Object valueToFind) {
         if (iter == null) {
@@ -485,11 +488,11 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param iter 
-     * @return 
+     *
+     * @param <T>
+     * @param iter
+     * @return
      * @see Multiset#from(Iterator)
      */
     public static <T> Map<T, Integer> occurrencesMap(final Iterator<? extends T> iter) {
@@ -623,11 +626,11 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param iter 
-     * @param valueToFind 
-     * @return 
+     *
+     * @param iter
+     * @param valueToFind
+     * @return
      */
     public static boolean contains(final Iterator<?> iter, final Object valueToFind) {
         if (iter == null) {
@@ -677,11 +680,11 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param iter 
-     * @param valuesToFind 
-     * @return 
+     *
+     * @param iter
+     * @param valuesToFind
+     * @return
      */
     public static boolean containsAll(final Iterator<?> iter, final Collection<?> valuesToFind) {
         if (isNullOrEmpty(valuesToFind)) {
@@ -731,11 +734,11 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param iter 
-     * @param valuesToFind 
-     * @return 
+     *
+     * @param iter
+     * @param valuesToFind
+     * @return
      */
     public static boolean containsAny(final Iterator<?> iter, final Set<?> valuesToFind) {
         if (iter == null || isNullOrEmpty(valuesToFind)) {
@@ -1387,12 +1390,12 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param iter 
-     * @param chunkSize 
-     * @return 
+     *
+     * @param <T>
+     * @param iter
+     * @param chunkSize
+     * @return
      */
     public static <T> ObjIterator<List<T>> split(final Iterator<? extends T> iter, final int chunkSize) {
         checkArgument(chunkSize > 0, "'chunkSize' must be greater than 0, can't be: %s", chunkSize);
@@ -2518,11 +2521,11 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param a 
-     * @param componentType 
+     *
+     * @param <T>
+     * @param a
+     * @param componentType
      * @return an empty {@code T[]} if {@code a} is null.
      */
     public static <T> T[] flatten(final T[][] a, final Class<T> componentType) {
@@ -2560,13 +2563,13 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <C> 
-     * @param c 
-     * @param supplier 
-     * @return 
+     *
+     * @param <T>
+     * @param <C>
+     * @param c
+     * @param supplier
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T, C extends Collection<T>> C flatten(final Collection<? extends Iterable<? extends T>> c, IntFunction<? extends C> supplier) {
@@ -3511,9 +3514,9 @@ public final class N extends CommonUtil {
      * Returns a new {@code List} with specified {@code objsToExclude} excluded.
      * That's to say no more {@code objsToExclude} will present in the returned {@code List}.
      *
-     * @param <T> 
-     * @param c 
-     * @param objsToExclude 
+     * @param <T>
+     * @param c
+     * @param objsToExclude
      * @return a new {@code List}
      * @see #difference(Collection, Collection)
      * @see #removeAll(Collection, Collection)
@@ -3544,9 +3547,9 @@ public final class N extends CommonUtil {
      * Returns a new {@code Set} with specified {@code objsToExclude} excluded.
      * That's to say no more {@code objsToExclude} will present in the returned {@code Set}.
      *
-     * @param <T> 
-     * @param c 
-     * @param objsToExclude 
+     * @param <T>
+     * @param c
+     * @param objsToExclude
      * @return a new {@code Set}
      * @see #difference(Collection, Collection)
      * @see #removeAll(Collection, Collection)
@@ -3976,12 +3979,12 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param a 
-     * @param operator 
-     * @throws E 
+     *
+     * @param <E>
+     * @param a
+     * @param operator
+     * @throws E
      */
     public static <E extends Exception> void replaceAll(final boolean[] a, final Throwables.BooleanUnaryOperator<E> operator) throws E {
         if (isNullOrEmpty(a)) {
@@ -3994,12 +3997,12 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param a 
-     * @param operator 
-     * @throws E 
+     *
+     * @param <E>
+     * @param a
+     * @param operator
+     * @throws E
      */
     public static <E extends Exception> void replaceAll(final char[] a, final Throwables.CharUnaryOperator<E> operator) throws E {
         if (isNullOrEmpty(a)) {
@@ -4012,12 +4015,12 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param a 
-     * @param operator 
-     * @throws E 
+     *
+     * @param <E>
+     * @param a
+     * @param operator
+     * @throws E
      */
     public static <E extends Exception> void replaceAll(final byte[] a, final Throwables.ByteUnaryOperator<E> operator) throws E {
         if (isNullOrEmpty(a)) {
@@ -4030,12 +4033,12 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param a 
-     * @param operator 
-     * @throws E 
+     *
+     * @param <E>
+     * @param a
+     * @param operator
+     * @throws E
      */
     public static <E extends Exception> void replaceAll(final short[] a, final Throwables.ShortUnaryOperator<E> operator) throws E {
         if (isNullOrEmpty(a)) {
@@ -4048,12 +4051,12 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param a 
-     * @param operator 
-     * @throws E 
+     *
+     * @param <E>
+     * @param a
+     * @param operator
+     * @throws E
      */
     public static <E extends Exception> void replaceAll(final int[] a, final Throwables.IntUnaryOperator<E> operator) throws E {
         if (isNullOrEmpty(a)) {
@@ -4066,12 +4069,12 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param a 
-     * @param operator 
-     * @throws E 
+     *
+     * @param <E>
+     * @param a
+     * @param operator
+     * @throws E
      */
     public static <E extends Exception> void replaceAll(final long[] a, final Throwables.LongUnaryOperator<E> operator) throws E {
         if (isNullOrEmpty(a)) {
@@ -4084,12 +4087,12 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param a 
-     * @param operator 
-     * @throws E 
+     *
+     * @param <E>
+     * @param a
+     * @param operator
+     * @throws E
      */
     public static <E extends Exception> void replaceAll(final float[] a, final Throwables.FloatUnaryOperator<E> operator) throws E {
         if (isNullOrEmpty(a)) {
@@ -4102,12 +4105,12 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param a 
-     * @param operator 
-     * @throws E 
+     *
+     * @param <E>
+     * @param a
+     * @param operator
+     * @throws E
      */
     public static <E extends Exception> void replaceAll(final double[] a, final Throwables.DoubleUnaryOperator<E> operator) throws E {
         if (isNullOrEmpty(a)) {
@@ -4120,13 +4123,13 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <E> 
-     * @param a 
-     * @param operator 
-     * @throws E 
+     *
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param operator
+     * @throws E
      */
     public static <T, E extends Exception> void replaceAll(final T[] a, final Throwables.UnaryOperator<T, E> operator) throws E {
         if (isNullOrEmpty(a)) {
@@ -4139,13 +4142,13 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <E> 
-     * @param list 
-     * @param operator 
-     * @throws E 
+     *
+     * @param <T>
+     * @param <E>
+     * @param list
+     * @param operator
+     * @throws E
      */
     public static <T, E extends Exception> void replaceAll(final List<T> list, final Throwables.UnaryOperator<T, E> operator) throws E {
         if (isNullOrEmpty(list)) {
@@ -4168,14 +4171,14 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param a 
-     * @param predicate 
-     * @param newValue 
-     * @return 
-     * @throws E 
+     *
+     * @param <E>
+     * @param a
+     * @param predicate
+     * @param newValue
+     * @return
+     * @throws E
      */
     public static <E extends Exception> int replaceIf(final boolean[] a, final Throwables.BooleanPredicate<E> predicate, final boolean newValue) throws E {
         if (isNullOrEmpty(a)) {
@@ -4195,14 +4198,14 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param a 
-     * @param predicate 
-     * @param newValue 
-     * @return 
-     * @throws E 
+     *
+     * @param <E>
+     * @param a
+     * @param predicate
+     * @param newValue
+     * @return
+     * @throws E
      */
     public static <E extends Exception> int replaceIf(final char[] a, final Throwables.CharPredicate<E> predicate, final char newValue) throws E {
         if (isNullOrEmpty(a)) {
@@ -4222,14 +4225,14 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param a 
-     * @param predicate 
-     * @param newValue 
-     * @return 
-     * @throws E 
+     *
+     * @param <E>
+     * @param a
+     * @param predicate
+     * @param newValue
+     * @return
+     * @throws E
      */
     public static <E extends Exception> int replaceIf(final byte[] a, final Throwables.BytePredicate<E> predicate, final byte newValue) throws E {
         if (isNullOrEmpty(a)) {
@@ -4249,14 +4252,14 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param a 
-     * @param predicate 
-     * @param newValue 
-     * @return 
-     * @throws E 
+     *
+     * @param <E>
+     * @param a
+     * @param predicate
+     * @param newValue
+     * @return
+     * @throws E
      */
     public static <E extends Exception> int replaceIf(final short[] a, final Throwables.ShortPredicate<E> predicate, final short newValue) throws E {
         if (isNullOrEmpty(a)) {
@@ -4276,14 +4279,14 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param a 
-     * @param predicate 
-     * @param newValue 
-     * @return 
-     * @throws E 
+     *
+     * @param <E>
+     * @param a
+     * @param predicate
+     * @param newValue
+     * @return
+     * @throws E
      */
     public static <E extends Exception> int replaceIf(final int[] a, final Throwables.IntPredicate<E> predicate, final int newValue) throws E {
         if (isNullOrEmpty(a)) {
@@ -4303,14 +4306,14 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param a 
-     * @param predicate 
-     * @param newValue 
-     * @return 
-     * @throws E 
+     *
+     * @param <E>
+     * @param a
+     * @param predicate
+     * @param newValue
+     * @return
+     * @throws E
      */
     public static <E extends Exception> int replaceIf(final long[] a, final Throwables.LongPredicate<E> predicate, final long newValue) throws E {
         if (isNullOrEmpty(a)) {
@@ -4330,14 +4333,14 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param a 
-     * @param predicate 
-     * @param newValue 
-     * @return 
-     * @throws E 
+     *
+     * @param <E>
+     * @param a
+     * @param predicate
+     * @param newValue
+     * @return
+     * @throws E
      */
     public static <E extends Exception> int replaceIf(final float[] a, final Throwables.FloatPredicate<E> predicate, final float newValue) throws E {
         if (isNullOrEmpty(a)) {
@@ -4357,14 +4360,14 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param a 
-     * @param predicate 
-     * @param newValue 
-     * @return 
-     * @throws E 
+     *
+     * @param <E>
+     * @param a
+     * @param predicate
+     * @param newValue
+     * @return
+     * @throws E
      */
     public static <E extends Exception> int replaceIf(final double[] a, final Throwables.DoublePredicate<E> predicate, final double newValue) throws E {
         if (isNullOrEmpty(a)) {
@@ -4384,15 +4387,15 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <E> 
-     * @param a 
-     * @param predicate 
-     * @param newValue 
-     * @return 
-     * @throws E 
+     *
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param predicate
+     * @param newValue
+     * @return
+     * @throws E
      */
     public static <T, E extends Exception> int replaceIf(final T[] a, final Throwables.Predicate<? super T, E> predicate, final T newValue) throws E {
         if (isNullOrEmpty(a)) {
@@ -4412,15 +4415,15 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <E> 
-     * @param c 
-     * @param predicate 
-     * @param newValue 
-     * @return 
-     * @throws E 
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param predicate
+     * @param newValue
+     * @return
+     * @throws E
      */
     public static <T, E extends Exception> int replaceIf(final List<T> c, final Throwables.Predicate<? super T, E> predicate, final T newValue) throws E {
         if (isNullOrEmpty(c)) {
@@ -4916,13 +4919,13 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param c 
-     * @param elementsToAdd 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param <T>
+     * @param c
+     * @param elementsToAdd
+     * @return
+     * @throws IllegalArgumentException
      */
     public static <T> boolean addAll(final Collection<T> c, final T... elementsToAdd) throws IllegalArgumentException {
         checkArgNotNull(c, "c");
@@ -5344,9 +5347,9 @@ public final class N extends CommonUtil {
     /**
      * Returns a new String.
      *
-     * @param str 
-     * @param index 
-     * @param strToInsert 
+     * @param str
+     * @param index
+     * @param strToInsert
      * @return a new String
      */
     public static String insert(final String str, final int index, final String strToInsert) {
@@ -6624,12 +6627,12 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param indices 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param a
+     * @param indices
+     * @return
+     * @throws IllegalArgumentException
      */
     @SafeVarargs
     public static String[] deleteAll(final String[] a, int... indices) throws IllegalArgumentException {
@@ -7012,11 +7015,11 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param elementToRemove 
-     * @return 
+     *
+     * @param a
+     * @param elementToRemove
+     * @return
      */
     public static String[] remove(final String[] a, final String elementToRemove) {
         if (isNullOrEmpty(a)) {
@@ -7066,8 +7069,8 @@ public final class N extends CommonUtil {
      * elementsToRemove are removed from the collection.
      * </p>
      *
-     * @param <T> 
-     * @param c 
+     * @param <T>
+     * @param c
      * @param elementToRemove the elementToRemove to be removed
      * @return <tt>true</tt> if this collection changed as a result of the call
      */
@@ -7337,10 +7340,10 @@ public final class N extends CommonUtil {
     /**
      * Removes the all.
      *
-     * @param <T> 
-     * @param c 
-     * @param elementsToRemove 
-     * @return 
+     * @param <T>
+     * @param c
+     * @param elementsToRemove
+     * @return
      * @see N#differentSet(Collection, Collection)
      */
     @SafeVarargs
@@ -7355,10 +7358,10 @@ public final class N extends CommonUtil {
     /**
      * Removes the all.
      *
-     * @param <T> 
-     * @param c 
-     * @param elementsToRemove 
-     * @return 
+     * @param <T>
+     * @param c
+     * @param elementsToRemove
+     * @return
      * @see N#differentSet(Collection, Collection)
      */
     public static <T> boolean removeAll(final Collection<T> c, final Collection<?> elementsToRemove) {
@@ -7384,12 +7387,12 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param c 
-     * @param elementsToRemove 
-     * @return 
+     *
+     * @param <T>
+     * @param c
+     * @param elementsToRemove
+     * @return
      */
     public static <T> boolean removeAll(final Collection<T> c, final Iterator<?> elementsToRemove) {
         if (isNullOrEmpty(c) || elementsToRemove == null) {
@@ -7651,11 +7654,11 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param elementToRemove 
-     * @return 
+     *
+     * @param a
+     * @param elementToRemove
+     * @return
      */
     public static String[] removeAllOccurrences(final String[] a, final String elementToRemove) {
         if (isNullOrEmpty(a)) {
@@ -7710,10 +7713,10 @@ public final class N extends CommonUtil {
     /**
      * Removes the all occurrences.
      *
-     * @param <T> 
-     * @param c 
-     * @param elementToRemove 
-     * @return 
+     * @param <T>
+     * @param c
+     * @param elementToRemove
+     * @return
      */
     public static <T> boolean removeAllOccurrences(final Collection<T> c, final T elementToRemove) {
         if (isNullOrEmpty(c)) {
@@ -8429,13 +8432,13 @@ public final class N extends CommonUtil {
      * <p>
      * Removes all duplicates elements
      * </p>
-     * 
+     *
      * <pre>
      * removeElements(["a", "b", "a"]) = ["a", "b"]
      * </pre>.
      *
      * @param <T> the component type of the array
-     * @param a 
+     * @param a
      * @return A new array containing the existing elements except the duplicates
      * @throws NullPointerException if the specified array <code>a</code> is null.
      */
@@ -8797,13 +8800,13 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
-     * @throws IllegalArgumentException 
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @return
+     * @throws IllegalArgumentException
      */
     public static String[] deleteRange(final String[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, len(a));
@@ -8899,12 +8902,12 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param str 
-     * @param fromIndex 
-     * @param toIndex 
-     * @return 
+     *
+     * @param str
+     * @param fromIndex
+     * @param toIndex
+     * @return
      */
     public static String deleteRange(String str, final int fromIndex, final int toIndex) {
         final int len = len(str);
@@ -9201,13 +9204,13 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param replacement 
-     * @return 
+     *
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
+     * @return
      */
     public static String[] replaceRange(final String[] a, final int fromIndex, final int toIndex, final String[] replacement) {
         final int len = len(a);
@@ -9238,11 +9241,11 @@ public final class N extends CommonUtil {
     /**
      * Return a new array.
      *
-     * @param <T> 
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param replacement 
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
      * @return a new array.
      * @throws IllegalArgumentException if the specified {@code Array} is <code>null</code>.
      */
@@ -9559,12 +9562,12 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
+     *
+     * @param <T>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
      * @param newPositionStartIndex must in the range: [0, array.length - (toIndex - fromIndex)]
      */
     public static <T> void moveRange(final T[] a, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
@@ -9588,12 +9591,12 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param c 
-     * @param fromIndex 
-     * @param toIndex 
+     *
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
      * @param newPositionStartIndex must in the range: [0, list.size() - (toIndex - fromIndex)]
      * @return {@code true} if the specified {@code List} is updated.
      */
@@ -9615,13 +9618,13 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param str 
-     * @param fromIndex 
-     * @param toIndex 
+     *
+     * @param str
+     * @param fromIndex
+     * @param toIndex
      * @param newPositionStartIndex must in the range: [0, String.length - (toIndex - fromIndex)]
-     * @return 
+     * @return
      */
     @SuppressWarnings("deprecation")
     public static String moveRange(final String str, final int fromIndex, final int toIndex, final int newPositionStartIndex) {
@@ -10104,28 +10107,28 @@ public final class N extends CommonUtil {
     //    }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param c 
-     * @param startInclusive 
-     * @param endExclusive 
-     * @return 
+     *
+     * @param <T>
+     * @param c
+     * @param startInclusive
+     * @param endExclusive
+     * @return
      */
     public static <T> List<T> skipRange(final Collection<T> c, final int startInclusive, final int endExclusive) {
         return skipRange(c, startInclusive, endExclusive, IntFunctions.ofList());
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <C> 
-     * @param c 
-     * @param startInclusive 
-     * @param endExclusive 
-     * @param supplier 
-     * @return 
+     *
+     * @param <T>
+     * @param <C>
+     * @param c
+     * @param startInclusive
+     * @param endExclusive
+     * @param supplier
+     * @return
      */
     public static <T, C extends Collection<T>> C skipRange(final Collection<T> c, final int startInclusive, final int endExclusive,
             final IntFunction<C> supplier) {
@@ -10169,13 +10172,13 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param list 
-     * @param minLen 
-     * @param objToAdd 
-     * @return 
+     *
+     * @param <T>
+     * @param list
+     * @param minLen
+     * @param objToAdd
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> boolean padLeft(final List<T> list, final int minLen, final T objToAdd) {
@@ -10200,13 +10203,13 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param c 
-     * @param minLen 
-     * @param objToAdd 
-     * @return 
+     *
+     * @param <T>
+     * @param c
+     * @param minLen
+     * @param objToAdd
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> boolean padRight(final Collection<T> c, final int minLen, final T objToAdd) {
@@ -10815,12 +10818,12 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param c 
-     * @param objsToKeep 
-     * @return 
+     *
+     * @param <T>
+     * @param c
+     * @param objsToKeep
+     * @return
      */
     public static <T> boolean retainAll(final Collection<T> c, final Collection<? extends T> objsToKeep) {
         if (isNullOrEmpty(c)) {
@@ -16320,15 +16323,15 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param c 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param n 
-     * @param keepEncounterOrder 
-     * @return 
+     *
+     * @param <T>
+     * @param c
+     * @param fromIndex
+     * @param toIndex
+     * @param n
+     * @param keepEncounterOrder
+     * @return
      */
     public static <T extends Comparable<? super T>> List<T> top(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int n,
             final boolean keepEncounterOrder) {
@@ -21144,17 +21147,17 @@ public final class N extends CommonUtil {
     //    }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <T2> 
-     * @param <R> 
-     * @param <E> 
-     * @param <E2> 
-     * @param a 
-     * @param func 
-     * @param func2 
-     * @return 
+     *
+     * @param <T>
+     * @param <T2>
+     * @param <R>
+     * @param <E>
+     * @param <E2>
+     * @param a
+     * @param func
+     * @param func2
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -21214,17 +21217,17 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <T2> 
-     * @param <R> 
-     * @param <E> 
-     * @param <E2> 
-     * @param c 
-     * @param func 
-     * @param func2 
-     * @return 
+     *
+     * @param <T>
+     * @param <T2>
+     * @param <R>
+     * @param <E>
+     * @param <E2>
+     * @param c
+     * @param func
+     * @param func2
+     * @return
      * @throws E the e
      * @throws E2 the e2
      */
@@ -22154,17 +22157,17 @@ public final class N extends CommonUtil {
 
     /**
      * Distinct by the value mapped from <code>keyMapper</code>.
-     * 
+     *
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> 
-     * @param <C> 
-     * @param <E> 
-     * @param a 
+     * @param <T>
+     * @param <C>
+     * @param <E>
+     * @param a
      * @param keyMapper don't change value of the input parameter.
-     * @param supplier 
-     * @return 
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public static <T, C extends Collection<T>, E extends Exception> C distinctBy(final T[] a, final Throwables.Function<? super T, ?, E> keyMapper,
@@ -22204,17 +22207,17 @@ public final class N extends CommonUtil {
 
     /**
      * Distinct by the value mapped from <code>keyMapper</code>.
-     * 
+     *
      * Mostly it's designed for one-step operation to complete the operation in one step.
      * <code>java.util.stream.Stream</code> is preferred for multiple phases operation.
      *
-     * @param <T> 
-     * @param <C> 
-     * @param <E> 
-     * @param c 
+     * @param <T>
+     * @param <C>
+     * @param <E>
+     * @param c
      * @param keyMapper don't change value of the input parameter.
-     * @param supplier 
-     * @return 
+     * @param supplier
+     * @return
      * @throws E the e
      */
     public static <T, C extends Collection<T>, E extends Exception> C distinctBy(final Iterable<? extends T> c,
@@ -22582,15 +22585,15 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <E> 
-     * @param iter 
-     * @param atLeast 
-     * @param atMost 
-     * @param filter 
-     * @return 
+     *
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param atLeast
+     * @param atMost
+     * @param filter
+     * @return
      * @throws E the e
      */
     public static <T, E extends Exception> boolean nMatch(final Iterator<? extends T> iter, final int atLeast, final int atMost,
@@ -22616,10 +22619,10 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @return 
+     *
+     * @param a
+     * @return
      */
     public static boolean allTrue(final boolean[] a) {
         if (isNullOrEmpty(a)) {
@@ -22636,10 +22639,10 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @return 
+     *
+     * @param a
+     * @return
      */
     public static boolean allFalse(final boolean[] a) {
         if (isNullOrEmpty(a)) {
@@ -22656,10 +22659,10 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @return 
+     *
+     * @param a
+     * @return
      */
     public static boolean anyTrue(final boolean[] a) {
         if (isNullOrEmpty(a)) {
@@ -22676,10 +22679,10 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @return 
+     *
+     * @param a
+     * @return
      */
     public static boolean anyFalse(final boolean[] a) {
         if (isNullOrEmpty(a)) {
@@ -23263,15 +23266,15 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <E> 
-     * @param iter 
-     * @param filter 
-     * @return 
+     *
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param filter
+     * @return
      * @throws ArithmeticException if the total matched {@code count} overflows an {@code int}.
-     * @throws E 
+     * @throws E
      */
     public static <T, E extends Exception> int count(final Iterator<? extends T> iter, final Throwables.Predicate<? super T, E> filter)
             throws ArithmeticException, E {
@@ -23410,26 +23413,26 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param c 
-     * @param nextSelector 
-     * @return 
+     *
+     * @param <T>
+     * @param c
+     * @param nextSelector
+     * @return
      */
     public static <T> List<T> merge(final Collection<? extends Iterable<? extends T>> c, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
         return merge(c, nextSelector, Factory.ofList());
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <C> 
-     * @param c 
-     * @param nextSelector 
-     * @param supplier 
-     * @return 
+     *
+     * @param <T>
+     * @param <C>
+     * @param c
+     * @param nextSelector
+     * @param supplier
+     * @return
      */
     public static <T, C extends Collection<T>> C merge(final Collection<? extends Iterable<? extends T>> c,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector, final IntFunction<? extends C> supplier) {
@@ -24283,15 +24286,15 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <T> 
-     * @param <E> 
-     * @param a 
-     * @param keyExtractor 
-     * @return 
-     * @throws E 
+     *
+     * @param <K>
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param keyExtractor
+     * @return
+     * @throws E
      */
     @Beta
     public static <K, T, E extends Exception> Map<K, List<T>> groupBy(final T[] a, final Throwables.Function<? super T, ? extends K, E> keyExtractor) throws E {
@@ -24299,17 +24302,17 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <T> 
-     * @param <M> 
-     * @param <E> 
-     * @param a 
-     * @param keyExtractor 
-     * @param mapSupplier 
-     * @return 
-     * @throws E 
+     *
+     * @param <K>
+     * @param <T>
+     * @param <M>
+     * @param <E>
+     * @param a
+     * @param keyExtractor
+     * @param mapSupplier
+     * @return
+     * @throws E
      */
     @Beta
     public static <K, T, M extends Map<K, List<T>>, E extends Exception> M groupBy(final T[] a,
@@ -24336,19 +24339,19 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <T> 
-     * @param <M> 
-     * @param <E> 
-     * @param a 
-     * @param fromIndex 
-     * @param toIndex 
-     * @param keyExtractor 
-     * @param mapSupplier 
-     * @return 
-     * @throws E 
+     *
+     * @param <K>
+     * @param <T>
+     * @param <M>
+     * @param <E>
+     * @param a
+     * @param fromIndex
+     * @param toIndex
+     * @param keyExtractor
+     * @param mapSupplier
+     * @return
+     * @throws E
      */
     @Beta
     public static <K, T, M extends Map<K, List<T>>, E extends Exception> M groupBy(final T[] a, final int fromIndex, final int toIndex,
@@ -24380,15 +24383,15 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <T> 
-     * @param <E> 
-     * @param iter 
-     * @param keyExtractor 
-     * @return 
-     * @throws E 
+     *
+     * @param <K>
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param keyExtractor
+     * @return
+     * @throws E
      */
     @Beta
     public static <K, T, E extends Exception> Map<K, List<T>> groupBy(final Iterable<? extends T> iter,
@@ -24397,17 +24400,17 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <T> 
-     * @param <M> 
-     * @param <E> 
-     * @param iter 
-     * @param keyExtractor 
-     * @param mapSupplier 
-     * @return 
-     * @throws E 
+     *
+     * @param <K>
+     * @param <T>
+     * @param <M>
+     * @param <E>
+     * @param iter
+     * @param keyExtractor
+     * @param mapSupplier
+     * @return
+     * @throws E
      */
     @Beta
     public static <K, T, M extends Map<K, List<T>>, E extends Exception> M groupBy(final Iterable<? extends T> iter,
@@ -24441,15 +24444,15 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <T> 
-     * @param <E> 
-     * @param iter 
-     * @param keyExtractor 
-     * @return 
-     * @throws E 
+     *
+     * @param <K>
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param keyExtractor
+     * @return
+     * @throws E
      */
     @Beta
     public static <K, T, E extends Exception> Map<K, List<T>> groupBy(final Iterator<? extends T> iter,
@@ -24458,17 +24461,17 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <T> 
-     * @param <M> 
-     * @param <E> 
-     * @param iter 
-     * @param keyExtractor 
-     * @param mapSupplier 
-     * @return 
-     * @throws E 
+     *
+     * @param <K>
+     * @param <T>
+     * @param <M>
+     * @param <E>
+     * @param iter
+     * @param keyExtractor
+     * @param mapSupplier
+     * @return
+     * @throws E
      */
     @Beta
     public static <K, T, M extends Map<K, List<T>>, E extends Exception> M groupBy(final Iterator<? extends T> iter,
@@ -24531,11 +24534,11 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param iterable 
-     * @return 
+     *
+     * @param <T>
+     * @param iterable
+     * @return
      */
     @Beta
     public static <T> Iterator<T> iterate(final Iterable<? extends T> iterable) {
@@ -25459,8 +25462,8 @@ public final class N extends CommonUtil {
     /**
      * Xml 2 JSO.
      *
-     * @param xml 
-     * @return 
+     * @param xml
+     * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -25471,9 +25474,9 @@ public final class N extends CommonUtil {
     /**
      * Xml 2 JSO.
      *
-     * @param cls 
-     * @param xml 
-     * @return 
+     * @param cls
+     * @param xml
+     * @return
      * @see com.landawn.abacus.util.TypeReference
      * @see com.landawn.abacus.util.TypeReference.TypeToken
      */
@@ -25713,30 +25716,260 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param command 
-     * @param executor 
-     * @return 
+     *
+     * @param command
+     * @param executor
+     * @return
      */
     public static ContinuableFuture<Void> asyncExecute(final Throwables.Runnable<? extends Exception> command, final Executor executor) {
         return ContinuableFuture.run(command, executor);
     }
 
     /**
-     * 
      *
-     * @param <R> 
-     * @param command 
-     * @param executor 
-     * @return 
+     *
+     * @param <R>
+     * @param command
+     * @param executor
+     * @return
      */
     public static <R> ContinuableFuture<R> asyncExecute(final Callable<R> command, final Executor executor) {
         return ContinuableFuture.call(command, executor);
     }
 
     /**
+     * Executes the specified commands/tasks asynchronous and immediately returns an {@code iterator} for iterating the result lazily.
+     * The first element will be the result of the command/task which is completed first.
+     * <br />
+     * If error happens in one command/task, iteration will be interrupted and error will be thrown. But other commands/tasks won't be impacted or cancelled.
+     *
+     * @param commands
+     * @return
+     */
+    public static ObjIterator<Void> asynRun(final Collection<? extends Throwables.Runnable<? extends Exception>> commands) {
+        return asynRun(commands, asyncExecutor.getExecutor());
+    }
+
+    /**
+     * Executes the specified commands/tasks asynchronous and immediately returns an {@code iterator} for iterating the result lazily.
+     * The first element will be the result of the command/task which is completed first.
+     * <br />
+     * If error happens in one command/task, iteration will be interrupted and error will be thrown. But other commands/tasks won't be impacted or cancelled.
+     *
+     *
+     * @param commands
+     * @param executor
+     * @return
+     */
+    public static ObjIterator<Void> asynRun(final Collection<? extends Throwables.Runnable<? extends Exception>> commands, final Executor executor) {
+        checkArgNotNull(executor, "executor");
+
+        if (isNullOrEmpty(commands)) {
+            return ObjIterator.empty();
+        }
+
+        final int cmdCount = commands.size();
+        final List<FutureTask<Object>> futures = new LinkedList<>();
+        final ArrayBlockingQueue<Object> queue = new ArrayBlockingQueue<>(cmdCount);
+        final Object none = N.NULL_MASK;
+
+        for (Throwables.Runnable<? extends Exception> cmd : commands) {
+            final FutureTask<Object> futureTask = new FutureTask<>(() -> {
+                cmd.run();
+
+                queue.add(none);
+
+                return null;
+            });
+
+            executor.execute(futureTask);
+
+            futures.add(futureTask);
+        }
+
+        return new ObjIterator<>() {
+            @Override
+            public boolean hasNext() {
+                if (queue.size() > 0) {
+                    return true;
+                }
+
+                while (true) {
+                    final Iterator<FutureTask<Object>> iter = futures.iterator();
+
+                    while (iter.hasNext()) {
+                        final FutureTask<Object> future = iter.next();
+
+                        if (future.isDone()) {
+                            try {
+                                future.get();
+                            } catch (InterruptedException | ExecutionException e) {
+                                // cause inconsistent if iterate result or not. Secondly, asynchronized execution should not impact each other.
+                                //    while (iter.hasNext()) {
+                                //        iter.next().cancel(false);
+                                //    }
+
+                                throw N.toRuntimeException(e);
+                            }
+
+                            iter.remove();
+
+                            if (queue.size() > 0) {
+                                return true;
+                            }
+                        }
+                    }
+
+                    if (queue.size() > 0) {
+                        return true;
+                    }
+
+                    if (futures.size() == 0) {
+                        break;
+                    }
+
+                    N.sleepUninterruptibly(1);
+                }
+
+                return queue.size() > 0;
+            }
+
+            @Override
+            public Void next() {
+                if (hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                queue.poll();
+
+                return null;
+            }
+        };
+    }
+
+    /**
+     * Executes the specified commands/tasks asynchronous and immediately returns an {@code iterator} for iterating the result lazily.
+     * The first element will be the result of the command/task which is completed first.
+     * <br />
+     * If error happens in one command/task, iteration will be interrupted and error will be thrown. But other commands/tasks won't be impacted or cancelled.
+     *
+     *
+     * @param <R>
+     * @param commands
+     * @return
+     */
+    public static <R> ObjIterator<R> asynCall(final Collection<? extends Callable<? extends R>> commands) {
+        return asynCall(commands, asyncExecutor.getExecutor());
+    }
+
+    /**
+     * Executes the specified commands/tasks asynchronous and immediately returns an {@code iterator} for iterating the result lazily.
+     * The first element will be the result of the command/task which is completed first.
+     * <br />
+     * If error happens in one command/task, iteration will be interrupted and error will be thrown. But other commands/tasks won't be impacted or cancelled.
+     *
+     *
+     * @param <R>
+     * @param commands
+     * @param executor
+     * @return
+     */
+    public static <R> ObjIterator<R> asynCall(final Collection<? extends Callable<? extends R>> commands, final Executor executor) {
+        checkArgNotNull(executor, "executor");
+
+        if (isNullOrEmpty(commands)) {
+            return ObjIterator.empty();
+        }
+
+        final int cmdCount = commands.size();
+        final List<FutureTask<R>> futures = new LinkedList<>();
+        final ArrayBlockingQueue<R> queue = new ArrayBlockingQueue<>(cmdCount);
+        final R none = (R) N.NULL_MASK;
+
+        for (Callable<? extends R> cmd : commands) {
+            final FutureTask<R> futureTask = new FutureTask<>(() -> {
+                final R ret = cmd.call();
+
+                if (ret == null) {
+                    queue.add(none);
+                } else {
+                    queue.add(ret);
+                }
+
+                return ret;
+            });
+
+            executor.execute(futureTask);
+
+            futures.add(futureTask);
+        }
+
+        return new ObjIterator<>() {
+            private R next = null;
+
+            @Override
+            public boolean hasNext() {
+                if (queue.size() > 0) {
+                    return true;
+                }
+
+                while (true) {
+                    final Iterator<FutureTask<R>> iter = futures.iterator();
+
+                    while (iter.hasNext()) {
+                        final FutureTask<R> future = iter.next();
+
+                        if (future.isDone()) {
+                            try {
+                                future.get();
+                            } catch (InterruptedException | ExecutionException e) {
+                                // cause inconsistent if iterate result or not. Secondly, asynchronized execution should not impact each other.
+                                //    while (iter.hasNext()) {
+                                //        iter.next().cancel(false);
+                                //    }
+
+                                throw N.toRuntimeException(e);
+                            }
+
+                            iter.remove();
+
+                            if (queue.size() > 0) {
+                                return true;
+                            }
+                        }
+                    }
+
+                    if (queue.size() > 0) {
+                        return true;
+                    }
+
+                    if (futures.size() == 0) {
+                        break;
+                    }
+
+                    N.sleepUninterruptibly(1);
+                }
+
+                return queue.size() > 0;
+            }
+
+            @Override
+            public R next() {
+                if (hasNext() == false) {
+                    throw new NoSuchElementException();
+                }
+
+                next = queue.poll();
+                return next == none ? null : next;
+            }
+        };
+    }
+
+    /**
      * Executes and complete the input commands in parallel.
+     * <br />
+     * if error happens in one task, {@code cancel} will be called for other unfinished tasks.
      *
      * @param command to be completed in current thread.
      * @param command2 to be completed in another thread.
@@ -25756,13 +25989,17 @@ public final class N extends CommonUtil {
             throw ExceptionUtil.toRuntimeException(e);
         } finally {
             if (hasException) {
-                f2.cancel(false);
+                if (f2.isDone() == false) {
+                    f2.cancel(false);
+                }
             }
         }
     }
 
     /**
      * Executes and complete the input commands in parallel.
+     * <br />
+     * if error happens in one task, {@code cancel} will be called for other unfinished tasks.
      *
      * @param command to be completed in current thread.
      * @param command2 to be completed in another thread.
@@ -25786,14 +26023,21 @@ public final class N extends CommonUtil {
             throw ExceptionUtil.toRuntimeException(e);
         } finally {
             if (hasException) {
-                f2.cancel(false);
-                f3.cancel(false);
+                if (f2.isDone() == false) {
+                    f2.cancel(false);
+                }
+
+                if (f3.isDone() == false) {
+                    f3.cancel(false);
+                }
             }
         }
     }
 
     /**
      * Executes and complete the input commands in parallel.
+     * <br />
+     * if error happens in one task, {@code cancel} will be called for other unfinished tasks.
      *
      * @param command to be completed in current thread.
      * @param command2 to be completed in another thread.
@@ -25820,15 +26064,25 @@ public final class N extends CommonUtil {
             throw ExceptionUtil.toRuntimeException(e);
         } finally {
             if (hasException) {
-                f2.cancel(false);
-                f3.cancel(false);
-                f4.cancel(false);
+                if (f2.isDone() == false) {
+                    f2.cancel(false);
+                }
+
+                if (f3.isDone() == false) {
+                    f3.cancel(false);
+                }
+
+                if (f4.isDone() == false) {
+                    f4.cancel(false);
+                }
             }
         }
     }
 
     /**
      * Executes and complete the input commands in parallel.
+     * <br />
+     * if error happens in one task, {@code cancel} will be called for other unfinished tasks.
      *
      * @param command to be completed in current thread.
      * @param command2 to be completed in another thread.
@@ -25859,15 +26113,29 @@ public final class N extends CommonUtil {
             throw ExceptionUtil.toRuntimeException(e);
         } finally {
             if (hasException) {
-                f2.cancel(false);
-                f3.cancel(false);
-                f4.cancel(false);
-                f5.cancel(false);
+                if (f2.isDone() == false) {
+                    f2.cancel(false);
+                }
+
+                if (f3.isDone() == false) {
+                    f3.cancel(false);
+                }
+
+                if (f4.isDone() == false) {
+                    f4.cancel(false);
+                }
+
+                if (f5.isDone() == false) {
+                    f5.cancel(false);
+                }
             }
         }
     }
 
     /**
+     * Executes and complete the input commands in parallel.
+     * <br />
+     * if error happens in one task, {@code cancel} will be called for other unfinished tasks.
      *
      * @param commands
      */
@@ -25876,6 +26144,9 @@ public final class N extends CommonUtil {
     }
 
     /**
+     * Executes and complete the input commands in parallel.
+     * <br />
+     * if error happens in one task, {@code cancel} will be called for other unfinished tasks.
      *
      * @param commands
      * @param executor
@@ -25910,7 +26181,9 @@ public final class N extends CommonUtil {
         } finally {
             if (hasException) {
                 for (ContinuableFuture<Void> f : futures) {
-                    f.cancel(false);
+                    if (f.isDone() == false) {
+                        f.cancel(false);
+                    }
                 }
             }
         }
@@ -25918,12 +26191,14 @@ public final class N extends CommonUtil {
 
     /**
      * Executes and complete the input commands in parallel.
+     * <br />
+     * if error happens in one task, {@code cancel} will be called for other unfinished tasks.
      *
-     * @param <R> 
-     * @param <R2> 
+     * @param <R>
+     * @param <R2>
      * @param command to be completed in current thread.
      * @param command2 to be completed in another thread.
-     * @return 
+     * @return
      * @see Fn#jr2c(Runnable)
      */
     public static <R, R2> Tuple2<R, R2> callInParallel(final Callable<R> command, final Callable<R2> command2) {
@@ -25941,21 +26216,25 @@ public final class N extends CommonUtil {
             throw ExceptionUtil.toRuntimeException(e);
         } finally {
             if (hasException) {
-                f2.cancel(false);
+                if (f2.isDone() == false) {
+                    f2.cancel(false);
+                }
             }
         }
     }
 
     /**
      * Executes and complete the input commands in parallel.
+     * <br />
+     * if error happens in one task, {@code cancel} will be called for other unfinished tasks.
      *
-     * @param <R> 
-     * @param <R2> 
-     * @param <R3> 
+     * @param <R>
+     * @param <R2>
+     * @param <R3>
      * @param command to be completed in current thread.
      * @param command2 to be completed in another thread.
      * @param command3 to be completed in another thread.
-     * @return 
+     * @return
      * @see Fn#jr2c(Runnable)
      */
     public static <R, R2, R3> Tuple3<R, R2, R3> callInParallel(final Callable<R> command, final Callable<R2> command2, final Callable<R3> command3) {
@@ -25975,24 +26254,31 @@ public final class N extends CommonUtil {
             throw ExceptionUtil.toRuntimeException(e);
         } finally {
             if (hasException) {
-                f2.cancel(false);
-                f3.cancel(false);
+                if (f2.isDone() == false) {
+                    f2.cancel(false);
+                }
+
+                if (f3.isDone() == false) {
+                    f3.cancel(false);
+                }
             }
         }
     }
 
     /**
      * Executes and complete the input commands in parallel.
+     * <br />
+     * if error happens in one task, {@code cancel} will be called for other unfinished tasks.
      *
-     * @param <R> 
-     * @param <R2> 
-     * @param <R3> 
-     * @param <R4> 
+     * @param <R>
+     * @param <R2>
+     * @param <R3>
+     * @param <R4>
      * @param command to be completed in current thread.
      * @param command2 to be completed in another thread.
      * @param command3 to be completed in another thread.
      * @param command4 to be completed in another thread.
-     * @return 
+     * @return
      * @see Fn#jr2c(Runnable)
      */
     public static <R, R2, R3, R4> Tuple4<R, R2, R3, R4> callInParallel(final Callable<R> command, final Callable<R2> command2, final Callable<R3> command3,
@@ -26015,27 +26301,37 @@ public final class N extends CommonUtil {
             throw ExceptionUtil.toRuntimeException(e);
         } finally {
             if (hasException) {
-                f2.cancel(false);
-                f3.cancel(false);
-                f4.cancel(false);
+                if (f2.isDone() == false) {
+                    f2.cancel(false);
+                }
+
+                if (f3.isDone() == false) {
+                    f3.cancel(false);
+                }
+
+                if (f4.isDone() == false) {
+                    f4.cancel(false);
+                }
             }
         }
     }
 
     /**
      * Executes and complete the input commands in parallel.
+     * <br />
+     * if error happens in one task, {@code cancel} will be called for other unfinished tasks.
      *
-     * @param <R> 
-     * @param <R2> 
-     * @param <R3> 
-     * @param <R4> 
-     * @param <R5> 
+     * @param <R>
+     * @param <R2>
+     * @param <R3>
+     * @param <R4>
+     * @param <R5>
      * @param command to be completed in current thread.
      * @param command2 to be completed in another thread.
      * @param command3 to be completed in another thread.
      * @param command4 to be completed in another thread.
      * @param command5 to be completed in another thread.
-     * @return 
+     * @return
      * @see Fn#jr2c(Runnable)
      */
     public static <R, R2, R3, R4, R5> Tuple5<R, R2, R3, R4, R5> callInParallel(final Callable<R> command, final Callable<R2> command2,
@@ -26060,15 +26356,29 @@ public final class N extends CommonUtil {
             throw ExceptionUtil.toRuntimeException(e);
         } finally {
             if (hasException) {
-                f2.cancel(false);
-                f3.cancel(false);
-                f4.cancel(false);
-                f5.cancel(false);
+                if (f2.isDone() == false) {
+                    f2.cancel(false);
+                }
+
+                if (f3.isDone() == false) {
+                    f3.cancel(false);
+                }
+
+                if (f4.isDone() == false) {
+                    f4.cancel(false);
+                }
+
+                if (f5.isDone() == false) {
+                    f5.cancel(false);
+                }
             }
         }
     }
 
     /**
+     * Executes and complete the input commands in parallel.
+     * <br />
+     * if error happens in one task, {@code cancel} will be called for other unfinished tasks.
      *
      * @param <R>
      * @param commands
@@ -26079,6 +26389,9 @@ public final class N extends CommonUtil {
     }
 
     /**
+     * Executes and complete the input commands in parallel.
+     * <br />
+     * if error happens in one task, {@code cancel} will be called for other unfinished tasks.
      *
      * @param <R>
      * @param commands
@@ -26121,7 +26434,9 @@ public final class N extends CommonUtil {
         } finally {
             if (hasException) {
                 for (ContinuableFuture<? extends R> f : futures) {
-                    f.cancel(false);
+                    if (f.isDone() == false) {
+                        f.cancel(false);
+                    }
                 }
             }
         }
@@ -26801,11 +27116,11 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param supplier 
-     * @return 
+     *
+     * @param <T>
+     * @param supplier
+     * @return
      */
     @Beta
     public static <T> LazyInitializer<T> lazyInit(final Supplier<T> supplier) {
@@ -26813,12 +27128,12 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <E> 
-     * @param supplier 
-     * @return 
+     *
+     * @param <T>
+     * @param <E>
+     * @param supplier
+     * @return
      */
     @Beta
     public static <T, E extends Exception> Throwables.LazyInitializer<T, E> lazyInitialize(final Throwables.Supplier<T, E> supplier) {
@@ -27211,13 +27526,13 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <E> 
-     * @param c 
-     * @param converter 
-     * @throws E 
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param converter
+     * @throws E
      */
     @Beta
     public static <T, E extends Exception> void applyToEach(final List<T> c, final Throwables.Function<? super T, ? extends T, E> converter) throws E {
@@ -27243,12 +27558,12 @@ public final class N extends CommonUtil {
     /**
      * Copy the specified array {@code a} first, then call {@code converter} on the copy.
      *
-     * @param <T> 
-     * @param <E> 
-     * @param a 
-     * @param converter 
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param converter
      * @return updated copy of {@code a}.
-     * @throws E 
+     * @throws E
      */
     public static <T, E extends Exception> T[] copyThenApply(final T[] a, final Throwables.Function<? super T, ? extends T, E> converter) throws E {
         checkArgNotNull(converter);
