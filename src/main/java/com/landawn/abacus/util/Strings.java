@@ -166,6 +166,7 @@ public abstract class Strings {
      * @param value the character array.
      * @return a String or null
      * @see String#valueOf(char[])
+     * @see N#toString(Object)
      * @since 3.9
      */
     public static String valueOf(final char[] value) {
@@ -230,6 +231,14 @@ public abstract class Strings {
         return N.notBlank(cs);
     }
 
+    public static boolean isAllEmpty(final CharSequence a, final CharSequence b) {
+        return N.isNullOrEmpty(a) && N.isNullOrEmpty(b);
+    }
+
+    public static boolean isAllEmpty(final CharSequence a, final CharSequence b, final CharSequence c) {
+        return N.isNullOrEmpty(a) && N.isNullOrEmpty(b) && N.isNullOrEmpty(c);
+    }
+
     /**
      * <p>Checks if all of the CharSequences are empty ("") or null.</p>
      *
@@ -282,6 +291,14 @@ public abstract class Strings {
         }
 
         return true;
+    }
+
+    public static boolean isAllBlank(final CharSequence a, final CharSequence b) {
+        return N.isBlank(a) && N.isBlank(b);
+    }
+
+    public static boolean isAllBlank(final CharSequence a, final CharSequence b, final CharSequence c) {
+        return N.isBlank(a) && N.isBlank(b) && N.isBlank(c);
     }
 
     /**
@@ -340,6 +357,14 @@ public abstract class Strings {
         return true;
     }
 
+    public static boolean isAnyEmpty(final CharSequence a, final CharSequence b) {
+        return N.isNullOrEmpty(a) || N.isNullOrEmpty(b);
+    }
+
+    public static boolean isAnyEmpty(final CharSequence a, final CharSequence b, final CharSequence c) {
+        return N.isNullOrEmpty(a) || N.isNullOrEmpty(b) || N.isNullOrEmpty(c);
+    }
+
     /**
      * <p>Checks if any of the CharSequences are empty ("") or null.</p>
      *
@@ -393,6 +418,14 @@ public abstract class Strings {
         }
 
         return false;
+    }
+
+    public static boolean isAnyBlank(final CharSequence a, final CharSequence b) {
+        return N.isBlank(a) || N.isBlank(b);
+    }
+
+    public static boolean isAnyBlank(final CharSequence a, final CharSequence b, final CharSequence c) {
+        return N.isBlank(a) || N.isBlank(b) || N.isBlank(c);
     }
 
     /**
@@ -454,6 +487,158 @@ public abstract class Strings {
     }
 
     /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @return the first value from specified parameters which is not empty, or {@code null} if there are no non-empty values
+     * @see #firstNonEmpty(CharSequence...)
+     */
+    public static <T extends CharSequence> T firstNonEmpty(final T a, final T b) {
+        return isEmpty(a) ? (isEmpty(b) ? null : b) : a;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @param c
+     * @return the first value from specified parameters which is not empty, or {@code null} if there are no non-empty values
+     * @see #firstNonEmpty(CharSequence...)
+     */
+    public static <T extends CharSequence> T firstNonEmpty(final T a, final T b, final T c) {
+        return isEmpty(a) ? (isEmpty(b) ? (isEmpty(c) ? null : c) : b) : a;
+    }
+
+    /**
+     * <p>Returns the first value in the array which is not empty.</p>
+     *
+     * <p>If all values are empty or the array is {@code null}
+     * or empty then {@code null} is returned.</p>
+     *
+     * <pre>
+     * StringUtil.firstNonEmpty(null, null, null)   = null
+     * StringUtil.firstNonEmpty(null, null, "")     = null
+     * StringUtil.firstNonEmpty(null, "", " ")      = " "
+     * StringUtil.firstNonEmpty("abc")              = "abc"
+     * StringUtil.firstNonEmpty(null, "xyz")        = "xyz"
+     * StringUtil.firstNonEmpty("", "xyz")          = "xyz"
+     * StringUtil.firstNonEmpty(null, "xyz", "abc") = "xyz"
+     * StringUtil.firstNonEmpty()                   = null
+     * </pre>
+     *
+     * @param <T> the specific kind of CharSequence
+     * @param css the values to test, may be {@code null} or empty
+     * @return the first value from {@code css} which is not empty, or {@code null} if there is no non-empty value.
+     * @see N#firstNonEmpty(CharSequence...)
+     * @since 3.8
+     */
+    @SafeVarargs
+    public static <T extends CharSequence> T firstNonEmpty(final T... css) {
+        if (N.isNullOrEmpty(css)) {
+            return null;
+        }
+
+        for (final T val : css) {
+            if (isNotEmpty(val)) {
+                return val;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param css
+     * @return the first value from {@code css} which is not empty, or {@code null} if there is no non-empty value.
+     * @see N#firstNonEmpty(CharSequence...)
+     */
+    public static <T extends CharSequence> T firstNonEmpty(final Collection<? extends T> css) {
+        if (N.isNullOrEmpty(css)) {
+            return null;
+        }
+
+        for (final T val : css) {
+            if (isNotEmpty(val)) {
+                return val;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @return the first value from specified parameters which is not blank, or {@code null} if there are no non-blank values
+     * @see #firstNonBlank(CharSequence...)
+     */
+    public static <T extends CharSequence> T firstNonBlank(final T a, final T b) {
+        return isBlank(a) ? (isBlank(b) ? null : b) : a;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param b
+     * @param c
+     * @return the first value from specified parameters which is not blank, or {@code null} if there are no non-blank values
+     * @see #firstNonBlank(CharSequence...)
+     */
+    public static <T extends CharSequence> T firstNonBlank(final T a, final T b, final T c) {
+        return isBlank(a) ? (isBlank(b) ? (isBlank(c) ? null : c) : b) : a;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param css
+     * @return the first value from {@code css} which is not empty, or {@code null} if there is no non-blank value.
+     * @see N#firstNonBlank(CharSequence...)
+     */
+    @SafeVarargs
+    public static <T extends CharSequence> T firstNonBlank(final T... css) {
+        if (N.isNullOrEmpty(css)) {
+            return null;
+        }
+
+        for (final T val : css) {
+            if (isNotBlank(val)) {
+                return val;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param css
+     * @return the first value from {@code css} which is not empty, or {@code null} if there is no non-blank value.
+     * @see N#firstNonEmpty(CharSequence...)
+     */
+    public static <T extends CharSequence> T firstNonBlank(final Collection<? extends T> css) {
+        if (N.isNullOrEmpty(css)) {
+            return null;
+        }
+
+        for (final T val : css) {
+            if (isNotBlank(val)) {
+                return val;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Same as {@code N.defaultIfNullOrEmpty(CharSequence, CharSequence)}.
      *
      * @param <T>
@@ -507,148 +692,6 @@ public abstract class Strings {
         }
 
         return str;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return the first value from specified parameters which is not empty, or {@code null} if there are no non-empty values
-     * @see #firstNonEmpty(CharSequence...)
-     */
-    public static <T extends CharSequence> T firstNonEmpty(final T a, final T b) {
-        return isEmpty(a) ? (isEmpty(b) ? null : b) : a;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param a
-     * @param b
-     * @param c
-     * @return the first value from specified parameters which is not empty, or {@code null} if there are no non-empty values
-     * @see #firstNonEmpty(CharSequence...)
-     */
-    public static <T extends CharSequence> T firstNonEmpty(final T a, final T b, final T c) {
-        return isEmpty(a) ? (isEmpty(b) ? (isEmpty(c) ? null : c) : b) : a;
-    }
-
-    /**
-     * <p>Returns the first value in the array which is not empty.</p>
-     *
-     * <p>If all values are empty or the array is {@code null}
-     * or empty then {@code null} is returned.</p>
-     *
-     * <pre>
-     * StringUtil.firstNonEmpty(null, null, null)   = null
-     * StringUtil.firstNonEmpty(null, null, "")     = null
-     * StringUtil.firstNonEmpty(null, "", " ")      = " "
-     * StringUtil.firstNonEmpty("abc")              = "abc"
-     * StringUtil.firstNonEmpty(null, "xyz")        = "xyz"
-     * StringUtil.firstNonEmpty("", "xyz")          = "xyz"
-     * StringUtil.firstNonEmpty(null, "xyz", "abc") = "xyz"
-     * StringUtil.firstNonEmpty()                   = null
-     * </pre>
-     *
-     * @param <T> the specific kind of CharSequence
-     * @param values the values to test, may be {@code null} or empty
-     * @return the first value from {@code values} which is not empty, or {@code null} if there are no non-empty values
-     * @see N#firstNonEmpty(CharSequence...)
-     * @since 3.8
-     */
-    @SafeVarargs
-    public static <T extends CharSequence> T firstNonEmpty(final T... values) {
-        if (values != null) {
-            for (final T val : values) {
-                if (isNotEmpty(val)) {
-                    return val;
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param a
-     * @param b
-     * @return the first value from specified parameters which is not blank, or {@code null} if there are no non-blank values
-     * @see #firstNonBlank(CharSequence...)
-     */
-    public static <T extends CharSequence> T firstNonBlank(final T a, final T b) {
-        return isBlank(a) ? (isBlank(b) ? null : b) : a;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param a
-     * @param b
-     * @param c
-     * @return the first value from specified parameters which is not blank, or {@code null} if there are no non-blank values
-     * @see #firstNonBlank(CharSequence...)
-     */
-    public static <T extends CharSequence> T firstNonBlank(final T a, final T b, final T c) {
-        return isBlank(a) ? (isBlank(b) ? (isBlank(c) ? null : c) : b) : a;
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param values
-     * @return the first value from {@code values} which is not blank, or {@code null} if there are no non-blank values
-     * @see N#firstNonBlank(CharSequence...)
-     */
-    @SafeVarargs
-    public static <T extends CharSequence> T firstNonBlank(final T... values) {
-        if (values != null) {
-            for (final T val : values) {
-                if (isNotBlank(val)) {
-                    return val;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    // Abbreviating
-    //-----------------------------------------------------------------------
-    /**
-     * <p>Abbreviates a String using ellipses. This will turn
-     * "Now is the time for all good men" into "Now is the time for..."</p>
-     *
-     * <p>Specifically:</p>
-     * <ul>
-     *   <li>If the number of characters in {@code str} is less than or equal to
-     *       {@code maxWidth}, return {@code str}.</li>
-     *   <li>Else abbreviate it to {@code (substring(str, 0, max-3) + "...")}.</li>
-     *   <li>If {@code maxWidth} is less than {@code 4}, throw an
-     *       {@code IllegalArgumentException}.</li>
-     *   <li>In no case will it return a String of length greater than
-     *       {@code maxWidth}.</li>
-     * </ul>
-     *
-     * <pre>
-     * StringUtil.abbreviate(null, 4)        = null
-     * StringUtil.abbreviate("", 4)        = ""
-     * StringUtil.abbreviate("abcdefg", 6) = "abc..."
-     * StringUtil.abbreviate("abcdefg", 7) = "abcdefg"
-     * StringUtil.abbreviate("abcdefg", 8) = "abcdefg"
-     * StringUtil.abbreviate("abcdefg", 4) = "a..."
-     * StringUtil.abbreviate("abcdefg", 3) = IllegalArgumentException
-     * </pre>
-     *
-     * @param str the String to check, may be null
-     * @param maxWidth maximum length of result String, must be at least 4
-     * @return abbreviated String
-     * @throws IllegalArgumentException if the width is too small
-     * @since 2.0
-     */
-    public static String abbreviate(final String str, final int maxWidth) {
-        return abbreviate(str, "...", 0, maxWidth);
     }
 
     /**
@@ -790,6 +833,43 @@ public abstract class Strings {
     @Deprecated
     static String abbreviate(final String str, final int offset, final int maxWidth) {
         return abbreviate(str, "...", offset, maxWidth);
+    }
+
+    // Abbreviating
+    //-----------------------------------------------------------------------
+    /**
+     * <p>Abbreviates a String using ellipses. This will turn
+     * "Now is the time for all good men" into "Now is the time for..."</p>
+     *
+     * <p>Specifically:</p>
+     * <ul>
+     *   <li>If the number of characters in {@code str} is less than or equal to
+     *       {@code maxWidth}, return {@code str}.</li>
+     *   <li>Else abbreviate it to {@code (substring(str, 0, max-3) + "...")}.</li>
+     *   <li>If {@code maxWidth} is less than {@code 4}, throw an
+     *       {@code IllegalArgumentException}.</li>
+     *   <li>In no case will it return a String of length greater than
+     *       {@code maxWidth}.</li>
+     * </ul>
+     *
+     * <pre>
+     * StringUtil.abbreviate(null, 4)        = null
+     * StringUtil.abbreviate("", 4)        = ""
+     * StringUtil.abbreviate("abcdefg", 6) = "abc..."
+     * StringUtil.abbreviate("abcdefg", 7) = "abcdefg"
+     * StringUtil.abbreviate("abcdefg", 8) = "abcdefg"
+     * StringUtil.abbreviate("abcdefg", 4) = "a..."
+     * StringUtil.abbreviate("abcdefg", 3) = IllegalArgumentException
+     * </pre>
+     *
+     * @param str the String to check, may be null
+     * @param maxWidth maximum length of result String, must be at least 4
+     * @return abbreviated String
+     * @throws IllegalArgumentException if the width is too small
+     * @since 2.0
+     */
+    public static String abbreviate(final String str, final int maxWidth) {
+        return abbreviate(str, "...", 0, maxWidth);
     }
 
     /**

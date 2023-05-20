@@ -26905,7 +26905,7 @@ public final class N extends CommonUtil {
      * @see Try#call(com.landawn.abacus.util.Throwables.Function, Object)
      */
     @Beta
-    public static <R> Nullable<R> tryOrEmptyIfNotSucceed(final Callable<R> cmd) {
+    public static <R> Nullable<R> tryOrEmptyIfExceptionOccurred(final Callable<R> cmd) {
         try {
             return Nullable.of(cmd.call());
         } catch (Exception e) {
@@ -26926,7 +26926,7 @@ public final class N extends CommonUtil {
      * @see Try#call(com.landawn.abacus.util.Throwables.Function, Object)
      */
     @Beta
-    public static <T, R, E extends Exception> Nullable<R> tryOrEmptyIfNotSucceed(final T init, final Throwables.Function<? super T, ? extends R, E> func) {
+    public static <T, R, E extends Exception> Nullable<R> tryOrEmptyIfExceptionOccurred(final T init, final Throwables.Function<? super T, ? extends R, E> func) {
         try {
             return Nullable.of(func.apply(init));
         } catch (Exception e) {
@@ -26935,88 +26935,88 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Returns the value returned by {@code action} or {@code defaultIfNotSucceed} if exception happens.
+     * Returns the value returned by {@code action} or {@code defaultIfExceptionOccurred} if exception happens.
      *
      * @param <R>
      * @param cmd
-     * @param defaultIfNotSucceed
+     * @param defaultIfExceptionOccurred
      * @return
      * @see Try#call(com.landawn.abacus.util.Throwables.Function)
      * @see Try#call(com.landawn.abacus.util.Throwables.Function, Object)
      */
     @Beta
-    public static <R> R tryOrDefaultIfNotSucceed(final Callable<R> cmd, final R defaultIfNotSucceed) {
+    public static <R> R tryOrDefaultIfExceptionOccurred(final Callable<R> cmd, final R defaultIfExceptionOccurred) {
         try {
             return cmd.call();
         } catch (Exception e) {
-            return defaultIfNotSucceed;
+            return defaultIfExceptionOccurred;
         }
     }
 
     /**
-     * Returns the value returned by {@code action} or {@code defaultIfNotSucceed} if exception happens.
+     * Returns the value returned by {@code action} or {@code defaultIfExceptionOccurred} if exception happens.
      *
      * @param <T>
      * @param <R>
      * @param <E>
      * @param init
      * @param func
-     * @param defaultIfNotSucceed
+     * @param defaultIfExceptionOccurred
      * @return
      * @see Try#call(com.landawn.abacus.util.Throwables.Function)
      * @see Try#call(com.landawn.abacus.util.Throwables.Function, Object)
      */
     @Beta
-    public static <T, R, E extends Exception> R tryOrDefaultIfNotSucceed(final T init, final Throwables.Function<? super T, ? extends R, E> func,
-            final R defaultIfNotSucceed) {
+    public static <T, R, E extends Exception> R tryOrDefaultIfExceptionOccurred(final T init, final Throwables.Function<? super T, ? extends R, E> func,
+            final R defaultIfExceptionOccurred) {
         try {
             return func.apply(init);
         } catch (Exception e) {
-            return defaultIfNotSucceed;
+            return defaultIfExceptionOccurred;
         }
     }
 
     /**
-     * Returns the value returned by {@code action} or {@code {@code supplierForDefaultIfNotSucceed}} if exception happens.
+     * Returns the value returned by {@code action} or {@code {@code supplierForDefaultIfExceptionOccurred}} if exception happens.
      *
      * @param <R>
      * @param cmd
-     * @param supplierForDefaultIfNotSucceed
+     * @param supplierForDefaultIfExceptionOccurred
      * @return
      * @see Try#call(com.landawn.abacus.util.Throwables.Function)
      * @see Try#call(com.landawn.abacus.util.Throwables.Function, Object)
      * @see Try#call(com.landawn.abacus.util.Throwables.Function, Supplier)
      */
     @Beta
-    public static <R> R tryOrDefaultIfNotSucceed(final Callable<R> cmd, final Supplier<R> supplierForDefaultIfNotSucceed) {
+    public static <R> R tryOrDefaultIfExceptionOccurred(final Callable<R> cmd, final Supplier<R> supplierForDefaultIfExceptionOccurred) {
         try {
             return cmd.call();
         } catch (Exception e) {
-            return supplierForDefaultIfNotSucceed.get();
+            return supplierForDefaultIfExceptionOccurred.get();
         }
     }
 
     /**
-     * Returns the value returned by {@code action} or {@code defaultIfNotSucceed} if exception happens.
+     * Returns the value returned by {@code action} or {@code defaultIfExceptionOccurred} if exception happens.
      *
      * @param <T>
      * @param <R>
      * @param <E>
      * @param init
      * @param func
-     * @param supplierForDefaultIfNotSucceed
+     * @param supplierForDefaultIfExceptionOccurred
      * @return
      * @see Try#call(com.landawn.abacus.util.Throwables.Function)
      * @see Try#call(com.landawn.abacus.util.Throwables.Function, Object)
      * @see Try#call(com.landawn.abacus.util.Throwables.Function, Supplier)
      */
     @Beta
-    public static <T, R, E extends Exception> R tryOrDefaultIfNotSucceed(final T init, final Throwables.Function<? super T, ? extends R, E> func,
-            final Supplier<R> supplierForDefaultIfNotSucceed) {
+    public static <T, R, E extends Exception> R tryOrDefaultIfExceptionOccurred(final T init, final Throwables.Function<? super T, ? extends R, E> func,
+            final Supplier<R> supplierForDefaultIfExceptionOccurred) {
         try {
             return func.apply(init);
         } catch (Exception e) {
-            return supplierForDefaultIfNotSucceed.get();
+            return supplierForDefaultIfExceptionOccurred.get();
         }
     }
 
