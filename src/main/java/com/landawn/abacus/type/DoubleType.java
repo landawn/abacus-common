@@ -33,9 +33,9 @@ public final class DoubleType extends AbstractDoubleType {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
@@ -68,10 +68,8 @@ public final class DoubleType extends AbstractDoubleType {
             return null;
         } else if (ret instanceof Double) {
             return (Double) ret;
-        } else if (ret instanceof Number) {
-            return ((Number) ret).doubleValue();
         } else {
-            return Numbers.toDouble(ret.toString());
+            return Numbers.toDouble(ret);
         }
     }
 
@@ -90,10 +88,8 @@ public final class DoubleType extends AbstractDoubleType {
             return null;
         } else if (ret instanceof Double) {
             return (Double) ret;
-        } else if (ret instanceof Number) {
-            return ((Number) ret).doubleValue();
         } else {
-            return Numbers.toDouble(ret.toString());
+            return Numbers.toDouble(ret);
         }
     }
 }

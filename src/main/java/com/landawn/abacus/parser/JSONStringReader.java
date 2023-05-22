@@ -553,7 +553,7 @@ class JSONStringReader extends AbstractJSONReader {
                             if (lastChar == 'f' || lastChar == 'F') {
                                 return (T) num;
                             } else {
-                                return (T) Double.valueOf(num.doubleValue());
+                                return (T) Double.valueOf(Numbers.toDouble(num));
                             }
                         }
 

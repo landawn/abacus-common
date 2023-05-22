@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -26,7 +27,7 @@ public interface ToFloatFunction<T> extends Throwables.ToFloatFunction<T, Runtim
 
     ToFloatFunction<Float> UNBOX = value -> value == null ? 0 : value;
 
-    ToFloatFunction<Number> FROM_NUM = value -> value == null ? 0 : value.floatValue();
+    ToFloatFunction<Number> FROM_NUM = value -> value == null ? 0 : Numbers.toFloat(value);
 
     //    /**
     //     * @deprecated replaced by {@code FROM_NUM}.
@@ -35,10 +36,10 @@ public interface ToFloatFunction<T> extends Throwables.ToFloatFunction<T, Runtim
     //    ToFloatFunction<Number> NUM = FROM_NUM;
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     @Override
     float applyAsFloat(T value);

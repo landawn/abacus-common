@@ -3417,7 +3417,7 @@ class CommonUtil {
                 if ((val = list.get(i + fromIndex)) == null) {
                     result[i] = defaultForNull;
                 } else {
-                    result[i] = val.floatValue();
+                    result[i] = Numbers.toFloat(val);
                 }
             }
         } else {
@@ -3437,7 +3437,7 @@ class CommonUtil {
                 if ((val = iter.next()) == null) {
                     result[i] = defaultForNull;
                 } else {
-                    result[i] = val.floatValue();
+                    result[i] = Numbers.toFloat(val);
                 }
             }
         }
@@ -3505,7 +3505,7 @@ class CommonUtil {
                 if ((val = list.get(i + fromIndex)) == null) {
                     result[i] = defaultForNull;
                 } else {
-                    result[i] = val.doubleValue();
+                    result[i] = Numbers.toDouble(val);
                 }
             }
         } else {
@@ -3525,7 +3525,7 @@ class CommonUtil {
                 if ((val = iter.next()) == null) {
                     result[i] = defaultForNull;
                 } else {
-                    result[i] = val.doubleValue();
+                    result[i] = Numbers.toDouble(val);
                 }
             }
         }
@@ -13972,11 +13972,11 @@ class CommonUtil {
             case 26:
                 return toString(((Long) obj).longValue());
 
-            case 27:
-                return toString(((Float) obj).floatValue());
-
-            case 28:
-                return toString(((Double) obj).doubleValue());
+            //    case 27:
+            //        return toString(((Float) obj).floatValue());
+            //
+            //    case 28:
+            //        return toString(((Double) obj).doubleValue());
 
             default:
                 return obj.toString();
@@ -20185,7 +20185,7 @@ class CommonUtil {
             multiset.add(a[i]);
         }
 
-        final Map<Float, Integer> m = multiset.toMapSortedBy((a1, b) -> N.compare(a1.getKey().floatValue(), a1.getKey().floatValue()));
+        final Map<Float, Integer> m = multiset.toMapSortedBy((a1, b) -> N.compare(a1.getKey(), a1.getKey()));
         int idx = fromIndex;
 
         for (Map.Entry<Float, Integer> entry : m.entrySet()) {

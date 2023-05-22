@@ -28,7 +28,6 @@ import java.util.function.IntFunction;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.If.OrElse;
-import com.landawn.abacus.util.Throwables.Function;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalByte;
 import com.landawn.abacus.util.u.OptionalDouble;
@@ -56,15 +55,15 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     private int size = 0;
 
     /**
-     * 
+     *
      */
     public ByteList() {
     }
 
     /**
-     * 
      *
-     * @param initialCapacity 
+     *
+     * @param initialCapacity
      */
     public ByteList(int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_BYTE_ARRAY : new byte[initialCapacity];
@@ -80,10 +79,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param size 
+     *
+     * @param a
+     * @param size
      */
     public ByteList(byte[] a, int size) {
         N.checkFromIndexSize(0, size, a.length);
@@ -572,9 +571,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public boolean removeDuplicates() {
@@ -741,11 +740,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param newPositionStartIndex 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex
      */
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionStartIndex) {
@@ -753,11 +752,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param replacement 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final byte[] replacement) {
@@ -1203,9 +1202,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalByte min() {
         return size() == 0 ? OptionalByte.empty() : OptionalByte.of(N.min(elementData, 0, size));
@@ -1224,9 +1223,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalByte median() {
         return size() == 0 ? OptionalByte.empty() : OptionalByte.of(N.median(elementData, 0, size));
@@ -1245,9 +1244,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalByte max() {
         return size() == 0 ? OptionalByte.empty() : OptionalByte.of(N.max(elementData, 0, size));
@@ -1289,9 +1288,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int sum() {
         return sum(0, size());
@@ -1310,9 +1309,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalDouble average() {
         return average(0, size());
@@ -1399,18 +1398,18 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalByte first() {
         return size() == 0 ? OptionalByte.empty() : OptionalByte.of(elementData[0]);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalByte last() {
         return size() == 0 ? OptionalByte.empty() : OptionalByte.of(elementData[size() - 1]);
@@ -1842,9 +1841,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public boolean isSorted() {
@@ -1975,9 +1974,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public ByteList copy() {
@@ -2129,9 +2128,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int size() {
@@ -2139,9 +2138,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public List<Byte> boxed() {
         return boxed(0, size);
@@ -2166,9 +2165,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public byte[] toArray() {
@@ -2232,9 +2231,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public ByteIterator iterator() {
         if (isEmpty()) {
@@ -2245,9 +2244,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public ByteStream stream() {
         return ByteStream.of(elementData, 0, size());
@@ -2288,7 +2287,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @throws E the e
      */
     @Override
-    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Function<? super ByteList, ? extends R, E> func) throws E {
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Throwables.Function<? super ByteList, ? extends R, E> func) throws E {
         return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
     }
 
@@ -2306,9 +2305,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Accept if not empty.
      *
-     * @param <E> 
-     * @param action 
-     * @return 
+     * @param <E>
+     * @param action
+     * @return
      * @throws E the e
      */
     @Override
@@ -2317,9 +2316,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -2346,9 +2345,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

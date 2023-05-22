@@ -1084,10 +1084,8 @@ public final class Maps {
 
         if (val == null) {
             return OptionalFloat.empty();
-        } else if (val instanceof Number) {
-            return OptionalFloat.of(((Number) val).floatValue());
         } else {
-            return OptionalFloat.of(Numbers.toFloat(N.toString(val)));
+            return OptionalFloat.of(Numbers.toFloat(val));
         }
     }
 
@@ -1110,10 +1108,8 @@ public final class Maps {
 
         if (val == null) {
             return defaultForNull;
-        } else if (val instanceof Number) {
-            return ((Number) val).floatValue();
         } else {
-            return Numbers.toFloat(N.toString(val));
+            return Numbers.toFloat(val);
         }
     }
 
@@ -1134,10 +1130,8 @@ public final class Maps {
 
         if (val == null) {
             return OptionalDouble.empty();
-        } else if (val instanceof Number) {
-            return OptionalDouble.of(((Number) val).doubleValue());
         } else {
-            return OptionalDouble.of(Numbers.toDouble(N.toString(val)));
+            return OptionalDouble.of(Numbers.toDouble(val));
         }
     }
 
@@ -1160,10 +1154,8 @@ public final class Maps {
 
         if (val == null) {
             return defaultForNull;
-        } else if (val instanceof Number) {
-            return ((Number) val).doubleValue();
         } else {
-            return Numbers.toDouble(N.toString(val));
+            return Numbers.toDouble(val);
         }
     }
 

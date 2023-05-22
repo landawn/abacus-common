@@ -10505,7 +10505,7 @@ public abstract class Strings {
      *
      * @param strs
      * @return
-     * @see N#copyThenApply(Object[], com.landawn.abacus.util.Throwables.Function)
+     * @see N#copyThenApply(Object[], Throwables.Function)
      * @see Fn#trim()
      * @see Fn#trimToEmpty()
      * @see Fn#trimToNull()
@@ -10519,7 +10519,7 @@ public abstract class Strings {
      *
      * @param strs
      * @return
-     * @see N#copyThenApply(Object[], com.landawn.abacus.util.Throwables.Function)
+     * @see N#copyThenApply(Object[], Throwables.Function)
      * @see Fn#strip()
      * @see Fn#stripToEmpty()
      * @see Fn#stripToNull()

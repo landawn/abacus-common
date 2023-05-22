@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -26,7 +27,7 @@ public interface ToDoubleFunction<T> extends Throwables.ToDoubleFunction<T, Runt
 
     ToDoubleFunction<Double> UNBOX = value -> value == null ? 0 : value;
 
-    ToDoubleFunction<Number> FROM_NUM = value -> value == null ? 0 : value.doubleValue();
+    ToDoubleFunction<Number> FROM_NUM = value -> value == null ? 0 : Numbers.toDouble(value);
 
     //    /**
     //     * @deprecated replaced by {@code FROM_NUM}.
@@ -35,10 +36,10 @@ public interface ToDoubleFunction<T> extends Throwables.ToDoubleFunction<T, Runt
     //    ToDoubleFunction<Number> NUM = FROM_NUM;
 
     /**
-     * 
      *
-     * @param value 
-     * @return 
+     *
+     * @param value
+     * @return
      */
     @Override
     double applyAsDouble(T value);

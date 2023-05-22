@@ -23,7 +23,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 import com.landawn.abacus.util.Fn.Suppliers;
-import com.landawn.abacus.util.Throwables.TriConsumer;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.function.IndexedConsumer;
 import com.landawn.abacus.util.function.TriFunction;
@@ -53,7 +52,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
         }
 
         @Override
-        protected void next(TriConsumer action) throws NoSuchElementException {
+        protected void next(Throwables.TriConsumer action) throws NoSuchElementException {
             throw new NoSuchElementException();
         }
 
@@ -554,10 +553,10 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     };
 
     /**
-     * 
      *
-     * @param n 
-     * @return 
+     *
+     * @param n
+     * @return
      */
     public TriIterator<A, B, C> skip(final long n) {
         N.checkArgNotNegative(n, "n");
@@ -632,10 +631,10 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
-     * 
      *
-     * @param count 
-     * @return 
+     *
+     * @param count
+     * @return
      */
     public TriIterator<A, B, C> limit(final long count) {
         N.checkArgNotNegative(count, "count");
@@ -695,10 +694,10 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
-     * 
      *
-     * @param predicate 
-     * @return 
+     *
+     * @param predicate
+     * @return
      */
     public TriIterator<A, B, C> filter(final TriPredicate<? super A, ? super B, ? super C> predicate) {
         N.checkArgNotNull(predicate, "predicate");
@@ -802,9 +801,9 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     public abstract <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper);
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Optional<Triple<A, B, C>> first() {
         if (hasNext()) {
@@ -815,9 +814,9 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Optional<Triple<A, B, C>> last() {
         if (hasNext()) {
@@ -845,9 +844,9 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Triple<A, B, C>[] toArray() {
         return toArray(new Triple[0]);
@@ -866,9 +865,9 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public List<Triple<A, B, C>> toList() {
         return toCollection(Suppliers.ofList());

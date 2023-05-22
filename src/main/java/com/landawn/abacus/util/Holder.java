@@ -245,7 +245,7 @@ public final class Holder<T> implements Mutable {
      * @param <E>
      * @param action
      * @throws E the e
-     * @deprecated replaced by {@link #ifNotNull(com.landawn.abacus.util.Throwables.Consumer)}
+     * @deprecated replaced by {@link #ifNotNull(Throwables.Consumer)}
      */
     @Deprecated
     public <E extends Exception> void acceptIfNotNull(final Throwables.Consumer<? super T, E> action) throws E {

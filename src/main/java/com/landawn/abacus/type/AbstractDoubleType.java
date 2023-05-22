@@ -50,7 +50,7 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
             return null;
         }
 
-        return N.stringOf(x.doubleValue());
+        return N.stringOf(x.toString());
     }
 
     /**

@@ -60,7 +60,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param <E>
      * @param action
      * @return
-     * @see N#asyncExecute(com.landawn.abacus.util.Throwables.Runnable)
+     * @see N#asyncExecute(Throwables.Runnable)
      */
     public static <E extends Exception> ContinuableFuture<Void> run(final Throwables.Runnable<E> action) {
         return run(action, N.asyncExecutor.getExecutor());

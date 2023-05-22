@@ -29,7 +29,6 @@ import java.util.function.IntFunction;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.If.OrElse;
-import com.landawn.abacus.util.Throwables.Function;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalInt;
@@ -57,15 +56,15 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     private int size = 0;
 
     /**
-     * 
+     *
      */
     public ShortList() {
     }
 
     /**
-     * 
      *
-     * @param initialCapacity 
+     *
+     * @param initialCapacity
      */
     public ShortList(int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_SHORT_ARRAY : new short[initialCapacity];
@@ -81,10 +80,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param size 
+     *
+     * @param a
+     * @param size
      */
     public ShortList(short[] a, int size) {
         N.checkFromIndexSize(0, size, a.length);
@@ -571,9 +570,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public boolean removeDuplicates() {
@@ -740,11 +739,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param newPositionStartIndex 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex
      */
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionStartIndex) {
@@ -752,11 +751,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param replacement 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final short[] replacement) {
@@ -1202,9 +1201,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalShort min() {
         return size() == 0 ? OptionalShort.empty() : OptionalShort.of(N.min(elementData, 0, size));
@@ -1223,9 +1222,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalShort median() {
         return size() == 0 ? OptionalShort.empty() : OptionalShort.of(N.median(elementData, 0, size));
@@ -1244,9 +1243,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalShort max() {
         return size() == 0 ? OptionalShort.empty() : OptionalShort.of(N.max(elementData, 0, size));
@@ -1288,9 +1287,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int sum() {
         return sum(0, size());
@@ -1309,9 +1308,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalDouble average() {
         return average(0, size());
@@ -1398,18 +1397,18 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalShort first() {
         return size() == 0 ? OptionalShort.empty() : OptionalShort.of(elementData[0]);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalShort last() {
         return size() == 0 ? OptionalShort.empty() : OptionalShort.of(elementData[size() - 1]);
@@ -1887,9 +1886,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public boolean isSorted() {
@@ -2020,9 +2019,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public ShortList copy() {
@@ -2174,9 +2173,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int size() {
@@ -2184,9 +2183,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public List<Short> boxed() {
         return boxed(0, size);
@@ -2211,9 +2210,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public short[] toArray() {
@@ -2277,9 +2276,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public ShortIterator iterator() {
         if (isEmpty()) {
@@ -2290,9 +2289,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public ShortStream stream() {
         return ShortStream.of(elementData, 0, size());
@@ -2333,7 +2332,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @throws E the e
      */
     @Override
-    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Function<? super ShortList, ? extends R, E> func) throws E {
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Throwables.Function<? super ShortList, ? extends R, E> func) throws E {
         return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
     }
 
@@ -2351,9 +2350,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Accept if not empty.
      *
-     * @param <E> 
-     * @param action 
-     * @return 
+     * @param <E>
+     * @param action
+     * @return
      * @throws E the e
      */
     @Override
@@ -2362,9 +2361,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -2391,9 +2390,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

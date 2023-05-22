@@ -50,7 +50,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
             return null;
         }
 
-        return N.stringOf(x.floatValue());
+        return x.toString();
     }
 
     /**

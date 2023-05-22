@@ -29,7 +29,6 @@ import java.util.function.IntFunction;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.If.OrElse;
-import com.landawn.abacus.util.Throwables.Function;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalInt;
@@ -57,15 +56,15 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     private int size = 0;
 
     /**
-     * 
+     *
      */
     public LongList() {
     }
 
     /**
-     * 
      *
-     * @param initialCapacity 
+     *
+     * @param initialCapacity
      */
     public LongList(int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_LONG_ARRAY : new long[initialCapacity];
@@ -81,10 +80,10 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param size 
+     *
+     * @param a
+     * @param size
      */
     public LongList(long[] a, int size) {
         N.checkFromIndexSize(0, size, a.length);
@@ -570,9 +569,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public boolean removeDuplicates() {
@@ -739,11 +738,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param newPositionStartIndex 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex
      */
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionStartIndex) {
@@ -751,11 +750,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param replacement 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final long[] replacement) {
@@ -1201,9 +1200,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalLong min() {
         return size() == 0 ? OptionalLong.empty() : OptionalLong.of(N.min(elementData, 0, size));
@@ -1222,9 +1221,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalLong median() {
         return size() == 0 ? OptionalLong.empty() : OptionalLong.of(N.median(elementData, 0, size));
@@ -1243,9 +1242,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalLong max() {
         return size() == 0 ? OptionalLong.empty() : OptionalLong.of(N.max(elementData, 0, size));
@@ -1287,9 +1286,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public long sum() {
         return sum(0, size());
@@ -1308,9 +1307,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalDouble average() {
         return average(0, size());
@@ -1397,18 +1396,18 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalLong first() {
         return size() == 0 ? OptionalLong.empty() : OptionalLong.of(elementData[0]);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalLong last() {
         return size() == 0 ? OptionalLong.empty() : OptionalLong.of(elementData[size() - 1]);
@@ -1886,9 +1885,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public boolean isSorted() {
@@ -2019,9 +2018,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public LongList copy() {
@@ -2173,9 +2172,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int size() {
@@ -2183,9 +2182,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public List<Long> boxed() {
         return boxed(0, size);
@@ -2210,9 +2209,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public long[] toArray() {
@@ -2291,9 +2290,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public LongIterator iterator() {
         if (isEmpty()) {
@@ -2304,9 +2303,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public LongStream stream() {
         return LongStream.of(elementData, 0, size());
@@ -2347,7 +2346,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @throws E the e
      */
     @Override
-    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Function<? super LongList, ? extends R, E> func) throws E {
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Throwables.Function<? super LongList, ? extends R, E> func) throws E {
         return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
     }
 
@@ -2365,9 +2364,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     /**
      * Accept if not empty.
      *
-     * @param <E> 
-     * @param action 
-     * @return 
+     * @param <E>
+     * @param action
+     * @return
      * @throws E the e
      */
     @Override
@@ -2376,9 +2375,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -2405,9 +2404,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

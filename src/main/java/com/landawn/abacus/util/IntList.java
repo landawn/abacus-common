@@ -29,7 +29,6 @@ import java.util.function.IntFunction;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.If.OrElse;
-import com.landawn.abacus.util.Throwables.Function;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalInt;
@@ -56,15 +55,15 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     private int size = 0;
 
     /**
-     * 
+     *
      */
     public IntList() {
     }
 
     /**
-     * 
      *
-     * @param initialCapacity 
+     *
+     * @param initialCapacity
      */
     public IntList(int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_INT_ARRAY : new int[initialCapacity];
@@ -80,10 +79,10 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param size 
+     *
+     * @param a
+     * @param size
      */
     public IntList(int[] a, int size) {
         N.checkFromIndexSize(0, size, a.length);
@@ -619,9 +618,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public boolean removeDuplicates() {
@@ -788,11 +787,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param newPositionStartIndex 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex
      */
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionStartIndex) {
@@ -800,11 +799,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param replacement 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final int[] replacement) {
@@ -1279,9 +1278,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalInt min() {
         return size() == 0 ? OptionalInt.empty() : OptionalInt.of(N.min(elementData, 0, size));
@@ -1300,9 +1299,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalInt median() {
         return size() == 0 ? OptionalInt.empty() : OptionalInt.of(N.median(elementData, 0, size));
@@ -1321,9 +1320,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalInt max() {
         return size() == 0 ? OptionalInt.empty() : OptionalInt.of(N.max(elementData, 0, size));
@@ -1365,9 +1364,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int sum() {
         return sum(0, size());
@@ -1386,9 +1385,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalDouble average() {
         return average(0, size());
@@ -1475,18 +1474,18 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalInt first() {
         return size() == 0 ? OptionalInt.empty() : OptionalInt.of(elementData[0]);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalInt last() {
         return size() == 0 ? OptionalInt.empty() : OptionalInt.of(elementData[size() - 1]);
@@ -1964,9 +1963,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public boolean isSorted() {
@@ -2097,9 +2096,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public IntList copy() {
@@ -2251,9 +2250,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int size() {
@@ -2261,9 +2260,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public List<Integer> boxed() {
         return boxed(0, size);
@@ -2288,9 +2287,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int[] toArray() {
@@ -2384,9 +2383,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public IntIterator iterator() {
         if (isEmpty()) {
@@ -2397,9 +2396,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public IntStream stream() {
         return IntStream.of(elementData, 0, size());
@@ -2440,7 +2439,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @throws E the e
      */
     @Override
-    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Function<? super IntList, ? extends R, E> func) throws E {
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Throwables.Function<? super IntList, ? extends R, E> func) throws E {
         return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
     }
 
@@ -2458,9 +2457,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     /**
      * Accept if not empty.
      *
-     * @param <E> 
-     * @param action 
-     * @return 
+     * @param <E>
+     * @param action
+     * @return
      * @throws E the e
      */
     @Override
@@ -2469,9 +2468,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -2498,9 +2497,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

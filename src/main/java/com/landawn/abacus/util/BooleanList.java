@@ -28,7 +28,6 @@ import java.util.function.IntFunction;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.If.OrElse;
-import com.landawn.abacus.util.Throwables.Function;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalBoolean;
 import com.landawn.abacus.util.u.OptionalInt;
@@ -55,15 +54,15 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     private int size = 0;
 
     /**
-     * 
+     *
      */
     public BooleanList() {
     }
 
     /**
-     * 
      *
-     * @param initialCapacity 
+     *
+     * @param initialCapacity
      */
     public BooleanList(int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_BOOLEAN_ARRAY : new boolean[initialCapacity];
@@ -79,10 +78,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param size 
+     *
+     * @param a
+     * @param size
      */
     public BooleanList(boolean[] a, int size) {
         N.checkFromIndexSize(0, size, a.length);
@@ -526,9 +525,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public boolean removeDuplicates() {
@@ -687,11 +686,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param newPositionStartIndex 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex
      */
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionStartIndex) {
@@ -699,11 +698,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param replacement 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final boolean[] replacement) {
@@ -1217,18 +1216,18 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalBoolean first() {
         return size() == 0 ? OptionalBoolean.empty() : OptionalBoolean.of(elementData[0]);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalBoolean last() {
         return size() == 0 ? OptionalBoolean.empty() : OptionalBoolean.of(elementData[size() - 1]);
@@ -1666,9 +1665,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public boolean isSorted() {
@@ -1780,9 +1779,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public BooleanList copy() {
@@ -1934,9 +1933,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int size() {
@@ -1944,9 +1943,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public List<Boolean> boxed() {
         return boxed(0, size);
@@ -1971,9 +1970,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public boolean[] toArray() {
@@ -2022,9 +2021,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public BooleanIterator iterator() {
         if (isEmpty()) {
@@ -2035,9 +2034,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Stream<Boolean> stream() {
         return Stream.of(elementData, 0, size());
@@ -2078,7 +2077,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @throws E the e
      */
     @Override
-    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Function<? super BooleanList, ? extends R, E> func) throws E {
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Throwables.Function<? super BooleanList, ? extends R, E> func) throws E {
         return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
     }
 
@@ -2096,9 +2095,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Accept if not empty.
      *
-     * @param <E> 
-     * @param action 
-     * @return 
+     * @param <E>
+     * @param action
+     * @return
      * @throws E the e
      */
     @Override
@@ -2107,9 +2106,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -2136,9 +2135,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

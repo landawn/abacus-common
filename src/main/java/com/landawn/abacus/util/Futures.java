@@ -27,8 +27,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.landawn.abacus.util.Throwables.Function;
-import com.landawn.abacus.util.Throwables.TriFunction;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.Tuple.Tuple4;
@@ -60,7 +58,7 @@ public final class Futures {
     public static <T1, T2, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2,
             final Throwables.BiFunction<? super Future<T1>, ? super Future<T2>, R, Exception> zipFunctionForGet) {
         return compose(cf1, cf2, zipFunctionForGet,
-                (Function<Tuple4<Future<T1>, Future<T2>, Long, TimeUnit>, R, Exception>) t -> zipFunctionForGet.apply(t._1, t._2));
+                (Throwables.Function<Tuple4<Future<T1>, Future<T2>, Long, TimeUnit>, R, Exception>) t -> zipFunctionForGet.apply(t._1, t._2));
     }
 
     /**
@@ -80,7 +78,7 @@ public final class Futures {
         final List<Future<?>> cfs = Arrays.asList(cf1, cf2);
 
         return compose(cfs, c -> zipFunctionForGet.apply((Future<T1>) c.get(0), (Future<T2>) c.get(1)),
-                (Function<Tuple3<List<Future<?>>, Long, TimeUnit>, R, Exception>) t -> zipFunctionTimeoutGet
+                (Throwables.Function<Tuple3<List<Future<?>>, Long, TimeUnit>, R, Exception>) t -> zipFunctionTimeoutGet
                         .apply(Tuple.of((Future<T1>) t._1.get(0), (Future<T2>) t._1.get(1), t._2, t._3)));
     }
 
@@ -120,7 +118,7 @@ public final class Futures {
         final List<Future<?>> cfs = Arrays.asList(cf1, cf2, cf3);
 
         return compose(cfs, c -> zipFunctionForGet.apply((Future<T1>) c.get(0), (Future<T2>) c.get(1), (Future<T3>) c.get(2)),
-                (Function<Tuple3<List<Future<?>>, Long, TimeUnit>, R, Exception>) t -> zipFunctionTimeoutGet
+                (Throwables.Function<Tuple3<List<Future<?>>, Long, TimeUnit>, R, Exception>) t -> zipFunctionTimeoutGet
                         .apply(Tuple.of((Future<T1>) t._1.get(0), (Future<T2>) t._1.get(1), (Future<T3>) t._1.get(2), t._2, t._3)));
     }
 
@@ -135,7 +133,7 @@ public final class Futures {
      */
     public static <T, FC extends Collection<? extends Future<? extends T>>, R> ContinuableFuture<R> compose(final FC cfs,
             final Throwables.Function<? super FC, R, Exception> zipFunctionForGet) {
-        return compose(cfs, zipFunctionForGet, (Function<Tuple3<FC, Long, TimeUnit>, R, Exception>) t -> zipFunctionForGet.apply(t._1));
+        return compose(cfs, zipFunctionForGet, (Throwables.Function<Tuple3<FC, Long, TimeUnit>, R, Exception>) t -> zipFunctionForGet.apply(t._1));
     }
 
     /**
@@ -225,28 +223,28 @@ public final class Futures {
     }
 
     /**
-     * 
      *
-     * @param <T1> 
-     * @param <T2> 
-     * @param cf1 
-     * @param cf2 
-     * @return 
+     *
+     * @param <T1>
+     * @param <T2>
+     * @param cf1
+     * @param cf2
+     * @return
      */
     public static <T1, T2> ContinuableFuture<Tuple2<T1, T2>> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2) {
         return allOf(Arrays.asList(cf1, cf2)).map(t -> Tuple.of((T1) t.get(0), (T2) t.get(1)));
     }
 
     /**
-     * 
      *
-     * @param <T1> 
-     * @param <T2> 
-     * @param <T3> 
-     * @param cf1 
-     * @param cf2 
-     * @param cf3 
-     * @return 
+     *
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param cf1
+     * @param cf2
+     * @param cf3
+     * @return
      */
     public static <T1, T2, T3> ContinuableFuture<Tuple3<T1, T2, T3>> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2,
             final Future<? extends T3> cf3) {
@@ -254,17 +252,17 @@ public final class Futures {
     }
 
     /**
-     * 
      *
-     * @param <T1> 
-     * @param <T2> 
-     * @param <T3> 
-     * @param <T4> 
-     * @param cf1 
-     * @param cf2 
-     * @param cf3 
-     * @param cf4 
-     * @return 
+     *
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param <T4>
+     * @param cf1
+     * @param cf2
+     * @param cf3
+     * @param cf4
+     * @return
      */
     public static <T1, T2, T3, T4> ContinuableFuture<Tuple4<T1, T2, T3, T4>> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2,
             final Future<? extends T3> cf3, final Future<? extends T4> cf4) {
@@ -272,19 +270,19 @@ public final class Futures {
     }
 
     /**
-     * 
      *
-     * @param <T1> 
-     * @param <T2> 
-     * @param <T3> 
-     * @param <T4> 
-     * @param <T5> 
-     * @param cf1 
-     * @param cf2 
-     * @param cf3 
-     * @param cf4 
-     * @param cf5 
-     * @return 
+     *
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param <T4>
+     * @param <T5>
+     * @param cf1
+     * @param cf2
+     * @param cf3
+     * @param cf4
+     * @param cf5
+     * @return
      */
     public static <T1, T2, T3, T4, T5> ContinuableFuture<Tuple5<T1, T2, T3, T4, T5>> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2,
             final Future<? extends T3> cf3, final Future<? extends T4> cf4, final Future<? extends T5> cf5) {
@@ -292,21 +290,21 @@ public final class Futures {
     }
 
     /**
-     * 
      *
-     * @param <T1> 
-     * @param <T2> 
-     * @param <T3> 
-     * @param <T4> 
-     * @param <T5> 
-     * @param <T6> 
-     * @param cf1 
-     * @param cf2 
-     * @param cf3 
-     * @param cf4 
-     * @param cf5 
-     * @param cf6 
-     * @return 
+     *
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param <T4>
+     * @param <T5>
+     * @param <T6>
+     * @param cf1
+     * @param cf2
+     * @param cf3
+     * @param cf4
+     * @param cf5
+     * @param cf6
+     * @return
      */
     public static <T1, T2, T3, T4, T5, T6> ContinuableFuture<Tuple6<T1, T2, T3, T4, T5, T6>> combine(final Future<? extends T1> cf1,
             final Future<? extends T2> cf2, final Future<? extends T3> cf3, final Future<? extends T4> cf4, final Future<? extends T5> cf5,
@@ -316,23 +314,23 @@ public final class Futures {
     }
 
     /**
-     * 
      *
-     * @param <T1> 
-     * @param <T2> 
-     * @param <T3> 
-     * @param <T4> 
-     * @param <T5> 
-     * @param <T6> 
-     * @param <T7> 
-     * @param cf1 
-     * @param cf2 
-     * @param cf3 
-     * @param cf4 
-     * @param cf5 
-     * @param cf6 
-     * @param cf7 
-     * @return 
+     *
+     * @param <T1>
+     * @param <T2>
+     * @param <T3>
+     * @param <T4>
+     * @param <T5>
+     * @param <T6>
+     * @param <T7>
+     * @param cf1
+     * @param cf2
+     * @param cf3
+     * @param cf4
+     * @param cf5
+     * @param cf6
+     * @param cf7
+     * @return
      */
     public static <T1, T2, T3, T4, T5, T6, T7> ContinuableFuture<Tuple7<T1, T2, T3, T4, T5, T6, T7>> combine(final Future<? extends T1> cf1,
             final Future<? extends T2> cf2, final Future<? extends T3> cf3, final Future<? extends T4> cf4, final Future<? extends T5> cf5,
@@ -371,7 +369,7 @@ public final class Futures {
      * @return
      */
     public static <T1, T2, T3, R, E extends Exception> ContinuableFuture<R> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2,
-            final Future<? extends T3> cf3, final TriFunction<? super T1, ? super T2, ? super T3, ? extends R, E> action) {
+            final Future<? extends T3> cf3, final Throwables.TriFunction<? super T1, ? super T2, ? super T3, ? extends R, E> action) {
         return allOf(Arrays.asList(cf1, cf2, cf3)).map(t -> action.apply((T1) t.get(0), (T2) t.get(1), (T3) t.get(2)));
     }
 

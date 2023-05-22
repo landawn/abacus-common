@@ -32,9 +32,9 @@ public class MutableDoubleType extends MutableType<MutableDouble> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<MutableDouble> clazz() {

@@ -29,7 +29,6 @@ import java.util.function.IntFunction;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.If.OrElse;
-import com.landawn.abacus.util.Throwables.Function;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalInt;
@@ -56,15 +55,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     private int size = 0;
 
     /**
-     * 
+     *
      */
     public DoubleList() {
     }
 
     /**
-     * 
      *
-     * @param initialCapacity 
+     *
+     * @param initialCapacity
      */
     public DoubleList(int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_DOUBLE_ARRAY : new double[initialCapacity];
@@ -80,10 +79,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param size 
+     *
+     * @param a
+     * @param size
      */
     public DoubleList(double[] a, int size) {
         N.checkFromIndexSize(0, size, a.length);
@@ -527,9 +526,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public boolean removeDuplicates() {
@@ -696,11 +695,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param newPositionStartIndex 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex
      */
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionStartIndex) {
@@ -708,11 +707,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param replacement 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final double[] replacement) {
@@ -1158,9 +1157,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalDouble min() {
         return size() == 0 ? OptionalDouble.empty() : OptionalDouble.of(N.min(elementData, 0, size));
@@ -1179,9 +1178,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalDouble median() {
         return size() == 0 ? OptionalDouble.empty() : OptionalDouble.of(N.median(elementData, 0, size));
@@ -1200,9 +1199,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalDouble max() {
         return size() == 0 ? OptionalDouble.empty() : OptionalDouble.of(N.max(elementData, 0, size));
@@ -1244,9 +1243,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public double sum() {
         return sum(0, size());
@@ -1265,9 +1264,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalDouble average() {
         return average(0, size());
@@ -1354,18 +1353,18 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalDouble first() {
         return size() == 0 ? OptionalDouble.empty() : OptionalDouble.of(elementData[0]);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalDouble last() {
         return size() == 0 ? OptionalDouble.empty() : OptionalDouble.of(elementData[size() - 1]);
@@ -1843,9 +1842,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public boolean isSorted() {
@@ -1976,9 +1975,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public DoubleList copy() {
@@ -2130,9 +2129,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int size() {
@@ -2140,9 +2139,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public List<Double> boxed() {
         return boxed(0, size);
@@ -2167,9 +2166,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public double[] toArray() {
@@ -2218,9 +2217,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public DoubleIterator iterator() {
         if (isEmpty()) {
@@ -2231,9 +2230,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public DoubleStream stream() {
         return DoubleStream.of(elementData, 0, size());
@@ -2274,7 +2273,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @throws E the e
      */
     @Override
-    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Function<? super DoubleList, ? extends R, E> func) throws E {
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Throwables.Function<? super DoubleList, ? extends R, E> func) throws E {
         return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
     }
 
@@ -2292,9 +2291,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Accept if not empty.
      *
-     * @param <E> 
-     * @param action 
-     * @return 
+     * @param <E>
+     * @param action
+     * @return
      * @throws E the e
      */
     @Override
@@ -2303,9 +2302,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -2332,9 +2331,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

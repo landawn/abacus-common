@@ -69,7 +69,6 @@ import com.landawn.abacus.util.Fn.Factory;
 import com.landawn.abacus.util.Fn.IntFunctions;
 import com.landawn.abacus.util.Fn.Suppliers;
 import com.landawn.abacus.util.Iterables.Slice;
-import com.landawn.abacus.util.Throwables.Runnable;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.Tuple.Tuple4;
@@ -12249,7 +12248,7 @@ public final class N extends CommonUtil {
      * @param func
      * @return
      * @throws E the e
-     * @see Iterables#averageDouble(Object[], com.landawn.abacus.util.Throwables.ToDoubleFunction)
+     * @see Iterables#averageDouble(Object[], Throwables.ToDoubleFunction)
      */
     public static <T, E extends Exception> double averageDouble(final T[] a, final Throwables.ToDoubleFunction<? super T, E> func) throws E {
         if (isNullOrEmpty(a)) {
@@ -12270,7 +12269,7 @@ public final class N extends CommonUtil {
      * @param func
      * @return
      * @throws E the e
-     * @see Iterables#averageDouble(Object[], int, int, com.landawn.abacus.util.Throwables.ToDoubleFunction)
+     * @see Iterables#averageDouble(Object[], int, int, Throwables.ToDoubleFunction)
      */
     public static <T, E extends Exception> double averageDouble(final T[] a, final int fromIndex, final int toIndex,
             final Throwables.ToDoubleFunction<? super T, E> func) throws E {
@@ -12304,7 +12303,7 @@ public final class N extends CommonUtil {
      * @param func
      * @return
      * @throws E the e
-     * @see Iterables#averageDouble(Collection, com.landawn.abacus.util.Throwables.ToDoubleFunction)
+     * @see Iterables#averageDouble(Collection, Throwables.ToDoubleFunction)
      */
     public static <T, E extends Exception> double averageDouble(final Iterable<? extends T> c, final Throwables.ToDoubleFunction<? super T, E> func) throws E {
         if (c == null) {
@@ -12338,7 +12337,7 @@ public final class N extends CommonUtil {
      * @param func
      * @return
      * @throws E the e
-     * @see Iterables#averageDouble(Collection, int, int, com.landawn.abacus.util.Throwables.ToDoubleFunction)
+     * @see Iterables#averageDouble(Collection, int, int, Throwables.ToDoubleFunction)
      */
     public static <T, E extends Exception> double averageDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex,
             final Throwables.ToDoubleFunction<? super T, E> func) throws E {
@@ -26163,7 +26162,7 @@ public final class N extends CommonUtil {
         boolean hasException = true;
 
         try {
-            final Iterator<? extends Runnable<? extends Exception>> iter = commands.iterator();
+            final Iterator<? extends Throwables.Runnable<? extends Exception>> iter = commands.iterator();
 
             for (int i = 0, toIndex = cmdSize - 1; i < toIndex; i++) {
                 futures.add(asyncExecute(iter.next(), executor));
@@ -26901,8 +26900,8 @@ public final class N extends CommonUtil {
      * @param <R>
      * @param cmd
      * @return
-     * @see Try#call(com.landawn.abacus.util.Throwables.Function)
-     * @see Try#call(com.landawn.abacus.util.Throwables.Function, Object)
+     * @see Try#call(Throwables.Function)
+     * @see Try#call(Throwables.Function, Object)
      */
     @Beta
     public static <R> Nullable<R> tryOrEmptyIfExceptionOccurred(final Callable<R> cmd) {
@@ -26922,11 +26921,12 @@ public final class N extends CommonUtil {
      * @param init
      * @param func
      * @return
-     * @see Try#call(com.landawn.abacus.util.Throwables.Function)
-     * @see Try#call(com.landawn.abacus.util.Throwables.Function, Object)
+     * @see Try#call(Throwables.Function)
+     * @see Try#call(Throwables.Function, Object)
      */
     @Beta
-    public static <T, R, E extends Exception> Nullable<R> tryOrEmptyIfExceptionOccurred(final T init, final Throwables.Function<? super T, ? extends R, E> func) {
+    public static <T, R, E extends Exception> Nullable<R> tryOrEmptyIfExceptionOccurred(final T init,
+            final Throwables.Function<? super T, ? extends R, E> func) {
         try {
             return Nullable.of(func.apply(init));
         } catch (Exception e) {
@@ -26941,8 +26941,8 @@ public final class N extends CommonUtil {
      * @param cmd
      * @param defaultIfExceptionOccurred
      * @return
-     * @see Try#call(com.landawn.abacus.util.Throwables.Function)
-     * @see Try#call(com.landawn.abacus.util.Throwables.Function, Object)
+     * @see Try#call(Throwables.Function)
+     * @see Try#call(Throwables.Function, Object)
      */
     @Beta
     public static <R> R tryOrDefaultIfExceptionOccurred(final Callable<R> cmd, final R defaultIfExceptionOccurred) {
@@ -26963,8 +26963,8 @@ public final class N extends CommonUtil {
      * @param func
      * @param defaultIfExceptionOccurred
      * @return
-     * @see Try#call(com.landawn.abacus.util.Throwables.Function)
-     * @see Try#call(com.landawn.abacus.util.Throwables.Function, Object)
+     * @see Try#call(Throwables.Function)
+     * @see Try#call(Throwables.Function, Object)
      */
     @Beta
     public static <T, R, E extends Exception> R tryOrDefaultIfExceptionOccurred(final T init, final Throwables.Function<? super T, ? extends R, E> func,
@@ -26983,9 +26983,9 @@ public final class N extends CommonUtil {
      * @param cmd
      * @param supplierForDefaultIfExceptionOccurred
      * @return
-     * @see Try#call(com.landawn.abacus.util.Throwables.Function)
-     * @see Try#call(com.landawn.abacus.util.Throwables.Function, Object)
-     * @see Try#call(com.landawn.abacus.util.Throwables.Function, Supplier)
+     * @see Try#call(Throwables.Function)
+     * @see Try#call(Throwables.Function, Object)
+     * @see Try#call(Throwables.Function, Supplier)
      */
     @Beta
     public static <R> R tryOrDefaultIfExceptionOccurred(final Callable<R> cmd, final Supplier<R> supplierForDefaultIfExceptionOccurred) {
@@ -27006,9 +27006,9 @@ public final class N extends CommonUtil {
      * @param func
      * @param supplierForDefaultIfExceptionOccurred
      * @return
-     * @see Try#call(com.landawn.abacus.util.Throwables.Function)
-     * @see Try#call(com.landawn.abacus.util.Throwables.Function, Object)
-     * @see Try#call(com.landawn.abacus.util.Throwables.Function, Supplier)
+     * @see Try#call(Throwables.Function)
+     * @see Try#call(Throwables.Function, Object)
+     * @see Try#call(Throwables.Function, Supplier)
      */
     @Beta
     public static <T, R, E extends Exception> R tryOrDefaultIfExceptionOccurred(final T init, final Throwables.Function<? super T, ? extends R, E> func,

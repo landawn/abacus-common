@@ -151,7 +151,7 @@ public class AsyncExecutor {
 
         final List<ContinuableFuture<Void>> results = new ArrayList<>(commands.length);
 
-        for (com.landawn.abacus.util.Throwables.Runnable<? extends Exception> command : commands) {
+        for (Throwables.Runnable<? extends Exception> command : commands) {
             results.add(execute(command));
         }
 

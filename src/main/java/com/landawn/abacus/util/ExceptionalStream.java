@@ -991,7 +991,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //        N.checkArgNotNull(supplier, "supplier");
     //
     //        return ExceptionalStream.<Throwables.Supplier<? extends Collection<? extends T>, ? extends E>, E> just(supplier)
-    //                .flatmap(com.landawn.abacus.util.Throwables.Supplier::get);
+    //                .flatmap(Throwables.Supplier::get);
     //    }
 
     /**
@@ -1010,7 +1010,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
         N.checkArgNotNull(supplier, "supplier");
 
         return ExceptionalStream.<Throwables.Supplier<? extends ExceptionalStream<? extends T, ? extends E>, ? extends E>, E> just(supplier)
-                .flatMap(com.landawn.abacus.util.Throwables.Supplier::get);
+                .flatMap(Throwables.Supplier::get);
     }
 
     /**
@@ -8056,7 +8056,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      *        Iteration on this stream will also be stopped when this flag is set to {@code true}.
      * @throws E
      * @throws E2
-     * @see #forEachUntil(MutableBoolean, com.landawn.abacus.util.Throwables.Consumer)
+     * @see #forEachUntil(MutableBoolean, Throwables.Consumer)
      */
     @Beta
     @TerminalOp
@@ -8081,7 +8081,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @param action
      * @throws E
      * @throws E2
-     * @see #forEachUntil(com.landawn.abacus.util.Throwables.BiConsumer)
+     * @see #forEachUntil(Throwables.BiConsumer)
      */
     @Beta
     @TerminalOp
@@ -8783,7 +8783,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      * @throws E
      * @throws E2
-     * @see #findFirst(com.landawn.abacus.util.Throwables.Predicate)
+     * @see #findFirst(Throwables.Predicate)
      */
     @TerminalOp
     public <E2 extends Exception> Optional<T> findAny(final Throwables.Predicate<? super T, E2> predicate) throws E, E2 {
@@ -9535,7 +9535,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     * @param keyMapper
     //     * @param downstream
     //     * @return
-    //     * @see #groupTo(com.landawn.abacus.util.Throwables.Function, Collector)
+    //     * @see #groupTo(Throwables.Function, Collector)
     //     * @deprecated replaced by {@code groupTo}
     //     */
     //    @Deprecated
@@ -9551,7 +9551,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     * @param downstream
     //     * @param mapFactory
     //     * @return
-    //     * @see #groupTo(com.landawn.abacus.util.Throwables.Function, Collector, Supplier)
+    //     * @see #groupTo(Throwables.Function, Collector, Supplier)
     //     * @deprecated replaced by {@code groupTo}
     //     */
     //    @Deprecated
@@ -9567,7 +9567,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     * @param valueMapper
     //     * @param downstream
     //     * @return
-    //     * @see #groupTo(com.landawn.abacus.util.Throwables.Function, com.landawn.abacus.util.Throwables.Function, Collector)
+    //     * @see #groupTo(Throwables.Function, Throwables.Function, Collector)
     //     * @deprecated replaced by {@code groupTo}
     //     */
     //    @Deprecated
@@ -9584,7 +9584,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     //     * @param downstream
     //     * @param mapFactory
     //     * @return
-    //     * @see #groupTo(com.landawn.abacus.util.Throwables.Function, com.landawn.abacus.util.Throwables.Function, Collector, Supplier)
+    //     * @see #groupTo(Throwables.Function, Throwables.Function, Collector, Supplier)
     //     * @deprecated replaced by {@code groupTo}
     //     */
     //    @Deprecated

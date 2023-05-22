@@ -537,7 +537,7 @@ public final class Numbers {
                 throw new ArithmeticException("float overflow");
             }
 
-            return Float.valueOf(it.floatValue());
+            return Float.parseFloat(num.toString());
         });
 
         temp.put(BigInteger.class, it -> {
@@ -569,7 +569,7 @@ public final class Numbers {
         temp.put(short.class, Number::doubleValue);
         temp.put(int.class, Number::doubleValue);
         temp.put(long.class, Number::doubleValue);
-        temp.put(float.class, Number::doubleValue);
+        temp.put(float.class, it -> Double.parseDouble(it.toString()));
         temp.put(double.class, Fn.identity());
 
         temp.put(BigInteger.class, it -> {
@@ -1080,7 +1080,11 @@ public final class Numbers {
         }
 
         if (obj instanceof Number) {
-            return ((Number) obj).floatValue();
+            if (obj instanceof Double) {
+                return Float.parseFloat(obj.toString());
+            } else {
+                return ((Number) obj).floatValue();
+            }
         }
 
         return toFloat(obj.toString(), defaultValueForNull);
@@ -1140,7 +1144,11 @@ public final class Numbers {
         }
 
         if (obj instanceof Number) {
-            return ((Number) obj).doubleValue();
+            if (obj instanceof Float) {
+                return Double.parseDouble(obj.toString());
+            } else {
+                return ((Number) obj).doubleValue();
+            }
         }
 
         return toDouble(obj.toString(), defaultValueForNull);

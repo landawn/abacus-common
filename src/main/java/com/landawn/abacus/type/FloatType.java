@@ -33,9 +33,9 @@ public final class FloatType extends AbstractFloatType {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
@@ -68,10 +68,8 @@ public final class FloatType extends AbstractFloatType {
             return null;
         } else if (ret instanceof Float) {
             return (Float) ret;
-        } else if (ret instanceof Number) {
-            return ((Number) ret).floatValue();
         } else {
-            return Numbers.toFloat(ret.toString());
+            return Numbers.toFloat(ret);
         }
     }
 
@@ -90,10 +88,8 @@ public final class FloatType extends AbstractFloatType {
             return null;
         } else if (ret instanceof Float) {
             return (Float) ret;
-        } else if (ret instanceof Number) {
-            return ((Number) ret).floatValue();
         } else {
-            return Numbers.toFloat(ret.toString());
+            return Numbers.toFloat(ret);
         }
     }
 }

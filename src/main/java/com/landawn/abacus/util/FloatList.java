@@ -29,7 +29,6 @@ import java.util.function.IntFunction;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.If.OrElse;
-import com.landawn.abacus.util.Throwables.Function;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.u.OptionalFloat;
@@ -57,15 +56,15 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     private int size = 0;
 
     /**
-     * 
+     *
      */
     public FloatList() {
     }
 
     /**
-     * 
      *
-     * @param initialCapacity 
+     *
+     * @param initialCapacity
      */
     public FloatList(int initialCapacity) {
         elementData = initialCapacity == 0 ? N.EMPTY_FLOAT_ARRAY : new float[initialCapacity];
@@ -81,10 +80,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * 
      *
-     * @param a 
-     * @param size 
+     *
+     * @param a
+     * @param size
      */
     public FloatList(float[] a, int size) {
         N.checkFromIndexSize(0, size, a.length);
@@ -528,9 +527,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public boolean removeDuplicates() {
@@ -698,11 +697,11 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param newPositionStartIndex 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param newPositionStartIndex
      */
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionStartIndex) {
@@ -710,11 +709,11 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * 
      *
-     * @param fromIndex 
-     * @param toIndex 
-     * @param replacement 
+     *
+     * @param fromIndex
+     * @param toIndex
+     * @param replacement
      */
     @Override
     public void replaceRange(final int fromIndex, final int toIndex, final float[] replacement) {
@@ -1160,9 +1159,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalFloat min() {
         return size() == 0 ? OptionalFloat.empty() : OptionalFloat.of(N.min(elementData, 0, size));
@@ -1181,9 +1180,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalFloat median() {
         return size() == 0 ? OptionalFloat.empty() : OptionalFloat.of(N.median(elementData, 0, size));
@@ -1202,9 +1201,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalFloat max() {
         return size() == 0 ? OptionalFloat.empty() : OptionalFloat.of(N.max(elementData, 0, size));
@@ -1246,9 +1245,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public float sum() {
         return sum(0, size());
@@ -1267,9 +1266,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalDouble average() {
         return average(0, size());
@@ -1356,18 +1355,18 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalFloat first() {
         return size() == 0 ? OptionalFloat.empty() : OptionalFloat.of(elementData[0]);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public OptionalFloat last() {
         return size() == 0 ? OptionalFloat.empty() : OptionalFloat.of(elementData[size() - 1]);
@@ -1845,9 +1844,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public boolean isSorted() {
@@ -1978,9 +1977,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public FloatList copy() {
@@ -2132,9 +2131,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int size() {
@@ -2142,9 +2141,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public List<Float> boxed() {
         return boxed(0, size);
@@ -2169,9 +2168,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public float[] toArray() {
@@ -2235,9 +2234,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public FloatIterator iterator() {
         if (isEmpty()) {
@@ -2248,9 +2247,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public FloatStream stream() {
         return FloatStream.of(elementData, 0, size());
@@ -2291,7 +2290,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @throws E the e
      */
     @Override
-    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Function<? super FloatList, ? extends R, E> func) throws E {
+    public <R, E extends Exception> Optional<R> applyIfNotEmpty(Throwables.Function<? super FloatList, ? extends R, E> func) throws E {
         return isEmpty() ? Optional.<R> empty() : Optional.ofNullable(func.apply(this));
     }
 
@@ -2309,9 +2308,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     /**
      * Accept if not empty.
      *
-     * @param <E> 
-     * @param action 
-     * @return 
+     * @param <E>
+     * @param action
+     * @return
      * @throws E the e
      */
     @Override
@@ -2320,9 +2319,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -2349,9 +2348,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {
