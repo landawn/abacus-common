@@ -91,9 +91,9 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static Joiner defauLt() {
         return with(DEFAULT_DELIMITER, DEFAULT_KEY_VALUE_DELIMITER);
@@ -167,9 +167,9 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Joiner trimBeforeAppend() {
         this.trimBeforeAppend = true;
@@ -192,9 +192,9 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Joiner skipNulls() {
         this.skipNulls = true;
@@ -1160,10 +1160,10 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param iter 
-     * @return 
+     *
+     * @param iter
+     * @return
      */
     public Joiner appendAll(final Iterable<?> iter) {
         if (iter != null) {
@@ -1192,7 +1192,7 @@ public final class Joiner implements Closeable {
      * @param <T>
      * @param <E>
      * @param iter
-     * @param filter will be the only condition to decide if append an element from the specified {@code Iterable} or not. {@code skipNull()} won't be used here.
+     * @param filter will be the only condition to decide if append an element from the specified {@code Iterable} or not. {@code skipNulls()} won't be used here.
      * @return
      * @throws E
      */
@@ -1257,7 +1257,7 @@ public final class Joiner implements Closeable {
      * @param <T>
      * @param <E>
      * @param iter
-     * @param filter will be the only condition to decide if append an element from the specified {@code Iterable} or not. {@code skipNull()} won't be used here.
+     * @param filter will be the only condition to decide if append an element from the specified {@code Iterable} or not. {@code skipNulls()} won't be used here.
      * @return
      * @throws E
      */
@@ -1573,15 +1573,15 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param <E> 
-     * @param m 
-     * @param filter 
-     * @return 
-     * @throws E 
+     *
+     * @param <K>
+     * @param <V>
+     * @param <E>
+     * @param m
+     * @param filter
+     * @return
+     * @throws E
      */
     public <K, V, E extends Exception> Joiner appendEntries(final Map<K, V> m, final Throwables.Predicate<? super Map.Entry<K, V>, E> filter) throws E {
         N.checkArgNotNull(filter, "filter");
@@ -1614,15 +1614,15 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param <E> 
-     * @param m 
-     * @param filter 
-     * @return 
-     * @throws E 
+     *
+     * @param <K>
+     * @param <V>
+     * @param <E>
+     * @param m
+     * @param filter
+     * @return
+     * @throws E
      */
     public <K, V, E extends Exception> Joiner appendEntries(final Map<K, V> m, final Throwables.BiPredicate<? super K, ? super V, E> filter) throws E {
         N.checkArgNotNull(filter, "filter");
@@ -1655,18 +1655,18 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param <E> 
-     * @param <E2> 
-     * @param m 
-     * @param keyMapper 
-     * @param valueMapper 
-     * @return 
-     * @throws E 
-     * @throws E2 
+     *
+     * @param <K>
+     * @param <V>
+     * @param <E>
+     * @param <E2>
+     * @param m
+     * @param keyMapper
+     * @param valueMapper
+     * @return
+     * @throws E
+     * @throws E2
      */
     public <K, V, E extends Exception, E2 extends Exception> Joiner appendEntries(final Map<K, V> m, final Throwables.Function<? super K, ?, E> keyMapper,
             final Throwables.Function<? super V, ?, E2> valueMapper) throws E, E2 {
@@ -1699,21 +1699,21 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param bean 
-     * @return 
+     *
+     * @param bean
+     * @return
      */
     public Joiner appendEntries(final Object bean) {
         return appendEntries(bean, (Collection<String>) null);
     }
 
     /**
-     * 
      *
-     * @param bean 
-     * @param selectPropNames 
-     * @return 
+     *
+     * @param bean
+     * @param selectPropNames
+     * @return
      */
     public Joiner appendEntries(final Object bean, final Collection<String> selectPropNames) {
         if (bean == null) {
@@ -1806,13 +1806,13 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param <E> 
-     * @param bean 
-     * @param filter 
-     * @return 
-     * @throws E 
+     *
+     * @param <E>
+     * @param bean
+     * @param filter
+     * @return
+     * @throws E
      */
     public <E extends Exception> Joiner appendEntries(final Object bean, final Throwables.BiPredicate<? super String, ?, E> filter) throws E {
         N.checkArgNotNull(filter, "filter");
@@ -1946,9 +1946,9 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public int length() {
         // Remember that we never actually append the suffix unless we return
@@ -1995,12 +1995,12 @@ public final class Joiner implements Closeable {
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param appendable 
-     * @return 
-     * @throws IOException 
+     *
+     * @param <A>
+     * @param appendable
+     * @return
+     * @throws IOException
      */
     public <A extends Appendable> A appendTo(final A appendable) throws IOException {
         if (buffer == null) {

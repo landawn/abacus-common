@@ -60,10 +60,6 @@ import com.landawn.abacus.util.u.OptionalChar;
 public abstract class Strings {
     private static final Logger LOGGER = LoggerFactory.getLogger(Strings.class);
 
-    public static final String ELEMENT_SEPARATOR = ", ".intern();
-
-    static final char[] ELEMENT_SEPARATOR_CHAR_ARRAY = ELEMENT_SEPARATOR.toCharArray();
-
     /**
      * String with value {@code "null"}.
      */
@@ -78,9 +74,15 @@ public abstract class Strings {
 
     /**
      * The empty String {@code ""}.
-     * @since 2.0
      */
-    public static final String EMPTY = N.EMPTY_STRING;
+    public static final String EMPTY_STRING = N.EMPTY_STRING;
+
+    //    /**
+    //     * The empty String {@code ""}.
+    //     * @deprecated Use {@link #EMPTY_STRING} instead
+    //     */
+    //    @Deprecated
+    //    public static final String EMPTY = N.EMPTY_STRING;
 
     /**
      * A String for a space character.
@@ -115,6 +117,10 @@ public abstract class Strings {
     public static final char CHAR_LF = LF.charAt(0);
     @Beta
     public static final char CHAR_CR = CR.charAt(0);
+
+    public static final String ELEMENT_SEPARATOR = ", ".intern();
+
+    static final char[] ELEMENT_SEPARATOR_CHAR_ARRAY = ELEMENT_SEPARATOR.toCharArray();
 
     /**
      * A regex pattern for recognizing blocks of whitespace characters. The
@@ -751,7 +757,7 @@ public abstract class Strings {
      * @return
      */
     public static String blankToEmpty(final String str) {
-        return isBlank(str) ? EMPTY : str;
+        return isBlank(str) ? EMPTY_STRING : str;
     }
 
     /**
@@ -765,7 +771,7 @@ public abstract class Strings {
         }
 
         for (int i = 0, len = strs.length; i < len; i++) {
-            strs[i] = isBlank(strs[i]) ? EMPTY : strs[i];
+            strs[i] = isBlank(strs[i]) ? EMPTY_STRING : strs[i];
         }
     }
 
@@ -3394,7 +3400,7 @@ public abstract class Strings {
         final StringBuilder decomposed = new StringBuilder(Normalizer.normalize(str, Normalizer.Form.NFD));
         convertRemainingAccentCharacters(decomposed);
         // Note that this doesn't correctly remove ligatures...
-        return STRIP_ACCENTS_PATTERN.matcher(decomposed).replaceAll(EMPTY);
+        return STRIP_ACCENTS_PATTERN.matcher(decomposed).replaceAll(EMPTY_STRING);
     }
 
     /**
@@ -3673,7 +3679,7 @@ public abstract class Strings {
         if (str == null) {
             return null;
         } else if (str.length() <= offset || maxWidth == 0) {
-            return EMPTY;
+            return EMPTY_STRING;
         } else if (str.length() - offset <= maxWidth) {
             return offset == 0 ? str : str.substring(offset);
         } else {
@@ -9377,7 +9383,7 @@ public abstract class Strings {
      * @return
      */
     public static String join(final Iterator<?> iter, final String delimiter) {
-        return join(iter, delimiter, EMPTY, EMPTY, false);
+        return join(iter, delimiter, EMPTY_STRING, EMPTY_STRING, false);
     }
 
     /**

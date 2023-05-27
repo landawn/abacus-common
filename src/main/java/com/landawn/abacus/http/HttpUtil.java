@@ -274,14 +274,14 @@ public final class HttpUtil {
     @SuppressWarnings("rawtypes")
     public static String readHttpHeadValue(Object value) {
         if (value == null) {
-            return Strings.EMPTY;
+            return Strings.EMPTY_STRING;
         }
 
         if (value instanceof Collection) {
             final Collection c = (Collection) value;
 
             if (N.isNullOrEmpty(c)) {
-                return Strings.EMPTY;
+                return Strings.EMPTY_STRING;
             } else if (c.size() == 1) {
                 return N.stringOf(N.firstOrNullIfEmpty(c));
             } else {

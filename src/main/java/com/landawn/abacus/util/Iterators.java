@@ -1879,8 +1879,21 @@ public final class Iterators {
      * @param <T>
      * @param iter
      * @return
+     * @deprecated Use {@link #skipNulls(Iterator<? extends T>)} instead
      */
+    @Deprecated
     public static <T> ObjIterator<T> skipNull(final Iterator<? extends T> iter) {
+        return skipNulls(iter);
+    }
+
+    /**
+     * Returns a new {@code ObjIterator} with {@code null} elements removed.
+     *
+     * @param <T>
+     * @param iter
+     * @return
+     */
+    public static <T> ObjIterator<T> skipNulls(final Iterator<? extends T> iter) {
         return filter(iter, Fn.<T> notNull());
     }
 
