@@ -51,6 +51,11 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
         public Object next() {
             throw new NoSuchElementException();
         }
+
+        @Override
+        public ObjIterator skipNulls() {
+            return this;
+        }
     };
 
     /**
@@ -517,10 +522,10 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * 
      *
-     * @param n 
-     * @return 
+     *
+     * @param n
+     * @return
      */
     public ObjIterator<T> skip(final long n) {
         N.checkArgNotNegative(n, "n");
@@ -565,10 +570,10 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * 
      *
-     * @param count 
-     * @return 
+     *
+     * @param count
+     * @return
      */
     public ObjIterator<T> limit(final long count) {
         N.checkArgNotNegative(count, "count");
@@ -600,21 +605,21 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * 
      *
-     * @param predicate 
-     * @return 
+     *
+     * @param predicate
+     * @return
      */
     public ObjIterator<T> filter(final Predicate<? super T> predicate) {
         return Iterators.filter(this, predicate);
     }
 
     /**
-     * 
      *
-     * @param <U> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <U>
+     * @param mapper
+     * @return
      */
     @Beta
     public <U> ObjIterator<U> map(final Function<? super T, U> mapper) {
@@ -622,9 +627,9 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Nullable<T> first() {
         if (hasNext()) {
@@ -635,9 +640,9 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Nullable<T> last() {
         if (hasNext()) {
@@ -654,29 +659,37 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * 
      *
-     * @return 
+     * @return
+     */
+    public ObjIterator<T> skipNulls() {
+        return Iterators.skipNulls(this);
+    }
+
+    /**
+     *
+     *
+     * @return
      */
     public Object[] toArray() {
         return toArray(N.EMPTY_OBJECT_ARRAY);
     }
 
     /**
-     * 
      *
-     * @param <A> 
-     * @param a 
-     * @return 
+     *
+     * @param <A>
+     * @param a
+     * @return
      */
     public <A> A[] toArray(A[] a) {
         return toList().toArray(a);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public List<T> toList() {
         final List<T> list = new ArrayList<>();
@@ -689,18 +702,18 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Stream<T> stream() {
         return Stream.of(this);
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Beta
     public ObjIterator<Indexed<T>> indexed() {
@@ -708,10 +721,10 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     }
 
     /**
-     * 
      *
-     * @param startIndex 
-     * @return 
+     *
+     * @param startIndex
+     * @return
      */
     @Beta
     public ObjIterator<Indexed<T>> indexed(final long startIndex) {

@@ -3113,7 +3113,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      * @implNote same as ====>
      * <pre>
-     * skipNull().flatmap(mapper)
+     * skipNulls().flatmap(mapper)
      * </pre>
      */
     @Beta
@@ -3132,7 +3132,7 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
      * @return
      * @implNote same as ====>
      * <pre>
-     * skipNull().flatmap(mapper).skipNull().flatmap(mapper2)
+     * skipNulls().flatmap(mapper).skipNulls().flatmap(mapper2)
      * </pre>
      */
     @Beta

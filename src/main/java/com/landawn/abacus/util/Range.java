@@ -18,6 +18,7 @@ package com.landawn.abacus.util;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.function.Function;
 
 import com.landawn.abacus.util.u.Optional;
 
@@ -147,9 +148,20 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
     }
 
     /**
-     * 
      *
-     * @return 
+     * @param <U>
+     * @param mapper
+     * @return
+     */
+    public <U extends Comparable<? super U>> Range<U> map(final Function<T, U> mapper) {
+        return new Range<>(new LowerEndpoint<>(mapper.apply(lowerEndpoint.value), lowerEndpoint.isClosed),
+                new UpperEndpoint<>(mapper.apply(upperEndpoint.value), upperEndpoint.isClosed), boundType);
+    }
+
+    /**
+     *
+     *
+     * @return
      */
     public BoundType boundType() {
         return boundType;
@@ -520,9 +532,9 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {
