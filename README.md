@@ -186,7 +186,7 @@ and [More](https://www.javadoc.io/static/com.landawn/abacus-common/3.6.20/com/la
 
 ```gradle
 // JDK 17 or above:
-compile 'com.landawn:abacus-jdbc:3.6.20'
+compile 'com.landawn:abacus-common:3.6.20'
 ```
 
 
