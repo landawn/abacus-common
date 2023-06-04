@@ -172,12 +172,21 @@ and [More](https://www.javadoc.io/static/com.landawn/abacus-common/3.6.20/com/la
 
 ## Download/Installation & [Changes](https://github.com/landawn/abacus-common/blob/master/CHANGES.md):
 
-* [Maven](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.landawn%22)
+* [Maven](https://central.sonatype.com/artifact/com.landawn/abacus-common)
+
+```xml
+<dependency>
+	<groupId>com.landawn</groupId>
+	<artifactId>abacus-common</artifactId>
+	<version>3.6.20</version> 
+<dependency>
+```
 
 * Gradle:
+
 ```gradle
 // JDK 17 or above:
-compile 'com.landawn:abacus-common:3.6.20'
+compile 'com.landawn:abacus-jdbc:3.6.20'
 ```
 
 
@@ -219,10 +228,9 @@ Please refer to [Wiki](https://github.com/landawn/abacus-common/wiki)
 [easyexcel](https://github.com/alibaba/easyexcel),
 [opencsv](http://opencsv.sourceforge.net/), 
 [mapstruct](https://github.com/mapstruct/mapstruct), 
-[Sharding-JDBC](https://github.com/apache/incubator-shardingsphere), 
 [fastutil](https://github.com/vigna/fastutil), 
 [hppc](https://github.com/carrotsearch/hppc), 
-[re2j](https://github.com/google/re2j)...[awesome-java](https://github.com/akullpp/awesome-java)
+[re2j](https://github.com/google/re2j) ... [awesome-java](https://github.com/akullpp/awesome-java)
 
 ## Recommended Java programming tools:
 [Spotbugs](https://github.com/spotbugs/spotbugs), [JaCoCo](https://www.eclemma.org/jacoco/)...
