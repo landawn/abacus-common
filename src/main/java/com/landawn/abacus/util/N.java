@@ -13283,6 +13283,451 @@ public final class N extends CommonUtil {
     }
 
     /**
+     * Returns the minimum value extracted from the specified array {@code a} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     *
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param a
+     * @param defaultValue
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, R extends Comparable<? super R>, E extends Exception> R minOrDefaultIfEmpty(final T[] a,
+            final Throwables.Function<? super T, ? extends R, E> valueExtractor, final R defaultValue) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return defaultValue;
+        }
+
+        R candicate = valueExtractor.apply(a[0]);
+        R next = null;
+
+        for (int i = 1, len = a.length; i < len; i++) {
+            next = valueExtractor.apply(a[i]);
+
+            if (candicate == null || (next != null && (next.compareTo(candicate) < 0))) {
+                candicate = next;
+            }
+        }
+
+        return candicate;
+    }
+
+    /**
+     * Returns the minimum value extracted from the specified collection {@code c} by {@code valueExtractor}, or {@code defaultValue} if {@code c} is null or empty.
+     *
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param c
+     * @param defaultValue
+     * @return
+     * @throws E
+     */
+    public static <T, R extends Comparable<? super R>, E extends Exception> R minOrDefaultIfEmpty(final Iterable<? extends T> c,
+            final Throwables.Function<? super T, ? extends R, E> valueExtractor, final R defaultValue) throws E {
+        if (c == null) {
+            return defaultValue;
+        }
+
+        return minOrDefaultIfEmpty(c.iterator(), valueExtractor, defaultValue);
+    }
+
+    /**
+     * Returns the minimum value extracted from the specified iterator {@code iter} by {@code valueExtractor}, or {@code defaultValue} if {@code iter} is null or empty.
+     *
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param iter
+     * @param defaultValue
+     * @return
+     * @throws E
+     */
+    public static <T, R extends Comparable<? super R>, E extends Exception> R minOrDefaultIfEmpty(final Iterator<? extends T> iter,
+            final Throwables.Function<? super T, ? extends R, E> valueExtractor, final R defaultValue) throws E {
+        if (iter == null || iter.hasNext() == false) {
+            return defaultValue;
+        }
+
+        R candicate = valueExtractor.apply(iter.next());
+        R next = null;
+
+        while (iter.hasNext()) {
+            next = valueExtractor.apply(iter.next());
+
+            if (candicate == null || (next != null && (next.compareTo(candicate) < 0))) {
+                candicate = next;
+            }
+        }
+
+        return candicate;
+    }
+
+    /**
+     * Returns the minimum {@code int} value extracted from the specified array {@code a} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param defaultValue
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> int minIntOrDefaultIfEmpty(final T[] a, final Throwables.ToIntFunction<? super T, E> valueExtractor,
+            final int defaultValue) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return defaultValue;
+        }
+
+        int candicate = valueExtractor.applyAsInt(a[0]);
+        int next = 0;
+
+        for (int i = 1, len = a.length; i < len; i++) {
+            next = valueExtractor.applyAsInt(a[i]);
+
+            if (next < candicate) {
+                candicate = next;
+            }
+        }
+
+        return candicate;
+    }
+
+    /**
+     * Returns the minimum {@code int} value extracted from the specified iterable {@code c} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param defaultValue
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> int minIntOrDefaultIfEmpty(final Iterable<? extends T> c,
+            final Throwables.ToIntFunction<? super T, E> valueExtractor, final int defaultValue) throws E {
+        if (c == null) {
+            return defaultValue;
+        }
+
+        return minIntOrDefaultIfEmpty(c.iterator(), valueExtractor, defaultValue);
+    }
+
+    /**
+     * Returns the minimum {@code int} value extracted from the specified iterator {@code iter} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param defaultValue
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> int minIntOrDefaultIfEmpty(final Iterator<? extends T> iter,
+            final Throwables.ToIntFunction<? super T, E> valueExtractor, final int defaultValue) throws E {
+        if (iter == null || iter.hasNext() == false) {
+            return defaultValue;
+        }
+
+        int candicate = valueExtractor.applyAsInt(iter.next());
+        int next = 0;
+
+        while (iter.hasNext()) {
+            next = valueExtractor.applyAsInt(iter.next());
+
+            if (next < candicate) {
+                candicate = next;
+            }
+        }
+
+        return candicate;
+    }
+
+    /**
+     * Returns the minimum {@code long} value extracted from the specified array {@code a} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param defaultValue
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> long minLongOrDefaultIfEmpty(final T[] a, final Throwables.ToLongFunction<? super T, E> valueExtractor,
+            final long defaultValue) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return defaultValue;
+        }
+
+        long candicate = valueExtractor.applyAsLong(a[0]);
+        long next = 0;
+
+        for (int i = 1, len = a.length; i < len; i++) {
+            next = valueExtractor.applyAsLong(a[i]);
+
+            if (next < candicate) {
+                candicate = next;
+            }
+        }
+
+        return candicate;
+    }
+
+    /**
+     * Returns the minimum {@code long} value extracted from the specified iterable {@code c} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param defaultValue
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> long minLongOrDefaultIfEmpty(final Iterable<? extends T> c,
+            final Throwables.ToLongFunction<? super T, E> valueExtractor, final long defaultValue) throws E {
+        if (c == null) {
+            return defaultValue;
+        }
+
+        return minLongOrDefaultIfEmpty(c.iterator(), valueExtractor, defaultValue);
+    }
+
+    /**
+     * Returns the minimum {@code long} value extracted from the specified iterator {@code iter} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param defaultValue
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> long minLongOrDefaultIfEmpty(final Iterator<? extends T> iter,
+            final Throwables.ToLongFunction<? super T, E> valueExtractor, final long defaultValue) throws E {
+        if (iter == null || iter.hasNext() == false) {
+            return defaultValue;
+        }
+
+        long candicate = valueExtractor.applyAsLong(iter.next());
+        long next = 0;
+
+        while (iter.hasNext()) {
+            next = valueExtractor.applyAsLong(iter.next());
+
+            if (next < candicate) {
+                candicate = next;
+            }
+        }
+
+        return candicate;
+    }
+
+    /**
+     * Returns the minimum {@code double} value extracted from the specified array {@code a} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param defaultValue
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> double minDoubleOrDefaultIfEmpty(final T[] a, final Throwables.ToDoubleFunction<? super T, E> valueExtractor,
+            final double defaultValue) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return defaultValue;
+        }
+
+        double candicate = valueExtractor.applyAsDouble(a[0]);
+        double next = 0;
+
+        for (int i = 1, len = a.length; i < len; i++) {
+            next = valueExtractor.applyAsDouble(a[i]);
+
+            if (N.compare(next, candicate) < 0) {
+                candicate = next;
+            }
+        }
+
+        return candicate;
+    }
+
+    /**
+     * Returns the minimum {@code double} value extracted from the specified iterable {@code c} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param defaultValue
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> double minDoubleOrDefaultIfEmpty(final Iterable<? extends T> c,
+            final Throwables.ToDoubleFunction<? super T, E> valueExtractor, final double defaultValue) throws E {
+        if (c == null) {
+            return defaultValue;
+        }
+
+        return minDoubleOrDefaultIfEmpty(c.iterator(), valueExtractor, defaultValue);
+    }
+
+    /**
+     * Returns the minimum {@code double} value extracted from the specified iterator {@code iter} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param defaultValue
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> double minDoubleOrDefaultIfEmpty(final Iterator<? extends T> iter,
+            final Throwables.ToDoubleFunction<? super T, E> valueExtractor, final double defaultValue) throws E {
+        if (iter == null || iter.hasNext() == false) {
+            return defaultValue;
+        }
+
+        double candicate = valueExtractor.applyAsDouble(iter.next());
+        double next = 0;
+
+        while (iter.hasNext()) {
+            next = valueExtractor.applyAsDouble(iter.next());
+
+            if (N.compare(next, candicate) < 0) {
+                candicate = next;
+            }
+        }
+
+        return candicate;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @return
+     * @throws IllegalArgumentException if {@code a} is null or empty.
+     */
+    public static <T extends Comparable<? super T>> Pair<T, T> minMax(final T[] a) throws IllegalArgumentException {
+        return minMax(a, NULL_MIN_COMPARATOR);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param a
+     * @param cmp
+     * @return
+     * @throws IllegalArgumentException if {@code a} is null or empty.
+     */
+    public static <T> Pair<T, T> minMax(final T[] a, Comparator<? super T> cmp) throws IllegalArgumentException {
+        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
+
+        if (a.length == 1) {
+            return Pair.of(a[0], a[0]);
+        }
+
+        cmp = cmp == null ? NULL_MIN_COMPARATOR : cmp;
+
+        T min = a[0];
+        T max = a[0];
+        int cp = 0;
+
+        for (int i = 1, len = a.length; i < len; i++) {
+            cp = cmp.compare(a[i], min);
+
+            if (cp < 0) {
+                min = a[i];
+            } else if ((cp > 0) && (cmp.compare(a[i], max) > 0)) {
+                max = a[i];
+            }
+        }
+
+        return Pair.of(min, max);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param c
+     * @return
+     * @throws IllegalArgumentException if {@code c} is null or empty.
+     */
+    public static <T extends Comparable<? super T>> Pair<T, T> minMax(final Iterable<? extends T> c) throws IllegalArgumentException {
+        return minMax(c, NULL_MIN_COMPARATOR);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param c
+     * @param cmp
+     * @return
+     * @throws IllegalArgumentException if {@code c} is null or empty.
+     */
+    public static <T> Pair<T, T> minMax(final Iterable<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
+        checkArgNotNull(c, "The spcified iterable can not be null or empty");
+
+        return minMax(c.iterator(), cmp);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param iter
+     * @return
+     * @throws IllegalArgumentException if {@code iter} is null or empty.
+     * @see Iterables#minMax(Iterator)
+     */
+    public static <T extends Comparable<? super T>> Pair<T, T> minMax(final Iterator<? extends T> iter) throws IllegalArgumentException {
+        return minMax(iter, NULL_MIN_COMPARATOR);
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param iter
+     * @param cmp
+     * @return
+     * @throws IllegalArgumentException if {@code iter} is null or empty.
+     * @see Iterables#minMax(Iterator, Comparator)
+     */
+    public static <T> Pair<T, T> minMax(final Iterator<? extends T> iter, Comparator<? super T> cmp) throws IllegalArgumentException {
+        checkArgument(iter != null && iter.hasNext(), "The spcified iterator can not be null or empty");
+
+        cmp = cmp == null ? NULL_MIN_COMPARATOR : cmp;
+
+        T next = iter.next();
+        T min = next;
+        T max = next;
+        int cp = 0;
+
+        while (iter.hasNext()) {
+            next = iter.next();
+
+            cp = cmp.compare(next, min);
+
+            if (cp < 0) {
+                min = next;
+            } else if ((cp > 0) && (cmp.compare(next, max) > 0)) {
+                max = next;
+            }
+        }
+
+        return Pair.of(min, max);
+    }
+
+    /**
      * <p>
      * Gets the maximum of two <code>char</code> values.
      * </p>
@@ -14115,119 +14560,332 @@ public final class N extends CommonUtil {
     }
 
     /**
+     * Returns the maximum value extracted from the specified array {@code a} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
      *
      * @param <T>
+     * @param <R>
+     * @param <E>
      * @param a
+     * @param defaultValue
      * @return
-     * @throws IllegalArgumentException if {@code a} is null or empty.
+     * @throws E
      */
-    public static <T extends Comparable<? super T>> Pair<T, T> minMax(final T[] a) throws IllegalArgumentException {
-        return minMax(a, NULL_MIN_COMPARATOR);
-    }
-
-    /**
-     *
-     * @param <T>
-     * @param a
-     * @param cmp
-     * @return
-     * @throws IllegalArgumentException if {@code a} is null or empty.
-     */
-    public static <T> Pair<T, T> minMax(final T[] a, Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgNotNullOrEmpty(a, "The spcified array can not be null or empty");
-
-        if (a.length == 1) {
-            return Pair.of(a[0], a[0]);
+    @Beta
+    public static <T, R extends Comparable<? super R>, E extends Exception> R maxOrDefaultIfEmpty(final T[] a,
+            final Throwables.Function<? super T, ? extends R, E> valueExtractor, final R defaultValue) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return defaultValue;
         }
 
-        cmp = cmp == null ? NULL_MIN_COMPARATOR : cmp;
-
-        T min = a[0];
-        T max = a[0];
-        int cp = 0;
+        R candicate = valueExtractor.apply(a[0]);
+        R next = null;
 
         for (int i = 1, len = a.length; i < len; i++) {
-            cp = cmp.compare(a[i], min);
+            next = valueExtractor.apply(a[i]);
 
-            if (cp < 0) {
-                min = a[i];
-            } else if ((cp > 0) && (cmp.compare(a[i], max) > 0)) {
-                max = a[i];
+            if (candicate == null || (next != null && (next.compareTo(candicate) > 0))) {
+                candicate = next;
             }
         }
 
-        return Pair.of(min, max);
+        return candicate;
     }
 
     /**
+     * Returns the maximum value extracted from the specified collection {@code c} by {@code valueExtractor}, or {@code defaultValue} if {@code c} is null or empty.
      *
      * @param <T>
+     * @param <R>
+     * @param <E>
      * @param c
+     * @param defaultValue
      * @return
-     * @throws IllegalArgumentException if {@code c} is null or empty.
+     * @throws E
      */
-    public static <T extends Comparable<? super T>> Pair<T, T> minMax(final Iterable<? extends T> c) throws IllegalArgumentException {
-        return minMax(c, NULL_MIN_COMPARATOR);
+    public static <T, R extends Comparable<? super R>, E extends Exception> R maxOrDefaultIfEmpty(final Iterable<? extends T> c,
+            final Throwables.Function<? super T, ? extends R, E> valueExtractor, final R defaultValue) throws E {
+        if (c == null) {
+            return defaultValue;
+        }
+
+        return maxOrDefaultIfEmpty(c.iterator(), valueExtractor, defaultValue);
     }
 
     /**
+     * Returns the maximum value extracted from the specified iterator {@code iter} by {@code valueExtractor}, or {@code defaultValue} if {@code iter} is null or empty.
      *
      * @param <T>
-     * @param c
-     * @param cmp
-     * @return
-     * @throws IllegalArgumentException if {@code c} is null or empty.
-     */
-    public static <T> Pair<T, T> minMax(final Iterable<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgNotNull(c, "The spcified iterable can not be null or empty");
-
-        return minMax(c.iterator(), cmp);
-    }
-
-    /**
-     *
-     * @param <T>
+     * @param <R>
+     * @param <E>
      * @param iter
+     * @param defaultValue
      * @return
-     * @throws IllegalArgumentException if {@code iter} is null or empty.
-     * @see Iterables#minMax(Iterator)
+     * @throws E
      */
-    public static <T extends Comparable<? super T>> Pair<T, T> minMax(final Iterator<? extends T> iter) throws IllegalArgumentException {
-        return minMax(iter, NULL_MIN_COMPARATOR);
-    }
+    public static <T, R extends Comparable<? super R>, E extends Exception> R maxOrDefaultIfEmpty(final Iterator<? extends T> iter,
+            final Throwables.Function<? super T, ? extends R, E> valueExtractor, final R defaultValue) throws E {
+        if (iter == null || iter.hasNext() == false) {
+            return defaultValue;
+        }
 
-    /**
-     *
-     * @param <T>
-     * @param iter
-     * @param cmp
-     * @return
-     * @throws IllegalArgumentException if {@code iter} is null or empty.
-     * @see Iterables#minMax(Iterator, Comparator)
-     */
-    public static <T> Pair<T, T> minMax(final Iterator<? extends T> iter, Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgument(iter != null && iter.hasNext(), "The spcified iterator can not be null or empty");
-
-        cmp = cmp == null ? NULL_MIN_COMPARATOR : cmp;
-
-        T next = iter.next();
-        T min = next;
-        T max = next;
-        int cp = 0;
+        R candicate = valueExtractor.apply(iter.next());
+        R next = null;
 
         while (iter.hasNext()) {
-            next = iter.next();
+            next = valueExtractor.apply(iter.next());
 
-            cp = cmp.compare(next, min);
-
-            if (cp < 0) {
-                min = next;
-            } else if ((cp > 0) && (cmp.compare(next, max) > 0)) {
-                max = next;
+            if (candicate == null || (next != null && (next.compareTo(candicate) > 0))) {
+                candicate = next;
             }
         }
 
-        return Pair.of(min, max);
+        return candicate;
+    }
+
+    /**
+     * Returns the maximum {@code int} value extracted from the specified array {@code a} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param defaultValue
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> int maxIntOrDefaultIfEmpty(final T[] a, final Throwables.ToIntFunction<? super T, E> valueExtractor,
+            final int defaultValue) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return defaultValue;
+        }
+
+        int candicate = valueExtractor.applyAsInt(a[0]);
+        int next = 0;
+
+        for (int i = 1, len = a.length; i < len; i++) {
+            next = valueExtractor.applyAsInt(a[i]);
+
+            if (next > candicate) {
+                candicate = next;
+            }
+        }
+
+        return candicate;
+    }
+
+    /**
+     * Returns the maximum {@code int} value extracted from the specified iterable {@code c} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param defaultValue
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> int maxIntOrDefaultIfEmpty(final Iterable<? extends T> c,
+            final Throwables.ToIntFunction<? super T, E> valueExtractor, final int defaultValue) throws E {
+        if (c == null) {
+            return defaultValue;
+        }
+
+        return maxIntOrDefaultIfEmpty(c.iterator(), valueExtractor, defaultValue);
+    }
+
+    /**
+     * Returns the maximum {@code int} value extracted from the specified iterator {@code iter} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param defaultValue
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> int maxIntOrDefaultIfEmpty(final Iterator<? extends T> iter,
+            final Throwables.ToIntFunction<? super T, E> valueExtractor, final int defaultValue) throws E {
+        if (iter == null || iter.hasNext() == false) {
+            return defaultValue;
+        }
+
+        int candicate = valueExtractor.applyAsInt(iter.next());
+        int next = 0;
+
+        while (iter.hasNext()) {
+            next = valueExtractor.applyAsInt(iter.next());
+
+            if (next > candicate) {
+                candicate = next;
+            }
+        }
+
+        return candicate;
+    }
+
+    /**
+     * Returns the maximum {@code long} value extracted from the specified array {@code a} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param defaultValue
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> long maxLongOrDefaultIfEmpty(final T[] a, final Throwables.ToLongFunction<? super T, E> valueExtractor,
+            final long defaultValue) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return defaultValue;
+        }
+
+        long candicate = valueExtractor.applyAsLong(a[0]);
+        long next = 0;
+
+        for (int i = 1, len = a.length; i < len; i++) {
+            next = valueExtractor.applyAsLong(a[i]);
+
+            if (next > candicate) {
+                candicate = next;
+            }
+        }
+
+        return candicate;
+    }
+
+    /**
+     * Returns the maximum {@code long} value extracted from the specified iterable {@code c} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param defaultValue
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> long maxLongOrDefaultIfEmpty(final Iterable<? extends T> c,
+            final Throwables.ToLongFunction<? super T, E> valueExtractor, final long defaultValue) throws E {
+        if (c == null) {
+            return defaultValue;
+        }
+
+        return maxLongOrDefaultIfEmpty(c.iterator(), valueExtractor, defaultValue);
+    }
+
+    /**
+     * Returns the maximum {@code long} value extracted from the specified iterator {@code iter} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param defaultValue
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> long maxLongOrDefaultIfEmpty(final Iterator<? extends T> iter,
+            final Throwables.ToLongFunction<? super T, E> valueExtractor, final long defaultValue) throws E {
+        if (iter == null || iter.hasNext() == false) {
+            return defaultValue;
+        }
+
+        long candicate = valueExtractor.applyAsLong(iter.next());
+        long next = 0;
+
+        while (iter.hasNext()) {
+            next = valueExtractor.applyAsLong(iter.next());
+
+            if (next > candicate) {
+                candicate = next;
+            }
+        }
+
+        return candicate;
+    }
+
+    /**
+     * Returns the maximum {@code double} value extracted from the specified array {@code a} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param a
+     * @param defaultValue
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> double maxDoubleOrDefaultIfEmpty(final T[] a, final Throwables.ToDoubleFunction<? super T, E> valueExtractor,
+            final double defaultValue) throws E {
+        if (N.isNullOrEmpty(a)) {
+            return defaultValue;
+        }
+
+        double candicate = valueExtractor.applyAsDouble(a[0]);
+        double next = 0;
+
+        for (int i = 1, len = a.length; i < len; i++) {
+            next = valueExtractor.applyAsDouble(a[i]);
+
+            if (N.compare(next, candicate) > 0) {
+                candicate = next;
+            }
+        }
+
+        return candicate;
+    }
+
+    /**
+     * Returns the maximum {@code double} value extracted from the specified iterable {@code c} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param c
+     * @param defaultValue
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> double maxDoubleOrDefaultIfEmpty(final Iterable<? extends T> c,
+            final Throwables.ToDoubleFunction<? super T, E> valueExtractor, final double defaultValue) throws E {
+        if (c == null) {
+            return defaultValue;
+        }
+
+        return maxDoubleOrDefaultIfEmpty(c.iterator(), valueExtractor, defaultValue);
+    }
+
+    /**
+     * Returns the maximum {@code double} value extracted from the specified iterator {@code iter} by {@code valueExtractor}, or {@code defaultValue} if {@code a} is null or empty.
+     *
+     * @param <T>
+     * @param <E>
+     * @param iter
+     * @param defaultValue
+     * @return
+     * @throws E
+     */
+    @Beta
+    public static <T, E extends Exception> double maxDoubleOrDefaultIfEmpty(final Iterator<? extends T> iter,
+            final Throwables.ToDoubleFunction<? super T, E> valueExtractor, final double defaultValue) throws E {
+        if (iter == null || iter.hasNext() == false) {
+            return defaultValue;
+        }
+
+        double candicate = valueExtractor.applyAsDouble(iter.next());
+        double next = 0;
+
+        while (iter.hasNext()) {
+            next = valueExtractor.applyAsDouble(iter.next());
+
+            if (N.compare(next, candicate) > 0) {
+                candicate = next;
+            }
+        }
+
+        return candicate;
     }
 
     /**

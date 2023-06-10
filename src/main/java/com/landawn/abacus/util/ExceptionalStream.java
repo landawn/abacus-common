@@ -7037,13 +7037,17 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     init();
                 }
 
-                if (a == null && !iter.hasNext()) {
+                if (a != null) {
+                    return len > 0;
+                } else if (iter.hasNext()) {
+                    return true;
+                } else {
                     a = (T[]) list.toArray();
                     len = a.length;
                     cursor = 0;
-                }
 
-                return cursor < len || iter.hasNext();
+                    return len > 0;
+                }
             }
 
             @Override
@@ -7079,12 +7083,12 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
     /**
      *
      *
-     * @param times
+     * @param rounds
      * @return
      */
     @SequentialOnly
     @IntermediateOp
-    public ExceptionalStream<T, E> cycled(long times) {
+    public ExceptionalStream<T, E> cycled(long rounds) {
         assertNotClosed();
 
         return newStream(new ExceptionalIterator<T, E>() {
@@ -7104,14 +7108,22 @@ public class ExceptionalStream<T, E extends Exception> implements Closeable, Imm
                     init();
                 }
 
-                if (a == null && !iter.hasNext()) {
+                if (m >= rounds) {
+                    return false;
+                }
+
+                if (a != null) {
+                    return cursor < len || rounds - m > 1;
+                } else if (iter.hasNext()) {
+                    return true;
+                } else {
                     a = (T[]) list.toArray();
                     len = a.length;
                     cursor = 0;
-                    m = 1;
-                }
+                    m++;
 
-                return m < times && (cursor < len || times - m > 1) && (len > 0 || iter.hasNext());
+                    return m < rounds && len > 0;
+                }
             }
 
             @Override
