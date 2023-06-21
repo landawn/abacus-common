@@ -755,7 +755,7 @@ public final class Futures {
         final long totalTimeoutForAllInMillis = totalTimeoutForAll == Long.MAX_VALUE ? Long.MAX_VALUE : unit.toMillis(totalTimeoutForAll);
 
         return new ObjIterator<>() {
-            private final Set<Future<? extends T>> activeFutures = N.newSetFromMap(new IdentityHashMap<Future<? extends T>, Boolean>());
+            private final Set<Future<? extends T>> activeFutures = N.newSetFromMap(new IdentityHashMap<>());
             { //NOSONAR
                 activeFutures.addAll(cfs);
             }

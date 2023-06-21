@@ -60,7 +60,7 @@ public final class InternalUtil {
         if (listElementDataField != null) {
             try {
                 listElementDataField.setAccessible(true); //NOSONAR
-                isListElementDataFieldGettable = listElementDataField.canAccess(new ArrayList<String>());
+                isListElementDataFieldGettable = listElementDataField.canAccess(new ArrayList<>());
             } catch (Throwable e) {
                 // ignore.
             }

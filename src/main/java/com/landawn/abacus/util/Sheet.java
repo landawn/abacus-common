@@ -22,6 +22,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -69,17 +70,17 @@ public final class Sheet<R, C, E> implements Cloneable {
     private boolean _isFrozen = false; //NOSONAR
 
     /**
-     * 
+     *
      */
     public Sheet() {
         this(N.emptyList(), N.emptyList());
     }
 
     /**
-     * 
      *
-     * @param rowKeySet 
-     * @param columnKeySet 
+     *
+     * @param rowKeySet
+     * @param columnKeySet
      */
     public Sheet(Collection<R> rowKeySet, Collection<C> columnKeySet) {
         N.checkArgument(!N.anyNull(rowKeySet), "Row key can't be null");
@@ -90,11 +91,11 @@ public final class Sheet<R, C, E> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @param rowKeySet 
-     * @param columnKeySet 
-     * @param rows 
+     *
+     * @param rowKeySet
+     * @param columnKeySet
+     * @param rows
      */
     public Sheet(Collection<R> rowKeySet, Collection<C> columnKeySet, Object[][] rows) {
         this(rowKeySet, columnKeySet);
@@ -841,9 +842,9 @@ public final class Sheet<R, C, E> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Map<R, Map<C, E>> rowMap() {
         final Map<R, Map<C, E>> result = N.newLinkedHashMap(this.rowKeySet().size());
@@ -1165,9 +1166,9 @@ public final class Sheet<R, C, E> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Map<C, Map<R, E>> columnMap() {
         final Map<C, Map<R, E>> result = N.newLinkedHashMap(this.columnKeySet().size());
@@ -1365,10 +1366,147 @@ public final class Sheet<R, C, E> implements Cloneable {
         }
     }
 
+    public void sortByRow() {
+        sortByRow((Comparator<R>) Comparator.naturalOrder());
+    }
+
+    public void sortByRow(final Comparator<? super R> cmp) {
+        checkFrozen();
+
+        final int rowCount = _rowKeySet.size();
+        final Indexed<R>[] arrayOfPair = new Indexed[rowCount];
+        final Iterator<R> iter = _rowKeySet.iterator();
+
+        for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+            arrayOfPair[rowIndex] = Indexed.of(iter.next(), rowIndex);
+        }
+
+        final Comparator<Indexed<R>> pairCmp = createComparatorForIndexedObject(cmp);
+
+        N.sort(arrayOfPair, pairCmp);
+
+        final int columnCount = _columnKeySet.size();
+        final Set<Integer> ordered = N.newHashSet(rowCount);
+        final E[] tempRow = (E[]) new Object[columnCount];
+
+        for (int i = 0, index = 0; i < rowCount; i++) {
+            index = arrayOfPair[i].index();
+
+            if ((index != i) && !ordered.contains(i)) {
+                for (int j = 0; j < columnCount; j++) {
+                    tempRow[j] = _columnList.get(j).get(i);
+                }
+
+                int previous = i;
+                int next = index;
+
+                do {
+                    for (int j = 0; j < columnCount; j++) {
+                        _columnList.get(j).set(previous, _columnList.get(j).get(next));
+                    }
+
+                    ordered.add(next);
+
+                    previous = next;
+                    next = arrayOfPair[next].index();
+                } while (next != i);
+
+                for (int j = 0; j < columnCount; j++) {
+                    _columnList.get(j).set(previous, tempRow[j]);
+                }
+
+                ordered.add(i);
+            }
+        }
+
+        final boolean indexedMapIntialized = N.notNullOrEmpty(_rowKeyIndexMap);
+        _rowKeySet.clear();
+
+        for (int i = 0; i < rowCount; i++) {
+            _rowKeySet.add(arrayOfPair[i].value());
+
+            if (indexedMapIntialized) {
+                _rowKeyIndexMap.forcePut(arrayOfPair[i].value(), i);
+            }
+        }
+    }
+
+    public void sortByColumn() {
+        sortByColumn((Comparator<C>) Comparator.naturalOrder());
+    }
+
+    public void sortByColumn(final Comparator<? super C> cmp) {
+        checkFrozen();
+
+        final int columnCount = _columnKeySet.size();
+        final Indexed<C>[] arrayOfPair = new Indexed[columnCount];
+        final Iterator<C> iter = _columnKeySet.iterator();
+
+        for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+            arrayOfPair[columnIndex] = Indexed.of(iter.next(), columnIndex);
+        }
+
+        final Comparator<Indexed<C>> pairCmp = createComparatorForIndexedObject(cmp);
+
+        N.sort(arrayOfPair, pairCmp);
+
+        final Set<Integer> ordered = N.newHashSet(columnCount);
+        List<E> tempColumn = null;
+
+        for (int i = 0, index = 0; i < columnCount; i++) {
+            index = arrayOfPair[i].index();
+
+            if ((index != i) && !ordered.contains(i)) {
+                tempColumn = _columnList.get(i);
+
+                int previous = i;
+                int next = index;
+
+                do {
+                    _columnList.set(previous, _columnList.get(next));
+
+                    ordered.add(next);
+
+                    previous = next;
+                    next = arrayOfPair[next].index();
+                } while (next != i);
+
+                _columnList.set(previous, tempColumn);
+
+                ordered.add(i);
+            }
+        }
+
+        final boolean indexedMapIntialized = N.notNullOrEmpty(_columnKeyIndexMap);
+        _columnKeySet.clear();
+
+        for (int i = 0; i < columnCount; i++) {
+            _columnKeySet.add(arrayOfPair[i].value());
+
+            if (indexedMapIntialized) {
+                _columnKeyIndexMap.forcePut(arrayOfPair[i].value(), i);
+            }
+        }
+    }
+
+    @SuppressWarnings("rawtypes")
+    private <T> Comparator<Indexed<T>> createComparatorForIndexedObject(final Comparator<? super T> cmp) {
+        Comparator<Indexed<T>> pairCmp = null;
+
+        if (cmp != null) {
+            pairCmp = (a, b) -> cmp.compare(a.value(), b.value());
+        } else {
+            final Comparator<Indexed<Comparable>> tmp = (a, b) -> N.compare(a.value(), b.value());
+            pairCmp = (Comparator) tmp;
+        }
+
+        return pairCmp;
+    }
+
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Sheet<R, C, E> copy() {
         final Sheet<R, C, E> copy = new Sheet<>(this._rowKeySet, this._columnKeySet);
@@ -1513,9 +1651,9 @@ public final class Sheet<R, C, E> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Sheet<C, R, E> transpose() {
         final Sheet<C, R, E> copy = new Sheet<>(this._columnKeySet, this._rowKeySet);
@@ -1994,9 +2132,9 @@ public final class Sheet<R, C, E> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Stream<IntPair> pointsH() {
         return pointsH(0, rowLength());
@@ -2027,9 +2165,9 @@ public final class Sheet<R, C, E> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Stream<IntPair> pointsV() {
         return pointsV(0, columnLength());
@@ -2060,9 +2198,9 @@ public final class Sheet<R, C, E> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Stream<Stream<IntPair>> pointsR() {
         return pointsR(0, rowLength());
@@ -2084,9 +2222,9 @@ public final class Sheet<R, C, E> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public Stream<Stream<IntPair>> pointsC() {
         return pointsR(0, columnLength());
@@ -2961,9 +3099,9 @@ public final class Sheet<R, C, E> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public int hashCode() {
@@ -2995,9 +3133,9 @@ public final class Sheet<R, C, E> implements Cloneable {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String toString() {

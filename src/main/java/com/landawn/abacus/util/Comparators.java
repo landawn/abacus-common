@@ -223,7 +223,7 @@ public abstract class Comparators {
     /**
      * Same as {@code nullsFirst}.
      *
-     * @param <T> 
+     * @param <T>
      * @return {@link #nullsFirst()}
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -695,14 +695,34 @@ public abstract class Comparators {
         return (Comparator<T>) COMPARING_BY_MAP_SIZE;
     }
 
+    //    /**
+    //     *
+    //     *
+    //     * @return
+    //     */
+    //    public static Comparator<Object[]> comparingObjArray() {
+    //        return comparingObjArray(naturalOrder());
+    //    }
+
     /**
-     * 
      *
-     * @param <T> 
-     * @param cmp 
-     * @return 
+     *
+     * @param cmp
+     * @return
      */
-    public static <T> Comparator<T[]> comparingArray(final Comparator<T> cmp) {
+    @SuppressWarnings("rawtypes")
+    public static Comparator<Object[]> comparingObjArray(final Comparator<?> cmp) {
+        return comparingArray((Comparator) cmp);
+    }
+
+    /**
+     *
+     *
+     * @param <T>
+     * @param cmp
+     * @return
+     */
+    public static <T> Comparator<T[]> comparingArray(final Comparator<? super T> cmp) {
         N.checkArgNotNull(cmp);
 
         return (a, b) -> {
@@ -729,14 +749,14 @@ public abstract class Comparators {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <C> 
-     * @param cmp 
-     * @return 
+     *
+     * @param <T>
+     * @param <C>
+     * @param cmp
+     * @return
      */
-    public static <T, C extends Collection<T>> Comparator<C> comparingCollection(final Comparator<T> cmp) {
+    public static <T, C extends Collection<T>> Comparator<C> comparingCollection(final Comparator<? super T> cmp) {
         N.checkArgNotNull(cmp);
 
         return (a, b) -> {
@@ -766,14 +786,14 @@ public abstract class Comparators {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <C> 
-     * @param cmp 
-     * @return 
+     *
+     * @param <T>
+     * @param <C>
+     * @param cmp
+     * @return
      */
-    public static <T, C extends Iterator<T>> Comparator<C> comparingIterator(final Comparator<T> cmp) {
+    public static <T, C extends Iterator<T>> Comparator<C> comparingIterator(final Comparator<? super T> cmp) {
         N.checkArgNotNull(cmp);
 
         return (a, b) -> {

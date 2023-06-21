@@ -4,7 +4,7 @@
 
 	<groupId>com.landawn</groupId>
 	<artifactId>abacus-common</artifactId>
-	<version>3.6.22</version>
+	<version>3.6.23</version>
 	<packaging>jar</packaging>
 
 	<name>abacus-common</name>
@@ -28,7 +28,7 @@
 		<dependency>
 			<groupId>com.landawn</groupId>
 			<artifactId>abacus-common</artifactId>
-			<version>3.6.20</version>
+			<version>3.6.22</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -42,21 +42,21 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.18.20</version>
+			<version>1.18.28</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>31.1-jre</version>
+			<version>32.0.1-jre</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.11</version>
+			<version>3.12.0</version>
 			<scope>provided</scope>
 		</dependency>
 

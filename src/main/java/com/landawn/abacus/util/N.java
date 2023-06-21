@@ -28222,6 +28222,8 @@ public final class N extends CommonUtil {
      * @param converter
      * @return updated copy of {@code a}.
      * @throws E
+     * @see {@link #map(Object[], com.landawn.abacus.util.Throwables.Function)}
+     * @see {@link N#map(Iterable, com.landawn.abacus.util.Throwables.Function)}
      */
     public static <T, E extends Exception> T[] copyThenApply(final T[] a, final Throwables.Function<? super T, ? extends T, E> converter) throws E {
         checkArgNotNull(converter);

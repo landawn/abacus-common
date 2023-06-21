@@ -318,7 +318,6 @@ public class Result<T, E extends Throwable> implements Immutable {
      * @return
      */
     @SuppressFBWarnings
-    @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {

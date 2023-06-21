@@ -297,7 +297,7 @@ public final class Profiler {
         final ExecutorService asyncExecutor = Executors.newFixedThreadPool(threadNum);
         final AtomicInteger threadCounter = new AtomicInteger();
         // MXBean mxBean = new MXBean();
-        final List<LoopStatistics> loopStatisticsList = Collections.synchronizedList(new ArrayList<LoopStatistics>());
+        final List<LoopStatistics> loopStatisticsList = Collections.synchronizedList(new ArrayList<>());
         final PrintStream ps = System.out;
         final long startTimeInMillis = System.currentTimeMillis();
         final long startTimeInNano = System.nanoTime();

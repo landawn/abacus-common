@@ -46,6 +46,7 @@ import java.util.function.ToLongFunction;
 import java.util.stream.Collector;
 import java.util.stream.Collector.Characteristics;
 
+import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.exception.TooManyElementsException;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.BiMap;
@@ -849,12 +850,12 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <C> 
-     * @param collectionFactory 
-     * @return 
+     *
+     * @param <T>
+     * @param <C>
+     * @param collectionFactory
+     * @return
      */
     public static <T, C extends Collection<T>> Collector<T, ?, C> toCollection(Supplier<? extends C> collectionFactory) {
         final BiConsumer<C, T> accumulator = BiConsumers.ofAdd();
@@ -864,10 +865,10 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @return 
+     *
+     * @param <T>
+     * @return
      */
     public static <T> Collector<T, ?, List<T>> toList() {
         final Supplier<List<T>> supplier = Suppliers.<T> ofList();
@@ -876,10 +877,10 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @return 
+     *
+     * @param <T>
+     * @return
      */
     public static <T> Collector<T, ?, LinkedList<T>> toLinkedList() {
         final Supplier<LinkedList<T>> supplier = Suppliers.<T> ofLinkedList();
@@ -888,10 +889,10 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @return 
+     *
+     * @param <T>
+     * @return
      */
     public static <T> Collector<T, ?, ImmutableList<T>> toImmutableList() {
         final Collector<T, ?, List<T>> downstream = toList();
@@ -902,10 +903,10 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @return 
+     *
+     * @param <T>
+     * @return
      */
     public static <T> Collector<T, ?, Set<T>> toSet() {
         final Supplier<Set<T>> supplier = Suppliers.<T> ofSet();
@@ -914,10 +915,10 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @return 
+     *
+     * @param <T>
+     * @return
      */
     public static <T> Collector<T, ?, Set<T>> toLinkedHashSet() {
         final Supplier<Set<T>> supplier = Suppliers.<T> ofLinkedHashSet();
@@ -926,10 +927,10 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @return 
+     *
+     * @param <T>
+     * @return
      */
     public static <T> Collector<T, ?, ImmutableSet<T>> toImmutableSet() {
         final Collector<T, ?, Set<T>> downstream = toSet();
@@ -940,10 +941,10 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @return 
+     *
+     * @param <T>
+     * @return
      */
     public static <T> Collector<T, ?, Queue<T>> toQueue() {
         final Supplier<Queue<T>> supplier = Suppliers.<T> ofQueue();
@@ -952,10 +953,10 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @return 
+     *
+     * @param <T>
+     * @return
      */
     public static <T> Collector<T, ?, Deque<T>> toDeque() {
         final Supplier<Deque<T>> supplier = Suppliers.<T> ofDeque();
@@ -964,13 +965,13 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <C> 
-     * @param collectionFactory 
-     * @param atMostSize 
-     * @return 
+     *
+     * @param <T>
+     * @param <C>
+     * @param collectionFactory
+     * @param atMostSize
+     * @return
      */
     public static <T, C extends Collection<T>> Collector<T, ?, C> toCollection(final Supplier<? extends C> collectionFactory, final int atMostSize) {
         final BiConsumer<C, T> accumulator = (c, t) -> {
@@ -1005,11 +1006,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param atMostSize 
-     * @return 
+     *
+     * @param <T>
+     * @param atMostSize
+     * @return
      */
     public static <T> Collector<T, ?, List<T>> toList(final int atMostSize) {
         final Supplier<List<T>> supplier = () -> new ArrayList<>(N.min(256, atMostSize));
@@ -1018,11 +1019,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param atMostSize 
-     * @return 
+     *
+     * @param <T>
+     * @param atMostSize
+     * @return
      */
     public static <T> Collector<T, ?, Set<T>> toSet(final int atMostSize) {
         final Supplier<Set<T>> supplier = () -> N.newHashSet(atMostSize);
@@ -1031,10 +1032,10 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @return 
+     *
+     * @param <T>
+     * @return
      */
     public static <T> Collector<T, ?, Multiset<T>> toMultiset() {
         final Supplier<Multiset<T>> supplier = Suppliers.ofMultiset();
@@ -1043,11 +1044,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param supplier 
-     * @return 
+     *
+     * @param <T>
+     * @param supplier
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, Multiset<T>> toMultiset(Supplier<Multiset<T>> supplier) {
@@ -1058,10 +1059,10 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @return 
+     *
+     * @param <T>
+     * @return
      */
     public static <T> Collector<T, ?, LongMultiset<T>> toLongMultiset() {
         final Supplier<LongMultiset<T>> supplier = Suppliers.ofLongMultiset();
@@ -1070,11 +1071,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param supplier 
-     * @return 
+     *
+     * @param <T>
+     * @param supplier
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, LongMultiset<T>> toLongMultiset(Supplier<LongMultiset<T>> supplier) {
@@ -1085,22 +1086,22 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @return 
+     *
+     * @param <T>
+     * @return
      */
     public static <T> Collector<T, ?, Object[]> toArray() {
         return toArray(Suppliers.ofEmptyObjectArray());
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <A> 
-     * @param arraySupplier 
-     * @return 
+     *
+     * @param <T>
+     * @param <A>
+     * @param arraySupplier
+     * @return
      */
     public static <T, A> Collector<T, ?, A[]> toArray(final Supplier<A[]> arraySupplier) {
         final Supplier<List<A>> supplier = Suppliers.<A> ofList();
@@ -1121,12 +1122,12 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <A> 
-     * @param arraySupplier 
-     * @return 
+     *
+     * @param <T>
+     * @param <A>
+     * @param arraySupplier
+     * @return
      */
     public static <T, A> Collector<T, ?, A[]> toArray(final IntFunction<A[]> arraySupplier) {
         final Supplier<List<A>> supplier = Suppliers.<A> ofList();
@@ -1139,9 +1140,9 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static Collector<Boolean, ?, BooleanList> toBooleanList() {
         final Supplier<BooleanList> supplier = Suppliers.ofBooleanList();
@@ -1152,9 +1153,9 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static Collector<Boolean, ?, boolean[]> toBooleanArray() {
         final Supplier<BooleanList> supplier = Suppliers.ofBooleanList();
@@ -1166,9 +1167,9 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static Collector<Character, ?, CharList> toCharList() {
         final Supplier<CharList> supplier = Suppliers.ofCharList();
@@ -1179,9 +1180,9 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static Collector<Character, ?, char[]> toCharArray() {
         final Supplier<CharList> supplier = Suppliers.ofCharList();
@@ -1193,9 +1194,9 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static Collector<Byte, ?, ByteList> toByteList() {
         final Supplier<ByteList> supplier = Suppliers.ofByteList();
@@ -1206,9 +1207,9 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static Collector<Byte, ?, byte[]> toByteArray() {
         final Supplier<ByteList> supplier = Suppliers.ofByteList();
@@ -1220,9 +1221,9 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static Collector<Short, ?, ShortList> toShortList() {
         final Supplier<ShortList> supplier = Suppliers.ofShortList();
@@ -1233,9 +1234,9 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static Collector<Short, ?, short[]> toShortArray() {
         final Supplier<ShortList> supplier = Suppliers.ofShortList();
@@ -1247,9 +1248,9 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static Collector<Integer, ?, IntList> toIntList() {
         final Supplier<IntList> supplier = Suppliers.ofIntList();
@@ -1260,9 +1261,9 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static Collector<Integer, ?, int[]> toIntArray() {
         final Supplier<IntList> supplier = Suppliers.ofIntList();
@@ -1274,9 +1275,9 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static Collector<Long, ?, LongList> toLongList() {
         final Supplier<LongList> supplier = Suppliers.ofLongList();
@@ -1287,9 +1288,9 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static Collector<Long, ?, long[]> toLongArray() {
         final Supplier<LongList> supplier = Suppliers.ofLongList();
@@ -1301,9 +1302,9 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static Collector<Float, ?, FloatList> toFloatList() {
         final Supplier<FloatList> supplier = Suppliers.ofFloatList();
@@ -1314,9 +1315,9 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static Collector<Float, ?, float[]> toFloatArray() {
         final Supplier<FloatList> supplier = Suppliers.ofFloatList();
@@ -1328,9 +1329,9 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static Collector<Double, ?, DoubleList> toDoubleList() {
         final Supplier<DoubleList> supplier = Suppliers.ofDoubleList();
@@ -1341,9 +1342,9 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static Collector<Double, ?, double[]> toDoubleArray() {
         final Supplier<DoubleList> supplier = Suppliers.ofDoubleList();
@@ -1377,8 +1378,8 @@ public abstract class Collectors {
     /**
      * {@code TooManyElementsException} is threw if there are more than one values are collected.
      *
-     * @param <T> 
-     * @return 
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, Optional<T>> onlyOne() {
@@ -1393,9 +1394,9 @@ public abstract class Collectors {
     /**
      * {@code TooManyElementsException} is threw if there are more than one values are collected.
      *
-     * @param <T> 
-     * @param predicate 
-     * @return 
+     * @param <T>
+     * @param predicate
+     * @return
      */
     public static <T> Collector<T, ?, Optional<T>> onlyOne(final Predicate<? super T> predicate) {
         final Collector<T, ?, Optional<T>> downstream = onlyOne();
@@ -1426,8 +1427,8 @@ public abstract class Collectors {
     /**
      * Only works for sequential Stream.
      *
-     * @param <T> 
-     * @return 
+     * @param <T>
+     * @return
      * @throws UnsupportedOperationException operated by multiple threads
      */
     @SuppressWarnings("rawtypes")
@@ -1443,8 +1444,8 @@ public abstract class Collectors {
     /**
      * Only works for sequential Stream.
      *
-     * @param <T> 
-     * @return 
+     * @param <T>
+     * @return
      * @throws UnsupportedOperationException operated by multiple threads
      */
     @SuppressWarnings("rawtypes")
@@ -1460,9 +1461,9 @@ public abstract class Collectors {
     /**
      * Only works for sequential Stream.
      *
-     * @param <T> 
-     * @param n 
-     * @return 
+     * @param <T>
+     * @param n
+     * @return
      * @throws UnsupportedOperationException operated by multiple threads
      */
     public static <T> Collector<T, ?, List<T>> first(final int n) {
@@ -1490,9 +1491,9 @@ public abstract class Collectors {
     /**
      * Only works for sequential Stream.
      *
-     * @param <T> 
-     * @param n 
-     * @return 
+     * @param <T>
+     * @param n
+     * @return
      * @throws UnsupportedOperationException operated by multiple threads
      */
     public static <T> Collector<T, ?, List<T>> last(final int n) {
@@ -1528,31 +1529,31 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     public static Collector<CharSequence, ?, String> joining() {
         return joining("", "", "");
     }
 
     /**
-     * 
      *
-     * @param delimiter 
-     * @return 
+     *
+     * @param delimiter
+     * @return
      */
     public static Collector<CharSequence, ?, String> joining(CharSequence delimiter) {
         return joining(delimiter, "", "");
     }
 
     /**
-     * 
      *
-     * @param delimiter 
-     * @param prefix 
-     * @param suffix 
-     * @return 
+     *
+     * @param delimiter
+     * @param prefix
+     * @param suffix
+     * @return
      */
     public static Collector<CharSequence, ?, String> joining(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix) {
         final Supplier<Joiner> supplier = () -> Joiner.with(delimiter, prefix, suffix).reuseCachedBuffer();
@@ -1587,6 +1588,7 @@ public abstract class Collectors {
      * @see #filtering(Predicate, Collector)
      * @since 0.6.0
      */
+    @Beta
     public static <T> Collector<T, ?, List<T>> filtering(Predicate<? super T> predicate) {
         final Collector<? super T, ?, List<T>> downstream = Collectors.toList();
 
@@ -1641,27 +1643,28 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param <U>
+     * @param mapper
+     * @return
      */
+    @Beta
     public static <T, U> Collector<T, ?, List<U>> mapping(Function<? super T, ? extends U> mapper) {
         return Collectors.mapping(mapper, Collectors.<U> toList());
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param <A> 
-     * @param <R> 
-     * @param mapper 
-     * @param downstream 
-     * @return 
+     *
+     * @param <T>
+     * @param <U>
+     * @param <A>
+     * @param <R>
+     * @param mapper
+     * @param downstream
+     * @return
      */
     public static <T, U, A, R> Collector<T, ?, R> mapping(final Function<? super T, ? extends U> mapper, final Collector<? super U, A, R> downstream) {
         final BiConsumer<A, ? super U> downstreamAccumulator = downstream.accumulator();
@@ -1672,27 +1675,28 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param <U>
+     * @param mapper
+     * @return
      */
+    @Beta
     public static <T, U> Collector<T, ?, List<U>> flatMaping(final Function<? super T, ? extends java.util.stream.Stream<? extends U>> mapper) {
         return flatMaping(mapper, Collectors.<U> toList());
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param <A> 
-     * @param <R> 
-     * @param mapper 
-     * @param downstream 
-     * @return 
+     *
+     * @param <T>
+     * @param <U>
+     * @param <A>
+     * @param <R>
+     * @param mapper
+     * @param downstream
+     * @return
      */
     public static <T, U, A, R> Collector<T, ?, R> flatMaping(final Function<? super T, ? extends java.util.stream.Stream<? extends U>> mapper,
             final Collector<? super U, A, R> downstream) {
@@ -1712,27 +1716,28 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param <U>
+     * @param mapper
+     * @return
      */
+    @Beta
     public static <T, U> Collector<T, ?, List<U>> flattMaping(final Function<? super T, ? extends Stream<? extends U>> mapper) {
         return flattMaping(mapper, Collectors.<U> toList());
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param <A> 
-     * @param <R> 
-     * @param mapper 
-     * @param downstream 
-     * @return 
+     *
+     * @param <T>
+     * @param <U>
+     * @param <A>
+     * @param <R>
+     * @param mapper
+     * @param downstream
+     * @return
      */
     public static <T, U, A, R> Collector<T, ?, R> flattMaping(final Function<? super T, ? extends Stream<? extends U>> mapper,
             final Collector<? super U, A, R> downstream) {
@@ -1752,27 +1757,28 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param <U>
+     * @param mapper
+     * @return
      */
+    @Beta
     public static <T, U> Collector<T, ?, List<U>> flatmapping(final Function<? super T, ? extends Collection<? extends U>> mapper) {
         return flatmapping(mapper, Collectors.<U> toList());
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param <A> 
-     * @param <R> 
-     * @param mapper 
-     * @param downstream 
-     * @return 
+     *
+     * @param <T>
+     * @param <U>
+     * @param <A>
+     * @param <R>
+     * @param mapper
+     * @param downstream
+     * @return
      */
     public static <T, U, A, R> Collector<T, ?, R> flatmapping(final Function<? super T, ? extends Collection<? extends U>> mapper,
             final Collector<? super U, A, R> downstream) {
@@ -1792,33 +1798,35 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <T2> 
-     * @param <U> 
-     * @param flatMapper 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param <T2>
+     * @param <U>
+     * @param flatMapper
+     * @param mapper
+     * @return
      */
+    @Beta
     public static <T, T2, U> Collector<T, ?, List<U>> flatMaping(final Function<? super T, ? extends java.util.stream.Stream<? extends T2>> flatMapper,
             final BiFunction<? super T, ? super T2, ? extends U> mapper) {
         return flatMaping(flatMapper, mapper, Collectors.<U> toList());
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <T2> 
-     * @param <U> 
-     * @param <A> 
-     * @param <R> 
-     * @param flatMapper 
-     * @param mapper 
-     * @param downstream 
-     * @return 
+     *
+     * @param <T>
+     * @param <T2>
+     * @param <U>
+     * @param <A>
+     * @param <R>
+     * @param flatMapper
+     * @param mapper
+     * @param downstream
+     * @return
      */
+    @Beta
     public static <T, T2, U, A, R> Collector<T, ?, R> flatMaping(final Function<? super T, ? extends java.util.stream.Stream<? extends T2>> flatMapper,
             final BiFunction<? super T, ? super T2, ? extends U> mapper, final Collector<? super U, A, R> downstream) {
         final BiConsumer<A, ? super U> downstreamAccumulator = downstream.accumulator();
@@ -1837,33 +1845,35 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <T2> 
-     * @param <U> 
-     * @param flatMapper 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param <T2>
+     * @param <U>
+     * @param flatMapper
+     * @param mapper
+     * @return
      */
+    @Beta
     public static <T, T2, U> Collector<T, ?, List<U>> flattMaping(final Function<? super T, ? extends Stream<? extends T2>> flatMapper,
             final BiFunction<? super T, ? super T2, ? extends U> mapper) {
         return flattMaping(flatMapper, mapper, Collectors.<U> toList());
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <T2> 
-     * @param <U> 
-     * @param <A> 
-     * @param <R> 
-     * @param flatMapper 
-     * @param mapper 
-     * @param downstream 
-     * @return 
+     *
+     * @param <T>
+     * @param <T2>
+     * @param <U>
+     * @param <A>
+     * @param <R>
+     * @param flatMapper
+     * @param mapper
+     * @param downstream
+     * @return
      */
+    @Beta
     public static <T, T2, U, A, R> Collector<T, ?, R> flattMaping(final Function<? super T, ? extends Stream<? extends T2>> flatMapper,
             final BiFunction<? super T, ? super T2, ? extends U> mapper, final Collector<? super U, A, R> downstream) {
         final BiConsumer<A, ? super U> downstreamAccumulator = downstream.accumulator();
@@ -1882,33 +1892,35 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <T2> 
-     * @param <U> 
-     * @param flatMapper 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param <T2>
+     * @param <U>
+     * @param flatMapper
+     * @param mapper
+     * @return
      */
+    @Beta
     public static <T, T2, U> Collector<T, ?, List<U>> flatmapping(final Function<? super T, ? extends Collection<? extends T2>> flatMapper,
             final BiFunction<? super T, ? super T2, ? extends U> mapper) {
         return flatmapping(flatMapper, mapper, Collectors.<U> toList());
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <T2> 
-     * @param <U> 
-     * @param <A> 
-     * @param <R> 
-     * @param flatMapper 
-     * @param mapper 
-     * @param downstream 
-     * @return 
+     *
+     * @param <T>
+     * @param <T2>
+     * @param <U>
+     * @param <A>
+     * @param <R>
+     * @param flatMapper
+     * @param mapper
+     * @param downstream
+     * @return
      */
+    @Beta
     public static <T, T2, U, A, R> Collector<T, ?, R> flatmapping(final Function<? super T, ? extends Collection<? extends T2>> flatMapper,
             final BiFunction<? super T, ? super T2, ? extends U> mapper, final Collector<? super U, A, R> downstream) {
         final BiConsumer<A, ? super U> downstreamAccumulator = downstream.accumulator();
@@ -1927,15 +1939,15 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <A> 
-     * @param <R> 
-     * @param <RR> 
-     * @param downstream 
-     * @param finisher 
-     * @return 
+     *
+     * @param <T>
+     * @param <A>
+     * @param <R>
+     * @param <RR>
+     * @param downstream
+     * @param finisher
+     * @return
      */
     public static <T, A, R, RR> Collector<T, A, RR> collectingAndThen(final Collector<T, A, R> downstream, final Function<R, RR> finisher) {
         N.checkArgNotNull(finisher);
@@ -1989,13 +2001,13 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <C> 
-     * @param keyExtractor 
-     * @param suppplier 
-     * @return 
+     *
+     * @param <T>
+     * @param <C>
+     * @param keyExtractor
+     * @param suppplier
+     * @return
      */
     public static <T, C extends Collection<T>> Collector<T, ?, C> distinctBy(final Function<? super T, ?> keyExtractor, final Supplier<? extends C> suppplier) {
         final Supplier<Map<Object, T>> supplier = Suppliers.<Object, T> ofLinkedHashMap();
@@ -2057,10 +2069,10 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @return 
+     *
+     * @param <T>
+     * @return
      */
     public static <T> Collector<T, ?, Long> counting() {
         final Function<? super T, Long> accumulator = Counting_Accumulator;
@@ -2070,10 +2082,10 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @return 
+     *
+     * @param <T>
+     * @return
      */
     public static <T> Collector<T, ?, Integer> countingInt() {
         final Function<? super T, Integer> accumulator = CountingInt_Accumulator;
@@ -2083,21 +2095,21 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @return 
+     *
+     * @param <T>
+     * @return
      */
     public static <T extends Comparable<? super T>> Collector<T, ?, Optional<T>> min() {
         return min(Fn.nullsLast());
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param comparator 
-     * @return 
+     *
+     * @param <T>
+     * @param comparator
+     * @return
      */
     public static <T> Collector<T, ?, Optional<T>> min(final Comparator<? super T> comparator) {
         N.checkArgNotNull(comparator);
@@ -2108,23 +2120,23 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param other 
-     * @return 
+     *
+     * @param <T>
+     * @param other
+     * @return
      */
     public static <T extends Comparable<? super T>> Collector<T, ?, T> minOrGet(final Supplier<? extends T> other) {
         return minOrGet(Fn.nullsLast(), other);
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param comparator 
-     * @param other 
-     * @return 
+     *
+     * @param <T>
+     * @param comparator
+     * @param other
+     * @return
      */
     public static <T> Collector<T, ?, T> minOrGet(final Comparator<? super T> comparator, final Supplier<? extends T> other) {
         N.checkArgNotNull(comparator);
@@ -2135,33 +2147,33 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @return 
+     *
+     * @param <T>
+     * @return
      */
     public static <T extends Comparable<? super T>> Collector<T, ?, T> minOrThrow() {
         return minOrThrow(Fn.nullsLast());
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param comparator 
-     * @return 
+     *
+     * @param <T>
+     * @param comparator
+     * @return
      */
     public static <T> Collector<T, ?, T> minOrThrow(final Comparator<? super T> comparator) {
         return minOrThrow(comparator, noSuchElementExceptionSupplier);
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param comparator 
-     * @param exceptionSupplier 
-     * @return 
+     *
+     * @param <T>
+     * @param comparator
+     * @param exceptionSupplier
+     * @return
      */
     public static <T> Collector<T, ?, T> minOrThrow(final Comparator<? super T> comparator, final Supplier<? extends RuntimeException> exceptionSupplier) {
         N.checkArgNotNull(comparator);
@@ -2174,11 +2186,11 @@ public abstract class Collectors {
     private static final Supplier<NoSuchElementException> noSuchElementExceptionSupplier = NoSuchElementException::new;
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param keyMapper 
-     * @return 
+     *
+     * @param <T>
+     * @param keyMapper
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, Optional<T>> minBy(final Function<? super T, ? extends Comparable> keyMapper) {
@@ -2186,12 +2198,12 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param keyMapper 
-     * @param other 
-     * @return 
+     *
+     * @param <T>
+     * @param keyMapper
+     * @param other
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, T> minByOrGet(final Function<? super T, ? extends Comparable> keyMapper, final Supplier<? extends T> other) {
@@ -2199,11 +2211,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param keyMapper 
-     * @return 
+     *
+     * @param <T>
+     * @param keyMapper
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, T> minByOrThrow(final Function<? super T, ? extends Comparable> keyMapper) {
@@ -2211,12 +2223,12 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param keyMapper 
-     * @param exceptionSupplier 
-     * @return 
+     *
+     * @param <T>
+     * @param keyMapper
+     * @param exceptionSupplier
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, T> minByOrThrow(final Function<? super T, ? extends Comparable> keyMapper,
@@ -2225,21 +2237,21 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @return 
+     *
+     * @param <T>
+     * @return
      */
     public static <T extends Comparable<? super T>> Collector<T, ?, Optional<T>> max() {
         return max(Fn.nullsFirst());
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param comparator 
-     * @return 
+     *
+     * @param <T>
+     * @param comparator
+     * @return
      */
     public static <T> Collector<T, ?, Optional<T>> max(final Comparator<? super T> comparator) {
         N.checkArgNotNull(comparator);
@@ -2250,23 +2262,23 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param other 
-     * @return 
+     *
+     * @param <T>
+     * @param other
+     * @return
      */
     public static <T extends Comparable<? super T>> Collector<T, ?, T> maxOrGet(final Supplier<? extends T> other) {
         return maxOrGet(Fn.nullsFirst(), other);
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param comparator 
-     * @param other 
-     * @return 
+     *
+     * @param <T>
+     * @param comparator
+     * @param other
+     * @return
      */
     public static <T> Collector<T, ?, T> maxOrGet(final Comparator<? super T> comparator, final Supplier<? extends T> other) {
         N.checkArgNotNull(comparator);
@@ -2277,33 +2289,33 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @return 
+     *
+     * @param <T>
+     * @return
      */
     public static <T extends Comparable<? super T>> Collector<T, ?, T> maxOrThrow() {
         return maxOrThrow(Fn.nullsFirst());
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param comparator 
-     * @return 
+     *
+     * @param <T>
+     * @param comparator
+     * @return
      */
     public static <T> Collector<T, ?, T> maxOrThrow(final Comparator<? super T> comparator) {
         return maxOrThrow(comparator, noSuchElementExceptionSupplier);
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param comparator 
-     * @param exceptionSupplier 
-     * @return 
+     *
+     * @param <T>
+     * @param comparator
+     * @param exceptionSupplier
+     * @return
      */
     public static <T> Collector<T, ?, T> maxOrThrow(final Comparator<? super T> comparator, final Supplier<? extends RuntimeException> exceptionSupplier) {
         N.checkArgNotNull(comparator);
@@ -2314,11 +2326,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param keyMapper 
-     * @return 
+     *
+     * @param <T>
+     * @param keyMapper
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, Optional<T>> maxBy(final Function<? super T, ? extends Comparable> keyMapper) {
@@ -2326,12 +2338,12 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param keyMapper 
-     * @param other 
-     * @return 
+     *
+     * @param <T>
+     * @param keyMapper
+     * @param other
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, T> maxByOrGet(final Function<? super T, ? extends Comparable> keyMapper, final Supplier<? extends T> other) {
@@ -2339,11 +2351,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param keyMapper 
-     * @return 
+     *
+     * @param <T>
+     * @param keyMapper
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, T> maxByOrThrow(final Function<? super T, ? extends Comparable> keyMapper) {
@@ -2351,12 +2363,12 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param keyMapper 
-     * @param exceptionSupplier 
-     * @return 
+     *
+     * @param <T>
+     * @param keyMapper
+     * @param exceptionSupplier
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, T> maxByOrThrow(final Function<? super T, ? extends Comparable> keyMapper,
@@ -2403,12 +2415,12 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param comparator 
-     * @param atMostSize 
-     * @return 
+     *
+     * @param <T>
+     * @param comparator
+     * @param atMostSize
+     * @return
      */
     public static <T> Collector<T, ?, List<T>> minAll(Comparator<? super T> comparator, int atMostSize) {
         return maxAll(Fn.reversedOrder(comparator), atMostSize);
@@ -2463,13 +2475,13 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <A> 
-     * @param <D> 
-     * @param downstream 
-     * @return 
+     *
+     * @param <T>
+     * @param <A>
+     * @param <D>
+     * @param downstream
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable, A, D> Collector<T, ?, Optional<Pair<T, D>>> minAlll(Collector<T, A, D> downstream) {
@@ -2477,30 +2489,30 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <A> 
-     * @param <D> 
-     * @param comparator 
-     * @param downstream 
-     * @return 
+     *
+     * @param <T>
+     * @param <A>
+     * @param <D>
+     * @param comparator
+     * @param downstream
+     * @return
      */
     public static <T, A, D> Collector<T, ?, Optional<Pair<T, D>>> minAlll(final Comparator<? super T> comparator, final Collector<? super T, A, D> downstream) {
         return minAlll(comparator, downstream, Fn.<Optional<Pair<T, D>>> identity());
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <A> 
-     * @param <D> 
-     * @param <R> 
-     * @param comparator 
-     * @param downstream 
-     * @param finisher 
-     * @return 
+     *
+     * @param <T>
+     * @param <A>
+     * @param <D>
+     * @param <R>
+     * @param comparator
+     * @param downstream
+     * @param finisher
+     * @return
      */
     public static <T, A, D, R> Collector<T, ?, R> minAlll(final Comparator<? super T> comparator, final Collector<? super T, A, D> downstream,
             final Function<Optional<Pair<T, D>>, R> finisher) {
@@ -2546,12 +2558,12 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param comparator 
-     * @param atMostSize 
-     * @return 
+     *
+     * @param <T>
+     * @param comparator
+     * @param atMostSize
+     * @return
      */
     public static <T> Collector<T, ?, List<T>> maxAll(final Comparator<? super T> comparator, final int atMostSize) {
         final Supplier<Pair<T, List<T>>> supplier = () -> {
@@ -2745,13 +2757,13 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <A> 
-     * @param <D> 
-     * @param downstream 
-     * @return 
+     *
+     * @param <T>
+     * @param <A>
+     * @param <D>
+     * @param downstream
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable, A, D> Collector<T, ?, Optional<Pair<T, D>>> maxAlll(Collector<T, A, D> downstream) {
@@ -2759,30 +2771,30 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <A> 
-     * @param <D> 
-     * @param comparator 
-     * @param downstream 
-     * @return 
+     *
+     * @param <T>
+     * @param <A>
+     * @param <D>
+     * @param comparator
+     * @param downstream
+     * @return
      */
     public static <T, A, D> Collector<T, ?, Optional<Pair<T, D>>> maxAlll(final Comparator<? super T> comparator, final Collector<? super T, A, D> downstream) {
         return maxAlll(comparator, downstream, Fn.<Optional<Pair<T, D>>> identity());
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <A> 
-     * @param <D> 
-     * @param <R> 
-     * @param comparator 
-     * @param downstream 
-     * @param finisher 
-     * @return 
+     *
+     * @param <T>
+     * @param <A>
+     * @param <D>
+     * @param <R>
+     * @param comparator
+     * @param downstream
+     * @param finisher
+     * @return
      */
     public static <T, A, D, R> Collector<T, ?, R> maxAlll(final Comparator<? super T> comparator, final Collector<? super T, A, D> downstream,
             final Function<Optional<Pair<T, D>>, R> finisher) {
@@ -2878,10 +2890,10 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @return 
+     *
+     * @param <T>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> Collector<T, ?, Optional<Pair<T, T>>> minMax() {
@@ -2889,11 +2901,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param comparator 
-     * @return 
+     *
+     * @param <T>
+     * @param comparator
+     * @return
      * @see Collectors#minMax(Comparator, BiFunction)
      */
     public static <T> Collector<T, ?, Optional<Pair<T, T>>> minMax(final Comparator<? super T> comparator) {
@@ -2936,11 +2948,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param keyMapper 
-     * @return 
+     *
+     * @param <T>
+     * @param keyMapper
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, Optional<Pair<T, T>>> minMaxBy(final Function<? super T, ? extends Comparable> keyMapper) {
@@ -2948,13 +2960,13 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <R> 
-     * @param keyMapper 
-     * @param finisher 
-     * @return 
+     *
+     * @param <T>
+     * @param <R>
+     * @param keyMapper
+     * @param finisher
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T, R> Collector<T, ?, Optional<R>> minMaxBy(final Function<? super T, ? extends Comparable> keyMapper,
@@ -2963,21 +2975,21 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @return 
+     *
+     * @param <T>
+     * @return
      */
     public static <T extends Comparable<? super T>> Collector<T, ?, Pair<T, T>> minMaxOrThrow() {
         return minMaxOrThrow(Fn.naturalOrder());
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param comparator 
-     * @return 
+     *
+     * @param <T>
+     * @param comparator
+     * @return
      */
     public static <T> Collector<T, ?, Pair<T, T>> minMaxOrThrow(final Comparator<? super T> comparator) {
         return MoreCollectors.combine(Collectors.minOrThrow(comparator), Collectors.maxOrThrow(comparator), Fn.<T, T> pair());
@@ -2989,11 +3001,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param mapper
+     * @return
      */
     public static <T> Collector<T, ?, Long> summingInt(final ToIntFunction<? super T> mapper) {
         final BiConsumer<long[], T> accumulator = (a, t) -> a[0] += mapper.applyAsInt(t);
@@ -3002,11 +3014,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param mapper
+     * @return
      */
     public static <T> Collector<T, ?, Long> summingLong(final ToLongFunction<? super T> mapper) {
         final BiConsumer<long[], T> accumulator = (a, t) -> a[0] += mapper.applyAsLong(t);
@@ -3015,11 +3027,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param mapper
+     * @return
      */
     public static <T> Collector<T, ?, Double> summingDouble(final ToDoubleFunction<? super T> mapper) {
         final BiConsumer<KahanSummation, T> accumulator = (a, t) -> a.add(mapper.applyAsDouble(t));
@@ -3028,11 +3040,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param mapper
+     * @return
      */
     public static <T> Collector<T, ?, BigInteger> summingBigInteger(final Function<? super T, BigInteger> mapper) {
         final BiConsumer<BigInteger[], T> accumulator = (a, t) -> a[0] = a[0].add(mapper.apply(t));
@@ -3041,11 +3053,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param mapper
+     * @return
      */
     public static <T> Collector<T, ?, BigDecimal> summingBigDecimal(final Function<? super T, BigDecimal> mapper) {
         final BiConsumer<BigDecimal[], T> accumulator = (a, t) -> a[0] = a[0].add(mapper.apply(t));
@@ -3054,11 +3066,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param mapper
+     * @return
      */
     public static <T> Collector<T, ?, OptionalDouble> averagingInt(final ToIntFunction<? super T> mapper) {
         final BiConsumer<long[], T> accumulator = (a, t) -> {
@@ -3070,11 +3082,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param mapper
+     * @return
      */
     public static <T> Collector<T, ?, Double> averagingIntOrThrow(final ToIntFunction<? super T> mapper) {
         final BiConsumer<long[], T> accumulator = (a, t) -> {
@@ -3086,11 +3098,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param mapper
+     * @return
      */
     public static <T> Collector<T, ?, OptionalDouble> averagingLong(final ToLongFunction<? super T> mapper) {
         final BiConsumer<long[], T> accumulator = (a, t) -> {
@@ -3102,11 +3114,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param mapper
+     * @return
      */
     public static <T> Collector<T, ?, Double> averagingLongOrThrow(final ToLongFunction<? super T> mapper) {
         final BiConsumer<long[], T> accumulator = (a, t) -> {
@@ -3118,11 +3130,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param mapper
+     * @return
      */
     public static <T> Collector<T, ?, OptionalDouble> averagingDouble(final ToDoubleFunction<? super T> mapper) {
         final BiConsumer<KahanSummation, T> accumulator = (a, t) -> a.add(mapper.applyAsDouble(t));
@@ -3131,11 +3143,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param mapper
+     * @return
      */
     public static <T> Collector<T, ?, Double> averagingDoubleOrThrow(final ToDoubleFunction<? super T> mapper) {
         final BiConsumer<KahanSummation, T> accumulator = (a, t) -> a.add(mapper.applyAsDouble(t));
@@ -3144,11 +3156,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param mapper
+     * @return
      */
     public static <T> Collector<T, ?, Optional<BigDecimal>> averagingBigInteger(final Function<? super T, BigInteger> mapper) {
         final BiConsumer<Pair<BigInteger, long[]>, T> accumulator = (a, t) -> {
@@ -3160,11 +3172,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param mapper
+     * @return
      */
     public static <T> Collector<T, ?, BigDecimal> averagingBigIntegerOrThrow(final Function<? super T, BigInteger> mapper) {
         final BiConsumer<Pair<BigInteger, long[]>, T> accumulator = (a, t) -> {
@@ -3176,11 +3188,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param mapper
+     * @return
      */
     public static <T> Collector<T, ?, Optional<BigDecimal>> averagingBigDecimal(final Function<? super T, BigDecimal> mapper) {
         final BiConsumer<Pair<BigDecimal, long[]>, T> accumulator = (a, t) -> {
@@ -3192,11 +3204,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param mapper
+     * @return
      */
     public static <T> Collector<T, ?, BigDecimal> averagingBigDecimalOrThrow(final Function<? super T, BigDecimal> mapper) {
         final BiConsumer<Pair<BigDecimal, long[]>, T> accumulator = (a, t) -> {
@@ -3208,11 +3220,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param mapper
+     * @return
      */
     public static <T> Collector<T, ?, CharSummaryStatistics> summarizingChar(final ToCharFunction<? super T> mapper) {
         final Supplier<CharSummaryStatistics> supplier = SummarizingChar_Supplier;
@@ -3225,11 +3237,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param mapper
+     * @return
      */
     public static <T> Collector<T, ?, ByteSummaryStatistics> summarizingByte(final ToByteFunction<? super T> mapper) {
         final Supplier<ByteSummaryStatistics> supplier = SummarizingByte_Supplier;
@@ -3242,11 +3254,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param mapper
+     * @return
      */
     public static <T> Collector<T, ?, ShortSummaryStatistics> summarizingShort(final ToShortFunction<? super T> mapper) {
         final Supplier<ShortSummaryStatistics> supplier = SummarizingShort_Supplier;
@@ -3259,11 +3271,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param mapper
+     * @return
      */
     public static <T> Collector<T, ?, IntSummaryStatistics> summarizingInt(final ToIntFunction<? super T> mapper) {
         final Supplier<IntSummaryStatistics> supplier = SummarizingInt_Supplier;
@@ -3276,11 +3288,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param mapper
+     * @return
      */
     public static <T> Collector<T, ?, LongSummaryStatistics> summarizingLong(final ToLongFunction<? super T> mapper) {
         final Supplier<LongSummaryStatistics> supplier = SummarizingLong_Supplier;
@@ -3293,11 +3305,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param mapper
+     * @return
      */
     public static <T> Collector<T, ?, FloatSummaryStatistics> summarizingFloat(final ToFloatFunction<? super T> mapper) {
         final Supplier<FloatSummaryStatistics> supplier = SummarizingFloat_Supplier;
@@ -3310,11 +3322,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param mapper
+     * @return
      */
     public static <T> Collector<T, ?, DoubleSummaryStatistics> summarizingDouble(final ToDoubleFunction<? super T> mapper) {
         final Supplier<DoubleSummaryStatistics> supplier = SummarizingDouble_Supplier;
@@ -3327,11 +3339,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param mapper
+     * @return
      */
     public static <T> Collector<T, ?, BigIntegerSummaryStatistics> summarizingBigInteger(final Function<? super T, BigInteger> mapper) {
         final Supplier<BigIntegerSummaryStatistics> supplier = SummarizingBigInteger_Supplier;
@@ -3344,11 +3356,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param mapper 
-     * @return 
+     *
+     * @param <T>
+     * @param mapper
+     * @return
      */
     public static <T> Collector<T, ?, BigDecimalSummaryStatistics> summarizingBigDecimal(final Function<? super T, BigDecimal> mapper) {
         final Supplier<BigDecimalSummaryStatistics> supplier = SummarizingBigDecimal_Supplier;
@@ -3361,12 +3373,12 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param identity 
-     * @param op 
-     * @return 
+     *
+     * @param <T>
+     * @param identity
+     * @param op
+     * @return
      */
     public static <T> Collector<T, ?, T> reducing(final T identity, final BinaryOperator<T> op) {
         final BiConsumer<Holder<T>, T> accumulator = (a, t) -> a.setValue(op.apply(a.value(), t));
@@ -3383,11 +3395,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param op 
-     * @return 
+     *
+     * @param <T>
+     * @param op
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, Optional<T>> reducing(final BinaryOperator<T> op) {
@@ -3401,12 +3413,12 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param op 
-     * @param other 
-     * @return 
+     *
+     * @param <T>
+     * @param op
+     * @param other
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, T> reducingOrGet(final BinaryOperator<T> op, final Supplier<? extends T> other) {
@@ -3421,12 +3433,12 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param op 
-     * @param exceptionSupplier 
-     * @return 
+     *
+     * @param <T>
+     * @param op
+     * @param exceptionSupplier
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, T> reducingOrThrow(final BinaryOperator<T> op, final Supplier<? extends RuntimeException> exceptionSupplier) {
@@ -3447,25 +3459,25 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param op 
-     * @return 
+     *
+     * @param <T>
+     * @param op
+     * @return
      */
     public static <T> Collector<T, ?, T> reducingOrThrow(final BinaryOperator<T> op) {
         return reducingOrThrow(op, noSuchElementExceptionSupplier);
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param identity 
-     * @param mapper 
-     * @param op 
-     * @return 
+     *
+     * @param <T>
+     * @param <U>
+     * @param identity
+     * @param mapper
+     * @param op
+     * @return
      */
     public static <T, U> Collector<T, ?, U> reducing(final U identity, final Function<? super T, ? extends U> mapper, final BinaryOperator<U> op) {
         final BiConsumer<Holder<U>, T> accumulator = (a, t) -> a.setValue(op.apply(a.value(), mapper.apply(t)));
@@ -3483,13 +3495,13 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param mapper 
-     * @param op 
-     * @return 
+     *
+     * @param <T>
+     * @param <U>
+     * @param mapper
+     * @param op
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T, U> Collector<T, ?, Optional<U>> reducing(final Function<? super T, ? extends U> mapper, final BinaryOperator<U> op) {
@@ -3550,14 +3562,14 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param mapper 
-     * @param op 
-     * @param other 
-     * @return 
+     *
+     * @param <T>
+     * @param <U>
+     * @param mapper
+     * @param op
+     * @param other
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T, U> Collector<T, ?, U> reducingOrGet(final Function<? super T, ? extends U> mapper, final BinaryOperator<U> op,
@@ -3572,14 +3584,14 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param mapper 
-     * @param op 
-     * @param exceptionSupplier 
-     * @return 
+     *
+     * @param <T>
+     * @param <U>
+     * @param mapper
+     * @param op
+     * @param exceptionSupplier
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <T, U> Collector<T, ?, U> reducingOrThrow(final Function<? super T, ? extends U> mapper, final BinaryOperator<U> op,
@@ -3600,13 +3612,13 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <U> 
-     * @param mapper 
-     * @param op 
-     * @return 
+     *
+     * @param <T>
+     * @param <U>
+     * @param mapper
+     * @param op
+     * @return
      */
     public static <T, U> Collector<T, ?, U> reducingOrThrow(final Function<? super T, ? extends U> mapper, final BinaryOperator<U> op) {
         return reducingOrThrow(mapper, op, noSuchElementExceptionSupplier);
@@ -3757,12 +3769,12 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param keyMapper 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param keyMapper
+     * @return
      */
     public static <T, K> Collector<T, ?, Map<K, List<T>>> groupingBy(Function<? super T, ? extends K> keyMapper) {
         final Collector<? super T, ?, List<T>> downstream = toList();
@@ -3771,14 +3783,14 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <M> 
-     * @param keyMapper 
-     * @param mapFactory 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <M>
+     * @param keyMapper
+     * @param mapFactory
+     * @return
      */
     public static <T, K, M extends Map<K, List<T>>> Collector<T, ?, M> groupingBy(final Function<? super T, ? extends K> keyMapper,
             final Supplier<? extends M> mapFactory) {
@@ -3788,15 +3800,15 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <A> 
-     * @param <D> 
-     * @param keyMapper 
-     * @param downstream 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <A>
+     * @param <D>
+     * @param keyMapper
+     * @param downstream
+     * @return
      */
     public static <T, K, A, D> Collector<T, ?, Map<K, D>> groupingBy(final Function<? super T, ? extends K> keyMapper,
             final Collector<? super T, A, D> downstream) {
@@ -3806,17 +3818,17 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <A> 
-     * @param <D> 
-     * @param <M> 
-     * @param keyMapper 
-     * @param downstream 
-     * @param mapFactory 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <A>
+     * @param <D>
+     * @param <M>
+     * @param keyMapper
+     * @param downstream
+     * @param mapFactory
+     * @return
      */
     public static <T, K, A, D, M extends Map<K, D>> Collector<T, ?, M> groupingBy(final Function<? super T, ? extends K> keyMapper,
             final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) {
@@ -3849,12 +3861,12 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param keyMapper 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param keyMapper
+     * @return
      */
     public static <T, K> Collector<T, ?, ConcurrentMap<K, List<T>>> groupingByConcurrent(Function<? super T, ? extends K> keyMapper) {
         final Collector<? super T, ?, List<T>> downstream = toList();
@@ -3863,14 +3875,14 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <M> 
-     * @param keyMapper 
-     * @param mapFactory 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <M>
+     * @param keyMapper
+     * @param mapFactory
+     * @return
      */
     public static <T, K, M extends ConcurrentMap<K, List<T>>> Collector<T, ?, M> groupingByConcurrent(final Function<? super T, ? extends K> keyMapper,
             final Supplier<? extends M> mapFactory) {
@@ -3880,15 +3892,15 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <A> 
-     * @param <D> 
-     * @param keyMapper 
-     * @param downstream 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <A>
+     * @param <D>
+     * @param keyMapper
+     * @param downstream
+     * @return
      */
     public static <T, K, A, D> Collector<T, ?, ConcurrentMap<K, D>> groupingByConcurrent(Function<? super T, ? extends K> keyMapper,
             Collector<? super T, A, D> downstream) {
@@ -3898,17 +3910,17 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <A> 
-     * @param <D> 
-     * @param <M> 
-     * @param keyMapper 
-     * @param downstream 
-     * @param mapFactory 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <A>
+     * @param <D>
+     * @param <M>
+     * @param keyMapper
+     * @param downstream
+     * @param mapFactory
+     * @return
      */
     public static <T, K, A, D, M extends ConcurrentMap<K, D>> Collector<T, ?, M> groupingByConcurrent(final Function<? super T, ? extends K> keyMapper,
             Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) {
@@ -3945,11 +3957,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param predicate 
-     * @return 
+     *
+     * @param <T>
+     * @param predicate
+     * @return
      */
     public static <T> Collector<T, ?, Map<Boolean, List<T>>> partitioningBy(Predicate<? super T> predicate) {
         final Collector<? super T, ?, List<T>> downstream = toList();
@@ -3958,14 +3970,14 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <D> 
-     * @param <A> 
-     * @param predicate 
-     * @param downstream 
-     * @return 
+     *
+     * @param <T>
+     * @param <D>
+     * @param <A>
+     * @param predicate
+     * @param downstream
+     * @return
      */
     public static <T, D, A> Collector<T, ?, Map<Boolean, D>> partitioningBy(final Predicate<? super T> predicate, final Collector<? super T, A, D> downstream) {
         final Supplier<Map<Boolean, A>> supplier = () -> {
@@ -4000,26 +4012,26 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param keyMapper 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param keyMapper
+     * @return
      */
     public static <T, K> Collector<T, ?, Map<K, Long>> countingBy(Function<? super T, ? extends K> keyMapper) {
         return countingBy(keyMapper, Suppliers.<K, Long> ofMap());
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <M> 
-     * @param keyMapper 
-     * @param mapFactory 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <M>
+     * @param keyMapper
+     * @param mapFactory
+     * @return
      */
     public static <T, K, M extends Map<K, Long>> Collector<T, ?, M> countingBy(final Function<? super T, ? extends K> keyMapper,
             final Supplier<? extends M> mapFactory) {
@@ -4029,26 +4041,26 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param keyMapper 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param keyMapper
+     * @return
      */
     public static <T, K> Collector<T, ?, Map<K, Integer>> countingIntBy(Function<? super T, ? extends K> keyMapper) {
         return countingIntBy(keyMapper, Suppliers.<K, Integer> ofMap());
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <M> 
-     * @param keyMapper 
-     * @param mapFactory 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <M>
+     * @param keyMapper
+     * @param mapFactory
+     * @return
      */
     public static <T, K, M extends Map<K, Integer>> Collector<T, ?, M> countingIntBy(final Function<? super T, ? extends K> keyMapper,
             final Supplier<? extends M> mapFactory) {
@@ -4058,11 +4070,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @return 
+     *
+     * @param <K>
+     * @param <V>
+     * @return
      */
     public static <K, V> Collector<Map.Entry<K, V>, ?, Map<K, V>> toMap() {
         final Function<Map.Entry<K, V>, ? extends K> keyMapper = Fn.<K, V> key();
@@ -4072,12 +4084,12 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param mergeFunction 
-     * @return 
+     *
+     * @param <K>
+     * @param <V>
+     * @param mergeFunction
+     * @return
      */
     public static <K, V> Collector<Map.Entry<K, V>, ?, Map<K, V>> toMap(final BinaryOperator<V> mergeFunction) {
         final Function<Map.Entry<K, V>, ? extends K> keyMapper = Fn.<K, V> key();
@@ -4087,13 +4099,13 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param <M> 
-     * @param mapFactory 
-     * @return 
+     *
+     * @param <K>
+     * @param <V>
+     * @param <M>
+     * @param mapFactory
+     * @return
      */
     public static <K, V, M extends Map<K, V>> Collector<Map.Entry<K, V>, ?, M> toMap(final Supplier<? extends M> mapFactory) {
         final Function<Map.Entry<K, V>, ? extends K> keyMapper = Fn.<K, V> key();
@@ -4103,14 +4115,14 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param <M> 
-     * @param mergeFunction 
-     * @param mapFactory 
-     * @return 
+     *
+     * @param <K>
+     * @param <V>
+     * @param <M>
+     * @param mergeFunction
+     * @param mapFactory
+     * @return
      */
     public static <K, V, M extends Map<K, V>> Collector<Map.Entry<K, V>, ?, M> toMap(final BinaryOperator<V> mergeFunction,
             final Supplier<? extends M> mapFactory) {
@@ -4121,14 +4133,14 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param keyMapper 
-     * @param valueMapper 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param keyMapper
+     * @param valueMapper
+     * @return
      */
     public static <T, K, V> Collector<T, ?, Map<K, V>> toMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
         final BinaryOperator<V> mergeFunction = Fn.throwingMerger();
@@ -4137,15 +4149,15 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param keyMapper 
-     * @param valueMapper 
-     * @param mergeFunction 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mergeFunction
+     * @return
      */
     public static <T, K, V> Collector<T, ?, Map<K, V>> toMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper,
             BinaryOperator<V> mergeFunction) {
@@ -4155,16 +4167,16 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param <M> 
-     * @param keyMapper 
-     * @param valueMapper 
-     * @param mapFactory 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param <M>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mapFactory
+     * @return
      */
     public static <T, K, V, M extends Map<K, V>> Collector<T, ?, M> toMap(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final Supplier<? extends M> mapFactory) {
@@ -4174,17 +4186,17 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param <M> 
-     * @param keyMapper 
-     * @param valueMapper 
-     * @param mergeFunction 
-     * @param mapFactory 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param <M>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mergeFunction
+     * @param mapFactory
+     * @return
      */
     public static <T, K, V, M extends Map<K, V>> Collector<T, ?, M> toMap(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory) {
@@ -4196,11 +4208,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @return 
+     *
+     * @param <K>
+     * @param <V>
+     * @return
      */
     public static <K, V> Collector<Map.Entry<K, V>, ?, ImmutableMap<K, V>> toImmutableMap() {
         final Collector<Map.Entry<K, V>, ?, Map<K, V>> downstream = toMap();
@@ -4211,12 +4223,12 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param mergeFunction 
-     * @return 
+     *
+     * @param <K>
+     * @param <V>
+     * @param mergeFunction
+     * @return
      */
     public static <K, V> Collector<Map.Entry<K, V>, ?, ImmutableMap<K, V>> toImmutableMap(final BinaryOperator<V> mergeFunction) {
         final Collector<Map.Entry<K, V>, ?, Map<K, V>> downstream = toMap(mergeFunction);
@@ -4227,14 +4239,14 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param keyMapper 
-     * @param valueMapper 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param keyMapper
+     * @param valueMapper
+     * @return
      */
     public static <T, K, V> Collector<T, ?, ImmutableMap<K, V>> toImmutableMap(Function<? super T, ? extends K> keyMapper,
             Function<? super T, ? extends V> valueMapper) {
@@ -4246,15 +4258,15 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param keyMapper 
-     * @param valueMapper 
-     * @param mergeFunction 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mergeFunction
+     * @return
      */
     public static <T, K, V> Collector<T, ?, ImmutableMap<K, V>> toImmutableMap(Function<? super T, ? extends K> keyMapper,
             Function<? super T, ? extends V> valueMapper, BinaryOperator<V> mergeFunction) {
@@ -4266,14 +4278,14 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param keyMapper 
-     * @param valueMapper 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param keyMapper
+     * @param valueMapper
+     * @return
      * @see #toMap(Function, Function)
      */
     public static <T, K, V> Collector<T, ?, Map<K, V>> toLinkedHashMap(Function<? super T, ? extends K> keyMapper,
@@ -4284,15 +4296,15 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param keyMapper 
-     * @param valueMapper 
-     * @param mergeFunction 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mergeFunction
+     * @return
      * @see #toMap(Function, Function, BinaryOperator)
      */
     public static <T, K, V> Collector<T, ?, Map<K, V>> toLinkedHashMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper,
@@ -4303,14 +4315,14 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param keyMapper 
-     * @param valueMapper 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param keyMapper
+     * @param valueMapper
+     * @return
      */
     public static <T, K, V> Collector<T, ?, ConcurrentMap<K, V>> toConcurrentMap(Function<? super T, ? extends K> keyMapper,
             Function<? super T, ? extends V> valueMapper) {
@@ -4320,16 +4332,16 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param <M> 
-     * @param keyMapper 
-     * @param valueMapper 
-     * @param mapFactory 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param <M>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mapFactory
+     * @return
      */
     public static <T, K, V, M extends ConcurrentMap<K, V>> Collector<T, ?, M> toConcurrentMap(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, Supplier<? extends M> mapFactory) {
@@ -4339,15 +4351,15 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param keyMapper 
-     * @param valueMapper 
-     * @param mergeFunction 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mergeFunction
+     * @return
      */
     public static <T, K, V> Collector<T, ?, ConcurrentMap<K, V>> toConcurrentMap(Function<? super T, ? extends K> keyMapper,
             Function<? super T, ? extends V> valueMapper, BinaryOperator<V> mergeFunction) {
@@ -4357,17 +4369,17 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param <M> 
-     * @param keyMapper 
-     * @param valueMapper 
-     * @param mergeFunction 
-     * @param mapFactory 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param <M>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mergeFunction
+     * @param mapFactory
+     * @return
      */
     public static <T, K, V, M extends ConcurrentMap<K, V>> Collector<T, ?, M> toConcurrentMap(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction, Supplier<? extends M> mapFactory) {
@@ -4380,14 +4392,14 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param keyMapper 
-     * @param valueMapper 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param keyMapper
+     * @param valueMapper
+     * @return
      */
     public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
         final BinaryOperator<V> mergeFunction = Fn.throwingMerger();
@@ -4396,15 +4408,15 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param keyMapper 
-     * @param valueMapper 
-     * @param mapFactory 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mapFactory
+     * @return
      */
     public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final Supplier<BiMap<K, V>> mapFactory) {
@@ -4414,15 +4426,15 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param keyMapper 
-     * @param valueMapper 
-     * @param mergeFunction 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mergeFunction
+     * @return
      */
     public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper,
             BinaryOperator<V> mergeFunction) {
@@ -4432,16 +4444,16 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param keyMapper 
-     * @param valueMapper 
-     * @param mergeFunction 
-     * @param mapFactory 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mergeFunction
+     * @param mapFactory
+     * @return
      */
     public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<BiMap<K, V>> mapFactory) {
@@ -4449,11 +4461,11 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @return 
+     *
+     * @param <K>
+     * @param <V>
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Collector<Map.Entry<K, V>, ?, ListMultimap<K, V>> toMultimap() {
@@ -4464,14 +4476,14 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <K> 
-     * @param <V> 
-     * @param <C> 
-     * @param <M> 
-     * @param mapFactory 
-     * @return 
+     *
+     * @param <K>
+     * @param <V>
+     * @param <C>
+     * @param <M>
+     * @param mapFactory
+     * @return
      */
     @SuppressWarnings("rawtypes")
     public static <K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<Map.Entry<K, V>, ?, M> toMultimap(
@@ -4483,12 +4495,12 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param keyMapper 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param keyMapper
+     * @return
      */
     public static <T, K> Collector<T, ?, ListMultimap<K, T>> toMultimap(Function<? super T, ? extends K> keyMapper) {
         final Function<? super T, ? extends T> valueMapper = Fn.identity();
@@ -4497,15 +4509,15 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <C> 
-     * @param <M> 
-     * @param keyMapper 
-     * @param mapFactory 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <C>
+     * @param <M>
+     * @param keyMapper
+     * @param mapFactory
+     * @return
      */
     public static <T, K, C extends Collection<T>, M extends Multimap<K, T, C>> Collector<T, ?, M> toMultimap(final Function<? super T, ? extends K> keyMapper,
             final Supplier<? extends M> mapFactory) {
@@ -4515,14 +4527,14 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param keyMapper 
-     * @param valueMapper 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param keyMapper
+     * @param valueMapper
+     * @return
      */
     public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> toMultimap(Function<? super T, ? extends K> keyMapper,
             Function<? super T, ? extends V> valueMapper) {
@@ -4532,17 +4544,17 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param <C> 
-     * @param <M> 
-     * @param keyMapper 
-     * @param valueMapper 
-     * @param mapFactory 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param <C>
+     * @param <M>
+     * @param keyMapper
+     * @param valueMapper
+     * @param mapFactory
+     * @return
      */
     public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> toMultimap(
             final Function<? super T, ? extends K> keyMapper, final Function<? super T, ? extends V> valueMapper, final Supplier<? extends M> mapFactory) {
@@ -4554,14 +4566,14 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param keyMapper 
-     * @param flatValueMapper 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param keyMapper
+     * @param flatValueMapper
+     * @return
      * @see Collectors#toMultimap(Function, Function)
      */
     public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatMapingValueToMultimap(final Function<? super T, K> keyMapper,
@@ -4570,17 +4582,17 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param <C> 
-     * @param <M> 
-     * @param keyMapper 
-     * @param flatValueMapper 
-     * @param mapFactory 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param <C>
+     * @param <M>
+     * @param keyMapper
+     * @param flatValueMapper
+     * @param mapFactory
+     * @return
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatMapingValueToMultimap(
@@ -4605,14 +4617,14 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param keyMapper 
-     * @param flatValueMapper 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param keyMapper
+     * @param flatValueMapper
+     * @return
      * @see Collectors#toMultimap(Function, Function)
      */
     public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flattMapingValueToMultimap(final Function<? super T, K> keyMapper,
@@ -4621,17 +4633,17 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param <C> 
-     * @param <M> 
-     * @param keyMapper 
-     * @param flatValueMapper 
-     * @param mapFactory 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param <C>
+     * @param <M>
+     * @param keyMapper
+     * @param flatValueMapper
+     * @param mapFactory
+     * @return
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flattMapingValueToMultimap(
@@ -4656,14 +4668,14 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param keyMapper 
-     * @param flatValueMapper 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param keyMapper
+     * @param flatValueMapper
+     * @return
      * @see Collectors#toMultimap(Function, Function)
      */
     public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatmappingValueToMultimap(final Function<? super T, K> keyMapper,
@@ -4672,17 +4684,17 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param <C> 
-     * @param <M> 
-     * @param keyMapper 
-     * @param flatValueMapper 
-     * @param mapFactory 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param <C>
+     * @param <M>
+     * @param keyMapper
+     * @param flatValueMapper
+     * @param mapFactory
+     * @return
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatmappingValueToMultimap(
@@ -4706,14 +4718,14 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param flatKeyMapper 
-     * @param valueMapper 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param flatKeyMapper
+     * @param valueMapper
+     * @return
      * @see Collectors#toMultimap(Function, Function)
      */
     public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatMapingKeyToMultimap(
@@ -4722,17 +4734,17 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param <C> 
-     * @param <M> 
-     * @param flatKeyMapper 
-     * @param valueMapper 
-     * @param mapFactory 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param <C>
+     * @param <M>
+     * @param flatKeyMapper
+     * @param valueMapper
+     * @param mapFactory
+     * @return
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatMapingKeyToMultimap(
@@ -4757,14 +4769,14 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param flatKeyMapper 
-     * @param valueMapper 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param flatKeyMapper
+     * @param valueMapper
+     * @return
      * @see Collectors#toMultimap(Function, Function)
      */
     public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flattMapingKeyToMultimap(final Function<? super T, Stream<? extends K>> flatKeyMapper,
@@ -4773,17 +4785,17 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param <C> 
-     * @param <M> 
-     * @param flatKeyMapper 
-     * @param valueMapper 
-     * @param mapFactory 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param <C>
+     * @param <M>
+     * @param flatKeyMapper
+     * @param valueMapper
+     * @param mapFactory
+     * @return
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flattMapingKeyToMultimap(
@@ -4807,14 +4819,14 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param flatKeyMapper 
-     * @param valueMapper 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param flatKeyMapper
+     * @param valueMapper
+     * @return
      * @see Collectors#toMultimap(Function, Function)
      */
     public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatmappingKeyToMultimap(
@@ -4823,17 +4835,17 @@ public abstract class Collectors {
     }
 
     /**
-     * 
      *
-     * @param <T> 
-     * @param <K> 
-     * @param <V> 
-     * @param <C> 
-     * @param <M> 
-     * @param flatKeyMapper 
-     * @param valueMapper 
-     * @param mapFactory 
-     * @return 
+     *
+     * @param <T>
+     * @param <K>
+     * @param <V>
+     * @param <C>
+     * @param <M>
+     * @param flatKeyMapper
+     * @param valueMapper
+     * @param mapFactory
+     * @return
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatmappingKeyToMultimap(
@@ -4972,12 +4984,12 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param mapper1 
-         * @param mapper2 
-         * @return 
+         *
+         * @param <T>
+         * @param mapper1
+         * @param mapper2
+         * @return
          */
         public static <T> Collector<T, ?, Tuple2<Long, Long>> summingInt(final ToIntFunction<? super T> mapper1, final ToIntFunction<? super T> mapper2) {
             final BiConsumer<long[], T> accumulator = (a, t) -> {
@@ -4989,13 +5001,13 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param mapper1 
-         * @param mapper2 
-         * @param mapper3 
-         * @return 
+         *
+         * @param <T>
+         * @param mapper1
+         * @param mapper2
+         * @param mapper3
+         * @return
          */
         public static <T> Collector<T, ?, Tuple3<Long, Long, Long>> summingInt(final ToIntFunction<? super T> mapper1, final ToIntFunction<? super T> mapper2,
                 final ToIntFunction<? super T> mapper3) {
@@ -5009,12 +5021,12 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param mapper1 
-         * @param mapper2 
-         * @return 
+         *
+         * @param <T>
+         * @param mapper1
+         * @param mapper2
+         * @return
          */
         public static <T> Collector<T, ?, Tuple2<Long, Long>> summingLong(final ToLongFunction<? super T> mapper1, final ToLongFunction<? super T> mapper2) {
             final BiConsumer<long[], T> accumulator = (a, t) -> {
@@ -5026,13 +5038,13 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param mapper1 
-         * @param mapper2 
-         * @param mapper3 
-         * @return 
+         *
+         * @param <T>
+         * @param mapper1
+         * @param mapper2
+         * @param mapper3
+         * @return
          */
         public static <T> Collector<T, ?, Tuple3<Long, Long, Long>> summingLong(final ToLongFunction<? super T> mapper1,
                 final ToLongFunction<? super T> mapper2, final ToLongFunction<? super T> mapper3) {
@@ -5046,12 +5058,12 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param mapper1 
-         * @param mapper2 
-         * @return 
+         *
+         * @param <T>
+         * @param mapper1
+         * @param mapper2
+         * @return
          */
         public static <T> Collector<T, ?, Tuple2<Double, Double>> summingDouble(final ToDoubleFunction<? super T> mapper1,
                 final ToDoubleFunction<? super T> mapper2) {
@@ -5064,13 +5076,13 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param mapper1 
-         * @param mapper2 
-         * @param mapper3 
-         * @return 
+         *
+         * @param <T>
+         * @param mapper1
+         * @param mapper2
+         * @param mapper3
+         * @return
          */
         public static <T> Collector<T, ?, Tuple3<Double, Double, Double>> summingDouble(final ToDoubleFunction<? super T> mapper1,
                 final ToDoubleFunction<? super T> mapper2, final ToDoubleFunction<? super T> mapper3) {
@@ -5084,12 +5096,12 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param mapper1 
-         * @param mapper2 
-         * @return 
+         *
+         * @param <T>
+         * @param mapper1
+         * @param mapper2
+         * @return
          */
         public static <T> Collector<T, ?, Tuple2<BigInteger, BigInteger>> summingBigInteger(final Function<? super T, BigInteger> mapper1,
                 final Function<? super T, BigInteger> mapper2) {
@@ -5103,13 +5115,13 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param mapper1 
-         * @param mapper2 
-         * @param mapper3 
-         * @return 
+         *
+         * @param <T>
+         * @param mapper1
+         * @param mapper2
+         * @param mapper3
+         * @return
          */
         public static <T> Collector<T, ?, Tuple3<BigInteger, BigInteger, BigInteger>> summingBigInteger(final Function<? super T, BigInteger> mapper1,
                 final Function<? super T, BigInteger> mapper2, final Function<? super T, BigInteger> mapper3) {
@@ -5124,12 +5136,12 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param mapper1 
-         * @param mapper2 
-         * @return 
+         *
+         * @param <T>
+         * @param mapper1
+         * @param mapper2
+         * @return
          */
         public static <T> Collector<T, ?, Tuple2<BigDecimal, BigDecimal>> summingBigDecimal(final Function<? super T, BigDecimal> mapper1,
                 final Function<? super T, BigDecimal> mapper2) {
@@ -5143,13 +5155,13 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param mapper1 
-         * @param mapper2 
-         * @param mapper3 
-         * @return 
+         *
+         * @param <T>
+         * @param mapper1
+         * @param mapper2
+         * @param mapper3
+         * @return
          */
         public static <T> Collector<T, ?, Tuple3<BigDecimal, BigDecimal, BigDecimal>> summingBigDecimal(final Function<? super T, BigDecimal> mapper1,
                 final Function<? super T, BigDecimal> mapper2, final Function<? super T, BigDecimal> mapper3) {
@@ -5164,12 +5176,12 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param mapper1 
-         * @param mapper2 
-         * @return 
+         *
+         * @param <T>
+         * @param mapper1
+         * @param mapper2
+         * @return
          */
         public static <T> Collector<T, ?, Tuple2<Double, Double>> averagingInt(final ToIntFunction<? super T> mapper1, final ToIntFunction<? super T> mapper2) {
             final BiConsumer<Pair<long[], long[]>, T> accumulator = (a, t) -> {
@@ -5183,13 +5195,13 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param mapper1 
-         * @param mapper2 
-         * @param mapper3 
-         * @return 
+         *
+         * @param <T>
+         * @param mapper1
+         * @param mapper2
+         * @param mapper3
+         * @return
          */
         public static <T> Collector<T, ?, Tuple3<Double, Double, Double>> averagingInt(final ToIntFunction<? super T> mapper1,
                 final ToIntFunction<? super T> mapper2, final ToIntFunction<? super T> mapper3) {
@@ -5206,12 +5218,12 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param mapper1 
-         * @param mapper2 
-         * @return 
+         *
+         * @param <T>
+         * @param mapper1
+         * @param mapper2
+         * @return
          */
         public static <T> Collector<T, ?, Tuple2<Double, Double>> averagingLong(final ToLongFunction<? super T> mapper1,
                 final ToLongFunction<? super T> mapper2) {
@@ -5226,13 +5238,13 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param mapper1 
-         * @param mapper2 
-         * @param mapper3 
-         * @return 
+         *
+         * @param <T>
+         * @param mapper1
+         * @param mapper2
+         * @param mapper3
+         * @return
          */
         public static <T> Collector<T, ?, Tuple3<Double, Double, Double>> averagingLong(final ToLongFunction<? super T> mapper1,
                 final ToLongFunction<? super T> mapper2, final ToLongFunction<? super T> mapper3) {
@@ -5249,12 +5261,12 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param mapper1 
-         * @param mapper2 
-         * @return 
+         *
+         * @param <T>
+         * @param mapper1
+         * @param mapper2
+         * @return
          */
         public static <T> Collector<T, ?, Tuple2<Double, Double>> averagingDouble(final ToDoubleFunction<? super T> mapper1,
                 final ToDoubleFunction<? super T> mapper2) {
@@ -5267,13 +5279,13 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param mapper1 
-         * @param mapper2 
-         * @param mapper3 
-         * @return 
+         *
+         * @param <T>
+         * @param mapper1
+         * @param mapper2
+         * @param mapper3
+         * @return
          */
         public static <T> Collector<T, ?, Tuple3<Double, Double, Double>> averagingDouble(final ToDoubleFunction<? super T> mapper1,
                 final ToDoubleFunction<? super T> mapper2, final ToDoubleFunction<? super T> mapper3) {
@@ -5287,12 +5299,12 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param mapper1 
-         * @param mapper2 
-         * @return 
+         *
+         * @param <T>
+         * @param mapper1
+         * @param mapper2
+         * @return
          */
         public static <T> Collector<T, ?, Tuple2<BigDecimal, BigDecimal>> averagingBigInteger(final Function<? super T, BigInteger> mapper1,
                 final Function<? super T, BigInteger> mapper2) {
@@ -5308,13 +5320,13 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param mapper1 
-         * @param mapper2 
-         * @param mapper3 
-         * @return 
+         *
+         * @param <T>
+         * @param mapper1
+         * @param mapper2
+         * @param mapper3
+         * @return
          */
         public static <T> Collector<T, ?, Tuple3<BigDecimal, BigDecimal, BigDecimal>> averagingBigInteger(final Function<? super T, BigInteger> mapper1,
                 final Function<? super T, BigInteger> mapper2, final Function<? super T, BigInteger> mapper3) {
@@ -5332,12 +5344,12 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param mapper1 
-         * @param mapper2 
-         * @return 
+         *
+         * @param <T>
+         * @param mapper1
+         * @param mapper2
+         * @return
          */
         public static <T> Collector<T, ?, Tuple2<BigDecimal, BigDecimal>> averagingBigDecimal(final Function<? super T, BigDecimal> mapper1,
                 final Function<? super T, BigDecimal> mapper2) {
@@ -5353,13 +5365,13 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param mapper1 
-         * @param mapper2 
-         * @param mapper3 
-         * @return 
+         *
+         * @param <T>
+         * @param mapper1
+         * @param mapper2
+         * @param mapper3
+         * @return
          */
         public static <T> Collector<T, ?, Tuple3<BigDecimal, BigDecimal, BigDecimal>> averagingBigDecimal(final Function<? super T, BigDecimal> mapper1,
                 final Function<? super T, BigDecimal> mapper2, final Function<? super T, BigDecimal> mapper3) {
@@ -5377,16 +5389,16 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <A1> 
-         * @param <A2> 
-         * @param <R1> 
-         * @param <R2> 
-         * @param collector1 
-         * @param collector2 
-         * @return 
+         *
+         * @param <T>
+         * @param <A1>
+         * @param <A2>
+         * @param <R1>
+         * @param <R2>
+         * @param collector1
+         * @param collector2
+         * @return
          */
         public static <T, A1, A2, R1, R2> Collector<T, Tuple2<A1, A2>, Tuple2<R1, R2>> combine(final Collector<? super T, A1, R1> collector1,
                 final Collector<? super T, A2, R2> collector2) {
@@ -5421,18 +5433,18 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <A1> 
-         * @param <A2> 
-         * @param <R1> 
-         * @param <R2> 
-         * @param <R> 
-         * @param collector1 
-         * @param collector2 
-         * @param finisher 
-         * @return 
+         *
+         * @param <T>
+         * @param <A1>
+         * @param <A2>
+         * @param <R1>
+         * @param <R2>
+         * @param <R>
+         * @param collector1
+         * @param collector2
+         * @param finisher
+         * @return
          */
         public static <T, A1, A2, R1, R2, R> Collector<T, Tuple2<A1, A2>, R> combine(final Collector<? super T, A1, R1> collector1,
                 final Collector<? super T, A2, R2> collector2, final BiFunction<? super R1, ? super R2, R> finisher) {
@@ -5464,19 +5476,19 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <A1> 
-         * @param <A2> 
-         * @param <A3> 
-         * @param <R1> 
-         * @param <R2> 
-         * @param <R3> 
-         * @param collector1 
-         * @param collector2 
-         * @param collector3 
-         * @return 
+         *
+         * @param <T>
+         * @param <A1>
+         * @param <A2>
+         * @param <A3>
+         * @param <R1>
+         * @param <R2>
+         * @param <R3>
+         * @param collector1
+         * @param collector2
+         * @param collector3
+         * @return
          */
         public static <T, A1, A2, A3, R1, R2, R3> Collector<T, Tuple3<A1, A2, A3>, Tuple3<R1, R2, R3>> combine(final Collector<? super T, A1, R1> collector1,
                 final Collector<? super T, A2, R2> collector2, final Collector<? super T, A3, R3> collector3) {
@@ -5523,21 +5535,21 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <A1> 
-         * @param <A2> 
-         * @param <A3> 
-         * @param <R1> 
-         * @param <R2> 
-         * @param <R3> 
-         * @param <R> 
-         * @param collector1 
-         * @param collector2 
-         * @param collector3 
-         * @param finisher 
-         * @return 
+         *
+         * @param <T>
+         * @param <A1>
+         * @param <A2>
+         * @param <A3>
+         * @param <R1>
+         * @param <R2>
+         * @param <R3>
+         * @param <R>
+         * @param collector1
+         * @param collector2
+         * @param collector3
+         * @param finisher
+         * @return
          */
         public static <T, A1, A2, A3, R1, R2, R3, R> Collector<T, Tuple3<A1, A2, A3>, R> combine(final Collector<? super T, A1, R1> collector1,
                 final Collector<? super T, A2, R2> collector2, final Collector<? super T, A3, R3> collector3,
@@ -5581,22 +5593,22 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <A1> 
-         * @param <A2> 
-         * @param <A3> 
-         * @param <A4> 
-         * @param <R1> 
-         * @param <R2> 
-         * @param <R3> 
-         * @param <R4> 
-         * @param collector1 
-         * @param collector2 
-         * @param collector3 
-         * @param collector4 
-         * @return 
+         *
+         * @param <T>
+         * @param <A1>
+         * @param <A2>
+         * @param <A3>
+         * @param <A4>
+         * @param <R1>
+         * @param <R2>
+         * @param <R3>
+         * @param <R4>
+         * @param collector1
+         * @param collector2
+         * @param collector3
+         * @param collector4
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T, A1, A2, A3, A4, R1, R2, R3, R4> Collector<T, Tuple4<A1, A2, A3, A4>, Tuple4<R1, R2, R3, R4>> combine(
@@ -5610,25 +5622,25 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <A1> 
-         * @param <A2> 
-         * @param <A3> 
-         * @param <A4> 
-         * @param <A5> 
-         * @param <R1> 
-         * @param <R2> 
-         * @param <R3> 
-         * @param <R4> 
-         * @param <R5> 
-         * @param collector1 
-         * @param collector2 
-         * @param collector3 
-         * @param collector4 
-         * @param collector5 
-         * @return 
+         *
+         * @param <T>
+         * @param <A1>
+         * @param <A2>
+         * @param <A3>
+         * @param <A4>
+         * @param <A5>
+         * @param <R1>
+         * @param <R2>
+         * @param <R3>
+         * @param <R4>
+         * @param <R5>
+         * @param collector1
+         * @param collector2
+         * @param collector3
+         * @param collector4
+         * @param collector5
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T, A1, A2, A3, A4, A5, R1, R2, R3, R4, R5> Collector<T, Tuple5<A1, A2, A3, A4, A5>, Tuple5<R1, R2, R3, R4, R5>> combine(
@@ -5643,28 +5655,28 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <A1> 
-         * @param <A2> 
-         * @param <A3> 
-         * @param <A4> 
-         * @param <A5> 
-         * @param <A6> 
-         * @param <R1> 
-         * @param <R2> 
-         * @param <R3> 
-         * @param <R4> 
-         * @param <R5> 
-         * @param <R6> 
-         * @param collector1 
-         * @param collector2 
-         * @param collector3 
-         * @param collector4 
-         * @param collector5 
-         * @param collector6 
-         * @return 
+         *
+         * @param <T>
+         * @param <A1>
+         * @param <A2>
+         * @param <A3>
+         * @param <A4>
+         * @param <A5>
+         * @param <A6>
+         * @param <R1>
+         * @param <R2>
+         * @param <R3>
+         * @param <R4>
+         * @param <R5>
+         * @param <R6>
+         * @param collector1
+         * @param collector2
+         * @param collector3
+         * @param collector4
+         * @param collector5
+         * @param collector6
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T, A1, A2, A3, A4, A5, A6, R1, R2, R3, R4, R5, R6> Collector<T, Tuple6<A1, A2, A3, A4, A5, A6>, Tuple6<R1, R2, R3, R4, R5, R6>> combine(
@@ -5679,31 +5691,31 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param <A1> 
-         * @param <A2> 
-         * @param <A3> 
-         * @param <A4> 
-         * @param <A5> 
-         * @param <A6> 
-         * @param <A7> 
-         * @param <R1> 
-         * @param <R2> 
-         * @param <R3> 
-         * @param <R4> 
-         * @param <R5> 
-         * @param <R6> 
-         * @param <R7> 
-         * @param collector1 
-         * @param collector2 
-         * @param collector3 
-         * @param collector4 
-         * @param collector5 
-         * @param collector6 
-         * @param collector7 
-         * @return 
+         *
+         * @param <T>
+         * @param <A1>
+         * @param <A2>
+         * @param <A3>
+         * @param <A4>
+         * @param <A5>
+         * @param <A6>
+         * @param <A7>
+         * @param <R1>
+         * @param <R2>
+         * @param <R3>
+         * @param <R4>
+         * @param <R5>
+         * @param <R6>
+         * @param <R7>
+         * @param collector1
+         * @param collector2
+         * @param collector3
+         * @param collector4
+         * @param collector5
+         * @param collector6
+         * @param collector7
+         * @return
          */
         @SuppressWarnings("rawtypes")
         public static <T, A1, A2, A3, A4, A5, A6, A7, R1, R2, R3, R4, R5, R6, R7> Collector<T, Tuple7<A1, A2, A3, A4, A5, A6, A7>, Tuple7<R1, R2, R3, R4, R5, R6, R7>> combine(
@@ -5720,11 +5732,11 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param collectors 
-         * @return 
+         *
+         * @param <T>
+         * @param collectors
+         * @return
          * @see Tuple#from(Collection)
          */
         @SuppressWarnings("rawtypes")
@@ -5784,21 +5796,21 @@ public abstract class Collectors {
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @return 
+         *
+         * @param <T>
+         * @return
          */
         public static <T> Collector<T, ?, DataSet> toDataSet() {
             return toDataSet(null);
         }
 
         /**
-         * 
          *
-         * @param <T> 
-         * @param columnNames 
-         * @return 
+         *
+         * @param <T>
+         * @param columnNames
+         * @return
          */
         public static <T> Collector<T, ?, DataSet> toDataSet(final List<String> columnNames) {
             @SuppressWarnings("rawtypes")
