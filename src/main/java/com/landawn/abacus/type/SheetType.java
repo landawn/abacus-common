@@ -43,7 +43,10 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
 
     private static final String COLUMN_KEY_SET = "columnKeySet";
 
+    @Deprecated
     private static final String ROW_LIST = "rowList";
+
+    private static final String COLUMN_LIST = "columnList";
 
     private final String declaringName;
 
@@ -54,11 +57,11 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
     private final JSONDeserializationConfig jdc;
 
     /**
-     * 
      *
-     * @param rowKeyTypeName 
-     * @param columnKeyTypeName 
-     * @param elementTypeName 
+     *
+     * @param rowKeyTypeName
+     * @param columnKeyTypeName
+     * @param elementTypeName
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public SheetType(String rowKeyTypeName, String columnKeyTypeName, String elementTypeName) {
@@ -76,9 +79,9 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public String declaringName() {
@@ -86,9 +89,9 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
     }
 
     /**
-     * 
      *
-     * @return 
+     *
+     * @return
      */
     @Override
     public Class<Sheet<R, C, E>> clazz() {
@@ -136,16 +139,25 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
             return null;
         }
 
-        final List<List<?>> rowList = new ArrayList<>(x.rowLength());
-
-        for (R rowKey : x.rowKeySet()) {
-            rowList.add(x.getRow(rowKey));
-        }
-
         final Map<Object, Object> m = new LinkedHashMap<>();
         m.put(ROW_KEY_SET, x.rowKeySet());
         m.put(COLUMN_KEY_SET, x.columnKeySet());
-        m.put(ROW_LIST, rowList);
+
+        //    final List<List<?>> rowList = new ArrayList<>(x.rowLength());
+        //
+        //    for (R rowKey : x.rowKeySet()) {
+        //        rowList.add(x.getRow(rowKey));
+        //    }
+        //
+        //    m.put(ROW_LIST, rowList);
+
+        final List<List<E>> columnList = new ArrayList<>(x.rowLength());
+
+        for (C columnKey : x.columnKeySet()) {
+            columnList.add(x.getColumn(columnKey));
+        }
+
+        m.put(COLUMN_LIST, columnList);
 
         return Utils.jsonParser.serialize(m, Utils.jsc);
     }
@@ -165,6 +177,7 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
         final List<R> rowKeySet = (List<R>) m.get(ROW_KEY_SET);
         final List<C> columnKeySet = (List<C>) m.get(COLUMN_KEY_SET);
         final List<List<E>> rowList = (List<List<E>>) m.get(ROW_LIST);
+        final List<List<E>> columnList = (List<List<E>>) m.get(COLUMN_LIST);
 
         Sheet<R, C, E> sheet = null;
 
@@ -174,9 +187,16 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
             sheet = ClassUtil.invokeConstructor(ClassUtil.getDeclaredConstructor(typeClass, Collection.class, Collection.class), rowKeySet, columnKeySet);
         }
 
-        int i = 0;
-        for (R rowKey : rowKeySet) {
-            sheet.setRow(rowKey, rowList.get(i++));
+        if (N.notNullOrEmpty(rowList)) {
+            int i = 0;
+            for (R rowKey : rowKeySet) {
+                sheet.setRow(rowKey, rowList.get(i++));
+            }
+        } else if (N.notNullOrEmpty(columnList)) {
+            int i = 0;
+            for (C columnKey : columnKeySet) {
+                sheet.setColumn(columnKey, columnList.get(i++));
+            }
         }
 
         return sheet;

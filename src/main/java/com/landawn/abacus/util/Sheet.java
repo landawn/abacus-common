@@ -286,7 +286,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param columnKey
      * @return
      */
-    public E get(Object rowKey, Object columnKey) {
+    public E get(R rowKey, C columnKey) {
         if (_initialized) {
             final int rowIndex = getRowIndex(rowKey);
             final int columnIndex = getColumnIndex(columnKey);
@@ -416,7 +416,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param columnKey
      * @return
      */
-    public E remove(Object rowKey, Object columnKey) {
+    public E remove(R rowKey, C columnKey) {
         checkFrozen();
 
         if (_initialized) {
@@ -467,7 +467,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param columnKey
      * @return
      */
-    public boolean contains(Object rowKey, Object columnKey) {
+    public boolean contains(R rowKey, C columnKey) {
         return get(rowKey, columnKey) != null;
     }
 
@@ -517,7 +517,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @return
      */
     @SuppressWarnings("deprecation")
-    public ImmutableList<E> getRow(Object rowKey) {
+    public ImmutableList<E> getRow(R rowKey) {
         final int columnLength = columnLength();
         final List<E> row = new ArrayList<>(columnLength);
 
@@ -670,7 +670,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param func
      * @throws X the x
      */
-    public <X extends Exception> void updateRow(R rowKey, Throwables.Function<? super E, E, X> func) throws X {
+    public <X extends Exception> void updateRow(R rowKey, Throwables.Function<? super E, ? extends E, X> func) throws X {
         checkFrozen();
 
         if (columnLength() > 0) {
@@ -689,7 +689,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      *
      * @param rowKey
      */
-    public void removeRow(Object rowKey) {
+    public void removeRow(R rowKey) {
         checkFrozen();
 
         checkRowKey(rowKey);
@@ -723,7 +723,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param rowKey
      * @param newRowIndex
      */
-    public void moveRow(Object rowKey, int newRowIndex) {
+    public void moveRow(R rowKey, int newRowIndex) {
         checkFrozen();
 
         this.checkRowIndex(newRowIndex);
@@ -751,7 +751,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param rowKeyA
      * @param rowKeyB
      */
-    public void swapRows(Object rowKeyA, Object rowKeyB) {
+    public void swapRows(R rowKeyA, R rowKeyB) {
         checkFrozen();
 
         final int rowIndexA = this.getRowIndex(rowKeyA);
@@ -810,7 +810,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param rowKey
      * @return
      */
-    public boolean containsRow(Object rowKey) {
+    public boolean containsRow(R rowKey) {
         return _rowKeySet.contains(rowKey);
     }
 
@@ -819,7 +819,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param rowKey
      * @return
      */
-    public Map<C, E> row(Object rowKey) {
+    public Map<C, E> row(R rowKey) {
         final int columnLength = columnLength();
         Map<C, E> rowMap = N.newLinkedHashMap(columnLength);
 
@@ -863,7 +863,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @return
      */
     @SuppressWarnings("deprecation")
-    public ImmutableList<E> getColumn(Object columnKey) {
+    public ImmutableList<E> getColumn(C columnKey) {
         final int rowLength = rowLength();
         List<E> column = null;
 
@@ -999,7 +999,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param func
      * @throws X the x
      */
-    public <X extends Exception> void updateColumn(C columnKey, Throwables.Function<? super E, E, X> func) throws X {
+    public <X extends Exception> void updateColumn(C columnKey, Throwables.Function<? super E, ? extends E, X> func) throws X {
         checkFrozen();
 
         if (rowLength() > 0) {
@@ -1019,7 +1019,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      *
      * @param columnKey
      */
-    public void removeColumn(Object columnKey) {
+    public void removeColumn(C columnKey) {
         checkFrozen();
 
         checkColumnKey(columnKey);
@@ -1050,7 +1050,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param columnKey
      * @param newColumnIndex
      */
-    public void moveColumn(Object columnKey, int newColumnIndex) {
+    public void moveColumn(C columnKey, int newColumnIndex) {
         checkFrozen();
 
         this.checkColumnIndex(newColumnIndex);
@@ -1076,7 +1076,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param columnKeyA
      * @param columnKeyB
      */
-    public void swapColumns(Object columnKeyA, Object columnKeyB) {
+    public void swapColumns(C columnKeyA, C columnKeyB) {
         checkFrozen();
 
         final int columnIndexA = this.getColumnIndex(columnKeyA);
@@ -1133,7 +1133,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param columnKey
      * @return
      */
-    public boolean containsColumn(Object columnKey) {
+    public boolean containsColumn(C columnKey) {
         return _columnKeySet.contains(columnKey);
     }
 
@@ -1142,7 +1142,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param columnKey
      * @return
      */
-    public Map<R, E> column(Object columnKey) {
+    public Map<R, E> column(C columnKey) {
         final int rowLength = rowLength();
         final Map<R, E> columnMap = N.newLinkedHashMap(rowLength);
 
@@ -1204,7 +1204,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param func
      * @throws X the x
      */
-    public <X extends Exception> void updateAll(Throwables.Function<? super E, E, X> func) throws X {
+    public <X extends Exception> void updateAll(Throwables.Function<? super E, ? extends E, X> func) throws X {
         checkFrozen();
 
         if (rowLength() > 0 && columnLength() > 0) {
@@ -1227,7 +1227,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param func
      * @throws X the x
      */
-    public <X extends Exception> void updateAll(Throwables.IntBiFunction<E, X> func) throws X {
+    public <X extends Exception> void updateAll(Throwables.IntBiFunction<? extends E, X> func) throws X {
         checkFrozen();
 
         if (rowLength() > 0 && columnLength() > 0) {
@@ -1253,7 +1253,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param func
      * @throws X the x
      */
-    public <X extends Exception> void updateAll(Throwables.TriFunction<R, C, E, E, X> func) throws X {
+    public <X extends Exception> void updateAll(Throwables.TriFunction<? super R, ? super C, ? super E, ? extends E, X> func) throws X {
         checkFrozen();
 
         if (rowLength() > 0 && columnLength() > 0) {
@@ -1337,7 +1337,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param newValue
      * @throws X the x
      */
-    public <X extends Exception> void replaceIf(final Throwables.TriPredicate<R, C, E, X> predicate, final E newValue) throws X {
+    public <X extends Exception> void replaceIf(final Throwables.TriPredicate<? super R, ? super C, ? super E, X> predicate, final E newValue) throws X {
         checkFrozen();
 
         if (rowLength() > 0 && columnLength() > 0) {
@@ -1385,37 +1385,39 @@ public final class Sheet<R, C, E> implements Cloneable {
 
         N.sort(arrayOfPair, pairCmp);
 
-        final int columnCount = _columnKeySet.size();
-        final Set<Integer> ordered = N.newHashSet(rowCount);
-        final E[] tempRow = (E[]) new Object[columnCount];
+        if (this._initialized) {
+            final int columnCount = _columnKeySet.size();
+            final Set<Integer> ordered = N.newHashSet(rowCount);
+            final E[] tempRow = (E[]) new Object[columnCount];
 
-        for (int i = 0, index = 0; i < rowCount; i++) {
-            index = arrayOfPair[i].index();
+            for (int i = 0, index = 0; i < rowCount; i++) {
+                index = arrayOfPair[i].index();
 
-            if ((index != i) && !ordered.contains(i)) {
-                for (int j = 0; j < columnCount; j++) {
-                    tempRow[j] = _columnList.get(j).get(i);
-                }
-
-                int previous = i;
-                int next = index;
-
-                do {
+                if ((index != i) && !ordered.contains(i)) {
                     for (int j = 0; j < columnCount; j++) {
-                        _columnList.get(j).set(previous, _columnList.get(j).get(next));
+                        tempRow[j] = _columnList.get(j).get(i);
                     }
 
-                    ordered.add(next);
+                    int previous = i;
+                    int next = index;
 
-                    previous = next;
-                    next = arrayOfPair[next].index();
-                } while (next != i);
+                    do {
+                        for (int j = 0; j < columnCount; j++) {
+                            _columnList.get(j).set(previous, _columnList.get(j).get(next));
+                        }
 
-                for (int j = 0; j < columnCount; j++) {
-                    _columnList.get(j).set(previous, tempRow[j]);
+                        ordered.add(next);
+
+                        previous = next;
+                        next = arrayOfPair[next].index();
+                    } while (next != i);
+
+                    for (int j = 0; j < columnCount; j++) {
+                        _columnList.get(j).set(previous, tempRow[j]);
+                    }
+
+                    ordered.add(i);
                 }
-
-                ordered.add(i);
             }
         }
 
@@ -1450,30 +1452,32 @@ public final class Sheet<R, C, E> implements Cloneable {
 
         N.sort(arrayOfPair, pairCmp);
 
-        final Set<Integer> ordered = N.newHashSet(columnCount);
-        List<E> tempColumn = null;
+        if (this._initialized) {
+            final Set<Integer> ordered = N.newHashSet(columnCount);
+            List<E> tempColumn = null;
 
-        for (int i = 0, index = 0; i < columnCount; i++) {
-            index = arrayOfPair[i].index();
+            for (int i = 0, index = 0; i < columnCount; i++) {
+                index = arrayOfPair[i].index();
 
-            if ((index != i) && !ordered.contains(i)) {
-                tempColumn = _columnList.get(i);
+                if ((index != i) && !ordered.contains(i)) {
+                    tempColumn = _columnList.get(i);
 
-                int previous = i;
-                int next = index;
+                    int previous = i;
+                    int next = index;
 
-                do {
-                    _columnList.set(previous, _columnList.get(next));
+                    do {
+                        _columnList.set(previous, _columnList.get(next));
 
-                    ordered.add(next);
+                        ordered.add(next);
 
-                    previous = next;
-                    next = arrayOfPair[next].index();
-                } while (next != i);
+                        previous = next;
+                        next = arrayOfPair[next].index();
+                    } while (next != i);
 
-                _columnList.set(previous, tempColumn);
+                    _columnList.set(previous, tempColumn);
 
-                ordered.add(i);
+                    ordered.add(i);
+                }
             }
         }
 
@@ -1613,12 +1617,14 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @throws X the x
      */
     public <E2, E3, X extends Exception> Sheet<R, C, E3> merge(Sheet<? extends R, ? extends C, ? extends E2> b,
-            Throwables.BiFunction<? super E, ? super E2, E3, X> mergeFunction) throws X {
+            Throwables.BiFunction<? super E, ? super E2, ? extends E3, X> mergeFunction) throws X {
+        final Sheet<R, C, E2> sheetB = (Sheet<R, C, E2>) b;
+
         final Set<R> newRowKeySet = N.newLinkedHashSet(this.rowKeySet());
-        newRowKeySet.addAll(b.rowKeySet());
+        newRowKeySet.addAll(sheetB.rowKeySet());
 
         final Set<C> newColumnKeySet = N.newLinkedHashSet(this.columnKeySet());
-        newColumnKeySet.addAll(b.columnKeySet());
+        newColumnKeySet.addAll(sheetB.columnKeySet());
 
         final Sheet<R, C, E3> result = new Sheet<>(newRowKeySet, newColumnKeySet);
         final int[] rowIndexes1 = new int[newRowKeySet.size()], rowIndexes2 = new int[newRowKeySet.size()];
@@ -1627,13 +1633,14 @@ public final class Sheet<R, C, E> implements Cloneable {
         int idx = 0;
         for (R rowKey : newRowKeySet) {
             rowIndexes1[idx] = this.containsRow(rowKey) ? this.getRowIndex(rowKey) : -1;
-            rowIndexes2[idx] = b.containsRow(rowKey) ? b.getRowIndex(rowKey) : -1;
+            rowIndexes2[idx] = sheetB.containsRow(rowKey) ? sheetB.getRowIndex(rowKey) : -1;
         }
 
         idx = 0;
+
         for (C columnKey : newColumnKeySet) {
             columnIndexes1[idx] = this.containsColumn(columnKey) ? this.getColumnIndex(columnKey) : -1;
-            columnIndexes2[idx] = b.containsColumn(columnKey) ? b.getColumnIndex(columnKey) : -1;
+            columnIndexes2[idx] = sheetB.containsColumn(columnKey) ? sheetB.getColumnIndex(columnKey) : -1;
         }
 
         E e1 = null;
@@ -1642,7 +1649,7 @@ public final class Sheet<R, C, E> implements Cloneable {
         for (int rowIndex = 0, rowLen = newRowKeySet.size(); rowIndex < rowLen; rowIndex++) {
             for (int columnIndex = 0, columnLen = newColumnKeySet.size(); columnIndex < columnLen; columnIndex++) {
                 e1 = rowIndexes1[rowIndex] > -1 && columnIndexes1[columnIndex] > -1 ? this.get(rowIndexes1[rowIndex], columnIndexes1[columnIndex]) : null;
-                e2 = rowIndexes2[rowIndex] > -1 && columnIndexes2[columnIndex] > -1 ? b.get(rowIndexes2[rowIndex], columnIndexes2[columnIndex]) : null;
+                e2 = rowIndexes2[rowIndex] > -1 && columnIndexes2[columnIndex] > -1 ? sheetB.get(rowIndexes2[rowIndex], columnIndexes2[columnIndex]) : null;
                 result.put(rowIndex, columnIndex, mergeFunction.apply(e1, e2));
             }
         }
@@ -1753,7 +1760,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param action
      * @throws X the x
      */
-    public <X extends Exception> void forEachH(Throwables.TriConsumer<R, C, E, X> action) throws X {
+    public <X extends Exception> void forEachH(Throwables.TriConsumer<? super R, ? super C, ? super E, X> action) throws X {
         if (_initialized) {
             for (R rowKey : _rowKeySet) {
                 for (C columnKey : _columnKeySet) {
@@ -1776,7 +1783,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param action
      * @throws X the x
      */
-    public <X extends Exception> void forEachV(Throwables.TriConsumer<R, C, E, X> action) throws X {
+    public <X extends Exception> void forEachV(Throwables.TriConsumer<? super R, ? super C, ? super E, X> action) throws X {
         if (_initialized) {
             for (C columnKey : _columnKeySet) {
                 for (R rowKey : _rowKeySet) {
@@ -1799,7 +1806,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param action
      * @throws X the x
      */
-    public <X extends Exception> void forEachNonNullH(Throwables.TriConsumer<R, C, E, X> action) throws X {
+    public <X extends Exception> void forEachNonNullH(Throwables.TriConsumer<? super R, ? super C, ? super E, X> action) throws X {
         if (_initialized) {
             E value = null;
 
@@ -1822,7 +1829,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param action
      * @throws X the x
      */
-    public <X extends Exception> void forEachNonNullV(Throwables.TriConsumer<R, C, E, X> action) throws X {
+    public <X extends Exception> void forEachNonNullV(Throwables.TriConsumer<? super R, ? super C, ? super E, X> action) throws X {
         if (_initialized) {
             E value = null;
 
@@ -2811,11 +2818,7 @@ public final class Sheet<R, C, E> implements Cloneable {
 
         if (_initialized) {
             for (int i = 0; i < columnLength; i++) {
-                final List<E> column = _columnList.get(i);
-
-                for (int j = 0; j < rowLength; j++) {
-                    copy[i][j] = column.get(j);
-                }
+                _columnList.get(i).toArray(copy[i]);
             }
         }
 
@@ -2840,11 +2843,7 @@ public final class Sheet<R, C, E> implements Cloneable {
 
         if (_initialized) {
             for (int i = 0; i < columnLength; i++) {
-                final List<E> column = _columnList.get(i);
-
-                for (int j = 0; j < rowLength; j++) {
-                    copy[i][j] = (T) column.get(j);
-                }
+                _columnList.get(i).toArray(copy[i]);
             }
         }
 
@@ -3225,7 +3224,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      *
      * @param rowKey
      */
-    private void checkRowKey(Object rowKey) {
+    private void checkRowKey(R rowKey) {
         if (!_rowKeySet.contains(rowKey)) {
             throw new IllegalArgumentException("No row found by key: " + rowKey);
         }
@@ -3236,7 +3235,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      *
      * @param columnKey
      */
-    private void checkColumnKey(Object columnKey) {
+    private void checkColumnKey(C columnKey) {
         if (!_columnKeySet.contains(columnKey)) {
             throw new IllegalArgumentException("No column found by key: " + columnKey);
         }
@@ -3271,7 +3270,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param rowKey
      * @return
      */
-    private int getRowIndex(Object rowKey) {
+    private int getRowIndex(R rowKey) {
         if (_rowKeyIndexMap == null) {
             this.initIndexMap();
         }
@@ -3291,7 +3290,7 @@ public final class Sheet<R, C, E> implements Cloneable {
      * @param columnKey
      * @return
      */
-    private int getColumnIndex(Object columnKey) {
+    private int getColumnIndex(C columnKey) {
         if (_columnKeyIndexMap == null) {
             this.initIndexMap();
         }

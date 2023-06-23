@@ -1,3 +1,8 @@
+### 3.6.23
+
+* Improvements and bug fix.
+
+
 ### 3.6.22
 
 * Add `DataSet.pivot`, `Sheet.sortByRow/sortByColumn`.
