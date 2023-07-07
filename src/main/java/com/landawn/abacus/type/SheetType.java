@@ -43,6 +43,9 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
 
     private static final String COLUMN_KEY_SET = "columnKeySet";
 
+    /**
+     * @deprecated
+     */
     @Deprecated
     private static final String ROW_LIST = "rowList";
 

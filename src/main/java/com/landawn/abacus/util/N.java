@@ -17530,10 +17530,11 @@ public final class N extends CommonUtil {
                 }
             }
         } else {
-            final Iterator<? extends T> iter = c.iterator();
-            int idx = 0;
 
             if (fromIndex <= toIndex) {
+                final Iterator<? extends T> iter = c.iterator();
+                int idx = 0;
+
                 while (idx < fromIndex && iter.hasNext()) {
                     iter.next();
                     idx++;
@@ -17547,23 +17548,45 @@ public final class N extends CommonUtil {
                     }
                 }
             } else {
-                while (idx <= toIndex && iter.hasNext()) {
-                    iter.next();
-                    idx++;
-                }
+                final Iterator<T> descendingIterator = getDescendingIteratorIfPossible(c);
 
-                final T[] a = (T[]) new Object[fromIndex - toIndex];
+                if (descendingIterator != null) {
+                    int idx = c.size() - 1;
 
-                while (iter.hasNext()) {
-                    a[idx - 1 - toIndex] = iter.next();
-
-                    if (idx++ >= fromIndex) {
-                        break;
+                    while (idx > fromIndex && descendingIterator.hasNext()) {
+                        descendingIterator.next();
+                        idx--;
                     }
-                }
 
-                for (int i = a.length - 1; i >= 0; i--) {
-                    action.accept(a[i]);
+                    while (descendingIterator.hasNext()) {
+                        action.accept(descendingIterator.next());
+
+                        if (--idx <= toIndex) {
+                            break;
+                        }
+                    }
+                } else {
+                    final Iterator<? extends T> iter = c.iterator();
+                    int idx = 0;
+
+                    while (idx <= toIndex && iter.hasNext()) {
+                        iter.next();
+                        idx++;
+                    }
+
+                    final T[] a = (T[]) new Object[fromIndex - toIndex];
+
+                    while (iter.hasNext()) {
+                        a[idx - 1 - toIndex] = iter.next();
+
+                        if (idx++ >= fromIndex) {
+                            break;
+                        }
+                    }
+
+                    for (int i = a.length - 1; i >= 0; i--) {
+                        action.accept(a[i]);
+                    }
                 }
             }
         }
@@ -17741,10 +17764,10 @@ public final class N extends CommonUtil {
                 }
             }
         } else {
-            final Iterator<? extends T> iter = c.iterator();
-            int idx = 0;
-
             if (fromIndex < toIndex) {
+                final Iterator<? extends T> iter = c.iterator();
+                int idx = 0;
+
                 while (idx < fromIndex && iter.hasNext()) {
                     iter.next();
                     idx++;
@@ -17758,23 +17781,45 @@ public final class N extends CommonUtil {
                     }
                 }
             } else {
-                while (idx <= toIndex && iter.hasNext()) {
-                    iter.next();
-                    idx++;
-                }
+                final Iterator<T> descendingIterator = getDescendingIteratorIfPossible(c);
 
-                final T[] a = (T[]) new Object[fromIndex - toIndex];
+                if (descendingIterator != null) {
+                    int idx = c.size() - 1;
 
-                while (iter.hasNext()) {
-                    a[idx - 1 - toIndex] = iter.next();
-
-                    if (idx++ >= fromIndex) {
-                        break;
+                    while (idx > fromIndex && descendingIterator.hasNext()) {
+                        descendingIterator.next();
+                        idx--;
                     }
-                }
 
-                for (int i = a.length - 1; i >= 0; i--) {
-                    action.accept(i + toIndex + 1, a[i]);
+                    while (descendingIterator.hasNext()) {
+                        action.accept(idx, descendingIterator.next());
+
+                        if (--idx <= toIndex) {
+                            break;
+                        }
+                    }
+                } else {
+                    final Iterator<? extends T> iter = c.iterator();
+                    int idx = 0;
+
+                    while (idx <= toIndex && iter.hasNext()) {
+                        iter.next();
+                        idx++;
+                    }
+
+                    final T[] a = (T[]) new Object[fromIndex - toIndex];
+
+                    while (iter.hasNext()) {
+                        a[idx - 1 - toIndex] = iter.next();
+
+                        if (idx++ >= fromIndex) {
+                            break;
+                        }
+                    }
+
+                    for (int i = a.length - 1; i >= 0; i--) {
+                        action.accept(i + toIndex + 1, a[i]);
+                    }
                 }
             }
         }
@@ -26172,6 +26217,8 @@ public final class N extends CommonUtil {
      * @param retryTimes
      * @param retryIntervallInMillis
      * @param retryCondition
+     * @see Retry#of(int, long, Predicate)
+     * @see Retry#of(int, long, Predicate)
      */
     public static void execute(final Throwables.Runnable<? extends Exception> cmd, final int retryTimes, final long retryIntervallInMillis,
             final Predicate<? super Exception> retryCondition) {
@@ -26190,6 +26237,8 @@ public final class N extends CommonUtil {
      * @param retryIntervallInMillis
      * @param retryCondition
      * @return
+     * @see Retry#of(int, long, Predicate)
+     * @see Retry#of(int, long, Predicate)
      */
     public static <R> R execute(final Callable<R> cmd, final int retryTimes, final long retryIntervallInMillis,
             final BiPredicate<? super R, ? super Exception> retryCondition) {
@@ -27097,6 +27146,246 @@ public final class N extends CommonUtil {
                 }
             }
         }
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param <E2>
+     * @param a
+     * @param batchSize
+     * @param elementConsumer
+     * @param batchAction
+     * @throws E
+     * @throws E2
+     */
+    public static <T, E extends Exception, E2 extends Exception> void runByBatch(final T[] a, final int batchSize,
+            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> batchAction) throws E, E2 {
+        N.checkArgPositive(batchSize, "batchSize");
+        N.checkArgNotNull(elementConsumer, "elementConsumer");
+        N.checkArgNotNull(batchAction, "batchAction");
+
+        if (N.isNullOrEmpty(a)) {
+            return;
+        }
+
+        int cnt = 0;
+
+        for (T e : a) {
+            elementConsumer.accept(e);
+            cnt++;
+
+            if (cnt % batchSize == 0) {
+                batchAction.run();
+            }
+        }
+
+        if (cnt % batchSize != 0) {
+            batchAction.run();
+        }
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param <E2>
+     * @param iter
+     * @param batchSize
+     * @param elementConsumer
+     * @param batchAction
+     * @throws E
+     * @throws E2
+     */
+    public static <T, E extends Exception, E2 extends Exception> void runByBatch(final Iterable<T> iter, final int batchSize,
+            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> batchAction) throws E, E2 {
+        N.checkArgPositive(batchSize, "batchSize");
+        N.checkArgNotNull(elementConsumer, "elementConsumer");
+        N.checkArgNotNull(batchAction, "batchAction");
+
+        if (iter == null) {
+            return;
+        }
+
+        int cnt = 0;
+
+        for (T e : iter) {
+            elementConsumer.accept(e);
+            cnt++;
+
+            if (cnt % batchSize == 0) {
+                batchAction.run();
+            }
+        }
+
+        if (cnt % batchSize != 0) {
+            batchAction.run();
+        }
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param <E2>
+     * @param iter
+     * @param batchSize
+     * @param elementConsumer
+     * @param batchAction
+     * @throws E
+     * @throws E2
+     */
+    public static <T, E extends Exception, E2 extends Exception> void runByBatch(final Iterator<T> iter, final int batchSize,
+            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> batchAction) throws E, E2 {
+        N.checkArgPositive(batchSize, "batchSize");
+        N.checkArgNotNull(elementConsumer, "elementConsumer");
+        N.checkArgNotNull(batchAction, "batchAction");
+
+        if (iter == null || iter.hasNext() == false) {
+            return;
+        }
+
+        int cnt = 0;
+
+        while (iter.hasNext()) {
+            elementConsumer.accept(iter.next());
+            cnt++;
+
+            if (cnt % batchSize == 0) {
+                batchAction.run();
+            }
+        }
+
+        if (cnt % batchSize != 0) {
+            batchAction.run();
+        }
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param <E2>
+     * @param a
+     * @param batchSize
+     * @param elementConsumer
+     * @param batchAction
+     * @throws E
+     * @throws E2
+     */
+    public static <T, R, E extends Exception, E2 extends Exception> List<R> callByBatch(final T[] a, final int batchSize,
+            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Callable<? extends R, E2> batchAction) throws E, E2 {
+        N.checkArgPositive(batchSize, "batchSize");
+        N.checkArgNotNull(elementConsumer, "elementConsumer");
+        N.checkArgNotNull(batchAction, "batchAction");
+
+        if (N.isNullOrEmpty(a)) {
+            return new ArrayList<>();
+        }
+
+        final List<R> result = new ArrayList<>(a.length / batchSize + 1);
+        int cnt = 0;
+
+        for (T e : a) {
+            elementConsumer.accept(e);
+            cnt++;
+
+            if (cnt % batchSize == 0) {
+                result.add(batchAction.call());
+            }
+        }
+
+        if (cnt % batchSize != 0) {
+            result.add(batchAction.call());
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <E>
+     * @param <E2>
+     * @param iter
+     * @param batchSize
+     * @param elementConsumer
+     * @param batchAction
+     * @throws E
+     * @throws E2
+     */
+    public static <T, R, E extends Exception, E2 extends Exception> List<R> callByBatch(final Iterable<T> iter, final int batchSize,
+            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Callable<? extends R, E2> batchAction) throws E, E2 {
+        N.checkArgPositive(batchSize, "batchSize");
+        N.checkArgNotNull(elementConsumer, "elementConsumer");
+        N.checkArgNotNull(batchAction, "batchAction");
+
+        if (iter == null) {
+            return new ArrayList<>();
+        }
+
+        final List<R> result = new ArrayList<>();
+        int cnt = 0;
+
+        for (T e : iter) {
+            elementConsumer.accept(e);
+            cnt++;
+
+            if (cnt % batchSize == 0) {
+                result.add(batchAction.call());
+            }
+        }
+
+        if (cnt % batchSize != 0) {
+            result.add(batchAction.call());
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param <E2>
+     * @param iter
+     * @param batchSize
+     * @param elementConsumer
+     * @param batchAction
+     * @throws E
+     * @throws E2
+     */
+    public static <T, R, E extends Exception, E2 extends Exception> List<R> callByBatch(final Iterator<T> iter, final int batchSize,
+            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Callable<? extends R, E2> batchAction) throws E, E2 {
+        N.checkArgPositive(batchSize, "batchSize");
+        N.checkArgNotNull(elementConsumer, "elementConsumer");
+        N.checkArgNotNull(batchAction, "batchAction");
+
+        if (iter == null || iter.hasNext() == false) {
+            return new ArrayList<>();
+        }
+
+        final List<R> result = new ArrayList<>();
+        int cnt = 0;
+
+        while (iter.hasNext()) {
+            elementConsumer.accept(iter.next());
+            cnt++;
+
+            if (cnt % batchSize == 0) {
+                result.add(batchAction.call());
+            }
+        }
+
+        if (cnt % batchSize != 0) {
+            result.add(batchAction.call());
+        }
+
+        return result;
     }
 
     /**

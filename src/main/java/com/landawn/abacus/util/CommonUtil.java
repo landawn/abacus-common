@@ -4529,6 +4529,31 @@ class CommonUtil {
     }
 
     /**
+     *
+     *
+     * @param <T>
+     * @param <C>
+     * @param iter
+     * @param supplier
+     * @return
+     */
+    public static <T, C extends Collection<T>> C toCollection(final Iterable<? extends T> iter, final Supplier<? extends C> supplier) {
+        if (iter == null) {
+            return supplier.get();
+        }
+
+        if (iter instanceof Collection) {
+            final C c = supplier.get();
+
+            c.addAll((Collection<T>) iter);
+
+            return c;
+        } else {
+            return toCollection(iter.iterator(), supplier);
+        }
+    }
+
+    /**
      * The input array is returned.
      *
      * @param <T>
@@ -7884,20 +7909,40 @@ class CommonUtil {
      * @return
      * @throws IndexOutOfBoundsException the index out of bounds exception
      */
-    public static <T> T getElement(final Collection<? extends T> c, int index) throws IndexOutOfBoundsException {
-        checkIndex(index, size(c));
+    public static <T> T getElement(final Iterable<? extends T> c, int index) throws IndexOutOfBoundsException {
+        checkArgNotNull(c, "c");
+
+        if (c instanceof Collection) {
+            checkIndex(index, ((Collection<T>) c).size());
+        }
 
         if (c instanceof List) {
             return ((List<T>) c).get(index);
         }
 
-        final Iterator<? extends T> iter = c.iterator();
+        return getElement(c.iterator(), index);
+    }
 
-        while (index-- > 0) {
+    /**
+     *
+     * @param <T>
+     * @param iter
+     * @param index
+     * @return
+     * @throws IndexOutOfBoundsException the index out of bounds exception
+     */
+    public static <T> T getElement(final Iterator<? extends T> iter, long index) throws IndexOutOfBoundsException {
+        checkArgNotNull(iter, "iter");
+
+        while (index-- > 0 && iter.hasNext()) {
             iter.next();
         }
 
-        return iter.next();
+        if (iter.hasNext()) {
+            return iter.next();
+        } else {
+            throw new IndexOutOfBoundsException("Index: " + index + " is bigger than the maximum index of the specified Iterable or Iterator");
+        }
     }
 
     /**
@@ -7908,16 +7953,18 @@ class CommonUtil {
      * @return throws TooManyElementsException if there are more than one elements in the specified {@code iterable}.
      * @throws TooManyElementsException
      */
-    public static <T> Nullable<T> getOnlyElement(Collection<? extends T> c) throws TooManyElementsException {
-        if (isNullOrEmpty(c)) {
+    public static <T> Nullable<T> getOnlyElement(Iterable<? extends T> c) throws TooManyElementsException {
+        if (c == null) {
             return Nullable.empty();
-        } else if (c.size() > 1) {
+        }
+
+        if (c instanceof Collection && ((Collection<T>) c).size() > 1) {
             final Iterator<? extends T> iter = c.iterator();
 
             throw new TooManyElementsException("Expected at most one element but was: [" + Strings.concat(iter.next(), ", ", iter.next(), "...]"));
         }
 
-        return firstElement(c);
+        return getOnlyElement(c.iterator());
     }
 
     /**
@@ -7948,7 +7995,7 @@ class CommonUtil {
      * @param c
      * @return
      */
-    public static <T> Nullable<T> firstElement(final Collection<? extends T> c) {
+    public static <T> Nullable<T> firstElement(final Iterable<? extends T> c) {
         if (isNullOrEmpty(c)) {
             return Nullable.empty();
         }
@@ -7976,38 +8023,24 @@ class CommonUtil {
      * @param c
      * @return
      */
-    public static <T> Nullable<T> lastElement(final Collection<? extends T> c) {
+    public static <T> Nullable<T> lastElement(final Iterable<? extends T> c) {
         if (isNullOrEmpty(c)) {
             return Nullable.empty();
         }
 
-        if (c instanceof List) {
+        if (c instanceof List && c instanceof RandomAccess) {
             final List<T> list = (List<T>) c;
 
-            if (c instanceof RandomAccess) {
-                return Nullable.of(list.get(c.size() - 1));
-            } else {
-                return Nullable.of(list.listIterator(list.size()).previous());
-            }
-        } else if (c instanceof Deque) {
-            return Nullable.of(((Deque<T>) c).descendingIterator().next());
-        } else {
-            try {
-                Method m = null;
-
-                if ((m = ClassUtil.getDeclaredMethod(c.getClass(), "descendingIterator")) != null && Modifier.isPublic(m.getModifiers())
-                        && Iterator.class.isAssignableFrom(m.getReturnType())) {
-
-                    final Iterator<T> iter = ClassUtil.invokeMethod(c, m);
-
-                    return Nullable.of(iter.next());
-                }
-            } catch (Exception e2) {
-                // continue
-            }
-
-            return lastElement(c.iterator());
+            return Nullable.of(list.get(list.size() - 1));
         }
+
+        final Iterator<T> descendingIterator = getDescendingIteratorIfPossible(c);
+
+        if (descendingIterator != null) {
+            return Nullable.of(descendingIterator.next());
+        }
+
+        return lastElement(c.iterator());
     }
 
     /**
@@ -8153,7 +8186,7 @@ class CommonUtil {
      * @param c
      * @return
      */
-    public static <T> Optional<T> firstNonNull(final Collection<? extends T> c) {
+    public static <T> Optional<T> firstNonNull(final Iterable<? extends T> c) {
         if (isNullOrEmpty(c)) {
             return Optional.empty();
         }
@@ -8244,64 +8277,38 @@ class CommonUtil {
      * @param c
      * @return
      */
-    public static <T> Optional<T> lastNonNull(final Collection<? extends T> c) {
+    public static <T> Optional<T> lastNonNull(final Iterable<? extends T> c) {
         if (isNullOrEmpty(c)) {
             return Optional.empty();
         }
 
-        if (c instanceof List) {
+        if (c instanceof List && c instanceof RandomAccess) {
             final List<T> list = (List<T>) c;
 
-            if (c instanceof RandomAccess) {
-                for (int i = c.size() - 1; i >= 0; i--) {
-                    if (list.get(i) != null) {
-                        return Optional.of(list.get(i));
-                    }
-                }
-            } else {
-                final ListIterator<T> iter = list.listIterator(list.size());
-                T pre = null;
-
-                while (iter.hasPrevious()) {
-                    if ((pre = iter.previous()) != null) {
-                        return Optional.of(pre);
-                    }
+            for (int i = list.size() - 1; i >= 0; i--) {
+                if (list.get(i) != null) {
+                    return Optional.of(list.get(i));
                 }
             }
-        } else if (c instanceof Deque) {
-            final Iterator<T> iter = ((Deque<T>) c).descendingIterator();
+
+            return Optional.empty();
+        }
+
+        final Iterator<T> descendingIterator = getDescendingIteratorIfPossible(c);
+
+        if (descendingIterator != null) {
             T next = null;
 
-            while (iter.hasNext()) {
-                if ((next = iter.next()) != null) {
+            while (descendingIterator.hasNext()) {
+                if ((next = descendingIterator.next()) != null) {
                     return Optional.of(next);
                 }
             }
-        } else {
-            try {
-                Method m = null;
 
-                if ((m = ClassUtil.getDeclaredMethod(c.getClass(), "descendingIterator")) != null && Modifier.isPublic(m.getModifiers())
-                        && Iterator.class.isAssignableFrom(m.getReturnType())) {
-
-                    final Iterator<T> iter = ClassUtil.invokeMethod(c, m);
-
-                    T next = null;
-
-                    while (iter.hasNext()) {
-                        if ((next = iter.next()) != null) {
-                            return Optional.of(next);
-                        }
-                    }
-                }
-            } catch (Exception e2) {
-                // continue
-            }
-
-            lastNonNull(c.iterator());
+            return Optional.empty();
         }
 
-        return Optional.empty();
+        return lastNonNull(c.iterator());
     }
 
     /**
@@ -8510,7 +8517,7 @@ class CommonUtil {
      * @param c
      * @return
      */
-    public static <T> T firstOrNullIfEmpty(final Collection<? extends T> c) {
+    public static <T> T firstOrNullIfEmpty(final Iterable<? extends T> c) {
         return firstOrDefaultIfEmpty(c, null);
     }
 
@@ -8545,7 +8552,7 @@ class CommonUtil {
      * @param defaultValueForEmpty
      * @return
      */
-    public static <T> T firstOrDefaultIfEmpty(final Collection<? extends T> c, final T defaultValueForEmpty) {
+    public static <T> T firstOrDefaultIfEmpty(final Iterable<? extends T> c, final T defaultValueForEmpty) {
         if (isNullOrEmpty(c)) {
             return defaultValueForEmpty;
         }
@@ -8591,7 +8598,7 @@ class CommonUtil {
      * @param c
      * @return
      */
-    public static <T> T lastOrNullIfEmpty(final Collection<? extends T> c) {
+    public static <T> T lastOrNullIfEmpty(final Iterable<? extends T> c) {
         return lastOrDefaultIfEmpty(c, null);
     }
 
@@ -8626,45 +8633,24 @@ class CommonUtil {
      * @param defaultValueForEmpty
      * @return
      */
-    public static <T> T lastOrDefaultIfEmpty(final Collection<? extends T> c, final T defaultValueForEmpty) {
+    public static <T> T lastOrDefaultIfEmpty(final Iterable<? extends T> c, final T defaultValueForEmpty) {
         if (isNullOrEmpty(c)) {
             return defaultValueForEmpty;
         }
 
-        if (c instanceof List) {
+        if (c instanceof List && c instanceof RandomAccess) {
             final List<T> list = (List<T>) c;
 
-            if (c instanceof RandomAccess) {
-                return list.get(c.size() - 1);
-            } else {
-                return list.listIterator(list.size()).previous();
-            }
-        } else if (c instanceof Deque) {
-            return ((Deque<T>) c).descendingIterator().next();
-        } else {
-            try {
-                Method m = null;
-
-                if ((m = ClassUtil.getDeclaredMethod(c.getClass(), "descendingIterator")) != null && Modifier.isPublic(m.getModifiers())
-                        && Iterator.class.isAssignableFrom(m.getReturnType())) {
-
-                    final Iterator<T> iter = ClassUtil.invokeMethod(c, m);
-
-                    return iter.next();
-                }
-            } catch (Exception e2) {
-                // continue
-            }
-
-            final Iterator<? extends T> iter = c.iterator();
-            T e = null;
-
-            while (iter.hasNext()) {
-                e = iter.next();
-            }
-
-            return e;
+            return list.get(list.size() - 1);
         }
+
+        final Iterator<T> descendingIterator = getDescendingIteratorIfPossible(c);
+
+        if (descendingIterator != null) {
+            return descendingIterator.next();
+        }
+
+        return lastOrDefaultIfEmpty(c.iterator(), defaultValueForEmpty);
     }
 
     /**
@@ -8721,7 +8707,7 @@ class CommonUtil {
      * @return the nullable
      * @throws E the e
      */
-    public static <T, E extends Exception> Nullable<T> findFirst(final Collection<? extends T> c, Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> Nullable<T> findFirst(final Iterable<? extends T> c, Throwables.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(c)) {
             return Nullable.empty();
         }
@@ -8794,7 +8780,7 @@ class CommonUtil {
      * @return the nullable
      * @throws E the e
      */
-    public static <T, E extends Exception> Nullable<T> findLast(final Collection<? extends T> c, Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> Nullable<T> findLast(final Iterable<? extends T> c, Throwables.Predicate<? super T, E> predicate) throws E {
         return (Nullable<T>) findLast(c, predicate, false);
     }
 
@@ -8809,43 +8795,19 @@ class CommonUtil {
      * @return the r
      * @throws E the e
      */
-    private static <T, E extends Exception> Object findLast(final Collection<? extends T> c, Throwables.Predicate<? super T, E> predicate, boolean isForNonNull)
+    private static <T, E extends Exception> Object findLast(final Iterable<? extends T> c, Throwables.Predicate<? super T, E> predicate, boolean isForNonNull)
             throws E {
-        if (N.isNullOrEmpty(c)) {
+        if (c == null) {
             return isForNonNull ? Optional.empty() : Nullable.empty();
         }
 
         T e = null;
 
-        if (c instanceof List) {
+        if (c instanceof List && c instanceof RandomAccess) {
             final List<T> list = (List<T>) c;
 
-            if (c instanceof RandomAccess) {
-                for (int i = c.size() - 1; i >= 0; i--) {
-                    e = list.get(i);
-
-                    if ((!isForNonNull || e != null) && predicate.test(e)) {
-                        return isForNonNull ? Optional.of(e) : Nullable.of(e);
-                    }
-                }
-            } else {
-                final ListIterator<T> iter = list.listIterator(list.size());
-
-                while (iter.hasPrevious()) {
-                    e = iter.previous();
-
-                    if ((!isForNonNull || e != null) && predicate.test(e)) {
-                        return isForNonNull ? Optional.of(e) : Nullable.of(e);
-                    }
-                }
-            }
-
-            return isForNonNull ? Optional.empty() : Nullable.empty();
-        } else if (c instanceof Deque) {
-            final Iterator<T> iter = ((Deque<T>) c).descendingIterator();
-
-            while (iter.hasNext()) {
-                e = iter.next();
+            for (int i = list.size() - 1; i >= 0; i--) {
+                e = list.get(i);
 
                 if ((!isForNonNull || e != null) && predicate.test(e)) {
                     return isForNonNull ? Optional.of(e) : Nullable.of(e);
@@ -8853,39 +8815,44 @@ class CommonUtil {
             }
 
             return isForNonNull ? Optional.empty() : Nullable.empty();
-        } else {
-            try {
-                Method m = null;
+        }
 
-                if ((m = ClassUtil.getDeclaredMethod(c.getClass(), "descendingIterator")) != null && Modifier.isPublic(m.getModifiers())
-                        && Iterator.class.isAssignableFrom(m.getReturnType())) {
+        final Iterator<T> descendingIterator = getDescendingIteratorIfPossible(c);
 
-                    final Iterator<T> iter = ClassUtil.invokeMethod(c, m);
+        if (descendingIterator != null) {
+            while (descendingIterator.hasNext()) {
+                e = descendingIterator.next();
 
-                    while (iter.hasNext()) {
-                        e = iter.next();
-
-                        if ((!isForNonNull || e != null) && predicate.test(e)) {
-                            return isForNonNull ? Optional.of(e) : Nullable.of(e);
-                        }
-                    }
-
-                    return isForNonNull ? Optional.empty() : Nullable.empty();
-                }
-            } catch (Exception e2) {
-                // continue
-            }
-
-            final T[] a = (T[]) c.toArray();
-
-            for (int i = a.length - 1; i >= 0; i--) {
-                if ((!isForNonNull || a[i] != null) && predicate.test(a[i])) {
-                    return isForNonNull ? Optional.of(a[i]) : Nullable.of(a[i]);
+                if ((!isForNonNull || e != null) && predicate.test(e)) {
+                    return isForNonNull ? Optional.of(e) : Nullable.of(e);
                 }
             }
 
             return isForNonNull ? Optional.empty() : Nullable.empty();
         }
+
+        T[] a = null;
+
+        if (c instanceof Collection) {
+            a = (T[]) ((Collection<T>) c).toArray();
+        } else {
+            final List<T> tmp = new ArrayList<>();
+            final Iterator<? extends T> iter = c.iterator();
+
+            while (iter.hasNext()) {
+                tmp.add(iter.next());
+            }
+
+            a = (T[]) tmp.toArray();
+        }
+
+        for (int i = a.length - 1; i >= 0; i--) {
+            if ((!isForNonNull || a[i] != null) && predicate.test(a[i])) {
+                return isForNonNull ? Optional.of(a[i]) : Nullable.of(a[i]);
+            }
+        }
+
+        return isForNonNull ? Optional.empty() : Nullable.empty();
     }
 
     /**
@@ -8922,8 +8889,7 @@ class CommonUtil {
      * @return the optional
      * @throws E the e
      */
-    public static <T, E extends Exception> Optional<T> findFirstNonNull(final Collection<? extends T> c, Throwables.Predicate<? super T, E> predicate)
-            throws E {
+    public static <T, E extends Exception> Optional<T> findFirstNonNull(final Iterable<? extends T> c, Throwables.Predicate<? super T, E> predicate) throws E {
         if (N.isNullOrEmpty(c)) {
             return Optional.empty();
         }
@@ -8999,7 +8965,7 @@ class CommonUtil {
      * @return the optional
      * @throws E the e
      */
-    public static <T, E extends Exception> Optional<T> findLastNonNull(final Collection<? extends T> c, Throwables.Predicate<? super T, E> predicate) throws E {
+    public static <T, E extends Exception> Optional<T> findLastNonNull(final Iterable<? extends T> c, Throwables.Predicate<? super T, E> predicate) throws E {
         return (Optional<T>) findLast(c, predicate, true);
     }
 
@@ -21876,67 +21842,35 @@ class CommonUtil {
             return INDEX_NOT_FOUND;
         }
 
-        if (c instanceof List) {
+        if (c instanceof List && c instanceof RandomAccess) {
             final List<Object> list = (List<Object>) c;
 
-            if (c instanceof RandomAccess) {
-                for (int i = N.min(startIndexFromBack, size - 1); i >= 0; i--) {
-                    if (N.equals(list.get(i), valueToFind)) {
-                        return i;
-                    }
-                }
-            } else {
-                final ListIterator<Object> iter = list.listIterator(list.size());
-
-                for (int i = size - 1; iter.hasPrevious(); i--) {
-                    if (i > startIndexFromBack) {
-                        iter.previous();
-                    } else if (N.equals(iter.previous(), valueToFind)) {
-                        return i;
-                    }
-                }
-            }
-
-            return INDEX_NOT_FOUND;
-        } else if (c instanceof Deque) {
-            final Iterator<Object> iter = ((Deque<Object>) c).descendingIterator();
-
-            for (int i = size - 1; iter.hasNext(); i--) {
-                if (i > startIndexFromBack) {
-                    iter.next();
-                } else if (N.equals(iter.next(), valueToFind)) {
+            for (int i = N.min(startIndexFromBack, size - 1); i >= 0; i--) {
+                if (N.equals(list.get(i), valueToFind)) {
                     return i;
                 }
             }
 
             return INDEX_NOT_FOUND;
-        } else {
-            try {
-                Method m = null;
+        }
 
-                if ((m = ClassUtil.getDeclaredMethod(c.getClass(), "descendingIterator")) != null && Modifier.isPublic(m.getModifiers())
-                        && Iterator.class.isAssignableFrom(m.getReturnType())) {
+        final Iterator<Object> descendingIterator = getDescendingIteratorIfPossible(c);
 
-                    final Iterator<Object> iter = ClassUtil.invokeMethod(c, m);
-
-                    for (int i = size - 1; iter.hasNext(); i--) {
-                        if (i > startIndexFromBack) {
-                            iter.next();
-                        } else if (N.equals(iter.next(), valueToFind)) {
-                            return i;
-                        }
-                    }
-
-                    return INDEX_NOT_FOUND;
+        if (descendingIterator != null) {
+            for (int i = size - 1; descendingIterator.hasNext(); i--) {
+                if (i > startIndexFromBack) {
+                    descendingIterator.next();
+                } else if (N.equals(descendingIterator.next(), valueToFind)) {
+                    return i;
                 }
-            } catch (Exception e2) {
-                // continue
             }
 
-            final Object[] a = c.toArray();
-
-            return lastIndexOf(a, startIndexFromBack, valueToFind);
+            return INDEX_NOT_FOUND;
         }
+
+        final Object[] a = c.toArray();
+
+        return lastIndexOf(a, startIndexFromBack, valueToFind);
     }
 
     /**
@@ -22156,67 +22090,39 @@ class CommonUtil {
 
         final int size = c.size();
 
-        if (c instanceof List) {
+        if (c instanceof List && c instanceof RandomAccess) {
             final List<T> list = (List<T>) c;
 
-            if (c instanceof RandomAccess) {
-                for (int i = size - 1; i >= 0; i--) {
-                    if (predicate.test(list.get(i))) {
-                        return OptionalInt.of(i);
-                    }
-                }
-            } else {
-                final ListIterator<T> iter = list.listIterator(list.size());
-
-                for (int i = size - 1; iter.hasPrevious(); i--) {
-                    if (predicate.test(iter.previous())) {
-                        return OptionalInt.of(i);
-                    }
-                }
-            }
-
-            return OptionalInt.empty();
-        } else if (c instanceof Deque) {
-            final Iterator<T> iter = ((Deque<T>) c).descendingIterator();
-
-            for (int i = size - 1; iter.hasNext(); i--) {
-                if (predicate.test(iter.next())) {
-                    return OptionalInt.of(i);
-                }
-            }
-
-            return OptionalInt.empty();
-        } else {
-            try {
-                Method m = null;
-
-                if ((m = ClassUtil.getDeclaredMethod(c.getClass(), "descendingIterator")) != null && Modifier.isPublic(m.getModifiers())
-                        && Iterator.class.isAssignableFrom(m.getReturnType())) {
-
-                    final Iterator<T> iter = ClassUtil.invokeMethod(c, m);
-
-                    for (int i = size - 1; iter.hasNext(); i--) {
-                        if (predicate.test(iter.next())) {
-                            return OptionalInt.of(i);
-                        }
-                    }
-
-                    return OptionalInt.empty();
-                }
-            } catch (Exception e) {
-                // continue
-            }
-
-            final T[] a = (T[]) c.toArray();
-
-            for (int i = a.length - 1; i >= 0; i--) {
-                if (predicate.test(a[i])) {
+            for (int i = size - 1; i >= 0; i--) {
+                if (predicate.test(list.get(i))) {
                     return OptionalInt.of(i);
                 }
             }
 
             return OptionalInt.empty();
         }
+
+        final Iterator<T> descendingIterator = getDescendingIteratorIfPossible(c);
+
+        if (descendingIterator != null) {
+            for (int i = size - 1; descendingIterator.hasNext(); i--) {
+                if (predicate.test(descendingIterator.next())) {
+                    return OptionalInt.of(i);
+                }
+            }
+
+            return OptionalInt.empty();
+        }
+
+        final T[] a = (T[]) c.toArray();
+
+        for (int i = a.length - 1; i >= 0; i--) {
+            if (predicate.test(a[i])) {
+                return OptionalInt.of(i);
+            }
+        }
+
+        return OptionalInt.empty();
     }
 
     /**
@@ -22239,6 +22145,26 @@ class CommonUtil {
         final Throwables.Predicate<? super T, E> predicate2 = t -> predicate.test(t, valueToFind);
 
         return findLastIndex(c, predicate2);
+    }
+
+    static <T> Iterator<T> getDescendingIteratorIfPossible(final Iterable<? extends T> c) {
+        if (c instanceof Deque) {
+            return ((Deque<T>) c).descendingIterator();
+        } else {
+            try {
+                Method m = null;
+
+                if ((m = ClassUtil.getDeclaredMethod(c.getClass(), "descendingIterator")) != null && Modifier.isPublic(m.getModifiers())
+                        && Iterator.class.isAssignableFrom(m.getReturnType())) {
+
+                    return (Iterator<T>) ClassUtil.invokeMethod(c, m);
+                }
+            } catch (Exception e) {
+                // continue
+            }
+        }
+
+        return null;
     }
 
     /**
